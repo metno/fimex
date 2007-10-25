@@ -1,16 +1,22 @@
+F2CLIB=-lg2c
 CC=gcc
-CXX=gcc
-CXXFLAGS=
-CPPFLAGS=
+CXX=g++
+CXXFLAGS=-Wall -pedantic -g
+CPPFLAGS=-I. -I/disk1/metno/local/include/milib
 CFLAGS=-std=c99 -Wall -pedantic -g
-LIBS=-lproj -lm
+LDLIBS=-lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lm
 LDFLAGS=
 RANLIB=ranlib
 
 .SUFFIXES:
-.SUFFIXES: .c .o .a .d
+.SUFFIXES: .c .cc .o .d
 
-sources = interpolation.c
+include felt_reader/Make.inc
+
+sources = interpolation.c $(addprefix felt_reader/,$(FELT_READER_SRC))
+c_sources = $(filter %.c,$(sources))
+cc_sources = $(filter %.cc,$(sources))
+objects = $(c_sources:.c=.o) $(cc_sources:.cc=.o)
 
 all: libmiutplukk
 
@@ -26,9 +32,12 @@ all: libmiutplukk
 
 libmiutplukk: libmiutplukk.a
 
-libmiutplukk.a: libmiutplukk.a(interpolation.o)
+# prevent deletion of intermediate objects
+.SECONDARY: $(objects)
+
+libmiutplukk.a: libmiutplukk.a($(objects))
 	$(RANLIB) $@
 
 .PHONY : clean
 clean :
-	-$(RM) *.o libmiutplukk.a
+	-$(RM) *.o libmiutplukk.a felt_reader/*.o

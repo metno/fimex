@@ -48,9 +48,10 @@
 </profile>
 </item>
 <item id="org.eclipse.cdt.core.pathentry">
-<pathentry kind="src" path=""/>
+<pathentry include="src" kind="inc" path="" system="true"/>
 <pathentry kind="out" path=""/>
 <pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+<pathentry kind="src" path=""/>
 </item>
 <item id="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>

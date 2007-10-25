@@ -1,12 +1,18 @@
 SHELL = /bin/sh
 
+
 all: src
 
-src:
+src: src/libutplukk.a
+
+src/libutplukk.a:
 	cd src && $(MAKE) all
 
-test: 
-	cd test && $(MAKE) test
+
+test: test/testInterpolation
+
+test/testInterpolation:
+	cd test && $(MAKE) all
 
 .PHONY : clean doc
 clean :
