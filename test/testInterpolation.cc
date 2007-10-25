@@ -108,7 +108,7 @@ void test_miup_interpolate_f()
 	
 	// reading the data
 	// i j country-id
-	std::ifstream datafile ("/home/heikok/Programme/Hyrax/Utplukk/test/inData.txt", std::ios::in);
+	std::ifstream datafile ("inData.txt", std::ios::in);
 	if (datafile.is_open()) {
 		datafile.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios::failbit);
 		int line = 0;
