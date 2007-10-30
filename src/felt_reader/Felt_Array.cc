@@ -5,12 +5,14 @@
 #include <iostream>
 #include <cassert>
 
+namespace MetNoFelt {
+
 Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx)
 : feltArrayName(name), idx(idx) 
 {
 }
 Felt_Array::Felt_Array()
-: feltArrayName(""), idx(FeltParameters::ANY_ARRAY()) {
+: feltArrayName(""), idx(ANY_ARRAY()) {
 }
 
 Felt_Array::~Felt_Array()
@@ -19,7 +21,7 @@ Felt_Array::~Felt_Array()
 
 void Felt_Array::addInformationByIndex(const boost::array<short, 16> idx) {
 	for (int i = 0; i < 16; i++) {
-		assert((this->idx[0] == FeltParameters::ANY_VALUE()) || (this->idx[0] == idx[0]));
+		assert((this->idx[0] == ANY_VALUE()) || (this->idx[0] == idx[0]));
 	}
 	time_t rawtime;
 	struct tm * timeinfo;
@@ -54,3 +56,5 @@ vector<short> Felt_Array::getLevels() {
 const string& Felt_Array::getName() {
 	return feltArrayName;
 } 
+
+} // end namespace MetNoFelt

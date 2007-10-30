@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+namespace MetNoFelt {
+
 Felt_File::Felt_File(const string& filename)
 	: filename(filename)
 {
@@ -106,3 +108,5 @@ vector<Felt_Array> Felt_File::listFeltArrays() {
 	}	
 	return li;
 }
+
+} // end namespace MetNoFelt

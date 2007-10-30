@@ -6,6 +6,8 @@
 #include <boost/regex.hpp> 
 #include <boost/tokenizer.hpp>
 
+namespace MetNoFelt {
+
 FeltParameters::FeltParameters() {
 	init();
 }
@@ -142,3 +144,5 @@ const std::string& FeltParameters::getParameterName(const boost::array<short, 16
 	}
 	return UNDEFINED();
 }
+
+} // end namespace MetNoFelt

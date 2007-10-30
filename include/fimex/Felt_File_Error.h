@@ -3,16 +3,18 @@
 
 #include <string>
 
-using namespace std;
+namespace MetNoFelt {
 
 class Felt_File_Error
 {
 private:
-	string message;
+	std::string message;
 public:
-	Felt_File_Error(string message);
+	Felt_File_Error(std::string message);
 	virtual ~Felt_File_Error();
-	const string& toString();
+	const std::string& toString();
 };
+
+} // end namespace MetNoFelt
 
 #endif /*FELT_FILE_ERROR_H_*/

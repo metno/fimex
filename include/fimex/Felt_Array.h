@@ -6,6 +6,8 @@
 #include <ctime>
 #include <boost/array.hpp>
 
+
+namespace MetNoFelt {
 using namespace std;
 
 /// encapsulate parameters of a felt file
@@ -45,4 +47,5 @@ public:
 	vector<short> getLevels();
 };
 
+} // end namespace MetNoFelt
 #endif /*FELT_ARRAY_H_*/

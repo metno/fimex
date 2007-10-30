@@ -9,7 +9,7 @@
 #include "felt_reader/Felt_File_Error.h"
 #include "felt_reader/FeltParameters.h"
 
-using namespace std;
+namespace MetNoFelt {
 
 /// Felt File access
 /** 
@@ -19,9 +19,9 @@ using namespace std;
  */
 class Felt_File
 {
-	const string filename;
-	FILE* fh;
-	map<string, Felt_Array> feltArrayMap;
+	const std::string filename;
+	std::FILE* fh;
+	std::map<string, Felt_Array> feltArrayMap;
 	FeltParameters feltParameters;
 	
 private:
@@ -33,7 +33,7 @@ public:
 	 * open and read toc of a felt file
 	 * \param filename name of felt file
 	 */
-	Felt_File(const string& filename);
+	Felt_File(const std::string& filename);
 	virtual ~Felt_File();
 	//float* getData(const string& compName);
 	
@@ -41,13 +41,16 @@ public:
 	/**
 	 * \param compName parameter name of felt file as named in diana setup
 	 */ 
-	Felt_Array& getFeltArray(const string& compName);
+	Felt_Array& getFeltArray(const std::string& compName);
 
 	/**
 	 *  retrieve all felt arrays
 	 */
-	vector<Felt_Array> listFeltArrays();
+	std::vector<Felt_Array> listFeltArrays();
 	
 	
 };
+
+
+} // end namespace MetNoFelt
 #endif /*FELT_FILE_H_*/
