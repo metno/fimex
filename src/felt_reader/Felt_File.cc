@@ -22,7 +22,6 @@ Felt_File::Felt_File(const string& filename)
 	int foundall = 0;
 	int iunit, ireq, iexist, nin;
 	short *inmr = new short[16];
-	int *ifound;
 	short *idrec1 = new short[1024];
 	float *field = new float[1];
 	int nfound, iend, ierror, ioerr;
@@ -45,7 +44,7 @@ Felt_File::Felt_File(const string& filename)
 	iend = 0;
 	nin = MAXNIN;
 	short *in = new short[nin*16];
-	ifound = new int[nin];
+	int *ifound = new int[nin];
 	while ((iend == 0) && (ierror == 0)) {
 		// init field = undef
     	for (int i = 0; i < 16; i++) {
@@ -63,15 +62,16 @@ Felt_File::Felt_File(const string& filename)
 					idx[j] = in[i*16 + j];
 				}
 				Felt_Array& fa = findOrCreateFeltArray(idx);
-				fa.addInformationByIndex(idx);
+				fa.addInformationByIndex(idx, ifound[i]);
         	}
         }
     }
     
     delete [] in;
+    delete [] ifound;
+    delete [] inmr;
 	delete [] idrec1;
-	delete [] ifound;
-    
+	delete [] field;    
 }
 
 Felt_File::~Felt_File()
@@ -112,12 +112,15 @@ vector<Felt_Array> Felt_File::listFeltArrays() {
 
 boost::shared_array<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
 	Felt_Array& fa = getFeltArray(compName);
-	boost::array<short, 16> idx(fa.getIndex());
-//	struct std::tm * timeinfo;
-//	timeinfo = gmtime(&time);
-//	idx[2] = timeinfo->tm_year + 1900;
-//	idx[3] = (timeinfo->tm_mon + 1) * 100 + timeinfo->tm_mday;
-//	idx[4] = (timeinfo->tm_hour * 100  
+	boost::array<short, 16> idx(fa.getIndex(time, level));
+	
+	if (fh == NULL) {
+		throw Felt_File_Error("file already closed");
+	}
+	int iunit = fileno(fh);
+	// read feltfile-data
+	//mrfelt(2,'*',iunit,idx.begin(),0,1,field,1.f,1024,idrec1,&ierror);
+	
 	return boost::shared_array<short>(new short[3]); // TODO: implement 
 }
 

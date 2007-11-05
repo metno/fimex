@@ -24,6 +24,7 @@ class Felt_Array
 	set<short> levels;
 	// the time-array[0,1,2,3] correspond to index-array[2,3,4,9]
 	TIME_MAP times;
+	map<time_t, map<short, int> > fieldSizeMap;
 	int nx;
 	int ny;
 	boost::array<short, 16> idx;
@@ -42,7 +43,7 @@ public:
 	 * add information from the felt-index (usually retrieved from qfelt) to this Felt_Array
 	 * the index given here must correspond to the initialization index
 	 */
-	void addInformationByIndex(const boost::array<short, 16> idx);
+	void addInformationByIndex(const boost::array<short, 16> idx, int fieldSize);
 	/** return the parameter name */
 	const string& getName();
 	/** return the times available for this parameter */
@@ -51,8 +52,8 @@ public:
 	vector<short> getLevels();
 	
 	/** return a copy of the index used within this Felt_Array */
-	boost::array<short, 16> const getIndex() {return idx;}
-	boost::array<short, 16> const getIndex(time_t time) throw(Felt_File_Error);
+	boost::array<short, 16> const getIndex(time_t time, short level) throw(Felt_File_Error);
+	int const getFieldSize(time_t time, short level) throw (Felt_File_Error);
 };
 
 } // end namespace MetNoFelt

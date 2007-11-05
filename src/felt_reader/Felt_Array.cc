@@ -20,7 +20,11 @@ Felt_Array::~Felt_Array()
 {
 }
 
-void Felt_Array::addInformationByIndex(const boost::array<short, 16> idx) {
+void Felt_Array::addInformationByIndex(const boost::array<short, 16> idx, int fieldSize) {
+	if (fieldSize <= 0) {
+		// no data, no field
+		return;
+	}
 	for (int i = 0; i < 16; i++) {
 		assert((this->idx[i] == ANY_VALUE()) || (this->idx[i] == idx[i]));
 	}
@@ -40,6 +44,7 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16> idx) {
 	boost::array<short, 4> timeIdx= { { idx[2], idx[3], idx[4], idx[9] } };
 	times[thisTime] = timeIdx;
 	levels.insert(idx[12]);
+	fieldSizeMap[thisTime][idx[12]] = fieldSize;
 }
 
 vector<time_t> Felt_Array::getTimes() {
@@ -68,7 +73,7 @@ const string& Felt_Array::getName() {
 	return feltArrayName;
 } 
 
-boost::array<short, 16> const Felt_Array::getIndex(time_t time) throw(Felt_File_Error) {
+boost::array<short, 16> const Felt_Array::getIndex(time_t time, short level) throw(Felt_File_Error) {
 	boost::array<short, 16> index(idx); // get a copy
 	TIME_MAP::iterator it = times.find(time);
 	if (it != times.end()) {
@@ -82,7 +87,32 @@ boost::array<short, 16> const Felt_Array::getIndex(time_t time) throw(Felt_File_
 		msg << "unknown time: " << time << " for felt_array: " << getName();
 		throw Felt_File_Error(msg.str());
 	}
+	if (fieldSizeMap[time].find(level) != fieldSizeMap[time].end()) {
+		index[12] = level;
+	} else {
+		ostringstream msg;
+		msg << "unknown level: " << level << " for felt array: " << getName();
+		throw Felt_File_Error(msg.str());
+	}	
 	return index;
 }
 
+int const Felt_Array::getFieldSize(time_t time, short level) throw(Felt_File_Error) {
+	map<time_t, map<short, int> >::iterator timeMap = fieldSizeMap.find(time); 
+	if (timeMap != fieldSizeMap.end()) {
+		map<short, int>::iterator levelMap = timeMap->second.find(level);
+		if (levelMap != timeMap->second.end()) {
+			return levelMap->second;
+		} else {
+			ostringstream msg;
+			msg << "unknown level: " << level << " for felt array: " << getName();
+			throw Felt_File_Error(msg.str());
+		}
+	} else {
+		ostringstream msg;
+		msg << "unknown time: " << time << " for felt array: " << getName();
+		throw Felt_File_Error(msg.str());
+	}
+}
+	
 } // end namespace MetNoFelt
