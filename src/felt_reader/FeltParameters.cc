@@ -145,4 +145,22 @@ const std::string& FeltParameters::getParameterName(const boost::array<short, 16
 	return UNDEFINED();
 }
 
+const int ANY_VALUE() {
+	const static int ANY_VALUE = -32767;
+	return ANY_VALUE;
+}
+const std::string& UNDEFINED() {	
+	const static std::string UNDEFINED("");
+	return UNDEFINED;
+}
+const boost::array<short, 16>& ANY_ARRAY() {
+	const static boost::array<short, 16> ANY_ARRAY =
+	{ {ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
+	return ANY_ARRAY;
+}	   
+
+
 } // end namespace MetNoFelt

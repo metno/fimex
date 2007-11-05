@@ -1,5 +1,6 @@
 #include "felt_reader/Felt_File.h"
 #include "milib.h"
+#include <ctime>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -93,7 +94,7 @@ Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx)
 	}
 }
 
-Felt_Array& Felt_File::getFeltArray(const string& arrayName) {
+Felt_Array& Felt_File::getFeltArray(const string& arrayName) throw(Felt_File_Error){
 	map<string, Felt_Array>::iterator it = feltArrayMap.find(arrayName); 
 	if (it == feltArrayMap.end()) {
 		throw Felt_File_Error("unknown parameter: " + arrayName);
@@ -108,5 +109,17 @@ vector<Felt_Array> Felt_File::listFeltArrays() {
 	}	
 	return li;
 }
+
+boost::shared_array<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
+	Felt_Array& fa = getFeltArray(compName);
+	boost::array<short, 16> idx(fa.getIndex());
+//	struct std::tm * timeinfo;
+//	timeinfo = gmtime(&time);
+//	idx[2] = timeinfo->tm_year + 1900;
+//	idx[3] = (timeinfo->tm_mon + 1) * 100 + timeinfo->tm_mday;
+//	idx[4] = (timeinfo->tm_hour * 100  
+	return boost::shared_array<short>(new short[3]); // TODO: implement 
+}
+
 
 } // end namespace MetNoFelt

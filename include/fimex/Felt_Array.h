@@ -3,12 +3,15 @@
 #include <string>
 #include <set>
 #include <vector>
+#include <map>
 #include <ctime>
 #include <boost/array.hpp>
-
+#include "Felt_File_Error.h"
 
 namespace MetNoFelt {
 using namespace std;
+
+typedef std::map<time_t, boost::array<short, 4> > TIME_MAP;
 
 /// encapsulate parameters of a felt file
 /**
@@ -19,7 +22,8 @@ class Felt_Array
 {
 	string feltArrayName;
 	set<short> levels;
-	set<time_t> times;
+	// the time-array[0,1,2,3] correspond to index-array[2,3,4,9]
+	TIME_MAP times;
 	int nx;
 	int ny;
 	boost::array<short, 16> idx;
@@ -45,6 +49,10 @@ public:
 	vector<time_t> getTimes();
 	/** return the levels available for this parameter */
 	vector<short> getLevels();
+	
+	/** return a copy of the index used within this Felt_Array */
+	boost::array<short, 16> const getIndex() {return idx;}
+	boost::array<short, 16> const getIndex(time_t time) throw(Felt_File_Error);
 };
 
 } // end namespace MetNoFelt

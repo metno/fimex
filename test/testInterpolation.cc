@@ -137,7 +137,7 @@ void test_miup_interpolate_f()
 	}
 	assert(std::fabs(inArray[miup_3d_array_position(93, 50, 0, iSize, jSize, zSize)] - 4) < 1e-5);
 	
-	std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
+	//std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
 	BOOST_CHECK(
 	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR,
 					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, iSize, jSize, zSize,
@@ -145,8 +145,8 @@ void test_miup_interpolate_f()
 	== MIUP_OK);
 	// -25 43 32 (long, lat, val)
 	BOOST_CHECK(std::fabs(outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);	    
-	std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
-	std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
+	//std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
+	//std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
 
 	for (int i = 0; i < latSize*lonSize*zSize; ++i) {
 		outArray[i] = MIUP_UNDEFINED_F;

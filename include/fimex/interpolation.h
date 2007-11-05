@@ -22,7 +22,7 @@ extern "C" {
 #define MIUP_LONGITUDE 1
 #define MIUP_LATITUDE 2
 
-#define MIUP_DEBUG 1
+#define MIUP_DEBUG 0
 
 /**
  * Interpolation between two projections. Missing values are set to MIUP_UNDEFINED_F
