@@ -13,7 +13,7 @@ RANLIB=ranlib
 
 all: build
 
-build: ../src/libmiutplukk.a testInterpolation testFeltReader
+build: testInterpolation testFeltReader
 
 ../src/libmiutplukk.a:
 	cd ../src && $(MAKE) libmiutplukk
@@ -22,6 +22,11 @@ test: build
 	./testInterpolation
 	./testFeltReader
 	
+testInterpolation: ../src/libmiutplukk.a
+
+testFeltReader: ../src/libmiutplukk.a
+
+
 .PHONY : clean
 clean :
 	-$(RM) *.o testInterpolation testFeltReader

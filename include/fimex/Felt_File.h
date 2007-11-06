@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <boost/shared_array.hpp>
 #include "felt_reader/Felt_Array.h"
 #include "felt_reader/Felt_File_Error.h"
 #include "felt_reader/FeltParameters.h"
@@ -43,7 +42,7 @@ public:
 	 * \param compName parameter name of felt file as named in diana setup
 	 */ 
 	Felt_Array& getFeltArray(const std::string& compName) throw(Felt_File_Error);
-	boost::shared_array<short> getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error);
+	vector<short> getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error);
 
 	/**
 	 *  retrieve all felt arrays

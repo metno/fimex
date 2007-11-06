@@ -27,7 +27,9 @@ class Felt_Array
 	map<time_t, map<short, int> > fieldSizeMap;
 	int nx;
 	int ny;
+	long scaling_factor;
 	boost::array<short, 16> idx;
+	vector<short> extraGridInfo;
 	
 public:
 	/** constructor */
@@ -43,13 +45,41 @@ public:
 	 * add information from the felt-index (usually retrieved from qfelt) to this Felt_Array
 	 * the index given here must correspond to the initialization index
 	 */
-	void addInformationByIndex(const boost::array<short, 16> idx, int fieldSize);
+	void addInformationByIndex(const boost::array<short, 16> idx, int fieldSize) throw(Felt_File_Error);
+	
+	/** 
+	 * set x and y dimension (or long/lat respectively) for this array
+	 * since this information is not available before reading the data, it will be set late only
+	 * x = y = ANY_VALUE() indicate not set value
+	 * 
+	 * @throw Felt_File_Error thrown when changing nx or ny values
+	 */
+	void setXandY(int nx, int ny) throw(Felt_File_Error);
+
+	/**
+	 *
+	 * @throw Felt_File_Error thrown when changing scalingFactor
+	 */
+	void setScalingFactor(long scalingFactor) throw(Felt_File_Error);
+
+	/**
+	 * some felt-files contain some extra information (behind the data array)
+	 * they should be set here. No tests are run when changing extra-information between fields
+	 */
+	void setExtraInformation(vector<short> extraInfo);
+
 	/** return the parameter name */
 	const string& getName();
 	/** return the times available for this parameter */
 	vector<time_t> getTimes();
 	/** return the levels available for this parameter */
 	vector<short> getLevels();
+	/** return x/longitude size */
+	const int getX();
+	/** return y/latitude size */
+	const int getY();
+	/** return scalingFactor */
+	const long getScalingFactor();
 	
 	/** return a copy of the index used within this Felt_Array */
 	boost::array<short, 16> const getIndex(time_t time, short level) throw(Felt_File_Error);

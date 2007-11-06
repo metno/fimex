@@ -1,6 +1,8 @@
 #include "felt_reader/Felt_File.h"
 #include "milib.h"
 #include <ctime>
+#include <cmath>
+#include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -21,9 +23,9 @@ Felt_File::Felt_File(const string& filename)
 	const int MAXNIN = 256;
 	int foundall = 0;
 	int iunit, ireq, iexist, nin;
-	short *inmr = new short[16];
-	short *idrec1 = new short[1024];
-	float *field = new float[1];
+	short inmr[16];
+	short idrec1[1024];
+	float dummy;
 	int nfound, iend, ierror, ioerr;
 	
 	// open in C to get a free file-descriptor
@@ -33,7 +35,7 @@ Felt_File::Felt_File(const string& filename)
 	}
 	iunit = fileno(fh);
 	// initialize feltfile
-	mrfelt(1,filename.c_str(),iunit,inmr,0,1,field,1.f,1024,idrec1,&ierror);
+	mrfelt(1,filename.c_str(),iunit,&inmr[0],0,1,&dummy,1.f,1024,&idrec1[0],&ierror);
 	for (int i = 0; i < 16; i++) {
 		//TODO: something with idrec1, inmr ???
 	}
@@ -43,19 +45,19 @@ Felt_File::Felt_File(const string& filename)
 	iexist = 1;
 	iend = 0;
 	nin = MAXNIN;
-	short *in = new short[nin*16];
-	int *ifound = new int[nin];
+	boost::scoped_array<short> in(new short[nin*16]);
+	boost::scoped_array<int> ifound(new int[nin]);
 	while ((iend == 0) && (ierror == 0)) {
 		// init field = undef
     	for (int i = 0; i < 16; i++) {
     		in[i] = -32767; // first row = undef
     	}
-        qfelt(iunit,ireq,iexist,nin,in,ifound,&nfound,&iend,&ierror,&ioerr);
+        qfelt(iunit,ireq,iexist,nin,in.get(),ifound.get(),&nfound,&iend,&ierror,&ioerr);
         if (ierror != 0) {
 			//TODO: error-handling???
         } else {
- 	       foundall += nfound;
- 	       boost::array<short, 16> idx;
+ 	       	foundall += nfound;
+ 	       	boost::array<short, 16> idx;
     	    for (int i = 0; i < nfound; i++) {
 				//TODO: fill feltArrayMap
 				for (int j = 0; j < 16; j++) {
@@ -66,12 +68,6 @@ Felt_File::Felt_File(const string& filename)
         	}
         }
     }
-    
-    delete [] in;
-    delete [] ifound;
-    delete [] inmr;
-	delete [] idrec1;
-	delete [] field;    
 }
 
 Felt_File::~Felt_File()
@@ -85,8 +81,7 @@ Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx)
 	string name = feltParameters.getParameterName(idx);
 	map<string, Felt_Array>::iterator it = feltArrayMap.find(name); 
 	if (it == feltArrayMap.end()) {
-		boost::array<short, 16> clearIdx = feltParameters.getParameters(name); // clear of variable params
-		Felt_Array fa(name, clearIdx);
+		Felt_Array fa(name, idx);
 		feltArrayMap[name] = fa;
 		return feltArrayMap[name];
 	} else {
@@ -110,18 +105,42 @@ vector<Felt_Array> Felt_File::listFeltArrays() {
 	return li;
 }
 
-boost::shared_array<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
+vector<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
 	Felt_Array& fa = getFeltArray(compName);
 	boost::array<short, 16> idx(fa.getIndex(time, level));
-	
+	int fieldSize(fa.getFieldSize(time, level));
+	boost::scoped_array<short> header_data(new short[fieldSize]); // contains header (20 fields) and data (nx*ny) and something extra???
 	if (fh == NULL) {
 		throw Felt_File_Error("file already closed");
 	}
 	int iunit = fileno(fh);
+	float dummy;
+	std::string lastFile("*");
+	int ierror(0);
 	// read feltfile-data
-	//mrfelt(2,'*',iunit,idx.begin(),0,1,field,1.f,1024,idrec1,&ierror);
-	
-	return boost::shared_array<short>(new short[3]); // TODO: implement 
+	//mrfelt(mode,          filnam,iunit,in         ,ipack,lfield,field ,fscale,     ldata,            idata, ierror)
+	mrfelt(     2,lastFile.c_str(),iunit,idx.begin(),    0,     0,&dummy,   1.f, fieldSize,header_data.get(),&ierror);
+	if (ierror > 0) {
+		throw Felt_File_Error("error reading with mrfelt");
+	}
+	int nx(header_data[9]);  //  x or longitudes
+	int ny(header_data[10]); // y or latitudes
+	fa.setXandY(nx, ny);
+	fa.setScalingFactor(static_cast<long>(std::pow(10,static_cast<double>(header_data[19]))));
+	vector<short> extraGridInfo(fieldSize-20-nx*ny);
+	// copy extra data to extraGridInfo
+	vector<short>::iterator egi_iter(extraGridInfo.begin());
+	int i;
+	for (i = 20+nx*ny; i < fieldSize; i++) {
+		*egi_iter++ = header_data[i];
+	}
+	fa.setExtraInformation(extraGridInfo);
+	vector<short> data(nx*ny);
+	vector<short>::iterator d_iter(data.begin());
+	for (i = 20; i < 20+nx*ny; i++) {
+		*d_iter++ = header_data[i];
+	}
+	return data;
 }
 
 

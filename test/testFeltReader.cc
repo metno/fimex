@@ -58,7 +58,13 @@ test_feltfile() {
 	}
 	//FeltParameters xx("/home/heikok/bla/test");
 	
-	
+	vector<short> data = ff.getDataSlice(fa.getName(), fa.getTimes().at(50), levels.at(0));
+	BOOST_CHECK(static_cast<int>(data.size()) == (fa.getX()*fa.getY()));
+	// u10m not defined on border
+	//cerr << "data: " << data[1000] << " " << data[10000] << " " << data[20000] << endl;
+	BOOST_CHECK(data[0] == ANY_VALUE());
+	BOOST_CHECK(data[10000] == 820);
+	BOOST_CHECK(data[20000] == 8964);
 }
 
 test_suite*
