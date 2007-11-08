@@ -43,11 +43,14 @@ test_feltfile() {
 	Felt_Array& fa = ff.getFeltArray("u10m");
 	vector<short> levels = fa.getLevels();
 	//cout << fa.getName() << ": "<<levels.size() << ": " << fa.getTimes().size() << " size: " << fa.getFieldSize(fa.getTimes().at(0), levels.at(0)) << endl;
-	BOOST_CHECK(levels.size() == 1);
+	BOOST_CHECK( levels.size() == 1 );
 	BOOST_CHECK( fa.getName() == "u10m" );
 	BOOST_CHECK( fa.getTimes().size() == 61);
 	BOOST_CHECK( fa.getFieldSize(fa.getTimes().at(50), levels.at(0)) == 44904 );
-	
+	// cout << fa.getX() << "x" << fa.getY() << ": " << fa.getScalingFactor() << endl;
+	BOOST_CHECK( fa.getX() == 229 );
+	BOOST_CHECK( fa.getY() == 196 );
+	BOOST_CHECK( fa.getScalingFactor() == 0 );
 	
 	try {
 		ff.getFeltArray("this parameter is intentionally unknown");

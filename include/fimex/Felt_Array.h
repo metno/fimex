@@ -39,7 +39,7 @@ public:
 	 * \param name parameter name
 	 * \param idx feltfiles are indexed by a short[16] arrays representing different parameters. The parameters used here are those applied to qfelt (query felt)
 	 */
-	Felt_Array(const string name, const boost::array<short, 16> idx);
+	explicit Felt_Array(const string name, const boost::array<short, 16> idx);
 	virtual ~Felt_Array();
 	/**
 	 * add information from the felt-index (usually retrieved from qfelt) to this Felt_Array
@@ -49,7 +49,7 @@ public:
 	
 	/** 
 	 * set x and y dimension (or long/lat respectively) for this array
-	 * since this information is not available before reading the data, it will be set late only
+	 * since this information is not available before reading the data, it will be set late only, (though Felt_File does this automatically)
 	 * x = y = ANY_VALUE() indicate not set value
 	 * 
 	 * @throw Felt_File_Error thrown when changing nx or ny values

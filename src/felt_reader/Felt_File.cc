@@ -65,6 +65,11 @@ Felt_File::Felt_File(const string& filename)
 				}
 				Felt_Array& fa = findOrCreateFeltArray(idx);
 				fa.addInformationByIndex(idx, ifound[i]);
+				if (fa.getX() == ANY_VALUE()) {
+					// make sure that all info is initialized even if it requires reading a bit more data
+					// return data of no interest
+					getDataSlice(fa, idx, ifound[i]);
+				}
         	}
         }
     }
@@ -97,18 +102,14 @@ Felt_Array& Felt_File::getFeltArray(const string& arrayName) throw(Felt_File_Err
 	return it->second;
 }
 
-vector<Felt_Array> Felt_File::listFeltArrays() {
+std::vector<Felt_Array> Felt_File::listFeltArrays() {
 	vector<Felt_Array> li;
 	for (map<string, Felt_Array>::iterator it = feltArrayMap.begin(); it != feltArrayMap.end(); ++it) {
 		li.push_back(it->second);
 	}	
 	return li;
 }
-
-vector<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
-	Felt_Array& fa = getFeltArray(compName);
-	boost::array<short, 16> idx(fa.getIndex(time, level));
-	int fieldSize(fa.getFieldSize(time, level));
+std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error) {
 	boost::scoped_array<short> header_data(new short[fieldSize]); // contains header (20 fields) and data (nx*ny) and something extra???
 	if (fh == NULL) {
 		throw Felt_File_Error("file already closed");
@@ -141,6 +142,13 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 		*d_iter++ = header_data[i];
 	}
 	return data;
+}
+
+vector<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
+	Felt_Array& fa = getFeltArray(compName);
+	boost::array<short, 16> idx(fa.getIndex(time, level));
+	int fieldSize(fa.getFieldSize(time, level));
+	return getDataSlice(fa, idx, fieldSize);
 }
 
 

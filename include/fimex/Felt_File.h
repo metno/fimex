@@ -26,6 +26,7 @@ class Felt_File
 	
 private:
 	Felt_Array& findOrCreateFeltArray(const boost::array<short, 16>& idx);
+	std::vector<short> getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error);
 	
 public:
 	/// constructor
@@ -33,7 +34,7 @@ public:
 	 * open and read toc of a felt file
 	 * \param filename name of felt file
 	 */
-	Felt_File(const std::string& filename);
+	explicit Felt_File(const std::string& filename);
 	virtual ~Felt_File();
 	//float* getData(const string& compName);
 	
@@ -42,7 +43,13 @@ public:
 	 * \param compName parameter name of felt file as named in diana setup
 	 */ 
 	Felt_Array& getFeltArray(const std::string& compName) throw(Felt_File_Error);
-	vector<short> getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error);
+	/// retrieve a data slice
+	/**
+	 * @param compName parameter name of felt file
+	 * @param time time of slice
+	 * @param level level of slice
+	 */
+	std::vector<short> getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error);
 
 	/**
 	 *  retrieve all felt arrays

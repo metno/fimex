@@ -12,7 +12,7 @@ class FeltParameters
 {
 public:
 	FeltParameters();
-	FeltParameters(std::string filename);
+	explicit FeltParameters(std::string filename);
 	virtual ~FeltParameters();
 	const boost::array<short, 16>& getParameters(const std::string&);
 	const std::string& getParameterName(const boost::array<short, 16>&);
