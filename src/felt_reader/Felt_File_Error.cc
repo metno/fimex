@@ -2,17 +2,17 @@
 
 namespace MetNoFelt {
 
-Felt_File_Error::Felt_File_Error(std::string message)
+Felt_File_Error::Felt_File_Error(const std::string& message)
 : message(message)
 {
 }
 
-Felt_File_Error::~Felt_File_Error()
+Felt_File_Error::~Felt_File_Error() throw()
 {
 }
 
-const std::string& Felt_File_Error::toString() {
-	return message;
+const char* Felt_File_Error::what() const throw() {
+	return message.c_str();
 }
 
 }
