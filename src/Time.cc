@@ -1,20 +1,20 @@
 #include "Time.h"
 #include <cassert>
-#include <udunits.h>
 extern "C" int utIsInit(); // this has been forgotten in the udunits.h 12.4
 
 namespace MetNoUtplukk {
 
 Time::Time(std::string format, double value) throw(TimeException)
-: format(format), value(value)
+: format(format), unit(new utUnit()), value(value)
 {
+	int uterror;
 	if (!utIsInit()) {
-		if (utInit("") != 0) {
-			throw TimeException("unable to initialize udunits");
+		if ((uterror = utInit("")) != 0) {
+			throw TimeException(uterror);
 		}
 	}
-	if (utScan(format.c_str() , unit.get()) != 0) {
-		throw TimeException("unknown time format");
+	if ((uterror = utScan(format.c_str() , unit.get())) != 0) {
+		throw TimeException(uterror);
 	}
 }
 
@@ -25,8 +25,9 @@ Time::Time(boost::shared_ptr<utUnit> unit, double value) throw(TimeException)
 		throw TimeException("initializaton unit not a time unit");
 	}
 	char* tempChar;
-	if (utPrint(unit.get(), &tempChar) != 0) {
-		throw TimeException("utPrint failed");
+	int uterror;
+	if ((uterror = utPrint(unit.get(), &tempChar)) != 0) {
+		throw TimeException(uterror);
 	}
 	format = tempChar;
 }

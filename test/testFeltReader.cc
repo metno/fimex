@@ -1,4 +1,3 @@
-/* should be moved to cppunit or similar */
 #include <iostream>
 #include <boost/array.hpp>
 #include <cassert>
