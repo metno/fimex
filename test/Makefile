@@ -13,7 +13,7 @@ RANLIB=ranlib
 
 all: build
 
-build: testInterpolation testFeltReader testTime
+build: testInterpolation testFeltReader testTime testTimeSliceData
 
 ../src/libmiutplukk.a:
 	cd ../src && $(MAKE) libmiutplukk
@@ -22,6 +22,7 @@ test: build
 	./testInterpolation
 	./testFeltReader
 	./testTime
+	./testTimeSliceData
 	
 testInterpolation: ../src/libmiutplukk.a
 
@@ -29,7 +30,9 @@ testFeltReader: ../src/libmiutplukk.a
 
 testTime: ../src/libmiutplukk.a
 
+testTimeSliceData: ../src/libmiutplukk.a
+
 
 .PHONY : clean
 clean :
-	-$(RM) *.o testInterpolation testFeltReader testTime
+	-$(RM) *.o testInterpolation testFeltReader testTime testTimeSliceData

@@ -19,7 +19,7 @@ Time::Time(std::string format, double value) throw(TimeException)
 }
 
 Time::Time(boost::shared_ptr<utUnit> unit, double value) throw(TimeException)
-: unit(unit), value(0)
+: unit(unit), value(value)
 {
 	if (! utIsTime(unit.get())) {
 		throw TimeException("initializaton unit not a time unit");
