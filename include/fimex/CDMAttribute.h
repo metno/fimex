@@ -2,8 +2,9 @@
 #define CDMATTRIBUTE_H_
 
 #include<string>
-#include<boost::shared_ptr>
+#include<boost/shared_ptr.hpp>
 #include "Data.h"
+#include "CDMDataType.h"
 
 namespace MetNoUtplukk
 {
@@ -13,11 +14,13 @@ class CDMAttribute
 public:
 	CDMAttribute();
 	virtual ~CDMAttribute();
-};
+	const std::string& getName() const {return name;}
 private:
-	int variableId;
-	string name;
+	std::string variableName;
+	std::string name;
+	CDMDataType datatype;
 	boost::shared_ptr<Data> data;
+};
 
 }
 

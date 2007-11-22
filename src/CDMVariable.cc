@@ -3,7 +3,8 @@
 namespace MetNoUtplukk
 {
 
-CDMVariable::CDMVariable()
+CDMVariable::CDMVariable(std::string name, CDMDataType datatype, std::vector<CDMDimension> shape)
+: name(name), datatype(datatype), shape(shape)
 {
 }
 

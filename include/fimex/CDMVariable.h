@@ -2,30 +2,26 @@
 #define CDMVARIABLE_H_
 
 #include <string>
+#include <vector>
 #include "CDMDimension.h"
+#include "CDMDataType.h"
 
 namespace MetNoUtplukk
 {
 
-enum CDMType {
-	CDM_NAN = 0,
-	CDM_CHAR,
-	CDM_SHORT,
-	CDM_INT,
-	CDM_FLOAT,
-	CDM_DOUBLE
-};
-
 class CDMVariable
 {
 public:
-	CDMVariable();
+	explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<CDMDimension> shape);
 	virtual ~CDMVariable();
+	const std::string& getName() const {return name;}
+	const CDMDataType& getDataType() const {return datatype;}
+	const std::vector<CDMDimension>& getShape() const {return shape;}	
+	
 private:
-	int variableId; 
-	string name;
-	CDMType datatype;
-	vector CDMDimension;
+	std::string name;
+	CDMDataType datatype;
+	std::vector<CDMDimension> shape;
 };
 
 }

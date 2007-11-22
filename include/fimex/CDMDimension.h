@@ -6,13 +6,15 @@
 namespace MetNoUtplukk
 {
 
+const static int CDM_UNLIMITED_DIMENSION = -1;
+
 class CDMDimension
 {
 public:
-	CDMDimension(string name, long length);
+	CDMDimension(std::string name, long length);
 	virtual ~CDMDimension();
 private:
-	string name;
+	std::string name;
 	long length;
 
 };

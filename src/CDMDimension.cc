@@ -3,7 +3,7 @@
 namespace MetNoUtplukk
 {
 
-CDMDimension::CDMDimension(string name, long length)
+CDMDimension::CDMDimension(std::string name, long length)
 : name(name), length(length)
 {
 }

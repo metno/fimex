@@ -2,6 +2,9 @@
 #define DATA_H_
 
 #include <boost/shared_array.hpp>
+#include <string>
+#include <sstream>
+#include <iostream>
 
 namespace MetNoUtplukk
 {
@@ -29,7 +32,6 @@ boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, 
 class Data
 {
 public:
-	Data() {}
 	virtual ~Data() {}
 
 	/// @brief size of the data
@@ -51,6 +53,8 @@ public:
 	virtual boost::shared_array<float> asFloat() const = 0;
 	/// @brief retrieve data-copy as double
 	virtual boost::shared_array<double> asDouble() const = 0;
+	/// @brief retrieve the whole array as a string (no separators!)
+	virtual std::string asString() const = 0;
 	
 private:
 };
@@ -71,6 +75,8 @@ public:
 		}
 		return os;
 	}
+	/// @brief get the datapointer of the data
+	virtual const boost::shared_array<C> asBase() const {return theData;}
 	// conversion function
 	virtual boost::shared_array<char> asChar() const {return convertArrayType<char, C>(theData, length);}
 	virtual boost::shared_array<short> asShort() const {return convertArrayType<short, C>(theData, length);}
@@ -78,6 +84,7 @@ public:
 	virtual boost::shared_array<long> asLong() const {return convertArrayType<long, C>(theData, length);}
 	virtual boost::shared_array<float> asFloat() const {return convertArrayType<float, C>(theData, length);}
 	virtual boost::shared_array<double> asDouble() const {return convertArrayType<double, C>(theData, length);}
+	virtual std::string asString() const {std::ostringstream o; print(o); return o.str();}
 
 private:
 	long length;
