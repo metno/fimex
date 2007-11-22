@@ -5,15 +5,14 @@
 #include <algorithm>
 #include <iostream>
 #include <cassert>
+#include <cmath>
 
 namespace MetNoFelt {
 
 Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx)
 : feltArrayName(name),
-  nx(ANY_VALUE()),
-  ny(ANY_VALUE()),
-  scaling_factor(ANY_VALUE()),
-  idx(idx) 
+  idx(idx),
+  header(ANY_ARRAY20())
 {
 	// clear time
 	this->idx[2] = ANY_VALUE();
@@ -33,17 +32,15 @@ Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx)
 }
 Felt_Array::Felt_Array()
 : feltArrayName(""),
- nx(ANY_VALUE()),
- ny(ANY_VALUE()),
- scaling_factor(ANY_VALUE()),
- idx(ANY_ARRAY()) {
+ idx(ANY_ARRAY()),
+ header(ANY_ARRAY20()) {
 }
 
 Felt_Array::~Felt_Array()
 {
 }
 
-void Felt_Array::addInformationByIndex(const boost::array<short, 16> idx, int fieldSize) throw(Felt_File_Error) {
+void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error) {
 	if (fieldSize <= 0) {
 		// no data, no field
 		return;
@@ -74,28 +71,28 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16> idx, int fi
 	fieldSizeMap[thisTime][idx[12]] = fieldSize;
 }
 
-void Felt_Array::setXandY(int nx, int ny) throw(Felt_File_Error) {
-	if (!((this->nx == ANY_VALUE()) || (this->nx == nx))) {
-		ostringstream msg;
-		msg << "nx changed from " << this->nx << " to " << nx << " in parameter "<< getName();
-		throw Felt_File_Error(msg.str());
+void Felt_Array::testHeaderElement(short oldVal, short newVal, const std::string& msg) const throw(Felt_File_Error)
+{
+	if ((oldVal != ANY_VALUE()) && (oldVal != newVal)) {
+		throw Felt_File_Error("change in " + msg);
 	}
-	if (!((this->ny == ANY_VALUE()) || (this->ny == ny))) {
-		ostringstream msg;
-		msg << "ny changed from " << this->ny << " to " << ny << " in parameter "<< getName();
-		throw Felt_File_Error(msg.str());
-	}
-	this->nx = nx;
-	this->ny = ny;
 }
 
-void Felt_Array::setScalingFactor(long scalingFactor) throw(Felt_File_Error) {
-	if (!((this->scaling_factor == ANY_VALUE()) || (this->scaling_factor == scalingFactor))) {
-		ostringstream msg;
-		msg << "scaling_factor changed from " << this->scaling_factor << " to " << scalingFactor << " in parameter "<< getName();
-		throw Felt_File_Error(msg.str());
+void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_Error)
+{
+	for (int i = 0; i < 20; i++) {
+		switch (i) {
+			case 9: testHeaderElement(this->header[i], header[i], "dataheader: x"); break;
+			case 10: testHeaderElement(this->header[i], header[i], "dataheader: y"); break;
+			case 19: testHeaderElement(this->header[i], header[i], "dataheader: scalingFactor"); break;
+			case 14:
+			case 15:
+			case 16:
+			case 17: testHeaderElement(this->header[i], header[i], "dataheader: grid definition " + i); break;
+			default: break;
+		}
 	}
-	this->scaling_factor = scalingFactor;
+	this->header = header;
 }
 
 void Felt_Array::setExtraInformation(vector<short> v) {
@@ -124,15 +121,8 @@ vector<short> Felt_Array::getLevels() {
 	return vLevels;
 }
 
-const int Felt_Array::getX() {
-	return nx;
-}
-const int Felt_Array::getY() {
-	return ny;
-}
-
-const long Felt_Array::getScalingFactor() {
-	return scaling_factor;
+long Felt_Array::getScalingFactor() {
+	return static_cast<long>(std::pow(10,static_cast<double>(header[19])));
 }
 
 const string& Felt_Array::getName() {

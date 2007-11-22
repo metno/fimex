@@ -146,20 +146,28 @@ const std::string& FeltParameters::getParameterName(const boost::array<short, 16
 }
 
 const int ANY_VALUE() {
-	const static int ANY_VALUE = -32767;
-	return ANY_VALUE;
+	return -32767;
 }
 const std::string& UNDEFINED() {	
-	const static std::string UNDEFINED("");
-	return UNDEFINED;
+	static std::string s("");
+	return s;
 }
 const boost::array<short, 16>& ANY_ARRAY() {
-	const static boost::array<short, 16> ANY_ARRAY =
+	const static boost::array<short, 16> ary =
 	{ {ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
-	return ANY_ARRAY;
+	return ary;
+}	   
+const boost::array<short, 20>& ANY_ARRAY20() {
+	const static boost::array<short, 20> ary =
+	{ {ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
+	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
+	return ary;
 }	   
 
 

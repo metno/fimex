@@ -29,6 +29,7 @@ class Felt_Array
 	int ny;
 	long scaling_factor;
 	boost::array<short, 16> idx;
+	boost::array<short, 20> header;
 	vector<short> extraGridInfo;
 	
 public:
@@ -45,28 +46,26 @@ public:
 	 * add information from the felt-index (usually retrieved from qfelt) to this Felt_Array
 	 * the index given here must correspond to the initialization index
 	 */
-	void addInformationByIndex(const boost::array<short, 16> idx, int fieldSize) throw(Felt_File_Error);
+	void addInformationByIndex(const boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error);
+	/// @brief get the time/level independent index of this header
+	const boost::array<short, 16>& getIndexHeader() const {return idx;}
 	
-	/** 
-	 * set x and y dimension (or long/lat respectively) for this array
-	 * since this information is not available before reading the data, it will be set late only, (though Felt_File does this automatically)
-	 * x = y = ANY_VALUE() indicate not set value
-	 * 
-	 * @throw Felt_File_Error thrown when changing nx or ny values
-	 */
-	void setXandY(int nx, int ny) throw(Felt_File_Error);
-
 	/**
-	 *
-	 * @throw Felt_File_Error thrown when changing scalingFactor
+	 * @brief set the felt data-header for this array
+	 * a Felt_File_Error will be thrown if the header is different for the different times/layers of this Array
+	 * @throw Felt_File_Error when data-definitions change 
 	 */
-	void setScalingFactor(long scalingFactor) throw(Felt_File_Error);
-
+	void setDataHeader(boost::array<short, 20> header) throw(Felt_File_Error);
+	/// get the time/level independent data-header
+	const boost::array<short, 20>& getDataHeader() const {return header;} 
+	
 	/**
 	 * some felt-files contain some extra information (behind the data array)
 	 * they should be set here. No tests are run when changing extra-information between fields
 	 */
 	void setExtraInformation(vector<short> extraInfo);
+	/// get the extra grid information from the end of the data
+	const vector<short>& getExtraInformation() const {return extraGridInfo;}
 
 	/** return the parameter name */
 	const string& getName();
@@ -75,15 +74,18 @@ public:
 	/** return the levels available for this parameter */
 	vector<short> getLevels();
 	/** return x/longitude size */
-	const int getX();
+	int getX() {return header[9];}
 	/** return y/latitude size */
-	const int getY();
+	int getY() {return header[10];}
 	/** return scalingFactor */
-	const long getScalingFactor();
+	long getScalingFactor();
 	
 	/** return a copy of the index used within this Felt_Array */
 	boost::array<short, 16> const getIndex(time_t time, short level) throw(Felt_File_Error);
 	int const getFieldSize(time_t time, short level) throw (Felt_File_Error);
+	
+private:
+	void testHeaderElement(short oldVal, short newVal, const std::string& msg) const throw(Felt_File_Error);
 };
 
 } // end namespace MetNoFelt

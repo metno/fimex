@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <boost/array.hpp>
-
+#include <vector>
 
 namespace MetNoFelt {
 
@@ -28,11 +28,17 @@ private:
 
 };
 
+inline std::string getProjString(const boost::array<short, 16>& indexheader, const boost::array<short, 20>& dataheader, const std::vector<short>& extraGridInfo)
+{
+// TODO: implement
+	return "not implemented";
+}
 
 
 const int ANY_VALUE();
 const std::string& UNDEFINED();
 const boost::array<short, 16>& ANY_ARRAY();
+const boost::array<short, 20>& ANY_ARRAY20();
 
 } // end namespace MetNoFelt
 

@@ -1,7 +1,6 @@
 #include "felt_reader/Felt_File.h"
 #include "milib.h"
 #include <ctime>
-#include <cmath>
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -124,10 +123,13 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 	if (ierror > 0) {
 		throw Felt_File_Error("error reading with mrfelt");
 	}
-	int nx(header_data[9]);  //  x or longitudes
-	int ny(header_data[10]); // y or latitudes
-	fa.setXandY(nx, ny);
-	fa.setScalingFactor(static_cast<long>(std::pow(10,static_cast<double>(header_data[19]))));
+	boost::array<short, 20> header;
+	for (int i = 0; i < 20; i++) {
+		header[i] = header_data[i];
+	}
+	fa.setDataHeader(header);
+	int nx(fa.getX());
+	int ny(fa.getY());
 	vector<short> extraGridInfo(fieldSize-20-nx*ny);
 	// copy extra data to extraGridInfo
 	vector<short>::iterator egi_iter(extraGridInfo.begin());
