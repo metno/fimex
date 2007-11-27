@@ -28,8 +28,6 @@ private:
 	std::map<std::string, CDMDimension> dimensions;
 };
 
-inline std::vector<CDMAttribute> projStringToAttributes(std::string projStr) {return std::vector<CDMAttribute>();}// TODO: implement
-
 }
 
 #endif /*CDM_H_*/

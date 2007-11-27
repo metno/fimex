@@ -5,6 +5,8 @@
 #include <fstream>
 #include <string>
 
+#include "Utils.h"
+
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
@@ -167,6 +169,11 @@ void test_miup_interpolate_f()
 //	}	
 }
 
+void test_Utils() {
+	MetNoUtplukk::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+}
+
+
 test_suite*
 init_unit_test_suite( int argc, char* argv[] )
 {
@@ -177,6 +184,7 @@ init_unit_test_suite( int argc, char* argv[] )
 	test->add( BOOST_TEST_CASE( &test_miup_get_values_f ) );
 	test->add( BOOST_TEST_CASE( &test_miup_get_values_bilinear_f ) );
 	test->add( BOOST_TEST_CASE( &test_miup_interpolate_f ) );
+	test->add( BOOST_TEST_CASE( &test_Utils ) );
     return test;
 }
 

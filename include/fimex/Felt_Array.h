@@ -74,9 +74,11 @@ public:
 	/** return the levels available for this parameter */
 	vector<short> getLevels();
 	/** return x/longitude size */
-	int getX() {return header[9];}
+	int getX() const {return header[9];}
 	/** return y/latitude size */
-	int getY() {return header[10];}
+	int getY() const {return header[10];}
+	/** return the felt-type of the vertical axis */
+	short getVerticalFeltType() const {return idx[10];}
 	/** return scalingFactor */
 	long getScalingFactor();
 	
