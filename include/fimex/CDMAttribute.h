@@ -11,10 +11,13 @@ namespace MetNoUtplukk
 
 class CDMAttribute
 {
+	
 public:
 	CDMAttribute();
+	explicit CDMAttribute(std::string name, std::string value);
 	virtual ~CDMAttribute();
 	const std::string& getName() const {return name;}
+	const std::string getStringValue() const {return data->asString();}
 private:
 	std::string variableName;
 	std::string name;

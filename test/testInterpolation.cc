@@ -170,7 +170,10 @@ void test_miup_interpolate_f()
 }
 
 void test_Utils() {
-	MetNoUtplukk::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::vector<MetNoUtplukk::CDMAttribute> attrs = MetNoUtplukk::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	for (std::vector<MetNoUtplukk::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
+		std::cerr << it->getName() << ": " << it->getStringValue() << std::endl;
+	}
 }
 
 
