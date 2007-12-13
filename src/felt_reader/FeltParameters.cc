@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <boost/regex.hpp> 
 #include <boost/tokenizer.hpp>
@@ -144,6 +145,27 @@ const std::string& FeltParameters::getParameterName(const boost::array<short, 16
 	}
 	return UNDEFINED();
 }
+
+std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error)
+{
+// TODO: still a bit unsure about usage of rotated geo. ; still unsure about usage of x_0, y_0 (this should go into axes??)
+	std::ostringstream tempProj;
+	std::string earth("+elips=sphere +a=3710 +e=0");
+	switch (gridType) {
+		case 1: 
+		case 4: tempProj << "+proj=stere +lat_0=90 +lat_ts=" << gridParameters[4] << " +lon_0=" << gridParameters[3] << " " << earth; 
+				break;
+		case 2: tempProj << "+proj=latlon " << earth; // geographic
+				break;
+		case 3: tempProj << "+proj=latlon " << earth; // rotated geographic ??
+				break;
+		case 5: tempProj << "+proj=tmerc +lat_1=" << gridParameters[4] << " " << earth; // mercator ???
+				break;
+		default: throw Felt_File_Error("unknown projection-id: " + gridType);
+	}
+	return tempProj.str();
+}
+
 
 const int ANY_VALUE() {
 	return -32767;

@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <boost/array.hpp>
-#include <vector>
+#include "Felt_File_Error.h"
 
 namespace MetNoFelt {
 
@@ -28,12 +28,7 @@ private:
 
 };
 
-inline std::string getProjString(const boost::array<short, 16>& indexheader, const boost::array<short, 20>& dataheader, const std::vector<short>& extraGridInfo)
-{
-// TODO: implement
-	return "not implemented";
-}
-
+std::string getProjString(int gridType, const boost::array<float, 6> gridParameters) throw(Felt_File_Error);
 
 const int ANY_VALUE();
 const std::string& UNDEFINED();

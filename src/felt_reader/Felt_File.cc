@@ -53,12 +53,11 @@ Felt_File::Felt_File(const string& filename)
     	}
         qfelt(iunit,ireq,iexist,nin,in.get(),ifound.get(),&nfound,&iend,&ierror,&ioerr);
         if (ierror != 0) {
-			//TODO: error-handling???
+			throw Felt_File_Error("problems querying feltfile");
         } else {
  	       	foundall += nfound;
  	       	boost::array<short, 16> idx;
     	    for (int i = 0; i < nfound; i++) {
-				//TODO: fill feltArrayMap
 				for (int j = 0; j < 16; j++) {
 					idx[j] = in[i*16 + j];
 				}
@@ -128,19 +127,19 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 		header[i] = header_data[i];
 	}
 	fa.setDataHeader(header);
-	int nx(fa.getX());
-	int ny(fa.getY());
-	vector<short> extraGridInfo(fieldSize-20-nx*ny);
-	// copy extra data to extraGridInfo
-	vector<short>::iterator egi_iter(extraGridInfo.begin());
-	int i;
-	for (i = 20+nx*ny; i < fieldSize; i++) {
-		*egi_iter++ = header_data[i];
+	// get gridParameters via libmi
+	boost::array<float, 6> gridParameters;
+	int gridType, nx, ny;
+//	gridpar(int icall, int ldata,      short *idata, int *igtype, int *nx, int *ny,              float *grid, int *ierror);
+	gridpar(1,         fieldSize, header_data.get(),   &gridType,     &nx,     &ny, gridParameters.c_array(),     &ierror);
+	if (ierror > 0) {
+		throw Felt_File_Error("error interpreting grid Parameters");
 	}
-	fa.setExtraInformation(extraGridInfo);
+	fa.setGridType(gridType);
+	fa.setGridParameters(gridParameters);
 	vector<short> data(nx*ny);
 	vector<short>::iterator d_iter(data.begin());
-	for (i = 20; i < 20+nx*ny; i++) {
+	for (int i = 20; i < 20+nx*ny; i++) {
 		*d_iter++ = header_data[i];
 	}
 	return data;

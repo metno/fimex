@@ -28,9 +28,10 @@ class Felt_Array
 	int nx;
 	int ny;
 	long scaling_factor;
+	int gridType;
 	boost::array<short, 16> idx;
 	boost::array<short, 20> header;
-	vector<short> extraGridInfo;
+	boost::array<float, 6> gridParameters;
 	
 public:
 	/** constructor */
@@ -59,13 +60,16 @@ public:
 	/// get the time/level independent data-header
 	const boost::array<short, 20>& getDataHeader() const {return header;} 
 	
+	/// set the gridType as used in libmi gridPar function
+	void setGridType(int gridType) {this->gridType = gridType;}
+	/// get the gridType
+	int getGridType() const {return gridType;}
 	/**
-	 * some felt-files contain some extra information (behind the data array)
-	 * they should be set here. No tests are run when changing extra-information between fields
+	 * set all the grid parameters from the felt file as retrieved from libmi's gridPar function 
 	 */
-	void setExtraInformation(vector<short> extraInfo);
+	void setGridParameters(boost::array<float, 6> gridParameters) {this->gridParameters = gridParameters;}
 	/// get the extra grid information from the end of the data
-	const vector<short>& getExtraInformation() const {return extraGridInfo;}
+	const boost::array<float, 6>& getGridParameters() const {return gridParameters;}
 
 	/** return the parameter name */
 	const string& getName();

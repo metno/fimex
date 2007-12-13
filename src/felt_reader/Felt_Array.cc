@@ -95,10 +95,6 @@ void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_E
 	this->header = header;
 }
 
-void Felt_Array::setExtraInformation(vector<short> v) {
-	this->extraGridInfo = v;
-}
-
 vector<time_t> Felt_Array::getTimes() {
 	vector<time_t> vTimes = vector<time_t>(times.size());
 	// below follows something similar to STL-copy, but for map-keys
