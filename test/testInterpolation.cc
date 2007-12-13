@@ -171,9 +171,26 @@ void test_miup_interpolate_f()
 
 void test_Utils() {
 	std::vector<MetNoUtplukk::CDMAttribute> attrs = MetNoUtplukk::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	int found = 4;
 	for (std::vector<MetNoUtplukk::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
-		std::cerr << it->getName() << ": " << it->getStringValue() << std::endl;
+		if (it->getName() == "grid_mapping_name") {
+			found--;
+			BOOST_CHECK(0 == (it->getStringValue() == "stereographic"));
+		}
+		if (it->getName() == "scale_factor_at_projection_origin") {
+			found--;
+			BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - 0.93301) < 0.00001);
+		}
+		if (it->getName() == "longitude_of_projection_origin") {
+			found--;
+			BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - -32.) < 0.00001);
+		}
+		if (it->getName() == "latitude_of_projection_origin") {
+			found--;
+			BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - 90.) < 0.00001);
+		}
 	}
+	BOOST_CHECK(found == 0);
 }
 
 

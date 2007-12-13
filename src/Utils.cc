@@ -23,33 +23,37 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 		std::cerr << "pj_init error: " << pj_errno << " " << pj_strerrno(pj_errno) << std::endl;
 		throw std::exception(); // not initialized
 	}
-	FACTORS factors;
-	LP lp;
+	LP lp, lpOrg;
 	boost::smatch what;
 	if (boost::regex_search(projStr, what, boost::regex("\\+lon_0=(\\S+)"))) {
-		lp.u = DEG_TO_RAD * std::strtod(what[1].str().c_str(), (char **)NULL);
+		lpOrg.u = std::strtod(what[1].str().c_str(), (char **)NULL);
+		lp.u = DEG_TO_RAD * lpOrg.u;
 	} else {
+		lpOrg.u = 0;
 		lp.u = 0;
 	}
 	if (boost::regex_search(projStr, what, boost::regex("\\+lat_0=(\\S+)"))) {
-		lp.v = DEG_TO_RAD * std::strtod(what[1].str().c_str(), (char **)NULL);
+		lpOrg.v = std::strtod(what[1].str().c_str(), (char **)NULL);
+		lp.v = DEG_TO_RAD * lpOrg.v;
 		// work around HALFPI which is singularity in proj (Proj BUGZILLA: 1605)
 		double delta = std::fabs(lp.v) - HALFPI;
 		if (std::fabs(delta) < DerivDelta) {
 			lp.v = (lp.v > 0) ? (HALFPI - DerivDelta) : (-1*HALFPI + DerivDelta);
 		}
 	} else {
+		lpOrg.v = 0;
 		lp.v = 0;
 	}
 
-	// pj_factors requires one conversion before it will work
-	LP lptest = pj_fwd(lp, pj.get());
+	// pj_factors
+	FACTORS factors;
+	factors.code = 0; // flag what to calculate. 0 means calc everything? undocumented, default: random
 	if (pj_factors(lp, pj.get(), 0., &factors) != 0) {
 		std::cerr << "pj_factors error: " << pj_errno << " " << pj_strerrno(pj_errno) << std::endl;
 		throw std::exception();
 	}
+
 	std::string projType;
-	std::vector<CDMAttribute> attrList;
 	if (boost::regex_search(projStr, what, boost::regex("\\+proj=(\\S+)"))) {
 		projType = what[1].str();
 	} else {
@@ -57,20 +61,15 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 		throw std::exception();
 	}
 
+	std::vector<CDMAttribute> attrList;
 	if (projType == "stere") {
 		// stereographic projection
-		std::string s("");
-		s+= lp.u;
-		CDMAttribute name("grid_mapping_name", "stereographic");
-		// TODO: set double values, test
-		CDMAttribute lon_opo("longitude_of_projection_origin", s);
-//		CDMAttribute lat_opo("latitude_of_projection_origin", std::string(lp.v));
-//		CDMAttribute scale("scale_factor_at_projection_origin", std::string(factors.k));
-		attrList.push_back(name);
-		attrList.push_back(lon_opo);
-//		attrList.push_back(lat_opo);
-//		attrList.push_back(scale);
+		attrList.push_back(CDMAttribute("grid_mapping_name", "stereographic"));
+		attrList.push_back(CDMAttribute("scale_factor_at_projection_origin", factors.k));
+		attrList.push_back(CDMAttribute("longitude_of_projection_origin", lpOrg.u));
+		attrList.push_back(CDMAttribute("latitude_of_projection_origin", lpOrg.v));
 	}
+	// TODO implement more projections (merc, ...)
 	
 	return attrList;
 }
