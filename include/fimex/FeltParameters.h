@@ -28,7 +28,7 @@ private:
 
 };
 
-std::string getProjString(int gridType, const boost::array<float, 6> gridParameters) throw(Felt_File_Error);
+std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error);
 
 const int ANY_VALUE();
 const std::string& UNDEFINED();

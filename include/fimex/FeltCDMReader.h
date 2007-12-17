@@ -3,7 +3,8 @@
 
 #include <string>
 #include <map>
-#include "felt_reader/Felt_File.h"
+#include "Felt_File.h"
+#include "Felt_File_Error.h"
 #include "CDMReader.h"
 
 namespace MetNoUtplukk
@@ -12,7 +13,7 @@ namespace MetNoUtplukk
 class FeltCDMReader : public CDMReader
 {
 public:
-	FeltCDMReader(std::string filename, std::string configFilename);
+	FeltCDMReader(std::string filename, std::string configFilename) throw(MetNoFelt::Felt_File_Error);
 	virtual ~FeltCDMReader();
 	
 	virtual TimeSliceData getDataSlice(int variableId, Time time);

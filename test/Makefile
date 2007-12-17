@@ -2,9 +2,9 @@ F2CLIB=-lg2c
 CC=gcc
 CXX=g++
 CXXFLAGS=-Wall -pedantic -g
-CPPFLAGS=-I../src -I/disk1/metno/local/include/milib
+CPPFLAGS=-I../src -I../src/felt_reader -I/disk1/metno/local/include/milib
 CFLAGS=-std=c99 -Wall -pedantic -g
-LDLIBS=-L../src -lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -ludunits -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lm
+LDLIBS=-L../src -lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -ludunits -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lm -lxml2 -lz
 LDFLAGS=
 RANLIB=ranlib
 

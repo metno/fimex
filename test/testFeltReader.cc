@@ -1,8 +1,9 @@
 #include <iostream>
 #include <boost/array.hpp>
 #include <cassert>
-#include "felt_reader/FeltParameters.h"
-#include "felt_reader/Felt_File.h"
+#include "FeltParameters.h"
+#include "Felt_File.h"
+#include "FeltCDMReader.h"
 
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
@@ -40,6 +41,7 @@ test_feltfile() {
 		//cout << it->getName() << endl;
 	}
 	Felt_Array& fa = ff.getFeltArray("u10m");
+	BOOST_CHECK( fa.getIdentifier() == "033-02");
 	vector<short> levels = fa.getLevels();
 	//cout << fa.getName() << ": "<<levels.size() << ": " << fa.getTimes().size() << " size: " << fa.getFieldSize(fa.getTimes().at(0), levels.at(0)) << endl;
 	BOOST_CHECK( levels.size() == 1 );
@@ -69,6 +71,11 @@ test_feltfile() {
 	BOOST_CHECK(data[20000] == 8964);
 }
 
+void
+test_felt_cdm_reader() {
+	MetNoUtplukk::FeltCDMReader("flth00.dat", "../etc/felt2nc_variables.xml");
+}
+
 test_suite*
 init_unit_test_suite( int argc, char* argv[] )
 {
@@ -76,5 +83,6 @@ init_unit_test_suite( int argc, char* argv[] )
 
     test->add( BOOST_TEST_CASE( &test_feltparameter ) );
 	test->add( BOOST_TEST_CASE( &test_feltfile ) );
+	test->add( BOOST_TEST_CASE( &test_felt_cdm_reader ) );
     return test;
 }

@@ -16,8 +16,14 @@ public:
 	CDMAttribute();
 	/// create a string attribute
 	explicit CDMAttribute(std::string name, std::string value);
+	/// create a char attribute with a char array of length 1
+	explicit CDMAttribute(std::string name, char value);
 	/// create a int attribute with a int array of length 1
 	explicit CDMAttribute(std::string name, int value);
+	/// create a short attribute with a short array of length 1
+	explicit CDMAttribute(std::string name, short value);
+	/// create a float attribute with a float array of length 1
+	explicit CDMAttribute(std::string name, float value);
 	/// create a double attribute with a double array of length 1
 	explicit CDMAttribute(std::string name, double value);
 	virtual ~CDMAttribute();
