@@ -84,8 +84,7 @@ Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx)
 	string name = feltParameters.getParameterName(idx);
 	map<string, Felt_Array>::iterator it = feltArrayMap.find(name); 
 	if (it == feltArrayMap.end()) {
-		Felt_Array fa(name, idx);
-		feltArrayMap[name] = fa;
+		feltArrayMap[name] = Felt_Array(name, idx);
 		return feltArrayMap[name];
 	} else {
 		return it->second;
@@ -150,6 +149,32 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 	boost::array<short, 16> idx(fa.getIndex(time, level));
 	int fieldSize(fa.getFieldSize(time, level));
 	return getDataSlice(fa, idx, fieldSize);
+}
+
+std::map<short, std::vector<short> > Felt_File::getFeltLevels() {
+	std::map<short, std::set<short> > typeLevelSet;
+	for (std::map<std::string, Felt_Array>::iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+		vector<short> levels = fait->second.getLevels();
+		typeLevelSet[fait->second.getLevelType()].insert(levels.begin(), levels.end());
+	}
+	std::map<short, std::vector<short> > typeLevelVector;
+	for (std::map<short, std::set<short> >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
+		std::vector<short> sortedLevels(it->second.begin(), it->second.end());
+		sort(sortedLevels.begin(), sortedLevels.end());
+		typeLevelVector[it->first] = sortedLevels;
+	}
+	return typeLevelVector;
+}
+
+std::vector<time_t> Felt_File::getFeltTimes() {
+	std::set<time_t> times;
+	for (std::map<std::string, Felt_Array>::iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+		vector<time_t> fa_times = fait->second.getTimes();
+		times.insert(fa_times.begin(), fa_times.end());
+	}
+	std::vector<time_t> sortedTimes(times.begin(), times.end());
+	sort(sortedTimes.begin(), sortedTimes.end());
+	return sortedTimes;
 }
 
 

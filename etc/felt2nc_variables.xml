@@ -1,4 +1,75 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<config>
+<axes>
+<time id="time" name="time">
+	<attribute name="long_name" value="time" type="string" />
+	<attribute name="standard_name" value="time" type="string" />
+</time>
+<spatial_axis id="x" name="Xc">
+	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis id="y" name="Yc">
+	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis id="longitude" name="longitude">
+	<attribute name="valid_max" value="180." type="float" />
+	<attribute name="valid_min" value="-180." type="float" />
+	<attribute name="long_name" value="longitude" type="string" />
+	<attribute name="standard_name" value="longitude" type="string" />
+	<attribute name="units" value="degree_east" type="string" />
+</spatial_axis>
+<spatial_axis id="latitude" name="latitude">
+	<attribute name="valid_max" value="90." type="float" />
+	<attribute name="valid_min" value="-90." type="float" />
+	<attribute name="long_name" value="latitude" type="string" />
+	<attribute name="standard_name" value="latitude" type="string" />
+	<attribute name="units" value="degree_north" type="string" />
+</spatial_axis>
+<vertical_axis id="undefined" name="undefined">
+	<attribute name="felt_id" value="1" type="integer" />
+</vertical_axis>
+<vertical_axis id="sigma" name="sigma" felt_id="2">
+	<attribute name="description" value="atmosphere sigma coordinate" type="string" />
+	<attribute name="long_name" value="atmosphere_sigma_coordinate" type="string" />
+	<attribute name="standard_name" value="atmosphere_sigma_coordinate" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="units" value="1" type="string" />
+	<recalc scale="0.001" offset="0" />
+</vertical_axis>
+<vertical_axis id="h" name="h" felt_id="3">
+	<attribute name="description" value="vertical coordinate used for wave variables, value: 0" type="string" />
+	<attribute name="long_name" value="vertical_wave_coordinate" type="string" />
+</vertical_axis>
+<vertical_axis id="undefined" name="undefined" felt_id="4">
+</vertical_axis>
+<vertical_axis id="depth" name="depth" felt_id="5">
+	<attribute name="description" value="geopotential level relative to equilibrium surface" type="string" />
+	<attribute name="long_name" value="depth" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="standard_name" value="depth" type="string" />
+	<attribute name="units" value="m" type="string" />
+</vertical_axis>
+<vertical_axis id="layer" name="layer" felt_id="6">
+	<attribute name="description" value="ocean model layer no., isopycnic or hybrid" type="string" />
+	<attribute name="long_name" value="ocean_layer_coordinate" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="units" value="1" type="string" />
+</vertical_axis>
+<vertical_axis id="sigma" name="sigma" felt_id="7">
+	<attribute name="description" value="ocean sigma coordinate, surface is 0, bottom is 1" type="string" />
+	<attribute name="long_name" value="ocean_sigma_coordinate" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="standard_name" value="ocean_sigma_coordinate" type="string" />
+	<attribute name="units" value="1" type="string" />
+</vertical_axis>
+<vertical_axis id="surface" name="surface" felt_id="8">
+	<attribute name="description" value="ocean surface, or vertically integrated" type="string" />
+	<attribute name="long_name" value="model_surface" type="string" />
+	<attribute name="units" value="1" type="string" />
+</vertical_axis>
+</axes>
 <variables>
 <parameter id="025-02" name="cloud_area_fraction">
 	<attribute name="scale_factor" value="0.01" type="float" />
@@ -541,3 +612,4 @@
 	<attribute name="units" value="mgN m-3" type="string" />
 </parameter>
 </variables>
+</config>

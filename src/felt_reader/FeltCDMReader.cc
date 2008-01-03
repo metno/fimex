@@ -94,7 +94,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		}
 		// TODO: enter variable via xpath
 		std::cerr << it->getName() << ":" << it->getIdentifier() << std::endl;
-		std::string xpathString("/variables/parameter[@id='"+it->getIdentifier()+"']");
+		std::string xpathString("/config/variables/parameter[@id='"+it->getIdentifier()+"']");
 		boost::shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathFreeContext);
 		if (xpathCtx.get() == 0) {
 			xmlCleanupParser();

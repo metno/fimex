@@ -60,6 +60,8 @@ public:
 	/// get the time/level independent data-header
 	const boost::array<short, 20>& getDataHeader() const {return header;} 
 	
+	/// get the felt level type of this array
+	short getLevelType() const {return header[10];}
 	/// set the gridType as used in libmi gridPar function
 	void setGridType(int gridType) {this->gridType = gridType;}
 	/// get the gridType

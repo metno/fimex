@@ -2,6 +2,7 @@
 #define FELT_FILE_H_
 
 #include <cstdio>
+#include <ctime>
 #include <map>
 #include <vector>
 #include <string>
@@ -55,7 +56,11 @@ public:
 	 *  retrieve all felt arrays
 	 */
 	std::vector<Felt_Array> listFeltArrays();
-	
+
+	/// Z-axis types and values 
+	std::map<short, std::vector<short> > getFeltLevels();
+	/// all time values
+	std::vector<time_t> getFeltTimes();
 	
 };
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <boost/array.hpp>
 #include <cassert>
+#include <ctime>
 #include "FeltParameters.h"
 #include "Felt_File.h"
 #include "FeltCDMReader.h"
@@ -69,6 +70,23 @@ test_feltfile() {
 	BOOST_CHECK(data[0] == ANY_VALUE());
 	BOOST_CHECK(data[10000] == 820);
 	BOOST_CHECK(data[20000] == 8964);
+	
+	vector<time_t> ff_times = ff.getFeltTimes();
+	vector<time_t> fa_times = fa.getTimes();
+	for (vector<time_t>::iterator it = fa_times.begin(); it < fa_times.end(); ++it) {
+		if (find(ff_times.begin(), ff_times.end(), *it) == ff_times.end()) {
+			BOOST_CHECK(false); // not found
+		}
+	}
+	
+	vector<short> ff_levels = ff.getFeltLevels()[fa.getLevelType()];
+	vector<short> fa_levels = fa.getLevels();
+	for (vector<short>::iterator it = fa_levels.begin(); it < fa_levels.end(); ++it) {
+		if (find(ff_levels.begin(), ff_levels.end(), *it) == ff_levels.end()) {
+			BOOST_CHECK(false); // not found
+		}
+	}
+	
 }
 
 void
