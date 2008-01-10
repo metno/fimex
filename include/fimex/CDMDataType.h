@@ -1,5 +1,6 @@
 #ifndef CDMDATATYPE_H_
 #define CDMDATATYPE_H_
+#include <string>
 namespace MetNoUtplukk
 {
 
@@ -12,6 +13,10 @@ enum CDMDataType {
 	CDM_DOUBLE,
 	CDM_STRING
 };
+
+/// translate float/string/... to the appropriate CDMDataType
+CDMDataType string2datatype(const std::string& s);
+std::string datatype2string(CDMDataType type);
 
 }
 #endif /*CDMDATATYPE_H_*/

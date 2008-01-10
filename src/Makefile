@@ -41,7 +41,7 @@ MKDIR=mkdir -p
 include felt_reader/Make.inc
 
 depdirs = $(DEPDIR) $(DEPDIR)/felt_reader
-sources = interpolation.c TimeException.cc Time.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMVariable.cc Utils.cc $(addprefix felt_reader/,$(FELT_READER_SRC))
+sources = interpolation.c TimeException.cc Time.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMVariable.cc Utils.cc $(addprefix felt_reader/,$(FELT_READER_SRC))
 c_sources = $(filter %.c,$(sources))
 cc_sources = $(filter %.cc,$(sources))
 objects = $(c_sources:.c=.o) $(cc_sources:.cc=.o)

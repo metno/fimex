@@ -19,6 +19,17 @@ void CDM::addVariable(CDMVariable var) throw(CDMException)
 		throw CDMException("cannot add variable: " + var.getName() + " already exists");
 	}
 }
+
+void CDM::addDimension(CDMDimension dim) throw(CDMException)
+{
+	if (dimensions.find(dim.getName()) == dimensions.end()) {
+		dimensions.insert(std::pair<std::string, CDMDimension>(dim.getName(), dim));
+	} else {
+		throw CDMException("cannot add dimension: " + dim.getName() + " already exists");
+	}
+}
+
+
 void CDM::addAttribute(std::string varName, CDMAttribute attr) throw(CDMException)
 {
 	if ((varName != globalAttributeNS ()) && (variables.find(varName) == variables.end())) {
@@ -31,6 +42,30 @@ void CDM::addAttribute(std::string varName, CDMAttribute attr) throw(CDMExceptio
 			throw CDMException("cannot add attribute: attribute " + varName + "." + attr.getName() + " already exists");
 		}
 	}  	
+}
+
+
+void CDM::toXMLStream(std::ostream& out) const
+{
+	out << "<cdm>" << std::endl;
+	for (std::map<std::string, CDMDimension>::const_iterator it = dimensions.begin(); it != dimensions.end(); ++it) {
+		it->second.toXMLStream(out);
+	}
+	if (attributes.find(globalAttributeNS()) != attributes.end()) {
+		const std::map<std::string, CDMAttribute> attrs = attributes.find(globalAttributeNS())->second;
+		for (std::map<std::string, CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
+			it->second.toXMLStream(out);
+		}
+	}
+	for (std::map<std::string, CDMVariable>::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+		if (attributes.find(it->first) != attributes.end()) {
+			it->second.toXMLStream(out, attributes.find(it->first)->second);
+		} else {
+			it->second.toXMLStream(out);
+		}
+	}
+	
+	out << "</cdm>" << std::endl;
 }
 
 

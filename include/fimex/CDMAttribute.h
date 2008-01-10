@@ -2,6 +2,7 @@
 #define CDMATTRIBUTE_H_
 
 #include<string>
+#include<ostream>
 #include<boost/shared_ptr.hpp>
 #include "Data.h"
 #include "CDMDataType.h"
@@ -35,6 +36,7 @@ public:
 	const boost::shared_ptr<Data> getData() const {return data;}
 	/// retrieve the datatype of the attribute
 	const CDMDataType getDataType() const {return datatype;}
+	void toXMLStream(std::ostream& out) const;
 private:
 	std::string variableName;
 	std::string name;

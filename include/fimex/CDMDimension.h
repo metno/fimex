@@ -1,7 +1,8 @@
 #ifndef CDMDIMENSION_H_
 #define CDMDIMENSION_H_
 
-#include<string>
+#include <string>
+#include <ostream>
 
 namespace MetNoUtplukk
 {
@@ -13,6 +14,10 @@ class CDMDimension
 public:
 	CDMDimension(std::string name, long length);
 	virtual ~CDMDimension();
+	const std::string& getName() const {return name;}
+	long getLength() const {return length;}
+	/// print xml representation to stream
+	void toXMLStream(std::ostream& out) const;
 private:
 	std::string name;
 	long length;

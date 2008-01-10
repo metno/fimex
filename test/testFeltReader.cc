@@ -91,7 +91,8 @@ test_feltfile() {
 
 void
 test_felt_cdm_reader() {
-	MetNoUtplukk::FeltCDMReader("flth00.dat", "../etc/felt2nc_variables.xml");
+	MetNoUtplukk::FeltCDMReader feltCDM("flth00.dat", "../etc/felt2nc_variables.xml");
+	feltCDM.getCDM().toXMLStream(std::cout);
 }
 
 test_suite*

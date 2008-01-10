@@ -62,5 +62,9 @@ CDMAttribute::~CDMAttribute()
 {
 }
 
+void CDMAttribute::toXMLStream(std::ostream& out) const 
+{
+	out << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
+}
 
 }
