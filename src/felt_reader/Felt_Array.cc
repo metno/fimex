@@ -94,11 +94,11 @@ void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_E
 	this->header = header;
 }
 
-vector<time_t> Felt_Array::getTimes() {
+vector<time_t> Felt_Array::getTimes() const {
 	vector<time_t> vTimes = vector<time_t>(times.size());
 	// below follows something similar to STL-copy, but for map-keys
-	TIME_MAP::iterator now(times.begin());
-	TIME_MAP::iterator last(times.end());
+	TIME_MAP::const_iterator now(times.begin());
+	TIME_MAP::const_iterator last(times.end());
 	vector<time_t>::iterator result(vTimes.begin());
 	while (now!=last) {
 		*result++ = now->first;
@@ -109,18 +109,18 @@ vector<time_t> Felt_Array::getTimes() {
 	return vTimes; 
 }
 
-vector<short> Felt_Array::getLevels() {
+vector<short> Felt_Array::getLevels() const {
 	vector<short> vLevels = vector<short>(levels.size());
 	copy(levels.begin(), levels.end(), vLevels.begin());
 	sort(vLevels.begin(), vLevels.end());
 	return vLevels;
 }
 
-long Felt_Array::getScalingFactor() {
+long Felt_Array::getScalingFactor() const {
 	return static_cast<long>(std::pow(10,static_cast<double>(header[19])));
 }
 
-const string& Felt_Array::getName() {
+const string& Felt_Array::getName() const {
 	return feltArrayName;
 } 
 
@@ -167,10 +167,10 @@ boost::array<short, 16> const Felt_Array::getIndex(time_t time, short level) thr
 	return index;
 }
 
-int const Felt_Array::getFieldSize(time_t time, short level) throw(Felt_File_Error) {
-	map<time_t, map<short, int> >::iterator timeMap = fieldSizeMap.find(time); 
+int Felt_Array::getFieldSize(time_t time, short level) const throw(Felt_File_Error) {
+	map<time_t, map<short, int> >::const_iterator timeMap = fieldSizeMap.find(time); 
 	if (timeMap != fieldSizeMap.end()) {
-		map<short, int>::iterator levelMap = timeMap->second.find(level);
+		map<short, int>::const_iterator levelMap = timeMap->second.find(level);
 		if (levelMap != timeMap->second.end()) {
 			return levelMap->second;
 		} else {

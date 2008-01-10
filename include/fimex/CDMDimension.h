@@ -12,6 +12,7 @@ const static int CDM_UNLIMITED_DIMENSION = -1;
 class CDMDimension
 {
 public:
+	CDMDimension(); // default null constructor for maps
 	CDMDimension(std::string name, long length);
 	virtual ~CDMDimension();
 	const std::string& getName() const {return name;}

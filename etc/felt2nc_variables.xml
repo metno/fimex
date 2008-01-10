@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <config>
 <axes>
-<time id="time" name="time">
+<time id="time" name="time" type="double">
 	<attribute name="long_name" value="time" type="string" />
 	<attribute name="standard_name" value="time" type="string" />
+	<attribute name="units" value="seconds since 01.01.1970 00:00" type="string" />
 </time>
 <spatial_axis id="x" name="Xc">
 	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
@@ -27,44 +28,50 @@
 	<attribute name="standard_name" value="latitude" type="string" />
 	<attribute name="units" value="degree_north" type="string" />
 </spatial_axis>
-<vertical_axis id="undefined" name="undefined">
-	<attribute name="felt_id" value="1" type="integer" />
+<vertical_axis id="pressure" name="pressure" felt_id="1" type="short">
+	<attribute name="description" value="pressure" type="string" />
+	<attribute name="long_name" value="pressure" type="string" />
+	<attribute name="standard_name" value="air_pressure" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="units" value="hPa" type="string" />
 </vertical_axis>
-<vertical_axis id="sigma" name="sigma" felt_id="2">
+<vertical_axis id="sigma" name="sigma" felt_id="2" type="short">
 	<attribute name="description" value="atmosphere sigma coordinate" type="string" />
 	<attribute name="long_name" value="atmosphere_sigma_coordinate" type="string" />
 	<attribute name="standard_name" value="atmosphere_sigma_coordinate" type="string" />
 	<attribute name="positive" value="up" type="string" />
 	<attribute name="units" value="1" type="string" />
-	<recalc scale="0.001" offset="0" />
+	<attribute name="scale_factor" value="0.001" type="float" />
 </vertical_axis>
-<vertical_axis id="h" name="h" felt_id="3">
+<vertical_axis id="h" name="h" felt_id="3" type="short">
 	<attribute name="description" value="vertical coordinate used for wave variables, value: 0" type="string" />
 	<attribute name="long_name" value="vertical_wave_coordinate" type="string" />
 </vertical_axis>
-<vertical_axis id="undefined" name="undefined" felt_id="4">
+<vertical_axis id="theta" name="theta" felt_id="4" type="short">
+	<attribute name="description" value="isentrop layer?" type="string" />
 </vertical_axis>
-<vertical_axis id="depth" name="depth" felt_id="5">
+<vertical_axis id="depth" name="depth" felt_id="5" type="short">
 	<attribute name="description" value="geopotential level relative to equilibrium surface" type="string" />
 	<attribute name="long_name" value="depth" type="string" />
 	<attribute name="positive" value="down" type="string" />
 	<attribute name="standard_name" value="depth" type="string" />
 	<attribute name="units" value="m" type="string" />
 </vertical_axis>
-<vertical_axis id="layer" name="layer" felt_id="6">
+<vertical_axis id="layer" name="layer" felt_id="6" type="short">
 	<attribute name="description" value="ocean model layer no., isopycnic or hybrid" type="string" />
 	<attribute name="long_name" value="ocean_layer_coordinate" type="string" />
 	<attribute name="positive" value="down" type="string" />
 	<attribute name="units" value="1" type="string" />
 </vertical_axis>
-<vertical_axis id="sigma" name="sigma" felt_id="7">
+<vertical_axis id="sigma" name="sigma" felt_id="7" type="short">
 	<attribute name="description" value="ocean sigma coordinate, surface is 0, bottom is 1" type="string" />
 	<attribute name="long_name" value="ocean_sigma_coordinate" type="string" />
 	<attribute name="positive" value="down" type="string" />
 	<attribute name="standard_name" value="ocean_sigma_coordinate" type="string" />
 	<attribute name="units" value="1" type="string" />
+	<attribute name="scale_factor" value="0.001" type="float" />
 </vertical_axis>
-<vertical_axis id="surface" name="surface" felt_id="8">
+<vertical_axis id="surface" name="surface" felt_id="8" type="short">
 	<attribute name="description" value="ocean surface, or vertically integrated" type="string" />
 	<attribute name="long_name" value="model_surface" type="string" />
 	<attribute name="units" value="1" type="string" />

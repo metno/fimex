@@ -6,13 +6,15 @@
 #include <libxml/xpath.h>
 #include <vector>
 #include <sstream>
+#include <iostream>
 #include <cassert>
 
 namespace MetNoUtplukk
 {
 
-static CDMAttribute createCDMAttribute(string name, string type, string value) throw(MetNoFelt::Felt_File_Error)
+static CDMAttribute createCDMAttribute(string name, string datatype, string value) throw(MetNoFelt::Felt_File_Error)
 {
+	std::string type(string2lowerCase(datatype));
 	if (type == "float") {
 		float f;
 		std::stringstream str(value);
@@ -82,6 +84,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	// TODO: translate producer-ids to something useful
     // TODO: add axes
     // time
+	CDMDimension timeDim("null", 0);
 	{
 		std::string xpathTimeString("/config/axes/time");
 		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathTimeString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
@@ -100,7 +103,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		string timeType(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
 		CDMDataType timeDataType = string2datatype(timeType);
 		long timeSize = feltFile.getFeltTimes().size();
-		CDMDimension timeDim(timeName, timeSize);
+		timeDim = CDMDimension(timeName, timeSize);
 		cdm.addDimension(timeDim);
 		std::vector<CDMDimension> timeShape;
 		timeShape.push_back(timeDim);
@@ -112,8 +115,51 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			cdm.addAttribute(timeVar.getName(), *it);
 		}
 	}
+	
+	// levels
+	map<short, CDMDimension> levelDims;
+	{
+		std::map<short, std::vector<short> > levels = feltFile.getFeltLevels();
+		for (std::map<short, std::vector<short> >::const_iterator it = levels.begin(); it != levels.end(); ++it) {
+			// add a level
+			std::string xpathLevelString("/config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
+			boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathLevelString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
+			if (xpathObj.get() == 0) {
+				xmlCleanupParser();
+				throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathLevelString);
+			}
+			xmlNodeSetPtr nodes = xpathObj->nodesetval;
+			if (nodes->nodeNr != 1) {
+				xmlCleanupParser();
+				throw MetNoFelt::Felt_File_Error("unable to find 'vertical'-axis "+type2string(it->first)+" in config: " + configFilename);
+			}
+			xmlNodePtr node = nodes->nodeTab[0];
+			assert(node->type == XML_ELEMENT_NODE);
+			string levelName(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
+			string levelId(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("id"))));
+			string levelType(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
+			CDMDataType levelDataType = string2datatype(levelType);
+			long levelSize = it->second.size();
+			CDMDimension levelDim(levelId, levelSize);
+			levelDims.insert(std::pair<short, CDMDimension>(it->first, levelDim));
+			cdm.addDimension(levelDim);
+			std::vector<CDMDimension> levelShape;
+			levelShape.push_back(levelDim);
+			CDMVariable levelVar(levelId, levelDataType, levelShape);
+			cdm.addVariable(levelVar);
+			std::vector<CDMAttribute> levelAttributes;
+			fillAttributeList(levelAttributes, nodes->nodeTab[0]->children);
+			for (std::vector<CDMAttribute>::iterator it = levelAttributes.begin(); it != levelAttributes.end(); ++it) {
+				cdm.addAttribute(levelVar.getName(), *it);
+			}
+		}
+	}
     
-    
+	//x,y dim will be set with the projection, can also = long/lat
+	// TODO: read attr from config, corresponding to projection
+    CDMDimension xDim("x", feltFile.getNX());
+    CDMDimension yDim("y", feltFile.getNY());
+	
 	std::vector<MetNoFelt::Felt_Array> fArrays(feltFile.listFeltArrays());
 	for (std::vector<MetNoFelt::Felt_Array>::iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
 		// projection of the array
@@ -152,9 +198,25 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		std::string varName(reinterpret_cast<char *>(xmlGetProp(nodes->nodeTab[0], reinterpret_cast<const xmlChar *>("name"))));
     		std::vector<CDMAttribute> attributes;
     		fillAttributeList(attributes, nodes->nodeTab[0]->children);
+    	
+    	
+    		// TODO: map shape, generate variable, set attributes/variable to CDM
+    		std::vector<CDMDimension> shape;
+    		shape.push_back(xDim);
+    		shape.push_back(yDim);
+    		if (it->getLevels().size() > 1) {
+    			shape.push_back(levelDims[it->getLevelType()]);
+    		}
+    		if (it->getTimes().size() > 1) {
+    			shape.push_back(timeDim);
+    		}
+    		std::cerr << varName << " shape " << shape.size() << std::endl;
+    		CDMVariable var(varName, CDM_SHORT, shape);
+    		cdm.addVariable(var);
+    		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
+    			cdm.addAttribute(varName, *attrIt);
+    		}
     	}
-    	// TODO: map shape, generate variable, set attributes/variable to CDM
-		
 	}
 	xmlCleanupParser();
 }

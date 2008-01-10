@@ -1,10 +1,11 @@
 #include "Utils.h"
 #include <cstdlib>
+#include <cmath>
+#include <cstring>
 #include <iostream>
+#include <exception>
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
-#include <exception>
-#include <cmath>
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam
@@ -12,12 +13,18 @@
 
 namespace MetNoUtplukk
 {
-
+std::string string2lowerCase(const std::string& str)
+{
+	std::string s(str);
+	for (unsigned int i = 0; i < s.length(); i++) {
+		s[i] = std::tolower(s[i]);
+	}
+	return s;
+}
 std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 {
 	// init projections
 	// make sure that pj is freed when going out of scope
-	const double DerivDelta(1e-5);
 	boost::shared_ptr<PJ> pj(pj_init_plus(projStr.c_str()), pj_free); 
 	if (!pj.get()) {
 		std::cerr << "pj_init error: " << pj_errno << " " << pj_strerrno(pj_errno) << std::endl;
@@ -37,6 +44,7 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 		lp.v = DEG_TO_RAD * lpOrg.v;
 		// work around HALFPI which is singularity in proj (Proj BUGZILLA: 1605)
 		double delta = std::fabs(lp.v) - HALFPI;
+		const double DerivDelta(1e-5);
 		if (std::fabs(delta) < DerivDelta) {
 			lp.v = (lp.v > 0) ? (HALFPI - DerivDelta) : (-1*HALFPI + DerivDelta);
 		}

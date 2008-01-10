@@ -28,6 +28,7 @@ private:
 	std::string name;
 	CDMDataType datatype;
 	std::vector<CDMDimension> shape;
+	void shapeToXMLStream(std::ostream& out) const;
 };
 
 }

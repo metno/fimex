@@ -61,7 +61,7 @@ public:
 	const boost::array<short, 20>& getDataHeader() const {return header;} 
 	
 	/// get the felt level type of this array
-	short getLevelType() const {return header[10];}
+	short getLevelType() const {return idx[10];}
 	/// set the gridType as used in libmi gridPar function
 	void setGridType(int gridType) {this->gridType = gridType;}
 	/// get the gridType
@@ -74,13 +74,13 @@ public:
 	const boost::array<float, 6>& getGridParameters() const {return gridParameters;}
 
 	/** return the parameter name */
-	const string& getName();
+	const string& getName() const;
 	/** return a string consisting of param-Id and level, i.e. 025-02 */
 	string getIdentifier() const;
 	/** return the times available for this parameter */
-	vector<time_t> getTimes();
+	vector<time_t> getTimes() const;
 	/** return the levels available for this parameter */
-	vector<short> getLevels();
+	vector<short> getLevels() const;
 	/** return x/longitude size */
 	int getX() const {return header[9];}
 	/** return y/latitude size */
@@ -88,11 +88,11 @@ public:
 	/** return the felt-type of the vertical axis */
 	short getVerticalFeltType() const {return idx[10];}
 	/** return scalingFactor */
-	long getScalingFactor();
+	long getScalingFactor() const;
 	
 	/** return a copy of the index used within this Felt_Array */
 	boost::array<short, 16> const getIndex(time_t time, short level) throw(Felt_File_Error);
-	int const getFieldSize(time_t time, short level) throw (Felt_File_Error);
+	int getFieldSize(time_t time, short level) const throw (Felt_File_Error);
 	
 private:
 	void testHeaderElement(short oldVal, short newVal, const std::string& msg) const throw(Felt_File_Error);

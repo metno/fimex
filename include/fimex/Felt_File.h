@@ -57,10 +57,17 @@ public:
 	 */
 	std::vector<Felt_Array> listFeltArrays();
 
-	/// Z-axis types and values 
-	std::map<short, std::vector<short> > getFeltLevels();
+	/**
+	 *  Z-axis types and values
+	 * @return map consisting of felt level-ids and a vector of level values
+	 */ 
+	std::map<short, std::vector<short> > getFeltLevels() const;
 	/// all time values
-	std::vector<time_t> getFeltTimes();
+	std::vector<time_t> getFeltTimes() const;
+	/// get size in x direction
+	int getNX() const;
+	/// get size in y direction
+	int getNY() const;
 	
 };
 

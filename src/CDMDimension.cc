@@ -3,6 +3,12 @@
 namespace MetNoUtplukk
 {
 
+CDMDimension::CDMDimension()
+: name("_null"), length(0)
+{
+}
+
+
 CDMDimension::CDMDimension(std::string name, long length)
 : name(name), length(length)
 {

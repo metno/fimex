@@ -1,14 +1,11 @@
 #include "CDMDataType.h"
-#include <cstring>
+#include "Utils.h"
 
 namespace MetNoUtplukk
 {
 
 CDMDataType string2datatype(const std::string& s) {
-	std::string str(s);
-	for (int i = 0; i < str.length(); i++) {
-		str[i] = std::tolower(str[i]);
-	}
+	std::string str(string2lowerCase(s));
 	if (str == "double") { return CDM_DOUBLE; }
 	else if (str == "float") { return CDM_FLOAT; }
 	else if (str == "int") { return CDM_INT; }

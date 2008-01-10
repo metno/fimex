@@ -11,9 +11,26 @@ CDMVariable::CDMVariable(std::string name, CDMDataType datatype, std::vector<CDM
 CDMVariable::~CDMVariable()
 {
 }
+
+void CDMVariable::shapeToXMLStream(std::ostream& out) const
+{
+	if (shape.size() > 0) {
+		out << "shape=\"";
+		for (unsigned int i = 0; i < shape.size(); i++) {
+			out << shape[i].getName();
+			if (i < (shape.size()-1)) {
+				out << " ";
+			} else {
+				out << "\" ";
+			}
+		}
+	}	
+}
 void CDMVariable::toXMLStream(std::ostream& out, const std::map<std::string, CDMAttribute>& attrs) const
 {
-	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\">" << std::endl;
+	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" ";
+	shapeToXMLStream(out);
+	out << ">" << std::endl;
 	for (std::map<std::string, CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
 		it->second.toXMLStream(out);
 	}
@@ -22,6 +39,8 @@ void CDMVariable::toXMLStream(std::ostream& out, const std::map<std::string, CDM
 
 void CDMVariable::toXMLStream(std::ostream& out) const
 {
-	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" />" << std::endl;
+	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\"";
+	shapeToXMLStream(out);
+	out << "/>" << std::endl;
 }
 }

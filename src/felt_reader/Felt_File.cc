@@ -5,6 +5,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include <algorithm>
 #include <iostream>
 
 namespace MetNoFelt {
@@ -151,9 +152,9 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 	return getDataSlice(fa, idx, fieldSize);
 }
 
-std::map<short, std::vector<short> > Felt_File::getFeltLevels() {
+std::map<short, std::vector<short> > Felt_File::getFeltLevels() const {
 	std::map<short, std::set<short> > typeLevelSet;
-	for (std::map<std::string, Felt_Array>::iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
 		vector<short> levels = fait->second.getLevels();
 		typeLevelSet[fait->second.getLevelType()].insert(levels.begin(), levels.end());
 	}
@@ -166,15 +167,31 @@ std::map<short, std::vector<short> > Felt_File::getFeltLevels() {
 	return typeLevelVector;
 }
 
-std::vector<time_t> Felt_File::getFeltTimes() {
+std::vector<time_t> Felt_File::getFeltTimes() const {
 	std::set<time_t> times;
-	for (std::map<std::string, Felt_Array>::iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
 		vector<time_t> fa_times = fait->second.getTimes();
 		times.insert(fa_times.begin(), fa_times.end());
 	}
 	std::vector<time_t> sortedTimes(times.begin(), times.end());
 	sort(sortedTimes.begin(), sortedTimes.end());
 	return sortedTimes;
+}
+
+int Felt_File::getNX() const {
+	int nx = 0;
+	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+		nx = std::max(fait->second.getX(), nx);
+	}
+	return nx;
+}
+
+int Felt_File::getNY() const {
+	int ny = 0;
+	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+		ny = std::max(fait->second.getY(), ny);
+	}
+	return ny;
 }
 
 
