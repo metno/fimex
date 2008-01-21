@@ -236,7 +236,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringY);    		
     		}
     		std::string yName(yXmlAttributes["name"]);
-    		yDim = CDMDimension(yName, feltFile.getNX());
+    		yDim = CDMDimension(yName, feltFile.getNY());
     		CDMDataType yDataType = string2datatype(yXmlAttributes["type"]);
     		std::vector<CDMDimension> yDimShape;
     		yDimShape.push_back(yDim);
