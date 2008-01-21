@@ -1,5 +1,7 @@
 #include "felt_reader/Felt_File.h"
 #include "milib.h"
+#include "CDMDataType.h"
+#include "Utils.h"
 #include <ctime>
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -9,6 +11,8 @@
 #include <iostream>
 
 namespace MetNoFelt {
+
+using namespace MetNoUtplukk;
 
 Felt_File::Felt_File(const string& filename)
 	: filename(filename)
@@ -192,6 +196,99 @@ int Felt_File::getNY() const {
 		ny = std::max(fait->second.getY(), ny);
 	}
 	return ny;
+}
+
+boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
+	boost::shared_ptr<Data> xData = createData(CDM_FLOAT, getNX());
+	const boost::array<float, 6>& params = getGridParameters();
+	float d, lon0, x0, scale;
+	switch (getGridType()) {
+		case 1:
+		case 4: // polarstereographic
+			d = (150.*79.)/params[2]; // (150.*79.) are met.no constant for 150km grid with 79 cells between equator and northpole?
+			lon0 = 0;
+			x0 = params[0];
+			scale = 1000;
+			break;
+		case 2:
+		case 3: // geographic or spherical rotated grid
+		case 5: // mercator
+			d = params[2];
+			lon0 = params[0];
+			x0 = 1;
+			scale = 1;
+			break;
+		default: throw Felt_File_Error("unknown gridType: " + type2string(getGridType()));
+	}
+	for (int i = 1; i <= getNX(); i++) {
+		float value = (lon0 + (i-x0)*d) * scale; // (km -> m)
+		xData->setValue(i-1, value);
+	}
+	return xData;
+}
+
+boost::shared_ptr<Data> Felt_File::getYData() const throw(Felt_File_Error) {
+	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNX());
+	const boost::array<float, 6>& params = getGridParameters();
+	float d, lat0, y0, scale;
+	switch (getGridType()) {
+		case 1:
+		case 4: // polarstereographic
+			d = (150.*79.)/params[2]; // (150.*79.) are met.no constant for 150km grid with 79 cells between equator and northpole?
+			lat0 = 0;
+			y0 = params[1];
+			scale = 1000; // (km -> m)
+			break;
+		case 2:
+		case 3: // geographic or spherical rotated grid
+		case 5: // mercator
+			d = params[2];
+			lat0 = params[1];
+			y0 = 1;
+			scale = 1;
+			break;
+		default: throw Felt_File_Error("unknown gridType: " + type2string(getGridType()));
+	}
+	for (int i = 1; i <= getNY(); i++) {
+		float value = (lat0 + (i-y0)*d) * scale;
+		yData->setValue(i-1, value);
+	}
+	return yData;
+}
+
+
+
+short Felt_File::getGridType() const throw(Felt_File_Error) {
+	std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin();
+	if (feltArrayMap.size() > 0) {
+		short gridType = fait->second.getGridType();
+		for (++fait; fait != feltArrayMap.end(); ++fait) {
+			if (gridType != fait->second.getGridType()) {
+				throw(Felt_File_Error("cannot change gridType within a file"));
+			}
+		}
+		return gridType;
+	} else {
+		throw(Felt_File_Error("cannot read gridParameters: no Felt_Array available"));
+	}	
+}
+
+const boost::array<float, 6>& Felt_File::getGridParameters() const throw(Felt_File_Error) {
+	std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin();
+	if (feltArrayMap.size() > 0) {
+		const boost::array<float, 6>& params = fait->second.getGridParameters();
+		for (++fait; fait != feltArrayMap.end(); ++fait) {
+			const boost::array<float, 6>& newParams = fait->second.getGridParameters();
+			for (int i = 0; i < 6; i++) {
+				if (newParams[i] != params[i]) {
+					throw(Felt_File_Error("cannot change gridParameters within a file"));
+				}
+			}
+		}
+		return params;
+	} else {
+		throw(Felt_File_Error("cannot read gridParameters: no Felt_Array available"));
+	}
 }
 
 

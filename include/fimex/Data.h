@@ -2,9 +2,11 @@
 #define DATA_H_
 
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <sstream>
 #include <iostream>
+#include "CDMDataType.h"
 
 namespace MetNoUtplukk
 {
@@ -17,13 +19,7 @@ namespace MetNoUtplukk
  * 
  */
 template<typename T1, typename T2>
-boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, long length) {
-	boost::shared_array<T1> outData(new T1[length]);
-	for (int i = 0; i < length; i++) {
-		outData[i] = static_cast<T1>(inData[i]);
-	}
-	return outData;
-}
+boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, long length);
 
 
 /**
@@ -38,8 +34,8 @@ public:
 	virtual long size() const = 0;
 	/// @brief sizeof the data-impl datatype
 	virtual int bytes_for_one() const = 0;
-	/// @brief printing of the current data to ostream
-	virtual std::ostream& print(std::ostream&) const = 0;
+	/// @brief printing of the current data to ostream, with optional separator
+	virtual void toStream(std::ostream&, std::string separator = "") const = 0;
 
 	/// @brief retrieve data-copy as char
 	virtual boost::shared_array<char> asChar() const = 0;
@@ -53,28 +49,30 @@ public:
 	virtual boost::shared_array<float> asFloat() const = 0;
 	/// @brief retrieve data-copy as double
 	virtual boost::shared_array<double> asDouble() const = 0;
-	/// @brief retrieve the whole array as a string (no separators!)
-	virtual std::string asString() const = 0;
+	/// @brief retrieve the whole array as a string (with possible separator)
+	virtual std::string asString(std::string separator = "") const = 0;
+	
+	/// @brief set a value at the desired position
+	virtual void setValue(long pos, double val) = 0;
 	
 private:
 };
 
-template<class C>
+template<typename C>
 class DataImpl : public Data
 {
 public:
+	/// constructor where the array will be automatically allocated
+	explicit DataImpl(long length)
+	: length(length), theData(new C[length]) {}
 	explicit DataImpl(boost::shared_array<C> array, long length)
 	: length(length), theData(array) {}
 	virtual ~DataImpl() {}
 	
 	virtual long size() const {return length;}
 	virtual int bytes_for_one() const {return sizeof(C);}
-	virtual std::ostream& print(std::ostream& os) const {
-		for (int i = 0; i < length; i++) {
-			os << theData[i];
-		}
-		return os;
-	}
+	virtual void toStream(std::ostream& os, std::string separator = "") const;
+	
 	/// @brief get the datapointer of the data
 	virtual const boost::shared_array<C> asBase() const {return theData;}
 	// conversion function
@@ -84,13 +82,45 @@ public:
 	virtual boost::shared_array<long> asLong() const {return convertArrayType<long, C>(theData, length);}
 	virtual boost::shared_array<float> asFloat() const {return convertArrayType<float, C>(theData, length);}
 	virtual boost::shared_array<double> asDouble() const {return convertArrayType<double, C>(theData, length);}
-	virtual std::string asString() const {std::ostringstream o; print(o); return o.str();}
+	virtual std::string asString(std::string separator = "") const;
 
+	virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
+	
 private:
 	long length;
 	boost::shared_array<C> theData;
 		
 };	
+
+boost::shared_ptr<Data> createData(CDMDataType datatype, long length);
+
+
+
+// below follow implementations of templates
+// (template definitions should be in header files (depending on compiler))
+template<typename C>
+void DataImpl<C>::toStream(std::ostream& os, std::string separator) const {
+	for (int i = 0; i < (length-1); i++) {
+		os << theData[i] << separator;
+	}
+	os << theData[length-1];
+}
+
+template<typename C>
+std::string DataImpl<C>::asString(std::string separator) const {
+	std::ostringstream o; 
+	toStream(o, separator); 
+	return o.str();
+}
+
+template<typename T1, typename T2>
+boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, long length) {
+	boost::shared_array<T1> outData(new T1[length]);
+	for (int i = 0; i < length; i++) {
+		outData[i] = static_cast<T1>(inData[i]);
+	}
+	return outData;
+}
 
 }
 

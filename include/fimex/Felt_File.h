@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
+#include "Data.h"
 #include "felt_reader/Felt_Array.h"
 #include "felt_reader/Felt_File_Error.h"
 #include "felt_reader/FeltParameters.h"
@@ -68,6 +70,16 @@ public:
 	int getNX() const;
 	/// get size in y direction
 	int getNY() const;
+	/// get the values of the x axis
+	boost::shared_ptr<MetNoUtplukk::Data> getXData() const throw(Felt_File_Error);
+	/// get the values of the y axis
+	boost::shared_ptr<MetNoUtplukk::Data> getYData() const throw(Felt_File_Error);
+	
+	/// assumes one set of grid-type for the whole file
+	short getGridType() const throw(Felt_File_Error);
+	
+	/// assumes one set of grid-parameters for the whole file
+	const boost::array<float, 6>& getGridParameters() const throw(Felt_File_Error);
 	
 };
 

@@ -24,11 +24,23 @@ public:
 	void toXMLStream(std::ostream& out) const;
 	/// print a xml representation to the stream with attributes
 	void toXMLStream(std::ostream& out, const std::map<std::string, CDMAttribute>& attrs) const;
+	/// add data to the variable
+	void setData(boost::shared_ptr<Data> data) {this->data = data;}
+	/**
+	 * @brief retrieve data from this variable
+	 * 
+	 * retrieve data, but only if it has been set previously by {@link setData()}
+	 * this method will not try to read data from the disk
+	 */ 
+	const boost::shared_ptr<Data> getData() const {return data;}
+	/// check if data has been set with @link setData()
+	int hasData() const {return (data.get() != 0);}
 private:
 	std::string name;
 	CDMDataType datatype;
 	std::vector<CDMDimension> shape;
 	void shapeToXMLStream(std::ostream& out) const;
+	boost::shared_ptr<Data> data;
 };
 
 }

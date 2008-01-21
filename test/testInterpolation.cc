@@ -175,7 +175,8 @@ void test_Utils() {
 	for (std::vector<MetNoUtplukk::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
 		if (it->getName() == "grid_mapping_name") {
 			found--;
-			BOOST_CHECK(0 == (it->getStringValue() == "stereographic"));
+			std::cerr << it->getStringValue() << ":" << std::endl;
+			BOOST_CHECK(it->getStringValue() == "stereographic");
 		}
 		if (it->getName() == "scale_factor_at_projection_origin") {
 			found--;

@@ -23,7 +23,6 @@ private:
 	const std::string filename;
 	const std::string configFilename;
 	MetNoFelt::Felt_File feltFile;
-	std::map<std::string, std::string> projectionVariables; // proj4-String -> variableName
 	CDM cdm;
 };
 

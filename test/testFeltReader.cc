@@ -5,6 +5,7 @@
 #include "FeltParameters.h"
 #include "Felt_File.h"
 #include "FeltCDMReader.h"
+#include "Data.h"
 
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
@@ -12,6 +13,7 @@ using boost::unit_test_framework::test_suite;
 
 using namespace std;
 using namespace MetNoFelt;
+using namespace MetNoUtplukk;
 
 void
 test_feltparameter(void) {
@@ -90,10 +92,23 @@ test_feltfile() {
 }
 
 void
+test_felt_axis() {
+	Felt_File ff("flth00.dat");
+	BOOST_CHECK(ff.getGridType() == 1);
+	const boost::array<float, 6>& gridPar = ff.getGridParameters();
+	boost::shared_ptr<Data> xdata = ff.getXData();
+	BOOST_CHECK((xdata->asFloat())[(int)gridPar[0]-1] == 0);
+	BOOST_CHECK((xdata->asFloat())[(int)gridPar[0]] == 50000);
+	BOOST_CHECK((ff.getYData()->asFloat())[(int)gridPar[1]-1] == 0);
+	BOOST_CHECK((ff.getYData()->asInt())[(int)gridPar[1]] == 50000);
+}
+
+void
 test_felt_cdm_reader() {
 	MetNoUtplukk::FeltCDMReader feltCDM("flth00.dat", "../etc/felt2nc_variables.xml");
 	feltCDM.getCDM().toXMLStream(std::cout);
 }
+
 
 test_suite*
 init_unit_test_suite( int argc, char* argv[] )
@@ -102,6 +117,7 @@ init_unit_test_suite( int argc, char* argv[] )
 
     test->add( BOOST_TEST_CASE( &test_feltparameter ) );
 	test->add( BOOST_TEST_CASE( &test_feltfile ) );
+	test->add( BOOST_TEST_CASE( &test_felt_axis ) );
 	test->add( BOOST_TEST_CASE( &test_felt_cdm_reader ) );
     return test;
 }
