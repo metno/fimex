@@ -12,7 +12,7 @@ using namespace MetNoUtplukk;
 void test_timeslicedata_constructor() {
 	boost::shared_array<int> ary(new int[100]);
 	boost::shared_ptr<Data> data(new DataImpl<int>(ary, 100));
-	TimeSliceData tsd(0, Time("seconds since 1970-01-01"), data);
+	TimeSliceData tsd("null", Time("seconds since 1970-01-01"), data);
 	BOOST_CHECK(tsd.getData()->size() == 100);
 }
 
