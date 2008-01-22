@@ -16,6 +16,9 @@ namespace MetNoUtplukk
 class CDM
 {
 public:
+	typedef std::map<std::string, std::map<std::string, CDMAttribute> > StrStrAttrMap;
+	typedef std::map<std::string, CDMDimension> StrDimMap;
+	typedef std::map<std::string, CDMVariable> StrVarMap;
 	CDM();
 	virtual ~CDM();
 	void addVariable(CDMVariable var) throw(CDMException);
@@ -24,12 +27,21 @@ public:
 	/// @brief print a xml representation to the stream
 	void toXMLStream(std::ostream& os) const;
 	/// @brief the namespace for global attributes
-	const static std::string& globalAttributeNS() {const static std::string global("_GLOBAL"); return global;} 
+	const static std::string& globalAttributeNS() {const static std::string global("_GLOBAL"); return global;}
 	
+	/// @brief get the dimension
+	const StrDimMap& getDimensions() const {return dimensions;} 
+	/// @brief get the variables
+	const StrVarMap& getVariables() const {return variables;}
+	/**
+	 *  @brief get the attributes
+	 *  @return map of type <variableName <attributeName, attribute>>
+	 */
+	const StrStrAttrMap& getAttributes() const {return attributes;}
 private:
-	std::map<std::string, std::map<std::string, CDMAttribute> > attributes;
-	std::map<std::string, CDMVariable> variables;
-	std::map<std::string, CDMDimension> dimensions;
+	StrStrAttrMap attributes;
+	StrVarMap variables;
+	StrDimMap dimensions;
 };
 
 }

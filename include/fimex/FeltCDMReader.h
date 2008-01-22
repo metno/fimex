@@ -6,6 +6,7 @@
 #include "Felt_File.h"
 #include "Felt_File_Error.h"
 #include "CDMReader.h"
+#include "Time.h"
 
 namespace MetNoUtplukk
 {
@@ -16,14 +17,13 @@ public:
 	FeltCDMReader(std::string filename, std::string configFilename) throw(MetNoFelt::Felt_File_Error);
 	virtual ~FeltCDMReader();
 	
-	virtual TimeSliceData getDataSlice(int variableId, Time time);
-	virtual CDM getCDM() {return cdm;}
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& variableName, const Time& time) const;
+	virtual const CDM& getCDM() const {return cdm;}
 	
 private:
 	const std::string filename;
 	const std::string configFilename;
 	MetNoFelt::Felt_File feltFile;
-	CDM cdm;
 };
 
 }

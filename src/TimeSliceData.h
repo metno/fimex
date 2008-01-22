@@ -2,6 +2,7 @@
 #define TIMESLICEDATA_H_
 
 #include <boost/shared_ptr.hpp>
+#include <string>
 #include "Time.h"
 #include "Data.h"
 
@@ -15,17 +16,19 @@ namespace MetNoUtplukk {
 class TimeSliceData
 {
 public:
-	explicit TimeSliceData(int variableId, Time time, boost::shared_ptr<Data> data)
-	: variableId(variableId), time(time), myData(data) {}
+	explicit TimeSliceData(const std::string& variableName, const Time& time, boost::shared_ptr<Data> data)
+	: variableName(variableName), time(time), myData(data) {}
 	~TimeSliceData() {}
 
-	/// @brief unique variableId this data-slice belongs to
-	int getVariableId() const {return variableId;}
+	/// @brief unique variableName this data-slice belongs to
+	const std::string& getVariableId() const {return variableName;}
+	/// @brief time of this slice
+	const Time& getTime() const {return time;}
 	/// @brief the data
 	const boost::shared_ptr<Data>& getData() const {return myData;}
 	
 private:
-	int variableId;
+	std::string variableName;
 	Time time;
 	boost::shared_ptr<Data> myData;
 };

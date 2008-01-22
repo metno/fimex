@@ -2,9 +2,9 @@ F2CLIB=-lg2c
 CC=gcc
 CXX=g++
 CXXFLAGS=-Wall -g
-CPPFLAGS=-I. -I/disk1/metno/local/include/milib -I/usr/include/libxml2 -Ifelt_reader
+CPPFLAGS=-I. -I/disk1/metno/local/include/milib -I/usr/include/libxml2 -Ifelt_reader -I/usr/include/netcdf-3
 CFLAGS=-std=c99 -Wall -pedantic -g
-LDLIBS=-lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lxml2 -lz -lm
+LDLIBS=-lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -L/usr/lib/netcdf-3 -lnetcdf_c++ -lnetcdf -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lxml2 -lz -lm
 LDFLAGS=
 RANLIB=ranlib
 DEPDIR = .deps
@@ -41,7 +41,7 @@ MKDIR=mkdir -p
 include felt_reader/Make.inc
 
 depdirs = $(DEPDIR) $(DEPDIR)/felt_reader
-sources = interpolation.c TimeException.cc Time.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMVariable.cc Data.cc Utils.cc $(addprefix felt_reader/,$(FELT_READER_SRC))
+sources = interpolation.c TimeException.cc Time.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMVariable.cc Data.cc Utils.cc NetCDF_CDMWriter.cc $(addprefix felt_reader/,$(FELT_READER_SRC))
 c_sources = $(filter %.c,$(sources))
 cc_sources = $(filter %.cc,$(sources))
 objects = $(c_sources:.c=.o) $(cc_sources:.cc=.o)

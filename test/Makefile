@@ -2,18 +2,20 @@ F2CLIB=-lg2c
 CC=gcc
 CXX=g++
 CXXFLAGS=-Wall -pedantic -g
-CPPFLAGS=-I../src -I../src/felt_reader -I/disk1/metno/local/include/milib
+CPPFLAGS=-I../src -I../src/felt_reader -I/disk1/metno/local/include/milib -I/usr/include/netcdf-3
 CFLAGS=-std=c99 -Wall -pedantic -g
-LDLIBS=-L../src -lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -ludunits -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lm -lxml2 -lz
+LDLIBS=-L../src -lmiutplukk -L/disk1/metno/local/lib -lmic -lmi $(F2CLIB) -L/usr/lib/netcdf-3 -lnetcdf_c++ -lnetcdf -ludunits -lproj -lboost_regex -lboost_filesystem -lboost_unit_test_framework -lm -lxml2 -lz
 LDFLAGS=
 RANLIB=ranlib
+
+PRGS=testInterpolation testFeltReader testTime testTimeSliceData testNetcdfWriter
 
 .SUFFIXES:
 .SUFFIXES: .cc .o
 
 all: build
 
-build: testInterpolation testFeltReader testTime testTimeSliceData
+build: $(PRGS)
 
 ../src/libmiutplukk.a:
 	cd ../src && $(MAKE) libmiutplukk
@@ -23,6 +25,7 @@ test: build
 	./testFeltReader
 	./testTime
 	./testTimeSliceData
+	./testNetcdfWriter
 	
 testInterpolation: ../src/libmiutplukk.a
 
@@ -32,7 +35,8 @@ testTime: ../src/libmiutplukk.a
 
 testTimeSliceData: ../src/libmiutplukk.a
 
+testNetcdfWriter: ../src/libmiutplukk.a
 
 .PHONY : clean
 clean :
-	-$(RM) *.o testInterpolation testFeltReader testTime testTimeSliceData
+	-$(RM) *.o $(PRGS)

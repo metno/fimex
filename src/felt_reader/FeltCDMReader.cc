@@ -186,7 +186,6 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	}
     
 	//x,y dim will be set with the projection, can also = long/lat
-	// TODO: read attr from config, corresponding to projection
     CDMDimension xDim("x", feltFile.getNX());
     CDMDimension yDim("y", feltFile.getNY());
 	
@@ -275,7 +274,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		fillAttributeList(attributes, nodes->nodeTab[0]->children);
     	
     	
-    		// TODO: map shape, generate variable, set attributes/variable to CDM
+    		// map shape, generate variable, set attributes/variable to CDM
     		std::vector<CDMDimension> shape;
     		shape.push_back(xDim);
     		shape.push_back(yDim);
@@ -300,7 +299,7 @@ FeltCDMReader::~FeltCDMReader()
 
 
 
-TimeSliceData FeltCDMReader::getDataSlice(int variableId, Time time) {
+boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& variableId, const Time& time) const {
 	// TODO
 	throw 1;
 }

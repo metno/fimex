@@ -2,6 +2,7 @@
 #include "milib.h"
 #include "CDMDataType.h"
 #include "Utils.h"
+#include <cassert>
 #include <ctime>
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
