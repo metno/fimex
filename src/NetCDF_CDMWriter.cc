@@ -74,10 +74,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 		typedef const NcDim* NcDimPtr;
 		boost::shared_array<NcDimPtr> ncshape(new NcDimPtr[shape.size()]);
 		for (size_t i = 0; i < shape.size(); i++) {
-			// TODO: maybe the shape should be converted in the reader?
-			// revert shape to get Time from last to first index
-			//ncshape[shape.size() - 1 + i] = ncDimMap[shape[i].getName()].get();
-			ncshape[shape.size() - i - 1] = ncDimMap[shape[i].getName()].get();
+			ncshape[i] = ncDimMap[shape[i].getName()].get();
 		}
 		CDMDataType datatype = var.getDataType();
 		if (datatype == CDM_NAT && shape.size() == 0) {
@@ -143,10 +140,10 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 		} else {
 			// write data from disk
 			if (!cdmVar.hasUnlimitedDim()) {
-				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), Time(0));
-				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
-					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
-				}
+//				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), Time(0));
+//				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
+//					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
+//				}
 			} else {
 				// iterate over each unlimited dim (usually time)
 				const CDMDimension* unLimDim = cdmVar.getUnlimitedDim();

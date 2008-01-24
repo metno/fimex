@@ -251,7 +251,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     	// TODO:  add extra projection axes for lon lat etc
     }
 
-
+    // add variables
 	std::vector<MetNoFelt::Felt_Array> fArrays(feltFile.listFeltArrays());
 	for (std::vector<MetNoFelt::Felt_Array>::iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
 		std::cerr << it->getName() << ":" << it->getIdentifier() << std::endl;
@@ -276,14 +276,14 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     	
     		// map shape, generate variable, set attributes/variable to CDM
     		std::vector<CDMDimension> shape;
-    		shape.push_back(xDim);
-    		shape.push_back(yDim);
-    		if (it->getLevels().size() > 1) {
-    			shape.push_back(levelDims[it->getLevelType()]);
-    		}
     		if (it->getTimes().size() > 1) {
     			shape.push_back(timeDim);
     		}
+    		if (it->getLevels().size() > 1) {
+    			shape.push_back(levelDims[it->getLevelType()]);
+    		}
+    		shape.push_back(yDim);
+    		shape.push_back(xDim);
     		CDMVariable var(varName, CDM_SHORT, shape);
     		cdm.addVariable(var);
     		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
