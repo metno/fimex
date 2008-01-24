@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include <boost/shared_ptr.hpp>
 #include "Felt_File_Error.h"
+#include "Felt_Array.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <vector>
@@ -176,6 +177,9 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			std::vector<CDMDimension> levelShape;
 			levelShape.push_back(levelDim);
 			CDMVariable levelVar(levelId, levelDataType, levelShape);
+			const std::vector<short> lv = it->second;
+			
+			//levelVar.setData();
 			cdm.addVariable(levelVar);
 			std::vector<CDMAttribute> levelAttributes;
 			fillAttributeList(levelAttributes, nodes->nodeTab[0]->children);
@@ -186,8 +190,9 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	}
     
 	//x,y dim will be set with the projection, can also = long/lat
-    CDMDimension xDim("x", feltFile.getNX());
-    CDMDimension yDim("y", feltFile.getNY());
+	// setting default-value
+    xDim = CDMDimension("x", feltFile.getNX());
+    yDim = CDMDimension("y", feltFile.getNY());
 	
     // projection of the array (currently only one allowed
     {
@@ -286,6 +291,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		shape.push_back(xDim);
     		CDMVariable var(varName, CDM_SHORT, shape);
     		cdm.addVariable(var);
+    		varNameFeltIdMap[varName] = it->getIdentifier();
     		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
     			cdm.addAttribute(varName, *attrIt);
     		}
@@ -299,9 +305,30 @@ FeltCDMReader::~FeltCDMReader()
 
 
 
-boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& variableId, const Time& time) const {
-	// TODO
-	throw 1;
+boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable, const Time& time) throw(CDMException) {
+	long length = 0;
+	MetNoFelt::Felt_Array& fa = feltFile.getFeltArray(varNameFeltIdMap[variable.getName()]);
+	const vector<CDMDimension>& dims = variable.getShape();
+	if (dims.size() > 0) length = 1;
+	for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+		length *= it->getLength();
+	}
+	
+	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y
+	boost::shared_ptr<Data> data;
+	if (!variable.hasUnlimitedDim()) {
+		data = createData(variable.getDataType(), length);
+		for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+			if (it->getName() == xDim.getName() || it->getName() == yDim.getName()) {
+				continue; // felt-file allways retrieves a whole x/ydim layer
+			}
+			for (long i = 0; i < it->getLength(); ++i) {
+				// this must be level!
+				
+			}
+		}
+	}
+	return data;
 }
 
 }

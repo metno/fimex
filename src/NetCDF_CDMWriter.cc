@@ -140,7 +140,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 		} else {
 			// write data from disk
 			if (!cdmVar.hasUnlimitedDim()) {
-//				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), Time(0));
+//				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, Time(0));
 //				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
 //					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
 //				}

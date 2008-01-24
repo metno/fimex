@@ -44,6 +44,15 @@ private:
 	boost::shared_ptr<Data> data;
 };
 
+/**
+ * @brief convert a proj4 string to a list of CDMAttributes usable for CF-1.0 projection variable
+ * 
+ * currently, projStrings of the form +proj=[stere] +lat_0=? +lon_0=? +lat_ts=?
+ */
+std::vector<CDMAttribute> projStringToAttributes(std::string projStr);
+
+
+
 }
 
 #endif /*CDMATTRIBUTE_H_*/

@@ -5,6 +5,7 @@
 #include "CDM.h"
 #include "Data.h"
 #include "Time.h"
+#include "CDMVariable.h"
 
 namespace MetNoUtplukk
 {
@@ -17,7 +18,7 @@ public:
 	virtual ~CDMReader() {}
 
 	virtual const CDM& getCDM() const {return cdm;}
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& variableName, const Time& time) const = 0;
+	virtual boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, const Time& time) const throw(CDMException) = 0;
 	
 protected:
 	CDM cdm;
