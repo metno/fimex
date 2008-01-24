@@ -16,7 +16,8 @@ namespace MetNoUtplukk
 class CDM
 {
 public:
-	typedef std::map<std::string, std::map<std::string, CDMAttribute> > StrStrAttrMap;
+	typedef std::map<std::string, CDMAttribute> StrAttrMap;
+	typedef std::map<std::string, StrAttrMap> StrStrAttrMap;
 	typedef std::map<std::string, CDMDimension> StrDimMap;
 	typedef std::map<std::string, CDMVariable> StrVarMap;
 	CDM();

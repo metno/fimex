@@ -86,6 +86,7 @@ public:
 
 	virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
 	
+	
 private:
 	long length;
 	boost::shared_array<C> theData;

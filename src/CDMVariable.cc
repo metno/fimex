@@ -43,4 +43,17 @@ void CDMVariable::toXMLStream(std::ostream& out) const
 	shapeToXMLStream(out);
 	out << "/>" << std::endl;
 }
+
+int CDMVariable::hasUnlimitedDim() const
+{
+	return getUnlimitedDim() != 0;
+}
+const CDMDimension* CDMVariable::getUnlimitedDim() const {
+	for (std::vector<CDMDimension>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
+		if (it->isUnlimited()) {
+			return &(*it);
+		}
+	}
+	return 0;
+}
 }

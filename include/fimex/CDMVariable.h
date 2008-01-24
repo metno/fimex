@@ -35,6 +35,12 @@ public:
 	const boost::shared_ptr<Data> getData() const {return data;}
 	/// check if data has been set with @link setData()
 	int hasData() const {return (data.get() != 0);}
+	int hasUnlimitedDim() const;
+	/**
+	 * @brief retrieve the unlimited dimension
+	 * @return unLimDim pointer with the unlimited dimension, the pointer will be deleted with the CDMVariable
+	 */
+	const CDMDimension* getUnlimitedDim() const;
 private:
 	std::string name;
 	CDMDataType datatype;

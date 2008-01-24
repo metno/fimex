@@ -229,7 +229,7 @@ boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 }
 
 boost::shared_ptr<Data> Felt_File::getYData() const throw(Felt_File_Error) {
-	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNX());
+	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNY());
 	const boost::array<float, 6>& params = getGridParameters();
 	float d, lat0, y0, scale;
 	switch (getGridType()) {
