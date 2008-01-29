@@ -114,7 +114,28 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	// fill the CDM;
 	// set the global data for this feltFile derived from first data
 	// TODO: translate producer-ids to something useful
-
+	
+	// global attributes from config
+	{
+		std::string xpathString("/config/global_attributes");
+		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
+		if (xpathObj.get() == 0) {
+			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
+		}
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		if (nodes->nodeNr != 1) {
+			throw MetNoFelt::Felt_File_Error("unable to find " + xpathString + " in config: " + configFilename);
+		}
+		xmlNodePtr node = nodes->nodeTab[0];
+		assert(node->type == XML_ELEMENT_NODE);
+		std::vector<CDMAttribute> globAttributes;
+		fillAttributeList(globAttributes, nodes->nodeTab[0]->children);
+		for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
+			cdm.addAttribute(cdm.globalAttributeNS(), *it);
+		}
+	}
+	
+	
 	// add axes
 	// time
 	CDMDimension timeDim("null", 0);
@@ -200,11 +221,12 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     yDim = CDMDimension("y", feltFile.getNY());
 	
     // projection of the array (currently only one allowed
+    std::string projName;
     {
     	const boost::array<float, 6>& gridParams = feltFile.getGridParameters();
     	short gridType = feltFile.getGridType();
     	std::string projStr = MetNoFelt::getProjString(gridType, gridParams);
-    	std::string projName("projection_" + gridType);
+    	projName = std::string("projection_" + type2string(gridType));
     	// projection-variable without datatype and dimension
     	CDMVariable projVar(projName, CDM_NAT, std::vector<CDMDimension>());
     	cdm.addVariable(projVar);
@@ -282,6 +304,8 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		std::string varName(reinterpret_cast<char *>(xmlGetProp(nodes->nodeTab[0], reinterpret_cast<const xmlChar *>("name"))));
     		std::vector<CDMAttribute> attributes;
     		fillAttributeList(attributes, nodes->nodeTab[0]->children);
+    		// add the projection
+    		attributes.push_back(createCDMAttribute("grid_mapping","string",projName));
     	
     	
     		// map shape, generate variable, set attributes/variable to CDM
