@@ -23,20 +23,37 @@ static NcType cdmDataType2ncType(CDMDataType dt) {
 	}
 }
 
-static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data, long start = 0) {
-	NcBool res = var->set_cur(start);
-	if (res == 0) {
-		return false;
-	}
+static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
+	if (data->size() == 0) return true;
 	
+	NcDim* dim = var->get_dim(0); // 0 dimension must be record dimension (unlimited if any)
+	var->set_rec(dim, recNum);
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
-	case CDM_STRING: return var->put(data->asChar().get(), data->size());
-	case CDM_SHORT: return var->put(data->asShort().get(), data->size());
-	case CDM_INT: return var->put(data->asInt().get(), data->size());
-	case CDM_FLOAT: return var->put(data->asFloat().get(), data->size());
-	case CDM_DOUBLE: return var->put(data->asDouble().get(), data->size());
+	case CDM_STRING: return var->put_rec(dim, data->asChar().get());
+	case CDM_SHORT:  return var->put_rec(dim, data->asShort().get());
+	case CDM_INT: return var->put_rec(dim, data->asInt().get());
+	case CDM_FLOAT: return var->put_rec(dim, data->asFloat().get());
+	case CDM_DOUBLE: return var->put_rec(dim, data->asDouble().get());
+	default: return false;
+	}
+	
+}
+
+
+static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data) {
+	size_t size = data->size();
+	if (size == 0) return true;
+		
+	switch (dt) {
+	case CDM_NAT: return false;
+	case CDM_CHAR:
+	case CDM_STRING: return var->put(data->asChar().get(),  size);
+	case CDM_SHORT:  return var->put(data->asShort().get(), size);
+	case CDM_INT:    return var->put(data->asInt().get(),   size);
+	case CDM_FLOAT:  return var->put(data->asFloat().get(), size);
+	case CDM_DOUBLE: return var->put(data->asDouble().get(),size);
 	default: return false;
 	}
 	
@@ -140,13 +157,20 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 		} else {
 			// write data from disk
 			if (!cdmVar.hasUnlimitedDim()) {
-//				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, Time(0));
-//				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
-//					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
-//				}
+				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar);
+				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
+					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
+				}
 			} else {
 				// iterate over each unlimited dim (usually time)
 				const CDMDimension* unLimDim = cdmVar.getUnlimitedDim();
+				for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+					boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, i);
+					if (!putRecData(ncVar, cdmVar.getDataType(), data, i)) {
+						throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
+					}
+				}
+				
 			}
 		}
 	}

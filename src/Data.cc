@@ -3,17 +3,9 @@
 namespace MetNoUtplukk
 {
 
-boost::shared_ptr<Data> createData(CDMDataType datatype, long length) {
-	switch (datatype) {
-		case CDM_DOUBLE: return boost::shared_ptr<Data>(new DataImpl<double>(length));
-		case CDM_FLOAT: return boost::shared_ptr<Data>(new DataImpl<float>(length));
-		case CDM_INT: return boost::shared_ptr<Data>(new DataImpl<int>(length));
-		case CDM_SHORT: return boost::shared_ptr<Data>(new DataImpl<short>(length));
-		case CDM_CHAR: return boost::shared_ptr<Data>(new DataImpl<char>(length));
-		case CDM_NAT: ;
-		default: ;
-	}
-	return boost::shared_ptr<Data>();
+boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException) {
+	int i = 0; // used as 0 InputIterator for first and last
+	return createData(datatype, length, &i, &i);
 }
 
 

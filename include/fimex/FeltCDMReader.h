@@ -2,6 +2,7 @@
 #define FELTCDMREADER_H_
 
 #include <string>
+#include <vector>
 #include <map>
 #include "Felt_File.h"
 #include "Felt_File_Error.h"
@@ -17,7 +18,7 @@ public:
 	FeltCDMReader(std::string filename, std::string configFilename) throw(MetNoFelt::Felt_File_Error);
 	virtual ~FeltCDMReader();
 	
-	virtual boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, const Time& time) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException);
 	virtual const CDM& getCDM() const {return cdm;}
 	
 private:
@@ -27,6 +28,8 @@ private:
 	CDMDimension xDim;
 	CDMDimension yDim;
 	std::map<std::string, std::string> varNameFeltIdMap;
+	std::vector<std::time_t> timeVec;
+	std::map<std::string, std::vector<short> > levelVecMap;
 };
 
 }

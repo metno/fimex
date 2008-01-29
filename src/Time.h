@@ -28,7 +28,7 @@ public:
 	 * @param format e.g. seconds since 1970-01-01 00:00:00 +00:00
 	 * @param value time in above units since above start-time, default 0
 	 */
-	explicit Time(std::string format, double value = 0) throw(TimeException);
+	explicit Time(std::string format = "seconds since 1970-01-01 00:00:00 +00:00", double value = 0) throw(TimeException);
 	/**
 	 * @brief Initialize time with a unit pointer
 	 * @param unit unit and startpoint, usually derived from another Time, i.e. Time(t.getUnit())

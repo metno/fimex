@@ -154,7 +154,7 @@ boost::array<short, 16> const Felt_Array::getIndex(time_t time, short level) thr
 		index[9] = timeIdx[3];
 	} else {
 		ostringstream  msg;
-		msg << "unknown time: " << time << " for felt_array: " << getName();
+		msg << "unknown time: " << time << " for felt_array: " << getName() << " (timeIdx: "<< index[2] << " " << index[3] << " " << index[4] << " " << index[9] << ")";
 		throw Felt_File_Error(msg.str());
 	}
 	if (fieldSizeMap[time].find(level) != fieldSizeMap[time].end()) {

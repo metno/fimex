@@ -55,8 +55,6 @@ namespace MetNoUtplukk
 
 		/// @brief set a value at the desired position
 		virtual void setValue(long pos, double val) = 0;
-
-	private:
 	};
 
 	template<typename C>
@@ -86,8 +84,9 @@ namespace MetNoUtplukk
 		virtual std::string asString(std::string separator = "") const;
 
 		virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
+		
 		template<class InputIterator>
-		void setValue(InputIterator start, InputIterator end, size_t dataStartPos = 0);
+		void setValues(InputIterator first, InputIterator last, size_t dataStartPos = 0) throw(CDMException);
 
 	private:
 		size_t length;
@@ -95,8 +94,31 @@ namespace MetNoUtplukk
 
 	};
 
-	boost::shared_ptr<Data> createData(CDMDataType datatype, long length);
+	/**
+	 * @brief create a Data-pointer of the datatype
+	 * 
+	 * @param datatype
+	 * @param size_t length of the data array
+	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
+	 */
+	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException);
 
+	/**
+	 * @brief create a Data-pointer of the datatype {@see createData(CDMDataType datatype, size_t length)}
+	 * 
+	 * @param datatype
+	 * @param size_t length of the data array
+	 * @param first start of container containing the data to fill the array with
+	 * @param last end (excluded) of the container containing the data to fill the array with
+	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
+	 */
+	template<class InputIterator>
+	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException);
+	
+	
+	
+
+	
 	// below follow implementations of templates
 	// (template definitions should be in header files (depending on compiler))
 	template<typename C>
@@ -114,11 +136,13 @@ namespace MetNoUtplukk
 		return o.str();
 	}
 
+
 	template<typename C>
 	template<class InputIterator>
-	void DataImpl<C>::setValue(InputIterator first, InputIterator last, size_t dataPos) {
+	void DataImpl<C>::setValues(InputIterator first, InputIterator last, size_t dataStartPos) throw(CDMException) {
+		size_t dataPos = dataStartPos;
 		if (dataPos < 0) {
-			throw CDMException("dataPos < 0");
+			throw CDMException("dataPos < 0, cannot set data");
 		}
 		while (first != last) {
 			if (dataPos < length) {
@@ -137,6 +161,24 @@ namespace MetNoUtplukk
 		}
 		return outData;
 	}
+	
+	template<class InputIterator>
+	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException) {
+		switch (datatype) {
+			case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > data(new DataImpl<double>(length)); data->setValues(first, last); return data; }  
+			case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > data(new DataImpl<float>(length));   data->setValues(first, last); return data; }
+			case CDM_INT:    { boost::shared_ptr<DataImpl<int> > data(new DataImpl<int>(length));       data->setValues(first, last); return data; }
+			case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > data(new DataImpl<short>(length));   data->setValues(first, last); return data; }
+			case CDM_CHAR:   { boost::shared_ptr<DataImpl<char> > data(new DataImpl<char>(length));     data->setValues(first, last); return data; }
+			case CDM_NAT: ;
+			default: ;
+		}
+		return boost::shared_ptr<Data>(new DataImpl<char>(0)); // a dummy dataset
+
+	}
+
+
+
 
 }
 

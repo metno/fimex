@@ -18,7 +18,7 @@ public:
 	virtual ~CDMReader() {}
 
 	virtual const CDM& getCDM() const {return cdm;}
-	virtual boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, const Time& time) const throw(CDMException) = 0;
+	virtual boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException) = 0;
 	
 protected:
 	CDM cdm;

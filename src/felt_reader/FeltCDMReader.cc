@@ -5,7 +5,6 @@
 #include "Felt_Array.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <vector>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -141,6 +140,9 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		std::vector<CDMDimension> timeShape;
 		timeShape.push_back(timeDim);
 		CDMVariable timeVar(timeName, timeDataType, timeShape);
+		timeVec = feltFile.getFeltTimes();
+		boost::shared_ptr<Data> timeData = createData(timeDataType, timeSize, timeVec.begin(), timeVec.end());
+		timeVar.setData(timeData);
 		cdm.addVariable(timeVar);
 		std::vector<CDMAttribute> timeAttributes;
 		fillAttributeList(timeAttributes, nodes->nodeTab[0]->children);
@@ -174,13 +176,16 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			CDMDimension levelDim(levelId, levelSize);
 			levelDims.insert(std::pair<short, CDMDimension>(it->first, levelDim));
 			cdm.addDimension(levelDim);
+			levelVecMap[levelDim.getName()] = it->second;
+
 			std::vector<CDMDimension> levelShape;
 			levelShape.push_back(levelDim);
 			CDMVariable levelVar(levelId, levelDataType, levelShape);
-			const std::vector<short> lv = it->second;
-			
-			//levelVar.setData();
+			const std::vector<short>& lv = it->second;
+			boost::shared_ptr<Data> data = createData(levelDataType, levelSize, lv.begin(), lv.end());
+			levelVar.setData(data);
 			cdm.addVariable(levelVar);
+			
 			std::vector<CDMAttribute> levelAttributes;
 			fillAttributeList(levelAttributes, nodes->nodeTab[0]->children);
 			for (std::vector<CDMAttribute>::iterator it = levelAttributes.begin(); it != levelAttributes.end(); ++it) {
@@ -291,7 +296,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		shape.push_back(xDim);
     		CDMVariable var(varName, CDM_SHORT, shape);
     		cdm.addVariable(var);
-    		varNameFeltIdMap[varName] = it->getIdentifier();
+    		varNameFeltIdMap[varName] = it->getName();
     		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
     			cdm.addAttribute(varName, *attrIt);
     		}
@@ -305,30 +310,75 @@ FeltCDMReader::~FeltCDMReader()
 
 
 
-boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable, const Time& time) throw(CDMException) {
+boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException) { 
 	long length = 0;
-	MetNoFelt::Felt_Array& fa = feltFile.getFeltArray(varNameFeltIdMap[variable.getName()]);
 	const vector<CDMDimension>& dims = variable.getShape();
 	if (dims.size() > 0) length = 1;
 	for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-		length *= it->getLength();
-	}
-	
-	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y
-	boost::shared_ptr<Data> data;
-	if (!variable.hasUnlimitedDim()) {
-		data = createData(variable.getDataType(), length);
-		for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-			if (it->getName() == xDim.getName() || it->getName() == yDim.getName()) {
-				continue; // felt-file allways retrieves a whole x/ydim layer
-			}
-			for (long i = 0; i < it->getLength(); ++i) {
-				// this must be level!
-				
-			}
+		if (!it->isUnlimited()) {
+			length *= it->getLength();
 		}
 	}
-	return data;
+	
+	if (unLimDimPos > timeVec.size()) {
+		throw CDMException("requested time outside data-region");
+	}
+	
+	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y; 
+	// only time can be unLimDim
+
+	std::vector<short> data;
+	std::vector<short>::iterator dataIt = data.begin();
+	const CDMDimension* layerDim = 0;
+	for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+		if (it->getName() != xDim.getName() &&
+			it->getName() != yDim.getName() &&
+			!it->isUnlimited())
+		{
+			layerDim = &(*it);
+		}
+	}
+	try {
+		MetNoFelt::Felt_Array& fa = feltFile.getFeltArray(varNameFeltIdMap[variable.getName()]);
+
+		// test for availability of the current time in the variable (getSlice will get data for every time)
+		vector<long> faTimes = fa.getTimes();
+		short contains = false;
+		for (vector<long>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
+			if (*it == timeVec[unLimDimPos]) {
+				contains = true;
+			}
+		}
+		if (!contains) {
+			return createData(variable.getDataType(), 0);
+		}
+		
+		// select all available layers
+		std::vector<short> layerVals;
+		if ((layerDim != 0) && (layerDim->getLength() > 0)) {
+			for (size_t i = 0; i < layerDim->getLength(); ++i) {
+				layerVals.push_back(levelVecMap[layerDim->getName()][i]);
+			}
+		} else {
+			std::vector<short> levels = fa.getLevels();
+			if (levels.size() == 1) {
+				layerVals.push_back(*(levels.begin()));
+			} else {
+				throw CDMException("variable " +variable.getName() + " has unspecified levels");
+			}
+		}
+		
+		// put the layer-data together
+		for (std::vector<short>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
+			std::vector<short> levelData;
+			levelData = feltFile.getDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit);	
+			data.insert(dataIt, levelData.begin(), levelData.end());
+			dataIt += levelData.size();
+		}
+	} catch (MetNoFelt::Felt_File_Error& ffe) {
+		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());
+	}
+	return createData(variable.getDataType(), data.size(), data.begin(), data.end());
 }
 
 }
