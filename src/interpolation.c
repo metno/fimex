@@ -106,45 +106,13 @@ static int miup_interpolate_f_functional(int (*func)(const float* infield, float
 		fprintf(stderr, "out axis conversion: x %f -> %f; y %f -> %f\n", out_x_axis[0], outXAxis[0], out_y_axis[0], outYAxis[0]);
 	}
 	
-	// init projections
-	projPJ inputPJ;
-	projPJ outputPJ;
-	if (MIUP_DEBUG > 0) {
-		fprintf(stderr, "input proj: %s\n", proj_input);
-		fprintf(stderr, "output proj: %s\n", proj_output);
-	}
-		
-	if (!(inputPJ = pj_init_plus(proj_input))) {
-		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
-		return MIUP_ERROR;
-	}
-	if (!(outputPJ = pj_init_plus(proj_output))) {
-		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
-		pj_free(inputPJ);
-		return MIUP_ERROR;
-	}
-	double pointsX[ox*oy];
-	double pointsY[ox*oy];
-	double pointsZ[ox*oy]; // z currently of no interest, no height attached to values
-	for (int x = 0; x < ox; ++x) {
-		for (int y = 0; y < oy; ++y) {
-			pointsX[y*ox +x] = outXAxis[x];
-			pointsY[y*ox +x] = outYAxis[y];
-			pointsZ[y*ox +x] = 0;
-		}
-	}
 	/* 
 	 * transforming from output to input, to receive later the correct input-values
 	 * for the output coordinates
 	 */
-	if (pj_transform(outputPJ, inputPJ, ox*oy, 0, pointsX, pointsY, pointsZ) != 0) {
-		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
-		pj_free(inputPJ);
-		pj_free(outputPJ);
-		return MIUP_ERROR;
-	}
-	pj_free(inputPJ);
-	pj_free(outputPJ);
+	double pointsX[ox*oy];
+	double pointsY[ox*oy];
+	miup_project_axes(proj_output, proj_input, outXAxis, outYAxis, ox, oy, pointsX, pointsY);
 	
 	miup_points2position(pointsX, ox*oy, inXAxis, ix, in_x_axis_type);
 	miup_points2position(pointsY, ox*oy, inYAxis, iy, in_y_axis_type);
@@ -238,4 +206,45 @@ int miup_get_values_bicubic_f(const float* infield, float* outvalues, const doub
 {
 	// TODO implement and reset error value to 0
 	return 1;
+}
+
+int miup_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis) {
+	// init projections
+	projPJ inputPJ;
+	projPJ outputPJ;
+	if (MIUP_DEBUG > 0) {
+		fprintf(stderr, "input proj: %s\n", proj_input);
+		fprintf(stderr, "output proj: %s\n", proj_output);
+	}
+		
+	if (!(inputPJ = pj_init_plus(proj_input))) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		return MIUP_ERROR;
+	}
+	if (!(outputPJ = pj_init_plus(proj_output))) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		pj_free(inputPJ);
+		return MIUP_ERROR;
+	}
+	double pointsZ[ix*iy]; // z currently of no interest, no height attached to values
+	for (int x = 0; x < ix; ++x) {
+		for (int y = 0; y < iy; ++y) {
+			out_xproj_axis[y*ix +x] = in_x_axis[x];
+			out_yproj_axis[y*ix +x] = in_y_axis[y];
+			pointsZ[y*ix +x] = 0;
+		}
+	}
+	/* 
+	 * transforming from output to input, to receive later the correct input-values
+	 * for the output coordinates
+	 */
+	if (pj_transform(inputPJ, outputPJ, ix*iy, 0, out_xproj_axis, out_yproj_axis, pointsZ) != 0) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		pj_free(inputPJ);
+		pj_free(outputPJ);
+		return MIUP_ERROR;
+	}
+	pj_free(inputPJ);
+	pj_free(outputPJ);
+	return MIUP_OK;
 }

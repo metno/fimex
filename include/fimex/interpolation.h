@@ -128,6 +128,23 @@ extern inline int miup_3d_array_position(int x, int y, int z, int ix, int iy, in
 	return (z*iy + y)*ix + x;
 }
 
+/**
+ * @brief project axes so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)
+ * 
+ * all axes must be given or will be returned in radians when converted from/to latlon
+ * 
+ * @param proj_input input projection proj string
+ * @param proj_output output projection proj string
+ * @param in_x_axis x-axis in input-projection
+ * @param in_y_axis y-axis in input-projection
+ * @param ix size of x-axis
+ * @param iy size of y-axis
+ * @param out_xproj_axis output-values of x_proj(x,y), field needs to be allocated in at least ix*iy size
+ * @param out_yproj_axis output-values of y_proj(x,y), field needs to be allocated in at least ix*iy size
+ * @return error-code
+ * 
+ */
+extern int miup_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis);
 
                                      
 #ifdef __cplusplus
