@@ -150,7 +150,7 @@ std::string getProjString(int gridType, const boost::array<float, 6>& gridParame
 {
 // TODO: still a bit unsure about usage of rotated geo. ; still unsure about usage of x_0, y_0 (this should go into axes??)
 	std::ostringstream tempProj;
-	std::string earth("+elips=sphere +a=3710 +e=0");
+	std::string earth("+elips=sphere +a=3710000 +e=0");
 	switch (gridType) {
 		case 1: 
 		case 4: tempProj << "+proj=stere +lat_0=90 +lat_ts=" << gridParameters[4] << " +lon_0=" << gridParameters[3] << " " << earth; 
