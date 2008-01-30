@@ -155,9 +155,9 @@ std::string getProjString(int gridType, const boost::array<float, 6>& gridParame
 		case 1: 
 		case 4: tempProj << "+proj=stere +lat_0=90 +lat_ts=" << gridParameters[4] << " +lon_0=" << gridParameters[3] << " " << earth; 
 				break;
-		case 2: tempProj << "+proj=latlon " << earth; // geographic
+		case 2: tempProj << "+proj=latlong " << earth; // geographic
 				break;
-		case 3: tempProj << "+proj=latlon " << earth; // rotated geographic ??
+		case 3: tempProj << "+proj=latlong " << earth; // rotated geographic ??
 				break;
 		case 5: tempProj << "+proj=tmerc +lat_1=" << gridParameters[4] << " " << earth; // mercator ???
 				break;
