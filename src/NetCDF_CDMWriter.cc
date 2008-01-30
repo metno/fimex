@@ -45,15 +45,25 @@ static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data) {
 	size_t size = data->size();
 	if (size == 0) return true;
-		
+	
+	boost::shared_array<long> edges(var->edges());
+	int dims = var->num_dims();
+	int dim_size = 1;
+	for (int i = 0; i < dims; i++) {
+		dim_size *= edges[i];
+	}
+	if (size != static_cast<size_t>(dim_size)) {
+		return false;
+	}
+	
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
-	case CDM_STRING: return var->put(data->asChar().get(),  size);
-	case CDM_SHORT:  return var->put(data->asShort().get(), size);
-	case CDM_INT:    return var->put(data->asInt().get(),   size);
-	case CDM_FLOAT:  return var->put(data->asFloat().get(), size);
-	case CDM_DOUBLE: return var->put(data->asDouble().get(),size);
+	case CDM_STRING: return var->put(data->asChar().get(),  edges.get());
+	case CDM_SHORT:  return var->put(data->asShort().get(), edges.get());
+	case CDM_INT:    return var->put(data->asInt().get(),   edges.get());
+	case CDM_FLOAT:  return var->put(data->asFloat().get(), edges.get());
+	case CDM_DOUBLE: return var->put(data->asDouble().get(),edges.get());
 	default: return false;
 	}
 	
@@ -152,14 +162,14 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 		if (cdmVar.hasData()) {
 			// write in-memory data
 			if (!putVarData(ncVar, cdmVar.getDataType(), cdmVar.getData())) {
-				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(cdmVar.getData()->size()));
+				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(cdmVar.getData()->size()));
 			}
 		} else {
 			// write data from disk
 			if (!cdmVar.hasUnlimitedDim()) {
 				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar);
 				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
-					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
+					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 				}
 			} else {
 				// iterate over each unlimited dim (usually time)
@@ -167,7 +177,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 				for (size_t i = 0; i < unLimDim->getLength(); ++i) {
 					boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, i);
 					if (!putRecData(ncVar, cdmVar.getDataType(), data, i)) {
-						throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + " datalength: " + type2string(data->size()));
+						throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 					}
 				}
 				

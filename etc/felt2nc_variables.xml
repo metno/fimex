@@ -13,15 +13,17 @@
 <time id="time" name="time" type="double">
 	<attribute name="long_name" value="time" type="string" />
 	<attribute name="standard_name" value="time" type="string" />
-	<attribute name="units" value="seconds since 01.01.1970 00:00" type="string" />
+	<attribute name="units" value="seconds since 1970-01-01 00:00:00 +00:00" type="string" />
 </time>
 <!-- polar-stereographic at 60deg -->
-<spatial_axis projection_felt_id="1" id="x" name="Xc" type="int">
+<spatial_axis projection_felt_id="1" id="x" name="x" type="int">
 	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_x_coordinate" type="string" />
 	<attribute name="units" value="m" type="string" />
 </spatial_axis>
-<spatial_axis projection_felt_id="1" id="y" name="Yc" type="int">
+<spatial_axis projection_felt_id="1" id="y" name="y" type="int">
 	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_y_coordinate" type="string" />
 	<attribute name="units" value="m" type="string" />
 </spatial_axis>
 <!-- geographic -->
@@ -43,21 +45,25 @@
 	<attribute name="units" value="degrees_north" type="string" />
 </spatial_axis>
 <!-- polar-stereographic -->
-<spatial_axis projection_felt_id="4" id="x" name="Xc" type="int">
+<spatial_axis projection_felt_id="4" id="x" name="x" type="int">
 	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_x_coordinate" type="string" />
 	<attribute name="units" value="m" type="string" />
 </spatial_axis>
-<spatial_axis projection_felt_id="4" id="y" name="Yc" type="int">
+<spatial_axis projection_felt_id="4" id="y" name="y" type="int">
 	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_y_coordinate" type="string" />
 	<attribute name="units" value="m" type="string" />
 </spatial_axis>
 <!-- mercator -->
-<spatial_axis projection_felt_id="5" id="x" name="Xc" type="int">
+<spatial_axis projection_felt_id="5" id="x" name="x" type="int">
 	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_x_coordinate" type="string" />
 	<attribute name="units" value="m" type="string" />
 </spatial_axis>
-<spatial_axis projection_felt_id="5" id="y" name="Yc">
+<spatial_axis projection_felt_id="5" id="y" name="y">
 	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_y_coordinate" type="string" />
 	<attribute name="units" value="m" type="string" />
 </spatial_axis>
 <spatial_axis id="longitude" name="longitude">
@@ -132,7 +138,7 @@
 	<attribute name="units" value="1" type="string" />
 </parameter>
 <parameter id="031-02" name="air_temperature">
-	<attribute name="cell_methods" value="time: point height: 2m" type="string" />
+	<attribute name="cell_methods" value="time: point height: p" type="string" />
 	<attribute name="long_name" value="air_temperature" type="string" />
 	<attribute name="standard_name" value="air_temperature" type="string" />
 	<attribute name="units" value="K" type="string" />

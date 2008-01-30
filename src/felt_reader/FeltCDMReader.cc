@@ -1,8 +1,10 @@
 #include "FeltCDMReader.h"
 #include "Utils.h"
-#include <boost/shared_ptr.hpp>
 #include "Felt_File_Error.h"
 #include "Felt_Array.h"
+#include "interpolation.h"
+#include "CDMDataType.h"
+#include <boost/shared_ptr.hpp>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <sstream>
@@ -222,6 +224,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	
     // projection of the array (currently only one allowed
     std::string projName;
+	std::string coordinates("");
     {
     	const boost::array<float, 6>& gridParams = feltFile.getGridParameters();
     	short gridType = feltFile.getGridType();
@@ -280,7 +283,42 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		}
     	}
     	
-    	// TODO:  add extra projection axes for lon lat etc
+    	// TODO:  more general detection fon non-lat/lon fields
+		if (xDim.getName() != "lon" && yDim.getName() != "lat") {
+			coordinates = "lon lat";
+			const CDMVariable& xVar = cdm.getVariables().find(xDim.getName())->second;
+			const CDMVariable& yVar = cdm.getVariables().find(yDim.getName())->second;
+			boost::shared_array<double> xData = xVar.getData()->asDouble();
+			boost::shared_array<double> yData = yVar.getData()->asDouble();
+			size_t fieldSize = xDim.getLength()*yDim.getLength(); 
+			double longVal[fieldSize];
+			double latVal[fieldSize];
+			std::string lonLatProj("+elips=sphere +a=3710000 +e=0 +proj=latlong");
+			if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDim.getLength(), yDim.getLength(), longVal, latVal)) {
+				throw MetNoFelt::Felt_File_Error("unable to project axes from "+projStr+ " to " +lonLatProj);
+			}
+			// converting to Degree
+			double* longPos = longVal;
+			double* latPos = latVal;
+			for (size_t i = 0; i < fieldSize; ++i, ++latPos, ++longPos) {
+				*longPos *= RAD_TO_DEG;
+				*latPos  *= RAD_TO_DEG;
+			}
+			std::vector<CDMDimension> xyDims;
+			xyDims.push_back(yDim);
+			xyDims.push_back(xDim);
+			CDMVariable lonVar("lon", CDM_DOUBLE, xyDims);
+			lonVar.setData(createData(CDM_DOUBLE, fieldSize, longVal, longVal+fieldSize));
+			CDMVariable latVar("lat", CDM_DOUBLE, xyDims);
+			latVar.setData(createData(CDM_DOUBLE, fieldSize, latVal, latVal+fieldSize));
+			cdm.addVariable(lonVar);
+			cdm.addVariable(latVar);
+			cdm.addAttribute(lonVar.getName(),createCDMAttribute("units", "string", "degrees_east"));
+			cdm.addAttribute(lonVar.getName(),createCDMAttribute("long_name", "string", "longitude"));
+			cdm.addAttribute(latVar.getName(),createCDMAttribute("units", "string", "degrees_north"));
+			cdm.addAttribute(latVar.getName(),createCDMAttribute("long_name", "string", "latitude"));
+
+		}
     }
 
     // add variables
@@ -305,8 +343,10 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		std::vector<CDMAttribute> attributes;
     		fillAttributeList(attributes, nodes->nodeTab[0]->children);
     		// add the projection
-    		attributes.push_back(createCDMAttribute("grid_mapping","string",projName));
-    	
+    		attributes.push_back(CDMAttribute("grid_mapping",projName));
+    		if (coordinates != "") {
+    			attributes.push_back(CDMAttribute("coordinates", coordinates));
+    		}
     	
     		// map shape, generate variable, set attributes/variable to CDM
     		std::vector<CDMDimension> shape;

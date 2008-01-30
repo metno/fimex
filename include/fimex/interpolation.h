@@ -123,10 +123,7 @@ extern int miup_points2position(double* points, const int n, const double* axis,
  * 
  *  @return the position of x, y, z
  */
-extern inline int miup_3d_array_position(int x, int y, int z, int ix, int iy, int iz)
-{
-	return (z*iy + y)*ix + x;
-}
+extern int miup_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
 
 /**
  * @brief project axes so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)

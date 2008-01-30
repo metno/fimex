@@ -127,6 +127,7 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 	}
 
 	std::vector<CDMAttribute> attrList;
+	attrList.push_back(CDMAttribute("proj4", projStr));
 	if (projType == "stere") {
 		// stereographic projection
 		attrList.push_back(CDMAttribute("grid_mapping_name", "stereographic"));

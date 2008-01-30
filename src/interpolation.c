@@ -46,6 +46,12 @@ static int bsearchDoubleIndex(const double key, const double* base, int num, int
   	else return (-1 + (-1 * pos)); 
 }
 
+int miup_3d_array_position(int x, int y, int z, int ix, int iy, int iz)
+{
+	return (z*iy + y)*ix + x;
+}
+
+
 int miup_points2position(double* points, const int n, const double* axis, const int num, const int axis_type) 
 {
 	int (*comparator)(const void * a, const void * b);

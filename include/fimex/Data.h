@@ -144,12 +144,13 @@ namespace MetNoUtplukk
 		if (dataPos < 0) {
 			throw CDMException("dataPos < 0, cannot set data");
 		}
-		while (first != last) {
+		for (; first != last; ++first) {
 			if (dataPos < length) {
-				theData[dataPos++] = *first++;
+				theData[dataPos] = static_cast<C>(*first);
 			} else {
 				throw CDMException("dataPos " + type2string(dataPos) + " >= dataLength " + type2string(length));
 			}
+			++dataPos;
 		}
 	}
 
