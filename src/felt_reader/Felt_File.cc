@@ -82,12 +82,14 @@ void Felt_File::init() throw(Felt_File_Error)
 					idx[j] = in[i*16 + j];
 				}
 				std::string name = feltParameters.getParameterName(idx);
-				Felt_Array& fa = findOrCreateFeltArray(idx);
-				fa.addInformationByIndex(idx, ifound[i]);
-				if (fa.getX() == ANY_VALUE()) {
-					// make sure that all info is initialized even if it requires reading a bit more data
-					// return data of no interest
-					getDataSlice(fa, idx, ifound[i]);
+				if (name != UNDEFINED()) {
+					Felt_Array& fa = findOrCreateFeltArray(idx);
+					fa.addInformationByIndex(idx, ifound[i]);
+					if (fa.getX() == ANY_VALUE()) {
+						// make sure that all info is initialized even if it requires reading a bit more data
+						// return data of no interest
+						getDataSlice(fa, idx, ifound[i]);
+					}
 				}
         	}
         }

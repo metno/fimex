@@ -95,9 +95,8 @@ static void myXmlCleanupParser(int* i) {
 	delete i;
 }
 
-
 FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) throw (MetNoFelt::Felt_File_Error)
-: filename(filename), configFilename(configFilename), feltFile(filename)
+: filename(filename), configFilename(configFilename)
 {
     // test lib vs compile version
 	xmlInitParser();
@@ -112,7 +111,24 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		throw MetNoFelt::Felt_File_Error("unable to generate xpath context");
 	}
 	
-
+	// open the feltFile with the desired parameters
+	std::vector<std::string> knownFeltIds;
+	{
+		std::string xpathString("/config/variables/parameter");
+		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
+		if (xpathObj.get() == 0) {
+			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
+		}
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		for (int i = 0; i < nodes->nodeNr; ++i) {
+			xmlNodePtr node = nodes->nodeTab[i];
+			xmlChar* idName = xmlGetProp(node, reinterpret_cast<const xmlChar*>("id"));
+			knownFeltIds.push_back(std::string(reinterpret_cast<char*>(idName)));
+			xmlFree(idName);
+		}
+	}
+	feltFile = MetNoFelt::Felt_File(filename, knownFeltIds);
+	
 	// fill the CDM;
 	// set the global data for this feltFile derived from first data
 	// TODO: translate producer-ids to something useful
@@ -324,8 +340,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     // add variables
 	std::vector<MetNoFelt::Felt_Array> fArrays(feltFile.listFeltArrays());
 	for (std::vector<MetNoFelt::Felt_Array>::iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
-		std::cerr << it->getName() << ":" << it->getIdentifier() << std::endl;
-		std::string xpathString("/config/variables/parameter[@id='"+it->getIdentifier()+"']");
+		std::string xpathString("/config/variables/parameter[@id='"+it->getName()+"']");
 		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 		if (xpathObj.get() == 0) {
 			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
@@ -333,7 +348,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 		int size = (nodes) ? nodes->nodeNr : 0;
 		if (size > 1) {
-			throw MetNoFelt::Felt_File_Error("error in config-file: several entries for parameter: " + it->getIdentifier());
+			throw MetNoFelt::Felt_File_Error("error in config-file: several entries for parameter: " + it->getName());
 		}
     	if (size < 1) {
     		std::cerr << "config-file doesn't contain parameter: " << xpathString << std::endl;
@@ -350,10 +365,10 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     	
     		// map shape, generate variable, set attributes/variable to CDM
     		std::vector<CDMDimension> shape;
-    		if (it->getTimes().size() > 1) {
+    		if (it->getTimes().size() > 0) {
     			shape.push_back(timeDim);
     		}
-    		if (it->getLevels().size() > 1) {
+    		if (it->getLevels().size() > 0) {
     			shape.push_back(levelDims[it->getLevelType()]);
     		}
     		shape.push_back(yDim);
@@ -403,41 +418,44 @@ boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable,
 		}
 	}
 	try {
-		MetNoFelt::Felt_Array& fa = feltFile.getFeltArray(varNameFeltIdMap[variable.getName()]);
+		std::map<std::string, std::string>::iterator foundId = varNameFeltIdMap.find(variable.getName()); 
+		if (foundId != varNameFeltIdMap.end()) {
+			MetNoFelt::Felt_Array& fa = feltFile.getFeltArray(foundId->second);
 
-		// test for availability of the current time in the variable (getSlice will get data for every time)
-		vector<long> faTimes = fa.getTimes();
-		short contains = false;
-		for (vector<long>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
-			if (*it == timeVec[unLimDimPos]) {
-				contains = true;
+			// test for availability of the current time in the variable (getSlice will get data for every time)
+			vector<long> faTimes = fa.getTimes();
+			short contains = false;
+			for (vector<long>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
+				if (*it == timeVec[unLimDimPos]) {
+					contains = true;
+				}
 			}
-		}
-		if (!contains) {
-			return createData(variable.getDataType(), 0);
-		}
-		
-		// select all available layers
-		std::vector<short> layerVals;
-		if ((layerDim != 0) && (layerDim->getLength() > 0)) {
-			for (size_t i = 0; i < layerDim->getLength(); ++i) {
-				layerVals.push_back(levelVecMap[layerDim->getName()][i]);
+			if (!contains) {
+				return createData(variable.getDataType(), 0);
 			}
-		} else {
-			std::vector<short> levels = fa.getLevels();
-			if (levels.size() == 1) {
-				layerVals.push_back(*(levels.begin()));
+
+			// select all available layers
+			std::vector<short> layerVals;
+			if ((layerDim != 0) && (layerDim->getLength() > 0)) {
+				for (size_t i = 0; i < layerDim->getLength(); ++i) {
+					layerVals.push_back(levelVecMap[layerDim->getName()][i]);
+				}
 			} else {
-				throw CDMException("variable " +variable.getName() + " has unspecified levels");
+				std::vector<short> levels = fa.getLevels();
+				if (levels.size() == 1) {
+					layerVals.push_back(*(levels.begin()));
+				} else {
+					throw CDMException("variable " +variable.getName() + " has unspecified levels");
+				}
 			}
-		}
-		
-		// put the layer-data together
-		for (std::vector<short>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
-			std::vector<short> levelData;
-			levelData = feltFile.getDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit);	
-			data.insert(dataIt, levelData.begin(), levelData.end());
-			dataIt += levelData.size();
+
+			// put the layer-data together
+			for (std::vector<short>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
+				std::vector<short> levelData;
+				levelData = feltFile.getDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit);	
+				data.insert(dataIt, levelData.begin(), levelData.end());
+				dataIt += levelData.size();
+			}
 		}
 	} catch (MetNoFelt::Felt_File_Error& ffe) {
 		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());

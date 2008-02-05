@@ -44,7 +44,6 @@ test_feltfile() {
 		//cout << it->getName() << endl;
 	}
 	Felt_Array& fa = ff.getFeltArray("u10m");
-	BOOST_CHECK( fa.getIdentifier() == "033-02");
 	vector<short> levels = fa.getLevels();
 	//cout << fa.getName() << ": "<<levels.size() << ": " << fa.getTimes().size() << " size: " << fa.getFieldSize(fa.getTimes().at(0), levels.at(0)) << endl;
 	BOOST_CHECK( levels.size() == 1 );
@@ -106,7 +105,8 @@ test_felt_axis() {
 void
 test_felt_cdm_reader() {
 	FeltCDMReader feltCDM("flth00.dat", "../etc/felt2nc_variables.xml");
-	feltCDM.getCDM().toXMLStream(std::cout);
+	feltCDM.getCDM().toXMLStream(std::cerr);
+	BOOST_CHECK(true);
 }
 
 

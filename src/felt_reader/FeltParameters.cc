@@ -18,6 +18,12 @@ FeltParameters::FeltParameters(std::string filename)
 	init(filename);
 }
 
+FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) {
+	for (std::vector<std::string>::const_iterator it = dianaFeltParams.begin(); it != dianaFeltParams.end(); ++it) {
+		parameterMap.insert(std::pair<std::string, boost::array<short, 16> >(*it, diana2feltparameters(*it)));
+	}
+}
+
 void FeltParameters::init(std::string configFile) {
 	boost::regex sectionEx("\\s*<([^/].*)>\\s*");
 	boost::regex parameterEx("\\s*([^=\\s]+)=(\\S+)");

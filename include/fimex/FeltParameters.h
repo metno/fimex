@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <boost/array.hpp>
 #include "Felt_File_Error.h"
 
@@ -12,7 +13,17 @@ class FeltParameters
 {
 public:
 	FeltParameters();
+	/**
+	 * initialize all known felt parameters from a diana-setup file
+	 * 
+	 * @param filename diana setup file
+	 * 
+	 */
 	explicit FeltParameters(std::string filename);
+	/**
+	 * initialize parameters from a list of parameters in diana format, e.g. 17,2,1000:prod=74
+	 */
+	explicit FeltParameters(const std::vector<string>& feltParams);
 	virtual ~FeltParameters();
 	const boost::array<short, 16>& getParameters(const std::string&);
 	const std::string& getParameterName(const boost::array<short, 16>&);

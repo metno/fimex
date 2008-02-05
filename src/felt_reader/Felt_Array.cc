@@ -124,25 +124,6 @@ const string& Felt_Array::getName() const {
 	return feltArrayName;
 } 
 
-string Felt_Array::getIdentifier() const {
-	short id = this->idx[11];
-	short level = this->idx[10];
-	ostringstream temp;
-	temp << id;
-	string sid(temp.str());
-	while (sid.size() < 3) {
-		sid = "0" + sid;
-	}
-	temp.str("");
-	temp << level;
-	string slevel(temp.str());
-	while (slevel.size() < 2) {
-		slevel = "0" + slevel;
-	}
-	return sid + "-" + slevel;
-}
-
-
 boost::array<short, 16> const Felt_Array::getIndex(time_t time, short level) throw(Felt_File_Error) {
 	boost::array<short, 16> index(idx); // get a copy
 	TIME_MAP::iterator it = times.find(time);

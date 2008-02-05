@@ -75,8 +75,6 @@ public:
 
 	/** return the parameter name */
 	const string& getName() const;
-	/** return a string consisting of param-Id and level, i.e. 025-02 */
-	string getIdentifier() const;
 	/** return the times available for this parameter */
 	vector<time_t> getTimes() const;
 	/** return the levels available for this parameter */
