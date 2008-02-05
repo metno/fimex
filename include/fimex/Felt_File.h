@@ -22,22 +22,33 @@ namespace MetNoFelt {
  */
 class Felt_File
 {
-	const std::string filename;
-	std::FILE* fh;
+	std::string filename;
+	boost::shared_ptr<std::FILE> fh;
 	std::map<std::string, Felt_Array> feltArrayMap;
 	FeltParameters feltParameters;
 	
 private:
 	Felt_Array& findOrCreateFeltArray(const boost::array<short, 16>& idx);
 	std::vector<short> getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error);
+	/// actually read the data with the parameters from the felt_file, should be called from constructors
+	void init() throw(Felt_File_Error);
 	
 public:
 	/// constructor
 	/**
+	 * open an empty felt file, just a default constructor, no useful information
+	 */
+	Felt_File() {}
+	/**
 	 * open and read toc of a felt file
 	 * \param filename name of felt file
 	 */
-	explicit Felt_File(const std::string& filename);
+	explicit Felt_File(const std::string& filename) throw(Felt_File_Error);
+	/**
+	 * open and read toc of a felt file
+	 * \param paramList a list of known parameters (in diana format, e.g. 17,2,1000:prod=74), only the known parameters will be read
+	 */
+	explicit Felt_File(const std::string& filename, const std::vector<std::string>& dianaParamList) throw(Felt_File_Error);
 	virtual ~Felt_File();
 	//float* getData(const string& compName);
 	

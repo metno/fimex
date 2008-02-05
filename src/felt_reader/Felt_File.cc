@@ -15,7 +15,7 @@ namespace MetNoFelt {
 
 using namespace MetNoUtplukk;
 
-Felt_File::Felt_File(const string& filename)
+Felt_File::Felt_File(const string& filename) throw(Felt_File_Error)
 	: filename(filename)
 {
 	int pos = filename.rfind("/");
@@ -25,6 +25,18 @@ Felt_File::Felt_File(const string& filename)
 		feltParameters = FeltParameters(dianaSetup);
 	} // else default constructor
 	
+	// read the data
+	init();
+}
+
+Felt_File::Felt_File(const std::string& filename, const std::vector<std::string>& dianaParamList) throw(Felt_File_Error)
+: filename(filename), feltParameters(dianaParamList)
+{
+	init();
+}
+
+void Felt_File::init() throw(Felt_File_Error)
+{
 	const int MAXNIN = 256;
 	int foundall = 0;
 	int iunit, ireq, iexist, nin;
@@ -32,13 +44,15 @@ Felt_File::Felt_File(const string& filename)
 	short idrec1[1024];
 	float dummy;
 	int nfound, iend, ierror, ioerr;
+	std::FILE* fileh;
 	
 	// open in C to get a free file-descriptor
-	fh = fopen(filename.c_str(), "r");
-	if (fh == NULL) {
+	fileh = fopen(filename.c_str(), "r");
+	if (fileh == NULL) {
 		return;
 	}
-	iunit = fileno(fh);
+	fh = boost::shared_ptr<std::FILE>(fileh, fclose);
+	iunit = fileno(fileh);
 	// initialize feltfile
 	mrfelt(1,filename.c_str(),iunit,&inmr[0],0,1,&dummy,1.f,1024,&idrec1[0],&ierror);
 	for (int i = 0; i < 16; i++) {
@@ -67,6 +81,7 @@ Felt_File::Felt_File(const string& filename)
 				for (int j = 0; j < 16; j++) {
 					idx[j] = in[i*16 + j];
 				}
+				std::string name = feltParameters.getParameterName(idx);
 				Felt_Array& fa = findOrCreateFeltArray(idx);
 				fa.addInformationByIndex(idx, ifound[i]);
 				if (fa.getX() == ANY_VALUE()) {
@@ -81,9 +96,6 @@ Felt_File::Felt_File(const string& filename)
 
 Felt_File::~Felt_File()
 {
-	if (fh != NULL) {
-		fclose(fh);
-	}
 }
 
 Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx) {
@@ -114,10 +126,10 @@ std::vector<Felt_Array> Felt_File::listFeltArrays() {
 }
 std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error) {
 	boost::scoped_array<short> header_data(new short[fieldSize]); // contains header (20 fields) and data (nx*ny) and something extra???
-	if (fh == NULL) {
+	if (fh == 0) {
 		throw Felt_File_Error("file already closed");
 	}
-	int iunit = fileno(fh);
+	int iunit = fileno(fh.get());
 	float dummy;
 	std::string lastFile("*");
 	int ierror(0);
