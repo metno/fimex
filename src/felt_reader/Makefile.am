@@ -1,5 +1,5 @@
 AM_CFLAGS = -std=c99 -Wall -pedantic
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I. -I.. -I/disk1/metno/local/include/milib -I/usr/include/libxml2 -Ifelt_reader -I/usr/include/netcdf-3
 
 lib_LIBRARIES = libutplukk_felt.a

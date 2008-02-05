@@ -7,6 +7,10 @@ AC_PROG_RANLIB
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([
 *** Libxml is required to build utplukk; Available at
 http://www.libxml.org/.]))
+AX_BOOST_BASE([1.33.1])
+AX_BOOST_FILESYSTEM
+AX_BOOST_REGEX
+AX_BOOST_UNIT_TEST_FRAMEWORK
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile src/Makefile src/felt_reader/Makefile test/Makefile])

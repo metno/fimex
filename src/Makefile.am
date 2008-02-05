@@ -1,7 +1,7 @@
 SUBDIRS = . felt_reader
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
-AM_CXXFLAGS = -Wall
+AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 
 INCLUDE = @XML_CFLAGS@
 
