@@ -12,6 +12,8 @@ AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX
 AX_BOOST_UNIT_TEST_FRAMEWORK
 
+DX_INIT_DOXYGEN('Utplukk', 'Doxyfile', 'share/doc')
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile src/Makefile src/felt_reader/Makefile test/Makefile])
 AC_OUTPUT
