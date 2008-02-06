@@ -389,7 +389,22 @@ FeltCDMReader::~FeltCDMReader()
 
 
 
-boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException) { 
+const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException) {
+	if (variable.hasData()) {
+		if (variable.hasUnlimitedDim()) {
+			// cut out the unlimited dim data
+			size_t sliceSize = 1;
+			std::vector<CDMDimension> shape = variable.getShape();
+			for (std::vector<CDMDimension>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
+				if (!it->isUnlimited()) {
+					sliceSize *= it->getLength();
+				}
+			}
+			return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
+		} else {
+			return variable.getData();
+		}
+	}
 	long length = 0;
 	const vector<CDMDimension>& dims = variable.getShape();
 	if (dims.size() > 0) length = 1;
@@ -418,7 +433,7 @@ boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable,
 		}
 	}
 	try {
-		std::map<std::string, std::string>::iterator foundId = varNameFeltIdMap.find(variable.getName()); 
+		std::map<std::string, std::string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName()); 
 		if (foundId != varNameFeltIdMap.end()) {
 			MetNoFelt::Felt_Array& fa = feltFile.getFeltArray(foundId->second);
 

@@ -10,15 +10,34 @@
 namespace MetNoUtplukk
 {
 
+/**
+ * @brief Basic interface for CDM reading and manipulation classes
+ * 
+ * The CDMReader is the basic interface for reading and manipulation of 
+ * the cdm datastructure. The {@link CDMWriter} will work with an implementation
+ * of the CDMReader and read the included data in the cdm or the data provided
+ * through the implementation of the {@link CDMReader#getDataSlice}
+ * 
+ * @see FeltCDMReader
+ */
 class CDMReader
 {
 public:
-	CDMReader() {}
-	CDMReader(const CDM& cdm) : cdm(cdm) {}
+	CDMReader() {};
 	virtual ~CDMReader() {}
 
 	virtual const CDM& getCDM() const {return cdm;}
-	virtual boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException) = 0;
+	/**
+	 * @brief data-reading function to be called from the CDMWriter
+	 * 
+	 * This function needs to be implemented by the CDMReader. It should provide the data
+	 * for each variable, either by reading from disk, converting from another CDMReader or
+	 * reading from an in-memory data-section.
+	 * 
+	 * @param variable the variable to read
+	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+	 */
+	virtual const boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException) = 0;
 	
 protected:
 	CDM cdm;

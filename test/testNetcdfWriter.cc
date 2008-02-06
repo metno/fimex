@@ -16,6 +16,8 @@ void
 test_feltNetcdfWrite(void) {
 	boost::shared_ptr<FeltCDMReader> feltReader(new FeltCDMReader("flth00.dat", "../etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter(feltReader, "test.nc");
+	feltReader = boost::shared_ptr<FeltCDMReader>(new FeltCDMReader("/disk1/opdata/hirlam20/grdn06.dat", "../etc/felt2nc_variables_hirlam20.xml"));
+	NetCDF_CDMWriter(feltReader, "test2.nc");
 }
 
 

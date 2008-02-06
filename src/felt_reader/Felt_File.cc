@@ -227,6 +227,7 @@ boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 			break;
 		case 2:
 		case 3: // geographic or spherical rotated grid
+			// TODO: interprete rotated grid! (used in hirlam)
 		case 5: // mercator
 			d = params[2];
 			lon0 = params[0];

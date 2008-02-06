@@ -23,7 +23,7 @@ public:
 	/**
 	 * initialize parameters from a list of parameters in diana format, e.g. 17,2,1000:prod=74
 	 */
-	explicit FeltParameters(const std::vector<string>& feltParams);
+	explicit FeltParameters(const std::vector<std::string>& feltParams);
 	virtual ~FeltParameters();
 	const boost::array<short, 16>& getParameters(const std::string&);
 	const std::string& getParameterName(const boost::array<short, 16>&);

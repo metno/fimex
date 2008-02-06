@@ -12,7 +12,12 @@
 
 namespace MetNoUtplukk
 {
-
+/**
+ * @brief Data structure of the Common %Data Model
+ * 
+ * This class implements the data-structure of the Common %Data Model version 1
+ * http://www.unidata.ucar.edu/software/netcdf-java/CDM.html
+ */
 class CDM
 {
 public:

@@ -159,29 +159,21 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		const CDMVariable& cdmVar = it->second;
 		NcVar* ncVar = (ncVarMap[cdmVar.getName()]).get();
-		if (cdmVar.hasData()) {
-			// write in-memory data
-			if (!putVarData(ncVar, cdmVar.getDataType(), cdmVar.getData())) {
-				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(cdmVar.getData()->size()));
+		if (!cdmVar.hasUnlimitedDim()) {
+			boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar);
+			if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
+				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 			}
 		} else {
-			// write data from disk
-			if (!cdmVar.hasUnlimitedDim()) {
-				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar);
-				if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
-					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
+			// iterate over each unlimited dim (usually time)
+			const CDMDimension* unLimDim = cdmVar.getUnlimitedDim();
+			for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, i);
+				if (!putRecData(ncVar, cdmVar.getDataType(), data, i)) {
+					throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 				}
-			} else {
-				// iterate over each unlimited dim (usually time)
-				const CDMDimension* unLimDim = cdmVar.getUnlimitedDim();
-				for (size_t i = 0; i < unLimDim->getLength(); ++i) {
-					boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, i);
-					if (!putRecData(ncVar, cdmVar.getDataType(), data, i)) {
-						throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
-					}
-				}
-				
 			}
+
 		}
 	}
 	

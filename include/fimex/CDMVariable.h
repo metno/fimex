@@ -18,7 +18,7 @@ public:
 	explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<CDMDimension> shape);
 	virtual ~CDMVariable();
 	const std::string& getName() const {return name;}
-	const CDMDataType& getDataType() const {return datatype;}
+	CDMDataType getDataType() const {return datatype;}
 	const std::vector<CDMDimension>& getShape() const {return shape;}
 	/// print a xml representation to the stream without attributes
 	void toXMLStream(std::ostream& out) const;
@@ -33,7 +33,7 @@ public:
 	 * this method will not try to read data from the disk
 	 */ 
 	const boost::shared_ptr<Data> getData() const {return data;}
-	/// check if data has been set with @link setData()
+	/// check if data has been set with @see{setData()}
 	int hasData() const {return (data.get() != 0);}
 	int hasUnlimitedDim() const;
 	/**
