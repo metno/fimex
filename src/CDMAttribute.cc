@@ -110,14 +110,6 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 		lp.v = 0;
 	}
 
-	// pj_factors
-	FACTORS factors;
-	factors.code = 0; // flag what to calculate. 0 means calc everything? undocumented, default: random
-	if (pj_factors(lp, pj.get(), 0., &factors) != 0) {
-		std::cerr << "pj_factors error: " << pj_errno << " " << pj_strerrno(pj_errno) << std::endl;
-		throw std::exception();
-	}
-
 	std::string projType;
 	if (boost::regex_search(projStr, what, boost::regex("\\+proj=(\\S+)"))) {
 		projType = what[1].str();
@@ -130,10 +122,40 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 	attrList.push_back(CDMAttribute("proj4", projStr));
 	if (projType == "stere") {
 		// stereographic projection
+		// pj_factors
+		FACTORS factors;
+		factors.code = 0; // flag what to calculate. 0 means calc everything? undocumented, default: random
+		if (pj_factors(lp, pj.get(), 0., &factors) != 0) {
+			std::cerr << "pj_factors error: " << pj_errno << " " << pj_strerrno(pj_errno) << std::endl;
+			throw std::exception();
+		}
 		attrList.push_back(CDMAttribute("grid_mapping_name", "stereographic"));
 		attrList.push_back(CDMAttribute("scale_factor_at_projection_origin", factors.k));
 		attrList.push_back(CDMAttribute("longitude_of_projection_origin", lpOrg.u));
 		attrList.push_back(CDMAttribute("latitude_of_projection_origin", lpOrg.v));
+	} else if (projType == "ob_tran") {
+		// rotated pole, at least for felt?
+		std::string orgProj;
+		if (boost::regex_search(projStr, what, boost::regex("\\+o_proj=(\\S+)"))) {
+			orgProj = what[1].str();
+		} else {
+			std::cerr << "no o_proj found" << std::endl;
+			throw std::exception();
+		}
+		if (orgProj == "latlong") {
+			double north_pole_lat = 90;
+			double north_pole_lon = 0;
+			if (boost::regex_search(projStr, what, boost::regex("\\+o_lat_p=(\\S+)"))) {
+				north_pole_lat = std::strtod(what[1].str().c_str(), (char **)NULL);
+			}
+			if (boost::regex_search(projStr, what, boost::regex("\\+o_lon_b=(\\S+)"))) {
+				north_pole_lon = std::strtod(what[1].str().c_str(), (char **)NULL);
+			}
+			attrList.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
+			attrList.push_back(CDMAttribute("grid_north_pole_longitude", north_pole_lon));
+			attrList.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));			
+		}
+		
 	}
 	// TODO implement more projections (merc, ...)
 	
