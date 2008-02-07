@@ -2,6 +2,7 @@
 #include "milib.h"
 #include "CDMDataType.h"
 #include "Utils.h"
+#include "interpolation.h"
 #include <cassert>
 #include <ctime>
 #include <boost/scoped_array.hpp>
@@ -216,6 +217,10 @@ int Felt_File::getNY() const {
 boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 	boost::shared_ptr<Data> xData = createData(CDM_FLOAT, getNX());
 	const boost::array<float, 6>& params = getGridParameters();
+//	for (int i = 0; i < 6; i++) {
+//		std::cerr << params[i] << " ";
+//	}
+//	std::cerr << std::endl;
 	float d, lon0, x0, scale;
 	switch (getGridType()) {
 		case 1:
@@ -225,9 +230,18 @@ boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 			x0 = params[0];
 			scale = 1000;
 			break;
-		case 2:
-		case 3: // geographic or spherical rotated grid
-			// TODO: interprete rotated grid! (used in hirlam)
+		case 2: // geographic grid
+			d = params[2];
+			lon0 = params[0];
+			x0 = 1;
+			scale = 1;
+			break;
+		case 3: // geographic rotated grid
+			d = params[2];
+			lon0 = params[0];
+			x0 = 1;
+			scale = DEG_TO_RAD; // proj requires radians for oblique transformations of longlat
+			break;
 		case 5: // mercator
 			d = params[2];
 			lon0 = params[0];
@@ -255,10 +269,20 @@ boost::shared_ptr<Data> Felt_File::getYData() const throw(Felt_File_Error) {
 			y0 = params[1];
 			scale = 1000; // (km -> m)
 			break;
-		case 2:
-		case 3: // geographic or spherical rotated grid
+		case 2: // geographical grid
+			d = params[3];
+			lat0 = params[1];
+			y0 = 1;
+			scale = 1;
+			break;
+		case 3: // spherical rotated grid
+			d = params[3] ;
+			lat0 = params[1];
+			y0 = 1;
+			scale = DEG_TO_RAD; // proj requires radians for oblique transformations of longlat
+			break;
 		case 5: // mercator
-			d = params[2];
+			d = params[3];
 			lat0 = params[1];
 			y0 = 1;
 			scale = 1;

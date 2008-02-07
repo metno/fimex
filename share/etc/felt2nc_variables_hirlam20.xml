@@ -36,13 +36,13 @@
 	<attribute name="units" value="degrees_north" type="string" />
 </spatial_axis>
 <!-- spherical rotated -->
-<spatial_axis projection_felt_id="3" id="x" name="lon" type="float">
-	<attribute name="long_name" value="longitude" type="string" />
-	<attribute name="units" value="degrees_east" type="string" />
+<spatial_axis projection_felt_id="3" id="x" name="u_lon" type="float">
+	<attribute name="long_name" value="unrotated_longitude" type="string" />
+	<attribute name="units" value="radians_east" type="string" />
 </spatial_axis>
-<spatial_axis projection_felt_id="3" id="y" name="lat" type="float">
-	<attribute name="long_name" value="latitude" type="string" />
-	<attribute name="units" value="degrees_north" type="string" />
+<spatial_axis projection_felt_id="3" id="y" name="u_lat" type="float">
+	<attribute name="long_name" value="unrotated_latitude" type="string" />
+	<attribute name="units" value="radians_north" type="string" />
 </spatial_axis>
 <!-- polar-stereographic -->
 <spatial_axis projection_felt_id="4" id="x" name="x" type="int">
