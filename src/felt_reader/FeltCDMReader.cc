@@ -5,6 +5,7 @@
 #include "interpolation.h"
 #include "CDMDataType.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <sstream>
@@ -306,6 +307,24 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			const CDMVariable& yVar = cdm.getVariables().find(yDim.getName())->second;
 			boost::shared_array<double> xData = xVar.getData()->asDouble();
 			boost::shared_array<double> yData = yVar.getData()->asDouble();
+			try {
+				std::string xUnits = cdm.getAttribute(xDim.getName(), "units").getData()->asString(); 
+				if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
+					// convert degrees to radians
+					for (size_t i = 0; i < xVar.getData()->size(); ++i) {
+						xData[i] *= DEG_TO_RAD;
+					}
+				}
+				std::string yUnits = cdm.getAttribute(yDim.getName(), "units").getData()->asString();; 
+				if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
+					// convert degrees to radians
+					for (size_t i = 0; i < yVar.getData()->size(); ++i) {
+						yData[i] *= DEG_TO_RAD;
+					}
+				}
+			} catch (CDMException& cex) {
+				throw MetNoFelt::Felt_File_Error(cex.what());
+			}
 			size_t fieldSize = xDim.getLength()*yDim.getLength(); 
 			double longVal[fieldSize];
 			double latVal[fieldSize];

@@ -152,7 +152,8 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 				north_pole_lon = std::strtod(what[1].str().c_str(), (char **)NULL);
 			}
 			attrList.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
-			attrList.push_back(CDMAttribute("grid_north_pole_longitude", north_pole_lon));
+			 // TODO: find out if its 180-lon or lon-180 (find example file and test with java-netcdf 4.0 toolsUI)
+			attrList.push_back(CDMAttribute("grid_north_pole_longitude", 180-north_pole_lon));
 			attrList.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));			
 		}
 		

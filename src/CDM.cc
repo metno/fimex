@@ -44,6 +44,22 @@ void CDM::addAttribute(std::string varName, CDMAttribute attr) throw(CDMExceptio
 	}  	
 }
 
+CDMAttribute& CDM::getAttribute(std::string varName, std::string attrName) throw(CDMException)
+{
+	StrStrAttrMap::iterator varIt = attributes.find(varName); 
+	if (varIt != attributes.end()) {
+		StrAttrMap::iterator attrIt = (varIt->second).find(attrName);
+		if (attrIt != (varIt->second).end()) {
+			return attrIt->second;
+		} else {
+			throw CDMException("Attribute " + attrName + " not found for varName");
+		}
+	} else {
+		throw CDMException("Variable " + varName + " not found");
+	}
+}
+
+
 
 void CDM::toXMLStream(std::ostream& out) const
 {

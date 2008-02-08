@@ -240,7 +240,7 @@ boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 			d = params[2];
 			lon0 = params[0];
 			x0 = 1;
-			scale = DEG_TO_RAD; // proj requires radians for oblique transformations of longlat
+			scale = 1;
 			break;
 		case 5: // mercator
 			d = params[2];
@@ -279,7 +279,7 @@ boost::shared_ptr<Data> Felt_File::getYData() const throw(Felt_File_Error) {
 			d = params[3] ;
 			lat0 = params[1];
 			y0 = 1;
-			scale = DEG_TO_RAD; // proj requires radians for oblique transformations of longlat
+			scale = 1;
 			break;
 		case 5: // mercator
 			d = params[3];

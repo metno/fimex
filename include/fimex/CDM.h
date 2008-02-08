@@ -44,6 +44,8 @@ public:
 	 *  @return map of type <variableName <attributeName, attribute>>
 	 */
 	const StrStrAttrMap& getAttributes() const {return attributes;}
+	
+	CDMAttribute& getAttribute(std::string varName, std::string attrName) throw(CDMException);
 private:
 	StrStrAttrMap attributes;
 	StrVarMap variables;
