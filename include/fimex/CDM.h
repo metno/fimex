@@ -27,7 +27,20 @@ public:
 	typedef std::map<std::string, CDMVariable> StrVarMap;
 	CDM();
 	virtual ~CDM();
+	/**
+	 * @brief add variable to cdm
+	 * 
+	 * @param var the variable to add
+	 * @throw CDMException if var.varName() already exists
+	 */
 	void addVariable(CDMVariable var) throw(CDMException);
+	/**
+	 * @brief remove a variable and corresponding attributes
+	 * 
+	 * @param var the variable to remove
+	 * @throw CDMException if variable does not exist
+	 */
+	void removeVariable(std::string variableName) throw(CDMException);
 	void addDimension(CDMDimension dim) throw(CDMException);
 	void addAttribute(std::string varName, CDMAttribute attr) throw(CDMException);
 	/// @brief print a xml representation to the stream
