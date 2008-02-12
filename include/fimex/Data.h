@@ -61,6 +61,21 @@ namespace MetNoUtplukk
 		 * @param last the last (excluded) data-entry, defaults to MAX size_t, automatically shrunken to fit size
 		 */		
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException) = 0;
+		/**
+		 * @brief get a slice of the data
+		 * 
+		 * This slices a multidimensional chunk out of the data.
+		 * All parameters must be vectors of the same size (dimension of array).
+		 * The first dimension is the fastest moving index (fortran arrays)
+		 * 
+		 * @param orgDimSize the dimensions of this vector. The product of all orgDimSizes must equal to data.size.
+		 * @param startDims The start-position in the original data to fetch data from
+		 * @param outputDimSize the size of the output data
+		 * @return a Data of the size of outputDimSize with the same datatype as the original type  
+		 * 
+		 * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
+		 */
+		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) = 0;
 	};
 
 	template<typename C>
@@ -97,7 +112,8 @@ namespace MetNoUtplukk
 		 */
 		template<class InputIterator>
 		void setValues(InputIterator first, InputIterator last, size_t dataStartPos = 0) throw(CDMException);
-
+		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException);
+		
 	private:
 		size_t length;
 		boost::shared_array<C> theData;
@@ -180,6 +196,62 @@ namespace MetNoUtplukk
 	template<>
 	void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
 	
+	/**
+	 * recursively copy data by moving the newData and orgData pointers forward and copy the data at the current position
+	 * 
+	 * it's assumed that the first dim in the vector is the fastest moving (fortran like)
+	 * 
+	 * @param orgData pointer to the current postion of the original array
+	 * @param newData pointer to the current position of the new array
+	 * @orgDimSize the original dimensions of orgData
+	 * @orgSliceSize helper-array with orgSliceSize[0] = 1; orgSliceSize[n] = orgDimSize[n] * orgSliceSize[n-1]
+	 * @newStart the start positions in the new data
+	 * @newSize the dimensions of the newData
+	 * @currentDim the dimension currently under work, should be between (orgData.size()-1) and 0
+	 * 
+	 */
+	template<typename C>
+	void recursiveCopyMultiDimData(C** orgData, C** newData, const std::vector<size_t>& orgDimSize, const std::vector<size_t>& orgSliceSize, const std::vector<size_t>& newStart, const std::vector<size_t>& newSize, size_t currentDim) {
+		(*orgData) += newStart[currentDim] * orgSliceSize[currentDim];
+		if (currentDim == 0) {
+			// putting loop inside if/else for performance
+			for (size_t i = 0; i < newSize[0]; i++) {
+				*(*newData)++ = *(*orgData)++;
+			}
+		} else {
+			for (size_t i = 0; i < newSize[currentDim]; i++) {
+				recursiveCopyMultiDimData(orgData, newData, orgDimSize, orgSliceSize, newStart, newSize, currentDim - 1);
+			}
+		}
+		(*orgData) += (orgDimSize[currentDim] - (newStart[currentDim] + newSize[currentDim])) * orgSliceSize[currentDim];
+	}
+	
+	template<typename C>
+	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) {
+		size_t orgSize = 1;
+		size_t outputSize = 1;
+		for (size_t i = 0; i < orgDimSize.size(); ++i) {
+			outputSize *= outputDimSize[i];
+			orgSize *= orgDimSize[i];
+			if (orgDimSize[i] < (startDims[i] + outputDimSize[i])) throw CDMException("dimension-size error, start+size > orgSize: " + type2string(orgDimSize[i]) + ">" + type2string(startDims[i]+outputDimSize[i]) );
+		}
+		if (orgSize != size()) throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
+		
+		
+		boost::shared_ptr<DataImpl<C> > output(new DataImpl<C>(outputSize));
+		C* newData = output->theData.get();
+		C* oldData = theData.get();
+		// pre-calculation of the slice-size of the different dimensions
+		std::vector<size_t> orgSliceSize; 
+		orgSliceSize.reserve(orgDimSize.size());
+		orgSliceSize[0] = 1;
+		for (size_t dim = 1; dim < orgDimSize.size(); dim++) {
+			orgSliceSize[dim] = orgSliceSize[dim-1] * orgDimSize[dim];
+		}
+		recursiveCopyMultiDimData(&oldData, &newData, orgDimSize, orgSliceSize, startDims, outputDimSize, orgDimSize.size() - 1);
+		
+		return output;
+	}
 	
 	
 	template<typename C>
