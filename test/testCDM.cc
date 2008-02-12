@@ -31,6 +31,15 @@ void test_variable(void) {
 		BOOST_CHECK(true);
 	}	
 	
+	CDMVariable& varRef = cdm.getVariable(varName);
+	BOOST_CHECK(varRef.getName() == varName);
+	try {
+		cdm.getVariable("dummy");
+		BOOST_CHECK(false);
+	} catch (CDMException& ex) {
+		BOOST_CHECK(true);
+	}
+	
 	try {
 		cdm.removeVariable("dummy"); // should fail, doesn't exists
 		BOOST_CHECK(false);
@@ -41,6 +50,10 @@ void test_variable(void) {
 	BOOST_CHECK(true);
 }
 
+void test_dimension(void) {
+	
+}
+
 test_suite*
 init_unit_test_suite( int argc, char* argv[] )
 {
@@ -48,5 +61,6 @@ init_unit_test_suite( int argc, char* argv[] )
     
 	test->add( BOOST_TEST_CASE( &test_cdm ) );
 	test->add( BOOST_TEST_CASE( &test_variable ) );
+	test->add( BOOST_TEST_CASE( &test_dimension ) );
     return test;
 }

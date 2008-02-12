@@ -11,7 +11,7 @@ CDM::~CDM()
 {
 }
 
-void CDM::addVariable(CDMVariable var) throw(CDMException)
+void CDM::addVariable(const CDMVariable& var) throw(CDMException)
 {
 	if (variables.find(var.getName()) == variables.end()) {
 		variables.insert(std::pair<std::string, CDMVariable>(var.getName(), var));
@@ -20,7 +20,37 @@ void CDM::addVariable(CDMVariable var) throw(CDMException)
 	}
 }
 
-void CDM::addDimension(CDMDimension dim) throw(CDMException)
+const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException) {
+	StrVarMap::const_iterator varPos = variables.find(varName); 
+	if (varPos != variables.end()) {
+		return varPos->second;
+	} else {
+		throw CDMException("cannot find variable: " + varName);
+	}
+}
+CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException) {
+	// call constant version and cast
+	return const_cast<CDMVariable&>(
+			static_cast<const CDM&>(*this).getVariable(varName)
+			);
+}
+
+
+void CDM::removeVariable(const std::string& variableName) throw(CDMException) {
+	StrVarMap::iterator varPos = variables.find(variableName); 
+	if (varPos != variables.end()) {
+		variables.erase(varPos);
+		StrStrAttrMap::iterator varAttrPos = attributes.find(variableName); 
+		if (varAttrPos != attributes.end()) {
+			attributes.erase(varAttrPos);
+		}
+	} else {
+		throw CDMException("cannot remove variable: " + variableName + " does not exists");
+	}
+}
+
+
+void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
 {
 	if (dimensions.find(dim.getName()) == dimensions.end()) {
 		dimensions.insert(std::pair<std::string, CDMDimension>(dim.getName(), dim));
@@ -29,8 +59,18 @@ void CDM::addDimension(CDMDimension dim) throw(CDMException)
 	}
 }
 
+CDMDimension& CDM::getDimension(std::string dimName) throw(CDMException)
+{
+	StrDimMap::iterator dimIt = dimensions.find(dimName); 
+	if (dimIt != dimensions.end()) {
+		return dimIt->second;
+	} else {
+		throw CDMException("cannot find dimension: " + dimName);
+	}	
+}
 
-void CDM::addAttribute(std::string varName, CDMAttribute attr) throw(CDMException)
+
+void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
 {
 	if ((varName != globalAttributeNS ()) && (variables.find(varName) == variables.end())) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");

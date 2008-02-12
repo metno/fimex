@@ -15,9 +15,14 @@ public:
 	virtual ~CDMDimension();
 	const std::string& getName() const {return name;}
 	size_t getLength() const {return length;}
+	void setLength(size_t length) {this->length = length;}
 	void setUnlimited(int unlimited) {this->unlimited = unlimited;}
 	int isUnlimited() const {return unlimited;}
-	/// print xml representation to stream
+	/**
+	 *  @brief print xml representation to stream
+	 * 
+	 * @param out stream to write xml to
+	 */
 	void toXMLStream(std::ostream& out) const;
 private:
 	std::string name;

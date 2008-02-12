@@ -33,7 +33,7 @@ public:
 	 * this method will not try to read data from the disk
 	 */ 
 	const boost::shared_ptr<Data> getData() const {return data;}
-	/// check if data has been set with @see{setData()}
+	/// check if real data has been set with @link{setData()} (null-pointer reference returns false)
 	int hasData() const {return (data.get() != 0);}
 	int hasUnlimitedDim() const;
 	/**

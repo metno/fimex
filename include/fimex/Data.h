@@ -246,7 +246,7 @@ namespace MetNoUtplukk
 		orgSliceSize.reserve(orgDimSize.size());
 		orgSliceSize[0] = 1;
 		for (size_t dim = 1; dim < orgDimSize.size(); dim++) {
-			orgSliceSize[dim] = orgSliceSize[dim-1] * orgDimSize[dim];
+			orgSliceSize[dim] = orgSliceSize[dim-1] * orgDimSize[dim-1];
 		}
 		recursiveCopyMultiDimData(&oldData, &newData, orgDimSize, orgSliceSize, startDims, outputDimSize, orgDimSize.size() - 1);
 		

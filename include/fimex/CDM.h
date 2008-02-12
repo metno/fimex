@@ -33,23 +33,52 @@ public:
 	 * @param var the variable to add
 	 * @throw CDMException if var.varName() already exists
 	 */
-	void addVariable(CDMVariable var) throw(CDMException);
+	void addVariable(const CDMVariable& var) throw(CDMException);
+	/**
+	 * @brief get a reference of a variable
+	 * 
+	 * @param varName name of the variable
+	 * @throw CDMException if varName doesn't exist
+	 */
+	CDMVariable& getVariable(const std::string& varName) throw(CDMException);
+	const CDMVariable& getVariable(const std::string& varName) const throw(CDMException);
 	/**
 	 * @brief remove a variable and corresponding attributes
 	 * 
-	 * @param var the variable to remove
-	 * @throw CDMException if variable does not exist
+	 * @param variableName the variable to remove
+	 * @throw CDMException if variable or its dimensions don't exist
 	 */
-	void removeVariable(std::string variableName) throw(CDMException);
-	void addDimension(CDMDimension dim) throw(CDMException);
-	void addAttribute(std::string varName, CDMAttribute attr) throw(CDMException);
+	void removeVariable(const std::string& variableName) throw(CDMException);
+
+	/**
+	 *  @brief add a dimension to cdm
+	 * 
+	 *  @param dim the dimension
+	 *  @throw CDMException if dim-name already exists
+	 */
+	void addDimension(const CDMDimension& dim) throw(CDMException);
+	/**
+	 * @brief get a reference to a dimension
+	 * 
+	 * @param dimName name of the dimension
+	 * @throw CDMException if dimension doesn't exist
+	 */
+	CDMDimension& getDimension(std::string dimName) throw(CDMException);
+	/**
+	 * add an attribute to cdm
+	 * 
+	 * @param varName name of the variablt the attribute belongs to
+	 * @param attr the CDMAttribute
+	 * @throw CDMException if varName doesn't exist, or attr.getName() already exists
+	 */
+	void addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException);
 	/// @brief print a xml representation to the stream
 	void toXMLStream(std::ostream& os) const;
 	/// @brief the namespace for global attributes
 	const static std::string& globalAttributeNS() {const static std::string global("_GLOBAL"); return global;}
 	
 	/// @brief get the dimension
-	const StrDimMap& getDimensions() const {return dimensions;} 
+	const StrDimMap& getDimensions() const {return dimensions;}
 	/// @brief get the variables
 	const StrVarMap& getVariables() const {return variables;}
 	/**
