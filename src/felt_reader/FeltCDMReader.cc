@@ -382,16 +382,16 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     			attributes.push_back(CDMAttribute("coordinates", coordinates));
     		}
     	
-    		// map shape, generate variable, set attributes/variable to CDM
+    		// map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
     		std::vector<CDMDimension> shape;
-    		if (it->getTimes().size() > 0) {
-    			shape.push_back(timeDim);
-    		}
+    		shape.push_back(xDim);
+    		shape.push_back(yDim);
     		if (it->getLevels().size() > 0) {
     			shape.push_back(levelDims[it->getLevelType()]);
     		}
-    		shape.push_back(yDim);
-    		shape.push_back(xDim);
+    		if (it->getTimes().size() > 0) {
+    			shape.push_back(timeDim);
+    		}
     		CDMVariable var(varName, CDM_SHORT, shape);
     		cdm.addVariable(var);
     		varNameFeltIdMap[varName] = it->getName();

@@ -101,7 +101,8 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 		typedef const NcDim* NcDimPtr;
 		boost::shared_array<NcDimPtr> ncshape(new NcDimPtr[shape.size()]);
 		for (size_t i = 0; i < shape.size(); i++) {
-			ncshape[i] = ncDimMap[shape[i].getName()].get();
+			// revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
+			ncshape[i] = ncDimMap[shape[(shape.size()-1-i)].getName()].get();
 		}
 		CDMDataType datatype = var.getDataType();
 		if (datatype == CDM_NAT && shape.size() == 0) {

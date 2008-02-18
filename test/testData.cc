@@ -74,25 +74,37 @@ void test_slicing3D() {
 
 void test_slice_asym() {
 	size_t sigma = 1;
-	size_t y = 5;
-	size_t x = 10;
-	DataImpl<int> data(sigma*x*y);
-	for (size_t i = 0; i < (x*y*sigma); i++)
-		data.setValue(i, i);
+	size_t y = 3;
+	size_t x = 5;
+	DataImpl<int> data(x*y*sigma);
+	for (size_t i = 0; i < sigma; i++) 
+		for (size_t j = 0; j < y; j++)
+			for (size_t k = 0; k < x; k++) {
+				int pos = i*(x*y) + j*x + k;
+				// cerr << i << ":" << j << ":" << k << " = " << pos << ":" << j << endl; 
+				data.setValue(pos, j);
+			}
 	
 	std::vector<size_t> orgDimSize(3, 0);
-	orgDimSize[0] = sigma;
+	orgDimSize[0] = x;
 	orgDimSize[1] = y;
-	orgDimSize[2] = x;
+	orgDimSize[2] = sigma;
 	std::vector<size_t> newDimStart(3, 0);
-	newDimStart[1] = 2;
+	newDimStart[1] = 1;
 	std::vector<size_t> newDimSize(3, 0);
-	newDimSize[0] = sigma;
+	newDimSize[0] = x;
 	newDimSize[1] = 2;
-	newDimSize[2] = x;
+	newDimSize[2] = sigma;
 	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
 	BOOST_CHECK(slice->size() == newDimSize[0]*newDimSize[1]*newDimSize[2]);
-
+	boost::shared_array<int> intSlice = slice->asInt();
+	for (size_t i = 0; i < newDimSize[2]; i++)
+		for (size_t j = 0; j < newDimSize[1]; j++)
+			for (size_t k = 0; k < newDimSize[0]; k++) {
+				int pos = k + j * (newDimSize[0]) + i * (newDimSize[1]*newDimSize[0]);
+				//std::cerr << i << ":" << j << ":" << k << " = " << pos << ":" << intSlice[pos] << std::endl;
+				BOOST_CHECK(intSlice[pos] == j + newDimStart[1]);
+			}
 }
 
 void test_slice_segfault() {

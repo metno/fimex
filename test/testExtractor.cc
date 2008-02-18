@@ -22,7 +22,9 @@ test_extract() {
 		BOOST_CHECK(true);
 	}
 
-	extract->reduceDimension("y", 50, 100);
+	extract->reduceDimension("y", 10, 50);
+	extract->reduceDimension("x", 80, 50); // spain
+//	extract->reduceDimension("time", 10, 12);
 	NetCDF_CDMWriter(extract, "test3.nc");
 	BOOST_CHECK(true);
 }

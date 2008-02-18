@@ -11,7 +11,7 @@ CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)
 
 CDMExtractor::~CDMExtractor()
 {
-}
+ }
 
 const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
 {
@@ -40,19 +40,16 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const CDMVariable& vari
 				// just changing unLimDimPos
 				DimChangeMap::iterator foundDim = dimChanges.find(it->getName());
 				if (foundDim != dimChanges.end()) {
+					std::cerr << unLimDimPos << " ";
 					unLimDimPos += (foundDim->second)[0];
+					std::cerr << unLimDimPos << std::endl;
 				}								
 			}
 		}
 		// read
-		std::cerr << variable.getName() << ": ";
-		for (int i = 0; i < newDimSize.size(); i++) {
-			std::cerr << orgDimSize[i] << "-> " << newDimStart[i] << "-" << newDimSize[i] << std::endl;
-		}
 		data = dataReader->getDataSlice(variable, unLimDimPos);
-		if (hasChangedDim) {
+		if (hasChangedDim && (data->size() > 0)) { // datasize might be 0, i.e. if time doesn't exist
 			data = data->slice(orgDimSize, newDimStart, newDimSize);
-			std::cerr << "slice done" << std::endl;
 		}
 	}
 	// TODO: translate datatype where required
@@ -79,7 +76,8 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	// removing data of this dimension, just to be sure it's read from the dataReader
 	try {
 		CDMVariable& var = cdm.getVariable(dim.getName());
-		var.setData(boost::shared_ptr<Data>());
+		//TODO fix: this deletes all data
+		//var.setData(boost::shared_ptr<Data>());
 	} catch (CDMException& ex) {
 		// var doesn't exists, don't care
 	}
