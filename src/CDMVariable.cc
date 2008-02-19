@@ -3,7 +3,7 @@
 namespace MetNoUtplukk
 {
 
-CDMVariable::CDMVariable(std::string name, CDMDataType datatype, std::vector<CDMDimension> shape)
+CDMVariable::CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape)
 : name(name), datatype(datatype), shape(shape)
 {
 }
@@ -17,7 +17,7 @@ void CDMVariable::shapeToXMLStream(std::ostream& out) const
 	if (shape.size() > 0) {
 		out << "shape=\"";
 		for (unsigned int i = 0; i < shape.size(); i++) {
-			out << shape[i].getName();
+			out << shape[i];
 			if (i < (shape.size()-1)) {
 				out << " ";
 			} else {
@@ -44,16 +44,4 @@ void CDMVariable::toXMLStream(std::ostream& out) const
 	out << "/>" << std::endl;
 }
 
-int CDMVariable::hasUnlimitedDim() const
-{
-	return getUnlimitedDim() != 0;
-}
-const CDMDimension* CDMVariable::getUnlimitedDim() const {
-	for (std::vector<CDMDimension>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
-		if (it->isUnlimited()) {
-			return &(*it);
-		}
-	}
-	return 0;
-}
 }

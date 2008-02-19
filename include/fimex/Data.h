@@ -233,7 +233,7 @@ namespace MetNoUtplukk
 		for (size_t i = 0; i < orgDimSize.size(); ++i) {
 			outputSize *= outputDimSize[i];
 			orgSize *= orgDimSize[i];
-			if (orgDimSize[i] < (startDims[i] + outputDimSize[i])) throw CDMException("dimension-size error, start+size > orgSize: " + type2string(orgDimSize[i]) + ">" + type2string(startDims[i]+outputDimSize[i]) );
+			if (orgDimSize[i] < (startDims[i] + outputDimSize[i])) throw CDMException("dimension-size error, start+size > orgSize: " + type2string(startDims[i]+outputDimSize[i]) + ">" + type2string(orgDimSize[i]) );
 		}
 		if (orgSize != size()) throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
 		

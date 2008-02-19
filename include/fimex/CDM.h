@@ -41,6 +41,14 @@ public:
 	 * @throw CDMException if varName doesn't exist
 	 */
 	CDMVariable& getVariable(const std::string& varName) throw(CDMException);
+	/**
+	 * @brief get a reference of a variable
+	 * 
+	 * this is a constant version of @link{CDMVariable::getVariable}
+	 * 
+	 * @param varName name of the variable
+	 * @throw CDMException if varName doesn't exist
+	 */
 	const CDMVariable& getVariable(const std::string& varName) const throw(CDMException);
 	/**
 	 * @brief remove a variable and corresponding attributes
@@ -63,7 +71,21 @@ public:
 	 * @param dimName name of the dimension
 	 * @throw CDMException if dimension doesn't exist
 	 */
-	CDMDimension& getDimension(std::string dimName) throw(CDMException);
+	CDMDimension& getDimension(const std::string& dimName) throw(CDMException);
+	const CDMDimension& getDimension(const std::string& dimName) const throw(CDMException);
+
+	
+	/**
+	 * @brief retrieve the unlimited dimension
+	 * @return unLimDim pointer with the unlimited dimension, the pointer will be deleted with the CDM
+	 */
+	const CDMDimension* getUnlimitedDim() const;
+	/**
+	 * @brief test if a variable contains the unlimited dim
+	 * @return true/false
+	 */
+	bool hasUnlimitedDim(const CDMVariable& var) const;
+	
 	/**
 	 * add an attribute to cdm
 	 * 

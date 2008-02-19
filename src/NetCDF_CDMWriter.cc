@@ -96,13 +96,13 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 	NcVarMap ncVarMap;
 	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		const CDMVariable& var = it->second;
-		const std::vector<CDMDimension>& shape = var.getShape();
+		const std::vector<std::string>& shape = var.getShape();
 		// the const-ness required by the library
 		typedef const NcDim* NcDimPtr;
 		boost::shared_array<NcDimPtr> ncshape(new NcDimPtr[shape.size()]);
 		for (size_t i = 0; i < shape.size(); i++) {
 			// revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
-			ncshape[i] = ncDimMap[shape[(shape.size()-1-i)].getName()].get();
+			ncshape[i] = ncDimMap[shape[(shape.size()-1-i)]].get();
 		}
 		CDMDataType datatype = var.getDataType();
 		if (datatype == CDM_NAT && shape.size() == 0) {
@@ -160,14 +160,14 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		const CDMVariable& cdmVar = it->second;
 		NcVar* ncVar = (ncVarMap[cdmVar.getName()]).get();
-		if (!cdmVar.hasUnlimitedDim()) {
+		if (!cdm.hasUnlimitedDim(cdmVar)) {
 			boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar);
 			if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
 				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 			}
 		} else {
 			// iterate over each unlimited dim (usually time)
-			const CDMDimension* unLimDim = cdmVar.getUnlimitedDim();
+			const CDMDimension* unLimDim = cdm.getUnlimitedDim();
 			for (size_t i = 0; i < unLimDim->getLength(); ++i) {
 				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar, i);
 				if (!putRecData(ncVar, cdmVar.getDataType(), data, i)) {

@@ -22,15 +22,17 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const CDMVariable& vari
 	} else {
 		// translate slice-variable size where dimensions have been transformed, (via data.slice)
 		bool hasChangedDim = false;
-		const std::vector<CDMDimension>& dims = variable.getShape();
+		const std::vector<std::string>& dims = variable.getShape();
 		std::vector<size_t> orgDimSize, newDimSize, newDimStart;
-		for (std::vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-			if (! it->isUnlimited()) { // this is the slice-dim
-				orgDimSize.push_back(it->getLength());
-				DimChangeMap::iterator foundDim = dimChanges.find(it->getName());
+		const CDM& orgCDM = dataReader->getCDM();
+		for (std::vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+			const CDMDimension& dim = orgCDM.getDimension(*it);
+			if (! dim.isUnlimited()) { // this is the slice-dim
+				orgDimSize.push_back(dim.getLength());
+				DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
 				if (foundDim == dimChanges.end()) {
 					newDimStart.push_back(0);
-					newDimSize.push_back(it->getLength());
+					newDimSize.push_back(dim.getLength());
 				} else {
 					hasChangedDim = true;
 					newDimStart.push_back((foundDim->second)[0]);
@@ -38,11 +40,9 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const CDMVariable& vari
 				}
 			} else {
 				// just changing unLimDimPos
-				DimChangeMap::iterator foundDim = dimChanges.find(it->getName());
+				DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
 				if (foundDim != dimChanges.end()) {
-					std::cerr << unLimDimPos << " ";
 					unLimDimPos += (foundDim->second)[0];
-					std::cerr << unLimDimPos << std::endl;
 				}								
 			}
 		}

@@ -16,7 +16,7 @@ void test_cdm() {
 
 
 void test_variable(void) {
-	vector<CDMDimension> noDim;
+	vector<std::string> noDim;
 	string varName("test");
 	CDMVariable testVar(varName, CDM_NAT, noDim);
 	CDM cdm;

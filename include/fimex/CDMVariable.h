@@ -15,11 +15,11 @@ namespace MetNoUtplukk
 class CDMVariable
 {
 public:
-	explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<CDMDimension> shape);
+	explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape);
 	virtual ~CDMVariable();
 	const std::string& getName() const {return name;}
 	CDMDataType getDataType() const {return datatype;}
-	const std::vector<CDMDimension>& getShape() const {return shape;}
+	const std::vector<std::string>& getShape() const {return shape;}
 	/// print a xml representation to the stream without attributes
 	void toXMLStream(std::ostream& out) const;
 	/// print a xml representation to the stream with attributes
@@ -35,16 +35,10 @@ public:
 	const boost::shared_ptr<Data> getData() const {return data;}
 	/// check if real data has been set with @link{setData()} (null-pointer reference returns false)
 	int hasData() const {return (data.get() != 0);}
-	int hasUnlimitedDim() const;
-	/**
-	 * @brief retrieve the unlimited dimension
-	 * @return unLimDim pointer with the unlimited dimension, the pointer will be deleted with the CDMVariable
-	 */
-	const CDMDimension* getUnlimitedDim() const;
 private:
 	std::string name;
 	CDMDataType datatype;
-	std::vector<CDMDimension> shape;
+	std::vector<std::string> shape;
 	void shapeToXMLStream(std::ostream& out) const;
 	boost::shared_ptr<Data> data;
 };

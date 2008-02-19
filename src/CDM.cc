@@ -59,14 +59,43 @@ void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
 	}
 }
 
-CDMDimension& CDM::getDimension(std::string dimName) throw(CDMException)
+const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CDMException)
 {
-	StrDimMap::iterator dimIt = dimensions.find(dimName); 
+	StrDimMap::const_iterator dimIt = dimensions.find(dimName); 
 	if (dimIt != dimensions.end()) {
 		return dimIt->second;
 	} else {
 		throw CDMException("cannot find dimension: " + dimName);
 	}	
+}
+
+CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException) {
+	return const_cast<CDMDimension&>(
+			static_cast<const CDM&>(*this).getDimension(dimName)
+			);
+}
+
+
+const CDMDimension* CDM::getUnlimitedDim() const {
+	for (StrDimMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++it) {
+		if (it->second.isUnlimited()) {
+			return &(it->second);
+		}
+	}
+	return 0;
+}
+
+bool CDM::hasUnlimitedDim(const CDMVariable& var) const {
+	const std::vector<std::string>& shape = var.getShape();
+	for (std::vector<std::string>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
+		StrDimMap::const_iterator dim = dimensions.find(*it);
+		if (dim != dimensions.end()) {
+			if (dim->second.isUnlimited()) {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
