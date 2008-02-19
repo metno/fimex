@@ -250,6 +250,7 @@ boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 			break;
 		default: throw Felt_File_Error("unknown gridType: " + type2string(getGridType()));
 	}
+	// coordinates are given in fortran type, i.e. first cell is 1, translation to first cell = 0
 	for (int i = 1; i <= getNX(); i++) {
 		float value = (lon0 + (i-x0)*d) * scale; // (km -> m)
 		xData->setValue(i-1, value);
@@ -289,6 +290,7 @@ boost::shared_ptr<Data> Felt_File::getYData() const throw(Felt_File_Error) {
 			break;
 		default: throw Felt_File_Error("unknown gridType: " + type2string(getGridType()));
 	}
+	// coordinates are given in fortran type, i.e. first cell is 1, translation to first cell = 0
 	for (int i = 1; i <= getNY(); i++) {
 		float value = (lat0 + (i-y0)*d) * scale;
 		yData->setValue(i-1, value);
