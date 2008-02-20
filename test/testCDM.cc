@@ -50,6 +50,29 @@ void test_variable(void) {
 	BOOST_CHECK(true);
 }
 
+void test_attributes(void) {
+	CDM cdm;
+	string varName("test");
+	vector<std::string> noDim;
+	CDMVariable testVar(varName, CDM_NAT, noDim);
+	cdm.addVariable(testVar);
+	string varName2("test2");
+	CDMVariable testVar2(varName2, CDM_NAT, noDim);
+	cdm.addVariable(testVar2);
+	
+	cdm.addAttribute(varName, CDMAttribute("attr", "value"));
+	cdm.addAttribute(varName, CDMAttribute("attr2", "value"));
+	cdm.addAttribute(varName2, CDMAttribute("attr", "value"));
+	cdm.addAttribute(varName2, CDMAttribute("attr2", "valueX"));
+			
+	vector<std::string> vars = cdm.findVariable("attr", "value");
+	BOOST_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
+	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+	vars = cdm.findVariable("attr2", "valueX");
+	BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
+	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+}
+
 void test_dimension(void) {
 	
 }
@@ -61,6 +84,7 @@ init_unit_test_suite( int argc, char* argv[] )
     
 	test->add( BOOST_TEST_CASE( &test_cdm ) );
 	test->add( BOOST_TEST_CASE( &test_variable ) );
+	test->add( BOOST_TEST_CASE( &test_attributes ) );
 	test->add( BOOST_TEST_CASE( &test_dimension ) );
     return test;
 }

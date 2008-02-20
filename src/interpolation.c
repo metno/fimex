@@ -86,7 +86,7 @@ static void convertAxis(const double* orgAxis, const int num, const int type, do
 {
 	switch (type) {
 		case MIUP_LONGITUDE:
-		case MIUP_LATITUDE: for (int i = 0; i < num; i++) outAxis[i] = DEG_TO_RAD * orgAxis[i]; break;
+		case MIUP_LATITUDE: for (int i = 0; i < num; i++) *outAxis++ = DEG_TO_RAD * *orgAxis++; break;
 		case MIUP_PROJ_AXIS:
 		default: memcpy(outAxis, orgAxis, num * sizeof(double));
 	}

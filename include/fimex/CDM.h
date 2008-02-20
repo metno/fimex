@@ -51,6 +51,14 @@ public:
 	 */
 	const CDMVariable& getVariable(const std::string& varName) const throw(CDMException);
 	/**
+	 * @brief search for variable with certain attribute-value
+	 * 
+	 * @param attrName name of the attribute
+	 * @param attrValue string-value of the attribute
+	 * @return copies of the attributes matching the request 
+	 */
+	std::vector<std::string> findVariable(const std::string& attrName, const std::string& attrValue) const;
+	/**
 	 * @brief remove a variable and corresponding attributes
 	 * 
 	 * @param variableName the variable to remove

@@ -76,8 +76,7 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	// removing data of this dimension, just to be sure it's read from the dataReader
 	try {
 		CDMVariable& var = cdm.getVariable(dim.getName());
-		//TODO fix: this deletes all data
-		//var.setData(boost::shared_ptr<Data>());
+		var.setData(boost::shared_ptr<Data>());
 	} catch (CDMException& ex) {
 		// var doesn't exists, don't care
 	}

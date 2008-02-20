@@ -35,6 +35,21 @@ CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException) {
 			);
 }
 
+std::vector<std::string> CDM::findVariable(const std::string& attrName, const std::string& attrValue) const {
+	std::vector<std::string> results;
+	for (StrStrAttrMap::const_iterator varIt = attributes.begin(); varIt != attributes.end(); ++varIt) {
+		if (varIt->first == globalAttributeNS())
+			continue;
+		StrAttrMap::const_iterator attrIt = varIt->second.find(attrName);
+		if (attrIt != varIt->second.end()) {
+			if (attrIt->second.getStringValue() == attrValue) {
+				results.push_back(varIt->first);
+			}
+		}
+	}
+	return results;
+}
+
 
 void CDM::removeVariable(const std::string& variableName) throw(CDMException) {
 	StrVarMap::iterator varPos = variables.find(variableName); 

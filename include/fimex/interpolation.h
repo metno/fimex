@@ -8,20 +8,45 @@
 extern "C" {
 #endif
 
+	
+/**
+ * @brief interpolation method
+ * 
+ * flag for nearest neighbor interpolation
+ */
 #define MIUP_NEAREST_NEIGHBOR 0
+/**
+ * @brief interpolation method
+ * 
+ * flag for bilinear interpolation
+ */
 #define MIUP_BILINEAR         1
+/**
+ * @brief interpolation method
+ * 
+ * flag for bicubic interpolation
+ * @warning not implemented yet
+ */
 #define MIUP_BICUBIC          2
 
+/** @brief undefined value for floats */
 #define MIUP_UNDEFINED_F (nanf(""))
+/** @brief undefined value for doubles */
 #define MIUP_UNDEFINED_D (nand(""))
 
+/** @brief return code, error */
 #define MIUP_ERROR -1
+/** @brief return code, ok */
 #define MIUP_OK 1
 
+/** @brief projection axis in m-equivalent */
 #define MIUP_PROJ_AXIS 0
+/** @brief longitude projection axis in degrees */
 #define MIUP_LONGITUDE 1
+/** @brief latitude projection axis in degrees */
 #define MIUP_LATITUDE 2
 
+/** @brief debug flag */
 #define MIUP_DEBUG 0
 
 /**
@@ -70,7 +95,7 @@ extern int miup_interpolate_d(int method,
  * @param infield 3d fortran array of size ix,iy,iz
  * @param outfield 1d array of size iz containing the values
  */
-extern int miup_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
+extern int miup_get_values_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
 
 /**
  *  Bilinear interpolation requires a neighborhood extending one pixel to the right and below the central sample. If the fractional subsample position is given by (xfrac, yfrac), the resampled pixel value will be:
