@@ -20,7 +20,7 @@ public:
 	 * 
 	 * @param method Interpolation method 
 	 */
-	virtual void changeProjection(int method, const string& proj_input, const vector<double> out_x_axis, const vector<double> out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException);
+	virtual void changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException);
 	
 };
 
