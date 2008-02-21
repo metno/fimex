@@ -54,10 +54,10 @@ public:
 	 * @brief search for variable with certain attribute-value
 	 * 
 	 * @param attrName name of the attribute
-	 * @param attrValue string-value of the attribute
+	 * @param attrValueRegExp regular expression the 'string'-value needs to match
 	 * @return copies of the attributes matching the request 
 	 */
-	std::vector<std::string> findVariable(const std::string& attrName, const std::string& attrValue) const;
+	std::vector<std::string> findVariable(const std::string& attrName, const std::string& attrValueRegExp) const;
 	/**
 	 * @brief remove a variable and corresponding attributes
 	 * 
