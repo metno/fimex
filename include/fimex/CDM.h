@@ -57,14 +57,13 @@ public:
 	 * @param attrValueRegExp regular expression the 'string'-value needs to match
 	 * @return copies of the attributes matching the request 
 	 */
-	std::vector<std::string> findVariable(const std::string& attrName, const std::string& attrValueRegExp) const;
+	std::vector<std::string> findVariables(const std::string& attrName, const std::string& attrValueRegExp) const;
 	/**
 	 * @brief remove a variable and corresponding attributes
 	 * 
 	 * @param variableName the variable to remove
-	 * @throw CDMException if variable or its dimensions don't exist
 	 */
-	void removeVariable(const std::string& variableName) throw(CDMException);
+	void removeVariable(const std::string& variableName);
 
 	/**
 	 *  @brief add a dimension to cdm
@@ -102,6 +101,23 @@ public:
 	 * @throw CDMException if varName doesn't exist, or attr.getName() already exists
 	 */
 	void addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException);
+	/**
+	 * add or replace an attribute of the cdm
+	 * 
+	 * @param varName name of variable the attribute belongs to
+	 * @param attr the CDMAttribute
+	 * @throw CDMException if vaName doesn't exist
+	 */
+	void addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException);
+	/**
+	 * remove an attribute from the cdm
+	 * 
+	 * @param varName name of variable the attribute belongs to
+	 * @param attr the CDMAttribute
+	 */
+	void removeAttribute(const std::string& varName, const std::string& attrName);
+	
+	
 	/// @brief print a xml representation to the stream
 	void toXMLStream(std::ostream& os) const;
 	/// @brief the namespace for global attributes
@@ -143,10 +159,14 @@ private:
  * @param projectionName output of the projection variables name
  * @param xAxis output of the spatial x axis
  * @param yAxis output of the spation y axis
+ * @param xAxisVals output of values of x axis
+ * @param yAxisVals output of values of y axis
+ * @param xAxisUnit output of unit for x axis
+ * @param yAxisUnit output of unit for y axis
  * @return true if unique result, false (and print warning) if results are not unique 
  * @throw CDMException if no projection with corresponding axes can be found
  */
-bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis) throw(CDMException);
+bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) throw(CDMException);
 
 }
 

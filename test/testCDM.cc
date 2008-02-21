@@ -40,12 +40,6 @@ void test_variable(void) {
 		BOOST_CHECK(true);
 	}
 	
-	try {
-		cdm.removeVariable("dummy"); // should fail, doesn't exists
-		BOOST_CHECK(false);
-	} catch (CDMException& ex) {
-		BOOST_CHECK(true);
-	}
 	cdm.removeVariable(varName);
 	BOOST_CHECK(true);
 }
@@ -65,12 +59,25 @@ void test_attributes(void) {
 	cdm.addAttribute(varName2, CDMAttribute("attr", "value"));
 	cdm.addAttribute(varName2, CDMAttribute("attr2", "valueX"));
 			
-	vector<std::string> vars = cdm.findVariable("attr", "value");
+	vector<std::string> vars = cdm.findVariables("attr", "value");
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
-	vars = cdm.findVariable("attr2", "valueX");
+	vars = cdm.findVariables("attr2", "valueX");
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+	
+	try {
+		cdm.addAttribute(varName, CDMAttribute("attr", "value"));
+		BOOST_CHECK(false); // should throw an error
+	} catch (CDMException& ex) {
+		BOOST_CHECK(true);
+	}
+	cdm.addOrReplaceAttribute(varName, CDMAttribute("attr", "valueNew"));
+	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() > 0);
+	cdm.removeAttribute("bla", "blub");
+	BOOST_CHECK(true); // no error
+	cdm.removeAttribute(varName, "attr");
+	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() == 0);
 }
 
 void test_dimension(void) {

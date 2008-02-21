@@ -36,7 +36,7 @@ CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException) {
 			);
 }
 
-std::vector<std::string> CDM::findVariable(const std::string& attrName, const std::string& attrValueRegExp) const {
+std::vector<std::string> CDM::findVariables(const std::string& attrName, const std::string& attrValueRegExp) const {
 	boost::regex valRegExp(attrValueRegExp);
 	boost::smatch what;
 	std::vector<std::string> results;
@@ -54,7 +54,7 @@ std::vector<std::string> CDM::findVariable(const std::string& attrName, const st
 }
 
 
-void CDM::removeVariable(const std::string& variableName) throw(CDMException) {
+void CDM::removeVariable(const std::string& variableName) {
 	StrVarMap::iterator varPos = variables.find(variableName); 
 	if (varPos != variables.end()) {
 		variables.erase(varPos);
@@ -62,8 +62,6 @@ void CDM::removeVariable(const std::string& variableName) throw(CDMException) {
 		if (varAttrPos != attributes.end()) {
 			attributes.erase(varAttrPos);
 		}
-	} else {
-		throw CDMException("cannot remove variable: " + variableName + " does not exists");
 	}
 }
 
@@ -131,6 +129,26 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 	}  	
 }
 
+void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
+{
+	if ((varName != globalAttributeNS ()) && (variables.find(varName) == variables.end())) {
+		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
+	} else {
+		std::map<std::string, CDMAttribute>& attrMap = attributes[varName];
+		attrMap.erase(attr.getName());
+		attrMap.insert(std::pair<std::string, CDMAttribute>(attr.getName(),attr));
+	}
+}
+
+void CDM::removeAttribute(const std::string& varName, const std::string& attrName)
+{
+	StrStrAttrMap::iterator varIt = attributes.find(varName);
+	if (varIt != attributes.end()) {
+		varIt->second.erase(attrName);
+	}
+}
+
+
 const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
 {
 	StrStrAttrMap::const_iterator varIt = attributes.find(varName); 
@@ -176,10 +194,10 @@ void CDM::toXMLStream(std::ostream& out) const
 	out << "</cdm>" << std::endl;
 }
 
-bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis) throw(CDMException) {
+bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) throw(CDMException) {
 	bool retVal = true;
 	projectionName = "latlong"; // default
-	std::vector<std::string> projs = cdm.findVariable("grid_mapping_name", ".*");
+	std::vector<std::string> projs = cdm.findVariables("grid_mapping_name", ".*");
 	if (projs.empty()) {
 		// assuming latlong
 	} else {
@@ -193,7 +211,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 	std::vector<std::string> dims;
 	if (projectionName == "latlong") {
 		std::string longUnits("degrees?_(east|west)");
-		dims = cdm.findVariable("units", longUnits);
+		dims = cdm.findVariables("units", longUnits);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with units "+ longUnits + " for projection " + projectionName);
 		} else {
@@ -204,7 +222,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 			}
 		}
 		std::string latUnits("degrees?_(north|south)");
-		dims = cdm.findVariable("units", latUnits);
+		dims = cdm.findVariables("units", latUnits);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with units "+ latUnits + " for projection " + projectionName);
 		} else {
@@ -223,7 +241,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 			std::string yStandardName("grid_longitude");
 		}
 		
-		dims = cdm.findVariable("standard_name", xStandardName);
+		dims = cdm.findVariables("standard_name", xStandardName);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with standard_name "+ xStandardName + " for projection " + projectionName);
 		} else {
@@ -234,7 +252,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 						<< xStandardName << ", using " << xAxis << std::endl;
 			}
 		}
-		dims = cdm.findVariable("standard_name", yStandardName);
+		dims = cdm.findVariables("standard_name", yStandardName);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with standard_name "+ yStandardName + " for projection " + projectionName);
 		} else {
@@ -246,6 +264,13 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 			}
 		}
 	}
+	// units and values
+	xAxisUnits = cdm.getAttribute(xAxis, "units").getStringValue();
+	xAxisVals = cdm.getVariable(xAxis).getData();
+	yAxisUnits = cdm.getAttribute(yAxis, "units").getStringValue();
+	yAxisVals = cdm.getVariable(yAxis).getData();
+
+	
 	return retVal;	
 }
 
