@@ -105,8 +105,12 @@ test_felt_axis() {
 void
 test_felt_cdm_reader() {
 	FeltCDMReader feltCDM("flth00.dat", "../etc/felt2nc_variables.xml");
-	feltCDM.getCDM().toXMLStream(std::cerr);
-	BOOST_CHECK(true);
+	//feltCDM.getCDM().toXMLStream(std::cerr);
+	string projName, projXAxis, projYAxis;
+	getProjectionAndAxesFromCDM(feltCDM.getCDM(), projName, projXAxis, projYAxis);
+	BOOST_CHECK(projName == "projection_1");
+	BOOST_CHECK(projXAxis == "x");
+	BOOST_CHECK(projYAxis == "y");
 }
 
 

@@ -117,12 +117,36 @@ public:
 	 */
 	const StrStrAttrMap& getAttributes() const {return attributes;}
 	
-	CDMAttribute& getAttribute(std::string varName, std::string attrName) throw(CDMException);
+	/**
+	 * @brief get an attribute
+	 * 
+	 * @param varName name of variable
+	 * @param attrName name of attribute
+	 */
+	CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException);
+	/**
+	 * @brief get an const attribute
+	 * @param varName name of variable
+	 * @param attrName name of attribute
+	 */
+	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException);
 private:
 	StrStrAttrMap attributes;
 	StrVarMap variables;
 	StrDimMap dimensions;
 };
+
+/**
+ * @brief extract the names of the projection-variable and the corresponding projection-axes from an cdm
+ * 
+ * @param cdm the CDM with the information
+ * @param projectionName output of the projection variables name
+ * @param xAxis output of the spatial x axis
+ * @param yAxis output of the spation y axis
+ * @return true if unique result, false (and print warning) if results are not unique 
+ * @throw CDMException if no projection with corresponding axes can be found
+ */
+bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis) throw(CDMException);
 
 }
 

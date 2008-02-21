@@ -131,11 +131,11 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 	}  	
 }
 
-CDMAttribute& CDM::getAttribute(std::string varName, std::string attrName) throw(CDMException)
+const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
 {
-	StrStrAttrMap::iterator varIt = attributes.find(varName); 
+	StrStrAttrMap::const_iterator varIt = attributes.find(varName); 
 	if (varIt != attributes.end()) {
-		StrAttrMap::iterator attrIt = (varIt->second).find(attrName);
+		StrAttrMap::const_iterator attrIt = (varIt->second).find(attrName);
 		if (attrIt != (varIt->second).end()) {
 			return attrIt->second;
 		} else {
@@ -144,6 +144,11 @@ CDMAttribute& CDM::getAttribute(std::string varName, std::string attrName) throw
 	} else {
 		throw CDMException("Variable " + varName + " not found");
 	}
+}
+CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException) {
+	return const_cast<CDMAttribute&>(
+			static_cast<const CDM&>(*this).getAttribute(varName, attrName)
+			);	
 }
 
 
@@ -170,6 +175,80 @@ void CDM::toXMLStream(std::ostream& out) const
 	
 	out << "</cdm>" << std::endl;
 }
+
+bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis) throw(CDMException) {
+	bool retVal = true;
+	projectionName = "latlong"; // default
+	std::vector<std::string> projs = cdm.findVariable("grid_mapping_name", ".*");
+	if (projs.empty()) {
+		// assuming latlong
+	} else {
+		projectionName = projs[0];
+		if (projs.size() > 1) {
+			retVal = false;
+			std::cerr << "found several projections, changing " << projs[0] << std::endl;
+		}
+	}
+	// detect original projection axes (x,y,lon,lat,rlat,rlon) (via projection_x/y_coordinate, degrees_east/north, grid_longitude/latitutde)
+	std::vector<std::string> dims;
+	if (projectionName == "latlong") {
+		std::string longUnits("degrees?_(east|west)");
+		dims = cdm.findVariable("units", longUnits);
+		if (dims.empty()) {
+			throw CDMException("couldn't find projection axis with units "+ longUnits + " for projection " + projectionName);
+		} else {
+			xAxis = dims[0];
+			if (dims.size() > 1) {
+				retVal = false;
+				std::cerr << "found several dimensions with units " << longUnits << ", using " << xAxis << std::endl;  
+			}
+		}
+		std::string latUnits("degrees?_(north|south)");
+		dims = cdm.findVariable("units", latUnits);
+		if (dims.empty()) {
+			throw CDMException("couldn't find projection axis with units "+ latUnits + " for projection " + projectionName);
+		} else {
+			yAxis = dims[0];
+			if (dims.size() > 1) {
+				retVal = false;
+				std::cerr << "found several dimensions with units " << latUnits << ", using " << yAxis << std::endl;
+			}
+		}
+	} else {
+		std::string orgProjName = cdm.getAttribute(projectionName, "grid_mapping_name").getStringValue();
+		std::string xStandardName("projection_x_coordinate");
+		std::string yStandardName("projection_y_coordinate");
+		if (orgProjName == "rotated_latitude_longitude") {
+			std::string xStandardName("grid_longitude");
+			std::string yStandardName("grid_longitude");
+		}
+		
+		dims = cdm.findVariable("standard_name", xStandardName);
+		if (dims.empty()) {
+			throw CDMException("couldn't find projection axis with standard_name "+ xStandardName + " for projection " + projectionName);
+		} else {
+			xAxis = dims[0];
+			if (dims.size() > 1) {
+				retVal = false;
+				std::cerr << "found several dimensions with standard_name "
+						<< xStandardName << ", using " << xAxis << std::endl;
+			}
+		}
+		dims = cdm.findVariable("standard_name", yStandardName);
+		if (dims.empty()) {
+			throw CDMException("couldn't find projection axis with standard_name "+ yStandardName + " for projection " + projectionName);
+		} else {
+			yAxis = dims[0];
+			if (dims.size() > 1) {
+				retVal = false;
+				std::cerr << "found several dimensions with standard_name "
+						<< yStandardName << " using " << yAxis << std::endl;
+			}
+		}
+	}
+	return retVal;	
+}
+
 
 
 }
