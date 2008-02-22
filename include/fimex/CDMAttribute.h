@@ -50,7 +50,13 @@ private:
  * currently, projStrings of the form +proj=[stere] +lat_0=? +lon_0=? +lat_ts=?
  */
 std::vector<CDMAttribute> projStringToAttributes(std::string projStr);
-
+/**
+ * @brief convert attributes of a projection-variable to a projString
+ * 
+ * @param attrs attributes of the projection variable
+ * @return proj4 string
+ */
+std::string attributesToProjString(const std::vector<CDMAttribute>& attrs);
 
 
 }

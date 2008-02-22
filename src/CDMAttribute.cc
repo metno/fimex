@@ -163,5 +163,17 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 	return attrList;
 }
 
+std::string attributesToProjString(const std::vector<CDMAttribute>& attrs)
+{
+	// TODO really implement conversion from FGDC, currently only using proj4 attribute (non-standard)
+	std::string projString;
+	for (std::vector<CDMAttribute>::const_iterator atIt = attrs.begin(); atIt != attrs.end(); ++atIt) {
+		if (atIt->getName() == "proj4") {
+			projString = atIt->getStringValue();
+		}
+	}
+	return projString;
+}
+
 
 }

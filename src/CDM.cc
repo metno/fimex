@@ -1,5 +1,5 @@
 #include "CDM.h"
-#include <boost/regex.hpp>
+#include "interpolation.h"
 
 namespace MetNoUtplukk
 {
@@ -37,17 +37,73 @@ CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException) {
 }
 
 std::vector<std::string> CDM::findVariables(const std::string& attrName, const std::string& attrValueRegExp) const {
-	boost::regex valRegExp(attrValueRegExp);
-	boost::smatch what;
-	std::vector<std::string> results;
-	for (StrStrAttrMap::const_iterator varIt = attributes.begin(); varIt != attributes.end(); ++varIt) {
-		if (varIt->first == globalAttributeNS())
-			continue;
-		StrAttrMap::const_iterator attrIt = varIt->second.find(attrName);
+//	boost::regex valRegExp(attrValueRegExp);
+//	boost::smatch what;
+//	std::vector<std::string> results;
+//	for (StrStrAttrMap::const_iterator varIt = attributes.begin(); varIt != attributes.end(); ++varIt) {
+//		if (varIt->first == globalAttributeNS())
+//			continue;
+//		StrAttrMap::const_iterator attrIt = varIt->second.find(attrName);
+//		if (attrIt != varIt->second.end()) {
+//			if (boost::regex_match(attrIt->second.getStringValue(), what, valRegExp)) {
+//				results.push_back(varIt->first);
+//			}
+//		}
+//	}
+//	return results;
+
+	std::map<std::string, std::string> findAttributes;
+	findAttributes[attrName] = attrValueRegExp;
+	std::vector<std::string> dims;
+	return findVariables(findAttributes, dims);
+}
+
+bool CDM::checkVariableAttribute(const CDMVariable& var, std::string attribute, const boost::regex& attrValue) const {
+	StrStrAttrMap::const_iterator varIt = attributes.find(var.getName());
+	if (varIt != attributes.end()) {
+		StrAttrMap::const_iterator attrIt = varIt->second.find(attribute);
 		if (attrIt != varIt->second.end()) {
-			if (boost::regex_match(attrIt->second.getStringValue(), what, valRegExp)) {
-				results.push_back(varIt->first);
+			boost::smatch what;
+			if (boost::regex_match(attrIt->second.getStringValue(), what, attrValue)) {
+				return true;
 			}
+		}
+	}
+	return false;
+}
+
+bool CDM::checkVariableDimension(const CDMVariable& var, std::string dimension) const {
+	const std::vector<std::string>& shape = var.getShape();
+	if (std::find(shape.begin(), shape.end(), dimension) != shape.end()) {
+		return true;
+	}
+	return false;
+}
+
+std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const {
+	std::vector<std::string> results;
+	// precalc regexp
+	std::map<std::string, boost::regex> attrRegExps;
+	for (std::map<std::string, std::string>::const_iterator attrIt = findAttributes.begin(); attrIt != findAttributes.end(); ++attrIt) {
+		attrRegExps[attrIt->first] = boost::regex(attrIt->second);
+	}
+	for (StrVarMap::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
+		bool test = true;
+		for (std::map<std::string, boost::regex>::iterator atIt = attrRegExps.begin(); atIt != attrRegExps.end(); ++atIt) {
+			if (!checkVariableAttribute(varIt->second, atIt->first, atIt->second)) {
+				test = false;
+				break;
+			}
+		}
+		if (! test) continue;
+		for (std::vector<std::string>::const_iterator dimIt = findDimensions.begin(); dimIt != findDimensions.end(); ++dimIt) {
+			if (!checkVariableDimension(varIt->second, *dimIt)) {
+				test = false;
+				break;
+			}
+		}
+		if (test) {
+			results.push_back(varIt->first);
 		}
 	}
 	return results;
@@ -169,6 +225,16 @@ CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& a
 			);	
 }
 
+std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) {
+	std::vector<CDMAttribute> results;
+	StrStrAttrMap::const_iterator varIt = attributes.find(varName); 
+	if (varIt != attributes.end()) {
+		for (StrAttrMap::const_iterator atIt = varIt->second.begin(); atIt != varIt->second.end(); ++atIt) {
+			results.push_back(atIt->second);
+		}
+	}
+	return results;
+}
 
 
 void CDM::toXMLStream(std::ostream& out) const
@@ -272,6 +338,57 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 
 	
 	return retVal;	
+}
+
+void generateProjectionCoordinates(CDM& cdm, const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException) {
+	const CDMVariable& xVar = cdm.getVariable(xDim);
+	const CDMVariable& yVar = cdm.getVariable(yDim);
+	boost::shared_array<double> xData = xVar.getData()->asDouble();
+	boost::shared_array<double> yData = yVar.getData()->asDouble();
+	std::string xUnits = cdm.getAttribute(xDim, "units").getData()->asString(); 
+	if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
+		// convert degrees to radians
+		for (size_t i = 0; i < xVar.getData()->size(); ++i) {
+			xData[i] *= DEG_TO_RAD;
+		}
+	}	
+	std::string yUnits = cdm.getAttribute(yDim, "units").getData()->asString();; 
+	if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
+		// convert degrees to radians
+		for (size_t i = 0; i < yVar.getData()->size(); ++i) {
+			yData[i] *= DEG_TO_RAD;
+		}
+	}
+	size_t xDimLength = cdm.getDimension(xDim).getLength();
+	size_t yDimLength = cdm.getDimension(yDim).getLength();
+	size_t fieldSize = xDimLength * yDimLength; 
+	double longVal[fieldSize];
+	double latVal[fieldSize];
+	std::string lonLatProj("+elips=sphere +a=3710000 +e=0 +proj=latlong");
+	std::string projStr = attributesToProjString(cdm.getAttributes(projectionVariable));
+	if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal, latVal)) {
+		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
+	}
+	// converting to Degree
+	double* longPos = longVal;
+	double* latPos = latVal;
+	for (size_t i = 0; i < fieldSize; ++i, ++latPos, ++longPos) {
+		*longPos *= RAD_TO_DEG;
+		*latPos  *= RAD_TO_DEG;
+	}
+	std::vector<std::string> xyDims;
+	xyDims.push_back(yDim);
+	xyDims.push_back(xDim);
+	CDMVariable lonVar(lonDim, CDM_DOUBLE, xyDims);
+	lonVar.setData(createData(CDM_DOUBLE, fieldSize, longVal, longVal+fieldSize));
+	CDMVariable latVar(latDim, CDM_DOUBLE, xyDims);
+	latVar.setData(createData(CDM_DOUBLE, fieldSize, latVal, latVal+fieldSize));
+	cdm.addVariable(lonVar);
+	cdm.addVariable(latVar);
+	cdm.addAttribute(lonVar.getName(),CDMAttribute("units", "degrees_east"));
+	cdm.addAttribute(lonVar.getName(),CDMAttribute("long_name", "longitude"));
+	cdm.addAttribute(latVar.getName(),CDMAttribute("units", "degrees_north"));
+	cdm.addAttribute(latVar.getName(),CDMAttribute("long_name", "latitude"));
 }
 
 

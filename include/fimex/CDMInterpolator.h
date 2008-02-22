@@ -10,7 +10,6 @@ class CDMInterpolator : public MetNoUtplukk::CDMReader
 {
 private: 
 	boost::shared_ptr<CDMReader> dataReader;
-	CDM cdm;
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMInterpolator();

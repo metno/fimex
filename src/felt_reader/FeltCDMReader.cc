@@ -177,8 +177,8 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		timeDim = CDMDimension(timeName, timeSize);
 		timeDim.setUnlimited(true);
 		cdm.addDimension(timeDim);
-		std::vector<CDMDimension> timeShape;
-		timeShape.push_back(timeDim);
+		std::vector<std::string> timeShape;
+		timeShape.push_back(timeDim.getName());
 		CDMVariable timeVar(timeName, timeDataType, timeShape);
 		timeVec = feltFile.getFeltTimes();
 		boost::shared_ptr<Data> timeData = createData(timeDataType, timeSize, timeVec.begin(), timeVec.end());
@@ -218,8 +218,8 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			cdm.addDimension(levelDim);
 			levelVecMap[levelDim.getName()] = it->second;
 
-			std::vector<CDMDimension> levelShape;
-			levelShape.push_back(levelDim);
+			std::vector<std::string> levelShape;
+			levelShape.push_back(levelDim.getName());
 			CDMVariable levelVar(levelId, levelDataType, levelShape);
 			const std::vector<short>& lv = it->second;
 			boost::shared_ptr<Data> data = createData(levelDataType, levelSize, lv.begin(), lv.end());
@@ -248,7 +248,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     	std::string projStr = MetNoFelt::getProjString(gridType, gridParams);
     	projName = std::string("projection_" + type2string(gridType));
     	// projection-variable without datatype and dimension
-    	CDMVariable projVar(projName, CDM_NAT, std::vector<CDMDimension>());
+    	CDMVariable projVar(projName, CDM_NAT, std::vector<std::string>());
     	cdm.addVariable(projVar);
     	std::vector<CDMAttribute> projAttr = projStringToAttributes(projStr);
     	for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
@@ -267,8 +267,8 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			std::string xName(xXmlAttributes["name"]);
 			xDim = CDMDimension(xName, feltFile.getNX());
 			CDMDataType xDataType = string2datatype(xXmlAttributes["type"]);
-			std::vector<CDMDimension> xDimShape;
-			xDimShape.push_back(xDim);
+			std::vector<std::string> xDimShape;
+			xDimShape.push_back(xDim.getName());
 			CDMVariable xVar(xName, xDataType, xDimShape);
 			xVar.setData(feltFile.getXData());
 			cdm.addDimension(xDim);
@@ -289,8 +289,8 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		std::string yName(yXmlAttributes["name"]);
     		yDim = CDMDimension(yName, feltFile.getNY());
     		CDMDataType yDataType = string2datatype(yXmlAttributes["type"]);
-    		std::vector<CDMDimension> yDimShape;
-    		yDimShape.push_back(yDim);
+    		std::vector<std::string> yDimShape;
+    		yDimShape.push_back(yDim.getName());
     		CDMVariable yVar(yName, yDataType, yDimShape);
     		yVar.setData(feltFile.getYData());
     		cdm.addDimension(yDim);
@@ -300,59 +300,14 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		}
     	}
     	
-    	// TODO:  more general detection fon non-lat/lon fields
+    	// TODO:  more general detection of non-lat/lon fields
 		if (xDim.getName() != "lon" && yDim.getName() != "lat") {
 			coordinates = "lon lat";
-			const CDMVariable& xVar = cdm.getVariables().find(xDim.getName())->second;
-			const CDMVariable& yVar = cdm.getVariables().find(yDim.getName())->second;
-			boost::shared_array<double> xData = xVar.getData()->asDouble();
-			boost::shared_array<double> yData = yVar.getData()->asDouble();
 			try {
-				std::string xUnits = cdm.getAttribute(xDim.getName(), "units").getData()->asString(); 
-				if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
-					// convert degrees to radians
-					for (size_t i = 0; i < xVar.getData()->size(); ++i) {
-						xData[i] *= DEG_TO_RAD;
-					}
-				}
-				std::string yUnits = cdm.getAttribute(yDim.getName(), "units").getData()->asString();; 
-				if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
-					// convert degrees to radians
-					for (size_t i = 0; i < yVar.getData()->size(); ++i) {
-						yData[i] *= DEG_TO_RAD;
-					}
-				}
-			} catch (CDMException& cex) {
-				throw MetNoFelt::Felt_File_Error(cex.what());
+				MetNoUtplukk::generateProjectionCoordinates(cdm, projName, xDim.getName(), yDim.getName(), "lon", "lat");
+			} catch (MetNoUtplukk::CDMException& ex) {
+				throw MetNoFelt::Felt_File_Error(ex.what());
 			}
-			size_t fieldSize = xDim.getLength()*yDim.getLength(); 
-			double longVal[fieldSize];
-			double latVal[fieldSize];
-			std::string lonLatProj("+elips=sphere +a=3710000 +e=0 +proj=latlong");
-			if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDim.getLength(), yDim.getLength(), longVal, latVal)) {
-				throw MetNoFelt::Felt_File_Error("unable to project axes from "+projStr+ " to " +lonLatProj);
-			}
-			// converting to Degree
-			double* longPos = longVal;
-			double* latPos = latVal;
-			for (size_t i = 0; i < fieldSize; ++i, ++latPos, ++longPos) {
-				*longPos *= RAD_TO_DEG;
-				*latPos  *= RAD_TO_DEG;
-			}
-			std::vector<CDMDimension> xyDims;
-			xyDims.push_back(yDim);
-			xyDims.push_back(xDim);
-			CDMVariable lonVar("lon", CDM_DOUBLE, xyDims);
-			lonVar.setData(createData(CDM_DOUBLE, fieldSize, longVal, longVal+fieldSize));
-			CDMVariable latVar("lat", CDM_DOUBLE, xyDims);
-			latVar.setData(createData(CDM_DOUBLE, fieldSize, latVal, latVal+fieldSize));
-			cdm.addVariable(lonVar);
-			cdm.addVariable(latVar);
-			cdm.addAttribute(lonVar.getName(),createCDMAttribute("units", "string", "degrees_east"));
-			cdm.addAttribute(lonVar.getName(),createCDMAttribute("long_name", "string", "longitude"));
-			cdm.addAttribute(latVar.getName(),createCDMAttribute("units", "string", "degrees_north"));
-			cdm.addAttribute(latVar.getName(),createCDMAttribute("long_name", "string", "latitude"));
-
 		}
     }
 
@@ -383,14 +338,14 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		}
     	
     		// map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
-    		std::vector<CDMDimension> shape;
-    		shape.push_back(xDim);
-    		shape.push_back(yDim);
+    		std::vector<std::string> shape;
+    		shape.push_back(xDim.getName());
+    		shape.push_back(yDim.getName());
     		if (it->getLevels().size() > 0) {
-    			shape.push_back(levelDims[it->getLevelType()]);
+    			shape.push_back(levelDims[it->getLevelType()].getName());
     		}
     		if (it->getTimes().size() > 0) {
-    			shape.push_back(timeDim);
+    			shape.push_back(timeDim.getName());
     		}
     		CDMVariable var(varName, CDM_SHORT, shape);
     		cdm.addVariable(var);
@@ -410,13 +365,14 @@ FeltCDMReader::~FeltCDMReader()
 
 const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException) {
 	if (variable.hasData()) {
-		if (variable.hasUnlimitedDim()) {
+		if (cdm.hasUnlimitedDim(variable)) {
 			// cut out the unlimited dim data
 			size_t sliceSize = 1;
-			std::vector<CDMDimension> shape = variable.getShape();
-			for (std::vector<CDMDimension>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
-				if (!it->isUnlimited()) {
-					sliceSize *= it->getLength();
+			std::vector<std::string> shape = variable.getShape();
+			for (std::vector<std::string>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
+				CDMDimension& dim = cdm.getDimension(*it);
+				if (!dim.isUnlimited()) {
+					sliceSize *= dim.getLength();
 				}
 			}
 			return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
@@ -425,11 +381,12 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& var
 		}
 	}
 	long length = 0;
-	const vector<CDMDimension>& dims = variable.getShape();
+	const vector<std::string>& dims = variable.getShape();
 	if (dims.size() > 0) length = 1;
-	for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-		if (!it->isUnlimited()) {
-			length *= it->getLength();
+	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+		CDMDimension& dim = cdm.getDimension(*it);
+		if (!dim.isUnlimited()) {
+			length *= dim.getLength();
 		}
 	}
 	
@@ -443,12 +400,13 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const CDMVariable& var
 	std::vector<short> data;
 	std::vector<short>::iterator dataIt = data.begin();
 	const CDMDimension* layerDim = 0;
-	for (vector<CDMDimension>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-		if (it->getName() != xDim.getName() &&
-			it->getName() != yDim.getName() &&
-			!it->isUnlimited())
+	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+		CDMDimension& dim = cdm.getDimension(*it);		
+		if (dim.getName() != xDim.getName() &&
+			dim.getName() != yDim.getName() &&
+			!dim.isUnlimited())
 		{
-			layerDim = &(*it);
+			layerDim = &dim;
 		}
 	}
 	try {

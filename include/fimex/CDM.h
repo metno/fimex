@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
+#include <boost/regex.hpp>
 #include "CDMAttribute.h"
 #include "CDMVariable.h"
 #include "CDMDimension.h"
@@ -58,6 +59,31 @@ public:
 	 * @return copies of the attributes matching the request 
 	 */
 	std::vector<std::string> findVariables(const std::string& attrName, const std::string& attrValueRegExp) const;
+	/**
+	 * @brief search for variable with attribute-values and dimensions
+	 * 
+	 * And AND search for attributes and dimensions.
+	 * 
+	 * @param findAttributes map with (attribute => string-value regExp) pairs
+	 * @param findDimensions vector with dimensions contained in variable
+	 * @return copies of the attributes matching the request 
+	 */	
+	std::vector<std::string> findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const;
+	/**
+	 * check if a variable contains a attributes with a matching string-value
+	 * 
+	 * @param var variable
+	 * @param attribute the attribute name
+	 * @param attrValue the regexp the string-value of the attribute will match against
+	 */
+	bool checkVariableAttribute(const CDMVariable& var, std::string attribute, const boost::regex& attrValue) const;
+	/**
+	 * check the dimension of a variable
+	 * 
+	 * @param var variable
+	 * @param dimension the dimension to check for
+	 */
+	bool checkVariableDimension(const CDMVariable& var, std::string dimension) const;
 	/**
 	 * @brief remove a variable and corresponding attributes
 	 * 
@@ -132,6 +158,12 @@ public:
 	 *  @return map of type <variableName <attributeName, attribute>>
 	 */
 	const StrStrAttrMap& getAttributes() const {return attributes;}
+	/**
+	 * @brief get the attributes of an variable
+	 * @param varName name of variable
+	 */
+	std::vector<CDMAttribute> getAttributes(const std::string& varName);
+
 	
 	/**
 	 * @brief get an attribute
@@ -167,7 +199,18 @@ private:
  * @throw CDMException if no projection with corresponding axes can be found
  */
 bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) throw(CDMException);
-
+/**
+ * @brief generate the projection coordinates (usually named "lat lon")
+ * 
+ * @param cdm the CDM to add the information to
+ * @param projectionVariable the variable containing the projection information
+ * @param xDim the x dimension (the corresponding variable needs to contain data and units)
+ * @param yDim the y dimension (the corresponding variable needs to contain data and units)
+ * @param lonDim name of the longitude variable
+ * @param latDim name of the latitude variable
+ * @throw CDMException if any information is missing
+ */
+void generateProjectionCoordinates(CDM& cdm, const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
 }
 
 #endif /*CDM_H_*/

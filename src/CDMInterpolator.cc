@@ -66,7 +66,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	// add new projection and parameters
 	std::string newProjection = "latlong";
 	if (newProj != "latlong") {
-		newProjection = "projection_"+newProjection;
+		newProjection = "projection_"+newProj;
 		cdm.addVariable(CDMVariable(newProjection, CDM_NAT, std::vector<std::string>()));
 		std::vector<CDMAttribute> projAttrs = projStringToAttributes(proj_input);
 		for (std::vector<CDMAttribute>::iterator it = projAttrs.begin(); it != projAttrs.end(); ++it) {
@@ -90,13 +90,38 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	}
 	cdm.removeAttribute(orgXAxis, "long_name");
 	cdm.removeAttribute(orgYAxis, "long_name");
-	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName);
-	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName);
+	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
+	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
+	cdm.getVariable(orgXAxis).setData(createData(CDM_DOUBLE, out_x_axis.size(), out_x_axis.begin(), out_x_axis.end()));
+	cdm.getVariable(orgYAxis).setData(createData(CDM_DOUBLE, out_y_axis.size(), out_y_axis.begin(), out_y_axis.end()));
 	
+	cdm.getDimension(orgXAxis).setLength(out_x_axis.size());
+	cdm.getDimension(orgYAxis).setLength(out_y_axis.size());
 	
+	std::string lat("lat");
+	std::string lon("lon");
+	if (newProj != "latlong") {
+		generateProjectionCoordinates(cdm, newProjection, orgXAxis, orgYAxis, lon, lat);
+	}
 	
-	// TODO change original projection axes from x,y <-> lon, lat if changing from proj <-> latlon
-	// TODO change all variables with projection (grid_mapping) to match new axes
+	// change all variable attributes grid_mapping and coordinates
+	{
+		// mapping all variables with matching orgX/orgY dimensions
+		std::vector<std::string> dims;
+		std::map<std::string, std::string> attrs;
+		dims.push_back(orgXAxis);
+		dims.push_back(orgYAxis);
+		std::vector<std::string> projVars = cdm.findVariables(attrs, dims);
+		for (std::vector<std::string>::iterator varIt = projVars.begin(); varIt != projVars.end(); ++varIt) {
+			if (newProj != "latlong") {
+				cdm.addOrReplaceAttribute(*varIt, CDMAttribute("coordinates", lon + " " + lat));
+				cdm.addOrReplaceAttribute(*varIt, CDMAttribute("grid_mapping", newProjection));
+			} else {
+				cdm.removeAttribute(*varIt, "coordinates");
+				cdm.removeAttribute(*varIt, "grid_mapping");
+			}
+		}
+	}
 	// TODO store projection changes to be used in data-section
 }
 
