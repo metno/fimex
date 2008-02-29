@@ -2,6 +2,7 @@
 #define CDMINTERPOLATOR_H_
 
 #include "CDMReader.h"
+#include "CachedInterpolation.h"
 
 namespace MetNoUtplukk
 {
@@ -10,6 +11,8 @@ class CDMInterpolator : public MetNoUtplukk::CDMReader
 {
 private: 
 	boost::shared_ptr<CDMReader> dataReader;
+	std::vector<std::string> projectionVariables;
+	CachedInterpolation cachedInterpolation;
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMInterpolator();

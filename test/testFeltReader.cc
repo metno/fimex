@@ -108,7 +108,7 @@ test_felt_cdm_reader() {
 	//feltCDM.getCDM().toXMLStream(std::cerr);
 	string projName, projXAxis, projYAxis, projXUnit, projYUnit;
 	boost::shared_ptr<Data> xVals, yVals;
-	getProjectionAndAxesFromCDM(feltCDM.getCDM(), projName, projXAxis, projYAxis, xVals, yVals, projXUnit, projYUnit);
+	feltCDM.getCDM().getProjectionAndAxes(projName, projXAxis, projYAxis, xVals, yVals, projXUnit, projYUnit);
 	BOOST_CHECK(projName == "projection_1");
 	BOOST_CHECK(projXAxis == "x");
 	BOOST_CHECK(projYAxis == "y");

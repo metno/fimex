@@ -304,7 +304,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		if (xDim.getName() != "lon" && yDim.getName() != "lat") {
 			coordinates = "lon lat";
 			try {
-				MetNoUtplukk::generateProjectionCoordinates(cdm, projName, xDim.getName(), yDim.getName(), "lon", "lat");
+				cdm.generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), "lon", "lat");
 			} catch (MetNoUtplukk::CDMException& ex) {
 				throw MetNoFelt::Felt_File_Error(ex.what());
 			}

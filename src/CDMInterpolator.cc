@@ -18,12 +18,19 @@ CDMInterpolator::~CDMInterpolator()
 
 const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
 {
-	
+	if (std::find(projectionVariables.begin(), projectionVariables.end(), variable.getName()) == projectionVariables.end()) {
+		// no projection, just forward
+		return dataReader->getDataSlice(variable, unLimDimPos);
+	} else {
+		// TODO: handle fillValues, scaling?, datatypes?
+		return cachedInterpolation.interpolateValues(dataReader->getDataSlice(variable, unLimDimPos));
+	}
 }
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
 	cdm = dataReader->getCDM(); // reset previous changes
+	projectionVariables.assign(0, ""); // reset variables
 	
 	// detect original projection and axes
 	std::string orgProjection;
@@ -31,7 +38,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	std::string orgYAxis;
 	boost::shared_ptr<Data> orgXAxisVals, orgYAxisVals;
 	std::string orgXAxisUnits, orgYAxisUnits;
-	getProjectionAndAxesFromCDM(cdm, orgProjection, orgXAxis, orgYAxis, orgXAxisVals, orgYAxisVals, orgXAxisUnits, orgYAxisUnits);
+	cdm.getProjectionAndAxes(orgProjection, orgXAxis, orgYAxis, orgXAxisVals, orgYAxisVals, orgXAxisUnits, orgYAxisUnits);
 	
 	// get the new projection
 	std::string newProj;
@@ -101,18 +108,18 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	std::string lat("lat");
 	std::string lon("lon");
 	if (newProj != "latlong") {
-		generateProjectionCoordinates(cdm, newProjection, orgXAxis, orgYAxis, lon, lat);
+		cdm.generateProjectionCoordinates(newProjection, orgXAxis, orgYAxis, lon, lat);
 	}
 	
-	// change all variable attributes grid_mapping and coordinates
+	// find all reprojectible variables and change variable attributes grid_mapping and coordinates
 	{
 		// mapping all variables with matching orgX/orgY dimensions
 		std::vector<std::string> dims;
 		std::map<std::string, std::string> attrs;
 		dims.push_back(orgXAxis);
 		dims.push_back(orgYAxis);
-		std::vector<std::string> projVars = cdm.findVariables(attrs, dims);
-		for (std::vector<std::string>::iterator varIt = projVars.begin(); varIt != projVars.end(); ++varIt) {
+		projectionVariables = cdm.findVariables(attrs, dims);
+		for (std::vector<std::string>::iterator varIt = projectionVariables.begin(); varIt != projectionVariables.end(); ++varIt) {
 			if (newProj != "latlong") {
 				cdm.addOrReplaceAttribute(*varIt, CDMAttribute("coordinates", lon + " " + lat));
 				cdm.addOrReplaceAttribute(*varIt, CDMAttribute("grid_mapping", newProjection));
@@ -122,8 +129,21 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 			}
 		}
 	}
-	// TODO store projection changes to be used in data-section
-}
+	// store projection changes to be used in data-section
+	// TODO: handle axes types (lon lat (deg -> rad))
+	size_t fieldSize = out_x_axis.size() * out_x_axis.size();
+	vector<double> pointsOnXAxis(fieldSize);
+	vector<double> pointsOnYAxis(fieldSize);
+	std::string orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
+	if (MIUP_OK != miup_project_axes(proj_input.c_str(), orgProjStr.c_str(), &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
+		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
+	}
+	// translate coordinates in m to indices
+	miup_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisVals->asDouble().get(), orgXAxisVals->size(), MIUP_PROJ_AXIS);
+	miup_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisVals->asDouble().get(), orgYAxisVals->size(), MIUP_PROJ_AXIS);
 
+	
+	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
+}
 
 }

@@ -225,7 +225,7 @@ CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& a
 			);	
 }
 
-std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) {
+std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const {
 	std::vector<CDMAttribute> results;
 	StrStrAttrMap::const_iterator varIt = attributes.find(varName); 
 	if (varIt != attributes.end()) {
@@ -260,10 +260,10 @@ void CDM::toXMLStream(std::ostream& out) const
 	out << "</cdm>" << std::endl;
 }
 
-bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) throw(CDMException) {
+bool CDM::getProjectionAndAxes(std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException) {
 	bool retVal = true;
 	projectionName = "latlong"; // default
-	std::vector<std::string> projs = cdm.findVariables("grid_mapping_name", ".*");
+	std::vector<std::string> projs = findVariables("grid_mapping_name", ".*");
 	if (projs.empty()) {
 		// assuming latlong
 	} else {
@@ -277,7 +277,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 	std::vector<std::string> dims;
 	if (projectionName == "latlong") {
 		std::string longUnits("degrees?_(east|west)");
-		dims = cdm.findVariables("units", longUnits);
+		dims = findVariables("units", longUnits);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with units "+ longUnits + " for projection " + projectionName);
 		} else {
@@ -288,7 +288,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 			}
 		}
 		std::string latUnits("degrees?_(north|south)");
-		dims = cdm.findVariables("units", latUnits);
+		dims = findVariables("units", latUnits);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with units "+ latUnits + " for projection " + projectionName);
 		} else {
@@ -299,7 +299,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 			}
 		}
 	} else {
-		std::string orgProjName = cdm.getAttribute(projectionName, "grid_mapping_name").getStringValue();
+		std::string orgProjName = getAttribute(projectionName, "grid_mapping_name").getStringValue();
 		std::string xStandardName("projection_x_coordinate");
 		std::string yStandardName("projection_y_coordinate");
 		if (orgProjName == "rotated_latitude_longitude") {
@@ -307,7 +307,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 			std::string yStandardName("grid_longitude");
 		}
 		
-		dims = cdm.findVariables("standard_name", xStandardName);
+		dims = findVariables("standard_name", xStandardName);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with standard_name "+ xStandardName + " for projection " + projectionName);
 		} else {
@@ -318,7 +318,7 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 						<< xStandardName << ", using " << xAxis << std::endl;
 			}
 		}
-		dims = cdm.findVariables("standard_name", yStandardName);
+		dims = findVariables("standard_name", yStandardName);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with standard_name "+ yStandardName + " for projection " + projectionName);
 		} else {
@@ -331,41 +331,41 @@ bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, st
 		}
 	}
 	// units and values
-	xAxisUnits = cdm.getAttribute(xAxis, "units").getStringValue();
-	xAxisVals = cdm.getVariable(xAxis).getData();
-	yAxisUnits = cdm.getAttribute(yAxis, "units").getStringValue();
-	yAxisVals = cdm.getVariable(yAxis).getData();
+	xAxisUnits = getAttribute(xAxis, "units").getStringValue();
+	xAxisVals = getVariable(xAxis).getData();
+	yAxisUnits = getAttribute(yAxis, "units").getStringValue();
+	yAxisVals = getVariable(yAxis).getData();
 
 	
 	return retVal;	
 }
 
-void generateProjectionCoordinates(CDM& cdm, const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException) {
-	const CDMVariable& xVar = cdm.getVariable(xDim);
-	const CDMVariable& yVar = cdm.getVariable(yDim);
+void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException) {
+	const CDMVariable& xVar = getVariable(xDim);
+	const CDMVariable& yVar = getVariable(yDim);
 	boost::shared_array<double> xData = xVar.getData()->asDouble();
 	boost::shared_array<double> yData = yVar.getData()->asDouble();
-	std::string xUnits = cdm.getAttribute(xDim, "units").getData()->asString(); 
+	std::string xUnits = getAttribute(xDim, "units").getData()->asString(); 
 	if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
 		// convert degrees to radians
 		for (size_t i = 0; i < xVar.getData()->size(); ++i) {
 			xData[i] *= DEG_TO_RAD;
 		}
 	}	
-	std::string yUnits = cdm.getAttribute(yDim, "units").getData()->asString();; 
+	std::string yUnits = getAttribute(yDim, "units").getData()->asString();; 
 	if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
 		// convert degrees to radians
 		for (size_t i = 0; i < yVar.getData()->size(); ++i) {
 			yData[i] *= DEG_TO_RAD;
 		}
 	}
-	size_t xDimLength = cdm.getDimension(xDim).getLength();
-	size_t yDimLength = cdm.getDimension(yDim).getLength();
+	size_t xDimLength = getDimension(xDim).getLength();
+	size_t yDimLength = getDimension(yDim).getLength();
 	size_t fieldSize = xDimLength * yDimLength; 
 	double longVal[fieldSize];
 	double latVal[fieldSize];
 	std::string lonLatProj("+elips=sphere +a=3710000 +e=0 +proj=latlong");
-	std::string projStr = attributesToProjString(cdm.getAttributes(projectionVariable));
+	std::string projStr = attributesToProjString(getAttributes(projectionVariable));
 	if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal, latVal)) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
 	}
@@ -383,12 +383,12 @@ void generateProjectionCoordinates(CDM& cdm, const std::string& projectionVariab
 	lonVar.setData(createData(CDM_DOUBLE, fieldSize, longVal, longVal+fieldSize));
 	CDMVariable latVar(latDim, CDM_DOUBLE, xyDims);
 	latVar.setData(createData(CDM_DOUBLE, fieldSize, latVal, latVal+fieldSize));
-	cdm.addVariable(lonVar);
-	cdm.addVariable(latVar);
-	cdm.addAttribute(lonVar.getName(),CDMAttribute("units", "degrees_east"));
-	cdm.addAttribute(lonVar.getName(),CDMAttribute("long_name", "longitude"));
-	cdm.addAttribute(latVar.getName(),CDMAttribute("units", "degrees_north"));
-	cdm.addAttribute(latVar.getName(),CDMAttribute("long_name", "latitude"));
+	addVariable(lonVar);
+	addVariable(latVar);
+	addAttribute(lonVar.getName(),CDMAttribute("units", "degrees_east"));
+	addAttribute(lonVar.getName(),CDMAttribute("long_name", "longitude"));
+	addAttribute(latVar.getName(),CDMAttribute("units", "degrees_north"));
+	addAttribute(latVar.getName(),CDMAttribute("long_name", "latitude"));
 }
 
 

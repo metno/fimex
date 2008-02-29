@@ -162,7 +162,7 @@ public:
 	 * @brief get the attributes of an variable
 	 * @param varName name of variable
 	 */
-	std::vector<CDMAttribute> getAttributes(const std::string& varName);
+	std::vector<CDMAttribute> getAttributes(const std::string& varName) const;
 
 	
 	/**
@@ -178,39 +178,40 @@ public:
 	 * @param attrName name of attribute
 	 */
 	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException);
+	/**
+	 * @brief generate the projection coordinates (usually named "lat lon")
+	 * 
+	 * @param projectionVariable the variable containing the projection information
+	 * @param xDim the x dimension (the corresponding variable needs to contain data and units)
+	 * @param yDim the y dimension (the corresponding variable needs to contain data and units)
+	 * @param lonDim name of the longitude variable
+	 * @param latDim name of the latitude variable
+	 * @throw CDMException if any information is missing
+	 */
+	void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
+	/**
+	 * @brief extract the names of the projection-variable and the corresponding projection-axes
+	 * 
+	 * @param projectionName output of the projection variables name
+	 * @param xAxis output of the spatial x axis
+	 * @param yAxis output of the spation y axis
+	 * @param xAxisVals output of values of x axis
+	 * @param yAxisVals output of values of y axis
+	 * @param xAxisUnit output of unit for x axis
+	 * @param yAxisUnit output of unit for y axis
+	 * @return true if unique result, false (and print warning) if results are not unique 
+	 * @throw CDMException if no projection with corresponding axes can be found
+	 */
+	bool getProjectionAndAxes(std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException);
+
+
+
 private:
 	StrStrAttrMap attributes;
 	StrVarMap variables;
 	StrDimMap dimensions;
 };
 
-/**
- * @brief extract the names of the projection-variable and the corresponding projection-axes from an cdm
- * 
- * @param cdm the CDM with the information
- * @param projectionName output of the projection variables name
- * @param xAxis output of the spatial x axis
- * @param yAxis output of the spation y axis
- * @param xAxisVals output of values of x axis
- * @param yAxisVals output of values of y axis
- * @param xAxisUnit output of unit for x axis
- * @param yAxisUnit output of unit for y axis
- * @return true if unique result, false (and print warning) if results are not unique 
- * @throw CDMException if no projection with corresponding axes can be found
- */
-bool getProjectionAndAxesFromCDM(const CDM& cdm, std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) throw(CDMException);
-/**
- * @brief generate the projection coordinates (usually named "lat lon")
- * 
- * @param cdm the CDM to add the information to
- * @param projectionVariable the variable containing the projection information
- * @param xDim the x dimension (the corresponding variable needs to contain data and units)
- * @param yDim the y dimension (the corresponding variable needs to contain data and units)
- * @param lonDim name of the longitude variable
- * @param latDim name of the latitude variable
- * @throw CDMException if any information is missing
- */
-void generateProjectionCoordinates(CDM& cdm, const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
 }
 
 #endif /*CDM_H_*/
