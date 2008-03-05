@@ -6,6 +6,8 @@
 namespace MetNoUtplukk
 {
 
+const int DEBUG = 1;
+
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
 : dataReader(dataReader)
 {
@@ -27,6 +29,10 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const CDMVariable& v
 	}
 }
 
+static void degreeToRad(double& val) {
+	val *= DEG_TO_RAD;
+}
+
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
 	cdm = dataReader->getCDM(); // reset previous changes
@@ -39,7 +45,6 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	boost::shared_ptr<Data> orgXAxisVals, orgYAxisVals;
 	std::string orgXAxisUnits, orgYAxisUnits;
 	cdm.getProjectionAndAxes(orgProjection, orgXAxis, orgYAxis, orgXAxisVals, orgYAxisVals, orgXAxisUnits, orgYAxisUnits);
-	
 	// get the new projection
 	std::string newProj;
 	boost::smatch what;
@@ -80,6 +85,13 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 			cdm.addAttribute(newProjection, *it);
 		}
 	}
+
+	if (DEBUG) {
+		std::cerr << "original projection: " << orgProjection << std::endl;
+		std::cerr << "new projection: " << newProjection << std::endl;
+		std::cerr << "new proj: " << newProj << std::endl;
+	}
+
 	
 	// change/add new axes
 	// don't change the name of the dimension, even if this might look strange if e.g. lon is a projection_x_coordinate
@@ -99,6 +111,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	cdm.removeAttribute(orgYAxis, "long_name");
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
+	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("units", out_x_axis_unit));
+	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("units", out_y_axis_unit));
 	cdm.getVariable(orgXAxis).setData(createData(CDM_DOUBLE, out_x_axis.size(), out_x_axis.begin(), out_x_axis.end()));
 	cdm.getVariable(orgYAxis).setData(createData(CDM_DOUBLE, out_y_axis.size(), out_y_axis.begin(), out_y_axis.end()));
 	
@@ -130,18 +144,41 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 		}
 	}
 	// store projection changes to be used in data-section
-	// TODO: handle axes types (lon lat (deg -> rad))
-	size_t fieldSize = out_x_axis.size() * out_x_axis.size();
+	// translate temporary new axes from deg2rad if required
+	vector<double> outXAxis = out_x_axis;
+	vector<double> outYAxis = out_y_axis;
+	boost::regex degree(".*degree.*");
+	if (boost::regex_match(out_x_axis_unit, degree)) {
+		for_each(outXAxis.begin(), outXAxis.end(), degreeToRad);
+	}
+	if (boost::regex_match(out_y_axis_unit, degree)) {
+		for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
+	}
+	
+	size_t fieldSize = outXAxis.size() * outYAxis.size();
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
 	std::string orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
-	if (MIUP_OK != miup_project_axes(proj_input.c_str(), orgProjStr.c_str(), &out_x_axis[0], &out_y_axis[0], out_x_axis.size(), out_y_axis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
+	if (MIUP_OK != miup_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
 	}
-	// translate coordinates in m to indices
-	miup_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisVals->asDouble().get(), orgXAxisVals->size(), MIUP_PROJ_AXIS);
-	miup_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisVals->asDouble().get(), orgYAxisVals->size(), MIUP_PROJ_AXIS);
-
+	
+	// translate original axes from deg2rad if required
+	int miupXAxis = MIUP_PROJ_AXIS;
+	int miupYAxis = MIUP_PROJ_AXIS;
+	boost::shared_array<double> orgXAxisValsArray = orgXAxisVals->asDouble();
+	boost::shared_array<double> orgYAxisValsArray = orgYAxisVals->asDouble();
+	if (boost::regex_match(orgXAxisUnits, degree)) {
+		miupXAxis = MIUP_LONGITUDE;
+		for_each(&(orgXAxisValsArray.get())[0], &(orgXAxisValsArray.get())[orgXAxisVals->size()], degreeToRad);
+	}
+	if (boost::regex_match(orgYAxisUnits, degree)) {
+		miupYAxis = MIUP_LATITUDE;
+		for_each(&(orgYAxisValsArray.get())[0], &(orgYAxisValsArray.get())[orgYAxisVals->size()], degreeToRad);
+	}	
+	// translate coordinates (in rad or m) to indices
+	miup_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
+	miup_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 	
 	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
 }

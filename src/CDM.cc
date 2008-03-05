@@ -303,13 +303,13 @@ bool CDM::getProjectionAndAxes(std::string& projectionName, std::string& xAxis, 
 		std::string xStandardName("projection_x_coordinate");
 		std::string yStandardName("projection_y_coordinate");
 		if (orgProjName == "rotated_latitude_longitude") {
-			std::string xStandardName("grid_longitude");
-			std::string yStandardName("grid_longitude");
+			xStandardName = "grid_longitude";
+			yStandardName = "grid_latitude";
 		}
 		
 		dims = findVariables("standard_name", xStandardName);
 		if (dims.empty()) {
-			throw CDMException("couldn't find projection axis with standard_name "+ xStandardName + " for projection " + projectionName);
+			throw CDMException("couldn't find projection axis with standard_name "+ xStandardName + " for projection " + projectionName + ": " + orgProjName);
 		} else {
 			xAxis = dims[0];
 			if (dims.size() > 1) {
@@ -364,7 +364,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	size_t fieldSize = xDimLength * yDimLength; 
 	double longVal[fieldSize];
 	double latVal[fieldSize];
-	std::string lonLatProj("+elips=sphere +a=3710000 +e=0 +proj=latlong");
+	std::string lonLatProj("+elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0 +proj=latlong");
 	std::string projStr = attributesToProjString(getAttributes(projectionVariable));
 	if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal, latVal)) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
