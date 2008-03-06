@@ -1,10 +1,25 @@
-TESTS = testInterpolation testData testCDM testFeltReader testTime testTimeSliceData testNetcdfWriter testExtractor testInterpolator
-LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a -L/disk1/metno/local/lib -lmic -lmi -lg2c -L/usr/lib/netcdf-3 -lnetcdf_c++ -lnetcdf -ludunits -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
-#LIBS = `xml2-config --libs`
-AM_CPPFLAGS = -I../src -I../src/felt_reader -I/disk1/metno/local/include/milib -I/usr/include/netcdf-3
+TESTS = testInterpolation testData testCDM testTime testTimeSliceData
+LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
+
+AM_CPPFLAGS = -I../src -I../src/felt_reader ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS}
 AM_CXXFLAGS = -Wall -pedantic 
 AM_CFLAGS = -std=c99 -Wall -pedantic
-bin_PROGRAMS = $(TESTS)
+
+if HAVE_MILIB
+  LDADD += ${milib_LIBS}
+  TESTS += testFeltReader
+  NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator
+endif
+if HAVE_UDUNITS
+  LDADD += ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
+endif
+if HAVE_NETCDF
+  LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
+  TESTS += ${NETCDF_MI_TESTS}
+endif
+
+#LIBS = `xml2-config --libs`
+check_PROGRAMS = $(TESTS)
 testInterpolation_SOURCES = testInterpolation.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 

@@ -13,6 +13,8 @@
 
 namespace MetNoUtplukk
 {
+const int EARTH_RADIUS_M = 6371000;
+
 /**
  * @brief Data structure of the Common %Data Model
  * 
