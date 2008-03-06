@@ -18,7 +18,6 @@ if HAVE_NETCDF
   TESTS += ${NETCDF_MI_TESTS}
 endif
 
-#LIBS = `xml2-config --libs`
 check_PROGRAMS = $(TESTS)
 testInterpolation_SOURCES = testInterpolation.cc
 testData_SOURCES = testData.cc
