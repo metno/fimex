@@ -27,6 +27,7 @@ AC_ARG_WITH(udunits,
             [ac_udunits_path=/usr])
 if test "$use_netcdf" = true; then
     HAVE_NETCDF_CHECK()
+    AC_DEFINE([HAVE_NETCDF], [1], [have netcdf])
     METNO_HAVE_UDUNITS( , [AC_MSG_FAILURE([udunits not found. Please make sure that udunits is properly installed when compiling with NetCDF.]) ])
 fi
 AM_CONDITIONAL([HAVE_UDUNITS], [test x$have_udunits = xyes])
@@ -42,6 +43,7 @@ http://www.libxml.org/.]))
 AX_BOOST_BASE([1.33.1])
 AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX
+AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_UNIT_TEST_FRAMEWORK
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
@@ -59,10 +61,6 @@ AC_ARG_WITH([miLib],
 AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xtrue])
 
 if test "$use_milib" = true; then
-PKG_CHECK_MODULES([libmi], [libmi])
-METNO_CHECK_LIB([mi], [mrfelt_], , , , [$libmi_LIBS],
-                 [the libmi package])
-
 # Check for the milib library.
 PKG_CHECK_MODULES([milib], [milib])
 METNO_CHECK_HEADERS([milib/milib.h], , , ,
@@ -93,5 +91,5 @@ AC_LANG_POP(C++)
 DX_INIT_DOXYGEN('Utplukk', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([utplukk.pc Makefile src/Makefile src/felt_reader/Makefile test/Makefile])
+AC_CONFIG_FILES([utplukk.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile])
 AC_OUTPUT
