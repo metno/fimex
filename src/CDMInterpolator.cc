@@ -18,14 +18,18 @@ CDMInterpolator::~CDMInterpolator()
 {
 }
 
-const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
+const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
+	const CDMVariable& variable = cdm.getVariable(varName);
+	if (variable.hasData()) {
+		return getDataFromMemory(variable, unLimDimPos);
+	}
 	if (std::find(projectionVariables.begin(), projectionVariables.end(), variable.getName()) == projectionVariables.end()) {
 		// no projection, just forward
-		return dataReader->getDataSlice(variable, unLimDimPos);
+		return dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
 		// TODO: handle fillValues, scaling?, datatypes?
-		return cachedInterpolation.interpolateValues(dataReader->getDataSlice(variable, unLimDimPos));
+		return cachedInterpolation.interpolateValues(dataReader->getDataSlice(varName, unLimDimPos));
 	}
 }
 
@@ -42,9 +46,10 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	std::string orgProjection;
 	std::string orgXAxis;
 	std::string orgYAxis;
-	boost::shared_ptr<Data> orgXAxisVals, orgYAxisVals;
 	std::string orgXAxisUnits, orgYAxisUnits;
-	cdm.getProjectionAndAxes(orgProjection, orgXAxis, orgYAxis, orgXAxisVals, orgYAxisVals, orgXAxisUnits, orgYAxisUnits);
+	cdm.getProjectionAndAxesUnits(orgProjection, orgXAxis, orgYAxis, orgXAxisUnits, orgYAxisUnits);
+	boost::shared_ptr<Data> orgXAxisVals = dataReader->getDataSlice(orgXAxis);
+	boost::shared_ptr<Data >orgYAxisVals = dataReader->getDataSlice(orgYAxis);
 	// get the new projection
 	std::string newProj;
 	boost::smatch what;
@@ -79,7 +84,9 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	std::string newProjection = "latlong";
 	if (newProj != "latlong") {
 		newProjection = "projection_"+newProj;
-		cdm.addVariable(CDMVariable(newProjection, CDM_NAT, std::vector<std::string>()));
+		CDMVariable projVar(newProjection, CDM_NAT, std::vector<std::string>());
+		projVar.setData(createData(CDM_NAT, 0)); // define empty data
+		cdm.addVariable(projVar);
 		std::vector<CDMAttribute> projAttrs = projStringToAttributes(proj_input);
 		for (std::vector<CDMAttribute>::iterator it = projAttrs.begin(); it != projAttrs.end(); ++it) {
 			cdm.addAttribute(newProjection, *it);
@@ -162,7 +169,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	if (MIUP_OK != miup_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
 	}
-	
+
 	// translate original axes from deg2rad if required
 	int miupXAxis = MIUP_PROJ_AXIS;
 	int miupYAxis = MIUP_PROJ_AXIS;

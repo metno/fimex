@@ -260,7 +260,7 @@ void CDM::toXMLStream(std::ostream& out) const
 	out << "</cdm>" << std::endl;
 }
 
-bool CDM::getProjectionAndAxes(std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException) {
+bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException) {
 	bool retVal = true;
 	projectionName = "latlong"; // default
 	std::vector<std::string> projs = findVariables("grid_mapping_name", ".*");
@@ -332,9 +332,10 @@ bool CDM::getProjectionAndAxes(std::string& projectionName, std::string& xAxis, 
 	}
 	// units and values
 	xAxisUnits = getAttribute(xAxis, "units").getStringValue();
-	xAxisVals = getVariable(xAxis).getData();
+	// TODO: use getDataSlice to make sure data exists
+	//xAxisVals = getVariable(xAxis).getData();
 	yAxisUnits = getAttribute(yAxis, "units").getStringValue();
-	yAxisVals = getVariable(yAxis).getData();
+	//yAxisVals = getVariable(yAxis).getData();
 
 	
 	return retVal;	

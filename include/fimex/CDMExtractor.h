@@ -24,7 +24,7 @@ public:
 	CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMExtractor();
 	
-	virtual const boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException);
+	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 
 	/**
 	 * @brief Remove a variable from the CDM
@@ -42,6 +42,15 @@ public:
 	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
 	 */
 	virtual void reduceDimension(std::string dimName, size_t start, size_t length) throw(CDMException);
+	/**
+	 * @brief Reduce a dimension of the file
+	 * 
+	 * @param name  dimension to change
+	 * @param start start-position corresponding to the original dimension, defaults to 0
+	 * @param end end-position of dimension, 0 means full size, negative values start from end
+	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
+	 */
+	virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0) throw(CDMException);
 	/**
 	 * @brief change the datatype of the variable
 	 * 

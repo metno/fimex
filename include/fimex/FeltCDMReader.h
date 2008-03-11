@@ -18,7 +18,7 @@ public:
 	FeltCDMReader(std::string filename, std::string configFilename) throw(MetNoFelt::Felt_File_Error);
 	virtual ~FeltCDMReader();
 	
-	virtual const boost::shared_ptr<Data> getDataSlice(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException);
+	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 	virtual const CDM& getCDM() const {return cdm;}
 	
 private:

@@ -197,14 +197,12 @@ public:
 	 * @param projectionName output of the projection variables name
 	 * @param xAxis output of the spatial x axis
 	 * @param yAxis output of the spation y axis
-	 * @param xAxisVals output of values of x axis
-	 * @param yAxisVals output of values of y axis
 	 * @param xAxisUnit output of unit for x axis
 	 * @param yAxisUnit output of unit for y axis
 	 * @return true if unique result, false (and print warning) if results are not unique 
 	 * @throw CDMException if no projection with corresponding axes can be found
 	 */
-	bool getProjectionAndAxes(std::string& projectionName, std::string& xAxis, std::string& yAxis, boost::shared_ptr<Data>& xAxisVals, boost::shared_ptr<Data>& yAxisVals, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException);
+	bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException);
 
 
 

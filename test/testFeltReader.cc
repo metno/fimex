@@ -107,15 +107,16 @@ test_felt_cdm_reader() {
 	FeltCDMReader feltCDM("flth00.dat", "../etc/felt2nc_variables.xml");
 	//feltCDM.getCDM().toXMLStream(std::cerr);
 	string projName, projXAxis, projYAxis, projXUnit, projYUnit;
-	boost::shared_ptr<Data> xVals, yVals;
-	feltCDM.getCDM().getProjectionAndAxes(projName, projXAxis, projYAxis, xVals, yVals, projXUnit, projYUnit);
+	feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);
 	BOOST_CHECK(projName == "projection_1");
 	BOOST_CHECK(projXAxis == "x");
 	BOOST_CHECK(projYAxis == "y");
-	BOOST_CHECK(xVals->size() == 229);
-	BOOST_CHECK(yVals->size() == 196);
 	BOOST_CHECK(projXUnit == "m");
 	BOOST_CHECK(projYUnit == "m");
+	boost::shared_ptr<Data> xVals = feltCDM.getDataSlice(projXAxis);
+	boost::shared_ptr<Data> yVals = feltCDM.getDataSlice(projYAxis);
+	BOOST_CHECK(xVals->size() == 229);
+	BOOST_CHECK(yVals->size() == 196);
 }
 
 

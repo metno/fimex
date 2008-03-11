@@ -13,12 +13,16 @@ CDMExtractor::~CDMExtractor()
 {
  }
 
-const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
+const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
+	const CDMVariable& variable = cdm.getVariable(varName);
+	if (variable.hasData()) {
+		return getDataFromMemory(variable, unLimDimPos);
+	}
 	boost::shared_ptr<Data> data; 
 	if (dimChanges.empty()) {
 		// simple read
-		data = dataReader->getDataSlice(variable, unLimDimPos);
+		data = dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
 		// translate slice-variable size where dimensions have been transformed, (via data.slice)
 		bool hasChangedDim = false;
@@ -47,7 +51,7 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const CDMVariable& vari
 			}
 		}
 		// read
-		data = dataReader->getDataSlice(variable, unLimDimPos);
+		data = dataReader->getDataSlice(varName, unLimDimPos);
 		if (hasChangedDim && (data->size() > 0)) { // datasize might be 0, i.e. if time doesn't exist
 			data = data->slice(orgDimSize, newDimStart, newDimSize);
 		}
@@ -65,7 +69,7 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 {
 	CDMDimension& dim = cdm.getDimension(dimName);
 	if (start+length >= dim.getLength()) {
-		throw CDMException("can't enlarge dimension " + dimName + ": start+length out of bounds");
+		throw CDMException("can't enlarge dimension " + dimName + ": start+length ("+type2string(start)+"+"+type2string(length)+") out of bounds");
 	}
 	// keep track of changes
 	dim.setLength(length);
@@ -73,14 +77,30 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	dimChanges[dimName] = changes; 
 	
 	
-	// removing data of this dimension, just to be sure it's read from the dataReader
-	try {
-		CDMVariable& var = cdm.getVariable(dim.getName());
-		var.setData(boost::shared_ptr<Data>());
-	} catch (CDMException& ex) {
-		// var doesn't exists, don't care
+	// removing all data containing this dimension, just to be sure it's read from the dataReader
+	const CDM::StrVarMap& variables = cdm.getVariables();
+	for (CDM::StrVarMap::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+		const std::vector<string>& shape = it->second.getShape();
+		if (find(shape.begin(), shape.end(), dim.getName()) != shape.end()) {
+			cdm.getVariable(it->second.getName()).setData(boost::shared_ptr<Data>());
+		}
 	}
 }
+
+void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long end) throw(CDMException)
+{
+	size_t length = 0;
+	if (end > 0) {
+		length = end - start;
+	} else {
+		CDMDimension& dim = cdm.getDimension(dimName);
+		length = dim.getLength();
+		length -= start;
+		length += end;
+	}
+	reduceDimension(dimName, start, length);
+}
+
 
 void CDMExtractor::changeDataType(std::string variable, CDMDataType datatype) throw(CDMException)
 {
