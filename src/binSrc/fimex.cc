@@ -13,6 +13,7 @@
 #endif
 #ifdef HAVE_NETCDF
 #include "NetCDF_CDMWriter.h"
+#include "NetCDF_CF10_CDMReader.h"
 #endif
 
 namespace po = boost::program_options;
@@ -109,7 +110,13 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 		return auto_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
 	}
 #endif
-
+#ifdef HAVE_NETCDF
+	if (type == "nc" || type == "cdf" || type == "netcdf") {
+		if (vm.count("debug"))
+			cerr << "reading Felt-File " << vm["input.file"].as<string>() << " without config"<< endl;
+		return auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
+	}
+#endif
 	cerr << "unable to read type: " << type << endl;
 	exit(1);
 	

@@ -9,6 +9,6 @@ libutplukk_a_SOURCES = interpolation.c TimeException.cc Time.cc CachedInterpolat
 include_HEADERS = CachedInterpolation.h CDMAttribute.h CDMDataType.h CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h interpolation.h TimeException.h Time.h TimeSliceData.h Utils.h
 
 if HAVE_NETCDF
-  libutplukk_a_SOURCES += NetCDF_CDMWriter.cc
-  include_HEADERS += NetCDF_CDMWriter.h
+  libutplukk_a_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+  include_HEADERS += NetCDF_CF10_CDMReader.h NetCDF_CDMWriter.h NetCDF_Utils.h
 endif

@@ -27,6 +27,8 @@ public:
 	explicit CDMAttribute(std::string name, float value);
 	/// create a double attribute with a double array of length 1
 	explicit CDMAttribute(std::string name, double value);
+	/// create a attribute with the low level information
+	explicit CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data);
 	virtual ~CDMAttribute();
 	/// retrieve the name of the attribute
 	const std::string& getName() const {return name;}
@@ -34,11 +36,12 @@ public:
 	const std::string getStringValue() const {return data->asString();}
 	/// retrieve the data-pointer of the attribute
 	const boost::shared_ptr<Data> getData() const {return data;}
+	/// set the data for this attribute
+	void setData(boost::shared_ptr<Data> data) {this->data = data;}
 	/// retrieve the datatype of the attribute
 	const CDMDataType getDataType() const {return datatype;}
 	void toXMLStream(std::ostream& out) const;
 private:
-	std::string variableName;
 	std::string name;
 	CDMDataType datatype;
 	boost::shared_ptr<Data> data;

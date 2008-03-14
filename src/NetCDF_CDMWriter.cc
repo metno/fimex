@@ -4,25 +4,13 @@ extern "C" {
 }
 #include <boost/shared_array.hpp>
 #include "CDMDataType.h"
+#include "NetCDF_Utils.h"
 #include "Utils.h"
 
 namespace MetNoUtplukk
 {
 
 static void dontDelete(void *) {} // used as non-destructor of shared_ptr
-static NcType cdmDataType2ncType(CDMDataType dt) {
-	switch (dt) {
-	case CDM_NAT: return ncNoType;
-	case CDM_CHAR: return ncChar;
-	case CDM_STRING: return ncChar;
-	case CDM_SHORT: return ncShort;
-	case CDM_INT: return ncInt;
-	case CDM_FLOAT: return ncFloat;
-	case CDM_DOUBLE: return ncDouble;
-	default: return ncNoType;
-	}
-}
-
 static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
 	if (data->size() == 0) return true;
 	
