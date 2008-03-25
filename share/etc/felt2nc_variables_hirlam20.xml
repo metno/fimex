@@ -132,6 +132,36 @@
 </vertical_axis>
 </axes>
 <variables>
+<parameter id="1" name="geopotential_height">
+	<attribute name="long_name" value="geopotential_height" type="string" />
+	<attribute name="standard_name" value="geopotential_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="2" name="x_wind">
+	<attribute name="long_name" value="x_wind" type="string" />
+	<attribute name="standard_name" value="x_wind" type="string" />
+	<attribute name="units" value="m/s" type="string" />
+</parameter>
+<parameter id="3" name="y_wind">
+	<attribute name="long_name" value="y_wind" type="string" />
+	<attribute name="standard_name" value="y_wind" type="string" />
+	<attribute name="units" value="m/s" type="string" />
+</parameter>
+<parameter id="10" name="relative_humidity">
+	<attribute name="long_name" value="relative_humidity" type="string" />
+	<attribute name="standard_name" value="relative_humidity" type="string" />
+	<attribute name="units" value="1/100" type="string" />
+</parameter>
+<parameter id="17,2,1000" name="precipitation_amount">
+	<attribute name="long_name" value="precipitation_amount" type="string" />
+	<attribute name="standard_name" value="precipitation_amount" type="string" />
+	<attribute name="units" value="kg/m2" type="string" />
+</parameter>
+<parameter id="18" name="air_potential_temperature">
+	<attribute name="long_name" value="air_potential_temperature" type="string" />
+	<attribute name="standard_name" value="air_potential_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
 <parameter id="25,2,1000" name="cloud_area_fraction">
 	<attribute name="scale_factor" value="0.01" type="float" />
 	<attribute name="_FillValue" value="-32767" type="short" />
@@ -155,19 +185,34 @@
 	<attribute name="standard_name" value="relative_humidity" type="string" />
 	<attribute name="units" value="1" type="string" />
 </parameter>
-<parameter id="33,2,1000" name="x_wind">
+<parameter id="33,2,1000" name="x_wind_10m">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
-	<attribute name="long_name" value="x_wind" type="string" />
-	<attribute name="standard_name" value="x_wind" type="string" />
+	<attribute name="long_name" value="x_wind_10m" type="string" />
+	<attribute name="metno_name" value="x_wind_10m" type="string" />
 	<attribute name="units" value="m s-1" type="string" />
 </parameter>
-<parameter id="34,2,1000" name="y_wind">
+<parameter id="34,2,1000" name="y_wind_10m">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
-	<attribute name="long_name" value="y_wind" type="string" />
-	<attribute name="standard_name" value="y_wind" type="string" />
+	<attribute name="long_name" value="y_wind_10m" type="string" />
+	<attribute name="standard_name" value="y_wind_10m" type="string" />
 	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="36,2,1000" name="accumulated_surface_upward_sensible_heat_flux">
+	<attribute name="long_name" value="accumulated_surface_upward_sensible_heat_flux" type="string" />
+	<attribute name="metno_name" value="accumulated_surface_upward_sensible_heat_flux" type="string" />
+	<attribute name="units" value="kJ/m2" type="string" />
+</parameter>
+<parameter id="37,2,1000" name="accumulated_surface_upward_latent_heat_flux">
+	<attribute name="long_name" value="accumulated_surface_upward_latent_heat_flux" type="string" />
+	<attribute name="metno_name" value="accumulated_surface_upward_latent_heat_flux" type="string" />
+	<attribute name="units" value="kJ/m2" type="string" />
+</parameter>
+<parameter id="39" name="cloud_area_fraction_in_atmosphere_layer">
+	<attribute name="long_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	<attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	<attribute name="units" value="1/100" type="string" />
 </parameter>
 <parameter id="58,2,1000" name="sea_level_pressure">
 	<attribute name="scale_factor" value="100." type="float" />
@@ -177,6 +222,27 @@
 	<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
 	<attribute name="units" value="Pa" type="string" />
 </parameter>
+<parameter id="66,2,1000" name="surface_snow_sickness">
+	<attribute name="long_name" value="surface_snow_sickness" type="string" />
+	<attribute name="standard_name" value="surface_snow_sickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="101" name="topography_height">
+	<attribute name="long_name" value="topography_height" type="string" />
+	<attribute name="metno_name" value="topography_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="103,2,1000" name="sea_surface_temperature">
+	<attribute name="long_name" value="sea_surface_temperature" type="string" />
+	<attribute name="metno_name" value="sea_surface_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="191,2,1000" name="land_ice_area_fraction">
+	<attribute name="long_name" value="land_ice_area_fraction" type="string" />
+	<attribute name="metno_name" value="land_ice_area_fraction" type="string" />
+	<attribute name="units" value="1/100" type="string" />
+</parameter>
+
 <parameter id="200,3,0" name="significant_wave_height">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="cell_methods" value="time: point" type="string" />
