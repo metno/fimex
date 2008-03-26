@@ -341,7 +341,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		std::vector<std::string> shape;
     		shape.push_back(xDim.getName());
     		shape.push_back(yDim.getName());
-    		if (it->getLevels().size() > 0) {
+    		if (it->getLevels().size() > 1) {
     			shape.push_back(levelDims[it->getLevelType()].getName());
     		}
     		if (it->getTimes().size() > 0) {
@@ -350,6 +350,20 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		CDMVariable var(varName, CDM_SHORT, shape);
     		cdm.addVariable(var);
     		varNameFeltIdMap[varName] = it->getName();
+    		//  update scaling factor attribute with value from felt-file and xml-setup
+    		if (it->getScalingFactor() != 1) {
+    			bool found = false;
+        		for (std::vector<CDMAttribute>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
+        			if (attrIt->getName() == "scale_factor") {
+        				found = true;
+        				float scale = (attrIt->getData()->asFloat())[0] * it->getScalingFactor();
+        				attrIt->getData()->setValue(0, scale);
+        			}
+        		}
+        		if (! found) {
+        			attributes.push_back(CDMAttribute("scale_factor", static_cast<float>(it->getScalingFactor())));
+        		}
+    		}
     		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
     			cdm.addAttribute(varName, *attrIt);
     		}
@@ -385,9 +399,8 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y; 
 	// only time can be unLimDim
 
-	std::vector<short> data;
-	std::vector<short>::iterator dataIt = data.begin();
 	const CDMDimension* layerDim = 0;
+	size_t size = 1;
 	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
 		CDMDimension& dim = cdm.getDimension(*it);		
 		if (dim.getName() != xDim.getName() &&
@@ -396,7 +409,13 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 		{
 			layerDim = &dim;
 		}
+		if (! dim.isUnlimited()) {
+			size *= dim.getLength();
+		}
 	}
+	std::vector<short> data;
+	data.reserve(size); // to make sure iterators aren't invalidated during inserts
+	std::vector<short>::iterator dataIt = data.begin();
 	try {
 		std::map<std::string, std::string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName()); 
 		if (foundId != varNameFeltIdMap.end()) {
@@ -429,7 +448,6 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 				}
 			}
 
-			// put the layer-data together
 			for (std::vector<short>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
 				std::vector<short> levelData;
 				levelData = feltFile.getDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit);	

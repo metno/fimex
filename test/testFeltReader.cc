@@ -2,6 +2,7 @@
 #include <boost/array.hpp>
 #include <cassert>
 #include <ctime>
+#include <cmath>
 #include "FeltParameters.h"
 #include "Felt_File.h"
 #include "FeltCDMReader.h"
@@ -50,10 +51,10 @@ test_feltfile() {
 	BOOST_CHECK( fa.getName() == "u10m" );
 	BOOST_CHECK( fa.getTimes().size() == 61);
 	BOOST_CHECK( fa.getFieldSize(fa.getTimes().at(50), levels.at(0)) == 44904 );
-	// cout << fa.getX() << "x" << fa.getY() << ": " << fa.getScalingFactor() << endl;
+	//cout << fa.getX() << "x" << fa.getY() << ": " << fa.getScalingFactor() << endl;
 	BOOST_CHECK( fa.getX() == 229 );
 	BOOST_CHECK( fa.getY() == 196 );
-	BOOST_CHECK( fa.getScalingFactor() == 0 );
+	BOOST_CHECK( std::abs(fa.getScalingFactor() - 0.001) < 1e-6 );
 	
 	try {
 		ff.getFeltArray("this parameter is intentionally unknown");

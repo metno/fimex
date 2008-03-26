@@ -86,7 +86,7 @@ public:
 	/** return the felt-type of the vertical axis */
 	short getVerticalFeltType() const {return idx[10];}
 	/** return scalingFactor */
-	long getScalingFactor() const;
+	double getScalingFactor() const;
 	
 	/** return a copy of the index used within this Felt_Array */
 	boost::array<short, 16> const getIndex(time_t time, short level) throw(Felt_File_Error);

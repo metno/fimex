@@ -1,5 +1,6 @@
-#include "felt_reader/Felt_Array.h"
-#include "felt_reader/FeltParameters.h"
+#include "Felt_Array.h"
+#include "FeltParameters.h"
+#include "Utils.h"
 #include <sstream>
 
 #include <algorithm>
@@ -81,13 +82,13 @@ void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_E
 {
 	for (int i = 0; i < 20; i++) {
 		switch (i) {
-			case 9: testHeaderElement(this->header[i], header[i], "dataheader: x"); break;
-			case 10: testHeaderElement(this->header[i], header[i], "dataheader: y"); break;
-			case 19: testHeaderElement(this->header[i], header[i], "dataheader: scalingFactor"); break;
+			case 9: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": x"); break;
+			case 10: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": y"); break;
+			case 19: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": scalingFactor"); break;
 			case 14:
 			case 15:
 			case 16:
-			case 17: testHeaderElement(this->header[i], header[i], "dataheader: grid definition " + i); break;
+			case 17: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": grid definition " + MetNoUtplukk::type2string(i)); break;
 			default: break;
 		}
 	}
@@ -116,8 +117,8 @@ vector<short> Felt_Array::getLevels() const {
 	return vLevels;
 }
 
-long Felt_Array::getScalingFactor() const {
-	return static_cast<long>(std::pow(10,static_cast<double>(header[19])));
+double Felt_Array::getScalingFactor() const {
+	return std::pow(10,static_cast<double>(header[19]));
 }
 
 const string& Felt_Array::getName() const {

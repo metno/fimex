@@ -67,6 +67,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "input.file", vm);
 	writeOption<string>(out, "input.type", vm);
 	writeOption<string>(out, "input.config", vm);
+	writeOption<boost::any>(out, "input.printNcML", vm);
 	writeOption<string>(out, "output.file", vm);
 	writeOption<string>(out, "output.type", vm);
 	writeOption<string>(out, "output.config", vm);
@@ -74,12 +75,14 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeVectorOption<string>(out, "extract.reduceDimension.name", vm);
 	writeVectorOption<int>(out, "extract.reduceDimension.start", vm);
 	writeVectorOption<int>(out, "extract.reduceDimension.end", vm);
+	writeOption<boost::any>(out, "extract.printNcML", vm);
 	writeOption<string>(out, "interpolate.projString", vm);
 	writeOption<string>(out, "interpolate.method", vm);
 	writeOption<string>(out, "interpolate.xAxisValues", vm);
 	writeOption<string>(out, "interpolate.yAxisValues", vm);
 	writeOption<string>(out, "interpolate.xAxisUnit", vm);
 	writeOption<string>(out, "interpolate.yAxisUnit", vm);
+	writeOption<boost::any>(out, "interpolate.printNcML", vm);
 }
 
 static string getType(const string& io, po::variables_map& vm) {
@@ -98,6 +101,7 @@ static string getType(const string& io, po::variables_map& vm) {
 
 static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 	string type = getType("input", vm);
+	auto_ptr<CDMReader> returnPtr;
 #ifdef HAVE_LIBMIC
 	if (type == "flt" || type == "dat" || type == "felt") {
 		string config(DATADIR);
@@ -107,23 +111,38 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 		}
 		if (vm.count("debug"))
 			cerr << "reading Felt-File " << vm["input.file"].as<string>() << " with config " << config << endl;
-		return auto_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
+		returnPtr = auto_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
 	}
 #endif
 #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf") {
 		if (vm.count("debug"))
 			cerr << "reading Felt-File " << vm["input.file"].as<string>() << " without config"<< endl;
-		return auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
+		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
 	}
 #endif
-	cerr << "unable to read type: " << type << endl;
-	exit(1);
 	
-	return auto_ptr<CDMReader>();
+	if (returnPtr.get() == 0) {
+		cerr << "unable to read type: " << type << endl;
+		exit(1);
+	} else {
+		if (vm.count("input.printNcML")) {
+			cout << "InputFile as NcML:" << endl;
+			returnPtr->getCDM().toXMLStream(cout);
+			cout << endl;
+		}
+	}
+	
+	return returnPtr;
 }
 
 static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
+	if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable"))) {
+		if (vm.count("debug")) {
+			cerr << "extract.reduceDimension.name and extract.removeVariable not found, no extraction used" << endl;
+		}
+		return dataReader;
+	}
 	auto_ptr<CDMExtractor> extractor(new CDMExtractor(boost::shared_ptr<CDMReader>(dataReader)));
 	if (vm.count("extract.removeVariable")) {
 		vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
@@ -153,6 +172,11 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 			extractor->reduceDimensionStartEnd(vars[i], startPos[i], endPos[i]);
 		}
 	}
+	if (vm.count("extract.printNcML")) {
+		cout << "Extractor as NcML:" << endl;
+		extractor->getCDM().toXMLStream(cout);
+		cout << endl;
+	}		
 	return auto_ptr<CDMReader>(extractor);
 }
 
@@ -205,6 +229,9 @@ static vector<double> parseDoubleString(const string& str) {
 
 static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! vm.count("interpolate.projString")) {
+		if (vm.count("debug")) {
+			cerr << "interpolate.projString not found, no interpolation used" << endl;
+		}
 		return dataReader;
 	}
 	auto_ptr<CDMInterpolator> interpolator(new CDMInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
@@ -244,6 +271,11 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 	}
 	
 	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), xAxisVals, yAxisVals, vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
+	if (vm.count("interpolate.printNcML")) {
+		cout << "Interpolator as NcML:" << endl;
+		interpolator->getCDM().toXMLStream(cout);
+		cout << endl;
+	}		
 	return auto_ptr<CDMReader>(interpolator);
 }
 
@@ -284,6 +316,7 @@ int main(int argc, char* args[])
 		("input.file", po::value<string>(), "input file")
 		("input.type", po::value<string>(), "filetype of intput file")
 		("input.config", po::value<string>(), "non-standard input configuration")
+		("input.printNcML", "print NcML description of input file")
 		("output.file", po::value<string>(), "output file")
 		("output.type", po::value<string>(), "filetype of output file")
 		("output.config", po::value<string>(), "non-standard output configuration")
@@ -291,12 +324,14 @@ int main(int argc, char* args[])
 		("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
+        ("extract.printNcML", "print NcML description of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear or bicubic")
         ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
         ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
         ("interpolate.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
+        ("interpolate.printNcML", "print NcML description of extractor")
 		;
 	
 	
