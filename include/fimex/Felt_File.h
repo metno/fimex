@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include "Data.h"
 #include "felt_reader/Felt_Array.h"
 #include "felt_reader/Felt_File_Error.h"
@@ -30,6 +31,7 @@ class Felt_File
 private:
 	Felt_Array& findOrCreateFeltArray(const boost::array<short, 16>& idx);
 	std::vector<short> getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error);
+	boost::shared_array<short> getHeaderData(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize)  throw(Felt_File_Error);
 	/// actually read the data with the parameters from the felt_file, should be called from constructors
 	void init() throw(Felt_File_Error);
 	
@@ -47,6 +49,8 @@ public:
 	/**
 	 * open and read toc of a felt file
 	 * \param paramList a list of known parameters (in diana format, e.g. 17,2,1000:prod=74), only the known parameters will be read
+	 * \warning The diana format is extended by dataType=short|float|double and fillValue=(number in short|float|double) to add the return type of the data.
+	 * Autoscaling will be turned on for 'getDataSlice'. default is dataType=short:fillValue=-32767 
 	 */
 	explicit Felt_File(const std::string& filename, const std::vector<std::string>& dianaParamList) throw(Felt_File_Error);
 	virtual ~Felt_File();
@@ -64,6 +68,14 @@ public:
 	 * @param level level of slice
 	 */
 	std::vector<short> getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error);
+	/**
+	 * retrieve the data prescaled (if float or double) and replaced with the new fill value
+	 * 
+	 * @param compName parameter name of felt file
+	 * @param time time of slice
+	 * @param level level of slice
+	 */	
+	boost::shared_ptr<MetNoUtplukk::Data> getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error);
 
 	/**
 	 *  retrieve all felt arrays

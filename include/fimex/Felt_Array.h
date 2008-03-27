@@ -32,6 +32,8 @@ class Felt_Array
 	boost::array<short, 16> idx;
 	boost::array<short, 20> header;
 	boost::array<float, 6> gridParameters;
+	string dataType;
+	double fillValue;
 	
 public:
 	/** constructor */
@@ -40,8 +42,9 @@ public:
 	 * constructor applying the parameter name and the felt description index array
 	 * \param name parameter name
 	 * \param idx feltfiles are indexed by a short[16] arrays representing different parameters. The parameters used here are those applied to qfelt (query felt)
+	 * \param dataType short|float|double datatype used for autoscaling, getScalingFactor() will be allways return 1 for float and double
 	 */
-	explicit Felt_Array(const string name, const boost::array<short, 16> idx);
+	explicit Felt_Array(const string name, const boost::array<short, 16> idx, const string& dataType = "short");
 	virtual ~Felt_Array();
 	/**
 	 * add information from the felt-index (usually retrieved from qfelt) to this Felt_Array
@@ -75,6 +78,12 @@ public:
 
 	/** return the parameter name */
 	const string& getName() const;
+	/** return the datatype as string short|float|double */
+	const string& getDatatype() const {return dataType;}
+	/** return the changed fill used in #Felt_File::getScaledDataSlice */
+	double getFillValue() const { return fillValue;}
+	/** set the fill value to be used in #Felt_File::getScaledDataSlice */
+	void setFillValue(double fillValue) {this->fillValue = fillValue;}
 	/** return the times available for this parameter */
 	vector<time_t> getTimes() const;
 	/** return the levels available for this parameter */

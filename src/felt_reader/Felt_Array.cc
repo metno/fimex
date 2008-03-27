@@ -9,10 +9,12 @@
 
 namespace MetNoFelt {
 
-Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx)
+Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx, const string& dataType)
 : feltArrayName(name),
   idx(idx),
-  header(ANY_ARRAY20())
+  header(ANY_ARRAY20()),
+  dataType(dataType),
+  fillValue(ANY_VALUE())
 {
 	// clear time
 	this->idx[2] = ANY_VALUE();
@@ -33,7 +35,9 @@ Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx)
 Felt_Array::Felt_Array()
 : feltArrayName(""),
  idx(ANY_ARRAY()),
- header(ANY_ARRAY20()) {
+ header(ANY_ARRAY20()),
+ dataType("short"),
+ fillValue(ANY_VALUE()) {
 }
 
 Felt_Array::~Felt_Array()
@@ -84,7 +88,7 @@ void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_E
 		switch (i) {
 			case 9: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": x"); break;
 			case 10: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": y"); break;
-			case 19: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": scalingFactor"); break;
+			case 19: if (dataType == "short") testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": scalingFactor"); break;
 			case 14:
 			case 15:
 			case 16:
@@ -118,7 +122,7 @@ vector<short> Felt_Array::getLevels() const {
 }
 
 double Felt_Array::getScalingFactor() const {
-	return std::pow(10,static_cast<double>(header[19]));
+	return (dataType == "short") ? std::pow(10,static_cast<double>(header[19])) : 1;
 }
 
 const string& Felt_Array::getName() const {

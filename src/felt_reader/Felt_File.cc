@@ -5,9 +5,11 @@
 #include "interpolation.h"
 #include <cassert>
 #include <ctime>
+#include <cmath>
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/bind.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -103,10 +105,13 @@ Felt_File::~Felt_File()
 
 Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx) {
 	string name = feltParameters.getParameterName(idx);
+	string dataType = feltParameters.getParameterDatatype(name);
 	map<string, Felt_Array>::iterator it = feltArrayMap.find(name); 
 	if (it == feltArrayMap.end()) {
-		feltArrayMap[name] = Felt_Array(name, idx);
-		return feltArrayMap[name];
+		Felt_Array fa(name, idx, dataType);
+		fa.setFillValue(feltParameters.getParameterFillValue(name));
+		feltArrayMap[name] = fa;   // copy to map
+		return feltArrayMap[name]; // reference from map
 	} else {
 		return it->second;
 	}
@@ -127,8 +132,9 @@ std::vector<Felt_Array> Felt_File::listFeltArrays() {
 	}	
 	return li;
 }
-std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error) {
-	boost::scoped_array<short> header_data(new short[fieldSize]); // contains header (20 fields) and data (nx*ny) and something extra???
+
+boost::shared_array<short> Felt_File::getHeaderData(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize)  throw(Felt_File_Error) {
+	boost::shared_array<short> header_data(new short[fieldSize]); // contains header (20 fields) and data (nx*ny) and something extra???
 	if (fh == 0) {
 		throw Felt_File_Error("file already closed");
 	}
@@ -142,14 +148,17 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 	if (ierror > 0) {
 		throw Felt_File_Error("error reading with mrfelt");
 	}
+	return header_data;
+}
+std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error) {
+	boost::shared_array<short> header_data = getHeaderData(fa, idx, fieldSize);
 	boost::array<short, 20> header;
-	for (int i = 0; i < 20; i++) {
-		header[i] = header_data[i];
-	}
+	copy(&header_data[0], &header_data[20], header.begin());
 	fa.setDataHeader(header);
 	// get gridParameters via libmi
 	boost::array<float, 6> gridParameters;
 	int gridType, nx, ny;
+	int ierror(0);
 //	gridpar(int icall, int ldata,      short *idata, int *igtype, int *nx, int *ny,              float *grid, int *ierror);
 	gridpar(1,         fieldSize, header_data.get(),   &gridType,     &nx,     &ny, gridParameters.c_array(),     &ierror);
 	if (ierror > 0) {
@@ -158,10 +167,7 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 	fa.setGridType(gridType);
 	fa.setGridParameters(gridParameters);
 	vector<short> data(nx*ny);
-	vector<short>::iterator d_iter(data.begin());
-	for (int i = 20; i < 20+nx*ny; i++) {
-		*d_iter++ = header_data[i];
-	}
+	copy(&header_data[20], &header_data[20+nx*ny], data.begin());
 	return data;
 }
 
@@ -172,6 +178,43 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 	return getDataSlice(fa, idx, fieldSize);
 }
 
+short replaceFill(short newFill, short current) {
+	if (current == ANY_VALUE()) return newFill;
+	return current;
+}
+double scaleValue(double newFill, double scale, double current) {
+	if (current == ANY_VALUE()) return newFill;
+	return current * scale;
+}
+
+boost::shared_ptr<MetNoUtplukk::Data> Felt_File::getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error) {
+	Felt_Array& fa = getFeltArray(compName);
+	boost::array<short, 16> idx(fa.getIndex(time, level));
+	int fieldSize(fa.getFieldSize(time, level));
+	boost::shared_array<short> header_data = getHeaderData(fa, idx, fieldSize);
+	double scalingFactor = std::pow(10,static_cast<double>(header_data[19]));
+	size_t dataSize = fa.getX() * fa.getY();
+	boost::shared_ptr<MetNoUtplukk::Data> returnData;
+	if (fa.getDatatype() == "short") {
+		boost::shared_array<short> data(new short[dataSize]);
+		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(replaceFill, static_cast<short>(fa.getFillValue()), _1));
+		if (scalingFactor != fa.getScalingFactor()) {
+			throw Felt_File_Error("change in scaling factor for parameter: " + fa.getName() + " consider using float or double datatpye");
+		}
+		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<short>(data, dataSize));
+	} else if (fa.getDatatype() == "float") {
+		boost::shared_array<float> data(new float[dataSize]);
+		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(scaleValue, fa.getFillValue(), scalingFactor, _1));
+		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<float>(data, dataSize));
+	} else if (fa.getDatatype() == "double") {
+		boost::shared_array<double> data(new double[dataSize]);
+		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(scaleValue, fa.getFillValue(), scalingFactor, _1));
+		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<double>(data, dataSize));
+	} else {
+		assert(false);
+	}
+	return returnData;
+}
 std::map<short, std::vector<short> > Felt_File::getFeltLevels() const {
 	std::map<short, std::set<short> > typeLevelSet;
 	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {

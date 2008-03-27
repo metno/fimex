@@ -11,6 +11,10 @@ namespace MetNoFelt {
 
 class FeltParameters
 {
+	std::map<std::string, boost::array<short,16> > parameterMap;
+	std::map<std::string, std::string> parameterDatatypeMap;
+	std::map<std::string, double> parameterFillValueMap;
+
 public:
 	FeltParameters();
 	/**
@@ -27,6 +31,8 @@ public:
 	virtual ~FeltParameters();
 	const boost::array<short, 16>& getParameters(const std::string&);
 	const std::string& getParameterName(const boost::array<short, 16>&);
+	std::string getParameterDatatype(const std::string& parameterName) const;
+	double getParameterFillValue(const std::string& parameterName) const;
 	// local static objects
 	const static std::string& DEFAULT_CONFIG() {
 		const static std::string DEFAULT_CONFIG("/metno/local/diana/etc/diana.setup-COMMON");
@@ -35,8 +41,6 @@ public:
 private:
 	void init(std::string filename=DEFAULT_CONFIG());
 	boost::array<short, 16> diana2feltparameters(const std::string&);
-	std::map<std::string, boost::array<short,16> > parameterMap;
-
 };
 
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error);

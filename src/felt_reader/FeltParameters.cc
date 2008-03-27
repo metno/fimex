@@ -20,7 +20,30 @@ FeltParameters::FeltParameters(std::string filename)
 
 FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) {
 	for (std::vector<std::string>::const_iterator it = dianaFeltParams.begin(); it != dianaFeltParams.end(); ++it) {
-		parameterMap.insert(std::pair<std::string, boost::array<short, 16> >(*it, diana2feltparameters(*it)));
+		std::string paramName(*it);
+		std::string dataType("none");
+		boost::smatch what; 
+		boost::regex dTypeRegex(":dataType=([a-z]*)");
+		if (boost::regex_search(paramName, what, dTypeRegex)) {
+			dataType = what[1].str();
+			if (!(dataType == "short" || dataType == "float" || dataType == "double")) {
+				MetNoFelt::Felt_File_Error("unknown type for variable "+paramName+": "+dataType+ " must be float|double|short");
+			}
+			paramName = boost::regex_replace(paramName, dTypeRegex, "");
+		}
+		boost::regex fillValueRegex(":fillValue=([^:]*)");
+		if (boost::regex_search(paramName, what, fillValueRegex)) {
+			std::stringstream ss;
+			ss << what[1].str();
+			double fillValue;
+			ss >> fillValue;
+			paramName = boost::regex_replace(paramName, fillValueRegex, "");
+			parameterFillValueMap[paramName] = fillValue;
+		}
+		parameterMap[paramName] = diana2feltparameters(paramName);
+		if (dataType != "none") {
+			parameterDatatypeMap[paramName] = dataType;
+		}
 	}
 }
 
@@ -151,6 +174,24 @@ const std::string& FeltParameters::getParameterName(const boost::array<short, 16
 	}
 	return UNDEFINED();
 }
+
+std::string FeltParameters::getParameterDatatype(const std::string& parameterName) const {
+	std::map<std::string, std::string>::const_iterator it = parameterDatatypeMap.find(parameterName);
+	if (it != parameterDatatypeMap.end()) {
+		return it->second;
+	} else {
+		return "short";
+	}
+}
+double FeltParameters::getParameterFillValue(const std::string& parameterName) const {
+	std::map<std::string, double>::const_iterator it = parameterFillValueMap.find(parameterName);
+	if (it != parameterFillValueMap.end()) {
+		return it->second;
+	} else {
+		return ANY_VALUE();
+	}
+}
+
 
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error)
 {

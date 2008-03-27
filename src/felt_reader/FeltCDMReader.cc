@@ -124,15 +124,36 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		for (int i = 0; i < nodes->nodeNr; ++i) {
 			xmlNodePtr node = nodes->nodeTab[i];
 			xmlChar* idName = xmlGetProp(node, reinterpret_cast<const xmlChar*>("id"));
-			knownFeltIds.push_back(std::string(reinterpret_cast<char*>(idName)));
+			string id(reinterpret_cast<char*>(idName));
 			xmlFree(idName);
+			xmlChar* typeName = xmlGetProp(node, reinterpret_cast<const xmlChar*>("type"));
+			// get the datatype
+			std::string dataType;
+			if (typeName != 0) {
+				std::string dataType(reinterpret_cast<char*>(typeName));
+				xmlFree(typeName);
+				dataType = ":dataType=" + dataType;
+			}
+			// get the fill value
+			std::string fillValue;
+			std::string xpathString("/config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
+			boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
+			if (xpathObj.get() == 0) {
+				throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
+			}
+			if (xpathObj->nodesetval->nodeNr > 0) {
+				xmlChar* fillValName = xmlGetProp(xpathObj->nodesetval->nodeTab[0], reinterpret_cast<const xmlChar*>("value"));
+				fillValue = ":fillValue=" + std::string(reinterpret_cast<char*>(fillValName));
+				xmlFree(fillValName);
+			}
+			knownFeltIds.push_back(id + dataType + fillValue);
 		}
 	}
 	feltFile = MetNoFelt::Felt_File(filename, knownFeltIds);
 	
 	// fill the CDM;
 	// set the global data for this feltFile derived from first data
-	// TODO: translate producer-ids to something useful
+	// TODO: translate producer-ids to something useful?
 	
 	// global attributes from config
 	{
@@ -347,10 +368,11 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		if (it->getTimes().size() > 0) {
     			shape.push_back(timeDim.getName());
     		}
-    		CDMVariable var(varName, CDM_SHORT, shape);
+    		CDMDataType type = string2datatype(it->getDatatype());
+    		CDMVariable var(varName, type, shape);
     		cdm.addVariable(var);
     		varNameFeltIdMap[varName] = it->getName();
-    		//  update scaling factor attribute with value from felt-file and xml-setup
+    		//  update scaling factor attribute with value from felt-file and xml-setup (only for short-values)
     		if (it->getScalingFactor() != 1) {
     			bool found = false;
         		for (std::vector<CDMAttribute>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
@@ -413,8 +435,9 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 			size *= dim.getLength();
 		}
 	}
+	// TODO: retrieve data via getScaledDataSlice and be independant of <short>
 	std::vector<short> data;
-	data.reserve(size); // to make sure iterators aren't invalidated during inserts
+	data.resize(size, MetNoFelt::ANY_VALUE());
 	std::vector<short>::iterator dataIt = data.begin();
 	try {
 		std::map<std::string, std::string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName()); 
@@ -451,7 +474,7 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 			for (std::vector<short>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
 				std::vector<short> levelData;
 				levelData = feltFile.getDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit);	
-				data.insert(dataIt, levelData.begin(), levelData.end());
+				copy(levelData.begin(), levelData.end(), dataIt);
 				dataIt += levelData.size();
 			}
 		}

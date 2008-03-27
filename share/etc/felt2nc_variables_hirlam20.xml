@@ -133,7 +133,7 @@
 </vertical_axis>
 </axes>
 <variables>
-<!-- 
+<!-- different grid
 <parameter id="1" name="geopotential_height">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="long_name" value="geopotential_height" type="string" />
@@ -141,7 +141,7 @@
 	<attribute name="units" value="m" type="string" />
 </parameter>
 -->
-<!--
+<!-- different grid
 <parameter id="2" name="x_wind">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="long_name" value="x_wind" type="string" />
@@ -155,7 +155,7 @@
 	<attribute name="units" value="m/s" type="string" />
 </parameter>
 -->
-<!--
+<!-- different grid
 <parameter id="10" name="relative_humidity">
 	<attribute name="scale_factor" value="0.01" type="float" />
 	<attribute name="_FillValue" value="-32767" type="short" />
@@ -170,7 +170,7 @@
 	<attribute name="standard_name" value="precipitation_amount" type="string" />
 	<attribute name="units" value="kg/m2" type="string" />
 </parameter>
-<!--
+<!-- different grid
 <parameter id="18" name="air_potential_temperature">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="long_name" value="air_potential_temperature" type="string" />
@@ -215,18 +215,18 @@
 	<attribute name="standard_name" value="y_wind_10m" type="string" />
 	<attribute name="units" value="m s-1" type="string" />
 </parameter>
-<!-- change in scale_factor
-<parameter id="36,2,1000" name="accumulated_surface_upward_sensible_heat_flux">
+<!-- change in scale_factor -->
+<parameter id="36,2,1000" name="accumulated_surface_upward_sensible_heat_flux" type="float">
 	<attribute name="long_name" value="accumulated_surface_upward_sensible_heat_flux" type="string" />
 	<attribute name="metno_name" value="accumulated_surface_upward_sensible_heat_flux" type="string" />
 	<attribute name="units" value="kJ/m2" type="string" />
 </parameter>
-<parameter id="37,2,1000" name="accumulated_surface_upward_latent_heat_flux">
+<parameter id="37,2,1000" name="accumulated_surface_upward_latent_heat_flux" type="float">
 	<attribute name="long_name" value="accumulated_surface_upward_latent_heat_flux" type="string" />
 	<attribute name="metno_name" value="accumulated_surface_upward_latent_heat_flux" type="string" />
 	<attribute name="units" value="kJ/m2" type="string" />
 </parameter>
--->
+
 <parameter id="39" name="cloud_area_fraction_in_atmosphere_layer">
 	<attribute name="long_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
 	<attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
