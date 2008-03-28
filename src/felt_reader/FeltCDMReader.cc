@@ -130,7 +130,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			// get the datatype
 			std::string dataType;
 			if (typeName != 0) {
-				std::string dataType(reinterpret_cast<char*>(typeName));
+				dataType = string(reinterpret_cast<char*>(typeName));
 				xmlFree(typeName);
 				dataType = ":dataType=" + dataType;
 			}
@@ -435,10 +435,7 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 			size *= dim.getLength();
 		}
 	}
-	// TODO: retrieve data via getScaledDataSlice and be independant of <short>
-	std::vector<short> data;
-	data.resize(size, MetNoFelt::ANY_VALUE());
-	std::vector<short>::iterator dataIt = data.begin();
+	boost::shared_ptr<Data> data = createData(variable.getDataType(), size);
 	try {
 		std::map<std::string, std::string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName()); 
 		if (foundId != varNameFeltIdMap.end()) {
@@ -470,18 +467,17 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 					throw CDMException("variable " +variable.getName() + " has unspecified levels");
 				}
 			}
-
+			size_t dataCurrentPos = 0;
 			for (std::vector<short>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
-				std::vector<short> levelData;
-				levelData = feltFile.getDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit);	
-				copy(levelData.begin(), levelData.end(), dataIt);
-				dataIt += levelData.size();
+				boost::shared_ptr<Data> levelData = feltFile.getScaledDataSlice(varNameFeltIdMap[variable.getName()], timeVec[unLimDimPos], *lit, fa.getFillValue());
+				data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
+				dataCurrentPos += levelData->size();
 			}
 		}
 	} catch (MetNoFelt::Felt_File_Error& ffe) {
 		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());
 	}
-	return createData(variable.getDataType(), data.size(), data.begin(), data.end());
+	return data;
 }
 
 }

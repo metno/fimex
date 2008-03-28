@@ -11,7 +11,6 @@
 namespace MetNoFelt {
 using namespace std;
 
-typedef std::map<time_t, boost::array<short, 4> > TIME_MAP;
 
 /// encapsulate parameters of a felt file
 /**
@@ -20,6 +19,7 @@ typedef std::map<time_t, boost::array<short, 4> > TIME_MAP;
  */
 class Felt_Array
 {
+	typedef std::map<time_t, boost::array<short, 4> > TIME_MAP;
 	string feltArrayName;
 	set<short> levels;
 	// the time-array[0,1,2,3] correspond to index-array[2,3,4,9]

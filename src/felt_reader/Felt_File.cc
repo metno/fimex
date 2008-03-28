@@ -108,6 +108,7 @@ Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx)
 	string dataType = feltParameters.getParameterDatatype(name);
 	map<string, Felt_Array>::iterator it = feltArrayMap.find(name); 
 	if (it == feltArrayMap.end()) {
+		//cerr << "new FeltArray " << name << ": " << dataType << " " << feltParameters.getParameterFillValue(name) << endl; 
 		Felt_Array fa(name, idx, dataType);
 		fa.setFillValue(feltParameters.getParameterFillValue(name));
 		feltArrayMap[name] = fa;   // copy to map
@@ -211,7 +212,7 @@ boost::shared_ptr<MetNoUtplukk::Data> Felt_File::getScaledDataSlice(const std::s
 		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(scaleValue, fa.getFillValue(), scalingFactor, _1));
 		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<double>(data, dataSize));
 	} else {
-		assert(false);
+		throw Felt_File_Error("unknown datatype for feltArray " + fa.getName() + ": " + fa.getDatatype());
 	}
 	return returnData;
 }

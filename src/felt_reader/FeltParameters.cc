@@ -1,4 +1,4 @@
-#include "felt_reader/FeltParameters.h"
+#include "FeltParameters.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -24,10 +24,11 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) 
 		std::string dataType("none");
 		boost::smatch what; 
 		boost::regex dTypeRegex(":dataType=([a-z]*)");
+		// cerr << "paramName: " << paramName;
 		if (boost::regex_search(paramName, what, dTypeRegex)) {
 			dataType = what[1].str();
 			if (!(dataType == "short" || dataType == "float" || dataType == "double")) {
-				MetNoFelt::Felt_File_Error("unknown type for variable "+paramName+": "+dataType+ " must be float|double|short");
+				Felt_File_Error("unknown type for variable "+paramName+": "+dataType+ " must be float|double|short");
 			}
 			paramName = boost::regex_replace(paramName, dTypeRegex, "");
 		}
@@ -44,6 +45,7 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) 
 		if (dataType != "none") {
 			parameterDatatypeMap[paramName] = dataType;
 		}
+		//cerr << "Parameter " << paramName << ": " << parameterDatatypeMap[paramName] << " " << parameterFillValueMap[paramName] << endl; 
 	}
 }
 
