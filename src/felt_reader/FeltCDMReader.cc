@@ -8,6 +8,7 @@
 #include <boost/regex.hpp>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <libxml/xinclude.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -107,6 +108,11 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     if (doc.get() == 0) {
     	throw MetNoFelt::Felt_File_Error("unable to parse config file: " + configFilename);
     }
+    // apply the XInclude process
+    if (xmlXIncludeProcess(doc.get()) < 0) {
+        throw MetNoFelt::Felt_File_Error("XInclude processing failed\n");
+    }
+    
 	boost::shared_ptr<xmlXPathContext> xpathCtx(xmlXPathNewContext(doc.get()), xmlXPathFreeContext);
 	if (xpathCtx.get() == 0) {
 		throw MetNoFelt::Felt_File_Error("unable to generate xpath context");
@@ -115,7 +121,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	// open the feltFile with the desired parameters
 	std::vector<std::string> knownFeltIds;
 	{
-		std::string xpathString("/config/variables/parameter");
+		std::string xpathString("/cdm_felt_config/variables/parameter");
 		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 		if (xpathObj.get() == 0) {
 			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
@@ -136,7 +142,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			}
 			// get the fill value
 			std::string fillValue;
-			std::string xpathString("/config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
+			std::string xpathString("/cdm_felt_config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
 			boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 			if (xpathObj.get() == 0) {
 				throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
@@ -157,7 +163,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	
 	// global attributes from config
 	{
-		std::string xpathString("/config/global_attributes");
+		std::string xpathString("/cdm_felt_config/global_attributes");
 		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 		if (xpathObj.get() == 0) {
 			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
@@ -166,12 +172,14 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		if (nodes->nodeNr != 1) {
 			throw MetNoFelt::Felt_File_Error("unable to find " + xpathString + " in config: " + configFilename);
 		}
-		xmlNodePtr node = nodes->nodeTab[0];
-		assert(node->type == XML_ELEMENT_NODE);
-		std::vector<CDMAttribute> globAttributes;
-		fillAttributeList(globAttributes, nodes->nodeTab[0]->children);
-		for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
-			cdm.addAttribute(cdm.globalAttributeNS(), *it);
+		for (int i = 0; i < nodes->nodeNr; ++i) {
+			xmlNodePtr node = nodes->nodeTab[i];
+			assert(node->type == XML_ELEMENT_NODE);
+			std::vector<CDMAttribute> globAttributes;
+			fillAttributeList(globAttributes, nodes->nodeTab[0]->children);
+			for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
+				cdm.addAttribute(cdm.globalAttributeNS(), *it);
+			}
 		}
 	}
 	
@@ -180,14 +188,14 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 	// time
 	CDMDimension timeDim("null", 0);
 	{
-		std::string xpathTimeString("/config/axes/time");
+		std::string xpathTimeString("/cdm_felt_config/axes/time");
 		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathTimeString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 		if (xpathObj.get() == 0) {
 			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathTimeString);
 		}
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 		if (nodes->nodeNr != 1) {
-			throw MetNoFelt::Felt_File_Error("unable to find 'time'-axis in config: " + configFilename);
+			throw MetNoFelt::Felt_File_Error("unable to find exactly 1 'time'-axis in config: " + configFilename);
 		}
 		xmlNodePtr node = nodes->nodeTab[0];
 		assert(node->type == XML_ELEMENT_NODE);
@@ -218,7 +226,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 		std::map<short, std::vector<short> > levels = feltFile.getFeltLevels();
 		for (std::map<short, std::vector<short> >::const_iterator it = levels.begin(); it != levels.end(); ++it) {
 			// add a level
-			std::string xpathLevelString("/config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
+			std::string xpathLevelString("/cdm_felt_config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
 			boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathLevelString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 			if (xpathObj.get() == 0) {
 				throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathLevelString);
@@ -278,7 +286,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     	
     	{
     	// create the x dimension variables and dimensions
-			std::string xpathStringX("/config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='x']");
+			std::string xpathStringX("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='x']");
 			std::vector<CDMAttribute> xVarAttributes;
 			std::map<string, string> xXmlAttributes;
 			int found = readXPathNode(xpathCtx, xpathStringX, xXmlAttributes, xVarAttributes);
@@ -300,7 +308,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     	}
     	{
     		// create the y dimension variables and dimensions
-    		std::string xpathStringY("/config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='y']");
+    		std::string xpathStringY("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='y']");
     		std::vector<CDMAttribute> yVarAttributes;
     		std::map<string, string> yXmlAttributes;
     		int found = readXPathNode(xpathCtx, xpathStringY, yXmlAttributes, yVarAttributes);
@@ -321,11 +329,31 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     		}
     	}
     	
-    	// TODO:  more general detection of non-lat/lon fields
-		if (xDim.getName() != "lon" && yDim.getName() != "lat") {
-			coordinates = "lon lat";
+    	std::string longName;
+    	std::string latName;
+    	{
+    		// read longitude and latitude names for projection axes
+    		std::string xpathStringLong("/cdm_felt_config/axes/spatial_axis[@id='longitude']");
+    		std::vector<CDMAttribute> lonlatVarAttributes;
+    		std::map<string, string> lonlatXmlAttributes;
+    		int found = readXPathNode(xpathCtx, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes);
+    		if (found != 1) {
+    			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLong);    		
+    		}
+    		longName = lonlatXmlAttributes["name"];
+    		std::string xpathStringLat("/cdm_felt_config/axes/spatial_axis[@id='latitude']");
+    		found = readXPathNode(xpathCtx, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes);
+    		if (found != 1) {
+    			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLat);    		
+    		}
+    		latName = lonlatXmlAttributes["name"]; 		
+    	}
+    	
+    	// add projection axes 'coordinates = "lon lat";
+    	if (xDim.getName() != longName && yDim.getName() != latName) {
+			coordinates = longName + " " + latName;
 			try {
-				cdm.generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), "lon", "lat");
+				cdm.generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), longName, latName);
 			} catch (MetNoUtplukk::CDMException& ex) {
 				throw MetNoFelt::Felt_File_Error(ex.what());
 			}
@@ -335,7 +363,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     // add variables
 	std::vector<MetNoFelt::Felt_Array> fArrays(feltFile.listFeltArrays());
 	for (std::vector<MetNoFelt::Felt_Array>::iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
-		std::string xpathString("/config/variables/parameter[@id='"+it->getName()+"']");
+		std::string xpathString("/cdm_felt_config/variables/parameter[@id='"+it->getName()+"']");
 		boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 		if (xpathObj.get() == 0) {
 			throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
