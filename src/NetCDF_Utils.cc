@@ -41,7 +41,8 @@ boost::shared_ptr<Data> ncValues2Data(NcValues* values, NcType dt, size_t length
 //	case ncLong: return CDM_INT; // ncLong is deprecated, and identical to ncInt
 	case ncFloat: return boost::shared_ptr<Data>(new DataImpl<float>(boost::shared_array<float>(reinterpret_cast<float*>(values->base())), length));
 	case ncDouble: return boost::shared_ptr<Data>(new DataImpl<double>(boost::shared_array<double>(reinterpret_cast<double*>(values->base())), length));
-	case ncNoType: delete values; return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(boost::shared_array<int>(new int[0]), 0));
+	case ncNoType: 
+	default: delete values; return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(boost::shared_array<int>(new int[0]), 0));
 	}
 }
 

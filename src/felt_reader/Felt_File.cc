@@ -10,7 +10,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/bind.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -180,13 +179,19 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 	return getDataSlice(fa, idx, fieldSize);
 }
 
-short replaceFill(short newFill, short current) {
-	if (current == ANY_VALUE()) return newFill;
-	return current;
-}
-double scaleValue(double newFill, double scale, double current) {
-	if (current == ANY_VALUE()) return newFill;
-	return current * scale;
+// convert felt short 'header+data+gridinfo = header_data' to a scaled Data
+template<typename T>
+boost::shared_ptr<MetNoUtplukk::Data> createScaledData(const boost::shared_array<short>& header_data, size_t dataSize, double newFillValue, double scalingFactor) {
+	boost::shared_array<T> data(new T[dataSize]);
+	T newFill = static_cast<T>(newFillValue);
+	short* headerDataPos = &header_data[20];
+	T* dataPos = &data[0];
+	for (size_t i = 0; i < dataSize; ++i) {
+		short val = *headerDataPos++;
+		T newVal = (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
+		*dataPos++ = newVal;
+	}
+	return boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<T>(data, dataSize));	
 }
 
 boost::shared_ptr<MetNoUtplukk::Data> Felt_File::getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error) {
@@ -198,20 +203,14 @@ boost::shared_ptr<MetNoUtplukk::Data> Felt_File::getScaledDataSlice(const std::s
 	size_t dataSize = fa.getX() * fa.getY();
 	boost::shared_ptr<MetNoUtplukk::Data> returnData;
 	if (fa.getDatatype() == "short") {
-		boost::shared_array<short> data(new short[dataSize]);
-		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(replaceFill, static_cast<short>(fa.getFillValue()), _1));
 		if (scalingFactor != fa.getScalingFactor()) {
 			throw Felt_File_Error("change in scaling factor for parameter: " + fa.getName() + " consider using float or double datatpye");
 		}
-		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<short>(data, dataSize));
+		returnData = createScaledData<short>(header_data, dataSize, fa.getFillValue(), scalingFactor);
 	} else if (fa.getDatatype() == "float") {
-		boost::shared_array<float> data(new float[dataSize]);
-		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(scaleValue, fa.getFillValue(), scalingFactor, _1));
-		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<float>(data, dataSize));
+		returnData = createScaledData<float>(header_data, dataSize, fa.getFillValue(), scalingFactor);
 	} else if (fa.getDatatype() == "double") {
-		boost::shared_array<double> data(new double[dataSize]);
-		transform(&header_data[20], &header_data[20+dataSize], &data[0], boost::bind(scaleValue, fa.getFillValue(), scalingFactor, _1));
-		returnData = boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<double>(data, dataSize));
+		returnData = createScaledData<double>(header_data, dataSize, fa.getFillValue(), scalingFactor);
 	} else {
 		throw Felt_File_Error("unknown datatype for feltArray " + fa.getName() + ": " + fa.getDatatype());
 	}

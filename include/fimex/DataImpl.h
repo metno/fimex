@@ -21,8 +21,10 @@ namespace MetNoUtplukk
 	 * 
 	 */
 	template<typename T1, typename T2>
-	boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, long length);
+	boost::shared_array<T1> convertArrayType(boost::shared_array<T2> inData, long length);
 
+
+	
 	template<typename C>
 	class DataImpl : public Data
 	{
@@ -197,14 +199,14 @@ namespace MetNoUtplukk
 	}
 	
 	template<typename T1, typename T2>
-	boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, long length) {
+	boost::shared_array<T1> convertArrayType(boost::shared_array<T2> inData, long length) {
 		boost::shared_array<T1> outData(new T1[length]);
 		for (int i = 0; i < length; i++) {
 			outData[i] = static_cast<T1>(inData[i]);
 		}
 		return outData;
 	}
-	
+
 	template<class InputIterator>
 	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException) {
 		switch (datatype) {

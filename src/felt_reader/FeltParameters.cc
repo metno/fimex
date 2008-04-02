@@ -216,10 +216,6 @@ std::string getProjString(int gridType, const boost::array<float, 6>& gridParame
 	return tempProj.str();
 }
 
-
-const int ANY_VALUE() {
-	return -32767;
-}
 const std::string& UNDEFINED() {	
 	static std::string s("");
 	return s;
