@@ -42,5 +42,16 @@ void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first
 	copyData(startPos, data.asDouble(), data.size(), first, last);
 }
 
+template<>
+boost::shared_array<short> convertArrayType(boost::shared_array<short> inData, long length) {
+	return inData;
+}
+template<>
+boost::shared_array<float> convertArrayType(boost::shared_array<float> inData, long length) {
+	return inData;
+}
+
+
+
 
 }
