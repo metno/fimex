@@ -20,6 +20,12 @@ public:
 	const std::string& getName() const {return name;}
 	CDMDataType getDataType() const {return datatype;}
 	const std::vector<std::string>& getShape() const {return shape;}
+	/**
+	 * check the dimension of a variable
+	 * 
+	 * @param dimension the dimension to check for
+	 */
+	bool checkDimension(const std::string& dimension) const;
 	/// print a xml representation to the stream without attributes
 	void toXMLStream(std::ostream& out) const;
 	/// print a xml representation to the stream with attributes

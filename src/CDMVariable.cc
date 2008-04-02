@@ -12,6 +12,15 @@ CDMVariable::~CDMVariable()
 {
 }
 
+bool CDMVariable::checkDimension(const std::string& dimension) const {
+	const std::vector<std::string>& shape = getShape();
+	if (std::find(shape.begin(), shape.end(), dimension) != shape.end()) {
+		return true;
+	}
+	return false;
+}
+
+
 void CDMVariable::shapeToXMLStream(std::ostream& out) const
 {
 	if (shape.size() > 0) {

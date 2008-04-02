@@ -8,6 +8,7 @@
 #include "CDMReader.h"
 #include "CDMExtractor.h"
 #include "CDMInterpolator.h"
+#include "Null_CDMWriter.h"
 #ifdef HAVE_LIBMIC
 #include "FeltCDMReader.h"
 #endif
@@ -82,6 +83,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "interpolate.yAxisValues", vm);
 	writeOption<string>(out, "interpolate.xAxisUnit", vm);
 	writeOption<string>(out, "interpolate.yAxisUnit", vm);
+	writeOption<string>(out, "interpolate.latitudeName", vm);
+	writeOption<string>(out, "interpolate.longitudeName", vm);
 	writeOption<boost::any>(out, "interpolate.printNcML", vm);
 }
 
@@ -235,6 +238,13 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 		return dataReader;
 	}
 	auto_ptr<CDMInterpolator> interpolator(new CDMInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
+	if (vm.count("interpolate.latitudeName")) {
+		interpolator->setLatitudeName(vm["interpolate.latitudeName"].as<string>());
+	}
+	if (vm.count("interpolate.longitudeName")) {
+		interpolator->setLongitudeName(vm["interpolate.longitudeName"].as<string>());
+	}
+	
 	
 	int method = MIUP_NEAREST_NEIGHBOR;
 	if (vm.count("interpolate.method")) {
@@ -290,7 +300,12 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 		return;
 	}
 #endif
-	
+	if (type == "null") {
+		if (vm.count("debug"))
+					cerr << "emulating writing without file without config" << endl;
+		Null_CDMWriter(boost::shared_ptr<CDMReader>(dataReader), vm["output.file"].as<string>());
+		return;
+	}
 	cerr << "unable to write type: " << type << endl;
 	exit(1);
 }
@@ -301,7 +316,7 @@ int main(int argc, char* args[])
 	po::options_description generic("Generic options");
 	std::string configFile("utplukk.cfg");
 	generic.add_options()
-	    ("help,h", po::value<bool>(), "help message")
+	    ("help,h", "help message")
 	    ("version", "program version")
 	    ("debug", "debug program")
 	    ("print-options", "print all options")
@@ -331,6 +346,8 @@ int main(int argc, char* args[])
         ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
         ("interpolate.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
+        ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
+        ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.printNcML", "print NcML description of extractor")
 		;
 	

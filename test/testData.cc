@@ -4,6 +4,7 @@ using boost::unit_test_framework::test_suite;
 
 
 #include "Data.h"
+#include "DataImpl.h"
 
 using namespace std;
 using namespace MetNoUtplukk;

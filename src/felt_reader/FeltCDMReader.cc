@@ -4,6 +4,7 @@
 #include "Felt_Array.h"
 #include "interpolation.h"
 #include "CDMDataType.h"
+#include "DataImpl.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <libxml/tree.h>
@@ -12,6 +13,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <time.h>
 
 namespace MetNoUtplukk
 {
@@ -180,6 +182,17 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
 			for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
 				cdm.addAttribute(cdm.globalAttributeNS(), *it);
 			}
+		}
+		if (! cdm.checkVariableAttribute(cdm.globalAttributeNS(), "history", boost::regex(".*"))) {
+			tm my_tmtime;
+			time_t mytime;
+			time(&mytime);
+			gmtime_r(&mytime, &my_tmtime);
+			std::stringstream stime;
+			int month = (my_tmtime.tm_mon + 1);
+			stime << (my_tmtime.tm_year + 1900) << "-" <<  (month < 10 ? "0" : "") << month << "-" << ( my_tmtime.tm_mday < 10 ? "0" : "") << my_tmtime.tm_mday;
+			//stime << (my_tmtime.tm_hour) << ":" << my_tmtime.tm_min << ":" << my_tmtime.tm_sec << "Z";
+			cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", stime.str() + " creation by utplukk from file '"+ filename+"'"));
 		}
 	}
 	

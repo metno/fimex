@@ -1,5 +1,6 @@
 #include "CDM.h"
 #include "interpolation.h"
+#include "DataImpl.h"
 
 namespace MetNoUtplukk
 {
@@ -58,8 +59,8 @@ std::vector<std::string> CDM::findVariables(const std::string& attrName, const s
 	return findVariables(findAttributes, dims);
 }
 
-bool CDM::checkVariableAttribute(const CDMVariable& var, std::string attribute, const boost::regex& attrValue) const {
-	StrStrAttrMap::const_iterator varIt = attributes.find(var.getName());
+bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const {
+	StrStrAttrMap::const_iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
 		StrAttrMap::const_iterator attrIt = varIt->second.find(attribute);
 		if (attrIt != varIt->second.end()) {
@@ -68,14 +69,6 @@ bool CDM::checkVariableAttribute(const CDMVariable& var, std::string attribute, 
 				return true;
 			}
 		}
-	}
-	return false;
-}
-
-bool CDM::checkVariableDimension(const CDMVariable& var, std::string dimension) const {
-	const std::vector<std::string>& shape = var.getShape();
-	if (std::find(shape.begin(), shape.end(), dimension) != shape.end()) {
-		return true;
 	}
 	return false;
 }
@@ -90,14 +83,14 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 	for (StrVarMap::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
 		bool test = true;
 		for (std::map<std::string, boost::regex>::iterator atIt = attrRegExps.begin(); atIt != attrRegExps.end(); ++atIt) {
-			if (!checkVariableAttribute(varIt->second, atIt->first, atIt->second)) {
+			if (!checkVariableAttribute(varIt->second.getName(), atIt->first, atIt->second)) {
 				test = false;
 				break;
 			}
 		}
 		if (! test) continue;
 		for (std::vector<std::string>::const_iterator dimIt = findDimensions.begin(); dimIt != findDimensions.end(); ++dimIt) {
-			if (!checkVariableDimension(varIt->second, *dimIt)) {
+			if (!varIt->second.checkDimension(*dimIt)) {
 				test = false;
 				break;
 			}
@@ -386,10 +379,13 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	latVar.setData(createData(CDM_DOUBLE, fieldSize, latVal, latVal+fieldSize));
 	addVariable(lonVar);
 	addVariable(latVar);
-	addAttribute(lonVar.getName(),CDMAttribute("units", "degrees_east"));
+	// TODO: those values should be configurable
+	addAttribute(lonVar.getName(),CDMAttribute("units", "degree_east"));
 	addAttribute(lonVar.getName(),CDMAttribute("long_name", "longitude"));
-	addAttribute(latVar.getName(),CDMAttribute("units", "degrees_north"));
+	addAttribute(lonVar.getName(),CDMAttribute("standard_name", "longitude"));
+	addAttribute(latVar.getName(),CDMAttribute("units", "degree_north"));
 	addAttribute(latVar.getName(),CDMAttribute("long_name", "latitude"));
+	addAttribute(latVar.getName(),CDMAttribute("standard_name", "latitude"));
 }
 
 

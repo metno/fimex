@@ -1,5 +1,5 @@
 #include "CachedInterpolation.h"
-
+#include "DataImpl.h"
 namespace MetNoUtplukk
 {
 
@@ -14,7 +14,7 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 	}
 }
 
-boost::shared_ptr<DataImpl<float> > CachedInterpolation::interpolateValues(boost::shared_ptr<Data> inData) {
+boost::shared_ptr<Data> CachedInterpolation::interpolateValues(boost::shared_ptr<Data> inData) {
 	size_t inZ = inData->size() / (inX*inY);
 	float zValues[inZ];
 	boost::shared_array<float> inFloatData = inData->asFloat(); 

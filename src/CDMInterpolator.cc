@@ -2,6 +2,7 @@
 
 #include <boost/regex.hpp>
 #include "interpolation.h"
+#include "DataImpl.h"
 
 namespace MetNoUtplukk
 {
@@ -9,7 +10,7 @@ namespace MetNoUtplukk
 const int DEBUG = 1;
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
-: dataReader(dataReader)
+: dataReader(dataReader), latitudeName("lat"), longitudeName("lon")
 {
 	cdm = dataReader->getCDM();
 }
@@ -126,8 +127,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	cdm.getDimension(orgXAxis).setLength(out_x_axis.size());
 	cdm.getDimension(orgYAxis).setLength(out_y_axis.size());
 	
-	std::string lat("lat");
-	std::string lon("lon");
+	std::string lat(getLatitudeName());
+	std::string lon(getLongitudeName());
 	if (newProj != "latlong") {
 		cdm.generateProjectionCoordinates(newProjection, orgXAxis, orgYAxis, lon, lat);
 	}

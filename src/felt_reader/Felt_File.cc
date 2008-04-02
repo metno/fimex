@@ -1,6 +1,7 @@
 #include "Felt_File.h"
 #include <milib/milib.h>
 #include "CDMDataType.h"
+#include "DataImpl.h"
 #include "Utils.h"
 #include "interpolation.h"
 #include <cassert>

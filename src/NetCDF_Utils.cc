@@ -1,5 +1,6 @@
 #include "NetCDF_Utils.h"
 #include <boost/shared_array.hpp>
+#include "DataImpl.h"
 
 namespace MetNoUtplukk
 {

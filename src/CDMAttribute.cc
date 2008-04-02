@@ -3,6 +3,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
+#include "DataImpl.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam

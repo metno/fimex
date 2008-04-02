@@ -74,18 +74,11 @@ public:
 	/**
 	 * check if a variable contains a attributes with a matching string-value
 	 * 
-	 * @param var variable
+	 * @param varName variable
 	 * @param attribute the attribute name
 	 * @param attrValue the regexp the string-value of the attribute will match against
 	 */
-	bool checkVariableAttribute(const CDMVariable& var, std::string attribute, const boost::regex& attrValue) const;
-	/**
-	 * check the dimension of a variable
-	 * 
-	 * @param var variable
-	 * @param dimension the dimension to check for
-	 */
-	bool checkVariableDimension(const CDMVariable& var, std::string dimension) const;
+	bool checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const;
 	/**
 	 * @brief remove a variable and corresponding attributes
 	 * 

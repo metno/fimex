@@ -1,4 +1,5 @@
 #include "Data.h"
+#include "DataImpl.h"
 
 namespace MetNoUtplukk
 {

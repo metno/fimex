@@ -1,4 +1,4 @@
-CC_TESTS = testInterpolation testData testCDM testTime testTimeSliceData
+CC_TESTS = testInterpolation testData testCDM
 SH_TESTS = 
 LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
@@ -27,8 +27,6 @@ testInterpolation_SOURCES = testInterpolation.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
-testTime_SOURCES = testTime.cc
-testTimeSliceData_SOURCES = testTimeSliceData.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testExtractor_SOURCES = testExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
