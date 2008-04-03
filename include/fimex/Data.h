@@ -28,16 +28,26 @@ namespace MetNoUtplukk
 		/// @brief printing of the current data to ostream, with optional separator
 		virtual void toStream(std::ostream&, std::string separator = "") const = 0;
 
-		/// @brief retrieve data-copy as char
-		virtual boost::shared_array<char> asChar() const = 0;
-		/// @brief retrieve data-copy as short
-		virtual boost::shared_array<short> asShort() const = 0;
-		/// @brief retrieve data-copy as int
-		virtual boost::shared_array<int> asInt() const = 0;
-		/// @brief retrieve data-copy as float
-		virtual boost::shared_array<float> asFloat() const = 0;
-		/// @brief retrieve data-copy as double
-		virtual boost::shared_array<double> asDouble() const = 0;
+		/// @brief retrieve data as char
+		virtual const boost::shared_array<char> asConstChar() const = 0;
+		/// @brief retrieve data as char
+		virtual boost::shared_array<char> asChar() = 0;
+		/// @brief retrieve data as short
+		virtual const boost::shared_array<short> asConstShort() const = 0;
+		/// @brief retrieve data as short
+		virtual boost::shared_array<short> asShort() = 0;
+		/// @brief retrieve data as int
+		virtual const boost::shared_array<int> asConstInt() const = 0;
+		/// @brief retrieve data as int
+		virtual boost::shared_array<int> asInt() = 0;
+		/// @brief retrieve data as float
+		virtual const boost::shared_array<float> asConstFloat() const = 0;
+		/// @brief retrieve data as float (eventually copy)
+		virtual boost::shared_array<float> asFloat() = 0;
+		/// @brief retrieve data as double
+		virtual const boost::shared_array<double> asConstDouble() const = 0;
+		/// @brief retrieve data as double
+		virtual boost::shared_array<double> asDouble() = 0;
 		/// @brief retrieve the whole array as a string (with possible separator)
 		virtual std::string asString(std::string separator = "") const = 0;
 
