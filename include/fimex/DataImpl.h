@@ -1,6 +1,7 @@
 #ifndef DATAIMPL_H_
 #define DATAIMPL_H_
 
+#include <typeinfo>
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <sstream>
@@ -21,8 +22,17 @@ namespace MetNoUtplukk
 	 * 
 	 */
 	template<typename T1, typename T2>
-	boost::shared_array<T1> convertArrayType(boost::shared_array<T2> inData, long length);
-
+	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length);
+	/**
+	 * @brief return a shared array of this data, possibly pointer to internal data
+	 * 
+	 * @param inData original data
+	 * @param length length of original data array
+	 * 
+	 */
+	template<typename T1, typename T2>
+	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length);
+		
 
 	
 	template<typename C>
@@ -44,14 +54,27 @@ namespace MetNoUtplukk
 		 *  @brief get the datapointer of the data
 		 */
 		virtual const boost::shared_array<C> asBase() const {return theData;}
+		/**
+		 * general conversion function, not in base since template methods not allowed
+		 */
+		template<typename T>
+		const boost::shared_array<T> as() const {return constConvertArrayType<T, C>(theData, length);}
+		template<typename T>
+		boost::shared_array<T> as() {return duplicateArrayType<T, C>(theData, length);}
 		// conversion function
-		virtual boost::shared_array<char> asChar() const {return convertArrayType<char, C>(theData, length);}
-		virtual boost::shared_array<short> asShort() const {return convertArrayType<short, C>(theData, length);}
-		virtual boost::shared_array<int> asInt() const {return convertArrayType<int, C>(theData, length);}
-		virtual boost::shared_array<float> asFloat() const {return convertArrayType<float, C>(theData, length);}
-		virtual boost::shared_array<double> asDouble() const {return convertArrayType<double, C>(theData, length);}
+		const virtual boost::shared_array<char> asConstChar() const {return as<char>();}
+		virtual boost::shared_array<char> asChar() {return as<char>();}
+		const virtual boost::shared_array<short> asConstShort() const {return as<short>();}
+		virtual boost::shared_array<short> asShort() {return as<short>();}
+		const virtual boost::shared_array<int> asConstInt() const {return as<int>();}
+		virtual boost::shared_array<int> asInt() {return as<int>();}
+		const virtual boost::shared_array<float> asConstFloat() const {return as<float>();}
+		virtual boost::shared_array<float> asFloat() {return as<float>();}
+		const virtual boost::shared_array<double> asConstDouble() const {return as<double>();}
+		virtual boost::shared_array<double> asDouble() {return as<double>();}
 		virtual std::string asString(std::string separator = "") const;
 
+		
 		virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException);
 		/**
@@ -64,7 +87,7 @@ namespace MetNoUtplukk
 	private:
 		size_t length;
 		boost::shared_array<C> theData;
-		void copyData(size_t startPos, boost::shared_array<C> otherData, size_t otherSize, size_t otherStart, size_t otherEnd) throw(CDMException);
+		void copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd) throw(CDMException);
 	};
 	
 	/**
@@ -97,7 +120,7 @@ namespace MetNoUtplukk
 	}
 
 	template<typename C>
-	void DataImpl<C>::copyData(size_t startPos, boost::shared_array<C> otherData, size_t otherSize, size_t otherFirst, size_t otherLast) throw(CDMException) {
+	void DataImpl<C>::copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherFirst, size_t otherLast) throw(CDMException) {
 		if (otherFirst > otherSize) {
 			throw(CDMException("data-region-start "+ type2string(otherFirst) + " outside range: "+ type2string(otherSize)));
 		}
@@ -105,7 +128,7 @@ namespace MetNoUtplukk
 		otherLast = std::min(otherLast, otherSize);
 		otherLast = std::min(size()-startPos+otherFirst, otherLast);
 		if (otherLast > otherFirst) {
-			std::copy(otherData.get()+otherFirst, otherData.get()+otherLast, theData.get()+startPos);
+			std::copy(&otherData[otherFirst], &otherData[otherLast], &theData[startPos]);
 		}
 	}
 	template<typename C>
@@ -199,13 +222,32 @@ namespace MetNoUtplukk
 	}
 	
 	template<typename T1, typename T2>
-	boost::shared_array<T1> convertArrayType(boost::shared_array<T2> inData, long length) {
+	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length) {
 		boost::shared_array<T1> outData(new T1[length]);
-		for (int i = 0; i < length; i++) {
-			outData[i] = static_cast<T1>(inData[i]);
+		T2* inDataPos = &inData[0];
+		T2* inDataLast = &inData[length];
+		T1* outDataPos = &outData[0];
+		while (inDataPos != inDataLast) {
+			*outDataPos++ = static_cast<T1>(*inDataPos++);
 		}
 		return outData;
 	}
+	// this version is identical to duplicateArrayType one, except that it allows for specializations
+	// in the case of T1 == T2 (see Data.cc)
+	template<typename T1, typename T2>
+	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length) {
+		return duplicateArrayType<T1,T2>(inData, length);
+	}
+	template<>
+	inline const boost::shared_array<char> constConvertArrayType(const boost::shared_array<char>& inData, long length) {return inData;}
+	template<>
+	inline const boost::shared_array<short> constConvertArrayType(const boost::shared_array<short>& inData, long length) {return inData;}
+	template<>
+	inline const boost::shared_array<int> constConvertArrayType(const boost::shared_array<int>& inData, long length) {return inData;}
+	template<>
+	inline const boost::shared_array<float> constConvertArrayType(const boost::shared_array<float>& inData, long length) {return inData;}
+	template<>
+	inline const boost::shared_array<double> constConvertArrayType(const boost::shared_array<double>& inData, long length) {return inData;}
 
 	template<class InputIterator>
 	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException) {

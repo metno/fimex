@@ -23,35 +23,23 @@ boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, 
 }
 template<>
 void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
-	copyData(startPos, data.asChar(), data.size(), first, last);
+	copyData(startPos, data.asConstChar(), data.size(), first, last);
 }
 template<>
 void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
-	copyData(startPos, data.asShort(), data.size(), first, last);
+	copyData(startPos, data.asConstShort(), data.size(), first, last);
 }
 template<>
 void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
-	copyData(startPos, data.asInt(), data.size(), first, last);
+	copyData(startPos, data.asConstInt(), data.size(), first, last);
 }
 template<>
 void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
-	copyData(startPos, data.asFloat(), data.size(), first, last);
+	copyData(startPos, data.asConstFloat(), data.size(), first, last);
 }
 template<>
 void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
-	copyData(startPos, data.asDouble(), data.size(), first, last);
+	copyData(startPos, data.asConstDouble(), data.size(), first, last);
 }
-
-template<>
-boost::shared_array<short> convertArrayType(boost::shared_array<short> inData, long length) {
-	return inData;
-}
-template<>
-boost::shared_array<float> convertArrayType(boost::shared_array<float> inData, long length) {
-	return inData;
-}
-
-
-
 
 }

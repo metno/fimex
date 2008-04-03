@@ -17,7 +17,7 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 boost::shared_ptr<Data> CachedInterpolation::interpolateValues(boost::shared_ptr<Data> inData) {
 	size_t inZ = inData->size() / (inX*inY);
 	float zValues[inZ];
-	boost::shared_array<float> inFloatData = inData->asFloat(); 
+	const boost::shared_array<float> inFloatData = inData->asConstFloat(); 
 	boost::shared_array<float> outfield(new float[outX*outY*inZ]);
 	for (size_t x = 0; x < outX; ++x) {
 		for (size_t y = 0; y < outY; ++y) {

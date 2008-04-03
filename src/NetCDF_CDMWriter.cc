@@ -19,11 +19,11 @@ static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
-	case CDM_STRING: return var->put_rec(dim, data->asChar().get());
-	case CDM_SHORT:  return var->put_rec(dim, data->asShort().get());
-	case CDM_INT: return var->put_rec(dim, data->asInt().get());
-	case CDM_FLOAT: return var->put_rec(dim, data->asFloat().get());
-	case CDM_DOUBLE: return var->put_rec(dim, data->asDouble().get());
+	case CDM_STRING: return var->put_rec(dim, data->asConstChar().get());
+	case CDM_SHORT:  return var->put_rec(dim, data->asConstShort().get());
+	case CDM_INT: return var->put_rec(dim, data->asConstInt().get());
+	case CDM_FLOAT: return var->put_rec(dim, data->asConstFloat().get());
+	case CDM_DOUBLE: return var->put_rec(dim, data->asConstDouble().get());
 	default: return false;
 	}
 	

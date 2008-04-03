@@ -419,7 +419,7 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
         		for (std::vector<CDMAttribute>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
         			if (attrIt->getName() == "scale_factor") {
         				found = true;
-        				float scale = (attrIt->getData()->asFloat())[0] * it->getScalingFactor();
+        				float scale = (attrIt->getData()->asConstFloat())[0] * it->getScalingFactor();
         				attrIt->getData()->setValue(0, scale);
         			}
         		}
