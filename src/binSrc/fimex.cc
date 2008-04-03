@@ -40,7 +40,7 @@ static void writeOption(ostream& out, const string& var, const po::variables_map
 }
 
 template <>
-static void writeOption<boost::any>(ostream& out, const string& var, const po::variables_map& vm) {
+void writeOption<boost::any>(ostream& out, const string& var, const po::variables_map& vm) {
 	// variables without real value, just set or unset
 	if (vm.count(var)) {
 		out << var  << endl;

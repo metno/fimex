@@ -16,12 +16,12 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 
 boost::shared_ptr<Data> CachedInterpolation::interpolateValues(boost::shared_ptr<Data> inData) {
 	size_t inZ = inData->size() / (inX*inY);
-	float zValues[inZ];
+	boost::shared_array<float> zValues(new float[inZ]);
 	const boost::shared_array<float> inFloatData = inData->asConstFloat(); 
 	boost::shared_array<float> outfield(new float[outX*outY*inZ]);
 	for (size_t x = 0; x < outX; ++x) {
 		for (size_t y = 0; y < outY; ++y) {
-			if (func(inFloatData.get(), zValues, pointsOnXAxis[y*outX+x], pointsOnYAxis[y*outX+x], inX, inY, inZ) != MIUP_ERROR) {
+			if (func(inFloatData.get(), zValues.get(), pointsOnXAxis[y*outX+x], pointsOnYAxis[y*outX+x], inX, inY, inZ) != MIUP_ERROR) {
 				for (size_t z = 0; z < inZ; ++z) {
 					outfield[miup_3d_array_position(x, y, z, outX, outY, inZ)] = zValues[z];
 				}			

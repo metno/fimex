@@ -356,16 +356,16 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	size_t xDimLength = getDimension(xDim).getLength();
 	size_t yDimLength = getDimension(yDim).getLength();
 	size_t fieldSize = xDimLength * yDimLength; 
-	double longVal[fieldSize];
-	double latVal[fieldSize];
+	boost::shared_array<double> longVal(new double[fieldSize]);
+	boost::shared_array<double> latVal(new double[fieldSize]);
 	std::string lonLatProj("+elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0 +proj=latlong");
 	std::string projStr = attributesToProjString(getAttributes(projectionVariable));
-	if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal, latVal)) {
+	if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
 	}
 	// converting to Degree
-	double* longPos = longVal;
-	double* latPos = latVal;
+	double* longPos = longVal.get();
+	double* latPos = latVal.get();
 	for (size_t i = 0; i < fieldSize; ++i, ++latPos, ++longPos) {
 		*longPos *= RAD_TO_DEG;
 		*latPos  *= RAD_TO_DEG;
@@ -374,9 +374,9 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	xyDims.push_back(yDim);
 	xyDims.push_back(xDim);
 	CDMVariable lonVar(lonDim, CDM_DOUBLE, xyDims);
-	lonVar.setData(createData(CDM_DOUBLE, fieldSize, longVal, longVal+fieldSize));
+	lonVar.setData(createData(CDM_DOUBLE, fieldSize, &longVal[0], &longVal[fieldSize]));
 	CDMVariable latVar(latDim, CDM_DOUBLE, xyDims);
-	latVar.setData(createData(CDM_DOUBLE, fieldSize, latVal, latVal+fieldSize));
+	latVar.setData(createData(CDM_DOUBLE, fieldSize, &latVal[0], &latVal[fieldSize]));
 	addVariable(lonVar);
 	addVariable(latVar);
 	// TODO: those values should be configurable
