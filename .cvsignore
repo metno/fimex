@@ -1,0 +1,11 @@
+config.guess
+config.sub
+config.status
+stamp-h1
+utplukk.pc
+Makefile.in
+Makefile
+aclocal.m4
+autom4te.cache
+config.h.in
+config.h
