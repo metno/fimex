@@ -7,6 +7,7 @@
 #include "DataImpl.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
+#include <boost/bind.hpp>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xinclude.h>
@@ -438,32 +439,20 @@ FeltCDMReader::~FeltCDMReader()
 {
 }
 
-
-
 const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
 	const CDMVariable& variable = cdm.getVariable(varName);
 	if (variable.hasData()) {
 		return getDataFromMemory(variable, unLimDimPos);
 	}
-	long length = 0;
-	const vector<std::string>& dims = variable.getShape();
-	if (dims.size() > 0) length = 1;
-	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-		CDMDimension& dim = cdm.getDimension(*it);
-		if (!dim.isUnlimited()) {
-			length *= dim.getLength();
-		}
-	}
-	
+	// only time can be unLimDim
 	if (unLimDimPos > timeVec.size()) {
 		throw CDMException("requested time outside data-region");
-	}
+	}	
 	
-	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y; 
-	// only time can be unLimDim
-
+	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y;
+	const vector<std::string>& dims = variable.getShape();
 	const CDMDimension* layerDim = 0;
-	size_t size = 1;
+	size_t xy_size = 1;
 	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
 		CDMDimension& dim = cdm.getDimension(*it);		
 		if (dim.getName() != xDim.getName() &&
@@ -473,10 +462,10 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 			layerDim = &dim;
 		}
 		if (! dim.isUnlimited()) {
-			size *= dim.getLength();
+			xy_size *= dim.getLength();
 		}
 	}
-	boost::shared_ptr<Data> data = createData(variable.getDataType(), size);
+	boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size);
 	try {
 		std::map<std::string, std::string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName()); 
 		if (foundId != varNameFeltIdMap.end()) {
@@ -491,6 +480,7 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 				}
 			}
 			if (!contains) {
+				// return empty dataset
 				return createData(variable.getDataType(), 0);
 			}
 
@@ -501,6 +491,7 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 					layerVals.push_back(levelVecMap[layerDim->getName()][i]);
 				}
 			} else {
+				// no layers, just 1 level
 				std::vector<short> levels = fa.getLevels();
 				if (levels.size() == 1) {
 					layerVals.push_back(*(levels.begin()));
