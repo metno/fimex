@@ -1,9 +1,12 @@
 AC_INIT([utplukk], [0.2], [heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_PROG_CC
+AC_PROG_CC_STDC
 AC_PROG_CXX
 #AC_PROG_RANLIB
 AC_PROG_LIBTOOL
+
+# C99 testing only available starting in autoconf 2.60
+# AC_PROG_CC_C99
 
 AC_ARG_WITH([NetCDF],
             [AS_HELP_STRING([--with-NetCDF],
