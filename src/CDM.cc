@@ -38,21 +38,6 @@ CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException) {
 }
 
 std::vector<std::string> CDM::findVariables(const std::string& attrName, const std::string& attrValueRegExp) const {
-//	boost::regex valRegExp(attrValueRegExp);
-//	boost::smatch what;
-//	std::vector<std::string> results;
-//	for (StrStrAttrMap::const_iterator varIt = attributes.begin(); varIt != attributes.end(); ++varIt) {
-//		if (varIt->first == globalAttributeNS())
-//			continue;
-//		StrAttrMap::const_iterator attrIt = varIt->second.find(attrName);
-//		if (attrIt != varIt->second.end()) {
-//			if (boost::regex_match(attrIt->second.getStringValue(), what, valRegExp)) {
-//				results.push_back(varIt->first);
-//			}
-//		}
-//	}
-//	return results;
-
 	std::map<std::string, std::string> findAttributes;
 	findAttributes[attrName] = attrValueRegExp;
 	std::vector<std::string> dims;
