@@ -178,6 +178,7 @@ namespace MetNoUtplukk
 	
 	template<typename C>
 	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) {
+		// get the sizes of the original data and the output data
 		size_t orgSize = 1;
 		size_t outputSize = 1;
 		for (size_t i = 0; i < orgDimSize.size(); ++i) {
@@ -187,10 +188,11 @@ namespace MetNoUtplukk
 		}
 		if (orgSize != size()) throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
 		
-		
+		// get the old and new datacontainer
 		boost::shared_ptr<DataImpl<C> > output(new DataImpl<C>(outputSize));
 		C* newData = output->theData.get();
 		C* oldData = theData.get();
+
 		// pre-calculation of the slice-size of the different dimensions
 		std::vector<size_t> orgSliceSize; 
 		orgSliceSize.reserve(orgDimSize.size());
@@ -198,6 +200,7 @@ namespace MetNoUtplukk
 		for (size_t dim = 1; dim < orgDimSize.size(); dim++) {
 			orgSliceSize[dim] = orgSliceSize[dim-1] * orgDimSize[dim-1];
 		}
+		// slice the data
 		recursiveCopyMultiDimData(&oldData, &newData, orgDimSize, orgSliceSize, startDims, outputDimSize, orgDimSize.size() - 1);
 		
 		return output;
