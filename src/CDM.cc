@@ -1,6 +1,8 @@
 #include "CDM.h"
 #include "interpolation.h"
 #include "DataImpl.h"
+#include <boost/bind.hpp>
+#include <functional>
 
 namespace MetNoUtplukk
 {
@@ -58,6 +60,15 @@ bool CDM::checkVariableAttribute(const std::string& varName, const std::string& 
 	return false;
 }
 
+/** object-function for checkVariableAttribute */ 
+class VariableAttributeCheck : public std::unary_function<std::pair<std::string, boost::regex>, bool> {
+	const CDM& cdm;
+	const std::string& varName;
+public:
+	VariableAttributeCheck(const CDM& cdm, const std::string& varName) : cdm(cdm), varName(varName) { };
+	bool operator() (const std::pair<std::string, boost::regex>& attrRegex) const { return cdm.checkVariableAttribute(varName, attrRegex.first, attrRegex.second); }
+};
+
 std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const {
 	std::vector<std::string> results;
 	// precalc regexp
@@ -66,22 +77,12 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 		attrRegExps[attrIt->first] = boost::regex(attrIt->second);
 	}
 	for (StrVarMap::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
-		bool test = true;
-		for (std::map<std::string, boost::regex>::iterator atIt = attrRegExps.begin(); atIt != attrRegExps.end(); ++atIt) {
-			if (!checkVariableAttribute(varIt->second.getName(), atIt->first, atIt->second)) {
-				test = false;
-				break;
+		// test if all attributes are found in variable (find_if finds the first not found)
+		if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, varIt->first))) == attrRegExps.end()) {
+			// test if all dimensions are found in variable (find_if finds the first not found)
+			if (find_if(findDimensions.begin(), findDimensions.end(), !boost::bind(&CDMVariable::checkDimension, &(varIt->second), _1)) == findDimensions.end()) {
+				results.push_back(varIt->first);
 			}
-		}
-		if (! test) continue;
-		for (std::vector<std::string>::const_iterator dimIt = findDimensions.begin(); dimIt != findDimensions.end(); ++dimIt) {
-			if (!varIt->second.checkDimension(*dimIt)) {
-				test = false;
-				break;
-			}
-		}
-		if (test) {
-			results.push_back(varIt->first);
 		}
 	}
 	return results;
@@ -310,11 +311,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 	}
 	// units and values
 	xAxisUnits = getAttribute(xAxis, "units").getStringValue();
-	// TODO: use getDataSlice to make sure data exists
-	//xAxisVals = getVariable(xAxis).getData();
 	yAxisUnits = getAttribute(yAxis, "units").getStringValue();
-	//yAxisVals = getVariable(yAxis).getData();
-
 	
 	return retVal;	
 }
