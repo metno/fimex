@@ -43,7 +43,7 @@ AC_CXX_HAVE_STL
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([
 *** Libxml is required to build utplukk; Available at
 http://www.libxml.org/.]))
-AX_BOOST_BASE([1.33.1])
+AX_BOOST_BASE([1.32.0])
 AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX
 AX_BOOST_PROGRAM_OPTIONS
