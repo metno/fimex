@@ -35,15 +35,27 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+build_triplet = @build@
+host_triplet = @host@
+@HAVE_MILIB_TRUE@am__append_1 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc FeltParameters.cc Felt_File_Error.cc
+@HAVE_MILIB_TRUE@am__append_2 = FeltCDMReader.h Felt_File.h Felt_Array.h FeltParameters.h Felt_File_Error.h
 subdir = src/felt_reader
-DIST_COMMON = $(include_HEADERS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__include_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ax_boost_base.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
+	$(top_srcdir)/m4/ac_cxx_have_stl.m4 \
+	$(top_srcdir)/m4/ac_cxx_namespaces.m4 \
+	$(top_srcdir)/m4/ax_boost_base.m4 \
 	$(top_srcdir)/m4/ax_boost_filesystem.m4 \
+	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_prog_doxygen.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
+	$(top_srcdir)/m4/have_netcdf_check.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
+	$(top_srcdir)/m4/metno_have_udunits.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -58,24 +70,32 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
-AR = ar
 ARFLAGS = cru
 libutplukk_felt_a_AR = $(AR) $(ARFLAGS)
 libutplukk_felt_a_LIBADD =
-am_libutplukk_felt_a_OBJECTS = FeltCDMReader.$(OBJEXT) \
-	Felt_Array.$(OBJEXT) Felt_File.$(OBJEXT) \
-	FeltParameters.$(OBJEXT) Felt_File_Error.$(OBJEXT)
+am__libutplukk_felt_a_SOURCES_DIST = FeltCDMReader.cc Felt_Array.cc \
+	Felt_File.cc FeltParameters.cc Felt_File_Error.cc
+@HAVE_MILIB_TRUE@am__objects_1 = FeltCDMReader.$(OBJEXT) \
+@HAVE_MILIB_TRUE@	Felt_Array.$(OBJEXT) Felt_File.$(OBJEXT) \
+@HAVE_MILIB_TRUE@	FeltParameters.$(OBJEXT) \
+@HAVE_MILIB_TRUE@	Felt_File_Error.$(OBJEXT)
+am_libutplukk_felt_a_OBJECTS = $(am__objects_1)
 libutplukk_felt_a_OBJECTS = $(am_libutplukk_felt_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libutplukk_felt_a_SOURCES)
-DIST_SOURCES = $(libutplukk_felt_a_SOURCES)
+DIST_SOURCES = $(am__libutplukk_felt_a_SOURCES_DIST)
+am__include_HEADERS_DIST = FeltCDMReader.h Felt_File.h Felt_Array.h \
+	FeltParameters.h Felt_File_Error.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -85,6 +105,7 @@ ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -92,13 +113,16 @@ AWK = @AWK@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
 BOOST_FILESYSTEM_LIB = @BOOST_FILESYSTEM_LIB@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
+BOOST_PROGRAM_OPTIONS_LIB = @BOOST_PROGRAM_OPTIONS_LIB@
 BOOST_REGEX_LIB = @BOOST_REGEX_LIB@
 BOOST_UNIT_TEST_FRAMEWORK_LIB = @BOOST_UNIT_TEST_FRAMEWORK_LIB@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
+CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -150,10 +174,20 @@ DX_MAKEINDEX = @DX_MAKEINDEX@
 DX_PDFLATEX = @DX_PDFLATEX@
 DX_PERL = @DX_PERL@
 DX_PROJECT = @DX_PROJECT@
+ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
+FFLAGS = @FFLAGS@
+HAVE_MILIB_FALSE = @HAVE_MILIB_FALSE@
+HAVE_MILIB_TRUE = @HAVE_MILIB_TRUE@
+HAVE_NETCDF_FALSE = @HAVE_NETCDF_FALSE@
+HAVE_NETCDF_TRUE = @HAVE_NETCDF_TRUE@
+HAVE_UDUNITS_FALSE = @HAVE_UDUNITS_FALSE@
+HAVE_UDUNITS_TRUE = @HAVE_UDUNITS_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -161,8 +195,13 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+NETCDF_CPPFLAGS = @NETCDF_CPPFLAGS@
+NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
+NETCDF_LIBS = @NETCDF_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -171,16 +210,23 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+UDUNITS_CPPFLAGS = @UDUNITS_CPPFLAGS@
+UDUNITS_LDFLAGS = @UDUNITS_LDFLAGS@
+UDUNITS_LIBS = @UDUNITS_LIBS@
 VERSION = @VERSION@
 XML2_CONFIG = @XML2_CONFIG@
 XML_CPPFLAGS = @XML_CPPFLAGS@
 XML_LIBS = @XML_LIBS@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_F77 = @ac_ct_F77@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 ac_pt_DX_DOT = @ac_pt_DX_DOT@
@@ -192,6 +238,7 @@ ac_pt_DX_LATEX = @ac_pt_DX_LATEX@
 ac_pt_DX_MAKEINDEX = @ac_pt_DX_MAKEINDEX@
 ac_pt_DX_PDFLATEX = @ac_pt_DX_PDFLATEX@
 ac_pt_DX_PERL = @ac_pt_DX_PERL@
+ac_pt_PKG_CONFIG = @ac_pt_PKG_CONFIG@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -202,10 +249,18 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 bindir = @bindir@
+build = @build@
 build_alias = @build_alias@
+build_cpu = @build_cpu@
+build_os = @build_os@
+build_vendor = @build_vendor@
 datadir = @datadir@
 exec_prefix = @exec_prefix@
+host = @host@
 host_alias = @host_alias@
+host_cpu = @host_cpu@
+host_os = @host_os@
+host_vendor = @host_vendor@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -213,6 +268,8 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
 mandir = @mandir@
+milib_CFLAGS = @milib_CFLAGS@
+milib_LIBS = @milib_LIBS@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 prefix = @prefix@
@@ -223,14 +280,14 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I. -I.. -I/disk1/metno/local/include/milib -I/usr/include/libxml2 -Ifelt_reader -I/usr/include/netcdf-3
+AM_CPPFLAGS = -I. -I.. ${milib_CFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
 lib_LIBRARIES = libutplukk_felt.a
-libutplukk_felt_a_SOURCES = FeltCDMReader.cc Felt_Array.cc Felt_File.cc FeltParameters.cc Felt_File_Error.cc
-include_HEADERS = FeltCDMReader.h Felt_File.h Felt_Array.h FeltParameters.h Felt_File_Error.h
+libutplukk_felt_a_SOURCES = $(am__append_1)
+include_HEADERS = $(am__append_2)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -319,6 +376,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cc.lo:
+@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 uninstall-info-am:
 install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
@@ -446,13 +519,14 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLIBRARIES mostlyclean-am
+clean-am: clean-generic clean-libLIBRARIES clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+	distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -481,7 +555,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -495,17 +570,17 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
-	clean-libLIBRARIES ctags distclean distclean-compile \
-	distclean-generic distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLIBRARIES install-man install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-libLIBRARIES clean-libtool ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-includeHEADERS install-info \
+	install-info-am install-libLIBRARIES install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLIBRARIES
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-includeHEADERS \
+	uninstall-info-am uninstall-libLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

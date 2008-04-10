@@ -13,7 +13,6 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -34,76 +33,124 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = $(am__EXEEXT_1)
+build_triplet = @build@
+host_triplet = @host@
+@HAVE_MILIB_TRUE@am__append_1 = ${milib_LIBS}
+@HAVE_MILIB_TRUE@am__append_2 = testFeltReader
+@HAVE_UDUNITS_TRUE@am__append_3 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
+@HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
+@HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_TESTS}
+@HAVE_NETCDF_TRUE@am__append_6 = testNetCDFReadWrite.sh
+check_PROGRAMS = $(am__EXEEXT_4)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ax_boost_base.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
+	$(top_srcdir)/m4/ac_cxx_have_stl.m4 \
+	$(top_srcdir)/m4/ac_cxx_namespaces.m4 \
+	$(top_srcdir)/m4/ax_boost_base.m4 \
 	$(top_srcdir)/m4/ax_boost_filesystem.m4 \
+	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_prog_doxygen.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
+	$(top_srcdir)/m4/have_netcdf_check.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
+	$(top_srcdir)/m4/metno_have_udunits.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-am__EXEEXT_1 = testInterpolation$(EXEEXT) testFeltReader$(EXEEXT) \
-	testTime$(EXEEXT) testTimeSliceData$(EXEEXT) \
-	testNetcdfWriter$(EXEEXT)
-am__installdirs = "$(DESTDIR)$(bindir)"
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS)
+@HAVE_MILIB_TRUE@am__EXEEXT_1 = testFeltReader$(EXEEXT)
+@HAVE_MILIB_TRUE@am__EXEEXT_2 = testNetcdfWriter$(EXEEXT) \
+@HAVE_MILIB_TRUE@	testExtractor$(EXEEXT) \
+@HAVE_MILIB_TRUE@	testInterpolator$(EXEEXT)
+@HAVE_NETCDF_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
+am__EXEEXT_4 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
+	testCDM$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3)
+am_testCDM_OBJECTS = testCDM.$(OBJEXT)
+testCDM_OBJECTS = $(am_testCDM_OBJECTS)
+testCDM_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+@HAVE_MILIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
+@HAVE_UDUNITS_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) \
+@HAVE_UDUNITS_TRUE@	$(am__DEPENDENCIES_1)
+@HAVE_NETCDF_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) \
+@HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
+testCDM_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
+	../src/libutplukk.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+am_testData_OBJECTS = testData.$(OBJEXT)
+testData_OBJECTS = $(am_testData_OBJECTS)
+testData_LDADD = $(LDADD)
+testData_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
+	../src/libutplukk.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
+testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
+testExtractor_LDADD = $(LDADD)
+testExtractor_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
+	../src/libutplukk.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
 testFeltReader_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
 testInterpolation_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
+testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
+testInterpolator_LDADD = $(LDADD)
+testInterpolator_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
+	../src/libutplukk.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
 testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
-am_testTime_OBJECTS = testTime.$(OBJEXT)
-testTime_OBJECTS = $(am_testTime_OBJECTS)
-testTime_LDADD = $(LDADD)
-testTime_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
-am_testTimeSliceData_OBJECTS = testTimeSliceData.$(OBJEXT)
-testTimeSliceData_OBJECTS = $(am_testTimeSliceData_OBJECTS)
-testTimeSliceData_LDADD = $(LDADD)
-testTimeSliceData_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
-CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
-SOURCES = $(testFeltReader_SOURCES) $(testInterpolation_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testTime_SOURCES) \
-	$(testTimeSliceData_SOURCES)
-DIST_SOURCES = $(testFeltReader_SOURCES) $(testInterpolation_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testTime_SOURCES) \
-	$(testTimeSliceData_SOURCES)
+CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
+	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
+	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
+	$(testNetcdfWriter_SOURCES)
+DIST_SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
+	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
+	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
+	$(testNetcdfWriter_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -111,6 +158,7 @@ ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -118,13 +166,16 @@ AWK = @AWK@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
 BOOST_FILESYSTEM_LIB = @BOOST_FILESYSTEM_LIB@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
+BOOST_PROGRAM_OPTIONS_LIB = @BOOST_PROGRAM_OPTIONS_LIB@
 BOOST_REGEX_LIB = @BOOST_REGEX_LIB@
 BOOST_UNIT_TEST_FRAMEWORK_LIB = @BOOST_UNIT_TEST_FRAMEWORK_LIB@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
+CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -176,10 +227,20 @@ DX_MAKEINDEX = @DX_MAKEINDEX@
 DX_PDFLATEX = @DX_PDFLATEX@
 DX_PERL = @DX_PERL@
 DX_PROJECT = @DX_PROJECT@
+ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
+FFLAGS = @FFLAGS@
+HAVE_MILIB_FALSE = @HAVE_MILIB_FALSE@
+HAVE_MILIB_TRUE = @HAVE_MILIB_TRUE@
+HAVE_NETCDF_FALSE = @HAVE_NETCDF_FALSE@
+HAVE_NETCDF_TRUE = @HAVE_NETCDF_TRUE@
+HAVE_UDUNITS_FALSE = @HAVE_UDUNITS_FALSE@
+HAVE_UDUNITS_TRUE = @HAVE_UDUNITS_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -187,8 +248,13 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+NETCDF_CPPFLAGS = @NETCDF_CPPFLAGS@
+NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
+NETCDF_LIBS = @NETCDF_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -197,16 +263,23 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+UDUNITS_CPPFLAGS = @UDUNITS_CPPFLAGS@
+UDUNITS_LDFLAGS = @UDUNITS_LDFLAGS@
+UDUNITS_LIBS = @UDUNITS_LIBS@
 VERSION = @VERSION@
 XML2_CONFIG = @XML2_CONFIG@
 XML_CPPFLAGS = @XML_CPPFLAGS@
 XML_LIBS = @XML_LIBS@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_F77 = @ac_ct_F77@
 ac_ct_RANLIB = @ac_ct_RANLIB@
 ac_ct_STRIP = @ac_ct_STRIP@
 ac_pt_DX_DOT = @ac_pt_DX_DOT@
@@ -218,6 +291,7 @@ ac_pt_DX_LATEX = @ac_pt_DX_LATEX@
 ac_pt_DX_MAKEINDEX = @ac_pt_DX_MAKEINDEX@
 ac_pt_DX_PDFLATEX = @ac_pt_DX_PDFLATEX@
 ac_pt_DX_PERL = @ac_pt_DX_PERL@
+ac_pt_PKG_CONFIG = @ac_pt_PKG_CONFIG@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -228,10 +302,18 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 bindir = @bindir@
+build = @build@
 build_alias = @build_alias@
+build_cpu = @build_cpu@
+build_os = @build_os@
+build_vendor = @build_vendor@
 datadir = @datadir@
 exec_prefix = @exec_prefix@
+host = @host@
 host_alias = @host_alias@
+host_cpu = @host_cpu@
+host_os = @host_os@
+host_vendor = @host_vendor@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -239,6 +321,8 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
 mandir = @mandir@
+milib_CFLAGS = @milib_CFLAGS@
+milib_LIBS = @milib_LIBS@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 prefix = @prefix@
@@ -247,21 +331,29 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-TESTS = testInterpolation testFeltReader testTime testTimeSliceData testNetcdfWriter
-LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a -L/disk1/metno/local/lib -lmic -lmi -lg2c -L/usr/lib/netcdf-3 -lnetcdf_c++ -lnetcdf -ludunits -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
-#LIBS = `xml2-config --libs`
-AM_CPPFLAGS = -I../src -I../src/felt_reader -I/disk1/metno/local/include/milib -I/usr/include/netcdf-3
+CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
+	$(am__append_5)
+SH_TESTS = $(am__append_6)
+LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a \
+	-lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) \
+	$(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm \
+	@XML_LIBS@ $(am__append_1) $(am__append_3) $(am__append_4)
+AM_CPPFLAGS = -I../src -I../src/felt_reader ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS}
 AM_CXXFLAGS = -Wall -pedantic 
 AM_CFLAGS = -std=c99 -Wall -pedantic
-testInterpolation_SOURCES = testInterpolation.cc 
+@HAVE_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator
+TESTS = $(CC_TESTS) $(SH_TESTS)
+testInterpolation_SOURCES = testInterpolation.cc
+testData_SOURCES = testData.cc
+testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
-testTime_SOURCES = testTime.cc
-testTimeSliceData_SOURCES = testTimeSliceData.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testExtractor_SOURCES = testExtractor.cc
+testInterpolator_SOURCES = testInterpolator.cc
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .o .obj
+.SUFFIXES: .cc .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -291,44 +383,34 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(bindir)/$$f'"; \
-	   $(INSTALL_PROGRAM_ENV) $(binPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(bindir)/$$f" || exit 1; \
-	  else :; fi; \
-	done
 
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
 	done
-
-clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+testCDM$(EXEEXT): $(testCDM_OBJECTS) $(testCDM_DEPENDENCIES) 
+	@rm -f testCDM$(EXEEXT)
+	$(CXXLINK) $(testCDM_LDFLAGS) $(testCDM_OBJECTS) $(testCDM_LDADD) $(LIBS)
+testData$(EXEEXT): $(testData_OBJECTS) $(testData_DEPENDENCIES) 
+	@rm -f testData$(EXEEXT)
+	$(CXXLINK) $(testData_LDFLAGS) $(testData_OBJECTS) $(testData_LDADD) $(LIBS)
+testExtractor$(EXEEXT): $(testExtractor_OBJECTS) $(testExtractor_DEPENDENCIES) 
+	@rm -f testExtractor$(EXEEXT)
+	$(CXXLINK) $(testExtractor_LDFLAGS) $(testExtractor_OBJECTS) $(testExtractor_LDADD) $(LIBS)
 testFeltReader$(EXEEXT): $(testFeltReader_OBJECTS) $(testFeltReader_DEPENDENCIES) 
 	@rm -f testFeltReader$(EXEEXT)
 	$(CXXLINK) $(testFeltReader_LDFLAGS) $(testFeltReader_OBJECTS) $(testFeltReader_LDADD) $(LIBS)
 testInterpolation$(EXEEXT): $(testInterpolation_OBJECTS) $(testInterpolation_DEPENDENCIES) 
 	@rm -f testInterpolation$(EXEEXT)
 	$(CXXLINK) $(testInterpolation_LDFLAGS) $(testInterpolation_OBJECTS) $(testInterpolation_LDADD) $(LIBS)
+testInterpolator$(EXEEXT): $(testInterpolator_OBJECTS) $(testInterpolator_DEPENDENCIES) 
+	@rm -f testInterpolator$(EXEEXT)
+	$(CXXLINK) $(testInterpolator_LDFLAGS) $(testInterpolator_OBJECTS) $(testInterpolator_LDADD) $(LIBS)
 testNetcdfWriter$(EXEEXT): $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_DEPENDENCIES) 
 	@rm -f testNetcdfWriter$(EXEEXT)
 	$(CXXLINK) $(testNetcdfWriter_LDFLAGS) $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_LDADD) $(LIBS)
-testTime$(EXEEXT): $(testTime_OBJECTS) $(testTime_DEPENDENCIES) 
-	@rm -f testTime$(EXEEXT)
-	$(CXXLINK) $(testTime_LDFLAGS) $(testTime_OBJECTS) $(testTime_LDADD) $(LIBS)
-testTimeSliceData$(EXEEXT): $(testTimeSliceData_OBJECTS) $(testTimeSliceData_DEPENDENCIES) 
-	@rm -f testTimeSliceData$(EXEEXT)
-	$(CXXLINK) $(testTimeSliceData_LDFLAGS) $(testTimeSliceData_OBJECTS) $(testTimeSliceData_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -336,11 +418,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testCDM.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testFeltReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetcdfWriter.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTime.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSliceData.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -355,6 +439,22 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cc.lo:
+@am__fastdepCXX_TRUE@	if $(LTCXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+	-rm -f libtool
 uninstall-info-am:
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
@@ -506,13 +606,11 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
-	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -539,13 +637,14 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+	distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -559,7 +658,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-info: install-info-am
 
@@ -574,7 +673,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -584,19 +684,19 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+uninstall-am: uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic ctags distclean \
-	distclean-compile distclean-generic distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-info-am
+	clean-checkPROGRAMS clean-generic clean-libtool ctags \
+	distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
