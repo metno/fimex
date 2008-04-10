@@ -56,9 +56,11 @@ if test "x$netcdf" = xno; then
     AC_MSG_ERROR([NetCDF include not found])
 fi
 
+AC_LANG_CPLUSPLUS
 AC_CHECKING([for libnetcdf_c++.a])
 AC_CHECK_LIB([netcdf_c++], [main],
            [netcdf=yes], [netcdf=no])
+AC_LANG_C
 
 AC_MSG_RESULT([NetCDF link result: $netcdf])
 if test "x$netcdf" = xno; then
