@@ -60,6 +60,14 @@ bool CDM::checkVariableAttribute(const std::string& varName, const std::string& 
 	return false;
 }
 
+/** object function for CDMVariable::checkDimension  (problems with boost::bind and std::not1, boost v 1.32 has no ! operator)*/
+class VariableDimensionCheck : public std::unary_function<std::string, bool> {
+	const CDMVariable& variable;
+public:
+	VariableDimensionCheck(const CDMVariable& var) : variable(var) {}
+	bool operator() (const std::string& dim) const { return variable.checkDimension(dim); }
+};
+
 /** object-function for checkVariableAttribute */ 
 class VariableAttributeCheck : public std::unary_function<std::pair<std::string, boost::regex>, bool> {
 	const CDM& cdm;
@@ -80,7 +88,7 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 		// test if all attributes are found in variable (find_if finds the first not found)
 		if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, varIt->first))) == attrRegExps.end()) {
 			// test if all dimensions are found in variable (find_if finds the first not found)
-			if (find_if(findDimensions.begin(), findDimensions.end(), !boost::bind(&CDMVariable::checkDimension, &(varIt->second), _1)) == findDimensions.end()) {
+			if (find_if(findDimensions.begin(), findDimensions.end(), std::not1(VariableDimensionCheck(varIt->second))) == findDimensions.end()) {
 				results.push_back(varIt->first);
 			}
 		}
