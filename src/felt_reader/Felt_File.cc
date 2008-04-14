@@ -7,10 +7,9 @@
 #include <cassert>
 #include <ctime>
 #include <cmath>
+#include <iostream>
+#include <fstream>
 #include <boost/scoped_array.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include <algorithm>
 #include <iostream>
 
@@ -23,10 +22,12 @@ Felt_File::Felt_File(const string& filename) throw(Felt_File_Error)
 {
 	int pos = filename.rfind("/");
 	std::string dianaSetup = filename.substr(0, pos+1) + "diana.setup";
-	boost::filesystem::path path(dianaSetup);
-	if (boost::filesystem::exists(path)) {
+	std::ifstream setupFile(dianaSetup.c_str());
+	if (setupFile.is_open()) {
+		setupFile.close();
 		feltParameters = FeltParameters(dianaSetup);
-	} // else default constructor
+	}
+	// else default constructor
 	
 	// read the data
 	init();
