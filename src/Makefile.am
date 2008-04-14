@@ -2,7 +2,7 @@ SUBDIRS = . felt_reader binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I. /disk1/heiko/local/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
+AM_CPPFLAGS = -I. ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
 
 lib_LIBRARIES = libutplukk.a
 libutplukk_a_SOURCES = interpolation.c CachedInterpolation.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc Null_CDMWriter.cc Utils.cc 
