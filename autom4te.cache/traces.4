@@ -1400,7 +1400,7 @@ esac
 #echo DX_FLAG_ps=$DX_FLAG_ps
 #echo DX_ENV=$DX_ENV
 ])
-m4trace:m4/have_netcdf_check.m4:78: -1- AC_DEFUN([HAVE_NETCDF_CHECK], [
+m4trace:m4/have_netcdf_check.m4:80: -1- AC_DEFUN([HAVE_NETCDF_CHECK], [
 AC_ARG_WITH(NetCDF-lib-dir, 
       [  --with-NetCDF-lib-dir=DIR      prefix for NetCDF library files], 
             [if test "$withval" = "no"; then
@@ -1429,8 +1429,7 @@ if eval "test ! -d $NC_INCLUDES_DIR"; then
 fi
 
 if eval "test -d $NC_LIBS_DIR"; then
-    NC_LDFLAGS="-L$NC_LIBS_DIR"
-    NC_LIBS="-lnetcdf_c++ -lnetcdf"
+    NC_LIBS="-L$NC_LIBS_DIR $NC_LIBS_DIR/libnetcdf_c++.a $NC_LIBS_DIR/libnetcdf.a"
 else
     AC_MSG_ERROR([$NC_LIBS_DIR not found])
 fi
@@ -1446,7 +1445,7 @@ LDFLAGS="$LDFLAGS $NC_LDFLAGS"
 netcdf=no
 
 AC_CHECKING([for netcdf.h])
-AC_CHECK_HEADER([netcdf.h],
+AC_CHECK_HEADER([$NC_INCLUDES_DIR/netcdf.h],
                 [netcdf=yes], [netcdf=no])
 
 AC_MSG_RESULT([NetCDF include result: $netcdf])
@@ -1472,6 +1471,9 @@ LIBS="$save_LIBS"
 AC_SUBST(NETCDF_CPPFLAGS, [-I$NC_INCLUDES_DIR])
 AC_SUBST(NETCDF_LDFLAGS, [$NC_LDFLAGS])
 AC_SUBST(NETCDF_LIBS, [$NC_LIBS])
+
+AC_DEFINE_UNQUOTED([NETCDF_CPP_INCLUDE], "$NC_INCLUDES_DIR/netcdfcpp.h", [absolute header for netcdfcpp.h])
+AC_DEFINE_UNQUOTED([NETCDF_C_INCLUDE], "$NC_INCLUDES_DIR/netcdf.h", [absolute header for netcdfcpp.h])
 
 ])
 m4trace:m4/libtool.m4:55: -1- AC_DEFUN([AC_PROG_LIBTOOL], [AC_REQUIRE([_AC_PROG_LIBTOOL])dnl
@@ -10514,28 +10516,34 @@ m4trace:configure.ac:19: -1- AC_SUBST([HAVE_NETCDF_FALSE])
 m4trace:configure.ac:32: -1- HAVE_NETCDF_CHECK([])
 m4trace:configure.ac:32: -1- _m4_warn([obsolete], [The macro `AC_CHECKING' is obsolete.
 You should run autoupdate.], [autoconf/general.m4:1966: AC_CHECKING is expanded from...
-m4/have_netcdf_check.m4:78: HAVE_NETCDF_CHECK is expanded from...
+m4/have_netcdf_check.m4:80: HAVE_NETCDF_CHECK is expanded from...
 configure.ac:32: the top level])
 m4trace:configure.ac:32: -1- _m4_warn([obsolete], [The macro `AC_CHECKING' is obsolete.
 You should run autoupdate.], [autoconf/general.m4:1966: AC_CHECKING is expanded from...
-m4/have_netcdf_check.m4:78: HAVE_NETCDF_CHECK is expanded from...
+m4/have_netcdf_check.m4:80: HAVE_NETCDF_CHECK is expanded from...
 configure.ac:32: the top level])
 m4trace:configure.ac:32: -1- _m4_warn([obsolete], [The macro `AC_LANG_CPLUSPLUS' is obsolete.
 You should run autoupdate.], [autoconf/c.m4:103: AC_LANG_CPLUSPLUS is expanded from...
-m4/have_netcdf_check.m4:78: HAVE_NETCDF_CHECK is expanded from...
+m4/have_netcdf_check.m4:80: HAVE_NETCDF_CHECK is expanded from...
 configure.ac:32: the top level])
 m4trace:configure.ac:32: -1- _m4_warn([obsolete], [The macro `AC_CHECKING' is obsolete.
 You should run autoupdate.], [autoconf/general.m4:1966: AC_CHECKING is expanded from...
-m4/have_netcdf_check.m4:78: HAVE_NETCDF_CHECK is expanded from...
+m4/have_netcdf_check.m4:80: HAVE_NETCDF_CHECK is expanded from...
 configure.ac:32: the top level])
 m4trace:configure.ac:32: -1- AC_CHECK_LIB([netcdf_c++], [main], [netcdf=yes], [netcdf=no])
 m4trace:configure.ac:32: -1- _m4_warn([obsolete], [The macro `AC_LANG_C' is obsolete.
 You should run autoupdate.], [autoconf/c.m4:71: AC_LANG_C is expanded from...
-m4/have_netcdf_check.m4:78: HAVE_NETCDF_CHECK is expanded from...
+m4/have_netcdf_check.m4:80: HAVE_NETCDF_CHECK is expanded from...
 configure.ac:32: the top level])
 m4trace:configure.ac:32: -1- AC_SUBST([NETCDF_CPPFLAGS], [-I$NC_INCLUDES_DIR])
 m4trace:configure.ac:32: -1- AC_SUBST([NETCDF_LDFLAGS], [$NC_LDFLAGS])
 m4trace:configure.ac:32: -1- AC_SUBST([NETCDF_LIBS], [$NC_LIBS])
+m4trace:configure.ac:32: -1- AC_DEFINE_TRACE_LITERAL([NETCDF_CPP_INCLUDE])
+m4trace:configure.ac:32: -1- AH_OUTPUT([NETCDF_CPP_INCLUDE], [/* absolute header for netcdfcpp.h */
+#undef NETCDF_CPP_INCLUDE])
+m4trace:configure.ac:32: -1- AC_DEFINE_TRACE_LITERAL([NETCDF_C_INCLUDE])
+m4trace:configure.ac:32: -1- AH_OUTPUT([NETCDF_C_INCLUDE], [/* absolute header for netcdfcpp.h */
+#undef NETCDF_C_INCLUDE])
 m4trace:configure.ac:33: -1- AC_DEFINE_TRACE_LITERAL([HAVE_NETCDF])
 m4trace:configure.ac:33: -1- AH_OUTPUT([HAVE_NETCDF], [/* have netcdf */
 #undef HAVE_NETCDF])

@@ -556,8 +556,8 @@ s,@LIBTOOL@,$(SHELL) $(top_builddir)/libtool,;t t
 s,@HAVE_NETCDF_TRUE@,,;t t
 s,@HAVE_NETCDF_FALSE@,#,;t t
 s,@NETCDF_CPPFLAGS@,-I/usr/include/netcdf-3,;t t
-s,@NETCDF_LDFLAGS@,-L/usr/lib/netcdf-3,;t t
-s,@NETCDF_LIBS@,-lnetcdf_c++ -lnetcdf,;t t
+s,@NETCDF_LDFLAGS@,,;t t
+s,@NETCDF_LIBS@,-L/usr/lib/netcdf-3 /usr/lib/netcdf-3/libnetcdf_c++.a /usr/lib/netcdf-3/libnetcdf.a,;t t
 s,@UDUNITS_CPPFLAGS@,-I/usr/include,;t t
 s,@UDUNITS_LDFLAGS@,-L/usr/lib,;t t
 s,@UDUNITS_LIBS@,-ludunits,;t t
@@ -982,6 +982,8 @@ ${ac_dA}HAVE_INTTYPES_H${ac_dB}HAVE_INTTYPES_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_STDINT_H${ac_dB}HAVE_STDINT_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_UNISTD_H${ac_dB}HAVE_UNISTD_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_DLFCN_H${ac_dB}HAVE_DLFCN_H${ac_dC}1${ac_dD}
+${ac_dA}NETCDF_CPP_INCLUDE${ac_dB}NETCDF_CPP_INCLUDE${ac_dC}"/usr/include/netcdf-3/netcdfcpp.h"${ac_dD}
+${ac_dA}NETCDF_C_INCLUDE${ac_dB}NETCDF_C_INCLUDE${ac_dC}"/usr/include/netcdf-3/netcdf.h"${ac_dD}
 ${ac_dA}HAVE_NETCDF${ac_dB}HAVE_NETCDF${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_LIBM${ac_dB}HAVE_LIBM${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_FMOD${ac_dB}HAVE_FMOD${ac_dC}1${ac_dD}
@@ -1000,8 +1002,6 @@ ${ac_dA}HAVE_BOOST_UNIT_TEST_FRAMEWORK${ac_dB}HAVE_BOOST_UNIT_TEST_FRAMEWORK${ac
 ${ac_dA}HAVE_MILIB_MILIB_H${ac_dB}HAVE_MILIB_MILIB_H${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_LIBMIC${ac_dB}HAVE_LIBMIC${ac_dC}1${ac_dD}
 ${ac_dA}STDC_HEADERS${ac_dB}STDC_HEADERS${ac_dC}1${ac_dD}
-${ac_dA}HAVE_STDBOOL_H${ac_dB}HAVE_STDBOOL_H${ac_dC}1${ac_dD}
-${ac_dA}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_dB}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_dC}1${ac_dD}
 CEOF
   sed -f $tmp/defines.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -1011,6 +1011,8 @@ CEOF
 /^[	 ]*#[	 ]*define/!b
 t clr
 : clr
+${ac_dA}HAVE_STDBOOL_H${ac_dB}HAVE_STDBOOL_H${ac_dC}1${ac_dD}
+${ac_dA}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_dB}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_MEMSET${ac_dB}HAVE_MEMSET${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_POW${ac_dB}HAVE_POW${ac_dC}1${ac_dD}
 ${ac_dA}HAVE_SQRT${ac_dB}HAVE_SQRT${ac_dC}1${ac_dD}
@@ -1045,6 +1047,8 @@ ${ac_uA}HAVE_INTTYPES_H${ac_uB}HAVE_INTTYPES_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_STDINT_H${ac_uB}HAVE_STDINT_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_UNISTD_H${ac_uB}HAVE_UNISTD_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_DLFCN_H${ac_uB}HAVE_DLFCN_H${ac_uC}1${ac_uD}
+${ac_uA}NETCDF_CPP_INCLUDE${ac_uB}NETCDF_CPP_INCLUDE${ac_uC}"/usr/include/netcdf-3/netcdfcpp.h"${ac_uD}
+${ac_uA}NETCDF_C_INCLUDE${ac_uB}NETCDF_C_INCLUDE${ac_uC}"/usr/include/netcdf-3/netcdf.h"${ac_uD}
 ${ac_uA}HAVE_NETCDF${ac_uB}HAVE_NETCDF${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_LIBM${ac_uB}HAVE_LIBM${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_FMOD${ac_uB}HAVE_FMOD${ac_uC}1${ac_uD}
@@ -1063,8 +1067,6 @@ ${ac_uA}HAVE_BOOST_UNIT_TEST_FRAMEWORK${ac_uB}HAVE_BOOST_UNIT_TEST_FRAMEWORK${ac
 ${ac_uA}HAVE_MILIB_MILIB_H${ac_uB}HAVE_MILIB_MILIB_H${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_LIBMIC${ac_uB}HAVE_LIBMIC${ac_uC}1${ac_uD}
 ${ac_uA}STDC_HEADERS${ac_uB}STDC_HEADERS${ac_uC}1${ac_uD}
-${ac_uA}HAVE_STDBOOL_H${ac_uB}HAVE_STDBOOL_H${ac_uC}1${ac_uD}
-${ac_uA}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_uB}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_uC}1${ac_uD}
 CEOF
   sed -f $tmp/undefs.sed $tmp/in >$tmp/out
   rm -f $tmp/in
@@ -1074,6 +1076,8 @@ CEOF
 /^[	 ]*#[	 ]*undef/!b
 t clr
 : clr
+${ac_uA}HAVE_STDBOOL_H${ac_uB}HAVE_STDBOOL_H${ac_uC}1${ac_uD}
+${ac_uA}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_uB}LSTAT_FOLLOWS_SLASHED_SYMLINK${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_MEMSET${ac_uB}HAVE_MEMSET${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_POW${ac_uB}HAVE_POW${ac_uC}1${ac_uD}
 ${ac_uA}HAVE_SQRT${ac_uB}HAVE_SQRT${ac_uC}1${ac_uD}

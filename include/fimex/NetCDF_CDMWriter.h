@@ -2,7 +2,8 @@
 #define NETCDF_CDMWRITER_H_
 
 #include "CDMWriter.h"
-#include "netcdfcpp.h"
+#include "../config.h"
+#include NETCDF_CPP_INCLUDE
 
 namespace MetNoUtplukk
 {

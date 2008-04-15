@@ -18887,8 +18887,7 @@ echo "$as_me: error: $NC_INCLUDES_DIR not found" >&2;}
 fi
 
 if eval "test -d $NC_LIBS_DIR"; then
-    NC_LDFLAGS="-L$NC_LIBS_DIR"
-    NC_LIBS="-lnetcdf_c++ -lnetcdf"
+    NC_LIBS="-L$NC_LIBS_DIR $NC_LIBS_DIR/libnetcdf_c++.a $NC_LIBS_DIR/libnetcdf.a"
 else
     { { echo "$as_me:$LINENO: error: $NC_LIBS_DIR not found" >&5
 echo "$as_me: error: $NC_LIBS_DIR not found" >&2;}
@@ -18907,18 +18906,19 @@ netcdf=no
 
 { echo "$as_me:$LINENO: checking for netcdf.h..." >&5
 echo "$as_me: checking for netcdf.h..." >&6;}
-if test "${ac_cv_header_netcdf_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for netcdf.h" >&5
-echo $ECHO_N "checking for netcdf.h... $ECHO_C" >&6
-if test "${ac_cv_header_netcdf_h+set}" = set; then
+as_ac_Header=`echo "ac_cv_header_$NC_INCLUDES_DIR/netcdf.h" | $as_tr_sh`
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
+  echo "$as_me:$LINENO: checking for $NC_INCLUDES_DIR/netcdf.h" >&5
+echo $ECHO_N "checking for $NC_INCLUDES_DIR/netcdf.h... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_netcdf_h" >&5
-echo "${ECHO_T}$ac_cv_header_netcdf_h" >&6
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
 else
   # Is the header compilable?
-echo "$as_me:$LINENO: checking netcdf.h usability" >&5
-echo $ECHO_N "checking netcdf.h usability... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking $NC_INCLUDES_DIR/netcdf.h usability" >&5
+echo $ECHO_N "checking $NC_INCLUDES_DIR/netcdf.h usability... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -18926,7 +18926,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 $ac_includes_default
-@%:@include <netcdf.h>
+@%:@include <$NC_INCLUDES_DIR/netcdf.h>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -18962,15 +18962,15 @@ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
 echo "${ECHO_T}$ac_header_compiler" >&6
 
 # Is the header present?
-echo "$as_me:$LINENO: checking netcdf.h presence" >&5
-echo $ECHO_N "checking netcdf.h presence... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking $NC_INCLUDES_DIR/netcdf.h presence" >&5
+echo $ECHO_N "checking $NC_INCLUDES_DIR/netcdf.h presence... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-@%:@include <netcdf.h>
+@%:@include <$NC_INCLUDES_DIR/netcdf.h>
 _ACEOF
 if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
@@ -19004,25 +19004,25 @@ echo "${ECHO_T}$ac_header_preproc" >&6
 # So?  What about this header?
 case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
   yes:no: )
-    { echo "$as_me:$LINENO: WARNING: netcdf.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: netcdf.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: netcdf.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: netcdf.h: proceeding with the compiler's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h: proceeding with the compiler's result" >&2;}
     ac_header_preproc=yes
     ;;
   no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: netcdf.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: netcdf.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: netcdf.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: netcdf.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: netcdf.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: netcdf.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: netcdf.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: netcdf.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: netcdf.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: netcdf.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: netcdf.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: netcdf.h: in the future, the compiler will take precedence" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: $NC_INCLUDES_DIR/netcdf.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: $NC_INCLUDES_DIR/netcdf.h: in the future, the compiler will take precedence" >&2;}
     (
       cat <<\_ASBOX
 @%:@@%:@ --------------------------------- @%:@@%:@
@@ -19033,18 +19033,18 @@ _ASBOX
       sed "s/^/$as_me: WARNING:     /" >&2
     ;;
 esac
-echo "$as_me:$LINENO: checking for netcdf.h" >&5
-echo $ECHO_N "checking for netcdf.h... $ECHO_C" >&6
-if test "${ac_cv_header_netcdf_h+set}" = set; then
+echo "$as_me:$LINENO: checking for $NC_INCLUDES_DIR/netcdf.h" >&5
+echo $ECHO_N "checking for $NC_INCLUDES_DIR/netcdf.h... $ECHO_C" >&6
+if eval "test \"\${$as_ac_Header+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_netcdf_h=$ac_header_preproc
+  eval "$as_ac_Header=\$ac_header_preproc"
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_netcdf_h" >&5
-echo "${ECHO_T}$ac_cv_header_netcdf_h" >&6
+echo "$as_me:$LINENO: result: `eval echo '${'$as_ac_Header'}'`" >&5
+echo "${ECHO_T}`eval echo '${'$as_ac_Header'}'`" >&6
 
 fi
-if test $ac_cv_header_netcdf_h = yes; then
+if test `eval echo '${'$as_ac_Header'}'` = yes; then
   netcdf=yes
 else
   netcdf=no
@@ -19156,6 +19156,17 @@ NETCDF_CPPFLAGS=-I$NC_INCLUDES_DIR
 NETCDF_LDFLAGS=$NC_LDFLAGS
 
 NETCDF_LIBS=$NC_LIBS
+
+
+
+cat >>confdefs.h <<_ACEOF
+@%:@define NETCDF_CPP_INCLUDE "$NC_INCLUDES_DIR/netcdfcpp.h"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+@%:@define NETCDF_C_INCLUDE "$NC_INCLUDES_DIR/netcdf.h"
+_ACEOF
 
 
 

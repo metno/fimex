@@ -2,7 +2,8 @@
 #define NETCDF_UTILS_H_
 
 #include <boost/shared_ptr.hpp>
-#include <netcdfcpp.h>
+#include "../config.h"
+#include NETCDF_CPP_INCLUDE
 #include "CDMDataType.h"
 #include "Data.h"
 

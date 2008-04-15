@@ -31,8 +31,7 @@ if eval "test ! -d $NC_INCLUDES_DIR"; then
 fi
 
 if eval "test -d $NC_LIBS_DIR"; then
-    NC_LDFLAGS="-L$NC_LIBS_DIR"
-    NC_LIBS="-lnetcdf_c++ -lnetcdf"
+    NC_LIBS="-L$NC_LIBS_DIR $NC_LIBS_DIR/libnetcdf_c++.a $NC_LIBS_DIR/libnetcdf.a"
 else
     AC_MSG_ERROR([$NC_LIBS_DIR not found])
 fi
@@ -48,7 +47,7 @@ LDFLAGS="$LDFLAGS $NC_LDFLAGS"
 netcdf=no
 
 AC_CHECKING([for netcdf.h])
-AC_CHECK_HEADER([netcdf.h],
+AC_CHECK_HEADER([$NC_INCLUDES_DIR/netcdf.h],
                 [netcdf=yes], [netcdf=no])
 
 AC_MSG_RESULT([NetCDF include result: $netcdf])
@@ -74,5 +73,8 @@ LIBS="$save_LIBS"
 AC_SUBST(NETCDF_CPPFLAGS, [-I$NC_INCLUDES_DIR])
 AC_SUBST(NETCDF_LDFLAGS, [$NC_LDFLAGS])
 AC_SUBST(NETCDF_LIBS, [$NC_LIBS])
+
+AC_DEFINE_UNQUOTED([NETCDF_CPP_INCLUDE], "$NC_INCLUDES_DIR/netcdfcpp.h", [absolute header for netcdfcpp.h])
+AC_DEFINE_UNQUOTED([NETCDF_C_INCLUDE], "$NC_INCLUDES_DIR/netcdf.h", [absolute header for netcdfcpp.h])
 
 ])

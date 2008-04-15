@@ -1,6 +1,7 @@
 #include "NetCDF_CDMWriter.h"
+#include "../config.h"
 extern "C" {
-#include "netcdf.h"             // the C interface
+#include NETCDF_C_INCLUDE             // the C interface
 }
 #include <boost/shared_array.hpp>
 #include "CDMDataType.h"
