@@ -32,60 +32,68 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << config << endl;	
 }
 
-template <typename T>
-static void writeOption(ostream& out, const string& var, const po::variables_map& vm) {
+static void writeOptionString(ostream& out, const string& var, const po::variables_map& vm) {
 	if (vm.count(var)) {
-		out << var << ": " << vm[var].as<T>() << endl;
+		out << var << ": " << vm[var].as<string>() << endl;
 	}
 }
 
-template <>
-void writeOption<boost::any>(ostream& out, const string& var, const po::variables_map& vm) {
+void writeOptionAny(ostream& out, const string& var, const po::variables_map& vm) {
 	// variables without real value, just set or unset
 	if (vm.count(var)) {
 		out << var  << endl;
 	}
 }
 
-template <typename T>
-static void writeVectorOption(ostream& out, const string& var, const po::variables_map& vm) {
+static void writeVectorOptionString(ostream& out, const string& var, const po::variables_map& vm) {
 	if (vm.count(var)) {
-		vector<T> vals = vm[var].as<vector<T> >();
-		typedef typename vector<T>::iterator VIT;
+		vector<string> vals = vm[var].as<vector<string> >();
+		typedef vector<string>::iterator VIT;
+		for (VIT it = vals.begin(); it != vals.end(); ++it) {
+			out << var << ": " << *it << endl;
+		}
+	}
+}
+static void writeVectorOptionInt(ostream& out, const string& var, const po::variables_map& vm) {
+	if (vm.count(var)) {
+		vector<int> vals = vm[var].as<vector<int> >();
+		typedef vector<int>::iterator VIT;
 		for (VIT it = vals.begin(); it != vals.end(); ++it) {
 			out << var << ": " << *it << endl;
 		}
 	}
 }
 
+
+
 static void writeOptions(ostream& out, const po::variables_map& vm) {
 	out << "Currently active options: " << endl;
-	writeOption<boost::any>(out, "help", vm);
-	writeOption<boost::any>(out, "version", vm);
-	writeOption<boost::any>(out, "debug", vm);
-	writeOption<boost::any>(out, "print-options", vm);
-	writeOption<string>(out, "config", vm);
-	writeOption<string>(out, "input.file", vm);
-	writeOption<string>(out, "input.type", vm);
-	writeOption<string>(out, "input.config", vm);
-	writeOption<boost::any>(out, "input.printNcML", vm);
-	writeOption<string>(out, "output.file", vm);
-	writeOption<string>(out, "output.type", vm);
-	writeOption<string>(out, "output.config", vm);
-	writeVectorOption<string>(out, "extract.removeVariable", vm);
-	writeVectorOption<string>(out, "extract.reduceDimension.name", vm);
-	writeVectorOption<int>(out, "extract.reduceDimension.start", vm);
-	writeVectorOption<int>(out, "extract.reduceDimension.end", vm);
-	writeOption<boost::any>(out, "extract.printNcML", vm);
-	writeOption<string>(out, "interpolate.projString", vm);
-	writeOption<string>(out, "interpolate.method", vm);
-	writeOption<string>(out, "interpolate.xAxisValues", vm);
-	writeOption<string>(out, "interpolate.yAxisValues", vm);
-	writeOption<string>(out, "interpolate.xAxisUnit", vm);
-	writeOption<string>(out, "interpolate.yAxisUnit", vm);
-	writeOption<string>(out, "interpolate.latitudeName", vm);
-	writeOption<string>(out, "interpolate.longitudeName", vm);
-	writeOption<boost::any>(out, "interpolate.printNcML", vm);
+	writeOptionAny(out, "help", vm);
+	writeOptionAny(out, "version", vm);
+	writeOptionAny(out, "debug", vm);
+	writeOptionAny(out, "print-options", vm);
+	writeOptionString(out, "config", vm);
+	writeOptionString(out, "input.file", vm);
+	writeOptionString(out, "input.type", vm);
+	writeOptionString(out, "input.config", vm);
+	writeOptionAny(out, "input.printNcML", vm);
+	writeOptionString(out, "output.file", vm);
+	writeOptionString(out, "output.type", vm);
+	writeOptionString(out, "output.config", vm);
+	writeVectorOptionString(out, "extract.removeVariable", vm);
+	writeVectorOptionString(out, "extract.reduceDimension.name", vm);
+	writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
+	writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
+	writeOptionAny(out, "extract.printNcML", vm);
+	writeOptionString(out, "interpolate.projString", vm);
+	writeOptionString(out, "interpolate.method", vm);
+	writeOptionString(out, "interpolate.xAxisValues", vm);
+	writeOptionString(out, "interpolate.yAxisValues", vm);
+	writeOptionString(out, "interpolate.xAxisUnit", vm);
+	writeOptionString(out, "interpolate.yAxisUnit", vm);
+	writeOptionString(out, "interpolate.latitudeName", vm);
+	writeOptionString(out, "interpolate.longitudeName", vm);
+	writeOptionAny(out, "interpolate.printNcML", vm);
 }
 
 static string getType(const string& io, po::variables_map& vm) {
@@ -296,14 +304,16 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 		// no config for netcdf!
 		if (vm.count("debug"))
 			cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " without config" << endl;
-		NetCDF_CDMWriter(boost::shared_ptr<CDMReader>(dataReader), vm["output.file"].as<string>());
+		boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
+		NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
 		return;
 	}
 #endif
 	if (type == "null") {
 		if (vm.count("debug"))
 					cerr << "emulating writing without file without config" << endl;
-		Null_CDMWriter(boost::shared_ptr<CDMReader>(dataReader), vm["output.file"].as<string>());
+		boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
+		Null_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
 		return;
 	}
 	cerr << "unable to write type: " << type << endl;
