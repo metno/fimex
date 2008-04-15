@@ -74,8 +74,7 @@ am__DEPENDENCIES_1 =
 @HAVE_NETCDF_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
 utplukk_DEPENDENCIES = ../felt_reader/libutplukk_felt.a \
-	../libutplukk.a /disk1/heiko/local/lib/libgrib_api.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	../libutplukk.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_4)
@@ -283,9 +282,8 @@ SUBDIRS = .
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I.. -I../felt_reader -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
-LDADD = ../felt_reader/libutplukk_felt.a ../libutplukk.a \
-	/disk1/heiko/local/lib/libgrib_api.a -lproj $(BOOST_LDFLAGS) \
-	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
+LDADD = ../felt_reader/libutplukk_felt.a ../libutplukk.a -lproj \
+	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_PROGRAM_OPTIONS_LIB) -lm @XML_LIBS@ $(am__append_1) \
 	$(am__append_2) $(am__append_3)
 utplukk_SOURCES = utplukk.cc
