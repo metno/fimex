@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<cdm_felt_config>
+<global_attributes>
+	<attribute name="Conventions" value="CF-1.0" type="string" />
+	<attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />
+	<attribute name="source" value="HIRLAM" type="string" />
+	<attribute name="title" value="unknown" type="string" />
+	<attribute name="references" value="unknown" type="string" />
+	<attribute name="history" value="unknown" type="string" />
+	<attribute name="comment" value="none" type="string" />
+</global_attributes>
+<axes>
+<time id="time" name="time" type="double">
+	<attribute name="long_name" value="time" type="string" />
+	<attribute name="standard_name" value="time" type="string" />
+	<attribute name="units" value="seconds since 1970-01-01 00:00:00 +00:00" type="string" />
+</time>
+<!-- polar-stereographic at 60deg -->
+<spatial_axis projection_felt_id="1" id="x" name="x" type="int">
+	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_x_coordinate" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis projection_felt_id="1" id="y" name="y" type="int">
+	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_y_coordinate" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<!-- geographic -->
+<spatial_axis projection_felt_id="2" id="x" name="lon" type="float">
+	<attribute name="long_name" value="longitude" type="string" />
+	<attribute name="units" value="degrees_east" type="string" />
+</spatial_axis>
+<spatial_axis projection_felt_id="2" id="y" name="lat" type="float">
+	<attribute name="long_name" value="latitude" type="string" />
+	<attribute name="units" value="degrees_north" type="string" />
+</spatial_axis>
+<!-- spherical rotated -->
+<spatial_axis projection_felt_id="3" id="x" name="rlon" type="float">
+	<attribute name="long_name" value="rotated longitude" type="string" />
+	<attribute name="standard_name" value="grid_longitude" type="string" />
+	<attribute name="units" value="degrees" type="string" />
+</spatial_axis>
+<spatial_axis projection_felt_id="3" id="y" name="rlat" type="float">
+	<attribute name="long_name" value="rotated latitude" type="string" />
+	<attribute name="standard_name" value="grid_latitude" type="string" />
+	<attribute name="units" value="degrees" type="string" />
+</spatial_axis>
+<!-- polar-stereographic -->
+<spatial_axis projection_felt_id="4" id="x" name="x" type="int">
+	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_x_coordinate" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis projection_felt_id="4" id="y" name="y" type="int">
+	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_y_coordinate" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<!-- mercator -->
+<spatial_axis projection_felt_id="5" id="x" name="x" type="int">
+	<attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_x_coordinate" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis projection_felt_id="5" id="y" name="y">
+	<attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+	<attribute name="standard_name" value="projection_y_coordinate" type="string" />
+	<attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis id="longitude" name="longitude">
+	<attribute name="valid_max" value="180." type="float" />
+	<attribute name="valid_min" value="-180." type="float" />
+	<attribute name="long_name" value="longitude" type="string" />
+	<attribute name="standard_name" value="longitude" type="string" />
+	<attribute name="units" value="degree_east" type="string" />
+</spatial_axis>
+<spatial_axis id="latitude" name="latitude">
+	<attribute name="valid_max" value="90." type="float" />
+	<attribute name="valid_min" value="-90." type="float" />
+	<attribute name="long_name" value="latitude" type="string" />
+	<attribute name="standard_name" value="latitude" type="string" />
+	<attribute name="units" value="degree_north" type="string" />
+</spatial_axis>
+<vertical_axis id="pressure" name="pressure" felt_id="1" type="short">
+	<attribute name="description" value="pressure" type="string" />
+	<attribute name="long_name" value="pressure" type="string" />
+	<attribute name="standard_name" value="air_pressure" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="units" value="hPa" type="string" />
+</vertical_axis>
+<vertical_axis id="sigma" name="sigma" felt_id="2" type="short">
+	<attribute name="description" value="atmosphere sigma coordinate" type="string" />
+	<attribute name="long_name" value="atmosphere_sigma_coordinate" type="string" />
+	<attribute name="standard_name" value="atmosphere_sigma_coordinate" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="units" value="1" type="string" />
+	<attribute name="scale_factor" value="0.001" type="float" />
+</vertical_axis>
+<vertical_axis id="h" name="h" felt_id="3" type="short">
+	<attribute name="description" value="vertical coordinate used for wave variables, value: 0" type="string" />
+	<attribute name="long_name" value="vertical_wave_coordinate" type="string" />
+</vertical_axis>
+<vertical_axis id="theta" name="theta" felt_id="4" type="short">
+	<attribute name="description" value="isentrop layer?" type="string" />
+</vertical_axis>
+<vertical_axis id="depth" name="depth" felt_id="5" type="short">
+	<attribute name="description" value="geopotential level relative to equilibrium surface" type="string" />
+	<attribute name="long_name" value="depth" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="standard_name" value="depth" type="string" />
+	<attribute name="units" value="m" type="string" />
+</vertical_axis>
+<vertical_axis id="layer" name="layer" felt_id="6" type="short">
+	<attribute name="description" value="ocean model layer no., isopycnic or hybrid" type="string" />
+	<attribute name="long_name" value="ocean_layer_coordinate" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="units" value="1" type="string" />
+</vertical_axis>
+<vertical_axis id="sigma" name="sigma" felt_id="7" type="short">
+	<attribute name="description" value="ocean sigma coordinate, surface is 0, bottom is 1" type="string" />
+	<attribute name="long_name" value="ocean_sigma_coordinate" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="standard_name" value="ocean_sigma_coordinate" type="string" />
+	<attribute name="units" value="1" type="string" />
+	<attribute name="scale_factor" value="0.001" type="float" />
+</vertical_axis>
+<vertical_axis id="surface" name="surface" felt_id="8" type="short">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="description" value="ocean surface, or vertically integrated" type="string" />
+	<attribute name="long_name" value="model_surface" type="string" />
+	<attribute name="units" value="1" type="string" />
+</vertical_axis>
+</axes>
+<variables>
+<!-- 
+<parameter id="1" name="geopotential_height">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="geopotential_height" type="string" />
+	<attribute name="standard_name" value="geopotential_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+-->
+<!--
+<parameter id="2" name="x_wind">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="x_wind" type="string" />
+	<attribute name="standard_name" value="x_wind" type="string" />
+	<attribute name="units" value="m/s" type="string" />
+</parameter>
+<parameter id="3" name="y_wind">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="y_wind" type="string" />
+	<attribute name="standard_name" value="y_wind" type="string" />
+	<attribute name="units" value="m/s" type="string" />
+</parameter>
+-->
+<!--
+<parameter id="10" name="relative_humidity">
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="relative_humidity" type="string" />
+	<attribute name="standard_name" value="relative_humidity" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+-->
+<parameter id="17,2,1000" name="precipitation_amount" type="float">
+	<attribute name="_FillValue" value="-32767" type="float" />
+	<attribute name="long_name" value="precipitation_amount" type="string" />
+	<attribute name="standard_name" value="precipitation_amount" type="string" />
+	<attribute name="units" value="kg/m2" type="string" />
+</parameter>
+<!--
+<parameter id="18" name="air_potential_temperature">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="air_potential_temperature" type="string" />
+	<attribute name="standard_name" value="air_potential_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+-->
+<parameter id="25,2,1000" name="cloud_area_fraction">
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="cloud_area_fraction" type="string" />
+	<attribute name="standard_name" value="cloud_area_fraction" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="31,2,1000" name="air_temperature">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point height: p" type="string" />
+	<attribute name="long_name" value="air_temperature" type="string" />
+	<attribute name="standard_name" value="air_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="32,2,1000" name="relative_humidity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="cell_methods" value="time: point height: 2m" type="string" />
+	<attribute name="long_name" value="relative_humidity" type="string" />
+	<attribute name="standard_name" value="relative_humidity" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="33,2,1000" name="x_wind_10m">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
+	<attribute name="long_name" value="x_wind_10m" type="string" />
+	<attribute name="metno_name" value="x_wind_10m" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="34,2,1000" name="y_wind_10m">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
+	<attribute name="long_name" value="y_wind_10m" type="string" />
+	<attribute name="standard_name" value="y_wind_10m" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<!-- change in scale_factor
+<parameter id="36,2,1000" name="accumulated_surface_upward_sensible_heat_flux">
+	<attribute name="long_name" value="accumulated_surface_upward_sensible_heat_flux" type="string" />
+	<attribute name="metno_name" value="accumulated_surface_upward_sensible_heat_flux" type="string" />
+	<attribute name="units" value="kJ/m2" type="string" />
+</parameter>
+<parameter id="37,2,1000" name="accumulated_surface_upward_latent_heat_flux">
+	<attribute name="long_name" value="accumulated_surface_upward_latent_heat_flux" type="string" />
+	<attribute name="metno_name" value="accumulated_surface_upward_latent_heat_flux" type="string" />
+	<attribute name="units" value="kJ/m2" type="string" />
+</parameter>
+-->
+<parameter id="39" name="cloud_area_fraction_in_atmosphere_layer">
+	<attribute name="long_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	<attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="58,2,1000" name="sea_level_pressure">
+	<attribute name="scale_factor" value="100." type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="air_pressure_at_sea_level" type="string" />
+	<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+	<attribute name="units" value="Pa" type="string" />
+</parameter>
+<parameter id="66,2,1000" name="surface_snow_sickness">
+	<attribute name="long_name" value="surface_snow_sickness" type="string" />
+	<attribute name="standard_name" value="surface_snow_sickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="101,2,1000" name="topography_height">
+	<attribute name="long_name" value="topography_height" type="string" />
+	<attribute name="metno_name" value="topography_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="103,2,1000" name="sea_surface_temperature">
+	<attribute name="long_name" value="sea_surface_temperature" type="string" />
+	<attribute name="metno_name" value="sea_surface_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="191,2,1000" name="land_ice_area_fraction">
+	<attribute name="long_name" value="land_ice_area_fraction" type="string" />
+	<attribute name="metno_name" value="land_ice_area_fraction" type="string" />
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="200,3,0" name="significant_wave_height">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_wave_significant_height" type="string" />
+	<attribute name="standard_name" value="sea_surface_wave_significant_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="201,3,0" name="peak_wave_period">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_wave_peak_period" type="string" />
+	<attribute name="units" value="s" type="string" />
+</parameter>
+<parameter id="202,3,0" name="significant_wave_period">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_wave_significant_period" type="string" />
+	<attribute name="units" value="s" type="string" />
+</parameter>
+<parameter id="203,3,0" name="peak_wave_direction">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_wave_peak_to_direction" type="string" />
+	<attribute name="units" value="degree" type="string" />
+</parameter>
+<parameter id="204,3,0" name="wave_direction">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_wave_to_direction" type="string" />
+	<attribute name="standard_name" value="sea_surface_wave_to_direction" type="string" />
+	<attribute name="units" value="degree" type="string" />
+</parameter>
+<parameter id="210,3,0" name="significant_wind_wave_height">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_wind_wave_significant_height" type="string" />
+	<attribute name="standard_name" value="sea_surface_wind_wave_significant_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="220,3,0" name="significant_swell_wave_height">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_swell_wave_significant_height" type="string" />
+	<attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="291,3,0" name="x_stokes_drift">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="x_sea_wave_stokes_drift" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="292,3,0" name="y_stokes_drift">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="y_sea_wave_stokes_drift" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="301,8,0" name="sea_surface_height">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_height_above_geoid" type="string" />
+	<attribute name="standard_name" value="sea_surface_height_above_geoid" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="302,5,0" name="x_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="302,6,0" name="x_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="302,7,0" name="x_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="302,8,0" name="x_btrop_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="barotropic_sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="303,5,0" name="y_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="303,6,0" name="y_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="303,7,0" name="y_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="303,8,0" name="y_btrop_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="barotropic_sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="304,5,0" name="z_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="standard_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="304,7,0" name="z_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="standard_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="305,5,0" name="sigma_t">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="standard_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="305,6,0" name="sigma_t">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="standard_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="305,7,0" name="sigma_t">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="standard_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="306,6,0" name="layer_thickness">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_layer_thickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="306,7,0" name="layer_thickness">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_layer_thickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="307,5,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_salinity" type="string" />
+	<attribute name="standard_name" value="sea_water_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="307,6,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_salinity" type="string" />
+	<attribute name="standard_name" value="sea_water_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="307,7,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_salinity" type="string" />
+	<attribute name="standard_name" value="sea_water_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="307,8,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_salinity" type="string" />
+	<attribute name="standard_name" value="sea_surface_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="308,5,0" name="sea_temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_temperature" type="string" />
+	<attribute name="standard_name" value="sea_water_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="308,6,0" name="sea_temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_temperature" type="string" />
+	<attribute name="standard_name" value="sea_water_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="308,7,0" name="sea_temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_temperature" type="string" />
+	<attribute name="standard_name" value="sea_water_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="308,8,0" name="sea_surface_temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_surface_temperature" type="string" />
+	<attribute name="standard_name" value="sea_surface_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="312,5,0" name="TKE">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_turbulent_kinetic_energy" type="string" />
+	<attribute name="units" value="m2 s-2" type="string" />
+</parameter>
+<parameter id="312,6,0" name="TKE">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_turbulent_kinetic_energy" type="string" />
+	<attribute name="units" value="m2 s-2" type="string" />
+</parameter>
+<parameter id="312,7,0" name="TKE">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_water_turbulent_kinetic_energy" type="string" />
+	<attribute name="units" value="m2 s-2" type="string" />
+</parameter>
+<parameter id="331,8,0" name="sea_surface_height">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_surface_height_above_geoid" type="string" />
+	<attribute name="standard_name" value="sea_surface_height_above_geoid" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="332,5,0" name="x_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="332,6,0" name="x_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="332,7,0" name="x_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="332,8,0" name="x_btrop_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="barotropic_sea_water_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="333,5,0" name="y_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="333,6,0" name="y_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="333,7,0" name="y_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="333,8,0" name="y_btrop_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="barotropic_sea_water_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="334,5,0" name="z_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="standard_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="334,7,0" name="z_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="standard_name" value="upward_sea_water_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="335,5,0" name="sigma_t">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="standard_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="335,6,0" name="sigma_t">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="standard_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="335,7,0" name="sigma_t">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="standard_name" value="sea_water_sigma_t" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="336,6,0" name="layer_thickness">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_layer_thickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="336,7,0" name="layer_thickness">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_layer_thickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="337,5,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_salinity" type="string" />
+	<attribute name="standard_name" value="sea_water_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="337,6,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_salinity" type="string" />
+	<attribute name="standard_name" value="sea_water_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="337,7,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_salinity" type="string" />
+	<attribute name="standard_name" value="sea_water_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="337,8,0" name="salinity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_surface_salinity" type="string" />
+	<attribute name="standard_name" value="sea_surface_salinity" type="string" />
+	<attribute name="units" value="1e-3" type="string" />
+</parameter>
+<parameter id="338,5,0" name="temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_temperature" type="string" />
+	<attribute name="standard_name" value="sea_water_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="338,6,0" name="temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_temperature" type="string" />
+	<attribute name="standard_name" value="sea_water_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="338,7,0" name="temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_water_temperature" type="string" />
+	<attribute name="standard_name" value="sea_water_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="338,8,0" name="temperature">
+	<attribute name="add_offset" value="273.15" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: mean" type="string" />
+	<attribute name="long_name" value="sea_surface_temperature" type="string" />
+	<attribute name="standard_name" value="sea_surface_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="339,2,0" name="total_precipitation_rate">
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="4.630e-8" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="lwe_precipitation_rate" type="string" />
+	<attribute name="standard_name" value="lwe_precipitation_rate" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+	<attribute name="unitsNOTE" value="assumes met.no FELT values are mm/6h" type="string" />
+</parameter>
+<parameter id="340,8,0" name="sea_ice_concentration">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_ice_area_fraction" type="string" />
+	<attribute name="standard_name" value="sea_ice_area_fraction" type="string" />
+	<attribute name="units" value="1e-2" type="string" />
+</parameter>
+<parameter id="341,8,0" name="sea_ice_thickness">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_ice_thickness" type="string" />
+	<attribute name="standard_name" value="sea_ice_thickness" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="342,6,0" name="x_ice_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_ice_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_ice_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="342,8,0" name="x_ice_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_ice_x_velocity" type="string" />
+	<attribute name="standard_name" value="sea_ice_x_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="343,6,0" name="y_ice_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_ice_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_ice_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="343,8,0" name="y_ice_velocity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="sea_ice_y_velocity" type="string" />
+	<attribute name="standard_name" value="sea_ice_y_velocity" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+</parameter>
+<parameter id="351,8,0" name="bottom_topography">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="long_name" value="sea_floor_depth_below_geoid" type="string" />
+	<attribute name="standard_name" value="sea_floor_depth_below_geoid" type="string" />
+	<attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="371,5,0" name="nitrate">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="6.969e-08" type="float" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="moles_of_nitrate_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="standard_name" value="moles_of_nitrate_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="units" value="mol kg-1" type="string" />
+</parameter>
+<parameter id="372,5,0" name="phosphate">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="3.147e-08" type="float" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="moles_of_phosphate_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="standard_name" value="moles_of_phosphate_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="units" value="mol kg-1" type="string" />
+</parameter>
+<parameter id="373,5,0" name="silicate">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="3.484e-08" type="float" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="moles_of_silicate_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="standard_name" value="moles_of_silicate_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="units" value="mol kg-1" type="string" />
+</parameter>
+<parameter id="374,5,0" name="detritus">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="7.143e-05" type="float" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="concentration_of_detritius_in_sea_water" type="string" />
+	<attribute name="standard_name" value="mole_concentration_of_organic_detritus_in_sea_water_expressed_as_nitrogen" type="string" />
+	<attribute name="units" value="mol m-3" type="string" />
+	<attribute name="units_assumption" value="units based on a density of 1025 kg m-3, not actual density" type="string" />
+</parameter>
+<parameter id="375,5,0" name="diatoms">
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="7.143e-05" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="concentration_of_diatoms_in_sea_water" type="string" />
+	<attribute name="standard_name" value="mole_concentration_of_diatoms_in_sea_water_expressed_as_nitrogen" type="string" />
+	<attribute name="units" value="mol m-3" type="string" />
+	<attribute name="units_assumption" value="units based on a density of 1025 kg m-3, not actual density" type="string" />
+</parameter>
+<parameter id="376,5,0" name="flagellates">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="concentration_of_flagellates_in_sea_water" type="string" />
+	<attribute name="units" value="mgN m-3" type="string" />
+</parameter>
+<parameter id="377,5,0" name="oxygen">
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="1.e-06" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="mass_concentration_of_oxygen_in_sea_water" type="string" />
+	<attribute name="standard_name" value="mass_concentration_of_oxygen_in_sea_water" type="string" />
+	<attribute name="units" value="kg m-3" type="string" />
+</parameter>
+<parameter id="378,5,0" name="silica">
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="3.484e-08" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="moles_of_silica_per_unit_mass_in_sea_water" type="string" />
+	<attribute name="units" value="mol kg-1" type="string" />
+</parameter>
+<parameter id="379,5,0" name="sediment_type_1">
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="1.e-06" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="mass_concentration_of_fast_sinking_material_in_sea_water" type="string" />
+	<attribute name="units" value="mgN m-3" type="string" />
+</parameter>
+<parameter id="380,5,0" name="sediment_type_2">
+	<attribute name="valid_min" value="0" type="short" />
+	<attribute name="scale_factor" value="1.e-06" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="mass_concentration_of_slow_sinking_material_in_sea_water" type="string" />
+	<attribute name="units" value="mgN m-3" type="string" />
+</parameter>
+</variables>
+</cdm_felt_config>
