@@ -869,80 +869,6 @@ if test "x$want_boost" = "xyes"; then
 fi
 
 ])
-m4trace:m4/ax_boost_filesystem.m4:108: -1- AC_DEFUN([AX_BOOST_FILESYSTEM], [
-	AC_ARG_WITH([boost-filesystem],
-	AS_HELP_STRING([--with-boost-filesystem@<:@=special-lib@:>@],
-                   [use the Filesystem library from boost - it is possible to specify a certain library for the linker
-                        e.g. --with-boost-filesystem=boost_filesystem-gcc-mt ]),
-        [
-        if test "$withval" = "no"; then
-			want_boost="no"
-        elif test "$withval" = "yes"; then
-            want_boost="yes"
-            ax_boost_user_filesystem_lib=""
-        else
-		    want_boost="yes"
-        	ax_boost_user_filesystem_lib="$withval"
-		fi
-        ],
-        [want_boost="yes"]
-	)
-
-	if test "x$want_boost" = "xyes"; then
-        AC_REQUIRE([AC_PROG_CC])
-		CPPFLAGS_SAVED="$CPPFLAGS"
-		CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-		export CPPFLAGS
-
-		LDFLAGS_SAVED="$LDFLAGS"
-		LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
-		export LDFLAGS
-
-        AC_CACHE_CHECK(whether the Boost::Filesystem library is available,
-					   ax_cv_boost_filesystem,
-        [AC_LANG_PUSH([C++])
-         AC_COMPILE_IFELSE(AC_LANG_PROGRAM([[@%:@include <boost/filesystem/path.hpp>]],
-                                   [[using namespace boost::filesystem;
-                                   path my_path( "foo/bar/data.txt" );
-                                   return 0;]]),
-            				       ax_cv_boost_filesystem=yes, ax_cv_boost_filesystem=no)
-         AC_LANG_POP([C++])
-		])
-		if test "x$ax_cv_boost_filesystem" = "xyes"; then
-			AC_DEFINE(HAVE_BOOST_FILESYSTEM,,[define if the Boost::Filesystem library is available])
-            BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
-            if test "x$ax_boost_user_filesystem_lib" = "x"; then
-                for libextension in `ls $BOOSTLIBDIR/libboost_filesystem*.{so,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_filesystem.*\)\.so.*$;\1;' -e 's;^lib\(boost_filesystem.*\)\.a*$;\1;'` ; do
-                     ax_lib=${libextension}
-				    AC_CHECK_LIB($ax_lib, exit,
-                                 [BOOST_FILESYSTEM_LIB="-l$ax_lib"; AC_SUBST(BOOST_FILESYSTEM_LIB) link_filesystem="yes"; break],
-                                 [link_filesystem="no"])
-  				done
-                if test "x$link_program_options" != "xyes"; then
-                for libextension in `ls $BOOSTLIBDIR/boost_filesystem*.{dll,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_filesystem.*\)\.dll.*$;\1;' -e 's;^\(boost_filesystem.*\)\.a*$;\1;'` ; do
-                     ax_lib=${libextension}
-				    AC_CHECK_LIB($ax_lib, exit,
-                                 [BOOST_FILESYSTEM_LIB="-l$ax_lib"; AC_SUBST(BOOST_FILESYSTEM_LIB) link_filesystem="yes"; break],
-                                 [link_filesystem="no"])
-  				done
-	            fi
-            else
-               for ax_lib in $ax_boost_user_filesystem_lib boost_filesystem-$ax_boost_user_filesystem_lib; do
-				      AC_CHECK_LIB($ax_lib, exit,
-                                   [BOOST_FILESYSTEM_LIB="-l$ax_lib"; AC_SUBST(BOOST_FILESYSTEM_LIB) link_filesystem="yes"; break],
-                                   [link_filesystem="no"])
-                  done
-
-            fi
-			if test "x$link_filesystem" != "xyes"; then
-				AC_MSG_ERROR(Could not link against $ax_lib !)
-			fi
-		fi
-
-		CPPFLAGS="$CPPFLAGS_SAVED"
-    	LDFLAGS="$LDFLAGS_SAVED"
-	fi
-])
 m4trace:m4/ax_boost_program_options.m4:105: -1- AC_DEFUN([AX_BOOST_PROGRAM_OPTIONS], [
 	AC_ARG_WITH([boost-program-options],
 		AS_HELP_STRING([--with-boost-program-options@<:@=special-lib@:>@],
@@ -10726,61 +10652,51 @@ m4trace:configure.ac:46: -1- AC_SUBST([BOOST_LDFLAGS])
 m4trace:configure.ac:46: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST])
 m4trace:configure.ac:46: -1- AH_OUTPUT([HAVE_BOOST], [/* define if the Boost library is available */
 #undef HAVE_BOOST])
-m4trace:configure.ac:47: -1- AX_BOOST_FILESYSTEM
-m4trace:configure.ac:47: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_FILESYSTEM])
-m4trace:configure.ac:47: -1- AH_OUTPUT([HAVE_BOOST_FILESYSTEM], [/* define if the Boost::Filesystem library is available */
-#undef HAVE_BOOST_FILESYSTEM])
-m4trace:configure.ac:47: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_FILESYSTEM_LIB="-l$ax_lib"; AC_SUBST(BOOST_FILESYSTEM_LIB) link_filesystem="yes"; break], [link_filesystem="no"])
-m4trace:configure.ac:47: -1- AC_SUBST([BOOST_FILESYSTEM_LIB])
-m4trace:configure.ac:47: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_FILESYSTEM_LIB="-l$ax_lib"; AC_SUBST(BOOST_FILESYSTEM_LIB) link_filesystem="yes"; break], [link_filesystem="no"])
-m4trace:configure.ac:47: -1- AC_SUBST([BOOST_FILESYSTEM_LIB])
-m4trace:configure.ac:47: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_FILESYSTEM_LIB="-l$ax_lib"; AC_SUBST(BOOST_FILESYSTEM_LIB) link_filesystem="yes"; break], [link_filesystem="no"])
-m4trace:configure.ac:47: -1- AC_SUBST([BOOST_FILESYSTEM_LIB])
-m4trace:configure.ac:48: -1- AX_BOOST_REGEX
-m4trace:configure.ac:48: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_REGEX])
-m4trace:configure.ac:48: -1- AH_OUTPUT([HAVE_BOOST_REGEX], [/* define if the Boost::Regex library is available */
+m4trace:configure.ac:47: -1- AX_BOOST_REGEX
+m4trace:configure.ac:47: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_REGEX])
+m4trace:configure.ac:47: -1- AH_OUTPUT([HAVE_BOOST_REGEX], [/* define if the Boost::Regex library is available */
 #undef HAVE_BOOST_REGEX])
-m4trace:configure.ac:48: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break], [link_regex="no"])
-m4trace:configure.ac:48: -1- AC_SUBST([BOOST_REGEX_LIB])
-m4trace:configure.ac:48: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break], [link_regex="no"])
-m4trace:configure.ac:48: -1- AC_SUBST([BOOST_REGEX_LIB])
-m4trace:configure.ac:48: -1- AC_CHECK_LIB([$ax_lib], [main], [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break], [link_regex="no"])
-m4trace:configure.ac:48: -1- AC_SUBST([BOOST_REGEX_LIB])
-m4trace:configure.ac:49: -1- AX_BOOST_PROGRAM_OPTIONS
-m4trace:configure.ac:49: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_PROGRAM_OPTIONS])
-m4trace:configure.ac:49: -1- AH_OUTPUT([HAVE_BOOST_PROGRAM_OPTIONS], [/* define if the Boost::PROGRAM_OPTIONS library is available */
+m4trace:configure.ac:47: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break], [link_regex="no"])
+m4trace:configure.ac:47: -1- AC_SUBST([BOOST_REGEX_LIB])
+m4trace:configure.ac:47: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break], [link_regex="no"])
+m4trace:configure.ac:47: -1- AC_SUBST([BOOST_REGEX_LIB])
+m4trace:configure.ac:47: -1- AC_CHECK_LIB([$ax_lib], [main], [BOOST_REGEX_LIB="-l$ax_lib"; AC_SUBST(BOOST_REGEX_LIB) link_regex="yes"; break], [link_regex="no"])
+m4trace:configure.ac:47: -1- AC_SUBST([BOOST_REGEX_LIB])
+m4trace:configure.ac:48: -1- AX_BOOST_PROGRAM_OPTIONS
+m4trace:configure.ac:48: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_PROGRAM_OPTIONS])
+m4trace:configure.ac:48: -1- AH_OUTPUT([HAVE_BOOST_PROGRAM_OPTIONS], [/* define if the Boost::PROGRAM_OPTIONS library is available */
 #undef HAVE_BOOST_PROGRAM_OPTIONS])
-m4trace:configure.ac:49: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_PROGRAM_OPTIONS_LIB="-l$ax_lib"; AC_SUBST(BOOST_PROGRAM_OPTIONS_LIB) link_program_options="yes"; break], [link_program_options="no"])
-m4trace:configure.ac:49: -1- AC_SUBST([BOOST_PROGRAM_OPTIONS_LIB])
-m4trace:configure.ac:49: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_PROGRAM_OPTIONS_LIB="-l$ax_lib"; AC_SUBST(BOOST_PROGRAM_OPTIONS_LIB) link_program_options="yes"; break], [link_program_options="no"])
-m4trace:configure.ac:49: -1- AC_SUBST([BOOST_PROGRAM_OPTIONS_LIB])
-m4trace:configure.ac:49: -1- AC_CHECK_LIB([$ax_lib], [main], [BOOST_PROGRAM_OPTIONS_LIB="-l$ax_lib"; AC_SUBST(BOOST_PROGRAM_OPTIONS_LIB) link_program_options="yes"; break], [link_program_options="no"])
-m4trace:configure.ac:49: -1- AC_SUBST([BOOST_PROGRAM_OPTIONS_LIB])
-m4trace:configure.ac:50: -1- AX_BOOST_UNIT_TEST_FRAMEWORK
-m4trace:configure.ac:50: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_UNIT_TEST_FRAMEWORK])
-m4trace:configure.ac:50: -1- AH_OUTPUT([HAVE_BOOST_UNIT_TEST_FRAMEWORK], [/* define if the Boost::Unit_Test_Framework library is available */
+m4trace:configure.ac:48: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_PROGRAM_OPTIONS_LIB="-l$ax_lib"; AC_SUBST(BOOST_PROGRAM_OPTIONS_LIB) link_program_options="yes"; break], [link_program_options="no"])
+m4trace:configure.ac:48: -1- AC_SUBST([BOOST_PROGRAM_OPTIONS_LIB])
+m4trace:configure.ac:48: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_PROGRAM_OPTIONS_LIB="-l$ax_lib"; AC_SUBST(BOOST_PROGRAM_OPTIONS_LIB) link_program_options="yes"; break], [link_program_options="no"])
+m4trace:configure.ac:48: -1- AC_SUBST([BOOST_PROGRAM_OPTIONS_LIB])
+m4trace:configure.ac:48: -1- AC_CHECK_LIB([$ax_lib], [main], [BOOST_PROGRAM_OPTIONS_LIB="-l$ax_lib"; AC_SUBST(BOOST_PROGRAM_OPTIONS_LIB) link_program_options="yes"; break], [link_program_options="no"])
+m4trace:configure.ac:48: -1- AC_SUBST([BOOST_PROGRAM_OPTIONS_LIB])
+m4trace:configure.ac:49: -1- AX_BOOST_UNIT_TEST_FRAMEWORK
+m4trace:configure.ac:49: -1- AC_DEFINE_TRACE_LITERAL([HAVE_BOOST_UNIT_TEST_FRAMEWORK])
+m4trace:configure.ac:49: -1- AH_OUTPUT([HAVE_BOOST_UNIT_TEST_FRAMEWORK], [/* define if the Boost::Unit_Test_Framework library is available */
 #undef HAVE_BOOST_UNIT_TEST_FRAMEWORK])
-m4trace:configure.ac:50: -1- AC_SUBST([BOOST_UNIT_TEST_FRAMEWORK_LIB])
-m4trace:configure.ac:50: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_UNIT_TEST_FRAMEWORK_LIB="-l$ax_lib"; AC_SUBST(BOOST_UNIT_TEST_FRAMEWORK_LIB) link_unit_test_framework="yes"; break], [link_unit_test_framework="no"])
-m4trace:configure.ac:50: -1- AC_SUBST([BOOST_UNIT_TEST_FRAMEWORK_LIB])
-m4trace:configure.ac:50: -1- AC_SUBST([BOOST_UNIT_TEST_FRAMEWORK_LIB])
-m4trace:configure.ac:64: -1- AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xtrue])
-m4trace:configure.ac:64: -1- AC_SUBST([HAVE_MILIB_TRUE])
-m4trace:configure.ac:64: -1- AC_SUBST([HAVE_MILIB_FALSE])
-m4trace:configure.ac:68: -1- PKG_CHECK_MODULES([milib], [milib])
-m4trace:configure.ac:68: -1- PKG_PROG_PKG_CONFIG
-m4trace:configure.ac:68: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
-m4trace:configure.ac:68: -1- m4_pattern_allow([^PKG_CONFIG(_PATH)?$])
-m4trace:configure.ac:68: -1- AC_SUBST([PKG_CONFIG])
-m4trace:configure.ac:68: -1- AC_SUBST([PKG_CONFIG], [$ac_cv_path_PKG_CONFIG])
-m4trace:configure.ac:68: -1- AC_SUBST([ac_pt_PKG_CONFIG], [$ac_cv_path_ac_pt_PKG_CONFIG])
-m4trace:configure.ac:68: -1- AC_SUBST([milib_CFLAGS])
-m4trace:configure.ac:68: -1- AC_SUBST([milib_LIBS])
-m4trace:configure.ac:68: -1- PKG_CHECK_EXISTS([milib], [pkg_cv_[]milib_CFLAGS=`$PKG_CONFIG --[]cflags "milib" 2>/dev/null`], [pkg_failed=yes])
-m4trace:configure.ac:68: -1- PKG_CHECK_EXISTS([milib], [pkg_cv_[]milib_LIBS=`$PKG_CONFIG --[]libs "milib" 2>/dev/null`], [pkg_failed=yes])
-m4trace:configure.ac:68: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:70: -1- METNO_CHECK_HEADERS([milib/milib.h], [], [], [], [$milib_CFLAGS], [the milib package])
-m4trace:configure.ac:70: -1- AC_CHECK_HEADERS([milib/milib.h], [], [{ { echo "$as_me:$LINENO: error: Could not find some of the headers from the milib package.
+m4trace:configure.ac:49: -1- AC_SUBST([BOOST_UNIT_TEST_FRAMEWORK_LIB])
+m4trace:configure.ac:49: -1- AC_CHECK_LIB([$ax_lib], [exit], [BOOST_UNIT_TEST_FRAMEWORK_LIB="-l$ax_lib"; AC_SUBST(BOOST_UNIT_TEST_FRAMEWORK_LIB) link_unit_test_framework="yes"; break], [link_unit_test_framework="no"])
+m4trace:configure.ac:49: -1- AC_SUBST([BOOST_UNIT_TEST_FRAMEWORK_LIB])
+m4trace:configure.ac:49: -1- AC_SUBST([BOOST_UNIT_TEST_FRAMEWORK_LIB])
+m4trace:configure.ac:63: -1- AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xtrue])
+m4trace:configure.ac:63: -1- AC_SUBST([HAVE_MILIB_TRUE])
+m4trace:configure.ac:63: -1- AC_SUBST([HAVE_MILIB_FALSE])
+m4trace:configure.ac:67: -1- PKG_CHECK_MODULES([milib], [milib])
+m4trace:configure.ac:67: -1- PKG_PROG_PKG_CONFIG
+m4trace:configure.ac:67: -1- m4_pattern_forbid([^_?PKG_[A-Z_]+$])
+m4trace:configure.ac:67: -1- m4_pattern_allow([^PKG_CONFIG(_PATH)?$])
+m4trace:configure.ac:67: -1- AC_SUBST([PKG_CONFIG])
+m4trace:configure.ac:67: -1- AC_SUBST([PKG_CONFIG], [$ac_cv_path_PKG_CONFIG])
+m4trace:configure.ac:67: -1- AC_SUBST([ac_pt_PKG_CONFIG], [$ac_cv_path_ac_pt_PKG_CONFIG])
+m4trace:configure.ac:67: -1- AC_SUBST([milib_CFLAGS])
+m4trace:configure.ac:67: -1- AC_SUBST([milib_LIBS])
+m4trace:configure.ac:67: -1- PKG_CHECK_EXISTS([milib], [pkg_cv_[]milib_CFLAGS=`$PKG_CONFIG --[]cflags "milib" 2>/dev/null`], [pkg_failed=yes])
+m4trace:configure.ac:67: -1- PKG_CHECK_EXISTS([milib], [pkg_cv_[]milib_LIBS=`$PKG_CONFIG --[]libs "milib" 2>/dev/null`], [pkg_failed=yes])
+m4trace:configure.ac:67: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:69: -1- METNO_CHECK_HEADERS([milib/milib.h], [], [], [], [$milib_CFLAGS], [the milib package])
+m4trace:configure.ac:69: -1- AC_CHECK_HEADERS([milib/milib.h], [], [{ { echo "$as_me:$LINENO: error: Could not find some of the headers from the milib package.
 
 Please make sure that the milib package is properly installed.
 See \`config.log' for more details." >&5
@@ -10789,10 +10705,10 @@ echo "$as_me: error: Could not find some of the headers from the milib package.
 Please make sure that the milib package is properly installed.
 See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }], [])
-m4trace:configure.ac:70: -1- AH_OUTPUT([HAVE_MILIB_MILIB_H], [/* Define to 1 if you have the <milib/milib.h> header file. */
+m4trace:configure.ac:69: -1- AH_OUTPUT([HAVE_MILIB_MILIB_H], [/* Define to 1 if you have the <milib/milib.h> header file. */
 #undef HAVE_MILIB_MILIB_H])
-m4trace:configure.ac:73: -1- METNO_CHECK_LIB([mic], [mrfelt], [], [], [], [$milib_LIBS -lg2c], [the milib package])
-m4trace:configure.ac:73: -1- AC_CHECK_LIB([mic], [mrfelt], [], [{ { echo "$as_me:$LINENO: error: The function mrfelt in mic from the milib package could not be found.
+m4trace:configure.ac:72: -1- METNO_CHECK_LIB([mic], [mrfelt], [], [], [], [$milib_LIBS -lg2c], [the milib package])
+m4trace:configure.ac:72: -1- AC_CHECK_LIB([mic], [mrfelt], [], [{ { echo "$as_me:$LINENO: error: The function mrfelt in mic from the milib package could not be found.
 
 Please make sure that the milib package is properly installed.
 See \`config.log' for more details." >&5
@@ -10801,566 +10717,566 @@ echo "$as_me: error: The function mrfelt in mic from the milib package could not
 Please make sure that the milib package is properly installed.
 See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }], [])
-m4trace:configure.ac:73: -1- AH_OUTPUT([HAVE_LIBMIC], [/* Define to 1 if you have the `mic\' library (-lmic). */
+m4trace:configure.ac:72: -1- AH_OUTPUT([HAVE_LIBMIC], [/* Define to 1 if you have the `mic\' library (-lmic). */
 #undef HAVE_LIBMIC])
-m4trace:configure.ac:73: -1- AC_DEFINE_TRACE_LITERAL([HAVE_LIBMIC])
-m4trace:configure.ac:80: -1- AC_HEADER_STDC
-m4trace:configure.ac:80: -1- AC_DEFINE_TRACE_LITERAL([STDC_HEADERS])
-m4trace:configure.ac:80: -1- AH_OUTPUT([STDC_HEADERS], [/* Define to 1 if you have the ANSI C header files. */
+m4trace:configure.ac:72: -1- AC_DEFINE_TRACE_LITERAL([HAVE_LIBMIC])
+m4trace:configure.ac:79: -1- AC_HEADER_STDC
+m4trace:configure.ac:79: -1- AC_DEFINE_TRACE_LITERAL([STDC_HEADERS])
+m4trace:configure.ac:79: -1- AH_OUTPUT([STDC_HEADERS], [/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS])
-m4trace:configure.ac:83: -1- AC_CHECK_TYPES([_Bool])
-m4trace:configure.ac:83: -1- AC_DEFINE_TRACE_LITERAL([HAVE__BOOL])
-m4trace:configure.ac:83: -1- AH_OUTPUT([HAVE__BOOL], [/* Define to 1 if the system has the type `_Bool\'. */
+m4trace:configure.ac:82: -1- AC_CHECK_TYPES([_Bool])
+m4trace:configure.ac:82: -1- AC_DEFINE_TRACE_LITERAL([HAVE__BOOL])
+m4trace:configure.ac:82: -1- AH_OUTPUT([HAVE__BOOL], [/* Define to 1 if the system has the type `_Bool\'. */
 #undef HAVE__BOOL])
-m4trace:configure.ac:83: -1- AC_DEFINE_TRACE_LITERAL([HAVE_STDBOOL_H])
-m4trace:configure.ac:83: -1- AH_OUTPUT([HAVE_STDBOOL_H], [/* Define to 1 if stdbool.h conforms to C99. */
+m4trace:configure.ac:82: -1- AC_DEFINE_TRACE_LITERAL([HAVE_STDBOOL_H])
+m4trace:configure.ac:82: -1- AH_OUTPUT([HAVE_STDBOOL_H], [/* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H])
-m4trace:configure.ac:84: -1- AC_C_CONST
-m4trace:configure.ac:84: -1- AC_DEFINE_TRACE_LITERAL([const])
-m4trace:configure.ac:84: -1- AH_OUTPUT([const], [/* Define to empty if `const\' does not conform to ANSI C. */
+m4trace:configure.ac:83: -1- AC_C_CONST
+m4trace:configure.ac:83: -1- AC_DEFINE_TRACE_LITERAL([const])
+m4trace:configure.ac:83: -1- AH_OUTPUT([const], [/* Define to empty if `const\' does not conform to ANSI C. */
 #undef const])
-m4trace:configure.ac:85: -1- AC_C_INLINE
-m4trace:configure.ac:85: -1- AH_OUTPUT([inline], [/* Define to `__inline__\' or `__inline\' if that\'s what the C compiler
+m4trace:configure.ac:84: -1- AC_C_INLINE
+m4trace:configure.ac:84: -1- AH_OUTPUT([inline], [/* Define to `__inline__\' or `__inline\' if that\'s what the C compiler
    calls it, or to nothing if \'inline\' is not supported under any name.  */
 #ifndef __cplusplus
 #undef inline
 #endif])
-m4trace:configure.ac:86: -1- AC_TYPE_SIZE_T
-m4trace:configure.ac:86: -1- AC_DEFINE_TRACE_LITERAL([size_t])
-m4trace:configure.ac:86: -1- AH_OUTPUT([size_t], [/* Define to `unsigned\' if <sys/types.h> does not define. */
+m4trace:configure.ac:85: -1- AC_TYPE_SIZE_T
+m4trace:configure.ac:85: -1- AC_DEFINE_TRACE_LITERAL([size_t])
+m4trace:configure.ac:85: -1- AH_OUTPUT([size_t], [/* Define to `unsigned\' if <sys/types.h> does not define. */
 #undef size_t])
-m4trace:configure.ac:89: -1- AC_FUNC_STAT
-m4trace:configure.ac:89: -1- AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
-m4trace:configure.ac:89: -1- AC_DEFINE_TRACE_LITERAL([LSTAT_FOLLOWS_SLASHED_SYMLINK])
-m4trace:configure.ac:89: -1- AH_OUTPUT([LSTAT_FOLLOWS_SLASHED_SYMLINK], [/* Define to 1 if `lstat\' dereferences a symlink specified with a trailing
+m4trace:configure.ac:88: -1- AC_FUNC_STAT
+m4trace:configure.ac:88: -1- AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
+m4trace:configure.ac:88: -1- AC_DEFINE_TRACE_LITERAL([LSTAT_FOLLOWS_SLASHED_SYMLINK])
+m4trace:configure.ac:88: -1- AH_OUTPUT([LSTAT_FOLLOWS_SLASHED_SYMLINK], [/* Define to 1 if `lstat\' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK])
-m4trace:configure.ac:89: -1- AC_LIBSOURCE([lstat.c])
-m4trace:configure.ac:89: -1- AC_SUBST([LIB@&t@OBJS])
-m4trace:configure.ac:89: -1- AC_LIBSOURCE([stat.c])
-m4trace:configure.ac:89: -1- AC_SUBST([LIB@&t@OBJS])
-m4trace:configure.ac:89: -1- AC_DEFINE_TRACE_LITERAL([HAVE_STAT_EMPTY_STRING_BUG])
-m4trace:configure.ac:89: -1- AH_OUTPUT([HAVE_STAT_EMPTY_STRING_BUG], [/* Define to 1 if `stat\' has the bug that it succeeds when given the
+m4trace:configure.ac:88: -1- AC_LIBSOURCE([lstat.c])
+m4trace:configure.ac:88: -1- AC_SUBST([LIB@&t@OBJS])
+m4trace:configure.ac:88: -1- AC_LIBSOURCE([stat.c])
+m4trace:configure.ac:88: -1- AC_SUBST([LIB@&t@OBJS])
+m4trace:configure.ac:88: -1- AC_DEFINE_TRACE_LITERAL([HAVE_STAT_EMPTY_STRING_BUG])
+m4trace:configure.ac:88: -1- AH_OUTPUT([HAVE_STAT_EMPTY_STRING_BUG], [/* Define to 1 if `stat\' has the bug that it succeeds when given the
    zero-length file name argument. */
 #undef HAVE_STAT_EMPTY_STRING_BUG])
-m4trace:configure.ac:90: -1- AC_CHECK_FUNCS([memset pow sqrt strstr])
-m4trace:configure.ac:90: -1- AH_OUTPUT([HAVE_MEMSET], [/* Define to 1 if you have the `memset\' function. */
+m4trace:configure.ac:89: -1- AC_CHECK_FUNCS([memset pow sqrt strstr])
+m4trace:configure.ac:89: -1- AH_OUTPUT([HAVE_MEMSET], [/* Define to 1 if you have the `memset\' function. */
 #undef HAVE_MEMSET])
-m4trace:configure.ac:90: -1- AH_OUTPUT([HAVE_POW], [/* Define to 1 if you have the `pow\' function. */
+m4trace:configure.ac:89: -1- AH_OUTPUT([HAVE_POW], [/* Define to 1 if you have the `pow\' function. */
 #undef HAVE_POW])
-m4trace:configure.ac:90: -1- AH_OUTPUT([HAVE_SQRT], [/* Define to 1 if you have the `sqrt\' function. */
+m4trace:configure.ac:89: -1- AH_OUTPUT([HAVE_SQRT], [/* Define to 1 if you have the `sqrt\' function. */
 #undef HAVE_SQRT])
-m4trace:configure.ac:90: -1- AH_OUTPUT([HAVE_STRSTR], [/* Define to 1 if you have the `strstr\' function. */
+m4trace:configure.ac:89: -1- AH_OUTPUT([HAVE_STRSTR], [/* Define to 1 if you have the `strstr\' function. */
 #undef HAVE_STRSTR])
-m4trace:configure.ac:94: -1- DX_INIT_DOXYGEN(['Utplukk'], ['Doxyfile'], ['share/doc'])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_PROJECT], ['Utplukk'])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_CONFIG], [ifelse(['Doxyfile'], [], Doxyfile, ['Doxyfile'])])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_DOCDIR], [ifelse(['share/doc'], [], doxygen-doc, ['share/doc'])])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([SRCDIR], [$srcdir])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV SRCDIR='$srcdir'"])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([PROJECT], [$DX_PROJECT])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV PROJECT='$DX_PROJECT'"])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([DOCDIR], [$DX_DOCDIR])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV DOCDIR='$DX_DOCDIR'"])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([VERSION], [$PACKAGE_VERSION])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV VERSION='$PACKAGE_VERSION'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([doc], [generate any doxygen documentation], [], [], [DX_REQUIRE_PROG([DX_DOXYGEN], doxygen)
+m4trace:configure.ac:93: -1- DX_INIT_DOXYGEN(['Utplukk'], ['Doxyfile'], ['share/doc'])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_PROJECT], ['Utplukk'])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_CONFIG], [ifelse(['Doxyfile'], [], Doxyfile, ['Doxyfile'])])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_DOCDIR], [ifelse(['share/doc'], [], doxygen-doc, ['share/doc'])])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([SRCDIR], [$srcdir])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV SRCDIR='$srcdir'"])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([PROJECT], [$DX_PROJECT])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV PROJECT='$DX_PROJECT'"])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([DOCDIR], [$DX_DOCDIR])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV DOCDIR='$DX_DOCDIR'"])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([VERSION], [$PACKAGE_VERSION])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV VERSION='$PACKAGE_VERSION'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([doc], [generate any doxygen documentation], [], [], [DX_REQUIRE_PROG([DX_DOXYGEN], doxygen)
              DX_REQUIRE_PROG([DX_PERL], perl)], [DX_ENV_APPEND(PERL_PATH, $DX_PERL)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [doc])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate any doxygen documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([doc], [--disable-doxygen-doc], [--enable-doxygen-doc])
-m4trace:configure.ac:94: -3- DX_FEATURE_doc
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([doc], [don't generate any doxygen documentation], [generate any doxygen documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_doc
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_doc], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_doc], [DX_IF_FEATURE([doc], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([doc], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_doc
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([doc])
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_DOXYGEN], [doxygen])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_DOXYGEN], [$ac_cv_path_DX_DOXYGEN])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_DOXYGEN], [$ac_cv_path_ac_pt_DX_DOXYGEN])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_PERL], [perl])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_PERL], [$ac_cv_path_DX_PERL])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_PERL], [$ac_cv_path_ac_pt_DX_PERL])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([doc])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_doc], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_doc_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_doc_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([PERL_PATH], [$DX_PERL])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV PERL_PATH='$DX_PERL'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_doc], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_doc_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_doc_FALSE])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([dot], [generate graphics for doxygen documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_DOT], dot)], [DX_ENV_APPEND(HAVE_DOT, YES)
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [doc])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate any doxygen documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([doc], [--disable-doxygen-doc], [--enable-doxygen-doc])
+m4trace:configure.ac:93: -3- DX_FEATURE_doc
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([doc], [don't generate any doxygen documentation], [generate any doxygen documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_doc
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_doc], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_doc], [DX_IF_FEATURE([doc], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([doc], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_doc
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([doc])
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_DOXYGEN], [doxygen])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_DOXYGEN], [$ac_cv_path_DX_DOXYGEN])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_DOXYGEN], [$ac_cv_path_ac_pt_DX_DOXYGEN])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_PERL], [perl])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_PERL], [$ac_cv_path_DX_PERL])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_PERL], [$ac_cv_path_ac_pt_DX_PERL])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([doc])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_doc], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_doc_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_doc_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([PERL_PATH], [$DX_PERL])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV PERL_PATH='$DX_PERL'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_doc], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_doc_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_doc_FALSE])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([dot], [generate graphics for doxygen documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_DOT], dot)], [DX_ENV_APPEND(HAVE_DOT, YES)
              DX_ENV_APPEND(DOT_PATH, [`DX_DIRNAME_EXPR($DX_DOT)`])], [DX_ENV_APPEND(HAVE_DOT, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [dot])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate graphics for doxygen documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([dot], [--disable-doxygen-dot], [--enable-doxygen-dot])
-m4trace:configure.ac:94: -3- DX_FEATURE_dot
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([dot], [don't generate graphics for doxygen documentation], [generate graphics for doxygen documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_dot
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_dot], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_dot], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_dot], [DX_IF_FEATURE([dot], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([dot], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_dot
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([dot])
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_DOT], [dot])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_DOT], [$ac_cv_path_DX_DOT])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_DOT], [$ac_cv_path_ac_pt_DX_DOT])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([dot])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_dot], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_dot_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_dot_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([HAVE_DOT], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV HAVE_DOT='YES'"])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([DOT_PATH], [`DX_DIRNAME_EXPR($DX_DOT)`])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV DOT_PATH='`DX_DIRNAME_EXPR($DX_DOT)`'"])
-m4trace:configure.ac:94: -1- DX_DIRNAME_EXPR([$DX_DOT])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_dot], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_dot_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_dot_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([HAVE_DOT], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV HAVE_DOT='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([man], [generate doxygen manual pages], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [], [DX_ENV_APPEND(GENERATE_MAN, YES)], [DX_ENV_APPEND(GENERATE_MAN, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [man])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen manual pages])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([man], [--disable-doxygen-man], [--enable-doxygen-man])
-m4trace:configure.ac:94: -3- DX_FEATURE_man
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([man], [don't generate doxygen manual pages], [generate doxygen manual pages])
-m4trace:configure.ac:94: -3- DX_FEATURE_man
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_man], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_man], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_man], [DX_IF_FEATURE([man], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([man], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_man
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([man])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([man])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_man], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_man_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_man_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_MAN], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_MAN='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_man], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_man_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_man_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_MAN], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_MAN='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([rtf], [generate doxygen RTF documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [], [DX_ENV_APPEND(GENERATE_RTF, YES)], [DX_ENV_APPEND(GENERATE_RTF, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [rtf])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen RTF documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([rtf], [--disable-doxygen-rtf], [--enable-doxygen-rtf])
-m4trace:configure.ac:94: -3- DX_FEATURE_rtf
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([rtf], [don't generate doxygen RTF documentation], [generate doxygen RTF documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_rtf
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_rtf], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_rtf], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_rtf], [DX_IF_FEATURE([rtf], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([rtf], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_rtf
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([rtf])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([rtf])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_rtf], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_rtf_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_rtf_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_RTF], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_RTF='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_rtf], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_rtf_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_rtf_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_RTF], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_RTF='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([xml], [generate doxygen XML documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [], [DX_ENV_APPEND(GENERATE_XML, YES)], [DX_ENV_APPEND(GENERATE_XML, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [xml])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen XML documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([xml], [--disable-doxygen-xml], [--enable-doxygen-xml])
-m4trace:configure.ac:94: -3- DX_FEATURE_xml
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([xml], [don't generate doxygen XML documentation], [generate doxygen XML documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_xml
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_xml], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_xml], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_xml], [DX_IF_FEATURE([xml], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([xml], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_xml
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([xml])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([xml])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_xml], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_xml_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_xml_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_XML], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_XML='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_xml], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_xml_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_xml_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_XML], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_XML='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([chm], [generate doxygen compressed HTML help documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_HHC], hhc)], [DX_ENV_APPEND(HHC_PATH, $DX_HHC)
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [dot])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate graphics for doxygen documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([dot], [--disable-doxygen-dot], [--enable-doxygen-dot])
+m4trace:configure.ac:93: -3- DX_FEATURE_dot
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([dot], [don't generate graphics for doxygen documentation], [generate graphics for doxygen documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_dot
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_dot], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_dot], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_dot], [DX_IF_FEATURE([dot], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([dot], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_dot
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([dot])
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_DOT], [dot])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_DOT], [$ac_cv_path_DX_DOT])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_DOT], [$ac_cv_path_ac_pt_DX_DOT])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([dot])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_dot], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_dot_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_dot_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([HAVE_DOT], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV HAVE_DOT='YES'"])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([DOT_PATH], [`DX_DIRNAME_EXPR($DX_DOT)`])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV DOT_PATH='`DX_DIRNAME_EXPR($DX_DOT)`'"])
+m4trace:configure.ac:93: -1- DX_DIRNAME_EXPR([$DX_DOT])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_dot], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_dot_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_dot_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([HAVE_DOT], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV HAVE_DOT='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([man], [generate doxygen manual pages], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [], [DX_ENV_APPEND(GENERATE_MAN, YES)], [DX_ENV_APPEND(GENERATE_MAN, NO)])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [man])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen manual pages])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([man], [--disable-doxygen-man], [--enable-doxygen-man])
+m4trace:configure.ac:93: -3- DX_FEATURE_man
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([man], [don't generate doxygen manual pages], [generate doxygen manual pages])
+m4trace:configure.ac:93: -3- DX_FEATURE_man
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_man], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_man], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_man], [DX_IF_FEATURE([man], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([man], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_man
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([man])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([man])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_man], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_man_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_man_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_MAN], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_MAN='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_man], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_man_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_man_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_MAN], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_MAN='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([rtf], [generate doxygen RTF documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [], [DX_ENV_APPEND(GENERATE_RTF, YES)], [DX_ENV_APPEND(GENERATE_RTF, NO)])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [rtf])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen RTF documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([rtf], [--disable-doxygen-rtf], [--enable-doxygen-rtf])
+m4trace:configure.ac:93: -3- DX_FEATURE_rtf
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([rtf], [don't generate doxygen RTF documentation], [generate doxygen RTF documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_rtf
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_rtf], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_rtf], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_rtf], [DX_IF_FEATURE([rtf], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([rtf], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_rtf
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([rtf])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([rtf])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_rtf], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_rtf_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_rtf_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_RTF], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_RTF='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_rtf], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_rtf_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_rtf_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_RTF], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_RTF='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([xml], [generate doxygen XML documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [], [DX_ENV_APPEND(GENERATE_XML, YES)], [DX_ENV_APPEND(GENERATE_XML, NO)])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [xml])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen XML documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([xml], [--disable-doxygen-xml], [--enable-doxygen-xml])
+m4trace:configure.ac:93: -3- DX_FEATURE_xml
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([xml], [don't generate doxygen XML documentation], [generate doxygen XML documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_xml
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_xml], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_xml], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_xml], [DX_IF_FEATURE([xml], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([xml], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_xml
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([xml])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([xml])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_xml], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_xml_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_xml_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_XML], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_XML='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_xml], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_xml_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_xml_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_XML], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_XML='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([chm], [generate doxygen compressed HTML help documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_HHC], hhc)], [DX_ENV_APPEND(HHC_PATH, $DX_HHC)
              DX_ENV_APPEND(GENERATE_HTML, YES)
              DX_ENV_APPEND(GENERATE_HTMLHELP, YES)], [DX_ENV_APPEND(GENERATE_HTMLHELP, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [chm])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen compressed HTML help documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([chm], [--disable-doxygen-chm], [--enable-doxygen-chm])
-m4trace:configure.ac:94: -3- DX_FEATURE_chm
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([chm], [don't generate doxygen compressed HTML help documentation], [generate doxygen compressed HTML help documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_chm
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_chm], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_chm], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_chm], [DX_IF_FEATURE([chm], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([chm], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_chm
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([chm])
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_HHC], [hhc])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_HHC], [$ac_cv_path_DX_HHC])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_HHC], [$ac_cv_path_ac_pt_DX_HHC])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([chm])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_chm], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chm_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chm_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([HHC_PATH], [$DX_HHC])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV HHC_PATH='$DX_HHC'"])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_HTML], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTML='YES'"])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_HTMLHELP], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTMLHELP='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_chm], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chm_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chm_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_HTMLHELP], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTMLHELP='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([chi], [generate doxygen seperate compressed HTML help index file], [DX_CHECK_DEPEND(chm, 1)], [DX_CLEAR_DEPEND(chm, 1)], [], [DX_ENV_APPEND(GENERATE_CHI, YES)], [DX_ENV_APPEND(GENERATE_CHI, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [chi])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen seperate compressed HTML help index file])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([chi], [--disable-doxygen-chi], [--enable-doxygen-chi])
-m4trace:configure.ac:94: -3- DX_FEATURE_chi
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([chi], [don't generate doxygen seperate compressed HTML help index file], [generate doxygen seperate compressed HTML help index file])
-m4trace:configure.ac:94: -3- DX_FEATURE_chi
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_chi], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([chm], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_chi], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_chi], [DX_IF_FEATURE([chi], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([chi], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_chi
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([chm], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([chi])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([chi])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_chi], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chi_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chi_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_CHI], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_CHI='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_chi], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chi_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_chi_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_CHI], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_CHI='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([html], [generate doxygen plain HTML documentation], [DX_CHECK_DEPEND(doc, 1) DX_CHECK_DEPEND(chm, 0)], [DX_CLEAR_DEPEND(doc, 1) DX_CLEAR_DEPEND(chm, 0)], [], [DX_ENV_APPEND(GENERATE_HTML, YES)], [DX_TEST_FEATURE(chm) || DX_ENV_APPEND(GENERATE_HTML, NO)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [html])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen plain HTML documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([html], [--disable-doxygen-html], [--enable-doxygen-html])
-m4trace:configure.ac:94: -3- DX_FEATURE_html
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([html], [don't generate doxygen plain HTML documentation], [generate doxygen plain HTML documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_html
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_html], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([chm], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_html], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_html], [DX_IF_FEATURE([html], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([html], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_html
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([chm], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([html])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([html])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_html], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_html_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_html_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_HTML], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTML='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_html], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_html_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_html_FALSE])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([chm])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_HTML], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTML='NO'"])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([ps], [generate doxygen PostScript documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_LATEX], latex)
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [chm])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen compressed HTML help documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([chm], [--disable-doxygen-chm], [--enable-doxygen-chm])
+m4trace:configure.ac:93: -3- DX_FEATURE_chm
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([chm], [don't generate doxygen compressed HTML help documentation], [generate doxygen compressed HTML help documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_chm
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_chm], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_chm], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_chm], [DX_IF_FEATURE([chm], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([chm], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_chm
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([chm])
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_HHC], [hhc])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_HHC], [$ac_cv_path_DX_HHC])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_HHC], [$ac_cv_path_ac_pt_DX_HHC])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([chm])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_chm], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chm_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chm_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([HHC_PATH], [$DX_HHC])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV HHC_PATH='$DX_HHC'"])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_HTML], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTML='YES'"])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_HTMLHELP], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTMLHELP='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_chm], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chm_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chm_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_HTMLHELP], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTMLHELP='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([chi], [generate doxygen seperate compressed HTML help index file], [DX_CHECK_DEPEND(chm, 1)], [DX_CLEAR_DEPEND(chm, 1)], [], [DX_ENV_APPEND(GENERATE_CHI, YES)], [DX_ENV_APPEND(GENERATE_CHI, NO)])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [chi])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen seperate compressed HTML help index file])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([chi], [--disable-doxygen-chi], [--enable-doxygen-chi])
+m4trace:configure.ac:93: -3- DX_FEATURE_chi
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([chi], [don't generate doxygen seperate compressed HTML help index file], [generate doxygen seperate compressed HTML help index file])
+m4trace:configure.ac:93: -3- DX_FEATURE_chi
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_chi], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([chm], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_chi], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_chi], [DX_IF_FEATURE([chi], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([chi], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_chi
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([chm], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([chi])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([chi])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_chi], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chi_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chi_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_CHI], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_CHI='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_chi], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chi_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_chi_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_CHI], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_CHI='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([html], [generate doxygen plain HTML documentation], [DX_CHECK_DEPEND(doc, 1) DX_CHECK_DEPEND(chm, 0)], [DX_CLEAR_DEPEND(doc, 1) DX_CLEAR_DEPEND(chm, 0)], [], [DX_ENV_APPEND(GENERATE_HTML, YES)], [DX_TEST_FEATURE(chm) || DX_ENV_APPEND(GENERATE_HTML, NO)])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [html])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen plain HTML documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([html], [--disable-doxygen-html], [--enable-doxygen-html])
+m4trace:configure.ac:93: -3- DX_FEATURE_html
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([html], [don't generate doxygen plain HTML documentation], [generate doxygen plain HTML documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_html
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_html], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([chm], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_html], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_html], [DX_IF_FEATURE([html], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([html], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_html
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([chm], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([html])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([html])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_html], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_html_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_html_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_HTML], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTML='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_html], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_html_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_html_FALSE])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([chm])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_HTML], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_HTML='NO'"])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([ps], [generate doxygen PostScript documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_LATEX], latex)
              DX_REQUIRE_PROG([DX_MAKEINDEX], makeindex)
              DX_REQUIRE_PROG([DX_DVIPS], dvips)
              DX_REQUIRE_PROG([DX_EGREP], egrep)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [ps])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen PostScript documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([ps], [--disable-doxygen-ps], [--enable-doxygen-ps])
-m4trace:configure.ac:94: -3- DX_FEATURE_ps
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([ps], [don't generate doxygen PostScript documentation], [generate doxygen PostScript documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_ps
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_ps], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_ps], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_ps], [DX_IF_FEATURE([ps], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([ps], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_ps
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([ps])
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_LATEX], [latex])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_LATEX], [$ac_cv_path_DX_LATEX])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_LATEX], [$ac_cv_path_ac_pt_DX_LATEX])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_MAKEINDEX], [makeindex])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_MAKEINDEX], [$ac_cv_path_DX_MAKEINDEX])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_MAKEINDEX], [$ac_cv_path_ac_pt_DX_MAKEINDEX])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_DVIPS], [dvips])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_DVIPS], [$ac_cv_path_DX_DVIPS])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_DVIPS], [$ac_cv_path_ac_pt_DX_DVIPS])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_EGREP], [egrep])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_EGREP], [$ac_cv_path_DX_EGREP])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_EGREP], [$ac_cv_path_ac_pt_DX_EGREP])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([ps])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_ps], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_ps_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_ps_FALSE])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_ps], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_ps_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_ps_FALSE])
-m4trace:configure.ac:94: -1- DX_ARG_ABLE([pdf], [generate doxygen PDF documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_PDFLATEX], pdflatex)
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [ps])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen PostScript documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([ps], [--disable-doxygen-ps], [--enable-doxygen-ps])
+m4trace:configure.ac:93: -3- DX_FEATURE_ps
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([ps], [don't generate doxygen PostScript documentation], [generate doxygen PostScript documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_ps
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_ps], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_ps], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_ps], [DX_IF_FEATURE([ps], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([ps], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_ps
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([ps])
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_LATEX], [latex])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_LATEX], [$ac_cv_path_DX_LATEX])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_LATEX], [$ac_cv_path_ac_pt_DX_LATEX])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_MAKEINDEX], [makeindex])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_MAKEINDEX], [$ac_cv_path_DX_MAKEINDEX])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_MAKEINDEX], [$ac_cv_path_ac_pt_DX_MAKEINDEX])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_DVIPS], [dvips])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_DVIPS], [$ac_cv_path_DX_DVIPS])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_DVIPS], [$ac_cv_path_ac_pt_DX_DVIPS])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_EGREP], [egrep])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_EGREP], [$ac_cv_path_DX_EGREP])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_EGREP], [$ac_cv_path_ac_pt_DX_EGREP])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([ps])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_ps], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_ps_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_ps_FALSE])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_ps], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_ps_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_ps_FALSE])
+m4trace:configure.ac:93: -1- DX_ARG_ABLE([pdf], [generate doxygen PDF documentation], [DX_CHECK_DEPEND(doc, 1)], [DX_CLEAR_DEPEND(doc, 1)], [DX_REQUIRE_PROG([DX_PDFLATEX], pdflatex)
              DX_REQUIRE_PROG([DX_MAKEINDEX], makeindex)
              DX_REQUIRE_PROG([DX_EGREP], egrep)])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_FEATURE], [pdf])
-m4trace:configure.ac:94: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen PDF documentation])
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([pdf], [--disable-doxygen-pdf], [--enable-doxygen-pdf])
-m4trace:configure.ac:94: -3- DX_FEATURE_pdf
-m4trace:configure.ac:94: -2- DX_IF_FEATURE([pdf], [don't generate doxygen PDF documentation], [generate doxygen PDF documentation])
-m4trace:configure.ac:94: -3- DX_FEATURE_pdf
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_pdf], [1])
-m4trace:configure.ac:94: -1- DX_CHECK_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_pdf], [0])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_pdf], [DX_IF_FEATURE([pdf], 1, 0)])
-m4trace:configure.ac:94: -1- DX_IF_FEATURE([pdf], [1], [0])
-m4trace:configure.ac:94: -2- DX_FEATURE_pdf
-m4trace:configure.ac:94: -1- DX_CLEAR_DEPEND([doc], [1])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([pdf])
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_PDFLATEX], [pdflatex])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_PDFLATEX], [$ac_cv_path_DX_PDFLATEX])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_PDFLATEX], [$ac_cv_path_ac_pt_DX_PDFLATEX])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_MAKEINDEX], [makeindex])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_MAKEINDEX], [$ac_cv_path_DX_MAKEINDEX])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_MAKEINDEX], [$ac_cv_path_ac_pt_DX_MAKEINDEX])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_REQUIRE_PROG([DX_EGREP], [egrep])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_EGREP], [$ac_cv_path_DX_EGREP])
-m4trace:configure.ac:94: -1- AC_SUBST([ac_pt_DX_EGREP], [$ac_cv_path_ac_pt_DX_EGREP])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- DX_CURRENT_DESCRIPTION
-m4trace:configure.ac:94: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
-m4trace:configure.ac:94: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -2- DX_CURRENT_FEATURE
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([pdf])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_pdf], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_pdf_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_pdf_FALSE])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_pdf], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_pdf_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_pdf_FALSE])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([ps])
-m4trace:configure.ac:94: -1- DX_TEST_FEATURE([pdf])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_latex], [:])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_latex_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_latex_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_LATEX], [YES])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_LATEX='YES'"])
-m4trace:configure.ac:94: -1- AM_CONDITIONAL([DX_COND_latex], [false])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_latex_TRUE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_COND_latex_FALSE])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([GENERATE_LATEX], [NO])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_LATEX='NO'"])
-m4trace:configure.ac:94: -1- AC_SUBST([DOXYGEN_PAPER_SIZE])
-m4trace:configure.ac:94: -1- AC_SUBST([DOXYGEN_PAPER_SIZE], [""])
-m4trace:configure.ac:94: -1- DX_ENV_APPEND([PAPER_SIZE], [$DOXYGEN_PAPER_SIZE])
-m4trace:configure.ac:94: -1- AC_SUBST([DX_ENV], ["$DX_ENV PAPER_SIZE='$DOXYGEN_PAPER_SIZE'"])
-m4trace:configure.ac:96: -1- AC_CONFIG_HEADERS([src/config.h])
-m4trace:configure.ac:97: -1- AC_CONFIG_FILES([utplukk.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile])
-m4trace:configure.ac:98: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
-m4trace:configure.ac:98: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- DX_CURRENT_FEATURE
-m4trace:configure.ac:98: -1- _AC_AM_CONFIG_HEADER_HOOK([$ac_file])
-m4trace:configure.ac:98: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_FEATURE], [pdf])
+m4trace:configure.ac:93: -1- AC_DEFUN([DX_CURRENT_DESCRIPTION], [generate doxygen PDF documentation])
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([pdf], [--disable-doxygen-pdf], [--enable-doxygen-pdf])
+m4trace:configure.ac:93: -3- DX_FEATURE_pdf
+m4trace:configure.ac:93: -2- DX_IF_FEATURE([pdf], [don't generate doxygen PDF documentation], [generate doxygen PDF documentation])
+m4trace:configure.ac:93: -3- DX_FEATURE_pdf
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_pdf], [1])
+m4trace:configure.ac:93: -1- DX_CHECK_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_pdf], [0])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_pdf], [DX_IF_FEATURE([pdf], 1, 0)])
+m4trace:configure.ac:93: -1- DX_IF_FEATURE([pdf], [1], [0])
+m4trace:configure.ac:93: -2- DX_FEATURE_pdf
+m4trace:configure.ac:93: -1- DX_CLEAR_DEPEND([doc], [1])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([pdf])
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_PDFLATEX], [pdflatex])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_PDFLATEX], [$ac_cv_path_DX_PDFLATEX])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_PDFLATEX], [$ac_cv_path_ac_pt_DX_PDFLATEX])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_MAKEINDEX], [makeindex])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_MAKEINDEX], [$ac_cv_path_DX_MAKEINDEX])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_MAKEINDEX], [$ac_cv_path_ac_pt_DX_MAKEINDEX])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_REQUIRE_PROG([DX_EGREP], [egrep])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_EGREP], [$ac_cv_path_DX_EGREP])
+m4trace:configure.ac:93: -1- AC_SUBST([ac_pt_DX_EGREP], [$ac_cv_path_ac_pt_DX_EGREP])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- DX_CURRENT_DESCRIPTION
+m4trace:configure.ac:93: -1- AC_SUBST([DX_FLAG_[]DX_CURRENT_FEATURE], [0])
+m4trace:configure.ac:93: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -2- DX_CURRENT_FEATURE
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([pdf])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_pdf], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_pdf_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_pdf_FALSE])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_pdf], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_pdf_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_pdf_FALSE])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([ps])
+m4trace:configure.ac:93: -1- DX_TEST_FEATURE([pdf])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_latex], [:])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_latex_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_latex_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_LATEX], [YES])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_LATEX='YES'"])
+m4trace:configure.ac:93: -1- AM_CONDITIONAL([DX_COND_latex], [false])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_latex_TRUE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_COND_latex_FALSE])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([GENERATE_LATEX], [NO])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV GENERATE_LATEX='NO'"])
+m4trace:configure.ac:93: -1- AC_SUBST([DOXYGEN_PAPER_SIZE])
+m4trace:configure.ac:93: -1- AC_SUBST([DOXYGEN_PAPER_SIZE], [""])
+m4trace:configure.ac:93: -1- DX_ENV_APPEND([PAPER_SIZE], [$DOXYGEN_PAPER_SIZE])
+m4trace:configure.ac:93: -1- AC_SUBST([DX_ENV], ["$DX_ENV PAPER_SIZE='$DOXYGEN_PAPER_SIZE'"])
+m4trace:configure.ac:95: -1- AC_CONFIG_HEADERS([src/config.h])
+m4trace:configure.ac:96: -1- AC_CONFIG_FILES([utplukk.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile])
+m4trace:configure.ac:97: -1- AC_SUBST([LIB@&t@OBJS], [$ac_libobjs])
+m4trace:configure.ac:97: -1- AC_SUBST([LTLIBOBJS], [$ac_ltlibobjs])
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- DX_CURRENT_FEATURE
+m4trace:configure.ac:97: -1- _AC_AM_CONFIG_HEADER_HOOK([$ac_file])
+m4trace:configure.ac:97: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS

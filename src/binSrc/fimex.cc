@@ -4,7 +4,7 @@
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include "../../config.h"
+#include "../src/config.h"
 #include "CDMReader.h"
 #include "CDMExtractor.h"
 #include "CDMInterpolator.h"
