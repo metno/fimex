@@ -1,3 +1,6 @@
+#include "../src/config.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+
 #include <iostream>
 #include "Time.h"
 
@@ -43,3 +46,9 @@ init_unit_test_suite( int argc, char* argv[] )
 	test->add( BOOST_TEST_CASE( &test_time_convert ) );
     return test;
 }
+
+#else
+// no boost testframework
+int main(int argc, char[] * args) {
+}
+#endif

@@ -1,3 +1,6 @@
+#include "../src/config.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+
 #include "../src/interpolation.h"
 
 #include <cmath>
@@ -208,4 +211,10 @@ init_unit_test_suite( int argc, char* argv[] )
 	test->add( BOOST_TEST_CASE( &test_Utils ) );
     return test;
 }
+
+#else
+// no boost testframework
+int main(int argc, char[] * args) {
+}
+#endif
 

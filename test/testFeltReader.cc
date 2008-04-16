@@ -1,3 +1,6 @@
+#include "../src/config.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+
 #include <iostream>
 #include <boost/array.hpp>
 #include <cassert>
@@ -105,7 +108,7 @@ test_felt_axis() {
 
 void
 test_felt_cdm_reader() {
-	FeltCDMReader feltCDM("flth00.dat", "../etc/felt2nc_variables.xml");
+	FeltCDMReader feltCDM("flth00.dat", "../share/etc/felt2nc_variables.xml");
 	//feltCDM.getCDM().toXMLStream(std::cerr);
 	string projName, projXAxis, projYAxis, projXUnit, projYUnit;
 	feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);
@@ -132,3 +135,9 @@ init_unit_test_suite( int argc, char* argv[] )
 	test->add( BOOST_TEST_CASE( &test_felt_cdm_reader ) );
     return test;
 }
+
+#else
+// no boost testframework
+int main(int argc, char[] * args) {
+}
+#endif

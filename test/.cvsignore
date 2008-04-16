@@ -1,2 +1,16 @@
 test.nc
 test2.nc
+testInterpolator.nc
+test3.nc
+testInterpolator2.nc
+Makefile
+testTimeSliceData
+testFeltReader
+testInterpolator
+testCDM
+testInterpolation
+testExtractor
+testData
+testNetcdfWriter
+.deps
+.libs

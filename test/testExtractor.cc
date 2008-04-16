@@ -1,3 +1,6 @@
+#include "../src/config.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
@@ -12,7 +15,7 @@ using namespace MetNoUtplukk;
 
 void
 test_extract() {
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader("flth00.dat", "../etc/felt2nc_variables.xml"));
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader("flth00.dat", "../share/etc/felt2nc_variables.xml"));
 	boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
 	extract->removeVariable("relative_humidity");
 	try {
@@ -36,3 +39,9 @@ init_unit_test_suite( int argc, char* argv[] )
    	test->add( BOOST_TEST_CASE( &test_extract ) );
     return test;
 }
+
+#else
+// no boost testframework
+int main(int argc, char[] * args) {
+}
+#endif

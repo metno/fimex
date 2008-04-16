@@ -49,7 +49,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ac_cxx_have_stl.m4 \
 	$(top_srcdir)/m4/ac_cxx_namespaces.m4 \
 	$(top_srcdir)/m4/ax_boost_base.m4 \
-	$(top_srcdir)/m4/ax_boost_filesystem.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
@@ -61,7 +60,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
-CONFIG_HEADER = $(top_builddir)/config.h
+CONFIG_HEADER = $(top_builddir)/src/config.h
 CONFIG_CLEAN_FILES =
 @HAVE_MILIB_TRUE@am__EXEEXT_1 = testFeltReader$(EXEEXT)
 @HAVE_MILIB_TRUE@am__EXEEXT_2 = testNetcdfWriter$(EXEEXT) \
@@ -82,57 +81,57 @@ am__DEPENDENCIES_1 =
 testCDM_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 am_testData_OBJECTS = testData.$(OBJEXT)
 testData_OBJECTS = $(am_testData_OBJECTS)
 testData_LDADD = $(LDADD)
 testData_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
 testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
 testExtractor_LDADD = $(LDADD)
 testExtractor_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
 testFeltReader_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
 testInterpolation_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
 testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
 testInterpolator_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
 testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
 	../src/libutplukk.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
-DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4)
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -164,7 +163,6 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
-BOOST_FILESYSTEM_LIB = @BOOST_FILESYSTEM_LIB@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_PROGRAM_OPTIONS_LIB = @BOOST_PROGRAM_OPTIONS_LIB@
 BOOST_REGEX_LIB = @BOOST_REGEX_LIB@

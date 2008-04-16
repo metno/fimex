@@ -1,3 +1,6 @@
+#include "../src/config.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
@@ -95,3 +98,8 @@ init_unit_test_suite( int argc, char* argv[] )
 	test->add( BOOST_TEST_CASE( &test_dimension ) );
     return test;
 }
+#else
+// no boost testframework
+int main(int argc, char[] * args) {
+}
+#endif

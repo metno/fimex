@@ -1,3 +1,6 @@
+#include "../src/config.h"
+#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 #include "FeltCDMReader.h"
@@ -14,9 +17,9 @@ using namespace MetNoUtplukk;
 
 void
 test_feltNetcdfWrite(void) {
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader("flth00.dat", "../etc/felt2nc_variables.xml"));
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader("flth00.dat", "../share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter(feltReader, "test.nc");
-	feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader("/disk1/opdata/hirlam20/grdn06.dat", "../etc/felt2nc_variables_hirlam20.xml"));
+	feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader("/disk1/opdata/hirlam20/grdn06.dat", "../share/etc/felt2nc_variables_hirlam20.xml"));
 	NetCDF_CDMWriter(feltReader, "test2.nc");
 }
 
@@ -29,3 +32,9 @@ init_unit_test_suite( int argc, char* argv[] )
     test->add( BOOST_TEST_CASE( &test_feltNetcdfWrite ) );
     return test;
 }
+
+#else
+// no boost testframework
+int main(int argc, char[] * args) {
+}
+#endif
