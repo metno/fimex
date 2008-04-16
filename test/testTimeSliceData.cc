@@ -43,6 +43,6 @@ init_unit_test_suite( int argc, char* argv[] )
 
 #else
 // no boost testframework
-int main(int argc, char[] * args) {
+int main(int argc, char* args[]) {
 }
 #endif
