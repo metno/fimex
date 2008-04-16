@@ -1,7 +1,7 @@
 #ifndef NETCDF_CF10_CDMREADER_H_
 #define NETCDF_CF10_CDMREADER_H_
 
-#include "../config.h"
+#include "config.h"
 #include "CDMReader.h"
 #include NETCDF_CPP_INCLUDE
 

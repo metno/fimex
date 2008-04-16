@@ -44,7 +44,6 @@ AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([
 *** Libxml is required to build utplukk; Available at
 http://www.libxml.org/.]))
 AX_BOOST_BASE([1.32.0])
-AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX
 AX_BOOST_PROGRAM_OPTIONS
 AX_BOOST_UNIT_TEST_FRAMEWORK
@@ -93,6 +92,6 @@ AC_LANG_POP(C++)
 
 DX_INIT_DOXYGEN('Utplukk', 'Doxyfile', 'share/doc')
 
-AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES([utplukk.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile])
 AC_OUTPUT

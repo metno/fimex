@@ -1,5 +1,5 @@
 #include "NetCDF_CDMWriter.h"
-#include "../config.h"
+#include "config.h"
 extern "C" {
 #include NETCDF_C_INCLUDE             // the C interface
 }
