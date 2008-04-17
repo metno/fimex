@@ -2,7 +2,7 @@ SUBDIRS = .
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I.. -I../felt_reader -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
+AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/felt_reader -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
 
 LDADD = ../felt_reader/libutplukk_felt.a ../libutplukk.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) -lm @XML_LIBS@
 

@@ -1,6 +1,6 @@
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I. -I.. ${milib_CFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
+AM_CPPFLAGS = -I. -I$(srcdir)/.. ${milib_CFLAGS} ${XML_CPPFLAGS}
 
 
 lib_LIBRARIES = libutplukk_felt.a

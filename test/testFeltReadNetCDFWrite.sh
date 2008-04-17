@@ -1,8 +1,11 @@
 #! /bin/sh
-echo "testing conversion NetCDF to NetCDF"
-file=../../test/test.nc
-cd ../src/binSrc
-./utplukk -c utplukk.cfg --output.file=${file}
+echo "testing conversion Felt to NetCDF"
+echo $0
+srcdir=`dirname $0`
+curdir=`pwd`
+cd $srcdir
+file=${curdir}/test.nc
+${curdir}/../src/binSrc/utplukk -c felt2netcdf.cfg --output.file=${file} 
 if [ $? != 0 ]; then
   echo "failed converting felt to nc"
   exit 1

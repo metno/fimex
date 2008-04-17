@@ -1,4 +1,4 @@
-#include "../src/config.h"
+#include "config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
@@ -18,7 +18,8 @@ using namespace MetNoUtplukk;
 
 void
 test_interpolator() {
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader("flth00.dat", "../share/etc/felt2nc_variables.xml"));
+	string topSrcDir(TOP_SRCDIR);
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
 	vector<double> xAxis, yAxis;
 	for (int i = -10; i < 100; i++) {
@@ -36,7 +37,7 @@ test_interpolator() {
 	ifstream inputFile(grdFile.c_str());
 	if (inputFile.is_open()) {
 		inputFile.close();
-		feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader(grdFile, "../share/etc/felt2nc_variables_hirlam20.xml"));
+		feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
 		interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
 		xAxis = vector<double>();
 		yAxis = vector<double>();

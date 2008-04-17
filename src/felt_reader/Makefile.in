@@ -278,7 +278,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I. -I.. ${milib_CFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
+AM_CPPFLAGS = -I. -I$(srcdir)/.. ${milib_CFLAGS} ${XML_CPPFLAGS}
 lib_LIBRARIES = libutplukk_felt.a
 libutplukk_felt_a_SOURCES = $(am__append_1)
 include_HEADERS = $(am__append_2)

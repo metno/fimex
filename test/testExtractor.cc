@@ -1,10 +1,9 @@
-#include "../src/config.h"
+#include "config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
-
 
 #include "FeltCDMReader.h"
 #include "NetCDF_CDMWriter.h"
@@ -15,7 +14,8 @@ using namespace MetNoUtplukk;
 
 void
 test_extract() {
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader("flth00.dat", "../share/etc/felt2nc_variables.xml"));
+	string topSrcDir(TOP_SRCDIR);
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir + "/share/etc/felt2nc_variables.xml"));
 	boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
 	extract->removeVariable("relative_humidity");
 	try {

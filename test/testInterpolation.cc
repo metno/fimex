@@ -1,7 +1,7 @@
-#include "../src/config.h"
+#include "config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include "../src/interpolation.h"
+#include "interpolation.h"
 
 #include <cmath>
 #include <iostream>
@@ -113,7 +113,8 @@ void test_miup_interpolate_f()
 	
 	// reading the data
 	// i j country-id
-	std::ifstream datafile ("inData.txt", std::ios::in);
+	std::string topSrcDir(TOP_SRCDIR);
+	std::ifstream datafile (std::string(topSrcDir+"/test/inData.txt").c_str(), std::ios::in);
 	if (datafile.is_open()) {
 		datafile.exceptions(std::ios_base::eofbit|std::ios_base::badbit|std::ios::failbit);
 		int line = 0;

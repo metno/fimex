@@ -1,4 +1,4 @@
-#include "../src/config.h"
+#include "config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <iostream>

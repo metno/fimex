@@ -1,4 +1,4 @@
-#include "../src/config.h"
+#include "config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <iostream>
@@ -21,7 +21,8 @@ using namespace MetNoUtplukk;
 
 void
 test_feltparameter(void) {
-	FeltParameters fp = FeltParameters();
+	string topSrcDir(TOP_SRCDIR);
+	FeltParameters fp = FeltParameters(topSrcDir + "/test/diana.setup");
 	const boost::array<short, 16>  tksoil = fp.getParameters(string("tksoil"));
 	//cout << "tksoil:" << tksoil[10] << ":" << tksoil[11] << ":" << tksoil[12] << endl;
 	BOOST_CHECK(tksoil[10] == 2);
@@ -42,7 +43,8 @@ test_feltparameter(void) {
 
 void
 test_feltfile() {
-	Felt_File ff("flth00.dat");
+	string topSrcDir(TOP_SRCDIR);
+	Felt_File ff(topSrcDir+"/test/flth00.dat");
 	vector<Felt_Array> vec = ff.listFeltArrays();
 	for (vector<Felt_Array>::iterator it = vec.begin(); it != vec.end(); ++it) {
 		//cout << it->getName() << endl;
@@ -96,7 +98,8 @@ test_feltfile() {
 
 void
 test_felt_axis() {
-	Felt_File ff("flth00.dat");
+	string topSrcDir(TOP_SRCDIR);
+	Felt_File ff(topSrcDir+"/test/flth00.dat");
 	BOOST_CHECK(ff.getGridType() == 1);
 	const boost::array<float, 6>& gridPar = ff.getGridParameters();
 	boost::shared_ptr<Data> xdata = ff.getXData();
@@ -108,7 +111,8 @@ test_felt_axis() {
 
 void
 test_felt_cdm_reader() {
-	FeltCDMReader feltCDM("flth00.dat", "../share/etc/felt2nc_variables.xml");
+	string topSrcDir(TOP_SRCDIR);
+	FeltCDMReader feltCDM(topSrcDir+"/test/flth00.dat", topSrcDir + "/share/etc/felt2nc_variables.xml");
 	//feltCDM.getCDM().toXMLStream(std::cerr);
 	string projName, projXAxis, projYAxis, projXUnit, projYUnit;
 	feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);

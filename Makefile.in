@@ -296,7 +296,14 @@ SUBDIRS = src test
 @DX_COND_doc_TRUE@    $(DX_CLEAN_LATEX)
 
 EXTRA_DIST = $(DX_CONFIG) share/doc/html
-dist_data_DATA = share/etc/felt2nc_variables.xml
+dist_data_DATA = share/etc/felt2nc_variables.xml \
+				 share/etc/felt2nc_variables_hirlam20.xml \
+                 share/etc/damocles_felt2nc_variables.xml share/etc/damocles_felt_axes.xml share/etc/damocles_felt_global_attributes.xml \
+				 share/etc/felt_axes.xml \
+				 share/etc/felt_global_attributes.xml \
+				 share/etc/felt_variables_hirlam20.xml
+
+DISTCHECK_CONFIGURE_FLAGS = --with-NetCDF-lib-dir=/usr/lib/netcdf-3 --with-NetCDF-include-dir=/usr/include/netcdf-3
 all: all-recursive
 
 .SUFFIXES:
