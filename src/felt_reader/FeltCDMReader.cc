@@ -19,6 +19,8 @@
 namespace MetNoUtplukk
 {
 
+using namespace std;
+
 static CDMAttribute createCDMAttribute(string name, string datatype, string value) throw(MetNoFelt::Felt_File_Error)
 {
 	std::string type(string2lowerCase(datatype));

@@ -7,6 +7,8 @@
 namespace MetNoUtplukk
 {
 
+using namespace std;
+
 const int DEBUG = 1;
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
