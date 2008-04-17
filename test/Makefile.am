@@ -9,6 +9,7 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 if HAVE_MILIB
   LDADD += ${milib_LIBS}
   CC_TESTS += testFeltReader
+  NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
   NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator
 endif
 if HAVE_UDUNITS
@@ -17,7 +18,7 @@ endif
 if HAVE_NETCDF
   LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
   CC_TESTS += ${NETCDF_MI_TESTS}
-  SH_TESTS += testNetCDFReadWrite.sh
+  SH_TESTS += ${NETCDF_MI_SH_TESTS}
 endif
 
 TESTS = $(CC_TESTS) $(SH_TESTS)
