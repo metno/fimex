@@ -1,4 +1,4 @@
-AC_INIT([utplukk], [0.2], [heiko.klein@met.no])
+AC_INIT([utplukk], [0.3], [heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
