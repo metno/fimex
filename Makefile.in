@@ -295,7 +295,7 @@ SUBDIRS = src test
 @DX_COND_doc_TRUE@    $(DX_CLEAN_PDF) \
 @DX_COND_doc_TRUE@    $(DX_CLEAN_LATEX)
 
-EXTRA_DIST = $(DX_CONFIG) share/doc/html
+EXTRA_DIST = $(DX_CONFIG) liststdc++.tag share/doc/html
 dist_data_DATA = share/etc/felt2nc_variables.xml \
 				 share/etc/felt2nc_variables_hirlam20.xml \
                  share/etc/damocles_felt2nc_variables.xml share/etc/damocles_felt_axes.xml share/etc/damocles_felt_global_attributes.xml \
