@@ -52,7 +52,7 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int f
 	for (int i = 0; i < 16; i++) {
 		if (!((this->idx[i] == ANY_VALUE()) || (this->idx[i] == idx[i]))) {
 			ostringstream msg;
-			msg << "inexact definition of parameter "<< getName() << " at id " << (i+1) << "values: " << this->idx[i] << "<->" << idx[i];
+			msg << "inexact definition of parameter "<< getName() << " at id " << (i+1) << " values: " << this->idx[i] << "<->" << idx[i];
 			throw Felt_File_Error(msg.str());
 		}
 	}

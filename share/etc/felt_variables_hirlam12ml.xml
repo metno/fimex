@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE variables SYSTEM "felt_variables.dtd">
+<variables>
+<!--  currently not distributing vector data due to missing support in fimex
+<parameter id="2" name="x_wind">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="x_wind" type="string" />
+	<attribute name="standard_name" value="x_wind" type="string" />
+	<attribute name="units" value="m/s" type="string" />
+</parameter>
+<parameter id="3" name="y_wind">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="y_wind" type="string" />
+	<attribute name="standard_name" value="y_wind" type="string" />
+	<attribute name="units" value="m/s" type="string" />
+</parameter>
+-->
+<parameter id="9" name="specific_humidity">
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="specific_humidity" type="string" />
+	<attribute name="standard_name" value="specific_humidity" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="10" name="relative_humidity">
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="relative_humidity" type="string" />
+	<attribute name="standard_name" value="relative_humidity" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="11" name="sigma_dot">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="sigma_dot" type="string" />
+	<attribute name="metno_name" value="sigma_dot" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="13" name="omega">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="relative_humidity" type="string" />
+	<attribute name="standard_name_alias" value="vertical_air_velocity_expressed_as_tendency_of_pressure" type="string" />	
+	<attribute name="standard_name" value="lagrangian_tendency_of_air_pressure" type="string" />
+	<attribute name="units" value="1000 hPa/s" type="string" />
+</parameter>
+<parameter id="18" name="air_potential_temperature">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="air_potential_temperature" type="string" />
+	<attribute name="standard_name" value="air_potential_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="22" name="cloud_liquid_water_content_of_atmosphere_layer">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="cloud_liquid_water_content_of_atmosphere_layer" type="string" />
+	<attribute name="standard_name" value="cloud_liquid_water_content_of_atmosphere_layer" type="string" />
+	<attribute name="metno_name" value="qliq" type="string" />
+	<attribute name="units" value="kg m-2" type="string" />
+</parameter>
+<parameter id="23" name="precipitation_amount">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="precipitation_amount" type="string" />
+	<attribute name="standard_name" value="precipitation_amount" type="string" />
+	<attribute name="units" value="kg/m2" type="string" />
+</parameter>
+</variables>

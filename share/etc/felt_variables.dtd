@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+    TODO define vocabulary identification
+    PUBLIC ID: -//vendor//vocabulary//EN
+    SYSTEM ID: http://server/path/felt_variables.dtd
+
+--><!--
+    An example how to use this DTD from your XML document:
+
+    <?xml version="1.0"?>
+
+    <!DOCTYPE variables SYSTEM "felt_variables.dtd">
+
+    <variables>
+    ...
+    </variables>
+-->
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT variables (parameter)*>
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT parameter (attribute)*>
+<!ATTLIST parameter
+    type CDATA #IMPLIED
+    name CDATA #REQUIRED
+    id CDATA #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT attribute EMPTY>
+<!ATTLIST attribute
+    type CDATA #REQUIRED
+    value CDATA #REQUIRED
+    name CDATA #REQUIRED
+  >

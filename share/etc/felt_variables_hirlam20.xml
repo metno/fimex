@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE variables SYSTEM "felt_variables.dtd">
 <variables>
 <!-- different grid
 <parameter id="1" name="geopotential_height">
