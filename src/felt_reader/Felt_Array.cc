@@ -21,8 +21,9 @@ Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx, con
 	this->idx[3] = ANY_VALUE();
 	this->idx[4] = ANY_VALUE();
 	this->idx[9] = ANY_VALUE();
-	// clear levels
+	// clear levels (niveau 1 and niveau 2)
 	this->idx[12] = ANY_VALUE();
+	this->idx[13] = ANY_VALUE();
 	// clear internal block information
 	this->idx[5] = ANY_VALUE();
 	this->idx[6] = ANY_VALUE();
@@ -71,7 +72,7 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int f
 	// required to be able to go back from tm_hour to idx[4], idx[9]
 	boost::array<short, 4> timeIdx= { { idx[2], idx[3], idx[4], idx[9] } };
 	times[thisTime] = timeIdx;
-	levels.insert(idx[12]);
+	levelPairs.insert(pair<short, short>(idx[12], idx[13]));
 	fieldSizeMap[thisTime][idx[12]] = fieldSize;
 }
 
@@ -114,11 +115,22 @@ vector<time_t> Felt_Array::getTimes() const {
 	return vTimes; 
 }
 
+static short getFirstPairValue(const pair<short, short>& p) {return p.first;}
+
 vector<short> Felt_Array::getLevels() const {
-	vector<short> vLevels = vector<short>(levels.size());
-	copy(levels.begin(), levels.end(), vLevels.begin());
+	set<short> levels1;
+	transform(levelPairs.begin(), levelPairs.end(), inserter(levels1, levels1.begin()), getFirstPairValue);
+	vector<short> vLevels = vector<short>(levels1.size());
+	copy(levels1.begin(), levels1.end(), vLevels.begin());
 	sort(vLevels.begin(), vLevels.end());
 	return vLevels;
+}
+
+vector<pair<short, short> > Felt_Array::getLevelPairs() const {
+	vector<pair<short, short> > retVal(levelPairs.size());
+	copy(levelPairs.begin(), levelPairs.end(), retVal.begin());
+	// retVal is sorted since the set is sorted
+	return retVal;
 }
 
 double Felt_Array::getScalingFactor() const {

@@ -11,6 +11,20 @@
 namespace MetNoFelt {
 using namespace std;
 
+/**
+ * comparison operator for pair<short, short> used for levelPairs
+ * 
+ */
+struct ShortPairLess : public binary_function<const pair<short, short>, const pair<short, short>, bool> 
+{
+	bool operator()(const pair<short, short>& p1, const pair<short, short>& p2) {
+		if (p1.first == p2.first) return p1.second < p2.second;
+		return p1.first < p2.first;
+	}
+};
+/** set<pair<short,short> > with comparator*/ 
+typedef set<pair<short,short>, ShortPairLess > ShortPairSet;
+
 
 /// encapsulate parameters of a felt file
 /**
@@ -19,9 +33,10 @@ using namespace std;
  */
 class Felt_Array
 {
-	typedef std::map<time_t, boost::array<short, 4> > TIME_MAP;
+private:
+	typedef map<time_t, boost::array<short, 4> > TIME_MAP;
 	string feltArrayName;
-	set<short> levels;
+	ShortPairSet levelPairs;
 	// the time-array[0,1,2,3] correspond to index-array[2,3,4,9]
 	TIME_MAP times;
 	map<time_t, map<short, int> > fieldSizeMap;
@@ -84,10 +99,14 @@ public:
 	double getFillValue() const { return fillValue;}
 	/** set the fill value to be used in #Felt_File::getScaledDataSlice */
 	void setFillValue(double fillValue) {this->fillValue = fillValue;}
-	/** return the times available for this parameter */
+	/** return the times available for this parameter, sorted */
 	vector<time_t> getTimes() const;
-	/** return the levels available for this parameter */
+	/** return the levels available for this parameter, sorted */
 	vector<short> getLevels() const;
+	/** 
+	 * return the level pairs (niveau 1, niveau 2) for this parameter as used by hybrid levels
+	 */
+	vector<pair<short, short> > getLevelPairs() const;
 	/** return x/longitude size */
 	int getX() const {return header[9];}
 	/** return y/latitude size */

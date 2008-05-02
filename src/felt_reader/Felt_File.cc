@@ -218,16 +218,31 @@ boost::shared_ptr<MetNoUtplukk::Data> Felt_File::getScaledDataSlice(const std::s
 	return returnData;
 }
 std::map<short, std::vector<short> > Felt_File::getFeltLevels() const {
+	// put level values of each id into the levelSet (sort and unique)
 	std::map<short, std::set<short> > typeLevelSet;
 	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
 		vector<short> levels = fait->second.getLevels();
 		typeLevelSet[fait->second.getLevelType()].insert(levels.begin(), levels.end());
 	}
+	// convert the set into a vector
 	std::map<short, std::vector<short> > typeLevelVector;
 	for (std::map<short, std::set<short> >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
-		std::vector<short> sortedLevels(it->second.begin(), it->second.end());
-		sort(sortedLevels.begin(), sortedLevels.end());
-		typeLevelVector[it->first] = sortedLevels;
+		typeLevelVector[it->first] = std::vector<short>(it->second.begin(), it->second.end());
+	}
+	return typeLevelVector;
+}
+
+std::map<short, std::vector<pair<short,short> > > Felt_File::getFeltLevelPairs() const {
+	// put level values of each id into the levelSet (sort and unique)
+	std::map<short, ShortPairSet> typeLevelSet;
+	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
+		vector<pair<short, short> > levels = fait->second.getLevelPairs();
+		typeLevelSet[fait->second.getLevelType()].insert(levels.begin(), levels.end());
+	}
+	// convert the set into a vector
+	std::map<short, std::vector<pair<short,short> > > typeLevelVector;
+	for (std::map<short, ShortPairSet >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
+		typeLevelVector[it->first] = std::vector<pair<short, short> >(it->second.begin(), it->second.end());
 	}
 	return typeLevelVector;
 }
@@ -237,9 +252,8 @@ std::vector<time_t> Felt_File::getFeltTimes() const {
 	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
 		vector<time_t> fa_times = fait->second.getTimes();
 		times.insert(fa_times.begin(), fa_times.end());
-	}
+	}	// times automatically sorted due to set
 	std::vector<time_t> sortedTimes(times.begin(), times.end());
-	sort(sortedTimes.begin(), sortedTimes.end());
 	return sortedTimes;
 }
 

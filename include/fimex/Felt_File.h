@@ -84,9 +84,14 @@ public:
 
 	/**
 	 *  Z-axis types and values
-	 * @return map consisting of felt level-ids and a vector of level values
+	 * @return map consisting of felt level-ids and a sorted vector of level values
 	 */ 
 	std::map<short, std::vector<short> > getFeltLevels() const;
+	/**
+	 *  Z-axis types and values
+	 * @return map consisting of felt level-ids and a sorted vector of level-pairs of values
+	 */ 
+	std::map<short, std::vector<pair<short,short> > > getFeltLevelPairs() const;
 	/// all time values, sorted
 	std::vector<time_t> getFeltTimes() const;
 	/// get size in x direction
