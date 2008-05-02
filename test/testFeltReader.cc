@@ -125,6 +125,9 @@ test_felt_cdm_reader() {
 	boost::shared_ptr<Data> yVals = feltCDM.getDataSlice(projYAxis);
 	BOOST_CHECK(xVals->size() == 229);
 	BOOST_CHECK(yVals->size() == 196);
+
+	const CDMAttribute& attr = feltCDM.getCDM().getAttribute(feltCDM.getCDM().globalAttributeNS(), "min_time");
+	BOOST_CHECK(attr.getStringValue() != "%MIN_DATETIME%");
 }
 
 

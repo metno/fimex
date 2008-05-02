@@ -8,6 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <libxml/xinclude.h>
@@ -56,7 +57,14 @@ static CDMAttribute createCDMAttribute(string name, string datatype, string valu
 	}
 }
 
-static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node) {
+static string replaceTemplateAttribute(string value, const map<string, string> templateReplacements) {
+	for (map<string, string>::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
+		value = boost::regex_replace(value, boost::regex("%" + it->first + "%"), it->second);
+	}
+	return value;
+}
+
+static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node, const std::map<std::string, std::string>& templateReplacements) {
 	if (node == 0) return;
 	string attribute("attribute");
 	if ((node->type == XML_ELEMENT_NODE) &&
@@ -64,13 +72,15 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node)
 			string name(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
 			string value(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("value"))));
 			string type(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
+
+			value = replaceTemplateAttribute(value, templateReplacements);
 			attributes.push_back(createCDMAttribute(name,type,value));
 	}
-	fillAttributeList(attributes, node->children);
-	fillAttributeList(attributes, node->next);
+	fillAttributeList(attributes, node->children, templateReplacements);
+	fillAttributeList(attributes, node->next, templateReplacements);
 }
 
-static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes ) throw(CDMException)
+static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, string> templateReplacements) throw(CDMException)
 {
 	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 	if (xpathObj.get() == 0) {
@@ -91,7 +101,7 @@ static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& x
 		xmlAttributes[name] = value;
 		attr = attr->next;
 	}
-	fillAttributeList(varAttributes, node->children);
+	fillAttributeList(varAttributes, node->children, templateReplacements);
 	return size;
 }
 
@@ -173,6 +183,15 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 		}
 	}
 	feltFile = MetNoFelt::Felt_File(filename, knownFeltIds);
+	{
+		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
+		std::vector<time_t> feltTimes = feltFile.getFeltTimes();
+		using namespace boost::posix_time;
+		ptime minTime = from_time_t(feltTimes[0]);
+		templateReplacementAttributes["MIN_DATETIME"] = to_iso_extended_string(minTime);
+		ptime maxTime = from_time_t(feltTimes[feltTimes.size() - 1]);
+		templateReplacementAttributes["MAX_DATETIME"] = to_iso_extended_string(maxTime);
+	}
 	
 	// fill the CDM;
 	// set the global data for this feltFile derived from first data
@@ -193,7 +212,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			xmlNodePtr node = nodes->nodeTab[i];
 			assert(node->type == XML_ELEMENT_NODE);
 			std::vector<CDMAttribute> globAttributes;
-			fillAttributeList(globAttributes, nodes->nodeTab[0]->children);
+			fillAttributeList(globAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 			for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
 				cdm.addAttribute(cdm.globalAttributeNS(), *it);
 			}
@@ -242,7 +261,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 		timeVar.setData(timeData);
 		cdm.addVariable(timeVar);
 		std::vector<CDMAttribute> timeAttributes;
-		fillAttributeList(timeAttributes, nodes->nodeTab[0]->children);
+		fillAttributeList(timeAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 		for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
 			cdm.addAttribute(timeVar.getName(), *it);
 		}
@@ -284,7 +303,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			cdm.addVariable(levelVar);
 			
 			std::vector<CDMAttribute> levelAttributes;
-			fillAttributeList(levelAttributes, nodes->nodeTab[0]->children);
+			fillAttributeList(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 			for (std::vector<CDMAttribute>::iterator it = levelAttributes.begin(); it != levelAttributes.end(); ++it) {
 				cdm.addAttribute(levelVar.getName(), *it);
 			}
@@ -317,7 +336,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			std::string xpathStringX("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='x']");
 			std::vector<CDMAttribute> xVarAttributes;
 			std::map<string, string> xXmlAttributes;
-			int found = readXPathNode(xpathCtx, xpathStringX, xXmlAttributes, xVarAttributes);
+			int found = readXPathNode(xpathCtx, xpathStringX, xXmlAttributes, xVarAttributes, templateReplacementAttributes);
 			if (found != 1) {
 				throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringX);
 			}
@@ -339,7 +358,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		std::string xpathStringY("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='y']");
     		std::vector<CDMAttribute> yVarAttributes;
     		std::map<string, string> yXmlAttributes;
-    		int found = readXPathNode(xpathCtx, xpathStringY, yXmlAttributes, yVarAttributes);
+    		int found = readXPathNode(xpathCtx, xpathStringY, yXmlAttributes, yVarAttributes, templateReplacementAttributes);
     		if (found != 1) {
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringY);    		
     		}
@@ -364,13 +383,13 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		std::string xpathStringLong("/cdm_felt_config/axes/spatial_axis[@id='longitude']");
     		std::vector<CDMAttribute> lonlatVarAttributes;
     		std::map<string, string> lonlatXmlAttributes;
-    		int found = readXPathNode(xpathCtx, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes);
+    		int found = readXPathNode(xpathCtx, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
     		if (found != 1) {
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLong);    		
     		}
     		longName = lonlatXmlAttributes["name"];
     		std::string xpathStringLat("/cdm_felt_config/axes/spatial_axis[@id='latitude']");
-    		found = readXPathNode(xpathCtx, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes);
+    		found = readXPathNode(xpathCtx, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
     		if (found != 1) {
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLat);    		
     		}
@@ -407,7 +426,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		assert(nodes->nodeTab[0]->type == XML_ELEMENT_NODE);
     		std::string varName(reinterpret_cast<char *>(xmlGetProp(nodes->nodeTab[0], reinterpret_cast<const xmlChar *>("name"))));
     		std::vector<CDMAttribute> attributes;
-    		fillAttributeList(attributes, nodes->nodeTab[0]->children);
+    		fillAttributeList(attributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
     		// add the projection
     		attributes.push_back(CDMAttribute("grid_mapping",projName));
     		if (coordinates != "") {

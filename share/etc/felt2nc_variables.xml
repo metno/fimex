@@ -5,6 +5,8 @@
 	<attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />
 	<attribute name="source" value="HIRLAM" type="string" />
 	<attribute name="title" value="unknown" type="string" />
+	<attribute name="min_time" value="%MIN_DATETIME%" type="string" />
+	<attribute name="max_time" value="%MAX_DATETIME%" type="string" />
 	<attribute name="references" value="unknown" type="string" />
 	<attribute name="history" value="unknown" type="string" />
 	<attribute name="comment" value="none" type="string" />

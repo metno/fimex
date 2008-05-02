@@ -29,6 +29,14 @@ private:
 	std::map<std::string, std::string> varNameFeltIdMap;
 	std::vector<std::time_t> timeVec;
 	std::map<std::string, std::vector<short> > levelVecMap;
+	/**
+	 * config attributes may contain template parameters marked with %PARAM%
+	 * which should be replaced by dynamic values from the felt-file and stored
+	 * temporary in this map
+	 * 
+	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
+	 */
+	std::map<std::string, std::string> templateReplacementAttributes;
 	void init() throw(MetNoFelt::Felt_File_Error);
 };
 
