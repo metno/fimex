@@ -1,0 +1,106 @@
+# %include <Incl_metop.pm> ; #-*-cperl-*-
+
+# %manual
+# ###########################################################################
+# #
+# # NAME:
+# #    SMSBASE/fimex/fimex_h12.sms
+# #
+# # FUNCTION:
+# #    convert HIRLAM model output to netcdf for damocles/IPY
+# #
+# # RESPONSIBLE:
+# #    "Heiko Klein" <heikok>
+# #
+# # RESTART:
+# #    Yes
+# #
+# #
+# #
+# # DESCRIPTION:
+# #    Read HIRLAM 12 model output and convert it to netcdf CF-1.0 for damocles/IPY
+# #    (00,06,12,18 utc).
+# #    - convert data to a polarstereographic map projection
+# #
+# # BUGS:
+# #
+# # DISTRIBUTION:
+# #    No
+# #
+# # CALLS:
+# #    bin/utplukk
+# #
+# # CONTROL DATA:
+# #
+# #
+# # INPUT DATA:
+# #    SMSDATA/hirlam12/h12WWXX.dat (WW=ml,sf,ie; XX=00,06,12,18)
+# #
+# # OUTPUT DATA:
+# #    workdir/
+# #
+# # CHANGE LOG:
+# #    (date:originator.name or userid:sms.name or userid: description)
+# #    2008-04-30::"Heiko Klein" <heikok>: first version
+# #
+# ##########################################################################
+# %end
+
+## test variables
+our $SMSDATA = '/opdata';
+our $datadir = '/home/guest/heikok/tmp';
+our $etcdir = '/home/guest/heikok/utplukk_install/etc';
+our $jobdir = '/home/guest/heikok/utplukk_install/job';
+our $utc = '00';
+$ENV{PATH} = "/home/guest/heikok/utplukk_install/bin:$ENV{PATH}";
+
+# variables and functions
+
+our $prog = 'fimex_h12.sms';
+
+# get argument: utc (hour) : 00/06/12/18
+
+if (! grep {$_ eq $utc} (qw(00 06 12 18))) {
+    &ERROR("usage: $prog  utc     (utc=00/06/12/18)\n");
+}
+
+chdir $datadir;
+
+our $fimex = "utplukk";
+our $config = "$etcdir/utplukk_hirlam12.cfg";
+our $sharedir = "$jobdir/../share";
+
+my ($day, $month, $year) = (gmtime(time))[3,4,5];
+$year+=1900;
+$month++;
+$month = ($month < 10) ? "0$month" : $month;
+$day = ($day < 10) ? "0$day" : $day;
+my $date= "$year-$month-$day";
+
+
+# map of time-appendices for different level types
+my %timeApp = (sf => [qw(_1h _3h _60h)],
+	      );
+foreach my $type (keys %timeApp) {
+    my $inputFile = "$SMSDATA/hirlam12/h12$type$utc.dat";
+    foreach my $app (@{ $timeApp{$type} }) {
+	my $outputFile = "h12$type$app\_$date\_$utc.nc";
+	my $inputConfig = "$sharedir/felt2nc_variables_hirlam12_damocles_$type$app.xml";
+	my @options = ("-c", $config,
+		        "--input.file=$inputFile",
+		        "--input.config=$inputConfig",
+		        "--output.file=$outputFile");
+	my $options = join " ", @options;
+	print "$fimex $options\n";
+	system ($fimex, @options) == 0 or &WARNING("'$fimex $options' failed: $?");
+    }
+}
+
+# #==========================================================================
+# #  End task.
+# #==========================================================================
+# &ENDT;
+# #==========================================================================
+# #  Clean up and exit
+# #==========================================================================
+# &EXIT;

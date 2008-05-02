@@ -21,7 +21,7 @@ namespace MetNoUtplukk
 
 using namespace std;
 
-static CDMAttribute createCDMAttribute(string name, string datatype, string value) throw(MetNoFelt::Felt_File_Error)
+static CDMAttribute createCDMAttribute(string name, string datatype, string value) throw(CDMException)
 {
 	std::string type(string2lowerCase(datatype));
 	if (type == "float") {
@@ -52,7 +52,7 @@ static CDMAttribute createCDMAttribute(string name, string datatype, string valu
 	} else if (type == "string") {
 		return CDMAttribute(name, value);
 	} else {
-		throw MetNoFelt::Felt_File_Error("unknown type: " + type);
+		throw CDMException("unknown type: " + type);
 	}
 }
 
@@ -70,11 +70,11 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node)
 	fillAttributeList(attributes, node->next);
 }
 
-static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes ) throw(MetNoFelt::Felt_File_Error)
+static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes ) throw(CDMException)
 {
 	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 	if (xpathObj.get() == 0) {
-		throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
+		throw CDMException("unable to parse xpath" + xpathString);
 	}
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0; 
@@ -82,7 +82,7 @@ static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& x
 	// only parsing node[0]
 	xmlNodePtr node = nodes->nodeTab[0];
 	if (node->type != XML_ELEMENT_NODE) {
-		throw MetNoFelt::Felt_File_Error("xpath does not point to XML_ELEMENT_NODE: " + xpathString);
+		throw CDMException("xpath does not point to XML_ELEMENT_NODE: " + xpathString);
 	}
 	xmlAttrPtr attr = node->properties;
 	while (attr != 0) {
@@ -102,9 +102,21 @@ static void myXmlCleanupParser(int* i) {
 	delete i;
 }
 
-FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) throw (MetNoFelt::Felt_File_Error)
+FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) throw (CDMException)
 : filename(filename), configFilename(configFilename)
 {
+	try {
+		init();
+	} catch (MetNoFelt::Felt_File_Error& ffe) {
+		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());
+	}
+}
+
+FeltCDMReader::~FeltCDMReader()
+{
+}
+
+void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     // test lib vs compile version
 	xmlInitParser();
     LIBXML_TEST_VERSION
@@ -434,12 +446,9 @@ FeltCDMReader::FeltCDMReader(std::string filename, std::string configFilename) t
     			cdm.addAttribute(varName, *attrIt);
     		}
     	}
-	}
+	}	
 }
 
-FeltCDMReader::~FeltCDMReader()
-{
-}
 
 const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
 	const CDMVariable& variable = cdm.getVariable(varName);

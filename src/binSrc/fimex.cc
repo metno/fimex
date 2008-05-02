@@ -402,10 +402,17 @@ int main(int argc, char* args[])
     	exit(1);
     }
     
-    auto_ptr<CDMReader> dataReader = getCDMFileReader(vm);
-    dataReader = getCDMExtractor(vm, dataReader);
-    dataReader = getCDMInterpolator(vm, dataReader);
-    writeCDM(dataReader, vm);
-    
+    try {
+    	auto_ptr<CDMReader> dataReader = getCDMFileReader(vm);
+    	dataReader = getCDMExtractor(vm, dataReader);
+    	dataReader = getCDMInterpolator(vm, dataReader);
+    	writeCDM(dataReader, vm);
+    } catch (CDMException& cdmex) {
+    	cout << "CDMException occured: " << cdmex.what() << endl;
+    	exit(1);
+    } catch (std::exception& ex) {
+    	cout << "exception occured: " << ex.what() << endl;
+    	exit(1);
+    }
 	return 0;
 }
