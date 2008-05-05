@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/shared_ptr.hpp>
 #include "Felt_File.h"
 #include "CDMReader.h"
 #include "CDMDimension.h"
+#include "ReplaceStringObject.h"
 
 namespace MetNoUtplukk
 {
@@ -36,7 +38,7 @@ private:
 	 * 
 	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
 	 */
-	std::map<std::string, std::string> templateReplacementAttributes;
+	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
 	void init() throw(MetNoFelt::Felt_File_Error);
 };
 

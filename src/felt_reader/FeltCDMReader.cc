@@ -5,6 +5,7 @@
 #include "interpolation.h"
 #include "CDMDataType.h"
 #include "DataImpl.h"
+#include "ReplaceStringTimeObject.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
@@ -15,7 +16,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
-#include <time.h>
+#include <ctime>
 
 namespace MetNoUtplukk
 {
@@ -57,14 +58,25 @@ static CDMAttribute createCDMAttribute(string name, string datatype, string valu
 	}
 }
 
-static string replaceTemplateAttribute(string value, const map<string, string> templateReplacements) {
-	for (map<string, string>::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
-		value = boost::regex_replace(value, boost::regex("%" + it->first + "%"), it->second);
+static string replaceTemplateAttribute(string value, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) {
+	for (map<string, boost::shared_ptr<ReplaceStringObject> >::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
+		boost::smatch matches;
+		boost::regex rgx(boost::regex(".*%" + it->first + "(\\((.*)\\))?" + "%.*"));
+		if (boost::regex_match(value, matches, rgx)) {
+			boost::shared_ptr<ReplaceStringObject> rso = it->second;
+			if (matches.size() > 2) {
+				// values within the inner brackets
+				rso->setFormatString(matches[2]);
+			}
+			stringstream ss;
+			rso->put(ss);
+			value = boost::regex_replace(value, rgx, ss.str());
+		}
 	}
 	return value;
 }
 
-static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node, const std::map<std::string, std::string>& templateReplacements) {
+static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) {
 	if (node == 0) return;
 	string attribute("attribute");
 	if ((node->type == XML_ELEMENT_NODE) &&
@@ -80,7 +92,7 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node,
 	fillAttributeList(attributes, node->next, templateReplacements);
 }
 
-static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, string> templateReplacements) throw(CDMException)
+static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) throw(CDMException)
 {
 	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 	if (xpathObj.get() == 0) {
@@ -186,11 +198,8 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
 		std::vector<time_t> feltTimes = feltFile.getFeltTimes();
-		using namespace boost::posix_time;
-		ptime minTime = from_time_t(feltTimes[0]);
-		templateReplacementAttributes["MIN_DATETIME"] = to_iso_extended_string(minTime);
-		ptime maxTime = from_time_t(feltTimes[feltTimes.size() - 1]);
-		templateReplacementAttributes["MAX_DATETIME"] = to_iso_extended_string(maxTime);
+		templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(feltTimes[0]));
+		templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(feltTimes[feltTimes.size() - 1]));
 	}
 	
 	// fill the CDM;

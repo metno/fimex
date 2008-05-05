@@ -9,7 +9,7 @@ namespace MetNoUtplukk
 
 using namespace std;
 
-const int DEBUG = 1;
+const int DEBUG = 0;
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
 : dataReader(dataReader), latitudeName("lat"), longitudeName("lon")

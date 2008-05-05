@@ -5,8 +5,8 @@ AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I. ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
 
 lib_LIBRARIES = libutplukk.a
-libutplukk_a_SOURCES = interpolation.c CachedInterpolation.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc Null_CDMWriter.cc Utils.cc 
-include_HEADERS = config.h CachedInterpolation.h CDMAttribute.h CDMDataType.h CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h DataImpl.h interpolation.h Null_CDMWriter.h Utils.h
+libutplukk_a_SOURCES = interpolation.c CachedInterpolation.cc CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc Null_CDMWriter.cc ReplaceStringTimeObject.cc Utils.cc 
+include_HEADERS = config.h CachedInterpolation.h CDMAttribute.h CDMDataType.h CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h DataImpl.h interpolation.h Null_CDMWriter.h ReplaceStringObject.h ReplaceStringTimeObject.h Utils.h
 
 if HAVE_NETCDF
   libutplukk_a_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc

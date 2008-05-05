@@ -15,8 +15,8 @@
 	<attribute name="westernmost_longitude" value="-180" type="string" />
 	<attribute name="easternmost_longitude" value="180" type="string" />
 	
-	<attribute name="start_date" value="2008-01-01 00:00:00" type="string" />
-	<attribute name="stop_date" value="2008-04-01 00:00:00" type="string" />
+	<attribute name="start_date" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
+	<attribute name="stop_date" value="%MAX_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
 	
 	<attribute name="PI_name" value="unknown" type="string" />
 	<attribute name="contact" value="Heiko.Klein@met.no" type="string" />

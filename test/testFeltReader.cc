@@ -127,7 +127,7 @@ test_felt_cdm_reader() {
 	BOOST_CHECK(yVals->size() == 196);
 
 	const CDMAttribute& attr = feltCDM.getCDM().getAttribute(feltCDM.getCDM().globalAttributeNS(), "min_time");
-	BOOST_CHECK(attr.getStringValue() != "%MIN_DATETIME%");
+	BOOST_CHECK(attr.getStringValue().substr(0,4) == "2007");
 }
 
 
