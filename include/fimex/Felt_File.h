@@ -1,7 +1,6 @@
 #ifndef FELT_FILE_H_
 #define FELT_FILE_H_
 
-#include <cstdio>
 #include <ctime>
 #include <map>
 #include <vector>
@@ -24,7 +23,7 @@ namespace MetNoFelt {
 class Felt_File
 {
 	std::string filename;
-	boost::shared_ptr<std::FILE> fh;
+	boost::shared_ptr<int> fdPtr; // file descriptor
 	std::map<std::string, Felt_Array> feltArrayMap;
 	FeltParameters feltParameters;
 	

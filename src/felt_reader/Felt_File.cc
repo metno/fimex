@@ -4,6 +4,11 @@
 #include "DataImpl.h"
 #include "Utils.h"
 #include "interpolation.h"
+#include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <cerrno>
 #include <cassert>
 #include <ctime>
 #include <cmath>
@@ -39,26 +44,30 @@ Felt_File::Felt_File(const std::string& filename, const std::vector<std::string>
 	init();
 }
 
+void fdPtrClose(int* fdPtr) {
+	close(*fdPtr);
+}
+
 void Felt_File::init() throw(Felt_File_Error)
 {
 	const int MAXNIN = 256;
 	int foundall = 0;
-	int iunit, ireq, iexist, nin;
+	int ireq, iexist, nin;
 	short inmr[16];
 	short idrec1[1024];
 	float dummy;
 	int nfound, iend, ierror, ioerr;
-	std::FILE* fileh;
 	
 	// open in C to get a free file-descriptor
-	fileh = fopen(filename.c_str(), "r");
-	if (fileh == NULL) {
-		return;
+	int fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
+	if (fd == -1) {
+		char* msg = strerror(errno);
+		throw Felt_File_Error("error reading file " + filename + ": " + msg);
 	}
-	fh = boost::shared_ptr<std::FILE>(fileh, fclose);
-	iunit = fileno(fileh);
+	fdPtr = boost::shared_ptr<int>(new int, fdPtrClose);
+	*fdPtr = fd;
 	// initialize feltfile
-	mrfelt(1,filename.c_str(),iunit,&inmr[0],0,1,&dummy,1.f,1024,&idrec1[0],&ierror);
+	mrfelt(1,filename.c_str(),*fdPtr,&inmr[0],0,1,&dummy,1.f,1024,&idrec1[0],&ierror);
 	for (int i = 0; i < 16; i++) {
 		//TODO: something with idrec1, inmr ???
 	}
@@ -75,7 +84,7 @@ void Felt_File::init() throw(Felt_File_Error)
     	for (int i = 0; i < 16; i++) {
     		in[i] = -32767; // first row = undef
     	}
-        qfelt(iunit,ireq,iexist,nin,in.get(),ifound.get(),&nfound,&iend,&ierror,&ioerr);
+        qfelt(*fdPtr,ireq,iexist,nin,in.get(),ifound.get(),&nfound,&iend,&ierror,&ioerr);
         if (ierror != 0) {
 			throw Felt_File_Error("problems querying feltfile");
         } else {
@@ -137,16 +146,15 @@ std::vector<Felt_Array> Felt_File::listFeltArrays() {
 
 boost::shared_array<short> Felt_File::getHeaderData(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize)  throw(Felt_File_Error) {
 	boost::shared_array<short> header_data(new short[fieldSize]); // contains header (20 fields) and data (nx*ny) and something extra???
-	if (fh == 0) {
+	if (fdPtr == 0) {
 		throw Felt_File_Error("file already closed");
 	}
-	int iunit = fileno(fh.get());
 	float dummy;
 	std::string lastFile("*");
 	int ierror(0);
 	// read feltfile-data
 	//mrfelt(mode,          filnam,iunit,in         ,ipack,lfield,field ,fscale,     ldata,            idata, ierror)
-	mrfelt(     2,lastFile.c_str(),iunit,idx.begin(),    0,     0,&dummy,   1.f, fieldSize,header_data.get(),&ierror);
+	mrfelt(     2,lastFile.c_str(),*fdPtr,idx.begin(),    0,     0,&dummy,   1.f, fieldSize,header_data.get(),&ierror);
 	if (ierror > 0) {
 		throw Felt_File_Error("error reading with mrfelt");
 	}
