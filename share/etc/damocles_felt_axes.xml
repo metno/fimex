@@ -138,4 +138,12 @@
 	<attribute name="long_name" value="model_surface" type="string" />
 	<attribute name="units" value="1" type="string" />
 </vertical_axis>
+<vertical_axis id="sigma_hybrid" name="sigma_hybrid" felt_id="10" type="short">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="standard_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
+	<attribute name="formular" value="p(n,k,j,i) = ap(k) + b(k)*ps(n,j,i)" type="string" />
+	<attribute name="formula_terms" value="ap: ap b: b ps: ps p0: p0" type="string" />
+	<attribute name="long_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
+	<attribute name="units" value="1" type="string" />
+</vertical_axis>
 </axes>

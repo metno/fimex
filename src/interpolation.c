@@ -160,6 +160,180 @@ int miup_interpolate_f(const int method,
 	return miup_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
+int miup_get_delta_matrix_f(const char* proj_input, 
+						const char* proj_output,
+						const double* out_x_axis, const double* out_y_axis,
+						int out_x_axis_type, int out_y_axis_type,
+						int ox, int oy,
+						double* matrix) // 4*ox*oy
+{
+	// init projections
+	projPJ inputPJ;
+	projPJ outputPJ;
+	if (MIUP_DEBUG > 0) {
+		fprintf(stderr, "input proj: %s\n", proj_input);
+		fprintf(stderr, "output proj: %s\n", proj_output);
+	}
+		
+	if (!(inputPJ = pj_init_plus(proj_input))) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		return MIUP_ERROR;
+	}
+	if (!(outputPJ = pj_init_plus(proj_output))) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		pj_free(inputPJ);
+		return MIUP_ERROR;
+	}
+
+	// convert longitude/latitude to rad
+	double outXAxis[ox];
+	double outYAxis[oy];
+	convertAxis(out_x_axis, ox, out_x_axis_type, outXAxis);
+	convertAxis(out_y_axis, oy, out_y_axis_type, outYAxis);
+	
+	
+	double in_xproj_axis[ox*oy];
+	double in_yproj_axis[ox*oy];
+	double pointsZ[ox*oy]; // z currently of no interest, no height attached to values
+	for (int x = 0; x < ox; ++x) {
+		for (int y = 0; y < oy; ++y) {
+			in_xproj_axis[y*ox +x] = outXAxis[x];
+			in_yproj_axis[y*ox +x] = outYAxis[y];
+			pointsZ[y*ox +x] = 0;
+		}
+	}
+
+	// getting positions in the original projection
+	if (pj_transform(outputPJ, inputPJ, ox*oy, 0, in_xproj_axis, in_yproj_axis, pointsZ) != 0) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		pj_free(inputPJ);
+		pj_free(outputPJ);
+		return MIUP_ERROR;
+	}
+	
+	// calculation of deltas: (x+d, y), (x, y+d) -> proj-values
+	{// conversion along x axis
+		double out_x_delta_proj_axis[ox*oy];
+		double out_y_delta_proj_axis[ox*oy];
+		double delta[ox*oy]; // dynamic delta
+		delta[0] = 1e-3; // will be overwritten if x > 1
+		for (int x = 0; x < ox; ++x) {
+			for (int y = 0; y < oy; ++y) {
+				// find a delta <<< than the diagonal to the next cell
+				if (x < (ox-1) && y < (oy-1)) {
+					delta[y*ox+x] = in_xproj_axis[(y+1)*ox +(x+1)] - in_xproj_axis[y*ox +x] * 1e-3;
+				} else if (x < (ox-1)) {
+					delta[y*ox+x] = in_xproj_axis[y*ox +(x+1)] - in_xproj_axis[y*ox +x] * 1e-3;
+				} else if (y < (oy-1)){
+					delta[y*ox+x] = in_xproj_axis[(y+1)*ox +x] - in_xproj_axis[y*ox +x] * 1e-3;
+				} else {
+					delta[y*ox+x] = delta[y*ox+x-1];
+				}
+				out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x] + delta[y*ox+x];
+				out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x];
+				pointsZ[y*ox +x] = 0;
+			}
+		}
+		if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_delta_proj_axis,
+				out_y_delta_proj_axis, pointsZ) != 0) {
+			fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+			pj_free(inputPJ);
+			pj_free(outputPJ);
+			return MIUP_ERROR;
+		}
+
+		for (int x = 0; x < ox; ++x) {
+			for (int y = 0; y < oy; ++y) {
+				double deltaInv = 1/delta[y*ox+x];
+				matrix[miup_3d_array_position(x,y,0,ox,oy,4)] = (out_x_delta_proj_axis[y*ox+x]
+						- outXAxis[x]) * deltaInv;
+				matrix[miup_3d_array_position(x,y,1,ox,oy,4)] = (out_y_delta_proj_axis[y*ox+x]
+						- outYAxis[y]) * deltaInv;
+			}
+		}
+	}
+	
+	{	// conversion along y axis
+		double out_x_delta_proj_axis[ox*oy];
+		double out_y_delta_proj_axis[ox*oy];
+		double delta[ox*oy]; // dynamic delta
+		delta[0] = 1e-3; // will be overwritten if x > 1
+		for (int x = 0; x < ox; ++x) {
+			for (int y = 0; y < oy; ++y) {
+				// find a delta <<< than the diagonal to the next cell
+				if (x < (ox-1) && y < (oy-1)) {
+					delta[y*ox+x] = in_yproj_axis[(y+1)*ox +(x+1)] - in_yproj_axis[y*ox +x] * 1e-3;
+				} else if (x < (ox-1)) {
+					delta[y*ox+x] = in_yproj_axis[y*ox +(x+1)] - in_yproj_axis[y*ox +x] * 1e-3;
+				} else if (y < (oy-1)){
+					delta[y*ox+x] = in_yproj_axis[(y+1)*ox +x] - in_yproj_axis[y*ox +x] * 1e-3;
+				} else {
+					delta[y*ox+x] = delta[y*ox+x-1];
+				}
+				out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x];
+				out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x] + delta[y*ox+x];
+				pointsZ[y*ox +x] = 0;
+			}
+		}
+		if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_delta_proj_axis,
+				out_y_delta_proj_axis, pointsZ) != 0) {
+			fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+			pj_free(inputPJ);
+			pj_free(outputPJ);
+			return MIUP_ERROR;
+		}
+
+		for (int x = 0; x < ox; ++x) {
+			for (int y = 0; y < oy; ++y) {
+				double deltaInv = 1/delta[y*ox+x];
+				matrix[miup_3d_array_position(x,y,2,ox,oy,4)] = (out_x_delta_proj_axis[y*ox+x]
+						- outXAxis[x]) * deltaInv;
+				matrix[miup_3d_array_position(x,y,3,ox,oy,4)] = (out_y_delta_proj_axis[y*ox+x]
+						- outYAxis[y]) * deltaInv;
+				//fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[miup_3d_array_position(x,y,0,ox,oy,4)], matrix[miup_3d_array_position(x,y,1,ox,oy,4)], matrix[miup_3d_array_position(x,y,2,ox,oy,4)], matrix[miup_3d_array_position(x,y,3,ox,oy,4)]);
+			}
+		}
+	}
+	pj_free(inputPJ);
+	pj_free(outputPJ);
+	return MIUP_OK;	
+}
+
+int miup_vector_reproject_values_f(int method,
+						const char* proj_input, 
+						const char* proj_output,
+						float* u_out, float* v_out,
+						const double* out_x_axis, const double* out_y_axis,
+						int out_x_axis_type, int out_y_axis_type,
+						int ox, int oy, int oz)
+{
+	double matrix[ox*oy*4];
+	// calculate the positions in the original proj.
+	int errcode = miup_get_delta_matrix_f(proj_input, proj_output, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy, matrix);
+	if (errcode != MIUP_OK) return errcode;
+	for (int x = 0; x < ox; ++x) {
+		for (int y = 0; y < oy; ++y) {
+			for (int z = 0; z < oz; ++z) {
+				int pos = miup_3d_array_position(x,y,z,ox,oy,oz);
+				double u_old = u_out[pos];
+				double v_old = v_out[pos];
+				u_out[pos] = u_old * matrix[miup_3d_array_position(x,y,0,ox,oy,4)] +
+							 v_old * matrix[miup_3d_array_position(x,y,1,ox,oy,4)];
+				v_out[pos] = u_old * matrix[miup_3d_array_position(x,y,2,ox,oy,4)] +
+				 			 v_old * matrix[miup_3d_array_position(x,y,3,ox,oy,4)];
+				if (method == MIUP_VECTOR_KEEP_SIZE) {
+					double norm = sqrt(u_old*u_old + v_old*v_old) /
+						   		  sqrt(u_out[pos]*u_out[pos] + v_out[pos]*v_out[pos]);
+					u_out[pos] *= norm;
+					v_out[pos] *= norm;
+				}
+			}
+		}
+	}
+	return MIUP_OK;
+}
+
+
 int miup_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
 	int rx = (int) round(x);
@@ -240,10 +414,8 @@ int miup_project_axes(const char* proj_input, const char* proj_output, const dou
 			pointsZ[y*ix +x] = 0;
 		}
 	}
-	/* 
-	 * transforming from output to input, to receive later the correct input-values
-	 * for the output coordinates
-	 */
+
+	// transforming
 	if (pj_transform(inputPJ, outputPJ, ix*iy, 0, out_xproj_axis, out_yproj_axis, pointsZ) != 0) {
 		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
 		pj_free(inputPJ);

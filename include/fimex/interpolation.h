@@ -29,6 +29,21 @@ extern "C" {
  */
 #define MIUP_BICUBIC          2
 
+	
+/**
+ * @brief vector projection flag
+ * 
+ * new size will be like old size
+ */
+#define MIUP_VECTOR_KEEP_SIZE 0
+/**
+ * @brief vector projection flag
+ * 
+ * vector might change size with projection
+ */
+#define MIUP_VECTOR_RESIZE    1
+	
+	
 /** @brief undefined value for floats */
 #define MIUP_UNDEFINED_F (nanf(""))
 /** @brief undefined value for doubles */
@@ -90,6 +105,41 @@ extern int miup_interpolate_d(int method,
                         int in_x_axis_type, int in_y_axis_type, int ix, int iy, int iz,
                         char* proj_output, double* outfield, double* out_x_axis, double* out_y_axis, 
                         int out_x_axis_type, int out_y_axis_type, int ox, int oy);
+
+/**
+ * @brief interpolate the vector values
+ * 
+ * When reprojecting a vector (i.e. wind (u, v)) from one projection to another, 
+ * not only the base-position of the vector will change, but also the
+ * angle of the vector might change due to rotation and streching within the
+ * projection. Thus, the values of (u,v) have to be changed accordingly to
+ * projection.
+ * 
+ * This function allows to only rotate the vector values (MIUP_VECTOR_KEEP_SIZE)
+ * which is useful to keep the windspeed constant, even if the projected plane
+ * has a different scale, or to completely reproject the vector (MIUP_VECTOR_RESIZE).
+ * 
+ * @param method (one of MIUP_VECTOR_KEEP_SIZE, MIUP_VECTOR_RESIZE)
+ * @param proj_input proj4-string of projection of infield
+ * @param proj_output proj4-string of projection of outfield
+ * @param u_out values of u, with position in the output-projection (i.e. by prevously applying miup_interpolate_f). The values here will be changed!
+ * @param v_out values of v, with position in the output-projection (i.e. by prevously applying miup_interpolate_f). The values here will be changed!
+ * @param out_x_axis field of size ox. Axis needs to be strong monotonous and if longitude/latitude in degree
+ * @param out_y_axis field of size oy. Axis needs to be strong monotonous and if longitude/latitude in degree
+ * @param out_x_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
+ * @param out_y_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
+ * @param ox x-dimension of outfield
+ * @param oy y-dimension of outfield
+ * @param oz z-dimension of the outfield
+ * 
+ */
+extern int miup_vector_reproject_values_f(int method,
+						const char* proj_input, 
+						const char* proj_output,
+						float* u_out, float* v_out,
+						const double* out_x_axis, const double* out_y_axis,
+						int out_x_axis_type, int out_y_axis_type,
+						int ox, int oy, int oz);
                         
 /** 
  * @param infield 3d fortran array of size ix,iy,iz

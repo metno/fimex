@@ -173,6 +173,113 @@ void test_miup_interpolate_f()
 //	}	
 }
 
+void test_miup_vector_reproject_values_rotate() {
+	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
+	std::string emepProj2("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
+	double emepIAxis[5];
+	double emepJAxis[5];
+	double emepIOutAxis[5];
+	double emepJOutAxis[5];
+	float u[5*5];
+	float v[5*5];
+	// initialize axes around northpole
+	for (int i = 0; i < 5; ++i) {
+		emepIAxis[i] = i - 2;
+		emepJAxis[i] = i - 2;
+		emepIOutAxis[i] =  i - 2;
+		emepJOutAxis[i] = i - 2;
+	}
+	// initialize values
+	for (int i = 0; i < 5*5; ++i) {
+		u[i] = i;
+		v[i] = 25-i;
+ 	}
+	
+	float uOut[5*5];
+	float vOut[5*5];
+	float uRot[5*5];
+	float vRot[5*5];
+	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5);
+	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5);
+	for (int i = 0; i < 5; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			uRot[j*5+i] = uOut[j*5+i];
+			vRot[j*5+i] = vOut[j*5+i];
+			//std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
+			//std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
+		}
+	}
+	miup_vector_reproject_values_f(MIUP_VECTOR_KEEP_SIZE, emepProj.c_str(), emepProj2.c_str(), uOut, vOut, emepIOutAxis, emepJOutAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5, 1);
+	for (int i = 0; i < 5; ++i) {
+		for (int j = 0; j < 5; ++j) {
+			//std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
+			//std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
+			// rotation of 90deg -> u->v, v->-u
+			BOOST_CHECK(fabs(vRot[j*5+i] + uOut[j*5+i]) < 1e-5);
+			BOOST_CHECK(fabs(uRot[j*5+i] - vOut[j*5+i]) < 1e-5);
+		}
+	}
+	BOOST_CHECK(true);
+}
+
+void test_miup_vector_reproject_keep_size() {
+	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::string latlongProj("+elips=sphere +a=6370 +e=0 +proj=latlong");
+	double emepIAxis[4];
+	double emepJAxis[4];
+	double latitudeAxis[4];
+	double longitudeAxis[4];
+	float u[4*4];
+	float v[4*4];
+	// initialize axes around northpole
+	for (int i = 0; i < 4; ++i) {
+		emepIAxis[i] = i + 6;
+	}
+	for (int i = 0; i < 4; ++i) {
+		emepJAxis[i] = i + 108;
+	}
+	for (int i = 0; i < 4; ++i) {
+		longitudeAxis[i] = (i*60);
+	}
+	for (int i = 0; i < 4; ++i) {
+		latitudeAxis[i] = (i/2.) + 88.5;
+	}
+	// initialize values
+	for (int i = 0; i < 4*4; ++i) {
+		u[i] = i;
+		v[i] = -16+i;
+ 	}
+	
+	float uOut[4*4];
+	float vOut[4*4];
+	float uRot[4*4];
+	float vRot[4*4];
+	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), uOut, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, 4, 4);
+	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), vOut, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, 4, 4);
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			//std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
+			//std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
+			uRot[j*4+i] = uOut[j*4+i];
+			vRot[j*4+i] = vOut[j*4+i];
+		}
+	}
+	miup_vector_reproject_values_f(MIUP_VECTOR_KEEP_SIZE, emepProj.c_str(), latlongProj.c_str(), uOut, vOut, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, 4, 4, 1);
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			//std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
+			//std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
+			// check equal length
+			double diff2 = (uOut[j*4+i]*uOut[j*4+i] + vOut[j*4+i]*vOut[j*4+i] - uRot[j*4+i]*uRot[j*4+i] - vRot[j*4+i]*vRot[j*4+i]); 
+			if (!isnan(diff2)) {
+				//std::cerr << diff2  << std::endl;
+				BOOST_CHECK(fabs(diff2) < 1e-3);
+			}
+		}
+	}
+	BOOST_CHECK(true);
+}
+
 void test_Utils() {
 	std::vector<MetNoUtplukk::CDMAttribute> attrs = MetNoUtplukk::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
 	int found = 4;
@@ -209,6 +316,8 @@ init_unit_test_suite( int argc, char* argv[] )
 	test->add( BOOST_TEST_CASE( &test_miup_get_values_f ) );
 	test->add( BOOST_TEST_CASE( &test_miup_get_values_bilinear_f ) );
 	test->add( BOOST_TEST_CASE( &test_miup_interpolate_f ) );
+	test->add( BOOST_TEST_CASE( &test_miup_vector_reproject_values_rotate ) );
+	test->add( BOOST_TEST_CASE( &test_miup_vector_reproject_keep_size ) );
 	test->add( BOOST_TEST_CASE( &test_Utils ) );
     return test;
 }
