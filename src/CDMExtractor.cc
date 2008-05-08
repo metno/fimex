@@ -1,6 +1,6 @@
 #include "CDMExtractor.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)

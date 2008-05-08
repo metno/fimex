@@ -10,7 +10,7 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 void test_timeslicedata_constructor() {
 	boost::shared_array<int> ary(new int[100]);

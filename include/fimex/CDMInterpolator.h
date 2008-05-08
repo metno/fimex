@@ -4,10 +4,10 @@
 #include "CDMReader.h"
 #include "CachedInterpolation.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
-class CDMInterpolator : public MetNoUtplukk::CDMReader
+class CDMInterpolator : public MetNoFimex::CDMReader
 {
 private: 
 	boost::shared_ptr<CDMReader> dataReader;

@@ -1,7 +1,7 @@
 #ifndef CDMDATATYPE_H_
 #define CDMDATATYPE_H_
 #include <string>
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 enum CDMDataType {

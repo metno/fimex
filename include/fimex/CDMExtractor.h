@@ -6,10 +6,10 @@
 
 #include "CDMReader.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
-class CDMExtractor : public MetNoUtplukk::CDMReader
+class CDMExtractor : public MetNoFimex::CDMReader
 {
 private:
 	boost::shared_ptr<CDMReader> dataReader;

@@ -6,7 +6,7 @@
 #include "interpolation.h"
 #include "Data.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 /**
@@ -24,7 +24,7 @@ private:
 	size_t outY;
 	int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
-	CachedInterpolation() : inX(0), inY(0), outX(0), outY(0), func(miup_get_values_f) {}
+	CachedInterpolation() : inX(0), inY(0), outX(0), outY(0), func(mifi_get_values_f) {}
 	/**
 	 * @param funcType {@link interpolation.h} interpolation method
 	 * @param pointsOnXAxis projected values of the new projections coordinates expressed in the current x-coordinate (size = outX*outY)

@@ -2,7 +2,7 @@
 
 #include <grib_api.h>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const std::string& configFile)

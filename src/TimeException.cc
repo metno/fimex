@@ -1,6 +1,6 @@
 #include "TimeException.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 TimeException::TimeException()

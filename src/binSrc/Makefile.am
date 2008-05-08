@@ -4,7 +4,7 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/felt_reader -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
 
-LDADD = ../felt_reader/libutplukk_felt.a ../libutplukk.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) -lm @XML_LIBS@
+LDADD = ../felt_reader/libfimex_felt.a ../libfimex.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) -lm @XML_LIBS@
 
 
 if HAVE_MILIB
@@ -17,5 +17,5 @@ if HAVE_NETCDF
   LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 endif
 
-bin_PROGRAMS = utplukk
-utplukk_SOURCES = utplukk.cc
+bin_PROGRAMS = fimex
+fimex_SOURCES = fimex.cc

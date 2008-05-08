@@ -5,10 +5,10 @@
 #include "CDMReader.h"
 #include NETCDF_CPP_INCLUDE
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
-class NetCDF_CF10_CDMReader : public MetNoUtplukk::CDMReader
+class NetCDF_CF10_CDMReader : public MetNoFimex::CDMReader
 {
 	std::string filename;
 	NcFile ncFile;

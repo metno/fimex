@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 /**

@@ -87,13 +87,13 @@ void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_E
 {
 	for (int i = 0; i < 20; i++) {
 		switch (i) {
-			case 9: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": x"); break;
-			case 10: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": y"); break;
-			case 19: if (dataType == "short") testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": scalingFactor"); break;
+			case 9: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoFimex::type2string(header[5])+": x"); break;
+			case 10: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoFimex::type2string(header[5])+": y"); break;
+			case 19: if (dataType == "short") testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoFimex::type2string(header[5])+": scalingFactor"); break;
 			case 14:
 			case 15:
 			case 16:
-			case 17: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoUtplukk::type2string(header[5])+": grid definition " + MetNoUtplukk::type2string(i)); break;
+			case 17: testHeaderElement(this->header[i], header[i], "dataheader for param " + MetNoFimex::type2string(header[5])+": grid definition " + MetNoFimex::type2string(i)); break;
 			default: break;
 		}
 	}

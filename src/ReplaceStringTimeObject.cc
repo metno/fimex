@@ -4,7 +4,7 @@
 #include <locale>
 
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 std::ostream& operator<<(std::ostream& s, const ReplaceStringTimeObject& rsto)

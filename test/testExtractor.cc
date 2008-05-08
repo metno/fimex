@@ -10,7 +10,7 @@ using boost::unit_test_framework::test_suite;
 #include "CDMExtractor.h"
 
 using namespace std;
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 void
 test_extract() {

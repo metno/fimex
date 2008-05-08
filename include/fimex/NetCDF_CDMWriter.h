@@ -5,7 +5,7 @@
 #include "config.h"
 #include NETCDF_CPP_INCLUDE
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class NetCDF_CDMWriter : public CDMWriter

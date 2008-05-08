@@ -6,7 +6,7 @@
 #include "Time.h"
 #include "Data.h"
 
-namespace MetNoUtplukk {
+namespace MetNoFimex {
 
 
 /**
@@ -34,5 +34,5 @@ private:
 };
 
 
-} // namespace MetNoUtplukk
+} // namespace MetNoFimex
 #endif /*TIMESLICEDATA_H_*/

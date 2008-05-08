@@ -4,7 +4,7 @@
 #include <iostream>
 #include <exception>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 std::string string2lowerCase(const std::string& str)
 {

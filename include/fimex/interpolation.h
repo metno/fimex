@@ -14,20 +14,20 @@ extern "C" {
  * 
  * flag for nearest neighbor interpolation
  */
-#define MIUP_NEAREST_NEIGHBOR 0
+#define MIFI_NEAREST_NEIGHBOR 0
 /**
  * @brief interpolation method
  * 
  * flag for bilinear interpolation
  */
-#define MIUP_BILINEAR         1
+#define MIFI_BILINEAR         1
 /**
  * @brief interpolation method
  * 
  * flag for bicubic interpolation
  * @warning not implemented yet
  */
-#define MIUP_BICUBIC          2
+#define MIFI_BICUBIC          2
 
 	
 /**
@@ -35,47 +35,47 @@ extern "C" {
  * 
  * new size will be like old size
  */
-#define MIUP_VECTOR_KEEP_SIZE 0
+#define MIFI_VECTOR_KEEP_SIZE 0
 /**
  * @brief vector projection flag
  * 
  * vector might change size with projection
  */
-#define MIUP_VECTOR_RESIZE    1
+#define MIFI_VECTOR_RESIZE    1
 	
 	
 /** @brief undefined value for floats */
-#define MIUP_UNDEFINED_F (nanf(""))
+#define MIFI_UNDEFINED_F (nanf(""))
 /** @brief undefined value for doubles */
-#define MIUP_UNDEFINED_D (nand(""))
+#define MIFI_UNDEFINED_D (nand(""))
 
 /** @brief return code, error */
-#define MIUP_ERROR -1
+#define MIFI_ERROR -1
 /** @brief return code, ok */
-#define MIUP_OK 1
+#define MIFI_OK 1
 
 /** @brief projection axis in m-equivalent */
-#define MIUP_PROJ_AXIS 0
+#define MIFI_PROJ_AXIS 0
 /** @brief longitude projection axis in degrees */
-#define MIUP_LONGITUDE 1
+#define MIFI_LONGITUDE 1
 /** @brief latitude projection axis in degrees */
-#define MIUP_LATITUDE 2
+#define MIFI_LATITUDE 2
 
 /** @brief debug flag */
-#define MIUP_DEBUG 0
+#define MIFI_DEBUG 0
 
 /**
- * Interpolation between two projections. Missing values are set to MIUP_UNDEFINED_F
+ * Interpolation between two projections. Missing values are set to MIFI_UNDEFINED_F
  * which is implemented as C99 nanf. The coordinates of a cell give the midpoint of a cell,
  * i.e. cell (10,20) spans  ([9.5..10.5[,[19.5-20.5[)
  * 
- * @param method one of MIUP_NEAREST_NEIGHBOR MIUP_BILINEAR MIUP_BICUBIC
+ * @param method one of MIFI_NEAREST_NEIGHBOR MIFI_BILINEAR MIFI_BICUBIC
  * @param proj_input proj4-string of projection of infield
  * @param infield real rectangular array of dimension infield[iz,iy,ix]  
  * @param in_x_axis field of size ix. Axis needs to be strong monotonous and if longitude/latitude in degree
  * @param in_y_axis field of size iy. Axis needs to be strong monotonous and if longitude/latitude in degree
- * @param in_x_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
- * @param in_y_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
+ * @param in_x_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
+ * @param in_y_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
  * @param ix x-dimension of infield
  * @param iy y-dimension of infield
  * @param iz z-dimension of infield and outfield. The z-dim allows you to convert several fields at once without calculating the projection again and again.
@@ -83,12 +83,12 @@ extern "C" {
  * @param outfield real rectangular array of dimension outfield[iz,oy,ox]
  * @param out_x_axis field of size ox. Axis needs to be strong monotonous and if longitude/latitude in degree
  * @param out_y_axis field of size oy. Axis needs to be strong monotonous and if longitude/latitude in degree
- * @param out_x_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
- * @param out_y_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
+ * @param out_x_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
+ * @param out_y_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
  * @param ox x-dimension of outfield
  * @param oy y-dimension of outfield
  */
-extern int miup_interpolate_f(int method,
+extern int mifi_interpolate_f(int method,
                         const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis, 
                         const int in_x_axis_type, const int in_y_axis_type, const int ix, const int iy, const int iz,
                         const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis, 
@@ -97,10 +97,10 @@ extern int miup_interpolate_f(int method,
 /**
  * @brief not implemented yet
  * 
- * double version of miup_interpolate_f
- * @see miup_interpolate_f
+ * double version of mifi_interpolate_f
+ * @see mifi_interpolate_f
  */
-extern int miup_interpolate_d(int method,
+extern int mifi_interpolate_d(int method,
                         char* proj_input, double* infield, double* in_x_axis, double* in_y_axis, 
                         int in_x_axis_type, int in_y_axis_type, int ix, int iy, int iz,
                         char* proj_output, double* outfield, double* out_x_axis, double* out_y_axis, 
@@ -115,25 +115,25 @@ extern int miup_interpolate_d(int method,
  * projection. Thus, the values of (u,v) have to be changed accordingly to
  * projection.
  * 
- * This function allows to only rotate the vector values (MIUP_VECTOR_KEEP_SIZE)
+ * This function allows to only rotate the vector values (MIFI_VECTOR_KEEP_SIZE)
  * which is useful to keep the windspeed constant, even if the projected plane
- * has a different scale, or to completely reproject the vector (MIUP_VECTOR_RESIZE).
+ * has a different scale, or to completely reproject the vector (MIFI_VECTOR_RESIZE).
  * 
- * @param method (one of MIUP_VECTOR_KEEP_SIZE, MIUP_VECTOR_RESIZE)
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
- * @param u_out values of u, with position in the output-projection (i.e. by prevously applying miup_interpolate_f). The values here will be changed!
- * @param v_out values of v, with position in the output-projection (i.e. by prevously applying miup_interpolate_f). The values here will be changed!
+ * @param u_out values of u, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
+ * @param v_out values of v, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
  * @param out_x_axis field of size ox. Axis needs to be strong monotonous and if longitude/latitude in degree
  * @param out_y_axis field of size oy. Axis needs to be strong monotonous and if longitude/latitude in degree
- * @param out_x_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
- * @param out_y_axis_type one of MIUP_LATITUDE, MIUP_LONGITUDE, MIUP_PROJ_AXIS
+ * @param out_x_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
+ * @param out_y_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
  * @param ox x-dimension of outfield
  * @param oy y-dimension of outfield
  * @param oz z-dimension of the outfield
  * 
  */
-extern int miup_vector_reproject_values_f(int method,
+extern int mifi_vector_reproject_values_f(int method,
 						const char* proj_input, 
 						const char* proj_output,
 						float* u_out, float* v_out,
@@ -145,7 +145,7 @@ extern int miup_vector_reproject_values_f(int method,
  * @param infield 3d fortran array of size ix,iy,iz
  * @param outfield 1d array of size iz containing the values
  */
-extern int miup_get_values_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
+extern int mifi_get_values_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
 
 /**
  *  Bilinear interpolation requires a neighborhood extending one pixel to the right and below the central sample. If the fractional subsample position is given by (xfrac, yfrac), the resampled pixel value will be:
@@ -168,7 +168,7 @@ extern int miup_get_values_f(const float* infield, float* outfield, const double
  * @see http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/InterpolationBilinear.html
  * @warning if any of the 4 used values of infield is undefined or outside of infield, the return value will be undefined 
  */
-extern int miup_get_values_bilinear_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
+extern int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 
 
 /**
@@ -176,7 +176,7 @@ extern int miup_get_values_bilinear_f(const float* infield, float* outvalues, co
  * 
  * @see http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/InterpolationBicubic.html
  */
-extern int miup_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);                        
+extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);                        
                         
               
 /**
@@ -188,9 +188,9 @@ extern int miup_get_values_bicubic_f(const float* infield, float* outvalues, con
  *  @param n number of values in points
  *  @param axis coordinate axis
  *  @param num number of elements in coordinate axis
- *  @param axis_type type of axis, one of MIUP_LONGITUDE, MIUP_LATITUDE, MIUP_PROJ_AXIS
+ *  @param axis_type type of axis, one of MIFI_LONGITUDE, MIFI_LATITUDE, MIFI_PROJ_AXIS
  */
-extern int miup_points2position(double* points, const int n, const double* axis, const int num, const int axis_type); 
+extern int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type); 
        
        
 /**
@@ -198,7 +198,7 @@ extern int miup_points2position(double* points, const int n, const double* axis,
  * 
  *  @return the position of x, y, z
  */
-extern int miup_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
+extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
 
 /**
  * @brief project axes so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)
@@ -216,7 +216,7 @@ extern int miup_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
  * @return error-code
  * 
  */
-extern int miup_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis);
+extern int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis);
 
                                      
 #ifdef __cplusplus

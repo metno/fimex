@@ -10,7 +10,7 @@
 #include <projects.h>
 
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 CDMAttribute::CDMAttribute()

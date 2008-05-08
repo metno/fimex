@@ -9,7 +9,7 @@
 #include "CDMDimension.h"
 #include "CDMDataType.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class CDMVariable

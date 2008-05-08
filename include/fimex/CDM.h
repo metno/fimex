@@ -11,7 +11,7 @@
 #include "CDMDimension.h"
 #include "CDMException.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 const int EARTH_RADIUS_M = 6371000;
 

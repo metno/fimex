@@ -7,7 +7,7 @@
 #include "Data.h"
 #include "CDMDataType.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class CDMAttribute

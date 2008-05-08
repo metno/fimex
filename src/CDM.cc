@@ -4,7 +4,7 @@
 #include <boost/bind.hpp>
 #include <functional>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 CDM::CDM()
@@ -350,7 +350,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	boost::shared_array<double> latVal(new double[fieldSize]);
 	std::string lonLatProj("+elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0 +proj=latlong");
 	std::string projStr = attributesToProjString(getAttributes(projectionVariable));
-	if (MIUP_OK != miup_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
+	if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
 	}
 	// converting to Degree

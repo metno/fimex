@@ -4,7 +4,7 @@ SUBDIRS = src test
 
 include doxygen_aminclude.am
 
-EXTRA_DIST = $(DX_CONFIG) liststdc++.tag share/doc/html
+EXTRA_DIST = $(DX_CONFIG) libstdc++.tag share/doc/html
 
 dist_data_DATA = share/etc/felt2nc_variables.xml \
 				 share/etc/felt2nc_variables_hirlam20.xml \

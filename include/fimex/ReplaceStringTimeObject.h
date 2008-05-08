@@ -4,10 +4,10 @@
 #include "ReplaceStringObject.h"
 #include <ctime>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
-class ReplaceStringTimeObject : public MetNoUtplukk::ReplaceStringObject
+class ReplaceStringTimeObject : public MetNoFimex::ReplaceStringObject
 {
 	std::time_t myTime;
 	std::string myFormat;

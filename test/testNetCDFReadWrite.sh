@@ -3,7 +3,7 @@ if [ ! -f test.nc ]; then
 	exit 0;
 fi
 echo "testing conversion NetCDF to NetCDF"
-../src/binSrc/utplukk test.nc testNcRdWr.nc
+../src/binSrc/fimex test.nc testNcRdWr.nc
 if [ $? != 0 ]; then
   echo "failed converting nc to nc"
   rm -f testNcRdWr.nc

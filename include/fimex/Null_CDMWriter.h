@@ -3,7 +3,7 @@
 
 #include "CDMWriter.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 /**

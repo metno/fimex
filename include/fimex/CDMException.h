@@ -4,7 +4,7 @@
 #include <exception>
 #include <string>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class CDMException : public std::exception

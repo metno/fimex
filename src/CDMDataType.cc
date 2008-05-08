@@ -1,7 +1,7 @@
 #include "CDMDataType.h"
 #include "Utils.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 CDMDataType string2datatype(const std::string& s) {

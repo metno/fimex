@@ -71,16 +71,16 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
-libutplukk_felt_a_AR = $(AR) $(ARFLAGS)
-libutplukk_felt_a_LIBADD =
-am__libutplukk_felt_a_SOURCES_DIST = FeltCDMReader.cc Felt_Array.cc \
+libfimex_felt_a_AR = $(AR) $(ARFLAGS)
+libfimex_felt_a_LIBADD =
+am__libfimex_felt_a_SOURCES_DIST = FeltCDMReader.cc Felt_Array.cc \
 	Felt_File.cc FeltParameters.cc Felt_File_Error.cc
 @HAVE_MILIB_TRUE@am__objects_1 = FeltCDMReader.$(OBJEXT) \
 @HAVE_MILIB_TRUE@	Felt_Array.$(OBJEXT) Felt_File.$(OBJEXT) \
 @HAVE_MILIB_TRUE@	FeltParameters.$(OBJEXT) \
 @HAVE_MILIB_TRUE@	Felt_File_Error.$(OBJEXT)
-am_libutplukk_felt_a_OBJECTS = $(am__objects_1)
-libutplukk_felt_a_OBJECTS = $(am_libutplukk_felt_a_OBJECTS)
+am_libfimex_felt_a_OBJECTS = $(am__objects_1)
+libfimex_felt_a_OBJECTS = $(am_libfimex_felt_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -92,8 +92,8 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libutplukk_felt_a_SOURCES)
-DIST_SOURCES = $(am__libutplukk_felt_a_SOURCES_DIST)
+SOURCES = $(libfimex_felt_a_SOURCES)
+DIST_SOURCES = $(am__libfimex_felt_a_SOURCES_DIST)
 am__include_HEADERS_DIST = FeltCDMReader.h Felt_File.h Felt_Array.h \
 	FeltParameters.h Felt_File_Error.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
@@ -281,8 +281,8 @@ target_alias = @target_alias@
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I. -I$(srcdir)/.. ${milib_CFLAGS} ${XML_CPPFLAGS}
-lib_LIBRARIES = libutplukk_felt.a
-libutplukk_felt_a_SOURCES = $(am__append_1)
+lib_LIBRARIES = libfimex_felt.a
+libfimex_felt_a_SOURCES = $(am__append_1)
 include_HEADERS = $(am__append_2)
 all: all-am
 
@@ -346,10 +346,10 @@ uninstall-libLIBRARIES:
 
 clean-libLIBRARIES:
 	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-libutplukk_felt.a: $(libutplukk_felt_a_OBJECTS) $(libutplukk_felt_a_DEPENDENCIES) 
-	-rm -f libutplukk_felt.a
-	$(libutplukk_felt_a_AR) libutplukk_felt.a $(libutplukk_felt_a_OBJECTS) $(libutplukk_felt_a_LIBADD)
-	$(RANLIB) libutplukk_felt.a
+libfimex_felt.a: $(libfimex_felt_a_OBJECTS) $(libfimex_felt_a_DEPENDENCIES) 
+	-rm -f libfimex_felt.a
+	$(libfimex_felt_a_AR) libfimex_felt.a $(libfimex_felt_a_OBJECTS) $(libfimex_felt_a_LIBADD)
+	$(RANLIB) libfimex_felt.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

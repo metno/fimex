@@ -10,7 +10,7 @@
 #include "CDMDimension.h"
 #include "ReplaceStringObject.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class FeltCDMReader : public CDMReader

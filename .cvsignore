@@ -5,3 +5,4 @@ config.h
 libtool
 config.log
 config.status
+fimex.pc

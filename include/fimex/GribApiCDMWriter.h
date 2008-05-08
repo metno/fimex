@@ -3,10 +3,10 @@
 
 #include "CDMWriter.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
-class GribApiCDMWriter : public MetNoUtplukk::CDMWriter
+class GribApiCDMWriter : public MetNoFimex::CDMWriter
 {
 public:
 	GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const std::string& configFile);

@@ -7,7 +7,7 @@
 #include "CDMDataType.h"
 #include "Data.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 /**

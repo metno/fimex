@@ -18,7 +18,7 @@
 #include <cassert>
 #include <ctime>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 using namespace std;
@@ -423,7 +423,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			coordinates = longName + " " + latName;
 			try {
 				cdm.generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), longName, latName);
-			} catch (MetNoUtplukk::CDMException& ex) {
+			} catch (MetNoFimex::CDMException& ex) {
 				throw MetNoFelt::Felt_File_Error(ex.what());
 			}
 		}

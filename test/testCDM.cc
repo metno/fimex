@@ -9,7 +9,7 @@ using boost::unit_test_framework::test_suite;
 #include "CDM.h"
 
 using namespace std;
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 void test_cdm() {
 	CDM cdm;

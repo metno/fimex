@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace MetNoUtplukk {
+namespace MetNoFimex {
 
 /**
  * Interface for objects which might be converted to 

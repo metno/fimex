@@ -39,7 +39,7 @@ host_triplet = @host@
 @HAVE_MILIB_TRUE@am__append_1 = ${milib_LIBS}
 @HAVE_UDUNITS_TRUE@am__append_2 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
 @HAVE_NETCDF_TRUE@am__append_3 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-bin_PROGRAMS = utplukk$(EXEEXT)
+bin_PROGRAMS = fimex$(EXEEXT)
 subdir = src/binSrc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -64,17 +64,17 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_utplukk_OBJECTS = utplukk.$(OBJEXT)
-utplukk_OBJECTS = $(am_utplukk_OBJECTS)
-utplukk_LDADD = $(LDADD)
+am_fimex_OBJECTS = fimex.$(OBJEXT)
+fimex_OBJECTS = $(am_fimex_OBJECTS)
+fimex_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @HAVE_MILIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
 @HAVE_UDUNITS_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) \
 @HAVE_UDUNITS_TRUE@	$(am__DEPENDENCIES_1)
 @HAVE_NETCDF_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
-utplukk_DEPENDENCIES = ../felt_reader/libutplukk_felt.a \
-	../libutplukk.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+fimex_DEPENDENCIES = ../felt_reader/libfimex_felt.a ../libfimex.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
@@ -88,8 +88,8 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(utplukk_SOURCES)
-DIST_SOURCES = $(utplukk_SOURCES)
+SOURCES = $(fimex_SOURCES)
+DIST_SOURCES = $(fimex_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -281,11 +281,11 @@ SUBDIRS = .
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/felt_reader -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
-LDADD = ../felt_reader/libutplukk_felt.a ../libutplukk.a -lproj \
+LDADD = ../felt_reader/libfimex_felt.a ../libfimex.a -lproj \
 	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_PROGRAM_OPTIONS_LIB) -lm @XML_LIBS@ $(am__append_1) \
 	$(am__append_2) $(am__append_3)
-utplukk_SOURCES = utplukk.cc
+fimex_SOURCES = fimex.cc
 all: all-recursive
 
 .SUFFIXES:
@@ -347,9 +347,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-utplukk$(EXEEXT): $(utplukk_OBJECTS) $(utplukk_DEPENDENCIES) 
-	@rm -f utplukk$(EXEEXT)
-	$(CXXLINK) $(utplukk_LDFLAGS) $(utplukk_OBJECTS) $(utplukk_LDADD) $(LIBS)
+fimex$(EXEEXT): $(fimex_OBJECTS) $(fimex_DEPENDENCIES) 
+	@rm -f fimex$(EXEEXT)
+	$(CXXLINK) $(fimex_LDFLAGS) $(fimex_OBJECTS) $(fimex_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -357,7 +357,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utplukk.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fimex.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

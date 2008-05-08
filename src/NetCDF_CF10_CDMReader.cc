@@ -1,7 +1,7 @@
 #include "NetCDF_CF10_CDMReader.h"
 #include "NetCDF_Utils.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)

@@ -3,7 +3,7 @@
 #include "CDMDataType.h"
 #include "Utils.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 static bool putRecData(CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {

@@ -10,7 +10,7 @@ using boost::unit_test_framework::test_suite;
 #include "DataImpl.h"
 
 using namespace std;
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 void test_slicing() {
 	DataImpl<int> data(10);

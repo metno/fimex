@@ -20,7 +20,7 @@
 
 namespace MetNoFelt {
 
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 Felt_File::Felt_File(const string& filename) throw(Felt_File_Error)
 	: filename(filename)
@@ -190,7 +190,7 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 
 // convert felt short 'header+data+gridinfo = header_data' to a scaled Data
 template<typename T>
-boost::shared_ptr<MetNoUtplukk::Data> createScaledData(const boost::shared_array<short>& header_data, size_t dataSize, double newFillValue, double scalingFactor) {
+boost::shared_ptr<MetNoFimex::Data> createScaledData(const boost::shared_array<short>& header_data, size_t dataSize, double newFillValue, double scalingFactor) {
 	boost::shared_array<T> data(new T[dataSize]);
 	T newFill = static_cast<T>(newFillValue);
 	short* headerDataPos = &header_data[20];
@@ -200,17 +200,17 @@ boost::shared_ptr<MetNoUtplukk::Data> createScaledData(const boost::shared_array
 		T newVal = (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
 		*dataPos++ = newVal;
 	}
-	return boost::shared_ptr<MetNoUtplukk::Data>(new DataImpl<T>(data, dataSize));	
+	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, dataSize));	
 }
 
-boost::shared_ptr<MetNoUtplukk::Data> Felt_File::getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error) {
+boost::shared_ptr<MetNoFimex::Data> Felt_File::getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error) {
 	Felt_Array& fa = getFeltArray(compName);
 	boost::array<short, 16> idx(fa.getIndex(time, level));
 	int fieldSize(fa.getFieldSize(time, level));
 	boost::shared_array<short> header_data = getHeaderData(fa, idx, fieldSize);
 	double scalingFactor = std::pow(10,static_cast<double>(header_data[19]));
 	size_t dataSize = fa.getX() * fa.getY();
-	boost::shared_ptr<MetNoUtplukk::Data> returnData;
+	boost::shared_ptr<MetNoFimex::Data> returnData;
 	if (fa.getDatatype() == "short") {
 		if (scalingFactor != fa.getScalingFactor()) {
 			throw Felt_File_Error("change in scaling factor for parameter: " + fa.getName() + " consider using float or double datatpye");

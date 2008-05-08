@@ -8,7 +8,7 @@ extern "C" {
 #include "NetCDF_Utils.h"
 #include "Utils.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 static void dontDelete(void *) {} // used as non-destructor of shared_ptr

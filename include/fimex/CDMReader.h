@@ -6,7 +6,7 @@
 #include "Data.h"
 #include "CDMVariable.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 /**

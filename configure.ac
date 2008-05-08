@@ -1,4 +1,4 @@
-AC_INIT([utplukk], [0.3], [heiko.klein@met.no])
+AC_INIT([fimex], [0.3], [heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -41,7 +41,7 @@ AC_CXX_HAVE_STD
 AC_CXX_HAVE_STL
 
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([
-*** Libxml is required to build utplukk; Available at
+*** Libxml is required to build fimex; Available at
 http://www.libxml.org/.]))
 AX_BOOST_BASE([1.32.0])
 AX_BOOST_REGEX
@@ -91,8 +91,8 @@ AC_CHECK_FUNCS([memset pow sqrt strstr])
 
 AC_LANG_POP(C++)
 
-DX_INIT_DOXYGEN('Utplukk', 'Doxyfile', 'share/doc')
+DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_FILES([utplukk.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile])
+AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile])
 AC_OUTPUT

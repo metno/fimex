@@ -15,12 +15,12 @@
 using boost::unit_test_framework::test_suite;
 
 
-void test_miup_points2position()
+void test_mifi_points2position()
 {
 	double axis[5] = {1., 2., 3., 4., 5.};
 	double points[5] = {-3., 5., 1.3, 2., 6.};
 	double apoints[5] = {-4., 4., 0.3, 1., 5.}; // results
-	miup_points2position(points,5,axis,5,MIUP_PROJ_AXIS);
+	mifi_points2position(points,5,axis,5,MIFI_PROJ_AXIS);
 	for (int i = 0; i < 5; ++i) {
 		//BOOST_CHECK_CLOSE not implemented in FC5 boost
 		//BOOST_CHECK_CLOSE(apoints[i], points[i], /* tolerance */ 1e-10);
@@ -31,12 +31,12 @@ void test_miup_points2position()
 	}
 }
 
-void test_miup_points2position_reverse()
+void test_mifi_points2position_reverse()
 {
 	double axis[5] = {5., 4., 3., 2., 1.};
 	double points[5] = {-3., 5., 1.3, 2., 6.};
 	double apoints[5] = {8., 0., 3.7, 3., -1.}; // results
-	miup_points2position(points,5,axis,5,MIUP_PROJ_AXIS);
+	mifi_points2position(points,5,axis,5,MIFI_PROJ_AXIS);
 	for (int i = 0; i < 5; ++i) {
 		//BOOST_CHECK_CLOSE not implemented in FC5 boost
 		//BOOST_CHECK_CLOSE(apoints[i], points[i], /* tolerance */ 1e-10);
@@ -47,34 +47,34 @@ void test_miup_points2position_reverse()
 	}
 }
 
-void test_miup_get_values_f()
+void test_mifi_get_values_f()
 {
 	float infield[4] = {1., 2., 1., 2.}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
 	float outvalues[1];
 	
-	miup_get_values_f(infield, outvalues, 0.3, 0.3, 2, 2, 1);
+	mifi_get_values_f(infield, outvalues, 0.3, 0.3, 2, 2, 1);
 	// std::cerr << outvalues[0] << std::endl;
 	BOOST_CHECK(std::fabs(outvalues[0] - 1.) < 1e-10);
 }
 
-void test_miup_get_values_bilinear_f()
+void test_mifi_get_values_bilinear_f()
 {
 	float infield[4] = {1., 2., 2., 1+sqrt(2)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
 	float outvalues[1];
 	
-	miup_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);
+	mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);
 	BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-6);
-	miup_get_values_bilinear_f(infield, outvalues, 0.3, 0.0001, 2, 2, 1);
+	mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0.0001, 2, 2, 1);
 	//std::cerr << outvalues[0] << std::endl;
 	BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-4);
-	miup_get_values_bilinear_f(infield, outvalues, 0., 0.3, 2, 2, 1);
+	mifi_get_values_bilinear_f(infield, outvalues, 0., 0.3, 2, 2, 1);
 	BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-6);
-	miup_get_values_bilinear_f(infield, outvalues, 0.0001, 0.3, 2, 2, 1);
+	mifi_get_values_bilinear_f(infield, outvalues, 0.0001, 0.3, 2, 2, 1);
 	//std::cerr << outvalues[0] << std::endl;
 	BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-4);
 }
 
-void test_miup_interpolate_f()
+void test_mifi_interpolate_f()
 {
 	const int iSize = 170;
 	const int jSize = 150;
@@ -92,10 +92,10 @@ void test_miup_interpolate_f()
 	
 	// initialization to undefined
 	for (int i = 0; i < iSize*jSize*zSize; ++i) {
-		inArray[i] = MIUP_UNDEFINED_F;
+		inArray[i] = MIFI_UNDEFINED_F;
 	}
 	for (int i = 0; i < latSize*lonSize*zSize; ++i) {
-		outArray[i] = MIUP_UNDEFINED_F;
+		outArray[i] = MIFI_UNDEFINED_F;
 	}
 	// initialization of axis (originally fortran arrays, therefore i+1)
 	for (int i = 0; i < iSize; ++i) {
@@ -126,7 +126,7 @@ void test_miup_interpolate_f()
 				datafile >> x;
 				datafile >> y;
 				datafile >> country;
-				inArray[miup_3d_array_position(x-1,y-1,0,iSize,jSize,zSize)] = country;
+				inArray[mifi_3d_array_position(x-1,y-1,0,iSize,jSize,zSize)] = country;
 			} catch (std::ifstream::failure fail) {
 				if (datafile.eof()) {
 					break;
@@ -141,39 +141,39 @@ void test_miup_interpolate_f()
 		std::cerr << "inData.txt: no such file" << std::endl;
 		assert(false);
 	}
-	assert(std::fabs(inArray[miup_3d_array_position(93, 50, 0, iSize, jSize, zSize)] - 4) < 1e-5);
+	assert(std::fabs(inArray[mifi_3d_array_position(93, 50, 0, iSize, jSize, zSize)] - 4) < 1e-5);
 	
 	//std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
 	BOOST_CHECK(
-	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR,
-					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, iSize, jSize, zSize,
-					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, lonSize, latSize)
-	== MIUP_OK);
+	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR,
+					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
+	== MIFI_OK);
 	// -25 43 32 (long, lat, val)
-	BOOST_CHECK(std::fabs(outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);	    
-	//std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
+	BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);	    
+	//std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
 	//std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
 
 	for (int i = 0; i < latSize*lonSize*zSize; ++i) {
-		outArray[i] = MIUP_UNDEFINED_F;
+		outArray[i] = MIFI_UNDEFINED_F;
 	}
 	BOOST_CHECK(
-	miup_interpolate_f(MIUP_BILINEAR,
-					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, iSize, jSize, zSize,
-					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, lonSize, latSize)
-	== MIUP_OK);
+	mifi_interpolate_f(MIFI_BILINEAR,
+					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
+					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
+	== MIFI_OK);
 	// -25 43 32 (long, lat, val)
-	BOOST_CHECK(std::fabs(outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);				    
-	std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[miup_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
+	BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);				    
+	std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
 	
 //	for (int lon = 0; lon < lonSize; ++lon) {
 //		for (int lat = 0; lat < latSize; ++lat) {
-//			std::cout << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[miup_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
+//			std::cout << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
 //		}
 //	}	
 }
 
-void test_miup_vector_reproject_values_rotate() {
+void test_mifi_vector_reproject_values_rotate() {
 	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
 	std::string emepProj2("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
 	double emepIAxis[5];
@@ -199,8 +199,8 @@ void test_miup_vector_reproject_values_rotate() {
 	float vOut[5*5];
 	float uRot[5*5];
 	float vRot[5*5];
-	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5);
-	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5);
+	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
 			uRot[j*5+i] = uOut[j*5+i];
@@ -209,7 +209,7 @@ void test_miup_vector_reproject_values_rotate() {
 			//std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
 		}
 	}
-	miup_vector_reproject_values_f(MIUP_VECTOR_KEEP_SIZE, emepProj.c_str(), emepProj2.c_str(), uOut, vOut, emepIOutAxis, emepJOutAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 5, 5, 1);
+	mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(), emepProj2.c_str(), uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1);
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
 			//std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
@@ -222,7 +222,7 @@ void test_miup_vector_reproject_values_rotate() {
 	BOOST_CHECK(true);
 }
 
-void test_miup_vector_reproject_keep_size() {
+void test_mifi_vector_reproject_keep_size() {
 	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
 	std::string latlongProj("+elips=sphere +a=6370 +e=0 +proj=latlong");
 	double emepIAxis[4];
@@ -254,8 +254,8 @@ void test_miup_vector_reproject_keep_size() {
 	float vOut[4*4];
 	float uRot[4*4];
 	float vRot[4*4];
-	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), uOut, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, 4, 4);
-	miup_interpolate_f(MIUP_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIUP_PROJ_AXIS, MIUP_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), vOut, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, 4, 4);
+	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), uOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
+	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			//std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
@@ -264,7 +264,7 @@ void test_miup_vector_reproject_keep_size() {
 			vRot[j*4+i] = vOut[j*4+i];
 		}
 	}
-	miup_vector_reproject_values_f(MIUP_VECTOR_KEEP_SIZE, emepProj.c_str(), latlongProj.c_str(), uOut, vOut, longitudeAxis, latitudeAxis, MIUP_LONGITUDE, MIUP_LATITUDE, 4, 4, 1);
+	mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(), latlongProj.c_str(), uOut, vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4, 1);
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			//std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;
@@ -281,9 +281,9 @@ void test_miup_vector_reproject_keep_size() {
 }
 
 void test_Utils() {
-	std::vector<MetNoUtplukk::CDMAttribute> attrs = MetNoUtplukk::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::vector<MetNoFimex::CDMAttribute> attrs = MetNoFimex::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
 	int found = 4;
-	for (std::vector<MetNoUtplukk::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
+	for (std::vector<MetNoFimex::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
 		if (it->getName() == "grid_mapping_name") {
 			found--;
 			std::cerr << it->getStringValue() << ":" << std::endl;
@@ -311,13 +311,13 @@ init_unit_test_suite( int argc, char* argv[] )
 {
     test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
 
-    test->add( BOOST_TEST_CASE( &test_miup_points2position ) );
-	test->add( BOOST_TEST_CASE( &test_miup_points2position_reverse ) );
-	test->add( BOOST_TEST_CASE( &test_miup_get_values_f ) );
-	test->add( BOOST_TEST_CASE( &test_miup_get_values_bilinear_f ) );
-	test->add( BOOST_TEST_CASE( &test_miup_interpolate_f ) );
-	test->add( BOOST_TEST_CASE( &test_miup_vector_reproject_values_rotate ) );
-	test->add( BOOST_TEST_CASE( &test_miup_vector_reproject_keep_size ) );
+    test->add( BOOST_TEST_CASE( &test_mifi_points2position ) );
+	test->add( BOOST_TEST_CASE( &test_mifi_points2position_reverse ) );
+	test->add( BOOST_TEST_CASE( &test_mifi_get_values_f ) );
+	test->add( BOOST_TEST_CASE( &test_mifi_get_values_bilinear_f ) );
+	test->add( BOOST_TEST_CASE( &test_mifi_interpolate_f ) );
+	test->add( BOOST_TEST_CASE( &test_mifi_vector_reproject_values_rotate ) );
+	test->add( BOOST_TEST_CASE( &test_mifi_vector_reproject_keep_size ) );
 	test->add( BOOST_TEST_CASE( &test_Utils ) );
     return test;
 }

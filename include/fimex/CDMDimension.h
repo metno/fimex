@@ -4,7 +4,7 @@
 #include <string>
 #include <ostream>
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class CDMDimension

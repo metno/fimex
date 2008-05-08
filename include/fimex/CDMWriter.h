@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include "CDMReader.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 class CDMWriter

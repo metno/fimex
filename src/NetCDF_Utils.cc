@@ -2,7 +2,7 @@
 #include <boost/shared_array.hpp>
 #include "DataImpl.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 NcType cdmDataType2ncType(CDMDataType dt) {

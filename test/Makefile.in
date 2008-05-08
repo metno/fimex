@@ -79,59 +79,52 @@ am__DEPENDENCIES_1 =
 @HAVE_UDUNITS_TRUE@	$(am__DEPENDENCIES_1)
 @HAVE_NETCDF_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
-testCDM_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testCDM_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testData_OBJECTS = testData.$(OBJEXT)
 testData_OBJECTS = $(am_testData_OBJECTS)
 testData_LDADD = $(LDADD)
-testData_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testData_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
 testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
 testExtractor_LDADD = $(LDADD)
-testExtractor_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testExtractor_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
-testFeltReader_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testFeltReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
-testInterpolation_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testInterpolation_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
 testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
-testInterpolator_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testInterpolator_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
-testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libutplukk_felt.a \
-	../src/libutplukk.a $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4)
+testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -335,10 +328,10 @@ CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc
 CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
 	$(am__append_5)
 SH_TESTS = $(am__append_6)
-LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a \
-	-lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) \
-	$(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm \
-	@XML_LIBS@ $(am__append_1) $(am__append_3) $(am__append_4)
+LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a -lproj \
+	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
+	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@ \
+	$(am__append_1) $(am__append_3) $(am__append_4)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/src -I$(top_srcdir)/src/felt_reader ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS}
 AM_CXXFLAGS = -Wall -pedantic 
 AM_CFLAGS = -std=c99 -Wall -pedantic

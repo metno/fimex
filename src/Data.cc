@@ -1,7 +1,7 @@
 #include "Data.h"
 #include "DataImpl.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException) {

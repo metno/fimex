@@ -1,7 +1,7 @@
 CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc
 CC_TESTS = testInterpolation testData testCDM
 SH_TESTS = 
-LDADD = ../src/felt_reader/libutplukk_felt.a ../src/libutplukk.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
+LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a -lproj $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/src -I$(top_srcdir)/src/felt_reader ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS}
 AM_CXXFLAGS = -Wall -pedantic 

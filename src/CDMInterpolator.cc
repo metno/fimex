@@ -4,7 +4,7 @@
 #include "interpolation.h"
 #include "DataImpl.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 using namespace std;
@@ -169,26 +169,26 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
 	std::string orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
-	if (MIUP_OK != miup_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
+	if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
 	}
 
 	// translate original axes from deg2rad if required
-	int miupXAxis = MIUP_PROJ_AXIS;
-	int miupYAxis = MIUP_PROJ_AXIS;
+	int miupXAxis = MIFI_PROJ_AXIS;
+	int miupYAxis = MIFI_PROJ_AXIS;
 	boost::shared_array<double> orgXAxisValsArray = orgXAxisVals->asDouble();
 	boost::shared_array<double> orgYAxisValsArray = orgYAxisVals->asDouble();
 	if (boost::regex_match(orgXAxisUnits, degree)) {
-		miupXAxis = MIUP_LONGITUDE;
+		miupXAxis = MIFI_LONGITUDE;
 		for_each(&(orgXAxisValsArray.get())[0], &(orgXAxisValsArray.get())[orgXAxisVals->size()], degreeToRad);
 	}
 	if (boost::regex_match(orgYAxisUnits, degree)) {
-		miupYAxis = MIUP_LATITUDE;
+		miupYAxis = MIFI_LATITUDE;
 		for_each(&(orgYAxisValsArray.get())[0], &(orgYAxisValsArray.get())[orgYAxisVals->size()], degreeToRad);
 	}	
 	// translate coordinates (in rad or m) to indices
-	miup_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
-	miup_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
+	mifi_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
+	mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 	
 	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
 }

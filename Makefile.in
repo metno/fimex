@@ -38,7 +38,7 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(am__configure_deps) $(dist_data_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/doxygen_aminclude.am $(srcdir)/utplukk.pc.in \
+	$(srcdir)/doxygen_aminclude.am $(srcdir)/fimex.pc.in \
 	$(top_srcdir)/configure config.guess config.sub depcomp \
 	install-sh ltmain.sh missing
 subdir = .
@@ -62,7 +62,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/config.h
-CONFIG_CLEAN_FILES = utplukk.pc
+CONFIG_CLEAN_FILES = fimex.pc
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -297,7 +297,7 @@ SUBDIRS = src test
 @DX_COND_doc_TRUE@    $(DX_CLEAN_PDF) \
 @DX_COND_doc_TRUE@    $(DX_CLEAN_LATEX)
 
-EXTRA_DIST = $(DX_CONFIG) liststdc++.tag share/doc/html
+EXTRA_DIST = $(DX_CONFIG) libstdc++.tag share/doc/html
 dist_data_DATA = share/etc/felt2nc_variables.xml \
 				 share/etc/felt2nc_variables_hirlam20.xml \
                  share/etc/damocles_felt2nc_variables.xml share/etc/damocles_felt_axes.xml share/etc/damocles_felt_global_attributes.xml \
@@ -342,7 +342,7 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(srcdir) && $(AUTOCONF)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
-utplukk.pc: $(top_builddir)/config.status $(srcdir)/utplukk.pc.in
+fimex.pc: $(top_builddir)/config.status $(srcdir)/fimex.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:

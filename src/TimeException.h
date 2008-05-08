@@ -7,7 +7,7 @@ extern "C" {
 #include <udunits.h>
 }
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 using namespace std;

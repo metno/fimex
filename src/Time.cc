@@ -2,7 +2,7 @@
 #include <cassert>
 extern "C" int utIsInit(); // this has been forgotten in the udunits.h 12.4
 
-namespace MetNoUtplukk {
+namespace MetNoFimex {
 
 Time::Time(std::string format, double value) throw(TimeException)
 : format(format), unit(new utUnit()), value(value)
@@ -46,4 +46,4 @@ void Time::convert(const Time& newTimeFormat)
 	format = newTimeFormat.getFormatString();
 }
 
-} // end namespace MetNoUtplukk
+} // end namespace MetNoFimex

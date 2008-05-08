@@ -5,7 +5,7 @@ srcdir=`dirname $0`
 curdir=`pwd`
 cd $srcdir
 file=${curdir}/test.nc
-${curdir}/../src/binSrc/utplukk -c felt2netcdf.cfg --output.file=${file} 
+${curdir}/../src/binSrc/fimex -c felt2netcdf.cfg --output.file=${file} 
 if [ $? != 0 ]; then
   echo "failed converting felt to nc"
   exit 1

@@ -17,7 +17,7 @@ using boost::unit_test_framework::test_suite;
 
 using namespace std;
 using namespace MetNoFelt;
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 void
 test_feltparameter(void) {

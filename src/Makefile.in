@@ -71,9 +71,9 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
-libutplukk_a_AR = $(AR) $(ARFLAGS)
-libutplukk_a_LIBADD =
-am__libutplukk_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
+libfimex_a_AR = $(AR) $(ARFLAGS)
+libfimex_a_LIBADD =
+am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMReader.cc CDMVariable.cc \
 	Data.cc Null_CDMWriter.cc ReplaceStringTimeObject.cc Utils.cc \
@@ -81,7 +81,7 @@ am__libutplukk_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
-am_libutplukk_a_OBJECTS = interpolation.$(OBJEXT) \
+am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	CachedInterpolation.$(OBJEXT) CDM.$(OBJEXT) \
 	CDMAttribute.$(OBJEXT) CDMDimension.$(OBJEXT) \
 	CDMDataType.$(OBJEXT) CDMExtractor.$(OBJEXT) \
@@ -89,7 +89,7 @@ am_libutplukk_a_OBJECTS = interpolation.$(OBJEXT) \
 	CDMVariable.$(OBJEXT) Data.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
 	ReplaceStringTimeObject.$(OBJEXT) Utils.$(OBJEXT) \
 	$(am__objects_1)
-libutplukk_a_OBJECTS = $(am_libutplukk_a_OBJECTS)
+libfimex_a_OBJECTS = $(am_libfimex_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -109,8 +109,8 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libutplukk_a_SOURCES)
-DIST_SOURCES = $(am__libutplukk_a_SOURCES_DIST)
+SOURCES = $(libfimex_a_SOURCES)
+DIST_SOURCES = $(am__libfimex_a_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -311,8 +311,8 @@ SUBDIRS = . felt_reader binSrc
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I. ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
-lib_LIBRARIES = libutplukk.a
-libutplukk_a_SOURCES = interpolation.c CachedInterpolation.cc CDM.cc \
+lib_LIBRARIES = libfimex.a
+libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc CDM.cc \
 	CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
 	Null_CDMWriter.cc ReplaceStringTimeObject.cc Utils.cc \
@@ -403,10 +403,10 @@ uninstall-libLIBRARIES:
 
 clean-libLIBRARIES:
 	-test -z "$(lib_LIBRARIES)" || rm -f $(lib_LIBRARIES)
-libutplukk.a: $(libutplukk_a_OBJECTS) $(libutplukk_a_DEPENDENCIES) 
-	-rm -f libutplukk.a
-	$(libutplukk_a_AR) libutplukk.a $(libutplukk_a_OBJECTS) $(libutplukk_a_LIBADD)
-	$(RANLIB) libutplukk.a
+libfimex.a: $(libfimex_a_OBJECTS) $(libfimex_a_DEPENDENCIES) 
+	-rm -f libfimex.a
+	$(libfimex_a_AR) libfimex.a $(libfimex_a_OBJECTS) $(libfimex_a_LIBADD)
+	$(RANLIB) libfimex.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

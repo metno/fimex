@@ -8,7 +8,7 @@ extern "C" {
 #include <string>
 #include "TimeException.h"
 
-namespace MetNoUtplukk {
+namespace MetNoFimex {
 
 /** Time is a simple encapsulation of udunits time format. 
  * 

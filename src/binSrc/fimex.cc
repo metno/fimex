@@ -19,7 +19,7 @@
 
 namespace po = boost::program_options;
 using namespace std;
-using namespace MetNoUtplukk;
+using namespace MetNoFimex;
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: utplukk --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
@@ -254,15 +254,15 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 	}
 	
 	
-	int method = MIUP_NEAREST_NEIGHBOR;
+	int method = MIFI_NEAREST_NEIGHBOR;
 	if (vm.count("interpolate.method")) {
 		string m = vm["interpolate.method"].as<string>();
 		if (m == "bilinear") {
-			method = MIUP_BILINEAR;
+			method = MIFI_BILINEAR;
 		} else if (m == "nearestneighbor") {
-			method = MIUP_NEAREST_NEIGHBOR;
+			method = MIFI_NEAREST_NEIGHBOR;
 		} else if (m == "bicubic") {
-			method = MIUP_BICUBIC;
+			method = MIFI_BICUBIC;
 		} else {
 			cerr << "WARNING: unknown interpolate.method: " << m << " using nearestneighbor" << endl;
 		}

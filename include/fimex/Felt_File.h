@@ -74,7 +74,7 @@ public:
 	 * @param time time of slice
 	 * @param level level of slice
 	 */	
-	boost::shared_ptr<MetNoUtplukk::Data> getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error);
 
 	/**
 	 *  retrieve all felt arrays
@@ -98,9 +98,9 @@ public:
 	/// get size in y direction
 	int getNY() const;
 	/// get the values of the x axis
-	boost::shared_ptr<MetNoUtplukk::Data> getXData() const throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getXData() const throw(Felt_File_Error);
 	/// get the values of the y axis
-	boost::shared_ptr<MetNoUtplukk::Data> getYData() const throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getYData() const throw(Felt_File_Error);
 	
 	/// assumes one set of grid-type for the whole file
 	short getGridType() const throw(Felt_File_Error);

@@ -1,3 +1,4 @@
 .deps
 Makefile
 libutplukk_felt.a
+libfimex_felt.a

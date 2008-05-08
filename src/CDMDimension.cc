@@ -1,6 +1,6 @@
 #include "CDMDimension.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 CDMDimension::CDMDimension()

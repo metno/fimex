@@ -1,6 +1,6 @@
 #include "CDMVariable.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 CDMVariable::CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape)

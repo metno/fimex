@@ -1,7 +1,7 @@
 #include "CDMReader.h"
 #include <boost/bind.hpp>
 
-namespace MetNoUtplukk {
+namespace MetNoFimex {
 
 static void addSizeUnlessUnlimited(const CDM& cdm, const std::string& dimName, size_t& size) {
 	const CDMDimension& dim = cdm.getDimension(dimName);

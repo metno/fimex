@@ -10,7 +10,7 @@
 #include "CDMException.h"
 #include "Utils.h"
 
-namespace MetNoUtplukk
+namespace MetNoFimex
 {
 
 	/**
