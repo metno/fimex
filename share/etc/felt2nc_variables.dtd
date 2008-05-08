@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+    TODO define vocabulary identification
+    PUBLIC ID: -//vendor//vocabulary//EN
+    SYSTEM ID: http://server/path/felt2nc_variables.dtd
+
+--><!--
+    An example how to use this DTD from your XML document:
+
+    <?xml version="1.0"?>
+
+    <!DOCTYPE cdm_felt_config SYSTEM "felt2nc_variables.dtd">
+
+    <cdm_felt_config>
+    ...
+    </cdm_felt_config>
+-->
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT cdm_felt_config (variables|axes|global_attributes)*>
+<!ATTLIST cdm_felt_config
+	xmlns:xi CDATA #IMPLIED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT global_attributes (attribute)*>
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT attribute EMPTY>
+<!ATTLIST attribute
+    type CDATA #REQUIRED
+    value CDATA #REQUIRED
+    name CDATA #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT axes (vertical_axis|spatial_axis|time)*>
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT time (attribute)*>
+<!ATTLIST time
+    type CDATA #REQUIRED
+    name CDATA #REQUIRED
+    id CDATA #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT spatial_axis (attribute)*>
+<!ATTLIST spatial_axis
+    type CDATA #IMPLIED
+    name CDATA #REQUIRED
+    id CDATA #REQUIRED
+    projection_felt_id CDATA #IMPLIED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT vertical_axis (attribute)*>
+<!ATTLIST vertical_axis
+    type CDATA #IMPLIED
+    felt_id CDATA #REQUIRED
+    name CDATA #REQUIRED
+    id CDATA #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT variables (parameter)*>
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT parameter (spatial_vector|attribute)*>
+<!ATTLIST parameter
+    type CDATA #IMPLIED
+    name CDATA #REQUIRED
+    id CDATA #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT spatial_vector EMPTY>
+<!ATTLIST spatial_vector
+    counterpart CDATA #REQUIRED
+    direction CDATA #REQUIRED
+  >

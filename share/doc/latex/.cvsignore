@@ -1,0 +1,6 @@
+*.tex
+*.eps
+*.pdf
+*.sty
+*.ttf
+Makefile
