@@ -20,11 +20,16 @@ bool CDMVariable::checkDimension(const std::string& dimension) const {
 	return false;
 }
 
+void CDMVariable::setAsSpatialVector(const std::string& counterpart, const std::string& direction) {
+	spatialVectorCounterpart = counterpart;
+	spatialVectorDirection = direction;
+}
+
 
 void CDMVariable::shapeToXMLStream(std::ostream& out) const
 {
 	if (shape.size() > 0) {
-		out << "shape=\"";
+		out << " shape=\"";
 		for (unsigned int i = 0; i < shape.size(); i++) {
 			out << shape[i];
 			if (i < (shape.size()-1)) {

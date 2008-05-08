@@ -21,7 +21,7 @@
 <!ELEMENT variables (parameter)*>
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT parameter (attribute)*>
+<!ELEMENT parameter (attribute|spatial_vector)*>
 <!ATTLIST parameter
     type CDATA #IMPLIED
     name CDATA #REQUIRED
@@ -35,3 +35,11 @@
     value CDATA #REQUIRED
     name CDATA #REQUIRED
   >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT spatial_vector EMPTY>
+<!ATTLIST spatial_vector
+    direction CDATA #REQUIRED
+    counterpart CDATA #REQUIRED
+  >
+  

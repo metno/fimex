@@ -21,6 +21,21 @@ public:
 	CDMDataType getDataType() const {return datatype;}
 	const std::vector<std::string>& getShape() const {return shape;}
 	/**
+	 * Declare this variable to be part of a spatial vector, e.g. (x-wind, y-wind)
+	 * 
+	 * @param counterpart name of the other variable being part of this vector
+	 * @param direction comma-separated list of possible directions for this vector, e.g. "x,longitude"
+	 */
+	void setAsSpatialVector(const std::string& counterpart, const std::string& direction);
+	/**
+	 * test if this variable has been declared to be a spatial vector
+	 */
+	bool isSpatialVector() const {return "" != spatialVectorCounterpart;}
+	/// get the spatial counterpart of this vector
+	const std::string& getSpatialVectorCounterpart() const {return spatialVectorCounterpart;}
+	/// get the possible directions of this spatial vector (comma-separated string)
+	const std::string& getSpatialVectorDirection() const {return spatialVectorDirection;}
+	/**
 	 * check the dimension of a variable
 	 * 
 	 * @param dimension the dimension to check for
@@ -47,6 +62,8 @@ private:
 	std::vector<std::string> shape;
 	void shapeToXMLStream(std::ostream& out) const;
 	boost::shared_ptr<Data> data;
+	std::string spatialVectorCounterpart;
+	std::string spatialVectorDirection;
 };
 
 }

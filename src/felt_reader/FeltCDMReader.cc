@@ -76,11 +76,14 @@ static string replaceTemplateAttribute(string value, const map<string, boost::sh
 	return value;
 }
 
-static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) {
+
+/**
+ * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
+ */
+static void fillAttributeList(vector<CDMAttribute>& attributes, const xmlNodePtr node, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) {
 	if (node == 0) return;
-	string attribute("attribute");
 	if ((node->type == XML_ELEMENT_NODE) &&
-		(attribute == reinterpret_cast<const char *>(node->name))) {
+		(string("attribute") == reinterpret_cast<const char *>(node->name))) {
 			string name(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
 			string value(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("value"))));
 			string type(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
@@ -92,7 +95,17 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, xmlNodePtr node,
 	fillAttributeList(attributes, node->next, templateReplacements);
 }
 
-static int readXPathNode(boost::shared_ptr<xmlXPathContext>& xpathCtx, string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) throw(CDMException)
+/**
+ * read a xml-node retrieved by the xpathString and extract the nodes attributes and all <attributes> sub-elements with name, value and type
+ * 
+ * @param xpathCtx the context to read from
+ * @param xpathString the string leading to the node
+ * @param xmlAttributes returns all attributes of the first node matched
+ * @param varAttributes returns all <attribute .../> sub elements of this node
+ * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
+ * @return number of nodes matched (only the first has been read)
+ */
+static int readXPathNodeWithCDMAttributes(const boost::shared_ptr<xmlXPathContext>& xpathCtx, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) throw(CDMException)
 {
 	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 	if (xpathObj.get() == 0) {
@@ -345,7 +358,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			std::string xpathStringX("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='x']");
 			std::vector<CDMAttribute> xVarAttributes;
 			std::map<string, string> xXmlAttributes;
-			int found = readXPathNode(xpathCtx, xpathStringX, xXmlAttributes, xVarAttributes, templateReplacementAttributes);
+			int found = readXPathNodeWithCDMAttributes(xpathCtx, xpathStringX, xXmlAttributes, xVarAttributes, templateReplacementAttributes);
 			if (found != 1) {
 				throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringX);
 			}
@@ -367,7 +380,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		std::string xpathStringY("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='y']");
     		std::vector<CDMAttribute> yVarAttributes;
     		std::map<string, string> yXmlAttributes;
-    		int found = readXPathNode(xpathCtx, xpathStringY, yXmlAttributes, yVarAttributes, templateReplacementAttributes);
+    		int found = readXPathNodeWithCDMAttributes(xpathCtx, xpathStringY, yXmlAttributes, yVarAttributes, templateReplacementAttributes);
     		if (found != 1) {
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringY);    		
     		}
@@ -392,13 +405,13 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		std::string xpathStringLong("/cdm_felt_config/axes/spatial_axis[@id='longitude']");
     		std::vector<CDMAttribute> lonlatVarAttributes;
     		std::map<string, string> lonlatXmlAttributes;
-    		int found = readXPathNode(xpathCtx, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
+    		int found = readXPathNodeWithCDMAttributes(xpathCtx, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
     		if (found != 1) {
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLong);    		
     		}
     		longName = lonlatXmlAttributes["name"];
     		std::string xpathStringLat("/cdm_felt_config/axes/spatial_axis[@id='latitude']");
-    		found = readXPathNode(xpathCtx, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
+    		found = readXPathNodeWithCDMAttributes(xpathCtx, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
     		if (found != 1) {
     			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLat);    		
     		}
@@ -441,7 +454,22 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		if (coordinates != "") {
     			attributes.push_back(CDMAttribute("coordinates", coordinates));
     		}
-    	
+    		
+    		// check if variable is part of vector
+    		string vectorDirection;
+    		string vectorCounterpart;
+    		{
+    			xmlNodePtr varNodeChild = nodes->nodeTab[0]->children;
+    			while (varNodeChild != 0) {
+    				if ((varNodeChild->type == XML_ELEMENT_NODE) &&
+    					(string("spatial_vector") == reinterpret_cast<const char *>(varNodeChild->name))) {
+    						vectorDirection = string(reinterpret_cast<char *>(xmlGetProp(varNodeChild, reinterpret_cast<const xmlChar *>("direction"))));
+    						vectorCounterpart = string(reinterpret_cast<char *>(xmlGetProp(varNodeChild, reinterpret_cast<const xmlChar *>("counterpart"))));
+    				}
+    				varNodeChild = varNodeChild->next;
+    			}
+    		}
+    		
     		// map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
     		std::vector<std::string> shape;
     		shape.push_back(xDim.getName());
@@ -454,6 +482,9 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		}
     		CDMDataType type = string2datatype(it->getDatatype());
     		CDMVariable var(varName, type, shape);
+    		if (vectorCounterpart != "") {
+    			var.setAsSpatialVector(vectorCounterpart, vectorDirection);
+    		}
     		cdm.addVariable(var);
     		varNameFeltIdMap[varName] = it->getName();
     		//  update scaling factor attribute with value from felt-file and xml-setup (only for short-values)
