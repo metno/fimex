@@ -22,11 +22,11 @@ test_interpolator() {
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
 	vector<double> xAxis, yAxis;
-	for (int i = -10; i < 100; i++) {
+	for (int i = -100; i < 10; i++) {
 		xAxis.push_back(i * 50000);
 		yAxis.push_back(i * 50000);
 	}
-	interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+	interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=148 +lat_ts=60 +elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
 	//interpolator->getCDM().toXMLStream(cerr);
 	BOOST_CHECK(true);
 	

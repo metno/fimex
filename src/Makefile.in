@@ -74,19 +74,23 @@ ARFLAGS = cru
 libfimex_a_AR = $(AR) $(ARFLAGS)
 libfimex_a_LIBADD =
 am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
-	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
-	CDMExtractor.cc CDMInterpolator.cc CDMReader.cc CDMVariable.cc \
-	Data.cc Null_CDMWriter.cc ReplaceStringTimeObject.cc Utils.cc \
-	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
+	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
+	Null_CDMWriter.cc ReplaceStringObject.cc \
+	ReplaceStringTimeObject.cc Utils.cc NetCDF_CF10_CDMReader.cc \
+	NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
 am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
-	CachedInterpolation.$(OBJEXT) CDM.$(OBJEXT) \
+	CachedInterpolation.$(OBJEXT) \
+	CachedVectorReprojection.$(OBJEXT) CDM.$(OBJEXT) \
 	CDMAttribute.$(OBJEXT) CDMDimension.$(OBJEXT) \
 	CDMDataType.$(OBJEXT) CDMExtractor.$(OBJEXT) \
 	CDMInterpolator.$(OBJEXT) CDMReader.$(OBJEXT) \
 	CDMVariable.$(OBJEXT) Data.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
+	ReplaceStringObject.$(OBJEXT) \
 	ReplaceStringTimeObject.$(OBJEXT) Utils.$(OBJEXT) \
 	$(am__objects_1)
 libfimex_a_OBJECTS = $(am_libfimex_a_OBJECTS)
@@ -312,11 +316,12 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I. ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
 lib_LIBRARIES = libfimex.a
-libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc CDM.cc \
-	CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
+	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
+	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
-	Null_CDMWriter.cc ReplaceStringTimeObject.cc Utils.cc \
-	$(am__append_1)
+	Null_CDMWriter.cc ReplaceStringObject.cc \
+	ReplaceStringTimeObject.cc Utils.cc $(am__append_1)
 include_HEADERS = config.h CachedInterpolation.h CDMAttribute.h \
 	CDMDataType.h CDMDimension.h CDMException.h CDMExtractor.h \
 	CDMInterpolator.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h \
@@ -423,11 +428,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CF10_CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Po@am__quote@

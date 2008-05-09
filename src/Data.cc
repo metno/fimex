@@ -4,6 +4,9 @@
 namespace MetNoFimex
 {
 
+// pure abstract class, impl. required for linker
+Data::~Data() {}
+
 boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException) {
 	int i = 0; // used as 0 InputIterator for first and last
 	return createData(datatype, length, &i, &i);

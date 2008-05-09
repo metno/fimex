@@ -32,7 +32,21 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		return dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
 		// TODO: handle fillValues, scaling?, datatypes?
-		return cachedInterpolation.interpolateValues(dataReader->getDataSlice(varName, unLimDimPos));
+		boost::shared_ptr<Data> data = cachedInterpolation.interpolateValues(dataReader->getDataSlice(varName, unLimDimPos)); 
+		if (variable.isSpatialVector()) {
+			// TODO: the current implementation is sub-optimal since it will fetch and transpose all vector-data twice (once for each direction)
+			const std::string& counterpart = variable.getSpatialVectorCounterpart();
+			boost::shared_ptr<Data> counterpartData = cachedInterpolation.interpolateValues(dataReader->getDataSlice(counterpart, unLimDimPos));
+			const std::string& direction = variable.getSpatialVectorDirection();
+			if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
+				cachedVectorReprojection.reprojectValues(data, counterpartData);
+			} else if (direction.find("y") != string::npos || direction.find("latitude") != string::npos) {
+				cachedVectorReprojection.reprojectValues(counterpartData, data);
+			} else {
+				throw CDMException("could not find x,longitude,y,latitude direction for vector: " + varName + ", direction: " + direction);
+			}
+		}
+		return data;
 	}
 }
 
@@ -191,6 +205,12 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 	
 	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
+
+	// prepare interpolation of vectors
+	// TODO: only prepare if at least one vector exists
+	boost::shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
+	mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], miupXAxis, miupYAxis, out_x_axis.size(), out_y_axis.size(), matrix.get());
+	cachedVectorReprojection = CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size());
 }
 
 }

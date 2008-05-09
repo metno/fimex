@@ -19,7 +19,7 @@ namespace MetNoFimex
 	class Data
 	{
 	public:
-		virtual ~Data() {}
+		virtual ~Data() = 0;
 
 		/// @brief size of the data
 		virtual size_t size() const = 0;

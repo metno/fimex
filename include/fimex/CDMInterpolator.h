@@ -3,6 +3,7 @@
 
 #include "CDMReader.h"
 #include "CachedInterpolation.h"
+#include "CachedVectorReprojection.h"
 
 namespace MetNoFimex
 {
@@ -13,12 +14,17 @@ private:
 	boost::shared_ptr<CDMReader> dataReader;
 	std::vector<std::string> projectionVariables;
 	CachedInterpolation cachedInterpolation;
+	CachedVectorReprojection cachedVectorReprojection;
 	std::string latitudeName;
 	std::string longitudeName;
 	
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMInterpolator();
+	/**
+	 * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection 
+	 * 
+	 */
 	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 	/**
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection

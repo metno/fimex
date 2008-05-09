@@ -160,7 +160,7 @@ int mifi_interpolate_f(const int method,
 	return mifi_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
-int mifi_get_delta_matrix_f(const char* proj_input, 
+int mifi_get_vector_reproject_matrix(const char* proj_input, 
 						const char* proj_output,
 						const double* out_x_axis, const double* out_y_axis,
 						int out_x_axis_type, int out_y_axis_type,
@@ -299,18 +299,11 @@ int mifi_get_delta_matrix_f(const char* proj_input,
 	return MIFI_OK;	
 }
 
-int mifi_vector_reproject_values_f(int method,
-						const char* proj_input, 
-						const char* proj_output,
+int mifi_vector_reproject_values_by_matrix_f(int method,
+						const double* matrix,
 						float* u_out, float* v_out,
-						const double* out_x_axis, const double* out_y_axis,
-						int out_x_axis_type, int out_y_axis_type,
 						int ox, int oy, int oz)
 {
-	double matrix[ox*oy*4];
-	// calculate the positions in the original proj.
-	int errcode = mifi_get_delta_matrix_f(proj_input, proj_output, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy, matrix);
-	if (errcode != MIFI_OK) return errcode;
 	for (int x = 0; x < ox; ++x) {
 		for (int y = 0; y < oy; ++y) {
 			for (int z = 0; z < oz; ++z) {
@@ -331,6 +324,21 @@ int mifi_vector_reproject_values_f(int method,
 		}
 	}
 	return MIFI_OK;
+}
+
+int mifi_vector_reproject_values_f(int method,
+						const char* proj_input, 
+						const char* proj_output,
+						float* u_out, float* v_out,
+						const double* out_x_axis, const double* out_y_axis,
+						int out_x_axis_type, int out_y_axis_type,
+						int ox, int oy, int oz)
+{
+	double matrix[ox*oy*4];
+	// calculate the positions in the original proj.
+	int errcode = mifi_get_vector_reproject_matrix(proj_input, proj_output, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy, matrix);
+	if (errcode != MIFI_OK) return errcode;
+	return mifi_vector_reproject_values_by_matrix_f(method, matrix, u_out, v_out, ox, oy, oz);
 }
 
 

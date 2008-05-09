@@ -204,19 +204,21 @@
 	<attribute name="standard_name" value="relative_humidity" type="string" />
 	<attribute name="units" value="1" type="string" />
 </parameter>
-<parameter id="33,2,1000" name="x_wind_10m">
-	<attribute name="_FillValue" value="-32767" type="short" />
+<parameter id="33,2,1000" name="x_wind_10m" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
 	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
 	<attribute name="long_name" value="x_wind_10m" type="string" />
 	<attribute name="metno_name" value="x_wind_10m" type="string" />
 	<attribute name="units" value="m s-1" type="string" />
+	<spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
 </parameter>
-<parameter id="34,2,1000" name="y_wind_10m">
-	<attribute name="_FillValue" value="-32767" type="short" />
+<parameter id="34,2,1000" name="y_wind_10m" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
 	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
 	<attribute name="long_name" value="y_wind_10m" type="string" />
 	<attribute name="standard_name" value="y_wind_10m" type="string" />
 	<attribute name="units" value="m s-1" type="string" />
+	<spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
 </parameter>
 <!-- change in scale_factor
 <parameter id="36,2,1000" name="accumulated_surface_upward_sensible_heat_flux">

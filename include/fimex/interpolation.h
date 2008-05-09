@@ -119,6 +119,14 @@ extern int mifi_interpolate_d(int method,
  * which is useful to keep the windspeed constant, even if the projected plane
  * has a different scale, or to completely reproject the vector (MIFI_VECTOR_RESIZE).
  * 
+ * This function is implemented by using a first order tailor expansion of the
+ * projection: (u', v') = A (u,v) with A a matrix defined at each point (x,y) through
+ * @code
+ * proj(x,y)_x' = a11*x+a21*y
+ * proj(x,y)_y' = a12*x+a22*y
+ * @endcode
+ * and the same formulars for (x+delta, y) and (x, y+delta) (with delta a small value against the x or y)
+ * 
  * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
@@ -131,7 +139,7 @@ extern int mifi_interpolate_d(int method,
  * @param ox x-dimension of outfield
  * @param oy y-dimension of outfield
  * @param oz z-dimension of the outfield
- * 
+ * @return MIFI_OK or error value
  */
 extern int mifi_vector_reproject_values_f(int method,
 						const char* proj_input, 
@@ -140,7 +148,45 @@ extern int mifi_vector_reproject_values_f(int method,
 						const double* out_x_axis, const double* out_y_axis,
 						int out_x_axis_type, int out_y_axis_type,
 						int ox, int oy, int oz);
-                        
+/**
+ * calculate the reprojected vectors with a known matrix for #mifi_vector_reproject_values_f
+ * 
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
+ * @param matrix reprojection matrix of size (ox,oy,4)
+ * @param u_out values of u, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
+ * @param v_out values of v, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
+ * @param ox x-dimension of outfield
+ * @param oy y-dimension of outfield
+ * @param oz z-dimension of the outfield
+ * @return MIFI_OK or error value
+ */
+extern int mifi_vector_reproject_values_by_matrix_f(int method,
+						const double* matrix,
+						float* u_out, float* v_out,
+						int ox, int oy, int oz);
+
+/**
+ * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f
+ * 
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
+ * @param proj_input proj4-string of projection of infield
+ * @param proj_output proj4-string of projection of outfield
+ * @param out_x_axis field of size ox. Axis needs to be strong monotonous and if longitude/latitude in degree
+ * @param out_y_axis field of size oy. Axis needs to be strong monotonous and if longitude/latitude in degree
+ * @param out_x_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
+ * @param out_y_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
+ * @param ox x-dimension of outfield
+ * @param oy y-dimension of outfield
+ * @return MIFI_OK or error value
+ */ 
+extern int mifi_get_vector_reproject_matrix(const char* proj_input, 
+						const char* proj_output,
+						const double* out_x_axis, const double* out_y_axis,
+						int out_x_axis_type, int out_y_axis_type,
+						int ox, int oy,
+						double* matrix);
+
+
 /** 
  * @param infield 3d fortran array of size ix,iy,iz
  * @param outfield 1d array of size iz containing the values

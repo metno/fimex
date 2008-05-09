@@ -13,8 +13,7 @@ namespace MetNoFimex {
 class ReplaceStringObject
 {
 public:
-	ReplaceStringObject() {}
-	virtual ~ReplaceStringObject() {}
+	virtual ~ReplaceStringObject() = 0;
 	/**
 	 *  put the formatted string to the stream
 	 * 
