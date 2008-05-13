@@ -36,7 +36,13 @@ public:
 	 */
 	CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
 	virtual ~CachedInterpolation() {}
-	boost::shared_ptr<Data> interpolateValues(boost::shared_ptr<Data> inData);
+	/**
+	 * Actually interpolate the data. The data will be interpolated as floats internally.
+	 * 
+	 * @param inData the input data
+	 * @param the bad value used for the data, defaults to MIFI_UNDEFINED_F
+	 */
+	boost::shared_ptr<Data> interpolateValues(boost::shared_ptr<Data> inData, float badValue = MIFI_UNDEFINED_F);
 };
 
 

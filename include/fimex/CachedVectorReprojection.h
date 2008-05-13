@@ -20,7 +20,7 @@ public:
 	 * @param uValues the values in x-direction. These will be changed in-place.
 	 * @param vValues the values in y-direction. These will be changed in-place.
 	 */
-	void reprojectValues(boost::shared_ptr<Data>& uValues, boost::shared_ptr<Data>& vValues) const throw(CDMException);
+	void reprojectValues(boost::shared_ptr<Data>& uValues, boost::shared_ptr<Data>& vValues, float uBadValue = MIFI_UNDEFINED_F, float vBadValue = MIFI_UNDEFINED_F) const throw(CDMException);
 	// @return size of the spatial plane in x-direction
 	size_t getXSize() const {return ox;}
 	// @return size of the spatial plane in y-direction

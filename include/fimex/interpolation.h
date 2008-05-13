@@ -264,6 +264,28 @@ extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
  */
 extern int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis);
 
+/**
+ * Convert bad-values to nan. The mifi_ functions don't handle bad values generally, but
+ * forward this work to the floating-point IEEE NaN's. This function converts a general bad value
+ * to a nan in a float array.
+ * 
+ * @param posPtr start pointer of the float array
+ * @param endPtr end-pointer of the float array (excluded from conversion)
+ * @param badVal bad value to be converted to nan
+ * @return number of conversions
+ */
+extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
+/**
+ * Convert nan back to bad-values. See #mifi_bad2nanf
+
+ * @param posPtr start pointer of the float array
+ * @param endPtr end-pointer of the float array (excluded from conversion)
+ * @param badVal value NaNs will be  converted to  
+ * @return number of conversions
+ */
+extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
+
+
                                      
 #ifdef __cplusplus
 }

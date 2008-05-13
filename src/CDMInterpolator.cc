@@ -32,16 +32,16 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		return dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
 		// TODO: handle fillValues, scaling?, datatypes?
-		boost::shared_ptr<Data> data = cachedInterpolation.interpolateValues(dataReader->getDataSlice(varName, unLimDimPos)); 
+		boost::shared_ptr<Data> data = cachedInterpolation.interpolateValues(dataReader->getDataSlice(varName, unLimDimPos), cdm.getFillValue(varName)); 
 		if (variable.isSpatialVector()) {
 			// TODO: the current implementation is sub-optimal since it will fetch and transpose all vector-data twice (once for each direction)
 			const std::string& counterpart = variable.getSpatialVectorCounterpart();
 			boost::shared_ptr<Data> counterpartData = cachedInterpolation.interpolateValues(dataReader->getDataSlice(counterpart, unLimDimPos));
 			const std::string& direction = variable.getSpatialVectorDirection();
 			if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
-				cachedVectorReprojection.reprojectValues(data, counterpartData);
+				cachedVectorReprojection.reprojectValues(data, counterpartData, cdm.getFillValue(varName), cdm.getFillValue(counterpart));
 			} else if (direction.find("y") != string::npos || direction.find("latitude") != string::npos) {
-				cachedVectorReprojection.reprojectValues(counterpartData, data);
+				cachedVectorReprojection.reprojectValues(counterpartData, data, cdm.getFillValue(counterpart), cdm.getFillValue(varName));
 			} else {
 				throw CDMException("could not find x,longitude,y,latitude direction for vector: " + varName + ", direction: " + direction);
 			}

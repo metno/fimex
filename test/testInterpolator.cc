@@ -26,7 +26,7 @@ test_interpolator() {
 		xAxis.push_back(i * 50000);
 		yAxis.push_back(i * 50000);
 	}
-	interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=148 +lat_ts=60 +elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+	interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
 	//interpolator->getCDM().toXMLStream(cerr);
 	BOOST_CHECK(true);
 	

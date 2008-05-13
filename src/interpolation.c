@@ -434,3 +434,33 @@ int mifi_project_axes(const char* proj_input, const char* proj_output, const dou
 	pj_free(outputPJ);
 	return MIFI_OK;
 }
+
+size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal) {
+	size_t retVal = 0;
+	if (!isnan(badVal)) {
+		while (posPtr != endPtr) {
+			if (*posPtr == badVal) {
+				*posPtr = MIFI_UNDEFINED_F;
+				retVal++;
+			}
+			posPtr++;
+		}
+	}
+	return retVal;
+}
+
+size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal) {
+	size_t retVal = 0;
+	if (!isnan(badVal)) {
+		while (posPtr != endPtr) {
+			if (isnan(*posPtr)) {
+				*posPtr = badVal;
+				retVal++;
+			}
+			posPtr++;
+		}		
+	}
+	return retVal;
+}
+
+

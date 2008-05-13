@@ -174,6 +174,13 @@ public:
 	 */
 	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException);
 	/**
+	 * get the fill value of an variable (_FillValue attribute)
+	 * 
+	 * @return value of _FillValue attribute, or MIFI_UNDEFINED_F
+	 */
+	double getFillValue(const std::string& varName) const;
+
+	/**
 	 * @brief generate the projection coordinates (usually named "lat lon")
 	 * 
 	 * @param projectionVariable the variable containing the projection information
@@ -183,7 +190,7 @@ public:
 	 * @param latDim name of the latitude variable
 	 * @throw CDMException if any information is missing
 	 */
-	void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
+		void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
 	/**
 	 * @brief extract the names of the projection-variable and the corresponding projection-axes
 	 * 
@@ -196,7 +203,6 @@ public:
 	 * @throw CDMException if no projection with corresponding axes can be found
 	 */
 	bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException);
-
 
 
 private:

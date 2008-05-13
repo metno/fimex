@@ -223,6 +223,15 @@ std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const {
 	return results;
 }
 
+double CDM::getFillValue(const std::string& varName) const {
+	try {
+		const CDMAttribute& attr = getAttribute(varName, "_FillValue");
+		return attr.getData()->asDouble()[0];
+	} catch (CDMException& ex) {
+		
+	}
+	return MIFI_UNDEFINED_F;
+}
 
 void CDM::toXMLStream(std::ostream& out) const
 {
