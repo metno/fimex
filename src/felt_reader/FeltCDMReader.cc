@@ -6,13 +6,14 @@
 #include "CDMDataType.h"
 #include "DataImpl.h"
 #include "ReplaceStringTimeObject.h"
+#include "Utils.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <libxml/xinclude.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include <libxml/xinclude.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -91,7 +92,6 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, const xmlNodePtr
 			value = replaceTemplateAttribute(value, templateReplacements);
 			attributes.push_back(createCDMAttribute(name,type,value));
 	}
-	fillAttributeList(attributes, node->children, templateReplacements);
 	fillAttributeList(attributes, node->next, templateReplacements);
 }
 
@@ -105,7 +105,7 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, const xmlNodePtr
  * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
  * @return number of nodes matched (only the first has been read)
  */
-static int readXPathNodeWithCDMAttributes(const boost::shared_ptr<xmlXPathContext>& xpathCtx, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) throw(CDMException)
+static int readXPathNodeWithCDMAttributes(const boost::shared_ptr<xmlXPathContext>& xpathCtx, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(CDMException)
 {
 	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 	if (xpathObj.get() == 0) {
@@ -129,6 +129,70 @@ static int readXPathNodeWithCDMAttributes(const boost::shared_ptr<xmlXPathContex
 	fillAttributeList(varAttributes, node->children, templateReplacements);
 	return size;
 }
+
+static std::vector<double> readValuesFromXPath(const boost::shared_ptr<xmlXPathContext>& xpathCtx, const std::string& variableXPath)
+{
+	std::vector<double> retValues;
+	std::string valuesXPath(variableXPath + "/values");
+	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(valuesXPath.c_str()), xpathCtx.get()), xmlXPathFreeObject);
+	if (xpathObj.get() != 0) {
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int i = 0; i < size; i++) {
+			xmlNodePtr node = nodes->nodeTab[0];
+			if (node->type == XML_ELEMENT_NODE) {
+				// add all space delimited values to the retVal vector
+				xmlChar *valuePtr = xmlNodeGetContent(node);
+				std::string
+						values(reinterpret_cast<const char *>(valuePtr));
+				xmlFree(valuePtr);
+				std::vector<std::string> tokens = tokenize(values, " ");
+				std::transform(tokens.begin(), tokens.end(),
+						std::back_inserter(retValues), string2type<double>);
+			}
+		}
+	}
+	return retValues;
+}
+/**
+ * add additional axis from the xml-file to this cdm
+ * 
+ * @param cdm the current cdm
+ * @param xpathCtx xpath context of the file
+ * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
+ * @param templateReplacements replacements for template parameters
+ */
+static void readAdditionalAxisVariablesFromXPath(CDM& cdm, const boost::shared_ptr<xmlXPathContext>& xpathCtx, const std::string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(MetNoFelt::Felt_File_Error)
+{
+	std::string addAxisXPath(xpathLevelString + "/additional_axis_variable");
+	boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(addAxisXPath.c_str()), xpathCtx.get()), xmlXPathFreeObject);
+	if (xpathObj.get() != 0) {
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int i = 0; i < size; i++) {
+			xmlNodePtr node = nodes->nodeTab[i];
+			string name(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
+			string type(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
+			string axis(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("axis"))));
+			CDMDataType dataType = string2datatype(type);
+			std::vector<double> values = readValuesFromXPath(xpathCtx, addAxisXPath + "[@name='" + name + "']");
+			std::vector<std::string> shape;
+			shape.push_back(axis);
+			CDMVariable var(name, dataType, shape);
+			var.setData(createData(dataType, values.size(), values.begin(), values.end()));
+			cdm.addVariable(var);
+
+			
+			// add the attributes of the extra variables
+			std::vector<CDMAttribute> attributes;
+			fillAttributeList(attributes, node->children, templateReplacements);
+			for (std::vector<CDMAttribute>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
+				cdm.addAttribute(name, *it);
+			}
+		}
+	}
+}
+
 
 // simple RAII for xmlCleanup
 static void myXmlCleanupParser(int* i) {
@@ -319,8 +383,16 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			std::vector<std::string> levelShape;
 			levelShape.push_back(levelDim.getName());
 			CDMVariable levelVar(levelId, levelDataType, levelShape);
-			const std::vector<short>& lv = it->second;
-			boost::shared_ptr<Data> data = createData(levelDataType, levelSize, lv.begin(), lv.end());
+			std::vector<double> lv = readValuesFromXPath(xpathCtx, xpathLevelString);
+			boost::shared_ptr<Data> data;
+			if (lv.size() > 0) {
+				// use values from xml-file
+				data = createData(levelDataType, levelSize, lv.begin(), lv.end());
+			} else {
+				//use values from felt-file
+				std::vector<short> lvs = it->second;
+				data = createData(levelDataType, levelSize, lvs.begin(), lvs.end());
+			}
 			levelVar.setData(data);
 			cdm.addVariable(levelVar);
 			
@@ -329,6 +401,8 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			for (std::vector<CDMAttribute>::iterator it = levelAttributes.begin(); it != levelAttributes.end(); ++it) {
 				cdm.addAttribute(levelVar.getName(), *it);
 			}
+			
+			readAdditionalAxisVariablesFromXPath(cdm, xpathCtx, xpathLevelString, templateReplacementAttributes);
 		}
 	}
     

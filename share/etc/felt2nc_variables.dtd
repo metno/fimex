@@ -24,9 +24,9 @@
   >
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT global_attributes (attribute)*>
+<!ELEMENT global_attributes (attribute*)>
 
-<!--- Put your DTDDoc comment here. -->
+<!--- Attributes of variables -->
 <!ELEMENT attribute EMPTY>
 <!ATTLIST attribute
     type CDATA #REQUIRED
@@ -34,11 +34,14 @@
     name CDATA #REQUIRED
   >
 
+<!--- list of space separated values -->
+<!ELEMENT values (#PCDATA)>
+
 <!--- Put your DTDDoc comment here. -->
 <!ELEMENT axes (vertical_axis|spatial_axis|time)*>
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT time (attribute)*>
+<!ELEMENT time (attribute*)>
 <!ATTLIST time
     type CDATA #REQUIRED
     name CDATA #REQUIRED
@@ -46,7 +49,7 @@
   >
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT spatial_axis (attribute)*>
+<!ELEMENT spatial_axis (attribute*)>
 <!ATTLIST spatial_axis
     type CDATA #IMPLIED
     name CDATA #REQUIRED
@@ -54,8 +57,15 @@
     projection_felt_id CDATA #IMPLIED
   >
 
+<!ELEMENT additional_axis_variable (attribute|values)*>
+<!ATTLIST additional_axis_variable
+	name CDATA #REQUIRED
+	type CDATA #REQUIRED
+	axis CDATA #REQUIRED
+  >
+
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT vertical_axis (attribute)*>
+<!ELEMENT vertical_axis (attribute|values|additional_axis_variable)*>
 <!ATTLIST vertical_axis
     type CDATA #IMPLIED
     felt_id CDATA #REQUIRED

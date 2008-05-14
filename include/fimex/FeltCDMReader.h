@@ -40,6 +40,7 @@ private:
 	 */
 	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
 	void init() throw(MetNoFelt::Felt_File_Error);
+
 };
 
 }
