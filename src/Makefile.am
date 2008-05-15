@@ -23,6 +23,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 Utils.cc 
 include_HEADERS = config.h \
 	              CachedInterpolation.h \
+				  CachedVectorReprojection.h \
 	              CDMAttribute.h \
 	              CDMDataType.h \
 	              CDMDimension.h \

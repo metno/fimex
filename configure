@@ -24956,7 +24956,7 @@ esac
 
           ac_config_headers="$ac_config_headers src/config.h"
 
-                                                            ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile"
+                                                                      ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -25695,6 +25695,7 @@ do
   "src/felt_reader/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/felt_reader/Makefile" ;;
   "src/binSrc/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/binSrc/Makefile" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
+  "share/etc/Makefile" ) CONFIG_FILES="$CONFIG_FILES share/etc/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
