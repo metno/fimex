@@ -6,3 +6,4 @@ libtool
 config.log
 config.status
 fimex.pc
+*.gz

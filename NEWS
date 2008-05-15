@@ -1,0 +1,15 @@
+2008-05-15 fimex-0.3
+	adding vector-interpolation
+	handling _FillValue in interpolation
+	reading of parameterized levels
+	renaming to fimex
+	
+2008-04-17 utplukk-0.2
+	backport to routine-machine, BOOST-1.32, hardcoded netcdf-path
+	dist-checked distribution
+	
+2008-01-02 utplukk-0.1
+	initial release using autotools
+	
+2007-09-18 utplukk-0.0
+	starting work on utplukk
