@@ -1,22 +1,20 @@
 #include "ReplaceStringTimeObject.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <locale>
-
 
 namespace MetNoFimex
 {
 
+// implementation before boost::date_time 1.33
 std::ostream& operator<<(std::ostream& s, const ReplaceStringTimeObject& rsto)
 {
-	using namespace boost::posix_time;
-	using namespace boost::gregorian;
 	using namespace std;
-	time_facet* f = new time_facet();
-	f->format(rsto.myFormat.c_str());
-	s.imbue(locale(s.getloc(), f));
-	// use ptime from_time_t to output a formatted date_time object
-	s << from_time_t(rsto.myTime);
+	struct tm * timeinfo;
+	char buffer [80];
+
+	timeinfo = gmtime( &rsto.myTime);
+
+	strftime(buffer, 80, rsto.myFormat.c_str(), timeinfo);
+	s << buffer;
 	return s;
 }
 

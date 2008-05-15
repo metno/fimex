@@ -20,7 +20,7 @@ public:
 	/**
 	 *  set the formatting String for this object
 	 * 
-	 * @param format: format string of boost::date_time time_facet are allowed http://www.boost.org/doc/html/date_time/date_time_io.html#date_time.format_flags
+	 * @param format: format string of strftime http://www.cplusplus.com/reference/clibrary/ctime/strftime.html
 	 */
 	virtual void setFormatString(std::string format) {myFormat = format;}
 

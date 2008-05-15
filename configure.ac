@@ -46,7 +46,6 @@ http://www.libxml.org/.]))
 AX_BOOST_BASE([1.32.0])
 AX_BOOST_REGEX
 AX_BOOST_PROGRAM_OPTIONS
-AX_BOOST_DATE_TIME
 AX_BOOST_UNIT_TEST_FRAMEWORK
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.

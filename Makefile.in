@@ -47,7 +47,6 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ac_cxx_have_stl.m4 \
 	$(top_srcdir)/m4/ac_cxx_namespaces.m4 \
 	$(top_srcdir)/m4/ax_boost_base.m4 \
-	$(top_srcdir)/m4/ax_boost_date_time.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
@@ -104,7 +103,6 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
-BOOST_DATE_TIME_LIB = @BOOST_DATE_TIME_LIB@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_PROGRAM_OPTIONS_LIB = @BOOST_PROGRAM_OPTIONS_LIB@
 BOOST_REGEX_LIB = @BOOST_REGEX_LIB@

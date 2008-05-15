@@ -10,7 +10,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <libxml/xinclude.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
