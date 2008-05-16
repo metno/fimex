@@ -76,6 +76,19 @@ static string replaceTemplateAttribute(string value, const map<string, boost::sh
 	return value;
 }
 
+/**
+ * a memory-save form of xmlGetProp
+ * 
+ * @return a string of the attribute, "" if attribute doesn't exist
+ */
+static std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
+	boost::shared_ptr<xmlChar> xChar(xmlGetProp(node, reinterpret_cast<const xmlChar *>(attrName.c_str())), xmlFree);
+	std::string retVal;
+	if (xChar.get() != 0) {
+		retVal = std::string(reinterpret_cast<char *>(xChar.get()));
+	}
+	return retVal;
+}
 
 /**
  * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
@@ -84,9 +97,9 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, const xmlNodePtr
 	if (node == 0) return;
 	if ((node->type == XML_ELEMENT_NODE) &&
 		(string("attribute") == reinterpret_cast<const char *>(node->name))) {
-			string name(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
-			string value(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("value"))));
-			string type(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
+			string name = getXmlProp(node, "name");
+			string value = getXmlProp(node, "value");
+			string type = getXmlProp(node, "type");
 
 			value = replaceTemplateAttribute(value, templateReplacements);
 			attributes.push_back(createCDMAttribute(name,type,value));
@@ -170,9 +183,9 @@ static void readAdditionalAxisVariablesFromXPath(CDM& cdm, const boost::shared_p
 		int size = (nodes) ? nodes->nodeNr : 0;
 		for (int i = 0; i < size; i++) {
 			xmlNodePtr node = nodes->nodeTab[i];
-			string name(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
-			string type(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
-			string axis(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("axis"))));
+			string name = getXmlProp(node,"name");
+			string type = getXmlProp(node, "type");
+			string axis = getXmlProp(node, "axis");
 			CDMDataType dataType = string2datatype(type);
 			std::vector<double> values = readValuesFromXPath(xpathCtx, addAxisXPath + "[@name='" + name + "']");
 			std::vector<std::string> shape;
@@ -244,28 +257,24 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 		for (int i = 0; i < nodes->nodeNr; ++i) {
 			xmlNodePtr node = nodes->nodeTab[i];
-			xmlChar* idName = xmlGetProp(node, reinterpret_cast<const xmlChar*>("id"));
-			string id(reinterpret_cast<char*>(idName));
-			xmlFree(idName);
-			xmlChar* typeName = xmlGetProp(node, reinterpret_cast<const xmlChar*>("type"));
+			string id = getXmlProp(node, "id");
 			// get the datatype
-			std::string dataType;
-			if (typeName != 0) {
-				dataType = string(reinterpret_cast<char*>(typeName));
-				xmlFree(typeName);
+			std::string dataType = getXmlProp(node, "type");
+			if (dataType != "") {
 				dataType = ":dataType=" + dataType;
 			}
 			// get the fill value
-			std::string fillValue;
 			std::string xpathString("/cdm_felt_config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
 			boost::shared_ptr<xmlXPathObject> xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpathString.c_str()), xpathCtx.get()), xmlXPathFreeObject);
 			if (xpathObj.get() == 0) {
 				throw MetNoFelt::Felt_File_Error("unable to parse xpath" + xpathString);
 			}
+			std::string fillValue;
 			if (xpathObj->nodesetval->nodeNr > 0) {
-				xmlChar* fillValName = xmlGetProp(xpathObj->nodesetval->nodeTab[0], reinterpret_cast<const xmlChar*>("value"));
-				fillValue = ":fillValue=" + std::string(reinterpret_cast<char*>(fillValName));
-				xmlFree(fillValName);
+				fillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+				if (fillValue != "") {
+					fillValue = ":fillValue=" + fillValue;
+				}
 			}
 			knownFeltIds.push_back(id + dataType + fillValue);
 		}
@@ -331,8 +340,8 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 		}
 		xmlNodePtr node = nodes->nodeTab[0];
 		assert(node->type == XML_ELEMENT_NODE);
-		string timeName(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
-		string timeType(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
+		string timeName = getXmlProp(node, "name");
+		string timeType = getXmlProp(node, "type");
 		CDMDataType timeDataType = string2datatype(timeType);
 		long timeSize = feltFile.getFeltTimes().size();
 		timeDim = CDMDimension(timeName, timeSize);
@@ -369,9 +378,9 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
 			}
 			xmlNodePtr node = nodes->nodeTab[0];
 			assert(node->type == XML_ELEMENT_NODE);
-			string levelName(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("name"))));
-			string levelId(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("id"))));
-			string levelType(reinterpret_cast<char *>(xmlGetProp(node, reinterpret_cast<const xmlChar *>("type"))));
+			string levelName = getXmlProp(node, "name");
+			string levelId = getXmlProp(node, "id");
+			string levelType = getXmlProp(node, "type");
 			CDMDataType levelDataType = string2datatype(levelType);
 			long levelSize = it->second.size();
 			CDMDimension levelDim(levelId, levelSize);
@@ -519,7 +528,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     		std::cerr << "config-file doesn't contain parameter: " << xpathString << std::endl;
     	} else {
     		assert(nodes->nodeTab[0]->type == XML_ELEMENT_NODE);
-    		std::string varName(reinterpret_cast<char *>(xmlGetProp(nodes->nodeTab[0], reinterpret_cast<const xmlChar *>("name"))));
+    		std::string varName = getXmlProp(nodes->nodeTab[0], "name");
     		std::vector<CDMAttribute> attributes;
     		fillAttributeList(attributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
     		// add the projection
@@ -536,8 +545,8 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error) {
     			while (varNodeChild != 0) {
     				if ((varNodeChild->type == XML_ELEMENT_NODE) &&
     					(string("spatial_vector") == reinterpret_cast<const char *>(varNodeChild->name))) {
-    						vectorDirection = string(reinterpret_cast<char *>(xmlGetProp(varNodeChild, reinterpret_cast<const xmlChar *>("direction"))));
-    						vectorCounterpart = string(reinterpret_cast<char *>(xmlGetProp(varNodeChild, reinterpret_cast<const xmlChar *>("counterpart"))));
+    						vectorDirection = getXmlProp(varNodeChild, "direction");
+    						vectorCounterpart = getXmlProp(varNodeChild, "counterpart");
     				}
     				varNodeChild = varNodeChild->next;
     			}

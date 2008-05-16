@@ -45,7 +45,13 @@ Felt_File::Felt_File(const std::string& filename, const std::vector<std::string>
 }
 
 void fdPtrClose(int* fdPtr) {
-	close(*fdPtr);
+	// close(*fdPtr) and release fortran data
+	// dummy variables needed for mrfelt, so not used there for close
+	short is;
+	int i;
+	float f;
+	mrfelt(3,"", *fdPtr, &is, 0, 1, &f, 1.f, 1024, &is, &i);
+	delete fdPtr;
 }
 
 void Felt_File::init() throw(Felt_File_Error)
@@ -64,10 +70,12 @@ void Felt_File::init() throw(Felt_File_Error)
 		char* msg = strerror(errno);
 		throw Felt_File_Error("error reading file " + filename + ": " + msg);
 	}
-	fdPtr = boost::shared_ptr<int>(new int, fdPtrClose);
-	*fdPtr = fd;
 	// initialize feltfile
-	mrfelt(1,filename.c_str(),*fdPtr,&inmr[0],0,1,&dummy,1.f,1024,&idrec1[0],&ierror);
+	mrfelt(1,filename.c_str(),fd,&inmr[0],0,1,&dummy,1.f,1024,&idrec1[0],&ierror);
+	if (ierror != 0) {
+		throw Felt_File_Error("error reading file " + filename + ": error in mrfelt");
+	}
+	fdPtr = boost::shared_ptr<int>(new int(fd), fdPtrClose);
 	for (int i = 0; i < 16; i++) {
 		//TODO: something with idrec1, inmr ???
 	}

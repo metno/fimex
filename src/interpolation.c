@@ -192,8 +192,12 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	convertAxis(out_y_axis, oy, out_y_axis_type, outYAxis);
 	
 	
-	double in_xproj_axis[ox*oy];
-	double in_yproj_axis[ox*oy];
+	double* in_xproj_axis = malloc(ox*oy*sizeof(double));
+	double* in_yproj_axis = malloc(ox*oy*sizeof(double));
+	if (in_xproj_axis == NULL || in_yproj_axis == NULL) {
+		fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
+		exit(1);
+	}
 	double pointsZ[ox*oy]; // z currently of no interest, no height attached to values
 	for (int x = 0; x < ox; ++x) {
 		for (int y = 0; y < oy; ++y) {
@@ -208,14 +212,20 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
 		pj_free(inputPJ);
 		pj_free(outputPJ);
+		free(in_yproj_axis);
+		free(in_xproj_axis);
 		return MIFI_ERROR;
 	}
 	
 	// calculation of deltas: (x+d, y), (x, y+d) -> proj-values
+	double* out_x_delta_proj_axis = malloc(ox*oy*sizeof(double));
+	double* out_y_delta_proj_axis = malloc(ox*oy*sizeof(double));
+	double* delta = malloc(ox*oy*sizeof(double)); // dynamic delta
+	if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL || delta == NULL) {
+		fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
+		exit(1);
+	}
 	{// conversion along x axis
-		double out_x_delta_proj_axis[ox*oy];
-		double out_y_delta_proj_axis[ox*oy];
-		double delta[ox*oy]; // dynamic delta
 		delta[0] = 1e-3; // will be overwritten if x > 1
 		for (int x = 0; x < ox; ++x) {
 			for (int y = 0; y < oy; ++y) {
@@ -239,6 +249,11 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
 			pj_free(inputPJ);
 			pj_free(outputPJ);
+			free(in_yproj_axis);
+			free(in_xproj_axis);
+			free(delta);
+			free(out_y_delta_proj_axis);
+			free(out_x_delta_proj_axis);
 			return MIFI_ERROR;
 		}
 
@@ -254,9 +269,6 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	}
 	
 	{	// conversion along y axis
-		double out_x_delta_proj_axis[ox*oy];
-		double out_y_delta_proj_axis[ox*oy];
-		double delta[ox*oy]; // dynamic delta
 		delta[0] = 1e-3; // will be overwritten if x > 1
 		for (int x = 0; x < ox; ++x) {
 			for (int y = 0; y < oy; ++y) {
@@ -280,6 +292,11 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
 			pj_free(inputPJ);
 			pj_free(outputPJ);
+			free(in_yproj_axis);
+			free(in_xproj_axis);
+			free(delta);
+			free(out_y_delta_proj_axis);
+			free(out_x_delta_proj_axis);
 			return MIFI_ERROR;
 		}
 
@@ -296,6 +313,11 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	}
 	pj_free(inputPJ);
 	pj_free(outputPJ);
+	free(in_yproj_axis);
+	free(in_xproj_axis);
+	free(delta);
+	free(out_y_delta_proj_axis);
+	free(out_x_delta_proj_axis);
 	return MIFI_OK;	
 }
 
@@ -334,11 +356,20 @@ int mifi_vector_reproject_values_f(int method,
 						int out_x_axis_type, int out_y_axis_type,
 						int ox, int oy, int oz)
 {
-	double matrix[ox*oy*4];
+	double* matrix = malloc(ox*oy*4*sizeof(double));
+	if (matrix == NULL) {
+		fprintf(stderr, "error allocating memory of double(4*%d*%d)", ox, oy);
+		exit(1);
+	}
 	// calculate the positions in the original proj.
 	int errcode = mifi_get_vector_reproject_matrix(proj_input, proj_output, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy, matrix);
-	if (errcode != MIFI_OK) return errcode;
-	return mifi_vector_reproject_values_by_matrix_f(method, matrix, u_out, v_out, ox, oy, oz);
+	if (errcode != MIFI_OK) {
+		free(matrix);
+		return errcode;
+	}
+	errcode = mifi_vector_reproject_values_by_matrix_f(method, matrix, u_out, v_out, ox, oy, oz);
+	free(matrix);
+	return errcode;
 }
 
 

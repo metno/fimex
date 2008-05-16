@@ -1,93 +1,108 @@
-%include <Incl_metop.pm> ; #-*-cperl-*-
+# %include <Incl_metop.pm> ; #-*-cperl-*-
 
-%manual
-###########################################################################
-#
-# NAME:
-#    SMSBASE/hirlam12/job/get_hir12_1.sms
-#
-# FUNCTION:
-#    Fetch 'high priority' HIRLAM model output from remote host
-#
-# RESPONSIBLE:
-#    "Ole Vignes" <olev>
-#
-# RESTART:
-#    Yes
-#
-#
-#
-# DESCRIPTION:
-#    Fetch 'high priority' HIRLAM model output from remote host
-#    (00,06,12,18 utc).
-#    - transfer files from remote host
-#    - put fields on FELT file(s)
-#    - convert data to a polarstereographic map projection
-#
-# BUGS:
-#
-# DISTRIBUTION:
-#    No
-#
-# CALLS:
-#    Programs:
-#       SMSLOCAL/bin/grib2felt
-#       SMSLOCAL/bin/flt2flt
-#    Functions:
-#       getfiles from SMSHOME/get2.pl
-#
-# CONTROL DATA:
-#    SMSBASE/hirlam12/job/flt2flt.def
-#    SMSBASE/hirlam12/job/grids.table
-#    SMSBASE/hirlam12/job/hirlam2dnmi.table
-#
-# INPUT DATA:
-#    00 utc (XX=00), 06 utc (XX=06), 12 utc (XX=12), 18 utc (XX=18):
-#       inXX.dat00pp
-#       fcXX.datHHp1 (HH=00,06,12,...60)
-#       fcXX.datHHp3 (HH=00,03,06,...60)
-#       fcXX.datHHp4 (HH=00,01,02,...60)
-#
-# OUTPUT DATA:
-#    SMSDATA/hirlam12/h12sfXX.dat  (XX = 00,06,12,18)
-#    SMSDATA/hirlam12/h12plXX.dat  (XX = 00,06,12,18)
-#
-# CHANGE LOG:
-#    (date:originator.name or userid:sms.name or userid: description)
-#    2007-06-19::"Ole Vignes" <olev>: Modified from Hirlam 20
-#    2007-12-10::"Jan Erik Haugen" <janeh>: Reruns in separate jobs
-#
-##########################################################################
-%end
+# %manual
+# ###########################################################################
+# #
+# # NAME:
+# #    SMSBASE/fimex/fimex_h12.sms
+# #
+# # FUNCTION:
+# #    convert HIRLAM model output to netcdf for damocles/IPY
+# #
+# # RESPONSIBLE:
+# #    "Heiko Klein" <heikok>
+# #
+# # RESTART:
+# #    Yes
+# #
+# #
+# #
+# # DESCRIPTION:
+# #    Read HIRLAM 12 model output and convert it to netcdf CF-1.0 for damocles/IPY
+# #    (00,06,12,18 utc).
+# #    - convert data to a polarstereographic map projection
+# #
+# # BUGS:
+# #
+# # DISTRIBUTION:
+# #    No
+# #
+# # CALLS:
+# #    bin/fimex
+# #
+# # CONTROL DATA:
+# #
+# #
+# # INPUT DATA:
+# #    SMSDATA/hirlam12/h12WWXX.dat (WW=ml,sf,ie; XX=00,06,12,18)
+# #
+# # OUTPUT DATA:
+# #    workdir/
+# #
+# # CHANGE LOG:
+# #    (date:originator.name or userid:sms.name or userid: description)
+# #    2008-04-30::"Heiko Klein" <heikok>: first version
+# #
+# ##########################################################################
+# %end
+
+## test variables
+our $SMSDATA = '/opdata';
+our $datadir = '/home/guest/heikok/tmp';
+our $etcdir = '/home/guest/heikok/fimex_install/etc';
+our $jobdir = '/home/guest/heikok/fimex_install/job';
+our $utc = '00';
+$ENV{PATH} = "/home/guest/heikok/fimex_install/bin:$ENV{PATH}";
 
 # variables and functions
 
-require "$SMSHOME/get2.pl";
+our $prog = 'fimex_h12.sms';
 
 # get argument: utc (hour) : 00/06/12/18
 
-$arg = $utc;
-$utc='xx';
-
-if    ( $arg eq "00") { $utc='00' ; }
-elsif ( $arg eq "06") { $utc='06' ; }
-elsif ( $arg eq "12") { $utc='12' ; }
-elsif ( $arg eq "18") { $utc='18' ; }
-
-if ( $utc eq 'xx' )
-{
-    &ERROR("usage:  fimex.sms utc     (utc=00/06/12/18)\n");
+if (! grep {$_ eq $utc} (qw(00 06 12 18))) {
+    &ERROR("usage: $prog  utc     (utc=00/06/12/18)\n");
 }
 
 chdir $datadir;
-chdir $workdir;
+
+our $fimex = "fimex";
+our $config = "$etcdir/fimex_hirlam12.cfg";
+our $sharedir = "$jobdir/../share/etc";
+
+my ($day, $month, $year) = (gmtime(time))[3,4,5];
+$year+=1900;
+$month++;
+$month = ($month < 10) ? "0$month" : $month;
+$day = ($day < 10) ? "0$day" : $day;
+my $date= "$year-$month-$day";
 
 
-#==========================================================================
-#  End task.
-#==========================================================================
-&ENDT;
-#==========================================================================
-#  Clean up and exit
-#==========================================================================
-&EXIT;
+# map of time-appendices for different level types
+my %timeApp = (sf => [qw(_1h _3h _60h)],
+			   pl => [""],
+			   ml => [""],
+	      );
+foreach my $type (keys %timeApp) {
+    my $inputFile = "$SMSDATA/hirlam12/h12$type$utc.dat";
+    foreach my $app (@{ $timeApp{$type} }) {
+	my $outputFile = "h12_$type$app\_$date\_$utc.nc";
+	my $inputConfig = "$sharedir/felt2nc_variables_hirlam12_damocles_$type$app.xml";
+	my @options = ("-c", $config,
+		        "--input.file=$inputFile",
+		        "--input.config=$inputConfig",
+		        "--output.file=$outputFile");
+	my $options = join " ", @options;
+	print "$fimex $options\n";
+	system ($fimex, @options) == 0 or &WARNING("'$fimex $options' failed: $?");
+    }
+}
+
+# #==========================================================================
+# #  End task.
+# #==========================================================================
+# &ENDT;
+# #==========================================================================
+# #  Clean up and exit
+# #==========================================================================
+# &EXIT;
