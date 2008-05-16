@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE variables SYSTEM "felt_variables.dtd">
 <variables>
-<parameter id="2" name="x_wind">
-	<attribute name="_FillValue" value="-32767" type="short" />
+<parameter id="2" name="x_wind" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
 	<attribute name="long_name" value="x_wind" type="string" />
 	<attribute name="standard_name" value="x_wind" type="string" />
 	<attribute name="units" value="m/s" type="string" />
 	<spatial_vector direction="x,longitude" counterpart="y_wind" />
 </parameter>
-<parameter id="3" name="y_wind">
-	<attribute name="_FillValue" value="-32767" type="short" />
+<parameter id="3" name="y_wind" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
 	<attribute name="long_name" value="y_wind" type="string" />
 	<attribute name="standard_name" value="y_wind" type="string" />
 	<attribute name="units" value="m/s" type="string" />
