@@ -46,10 +46,8 @@ static int bsearchDoubleIndex(const double key, const double* base, int num, int
   	else return (-1 + (-1 * pos)); 
 }
 
-int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz)
-{
-	return (z*iy + y)*ix + x;
-}
+// c99: one implementation of inline function must exist
+extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
 
 
 int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type) 
@@ -260,9 +258,9 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 		for (int x = 0; x < ox; ++x) {
 			for (int y = 0; y < oy; ++y) {
 				double deltaInv = 1/delta[y*ox+x];
-				matrix[mifi_3d_array_position(x,y,0,ox,oy,4)] = (out_x_delta_proj_axis[y*ox+x]
+				matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
 						- outXAxis[x]) * deltaInv;
-				matrix[mifi_3d_array_position(x,y,1,ox,oy,4)] = (out_y_delta_proj_axis[y*ox+x]
+				matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
 						- outYAxis[y]) * deltaInv;
 			}
 		}
@@ -303,9 +301,9 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 		for (int x = 0; x < ox; ++x) {
 			for (int y = 0; y < oy; ++y) {
 				double deltaInv = 1/delta[y*ox+x];
-				matrix[mifi_3d_array_position(x,y,2,ox,oy,4)] = (out_x_delta_proj_axis[y*ox+x]
+				matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
 						- outXAxis[x]) * deltaInv;
-				matrix[mifi_3d_array_position(x,y,3,ox,oy,4)] = (out_y_delta_proj_axis[y*ox+x]
+				matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
 						- outYAxis[y]) * deltaInv;
 				//fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[mifi_3d_array_position(x,y,0,ox,oy,4)], matrix[mifi_3d_array_position(x,y,1,ox,oy,4)], matrix[mifi_3d_array_position(x,y,2,ox,oy,4)], matrix[mifi_3d_array_position(x,y,3,ox,oy,4)]);
 			}
@@ -326,22 +324,32 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 						float* u_out, float* v_out,
 						int ox, int oy, int oz)
 {
-	for (int x = 0; x < ox; ++x) {
-		for (int y = 0; y < oy; ++y) {
-			for (int z = 0; z < oz; ++z) {
-				int pos = mifi_3d_array_position(x,y,z,ox,oy,oz);
-				double u_old = u_out[pos];
-				double v_old = v_out[pos];
-				u_out[pos] = u_old * matrix[mifi_3d_array_position(x,y,0,ox,oy,4)] +
-							 v_old * matrix[mifi_3d_array_position(x,y,1,ox,oy,4)];
-				v_out[pos] = u_old * matrix[mifi_3d_array_position(x,y,2,ox,oy,4)] +
-				 			 v_old * matrix[mifi_3d_array_position(x,y,3,ox,oy,4)];
+	/*forks off the threads*/
+#pragma omp parallel
+	{
+#pragma omp for
+		for (int z = 0; z < oz; ++z) {
+			const double *matrixPos = matrix; // reset matrix for each z
+			double m0, m1, m2, m3, u_old, v_old, u_new, v_new;
+			// loop over one layer: calc uv' = A*uv at each pos
+			int layerSize = ox*oy;
+			for (int i = 0; i < layerSize; i++) {
+				m0 = *matrixPos++;
+				m1 = *matrixPos++;
+				m2 = *matrixPos++;
+				m3 = *matrixPos++;
+				u_old = u_out[z*layerSize + i];
+				v_old = v_out[z*layerSize + i];
+				u_new = u_old * m0 + v_old * m1;
+				v_new = u_old * m2 + v_old * m3;
 				if (method == MIFI_VECTOR_KEEP_SIZE) {
-					double norm = sqrt(u_old*u_old + v_old*v_old) /
-						   		  sqrt(u_out[pos]*u_out[pos] + v_out[pos]*v_out[pos]);
-					u_out[pos] *= norm;
-					v_out[pos] *= norm;
+					double norm = sqrt( (u_old*u_old + v_old*v_old) / (u_new
+							*u_new + v_new*v_new));
+					u_new *= norm;
+					v_new *= norm;
 				}
+				u_out[z*layerSize + i] = u_new;
+				v_out[z*layerSize + i] = v_new;
 			}
 		}
 	}
