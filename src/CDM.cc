@@ -370,8 +370,8 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 		*latPos  *= RAD_TO_DEG;
 	}
 	std::vector<std::string> xyDims;
-	xyDims.push_back(yDim);
 	xyDims.push_back(xDim);
+	xyDims.push_back(yDim);
 	CDMVariable lonVar(lonDim, CDM_DOUBLE, xyDims);
 	lonVar.setData(createData(CDM_DOUBLE, fieldSize, &longVal[0], &longVal[fieldSize]));
 	CDMVariable latVar(latDim, CDM_DOUBLE, xyDims);
