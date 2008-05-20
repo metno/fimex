@@ -126,8 +126,8 @@ static int mifi_interpolate_f_functional(int (*func)(const float* infield, float
 	}
 	
 	float zValues[iz];
-	for (int x = 0; x < ox; ++x) {
-		for (int y = 0; y < oy; ++y) {
+	for (int y = 0; y < oy; ++y) {
+		for (int x = 0; x < ox; ++x) {
 			if (func(infield, zValues, pointsX[y*ox+x], pointsY[y*ox+x], ix, iy, iz) != MIFI_ERROR) {
 				for (int z = 0; z < iz; ++z) {
 					outfield[mifi_3d_array_position(x, y, z, ox, oy, iz)] = zValues[z];
@@ -325,31 +325,33 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 						int ox, int oy, int oz)
 {
 	/*forks off the threads*/
-#pragma omp parallel
+	int layerSize = ox*oy;
+#pragma omp parallel shared
 	{
 #pragma omp for
 		for (int z = 0; z < oz; ++z) {
 			const double *matrixPos = matrix; // reset matrix for each z
+			float *uCur = &u_out[z*layerSize]; // current layer of u (cannot use global because of omp)
+			float *vCur = &v_out[z*layerSize]; // current layer of v (cannot use global because of omp)
 			double m0, m1, m2, m3, u_old, v_old, u_new, v_new;
 			// loop over one layer: calc uv' = A*uv at each pos
-			int layerSize = ox*oy;
 			for (int i = 0; i < layerSize; i++) {
 				m0 = *matrixPos++;
 				m1 = *matrixPos++;
 				m2 = *matrixPos++;
 				m3 = *matrixPos++;
-				u_old = u_out[z*layerSize + i];
-				v_old = v_out[z*layerSize + i];
+				u_old = *uCur;
+				v_old = *vCur;
 				u_new = u_old * m0 + v_old * m1;
 				v_new = u_old * m2 + v_old * m3;
 				if (method == MIFI_VECTOR_KEEP_SIZE) {
-					double norm = sqrt( (u_old*u_old + v_old*v_old) / (u_new
-							*u_new + v_new*v_new));
+					double norm = sqrt( (u_old*u_old + v_old*v_old) / 
+										(u_new*u_new + v_new*v_new) );
 					u_new *= norm;
 					v_new *= norm;
 				}
-				u_out[z*layerSize + i] = u_new;
-				v_out[z*layerSize + i] = v_new;
+				*uCur++ = u_new;
+				*vCur++ = v_new;
 			}
 		}
 	}
