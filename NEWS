@@ -1,3 +1,7 @@
+2008-05-21 fimex-0.4
+	performance improvements of interpolation (>90% with SIMD)
+	adjusting output to damocles
+	fixing order of long, lat projection axes
 2008-05-15 fimex-0.3
 	adding vector-interpolation
 	handling _FillValue in interpolation

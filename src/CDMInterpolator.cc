@@ -119,6 +119,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	
 	// change/add new axes
 	// don't change the name of the dimension, even if this might look strange if e.g. lon is a projection_x_coordinate
+	cdm.removeAttribute(orgXAxis, "long_name");
+	cdm.removeAttribute(orgYAxis, "long_name");
 	std::string xStandardName;
 	std::string yStandardName;
 	if (newProj == "latlong") {
@@ -130,9 +132,11 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	} else {
 		xStandardName = "projection_x_coordinate";
 		yStandardName = "projection_y_coordinate";
+		//TODO: the following lines are required by damocles and should be moved to an output
+		// changer for netcdf. remove here when output changer is in place
+		cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("long_name", "x-coordinate in Cartesian system"));
+		cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("long_name", "y-coordinate in Cartesian system"));
 	}
-	cdm.removeAttribute(orgXAxis, "long_name");
-	cdm.removeAttribute(orgYAxis, "long_name");
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("units", out_x_axis_unit));
