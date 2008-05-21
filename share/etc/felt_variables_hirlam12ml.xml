@@ -15,7 +15,6 @@
 	<attribute name="units" value="m/s" type="string" />
 	<spatial_vector direction="y,latitude" counterpart="x_wind" />
 </parameter>
-<!--
 <parameter id="9" name="specific_humidity" type="float">
 	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
 	<attribute name="scale_factor" value="0.01" type="float" />
@@ -62,5 +61,4 @@
 	<attribute name="standard_name" value="precipitation_amount" type="string" />
 	<attribute name="units" value="kg/m2" type="string" />
 </parameter>
--->
 </variables>
