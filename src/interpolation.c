@@ -326,9 +326,7 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 {
 	/*forks off the threads*/
 	int layerSize = ox*oy;
-#pragma omp parallel shared
 	{
-#pragma omp for
 		for (int z = 0; z < oz; ++z) {
 			const double *matrixPos = matrix; // reset matrix for each z
 			float *uCur = &u_out[z*layerSize]; // current layer of u (cannot use global because of omp)
