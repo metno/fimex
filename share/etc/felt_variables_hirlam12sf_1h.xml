@@ -65,7 +65,7 @@
 </parameter>
 <parameter id="131,2,1000" name="surface_temperature_where_land">
 	<attribute name="long_name" value="surface_temperature_where_land" type="string" />
-	<attribute name="standard_name" value="surface_temperature_2m_where_land" type="string" />
+	<attribute name="standard_name" value="surface_temperature_where_land" type="string" />
 	<attribute name="metno_info" value="height: 2m" type="string"/>
 	<attribute name="units" value="K" type="string" />
 </parameter>
