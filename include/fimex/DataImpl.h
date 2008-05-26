@@ -48,6 +48,7 @@ namespace MetNoFimex
 
 		virtual size_t size() const {return length;}
 		virtual int bytes_for_one() const {return sizeof(C);}
+		virtual void* getDataPtr() {return &theData[0];}
 		virtual void toStream(std::ostream& os, std::string separator = "") const;
 
 		/**

@@ -12,6 +12,7 @@
 
 namespace MetNoFimex
 {
+class XMLDoc; // declaration without import
 
 class FeltCDMReader : public CDMReader
 {
@@ -39,7 +40,16 @@ private:
 	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
 	 */
 	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
-	void init() throw(MetNoFelt::Felt_File_Error);
+	void init() throw(MetNoFelt::Felt_File_Error, CDMException);
+	// the following methods are parts of the init function and should not
+	// be called from elsewhere
+	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc);
+	void initAddGlobalAttributesFromXML(const XMLDoc& doc);
+	CDMDimension initAddTimeDimensionFromXML(const XMLDoc& doc);
+	std::map<short, CDMDimension> initAddLevelDimensionsFromXML(const XMLDoc& doc);
+	void initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates);
+	void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<short, CDMDimension>& levelDims);
+
 
 };
 

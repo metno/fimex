@@ -20,7 +20,8 @@ libfimex_a_SOURCES = interpolation.c \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
-					 Utils.cc 
+					 Utils.cc \
+					 XMLDoc.cc
 include_HEADERS = config.h \
 	              CachedInterpolation.h \
 				  CachedVectorReprojection.h \
@@ -39,7 +40,8 @@ include_HEADERS = config.h \
 	              Null_CDMWriter.h \
 	              ReplaceStringObject.h \
 	              ReplaceStringTimeObject.h \
-	              Utils.h
+	              Utils.h \
+	              XMLDoc.h
 
 if HAVE_NETCDF
   libfimex_a_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc

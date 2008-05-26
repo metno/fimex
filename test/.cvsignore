@@ -14,3 +14,4 @@ testData
 testNetcdfWriter
 .deps
 .libs
+gmon.out

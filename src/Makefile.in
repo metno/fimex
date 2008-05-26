@@ -77,8 +77,8 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc Utils.cc NetCDF_CF10_CDMReader.cc \
-	NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	ReplaceStringTimeObject.cc Utils.cc XMLDoc.cc \
+	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
@@ -91,7 +91,7 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	CDMVariable.$(OBJEXT) Data.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
 	ReplaceStringObject.$(OBJEXT) \
 	ReplaceStringTimeObject.$(OBJEXT) Utils.$(OBJEXT) \
-	$(am__objects_1)
+	XMLDoc.$(OBJEXT) $(am__objects_1)
 libfimex_a_OBJECTS = $(am_libfimex_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -125,8 +125,8 @@ am__include_HEADERS_DIST = config.h CachedInterpolation.h \
 	CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h \
 	CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h DataImpl.h \
 	interpolation.h Null_CDMWriter.h ReplaceStringObject.h \
-	ReplaceStringTimeObject.h Utils.h NetCDF_CF10_CDMReader.h \
-	NetCDF_CDMWriter.h NetCDF_Utils.h
+	ReplaceStringTimeObject.h Utils.h XMLDoc.h \
+	NetCDF_CF10_CDMReader.h NetCDF_CDMWriter.h NetCDF_Utils.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -319,13 +319,13 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc Utils.cc $(am__append_1)
+	ReplaceStringTimeObject.cc Utils.cc XMLDoc.cc $(am__append_1)
 include_HEADERS = config.h CachedInterpolation.h \
 	CachedVectorReprojection.h CDMAttribute.h CDMDataType.h \
 	CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h \
 	CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h DataImpl.h \
 	interpolation.h Null_CDMWriter.h ReplaceStringObject.h \
-	ReplaceStringTimeObject.h Utils.h $(am__append_2)
+	ReplaceStringTimeObject.h Utils.h XMLDoc.h $(am__append_2)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -435,6 +435,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Po@am__quote@
 
 .c.o:

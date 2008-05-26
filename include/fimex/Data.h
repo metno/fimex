@@ -25,6 +25,7 @@ namespace MetNoFimex
 		virtual size_t size() const = 0;
 		/// @brief sizeof the data-impl datatype
 		virtual int bytes_for_one() const = 0;
+		virtual void* getDataPtr() = 0;
 		/// @brief printing of the current data to ostream, with optional separator
 		virtual void toStream(std::ostream&, std::string separator = "") const = 0;
 
