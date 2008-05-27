@@ -10,18 +10,19 @@
 
 <!-- add/reassign a new variable attribute -->
 <variable name="air_temperature">
-	<attribute name="standard_name" value="air_temperature" type="string" />
+	<attribute name="standard_name" value="temperature" type="string" />
 </variable>
 
 <!-- change the type of a variable -->
-<variable name="x_wind" type="short">
+<!-- 
+<variable name="precipitation_amount" type="short">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="scale_factor" value="10" type="float" />
 	<attribute name="add_offset" value="-1000" type="double" />
 </variable>
-
+ -->
 <!-- rename a variable -->
-<variable name="y_wind" newname="wind_in_y" />
+<variable name="pressure" newname="air_pressure" />
 
 <!-- rename a dimension -->
 <dimension name="x" newname="Xc" />

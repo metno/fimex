@@ -36,6 +36,13 @@ private:
  */
 std::string getXmlProp(const xmlNodePtr node, const std::string& attrName);
 
+/**
+ * a memory-save form of xmlGetProp
+ * 
+ * @return a string of the attribute, "" if attribute doesn't exist
+ */
+std::string getXmlName(const xmlNodePtr node);
+
 
 }
 

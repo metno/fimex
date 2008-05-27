@@ -7,6 +7,7 @@ extern "C" {
 #include "CDMDataType.h"
 #include "NetCDF_Utils.h"
 #include "Utils.h"
+#include "XMLDoc.h"
 
 namespace MetNoFimex
 {
@@ -66,9 +67,77 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const std::string& configFile)
 : CDMWriter(cdmReader, outputFile), ncErr(NcError::verbose_nonfatal), ncFile(outputFile.c_str(), NcFile::Replace)
 {
-		
+	std::auto_ptr<XMLDoc> doc(new XMLDoc(configFile));
+	// variable needs to be called before dimension!!!
+	initFillRenameVariable(doc);
+	initFillRenameDimension(doc);
+	initFillRenameAttribute(doc);
 	init();
 }
+
+void NetCDF_CDMWriter::initFillRenameDimension(const std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+{
+	XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	for (int i = 0; i < size; i++) {
+		std::string name = getXmlProp(nodes->nodeTab[i], "name");
+		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+		dimensionNameChanges[name] = newname;
+		// change dimension variable unless it has been changed
+		if (variableNameChanges.find(name) == variableNameChanges.end()) {
+			variableNameChanges[name] = newname;
+		}
+	}
+}
+
+void NetCDF_CDMWriter::initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+{
+	XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	for (int i = 0; i < size; i++) {
+		std::string name = getXmlProp(nodes->nodeTab[i], "name");
+		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+		variableNameChanges[name] = newname;
+	}
+	
+	// TODO: read 'type' attribute and enable re-typeing of data
+}
+
+void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+{
+	// make a complete copy of the original attributes
+	attributes = cdmReader->getCDM().getAttributes();
+	XPathObjPtr xpathObj = doc->getXPathObject("//attribute");
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	for (int i = 0; i < size; i++) {
+		xmlNodePtr node = nodes->nodeTab[i];
+		std::string attName = getXmlProp(node, "name");
+		std::string varName = CDM::globalAttributeNS();
+		xmlNodePtr parent = node->parent;
+		std::string parentName = getXmlName(parent);
+		if (parentName == "cdm_ncwriter_config") {
+			// default
+		} else if (parentName == "variable") {
+			varName = getXmlProp(parent, "name");
+		} else {
+			throw CDMException("unknown parent of attribute "+attName+": "+parentName);
+		}
+		
+		std::string attValue = getXmlProp(node, "value");
+		std::string attType = getXmlProp(node, "type");
+		std::string attNewName = getXmlProp(node, "newname");
+		if (attNewName != "") {
+			attributeNameChanges[varName][attName] = attNewName;
+		}
+		if (attType != "") {
+			attributes[varName][attName] = CDMAttribute(attName, attType, attValue);
+		}	
+	}
+}
+
 
 NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
 	const CDM& cdm = cdmReader->getCDM();
@@ -114,10 +183,8 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 }
 
 void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
-	const CDM& cdm = cdmReader->getCDM();
-	const CDM::StrStrAttrMap& cdmAttrs = cdm.getAttributes();
 	// using C interface since it offers a combined interface to global and var attributes
-	for (CDM::StrStrAttrMap::const_iterator it = cdmAttrs.begin(); it != cdmAttrs.end(); ++it) {
+	for (CDM::StrStrAttrMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
 		int varId;
 		if (it->first == CDM::globalAttributeNS()) {
 			varId = NC_GLOBAL;
@@ -195,13 +262,19 @@ NetCDF_CDMWriter::~NetCDF_CDMWriter()
 {
 }
 
+const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const
+{
+	return attributes.find(varName)->second.find(attName)->second;
+}
+
 const std::string& NetCDF_CDMWriter::getAttributeName(const std::string& varName, const std::string& attName) const
 {
-	if ((attributeNameChanges.find(varName) == attributeNameChanges.end()) ||
-		(attributeNameChanges.find(varName)->second.find(attName) == attributeNameChanges.find(varName)->second.end())) {
-		return attName;
+	if (attributeNameChanges.find(varName) != attributeNameChanges.end()) {
+		if (attributeNameChanges.find(varName)->second.find(attName) != attributeNameChanges.find(varName)->second.end()) {
+			return attributeNameChanges.find(varName)->second.find(attName)->second;
+		}
 	}
-	return attributeNameChanges.find(varName)->second.find(attName)->second;
+	return attName;
 }
 
 const std::string& NetCDF_CDMWriter::getVariableName(const std::string& varName) const

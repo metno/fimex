@@ -197,7 +197,6 @@ double FeltParameters::getParameterFillValue(const std::string& parameterName) c
 
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error)
 {
-// TODO: still a bit unsure about usage of rotated geo. ; still unsure about usage of x_0, y_0 (this should go into axes??)
 	std::ostringstream tempProj;
 	std::string earth("+elips=sphere +a=6371000 +e=0");
 	switch (gridType) {

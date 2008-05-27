@@ -73,6 +73,56 @@ CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, boost::shared
 {
 }
 
+CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException)
+: name(name)
+{
+	CDMDataType dtype = string2datatype(datatype);
+	switch (dtype) {
+	case CDM_FLOAT: {
+		float f;
+		std::stringstream str(value);
+		str >> f;
+		*this = CDMAttribute(name, f);
+		break;
+	}
+	case CDM_DOUBLE: {
+		double d;
+		std::stringstream str(value); 
+		str >> d;
+		*this = CDMAttribute(name, d);
+		break;
+	}
+	case CDM_INT:  {
+		int i;
+		std::stringstream str(value);
+		str >> i;
+		*this = CDMAttribute(name, i);
+		break;
+	} 
+	case CDM_SHORT: {
+		short s;
+		std::stringstream str(value);
+		str >> s;
+		*this = CDMAttribute(name, s);
+		break;
+	}
+	case CDM_CHAR: {
+		char c;
+		std::stringstream str(value);
+		str >> c;
+		*this = CDMAttribute(name, c);
+		break;
+	} 
+	case CDM_STRING: {
+		*this = CDMAttribute(name, value);
+		break;
+	}
+	default: {
+		throw CDMException("Unknown type to generate attribute " + name + ": " + datatype);
+	}
+	}
+}
+
 
 CDMAttribute::~CDMAttribute()
 {

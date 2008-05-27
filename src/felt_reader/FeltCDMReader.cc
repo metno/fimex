@@ -24,41 +24,6 @@ namespace MetNoFimex
 
 using namespace std;
 
-static CDMAttribute createCDMAttribute(string name, string datatype, string value) throw(CDMException)
-{
-	std::string type(string2lowerCase(datatype));
-	if (type == "float") {
-		float f;
-		std::stringstream str(value);
-		str >> f;
-		return CDMAttribute(name, f);
-	} else if (type == "double") {
-		double d;
-		std::stringstream str(value); 
-		str >> d;
-		return CDMAttribute(name, d);		
-	} else if (type == "int") {
-		int i;
-		std::stringstream str(value);
-		str >> i;
-		return CDMAttribute(name, i);
-	} else if (type == "short") {
-		short s;
-		std::stringstream str(value);
-		str >> s;
-		return CDMAttribute(name, s);
-	} else if (type == "char") {
-		char c;
-		std::stringstream str(value);
-		str >> c;
-		return CDMAttribute(name, c);
-	} else if (type == "string") {
-		return CDMAttribute(name, value);
-	} else {
-		throw CDMException("unknown type: " + type);
-	}
-}
-
 static string replaceTemplateAttribute(string value, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) {
 	for (map<string, boost::shared_ptr<ReplaceStringObject> >::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
 		boost::smatch matches;
@@ -89,7 +54,7 @@ static void fillAttributeList(vector<CDMAttribute>& attributes, const xmlNodePtr
 			string type = getXmlProp(node, "type");
 
 			value = replaceTemplateAttribute(value, templateReplacements);
-			attributes.push_back(createCDMAttribute(name,type,value));
+			attributes.push_back(CDMAttribute(name,type,value));
 	}
 	fillAttributeList(attributes, node->next, templateReplacements);
 }

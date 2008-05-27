@@ -29,6 +29,8 @@ public:
 	explicit CDMAttribute(std::string name, double value);
 	/// create a attribute with the low level information
 	explicit CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data);
+	/// create a attribute from a string representation
+	explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException);
 	virtual ~CDMAttribute();
 	/// retrieve the name of the attribute
 	const std::string& getName() const {return name;}

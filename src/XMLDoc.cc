@@ -66,5 +66,9 @@ std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
 	return retVal;
 }
 
+std::string getXmlName(const xmlNodePtr node) {
+	return std::string (reinterpret_cast<const char *>(node->name)); 
+}
+
 
 }
