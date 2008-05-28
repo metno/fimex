@@ -4,7 +4,9 @@ extern "C" {
 #include NETCDF_C_INCLUDE             // the C interface
 }
 #include <boost/shared_array.hpp>
+#include "interpolation.h"
 #include "CDMDataType.h"
+#include "DataTypeChanger.h"
 #include "NetCDF_Utils.h"
 #include "Utils.h"
 #include "XMLDoc.h"
@@ -101,8 +103,15 @@ void NetCDF_CDMWriter::initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) 
 		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
 		variableNameChanges[name] = newname;
 	}
-	
-	// TODO: read 'type' attribute and enable re-typeing of data
+	// read 'type' attribute and enable re-typeing of data
+	xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@type]");
+	nodes = xpathObj->nodesetval;
+	size = (nodes) ? nodes->nodeNr : 0;
+	for (int i = 0; i < size; i++) {
+		std::string name = getXmlProp(nodes->nodeTab[i], "name");
+		CDMDataType type = string2datatype(getXmlProp(nodes->nodeTab[i], "type"));
+		variableTypeChanges[name] = type;
+	}
 }
 
 void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc) throw(CDMException)
@@ -169,6 +178,10 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 			ncshape[i] = ncDimMap.find(shape[(shape.size()-1-i)])->second;
 		}
 		CDMDataType datatype = var.getDataType();
+		if (variableTypeChanges.find(var.getName()) != variableTypeChanges.end()) {
+			CDMDataType& newType = variableTypeChanges[var.getName()];
+			datatype = newType != CDM_NAT ? newType : datatype;
+		}
 		if (datatype == CDM_NAT && shape.size() == 0) {
 			// empty variable, use int datatype
 			datatype = CDM_INT;
@@ -226,11 +239,59 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 	const CDM& cdm = cdmReader->getCDM();
 	const CDM::StrVarMap& cdmVars = cdm.getVariables();
 	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
+		const std::string& varName = it->first;
 		const CDMVariable& cdmVar = it->second;
+		DataTypeChanger dtc(cdmVar.getDataType());
+		if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
+			(variableTypeChanges[varName] != CDM_NAT)) {
+			double oldFill = MIFI_UNDEFINED_D;
+			try {
+				const CDMAttribute& attr = cdm.getAttribute(varName, "_FillValue");
+				oldFill = attr.getData()->asDouble()[0];
+			} catch (CDMException& e) {
+			}
+			double oldScale = 1.;
+			try {
+				const CDMAttribute& attr = cdm.getAttribute(varName, "scale_factor");
+				oldScale = attr.getData()->asDouble()[0];
+			} catch (CDMException& e) {
+			}
+			double oldOffset = 0.;
+			try {
+				const CDMAttribute& attr = cdm.getAttribute(varName, "add_offset");
+				oldOffset = attr.getData()->asDouble()[0];
+			} catch (CDMException& e) {
+			}
+			double newFill = MIFI_UNDEFINED_D;
+			try {
+				const CDMAttribute& attr = getAttribute(varName, "_FillValue");
+				newFill = attr.getData()->asDouble()[0];
+			} catch (CDMException& e) {
+			}
+			double newScale = 1.;
+			try {
+				const CDMAttribute& attr = getAttribute(varName, "scale_factor");
+				newScale = attr.getData()->asDouble()[0];
+			} catch (CDMException& e) {
+			}
+			double newOffset = 0.;
+			try {
+				const CDMAttribute& attr = cdm.getAttribute(varName, "add_offset");
+				newOffset = attr.getData()->asDouble()[0];
+			} catch (CDMException& e) {
+			}
+			std::cerr << cdmVar.getName() << " " << oldFill << " " << oldScale << " " << oldOffset << " " << " " << newFill << " " << newScale << " " << newOffset << std::endl;
+			dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset);
+		}
 		NcVar* ncVar = ncVarMap.find(cdmVar.getName())->second;
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
 			boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName());
-			if (!putVarData(ncVar, cdmVar.getDataType(), data)) {
+			try {
+				data = dtc.convertData(data);
+			} catch (CDMException& e) {
+				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + e.what());
+			}
+			if (!putVarData(ncVar, dtc.getDataType(), data)) {
 				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 			}
 		} else {
@@ -238,7 +299,12 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 			const CDMDimension* unLimDim = cdm.getUnlimitedDim();
 			for (size_t i = 0; i < unLimDim->getLength(); ++i) {
 				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), i);
-				if (!putRecData(ncVar, cdmVar.getDataType(), data, i)) {
+				try {
+					data = dtc.convertData(data);
+				} catch (CDMException& e) {
+					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + e.what());
+				}
+				if (!putRecData(ncVar, dtc.getDataType(), data, i)) {
 					throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
 				}
 			}
@@ -262,8 +328,14 @@ NetCDF_CDMWriter::~NetCDF_CDMWriter()
 {
 }
 
-const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const
+const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException)
 {
+	if (attributes.find(varName) == attributes.end()) {
+		throw CDMException("could not find variable "+varName+" in NetcdfWriter attribute list");
+	}
+	if (attributes.find(varName)->second.find(attName) == attributes.find(varName)->second.end()) {
+		throw CDMException("could not find attribute "+attName+" for variable "+varName+" in NetcdfWriter attribute list");		
+	}
 	return attributes.find(varName)->second.find(attName)->second;
 }
 

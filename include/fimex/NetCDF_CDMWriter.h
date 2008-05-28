@@ -36,7 +36,7 @@ public:
 	 * @param attName original attribute name (before config: newname)
 	 * @return an attribute contained in the writers attribute, possibly added by config 
 	 */
-	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
+	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException);
 
 
 
@@ -53,6 +53,7 @@ private:
 	void writeAttributes(const NcVarMap& varMap);
 	void writeData(const NcVarMap& varMap);
 	std::map<std::string, std::string> variableNameChanges;
+	std::map<std::string, CDMDataType> variableTypeChanges;
 	std::map<std::string, std::string> dimensionNameChanges;
 	std::map<std::string, std::map<std::string, std::string> > attributeNameChanges;
 	CDM::StrStrAttrMap attributes;

@@ -15,3 +15,4 @@ testNetcdfWriter
 .deps
 .libs
 gmon.out
+testUnconf.nc

@@ -17,6 +17,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 CDMReader.cc \
 					 CDMVariable.cc \
 					 Data.cc \
+					 DataTypeChanger.cc \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
@@ -36,6 +37,7 @@ include_HEADERS = config.h \
 	              CDMWriter.h CDM.h \
 	              Data.h \
 	              DataImpl.h \
+ 				  DataTypeChanger.h \
 	              interpolation.h \
 	              Null_CDMWriter.h \
 	              ReplaceStringObject.h \

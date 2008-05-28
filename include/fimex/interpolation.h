@@ -47,7 +47,7 @@ extern "C" {
 /** @brief undefined value for floats */
 #define MIFI_UNDEFINED_F (nanf(""))
 /** @brief undefined value for doubles */
-#define MIFI_UNDEFINED_D (nand(""))
+#define MIFI_UNDEFINED_D (nan(""))
 
 /** @brief return code, error */
 #define MIFI_ERROR -1
@@ -288,8 +288,6 @@ extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
  */
 extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
 
-
-                                     
 #ifdef __cplusplus
 }
 #endif

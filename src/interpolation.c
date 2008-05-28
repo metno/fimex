@@ -502,4 +502,3 @@ size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal) {
 	return retVal;
 }
 
-

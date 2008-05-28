@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <cmath>
 #include "Data.h"
 #include "CDMDataType.h"
 #include "CDMException.h"
@@ -78,12 +79,13 @@ namespace MetNoFimex
 		
 		virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException);
+		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException);
+		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException);
 		/**
 		 * set the values of the data by the input-iterator
 		 */
 		template<class InputIterator>
 		void setValues(InputIterator first, InputIterator last, size_t dataStartPos = 0) throw(CDMException);
-		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException);
 		
 	private:
 		size_t length;
@@ -224,6 +226,42 @@ namespace MetNoFimex
 			++dataPos;
 		}
 	}
+
+	template<typename T1, typename T2>
+	boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, size_t length, double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) {
+		boost::shared_array<T1> outData(new T1[length]);
+		T2* inDataPos = &inData[0];
+		T2* inDataLast = &inData[length];
+		T1* outDataPos = &outData[0];
+		T1 fill = static_cast<T1>(newFill);
+		while (inDataPos != inDataLast) {
+			if (*inDataPos == oldFill || isinf(static_cast<double>(*inDataPos))) {
+				*outDataPos = fill;
+			} else {
+				*outDataPos = static_cast<T1>(((oldScale*(*inDataPos) + oldOffset)-newOffset)/newScale);
+			}
+			*inDataPos++;
+			*outDataPos++;
+		}
+		return outData;
+	}
+	
+	template<typename C>
+	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException) 
+	{
+		boost::shared_ptr<Data> data(new DataImpl<char>(0)); // dummy default
+		switch (newType) {
+		case CDM_CHAR: data = boost::shared_ptr<Data>(new DataImpl<char>(convertArrayType<char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_SHORT: data = boost::shared_ptr<Data>(new DataImpl<short>(convertArrayType<short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_INT: data = boost::shared_ptr<Data>(new DataImpl<int>(convertArrayType<int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_FLOAT: data = boost::shared_ptr<Data>(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_DOUBLE: data = boost::shared_ptr<Data>(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_STRING: throw CDMException("cannot convert string datatype"); break;
+		case CDM_NAT: throw CDMException("cannot convert CDM_NAT datatype"); break;
+		}
+		return data;
+	}
+
 	
 	template<typename T1, typename T2>
 	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length) {

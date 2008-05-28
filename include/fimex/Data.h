@@ -77,6 +77,10 @@ namespace MetNoFimex
 		 * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
 		 */
 		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) = 0;
+		/**
+		 * @brief convert the datatype from one type,fill,scale,offset to another
+		 */
+		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException) = 0;
 	};
 
 	/**
