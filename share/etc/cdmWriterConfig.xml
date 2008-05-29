@@ -6,7 +6,7 @@
 <!-- i.e. a <variable name="x"... may not occur twice!!! -->
 
 <!-- add/reassign a new global attribute -->
-<attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string" />
+<attribute name="max_time" value="2008-05-28" type="string" />
 
 <!-- add/reassign a new variable attribute -->
 <variable name="air_temperature">
