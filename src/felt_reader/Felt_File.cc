@@ -398,7 +398,7 @@ const boost::array<float, 6>& Felt_File::getGridParameters() const throw(Felt_Fi
 			const boost::array<float, 6>& newParams = fait->second.getGridParameters();
 			for (int i = 0; i < 6; i++) {
 				if (newParams[i] != params[i]) {
-					throw(Felt_File_Error("cannot change gridParameters within a file for " + fait->second.getName() + " param " + type2string(i) + ": " + type2string(params[i]) + " != " + type2string(newParams[i])));
+					throw(Felt_File_Error("cannot change gridParameters within a file for " + fait->second.getName() + " param " + type2string(i) + ": " + type2string(params[i]) + " != " + type2string(newParams[i]) + "("+type2string(newParams[i]-params[i])+")"));
 				}
 			}
 		}
