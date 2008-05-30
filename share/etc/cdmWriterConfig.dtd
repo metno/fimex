@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!--
+    TODO define vocabulary identification
+    PUBLIC ID: -//vendor//vocabulary//EN
+    SYSTEM ID: http://server/path/cdmWriterConfig.dtd
+
+--><!--
+    An example how to use this DTD from your XML document:
+
+    <?xml version="1.0"?>
+
+    <!DOCTYPE cdm_ncwriter_config SYSTEM "cdmWriterConfig.dtd">
+
+    <cdm_ncwriter_config>
+    ...
+    </cdm_ncwriter_config>
+-->
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT cdm_ncwriter_config (dimension|variable|attribute)*>
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT attribute EMPTY>
+<!ATTLIST attribute
+    newname CDATA #IMPLIED
+    type CDATA #IMPLIED
+    value CDATA #IMPLIED
+    name CDATA #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT variable (attribute)*>
+<!ATTLIST variable
+    newname CDATA #IMPLIED
+    type CDATA #IMPLIED
+    name ID #REQUIRED
+  >
+
+<!--- Put your DTDDoc comment here. -->
+<!ELEMENT dimension EMPTY>
+<!ATTLIST dimension
+    newname CDATA #REQUIRED
+    name ID #REQUIRED
+  >

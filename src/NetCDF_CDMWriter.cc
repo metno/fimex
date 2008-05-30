@@ -282,7 +282,6 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 				newOffset = attr.getData()->asDouble()[0];
 			} catch (CDMException& e) {
 			}
-			std::cerr << cdmVar.getName() << " " << oldFill << " " << oldScale << " " << oldOffset << " " << " " << newFill << " " << newScale << " " << newOffset << std::endl;
 			dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset);
 		}
 		NcVar* ncVar = ncVarMap.find(cdmVar.getName())->second;

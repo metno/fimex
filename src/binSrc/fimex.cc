@@ -301,11 +301,17 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	string type = getType("output", vm);
 #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf") {
-		// no config for netcdf!
-		if (vm.count("debug"))
-			cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " without config" << endl;
+		// auto_ptr to shared_ptr
 		boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
-		NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
+		if (vm.count("output.config")) {
+			if (vm.count("debug"))
+				cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>() << endl;
+			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>());
+		} else {
+			if (vm.count("debug"))
+				cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " without config" << endl;
+			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
+		}
 		return;
 	}
 #endif

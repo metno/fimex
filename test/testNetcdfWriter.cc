@@ -36,9 +36,9 @@ test_feltNetcdfWriteConfig(void) {
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfig.xml");
 	BOOST_CHECK(writer.getVariableName("pressure") == "air_pressure");
-	BOOST_CHECK(writer.getDimensionName("x") == "Xc");
-	BOOST_CHECK(writer.getVariableName("x") == "Xc");
-	BOOST_CHECK(writer.getAttributeName(CDM::globalAttributeNS(), "min_time") == "start_time");
+	BOOST_CHECK(writer.getDimensionName("x") == "x_c");
+	BOOST_CHECK(writer.getVariableName("x") == "x_c");
+	BOOST_CHECK(writer.getAttributeName(CDM::globalAttributeNS(), "minimum_time") == "start_time");
 	BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
 }
 
@@ -48,7 +48,7 @@ init_unit_test_suite( int argc, char* argv[] )
 {
     test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
 
-//    test->add( BOOST_TEST_CASE( &test_feltNetcdfWrite ) );
+    test->add( BOOST_TEST_CASE( &test_feltNetcdfWrite ) );
     test->add( BOOST_TEST_CASE( &test_feltNetcdfWriteConfig ) );
     return test;
 }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cdm_ncwriter_config SYSTEM "cdmWriterConfig.dtd">
 <cdm_ncwriter_config>
 
 <!-- all operations below can (and must) be joined if the -->
@@ -25,8 +26,8 @@
 <variable name="pressure" newname="air_pressure" />
 
 <!-- rename a dimension -->
-<dimension name="x" newname="Xc" />
+<dimension name="x" newname="x_c" />
 
 <!-- rename a attribute -->
-<attribute name="min_time" newname="start_time" />
+<attribute name="min_time" newname="minimum_time" />
 </cdm_ncwriter_config>  
