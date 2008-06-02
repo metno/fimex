@@ -256,7 +256,7 @@ config_DATA = \
 	felt2nc_variables.dtd\
 	felt2nc_variables_ec_mad_0_25.xml\
 	felt2nc_variables_ec_mad_0_5.xml\
-	felt2nc_variables_ec_wav.xml\
+	felt2nc_variables_ec_mwp_0_25.xml\
 	felt2nc_variables_hirlam12_damocles_ml.xml\
 	felt2nc_variables_hirlam12_damocles_pl.xml\
 	felt2nc_variables_hirlam12_damocles_sf_1h.xml\
