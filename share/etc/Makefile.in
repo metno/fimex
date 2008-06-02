@@ -273,7 +273,6 @@ config_DATA = \
 	felt_variables_hirlam12sf_1h.xml\
 	felt_variables_hirlam12sf_3h.xml\
 	felt_variables_hirlam12sf_60h.xml\
-	felt_variables_hirlam12sf_all.xml\
 	felt_variables_hirlam20.xml\
 	fimex_example.cfg
 
