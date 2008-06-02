@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<global_attributes>
+	<attribute name="Conventions" value="CF-1.0" type="string" />
+	<attribute name="institution" value="met.no" type="string" />
+	<attribute name="product_name" value="ECMWF model data" type="string" />
+	<attribute name="project_name" value="ECMWF" type="string" />
+	<attribute name="title" value="ECMWF operational weather-forecast model" type="string" />
+	<attribute name="abstract" value="Data from the ECMWF-model version ? run as operational forecast model at ECMWF with a horizontal resolution of 0.5degree or 0.25degree." type="string" />
+	<attribute name="topiccategory" value="Oceans" type="string" />
+	<attribute name="keywords" value="unknown" type="string" />
+	<attribute name="activity_type" value="Model run" type="string" />
+	<attribute name="area" value="Arctic Ocean, Barents Sea, Beufort Sea, Chukchi Sea, Denmark Strait Sea, East Siberian Sea, Fram Strait, Greenland Sea, Iceland Sea, Kara Sea, Laptev Sea, Nordic Seas, White Sea" type="string" />
+	<attribute name="southernmost_latitude" value="60" type="string" />
+	<attribute name="northernmost_latitude" value="90" type="string" />
+	<attribute name="westernmost_longitude" value="-180" type="string" />
+	<attribute name="easternmost_longitude" value="180" type="string" />
+	
+	<attribute name="start_date" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
+	<attribute name="stop_date" value="%MAX_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
+	
+	<attribute name="PI_name" value="Øystein Godøy" type="string" />
+	<attribute name="contact" value="oystein.godoy@met.no" type="string" />
+	<attribute name="distribution_statement" value="Restricted to IPY" type="string" />
+</global_attributes>

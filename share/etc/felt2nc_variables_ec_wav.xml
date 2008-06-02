@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE cdm_felt_config SYSTEM "felt2nc_variables.dtd">
 <cdm_felt_config xmlns:xi="http://www.w3.org/2001/XInclude">
-<xi:include href="damocles_felt_global_attributes.xml" />
+<xi:include href="damocles_ec_ocean_felt_global_attributes.xml" />
 <xi:include href="damocles_felt_axes.xml" />
 <xi:include href="felt_variables_ec_wav.xml" />
 </cdm_felt_config>
