@@ -6,7 +6,7 @@
 	<attribute name="project_name" value="ECMWF" type="string" />
 	<attribute name="title" value="ECMWF operational weather-forecast model" type="string" />
 	<attribute name="abstract" value="Data from the ECMWF-model version ? run as operational forecast model at ECMWF with a horizontal resolution of 0.5degree or 0.25degree." type="string" />
-	<attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere" type="string" />
+	<attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere, Oceans" type="string" />
 	<attribute name="keywords" value="unknown" type="string" />
 	<attribute name="activity_type" value="Model run" type="string" />
 	<attribute name="area" value="Arctic Ocean, Barents Sea, Beufort Sea, Chukchi Sea, Denmark Strait Sea, East Siberian Sea, Fram Strait, Greenland Sea, Iceland Sea, Kara Sea, Laptev Sea, Nordic Seas, White Sea" type="string" />

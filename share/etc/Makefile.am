@@ -3,7 +3,6 @@ config_DATA = \
 	cdmWriterConfig.xml\
 	cdmWriterConfig.dtd\
 	damocles_ec_felt_global_attributes.xml\
-	damocles_ec_ocean_felt_global_attributes.xml\
 	damocles_felt2nc_variables.xml\
 	damocles_felt_axes.xml\
 	damocles_felt_global_attributes.xml\
