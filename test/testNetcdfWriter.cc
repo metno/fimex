@@ -38,7 +38,7 @@ test_feltNetcdfWriteConfig(void) {
 	BOOST_CHECK(writer.getVariableName("pressure") == "air_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");
 	BOOST_CHECK(writer.getVariableName("x") == "x_c");
-	BOOST_CHECK(writer.getAttributeName(CDM::globalAttributeNS(), "minimum_time") == "start_time");
+	BOOST_CHECK(writer.getAttributeName(CDM::globalAttributeNS(), "min_time") == "minimum_time");
 	BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
 }
 

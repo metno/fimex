@@ -93,6 +93,7 @@ foreach my $type (keys %timeApp) {
 	my $options = join " ", @options;
 	print "$fimex $options\n";
 	system ($fimex, @options) == 0 or &WARNING("'$fimex $options' failed: $?");
+	chmod 0666, $outputFile;
     }
 }
 
