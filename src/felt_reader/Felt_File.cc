@@ -196,18 +196,23 @@ vector<short> Felt_File::getDataSlice(const std::string& compName, const std::ti
 	return getDataSlice(fa, idx, fieldSize);
 }
 
+template<typename T>
+class Scale : public unary_function<short, T> {
+public:
+	Scale(double newFillValue, double scalingFactor) : newFill(static_cast<T>(newFillValue)), scalingFactor(scalingFactor) {}
+	T operator()(short val) {
+		return (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
+	}
+private:
+	const T newFill;
+	const double scalingFactor;
+};
+
 // convert felt short 'header+data+gridinfo = header_data' to a scaled Data
 template<typename T>
 boost::shared_ptr<MetNoFimex::Data> createScaledData(const boost::shared_array<short>& header_data, size_t dataSize, double newFillValue, double scalingFactor) {
 	boost::shared_array<T> data(new T[dataSize]);
-	T newFill = static_cast<T>(newFillValue);
-	short* headerDataPos = &header_data[20];
-	T* dataPos = &data[0];
-	for (size_t i = 0; i < dataSize; ++i) {
-		short val = *headerDataPos++;
-		T newVal = (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
-		*dataPos++ = newVal;
-	}
+	transform(&header_data[20], &header_data[20+dataSize], &data[0], Scale<T>(newFillValue, scalingFactor));
 	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, dataSize));	
 }
 
@@ -223,7 +228,7 @@ boost::shared_ptr<MetNoFimex::Data> Felt_File::getScaledDataSlice(const std::str
 		if (scalingFactor != fa.getScalingFactor()) {
 			throw Felt_File_Error("change in scaling factor for parameter: " + fa.getName() + " consider using float or double datatpye");
 		}
-		returnData = createScaledData<short>(header_data, dataSize, fa.getFillValue(), scalingFactor);
+		returnData = createScaledData<short>(header_data, dataSize, fa.getFillValue(), 1.);
 	} else if (fa.getDatatype() == "float") {
 		returnData = createScaledData<float>(header_data, dataSize, fa.getFillValue(), scalingFactor);
 	} else if (fa.getDatatype() == "double") {
