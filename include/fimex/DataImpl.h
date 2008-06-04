@@ -280,16 +280,6 @@ namespace MetNoFimex
 	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length) {
 		return duplicateArrayType<T1,T2>(inData, length);
 	}
-	template<>
-	inline const boost::shared_array<char> constConvertArrayType(const boost::shared_array<char>& inData, long length) {return inData;}
-	template<>
-	inline const boost::shared_array<short> constConvertArrayType(const boost::shared_array<short>& inData, long length) {return inData;}
-	template<>
-	inline const boost::shared_array<int> constConvertArrayType(const boost::shared_array<int>& inData, long length) {return inData;}
-	template<>
-	inline const boost::shared_array<float> constConvertArrayType(const boost::shared_array<float>& inData, long length) {return inData;}
-	template<>
-	inline const boost::shared_array<double> constConvertArrayType(const boost::shared_array<double>& inData, long length) {return inData;}
 
 	template<class InputIterator>
 	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException) {

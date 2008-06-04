@@ -16,3 +16,4 @@ testNetcdfWriter
 .libs
 gmon.out
 testUnconf.nc
+felt2netcdf2.cfg

@@ -45,4 +45,18 @@ void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first
 	copyData(startPos, data.asConstDouble(), data.size(), first, last);
 }
 
+// specializations of constConvertArrayType
+template<>
+const boost::shared_array<char> constConvertArrayType(const boost::shared_array<char>& inData, long length) {return inData;}
+template<>
+const boost::shared_array<short> constConvertArrayType(const boost::shared_array<short>& inData, long length) {return inData;}
+template<>
+const boost::shared_array<int> constConvertArrayType(const boost::shared_array<int>& inData, long length) {return inData;}
+template<>
+const boost::shared_array<float> constConvertArrayType(const boost::shared_array<float>& inData, long length) {return inData;}
+template<>
+const boost::shared_array<double> constConvertArrayType(const boost::shared_array<double>& inData, long length) {return inData;}
+
+
+
 }
