@@ -22,7 +22,7 @@ if HAVE_NETCDF
   SH_TESTS += ${NETCDF_MI_SH_TESTS}
 endif
 
-EXTRA_DIST = $(SH_TESTS) flth00.dat inData.txt diana.setup felt2netcdf.cfg
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 

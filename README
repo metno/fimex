@@ -29,9 +29,11 @@ export milib_LIBS=-L/disk1/metno/local/lib -lmic -lmi -lg2c
 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-NetCDF-lib-dir=/usr/lib/netcdf-3 -with-NetCDF-include-dir=/usr/include/netcdf-3
 
 Testing the Installation
-Run 'make check'. Make sure to have downloaded the test-data (pre-packed
-until 0.5).
-
+------------------------
+Make sure to download the test-data from
+https://wiki.met.no/_media/fimex/flth00.dat.gz, add it to the test/
+directory and gunzip it.
+Then run 'make check'. 
 
 USAGE EXAMPLE
 -------------

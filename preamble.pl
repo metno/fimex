@@ -1,3 +1,6 @@
+#!/usr/bin/perl -w
+use strict;
+our $preamble = <<'EOF';
 /*
  * Fimex
  * 
@@ -21,26 +24,26 @@
  * USA.
  */
 
-#ifndef NULL_CDMWRITER_H_
-#define NULL_CDMWRITER_H_
+EOF
 
-#include "CDMWriter.h"
-
-namespace MetNoFimex
-{
-
-/**
- * CDMWriter does all operations as the NetCDF_CDMWriter, except writing to the file.
- * This class is useful for performance tests.
- */
-class Null_CDMWriter : public CDMWriter
-{
-public:
-	Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile);
-	virtual ~Null_CDMWriter();
-private:
-};
-
+our $extension = '.orig';
+our $oldargv = '';
+LINE: while (<>) {
+    my $backup;
+    if ($ARGV ne $oldargv) {
+	if ($extension !~ /\*/) {
+	    $backup = $ARGV . $extension;
+	} else {
+	    ($backup = $extension) =~ s/\*/$ARGV/g;
+	}
+	rename($ARGV, $backup);
+	open(ARGVOUT, ">$ARGV");
+	select(ARGVOUT);
+	$oldargv = $ARGV;
+	print $preamble;
+    }
+#    s/foo/bar/;
+} continue {
+    print;				# this prints to original filename
 }
-
-#endif /*NULL_CDMWRITER_H_*/
+select(STDOUT);
