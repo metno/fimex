@@ -19,7 +19,12 @@ using namespace MetNoFimex;
 void
 test_feltNetcdfWrite(void) {
 	string topSrcDir(TOP_SRCDIR);
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir+"/share/etc/felt2nc_variables.xml"));
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter(feltReader, "test.nc");
 	string testFile2("/disk1/opdata/hirlam20/grdn06.dat");
 	ifstream grdFile(testFile2.c_str());
@@ -33,7 +38,12 @@ test_feltNetcdfWrite(void) {
 void
 test_feltNetcdfWriteConfig(void) {
 	string topSrcDir(TOP_SRCDIR);
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir+"/share/etc/felt2nc_variables.xml"));
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfig.xml");
 	BOOST_CHECK(writer.getVariableName("pressure") == "air_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");

@@ -3,6 +3,10 @@ if [ ! -f test.nc ]; then
 	exit 0;
 fi
 echo "testing conversion NetCDF to NetCDF"
+if [ ! -f flth00.dat ]; then
+   echo "no input data: flth00.dat, skipping test..."
+   exit 0;
+fi
 ../src/binSrc/fimex test.nc testNcRdWr.nc
 if [ $? != 0 ]; then
   echo "failed converting nc to nc"

@@ -19,7 +19,12 @@ using namespace MetNoFimex;
 void
 test_interpolator() {
 	string topSrcDir(TOP_SRCDIR);
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(topSrcDir+"/test/flth00.dat", topSrcDir+"/share/etc/felt2nc_variables.xml"));
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
 	vector<double> xAxis, yAxis;
 	for (int i = -100; i < 10; i++) {

@@ -2,6 +2,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <iostream>
+#include <fstream>
 #include <boost/array.hpp>
 #include <cassert>
 #include <ctime>
@@ -44,7 +45,12 @@ test_feltparameter(void) {
 void
 test_feltfile() {
 	string topSrcDir(TOP_SRCDIR);
-	Felt_File ff(topSrcDir+"/test/flth00.dat");
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	Felt_File ff(fileName);
 	vector<Felt_Array> vec = ff.listFeltArrays();
 	for (vector<Felt_Array>::iterator it = vec.begin(); it != vec.end(); ++it) {
 		//cout << it->getName() << endl;
@@ -99,7 +105,12 @@ test_feltfile() {
 void
 test_felt_axis() {
 	string topSrcDir(TOP_SRCDIR);
-	Felt_File ff(topSrcDir+"/test/flth00.dat");
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	Felt_File ff(fileName);
 	BOOST_CHECK(ff.getGridType() == 1);
 	const boost::array<float, 6>& gridPar = ff.getGridParameters();
 	boost::shared_ptr<Data> xdata = ff.getXData();
@@ -112,7 +123,12 @@ test_felt_axis() {
 void
 test_felt_cdm_reader() {
 	string topSrcDir(TOP_SRCDIR);
-	FeltCDMReader feltCDM(topSrcDir+"/test/flth00.dat", topSrcDir + "/share/etc/felt2nc_variables.xml");
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	FeltCDMReader feltCDM(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml");
 	//feltCDM.getCDM().toXMLStream(std::cerr);
 	string projName, projXAxis, projYAxis, projXUnit, projYUnit;
 	feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);
