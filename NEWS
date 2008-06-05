@@ -1,3 +1,6 @@
+2008-06-05 fimex-0.5
+    bugfix for short-fields when converting from felt
+    netcdf output configuration
 2008-05-21 fimex-0.4
 	performance improvements of interpolation (>90% with SIMD)
 	adjusting output to damocles
