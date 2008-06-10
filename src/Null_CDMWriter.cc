@@ -82,9 +82,9 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 	}
 
 	// define vars
-	const CDM::StrVarMap& cdmVars = cdm.getVariables();
-	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
-		const CDMVariable& var = it->second;
+	const CDM::VarVec& cdmVars = cdm.getVariables();
+	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
+		const CDMVariable& var = *it;
 		const std::vector<std::string>& shape = var.getShape();
 		for (size_t i = 0; i < shape.size(); i++) {
 			// revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
@@ -132,8 +132,8 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 	}
 	
 	// write data
-	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
-		const CDMVariable& cdmVar = it->second;
+	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
+		const CDMVariable& cdmVar = *it;
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
 			boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName());
 			if (!putVarData(cdmVar.getDataType(), data)) {

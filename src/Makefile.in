@@ -75,10 +75,11 @@ libfimex_a_LIBADD =
 am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
-	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
-	DataTypeChanger.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc Utils.cc XMLDoc.cc \
-	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
+	CDMVariable.cc Data.cc DataTypeChanger.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc Utils.cc \
+	XMLDoc.cc NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc \
+	NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
@@ -87,9 +88,10 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	CachedVectorReprojection.$(OBJEXT) CDM.$(OBJEXT) \
 	CDMAttribute.$(OBJEXT) CDMDimension.$(OBJEXT) \
 	CDMDataType.$(OBJEXT) CDMExtractor.$(OBJEXT) \
-	CDMInterpolator.$(OBJEXT) CDMReader.$(OBJEXT) \
-	CDMVariable.$(OBJEXT) Data.$(OBJEXT) DataTypeChanger.$(OBJEXT) \
-	Null_CDMWriter.$(OBJEXT) ReplaceStringObject.$(OBJEXT) \
+	CDMInterpolator.$(OBJEXT) CDMNamedEntity.$(OBJEXT) \
+	CDMReader.$(OBJEXT) CDMVariable.$(OBJEXT) Data.$(OBJEXT) \
+	DataTypeChanger.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
+	ReplaceStringObject.$(OBJEXT) \
 	ReplaceStringTimeObject.$(OBJEXT) Utils.$(OBJEXT) \
 	XMLDoc.$(OBJEXT) $(am__objects_1)
 libfimex_a_OBJECTS = $(am_libfimex_a_OBJECTS)
@@ -123,11 +125,11 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 am__include_HEADERS_DIST = config.h CachedInterpolation.h \
 	CachedVectorReprojection.h CDMAttribute.h CDMDataType.h \
 	CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h \
-	CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h DataImpl.h \
-	DataTypeChanger.h interpolation.h Null_CDMWriter.h \
-	ReplaceStringObject.h ReplaceStringTimeObject.h Utils.h \
-	XMLDoc.h NetCDF_CF10_CDMReader.h NetCDF_CDMWriter.h \
-	NetCDF_Utils.h
+	CDMNamedEntity.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h \
+	Data.h DataImpl.h DataTypeChanger.h interpolation.h \
+	Null_CDMWriter.h ReplaceStringObject.h \
+	ReplaceStringTimeObject.h Utils.h XMLDoc.h \
+	NetCDF_CF10_CDMReader.h NetCDF_CDMWriter.h NetCDF_Utils.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS)
 ETAGS = etags
@@ -318,16 +320,17 @@ lib_LIBRARIES = libfimex.a
 libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
-	CDMInterpolator.cc CDMReader.cc CDMVariable.cc Data.cc \
-	DataTypeChanger.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc Utils.cc XMLDoc.cc $(am__append_1)
+	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
+	CDMVariable.cc Data.cc DataTypeChanger.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc Utils.cc \
+	XMLDoc.cc $(am__append_1)
 include_HEADERS = config.h CachedInterpolation.h \
 	CachedVectorReprojection.h CDMAttribute.h CDMDataType.h \
 	CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h \
-	CDMReader.h CDMVariable.h CDMWriter.h CDM.h Data.h DataImpl.h \
-	DataTypeChanger.h interpolation.h Null_CDMWriter.h \
-	ReplaceStringObject.h ReplaceStringTimeObject.h Utils.h \
-	XMLDoc.h $(am__append_2)
+	CDMNamedEntity.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h \
+	Data.h DataImpl.h DataTypeChanger.h interpolation.h \
+	Null_CDMWriter.h ReplaceStringObject.h \
+	ReplaceStringTimeObject.h Utils.h XMLDoc.h $(am__append_2)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -425,6 +428,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMDimension.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMInterpolator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Po@am__quote@

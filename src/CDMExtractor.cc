@@ -101,11 +101,11 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	
 	
 	// removing all data containing this dimension, just to be sure it's read from the dataReader
-	const CDM::StrVarMap& variables = cdm.getVariables();
-	for (CDM::StrVarMap::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-		const std::vector<std::string>& shape = it->second.getShape();
+	const CDM::VarVec& variables = cdm.getVariables();
+	for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+		const std::vector<std::string>& shape = it->getShape();
 		if (std::find(shape.begin(), shape.end(), dim.getName()) != shape.end()) {
-			cdm.getVariable(it->second.getName()).setData(boost::shared_ptr<Data>());
+			cdm.getVariable(it->getName()).setData(boost::shared_ptr<Data>());
 		}
 	}
 }

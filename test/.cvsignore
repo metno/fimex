@@ -17,3 +17,4 @@ testNetcdfWriter
 gmon.out
 testUnconf.nc
 felt2netcdf2.cfg
+flth00.dat

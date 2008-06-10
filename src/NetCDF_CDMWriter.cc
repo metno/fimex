@@ -190,10 +190,10 @@ NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
 
 NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncDimMap) {
 	const CDM& cdm = cdmReader->getCDM();
-	const CDM::StrVarMap& cdmVars = cdm.getVariables();
+	const CDM::VarVec& cdmVars = cdm.getVariables();
 	NcVarMap ncVarMap;
-	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
-		const CDMVariable& var = it->second;
+	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
+		const CDMVariable& var = *it;
 		const std::vector<std::string>& shape = var.getShape();
 		// the const-ness required by the library
 		typedef const NcDim* NcDimPtr;
@@ -215,7 +215,7 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 		if (! ncVar) {
 			throw CDMException(nc_strerror(ncErr.get_err()));
 		}
-		ncVarMap[it->first] = ncVar;
+		ncVarMap[var.getName()] = ncVar;
 	}
 	return ncVarMap;
 }
@@ -262,10 +262,10 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 
 void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 	const CDM& cdm = cdmReader->getCDM();
-	const CDM::StrVarMap& cdmVars = cdm.getVariables();
-	for (CDM::StrVarMap::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
-		const std::string& varName = it->first;
-		const CDMVariable& cdmVar = it->second;
+	const CDM::VarVec& cdmVars = cdm.getVariables();
+	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
+		const CDMVariable& cdmVar = *it;
+		const std::string& varName = cdmVar.getName();
 		DataTypeChanger dtc(cdmVar.getDataType());
 		if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
 			(variableTypeChanges[varName] != CDM_NAT)) {

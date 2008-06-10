@@ -50,7 +50,7 @@ public:
 	typedef std::map<std::string, CDMAttribute> StrAttrMap;
 	typedef std::map<std::string, StrAttrMap> StrStrAttrMap;
 	typedef std::map<std::string, CDMDimension> StrDimMap;
-	typedef std::map<std::string, CDMVariable> StrVarMap;
+	typedef std::vector<CDMVariable> VarVec;
 	CDM();
 	virtual ~CDM();
 	/**
@@ -76,6 +76,12 @@ public:
 	 * @throw CDMException if varName doesn't exist
 	 */
 	const CDMVariable& getVariable(const std::string& varName) const throw(CDMException);
+	/**
+	 * @brief test if variable exists
+	 * 
+	 * @param varName name of variable
+	 */
+	bool hasVariable(const std::string& varName) const;
 	/**
 	 * @brief search for variable with certain attribute-value
 	 * 
@@ -170,7 +176,7 @@ public:
 	/// @brief get the dimension
 	const StrDimMap& getDimensions() const {return dimensions;}
 	/// @brief get the variables
-	const StrVarMap& getVariables() const {return variables;}
+	const VarVec& getVariables() const {return variables;}
 	/**
 	 *  @brief get the attributes
 	 *  @return map of type <variableName <attributeName, attribute>>
@@ -230,7 +236,7 @@ public:
 
 private:
 	StrStrAttrMap attributes;
-	StrVarMap variables;
+	VarVec variables;
 	StrDimMap dimensions;
 };
 

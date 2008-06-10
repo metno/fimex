@@ -29,11 +29,12 @@
 #include<boost/shared_ptr.hpp>
 #include "Data.h"
 #include "CDMDataType.h"
+#include "CDMNamedEntity.h"
 
 namespace MetNoFimex
 {
 
-class CDMAttribute
+class CDMAttribute : public CDMNamedEntity
 {
 	
 public:

@@ -47,7 +47,7 @@ void test_variable(void) {
 	CDMVariable testVar(varName, CDM_NAT, noDim);
 	CDM cdm;
 	cdm.addVariable(testVar);
-	BOOST_CHECK(cdm.getVariables().find(varName) != cdm.getVariables().end());
+	BOOST_CHECK(cdm.hasVariable(varName));
 	
 	try {
 		CDMVariable failVar(varName, CDM_NAT, noDim);

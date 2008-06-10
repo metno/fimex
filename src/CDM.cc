@@ -26,6 +26,7 @@
 #include "DataImpl.h"
 #include <boost/bind.hpp>
 #include <functional>
+#include <algorithm>
 
 namespace MetNoFimex
 {
@@ -40,17 +41,21 @@ CDM::~CDM()
 
 void CDM::addVariable(const CDMVariable& var) throw(CDMException)
 {
-	if (variables.find(var.getName()) == variables.end()) {
-		variables.insert(std::pair<std::string, CDMVariable>(var.getName(), var));
+	if (!hasVariable(var.getName())) {
+		variables.push_back(var);
 	} else {
 		throw CDMException("cannot add variable: " + var.getName() + " already exists");
 	}
 }
+bool CDM::hasVariable(const std::string& varName) const
+{
+	return (find_if(variables.begin(), variables.end(), CDMNameEqual(varName)) != variables.end());
+}
 
 const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException) {
-	StrVarMap::const_iterator varPos = variables.find(varName); 
+	VarVec::const_iterator varPos = find_if(variables.begin(), variables.end(), CDMNameEqual(varName)); 
 	if (varPos != variables.end()) {
-		return varPos->second;
+		return *varPos;
 	} else {
 		throw CDMException("cannot find variable: " + varName);
 	}
@@ -107,12 +112,12 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 	for (std::map<std::string, std::string>::const_iterator attrIt = findAttributes.begin(); attrIt != findAttributes.end(); ++attrIt) {
 		attrRegExps[attrIt->first] = boost::regex(attrIt->second);
 	}
-	for (StrVarMap::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
+	for (VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
 		// test if all attributes are found in variable (find_if finds the first not found)
-		if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, varIt->first))) == attrRegExps.end()) {
+		if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, varIt->getName()))) == attrRegExps.end()) {
 			// test if all dimensions are found in variable (find_if finds the first not found)
-			if (find_if(findDimensions.begin(), findDimensions.end(), std::not1(VariableDimensionCheck(varIt->second))) == findDimensions.end()) {
-				results.push_back(varIt->first);
+			if (find_if(findDimensions.begin(), findDimensions.end(), std::not1(VariableDimensionCheck(*varIt))) == findDimensions.end()) {
+				results.push_back(varIt->getName());
 			}
 		}
 	}
@@ -121,9 +126,9 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 
 
 void CDM::removeVariable(const std::string& variableName) {
-	StrVarMap::iterator varPos = variables.find(variableName); 
-	if (varPos != variables.end()) {
-		variables.erase(varPos);
+	VarVec::iterator newEnd = remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName));
+	if (newEnd != variables.end()) {
+		variables.erase(newEnd, variables.end());
 		StrStrAttrMap::iterator varAttrPos = attributes.find(variableName); 
 		if (varAttrPos != attributes.end()) {
 			attributes.erase(varAttrPos);
@@ -183,7 +188,7 @@ bool CDM::hasUnlimitedDim(const CDMVariable& var) const {
 
 void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
 {
-	if ((varName != globalAttributeNS ()) && (variables.find(varName) == variables.end())) {
+	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
 		std::map<std::string, CDMAttribute>& attrMap = attributes[varName];
@@ -197,7 +202,7 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 
 void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
 {
-	if ((varName != globalAttributeNS ()) && (variables.find(varName) == variables.end())) {
+	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
 		std::map<std::string, CDMAttribute>& attrMap = attributes[varName];
@@ -268,11 +273,11 @@ void CDM::toXMLStream(std::ostream& out) const
 			it->second.toXMLStream(out);
 		}
 	}
-	for (std::map<std::string, CDMVariable>::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-		if (attributes.find(it->first) != attributes.end()) {
-			it->second.toXMLStream(out, attributes.find(it->first)->second);
+	for (VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+		if (attributes.find(it->getName()) != attributes.end()) {
+			it->toXMLStream(out, attributes.find(it->getName())->second);
 		} else {
-			it->second.toXMLStream(out);
+			it->toXMLStream(out);
 		}
 	}
 	

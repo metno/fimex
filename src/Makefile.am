@@ -14,6 +14,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 CDMDataType.cc \
 					 CDMExtractor.cc \
 					 CDMInterpolator.cc \
+					 CDMNamedEntity.cc \
 					 CDMReader.cc \
 					 CDMVariable.cc \
 					 Data.cc \
@@ -32,6 +33,7 @@ include_HEADERS = config.h \
 	              CDMException.h \
 	              CDMExtractor.h \
 	              CDMInterpolator.h \
+  			      CDMNamedEntity.h \
 	              CDMReader.h \
 	              CDMVariable.h \
 	              CDMWriter.h CDM.h \

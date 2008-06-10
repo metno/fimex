@@ -185,7 +185,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 		dims.push_back(orgYAxis);
 		projectionVariables = cdm.findVariables(attrs, dims);
 		for (std::vector<std::string>::iterator varIt = projectionVariables.begin(); varIt != projectionVariables.end(); ++varIt) {
-			if (newProj != "latlong") {
+			if (newProj != "latlong" && (*varIt != lat) && (*varIt != lon)) {
 				cdm.addOrReplaceAttribute(*varIt, CDMAttribute("coordinates", lon + " " + lat));
 				cdm.addOrReplaceAttribute(*varIt, CDMAttribute("grid_mapping", newProjection));
 			} else {

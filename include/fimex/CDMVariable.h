@@ -31,11 +31,12 @@
 #include "CDMAttribute.h"
 #include "CDMDimension.h"
 #include "CDMDataType.h"
+#include "CDMNamedEntity.h"
 
 namespace MetNoFimex
 {
 
-class CDMVariable
+class CDMVariable : public CDMNamedEntity
 {
 public:
 	explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape);
