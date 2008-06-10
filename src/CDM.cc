@@ -75,12 +75,12 @@ std::vector<std::string> CDM::findVariables(const std::string& attrName, const s
 }
 
 bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const {
-	StrStrAttrMap::const_iterator varIt = attributes.find(varName);
+	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
-		StrAttrMap::const_iterator attrIt = varIt->second.find(attribute);
+		AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attribute));
 		if (attrIt != varIt->second.end()) {
 			boost::smatch what;
-			if (boost::regex_match(attrIt->second.getStringValue(), what, attrValue)) {
+			if (boost::regex_match(attrIt->getStringValue(), what, attrValue)) {
 				return true;
 			}
 		}
@@ -129,7 +129,7 @@ void CDM::removeVariable(const std::string& variableName) {
 	VarVec::iterator newEnd = remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName));
 	if (newEnd != variables.end()) {
 		variables.erase(newEnd, variables.end());
-		StrStrAttrMap::iterator varAttrPos = attributes.find(variableName); 
+		StrAttrVecMap::iterator varAttrPos = attributes.find(variableName); 
 		if (varAttrPos != attributes.end()) {
 			attributes.erase(varAttrPos);
 		}
@@ -193,9 +193,9 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
-		std::map<std::string, CDMAttribute>& attrMap = attributes[varName];
-		if (attrMap.find(attr.getName()) == attrMap.end()) {
-			attrMap.insert(std::pair<std::string, CDMAttribute>(attr.getName(),attr));
+		AttrVec& attrVec = attributes[varName];
+		if (find_if(attrVec.begin(), attrVec.end(), CDMNameEqual(attr.getName())) == attrVec.end()) {
+			attrVec.push_back(attr);
 		} else {
 			throw CDMException("cannot add attribute: attribute " + varName + "." + attr.getName() + " already exists");
 		}
@@ -207,28 +207,28 @@ void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& 
 	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
-		std::map<std::string, CDMAttribute>& attrMap = attributes[varName];
-		attrMap.erase(attr.getName());
-		attrMap.insert(std::pair<std::string, CDMAttribute>(attr.getName(),attr));
+		removeAttribute(varName, attr.getName());
+		attributes[varName].push_back(attr);
 	}
 }
 
 void CDM::removeAttribute(const std::string& varName, const std::string& attrName)
 {
-	StrStrAttrMap::iterator varIt = attributes.find(varName);
+	StrAttrVecMap::iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
-		varIt->second.erase(attrName);
+		AttrVec& attrVec = varIt->second;
+		attrVec.erase(remove_if(attrVec.begin(), attrVec.end(), CDMNameEqual(attrName)), attrVec.end());
 	}
 }
 
 
 const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
 {
-	StrStrAttrMap::const_iterator varIt = attributes.find(varName); 
+	StrAttrVecMap::const_iterator varIt = attributes.find(varName); 
 	if (varIt != attributes.end()) {
-		StrAttrMap::const_iterator attrIt = (varIt->second).find(attrName);
+		AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attrName));
 		if (attrIt != (varIt->second).end()) {
-			return attrIt->second;
+			return *attrIt;
 		} else {
 			throw CDMException("Attribute " + attrName + " not found for varName");
 		}
@@ -244,11 +244,9 @@ CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& a
 
 std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const {
 	std::vector<CDMAttribute> results;
-	StrStrAttrMap::const_iterator varIt = attributes.find(varName); 
+	StrAttrVecMap::const_iterator varIt = attributes.find(varName); 
 	if (varIt != attributes.end()) {
-		for (StrAttrMap::const_iterator atIt = varIt->second.begin(); atIt != varIt->second.end(); ++atIt) {
-			results.push_back(atIt->second);
-		}
+		results.insert(results.begin(), varIt->second.begin(), varIt->second.end());
 	}
 	return results;
 }
@@ -270,9 +268,9 @@ void CDM::toXMLStream(std::ostream& out) const
 		it->toXMLStream(out);
 	}
 	if (attributes.find(globalAttributeNS()) != attributes.end()) {
-		const std::map<std::string, CDMAttribute> attrs = attributes.find(globalAttributeNS())->second;
-		for (std::map<std::string, CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
-			it->second.toXMLStream(out);
+		const AttrVec& attrs = attributes.find(globalAttributeNS())->second;
+		for (AttrVec::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
+			it->toXMLStream(out);
 		}
 	}
 	for (VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {

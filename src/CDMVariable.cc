@@ -63,13 +63,13 @@ void CDMVariable::shapeToXMLStream(std::ostream& out) const
 		}
 	}	
 }
-void CDMVariable::toXMLStream(std::ostream& out, const std::map<std::string, CDMAttribute>& attrs) const
+void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const
 {
 	out << "<variable name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" ";
 	shapeToXMLStream(out);
 	out << ">" << std::endl;
-	for (std::map<std::string, CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
-		it->second.toXMLStream(out);
+	for (std::vector<CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
+		it->toXMLStream(out);
 	}
 	out << "</variable>" << std::endl;
 }

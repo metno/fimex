@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include <map>
 #include "CDMAttribute.h"
 #include "CDMDimension.h"
 #include "CDMDataType.h"
@@ -68,7 +67,7 @@ public:
 	/// print a xml representation to the stream without attributes
 	void toXMLStream(std::ostream& out) const;
 	/// print a xml representation to the stream with attributes
-	void toXMLStream(std::ostream& out, const std::map<std::string, CDMAttribute>& attrs) const;
+	void toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const;
 	/// add data to the variable
 	void setData(boost::shared_ptr<Data> data) {this->data = data;}
 	/**

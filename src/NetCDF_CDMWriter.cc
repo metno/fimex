@@ -167,7 +167,14 @@ void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc)
 			attributeNameChanges[varName][attName] = attNewName;
 		}
 		if (attType != "") {
-			attributes[varName][attName] = CDMAttribute(attName, attType, attValue);
+			CDMAttribute attr(attName, attType, attValue);
+			CDM::AttrVec& av = attributes[varName]; 
+			CDM::AttrVec::iterator ait = find_if(av.begin(), av.end(), CDMNameEqual(attName));
+			if (ait == av.end()) {
+				av.push_back(attr);
+			} else {
+				*ait = attr;
+			}
 		}	
 	}
 }
@@ -222,16 +229,16 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 
 void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 	// using C interface since it offers a combined interface to global and var attributes
-	for (CDM::StrStrAttrMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
+	for (CDM::StrAttrVecMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
 		int varId;
 		if (it->first == CDM::globalAttributeNS()) {
 			varId = NC_GLOBAL;
 		} else {
 			varId = ncVarMap.find(it->first)->second->id();
 		}
-		for (CDM::StrAttrMap::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
+		for (CDM::AttrVec::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
 			int errCode = NC_NOERR;
-			const CDMAttribute& attr = ait->second;
+			const CDMAttribute& attr = *ait;
 			CDMDataType dt = attr.getDataType();
 			switch (dt) {
 			case CDM_STRING: ;
@@ -354,13 +361,15 @@ NetCDF_CDMWriter::~NetCDF_CDMWriter()
 
 const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException)
 {
-	if (attributes.find(varName) == attributes.end()) {
+	CDM::StrAttrVecMap::const_iterator varAttsIt = attributes.find(varName); 
+	if (varAttsIt == attributes.end()) {
 		throw CDMException("could not find variable "+varName+" in NetcdfWriter attribute list");
 	}
-	if (attributes.find(varName)->second.find(attName) == attributes.find(varName)->second.end()) {
+	CDM::AttrVec::const_iterator ait = find_if(varAttsIt->second.begin(), varAttsIt->second.end(), CDMNameEqual(attName));
+	if (ait == varAttsIt->second.end()) {
 		throw CDMException("could not find attribute "+attName+" for variable "+varName+" in NetcdfWriter attribute list");		
 	}
-	return attributes.find(varName)->second.find(attName)->second;
+	return *ait;
 }
 
 const std::string& NetCDF_CDMWriter::getAttributeName(const std::string& varName, const std::string& attName) const

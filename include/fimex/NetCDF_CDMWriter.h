@@ -79,7 +79,7 @@ private:
 	std::map<std::string, CDMDataType> variableTypeChanges;
 	std::map<std::string, std::string> dimensionNameChanges;
 	std::map<std::string, std::map<std::string, std::string> > attributeNameChanges;
-	CDM::StrStrAttrMap attributes;
+	CDM::StrAttrVecMap attributes;
 };
 
 }

@@ -47,8 +47,8 @@ const int EARTH_RADIUS_M = 6371000;
 class CDM
 {
 public:
-	typedef std::map<std::string, CDMAttribute> StrAttrMap;
-	typedef std::map<std::string, StrAttrMap> StrStrAttrMap;
+	typedef std::vector<CDMAttribute> AttrVec;
+	typedef std::map<std::string, AttrVec> StrAttrVecMap;
 	typedef std::vector<CDMDimension> DimVec;
 	typedef std::vector<CDMVariable> VarVec;
 	CDM();
@@ -122,6 +122,10 @@ public:
 	 *  @throw CDMException if dim-name already exists
 	 */
 	void addDimension(const CDMDimension& dim) throw(CDMException);
+	/**
+	 * check if the dimension exists
+	 * @param dimName name of the dimension
+	 */
 	bool hasDimension(const std::string& dimName) const;
 	
 	/**
@@ -183,7 +187,7 @@ public:
 	 *  @brief get the attributes
 	 *  @return map of type <variableName <attributeName, attribute>>
 	 */
-	const StrStrAttrMap& getAttributes() const {return attributes;}
+	const StrAttrVecMap& getAttributes() const {return attributes;}
 	/**
 	 * @brief get the attributes of an variable
 	 * @param varName name of variable
@@ -237,7 +241,7 @@ public:
 
 
 private:
-	StrStrAttrMap attributes;
+	StrAttrVecMap attributes;
 	VarVec variables;
 	DimVec dimensions;
 };

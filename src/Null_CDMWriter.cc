@@ -96,17 +96,17 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 	}
 	
 	// write attributes
-	const CDM::StrStrAttrMap& cdmAttrs = cdm.getAttributes();
+	const CDM::StrAttrVecMap& cdmAttrs = cdm.getAttributes();
 	// using C interface since it offers a combined interface to global and var attributes
-	for (CDM::StrStrAttrMap::const_iterator it = cdmAttrs.begin(); it != cdmAttrs.end(); ++it) {
+	for (CDM::StrAttrVecMap::const_iterator it = cdmAttrs.begin(); it != cdmAttrs.end(); ++it) {
 		int varId;
 		if (it->first == CDM::globalAttributeNS()) {
 			varId = 0;
 		} else {
 			varId = 1;
 		}
-		for (CDM::StrAttrMap::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
-			const CDMAttribute& attr = ait->second;
+		for (CDM::AttrVec::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
+			const CDMAttribute& attr = *ait;
 			CDMDataType dt = attr.getDataType();
 			switch (dt) {
 			case CDM_STRING: ;
