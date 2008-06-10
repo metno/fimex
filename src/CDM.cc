@@ -139,18 +139,23 @@ void CDM::removeVariable(const std::string& variableName) {
 
 void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
 {
-	if (dimensions.find(dim.getName()) == dimensions.end()) {
-		dimensions.insert(std::pair<std::string, CDMDimension>(dim.getName(), dim));
+	if (!hasDimension(dim.getName())) {
+		dimensions.push_back(dim);
 	} else {
 		throw CDMException("cannot add dimension: " + dim.getName() + " already exists");
 	}
 }
 
+bool CDM::hasDimension(const std::string& dimName) const
+{
+	return (find_if(dimensions.begin(), dimensions.end(), CDMNameEqual(dimName)) != dimensions.end());
+}
+
 const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CDMException)
 {
-	StrDimMap::const_iterator dimIt = dimensions.find(dimName); 
+	DimVec::const_iterator dimIt = find_if(dimensions.begin(), dimensions.end(), CDMNameEqual(dimName)); 
 	if (dimIt != dimensions.end()) {
-		return dimIt->second;
+		return *dimIt;
 	} else {
 		throw CDMException("cannot find dimension: " + dimName);
 	}	
@@ -164,25 +169,22 @@ CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException) 
 
 
 const CDMDimension* CDM::getUnlimitedDim() const {
-	for (StrDimMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++it) {
-		if (it->second.isUnlimited()) {
-			return &(it->second);
-		}
+	DimVec::const_iterator it = find_if(dimensions.begin(), dimensions.end(), std::mem_fun_ref(&CDMDimension::isUnlimited));
+	if (it == dimensions.end()) {
+		return 0;
+	} else {
+		return &(*it);
 	}
-	return 0;
 }
 
 bool CDM::hasUnlimitedDim(const CDMVariable& var) const {
 	const std::vector<std::string>& shape = var.getShape();
-	for (std::vector<std::string>::const_iterator it = shape.begin(); it != shape.end(); ++it) {
-		StrDimMap::const_iterator dim = dimensions.find(*it);
-		if (dim != dimensions.end()) {
-			if (dim->second.isUnlimited()) {
-				return true;
-			}
-		}
+	const CDMDimension* unlimDim = getUnlimitedDim();
+	if (unlimDim == 0) {
+		return false;
+	} else {
+		return (find(shape.begin(), shape.end(), unlimDim->getName()) != shape.end());
 	}
-	return false;
 }
 
 
@@ -264,8 +266,8 @@ double CDM::getFillValue(const std::string& varName) const {
 void CDM::toXMLStream(std::ostream& out) const
 {
 	out << "<cdm>" << std::endl;
-	for (std::map<std::string, CDMDimension>::const_iterator it = dimensions.begin(); it != dimensions.end(); ++it) {
-		it->second.toXMLStream(out);
+	for (DimVec::const_iterator it = dimensions.begin(); it != dimensions.end(); ++it) {
+		it->toXMLStream(out);
 	}
 	if (attributes.find(globalAttributeNS()) != attributes.end()) {
 		const std::map<std::string, CDMAttribute> attrs = attributes.find(globalAttributeNS())->second;

@@ -74,10 +74,10 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 : CDMWriter(cdmReader, outputFile)
 {
 	const CDM& cdm = cdmReader->getCDM();
-	const CDM::StrDimMap& cdmDims = cdm.getDimensions();
+	const CDM::DimVec& cdmDims = cdm.getDimensions();
 	// define dims
-	for (CDM::StrDimMap::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
-		int length = it->second.isUnlimited() ? 0 : it->second.getLength();
+	for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
+		int length = it->isUnlimited() ? 0 : it->getLength();
 		length++;
 	}
 

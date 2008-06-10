@@ -175,15 +175,15 @@ void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc)
 
 NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
 	const CDM& cdm = cdmReader->getCDM();
-	const CDM::StrDimMap& cdmDims = cdm.getDimensions();
+	const CDM::DimVec& cdmDims = cdm.getDimensions();
 	NcDimMap ncDimMap;
-	for (CDM::StrDimMap::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
-		int length = it->second.isUnlimited() ? NC_UNLIMITED : it->second.getLength();
+	for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
+		int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
 		// NcDim is organized by NcFile, no need to clean
 		// change the name written to the file according to getDimensionName
-		NcDim* dim = ncFile.add_dim(getDimensionName(it->first).c_str(), length); 
+		NcDim* dim = ncFile.add_dim(getDimensionName(it->getName()).c_str(), length); 
 		if (dim == 0) throw CDMException(nc_strerror(ncErr.get_err()));
-		ncDimMap[it->first] = dim;
+		ncDimMap[it->getName()] = dim;
 	}
 	return ncDimMap;
 }

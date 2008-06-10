@@ -49,7 +49,7 @@ class CDM
 public:
 	typedef std::map<std::string, CDMAttribute> StrAttrMap;
 	typedef std::map<std::string, StrAttrMap> StrStrAttrMap;
-	typedef std::map<std::string, CDMDimension> StrDimMap;
+	typedef std::vector<CDMDimension> DimVec;
 	typedef std::vector<CDMVariable> VarVec;
 	CDM();
 	virtual ~CDM();
@@ -122,6 +122,8 @@ public:
 	 *  @throw CDMException if dim-name already exists
 	 */
 	void addDimension(const CDMDimension& dim) throw(CDMException);
+	bool hasDimension(const std::string& dimName) const;
+	
 	/**
 	 * @brief get a reference to a dimension
 	 * 
@@ -174,7 +176,7 @@ public:
 	const static std::string& globalAttributeNS() {const static std::string global("_GLOBAL"); return global;}
 	
 	/// @brief get the dimension
-	const StrDimMap& getDimensions() const {return dimensions;}
+	const DimVec& getDimensions() const {return dimensions;}
 	/// @brief get the variables
 	const VarVec& getVariables() const {return variables;}
 	/**
@@ -237,7 +239,7 @@ public:
 private:
 	StrStrAttrMap attributes;
 	VarVec variables;
-	StrDimMap dimensions;
+	DimVec dimensions;
 };
 
 }
