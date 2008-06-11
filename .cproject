@@ -59,12 +59,7 @@
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 
 
-<storageModule moduleId="org.eclipse.cdt.core.pathentry">
-<pathentry include="src" kind="inc" path="" system="true"/>
-<pathentry kind="out" path=""/>
-<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
-<pathentry kind="src" path=""/>
-</storageModule>
+
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="all" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
@@ -164,6 +159,13 @@
 <runAllBuilders>true</runAllBuilders>
 </target>
 </buildTargets>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+<pathentry include="src" kind="inc" path="" system="true"/>
+<pathentry include="/usr/include/c++/4.1.1" kind="inc" path="" system="true"/>
+<pathentry kind="out" path=""/>
+<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+<pathentry kind="src" path=""/>
 </storageModule>
 </cconfiguration>
 </storageModule>

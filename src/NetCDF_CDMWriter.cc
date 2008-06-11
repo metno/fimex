@@ -31,6 +31,7 @@ extern "C" {
 #include "CDMDataType.h"
 #include "DataTypeChanger.h"
 #include "NetCDF_Utils.h"
+#include "Units.h"
 #include "Utils.h"
 #include "XMLDoc.h"
 
@@ -267,7 +268,28 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 	}	
 }
 
+double NetCDF_CDMWriter::getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const
+{
+	double retVal = defaultValue;
+	try {
+		const CDMAttribute& attr = cdmReader->getCDM().getAttribute(varName, attName);
+		retVal = attr.getData()->asDouble()[0];
+	} catch (CDMException& e) {} // don't care
+	return retVal;
+}
+double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const
+{
+	double retVal = defaultValue;
+	try {
+		const CDMAttribute& attr = getAttribute(varName, attName);
+		retVal = attr.getData()->asDouble()[0];
+	} catch (CDMException& e) {} // don't care
+	return retVal;	
+}
+
+
 void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
+	Units units;
 	const CDM& cdm = cdmReader->getCDM();
 	const CDM::VarVec& cdmVars = cdm.getVariables();
 	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
@@ -276,43 +298,31 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 		DataTypeChanger dtc(cdmVar.getDataType());
 		if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
 			(variableTypeChanges[varName] != CDM_NAT)) {
-			double oldFill = MIFI_UNDEFINED_D;
+			double oldFill = getOldAttribute(varName, "_FillValue", MIFI_UNDEFINED_D);
+			double oldScale = getOldAttribute(varName, "scale_factor", 1.);
+			double oldOffset = getOldAttribute(varName, "add_offset", 0.);
+			double newFill = getNewAttribute(varName, "_FillValue", MIFI_UNDEFINED_D);
+			double newScale = getNewAttribute(varName, "scale_factor", 1.);
+			double newOffset = getNewAttribute(varName, "add_offset", 0.);
+
+			// changes of the units
+			double unitSlope = 1.;
+			double unitOffset = 0.;
+			std::string oldUnit;
+			std::string newUnit;
 			try {
-				const CDMAttribute& attr = cdm.getAttribute(varName, "_FillValue");
-				oldFill = attr.getData()->asDouble()[0];
+				oldUnit = cdm.getAttribute(varName, "units").getData()->asString();
+				newUnit = getAttribute(varName, "units").getData()->asString();
+				if (oldUnit != newUnit) {
+					units.convert(oldUnit, newUnit,&unitSlope, &unitOffset);
+				}
+			} catch (UnitException& e) {
+				std::cerr << "Warning: unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what() << std::endl;
 			} catch (CDMException& e) {
+				// units not defined, do nothing
 			}
-			double oldScale = 1.;
-			try {
-				const CDMAttribute& attr = cdm.getAttribute(varName, "scale_factor");
-				oldScale = attr.getData()->asDouble()[0];
-			} catch (CDMException& e) {
-			}
-			double oldOffset = 0.;
-			try {
-				const CDMAttribute& attr = cdm.getAttribute(varName, "add_offset");
-				oldOffset = attr.getData()->asDouble()[0];
-			} catch (CDMException& e) {
-			}
-			double newFill = MIFI_UNDEFINED_D;
-			try {
-				const CDMAttribute& attr = getAttribute(varName, "_FillValue");
-				newFill = attr.getData()->asDouble()[0];
-			} catch (CDMException& e) {
-			}
-			double newScale = 1.;
-			try {
-				const CDMAttribute& attr = getAttribute(varName, "scale_factor");
-				newScale = attr.getData()->asDouble()[0];
-			} catch (CDMException& e) {
-			}
-			double newOffset = 0.;
-			try {
-				const CDMAttribute& attr = cdm.getAttribute(varName, "add_offset");
-				newOffset = attr.getData()->asDouble()[0];
-			} catch (CDMException& e) {
-			}
-			dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset);
+			
+			dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
 		}
 		NcVar* ncVar = ncVarMap.find(cdmVar.getName())->second;
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
@@ -320,7 +330,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 			try {
 				data = dtc.convertData(data);
 			} catch (CDMException& e) {
-				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + e.what());
+				throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
 			}
 			if (!putVarData(ncVar, dtc.getDataType(), data)) {
 				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));
@@ -333,7 +343,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 				try {
 					data = dtc.convertData(data);
 				} catch (CDMException& e) {
-					throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + e.what());
+					throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
 				}
 				if (!putRecData(ncVar, dtc.getDataType(), data, i)) {
 					throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + nc_strerror(ncErr.get_err()) + ", datalength: " + type2string(data->size()));

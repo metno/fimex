@@ -14,7 +14,10 @@ compilation
 To configure the different file formats it requires:
     * NetCDF (netcdf-3 > 3.6)
     * Felt (libmi)
-    
+
+Optional packages:
+    * udunits (> 1.12)
+        
 
 INSTALLATION
 ------------
@@ -26,7 +29,7 @@ following flags (those are default for x86-64)
 
 export libmi_CFLAGS=-I/disk1/metno/local/include
 export milib_LIBS=-L/disk1/metno/local/lib -lmic -lmi -lg2c
-CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-NetCDF-lib-dir=/usr/lib/netcdf-3 -with-NetCDF-include-dir=/usr/include/netcdf-3
+CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-NetCDF-lib-dir=/usr/lib/netcdf-3 -with-NetCDF-include-dir=/usr/include/netcdf-3 --with-udunits=/usr
 
 Testing the Installation
 ------------------------

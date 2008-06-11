@@ -51,8 +51,19 @@ public:
 	explicit DataTypeChanger(CDMDataType oldType);
 	/**
 	 * initialize with the old and new settings
+	 * 
+	 * @param oldType datatype of original data
+	 * @param oldFill fill value of the original data
+	 * @param oldScale scale_factor of the original data
+	 * @param oldOffset scale_factor of the original data
+	 * @param newType datatype of converted data
+	 * @param newFill fill value of converted data
+	 * @param newScale scale_factor of the converted data
+	 * @param newOffset add_offset of the converted data
+	 * @param unitScale scale_factor for the unpacked data, i.e. for unit changes, default 1.
+	 * @param unitOffset offset for the unpacked data, i.e. for unit changes, default 0.
 	 */
-	explicit DataTypeChanger(CDMDataType oldType, double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
+	explicit DataTypeChanger(CDMDataType oldType, double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset, double unitScale = 1., double unitOffset = 0.);
 	virtual ~DataTypeChanger();
 	/**
 	 * convert the data to the new scale/fill/offset

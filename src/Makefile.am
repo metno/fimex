@@ -22,6 +22,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
+					 Units.cc \
 					 Utils.cc \
 					 XMLDoc.cc
 include_HEADERS = config.h \
@@ -44,6 +45,7 @@ include_HEADERS = config.h \
 	              Null_CDMWriter.h \
 	              ReplaceStringObject.h \
 	              ReplaceStringTimeObject.h \
+	              Units.h \
 	              Utils.h \
 	              XMLDoc.h
 

@@ -32,9 +32,14 @@ DataTypeChanger::DataTypeChanger(CDMDataType oldType)
 {
 }
 
-DataTypeChanger::DataTypeChanger(CDMDataType oldType, double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
+DataTypeChanger::DataTypeChanger(CDMDataType oldType, double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset, double unitScale, double unitOffset)
 : oldType(oldType), newType(newType), oldFill(oldFill), newFill(newFill), oldScale(oldScale), newScale(newScale), oldOffset(oldOffset), newOffset(newOffset)
 {
+	// propagate the unit offset: newUnitVal = oldVal * unitScale + unitOffset
+	// with oldVal = oldOffset + oldScale * data:
+	// newUnitVal = unitScale * (oldOffset + oldScale * data) + unitOffset
+	this->oldOffset = unitScale*oldOffset + unitOffset;
+	this->oldScale *= unitScale;
 }
 
 DataTypeChanger::~DataTypeChanger()

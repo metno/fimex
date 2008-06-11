@@ -1,3 +1,6 @@
+2008-06-11 fimex-0.6
+	units-support for netcdf output configuration
+	keeping input-order of variables/attributes/dimensions within fimex 
 2008-06-05 fimex-0.5
     bugfix for short-fields when converting from felt
     netcdf output configuration

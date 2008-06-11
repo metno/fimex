@@ -70,11 +70,13 @@ private:
 	void initFillRenameDimension(const std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc) throw(CDMException);
-
+	
 	NcDimMap defineDimensions();
 	NcVarMap defineVariables(const NcDimMap& dimMap);
 	void writeAttributes(const NcVarMap& varMap);
 	void writeData(const NcVarMap& varMap);
+	double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
+	double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
 	std::map<std::string, std::string> variableNameChanges;
 	std::map<std::string, CDMDataType> variableTypeChanges;
 	std::map<std::string, std::string> dimensionNameChanges;
