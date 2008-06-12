@@ -22,6 +22,8 @@
  */
 
 #include "FeltParameters.h"
+#include "CDMconstants.h"
+#include "Utils.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -221,7 +223,7 @@ double FeltParameters::getParameterFillValue(const std::string& parameterName) c
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error)
 {
 	std::ostringstream tempProj;
-	std::string earth("+elips=sphere +a=6371000 +e=0");
+	std::string earth("+elips=sphere +a="+MetNoFimex::type2string(MIFI_EARTH_RADIUS_M)+" +e=0");
 	switch (gridType) {
 		case 1: 
 		case 4: tempProj << "+proj=stere +lat_0=90 +lat_ts=" << gridParameters[4] << " +lon_0=" << gridParameters[3] << " " << earth; 

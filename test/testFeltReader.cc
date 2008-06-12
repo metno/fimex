@@ -138,9 +138,9 @@ test_felt_axis() {
 	const boost::array<float, 6>& gridPar = ff.getGridParameters();
 	boost::shared_ptr<Data> xdata = ff.getXData();
 	BOOST_CHECK((xdata->asFloat())[(int)gridPar[0]-1] == 0);
-	BOOST_CHECK((xdata->asFloat())[(int)gridPar[0]] == 50000);
+	BOOST_CHECK((xdata->asInt())[(int)gridPar[0]] == 50162);
 	BOOST_CHECK((ff.getYData()->asFloat())[(int)gridPar[1]-1] == 0);
-	BOOST_CHECK((ff.getYData()->asInt())[(int)gridPar[1]] == 50000);
+	BOOST_CHECK((ff.getYData()->asInt())[(int)gridPar[1]] == 50162);
 }
 
 void

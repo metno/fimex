@@ -33,10 +33,10 @@
 #include "CDMVariable.h"
 #include "CDMDimension.h"
 #include "CDMException.h"
+#include "CDMconstants.h"
 
 namespace MetNoFimex
 {
-const int EARTH_RADIUS_M = 6371000;
 
 /**
  * @brief Data structure of the Common %Data Model

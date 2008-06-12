@@ -1,3 +1,5 @@
+2008-06-12 fimex-0.7
+	fixing coordinates of polar-stereographic felt-files
 2008-06-11 fimex-0.6
 	units-support for netcdf output configuration
 	keeping input-order of variables/attributes/dimensions within fimex 

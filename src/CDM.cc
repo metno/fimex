@@ -385,7 +385,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	size_t fieldSize = xDimLength * yDimLength; 
 	boost::shared_array<double> longVal(new double[fieldSize]);
 	boost::shared_array<double> latVal(new double[fieldSize]);
-	std::string lonLatProj("+elips=sphere +a="+type2string(EARTH_RADIUS_M)+" +e=0 +proj=latlong");
+	std::string lonLatProj("+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong");
 	std::string projStr = attributesToProjString(getAttributes(projectionVariable));
 	if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);

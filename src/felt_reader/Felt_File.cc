@@ -25,6 +25,7 @@
 #include <milib/milib.h>
 #include "CDMDataType.h"
 #include "DataImpl.h"
+#include "CDMconstants.h"
 #include "Utils.h"
 #include "interpolation.h"
 #include <cstring>
@@ -328,7 +329,8 @@ boost::shared_ptr<Data> Felt_File::getXData() const throw(Felt_File_Error) {
 	switch (getGridType()) {
 		case 1:
 		case 4: // polarstereographic
-			d = (150.*79.)/params[2]; // (150.*79.) are met.no constant for 150km grid with 79 cells between equator and northpole?
+			//R*(1+sin(phi) == 1/4 of earth circumference
+			d = MIFI_EARTH_RADIUS_M/1000 * (1+std::sin(DEG_TO_RAD*params[4]))/params[2];
 			lon0 = 0;
 			x0 = params[0];
 			scale = 1000;
@@ -368,7 +370,8 @@ boost::shared_ptr<Data> Felt_File::getYData() const throw(Felt_File_Error) {
 	switch (getGridType()) {
 		case 1:
 		case 4: // polarstereographic
-			d = (150.*79.)/params[2]; // (150.*79.) are met.no constant for 150km grid with 79 cells between equator and northpole?
+			//R*(1+sin(phi) == 1/4 of earth circumference
+			d = MIFI_EARTH_RADIUS_M/1000* (1+std::sin(DEG_TO_RAD*params[4]))/params[2];
 			lat0 = 0;
 			y0 = params[1];
 			scale = 1000; // (km -> m)

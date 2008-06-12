@@ -123,11 +123,11 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	pdf-recursive ps-recursive uninstall-info-recursive \
 	uninstall-recursive
 am__include_HEADERS_DIST = config.h CachedInterpolation.h \
-	CachedVectorReprojection.h CDMAttribute.h CDMDataType.h \
-	CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h \
-	CDMNamedEntity.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h \
-	Data.h DataImpl.h DataTypeChanger.h interpolation.h \
-	Null_CDMWriter.h ReplaceStringObject.h \
+	CachedVectorReprojection.h CDMAttribute.h CDMconstants.h \
+	CDMDataType.h CDMDimension.h CDMException.h CDMExtractor.h \
+	CDMInterpolator.h CDMNamedEntity.h CDMReader.h CDMVariable.h \
+	CDMWriter.h CDM.h Data.h DataImpl.h DataTypeChanger.h \
+	interpolation.h Null_CDMWriter.h ReplaceStringObject.h \
 	ReplaceStringTimeObject.h Units.h Utils.h XMLDoc.h \
 	NetCDF_CF10_CDMReader.h NetCDF_CDMWriter.h NetCDF_Utils.h
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
@@ -325,11 +325,11 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc Units.cc \
 	Utils.cc XMLDoc.cc $(am__append_1)
 include_HEADERS = config.h CachedInterpolation.h \
-	CachedVectorReprojection.h CDMAttribute.h CDMDataType.h \
-	CDMDimension.h CDMException.h CDMExtractor.h CDMInterpolator.h \
-	CDMNamedEntity.h CDMReader.h CDMVariable.h CDMWriter.h CDM.h \
-	Data.h DataImpl.h DataTypeChanger.h interpolation.h \
-	Null_CDMWriter.h ReplaceStringObject.h \
+	CachedVectorReprojection.h CDMAttribute.h CDMconstants.h \
+	CDMDataType.h CDMDimension.h CDMException.h CDMExtractor.h \
+	CDMInterpolator.h CDMNamedEntity.h CDMReader.h CDMVariable.h \
+	CDMWriter.h CDM.h Data.h DataImpl.h DataTypeChanger.h \
+	interpolation.h Null_CDMWriter.h ReplaceStringObject.h \
 	ReplaceStringTimeObject.h Units.h Utils.h XMLDoc.h \
 	$(am__append_2)
 all: config.h

@@ -1,0 +1,7 @@
+#ifndef CONSTANTS_H_
+#define CONSTANTS_H_
+
+#define MIFI_EARTH_RADIUS_M 6371000
+
+
+#endif /*CONSTANTS_H_*/
