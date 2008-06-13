@@ -49,7 +49,8 @@ class Felt_File
 	boost::shared_ptr<int> fdPtr; // file descriptor
 	std::map<std::string, Felt_Array> feltArrayMap;
 	FeltParameters feltParameters;
-	
+	ShortPairMap hybridLevels; // only set for files with idx[10] = 11
+
 private:
 	Felt_Array& findOrCreateFeltArray(const boost::array<short, 16>& idx);
 	std::vector<short> getDataSlice(Felt_Array& fa, boost::array<short, 16>& idx, int fieldSize) throw(Felt_File_Error);
@@ -114,6 +115,7 @@ public:
 	 * @return map consisting of felt level-ids and a sorted vector of level-pairs of values
 	 */ 
 	std::map<short, std::vector<pair<short,short> > > getFeltLevelPairs() const;
+	const ShortPairMap& getHybridLevels() const {return hybridLevels;}
 	/// all time values, sorted
 	std::vector<time_t> getFeltTimes() const;
 	/// get size in x direction

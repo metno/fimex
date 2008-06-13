@@ -1,27 +1,24 @@
-2008-06-12 fimex-0.7
-	fixing coordinates of polar-stereographic felt-files
-2008-06-11 fimex-0.6
-	units-support for netcdf output configuration
-	keeping input-order of variables/attributes/dimensions within fimex 
-2008-06-05 fimex-0.5
-    bugfix for short-fields when converting from felt
-    netcdf output configuration
-2008-05-21 fimex-0.4
-	performance improvements of interpolation (>90% with SIMD)
-	adjusting output to damocles
-	fixing order of long, lat projection axes
-2008-05-15 fimex-0.3
-	adding vector-interpolation
-	handling _FillValue in interpolation
-	reading of parameterized levels
-	renaming to fimex
-	
-2008-04-17 utplukk-0.2
-	backport to routine-machine, BOOST-1.32, hardcoded netcdf-path
-	dist-checked distribution
-	
-2008-01-02 utplukk-0.1
-	initial release using autotools
-	
-2007-09-18 utplukk-0.0
-	starting work on utplukk
+  * 2008-06-12 fimex-0.7
+    * fixing coordinates of polar-stereographic felt-files
+  * 2008-06-11 fimex-0.6
+    * units-support for netcdf output configuration
+    * keeping input-order of variables/attributes/dimensions within fimex 
+  * 2008-06-05 fimex-0.5
+    * bugfix for short-fields when converting from felt
+    * netcdf output configuration
+  * 2008-05-21 fimex-0.4
+    * performance improvements of interpolation (>90% with SIMD)
+    * adjusting output to damocles
+    * fixing order of long, lat projection axes
+  * 2008-05-15 fimex-0.3
+    * adding vector-interpolation
+    * handling _FillValue in interpolation
+    * reading of parameterized levels
+    * renaming to fimex
+  * 2008-04-17 utplukk-0.2
+    * backport to routine-machine, BOOST-1.32, hardcoded netcdf-path
+    * dist-checked distribution	
+  * 2008-01-02 utplukk-0.1
+    * initial release using autotools
+  * 2007-09-18 utplukk-0.0
+    * starting work on utplukk

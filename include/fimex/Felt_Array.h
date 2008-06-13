@@ -40,13 +40,15 @@ using namespace std;
  */
 struct ShortPairLess : public binary_function<const pair<short, short>, const pair<short, short>, bool> 
 {
-	bool operator()(const pair<short, short>& p1, const pair<short, short>& p2) {
+	bool operator()(const pair<short, short>& p1, const pair<short, short>& p2) const {
 		if (p1.first == p2.first) return p1.second < p2.second;
 		return p1.first < p2.first;
 	}
 };
 /** set<pair<short,short> > with comparator*/ 
 typedef set<pair<short,short>, ShortPairLess > ShortPairSet;
+/** map<pair<short,short>, short> with comparator*/
+typedef map<pair<short,short>, short, ShortPairLess > ShortPairMap;
 
 
 /// encapsulate parameters of a felt file
@@ -63,6 +65,8 @@ private:
 	// the time-array[0,1,2,3] correspond to index-array[2,3,4,9]
 	TIME_MAP times;
 	map<time_t, map<short, int> > fieldSizeMap;
+	// ident19 stores extra informations which might be time/level dependent
+	map<time_t, ShortPairMap> ident19;
 	int nx;
 	int ny;
 	long scaling_factor;
@@ -130,6 +134,34 @@ public:
 	 * return the level pairs (niveau 1, niveau 2) for this parameter as used by hybrid levels
 	 */
 	vector<pair<short, short> > getLevelPairs() const;
+	/**
+	 * add the ident19 parameter from the data-header
+	 */
+	void addIdent19(time_t time, pair<short, short> levelPair, short value) {ident19[time][levelPair] = value;}
+	/** 
+	 * get the ident19 parameter from the data-header, throw error if levelPair/time doesn't exists
+	 *  @warning only ident19 of data already read will be taken into account  
+	 */
+	short getIdent19(time_t time, pair<short, short> levelPair) const throw(Felt_File_Error);
+	/** 
+	 * get the ident19 parameter from the data-header, assures that the parameters keep constant
+	 * across all times for each levelPair or throws a Felt_File_Error
+	 * @warning only ident19 of data already read will be taken into account
+	 */
+	short getIdent19(pair<short, short> levelPair) const throw(Felt_File_Error);
+	/** 
+	 * get the ident19 parameter from the data-header, assures that the parameters keep constant
+	 * across all levelPair for each time or throws a Felt_File_Error
+	 * @warning only ident19 of data already read will be taken into account
+	 */
+	short getIdent19(time_t time) const throw(Felt_File_Error);
+	/** 
+	 * get the ident19 parameter from the data-header, assures that the parameters keep constant
+	 * across all levelPair and times or throws a Felt_File_Error
+	 * @warning only ident19 of data already read will be taken into account
+	 */
+	short getIdent19() const throw(Felt_File_Error);
+		
 	/** return x/longitude size */
 	int getX() const {return header[9];}
 	/** return y/latitude size */
@@ -146,6 +178,15 @@ public:
 private:
 	void testHeaderElement(short oldVal, short newVal, const std::string& msg) const throw(Felt_File_Error);
 };
+
+/**
+ * convert the 16-short header to a time
+ */
+time_t index16toTime(const boost::array<short,16>& idx);
+/**
+ * convert the 16-short header to a levelPair
+ */
+pair<short, short> index16toLevelPair(const boost::array<short, 16>& idx);
 
 } // end namespace MetNoFelt
 #endif /*FELT_ARRAY_H_*/

@@ -80,6 +80,17 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int f
 			throw Felt_File_Error(msg.str());
 		}
 	}
+	
+	// required to be able to go back from tm_hour to idx[4], idx[9]
+	time_t thisTime = index16toTime(idx); 
+	boost::array<short, 4> timeIdx= { { idx[2], idx[3], idx[4], idx[9] } };
+	times[thisTime] = timeIdx;
+	levelPairs.insert(index16toLevelPair(idx));
+	fieldSizeMap[thisTime][idx[12]] = fieldSize;
+}
+
+time_t index16toTime(const boost::array<short, 16>& idx)
+{
 	time_t rawtime;
 	struct tm * timeinfo;
 	time ( &rawtime );
@@ -90,13 +101,11 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int f
 	timeinfo->tm_hour = idx[4] / 100 + idx[9];
 	timeinfo->tm_min = idx[4] % 100;
 	timeinfo->tm_sec = 0;
-	time_t thisTime = mktime(timeinfo);
-
-	// required to be able to go back from tm_hour to idx[4], idx[9]
-	boost::array<short, 4> timeIdx= { { idx[2], idx[3], idx[4], idx[9] } };
-	times[thisTime] = timeIdx;
-	levelPairs.insert(pair<short, short>(idx[12], idx[13]));
-	fieldSizeMap[thisTime][idx[12]] = fieldSize;
+	return mktime(timeinfo);
+}
+pair<short, short> index16toLevelPair(const boost::array<short, 16>& idx)
+{
+	return pair<short, short>(idx[12], idx[13]);
 }
 
 void Felt_Array::testHeaderElement(short oldVal, short newVal, const std::string& msg) const throw(Felt_File_Error)
@@ -155,6 +164,80 @@ vector<pair<short, short> > Felt_Array::getLevelPairs() const {
 	// retVal is sorted since the set is sorted
 	return retVal;
 }
+
+short Felt_Array::getIdent19(time_t time, pair<short, short> levelPair) const throw(Felt_File_Error)
+{
+	map<time_t, ShortPairMap>::const_iterator tit = ident19.find(time);
+	if (tit != ident19.end()) {
+		ShortPairMap::const_iterator lit = tit->second.find(levelPair);
+		if (lit != tit->second.end()) {
+			return lit->second;
+		}
+	}
+	throw Felt_File_Error("getIdent19: time/pair value not found in ident19");
+}
+short Felt_Array::getIdent19(pair<short, short> levelPair) const throw(Felt_File_Error)
+{
+	short retVal = ANY_VALUE();
+	int found = 0;
+	for (map<time_t, ShortPairMap>::const_iterator tit = ident19.begin(); tit != ident19.end(); ++tit) {
+		ShortPairMap::const_iterator lit = tit->second.find(levelPair);
+		if (lit != tit->second.end()) {
+			found++;
+			if (retVal == ANY_VALUE()) {
+				retVal = lit->second;
+			} else if (retVal != lit->second) {
+				throw Felt_File_Error("changing ident19 for levelPair: "+MetNoFimex::type2string(levelPair.first) + "/"+MetNoFimex::type2string(levelPair.second));
+			}
+		}
+	}
+	if (found == 0) {
+		throw Felt_File_Error("could not find ident19 in "+getName()+" for levelPair: "+MetNoFimex::type2string(levelPair.first) + "/"+MetNoFimex::type2string(levelPair.second));
+	}
+	return retVal;
+}
+short Felt_Array::getIdent19(time_t time) const throw(Felt_File_Error) 
+{
+	short retVal = ANY_VALUE();
+	int found = 0;
+	
+	map<time_t, ShortPairMap>::const_iterator tit = ident19.find(time);
+	if (tit != ident19.end()) {
+		for (ShortPairMap::const_iterator lit = tit->second.begin(); lit != tit->second.end(); ++lit) {
+			found++;
+			if (retVal == ANY_VALUE()) {
+				retVal = lit->second;
+			} else if (retVal != lit->second) {
+				throw Felt_File_Error("changing ident19 for time: "+MetNoFimex::type2string(time));
+			}
+		}
+	}
+	if (found == 0) {
+		throw Felt_File_Error("could not find ident19 in "+getName()+" for time: "+MetNoFimex::type2string(time));
+	}
+	return retVal;	
+}
+short Felt_Array::getIdent19() const throw(Felt_File_Error)
+{
+	short retVal = ANY_VALUE();
+	int found = 0;
+	for (map<time_t, ShortPairMap>::const_iterator tit = ident19.begin(); tit != ident19.end(); ++tit) {
+		for (ShortPairMap::const_iterator lit = tit->second.begin(); lit != tit->second.end(); ++lit) {
+			found++;
+			if (retVal == ANY_VALUE()) {
+				retVal = lit->second;
+			} else if (retVal != lit->second) {
+				throw Felt_File_Error("changing ident19 in "+getName());
+			}
+		}
+	}
+	if (found == 0) {
+		throw Felt_File_Error("could not find ident19 for "+getName());
+	}
+	return retVal;	
+	
+}
+
 
 double Felt_Array::getScalingFactor() const {
 	return (dataType == "short") ? std::pow(10,static_cast<double>(header[19])) : 1;

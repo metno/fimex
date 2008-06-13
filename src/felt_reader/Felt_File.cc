@@ -130,11 +130,20 @@ void Felt_File::init() throw(Felt_File_Error)
 				if (name != UNDEFINED()) {
 					Felt_Array& fa = findOrCreateFeltArray(idx);
 					fa.addInformationByIndex(idx, ifound[i]);
+					if (idx[10] == 10) {
+						// hybrid levels are defined in the data-section (ident19), need all levels once
+						if (hybridLevels.find(index16toLevelPair(idx)) == hybridLevels.end()) {
+							getDataSlice(fa, idx, ifound[i]); // initialize data-section
+							hybridLevels[index16toLevelPair(idx)] = fa.getIdent19(index16toTime(idx), index16toLevelPair(idx));
+//							pair<short, short> p = index16toLevelPair(idx); 
+//							std::cerr << "reading level for: " << p.first << " " << p.second << " "<< hybridLevels[p] <<std::endl;
+						}
+					}
 					if (fa.getX() == ANY_VALUE()) {
 						// make sure that all info is initialized even if it requires reading a bit more data
 						// return data of no interest
 						getDataSlice(fa, idx, ifound[i]);
-					}
+					} 
 				}
         	}
         }
@@ -208,6 +217,7 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 	}
 	fa.setGridType(gridType);
 	fa.setGridParameters(gridParameters);
+	fa.addIdent19(index16toTime(idx), index16toLevelPair(idx), header_data[19-1]); // -1 due to fortran/c conversion 
 	vector<short> data(nx*ny);
 	copy(&header_data[20], &header_data[20+nx*ny], data.begin());
 	return data;

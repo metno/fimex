@@ -114,7 +114,7 @@ static int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpath
 	return size;
 }
 
-static std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath)
+std::vector<double> FeltCDMReader::readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath)
 {
 	std::vector<double> retValues;
 	std::string valuesXPath(variableXPath + "/values");
@@ -125,28 +125,32 @@ static std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::str
 		for (int i = 0; i < size; i++) {
 			xmlNodePtr node = nodes->nodeTab[0];
 			if (node->type == XML_ELEMENT_NODE) {
-				// add all space delimited values to the retVal vector
-				xmlChar *valuePtr = xmlNodeGetContent(node);
-				std::string
-						values(reinterpret_cast<const char *>(valuePtr));
-				xmlFree(valuePtr);
-				std::vector<std::string> tokens = tokenize(values, " ");
-				std::transform(tokens.begin(), tokens.end(),
-						std::back_inserter(retValues), string2type<double>);
+				std::string mode = getXmlProp(node, mode);
+				if (mode == "") {
+					// add all space delimited values to the retVal vector
+					xmlChar *valuePtr = xmlNodeGetContent(node);
+					std::string
+							values(reinterpret_cast<const char *>(valuePtr));
+					xmlFree(valuePtr);
+					std::vector<std::string> tokens = tokenize(values, " ");
+					std::transform(tokens.begin(), tokens.end(),
+							std::back_inserter(retValues), string2type<double>);
+				} else if (mode == "level2") {
+					// TODO: add values to vector
+					// TODO: get id from variableXPath
+					//feltFile.getFeltLevelPairs()[id];
+				} else if (mode == "hybridLevels") {
+					feltFile.getHybridLevels();
+				} else if (mode == "hybridSigmaCalc(ap,b)") {
+					// TODO: fetch ap, b, and cacl
+					
+				}
 			}
 		}
 	}
 	return retValues;
 }
-/**
- * add additional axis from the xml-file to this cdm
- * 
- * @param cdm the current cdm
- * @param xpathCtx xpath context of the file
- * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
- * @param templateReplacements replacements for template parameters
- */
-static void readAdditionalAxisVariablesFromXPath(CDM& cdm, const XMLDoc& doc, const std::string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(MetNoFelt::Felt_File_Error)
+void FeltCDMReader::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(MetNoFelt::Felt_File_Error)
 {
 	std::string addAxisXPath(xpathLevelString + "/additional_axis_variable");
 	XPathObjPtr xpathObj = doc.getXPathObject(addAxisXPath);
@@ -367,7 +371,7 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 			cdm.addAttribute(levelVar.getName(), *it);
 		}
 		
-		readAdditionalAxisVariablesFromXPath(cdm, doc, xpathLevelString, templateReplacementAttributes);
+		readAdditionalAxisVariablesFromXPath(doc, xpathLevelString, templateReplacementAttributes);
 	}
 	return levelDims;
 }
