@@ -296,7 +296,7 @@ std::map<short, std::vector<pair<short,short> > > Felt_File::getFeltLevelPairs()
 	}
 	// convert the set into a vector
 	std::map<short, std::vector<pair<short,short> > > typeLevelVector;
-	for (std::map<short, ShortPairSet >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
+	for (std::map<short, ShortPairSet >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {		
 		typeLevelVector[it->first] = std::vector<pair<short, short> >(it->second.begin(), it->second.end());
 	}
 	return typeLevelVector;

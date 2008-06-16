@@ -125,8 +125,8 @@ std::vector<double> FeltCDMReader::readValuesFromXPath(const XMLDoc& doc, const 
 		for (int i = 0; i < size; i++) {
 			xmlNodePtr node = nodes->nodeTab[0];
 			if (node->type == XML_ELEMENT_NODE) {
-				std::string mode = getXmlProp(node, mode);
-				if (mode == "") {
+				std::string mode = getXmlProp(node, "mode");
+				if (mode == "" || mode == "inline") {
 					// add all space delimited values to the retVal vector
 					xmlChar *valuePtr = xmlNodeGetContent(node);
 					std::string
@@ -136,14 +136,56 @@ std::vector<double> FeltCDMReader::readValuesFromXPath(const XMLDoc& doc, const 
 					std::transform(tokens.begin(), tokens.end(),
 							std::back_inserter(retValues), string2type<double>);
 				} else if (mode == "level2") {
-					// TODO: add values to vector
-					// TODO: get id from variableXPath
-					//feltFile.getFeltLevelPairs()[id];
+					// get level-id from variableXPath
+					boost::smatch matches;
+					boost::regex rgx(boost::regex("felt_id=[\"'](\\d+)[\"']"));
+					if (boost::regex_search(valuesXPath, matches, rgx)) {
+						short verticalId = string2type<short>(matches[1]);
+						// cannot take reference here, feltFile.getFeltLevelPairs container will be deleted
+						const vector<pair<short, short> > level2s = (feltFile.getFeltLevelPairs())[verticalId];
+						for (vector<pair<short, short> >::const_iterator it = level2s.begin(); it != level2s.end(); ++it) {
+							retValues.push_back(it->second);
+						}						
+					} else {
+						throw CDMException("cannot find felt_id for vertical axes needed to detect level2 in " + valuesXPath);
+					}
 				} else if (mode == "hybridLevels") {
-					feltFile.getHybridLevels();
+					// get level-id from variableXPath
+					boost::smatch matches;
+					boost::regex rgx(boost::regex("felt_id=[\"'](\\d+)[\"']"));
+					if (boost::regex_search(valuesXPath, matches, rgx)) {
+						short verticalId = string2type<short>(matches[1]);
+						// cannot take reference here, feltFile.getFeltLevelPairs container will be deleted
+						const vector<pair<short, short> > level2s = (feltFile.getFeltLevelPairs())[verticalId];
+						const MetNoFelt::ShortPairMap& hybridLevels = feltFile.getHybridLevels();
+						for (vector<pair<short, short> >::const_iterator it = level2s.begin(); it != level2s.end(); ++it) {
+							MetNoFelt::ShortPairMap::const_iterator hl = hybridLevels.find(*it);
+							if (hl != hybridLevels.end()) {
+								retValues.push_back(hl->second);
+							} else {
+								throw CDMException("cannot find hybrid-level for pair: " + type2string(it->first) + "," + type2string(it->second));
+							}
+						}
+					} else {
+						throw CDMException("cannot find felt_id for vertical axes needed to detect level2 in " + valuesXPath);
+					}
 				} else if (mode == "hybridSigmaCalc(ap,b)") {
-					// TODO: fetch ap, b, and cacl
-					
+					// fetch ap, b, and cacl
+					// TODO: read reference pressure p0 from CDM (currently not there)
+					double p0 = 100000;
+					const CDMVariable& ap = getCDM().getVariable("ap");
+					const CDMVariable& b = getCDM().getVariable("b");
+					const boost::shared_array<double> apData = ap.getData()->asConstDouble();
+					const boost::shared_array<double> bData = b.getData()->asConstDouble();										
+					for (size_t i = 0; i < ap.getData()->size(); ++i) {
+						retValues.push_back(apData[i]/p0 + bData[i]);
+					}
+				}
+				std::string sscale = getXmlProp(node, "scale_factor");
+				if (sscale != "") {
+					double scale = string2type<double>(sscale);
+					std::transform(retValues.begin(), retValues.end(),
+							retValues.begin(), std::bind1st(multiplies<double>(), scale));
 				}
 			}
 		}
@@ -290,7 +332,7 @@ void FeltCDMReader::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 		int month = (my_tmtime.tm_mon + 1);
 		stime << (my_tmtime.tm_year + 1900) << "-" <<  (month < 10 ? "0" : "") << month << "-" << ( my_tmtime.tm_mday < 10 ? "0" : "") << my_tmtime.tm_mday;
 		//stime << (my_tmtime.tm_hour) << ":" << my_tmtime.tm_min << ":" << my_tmtime.tm_sec << "Z";
-		cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", stime.str() + " creation by utplukk from file '"+ filename+"'"));
+		cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", stime.str() + " creation by fimex from file '"+ filename+"'"));
 	}
 }
 
@@ -349,9 +391,24 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 		cdm.addDimension(levelDim);
 		levelVecMap[levelDim.getName()] = it->second;
 
+		// create level variable without data!
 		std::vector<std::string> levelShape;
 		levelShape.push_back(levelDim.getName());
 		CDMVariable levelVar(levelId, levelDataType, levelShape);
+		cdm.addVariable(levelVar);
+
+		// add attributes
+		std::vector<CDMAttribute> levelAttributes;
+		fillAttributeList(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
+		for (std::vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
+			cdm.addAttribute(levelVar.getName(), *ait);
+		}
+		
+		// read additional axis variables
+		readAdditionalAxisVariablesFromXPath(doc, xpathLevelString, templateReplacementAttributes);
+
+		// read level data after! additional axis variables since additional axis variable might contain
+		// data needed from level data (i.e. for hybrid_sigma levels)
 		std::vector<double> lv = readValuesFromXPath(doc, xpathLevelString);
 		boost::shared_ptr<Data> data;
 		if (lv.size() > 0) {
@@ -362,16 +419,9 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 			std::vector<short> lvs = it->second;
 			data = createData(levelDataType, levelSize, lvs.begin(), lvs.end());
 		}
-		levelVar.setData(data);
-		cdm.addVariable(levelVar);
-		
-		std::vector<CDMAttribute> levelAttributes;
-		fillAttributeList(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
-		for (std::vector<CDMAttribute>::iterator it = levelAttributes.begin(); it != levelAttributes.end(); ++it) {
-			cdm.addAttribute(levelVar.getName(), *it);
-		}
-		
-		readAdditionalAxisVariablesFromXPath(doc, xpathLevelString, templateReplacementAttributes);
+		cdm.getVariable(levelDim.getName()).setData(data);
+
+	
 	}
 	return levelDims;
 }
