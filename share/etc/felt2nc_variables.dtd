@@ -36,6 +36,10 @@
 
 <!--- list of space separated values -->
 <!ELEMENT values (#PCDATA)>
+<!ATTLIST values
+	mode CDATA "inline"
+	scale_factor CDATA "1."
+  >
 
 <!--- Put your DTDDoc comment here. -->
 <!ELEMENT axes (vertical_axis|spatial_axis|time)*>
