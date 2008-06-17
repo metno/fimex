@@ -26,7 +26,7 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include "CDMReader.h"
+#include "fimex/CDMReader.h"
 
 namespace MetNoFimex
 {

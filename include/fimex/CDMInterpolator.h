@@ -24,9 +24,9 @@
 #ifndef CDMINTERPOLATOR_H_
 #define CDMINTERPOLATOR_H_
 
-#include "CDMReader.h"
-#include "CachedInterpolation.h"
-#include "CachedVectorReprojection.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CachedInterpolation.h"
+#include "fimex/CachedVectorReprojection.h"
 
 namespace MetNoFimex
 {

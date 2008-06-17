@@ -26,7 +26,7 @@
 
 #include <string>
 #include <ostream>
-#include "CDMNamedEntity.h"
+#include "fimex/CDMNamedEntity.h"
 
 namespace MetNoFimex
 {

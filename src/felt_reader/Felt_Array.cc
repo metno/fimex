@@ -21,9 +21,9 @@
  * USA.
  */
 
-#include "Felt_Array.h"
-#include "FeltParameters.h"
-#include "Utils.h"
+#include "fimex/Felt_Array.h"
+#include "fimex/FeltParameters.h"
+#include "fimex/Utils.h"
 #include <sstream>
 
 #include <algorithm>

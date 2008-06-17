@@ -28,8 +28,8 @@
 #include <string>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include "CDMException.h"
-#include "XMLDoc.h"
+#include "fimex/CDMException.h"
+#include "fimex/XMLDoc.h"
 
 namespace MetNoFimex
 {

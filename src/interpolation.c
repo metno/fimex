@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "interpolation.h"
+#include "fimex/interpolation.h"
 #include <string.h>
 #include <stdio.h>
 

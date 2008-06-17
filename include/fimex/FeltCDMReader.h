@@ -28,10 +28,10 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include "Felt_File.h"
-#include "CDMReader.h"
-#include "CDMDimension.h"
-#include "ReplaceStringObject.h"
+#include "fimex/Felt_File.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMDimension.h"
+#include "fimex/ReplaceStringObject.h"
 
 namespace MetNoFimex
 {

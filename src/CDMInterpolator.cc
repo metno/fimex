@@ -21,11 +21,11 @@
  * USA.
  */
 
-#include "CDMInterpolator.h"
+#include "fimex/CDMInterpolator.h"
 
 #include <boost/regex.hpp>
-#include "interpolation.h"
-#include "DataImpl.h"
+#include "fimex/interpolation.h"
+#include "fimex/DataImpl.h"
 
 namespace MetNoFimex
 {

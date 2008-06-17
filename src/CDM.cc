@@ -21,9 +21,9 @@
  * USA.
  */
 
-#include "CDM.h"
-#include "interpolation.h"
-#include "DataImpl.h"
+#include "fimex/CDM.h"
+#include "fimex/interpolation.h"
+#include "fimex/DataImpl.h"
 #include <boost/bind.hpp>
 #include <functional>
 #include <algorithm>

@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "TimeException.h"
+#include "fimex/TimeException.h"
 
 namespace MetNoFimex
 {

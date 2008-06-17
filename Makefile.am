@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src test share/etc
+SUBDIRS = src include test share/etc
 
 include doxygen_aminclude.am
 

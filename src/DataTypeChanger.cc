@@ -21,8 +21,8 @@
  * USA.
  */
 
-#include "DataTypeChanger.h"
-#include "Data.h"
+#include "fimex/DataTypeChanger.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

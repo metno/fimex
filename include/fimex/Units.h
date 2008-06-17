@@ -26,7 +26,7 @@
 
 #include <string>
 #include <boost/noncopyable.hpp>
-#include "CDMException.h"
+#include "fimex/CDMException.h"
 namespace MetNoFimex
 {
 

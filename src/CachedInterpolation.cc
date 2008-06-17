@@ -21,8 +21,8 @@
  * USA.
  */
 
-#include "CachedInterpolation.h"
-#include "DataImpl.h"
+#include "fimex/CachedInterpolation.h"
+#include "fimex/DataImpl.h"
 namespace MetNoFimex
 {
 

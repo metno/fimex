@@ -29,11 +29,11 @@
 #include <string>
 #include <ostream>
 #include <boost/regex.hpp>
-#include "CDMAttribute.h"
-#include "CDMVariable.h"
-#include "CDMDimension.h"
-#include "CDMException.h"
-#include "CDMconstants.h"
+#include "fimex/CDMAttribute.h"
+#include "fimex/CDMVariable.h"
+#include "fimex/CDMDimension.h"
+#include "fimex/CDMException.h"
+#include "fimex/CDMconstants.h"
 
 namespace MetNoFimex
 {

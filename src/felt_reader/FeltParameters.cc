@@ -21,9 +21,9 @@
  * USA.
  */
 
-#include "FeltParameters.h"
-#include "CDMconstants.h"
-#include "Utils.h"
+#include "fimex/FeltParameters.h"
+#include "fimex/CDMconstants.h"
+#include "fimex/Utils.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>

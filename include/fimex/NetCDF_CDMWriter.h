@@ -24,8 +24,8 @@
 #ifndef NETCDF_CDMWRITER_H_
 #define NETCDF_CDMWRITER_H_
 
-#include "CDMWriter.h"
-#include "config.h"
+#include "fimex/CDMWriter.h"
+#include "fimex/config.h"
 #include <map>
 #include <string>
 #include NETCDF_CPP_INCLUDE

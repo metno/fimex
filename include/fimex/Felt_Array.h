@@ -29,7 +29,7 @@
 #include <map>
 #include <ctime>
 #include <boost/array.hpp>
-#include "Felt_File_Error.h"
+#include "fimex/Felt_File_Error.h"
 
 namespace MetNoFelt {
 using namespace std;

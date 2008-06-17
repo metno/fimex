@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "ReplaceStringObject.h"
+#include "fimex/ReplaceStringObject.h"
 
 namespace MetNoFimex {
 

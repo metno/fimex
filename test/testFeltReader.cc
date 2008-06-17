@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "config.h"
+#include "fimex/config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <iostream>
@@ -30,10 +30,10 @@
 #include <cassert>
 #include <ctime>
 #include <cmath>
-#include "FeltParameters.h"
-#include "Felt_File.h"
-#include "FeltCDMReader.h"
-#include "Data.h"
+#include "fimex/FeltParameters.h"
+#include "fimex/Felt_File.h"
+#include "fimex/FeltCDMReader.h"
+#include "fimex/Data.h"
 
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>

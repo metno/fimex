@@ -21,16 +21,16 @@
  * USA.
  */
 
-#include "FeltCDMReader.h"
-#include "Utils.h"
-#include "Felt_File_Error.h"
-#include "Felt_Array.h"
-#include "interpolation.h"
-#include "CDMDataType.h"
-#include "DataImpl.h"
-#include "ReplaceStringTimeObject.h"
-#include "Utils.h"
-#include "XMLDoc.h"
+#include "fimex/FeltCDMReader.h"
+#include "fimex/Utils.h"
+#include "fimex/Felt_File_Error.h"
+#include "fimex/Felt_Array.h"
+#include "fimex/interpolation.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/DataImpl.h"
+#include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>

@@ -24,7 +24,7 @@
 #ifndef REPLACESTRINGTIMEOBJECT_H_
 #define REPLACESTRINGTIMEOBJECT_H_
 
-#include "ReplaceStringObject.h"
+#include "fimex/ReplaceStringObject.h"
 #include <ctime>
 
 namespace MetNoFimex

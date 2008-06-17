@@ -26,8 +26,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-#include "interpolation.h"
-#include "Data.h"
+#include "fimex/interpolation.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

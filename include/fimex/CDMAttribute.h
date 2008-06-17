@@ -27,9 +27,9 @@
 #include<string>
 #include<ostream>
 #include<boost/shared_ptr.hpp>
-#include "Data.h"
-#include "CDMDataType.h"
-#include "CDMNamedEntity.h"
+#include "fimex/Data.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/CDMNamedEntity.h"
 
 namespace MetNoFimex
 {

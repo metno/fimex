@@ -1,4 +1,4 @@
-/* src/config.h.in.  Generated from configure.ac by autoheader.  */
+/* include/fimex/config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* define if the Boost library is available */
 #undef HAVE_BOOST

@@ -25,10 +25,10 @@
 #define NETCDF_UTILS_H_
 
 #include <boost/shared_ptr.hpp>
-#include "config.h"
+#include "fimex/config.h"
 #include NETCDF_CPP_INCLUDE
-#include "CDMDataType.h"
-#include "Data.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

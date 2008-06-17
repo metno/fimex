@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "CDMReader.h"
+#include "fimex/CDMReader.h"
 #include <boost/bind.hpp>
 
 namespace MetNoFimex {

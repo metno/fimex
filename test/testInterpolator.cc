@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "config.h"
+#include "fimex/config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
@@ -31,10 +31,10 @@ using boost::unit_test_framework::test_suite;
 #include <iostream>
 #include <fstream>
 
-#include "FeltCDMReader.h"
-#include "NetCDF_CDMWriter.h"
-#include "CDMInterpolator.h"
-#include "interpolation.h"
+#include "fimex/FeltCDMReader.h"
+#include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/CDMInterpolator.h"
+#include "fimex/interpolation.h"
 
 using namespace std;
 using namespace MetNoFimex;

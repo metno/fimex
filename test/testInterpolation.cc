@@ -21,17 +21,17 @@
  * USA.
  */
 
-#include "config.h"
+#include "fimex/config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-#include "interpolation.h"
+#include "fimex/interpolation.h"
 
 #include <cmath>
 #include <iostream>
 #include <fstream>
 #include <string>
 
-#include "CDMAttribute.h"
+#include "fimex/CDMAttribute.h"
 
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>

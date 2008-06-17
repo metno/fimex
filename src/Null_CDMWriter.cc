@@ -21,10 +21,10 @@
  * USA.
  */
 
-#include "Null_CDMWriter.h"
+#include "fimex/Null_CDMWriter.h"
 #include <boost/shared_array.hpp>
-#include "CDMDataType.h"
-#include "Utils.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {

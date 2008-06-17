@@ -21,14 +21,14 @@
  * USA.
  */
 
-#include "config.h"
+#include "fimex/config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
-#include "FeltCDMReader.h"
-#include "NetCDF_CDMWriter.h"
+#include "fimex/FeltCDMReader.h"
+#include "fimex/NetCDF_CDMWriter.h"
 
 #define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>

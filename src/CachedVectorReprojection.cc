@@ -21,9 +21,9 @@
  * USA.
  */
 
-#include "CachedVectorReprojection.h"
-#include "CDMException.h"
-#include "DataImpl.h"
+#include "fimex/CachedVectorReprojection.h"
+#include "fimex/CDMException.h"
+#include "fimex/DataImpl.h"
 #include <iostream>
 
 namespace MetNoFimex

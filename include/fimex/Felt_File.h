@@ -30,10 +30,10 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
-#include "Data.h"
-#include "felt_reader/Felt_Array.h"
-#include "felt_reader/Felt_File_Error.h"
-#include "felt_reader/FeltParameters.h"
+#include "fimex/Data.h"
+#include "fimex/Felt_Array.h"
+#include "fimex/Felt_File_Error.h"
+#include "fimex/FeltParameters.h"
 
 namespace MetNoFelt {
 

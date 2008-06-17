@@ -27,17 +27,17 @@
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include "../src/config.h"
-#include "CDMReader.h"
-#include "CDMExtractor.h"
-#include "CDMInterpolator.h"
-#include "Null_CDMWriter.h"
+#include "fimex/config.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMExtractor.h"
+#include "fimex/CDMInterpolator.h"
+#include "fimex/Null_CDMWriter.h"
 #ifdef HAVE_LIBMIC
-#include "FeltCDMReader.h"
+#include "fimex/FeltCDMReader.h"
 #endif
 #ifdef HAVE_NETCDF
-#include "NetCDF_CDMWriter.h"
-#include "NetCDF_CF10_CDMReader.h"
+#include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/NetCDF_CF10_CDMReader.h"
 #endif
 
 namespace po = boost::program_options;

@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "felt_reader/Felt_File_Error.h"
+#include "fimex/Felt_File_Error.h"
 
 namespace MetNoFelt {
 

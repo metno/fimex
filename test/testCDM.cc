@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "config.h"
+#include "fimex/config.h"
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
@@ -29,7 +29,7 @@
 using boost::unit_test_framework::test_suite;
 
 
-#include "CDM.h"
+#include "fimex/CDM.h"
 
 using namespace std;
 using namespace MetNoFimex;

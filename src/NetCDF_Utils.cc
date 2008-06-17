@@ -21,9 +21,9 @@
  * USA.
  */
 
-#include "NetCDF_Utils.h"
+#include "fimex/NetCDF_Utils.h"
 #include <boost/shared_array.hpp>
-#include "DataImpl.h"
+#include "fimex/DataImpl.h"
 
 namespace MetNoFimex
 {

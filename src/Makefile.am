@@ -2,7 +2,7 @@ SUBDIRS = . felt_reader binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I. ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
+AM_CPPFLAGS = -I../include -I${top_srcdir}/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
 
 lib_LIBRARIES = libfimex.a
 libfimex_a_SOURCES = interpolation.c \
@@ -25,32 +25,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 Units.cc \
 					 Utils.cc \
 					 XMLDoc.cc
-include_HEADERS = config.h \
-	              CachedInterpolation.h \
-				  CachedVectorReprojection.h \
-	              CDMAttribute.h \
-				  CDMconstants.h \
-	              CDMDataType.h \
-	              CDMDimension.h \
-	              CDMException.h \
-	              CDMExtractor.h \
-	              CDMInterpolator.h \
-  			      CDMNamedEntity.h \
-	              CDMReader.h \
-	              CDMVariable.h \
-	              CDMWriter.h CDM.h \
-	              Data.h \
-	              DataImpl.h \
- 				  DataTypeChanger.h \
-	              interpolation.h \
-	              Null_CDMWriter.h \
-	              ReplaceStringObject.h \
-	              ReplaceStringTimeObject.h \
-	              Units.h \
-	              Utils.h \
-	              XMLDoc.h
 
 if HAVE_NETCDF
   libfimex_a_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
-  include_HEADERS += NetCDF_CF10_CDMReader.h NetCDF_CDMWriter.h NetCDF_Utils.h
 endif

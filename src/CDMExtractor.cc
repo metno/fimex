@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "CDMExtractor.h"
+#include "fimex/CDMExtractor.h"
 
 namespace MetNoFimex
 {

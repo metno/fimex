@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "CDMVariable.h"
+#include "fimex/CDMVariable.h"
 
 namespace MetNoFimex
 {

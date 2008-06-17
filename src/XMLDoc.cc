@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "XMLDoc.h"
+#include "fimex/XMLDoc.h"
 #include <libxml/xinclude.h>
 
 

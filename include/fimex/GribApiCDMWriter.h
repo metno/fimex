@@ -24,7 +24,7 @@
 #ifndef GRIBAPICDMWRITER_H_
 #define GRIBAPICDMWRITER_H_
 
-#include "CDMWriter.h"
+#include "fimex/CDMWriter.h"
 
 namespace MetNoFimex
 {

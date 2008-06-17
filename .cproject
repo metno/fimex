@@ -160,6 +160,7 @@
 </target>
 </buildTargets>
 </storageModule>
+
 <storageModule moduleId="org.eclipse.cdt.core.pathentry">
 <pathentry include="src" kind="inc" path="" system="true"/>
 <pathentry include="/usr/include/c++/4.1.1" kind="inc" path="" system="true"/>

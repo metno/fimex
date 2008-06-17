@@ -24,7 +24,7 @@
 #ifndef NULL_CDMWRITER_H_
 #define NULL_CDMWRITER_H_
 
-#include "CDMWriter.h"
+#include "fimex/CDMWriter.h"
 
 namespace MetNoFimex
 {

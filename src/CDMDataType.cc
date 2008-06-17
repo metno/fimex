@@ -21,8 +21,8 @@
  * USA.
  */
 
-#include "CDMDataType.h"
-#include "Utils.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {

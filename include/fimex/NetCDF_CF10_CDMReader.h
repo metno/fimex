@@ -24,8 +24,8 @@
 #ifndef NETCDF_CF10_CDMREADER_H_
 #define NETCDF_CF10_CDMREADER_H_
 
-#include "config.h"
-#include "CDMReader.h"
+#include "fimex/config.h"
+#include "fimex/CDMReader.h"
 #include NETCDF_CPP_INCLUDE
 
 namespace MetNoFimex

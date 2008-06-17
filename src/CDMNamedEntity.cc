@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "CDMNamedEntity.h"
+#include "fimex/CDMNamedEntity.h"
 
 namespace MetNoFimex
 {

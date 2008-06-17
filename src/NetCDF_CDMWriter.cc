@@ -21,19 +21,19 @@
  * USA.
  */
 
-#include "NetCDF_CDMWriter.h"
-#include "config.h"
+#include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/config.h"
 extern "C" {
 #include NETCDF_C_INCLUDE             // the C interface
 }
 #include <boost/shared_array.hpp>
-#include "interpolation.h"
-#include "CDMDataType.h"
-#include "DataTypeChanger.h"
-#include "NetCDF_Utils.h"
-#include "Units.h"
-#include "Utils.h"
-#include "XMLDoc.h"
+#include "fimex/interpolation.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/DataTypeChanger.h"
+#include "fimex/NetCDF_Utils.h"
+#include "fimex/Units.h"
+#include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
 
 namespace MetNoFimex
 {

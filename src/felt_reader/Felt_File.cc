@@ -21,13 +21,13 @@
  * USA.
  */
 
-#include "Felt_File.h"
+#include "fimex/Felt_File.h"
 #include <milib/milib.h>
-#include "CDMDataType.h"
-#include "DataImpl.h"
-#include "CDMconstants.h"
-#include "Utils.h"
-#include "interpolation.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/DataImpl.h"
+#include "fimex/CDMconstants.h"
+#include "fimex/Utils.h"
+#include "fimex/interpolation.h"
 #include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>

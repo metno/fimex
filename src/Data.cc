@@ -21,8 +21,8 @@
  * USA.
  */
 
-#include "Data.h"
-#include "DataImpl.h"
+#include "fimex/Data.h"
+#include "fimex/DataImpl.h"
 
 namespace MetNoFimex
 {

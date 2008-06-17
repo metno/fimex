@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "GribApiCDMWriter.h"
+#include "fimex/GribApiCDMWriter.h"
 
 #include <grib_api.h>
 

@@ -30,10 +30,10 @@
 #include <sstream>
 #include <iostream>
 #include <cmath>
-#include "Data.h"
-#include "CDMDataType.h"
-#include "CDMException.h"
-#include "Utils.h"
+#include "fimex/Data.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/CDMException.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {

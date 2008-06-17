@@ -27,10 +27,10 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include "CDMAttribute.h"
-#include "CDMDimension.h"
-#include "CDMDataType.h"
-#include "CDMNamedEntity.h"
+#include "fimex/CDMAttribute.h"
+#include "fimex/CDMDimension.h"
+#include "fimex/CDMDataType.h"
+#include "fimex/CDMNamedEntity.h"
 
 namespace MetNoFimex
 {

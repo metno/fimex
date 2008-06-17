@@ -21,8 +21,8 @@
  * USA.
  */
 
-#include "Units.h"
-#include "config.h"
+#include "fimex/Units.h"
+#include "fimex/config.h"
 #if HAVE_UDUNITS
 extern "C" {
 #include "udunits.h"

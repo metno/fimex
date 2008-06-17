@@ -25,9 +25,9 @@
 #define CDMREADER_H_
 
 #include <boost/shared_ptr.hpp>
-#include "CDM.h"
-#include "Data.h"
-#include "CDMVariable.h"
+#include "fimex/CDM.h"
+#include "fimex/Data.h"
+#include "fimex/CDMVariable.h"
 
 namespace MetNoFimex
 {
