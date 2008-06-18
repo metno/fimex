@@ -70,6 +70,8 @@ private:
 	void initFillRenameDimension(const std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc) throw(CDMException);
+	/** test if the variable exists in the cdmReader or throw an CDMException */
+	void testVariableExists(const std::string& varName) throw(CDMException);
 	
 	NcDimMap defineDimensions();
 	NcVarMap defineVariables(const NcDimMap& dimMap);

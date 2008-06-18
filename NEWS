@@ -1,3 +1,6 @@
+  * 2008-... fimex-0.8beta
+    * moving headers to fimex/*.h
+    * throw exception when renaming non-existing field in NetCDF-writer (instead of segfault)
   * 2008-06-12 fimex-0.7
     * fixing coordinates of polar-stereographic felt-files
   * 2008-06-11 fimex-0.6

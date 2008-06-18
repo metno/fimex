@@ -230,7 +230,7 @@ const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::str
 		if (attrIt != (varIt->second).end()) {
 			return *attrIt;
 		} else {
-			throw CDMException("Attribute " + attrName + " not found for varName");
+			throw CDMException("Attribute " + attrName + " not found for variable: " + varName);
 		}
 	} else {
 		throw CDMException("Variable " + varName + " not found");

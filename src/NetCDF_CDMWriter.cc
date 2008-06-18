@@ -111,12 +111,22 @@ void NetCDF_CDMWriter::initFillRenameDimension(const std::auto_ptr<XMLDoc>& doc)
 	for (int i = 0; i < size; i++) {
 		std::string name = getXmlProp(nodes->nodeTab[i], "name");
 		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+		cdmReader->getCDM().getDimension(name); // check existence, throw exception
 		dimensionNameChanges[name] = newname;
 		// change dimension variable unless it has been changed
 		if (variableNameChanges.find(name) == variableNameChanges.end()) {
 			variableNameChanges[name] = newname;
 		}
 	}
+}
+
+void NetCDF_CDMWriter::testVariableExists(const std::string& varName) throw(CDMException)
+{
+	try {
+		cdmReader->getCDM().getVariable(varName);
+	} catch (CDMException& e) {
+		throw CDMException(std::string("error modifying variable in writer: ") + e.what());
+	}	
 }
 
 void NetCDF_CDMWriter::initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) throw(CDMException)
@@ -126,6 +136,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) 
 	int size = (nodes) ? nodes->nodeNr : 0;
 	for (int i = 0; i < size; i++) {
 		std::string name = getXmlProp(nodes->nodeTab[i], "name");
+		testVariableExists(name);
 		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
 		variableNameChanges[name] = newname;
 	}
@@ -157,6 +168,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc)
 			// default
 		} else if (parentName == "variable") {
 			varName = getXmlProp(parent, "name");
+			testVariableExists(varName);
 		} else {
 			throw CDMException("unknown parent of attribute "+attName+": "+parentName);
 		}
@@ -165,6 +177,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc)
 		std::string attType = getXmlProp(node, "type");
 		std::string attNewName = getXmlProp(node, "newname");
 		if (attNewName != "") {
+			cdmReader->getCDM().getAttribute(varName, attName); // throw error
 			attributeNameChanges[varName][attName] = attNewName;
 		}
 		if (attType != "") {
