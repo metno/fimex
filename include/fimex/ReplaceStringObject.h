@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace MetNoFimex {
 
@@ -43,8 +44,10 @@ public:
 	 * implementors are asked to implement operator<<
 	 */
 	virtual std::ostream& put(std::ostream& s) const = 0;
-	// set the formatting String for this object
-	virtual void setFormatString(std::string) = 0;
+	/// set the formatting string for this object
+	virtual void setFormatString(const std::string& format) = 0;
+	/// set the formatting string and additional options for this object 
+	virtual void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options) = 0;
 };
 
 }

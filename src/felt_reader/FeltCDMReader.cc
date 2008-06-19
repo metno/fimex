@@ -50,12 +50,16 @@ using namespace std;
 static string replaceTemplateAttribute(string value, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) {
 	for (map<string, boost::shared_ptr<ReplaceStringObject> >::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
 		boost::smatch matches;
-		boost::regex rgx(boost::regex(".*%" + it->first + "(\\((.*)\\))?" + "%.*"));
+		boost::regex rgx(boost::regex(".*%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%.*"));
 		if (boost::regex_match(value, matches, rgx)) {
 			boost::shared_ptr<ReplaceStringObject> rso = it->second;
 			if (matches.size() > 2) {
+				std::vector<std::string> options;
+				if (matches.size() > 3) {
+					options = tokenize(matches[3], ",");
+				}
 				// values within the inner brackets
-				rso->setFormatString(matches[2]);
+				rso->setFormatStringAndOptions(matches[2], options);
 			}
 			stringstream ss;
 			rso->put(ss);

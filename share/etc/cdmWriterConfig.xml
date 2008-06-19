@@ -22,7 +22,7 @@
 </variable>
 
 <!-- rename a variable -->
-<variable name="pressure" newname="air_pressure" />
+<variable name="sea_level_pressure" newname="sea_pressure" />
 
 <!-- rename a dimension -->
 <dimension name="x" newname="x_c" />

@@ -68,7 +68,7 @@ test_feltNetcdfWriteConfig(void) {
 	}
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
 	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfig.xml");
-	BOOST_CHECK(writer.getVariableName("pressure") == "air_pressure");
+	BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");
 	BOOST_CHECK(writer.getVariableName("x") == "x_c");
 	BOOST_CHECK(writer.getAttributeName(CDM::globalAttributeNS(), "min_time") == "minimum_time");

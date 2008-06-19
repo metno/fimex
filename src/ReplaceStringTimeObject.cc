@@ -22,7 +22,7 @@
  */
 
 #include "fimex/ReplaceStringTimeObject.h"
-
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {
@@ -34,11 +34,22 @@ std::ostream& operator<<(std::ostream& s, const ReplaceStringTimeObject& rsto)
 	struct tm * timeinfo;
 	char buffer [80];
 
-	timeinfo = gmtime( &rsto.myTime);
+	time_t newTime = rsto.myTime + rsto.offset;
+	
+	timeinfo = gmtime( &newTime );
 
 	strftime(buffer, 80, rsto.myFormat.c_str(), timeinfo);
 	s << buffer;
 	return s;
 }
+
+void ReplaceStringTimeObject::setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options)
+{
+	myFormat = format;
+	if (options.size() > 0) {
+		offset = string2type<time_t>(options[0]);
+	}
+}
+
 
 }
