@@ -68,6 +68,18 @@ void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first
 	copyData(startPos, data.asConstDouble(), data.size(), first, last);
 }
 
+// specializations of getDataType
+template<>
+CDMDataType DataImpl<char>::getDataType() const {return CDM_CHAR;}
+template<>
+CDMDataType DataImpl<short>::getDataType() const {return CDM_SHORT;}
+template<>
+CDMDataType DataImpl<int>::getDataType() const {return CDM_INT;}
+template<>
+CDMDataType DataImpl<float>::getDataType() const {return CDM_FLOAT;}
+template<>
+CDMDataType DataImpl<double>::getDataType() const {return CDM_DOUBLE;}
+
 // specializations of constConvertArrayType
 template<>
 const boost::shared_array<char> constConvertArrayType(const boost::shared_array<char>& inData, long length) {return inData;}

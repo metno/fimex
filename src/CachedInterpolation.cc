@@ -37,23 +37,21 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 	}
 }
 
-boost::shared_ptr<Data> CachedInterpolation::interpolateValues(boost::shared_ptr<Data> inData, float badValue) {
-	size_t inZ = inData->size() / (inX*inY);
+boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) {
+	size_t inZ = size / (inX*inY);
+	newSize = outX*outY*inZ;
 	boost::shared_array<float> zValues(new float[inZ]);
-	const boost::shared_array<float> inFloatData = inData->asConstFloat(); 
-	mifi_bad2nanf(&inFloatData[0], &inFloatData[inData->size()], badValue);
-	boost::shared_array<float> outfield(new float[outX*outY*inZ]);
+	boost::shared_array<float> outfield(new float[newSize]);
 	for (size_t y = 0; y < outY; ++y) {
 		for (size_t x = 0; x < outX; ++x) {
-			if (func(inFloatData.get(), zValues.get(), pointsOnXAxis[y*outX+x], pointsOnYAxis[y*outX+x], inX, inY, inZ) != MIFI_ERROR) {
+			if (func(inData.get(), zValues.get(), pointsOnXAxis[y*outX+x], pointsOnYAxis[y*outX+x], inX, inY, inZ) != MIFI_ERROR) {
 				for (size_t z = 0; z < inZ; ++z) {
 					outfield[mifi_3d_array_position(x, y, z, outX, outY, inZ)] = zValues[z];
 				}			
 			} else (throw CDMException("error during interpolation"));
 		}
 	}
-	mifi_nanf2bad(&outfield[0], &outfield[outX*outY*inZ], badValue);
-	return boost::shared_ptr<DataImpl<float> >(new DataImpl<float>(outfield, outX*outY*inZ));
+	return outfield;
 }
 
 }

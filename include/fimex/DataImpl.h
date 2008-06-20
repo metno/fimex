@@ -104,6 +104,9 @@ namespace MetNoFimex
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException);
 		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException);
 		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException);
+		// specialized for each known type in Data.cc
+		virtual CDMDataType getDataType() const {return CDM_NAT;}
+
 		/**
 		 * set the values of the data by the input-iterator
 		 */

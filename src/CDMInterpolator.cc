@@ -44,6 +44,18 @@ CDMInterpolator::~CDMInterpolator()
 {
 }
 
+static boost::shared_array<float> data2InterpolationArray(const boost::shared_ptr<Data>& inData, double badValue) {
+	boost::shared_array<float> array = inData->asFloat();
+	mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
+	return array;
+}
+
+// for performance reasons, the iData-reference will be modified and used within the return data
+static boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
+	mifi_nanf2bad(&iData[0], &iData[size], badValue);
+	return boost::shared_ptr<Data>(new DataImpl<float>(iData, size));
+}
+
 const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	const CDMVariable& variable = cdm.getVariable(varName);
@@ -54,22 +66,26 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		// no projection, just forward
 		return dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
-		// TODO: handle fillValues, scaling?, datatypes?
-		boost::shared_ptr<Data> data = cachedInterpolation.interpolateValues(dataReader->getDataSlice(varName, unLimDimPos), cdm.getFillValue(varName)); 
+		boost::shared_ptr<Data> data = dataReader->getDataSlice(varName, unLimDimPos);
+		double badValue = cdm.getFillValue(varName);
+		boost::shared_array<float> array = data2InterpolationArray(data, badValue);
+		size_t newSize = 0;
+		boost::shared_array<float> iArray = cachedInterpolation.interpolateValues(array, data->size(), newSize); 
 		if (variable.isSpatialVector()) {
 			// TODO: the current implementation is sub-optimal since it will fetch and transpose all vector-data twice (once for each direction)
 			const std::string& counterpart = variable.getSpatialVectorCounterpart();
-			boost::shared_ptr<Data> counterpartData = cachedInterpolation.interpolateValues(dataReader->getDataSlice(counterpart, unLimDimPos));
+			boost::shared_array<float> counterPartArray = data2InterpolationArray(dataReader->getDataSlice(counterpart, unLimDimPos), cdm.getFillValue(counterpart));
+			boost::shared_array<float> counterpartiArray = cachedInterpolation.interpolateValues(counterPartArray, data->size(), newSize);
 			const std::string& direction = variable.getSpatialVectorDirection();
 			if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
-				cachedVectorReprojection.reprojectValues(data, counterpartData, cdm.getFillValue(varName), cdm.getFillValue(counterpart));
+				cachedVectorReprojection.reprojectValues(iArray, counterpartiArray, newSize);
 			} else if (direction.find("y") != string::npos || direction.find("latitude") != string::npos) {
-				cachedVectorReprojection.reprojectValues(counterpartData, data, cdm.getFillValue(counterpart), cdm.getFillValue(varName));
+				cachedVectorReprojection.reprojectValues(counterpartiArray, iArray, newSize);
 			} else {
 				throw CDMException("could not find x,longitude,y,latitude direction for vector: " + varName + ", direction: " + direction);
 			}
 		}
-		return data;
+		return interpolationArray2Data(iArray, newSize, badValue);
 	}
 }
 

@@ -104,6 +104,10 @@ namespace MetNoFimex
 		 * @brief convert the datatype from one type,fill,scale,offset to another
 		 */
 		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException) = 0;
+		/**
+		 * return the CDMDataType of this data
+		 */
+		virtual CDMDataType getDataType() const = 0;
 	};
 
 	/**

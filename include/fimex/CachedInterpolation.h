@@ -63,9 +63,10 @@ public:
 	 * Actually interpolate the data. The data will be interpolated as floats internally.
 	 * 
 	 * @param inData the input data
-	 * @param the bad value used for the data, defaults to MIFI_UNDEFINED_F
+	 * @param the size of the input data array
+	 * @param newSize return the size of the output-array
 	 */
-	boost::shared_ptr<Data> interpolateValues(boost::shared_ptr<Data> inData, float badValue = MIFI_UNDEFINED_F);
+	boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize);
 };
 
 
