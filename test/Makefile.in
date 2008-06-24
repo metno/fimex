@@ -37,11 +37,12 @@ build_triplet = @build@
 host_triplet = @host@
 @HAVE_UDUNITS_TRUE@am__append_1 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
 @HAVE_UDUNITS_TRUE@am__append_2 = testUnits
-@HAVE_MILIB_TRUE@am__append_3 = ${milib_LIBS}
-@HAVE_MILIB_TRUE@am__append_4 = testFeltReader
-@HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-@HAVE_NETCDF_TRUE@am__append_6 = ${NETCDF_MI_TESTS}
-@HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_MI_SH_TESTS}
+@HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
+@HAVE_MILIB_TRUE@am__append_4 = ${milib_LIBS}
+@HAVE_MILIB_TRUE@am__append_5 = testFeltReader
+@HAVE_NETCDF_TRUE@am__append_6 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
+@HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_MI_TESTS}
+@HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_SH_TESTS}
 check_PROGRAMS = $(am__EXEEXT_5)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -56,7 +57,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
 	$(top_srcdir)/m4/have_netcdf_check.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/metno_have_udunits.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/metno_have_udunits.m4 \
+	$(top_srcdir)/m4/mifi_proj4.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -78,62 +80,72 @@ testCDM_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @HAVE_UDUNITS_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
 @HAVE_UDUNITS_TRUE@	$(am__DEPENDENCIES_1)
-@HAVE_MILIB_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1)
-@HAVE_NETCDF_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) \
+@HAVE_PROJ4_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) \
+@HAVE_PROJ4_TRUE@	$(am__DEPENDENCIES_1)
+@HAVE_MILIB_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
+@HAVE_NETCDF_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
 testCDM_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testData_OBJECTS = testData.$(OBJEXT)
 testData_OBJECTS = $(am_testData_OBJECTS)
 testData_LDADD = $(LDADD)
 testData_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
 testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
 testExtractor_LDADD = $(LDADD)
 testExtractor_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
 testFeltReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
 testInterpolation_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
 testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
 testInterpolator_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
 testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testUnits_OBJECTS = testUnits.$(OBJEXT)
 testUnits_OBJECTS = $(am_testUnits_OBJECTS)
 testUnits_LDADD = $(LDADD)
 testUnits_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4)
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -240,6 +252,8 @@ HAVE_MILIB_FALSE = @HAVE_MILIB_FALSE@
 HAVE_MILIB_TRUE = @HAVE_MILIB_TRUE@
 HAVE_NETCDF_FALSE = @HAVE_NETCDF_FALSE@
 HAVE_NETCDF_TRUE = @HAVE_NETCDF_TRUE@
+HAVE_PROJ4_FALSE = @HAVE_PROJ4_FALSE@
+HAVE_PROJ4_TRUE = @HAVE_PROJ4_TRUE@
 HAVE_UDUNITS_FALSE = @HAVE_UDUNITS_FALSE@
 HAVE_UDUNITS_TRUE = @HAVE_UDUNITS_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
@@ -265,6 +279,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PROJ4_CPPFLAGS = @PROJ4_CPPFLAGS@
+PROJ4_LDFLAGS = @PROJ4_LDFLAGS@
+PROJ4_LIBS = @PROJ4_LIBS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -334,13 +351,14 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc
 CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
-	$(am__append_4) $(am__append_6)
-SH_TESTS = $(am__append_7)
-LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a -lproj \
+	$(am__append_5) $(am__append_7)
+SH_TESTS = $(am__append_8)
+LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@ \
-	$(am__append_1) $(am__append_3) $(am__append_5)
-AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS}
+	$(am__append_1) $(am__append_3) $(am__append_4) \
+	$(am__append_6)
+AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS}
 AM_CXXFLAGS = -Wall -pedantic 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 @HAVE_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh

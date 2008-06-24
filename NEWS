@@ -1,7 +1,10 @@
+  * .... fimex-0.9beta
+    * adding proj4 configuration
   * 2008-06-20 fimex-0.8
     * moving headers to fimex/*.h
     * throw exception when renaming non-existing field in NetCDF-writer (instead of segfault)
     * allowing additional parameters to MIN_DATETIME()/MAX_DATETIME in attributes for felt2nc_variables
+    * reading sigma_hybrid parameters directly from felt_file
     * changing global attributes for damocles
     * fixing a bug in vector-interpolation (errors during calculation of v-vector)
     * improving speed of vector-interpolation

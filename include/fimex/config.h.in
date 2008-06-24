@@ -51,6 +51,9 @@
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 
+/* Define if proj4 is available */
+#undef HAVE_PROJ4
+
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
 

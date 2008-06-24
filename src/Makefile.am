@@ -2,7 +2,7 @@ SUBDIRS = . felt_reader binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I../include -I${top_srcdir}/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
+AM_CPPFLAGS = -I../include -I${top_srcdir}/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 
 lib_LIBRARIES = libfimex.a
 libfimex_a_SOURCES = interpolation.c \
