@@ -24,6 +24,7 @@
 #include "fimex/CDM.h"
 #include "fimex/interpolation.h"
 #include "fimex/DataImpl.h"
+#include "fimex/Units.h"
 #include <boost/bind.hpp>
 #include <functional>
 #include <algorithm>
@@ -415,6 +416,127 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	addAttribute(latVar.getName(),CDMAttribute("standard_name", "latitude"));
 }
 
+class CDMCompatibleUnit : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+	const std::string& unitString;
+public:
+	CDMCompatibleUnit(const CDM& cdm, const std::string& unitString) : cdm(cdm), unitString(unitString) {}
+	bool operator() (const std::string& varName) const
+	{
+		Units units;
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
+			std::string testUnit(unitAttr.getData()->asString());
+			if (testUnit == "") return false;
+			return units.areConvertible(unitString, testUnit);
+		} catch (CDMException& ex) {
+			// nothing to do
+		}
+		return false;
+	}
+};
+
+class CDMAttributeEquals : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+	const std::string& attrName;
+	const std::string& attrValue;
+public:
+	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, const std::string& attrValue) : cdm(cdm), attrName(attrName), attrValue(attrValue) {}
+	bool operator() (const std::string& varName) const
+	{
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, attrName);
+			std::string testAttrVal(unitAttr.getData()->asString());
+			return testAttrVal == attrValue;
+		} catch (CDMException& ex) {
+			// nothing to do
+		}
+		return false;
+	}
+};
+
+
+CDM::AttrVec CDM::getProjection(std::string varName) const
+{
+	CDM::AttrVec retVal;
+	const AttrVec& attributes = getAttributes(varName);
+	AttrVec::const_iterator ait = find_if(attributes.begin(), attributes.end(), CDMNameEqual("grid_mapping"));
+	if (ait != attributes.end()) {
+		std::string gridMapping = ait->getData()->asString();
+		retVal = getAttributes(gridMapping);
+	} else {
+		// no projection, maybe longitude latitude?
+		const std::vector<std::string>& shape = getVariable(varName).getShape();
+		
+		if (find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_east")) != shape.end()) {
+			if (find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_north")) != shape.end()) {
+				// longitude and latitude found
+				// using CF-1.2 draft attribute for declaration of sphere
+				retVal.push_back(CDMAttribute("grid_mapping_name", "latitude_longitude"));
+				retVal.push_back(CDMAttribute("semi_major_axis", MIFI_EARTH_RADIUS_M));
+				retVal.push_back(CDMAttribute("inverse_flattening", 0));
+			}
+		}
+	}
+	return retVal;
+}
+
+
+std::string CDM::getHorizontalXAxis(std::string varName) const
+{
+	std::string retVal;
+	const std::vector<std::string>& shape = getVariable(varName).getShape();
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_x_axis"));
+	if (shapeIt != shape.end()) {
+		retVal = *shapeIt;
+	} else {
+		shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "grid_longitude"));
+		if (shapeIt != shape.end()) {
+			retVal = *shapeIt;
+		} else {
+			// longitude
+			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_east"));
+			if (shapeIt != shape.end()) {
+				retVal = *shapeIt;
+			}
+		}
+	}
+	return retVal;
+}
+std::string CDM::getHorizontalYAxis(std::string varName) const
+{
+	std::string retVal;
+	const std::vector<std::string>& shape = getVariable(varName).getShape();
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_y_axis"));
+	if (shapeIt != shape.end()) {
+		retVal = *shapeIt;
+	} else {
+		shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "grid_latitude"));
+		if (shapeIt != shape.end()) {
+			retVal = *shapeIt;
+		} else {
+			// longitude
+			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_west"));
+			if (shapeIt != shape.end()) {
+				retVal = *shapeIt;
+			}
+		}
+	}
+	return retVal;
+}
+std::string CDM::getTimeAxis(std::string varName) const
+{
+	std::string retVal;
+	const std::vector<std::string>& shape = getVariable(varName).getShape();
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "seconds since 1970-01-01 00:00:00"));
+	if (shapeIt != shape.end()) retVal = *shapeIt;
+	return retVal;
+}
+
+std::string CDM::getVerticalAxis(std::string varName) const
+{
+	// TODO
+}
 
 
 }

@@ -11,6 +11,9 @@ if HAVE_UDUNITS
   LDADD += ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
   CC_TESTS += testUnits
 endif
+if HAVE_GRIBAPI
+#  CC_TESTS += testUnits
+endif
 if HAVE_PROJ4
   LDADD += ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 endif

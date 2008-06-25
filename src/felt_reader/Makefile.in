@@ -51,6 +51,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/have_netcdf_check.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
 	$(top_srcdir)/m4/metno_have_udunits.m4 \
+	$(top_srcdir)/m4/mifi_gribapi.m4 \
 	$(top_srcdir)/m4/mifi_proj4.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -174,6 +175,8 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
+HAVE_GRIBAPI_FALSE = @HAVE_GRIBAPI_FALSE@
+HAVE_GRIBAPI_TRUE = @HAVE_GRIBAPI_TRUE@
 HAVE_MILIB_FALSE = @HAVE_MILIB_FALSE@
 HAVE_MILIB_TRUE = @HAVE_MILIB_TRUE@
 HAVE_NETCDF_FALSE = @HAVE_NETCDF_FALSE@

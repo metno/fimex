@@ -21,6 +21,12 @@
 /* Define to 1 if you have the `fmod' function. */
 #undef HAVE_FMOD
 
+/* Define if gribapi is available */
+#undef HAVE_GRIBAPI
+
+/* Define to 1 if you have <grib_api.h>. */
+#undef HAVE_GRIBAPI_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

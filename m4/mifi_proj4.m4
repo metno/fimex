@@ -66,7 +66,7 @@ AC_DEFUN([MIFI_HAVE_PROJ4], [
 
 AC_DEFUN([MIFI_HAVE_PROJ4_CHECK],[
 AC_ARG_WITH(proj4-lib-dir, 
-      [  --with-proj4-lib-dir=DIR      prefix for NetCDF library files], 
+      [  --with-proj4-lib-dir=DIR      prefix for proj4 library files], 
             [if test "$withval" = "no"; then
                PROJ4_LIBS_DIR=
              else
@@ -75,7 +75,7 @@ AC_ARG_WITH(proj4-lib-dir,
       [PROJ4_LIBS_DIR=/usr/local/lib])
 
 AC_ARG_WITH(proj4-include-dir, 
-      [  --with-proj4-include-dir=DIR      prefix for NetCDF headers], 
+      [  --with-proj4-include-dir=DIR      prefix for proj4 headers], 
             [if test "$withval" = "no"; then
                PROJ4_INCLUDES_DIR=
              else

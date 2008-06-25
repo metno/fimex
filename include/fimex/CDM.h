@@ -239,7 +239,43 @@ public:
 	 */
 	bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException);
 
-
+	
+	/**
+	 * @brief get the projection attributes (as of CF-1.0) of a variable
+	 * 
+	 * @param varName name of variable
+	 * @return vector of attributes of the projection, an empty vector if no projection found
+	 */
+	AttrVec getProjection(std::string varName) const;
+	/**
+	 * @brief get the x-(lon) axis of the variable
+	 * 
+	 * @param varName name of variable
+	 * @return name of x-axis dimension (or "" if not defined)
+	 */
+	std::string getHorizontalXAxis(std::string varName) const;
+	/**
+	 * @brief get the y-(lat) axis of the variable
+	 * 
+	 * @param varName name of variable
+	 * @return name of y-axis dimension (or "" if not defined)
+	 */
+	std::string getHorizontalYAxis(std::string varName) const;
+	/**
+	 * @brief get the time axis of the variable
+	 * 
+	 * @param varName name of variable
+	 * @return name of time dimension (or "" if not defined)
+	 */
+	std::string getTimeAxis(std::string varName) const;
+	/**
+	 * @brief get the vertical axis of the variable
+	 * 
+	 * @param varName name of variable
+	 * @return name of vertical dimension (or "" if not defined)
+	 */
+	std::string getVerticalAxis(std::string varName) const;
+	
 private:
 	StrAttrVecMap attributes;
 	VarVec variables;

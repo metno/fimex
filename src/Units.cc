@@ -90,4 +90,35 @@ void Units::convert(const std::string& from, const std::string& to, double* slop
 #endif
 }
 
+bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException)
+{
+#if HAVE_UDUNITS
+	utUnit fromUnit, toUnit;
+	double slope, offset;
+	handleUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
+	handleUnitError(utScan(unit2.c_str(), &toUnit), unit2);
+	int error = utConvert(&fromUnit, &toUnit, &slope, &offset);
+	switch (error) {
+	case 0: return true;
+	case UT_ECONVERT: return false;
+	default: handleUnitError(error);
+	}
+#else
+	throw UnitException("fimex not compiled with udunits support");
+#endif	
+	return false;
+}
+bool Units::isTime(const std::string& timeUnit) const throw(UnitException)
+{
+#if HAVE_UDUNITS
+	utUnit unit;
+	handleUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
+	return utIsTime(&unit) != 0;
+#else
+	throw UnitException("fimex not compiled with udunits support");
+#endif	
+	return false;
+}
+
+
 }

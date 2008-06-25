@@ -464,7 +464,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE SED EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL HAVE_NETCDF_TRUE HAVE_NETCDF_FALSE NETCDF_CPPFLAGS NETCDF_LDFLAGS NETCDF_LIBS UDUNITS_CPPFLAGS UDUNITS_LDFLAGS UDUNITS_LIBS HAVE_UDUNITS_TRUE HAVE_UDUNITS_FALSE PROJ4_CPPFLAGS PROJ4_LDFLAGS PROJ4_LIBS HAVE_PROJ4_TRUE HAVE_PROJ4_FALSE XML2_CONFIG XML_CPPFLAGS XML_LIBS BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_REGEX_LIB BOOST_PROGRAM_OPTIONS_LIB BOOST_UNIT_TEST_FRAMEWORK_LIB HAVE_MILIB_TRUE HAVE_MILIB_FALSE PKG_CONFIG ac_pt_PKG_CONFIG milib_CFLAGS milib_LIBS LIBOBJS DX_PROJECT DX_CONFIG DX_DOCDIR DX_ENV DX_FLAG_doc DX_DOXYGEN ac_pt_DX_DOXYGEN DX_FLAG_[]DX_CURRENT_FEATURE DX_PERL ac_pt_DX_PERL DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_doc_TRUE DX_COND_doc_FALSE DX_FLAG_dot DX_FLAG_[]DX_CURRENT_FEATURE DX_DOT ac_pt_DX_DOT DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_dot_TRUE DX_COND_dot_FALSE DX_FLAG_man DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_man_TRUE DX_COND_man_FALSE DX_FLAG_rtf DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_rtf_TRUE DX_COND_rtf_FALSE DX_FLAG_xml DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_xml_TRUE DX_COND_xml_FALSE DX_FLAG_chm DX_FLAG_[]DX_CURRENT_FEATURE DX_HHC ac_pt_DX_HHC DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_chm_TRUE DX_COND_chm_FALSE DX_FLAG_chi DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_chi_TRUE DX_COND_chi_FALSE DX_FLAG_html DX_FLAG_[]DX_CURRENT_FEATURE DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_html_TRUE DX_COND_html_FALSE DX_FLAG_ps DX_FLAG_[]DX_CURRENT_FEATURE DX_LATEX ac_pt_DX_LATEX DX_FLAG_[]DX_CURRENT_FEATURE DX_MAKEINDEX ac_pt_DX_MAKEINDEX DX_FLAG_[]DX_CURRENT_FEATURE DX_DVIPS ac_pt_DX_DVIPS DX_FLAG_[]DX_CURRENT_FEATURE DX_EGREP ac_pt_DX_EGREP DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_ps_TRUE DX_COND_ps_FALSE DX_FLAG_pdf DX_FLAG_[]DX_CURRENT_FEATURE DX_PDFLATEX ac_pt_DX_PDFLATEX DX_FLAG_[]DX_CURRENT_FEATURE DX_FLAG_[]DX_CURRENT_FEATURE DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_pdf_TRUE DX_COND_pdf_FALSE DX_COND_latex_TRUE DX_COND_latex_FALSE DOXYGEN_PAPER_SIZE LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar CXX CXXFLAGS LDFLAGS CPPFLAGS ac_ct_CXX EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS ac_ct_CC CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE SED EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL HAVE_NETCDF_TRUE HAVE_NETCDF_FALSE NETCDF_CPPFLAGS NETCDF_LDFLAGS NETCDF_LIBS UDUNITS_CPPFLAGS UDUNITS_LDFLAGS UDUNITS_LIBS HAVE_UDUNITS_TRUE HAVE_UDUNITS_FALSE PROJ4_CPPFLAGS PROJ4_LDFLAGS PROJ4_LIBS HAVE_PROJ4_TRUE HAVE_PROJ4_FALSE HAVE_GRIBAPI_TRUE HAVE_GRIBAPI_FALSE XML2_CONFIG XML_CPPFLAGS XML_LIBS BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_REGEX_LIB BOOST_PROGRAM_OPTIONS_LIB BOOST_UNIT_TEST_FRAMEWORK_LIB HAVE_MILIB_TRUE HAVE_MILIB_FALSE PKG_CONFIG ac_pt_PKG_CONFIG milib_CFLAGS milib_LIBS LIBOBJS DX_PROJECT DX_CONFIG DX_DOCDIR DX_ENV DX_FLAG_doc DX_DOXYGEN ac_pt_DX_DOXYGEN DX_FLAG_[]DX_CURRENT_FEATURE DX_PERL ac_pt_DX_PERL DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_doc_TRUE DX_COND_doc_FALSE DX_FLAG_dot DX_FLAG_[]DX_CURRENT_FEATURE DX_DOT ac_pt_DX_DOT DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_dot_TRUE DX_COND_dot_FALSE DX_FLAG_man DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_man_TRUE DX_COND_man_FALSE DX_FLAG_rtf DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_rtf_TRUE DX_COND_rtf_FALSE DX_FLAG_xml DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_xml_TRUE DX_COND_xml_FALSE DX_FLAG_chm DX_FLAG_[]DX_CURRENT_FEATURE DX_HHC ac_pt_DX_HHC DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_chm_TRUE DX_COND_chm_FALSE DX_FLAG_chi DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_chi_TRUE DX_COND_chi_FALSE DX_FLAG_html DX_FLAG_[]DX_CURRENT_FEATURE DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_html_TRUE DX_COND_html_FALSE DX_FLAG_ps DX_FLAG_[]DX_CURRENT_FEATURE DX_LATEX ac_pt_DX_LATEX DX_FLAG_[]DX_CURRENT_FEATURE DX_MAKEINDEX ac_pt_DX_MAKEINDEX DX_FLAG_[]DX_CURRENT_FEATURE DX_DVIPS ac_pt_DX_DVIPS DX_FLAG_[]DX_CURRENT_FEATURE DX_EGREP ac_pt_DX_EGREP DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_ps_TRUE DX_COND_ps_FALSE DX_FLAG_pdf DX_FLAG_[]DX_CURRENT_FEATURE DX_PDFLATEX ac_pt_DX_PDFLATEX DX_FLAG_[]DX_CURRENT_FEATURE DX_FLAG_[]DX_CURRENT_FEATURE DX_FLAG_[]DX_CURRENT_FEATURE DX_COND_pdf_TRUE DX_COND_pdf_FALSE DX_COND_latex_TRUE DX_COND_latex_FALSE DOXYGEN_PAPER_SIZE LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1077,8 +1077,11 @@ Optional Packages:
   --with-NetCDF-lib-dir=DIR      prefix for NetCDF library files
   --with-NetCDF-include-dir=DIR      prefix for NetCDF headers
   --with-proj4            use proj4 library
-  --with-proj4-lib-dir=DIR      prefix for NetCDF library files
-  --with-proj4-include-dir=DIR      prefix for NetCDF headers
+  --with-proj4-lib-dir=DIR      prefix for proj4 library files
+  --with-proj4-include-dir=DIR      prefix for proj4 headers
+  --with-gribapi          use grib_api library
+  --with-gribapi-lib-dir=DIR      prefix for grib_api library files
+  --with-gribapi-include-dir=DIR      prefix for grib_api headers
   --with-xml-prefix=PFX   Prefix where libxml is installed (optional)
   --with-xml-exec-prefix=PFX Exec prefix where libxml is installed (optional)
   --with-boost[=DIR]
@@ -4208,7 +4211,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4211 "configure"' > conftest.$ac_ext
+  echo '#line 4214 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5350,7 +5353,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5353:" \
+echo "$as_me:5356:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6421,11 +6424,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6424: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6427: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6428: \$? = $ac_status" >&5
+   echo "$as_me:6431: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -6711,11 +6714,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6714: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6717: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6718: \$? = $ac_status" >&5
+   echo "$as_me:6721: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -6815,11 +6818,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6818: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6821: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:6822: \$? = $ac_status" >&5
+   echo "$as_me:6825: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9214,7 +9217,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9217 "configure"
+#line 9220 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -9314,7 +9317,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 9317 "configure"
+#line 9320 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11742,11 +11745,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11745: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11748: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11749: \$? = $ac_status" >&5
+   echo "$as_me:11752: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11846,11 +11849,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11849: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11852: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11853: \$? = $ac_status" >&5
+   echo "$as_me:11856: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13423,11 +13426,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13426: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13429: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13430: \$? = $ac_status" >&5
+   echo "$as_me:13433: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13527,11 +13530,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13530: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13533: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13534: \$? = $ac_status" >&5
+   echo "$as_me:13537: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15736,11 +15739,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15739: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15742: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15743: \$? = $ac_status" >&5
+   echo "$as_me:15746: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16026,11 +16029,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16029: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16032: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16033: \$? = $ac_status" >&5
+   echo "$as_me:16036: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16130,11 +16133,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16133: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16136: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16137: \$? = $ac_status" >&5
+   echo "$as_me:16140: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19905,9 +19908,9 @@ _ACEOF
 else
 
         :
-        { { echo "$as_me:$LINENO: error: proj4 not found. Please make sure that proj4
+        { { echo "$as_me:$LINENO: error: proj4 not found. Please make sure that proj4 is installed.
 See \`config.log' for more details." >&5
-echo "$as_me: error: proj4 not found. Please make sure that proj4
+echo "$as_me: error: proj4 not found. Please make sure that proj4 is installed.
 See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }
 
@@ -19925,9 +19928,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 else
 
       :
-      { { echo "$as_me:$LINENO: error: proj4 not found. Please make sure that proj4
+      { { echo "$as_me:$LINENO: error: proj4 not found. Please make sure that proj4 is installed.
 See \`config.log' for more details." >&5
-echo "$as_me: error: proj4 not found. Please make sure that proj4
+echo "$as_me: error: proj4 not found. Please make sure that proj4 is installed.
 See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }
 
@@ -19947,6 +19950,607 @@ else
   HAVE_PROJ4_TRUE='#'
   HAVE_PROJ4_FALSE=
 fi
+
+
+
+# Check whether --with-gribapi or --without-gribapi was given.
+if test "${with_gribapi+set}" = set; then
+  withval="$with_gribapi"
+  if test "$withval" != "no"; then
+
+
+# Check whether --with-gribapi-lib-dir or --without-gribapi-lib-dir was given.
+if test "${with_gribapi_lib_dir+set}" = set; then
+  withval="$with_gribapi_lib_dir"
+  if test "$withval" = "no"; then
+               GRIBAPI_LIBS_DIR=
+             else
+               GRIBAPI_LIBS_DIR="$withval"
+             fi
+else
+  GRIBAPI_LIBS_DIR=/usr/local/lib
+fi;
+
+
+# Check whether --with-gribapi-include-dir or --without-gribapi-include-dir was given.
+if test "${with_gribapi_include_dir+set}" = set; then
+  withval="$with_gribapi_include_dir"
+  if test "$withval" = "no"; then
+               GRIBAPI_INCLUDES_DIR=
+             else
+               GRIBAPI_INCLUDES_DIR="$withval"
+             fi
+else
+  GRIBAPI_INCLUDES_DIR=/usr/local/include
+fi;
+
+
+
+
+
+
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+    CPPFLAGS="$CPPFLAGS -I$GRIBAPI_INCLUDES_DIR"
+    if test "${ac_cv_header_grib_api_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for grib_api.h" >&5
+echo $ECHO_N "checking for grib_api.h... $ECHO_C" >&6
+if test "${ac_cv_header_grib_api_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_grib_api_h" >&5
+echo "${ECHO_T}$ac_cv_header_grib_api_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking grib_api.h usability" >&5
+echo $ECHO_N "checking grib_api.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <grib_api.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking grib_api.h presence" >&5
+echo $ECHO_N "checking grib_api.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <grib_api.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: grib_api.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: grib_api.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: grib_api.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: grib_api.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: grib_api.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: grib_api.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: grib_api.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: grib_api.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: grib_api.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: grib_api.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: grib_api.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: grib_api.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: grib_api.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: grib_api.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: grib_api.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: grib_api.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## --------------------------------- ##
+## Report this to heiko.klein@met.no ##
+## --------------------------------- ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for grib_api.h" >&5
+echo $ECHO_N "checking for grib_api.h... $ECHO_C" >&6
+if test "${ac_cv_header_grib_api_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_grib_api_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_grib_api_h" >&5
+echo "${ECHO_T}$ac_cv_header_grib_api_h" >&6
+
+fi
+if test $ac_cv_header_grib_api_h = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_GRIBAPI_H 1
+_ACEOF
+
+else
+  { { echo "$as_me:$LINENO: error: grib_api.h not found" >&5
+echo "$as_me: error: grib_api.h not found" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+    LDFLAGS="$LDFLAGS -L$GRIBAPI_LIBS_DIR"
+    echo "$as_me:$LINENO: checking for library containing png_read_image" >&5
+echo $ECHO_N "checking for library containing png_read_image... $ECHO_C" >&6
+if test "${ac_cv_search_png_read_image+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+ac_cv_search_png_read_image=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char png_read_image ();
+int
+main ()
+{
+png_read_image ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_png_read_image="none required"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+if test "$ac_cv_search_png_read_image" = no; then
+  for ac_lib in png; do
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char png_read_image ();
+int
+main ()
+{
+png_read_image ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_png_read_image="-l$ac_lib"
+break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  done
+fi
+LIBS=$ac_func_search_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_search_png_read_image" >&5
+echo "${ECHO_T}$ac_cv_search_png_read_image" >&6
+if test "$ac_cv_search_png_read_image" != no; then
+  test "$ac_cv_search_png_read_image" = "none required" || LIBS="$ac_cv_search_png_read_image $LIBS"
+
+fi
+
+	echo "$as_me:$LINENO: checking for library containing jas_stream_memopen" >&5
+echo $ECHO_N "checking for library containing jas_stream_memopen... $ECHO_C" >&6
+if test "${ac_cv_search_jas_stream_memopen+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+ac_cv_search_jas_stream_memopen=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char jas_stream_memopen ();
+int
+main ()
+{
+jas_stream_memopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_jas_stream_memopen="none required"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+if test "$ac_cv_search_jas_stream_memopen" = no; then
+  for ac_lib in jasper; do
+    LIBS="-l$ac_lib -lm -ljpeg $ac_func_search_save_LIBS"
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char jas_stream_memopen ();
+int
+main ()
+{
+jas_stream_memopen ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_jas_stream_memopen="-l$ac_lib"
+break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  done
+fi
+LIBS=$ac_func_search_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_search_jas_stream_memopen" >&5
+echo "${ECHO_T}$ac_cv_search_jas_stream_memopen" >&6
+if test "$ac_cv_search_jas_stream_memopen" != no; then
+  test "$ac_cv_search_jas_stream_memopen" = "none required" || LIBS="$ac_cv_search_jas_stream_memopen $LIBS"
+
+fi
+
+	echo "$as_me:$LINENO: checking for library containing grib_set_string" >&5
+echo $ECHO_N "checking for library containing grib_set_string... $ECHO_C" >&6
+if test "${ac_cv_search_grib_set_string+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+ac_cv_search_grib_set_string=no
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char grib_set_string ();
+int
+main ()
+{
+grib_set_string ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_grib_set_string="none required"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+if test "$ac_cv_search_grib_set_string" = no; then
+  for ac_lib in grib_api; do
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char grib_set_string ();
+int
+main ()
+{
+grib_set_string ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_search_grib_set_string="-l$ac_lib"
+break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  done
+fi
+LIBS=$ac_func_search_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_search_grib_set_string" >&5
+echo "${ECHO_T}$ac_cv_search_grib_set_string" >&6
+if test "$ac_cv_search_grib_set_string" != no; then
+  test "$ac_cv_search_grib_set_string" = "none required" || LIBS="$ac_cv_search_grib_set_string $LIBS"
+
+         have_gribapi=yes
+
+else
+  { { echo "$as_me:$LINENO: error: -lgrib_api not found" >&5
+echo "$as_me: error: -lgrib_api not found" >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+
+     ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+          fi
+fi;
+
+
+if test x$have_gribapi = xyes; then
+  HAVE_GRIBAPI_TRUE=
+  HAVE_GRIBAPI_FALSE='#'
+else
+  HAVE_GRIBAPI_TRUE='#'
+  HAVE_GRIBAPI_FALSE=
+fi
+
 
 
 # Checks for libraries.
@@ -25062,6 +25666,13 @@ echo "$as_me: error: conditional \"HAVE_PROJ4\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${HAVE_GRIBAPI_TRUE}" && test -z "${HAVE_GRIBAPI_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"HAVE_GRIBAPI\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"HAVE_GRIBAPI\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${HAVE_MILIB_TRUE}" && test -z "${HAVE_MILIB_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"HAVE_MILIB\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -25844,6 +26455,8 @@ s,@PROJ4_LDFLAGS@,$PROJ4_LDFLAGS,;t t
 s,@PROJ4_LIBS@,$PROJ4_LIBS,;t t
 s,@HAVE_PROJ4_TRUE@,$HAVE_PROJ4_TRUE,;t t
 s,@HAVE_PROJ4_FALSE@,$HAVE_PROJ4_FALSE,;t t
+s,@HAVE_GRIBAPI_TRUE@,$HAVE_GRIBAPI_TRUE,;t t
+s,@HAVE_GRIBAPI_FALSE@,$HAVE_GRIBAPI_FALSE,;t t
 s,@XML2_CONFIG@,$XML2_CONFIG,;t t
 s,@XML_CPPFLAGS@,$XML_CPPFLAGS,;t t
 s,@XML_LIBS@,$XML_LIBS,;t t

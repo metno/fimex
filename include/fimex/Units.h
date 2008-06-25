@@ -52,6 +52,13 @@ public:
 	 * @param offset return value of the offset
 	 */
 	void convert(const std::string& from, const std::string& to, double* slope, double* offset) throw(UnitException);
+	/**
+	 * @brief test if two units are convertible to each others
+	 * @param unit1 first unit
+	 * @param unit2 second unit
+	 */
+	bool areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException);
+	bool isTime(const std::string& timeUnit) const throw(UnitException);
 };
 
 }

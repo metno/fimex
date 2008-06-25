@@ -57,6 +57,27 @@ void test_UnitsError() {
 	}
 }
 
+void test_UnitsConvertible() {
+	Units units;
+#if HAVE_UDUNITS
+	BOOST_CHECK(!units.areConvertible("km", "s"));
+	BOOST_CHECK(units.areConvertible("hours since 2000-01-01 19:30:00", "seconds since 1970-01-01"));
+#else
+	BOOST_CHECK(true);
+#endif	
+}
+
+void test_UnitsTime() {
+	Units units;
+#if HAVE_UDUNITS
+	BOOST_CHECK(!units.isTime("km"));
+	BOOST_CHECK(units.isTime("hours since 2000-01-01 19:30:00"));
+#else
+	BOOST_CHECK(true);
+#endif
+}
+
+
 test_suite*
 init_unit_test_suite( int argc, char* argv[] )
 {
@@ -64,6 +85,8 @@ init_unit_test_suite( int argc, char* argv[] )
     
 	test->add( BOOST_TEST_CASE( &test_Units ) );
 	test->add( BOOST_TEST_CASE( &test_UnitsError ) );
+	test->add( BOOST_TEST_CASE( &test_UnitsConvertible ) );
+	test->add( BOOST_TEST_CASE( &test_UnitsTime ) );
     return test;
 }
 #else

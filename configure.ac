@@ -39,9 +39,18 @@ AC_ARG_WITH(proj4,
       [AS_HELP_STRING([--with-proj4],[use proj4 library])],
          [if test "$withval" != "no"; then
              MIFI_HAVE_PROJ4_CHECK()
-             MIFI_HAVE_PROJ4( , [AC_MSG_FAILURE([proj4 not found. Please make sure that proj4]) ])
+             MIFI_HAVE_PROJ4( , [AC_MSG_FAILURE([proj4 not found. Please make sure that proj4 is installed.]) ])
           fi],[])
 AM_CONDITIONAL([HAVE_PROJ4], [test x$have_proj4 = xyes])
+
+AC_ARG_WITH(gribapi,
+      [AS_HELP_STRING([--with-gribapi],[use grib_api library])],
+         [if test "$withval" != "no"; then
+             MIFI_HAVE_GRIBAPI_CHECK()
+             MIFI_HAVE_GRIBAPI( , [AC_MSG_FAILURE([grib-api not found. Please make sure that grib-api is installed.]) ])
+          fi],[])
+AM_CONDITIONAL([HAVE_GRIBAPI], [test x$have_gribapi = xyes])
+
 
 # Checks for libraries.
 AC_CXX_HAVE_STD
