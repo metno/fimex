@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -25,7 +25,6 @@
 #define UNITS_H_
 
 #include <string>
-#include <boost/noncopyable.hpp>
 #include "fimex/CDMException.h"
 namespace MetNoFimex
 {
@@ -37,15 +36,17 @@ public:
 	UnitException(std::string message) : CDMException(message) {}
 };
 
-class Units : public boost::noncopyable
+class Units
 {
 	static int counter;
 public:
 	/** initialization of unit handling, i.e. parsing of unit file etc if required */
 	Units();
+	Units(const Units& rhs);
+	Units& operator=(const Units& rhs);
 	virtual ~Units();
 	/**
-	 * calculate the linear unit conversion: newVal (in to unit) = oldVal (in from unit) * slope + offset 
+	 * calculate the linear unit conversion: newVal (in to unit) = oldVal (in from unit) * slope + offset
 	 * @param from unit
 	 * @param to unit
 	 * @param slope return value of the slope

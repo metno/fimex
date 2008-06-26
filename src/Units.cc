@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -65,6 +65,16 @@ Units::Units()
 	++counter;
 }
 
+Units::Units(const Units& u)
+{
+	counter++;
+}
+
+Units& Units::operator=(const Units& rhs)
+{
+	return *this; // no state! no increase/decrease to counter required
+}
+
 Units::~Units()
 {
 	if (--counter == 0) {
@@ -105,7 +115,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 	}
 #else
 	throw UnitException("fimex not compiled with udunits support");
-#endif	
+#endif
 	return false;
 }
 bool Units::isTime(const std::string& timeUnit) const throw(UnitException)
@@ -116,7 +126,7 @@ bool Units::isTime(const std::string& timeUnit) const throw(UnitException)
 	return utIsTime(&unit) != 0;
 #else
 	throw UnitException("fimex not compiled with udunits support");
-#endif	
+#endif
 	return false;
 }
 

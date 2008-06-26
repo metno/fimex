@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -54,7 +54,7 @@ bool CDM::hasVariable(const std::string& varName) const
 }
 
 const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException) {
-	VarVec::const_iterator varPos = find_if(variables.begin(), variables.end(), CDMNameEqual(varName)); 
+	VarVec::const_iterator varPos = find_if(variables.begin(), variables.end(), CDMNameEqual(varName));
 	if (varPos != variables.end()) {
 		return *varPos;
 	} else {
@@ -97,7 +97,7 @@ public:
 	bool operator() (const std::string& dim) const { return variable.checkDimension(dim); }
 };
 
-/** object-function for checkVariableAttribute */ 
+/** object-function for checkVariableAttribute */
 class VariableAttributeCheck : public std::unary_function<std::pair<std::string, boost::regex>, bool> {
 	const CDM& cdm;
 	const std::string& varName;
@@ -130,7 +130,7 @@ void CDM::removeVariable(const std::string& variableName) {
 	VarVec::iterator newEnd = remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName));
 	if (newEnd != variables.end()) {
 		variables.erase(newEnd, variables.end());
-		StrAttrVecMap::iterator varAttrPos = attributes.find(variableName); 
+		StrAttrVecMap::iterator varAttrPos = attributes.find(variableName);
 		if (varAttrPos != attributes.end()) {
 			attributes.erase(varAttrPos);
 		}
@@ -154,12 +154,12 @@ bool CDM::hasDimension(const std::string& dimName) const
 
 const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CDMException)
 {
-	DimVec::const_iterator dimIt = find_if(dimensions.begin(), dimensions.end(), CDMNameEqual(dimName)); 
+	DimVec::const_iterator dimIt = find_if(dimensions.begin(), dimensions.end(), CDMNameEqual(dimName));
 	if (dimIt != dimensions.end()) {
 		return *dimIt;
 	} else {
 		throw CDMException("cannot find dimension: " + dimName);
-	}	
+	}
 }
 
 CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException) {
@@ -200,7 +200,7 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 		} else {
 			throw CDMException("cannot add attribute: attribute " + varName + "." + attr.getName() + " already exists");
 		}
-	}  	
+	}
 }
 
 void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
@@ -225,7 +225,7 @@ void CDM::removeAttribute(const std::string& varName, const std::string& attrNam
 
 const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
 {
-	StrAttrVecMap::const_iterator varIt = attributes.find(varName); 
+	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
 		AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attrName));
 		if (attrIt != (varIt->second).end()) {
@@ -240,12 +240,12 @@ const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::str
 CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException) {
 	return const_cast<CDMAttribute&>(
 			static_cast<const CDM&>(*this).getAttribute(varName, attrName)
-			);	
+			);
 }
 
 std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const {
 	std::vector<CDMAttribute> results;
-	StrAttrVecMap::const_iterator varIt = attributes.find(varName); 
+	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
 		results.insert(results.begin(), varIt->second.begin(), varIt->second.end());
 	}
@@ -257,7 +257,7 @@ double CDM::getFillValue(const std::string& varName) const {
 		const CDMAttribute& attr = getAttribute(varName, "_FillValue");
 		return attr.getData()->asDouble()[0];
 	} catch (CDMException& ex) {
-		
+
 	}
 	return MIFI_UNDEFINED_F;
 }
@@ -281,7 +281,7 @@ void CDM::toXMLStream(std::ostream& out) const
 			it->toXMLStream(out);
 		}
 	}
-	
+
 	out << "</cdm>" << std::endl;
 }
 
@@ -309,7 +309,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 			xAxis = dims[0];
 			if (dims.size() > 1) {
 				retVal = false;
-				std::cerr << "found several dimensions with units " << longUnits << ", using " << xAxis << std::endl;  
+				std::cerr << "found several dimensions with units " << longUnits << ", using " << xAxis << std::endl;
 			}
 		}
 		std::string latUnits("degrees?_(north|south)");
@@ -331,7 +331,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 			xStandardName = "grid_longitude";
 			yStandardName = "grid_latitude";
 		}
-		
+
 		dims = findVariables("standard_name", xStandardName);
 		if (dims.empty()) {
 			throw CDMException("couldn't find projection axis with standard_name "+ xStandardName + " for projection " + projectionName + ": " + orgProjName);
@@ -358,8 +358,8 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 	// units and values
 	xAxisUnits = getAttribute(xAxis, "units").getStringValue();
 	yAxisUnits = getAttribute(yAxis, "units").getStringValue();
-	
-	return retVal;	
+
+	return retVal;
 }
 
 void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException) {
@@ -367,14 +367,14 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	const CDMVariable& yVar = getVariable(yDim);
 	boost::shared_array<double> xData = xVar.getData()->asDouble();
 	boost::shared_array<double> yData = yVar.getData()->asDouble();
-	std::string xUnits = getAttribute(xDim, "units").getData()->asString(); 
+	std::string xUnits = getAttribute(xDim, "units").getData()->asString();
 	if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
 		// convert degrees to radians
 		for (size_t i = 0; i < xVar.getData()->size(); ++i) {
 			xData[i] *= DEG_TO_RAD;
 		}
-	}	
-	std::string yUnits = getAttribute(yDim, "units").getData()->asString();; 
+	}
+	std::string yUnits = getAttribute(yDim, "units").getData()->asString();;
 	if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
 		// convert degrees to radians
 		for (size_t i = 0; i < yVar.getData()->size(); ++i) {
@@ -383,7 +383,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	}
 	size_t xDimLength = getDimension(xDim).getLength();
 	size_t yDimLength = getDimension(yDim).getLength();
-	size_t fieldSize = xDimLength * yDimLength; 
+	size_t fieldSize = xDimLength * yDimLength;
 	boost::shared_array<double> longVal(new double[fieldSize]);
 	boost::shared_array<double> latVal(new double[fieldSize]);
 	std::string lonLatProj("+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong");
@@ -419,16 +419,35 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 class CDMCompatibleUnit : public std::unary_function<std::string, bool> {
 	const CDM& cdm;
 	const std::string& unitString;
+	Units units;
 public:
 	CDMCompatibleUnit(const CDM& cdm, const std::string& unitString) : cdm(cdm), unitString(unitString) {}
 	bool operator() (const std::string& varName) const
 	{
-		Units units;
 		try {
 			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
 			std::string testUnit(unitAttr.getData()->asString());
 			if (testUnit == "") return false;
 			return units.areConvertible(unitString, testUnit);
+		} catch (CDMException& ex) {
+			// nothing to do
+		}
+		return false;
+	}
+};
+
+class CDMCompatibleTime : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+	Units units;
+public:
+	CDMCompatibleTime(const CDM& cdm) : cdm(cdm) {}
+	bool operator() (const std::string& varName) const
+	{
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
+			std::string testUnit(unitAttr.getData()->asString());
+			if (testUnit == "") return false;
+			return units.isTime(testUnit);
 		} catch (CDMException& ex) {
 			// nothing to do
 		}
@@ -467,7 +486,7 @@ CDM::AttrVec CDM::getProjection(std::string varName) const
 	} else {
 		// no projection, maybe longitude latitude?
 		const std::vector<std::string>& shape = getVariable(varName).getShape();
-		
+
 		if (find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_east")) != shape.end()) {
 			if (find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_north")) != shape.end()) {
 				// longitude and latitude found
@@ -528,7 +547,7 @@ std::string CDM::getTimeAxis(std::string varName) const
 {
 	std::string retVal;
 	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "seconds since 1970-01-01 00:00:00"));
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleTime(*this));
 	if (shapeIt != shape.end()) retVal = *shapeIt;
 	return retVal;
 }
