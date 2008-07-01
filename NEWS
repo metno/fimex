@@ -1,6 +1,7 @@
   * .... fimex-0.9beta
-    * adding proj4 configuration
     * switching to svn
+    * adding proj4 to automake
+    * adding grib-api to automake
   * 2008-06-20 fimex-0.8
     * moving headers to fimex/*.h
     * throw exception when renaming non-existing field in NetCDF-writer (instead of segfault)

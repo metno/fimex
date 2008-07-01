@@ -26,6 +26,7 @@
 #include "fimex/DataImpl.h"
 #include "fimex/Units.h"
 #include <boost/bind.hpp>
+#include <boost/regex.hpp>
 #include <functional>
 #include <algorithm>
 
@@ -458,15 +459,16 @@ public:
 class CDMAttributeEquals : public std::unary_function<std::string, bool> {
 	const CDM& cdm;
 	const std::string& attrName;
-	const std::string& attrValue;
+	boost::regex attrRegex;
 public:
-	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, const std::string& attrValue) : cdm(cdm), attrName(attrName), attrValue(attrValue) {}
+	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, const std::string& attrValue) : cdm(cdm), attrName(attrName) {attrRegex = boost::regex("\\Q"+attrValue+"\\E");}
+	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, boost::regex attrValue) : cdm(cdm), attrName(attrName), attrRegex(attrValue) {}
 	bool operator() (const std::string& varName) const
 	{
 		try {
 			const CDMAttribute& unitAttr = cdm.getAttribute(varName, attrName);
 			std::string testAttrVal(unitAttr.getData()->asString());
-			return testAttrVal == attrValue;
+			return boost::regex_match(testAttrVal, attrRegex);
 		} catch (CDMException& ex) {
 			// nothing to do
 		}
@@ -505,7 +507,7 @@ std::string CDM::getHorizontalXAxis(std::string varName) const
 {
 	std::string retVal;
 	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_x_axis"));
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_x_coordinate"));
 	if (shapeIt != shape.end()) {
 		retVal = *shapeIt;
 	} else {
@@ -526,7 +528,7 @@ std::string CDM::getHorizontalYAxis(std::string varName) const
 {
 	std::string retVal;
 	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_y_axis"));
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_y_coordinate"));
 	if (shapeIt != shape.end()) {
 		retVal = *shapeIt;
 	} else {
@@ -554,7 +556,26 @@ std::string CDM::getTimeAxis(std::string varName) const
 
 std::string CDM::getVerticalAxis(std::string varName) const
 {
-	// TODO
+	// detect attribute 'positive' = up/down (case insensitive)
+	// detect pressure units
+	std::string retVal;
+	const std::vector<std::string>& shape = getVariable(varName).getShape();
+	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "positive", boost::regex("up", boost::regex::perl|boost::regex::icase)));
+	if (shapeIt != shape.end()) {
+		retVal = *shapeIt;
+	} else {
+		shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "positive", boost::regex("down", boost::regex::perl|boost::regex::icase)));
+		if (shapeIt != shape.end()) {
+			retVal = *shapeIt;
+		} else {
+			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "Pa"));
+			if (shapeIt != shape.end()) {
+				retVal = *shapeIt;
+			}
+		}
+	}
+
+	return retVal;
 }
 
 

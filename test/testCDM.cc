@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -48,15 +48,15 @@ void test_variable(void) {
 	CDM cdm;
 	cdm.addVariable(testVar);
 	BOOST_CHECK(cdm.hasVariable(varName));
-	
+
 	try {
 		CDMVariable failVar(varName, CDM_NAT, noDim);
 		cdm.addVariable(failVar); // adding new variable with same name should fail
 		BOOST_CHECK(false);
 	} catch (CDMException& ex) {
 		BOOST_CHECK(true);
-	}	
-	
+	}
+
 	CDMVariable& varRef = cdm.getVariable(varName);
 	BOOST_CHECK(varRef.getName() == varName);
 	try {
@@ -65,7 +65,7 @@ void test_variable(void) {
 	} catch (CDMException& ex) {
 		BOOST_CHECK(true);
 	}
-	
+
 	cdm.removeVariable(varName);
 	BOOST_CHECK(true);
 }
@@ -79,19 +79,19 @@ void test_attributes(void) {
 	string varName2("test2");
 	CDMVariable testVar2(varName2, CDM_NAT, noDim);
 	cdm.addVariable(testVar2);
-	
+
 	cdm.addAttribute(varName, CDMAttribute("attr", "value"));
 	cdm.addAttribute(varName, CDMAttribute("attr2", "value"));
 	cdm.addAttribute(varName2, CDMAttribute("attr", "value"));
 	cdm.addAttribute(varName2, CDMAttribute("attr2", "valueX"));
-			
+
 	vector<std::string> vars = cdm.findVariables("attr", "value");
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
 	vars = cdm.findVariables("attr2", "valueX");
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
-	
+
 	try {
 		cdm.addAttribute(varName, CDMAttribute("attr", "value"));
 		BOOST_CHECK(false); // should throw an error
@@ -107,18 +107,69 @@ void test_attributes(void) {
 }
 
 void test_dimension(void) {
-	
+
+}
+
+void test_coordinateSystem(void) {
+	// preparing a cs
+	CDM cdm;
+	string x("x");
+	string y("y");
+	string p("p");
+	string t("t");
+    string l("l");
+	string var("var");
+	string var2("var2");
+	cdm.addDimension(CDMDimension(x, 1));
+	cdm.addDimension(CDMDimension(y, 1));
+	cdm.addDimension(CDMDimension(p, 1));
+	cdm.addDimension(CDMDimension(t, 1));
+	vector<std::string> shape;
+	shape.push_back(x);
+	shape.push_back(y);
+	shape.push_back(t);
+	shape.push_back(p);
+	shape.push_back(l);
+	for (vector<string>::iterator sit = shape.begin(); sit != shape.end(); ++sit) {
+		vector<string> dimShape;
+		dimShape.push_back(*sit);
+		cdm.addVariable(CDMVariable(*sit, CDM_INT, dimShape));
+	}
+	shape.pop_back(); // remove l
+	cdm.addVariable(CDMVariable(var, CDM_INT, shape));
+	shape.pop_back(); // remove p
+	shape.push_back(l);
+	cdm.addVariable(CDMVariable(var2, CDM_INT, shape));
+
+	// define units
+	cdm.addAttribute(x, CDMAttribute("units", "m"));
+	cdm.addAttribute(y, CDMAttribute("units", "m"));
+	cdm.addAttribute(p, CDMAttribute("units", "bar"));
+	cdm.addAttribute(l, CDMAttribute("positive", "UP"));
+	cdm.addAttribute(t, CDMAttribute("units", "days since 1973-06-26 09:51:00"));
+
+	// define projection params
+	cdm.addAttribute(x, CDMAttribute("standard_name", "projection_x_coordinate"));
+	cdm.addAttribute(y, CDMAttribute("standard_name", "projection_y_coordinate"));
+
+	BOOST_CHECK(x == cdm.getHorizontalXAxis(var));
+	BOOST_CHECK(y == cdm.getHorizontalYAxis(var));
+	BOOST_CHECK(t == cdm.getTimeAxis(var));
+	BOOST_CHECK(p == cdm.getVerticalAxis(var));
+	BOOST_CHECK(l == cdm.getVerticalAxis(var2));
+
 }
 
 test_suite*
 init_unit_test_suite( int argc, char* argv[] )
 {
     test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-    
+
 	test->add( BOOST_TEST_CASE( &test_cdm ) );
 	test->add( BOOST_TEST_CASE( &test_variable ) );
 	test->add( BOOST_TEST_CASE( &test_attributes ) );
 	test->add( BOOST_TEST_CASE( &test_dimension ) );
+	test->add( BOOST_TEST_CASE( &test_coordinateSystem ) );
     return test;
 }
 #else
