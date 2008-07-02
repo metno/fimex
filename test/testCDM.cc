@@ -158,6 +158,8 @@ void test_coordinateSystem(void) {
 	BOOST_CHECK(p == cdm.getVerticalAxis(var));
 	BOOST_CHECK(l == cdm.getVerticalAxis(var2));
 
+	// TODO test cdm.getLatitudeLongitude
+
 }
 
 test_suite*

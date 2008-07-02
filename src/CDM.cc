@@ -545,6 +545,38 @@ std::string CDM::getHorizontalYAxis(std::string varName) const
 	}
 	return retVal;
 }
+
+bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::string& longitude) const
+{
+	try {
+		std::string coordinates = getAttribute(varName, "coordinates").getData()->asString();
+		std::vector<std::string> tokens = tokenize(coordinates, " ");
+		std::vector<std::string>::const_iterator latIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleUnit(*this, "degree_north"));
+		if (latIt != tokens.end()) {
+			std::vector<std::string>::const_iterator lonIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleUnit(*this, "degree_west"));
+			if (lonIt != tokens.end()) {
+				latitude = *latIt;
+				longitude = *lonIt;
+				return true;
+			}
+		}
+	} catch (CDMException& e) {
+		// coordinates not found for varName, doesn't matter
+	}
+	// try the shape axis
+	const std::vector<std::string>& shape = getVariable(varName).getShape();
+	std::vector<std::string>::const_iterator latIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_north"));
+	if (latIt != shape.end()) {
+		std::vector<std::string>::const_iterator lonIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_west"));
+		if (lonIt != shape.end()) {
+			latitude = *latIt;
+			longitude = *lonIt;
+			return true;
+		}
+	}
+	return false;
+}
+
 std::string CDM::getTimeAxis(std::string varName) const
 {
 	std::string retVal;
