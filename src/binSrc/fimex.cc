@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -39,6 +39,9 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #endif
+#ifdef HAVE_GRIBAPI_H
+#include "fimex/GribApiCDMWriter.h"
+#endif
 
 namespace po = boost::program_options;
 using namespace std;
@@ -52,7 +55,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "               [--interpolate....]" << endl;
     out << endl;
     out << generic << endl;
-    out << config << endl;	
+    out << config << endl;
 }
 
 static void writeOptionString(ostream& out, const string& var, const po::variables_map& vm) {
@@ -124,7 +127,7 @@ static string getType(const string& io, po::variables_map& vm) {
 	if (vm.count(io+".type")) {
 		type = vm[io+".type"].as<string>();
 	} else {
-		boost::smatch what; 
+		boost::smatch what;
 		if (boost::regex_match(vm[io+".file"].as<string>(), what, boost::regex(".*\\.(\\w+)$"))) {
 			type = what[1].str();
 		}
@@ -155,7 +158,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
 	}
 #endif
-	
+
 	if (returnPtr.get() == 0) {
 		cerr << "unable to read type: " << type << endl;
 		exit(1);
@@ -166,7 +169,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 			cout << endl;
 		}
 	}
-	
+
 	return returnPtr;
 }
 
@@ -210,7 +213,7 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 		cout << "Extractor as NcML:" << endl;
 		extractor->getCDM().toXMLStream(cout);
 		cout << endl;
-	}		
+	}
 	return auto_ptr<CDMReader>(extractor);
 }
 
@@ -228,7 +231,7 @@ static double toDouble(const string& str) {
 	return d;
 }
 static vector<double> parseDoubleString(const string& str) {
-	typedef boost::tokenizer<boost::char_separator<char> > 
+	typedef boost::tokenizer<boost::char_separator<char> >
 	    tokenizer;
 	  boost::char_separator<char> sep(",");
 	  tokenizer tokens(str, sep);
@@ -239,7 +242,7 @@ static vector<double> parseDoubleString(const string& str) {
 		  if (current == "...") {
 			  pricks = true;
 		  } else {
-			  double val = toDouble(current); 
+			  double val = toDouble(current);
 			  if (pricks == true) {
 				  pricks = false;
 				  size_t end = vals.size();
@@ -275,8 +278,8 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 	if (vm.count("interpolate.longitudeName")) {
 		interpolator->setLongitudeName(vm["interpolate.longitudeName"].as<string>());
 	}
-	
-	
+
+
 	int method = MIFI_NEAREST_NEIGHBOR;
 	if (vm.count("interpolate.method")) {
 		string m = vm["interpolate.method"].as<string>();
@@ -290,7 +293,7 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 			cerr << "WARNING: unknown interpolate.method: " << m << " using nearestneighbor" << endl;
 		}
 	}
-	
+
 	vector<double> xAxisVals;
 	if (vm.count("interpolate.xAxisValues")) {
 		xAxisVals = parseDoubleString(vm["interpolate.xAxisValues"].as<string>());
@@ -305,27 +308,27 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 		cerr << "ERROR: no yAxisValues given" << endl;
 		exit(1);
 	}
-	
+
 	if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
 		cerr << "ERROR: xAxisUnit and yAxisUnit required" << endl;
 		exit(1);
 	}
-	
+
 	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), xAxisVals, yAxisVals, vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
 	if (vm.count("interpolate.printNcML")) {
 		cout << "Interpolator as NcML:" << endl;
 		interpolator->getCDM().toXMLStream(cout);
 		cout << endl;
-	}		
+	}
 	return auto_ptr<CDMReader>(interpolator);
 }
 
 static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	string type = getType("output", vm);
+	// auto_ptr to shared_ptr
+	boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
 #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf") {
-		// auto_ptr to shared_ptr
-		boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
 		if (vm.count("output.config")) {
 			if (vm.count("debug"))
 				cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>() << endl;
@@ -338,6 +341,15 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 		return;
 	}
 #endif
+#ifdef HAVE_GRIBAPI_H
+	if (type == "grb" || type == "grib") {
+		if (vm.count("debug"))
+			cerr << "writing grib-file " << vm["output.file"].as<string>() << " without config" << endl;
+		GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), "");
+		return;
+	}
+#endif
+
 	if (type == "null") {
 		if (vm.count("debug"))
 					cerr << "emulating writing without file without config" << endl;
@@ -362,7 +374,7 @@ int main(int argc, char* args[])
 	    ("config,c", po::value<string>(&configFile)->default_value(configFile), "configuration file")
 	    ;
 
-	// Declare a group of options that will be 
+	// Declare a group of options that will be
 	// allowed both on command line and in
 	// config file
 	po::options_description config("Configurational options");
@@ -389,14 +401,14 @@ int main(int argc, char* args[])
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.printNcML", "print NcML description of extractor")
 		;
-	
-	
+
+
 	po::options_description cmdline_options;
 	cmdline_options.add(generic).add(config);
 
 	po::options_description config_file_options;
 	config_file_options.add(config);
-	
+
     po::positional_options_description p;
     p.add("input.file", 1);
     p.add("output.file", 1);
@@ -404,8 +416,8 @@ int main(int argc, char* args[])
 	// read first only cmd-line to get the configFile right
 	po::variables_map genVm;
 	po::store(po::command_line_parser(argc, args).options(cmdline_options).run(), genVm);
-    po::notify(genVm); 
-    
+    po::notify(genVm);
+
 	po::variables_map vm;
     po::store(po::command_line_parser(argc, args).options(cmdline_options).positional(p).run(), vm);
     ifstream ifs(configFile.c_str());
@@ -430,7 +442,7 @@ int main(int argc, char* args[])
     	cerr << "ERROR: input.file and output.file required" << endl;
     	exit(1);
     }
-    
+
     try {
     	auto_ptr<CDMReader> dataReader = getCDMFileReader(vm);
     	dataReader = getCDMExtractor(vm, dataReader);

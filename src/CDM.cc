@@ -29,9 +29,124 @@
 #include <boost/regex.hpp>
 #include <functional>
 #include <algorithm>
+#include <set>
 
 namespace MetNoFimex
 {
+
+/** Comparator to check if units are comparable to the initialized one */
+class CDMCompatibleUnit : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+	const std::string& unitString;
+	Units units;
+public:
+	CDMCompatibleUnit(const CDM& cdm, const std::string& unitString) : cdm(cdm), unitString(unitString) {}
+	bool operator() (const std::string& varName) const
+	{
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
+			std::string testUnit(unitAttr.getData()->asString());
+			if (testUnit == "") return false;
+			return units.areConvertible(unitString, testUnit);
+		} catch (CDMException& ex) {
+			// nothing to do
+		}
+		return false;
+	}
+};
+
+/** Comparator to check if units is time */
+class CDMCompatibleTime : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+	Units units;
+public:
+	CDMCompatibleTime(const CDM& cdm) : cdm(cdm) {}
+	bool operator() (const std::string& varName) const
+	{
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
+			std::string testUnit(unitAttr.getData()->asString());
+			if (testUnit == "") return false;
+			return units.isTime(testUnit);
+		} catch (CDMException& ex) {
+			// nothing to do
+		}
+		return false;
+	}
+};
+
+
+/**
+ * Comparator to check if units is latitude or longitude as of CF-1.2
+ * unfortunatley, udunits says degreesE == degreesN, so a string comparison
+ * is required
+ */
+class CDMCompatibleLatLongUnit : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+protected:
+	std::set<std::string> compatibleDegrees;
+	CDMCompatibleLatLongUnit(const CDM& cdm) : cdm(cdm) {}
+public:
+	virtual ~CDMCompatibleLatLongUnit() {}
+	bool operator() (const std::string& varName) const {
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
+			std::string testUnit(unitAttr.getData()->asString());
+			if (testUnit == "") return false;
+			return compatibleDegrees.find(testUnit) != compatibleDegrees.end();
+		} catch (CDMException& e) {
+			// varName doesn't have units
+		}
+		return false;
+	}
+};
+
+class CDMCompatibleLatitudeUnit : public CDMCompatibleLatLongUnit {
+public:
+	CDMCompatibleLatitudeUnit(const CDM& cdm) : CDMCompatibleLatLongUnit(cdm) {
+		compatibleDegrees.insert("degrees_north");
+		compatibleDegrees.insert("degree_north");
+		compatibleDegrees.insert("degree_N");
+		compatibleDegrees.insert("degrees_N");
+		compatibleDegrees.insert("degreeN");
+		compatibleDegrees.insert("degreesN");
+	}
+};
+
+class CDMCompatibleLongitudeUnit : public CDMCompatibleLatLongUnit {
+public:
+	CDMCompatibleLongitudeUnit(const CDM& cdm) : CDMCompatibleLatLongUnit(cdm) {
+		compatibleDegrees.insert("degrees_east");
+		compatibleDegrees.insert("degree_east");
+		compatibleDegrees.insert("degree_E");
+		compatibleDegrees.insert("degrees_E");
+		compatibleDegrees.insert("degreeE");
+		compatibleDegrees.insert("degreesE");
+	}
+};
+
+/** test if attributes string value is comparable to the initialized one */
+class CDMAttributeEquals : public std::unary_function<std::string, bool> {
+	const CDM& cdm;
+	const std::string& attrName;
+	boost::regex attrRegex;
+public:
+	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, const std::string& attrValue) : cdm(cdm), attrName(attrName) {attrRegex = boost::regex("\\Q"+attrValue+"\\E");}
+	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, boost::regex attrValue) : cdm(cdm), attrName(attrName), attrRegex(attrValue) {}
+	bool operator() (const std::string& varName) const
+	{
+		try {
+			const CDMAttribute& unitAttr = cdm.getAttribute(varName, attrName);
+			std::string testAttrVal(unitAttr.getData()->asString());
+			return boost::regex_match(testAttrVal, attrRegex);
+		} catch (CDMException& ex) {
+			// nothing to do
+		}
+		return false;
+	}
+};
+
+
 
 CDM::CDM()
 {
@@ -286,9 +401,10 @@ void CDM::toXMLStream(std::ostream& out) const
 	out << "</cdm>" << std::endl;
 }
 
+// TODO: in CF: projection belongs to variable, not to file!!
 bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException) {
 	bool retVal = true;
-	projectionName = "latlong"; // default
+	projectionName = "latitude_longitude"; // default
 	std::vector<std::string> projs = findVariables("grid_mapping_name", ".*");
 	if (projs.empty()) {
 		// assuming latlong
@@ -301,28 +417,20 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 	}
 	// detect original projection axes (x,y,lon,lat,rlat,rlon) (via projection_x/y_coordinate, degrees_east/north, grid_longitude/latitutde)
 	std::vector<std::string> dims;
-	if (projectionName == "latlong") {
-		std::string longUnits("degrees?_(east|west)");
-		dims = findVariables("units", longUnits);
-		if (dims.empty()) {
-			throw CDMException("couldn't find projection axis with units "+ longUnits + " for projection " + projectionName);
+	if (projectionName == "latitude_longitude") {
+		std::vector<std::string> shape;
+		std::transform(getDimensions().begin(), getDimensions().end(), std::back_inserter(shape), std::mem_fun_ref(&CDMDimension::getName));
+		std::vector<std::string>::iterator sit = find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this));
+		if (sit == shape.end()) {
+			throw CDMException("couldn't find projection longitude axis for projection " + projectionName);
 		} else {
-			xAxis = dims[0];
-			if (dims.size() > 1) {
-				retVal = false;
-				std::cerr << "found several dimensions with units " << longUnits << ", using " << xAxis << std::endl;
-			}
+			xAxis = *sit;
 		}
-		std::string latUnits("degrees?_(north|south)");
-		dims = findVariables("units", latUnits);
-		if (dims.empty()) {
-			throw CDMException("couldn't find projection axis with units "+ latUnits + " for projection " + projectionName);
+		sit = find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this));
+		if (sit == shape.end()) {
+			throw CDMException("couldn't find projection axis with latitue axis for projection " + projectionName);
 		} else {
-			yAxis = dims[0];
-			if (dims.size() > 1) {
-				retVal = false;
-				std::cerr << "found several dimensions with units " << latUnits << ", using " << yAxis << std::endl;
-			}
+			yAxis = *sit;
 		}
 	} else {
 		std::string orgProjName = getAttribute(projectionName, "grid_mapping_name").getStringValue();
@@ -417,65 +525,6 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	addAttribute(latVar.getName(),CDMAttribute("standard_name", "latitude"));
 }
 
-class CDMCompatibleUnit : public std::unary_function<std::string, bool> {
-	const CDM& cdm;
-	const std::string& unitString;
-	Units units;
-public:
-	CDMCompatibleUnit(const CDM& cdm, const std::string& unitString) : cdm(cdm), unitString(unitString) {}
-	bool operator() (const std::string& varName) const
-	{
-		try {
-			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
-			std::string testUnit(unitAttr.getData()->asString());
-			if (testUnit == "") return false;
-			return units.areConvertible(unitString, testUnit);
-		} catch (CDMException& ex) {
-			// nothing to do
-		}
-		return false;
-	}
-};
-
-class CDMCompatibleTime : public std::unary_function<std::string, bool> {
-	const CDM& cdm;
-	Units units;
-public:
-	CDMCompatibleTime(const CDM& cdm) : cdm(cdm) {}
-	bool operator() (const std::string& varName) const
-	{
-		try {
-			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
-			std::string testUnit(unitAttr.getData()->asString());
-			if (testUnit == "") return false;
-			return units.isTime(testUnit);
-		} catch (CDMException& ex) {
-			// nothing to do
-		}
-		return false;
-	}
-};
-
-class CDMAttributeEquals : public std::unary_function<std::string, bool> {
-	const CDM& cdm;
-	const std::string& attrName;
-	boost::regex attrRegex;
-public:
-	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, const std::string& attrValue) : cdm(cdm), attrName(attrName) {attrRegex = boost::regex("\\Q"+attrValue+"\\E");}
-	CDMAttributeEquals(const CDM& cdm, const std::string& attrName, boost::regex attrValue) : cdm(cdm), attrName(attrName), attrRegex(attrValue) {}
-	bool operator() (const std::string& varName) const
-	{
-		try {
-			const CDMAttribute& unitAttr = cdm.getAttribute(varName, attrName);
-			std::string testAttrVal(unitAttr.getData()->asString());
-			return boost::regex_match(testAttrVal, attrRegex);
-		} catch (CDMException& ex) {
-			// nothing to do
-		}
-		return false;
-	}
-};
-
 
 CDM::AttrVec CDM::getProjection(std::string varName) const
 {
@@ -489,8 +538,8 @@ CDM::AttrVec CDM::getProjection(std::string varName) const
 		// no projection, maybe longitude latitude?
 		const std::vector<std::string>& shape = getVariable(varName).getShape();
 
-		if (find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_east")) != shape.end()) {
-			if (find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_north")) != shape.end()) {
+		if (find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this)) != shape.end()) {
+			if (find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this)) != shape.end()) {
 				// longitude and latitude found
 				// using CF-1.2 draft attribute for declaration of sphere
 				retVal.push_back(CDMAttribute("grid_mapping_name", "latitude_longitude"));
@@ -516,7 +565,7 @@ std::string CDM::getHorizontalXAxis(std::string varName) const
 			retVal = *shapeIt;
 		} else {
 			// longitude
-			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_east"));
+			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this));
 			if (shapeIt != shape.end()) {
 				retVal = *shapeIt;
 			}
@@ -536,8 +585,8 @@ std::string CDM::getHorizontalYAxis(std::string varName) const
 		if (shapeIt != shape.end()) {
 			retVal = *shapeIt;
 		} else {
-			// longitude
-			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_west"));
+			// latitude
+			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this));
 			if (shapeIt != shape.end()) {
 				retVal = *shapeIt;
 			}
@@ -551,9 +600,9 @@ bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::
 	try {
 		std::string coordinates = getAttribute(varName, "coordinates").getData()->asString();
 		std::vector<std::string> tokens = tokenize(coordinates, " ");
-		std::vector<std::string>::const_iterator latIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleUnit(*this, "degree_north"));
+		std::vector<std::string>::const_iterator latIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleLatitudeUnit(*this));
 		if (latIt != tokens.end()) {
-			std::vector<std::string>::const_iterator lonIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleUnit(*this, "degree_west"));
+			std::vector<std::string>::const_iterator lonIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleLongitudeUnit(*this));
 			if (lonIt != tokens.end()) {
 				latitude = *latIt;
 				longitude = *lonIt;
@@ -565,9 +614,9 @@ bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::
 	}
 	// try the shape axis
 	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator latIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_north"));
+	std::vector<std::string>::const_iterator latIt = find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this));
 	if (latIt != shape.end()) {
-		std::vector<std::string>::const_iterator lonIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "degree_west"));
+		std::vector<std::string>::const_iterator lonIt = find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this));
 		if (lonIt != shape.end()) {
 			latitude = *latIt;
 			longitude = *lonIt;

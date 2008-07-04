@@ -28,6 +28,7 @@
 #include <grib_api.h>
 #include <fstream>
 #include <iostream>
+#include <cmath>
 #include <boost/shared_ptr.hpp>
 
 
@@ -83,7 +84,7 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 						CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("latitude_of_projection_origin"));
 						if (ait != projAttrs.end()) {
 							double lat = ait->getData()->asDouble()[0];
-							if (lat != 90. || lat != -90) {
+							if (std::fabs(lat) < 89.9995) {
 								throw CDMException("grib doesn't know general stereographic projection: found origin latitude " + type2string(lat));
 							}
 						}
@@ -95,7 +96,7 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 							if (x <= 1 || x >= -1) {
 								latitudeWhereDxAndDyAreSpecifiedInDegrees = RAD_TO_DEG * asin(2*scale - 1);
 							} else {
-								throw CDMException("scale_factor_at_projection_origin not defined propperly: abs(2*scale-1) >= 1: " + type2string(x));
+								throw CDMException("scale_factor_at_projection_origin not defined properly: abs(2*scale-1) >= 1: " + type2string(x));
 							}
 						}
 						// get lon0
@@ -104,8 +105,11 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 							orientationOfTheGridInDegrees = ait->getData()->asDouble()[0];
 						}
 					}
-					GRIB_CHECK(grib_set_double(gh.get(), "numberOfPointsAlongXAxis", xData->size()),"");
-					GRIB_CHECK(grib_set_double(gh.get(), "numberOfPointsAlongYAxis", yData->size()),"");
+					std::string polar_stereographic("polar_stereographic");
+					size_t ps_size = polar_stereographic.size();
+					GRIB_CHECK(grib_set_string(gh.get(), "typeOfGrid", polar_stereographic.c_str(), &ps_size), "");
+					GRIB_CHECK(grib_set_long(gh.get(), "numberOfPointsAlongXAxis", xData->size()),"");
+					GRIB_CHECK(grib_set_long(gh.get(), "numberOfPointsAlongYAxis", yData->size()),"");
 					std::string latitude, longitude;
 					if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
 						GRIB_CHECK(grib_set_double(gh.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getDataSlice(latitude)->asConstDouble()[0]),"");
@@ -116,17 +120,18 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 					GRIB_CHECK(grib_set_double(gh.get(), "orientationOfTheGridInDegrees", orientationOfTheGridInDegrees),"");
 					GRIB_CHECK(grib_set_double(gh.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
 					const boost::shared_array<double> xArray = xData->asConstDouble();
-					GRIB_CHECK(grib_set_double(gh.get(), "xDirectionGridLengthInMetres", xArray[1] - xArray[0]),"");
+					// grib1 doesn't allow to set double values for this! // (grib2 not checked)
+					GRIB_CHECK(grib_set_long(gh.get(), "xDirectionGridLengthInMetres", static_cast<long>(xArray[1] - xArray[0])),"");
 					const boost::shared_array<double> yArray = yData->asConstDouble();
-					GRIB_CHECK(grib_set_double(gh.get(), "yDirectionGridLengthInMetres", yArray[1] - yArray[0]),"");
+					GRIB_CHECK(grib_set_long(gh.get(), "yDirectionGridLengthInMetres", static_cast<long>(yArray[1] - yArray[0])),"");
 				} else if (projection == "latitude_longitude") {
-					throw CDMException("grid_mapping_name " + projection + " not supportet yet by GribApiCDMWriter" );
+					throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
 				} else if (projection == "rotated_latitude_longitude") {
-					throw CDMException("grid_mapping_name " + projection + " not supportet yet by GribApiCDMWriter" );
+					throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
 				} else if (projection == "transverse_mercator") {
-					throw CDMException("grid_mapping_name " + projection + " not supportet yet by GribApiCDMWriter" );
+					throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
 				} else {
-					throw CDMException("grid_mapping_name " + projection + " not supportet yet by GribApiCDMWriter" );
+					throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
 				}
 			} else {
 				throw CDMException("Cannot find grid_mapping_name for projection of variable " + vi->getName());
@@ -140,6 +145,7 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 	        const void* buffer;
 	        /* get the coded message in a buffer */
 	        GRIB_CHECK(grib_get_message(gh.get(),&buffer,&size),0);
+	        gribFile << "Hallo" << std::endl;
 	        gribFile.write(reinterpret_cast<const char*>(buffer), size);
 
 
@@ -147,8 +153,9 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			// skip var, no grid?
 			// TODO: message/log
 		}
-		gribFile.close();
 	}
+    gribFile.write("end", 3);
+	gribFile.close();
 }
 
 GribApiCDMWriter::~GribApiCDMWriter()

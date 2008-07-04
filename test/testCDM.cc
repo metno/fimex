@@ -158,7 +158,22 @@ void test_coordinateSystem(void) {
 	BOOST_CHECK(p == cdm.getVerticalAxis(var));
 	BOOST_CHECK(l == cdm.getVerticalAxis(var2));
 
-	// TODO test cdm.getLatitudeLongitude
+	// test cdm.getLatitudeLongitude
+	string lat("lat");
+	string lon("lon");
+	vector<string> xyShape;
+	xyShape.push_back(x);
+	xyShape.push_back(y);
+	cdm.addVariable(CDMVariable(lat, CDM_INT, xyShape));
+	cdm.addVariable(CDMVariable(lon, CDM_INT, xyShape));
+	cdm.addAttribute(lat, CDMAttribute("units", "degreesN"));
+	cdm.addAttribute(lon, CDMAttribute("units", "degreesE"));
+	cdm.addAttribute(var, CDMAttribute("coordinates", lat + " " + lon));
+
+	string latRetVal, lonRetVal;
+	BOOST_CHECK(cdm.getLatitudeLongitude(var, latRetVal, lonRetVal));
+	BOOST_CHECK(latRetVal == lat);
+	BOOST_CHECK(lonRetVal == lon);
 
 }
 
