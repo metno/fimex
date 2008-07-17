@@ -4,7 +4,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: @PACKAGE_NAME@
-Description: The utplukk Library
+Description: The fimex Library
 Version: @VERSION@
 Requires: libmi >= 3.0.0, milib >= 3.0.0 
 Libs: -L${libdir} -l@PACKAGE_NAME@ @NETCDF_LDFLAGS@ @NETCDF_LIBS@

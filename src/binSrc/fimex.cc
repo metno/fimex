@@ -365,7 +365,7 @@ int main(int argc, char* args[])
 {
 	// Declare the supported options.
 	po::options_description generic("Generic options");
-	std::string configFile("utplukk.cfg");
+	std::string configFile("fimex.cfg");
 	generic.add_options()
 	    ("help,h", "help message")
 	    ("version", "program version")

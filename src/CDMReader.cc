@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -30,7 +30,7 @@ static void addSizeUnlessUnlimited(const CDM& cdm, const std::string& dimName, s
 	const CDMDimension& dim = cdm.getDimension(dimName);
 	if (!dim.isUnlimited()) {
 		size *= dim.getLength();
-	}	
+	}
 }
 
 // retrieve size of data slice

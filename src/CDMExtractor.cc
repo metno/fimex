@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -42,7 +42,7 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varN
 	if (variable.hasData()) {
 		return getDataFromMemory(variable, unLimDimPos);
 	}
-	boost::shared_ptr<Data> data; 
+	boost::shared_ptr<Data> data;
 	if (dimChanges.empty()) {
 		// simple read
 		data = dataReader->getDataSlice(varName, unLimDimPos);
@@ -70,7 +70,7 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varN
 				DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
 				if (foundDim != dimChanges.end()) {
 					unLimDimPos += (foundDim->second)[0];
-				}								
+				}
 			}
 		}
 		// read
@@ -97,9 +97,9 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	// keep track of changes
 	dim.setLength(length);
 	boost::array<size_t, 2> changes = { {start, length} };
-	dimChanges[dimName] = changes; 
-	
-	
+	dimChanges[dimName] = changes;
+
+
 	// removing all data containing this dimension, just to be sure it's read from the dataReader
 	const CDM::VarVec& variables = cdm.getVariables();
 	for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {

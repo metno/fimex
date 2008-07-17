@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -40,7 +40,7 @@ namespace MetNoFimex
 
 static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
 	if (data->size() == 0) return true;
-	
+
 	NcDim* dim = var->get_dim(0); // 0 dimension must be record dimension (unlimited if any)
 	var->set_rec(dim, recNum);
 	switch (dt) {
@@ -53,14 +53,14 @@ static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 	case CDM_DOUBLE: return var->put_rec(dim, data->asConstDouble().get());
 	default: return false;
 	}
-	
+
 }
 
 
 static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data) {
 	size_t size = data->size();
 	if (size == 0) return true;
-	
+
 	boost::shared_array<long> edges(var->edges());
 	int dims = var->num_dims();
 	int dim_size = 1;
@@ -70,7 +70,7 @@ static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 	if (size != static_cast<size_t>(dim_size)) {
 		return false;
 	}
-	
+
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
@@ -81,7 +81,7 @@ static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 	case CDM_DOUBLE: return var->put(data->asDouble().get(),edges.get());
 	default: return false;
 	}
-	
+
 }
 
 NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
@@ -126,7 +126,7 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName) throw(CDME
 		cdmReader->getCDM().getVariable(varName);
 	} catch (CDMException& e) {
 		throw CDMException(std::string("error modifying variable in writer: ") + e.what());
-	}	
+	}
 }
 
 void NetCDF_CDMWriter::initFillRenameVariable(const std::auto_ptr<XMLDoc>& doc) throw(CDMException)
@@ -172,7 +172,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc)
 		} else {
 			throw CDMException("unknown parent of attribute "+attName+": "+parentName);
 		}
-		
+
 		std::string attValue = getXmlProp(node, "value");
 		std::string attType = getXmlProp(node, "type");
 		std::string attNewName = getXmlProp(node, "newname");
@@ -182,14 +182,14 @@ void NetCDF_CDMWriter::initFillRenameAttribute(const std::auto_ptr<XMLDoc>& doc)
 		}
 		if (attType != "") {
 			CDMAttribute attr(attName, attType, attValue);
-			CDM::AttrVec& av = attributes[varName]; 
+			CDM::AttrVec& av = attributes[varName];
 			CDM::AttrVec::iterator ait = find_if(av.begin(), av.end(), CDMNameEqual(attName));
 			if (ait == av.end()) {
 				av.push_back(attr);
 			} else {
 				*ait = attr;
 			}
-		}	
+		}
 	}
 }
 
@@ -202,7 +202,7 @@ NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
 		int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
 		// NcDim is organized by NcFile, no need to clean
 		// change the name written to the file according to getDimensionName
-		NcDim* dim = ncFile.add_dim(getDimensionName(it->getName()).c_str(), length); 
+		NcDim* dim = ncFile.add_dim(getDimensionName(it->getName()).c_str(), length);
 		if (dim == 0) throw CDMException(nc_strerror(ncErr.get_err()));
 		ncDimMap[it->getName()] = dim;
 	}
@@ -278,7 +278,7 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 				throw CDMException(nc_strerror(ncErr.get_err()));
 			}
 		}
-	}	
+	}
 }
 
 double NetCDF_CDMWriter::getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const
@@ -297,7 +297,7 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 		const CDMAttribute& attr = getAttribute(varName, attName);
 		retVal = attr.getData()->asDouble()[0];
 	} catch (CDMException& e) {} // don't care
-	return retVal;	
+	return retVal;
 }
 
 
@@ -334,7 +334,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 			} catch (CDMException& e) {
 				// units not defined, do nothing
 			}
-			
+
 			dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
 		}
 		NcVar* ncVar = ncVarMap.find(cdmVar.getName())->second;
@@ -365,7 +365,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 		}
 	}
 }
-	
+
 void NetCDF_CDMWriter::init() throw(CDMException)
 {
 	// write metadata
@@ -375,7 +375,7 @@ void NetCDF_CDMWriter::init() throw(CDMException)
 	NcDimMap ncDimMap = defineDimensions();
 	NcVarMap ncVarMap = defineVariables(ncDimMap);
 	writeAttributes(ncVarMap);
-	writeData(ncVarMap);	
+	writeData(ncVarMap);
 }
 
 NetCDF_CDMWriter::~NetCDF_CDMWriter()
@@ -384,13 +384,13 @@ NetCDF_CDMWriter::~NetCDF_CDMWriter()
 
 const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException)
 {
-	CDM::StrAttrVecMap::const_iterator varAttsIt = attributes.find(varName); 
+	CDM::StrAttrVecMap::const_iterator varAttsIt = attributes.find(varName);
 	if (varAttsIt == attributes.end()) {
 		throw CDMException("could not find variable "+varName+" in NetcdfWriter attribute list");
 	}
 	CDM::AttrVec::const_iterator ait = find_if(varAttsIt->second.begin(), varAttsIt->second.end(), CDMNameEqual(attName));
 	if (ait == varAttsIt->second.end()) {
-		throw CDMException("could not find attribute "+attName+" for variable "+varName+" in NetcdfWriter attribute list");		
+		throw CDMException("could not find attribute "+attName+" for variable "+varName+" in NetcdfWriter attribute list");
 	}
 	return *ait;
 }
