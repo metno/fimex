@@ -77,8 +77,9 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc Units.cc Utils.cc XMLDoc.cc \
-	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	ReplaceStringTimeObject.cc TimeUnit.cc Units.cc Utils.cc \
+	XMLDoc.cc NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc \
+	NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
@@ -91,8 +92,9 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	CDMReader.$(OBJEXT) CDMVariable.$(OBJEXT) Data.$(OBJEXT) \
 	DataTypeChanger.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
 	Null_CDMWriter.$(OBJEXT) ReplaceStringObject.$(OBJEXT) \
-	ReplaceStringTimeObject.$(OBJEXT) Units.$(OBJEXT) \
-	Utils.$(OBJEXT) XMLDoc.$(OBJEXT) $(am__objects_1)
+	ReplaceStringTimeObject.$(OBJEXT) TimeUnit.$(OBJEXT) \
+	Units.$(OBJEXT) Utils.$(OBJEXT) XMLDoc.$(OBJEXT) \
+	$(am__objects_1)
 libfimex_a_OBJECTS = $(am_libfimex_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -319,8 +321,8 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc Units.cc Utils.cc XMLDoc.cc \
-	$(am__append_1)
+	ReplaceStringTimeObject.cc TimeUnit.cc Units.cc Utils.cc \
+	XMLDoc.cc $(am__append_1)
 all: all-recursive
 
 .SUFFIXES:
@@ -414,6 +416,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Po@am__quote@

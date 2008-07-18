@@ -29,15 +29,13 @@ extern "C" {
 }
 // add forgotten utIsInit fom udunits
 extern "C" int utIsInit();
-#endif
 
 namespace MetNoFimex
 {
-static void handleUnitError(int unitErrCode, const std::string& message = "") throw(UnitException)
+void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitException)
 {
 	switch (unitErrCode) {
 	case 0: break;
-#if HAVE_UDUNITS
 	case UT_EOF: throw UnitException("end-of-file encountered : " + message);
     case UT_ENOFILE: throw UnitException("no units-file : " + message);
     case UT_ESYNTAX: throw UnitException("syntax error : " + message);
@@ -50,18 +48,15 @@ static void handleUnitError(int unitErrCode, const std::string& message = "") th
     case UT_ENOROOM: throw UnitException("insufficient room supplied : " + message);
     case UT_ENOTTIME: throw UnitException("not a unit of time : " + message);
     case UT_DUP: throw UnitException("duplicate unit : " + message);
-#endif
 	default: throw UnitException("unknown error");
 	}
 }
 int Units::counter = 0;
 Units::Units()
 {
-#if HAVE_UDUNITS
 	if (!utIsInit()) {
-		handleUnitError(utInit(0));
+		handleUdUnitError(utInit(0));
 	}
-#endif
 	++counter;
 }
 
@@ -78,9 +73,7 @@ Units& Units::operator=(const Units& rhs)
 Units::~Units()
 {
 	if (--counter == 0) {
-#if HAVE_UDUNITS
 		utTerm();
-#endif
 	}
 }
 
@@ -90,45 +83,32 @@ void Units::convert(const std::string& from, const std::string& to, double* slop
 		*slope = 1.;
 		*offset = 0.;
 	}
-#if HAVE_UDUNITS
 	utUnit fromUnit, toUnit;
-	handleUnitError(utScan(from.c_str(), &fromUnit), from);
-	handleUnitError(utScan(to.c_str(), &toUnit), to);
-	handleUnitError(utConvert(&fromUnit, &toUnit, slope, offset));
-#else
-	throw UnitException("fimex not compiled with udunits support");
-#endif
+	handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
+	handleUdUnitError(utScan(to.c_str(), &toUnit), to);
+	handleUdUnitError(utConvert(&fromUnit, &toUnit, slope, offset));
 }
 
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException)
 {
-#if HAVE_UDUNITS
 	utUnit fromUnit, toUnit;
 	double slope, offset;
-	handleUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
-	handleUnitError(utScan(unit2.c_str(), &toUnit), unit2);
+	handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
+	handleUdUnitError(utScan(unit2.c_str(), &toUnit), unit2);
 	int error = utConvert(&fromUnit, &toUnit, &slope, &offset);
 	switch (error) {
 	case 0: return true;
 	case UT_ECONVERT: return false;
-	default: handleUnitError(error);
+	default: handleUdUnitError(error);
 	}
-#else
-	throw UnitException("fimex not compiled with udunits support");
-#endif
 	return false;
 }
 bool Units::isTime(const std::string& timeUnit) const throw(UnitException)
 {
-#if HAVE_UDUNITS
 	utUnit unit;
-	handleUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
+	handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
 	return utIsTime(&unit) != 0;
-#else
-	throw UnitException("fimex not compiled with udunits support");
-#endif
-	return false;
 }
-
+#endif // HAVE_UDUNITS
 
 }

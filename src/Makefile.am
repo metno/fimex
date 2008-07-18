@@ -23,6 +23,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
+					 TimeUnit.cc \
 					 Units.cc \
 					 Utils.cc \
 					 XMLDoc.cc

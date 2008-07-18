@@ -27,6 +27,7 @@
 #include "fimex/interpolation.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include "fimex/TimeUnit.h"
 #include <fcntl.h>
 #include <grib_api.h>
 #include <fstream>
@@ -48,9 +49,16 @@ static void writeGribData(std::ofstream& gribFile, boost::shared_ptr<grib_handle
     gribFile.write(reinterpret_cast<const char*>(buffer), size);
 }
 
-static void writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, int timePos, int levelPos)
+void gribSetDate(grib_handle* gh, const FimexTime& fiTime) {
+	long date = fiTime.year * 10000 + fiTime.month * 100 + fiTime.mday;
+	long time = fiTime.hour * 100 + fiTime.minute;
+	GRIB_CHECK(grib_set_long(gh, "dataDate", date), "setting dataDate");
+	GRIB_CHECK(grib_set_long(gh, "dataTime", time), "setting dataTime");
+}
+
+void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const boost::shared_array<double>& timeData, const boost::shared_array<double>& levelData, TimeUnit tu)
 {
-	std::cerr << "writing data: time: " << timePos << " level: " << levelPos << std::endl;
+	// read the times and levels of the variable
 	std::vector<size_t> finalDimSize = orgDims;
 	std::vector<size_t> startDimPos(orgDims.size(), 0);
 	if (timePos >= 0) {
@@ -63,6 +71,9 @@ static void writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gr
 					startDimPos[timePos] = t;
 					startDimPos[levelPos] = l;
 					boost::shared_ptr<Data> ndata = data->slice(orgDims, startDimPos, finalDimSize);
+					// add vertical axis, add time
+					gribSetDate(gribHandle.get(), tu.unitTime2fimexTime(timeData[t]));
+					GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelData[l])), "setting level");
 					writeGribData(gribFile, gribHandle, ndata);
 				}
 			}
@@ -72,6 +83,11 @@ static void writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gr
 				finalDimSize[timePos] = 1;
 				startDimPos[timePos] = t;
 				boost::shared_ptr<Data> ndata = data->slice(orgDims, startDimPos, finalDimSize);
+				// add vertical axis, add time
+				gribSetDate(gribHandle.get(), tu.unitTime2fimexTime(timeData[t]));
+				if (level != "") {
+					GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelData[currentLevel])), "setting level");
+				}
 				writeGribData(gribFile, gribHandle, ndata);
 			}
 		}
@@ -81,14 +97,23 @@ static void writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gr
 			for (size_t l = 0; l < orgDims[levelPos]; l++) {
 				finalDimSize[levelPos] = 1;
 				startDimPos[levelPos] = l;
-				for (size_t i = 0; i < orgDims.size(); i++) {
-					std::cerr << "org start size: " << orgDims[i] << " " << startDimPos[i] << " " << finalDimSize[i] << std::endl;
-				}
 				boost::shared_ptr<Data> ndata = data->slice(orgDims, startDimPos, finalDimSize);
+				// add vertical axis, add time
+				if (time != "") {
+					gribSetDate(gribHandle.get(), tu.unitTime2fimexTime(timeData[currentTime]));
+				}
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelData[l])), "setting level");
 				writeGribData(gribFile, gribHandle, ndata);
 			}
 		} else {
 			// only xy, no level, no time
+			// add vertical axis, add time
+			if (time != "") {
+				gribSetDate(gribHandle.get(), tu.unitTime2fimexTime(timeData[currentTime]));
+			}
+			if (level != "") {
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelData[currentLevel])), "setting level");
+			}
 			writeGribData(gribFile, gribHandle, data);
 		}
 	}
@@ -200,9 +225,12 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 
 			// TODO: add attributes
 
-			// TODO: add vertical axis, add time
+			// set missing value
+			GRIB_CHECK(grib_set_double(gh.get(), "missingValue", cdm.getFillValue(varName)), "setting missing value");
 
-			// TODO: set missing value
+			// TODO: proper definition of level (code table 3) (indicatorOfLevel)
+			// recalculate level values to have units as defined in code table 3
+			// recalculate levels to be of type 'long'
 
 			// add data
 			std::cerr << "starting setting data of " << varName << ": " << time << " " << level << std::endl;
@@ -217,8 +245,10 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			int yPos = -1;
 			int timePos = -1;
 			int levelPos = -1;
+			size_t currentTime = 0;
+			size_t currentLevel = 0;
+			std::string unLimDim;
 			for (size_t i = 0; i < dims.size(); i++) {
-				std::cerr << "dim: " << dims[i].getName() << " " << dims[i].getLength() << std::endl;
 				if (!dims[i].isUnlimited()) {
 					orgDims.push_back(dims[i].getLength());
 					std::string currentName = dims[i].getName();
@@ -235,18 +265,33 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 							throw CDMException("unknown dimension: " + currentName);
 						}
 					}
+				} else {
+					unLimDim = dims[i].getName();
 				}
+			}
+
+			TimeUnit tu;
+			boost::shared_array<double> timeData;
+			if (time != "") {
+				timeData = cdmReader->getDataSlice(time)->asDouble();
+				tu = TimeUnit(cdmReader->getCDM().getAttribute(time, "units").getStringValue());
+			}
+			boost::shared_array<double> levelData;
+			if (level != "") {
+				levelData = cdmReader->getDataSlice(level)->asDouble();
 			}
 			if (!cdm.hasUnlimitedDim(cdm.getVariable(varName))) {
 				boost::shared_ptr<Data> data = cdmReader->getDataSlice(varName);
-				writeData(gribFile, gh, data, orgDims, timePos, levelPos);
+				writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, tu);
 			} else {
 				const CDMDimension* unLimDim = cdm.getUnlimitedDim();
 				for (size_t i = 0; i < unLimDim->getLength(); ++i) {
 					boost::shared_ptr<Data> data = cdmReader->getDataSlice(varName, i);
 					if (data->size() > 0) {
 						// might be zero if slice not defined
-						writeData(gribFile, gh, data, orgDims, timePos, levelPos);
+						if (unLimDim->getName() == time) currentTime = i;
+						else if (unLimDim->getName() == level) currentLevel = i;
+						writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, tu);
 					}
 				}
 			}
@@ -257,7 +302,6 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			// TODO: message/log
 		}
 	}
-    gribFile.write("end", 3);
 	gribFile.close();
 }
 

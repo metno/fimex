@@ -62,6 +62,8 @@ public:
 	bool isTime(const std::string& timeUnit) const throw(UnitException);
 };
 
+void handleUdUnitError(int unitErrCode, const std::string& message = "") throw(UnitException);
+
 }
 
 #endif /*UNITS_H_*/
