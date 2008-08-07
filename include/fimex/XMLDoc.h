@@ -54,7 +54,8 @@ public:
 	 * get a ptr to the node defined by xpath
 	 *
 	 * @param xpath xpath string for the node
-	 * @throw CDMException if xpath doesn't exists
+	 * @return an xpathobj, which is != 0, but might have 0 elements, i.e. nodesetval == 0 or nodesetval->nodeNr == 0
+	 * @throw CDMException if xpath is not parsable
 	 */
 	XPathObjPtr getXPathObject(const std::string& xpath) const throw(CDMException);
 

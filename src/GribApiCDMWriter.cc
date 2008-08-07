@@ -51,7 +51,6 @@ static void writeGribData(std::ofstream& gribFile, boost::shared_ptr<grib_handle
 }
 
 void gribSetDate(grib_handle* gh, const FimexTime& fiTime) {
-	std::cerr << fiTime.year << "-"<< fiTime.month << "-" << fiTime.mday << std::endl;
 	long date = fiTime.year * 10000 + fiTime.month * 100 + fiTime.mday;
 	long time = fiTime.hour * 100 + fiTime.minute;
 	GRIB_CHECK(grib_set_long(gh, "dataDate", date), "setting dataDate");
@@ -239,27 +238,27 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			}
 			std::string parameterUnits;
 			parameterXPath += "/grib"+gribVersionStr;
-			try {
-				XPathObjPtr xpathObj = xmlConfig.getXPathObject(parameterXPath);
-				xmlNodeSetPtr nodes = xpathObj->nodesetval;
-				int size = (nodes) ? nodes->nodeNr : 0;
-				if (size == 1) {
-					xmlNodePtr node = nodes->nodeTab[0];
-					parameterUnits = getXmlProp(node, "units");
-					std::string parameter = getXmlProp(node, "parameterNumber");
-					if (gribVersion == 1) {
-						GRIB_CHECK(grib_set_long(gh.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
-					} else {
-						GRIB_CHECK(grib_set_long(gh.get(), "parameterNumber", string2type<long>(parameter)),"");
-						std::string category = getXmlProp(node, "parameterCategory");
-						GRIB_CHECK(grib_set_long(gh.get(), "parameterCategory", string2type<long>(category)),"");
-						std::string discipline = getXmlProp(node, "discipline");
-						GRIB_CHECK(grib_set_long(gh.get(), "discipline", string2type<long>(discipline)),"");
-					}
+			std::cerr << parameterXPath << std::endl;
+			XPathObjPtr xpathObj = xmlConfig.getXPathObject(parameterXPath);
+			xmlNodeSetPtr nodes = xpathObj->nodesetval;
+			int size = (nodes) ? nodes->nodeNr : 0;
+			if (size == 1) {
+				xmlNodePtr node = nodes->nodeTab[0];
+				parameterUnits = getXmlProp(node, "units");
+				std::string parameter = getXmlProp(node, "parameterNumber");
+				if (gribVersion == 1) {
+					GRIB_CHECK(grib_set_long(gh.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
+				} else {
+					GRIB_CHECK(grib_set_long(gh.get(), "parameterNumber", string2type<long>(parameter)),"");
+					std::string category = getXmlProp(node, "parameterCategory");
+					GRIB_CHECK(grib_set_long(gh.get(), "parameterCategory", string2type<long>(category)),"");
+					std::string discipline = getXmlProp(node, "discipline");
+					GRIB_CHECK(grib_set_long(gh.get(), "discipline", string2type<long>(discipline)),"");
 				}
-			} catch (CDMException& e) {
-				// TODO: log??
-				std::cerr << "problems finding configuration: " << e.what() << std::endl;
+			} else if (size > 1) {
+				throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
+			} else {
+				std::cerr << "could not find " << parameterXPath << " in " << configFile << ", skipping parameter" << std::endl;
 				continue;
 			}
 
@@ -313,10 +312,6 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			if (time != "") {
 				timeData = cdmReader->getData(time)->asDouble();
 				tu = TimeUnit(cdmReader->getCDM().getAttribute(time, "units").getStringValue());
-				for (size_t i = 0; i < cdmReader->getCDM().getDimension(time).getLength(); i++) {
-					std::cerr << timeData[i] << " ";
-				}
-				std::cerr << std::endl;
 			}
 			boost::shared_array<double> levelData;
 			if (level != "") {
