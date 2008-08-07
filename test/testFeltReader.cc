@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -89,7 +89,7 @@ test_feltfile() {
 	BOOST_CHECK( fa.getX() == 229 );
 	BOOST_CHECK( fa.getY() == 196 );
 	BOOST_CHECK( std::abs(fa.getScalingFactor() - 0.001) < 1e-6 );
-	
+
 	try {
 		ff.getFeltArray("this parameter is intentionally unknown");
 		BOOST_CHECK(false); // should never reach this line
@@ -98,7 +98,7 @@ test_feltfile() {
 		BOOST_CHECK(true);
 	}
 	//FeltParameters xx("/home/heikok/bla/test");
-	
+
 	vector<short> data = ff.getDataSlice(fa.getName(), fa.getTimes().at(50), levels.at(0));
 	BOOST_CHECK(static_cast<int>(data.size()) == (fa.getX()*fa.getY()));
 	// u10m not defined on border
@@ -106,7 +106,7 @@ test_feltfile() {
 	BOOST_CHECK(data[0] == ANY_VALUE());
 	BOOST_CHECK(data[10000] == 820);
 	BOOST_CHECK(data[20000] == 8964);
-	
+
 	vector<time_t> ff_times = ff.getFeltTimes();
 	vector<time_t> fa_times = fa.getTimes();
 	for (vector<time_t>::iterator it = fa_times.begin(); it < fa_times.end(); ++it) {
@@ -114,7 +114,7 @@ test_feltfile() {
 			BOOST_CHECK(false); // not found
 		}
 	}
-	
+
 	vector<short> ff_levels = ff.getFeltLevels()[fa.getLevelType()];
 	vector<short> fa_levels = fa.getLevels();
 	for (vector<short>::iterator it = fa_levels.begin(); it < fa_levels.end(); ++it) {
@@ -122,7 +122,7 @@ test_feltfile() {
 			BOOST_CHECK(false); // not found
 		}
 	}
-	
+
 }
 
 void
@@ -160,8 +160,8 @@ test_felt_cdm_reader() {
 	BOOST_CHECK(projYAxis == "y");
 	BOOST_CHECK(projXUnit == "m");
 	BOOST_CHECK(projYUnit == "m");
-	boost::shared_ptr<Data> xVals = feltCDM.getDataSlice(projXAxis);
-	boost::shared_ptr<Data> yVals = feltCDM.getDataSlice(projYAxis);
+	boost::shared_ptr<Data> xVals = feltCDM.getData(projXAxis);
+	boost::shared_ptr<Data> yVals = feltCDM.getData(projYAxis);
 	BOOST_CHECK(xVals->size() == 229);
 	BOOST_CHECK(yVals->size() == 196);
 

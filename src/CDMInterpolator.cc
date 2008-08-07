@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -60,7 +60,7 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 {
 	const CDMVariable& variable = cdm.getVariable(varName);
 	if (variable.hasData()) {
-		return getDataFromMemory(variable, unLimDimPos);
+		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
 	if (std::find(projectionVariables.begin(), projectionVariables.end(), variable.getName()) == projectionVariables.end()) {
 		// no projection, just forward
@@ -70,7 +70,7 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		double badValue = cdm.getFillValue(varName);
 		boost::shared_array<float> array = data2InterpolationArray(data, badValue);
 		size_t newSize = 0;
-		boost::shared_array<float> iArray = cachedInterpolation.interpolateValues(array, data->size(), newSize); 
+		boost::shared_array<float> iArray = cachedInterpolation.interpolateValues(array, data->size(), newSize);
 		if (variable.isSpatialVector()) {
 			// TODO: the current implementation is sub-optimal since it will fetch and transpose all vector-data twice (once for each direction)
 			const std::string& counterpart = variable.getSpatialVectorCounterpart();
@@ -97,15 +97,15 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 {
 	cdm = dataReader->getCDM(); // reset previous changes
 	projectionVariables.assign(0, ""); // reset variables
-	
+
 	// detect original projection and axes
 	std::string orgProjection;
 	std::string orgXAxis;
 	std::string orgYAxis;
 	std::string orgXAxisUnits, orgYAxisUnits;
 	cdm.getProjectionAndAxesUnits(orgProjection, orgXAxis, orgYAxis, orgXAxisUnits, orgYAxisUnits);
-	boost::shared_ptr<Data> orgXAxisVals = dataReader->getDataSlice(orgXAxis);
-	boost::shared_ptr<Data >orgYAxisVals = dataReader->getDataSlice(orgYAxis);
+	boost::shared_ptr<Data> orgXAxisVals = dataReader->getData(orgXAxis);
+	boost::shared_ptr<Data >orgYAxisVals = dataReader->getData(orgYAxis);
 	// get the new projection
 	std::string newProj;
 	boost::smatch what;
@@ -114,8 +114,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	} else {
 		throw CDMException("cannot find +proj=... in proj-string: " + proj_input);
 	}
-	
-	// remove projection and coordinates (lon lat) 
+
+	// remove projection and coordinates (lon lat)
 	if (orgProjection != "latlong") {
 		cdm.removeVariable(orgProjection);
 		std::string var = (cdm.findVariables("grid_mapping", orgProjection))[0];
@@ -133,9 +133,9 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 			}
 		}
 	}
-	
-	
-	
+
+
+
 	// add new projection and parameters
 	std::string newProjection = "latlong";
 	if (newProj != "latlong") {
@@ -155,7 +155,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 		std::cerr << "new proj: " << newProj << std::endl;
 	}
 
-	
+
 	// change/add new axes
 	// don't change the name of the dimension, even if this might look strange if e.g. lon is a projection_x_coordinate
 	cdm.removeAttribute(orgXAxis, "long_name");
@@ -182,16 +182,16 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("units", out_y_axis_unit));
 	cdm.getVariable(orgXAxis).setData(createData(CDM_DOUBLE, out_x_axis.size(), out_x_axis.begin(), out_x_axis.end()));
 	cdm.getVariable(orgYAxis).setData(createData(CDM_DOUBLE, out_y_axis.size(), out_y_axis.begin(), out_y_axis.end()));
-	
+
 	cdm.getDimension(orgXAxis).setLength(out_x_axis.size());
 	cdm.getDimension(orgYAxis).setLength(out_y_axis.size());
-	
+
 	std::string lat(getLatitudeName());
 	std::string lon(getLongitudeName());
 	if (newProj != "latlong") {
 		cdm.generateProjectionCoordinates(newProjection, orgXAxis, orgYAxis, lon, lat);
 	}
-	
+
 	// find all reprojectible variables and change variable attributes grid_mapping and coordinates
 	{
 		// mapping all variables with matching orgX/orgY dimensions
@@ -221,7 +221,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	if (boost::regex_match(out_y_axis_unit, degree)) {
 		for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
 	}
-	
+
 	size_t fieldSize = outXAxis.size() * outYAxis.size();
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
@@ -242,11 +242,11 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	if (boost::regex_match(orgYAxisUnits, degree)) {
 		miupYAxis = MIFI_LATITUDE;
 		for_each(&(orgYAxisValsArray.get())[0], &(orgYAxisValsArray.get())[orgYAxisVals->size()], degreeToRad);
-	}	
+	}
 	// translate coordinates (in rad or m) to indices
 	mifi_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
 	mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
-	
+
 	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
 
 	// prepare interpolation of vectors

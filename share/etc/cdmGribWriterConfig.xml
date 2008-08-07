@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdm_gribwriter_config>
+<axes>
+<!-- no vertical axis -->
+<vertical_axis standard_name="">
+   <!-- using height in meter, 0 -->
+   <grib1 id="105" value="0" type="short"/>
+   <grib2 id="103" value="0" type="short"/>
+</vertical_axis>
+<vertical_axis units="m">
+   <!-- no standard_name for height/depth, defined only by positive=up/down -->
+   <grib1 id="105" units="m" type="short"/>
+   <grib2 id="103" units="m" type="double"/>
+</vertical_axis>
+<vertical_axis units="hPa">
+   <!-- no standard_name for pressure coord, defined only by unit of hPa -->
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
+<vertical_axis standard_name="atmosphere_sigma_coordinate">
+	<grib1 id="107" scale_factor="1e-5" add_offset="0" type="short" />
+	<grib2 id="104" type="double" />
+</vertical_axis>
+</axes>
+<variables>
+<!-- translation section for parameter names/standard_names -->
+<parameter standard_name="altitude">
+    <grib1 parameterNumber="8" units="m"/>
+    <grib2 discipline="0" parameterCategory="3" parameterNumber="6" units="m"/>
+</parameter>
+<parameter standard_name="sea_surface_temperature">
+    <grib1 parameterNumber="80" units="K"/>
+    <grib2 discipline="10" parameterCategory="3" parameterNumber="0" units="K"/>
+</parameter>
+<parameter standard_name="precipitation_amount">
+    <grib1 parameterNumber="61" units="kg/m2"/>
+    <grib2 discipline="0" category="1" id="8" units="kg/m2"/>
+</parameter>
+</variables>
+</cdm_gribwriter_config>

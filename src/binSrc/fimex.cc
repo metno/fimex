@@ -48,11 +48,11 @@ using namespace std;
 using namespace MetNoFimex;
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
-    out << "usage: utplukk --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
-    out << "               --output.file FILENAME [--output.type OUTPUT_TYPE]" << endl;
-    out << "               [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
-    out << "               [--extract....]" << endl;
-    out << "               [--interpolate....]" << endl;
+    out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
+    out << "             --output.file FILENAME [--output.type OUTPUT_TYPE]" << endl;
+    out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
+    out << "             [--extract....]" << endl;
+    out << "             [--interpolate....]" << endl;
     out << endl;
     out << generic << endl;
     out << config << endl;
@@ -342,10 +342,17 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	}
 #endif
 #ifdef HAVE_GRIBAPI_H
-	if (type == "grb" || type == "grib") {
+	if (type == "grb" || type == "grib" ||
+			type == "grb1" || type == "grib1" ||
+			type == "grb2" || type == "grib2") {
+		int gribVersion = 1;
+		if (type == "grb2" || type == "grib2") {
+			gribVersion = 2;
+		}
 		if (vm.count("debug"))
 			cerr << "writing grib-file " << vm["output.file"].as<string>() << " without config" << endl;
-		GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), "");
+		if (!vm.count("output.config")) throw CDMException("Cannot write grib-file without config");
+		GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), gribVersion, vm["output.config"].as<string>());
 		return;
 	}
 #endif

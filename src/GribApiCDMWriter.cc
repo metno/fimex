@@ -26,6 +26,7 @@
 #include "fimex/GribApiCDMWriter.h"
 #include "fimex/interpolation.h"
 #include "fimex/Utils.h"
+#include "fimex/XMLDoc.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
 #include <fcntl.h>
@@ -50,6 +51,7 @@ static void writeGribData(std::ofstream& gribFile, boost::shared_ptr<grib_handle
 }
 
 void gribSetDate(grib_handle* gh, const FimexTime& fiTime) {
+	std::cerr << fiTime.year << "-"<< fiTime.month << "-" << fiTime.mday << std::endl;
 	long date = fiTime.year * 10000 + fiTime.month * 100 + fiTime.mday;
 	long time = fiTime.hour * 100 + fiTime.minute;
 	GRIB_CHECK(grib_set_long(gh, "dataDate", date), "setting dataDate");
@@ -119,16 +121,20 @@ void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib
 	}
 }
 
-GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const std::string& configFile)
+GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const int gribVersion, const std::string& configFile)
 : CDMWriter(cdmReader, outputFile), configFile(configFile)
 {
+	XMLDoc xmlConfig(configFile);
+
 	// open the file
 	std::ofstream gribFile(outputFile.c_str(), std::ios::binary|std::ios::out);
 	if (!gribFile.is_open()) throw CDMException("Cannot write grib-file: "+outputFile);
 
 	// get the major grib-handle, including projection and x/y axes
-	boost::shared_ptr<grib_handle> mainGH(grib_handle_new_from_template(0, "GRIB1"), grib_handle_delete);
-	if (mainGH.get() == 0) throw CDMException("unable to open grib_handle_from_template");
+	const std::string gribVersionStr = type2string(gribVersion);
+	std::string gribTemplate("GRIB" + gribVersionStr);
+	boost::shared_ptr<grib_handle> mainGH(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
+	if (mainGH.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
 	// TODO: set global attributes
 
 	const CDM& cdm = cdmReader->getCDM();
@@ -147,8 +153,8 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			const std::string time = cdm.getTimeAxis(varName);
 			if (projIt != projAttrs.end()) {
 				const std::string projection(projIt->getData()->asString());
-				const boost::shared_ptr<Data> xData = cdmReader->getDataSlice(x);
-				const boost::shared_ptr<Data> yData = cdmReader->getDataSlice(y);
+				const boost::shared_ptr<Data> xData = cdmReader->getData(x);
+				const boost::shared_ptr<Data> yData = cdmReader->getData(y);
 				if (xData->size() < 2 || yData->size() < 2) {
 					throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
 				}
@@ -198,8 +204,8 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 					GRIB_CHECK(grib_set_long(gh.get(), "numberOfPointsAlongYAxis", yData->size()),"");
 					std::string latitude, longitude;
 					if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-						GRIB_CHECK(grib_set_double(gh.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getDataSlice(latitude)->asConstDouble()[0]),"");
-						GRIB_CHECK(grib_set_double(gh.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getDataSlice(longitude)->asConstDouble()[0]),"");
+						GRIB_CHECK(grib_set_double(gh.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asConstDouble()[0]),"");
+						GRIB_CHECK(grib_set_double(gh.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getData(longitude)->asConstDouble()[0]),"");
 					} else {
 						throw CDMException("unable to find latitude/longitude for variable " + varName);
 					}
@@ -223,7 +229,39 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 				throw CDMException("Cannot find grid_mapping_name for projection of variable " + vi->getName());
 			}
 
-			// TODO: add attributes
+			// TODO: add parameter attribute
+			std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
+			try {
+				const CDMAttribute& attr = cdm.getAttribute(varName, "standard_name");
+				parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+			} catch (CDMException& e) {
+				parameterXPath += "[@name=\"" + varName + "\"]";
+			}
+			std::string parameterUnits;
+			parameterXPath += "/grib"+gribVersionStr;
+			try {
+				XPathObjPtr xpathObj = xmlConfig.getXPathObject(parameterXPath);
+				xmlNodeSetPtr nodes = xpathObj->nodesetval;
+				int size = (nodes) ? nodes->nodeNr : 0;
+				if (size == 1) {
+					xmlNodePtr node = nodes->nodeTab[0];
+					parameterUnits = getXmlProp(node, "units");
+					std::string parameter = getXmlProp(node, "parameterNumber");
+					if (gribVersion == 1) {
+						GRIB_CHECK(grib_set_long(gh.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
+					} else {
+						GRIB_CHECK(grib_set_long(gh.get(), "parameterNumber", string2type<long>(parameter)),"");
+						std::string category = getXmlProp(node, "parameterCategory");
+						GRIB_CHECK(grib_set_long(gh.get(), "parameterCategory", string2type<long>(category)),"");
+						std::string discipline = getXmlProp(node, "discipline");
+						GRIB_CHECK(grib_set_long(gh.get(), "discipline", string2type<long>(discipline)),"");
+					}
+				}
+			} catch (CDMException& e) {
+				// TODO: log??
+				std::cerr << "problems finding configuration: " << e.what() << std::endl;
+				continue;
+			}
 
 			// set missing value
 			GRIB_CHECK(grib_set_double(gh.get(), "missingValue", cdm.getFillValue(varName)), "setting missing value");
@@ -273,15 +311,19 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			TimeUnit tu;
 			boost::shared_array<double> timeData;
 			if (time != "") {
-				timeData = cdmReader->getDataSlice(time)->asDouble();
+				timeData = cdmReader->getData(time)->asDouble();
 				tu = TimeUnit(cdmReader->getCDM().getAttribute(time, "units").getStringValue());
+				for (size_t i = 0; i < cdmReader->getCDM().getDimension(time).getLength(); i++) {
+					std::cerr << timeData[i] << " ";
+				}
+				std::cerr << std::endl;
 			}
 			boost::shared_array<double> levelData;
 			if (level != "") {
-				levelData = cdmReader->getDataSlice(level)->asDouble();
+				levelData = cdmReader->getData(level)->asDouble();
 			}
 			if (!cdm.hasUnlimitedDim(cdm.getVariable(varName))) {
-				boost::shared_ptr<Data> data = cdmReader->getDataSlice(varName);
+				boost::shared_ptr<Data> data = cdmReader->getData(varName);
 				writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, tu);
 			} else {
 				const CDMDimension* unLimDim = cdm.getUnlimitedDim();

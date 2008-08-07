@@ -339,7 +339,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 		}
 		NcVar* ncVar = ncVarMap.find(cdmVar.getName())->second;
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
-			boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName());
+			boost::shared_ptr<Data> data = cdmReader->getData(cdmVar.getName());
 			try {
 				data = dtc.convertData(data);
 			} catch (CDMException& e) {

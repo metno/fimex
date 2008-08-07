@@ -41,7 +41,30 @@ static size_t getSliceSize(const CDM& cdm, const CDMVariable& variable) {
 	return sliceSize;
 }
 
-const boost::shared_ptr<Data> CDMReader::getDataFromMemory(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
+const boost::shared_ptr<Data> CDMReader::getData(const std::string& varName) throw(CDMException)
+{
+	const CDMVariable& variable = cdm.getVariable(varName);
+	if (variable.hasData()) {
+		return variable.getData();
+	} else {
+		if (cdm.hasUnlimitedDim(variable)) {
+			const CDMDimension* udim = cdm.getUnlimitedDim();
+			size_t uDimSize = udim->getLength();
+			size_t sliceSize = getSliceSize(getCDM(), variable);
+			boost::shared_ptr<Data> data = createData(variable.getDataType(), uDimSize*sliceSize);
+			for (size_t i = 0; i < uDimSize; i++) {
+				boost::shared_ptr<Data> slice = getDataSlice(varName, i);
+				data->setValues(i*sliceSize, *slice, 0, sliceSize);
+			}
+			return data;
+		} else {
+			return getDataSlice(varName, 0);
+		}
+	}
+}
+
+
+const boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
 {
 	if (variable.hasData()) {
 		if (cdm.hasUnlimitedDim(variable)) {

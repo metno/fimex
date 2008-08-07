@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -34,7 +34,7 @@ NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
 	if (!ncFile.is_valid()) {
 		throw CDMException(nc_strerror(ncErr.get_err()));
 	}
-	
+
 	// read metadata to cdm
 	// define dimensions
 	for (int i = 0; i < ncFile.num_dims(); ++i) {
@@ -73,9 +73,9 @@ const boost::shared_ptr<Data> NetCDF_CF10_CDMReader::getDataSlice(const std::str
 {
 	const CDMVariable& var = cdm.getVariable(varName);
 	if (var.hasData()) {
-		return getDataFromMemory(var, unLimDimPos);
+		return getDataSliceFromMemory(var, unLimDimPos);
 	}
-	
+
 	NcVar* ncVar = ncFile.get_var(var.getName().c_str());
 	if (cdm.hasUnlimitedDim(var)) {
 		return ncValues2Data(ncVar->get_rec(unLimDimPos), ncVar->type(), ncVar->rec_size());

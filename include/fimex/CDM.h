@@ -200,12 +200,14 @@ public:
 	 *
 	 * @param varName name of variable
 	 * @param attrName name of attribute
+	 * @throw CDMException if varName attrName combination doesn't exists
 	 */
 	CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException);
 	/**
 	 * @brief get an const attribute
 	 * @param varName name of variable
 	 * @param attrName name of attribute
+	 * @throw CDMException if varName attrName combination doesn't exists
 	 */
 	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException);
 	/**

@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -42,10 +42,10 @@ class FeltCDMReader : public CDMReader
 public:
 	FeltCDMReader(std::string filename, std::string configFilename) throw(CDMException);
 	virtual ~FeltCDMReader();
-	
-	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+
+	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
 	virtual const CDM& getCDM() const {return cdm;}
-	
+
 private:
 	const std::string filename;
 	const std::string configFilename;
@@ -59,7 +59,7 @@ private:
 	 * config attributes may contain template parameters marked with %PARAM%
 	 * which should be replaced by dynamic values from the felt-file and stored
 	 * temporary in this map
-	 * 
+	 *
 	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
 	 */
 	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
@@ -72,7 +72,7 @@ private:
 	std::map<short, CDMDimension> initAddLevelDimensionsFromXML(const XMLDoc& doc);
 	/**
 	 * add additional axis from the xml-file to this cdm
-	 * 
+	 *
 	 * @param xpathCtx xpath context of the file
 	 * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
 	 * @param templateReplacements replacements for template parameters

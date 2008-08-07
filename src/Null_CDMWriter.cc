@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -31,7 +31,7 @@ namespace MetNoFimex
 
 static bool putRecData(CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
 	if (data->size() == 0) return true;
-	
+
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
@@ -43,20 +43,20 @@ static bool putRecData(CDMDataType dt, boost::shared_ptr<Data> data, size_t recN
 	default: return false;
 	}
 	return true;
-	
+
 }
 
 
 static bool putVarData(CDMDataType dt, boost::shared_ptr<Data> data) {
 	size_t size = data->size();
 	if (size == 0) return true;
-	
+
 	int dims = 5;
 	int dim_size = 1;
 	for (int i = 0; i < dims; i++) {
 		dim_size *= 3;
 	}
-	
+
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
@@ -94,7 +94,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 			datatype = CDM_INT;
 		}
 	}
-	
+
 	// write attributes
 	const CDM::StrAttrVecMap& cdmAttrs = cdm.getAttributes();
 	// using C interface since it offers a combined interface to global and var attributes
@@ -130,12 +130,12 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 			}
 		}
 	}
-	
+
 	// write data
 	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		const CDMVariable& cdmVar = *it;
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
-			boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName());
+			boost::shared_ptr<Data> data = cdmReader->getData(cdmVar.getName());
 			if (!putVarData(cdmVar.getDataType(), data)) {
 				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
 			}
@@ -151,7 +151,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 
 		}
 	}
-	
+
 }
 
 Null_CDMWriter::~Null_CDMWriter()

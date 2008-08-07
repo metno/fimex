@@ -40,7 +40,7 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varN
 {
 	const CDMVariable& variable = cdm.getVariable(varName);
 	if (variable.hasData()) {
-		return getDataFromMemory(variable, unLimDimPos);
+		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
 	boost::shared_ptr<Data> data;
 	if (dimChanges.empty()) {
