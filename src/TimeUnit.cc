@@ -21,7 +21,7 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 	if (!units.isTime(timeUnitString)) {
 		throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
 	} else {
-		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", &epochSlope, &epochOffset);
+		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
 		pUnit = boost::shared_ptr<utUnit>(new utUnit);
 		utScan(timeUnitString.c_str(), pUnit.get());
 	}

@@ -327,7 +327,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 				oldUnit = cdm.getAttribute(varName, "units").getData()->asString();
 				newUnit = getAttribute(varName, "units").getData()->asString();
 				if (oldUnit != newUnit) {
-					units.convert(oldUnit, newUnit,&unitSlope, &unitOffset);
+					units.convert(oldUnit, newUnit, unitSlope, unitOffset);
 				}
 			} catch (UnitException& e) {
 				std::cerr << "Warning: unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what() << std::endl;

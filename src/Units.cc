@@ -77,16 +77,16 @@ Units::~Units()
 	}
 }
 
-void Units::convert(const std::string& from, const std::string& to, double* slope, double* offset) throw(UnitException)
+void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException)
 {
 	if (from == to) {
-		*slope = 1.;
-		*offset = 0.;
+		slope = 1.;
+		offset = 0.;
 	}
 	utUnit fromUnit, toUnit;
 	handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
 	handleUdUnitError(utScan(to.c_str(), &toUnit), to);
-	handleUdUnitError(utConvert(&fromUnit, &toUnit, slope, offset));
+	handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
 }
 
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException)

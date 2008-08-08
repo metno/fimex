@@ -52,7 +52,7 @@ public:
 	 * @param slope return value of the slope
 	 * @param offset return value of the offset
 	 */
-	void convert(const std::string& from, const std::string& to, double* slope, double* offset) throw(UnitException);
+	void convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException);
 	/**
 	 * @brief test if two units are convertible to each others
 	 * @param unit1 first unit

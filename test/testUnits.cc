@@ -40,7 +40,7 @@ using namespace MetNoFimex;
 void test_Units() {
 	double slope, offset;
 	Units units;
-	units.convert("km", "m", &slope, &offset);
+	units.convert("km", "m", slope, offset);
 	BOOST_CHECK(slope == 1000);
 	BOOST_CHECK(offset == 0);
 }
@@ -49,7 +49,7 @@ void test_UnitsError() {
 	double slope, offset;
 	Units units;
 	try {
-		units.convert("km", "s", &slope, &offset);
+		units.convert("km", "s", slope, offset);
 		BOOST_CHECK(false);
 	} catch (UnitException& ex) {
 		BOOST_CHECK(true);
