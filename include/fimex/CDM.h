@@ -204,12 +204,24 @@ public:
 	 */
 	CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException);
 	/**
-	 * @brief get an const attribute
+	 * @brief get a const. attribute
 	 * @param varName name of variable
 	 * @param attrName name of attribute
 	 * @throw CDMException if varName attrName combination doesn't exists
 	 */
 	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException);
+	/**
+	 * @brief get an attribute without throwing an error
+	 *
+	 * This method will search for an attribute in the cdm. It will return
+	 * true on success and return the attribute.
+	 *
+	 * @param varName name of variable
+	 * @param attrName name of attribute
+	 * @param retAttribute returns the attribute if found
+	 * @return true when attribute has been found and set
+	 */
+	bool getAttribute(const std::string& varName, const std::string& attrName, CDMAttribute& retAttribute) const;
 	/**
 	 * get the fill value of an variable (_FillValue attribute)
 	 *

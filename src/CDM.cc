@@ -35,7 +35,8 @@ namespace MetNoFimex
 {
 
 /** Comparator to check if units are comparable to the initialized one */
-class CDMCompatibleUnit : public std::unary_function<std::string, bool> {
+class CDMCompatibleUnit : public std::unary_function<std::string, bool>
+{
 	const CDM& cdm;
 	const std::string& unitString;
 	Units units;
@@ -56,7 +57,8 @@ public:
 };
 
 /** Comparator to check if units is time */
-class CDMCompatibleTime : public std::unary_function<std::string, bool> {
+class CDMCompatibleTime : public std::unary_function<std::string, bool>
+{
 	const CDM& cdm;
 	Units units;
 public:
@@ -81,7 +83,8 @@ public:
  * unfortunatley, udunits says degreesE == degreesN, so a string comparison
  * is required
  */
-class CDMCompatibleLatLongUnit : public std::unary_function<std::string, bool> {
+class CDMCompatibleLatLongUnit : public std::unary_function<std::string, bool>
+{
 	const CDM& cdm;
 protected:
 	std::set<std::string> compatibleDegrees;
@@ -101,7 +104,8 @@ public:
 	}
 };
 
-class CDMCompatibleLatitudeUnit : public CDMCompatibleLatLongUnit {
+class CDMCompatibleLatitudeUnit : public CDMCompatibleLatLongUnit
+{
 public:
 	CDMCompatibleLatitudeUnit(const CDM& cdm) : CDMCompatibleLatLongUnit(cdm) {
 		compatibleDegrees.insert("degrees_north");
@@ -113,7 +117,8 @@ public:
 	}
 };
 
-class CDMCompatibleLongitudeUnit : public CDMCompatibleLatLongUnit {
+class CDMCompatibleLongitudeUnit : public CDMCompatibleLatLongUnit
+{
 public:
 	CDMCompatibleLongitudeUnit(const CDM& cdm) : CDMCompatibleLatLongUnit(cdm) {
 		compatibleDegrees.insert("degrees_east");
@@ -126,7 +131,8 @@ public:
 };
 
 /** test if attributes string value is comparable to the initialized one */
-class CDMAttributeEquals : public std::unary_function<std::string, bool> {
+class CDMAttributeEquals : public std::unary_function<std::string, bool>
+{
 	const CDM& cdm;
 	const std::string& attrName;
 	boost::regex attrRegex;
@@ -169,7 +175,8 @@ bool CDM::hasVariable(const std::string& varName) const
 	return (find_if(variables.begin(), variables.end(), CDMNameEqual(varName)) != variables.end());
 }
 
-const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException) {
+const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException)
+{
 	VarVec::const_iterator varPos = find_if(variables.begin(), variables.end(), CDMNameEqual(varName));
 	if (varPos != variables.end()) {
 		return *varPos;
@@ -177,21 +184,24 @@ const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDME
 		throw CDMException("cannot find variable: " + varName);
 	}
 }
-CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException) {
+CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException)
+{
 	// call constant version and cast
 	return const_cast<CDMVariable&>(
 			static_cast<const CDM&>(*this).getVariable(varName)
 			);
 }
 
-std::vector<std::string> CDM::findVariables(const std::string& attrName, const std::string& attrValueRegExp) const {
+std::vector<std::string> CDM::findVariables(const std::string& attrName, const std::string& attrValueRegExp) const
+{
 	std::map<std::string, std::string> findAttributes;
 	findAttributes[attrName] = attrValueRegExp;
 	std::vector<std::string> dims;
 	return findVariables(findAttributes, dims);
 }
 
-bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const {
+bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const
+{
 	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
 		AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attribute));
@@ -206,7 +216,8 @@ bool CDM::checkVariableAttribute(const std::string& varName, const std::string& 
 }
 
 /** object function for CDMVariable::checkDimension  (problems with boost::bind and std::not1, boost v 1.32 has no ! operator)*/
-class VariableDimensionCheck : public std::unary_function<std::string, bool> {
+class VariableDimensionCheck : public std::unary_function<std::string, bool>
+{
 	const CDMVariable& variable;
 public:
 	VariableDimensionCheck(const CDMVariable& var) : variable(var) {}
@@ -214,7 +225,8 @@ public:
 };
 
 /** object-function for checkVariableAttribute */
-class VariableAttributeCheck : public std::unary_function<std::pair<std::string, boost::regex>, bool> {
+class VariableAttributeCheck : public std::unary_function<std::pair<std::string, boost::regex>, bool>
+{
 	const CDM& cdm;
 	const std::string& varName;
 public:
@@ -222,7 +234,8 @@ public:
 	bool operator() (const std::pair<std::string, boost::regex>& attrRegex) const { return cdm.checkVariableAttribute(varName, attrRegex.first, attrRegex.second); }
 };
 
-std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const {
+std::vector<std::string> CDM::findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const
+{
 	std::vector<std::string> results;
 	// precalc regexp
 	std::map<std::string, boost::regex> attrRegExps;
@@ -242,7 +255,8 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 }
 
 
-void CDM::removeVariable(const std::string& variableName) {
+void CDM::removeVariable(const std::string& variableName)
+{
 	VarVec::iterator newEnd = remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName));
 	if (newEnd != variables.end()) {
 		variables.erase(newEnd, variables.end());
@@ -278,14 +292,16 @@ const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CD
 	}
 }
 
-CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException) {
+CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException)
+{
 	return const_cast<CDMDimension&>(
 			static_cast<const CDM&>(*this).getDimension(dimName)
 			);
 }
 
 
-const CDMDimension* CDM::getUnlimitedDim() const {
+const CDMDimension* CDM::getUnlimitedDim() const
+{
 	DimVec::const_iterator it = find_if(dimensions.begin(), dimensions.end(), std::mem_fun_ref(&CDMDimension::isUnlimited));
 	if (it == dimensions.end()) {
 		return 0;
@@ -294,7 +310,8 @@ const CDMDimension* CDM::getUnlimitedDim() const {
 	}
 }
 
-bool CDM::hasUnlimitedDim(const CDMVariable& var) const {
+bool CDM::hasUnlimitedDim(const CDMVariable& var) const
+{
 	const std::vector<std::string>& shape = var.getShape();
 	const CDMDimension* unlimDim = getUnlimitedDim();
 	if (unlimDim == 0) {
@@ -353,13 +370,25 @@ const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::str
 		throw CDMException("Variable " + varName + " not found");
 	}
 }
-CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException) {
+CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException)
+{
 	return const_cast<CDMAttribute&>(
 			static_cast<const CDM&>(*this).getAttribute(varName, attrName)
 			);
 }
 
-std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const {
+bool CDM::getAttribute(const std::string& varName, const std::string& attrName, CDMAttribute& retAttribute) const
+{
+	try {
+		retAttribute = getAttribute(varName, attrName);
+	} catch (CDMException e) {
+		return false;
+	}
+	return true;
+}
+
+std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const
+{
 	std::vector<CDMAttribute> results;
 	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
 	if (varIt != attributes.end()) {
@@ -368,7 +397,8 @@ std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const {
 	return results;
 }
 
-double CDM::getFillValue(const std::string& varName) const {
+double CDM::getFillValue(const std::string& varName) const
+{
 	try {
 		const CDMAttribute& attr = getAttribute(varName, "_FillValue");
 		return attr.getData()->asDouble()[0];
@@ -402,7 +432,8 @@ void CDM::toXMLStream(std::ostream& out) const
 }
 
 // TODO: in CF: projection belongs to variable, not to file!!
-bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException) {
+bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException)
+{
 	bool retVal = true;
 	projectionName = "latitude_longitude"; // default
 	std::vector<std::string> projs = findVariables("grid_mapping_name", ".*");
@@ -471,7 +502,8 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 	return retVal;
 }
 
-void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException) {
+void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException)
+{
 	const CDMVariable& xVar = getVariable(xDim);
 	const CDMVariable& yVar = getVariable(yDim);
 	boost::shared_array<double> xData = xVar.getData()->asDouble();

@@ -120,6 +120,7 @@ void test_coordinateSystem(void) {
     string l("l");
 	string var("var");
 	string var2("var2");
+	string var3d("var3d");
 	cdm.addDimension(CDMDimension(x, 1));
 	cdm.addDimension(CDMDimension(y, 1));
 	cdm.addDimension(CDMDimension(p, 1));
@@ -140,6 +141,8 @@ void test_coordinateSystem(void) {
 	shape.pop_back(); // remove p
 	shape.push_back(l);
 	cdm.addVariable(CDMVariable(var2, CDM_INT, shape));
+	shape.pop_back(); // remove l
+	cdm.addVariable(CDMVariable(var3d, CDM_INT, shape));
 
 	// define units
 	cdm.addAttribute(x, CDMAttribute("units", "m"));
@@ -157,6 +160,7 @@ void test_coordinateSystem(void) {
 	BOOST_CHECK(t == cdm.getTimeAxis(var));
 	BOOST_CHECK(p == cdm.getVerticalAxis(var));
 	BOOST_CHECK(l == cdm.getVerticalAxis(var2));
+	BOOST_CHECK("" == cdm.getVerticalAxis(var3d));
 
 	// test cdm.getLatitudeLongitude
 	string lat("lat");

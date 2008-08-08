@@ -7,12 +7,12 @@
    <grib1 id="105" value="0" type="short"/>
    <grib2 id="103" value="0" type="short"/>
 </vertical_axis>
-<vertical_axis units="m">
+<vertical_axis unitCompatibleTo="m">
    <!-- no standard_name for height/depth, defined only by positive=up/down -->
    <grib1 id="105" units="m" type="short"/>
    <grib2 id="103" units="m" type="double"/>
 </vertical_axis>
-<vertical_axis units="hPa">
+<vertical_axis unitCompatibleTo="Pa">
    <!-- no standard_name for pressure coord, defined only by unit of hPa -->
    <grib1 id="100" units="hPa" type="short"/>
    <grib2 id="100" units="Pa" type="double"/>

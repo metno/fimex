@@ -29,6 +29,7 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/Units.h"
 #include <fcntl.h>
 #include <grib_api.h>
 #include <fstream>
@@ -39,6 +40,28 @@
 
 namespace MetNoFimex
 {
+
+// TODO: find a way to use grib_set_double for several grib2 parameters and use grib_set_long for the corresponding grib1 parameters (i.e. level)
+//       check newest version of grib_api first
+
+class Scale : public std::unary_function<std::string, bool>
+{
+	const double scale_factor;
+	const double add_offset;
+public:
+	Scale(double scale_factor, double add_offset) : scale_factor(scale_factor), add_offset(add_offset) {}
+	virtual ~Scale() {}
+	virtual double operator() (double x) const {return x*scale_factor + add_offset;}
+};
+
+class UnScale : public Scale
+{
+public:
+	UnScale(double scale_factor, double add_offset) : Scale(1/scale_factor, -1 * add_offset/scale_factor) {}
+	virtual ~UnScale() {}
+};
+
+
 static void writeGribData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, const boost::shared_ptr<Data>& data)
 {
 	GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asConstDouble().get(), data->size()), "");
@@ -57,7 +80,7 @@ void gribSetDate(grib_handle* gh, const FimexTime& fiTime) {
 	GRIB_CHECK(grib_set_long(gh, "dataTime", time), "setting dataTime");
 }
 
-void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const boost::shared_array<double>& timeData, const boost::shared_array<double>& levelData, TimeUnit tu)
+void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const std::vector<double>& timeData, const std::vector<double>& levelData, TimeUnit tu)
 {
 	// read the times and levels of the variable
 	std::vector<size_t> finalDimSize = orgDims;
@@ -124,6 +147,7 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 : CDMWriter(cdmReader, outputFile), configFile(configFile)
 {
 	XMLDoc xmlConfig(configFile);
+	Units units;
 
 	// open the file
 	std::ofstream gribFile(outputFile.c_str(), std::ios::binary|std::ios::out);
@@ -230,11 +254,13 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 
 			// TODO: add parameter attribute
 			std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
-			try {
-				const CDMAttribute& attr = cdm.getAttribute(varName, "standard_name");
-				parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
-			} catch (CDMException& e) {
-				parameterXPath += "[@name=\"" + varName + "\"]";
+			{
+				CDMAttribute attr;
+				if (cdm.getAttribute(varName, "standard_name", attr)) {
+					parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+				} else {
+					parameterXPath += "[@name=\"" + varName + "\"]";
+				}
 			}
 			std::string parameterUnits;
 			parameterXPath += "/grib"+gribVersionStr;
@@ -265,9 +291,95 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			// set missing value
 			GRIB_CHECK(grib_set_double(gh.get(), "missingValue", cdm.getFillValue(varName)), "setting missing value");
 
-			// TODO: proper definition of level (code table 3) (indicatorOfLevel)
-			// recalculate level values to have units as defined in code table 3
-			// recalculate levels to be of type 'long'
+			std::cerr << "starting to find levelData" << std::endl;
+			std::vector<double> levelData;
+			{
+				// TODO: proper definition of level (code table 3) (indicatorOfLevel)
+				// recalculate level values to have units as defined in code table 3
+				// recalculate units of level
+				std::string verticalAxis = cdm.getVerticalAxis(varName);
+				std::cerr << "found verticalAxis at: " << verticalAxis << std::endl;
+				std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
+				std::string unit;
+				if (verticalAxis != ""){
+					boost::shared_ptr<Data> myLevelData = cdmReader->getData(verticalAxis);
+					const boost::shared_array<double> levelDataArray = myLevelData->asConstDouble();
+					levelData= std::vector<double>(&levelDataArray[0], &levelDataArray[myLevelData->size()]);
+					CDMAttribute attr;
+					if (cdm.getAttribute(verticalAxis, "standard_name", attr)) {
+						verticalAxisXPath += "[@standard_name=\""+ attr.getData()->asString() + "\"]";
+					} else if (cdm.getAttribute(verticalAxis, "units", attr)) {
+						// units compatible to Pa or m
+						std::string unit = attr.getData()->asString();
+						if (units.areConvertible(unit, "m")) {
+							verticalAxisXPath += "[@unitCompatibleTo=\"m\"]";
+						} else if (units.areConvertible(unit, "Pa")) {
+							verticalAxisXPath += "[@unitCompatibleTo=\"Pa\"]";
+						} else {
+							throw CDMException("units of vertical axis " + verticalAxis + " should be compatible with m or Pa but are: " + unit);
+						}
+					} else {
+						throw CDMException("couldn't find standard_name or units for vertical Axis " + verticalAxis + ". Is this CF compatible?");
+					}
+				} else {
+					// cdmGribWriterConfig should contain something like standard_name=""
+					verticalAxisXPath += "[@standard_name=\"\"]";
+					levelData.push_back(0);
+					// immediately set level-data, since it won't change
+					GRIB_CHECK(grib_set_long(gh.get(), "level", static_cast<long>(levelData[0])), "setting level");
+				}
+				verticalAxisXPath += "/grib" + gribVersionStr;
+				std::cerr << "looking at: " << verticalAxisXPath << std::endl;
+				XPathObjPtr verticalXPObj = xmlConfig.getXPathObject(verticalAxisXPath);
+				xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
+				int size = (nodes) ? nodes->nodeNr : 0;
+				if (size == 1) {
+					xmlNodePtr node = nodes->nodeTab[0];
+					std::string levelId = getXmlProp(node, "id");
+					GRIB_CHECK(grib_set_long(gh.get(), "indicatorOfTypeOfLevel", string2type<long>(levelId)),"setting levelId");
+					std::cerr << "finished setting of indicatorOfTypeOfLevel: " << levelId << std::endl;
+
+					// scale the original levels according to the cdm
+					double scale_factor = 1.;
+					double add_offset = 0.;
+					CDMAttribute attr;
+					if (cdm.getAttribute(verticalAxis, "scale_factor", attr)) {
+						scale_factor = attr.getData()->asDouble()[0];
+					}
+					if (cdm.getAttribute(verticalAxis, "add_offset", attr)) {
+						add_offset = attr.getData()->asDouble()[0];
+					}
+					std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(scale_factor, add_offset));
+					// scale the levels according to the units
+					std::string gribUnits = getXmlProp(node, "units");
+					if (gribUnits != "") {
+						if (cdm.getAttribute(verticalAxis, "units", attr)) {
+							double slope;
+							double offset;
+							units.convert(attr.getData()->asString(), gribUnits, slope, offset);
+							std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(slope, offset));
+						}
+					}
+
+					// unscale to be able to put the data into values suitable to grib
+					std::string gribScaleFactorStr = getXmlProp(node, "scale_factor");
+					std::string gribAddOffsetStr = getXmlProp(node, "add_offset");
+					scale_factor = 1.;
+					add_offset = 0.;
+					if (gribScaleFactorStr != "") {
+						scale_factor = string2type<double>(gribScaleFactorStr);
+					}
+					if (gribAddOffsetStr != "") {
+						add_offset = string2type<double>(gribAddOffsetStr);
+					}
+					std::transform(levelData.begin(), levelData.end(), levelData.begin(), UnScale(scale_factor, add_offset));
+				} else if (size > 1) {
+					throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
+				} else {
+					std::cerr << "could not find vertical Axis " << verticalAxisXPath << " in " << configFile << ", skipping parameter " << parameterXPath << std::endl;
+					continue;
+				}
+			}
 
 			// add data
 			std::cerr << "starting setting data of " << varName << ": " << time << " " << level << std::endl;
@@ -308,14 +420,11 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			}
 
 			TimeUnit tu;
-			boost::shared_array<double> timeData;
+			std::vector<double> timeData;
 			if (time != "") {
-				timeData = cdmReader->getData(time)->asDouble();
+				const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+				timeData = std::vector<double>(&timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
 				tu = TimeUnit(cdmReader->getCDM().getAttribute(time, "units").getStringValue());
-			}
-			boost::shared_array<double> levelData;
-			if (level != "") {
-				levelData = cdmReader->getData(level)->asDouble();
 			}
 			if (!cdm.hasUnlimitedDim(cdm.getVariable(varName))) {
 				boost::shared_ptr<Data> data = cdmReader->getData(varName);

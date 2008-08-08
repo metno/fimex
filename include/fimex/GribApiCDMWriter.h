@@ -25,6 +25,7 @@
 #define GRIBAPICDMWRITER_H_
 
 #include "fimex/CDMWriter.h"
+#include <vector>
 
 // pre-declaration of parameters
 struct grib_handle;
@@ -40,7 +41,7 @@ public:
 	virtual ~GribApiCDMWriter();
 private:
 	std::string configFile;
-	void writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const boost::shared_array<double>& timeData, const boost::shared_array<double>& levelData, TimeUnit tu);
+	void writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const std::vector<double>& timeData, const std::vector<double>& levelData, TimeUnit tu);
 };
 
 }
