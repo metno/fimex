@@ -76,13 +76,13 @@ public:
 	TimeUnit(const std::string& timeUnitString) throw(CDMException);
 	virtual ~TimeUnit();
 	/// calculate the epochSeconds for a time in the current unit
-	double unitTime2epochSeconds(double unitTime);
+	double unitTime2epochSeconds(double unitTime) const;
 	/// calculate the time in the current unit from the epoch
-	double epochSeconds2unitTime(double epochSeconds);
+	double epochSeconds2unitTime(double epochSeconds) const;
 	/// calculate the time in a calendar form
-	FimexTime unitTime2fimexTime(double unitTime) throw(CDMException);
+	FimexTime unitTime2fimexTime(double unitTime) const throw(CDMException);
 	/// calculate the time in the current unit from the calendar form
-	double fimexTime2unitTime(const FimexTime& fiTime) throw(CDMException);
+	double fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException);
 private:
 	void init(const std::string& timeUnitString = "seconds since 1970-01-01 00:00:00") throw(CDMException);
 };

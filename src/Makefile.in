@@ -76,10 +76,11 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
+	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc TimeUnit.cc Units.cc Utils.cc \
-	XMLDoc.cc NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc \
-	NetCDF_Utils.cc
+	ReplaceStringTimeObject.cc TimeLevelDataSliceFetcher.cc \
+	TimeUnit.cc Units.cc Utils.cc XMLDoc.cc \
+	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
@@ -91,8 +92,11 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	CDMInterpolator.$(OBJEXT) CDMNamedEntity.$(OBJEXT) \
 	CDMReader.$(OBJEXT) CDMVariable.$(OBJEXT) Data.$(OBJEXT) \
 	DataTypeChanger.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
+	GribApiCDMWriter_ImplAbstract.$(OBJEXT) \
+	GribApiCDMWriter_Impl1.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
 	Null_CDMWriter.$(OBJEXT) ReplaceStringObject.$(OBJEXT) \
-	ReplaceStringTimeObject.$(OBJEXT) TimeUnit.$(OBJEXT) \
+	ReplaceStringTimeObject.$(OBJEXT) \
+	TimeLevelDataSliceFetcher.$(OBJEXT) TimeUnit.$(OBJEXT) \
 	Units.$(OBJEXT) Utils.$(OBJEXT) XMLDoc.$(OBJEXT) \
 	$(am__objects_1)
 libfimex_a_OBJECTS = $(am_libfimex_a_OBJECTS)
@@ -320,9 +324,10 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc TimeUnit.cc Units.cc Utils.cc \
-	XMLDoc.cc $(am__append_1)
+	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
+	GribApiCDMWriter.cc Null_CDMWriter.cc ReplaceStringObject.cc \
+	ReplaceStringTimeObject.cc TimeLevelDataSliceFetcher.cc \
+	TimeUnit.cc Units.cc Utils.cc XMLDoc.cc $(am__append_1)
 all: all-recursive
 
 .SUFFIXES:
@@ -410,12 +415,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_ImplAbstract.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CF10_CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Po@am__quote@

@@ -80,7 +80,7 @@ void gribSetDate(grib_handle* gh, const FimexTime& fiTime) {
 	GRIB_CHECK(grib_set_long(gh, "dataTime", time), "setting dataTime");
 }
 
-void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const std::vector<double>& timeData, const std::vector<double>& levelData, TimeUnit tu)
+void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib_handle> gribHandle, boost::shared_ptr<Data> data, std::vector<size_t> orgDims, const std::string& time, const std::string& level, int timePos, int levelPos, size_t currentTime, size_t currentLevel, const std::vector<double>& timeData, const std::vector<double>& levelData, const std::vector<std::map<std::string, std::string> >& levelParameters, TimeUnit tu)
 {
 	// read the times and levels of the variable
 	std::vector<size_t> finalDimSize = orgDims;
@@ -98,6 +98,16 @@ void GribApiCDMWriter::writeData(std::ofstream& gribFile, boost::shared_ptr<grib
 					// add vertical axis, add time
 					gribSetDate(gribHandle.get(), tu.unitTime2fimexTime(timeData[t]));
 					GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelData[l])), "setting level");
+					// some data, i.e. cloud, have different parameters per level, change them here
+					if (levelParameters.size() > 0) {
+						// TODO: integrate all parameters
+						std::map<std::string, std::string>::const_iterator parIt = levelParameters[l].begin();
+						while (parIt != levelParameters[l].end()) {
+							long value = string2type<long>(parIt->second);
+							GRIB_CHECK(grib_set_long(gribHandle.get(), parIt->first.c_str(), value), ("setting level parameter" + parIt->first).c_str());
+						}
+					}
+
 					writeGribData(gribFile, gribHandle, ndata);
 				}
 			}
@@ -164,8 +174,8 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 	const CDM::VarVec& vars = cdm.getVariables();
 	// iterator over all variables
 	for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
-		// TODO: detect more projections
 		const std::string varName(vi->getName());
+		// TODO: detect more projections
 		CDM::AttrVec projAttrs = cdm.getProjection(varName);
 		if (!projAttrs.empty()) {
 			boost::shared_ptr<grib_handle> gh = boost::shared_ptr<grib_handle>(grib_handle_clone(mainGH.get()), grib_handle_delete);
@@ -268,12 +278,15 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			XPathObjPtr xpathObj = xmlConfig.getXPathObject(parameterXPath);
 			xmlNodeSetPtr nodes = xpathObj->nodesetval;
 			int size = (nodes) ? nodes->nodeNr : 0;
+			std::vector<std::map<std::string, std::string> > levelParameters;
 			if (size == 1) {
 				xmlNodePtr node = nodes->nodeTab[0];
 				parameterUnits = getXmlProp(node, "units");
 				std::string parameter = getXmlProp(node, "parameterNumber");
 				if (gribVersion == 1) {
 					GRIB_CHECK(grib_set_long(gh.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
+					std::string tableNumber = getXmlProp(node, "codeTable");
+					GRIB_CHECK(grib_set_long(gh.get(), "gribTablesVersionNo", string2type<long>(tableNumber)),"");
 				} else {
 					GRIB_CHECK(grib_set_long(gh.get(), "parameterNumber", string2type<long>(parameter)),"");
 					std::string category = getXmlProp(node, "parameterCategory");
@@ -428,7 +441,7 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 			}
 			if (!cdm.hasUnlimitedDim(cdm.getVariable(varName))) {
 				boost::shared_ptr<Data> data = cdmReader->getData(varName);
-				writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, tu);
+				writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, levelParameters, tu);
 			} else {
 				const CDMDimension* unLimDim = cdm.getUnlimitedDim();
 				for (size_t i = 0; i < unLimDim->getLength(); ++i) {
@@ -437,7 +450,7 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 						// might be zero if slice not defined
 						if (unLimDim->getName() == time) currentTime = i;
 						else if (unLimDim->getName() == level) currentLevel = i;
-						writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, tu);
+						writeData(gribFile, gh, data, orgDims, time, level, timePos, levelPos, currentTime, currentLevel, timeData, levelData, levelParameters, tu);
 					}
 				}
 			}

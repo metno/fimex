@@ -20,9 +20,13 @@ libfimex_a_SOURCES = interpolation.c \
 					 Data.cc \
 					 DataTypeChanger.cc \
 					 GribApiCDMWriter.cc \
+					 GribApiCDMWriter_ImplAbstract.cc \
+					 GribApiCDMWriter_Impl1.cc \
+					 GribApiCDMWriter.cc \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
+					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
 					 Units.cc \
 					 Utils.cc \

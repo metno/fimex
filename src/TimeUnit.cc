@@ -56,15 +56,15 @@ TimeUnit::~TimeUnit()
 {
 }
 
-double TimeUnit::unitTime2epochSeconds(double unitTime)
+double TimeUnit::unitTime2epochSeconds(double unitTime) const
 {
 	return unitTime * epochSlope + epochOffset;
 }
-double TimeUnit::epochSeconds2unitTime(double epochSeconds)
+double TimeUnit::epochSeconds2unitTime(double epochSeconds) const
 {
 	return (epochSeconds - epochOffset) / epochSlope;
 }
-FimexTime TimeUnit::unitTime2fimexTime(double unitTime) throw(CDMException)
+FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException)
 {
 	FimexTime fiTime;
 	float second;
@@ -73,7 +73,7 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) throw(CDMException)
 	fiTime.msecond = static_cast<int>((second - fiTime.second)*1000);
 	return fiTime;
 }
-double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) throw(CDMException)
+double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
 {
 	float second = fiTime.second + (fiTime.msecond/1000.);
 	double retVal;
