@@ -27,6 +27,8 @@
 
 #include <vector>
 #include <grib_api.h>
+#include <fstream>
+#include <iostream>
 #include "fimex/CDMWriter.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/CDMException.h"
@@ -39,8 +41,21 @@ namespace MetNoFimex
 class GribApiCDMWriter_ImplAbstract
 {
 public:
+	/**
+	 * Constructor of the general writer. It should be called during
+	 * construction of derived classes.
+	 *
+	 * @warn remember to call run to actually do something
+	 */
 	GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile);
 	virtual ~GribApiCDMWriter_ImplAbstract();
+	/**
+	 * @brief actually write the data
+	 *
+	 * The run function has be to called after construction the object to
+	 * actually fetch and write the data.
+	 */
+	void run() throw(CDMException);
 protected:
 	virtual void setData(const boost::shared_ptr<Data>& data);
 	/**
@@ -49,9 +64,9 @@ protected:
 	 * @throw CDMException if parameters cannot be set
 	 */
 	virtual void setProjection(const std::string& varName) throw(CDMException) = 0;
-	virtual void setParameter(const std::string& varName) throw(CDMException) = 0;
-	virtual void setTime(size_t timePos, const std::vector<FimexTime>& cdmVarTimes);
-	virtual void setLevel(const std::string& varName, size_t levelPos, const std::vector<double>& cdmLevels) = 0;
+	virtual void setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException) = 0;
+	virtual void setTime(const std::string& varName, const FimexTime& fTime);
+	virtual void setLevel(const std::string& varName, double levelValue) = 0;
 	/**
 	 * get the levels from the cdm scaled to values used in grib (units/scale-factor)
 	 * assign at least 1 level, give it a default value if none is found in the cdm
@@ -63,7 +78,12 @@ protected:
 	 * assign at least 1 time, give it a default value if none is found in the cdm
 	 */
 	virtual std::vector<FimexTime> getTimes(const std::string& varName) throw(CDMException);
-	virtual void setMissingValue() = 0;
+	/**
+	 * add the missing value to the gribHandle
+	 * @return value of the missing value
+	 */
+	virtual double setMissingValue(const std::string& varName, const FimexTime& fTime, double levelValue) = 0;
+	virtual void writeGribHandleToFile();
 
 protected:
 	int gribVersion;
@@ -72,6 +92,8 @@ protected:
 	const std::string configFile;
 	const boost::shared_ptr<XMLDoc> xmlConfig;
 	boost::shared_ptr<grib_handle> gribHandle;
+private:
+	std::ofstream gribFile;
 
 };
 

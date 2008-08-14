@@ -23,6 +23,7 @@
 
 #include "fimex/GribApiCDMWriter_ImplAbstract.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/TimeLevelDataSliceFetcher.h"
 
 namespace MetNoFimex
 {
@@ -55,26 +56,78 @@ public:
 };
 
 GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
-: gribVersion(gribVersion), cdmReader(cdmReader), outputFile(outputFile), configFile(configFile), xmlConfig(new XMLDoc(configFile))
+: gribVersion(gribVersion), cdmReader(cdmReader), outputFile(outputFile), configFile(configFile), xmlConfig(new XMLDoc(configFile)), gribFile(outputFile.c_str(), std::ios::binary|std::ios::out)
 {
 	std::string gribTemplate("GRIB" + type2string(gribVersion));
 	gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
 	if (gribHandle.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
+	// check the file
+	if (!gribFile.is_open()) throw CDMException("Cannot write grib-file: "+outputFile);
 }
 
 GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
 {
 }
 
+void GribApiCDMWriter_ImplAbstract::run() throw(CDMException) {
+	// TODO: set global attributes
+
+	const CDM& cdm = cdmReader->getCDM();
+	const CDM::VarVec& vars = cdm.getVariables();
+	// iterator over all variables
+	for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
+		const std::string& varName = vi->getName();
+		try {
+		std::cerr << "getting times" << std::endl;
+		std::vector<FimexTime> times = getTimes(varName);
+		std::cerr << "getting levels" << std::endl;
+		std::vector<double> levels = getLevels(varName);
+		std::cerr << "getting dataFetcher" << std::endl;
+		TimeLevelDataSliceFetcher tld(cdmReader, varName);
+		try {
+			std::cerr << "setting projection" << std::endl;
+			setProjection(varName);
+		} catch (CDMException& e) {
+			std::cerr << "cannot write variable " << varName << " due to projection problems: " << e.what() << std::endl;
+			continue;
+		}
+		for (size_t t = 0; t < times.size(); t++) {
+			for (size_t l = 0; l < levels.size(); l++) {
+				std::cerr << "getting data" << std::endl;
+				boost::shared_ptr<Data> data = tld.getTimeLevelSlice(t, l);
+				if (data->size() == 0) {
+					// no data, silently skip to next level/time
+					continue;
+				}
+				double levelVal = levels[l];
+				const FimexTime& fTime = times[t];
+				std::cerr << "setting missing" << std::endl;
+				setMissingValue(varName, fTime, levelVal);
+				std::cerr << "setting data" << std::endl;
+				setData(data);
+				std::cerr << "setting level" << std::endl;
+				setLevel(varName, levelVal);
+				std::cerr << "setting time" << std::endl;
+				setTime(varName, fTime);
+				std::cerr << "setting parameter" << std::endl;
+				setParameter(varName, fTime, levelVal);
+				writeGribHandleToFile();
+			}
+		}
+		} catch (CDMException& e) {
+			std::cerr << "unable to write parameter "<< varName << ": " << e.what() << std::endl;
+		}
+	}
+}
+
 void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data) {
 	GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asConstDouble().get(), data->size()), "setting values");
 }
 
-void GribApiCDMWriter_ImplAbstract::setTime(size_t timePos, const std::vector<FimexTime>& cdmVarTimes)
+void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const FimexTime& fTime)
 {
-	const FimexTime& fiTime = cdmVarTimes[timePos];
-	long date = fiTime.year * 10000 + fiTime.month * 100 + fiTime.mday;
-	long time = fiTime.hour * 100 + fiTime.minute;
+	long date = fTime.year * 10000 + fTime.month * 100 + fTime.mday;
+	long time = fTime.hour * 100 + fTime.minute;
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", date), "setting dataDate");
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", time), "setting dataTime");
 }
@@ -184,5 +237,16 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
 	}
 	return timeData;
 }
+
+void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
+{
+	// write data to file
+    size_t size;
+    const void* buffer;
+    /* get the coded message in a buffer */
+    GRIB_CHECK(grib_get_message(gribHandle.get(),&buffer,&size),0);
+    gribFile.write(reinterpret_cast<const char*>(buffer), size);
+}
+
 
 }

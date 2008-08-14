@@ -24,7 +24,7 @@
 #include <cmath>
 #include "fimex/interpolation.h"
 #include "fimex/GribApiCDMWriter_Impl1.h"
-#include "fimex/TimeLevelDataSliceFetcher.h"
+#include "fimex/Units.h"
 
 namespace MetNoFimex
 {
@@ -32,35 +32,53 @@ namespace MetNoFimex
 GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
 : GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, configFile)
 {
-	// TODO: set global attributes
-
-	const CDM& cdm = cdmReader->getCDM();
-	const CDM::VarVec& vars = cdm.getVariables();
-	// iterator over all variables
-	for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
-		const std::string& varName = vi->getName();
-		std::vector<FimexTime> times = getTimes(varName);
-		std::vector<double> levels = getLevels(varName);
-		TimeLevelDataSliceFetcher tld(cdmReader, varName);
-		try {
-			setProjection(varName);
-		} catch (CDMException& e) {
-			std::cerr << "cannot write variable " << varName << " due to projection problems: " << e.what() << std::endl;
-			continue;
-		}
-		for (size_t t = 0; t < times.size(); t++) {
-			for (size_t l = 0; l < levels.size(); l++) {
-				boost::shared_ptr<Data> data = tld.getTimeLevelSlice(t, l);
-
-			}
-		}
-	}
 }
 
 GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
 {
 }
 
+void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+{
+	// TODO: check possible parameter per level
+	const CDM& cdm = cdmReader->getCDM();
+	std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
+	{
+		CDMAttribute attr;
+		if (cdm.getAttribute(varName, "standard_name", attr)) {
+			parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+		} else {
+			parameterXPath += "[@name=\"" + varName + "\"]";
+		}
+	}
+	std::string parameterUnits;
+	parameterXPath += "/grib"+type2string(gribVersion);
+	std::cerr << parameterXPath << std::endl;
+	XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	std::vector<std::map<std::string, std::string> > levelParameters;
+	if (size == 1) {
+		xmlNodePtr node = nodes->nodeTab[0];
+		parameterUnits = getXmlProp(node, "units");
+		std::string parameter = getXmlProp(node, "parameterNumber");
+		if (gribVersion == 1) {
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
+			std::string tableNumber = getXmlProp(node, "codeTable");
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "gribTablesVersionNo", string2type<long>(tableNumber)),"");
+		} else {
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterNumber", string2type<long>(parameter)),"");
+			std::string category = getXmlProp(node, "parameterCategory");
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterCategory", string2type<long>(category)),"");
+			std::string discipline = getXmlProp(node, "discipline");
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "discipline", string2type<long>(discipline)),"");
+		}
+	} else if (size > 1) {
+		throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
+	} else {
+		throw CDMException("could not find " + varName + " in " + configFile + ", skipping parameter");
+	}
+}
 
 void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDMException)
 {
@@ -152,5 +170,60 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 		throw CDMException("No projectionn found");
 	}
 }
+
+void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelValue)
+{
+	// TODO check for level/parameter dependencies
+	const CDM& cdm = cdmReader->getCDM();
+	std::string verticalAxis = cdm.getVerticalAxis(varName);
+	std::cerr << "found verticalAxis at: " << verticalAxis << std::endl;
+	std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
+	if (verticalAxis != ""){
+		CDMAttribute attr;
+		if (cdm.getAttribute(verticalAxis, "standard_name", attr)) {
+			verticalAxisXPath += "[@standard_name=\""+ attr.getData()->asString() + "\"]";
+		} else if (cdm.getAttribute(verticalAxis, "units", attr)) {
+			// units compatible to Pa or m
+			std::string unit = attr.getData()->asString();
+			Units units;
+			if (units.areConvertible(unit, "m")) {
+				verticalAxisXPath += "[@unitCompatibleTo=\"m\"]";
+			} else if (units.areConvertible(unit, "Pa")) {
+				verticalAxisXPath += "[@unitCompatibleTo=\"Pa\"]";
+			} else {
+				throw CDMException("units of vertical axis " + verticalAxis + " should be compatible with m or Pa but are: " + unit);
+			}
+		} else {
+			throw CDMException("couldn't find standard_name or units for vertical Axis " + verticalAxis + ". Is this CF compatible?");
+		}
+	} else {
+		// cdmGribWriterConfig should contain something like standard_name=""
+		verticalAxisXPath += "[@standard_name=\"\"]";
+	}
+	verticalAxisXPath += "/grib" + type2string(gribVersion);
+	std::cerr << "looking at: " << verticalAxisXPath << std::endl;
+	XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
+	xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	if (size == 1) {
+		xmlNodePtr node = nodes->nodeTab[0];
+		std::string levelId = getXmlProp(node, "id");
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfTypeOfLevel", string2type<long>(levelId)),"setting levelId");
+	} else if (size > 1) {
+		throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
+	} else {
+		throw CDMException("could not find vertical Axis " + verticalAxisXPath + " in " + configFile + ", skipping parameter " + varName);
+	}
+	GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
+}
+
+double GribApiCDMWriter_Impl1::setMissingValue(const std::string& varName, const FimexTime& fTime, double levelValue)
+{
+	double fillValue = cdmReader->getCDM().getFillValue(varName);
+	GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", fillValue), "setting missing value");
+	return fillValue;
+
+}
+
 
 }

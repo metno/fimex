@@ -44,17 +44,20 @@
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="1">
 </parameter>
 -->
+<!--
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level=".85">
-<!--  low clouds -->
+  low clouds 
     <grib1 parameterNumber="73" codeTable="128" units="kg/m2"/>
 </parameter>
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level=".5">
-<!--  medium clouds -->
+  medium clouds 
     <grib1 parameterNumber="74" codeTable="128" units="kg/m2"/>
 </parameter>
 </variables>
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level=".3">
-<!--  high clouds -->
+  high clouds 
     <grib1 parameterNumber="75" codeTable="128" units="kg/m2"/>
 </parameter>
+-->
+</variables>
 </cdm_gribwriter_config>

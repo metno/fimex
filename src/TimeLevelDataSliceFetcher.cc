@@ -45,26 +45,24 @@ TimeLevelDataSliceFetcher::TimeLevelDataSliceFetcher(boost::shared_ptr<CDMReader
 	timePos = -1;
 	levelPos = -1;
 	unLimPos = -1;
-	orgShape = std::vector<size_t>();
 	for (size_t i = 0; i < shape.size(); i++) {
 		const CDMDimension& dim = cdm.getDimension(shape[i]);
-		orgShape[i] = dim.getLength();
+		orgShape.push_back(dim.getLength());
 		if (shape[i] == time) timePos = i;
 		else if (shape[i] == level) levelPos = i;
-		else throw CDMException("cannot convert dimension " + shape[i] + "to x,y,l,t");
 		if (shape[i] == unLimDim) unLimPos = i;
 	}
 	if (levelPos == -1) {
 		levelPos = orgShape.size();
-		orgShape[levelPos] = 1;
+		orgShape.push_back(1);
 	}
 	if (timePos == -1) {
 		timePos = orgShape.size();
-		orgShape[timePos] = 1;
+		orgShape.push_back(1);
 	}
 }
 boost::shared_ptr<Data> TimeLevelDataSliceFetcher::getTimeLevelSlice(size_t time, size_t level) throw(CDMException) {
-	boost::shared_ptr<Data> data;
+	std::cerr << "getTimeLevelSlice: " << time << " " << level << " " << timePos << " " << levelPos << " " << unLimPos << std::endl;
 	// setting the shape of the input and output-data
 	std::vector<size_t> finalShape = orgShape;
 	std::vector<size_t> startDims(orgShape.size(), 0);
@@ -93,7 +91,10 @@ boost::shared_ptr<Data> TimeLevelDataSliceFetcher::getTimeLevelSlice(size_t time
 			dataCache = cdmReader->getData(varName);
 		}
 	}
-	data = dataCache->slice(orgShape, startDims, finalShape);
+	if (dataCache->size() == 0) {
+		return createData(CDM_DOUBLE, 0);
+	}
+	boost::shared_ptr<Data> data = dataCache->slice(orgShape, startDims, finalShape);
 	return data;
 }
 
