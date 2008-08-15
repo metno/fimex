@@ -29,11 +29,11 @@
 #include <grib_api.h>
 #include <fstream>
 #include <iostream>
+#include "fimex/Logger.h"
 #include "fimex/CDMWriter.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/CDMException.h"
 #include "fimex/TimeUnit.h"
-
 
 namespace MetNoFimex
 {
@@ -92,6 +92,7 @@ protected:
 	const std::string configFile;
 	const boost::shared_ptr<XMLDoc> xmlConfig;
 	boost::shared_ptr<grib_handle> gribHandle;
+	LoggerPtr logger;
 private:
 	std::ofstream gribFile;
 

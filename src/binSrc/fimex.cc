@@ -32,6 +32,7 @@
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
+#include "fimex/Logger.h"
 #ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
 #endif
@@ -46,6 +47,8 @@
 namespace po = boost::program_options;
 using namespace std;
 using namespace MetNoFimex;
+
+static LoggerPtr logger = getLogger("fimex");
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
@@ -146,21 +149,19 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 		if (vm.count("input.config")) {
 			config = vm["input.config"].as<string>();
 		}
-		if (vm.count("debug"))
-			cerr << "reading Felt-File " << vm["input.file"].as<string>() << " with config " << config << endl;
+		LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " with config " << config);
 		returnPtr = auto_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
 	}
 #endif
 #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf") {
-		if (vm.count("debug"))
-			cerr << "reading Felt-File " << vm["input.file"].as<string>() << " without config"<< endl;
+		LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " without config");
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
 	}
 #endif
 
 	if (returnPtr.get() == 0) {
-		cerr << "unable to read type: " << type << endl;
+		LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
 		exit(1);
 	} else {
 		if (vm.count("input.printNcML")) {
@@ -175,9 +176,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 
 static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable"))) {
-		if (vm.count("debug")) {
-			cerr << "extract.reduceDimension.name and extract.removeVariable not found, no extraction used" << endl;
-		}
+		LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
 		return dataReader;
 	}
 	auto_ptr<CDMExtractor> extractor(new CDMExtractor(boost::shared_ptr<CDMReader>(dataReader)));
@@ -266,9 +265,7 @@ static vector<double> parseDoubleString(const string& str) {
 
 static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! vm.count("interpolate.projString")) {
-		if (vm.count("debug")) {
-			cerr << "interpolate.projString not found, no interpolation used" << endl;
-		}
+		LOG4FIMEX(logger, Logger::DEBUG, "interpolate.projString not found, no interpolation used");
 		return dataReader;
 	}
 	auto_ptr<CDMInterpolator> interpolator(new CDMInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
@@ -330,12 +327,10 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf") {
 		if (vm.count("output.config")) {
-			if (vm.count("debug"))
-				cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>() << endl;
+			LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
 			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>());
 		} else {
-			if (vm.count("debug"))
-				cerr << "writing NetCDF-file " << vm["output.file"].as<string>() << " without config" << endl;
+			LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " without config");
 			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
 		}
 		return;
@@ -349,8 +344,7 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 		if (type == "grb2" || type == "grib2") {
 			gribVersion = 2;
 		}
-		if (vm.count("debug"))
-			cerr << "writing grib-file " << vm["output.file"].as<string>() << " without config" << endl;
+		LOG4FIMEX(logger, Logger::DEBUG, "writing grib-file " << vm["output.file"].as<string>() << " without config");
 		if (!vm.count("output.config")) throw CDMException("Cannot write grib-file without config");
 		GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), gribVersion, vm["output.config"].as<string>());
 		return;
@@ -358,8 +352,7 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 #endif
 
 	if (type == "null") {
-		if (vm.count("debug"))
-					cerr << "emulating writing without file without config" << endl;
+		LOG4FIMEX(logger, Logger::DEBUG, "emulating writing without file without config");
 		boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
 		Null_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
 		return;
@@ -435,8 +428,14 @@ int main(int argc, char* args[])
         return 0;
     }
     if (vm.count("version")) {
-    	cout << "utplukk version " << VERSION << endl;
+    	cout << "fimex version " << VERSION << endl;
     	return 0;
+    }
+    if (vm.count("debug") >= 1) {
+    	// TODO allow for multiple occurances and use INFO as == 1
+    	defaultLogLevel(Logger::DEBUG);
+    } else if (vm.count("debug") > 1) {
+    	defaultLogLevel(Logger::DEBUG);
     }
     if (vm.count("print-options")) {
     	writeOptions(cout, vm);
@@ -446,7 +445,7 @@ int main(int argc, char* args[])
     }
     if (!(vm.count("input.file") && vm.count("output.file"))) {
     	writeUsage(cerr, generic, config);
-    	cerr << "ERROR: input.file and output.file required" << endl;
+    	LOG4FIMEX(logger, Logger::FATAL, "input.file and output.file required");
     	exit(1);
     }
 

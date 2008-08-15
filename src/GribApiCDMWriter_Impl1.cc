@@ -32,6 +32,7 @@ namespace MetNoFimex
 GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
 : GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, configFile)
 {
+	logger = getLogger("fimex.GribApi_CDMWriter.Impl1");
 }
 
 GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
@@ -40,6 +41,7 @@ GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
 
 void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << fTime << ", " << levelValue << ")" );
 	// TODO: check possible parameter per level
 	const CDM& cdm = cdmReader->getCDM();
 	std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
@@ -53,7 +55,6 @@ void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const Fime
 	}
 	std::string parameterUnits;
 	parameterXPath += "/grib"+type2string(gribVersion);
-	std::cerr << parameterXPath << std::endl;
 	XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
@@ -82,6 +83,7 @@ void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const Fime
 
 void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDMException)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "setProjection(" << varName << ")");
 	const CDM& cdm = cdmReader->getCDM();
 	// TODO: detect more projections
 	CDM::AttrVec projAttrs = cdm.getProjection(varName);
@@ -102,6 +104,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 				double latitudeWhereDxAndDyAreSpecifiedInDegrees = 90.;
 				double orientationOfTheGridInDegrees = 0.;
 				if (projection == "polar_stereograhpic") {
+					LOG4FIMEX(logger, Logger::INFO, "polar_stereographic projection for" << varName);
 					// get lat_ts fixed
 					latitudeWhereDxAndDyAreSpecifiedInDegrees = 90.;
 					// get lon0
@@ -110,6 +113,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 						orientationOfTheGridInDegrees = ait->getData()->asDouble()[0];
 					}
 				} else {
+					LOG4FIMEX(logger, Logger::INFO, "stereographic projection for" << varName);
 					// test stereographic is +- 90deg latitude (grib knows only polar-stereographic)
 					CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("latitude_of_projection_origin"));
 					if (ait != projAttrs.end()) {
@@ -173,10 +177,10 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 
 void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelValue)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ")");
 	// TODO check for level/parameter dependencies
 	const CDM& cdm = cdmReader->getCDM();
 	std::string verticalAxis = cdm.getVerticalAxis(varName);
-	std::cerr << "found verticalAxis at: " << verticalAxis << std::endl;
 	std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
 	if (verticalAxis != ""){
 		CDMAttribute attr;
@@ -201,7 +205,6 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
 		verticalAxisXPath += "[@standard_name=\"\"]";
 	}
 	verticalAxisXPath += "/grib" + type2string(gribVersion);
-	std::cerr << "looking at: " << verticalAxisXPath << std::endl;
 	XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
 	xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
@@ -219,6 +222,7 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
 
 double GribApiCDMWriter_Impl1::setMissingValue(const std::string& varName, const FimexTime& fTime, double levelValue)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "setMissingValue(" << varName << ", " << fTime << ", " << levelValue << ")" );
 	double fillValue = cdmReader->getCDM().getFillValue(varName);
 	GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", fillValue), "setting missing value");
 	return fillValue;

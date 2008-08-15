@@ -58,6 +58,7 @@ public:
 GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
 : gribVersion(gribVersion), cdmReader(cdmReader), outputFile(outputFile), configFile(configFile), xmlConfig(new XMLDoc(configFile)), gribFile(outputFile.c_str(), std::ios::binary|std::ios::out)
 {
+	logger = getLogger("fimex.GribApi_CDMWriter");
 	std::string gribTemplate("GRIB" + type2string(gribVersion));
 	gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
 	if (gribHandle.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
@@ -69,7 +70,9 @@ GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
 {
 }
 
-void GribApiCDMWriter_ImplAbstract::run() throw(CDMException) {
+void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
+{
+	LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
 	// TODO: set global attributes
 
 	const CDM& cdm = cdmReader->getCDM();
@@ -78,22 +81,17 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException) {
 	for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
 		const std::string& varName = vi->getName();
 		try {
-		std::cerr << "getting times" << std::endl;
 		std::vector<FimexTime> times = getTimes(varName);
-		std::cerr << "getting levels" << std::endl;
 		std::vector<double> levels = getLevels(varName);
-		std::cerr << "getting dataFetcher" << std::endl;
 		TimeLevelDataSliceFetcher tld(cdmReader, varName);
 		try {
-			std::cerr << "setting projection" << std::endl;
 			setProjection(varName);
 		} catch (CDMException& e) {
-			std::cerr << "cannot write variable " << varName << " due to projection problems: " << e.what() << std::endl;
+			LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << varName << " due to projection problems: " << e.what());
 			continue;
 		}
 		for (size_t t = 0; t < times.size(); t++) {
 			for (size_t l = 0; l < levels.size(); l++) {
-				std::cerr << "getting data" << std::endl;
 				boost::shared_ptr<Data> data = tld.getTimeLevelSlice(t, l);
 				if (data->size() == 0) {
 					// no data, silently skip to next level/time
@@ -101,21 +99,16 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException) {
 				}
 				double levelVal = levels[l];
 				const FimexTime& fTime = times[t];
-				std::cerr << "setting missing" << std::endl;
 				setMissingValue(varName, fTime, levelVal);
-				std::cerr << "setting data" << std::endl;
 				setData(data);
-				std::cerr << "setting level" << std::endl;
 				setLevel(varName, levelVal);
-				std::cerr << "setting time" << std::endl;
 				setTime(varName, fTime);
-				std::cerr << "setting parameter" << std::endl;
 				setParameter(varName, fTime, levelVal);
 				writeGribHandleToFile();
 			}
 		}
 		} catch (CDMException& e) {
-			std::cerr << "unable to write parameter "<< varName << ": " << e.what() << std::endl;
+			LOG4FIMEX(logger, Logger::WARN, "unable to write parameter "<< varName << ": " << e.what());
 		}
 	}
 }
@@ -126,6 +119,7 @@ void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data)
 
 void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const FimexTime& fTime)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << fTime << ")" );
 	long date = fTime.year * 10000 + fTime.month * 100 + fTime.mday;
 	long time = fTime.hour * 100 + fTime.minute;
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", date), "setting dataDate");
@@ -134,6 +128,7 @@ void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const Fi
 
 std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& varName) throw(CDMException)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "getLevels(" << varName << ")" );
 	Units units;
 	std::vector<double> levelData;
 	// TODO: proper definition of level (code table 3) (indicatorOfLevel)
@@ -184,7 +179,6 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 
 	// scale the levels according to grib
 	verticalAxisXPath += "/grib" + type2string(gribVersion);
-	std::cerr << "looking at: " << verticalAxisXPath << std::endl;
 	XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
 	xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
@@ -223,6 +217,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 
 std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string& varName) throw(CDMException)
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
 	const CDM& cdm = cdmReader->getCDM();
 	const std::string& time = cdm.getTimeAxis(varName);
 	std::vector<FimexTime> timeData;
@@ -240,6 +235,7 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
 
 void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
 {
+	LOG4FIMEX(logger, Logger::DEBUG, "writeGribHandleToFile");
 	// write data to file
     size_t size;
     const void* buffer;

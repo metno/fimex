@@ -33,6 +33,8 @@ TimeLevelDataSliceFetcher::~TimeLevelDataSliceFetcher()
 TimeLevelDataSliceFetcher::TimeLevelDataSliceFetcher(boost::shared_ptr<CDMReader> cdmReader, const std::string& varName)
 : cdmReader(cdmReader), varName(varName)
 {
+	logger = getLogger("fimex.TimeLevelDataSliceFetcher");
+	LOG4FIMEX(logger, Logger::DEBUG, "initializing TimeLevelDataSliceFetcher for " << varName);
 	const CDM& cdm = cdmReader->getCDM();
 	std::string time = cdm.getTimeAxis(varName);
 	std::string level = cdm.getVerticalAxis(varName);
@@ -60,9 +62,11 @@ TimeLevelDataSliceFetcher::TimeLevelDataSliceFetcher(boost::shared_ptr<CDMReader
 		timePos = orgShape.size();
 		orgShape.push_back(1);
 	}
+	LOG4FIMEX(logger, Logger::DEBUG, "TimeLevelDataSlice has timePos " << timePos << ", levelPos " << levelPos << ", unLimDimPos " << unLimPos);
 }
+
 boost::shared_ptr<Data> TimeLevelDataSliceFetcher::getTimeLevelSlice(size_t time, size_t level) throw(CDMException) {
-	std::cerr << "getTimeLevelSlice: " << time << " " << level << " " << timePos << " " << levelPos << " " << unLimPos << std::endl;
+	LOG4FIMEX(logger, Logger::DEBUG, "getTimeLevelSlice(" << time << "," << level << ") " << timePos << "," << levelPos << "," << unLimPos << ")");
 	// setting the shape of the input and output-data
 	std::vector<size_t> finalShape = orgShape;
 	std::vector<size_t> startDims(orgShape.size(), 0);

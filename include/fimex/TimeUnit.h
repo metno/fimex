@@ -27,6 +27,7 @@
 #include "boost/shared_ptr.hpp"
 #include "fimex/Units.h"
 #include "fimex/CDMException.h"
+#include <iostream>
 
 // pre-declaration of utUnit pointer
 struct utUnit;
@@ -53,6 +54,8 @@ struct FimexTime {
 	/// year (2008 as of writing)
 	int year;
 };
+
+std::ostream& operator<< (std::ostream& out, const FimexTime& fTime);
 
 /**
  * TimeUnit calculates times from a time given in a unit as

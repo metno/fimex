@@ -27,6 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMReader.h"
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
 
 namespace MetNoFimex
 {
@@ -44,6 +45,7 @@ class TimeLevelDataSliceFetcher
 	int unLimPos;
 	boost::shared_ptr<Data> dataCache;
 	size_t dataCachePos;
+	LoggerPtr logger;
 public:
 	/**
 	 * initialize the Fetcher

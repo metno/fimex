@@ -77,7 +77,7 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
+	Logger.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc TimeLevelDataSliceFetcher.cc \
 	TimeUnit.cc Units.cc Utils.cc XMLDoc.cc \
 	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
@@ -94,7 +94,8 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	DataTypeChanger.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
 	GribApiCDMWriter_ImplAbstract.$(OBJEXT) \
 	GribApiCDMWriter_Impl1.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
-	Null_CDMWriter.$(OBJEXT) ReplaceStringObject.$(OBJEXT) \
+	Logger.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
+	ReplaceStringObject.$(OBJEXT) \
 	ReplaceStringTimeObject.$(OBJEXT) \
 	TimeLevelDataSliceFetcher.$(OBJEXT) TimeUnit.$(OBJEXT) \
 	Units.$(OBJEXT) Utils.$(OBJEXT) XMLDoc.$(OBJEXT) \
@@ -325,9 +326,10 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc TimeLevelDataSliceFetcher.cc \
-	TimeUnit.cc Units.cc Utils.cc XMLDoc.cc $(am__append_1)
+	GribApiCDMWriter.cc Logger.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc Units.cc Utils.cc \
+	XMLDoc.cc $(am__append_1)
 all: all-recursive
 
 .SUFFIXES:
@@ -417,6 +419,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_ImplAbstract.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CF10_CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Po@am__quote@

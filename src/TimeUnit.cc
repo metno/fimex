@@ -32,6 +32,15 @@ extern "C" {
 namespace MetNoFimex
 {
 
+std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
+{
+	out << fTime.year << "-" << fTime.month << "-" << fTime.mday << " ";
+	double secMSec = fTime.second + fTime.msecond/1000;
+	out << fTime.hour << ":" << fTime.minute << ":" << secMSec;
+	return out;
+}
+
+
 void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 {
 	if (!units.isTime(timeUnitString)) {
