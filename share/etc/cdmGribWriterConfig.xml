@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdm_gribwriter_config>
+<global_attributes>
+	<!-- type can be double, long, string -->
+	<attribute name="identificationOfOriginatingGeneratingCentre" value="88" type="long" />
+	<!-- use for grib1 only attributes -->
+	<!--  <g1attribute name="" value="" type="" /> -->
+	<!-- use for grib2 only attributes -->
+	<g2attribute name="" value="" type="" />
+</global_attributes>
 <axes>
 <!-- no vertical axis -->
 <vertical_axis standard_name="">
@@ -18,7 +26,7 @@
    <grib2 id="100" units="Pa" type="double"/>
 </vertical_axis>
 <vertical_axis standard_name="atmosphere_sigma_coordinate">
-	<grib1 id="107" scale_factor="1e-5" add_offset="0" type="short" />
+	<grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
 	<grib2 id="104" type="double" />
 </vertical_axis>
 </axes>
@@ -38,26 +46,23 @@
 </parameter>
 <parameter standard_name="cloud_area_fraction">
 <!-- total -->
-    <grib1 parameterNumber="71" codeTable="128" units="1/100"/>
+    <grib1 parameterNumber="164" codeTable="128" units="1/100"/>
 </parameter>
-<!-- fog
-<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="1">
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="10000">
+<!-- fog -->
+    <grib1 parameterNumber="248" codeTable="128" units="1/100"/>
 </parameter>
--->
-<!--
-<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level=".85">
-  low clouds 
-    <grib1 parameterNumber="73" codeTable="128" units="kg/m2"/>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="8500">
+<!-- low clouds  --> 
+    <grib1 parameterNumber="186" codeTable="128" units="1/100"/>
 </parameter>
-<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level=".5">
-  medium clouds 
-    <grib1 parameterNumber="74" codeTable="128" units="kg/m2"/>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="5000">
+<!--  medium clouds  --> 
+    <grib1 parameterNumber="187" codeTable="128" units="1/100"/>
 </parameter>
-</variables>
-<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level=".3">
-  high clouds 
-    <grib1 parameterNumber="75" codeTable="128" units="kg/m2"/>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="3000">
+<!-- high clouds --> 
+    <grib1 parameterNumber="188" codeTable="128" units="1/100"/>
 </parameter>
--->
 </variables>
 </cdm_gribwriter_config>

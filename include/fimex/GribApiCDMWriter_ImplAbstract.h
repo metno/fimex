@@ -57,6 +57,10 @@ public:
 	 */
 	void run() throw(CDMException);
 protected:
+	/**
+	 * add the global attributes from the config to the default grib-handle
+	 */
+	virtual void setGlobalAttributes();
 	virtual void setData(const boost::shared_ptr<Data>& data);
 	/**
 	 * set the projection parameters, throw an exception if none are available
@@ -79,10 +83,11 @@ protected:
 	 */
 	virtual std::vector<FimexTime> getTimes(const std::string& varName) throw(CDMException);
 	/**
-	 * add the missing value to the gribHandle
-	 * @return value of the missing value
+	 * add the missing value to the gribHandle, rescale the data if needed
+	 * and change the datatype if needed, change the missingValue of the data if need
+	 * @return modified data
 	 */
-	virtual double setMissingValue(const std::string& varName, const FimexTime& fTime, double levelValue) = 0;
+	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData) = 0;
 	virtual void writeGribHandleToFile();
 
 protected:

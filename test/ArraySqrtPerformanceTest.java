@@ -30,7 +30,7 @@ public class ArraySqrtPerformanceTest {
 
     public static void calcByTransform(double[] values1, double[] values2) {
         for (int i = 0; i < 10; i++) {
-            offset = i*.02;
+            offset = i*.2;
             for (int j = 0; j < values1.length; j++) {
                 values1[j] = transform(values1[j], values2[j]);
             }

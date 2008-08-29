@@ -73,7 +73,7 @@ GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
 void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
-	// TODO: set global attributes
+	setGlobalAttributes();
 
 	const CDM& cdm = cdmReader->getCDM();
 	const CDM::VarVec& vars = cdm.getVariables();
@@ -99,7 +99,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 				}
 				double levelVal = levels[l];
 				const FimexTime& fTime = times[t];
-				setMissingValue(varName, fTime, levelVal);
+				data = handleTypeScaleAndMissingData(varName, fTime, levelVal, data);
 				setData(data);
 				setLevel(varName, levelVal);
 				setTime(varName, fTime);
@@ -113,7 +113,37 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 	}
 }
 
-void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data) {
+void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
+{
+	std::string globalAttrXPath("/cdm_gribwriter_config/global_attributes/");
+	std::string gattr = "g" + type2string(gribVersion) + "attribute";
+	std::string attr[] = {"attribute", gattr};
+	for (int i = 0; i < 2; i++) {
+		std::string attrXPath = globalAttrXPath + attr[i];
+		XPathObjPtr xPObj = xmlConfig->getXPathObject(attrXPath);
+		xmlNodeSetPtr nodes = xPObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int j = 0; j < size; j++) {
+			xmlNodePtr node = nodes->nodeTab[j];
+			std::string name = getXmlProp(node, "name");
+			std::string value = getXmlProp(node, "value");
+			std::string type = getXmlProp(node, "type");
+			LOG4FIMEX(logger, Logger::DEBUG, "setting global attribute: " << name << "(" << value << "," << type << ")");
+			if (type == "long") {
+				GRIB_CHECK(grib_set_long(gribHandle.get(), name.c_str(), string2type<long>(value)), "setting global attr");
+			} else if (type == "double") {
+				GRIB_CHECK(grib_set_double(gribHandle.get(), name.c_str(), string2type<double>(value)), "setting global attr");
+			} else if (type == "string") {
+				size_t msgSize = value.size();
+				GRIB_CHECK(grib_set_string(gribHandle.get(), name.c_str(), value.c_str(), &msgSize), "setting global attr");
+			} else {
+				throw CDMException("unknown type for grib global_attributes: " + type );
+			}
+		}
+	}
+}
+void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data)
+{
 	GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asConstDouble().get(), data->size()), "setting values");
 }
 

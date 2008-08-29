@@ -39,45 +39,69 @@ GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
 {
 }
 
-void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+xmlNode* GribApiCDMWriter_Impl1::getNodePtr(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << fTime << ", " << levelValue << ")" );
-	// TODO: check possible parameter per level
-	const CDM& cdm = cdmReader->getCDM();
+	xmlNodePtr node = 0;
 	std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
 	{
 		CDMAttribute attr;
-		if (cdm.getAttribute(varName, "standard_name", attr)) {
+		if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
 			parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
 		} else {
 			parameterXPath += "[@name=\"" + varName + "\"]";
 		}
 	}
-	std::string parameterUnits;
 	parameterXPath += "/grib"+type2string(gribVersion);
 	XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
 	std::vector<std::map<std::string, std::string> > levelParameters;
-	if (size == 1) {
-		xmlNodePtr node = nodes->nodeTab[0];
-		parameterUnits = getXmlProp(node, "units");
-		std::string parameter = getXmlProp(node, "parameterNumber");
-		if (gribVersion == 1) {
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
-			std::string tableNumber = getXmlProp(node, "codeTable");
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "gribTablesVersionNo", string2type<long>(tableNumber)),"");
-		} else {
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterNumber", string2type<long>(parameter)),"");
-			std::string category = getXmlProp(node, "parameterCategory");
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterCategory", string2type<long>(category)),"");
-			std::string discipline = getXmlProp(node, "discipline");
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "discipline", string2type<long>(discipline)),"");
+	if (size >= 1) {
+		// find node with corresponding level
+		std::vector<int> possibleNodes;
+		for (int i = 0; i < size; i++) {
+			xmlNodePtr node = nodes->nodeTab[i];
+			xmlNodePtr parent = node->parent;
+			std::string level = getXmlProp(parent, "level");
+			if (level != "") {
+				LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
+				double xLevelValue = string2type<double>(level);
+				if (std::fabs(levelValue - xLevelValue) < (1e-6*levelValue)) {
+					LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
+					possibleNodes.push_back(i);
+				}
+			} else {
+				LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
+				possibleNodes.push_back(i);
+			}
 		}
+		if (possibleNodes.size() != 1) {
+			throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile + ": " + parameterXPath);
+		}
+		node = nodes->nodeTab[possibleNodes[0]];
 	} else if (size > 1) {
 		throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
 	} else {
 		throw CDMException("could not find " + varName + " in " + configFile + ", skipping parameter");
+	}
+	return node;
+}
+
+void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+{
+	LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << fTime << ", " << levelValue << ")" );
+	xmlNodePtr node = getNodePtr(varName, fTime, levelValue);
+	std::string parameter = getXmlProp(node, "parameterNumber");
+	if (gribVersion == 1) {
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
+		std::string tableNumber = getXmlProp(node, "codeTable");
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "gribTablesVersionNo", string2type<long>(tableNumber)),"");
+	} else {
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterNumber", string2type<long>(parameter)),"");
+		std::string category = getXmlProp(node, "parameterCategory");
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterCategory", string2type<long>(category)),"");
+		std::string discipline = getXmlProp(node, "discipline");
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "discipline", string2type<long>(discipline)),"");
 	}
 }
 
@@ -178,7 +202,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelValue)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ")");
-	// TODO check for level/parameter dependencies
+	// check for level/parameter dependencies
 	const CDM& cdm = cdmReader->getCDM();
 	std::string verticalAxis = cdm.getVerticalAxis(varName);
 	std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
@@ -220,13 +244,45 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
 }
 
-double GribApiCDMWriter_Impl1::setMissingValue(const std::string& varName, const FimexTime& fTime, double levelValue)
+boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "setMissingValue(" << varName << ", " << fTime << ", " << levelValue << ")" );
-	double fillValue = cdmReader->getCDM().getFillValue(varName);
-	GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", fillValue), "setting missing value");
-	return fillValue;
+	LOG4FIMEX(logger, Logger::DEBUG, "handleTypeScaleAndMissingData(" << varName << ", " << fTime << ", " << levelValue << ")" );
+	const CDM& cdm = cdmReader->getCDM();
+	double inFillValue = cdm.getFillValue(varName);
+	// TODO this is the default for grib_api, cannot be changed?
+	double outFillValue = 9999.;
+	GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", outFillValue), "setting missing value");
 
+	CDMAttribute attr;
+	double scale = 1.;
+	double offset = 0.;
+	if (cdm.getAttribute(varName, "scale_factor", attr)) {
+		scale = attr.getData()->asConstDouble()[0];
+	}
+	if (cdm.getAttribute(varName, "add_offset", attr)) {
+		offset = attr.getData()->asConstDouble()[0];
+	}
+	// scale and offset by units
+	if (cdm.getAttribute(varName, "units", attr)) {
+		std::string unit = attr.getData()->asString();
+		xmlNodePtr node = getNodePtr(varName, fTime, levelValue);
+		std::string gUnit = getXmlProp(node, "units");
+		if (gUnit != "") {
+			double slope, uOffset;
+			Units u;
+			u.convert(unit, gUnit, slope, uOffset);
+			// join both scalings: (scale*x + offset)*slope + uOffset
+			scale *= slope;
+			offset *= slope;
+			offset += uOffset;
+		}
+	}
+
+	// TODO: in some cases this doesn't seem to work with accuracy, i.e. altitude
+	// eventually, change cdm.getFillValue to return Data instead of double representation?
+	LOG4FIMEX(logger, Logger::DEBUG, "change from (" << inFillValue << " " << scale << "," << offset << ") to (" << outFillValue << "," << 1 << "," << 0 << ")" );
+
+	return inData->convertDataType(inFillValue, scale, offset, CDM_DOUBLE, outFillValue,1,0);
 }
 
 

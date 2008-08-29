@@ -7,10 +7,12 @@
 
 /**
  * results: (gcc 4.1.1 FC5 -O2 (same for -O3))
- * transform slightly version faster than while version: 283MFLOPS vs 279 MFLOPS
+ * transform slightly version faster than while version: 283MFLOPS vs 280 MFLOPS
  * openmp (-fopenmp) about 80% faster on Core2 Duo T7300 520MFLOPS
- * -mfpmath=sse -msse2 about 18% faster on Core2 Duo T7300 (238MFLOPS for transform, 239 for while)
+ * -mfpmath=sse -msse2 about 18% faster on Core2 Duo T7300 (237MFLOPS for transform, 237 for while)
  * -mfpmath=sse -msse2 about 14% faster on Xeon (cpu-family 15, model 2) (dual core, 2.35MHz) (360MFLOPS vs 317MFLOPS)
+ *
+ * infinity: 1380MFLOPS with SSE, 12MFLOPS without
  *
  *
  * translated to java/transform version:
@@ -22,6 +24,9 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
+
+#define OFFSET (INFINITY)
+/* #define OFFSET (.2) */
 
 using namespace std;
 
@@ -53,7 +58,7 @@ void calcByWhile(vector<double>& values1, vector<double>& values2) {
 	int size = values1.size();
 #pragma omp parallel for
 	for (int i = 0; i < 10; i++) {
-		double offset = i * 0.02;
+		double offset = i * INFINITY; // this is inf
 		double* curVal1 = &values1[0];
 		double* curVal2 = &values2[0];
 		double* endVal1 = &values1[values1.size()];

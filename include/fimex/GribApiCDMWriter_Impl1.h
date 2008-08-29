@@ -42,7 +42,9 @@ public:
 	virtual void setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException);
 	virtual void setProjection(const std::string& varName) throw(CDMException);
 	virtual void setLevel(const std::string& varName, double levelValue);
-	virtual double setMissingValue(const std::string& varName, const FimexTime& fTime, double levelValue);
+	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData);
+private:
+	xmlNode* getNodePtr(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException);
 
 };
 
