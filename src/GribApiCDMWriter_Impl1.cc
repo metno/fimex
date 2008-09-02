@@ -21,6 +21,8 @@
  * USA.
  */
 
+#include "fimex/config.h"
+#ifdef HAVE_GRIBAPI_H
 #include <cmath>
 #include "fimex/interpolation.h"
 #include "fimex/GribApiCDMWriter_Impl1.h"
@@ -249,9 +251,10 @@ boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(co
 	LOG4FIMEX(logger, Logger::DEBUG, "handleTypeScaleAndMissingData(" << varName << ", " << fTime << ", " << levelValue << ")" );
 	const CDM& cdm = cdmReader->getCDM();
 	double inFillValue = cdm.getFillValue(varName);
-	// TODO this is the default for grib_api, cannot be changed?
-	double outFillValue = 9999.;
+	double outFillValue = inFillValue;
 	GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", outFillValue), "setting missing value");
+	// need bitmap to represent missing values in grib1
+	GRIB_CHECK(grib_set_long(gribHandle.get(), "bitmapPresent", 1), "setting bitmap");
 
 	CDMAttribute attr;
 	double scale = 1.;
@@ -278,8 +281,6 @@ boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(co
 		}
 	}
 
-	// TODO: in some cases this doesn't seem to work with accuracy, i.e. altitude
-	// eventually, change cdm.getFillValue to return Data instead of double representation?
 	LOG4FIMEX(logger, Logger::DEBUG, "change from (" << inFillValue << " " << scale << "," << offset << ") to (" << outFillValue << "," << 1 << "," << 0 << ")" );
 
 	return inData->convertDataType(inFillValue, scale, offset, CDM_DOUBLE, outFillValue,1,0);
@@ -287,3 +288,4 @@ boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(co
 
 
 }
+#endif /* HAVE_GRIBAPI_H */

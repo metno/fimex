@@ -21,6 +21,8 @@
  * USA.
  */
 
+#include "fimex/config.h"
+#ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter_ImplAbstract.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeLevelDataSliceFetcher.h"
@@ -161,9 +163,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 	LOG4FIMEX(logger, Logger::DEBUG, "getLevels(" << varName << ")" );
 	Units units;
 	std::vector<double> levelData;
-	// TODO: proper definition of level (code table 3) (indicatorOfLevel)
-	// recalculate level values to have units as defined in code table 3
-	// recalculate units of level
+	// TODO: check what to do with hybrid levels
 	const CDM& cdm = cdmReader->getCDM();
 	std::string verticalAxis = cdm.getVerticalAxis(varName);
 	std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
@@ -191,8 +191,6 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 	} else {
 		// cdmGribWriterConfig should contain something like standard_name=""
 		verticalAxisXPath += "[@standard_name=\"\"]";
-		// TODO get default from config
-		levelData.push_back(0);
 	}
 	// scale the original levels according to the cdm
 	double scale_factor = 1.;
@@ -214,6 +212,16 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 	int size = (nodes) ? nodes->nodeNr : 0;
 	if (size == 1) {
 		xmlNodePtr node = nodes->nodeTab[0];
+		if (levelData.size() == 0) {
+			// add default value from config
+			std::string value = getXmlProp(node, "value");
+			if (value != "") {
+				levelData.push_back(string2type<double>(value));
+			} else {
+				LOG4FIMEX(logger, Logger::ERROR, "no level data available");
+				throw CDMException("no level-data available");
+			}
+		}
 		// scale the levels from cf-units to grib-untis
 		std::string gribUnits = getXmlProp(node, "units");
 		if (gribUnits != "") {
@@ -276,3 +284,5 @@ void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
 
 
 }
+
+#endif /* HAVE_GRIBAPI_H */

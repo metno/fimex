@@ -60,8 +60,36 @@
 
 
 
+
+
+
+
+<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+<pathentry include="src" kind="inc" path="" system="true"/>
+<pathentry include="/usr/include/c++/4.1.1" kind="inc" path="" system="true"/>
+<pathentry kind="out" path=""/>
+<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+<pathentry kind="src" path=""/>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
+<target name="all" path="src/felt_reader" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments>-j2</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
+<target name="clean" path="src/felt_reader" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments>-j2</buildArguments>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+<runAllBuilders>true</runAllBuilders>
+</target>
 <target name="all" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
 <buildCommand>make</buildCommand>
 <buildArguments>-j2</buildArguments>
@@ -99,23 +127,7 @@
 <buildArguments>-j2</buildArguments>
 <buildTarget>check</buildTarget>
 <stopOnError>false</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="all" path="src/felt_reader" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-j2</buildArguments>
-<buildTarget>all</buildTarget>
-<stopOnError>false</stopOnError>
 <useDefaultCommand>false</useDefaultCommand>
-<runAllBuilders>true</runAllBuilders>
-</target>
-<target name="clean" path="src/felt_reader" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
-<buildCommand>make</buildCommand>
-<buildArguments>-j2</buildArguments>
-<buildTarget>clean</buildTarget>
-<stopOnError>false</stopOnError>
-<useDefaultCommand>true</useDefaultCommand>
 <runAllBuilders>true</runAllBuilders>
 </target>
 <target name="all" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
@@ -160,17 +172,6 @@
 </target>
 </buildTargets>
 </storageModule>
-
-
-
-<storageModule moduleId="org.eclipse.cdt.core.pathentry">
-<pathentry include="src" kind="inc" path="" system="true"/>
-<pathentry include="/usr/include/c++/4.1.1" kind="inc" path="" system="true"/>
-<pathentry kind="out" path=""/>
-<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
-<pathentry kind="src" path=""/>
-</storageModule>
-<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cconfiguration>
 </storageModule>
 </cproject>
