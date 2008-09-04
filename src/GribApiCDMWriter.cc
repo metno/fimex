@@ -25,6 +25,7 @@
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter.h"
 #include "fimex/GribApiCDMWriter_Impl1.h"
+#include "fimex/GribApiCDMWriter_Impl2.h"
 
 namespace MetNoFimex
 {
@@ -34,9 +35,10 @@ GribApiCDMWriter::GribApiCDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 {
 	if (gribVersion == 1) {
 		GribApiCDMWriter_Impl1(cdmReader, outputFile, configFile).run();
+	} else if (gribVersion == 2) {
+		GribApiCDMWriter_Impl2(cdmReader, outputFile, configFile).run();
 	} else {
-		// TODO implement
-//		GribApiCDMWriter_Impl2(cdmReader, const std::string& outputFile, const std::string& configFile).run();
+		throw CDMException("Unknown grib Version: " + type2string(gribVersion));
 	}
 }
 

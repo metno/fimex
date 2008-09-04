@@ -89,6 +89,14 @@ protected:
 	 */
 	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData) = 0;
 	virtual void writeGribHandleToFile();
+	/**
+	 * get the node belonging to varName, level and time from the
+	 * config file
+	 * @param varName name of the variable
+	 * @param fTime current time
+	 * @param level curent level
+	 */
+	xmlNode* getNodePtr(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException);
 
 protected:
 	int gribVersion;

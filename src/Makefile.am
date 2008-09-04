@@ -2,7 +2,7 @@ SUBDIRS = . felt_reader binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I../include -I${top_srcdir}/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 
 lib_LIBRARIES = libfimex.a
 libfimex_a_SOURCES = interpolation.c \
@@ -22,6 +22,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 GribApiCDMWriter.cc \
 					 GribApiCDMWriter_ImplAbstract.cc \
 					 GribApiCDMWriter_Impl1.cc \
+					 GribApiCDMWriter_Impl2.cc \
 					 GribApiCDMWriter.cc \
 					 Logger.cc \
 					 Null_CDMWriter.cc \

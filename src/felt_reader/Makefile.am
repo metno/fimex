@@ -1,6 +1,6 @@
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I../../include -I$(top_srcdir)/include ${milib_CFLAGS} ${XML_CPPFLAGS}
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${XML_CPPFLAGS}
 
 
 lib_LIBRARIES = libfimex_felt.a

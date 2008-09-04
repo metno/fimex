@@ -21,8 +21,8 @@
  * USA.
  */
 
-#ifndef GRIBAPICDMWRITER_IMPL1_H_
-#define GRIBAPICDMWRITER_IMPL1_H_
+#ifndef GRIBAPICDMWRITER_IMPL2_H_
+#define GRIBAPICDMWRITER_IMPL2_H_
 
 #include "fimex/GribApiCDMWriter_ImplAbstract.h"
 
@@ -30,14 +30,14 @@ namespace MetNoFimex
 {
 
 /**
- * Implemenationn of a writer using GribApi for grib1
+ * Implemenationn of a writer using GribApi for grib2
  *
  */
-class GribApiCDMWriter_Impl1: public MetNoFimex::GribApiCDMWriter_ImplAbstract
+class GribApiCDMWriter_Impl2: public MetNoFimex::GribApiCDMWriter_ImplAbstract
 {
 public:
-	GribApiCDMWriter_Impl1(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile);
-	virtual ~GribApiCDMWriter_Impl1();
+	GribApiCDMWriter_Impl2(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile);
+	virtual ~GribApiCDMWriter_Impl2();
 
 	virtual void setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException);
 	virtual void setProjection(const std::string& varName) throw(CDMException);

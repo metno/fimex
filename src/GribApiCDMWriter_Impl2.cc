@@ -25,33 +25,39 @@
 #ifdef HAVE_GRIBAPI_H
 #include <cmath>
 #include "fimex/interpolation.h"
-#include "fimex/GribApiCDMWriter_Impl1.h"
+#include "fimex/GribApiCDMWriter_Impl2.h"
 #include "fimex/Units.h"
 
 namespace MetNoFimex
 {
 
-GribApiCDMWriter_Impl1::GribApiCDMWriter_Impl1(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
-: GribApiCDMWriter_ImplAbstract(1, cdmReader, outputFile, configFile)
+GribApiCDMWriter_Impl2::GribApiCDMWriter_Impl2(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
+: GribApiCDMWriter_ImplAbstract(2, cdmReader, outputFile, configFile)
 {
-	logger = getLogger("fimex.GribApi_CDMWriter.Impl1");
+	logger = getLogger("fimex.GribApi_CDMWriter.Impl2");
 }
 
-GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
+GribApiCDMWriter_Impl2::~GribApiCDMWriter_Impl2()
 {
 }
 
-void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+
+void GribApiCDMWriter_Impl2::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << fTime << ", " << levelValue << ")" );
 	xmlNodePtr node = getNodePtr(varName, fTime, levelValue);
 	std::string parameter = getXmlProp(node, "parameterNumber");
-	GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
-	std::string tableNumber = getXmlProp(node, "codeTable");
-	GRIB_CHECK(grib_set_long(gribHandle.get(), "gribTablesVersionNo", string2type<long>(tableNumber)),"");
+	std::string category = getXmlProp(node, "parameterCategory");
+	std::string discipline = getXmlProp(node, "discipline");
+	if (parameter == "" || category == "" || discipline == "") {
+		throw CDMException("incomplete defininition of " + varName + ": (param, categ, discipl) = (" + parameter + "," + category + "," + discipline +")");
+	}
+	GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterNumber", string2type<long> (parameter)), "");
+	GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterCategory",	string2type<long> (category)), "");
+	GRIB_CHECK(grib_set_long(gribHandle.get(), "discipline", string2type<long> (discipline)), "");
 }
 
-void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDMException)
+void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDMException)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "setProjection(" << varName << ")");
 	const CDM& cdm = cdmReader->getCDM();
@@ -116,18 +122,21 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 				GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()),"");
 				std::string latitude, longitude;
 				if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
+					double lon = cdmReader->getData(longitude)->asConstDouble()[0];
+					while (lon < 0) {
+						lon += 360;
+					}
 					GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asConstDouble()[0]),"");
-					GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getData(longitude)->asConstDouble()[0]),"");
+					GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon),"");
 				} else {
 					throw CDMException("unable to find latitude/longitude for variable " + varName);
 				}
 				GRIB_CHECK(grib_set_double(gribHandle.get(), "orientationOfTheGridInDegrees", orientationOfTheGridInDegrees),"");
 				GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
 				const boost::shared_array<double> xArray = xData->asConstDouble();
-				// grib1 doesn't allow to set double values for this! // (grib2 not checked)
-				GRIB_CHECK(grib_set_long(gribHandle.get(), "xDirectionGridLengthInMetres", static_cast<long>(xArray[1] - xArray[0])),"");
+				GRIB_CHECK(grib_set_double(gribHandle.get(), "xDirectionGridLengthInMetres", (xArray[1] - xArray[0])),"");
 				const boost::shared_array<double> yArray = yData->asConstDouble();
-				GRIB_CHECK(grib_set_long(gribHandle.get(), "yDirectionGridLengthInMetres", static_cast<long>(yArray[1] - yArray[0])),"");
+				GRIB_CHECK(grib_set_double(gribHandle.get(), "yDirectionGridLengthInMetres", (yArray[1] - yArray[0])),"");
 			} else if (projection == "latitude_longitude") {
 				throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
 			} else if (projection == "rotated_latitude_longitude") {
@@ -145,7 +154,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 	}
 }
 
-void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelValue)
+void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelValue)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "setLevel(" << varName << ", " << levelValue << ")");
 	// check for level/parameter dependencies
@@ -174,7 +183,7 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
 		// cdmGribWriterConfig should contain something like standard_name=""
 		verticalAxisXPath += "[@standard_name=\"\"]";
 	}
-	verticalAxisXPath += "/grib" + type2string(gribVersion);
+	verticalAxisXPath += "/grib2";
 	XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
 	xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
@@ -190,15 +199,14 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
 }
 
-boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData)
+boost::shared_ptr<Data> GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "handleTypeScaleAndMissingData(" << varName << ", " << fTime << ", " << levelValue << ")" );
 	const CDM& cdm = cdmReader->getCDM();
 	double inFillValue = cdm.getFillValue(varName);
 	double outFillValue = inFillValue;
 	GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", outFillValue), "setting missing value");
-	// need bitmap to represent missing values in grib1
-	GRIB_CHECK(grib_set_long(gribHandle.get(), "bitmapPresent", 1), "setting bitmap");
+	GRIB_CHECK(grib_set_long(gribHandle.get(), "bitMapIndicator", 0), "setting bitmap");
 
 	CDMAttribute attr;
 	double scale = 1.;

@@ -344,7 +344,7 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 		if (type == "grb2" || type == "grib2") {
 			gribVersion = 2;
 		}
-		LOG4FIMEX(logger, Logger::DEBUG, "writing grib-file " << vm["output.file"].as<string>() << " without config");
+		LOG4FIMEX(logger, Logger::DEBUG, "writing grib-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
 		if (!vm.count("output.config")) throw CDMException("Cannot write grib-file without config");
 		GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), gribVersion, vm["output.config"].as<string>());
 		return;

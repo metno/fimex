@@ -6,7 +6,8 @@
 	<!-- use for grib1 only attributes -->
 	<!--  <g1attribute name="" value="" type="" /> -->
 	<!-- use for grib2 only attributes -->
-	<g2attribute name="" value="" type="" />
+	<g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
+	<g2attribute name="typeOfPacking" value="grid_simple" type="string" /> <!-- jpeg2000 -->
 </global_attributes>
 <axes>
 <!-- no vertical axis -->
@@ -42,7 +43,7 @@
 </parameter>
 <parameter standard_name="precipitation_amount">
     <grib1 parameterNumber="61" codeTable="128" units="kg/m2"/>
-    <grib2 discipline="0" category="1" id="8" units="kg/m2"/>
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
 </parameter>
 <parameter standard_name="cloud_area_fraction">
 <!-- total -->

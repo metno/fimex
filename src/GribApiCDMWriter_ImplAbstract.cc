@@ -26,6 +26,7 @@
 #include "fimex/GribApiCDMWriter_ImplAbstract.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeLevelDataSliceFetcher.h"
+#include <cmath>
 
 namespace MetNoFimex
 {
@@ -280,6 +281,54 @@ void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
     /* get the coded message in a buffer */
     GRIB_CHECK(grib_get_message(gribHandle.get(),&buffer,&size),0);
     gribFile.write(reinterpret_cast<const char*>(buffer), size);
+}
+
+xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+{
+	xmlNodePtr node = 0;
+	std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
+	{
+		CDMAttribute attr;
+		if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
+			parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+		} else {
+			parameterXPath += "[@name=\"" + varName + "\"]";
+		}
+	}
+	parameterXPath += "/grib"+type2string(gribVersion);
+	XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	std::vector<std::map<std::string, std::string> > levelParameters;
+	if (size >= 1) {
+		// find node with corresponding level
+		std::vector<int> possibleNodes;
+		for (int i = 0; i < size; i++) {
+			xmlNodePtr node = nodes->nodeTab[i];
+			xmlNodePtr parent = node->parent;
+			std::string level = getXmlProp(parent, "level");
+			if (level != "") {
+				LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
+				double xLevelValue = string2type<double>(level);
+				if (std::fabs(levelValue - xLevelValue) < (1e-6*levelValue)) {
+					LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
+					possibleNodes.push_back(i);
+				}
+			} else {
+				LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
+				possibleNodes.push_back(i);
+			}
+		}
+		if (possibleNodes.size() != 1) {
+			throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile + ": " + parameterXPath);
+		}
+		node = nodes->nodeTab[possibleNodes[0]];
+	} else if (size > 1) {
+		throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
+	} else {
+		throw CDMException("could not find " + varName + " in " + configFile + ", skipping parameter");
+	}
+	return node;
 }
 
 
