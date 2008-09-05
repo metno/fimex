@@ -64,6 +64,7 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
 	// TODO: detect more projections
 	CDM::AttrVec projAttrs = cdm.getProjection(varName);
 	if (!projAttrs.empty()) {
+		std::string projVar = cdm.getAttribute(varName, "grid_mapping").getData()->asString();
 		CDM::AttrVec::iterator projIt = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_mapping_name"));
 		const std::string x = cdm.getHorizontalXAxis(varName);
 		const std::string y = cdm.getHorizontalYAxis(varName);
@@ -138,9 +139,84 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
 				const boost::shared_array<double> yArray = yData->asConstDouble();
 				GRIB_CHECK(grib_set_double(gribHandle.get(), "yDirectionGridLengthInMetres", (yArray[1] - yArray[0])),"");
 			} else if (projection == "latitude_longitude") {
-				throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
+				LOG4FIMEX(logger, Logger::INFO, "latlong projection for" << varName);
+				size_t ni, nj;
+				double di, dj, lon0, lat0;
+				std::string latitude, longitude;
+				if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
+					boost::shared_ptr<Data> lonData = cdmReader->getData(longitude);
+					boost::shared_ptr<Data> latData = cdmReader->getData(latitude);
+					ni = lonData->size();
+					nj = lonData->size();
+					if (ni < 2 || nj < 2) {
+						throw CDMException("longitude, latitude for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
+					}
+					const boost::shared_array<double> longs = lonData->asConstDouble();
+					const boost::shared_array<double> lats = latData->asConstDouble();
+					di = longs[1] - longs[0];
+					dj = lats[1] - lats[0];
+					lat0 = lats[0];
+					lon0 = longs[0];
+					while (lon0 < 0) {
+						lon0 += 360;
+					}
+				} else {
+					throw CDMException("could not find latitude/longitude for varName: " + varName);
+				}
+				std::string typeOfGrid("regular_ll");
+				// TODO: untested
+				size_t tog_size = typeOfGrid.size();
+				GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAParallel", ni),"");
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAMeridian", nj),"");
+				GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", di),"");
+				GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", dj),"");
 			} else if (projection == "rotated_latitude_longitude") {
-				throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
+				LOG4FIMEX(logger, Logger::INFO, "rotated latlong projection for " << varName);
+				const std::string rotLon = cdm.getHorizontalXAxis(varName);
+				const std::string rotLat = cdm.getHorizontalYAxis(varName);
+				boost::shared_ptr<Data> rLonData = cdmReader->getData(rotLon);
+				boost::shared_ptr<Data> rLatData = cdmReader->getData(rotLat);
+				size_t ni = rLonData->size();
+				size_t nj = rLatData->size();
+				if (ni < 2 || nj < 2) {
+					throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
+				}
+				double di, dj, rlon0, rlat0;
+				const boost::shared_array<double> rlongs = rLonData->asConstDouble();
+				const boost::shared_array<double> rlats = rLatData->asConstDouble();
+				di = rlongs[1] - rlongs[0];
+				dj = rlats[1] - rlats[0];
+				rlat0 = rlats[0];
+				rlon0 = rlongs[0];
+				while (rlon0 < 0) {
+					rlon0 += 360;
+				}
+
+
+				double northPoleLon = cdm.getAttribute(projVar, "grid_north_pole_longitude").getData()->asConstDouble()[0];
+				double northPoleLat = cdm.getAttribute(projVar, "grid_north_pole_latitude").getData()->asConstDouble()[0];
+
+
+				double southPoleLat = -1 * northPoleLat;
+				while (southPoleLat < -90) {
+					southPoleLat += 180;
+				}
+
+				double southPoleLon = northPoleLon - 180;
+				while (southPoleLon < 0) {
+					southPoleLon += 360;
+				}
+
+				std::string typeOfGrid("rotated_ll");
+				// TODO: this seems still to be inperfect, more tests required
+				size_t tog_size = typeOfGrid.size();
+				GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAParallel", ni),"");
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAMeridian", nj),"");
+				GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", di),"");
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "latitudeOfTheSouthernPoleOfProjection", static_cast<long>(southPoleLat * 1000000)), "");
+				GRIB_CHECK(grib_set_long(gribHandle.get(), "longitudeOfTheSouthernPoleOfProjection", static_cast<long>(southPoleLon * 1000000)), "");
 			} else if (projection == "transverse_mercator") {
 				throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
 			} else {
