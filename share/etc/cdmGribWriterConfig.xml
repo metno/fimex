@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdm_gribwriter_config>
+<global_attributes>
+	<!-- type can be double, long, string -->
+	<attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
+	<!-- use for grib1 only attributes -->
+	<!--  <g1attribute name="" value="" type="" /> -->
+	<!-- use for grib2 only attributes -->
+	<g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
+	<g2attribute name="typeOfPacking" value="grid_simple" type="string" /> <!-- jpeg2000 -->
+</global_attributes>
+<axes>
+<!-- no vertical axis -->
+<vertical_axis standard_name="">
+   <!-- using height in meter, 0 -->
+   <grib1 id="105" value="0" type="short"/>
+   <grib2 id="103" value="0" type="short"/>
+</vertical_axis>
+<vertical_axis unitCompatibleTo="m">
+   <!-- no standard_name for height/depth, defined only by positive=up/down -->
+   <grib1 id="105" units="m" type="short"/>
+   <grib2 id="103" units="m" type="double"/>
+</vertical_axis>
+<vertical_axis unitCompatibleTo="Pa">
+   <!-- no standard_name for pressure coord, defined only by unit of hPa -->
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
+<vertical_axis standard_name="atmosphere_sigma_coordinate">
+	<grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
+	<grib2 id="104" type="double" />
+</vertical_axis>
+</axes>
+<variables>
+<!-- translation section for parameter names/standard_names -->
+<parameter standard_name="altitude">
+    <grib1 parameterNumber="8" codeTable="128" units="m"/>
+    <grib2 discipline="0" parameterCategory="3" parameterNumber="6" units="m"/>
+</parameter>
+<parameter standard_name="sea_surface_temperature">
+    <grib1 parameterNumber="80" codeTable="128" units="K"/>
+    <grib2 discipline="10" parameterCategory="3" parameterNumber="0" units="K"/>
+</parameter>
+<parameter standard_name="precipitation_amount">
+    <grib1 parameterNumber="61" codeTable="128" units="kg/m2"/>
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction">
+<!-- total -->
+    <grib1 parameterNumber="164" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="10000">
+<!-- fog -->
+    <grib1 parameterNumber="248" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="8500">
+<!-- low clouds  --> 
+    <grib1 parameterNumber="186" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="5000">
+<!--  medium clouds  --> 
+    <grib1 parameterNumber="187" codeTable="128" units="1/100"/>
+</parameter>
+<parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="3000">
+<!-- high clouds --> 
+    <grib1 parameterNumber="188" codeTable="128" units="1/100"/>
+</parameter>
+</variables>
+</cdm_gribwriter_config>

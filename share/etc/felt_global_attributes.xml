@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<global_attributes>
+	<attribute name="Conventions" value="CF-1.0" type="string" />
+	<attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />
+	<attribute name="source" value="HIRLAM" type="string" />
+	<attribute name="title" value="unknown" type="string" />
+	<attribute name="references" value="unknown" type="string" />
+	<attribute name="comment" value="none" type="string" />
+</global_attributes>

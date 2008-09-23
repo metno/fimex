@@ -1,0 +1,15 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE_NAME@
+Description: The fimex Library
+Version: @VERSION@
+Requires: libmi >= 3.0.0, milib >= 3.0.0 
+Libs: -L${libdir} -l@PACKAGE_NAME@ @NETCDF_LDFLAGS@ @NETCDF_LIBS@
+Cflags: -I${includedir}
+
+extra_ldflags = @UDUNITS_LDFLAGS@ 
+extra_libs = @UDUNITS_LIBS@ 
+extra_cppflags = @UDUNITS_CPPFLAGS@
