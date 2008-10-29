@@ -13,6 +13,7 @@ compilation
 	
 To configure the different file formats it requires:
     * NetCDF (netcdf-3 > 3.6)
+    * Grib_API (grib_api > 1.4)
     * Felt (libmi)
 
 Optional packages:
