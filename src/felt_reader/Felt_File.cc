@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -28,6 +28,7 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
+#include "fimex/Logger.h"
 #include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,7 +58,7 @@ Felt_File::Felt_File(const string& filename) throw(Felt_File_Error)
 		feltParameters = FeltParameters(dianaSetup);
 	}
 	// else default constructor
-	
+
 	// read the data
 	init();
 }
@@ -87,7 +88,7 @@ void Felt_File::init() throw(Felt_File_Error)
 	short idrec1[1024];
 	float dummy;
 	int nfound, iend, ierror, ioerr;
-	
+
 	// open in C to get a free file-descriptor
 	int fd = open(filename.c_str(), O_RDONLY|O_LARGEFILE);
 	if (fd == -1) {
@@ -135,7 +136,7 @@ void Felt_File::init() throw(Felt_File_Error)
 						if (hybridLevels.find(index16toLevelPair(idx)) == hybridLevels.end()) {
 							getDataSlice(fa, idx, ifound[i]); // initialize data-section
 							hybridLevels[index16toLevelPair(idx)] = fa.getIdent19(index16toTime(idx), index16toLevelPair(idx));
-//							pair<short, short> p = index16toLevelPair(idx); 
+//							pair<short, short> p = index16toLevelPair(idx);
 //							std::cerr << "reading level for: " << p.first << " " << p.second << " "<< hybridLevels[p] <<std::endl;
 						}
 					}
@@ -143,7 +144,7 @@ void Felt_File::init() throw(Felt_File_Error)
 						// make sure that all info is initialized even if it requires reading a bit more data
 						// return data of no interest
 						getDataSlice(fa, idx, ifound[i]);
-					} 
+					}
 				}
         	}
         }
@@ -157,9 +158,9 @@ Felt_File::~Felt_File()
 Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx) {
 	string name = feltParameters.getParameterName(idx);
 	string dataType = feltParameters.getParameterDatatype(name);
-	map<string, Felt_Array>::iterator it = feltArrayMap.find(name); 
+	map<string, Felt_Array>::iterator it = feltArrayMap.find(name);
 	if (it == feltArrayMap.end()) {
-		//cerr << "new FeltArray " << name << ": " << dataType << " " << feltParameters.getParameterFillValue(name) << endl; 
+		//cerr << "new FeltArray " << name << ": " << dataType << " " << feltParameters.getParameterFillValue(name) << endl;
 		Felt_Array fa(name, idx, dataType);
 		fa.setFillValue(feltParameters.getParameterFillValue(name));
 		feltArrayMap[name] = fa;   // copy to map
@@ -170,7 +171,7 @@ Felt_Array& Felt_File::findOrCreateFeltArray(const boost::array<short, 16>& idx)
 }
 
 Felt_Array& Felt_File::getFeltArray(const string& arrayName) throw(Felt_File_Error){
-	map<string, Felt_Array>::iterator it = feltArrayMap.find(arrayName); 
+	map<string, Felt_Array>::iterator it = feltArrayMap.find(arrayName);
 	if (it == feltArrayMap.end()) {
 		throw Felt_File_Error("unknown parameter: " + arrayName);
 	}
@@ -181,7 +182,7 @@ std::vector<Felt_Array> Felt_File::listFeltArrays() {
 	vector<Felt_Array> li;
 	for (map<string, Felt_Array>::iterator it = feltArrayMap.begin(); it != feltArrayMap.end(); ++it) {
 		li.push_back(it->second);
-	}	
+	}
 	return li;
 }
 
@@ -217,9 +218,25 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 	}
 	fa.setGridType(gridType);
 	fa.setGridParameters(gridParameters);
-	fa.addIdent19(index16toTime(idx), index16toLevelPair(idx), header_data[19-1]); // -1 due to fortran/c conversion 
+	fa.addIdent19(index16toTime(idx), index16toLevelPair(idx), header_data[19-1]); // -1 due to fortran/c conversion
 	vector<short> data(nx*ny);
 	copy(&header_data[20], &header_data[20+nx*ny], data.begin());
+
+	LoggerPtr logger = getLogger("fimex.Felt_File");
+	if (logger->isEnabledFor(Logger::DEBUG)) {
+		std::ostringstream oss;
+		oss << "header(2,3,4,8,19): " << header[2] << " " << header[3] << " " << header[4] << " " << header[8] << " " << header[19];
+		if (header[8] > 1000) {
+			int extra = header[8] % 1000;
+			oss << "\textraHeader: ";
+			for (int i = 0; i < extra; i++) {
+				oss << header_data[20 + nx*ny + i] << " ";
+			}
+		}
+
+		LOG4FIMEX(logger, Logger::DEBUG, oss.str());
+	}
+
 	return data;
 }
 
@@ -247,7 +264,7 @@ template<typename T>
 boost::shared_ptr<MetNoFimex::Data> createScaledData(const boost::shared_array<short>& header_data, size_t dataSize, double newFillValue, double scalingFactor) {
 	boost::shared_array<T> data(new T[dataSize]);
 	transform(&header_data[20], &header_data[20+dataSize], &data[0], Scale<T>(newFillValue, scalingFactor));
-	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, dataSize));	
+	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, dataSize));
 }
 
 boost::shared_ptr<MetNoFimex::Data> Felt_File::getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error) {
@@ -296,7 +313,7 @@ std::map<short, std::vector<pair<short,short> > > Felt_File::getFeltLevelPairs()
 	}
 	// convert the set into a vector
 	std::map<short, std::vector<pair<short,short> > > typeLevelVector;
-	for (std::map<short, ShortPairSet >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {		
+	for (std::map<short, ShortPairSet >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
 		typeLevelVector[it->first] = std::vector<pair<short, short> >(it->second.begin(), it->second.end());
 	}
 	return typeLevelVector;
@@ -428,7 +445,7 @@ short Felt_File::getGridType() const throw(Felt_File_Error) {
 		return gridType;
 	} else {
 		throw(Felt_File_Error("cannot read gridParameters: no Felt_Array available"));
-	}	
+	}
 }
 
 const boost::array<float, 6>& Felt_File::getGridParameters() const throw(Felt_File_Error) {
