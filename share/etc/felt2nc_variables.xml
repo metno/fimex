@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE cdm_felt_config SYSTEM "felt2nc_variables.dtd">
 <cdm_felt_config>
+<!-- optional processing options for felt-files -->
+<processOptions>
+    <!-- allowed deviation of gridParameter (6 values, see felt.doc) to still assumed to be the same grid, default: no deviation allowed -->
+	<!--  <option name="gridParameterDelta" value="0 0 0 0 0 0"/> -->
+</processOptions>
 <global_attributes>
 	<attribute name="Conventions" value="CF-1.0" type="string" />
 	<attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />

@@ -245,7 +245,8 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
     MetNoFimex::XMLDoc doc(configFilename);
 	// open the feltFile with the desired parameters
 	std::vector<std::string> knownFeltIds = initGetKnownFeltIdsFromXML(doc);
-	feltFile = MetNoFelt::Felt_File(filename, knownFeltIds);
+	std::map<std::string, std::string> options = initGetOptionsFromXML(doc);
+	feltFile = MetNoFelt::Felt_File(filename, knownFeltIds, options);
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
 		std::vector<time_t> feltTimes = feltFile.getFeltTimes();
@@ -307,7 +308,18 @@ std::vector<std::string> FeltCDMReader::initGetKnownFeltIdsFromXML(const XMLDoc&
 	return knownFeltIds;
 }
 
-
+std::map<std::string, std::string> FeltCDMReader::initGetOptionsFromXML(const XMLDoc& doc)
+{
+	std::map<std::string, std::string> options;
+	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/processOptions/option");
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	for (int i = 0; i < nodes->nodeNr; ++i) {
+		std::string name = getXmlProp(nodes->nodeTab[i], "name");
+		std::string value = getXmlProp(nodes->nodeTab[i], "value");
+		options[name] = value;
+	}
+	return options;
+}
 void FeltCDMReader::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 {
 	std::string xpathString("/cdm_felt_config/global_attributes");

@@ -18,9 +18,18 @@
 -->
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT cdm_felt_config (variables|axes|global_attributes)*>
+<!ELEMENT cdm_felt_config (processOptions|variables|axes|global_attributes)*>
 <!ATTLIST cdm_felt_config
 	xmlns:xi CDATA #IMPLIED
+  >
+
+<!--- optional processing options used by FeltFile -->
+<!ELEMENT processOptions (option*)>
+<!--- processing option, currently only gridParameterDelta allowed -->
+<!ELEMENT option EMPTY>
+<!ATTLIST option
+	name CDATA #REQUIRED
+	value CDATA #REQUIRED
   >
 
 <!--- Put your DTDDoc comment here. -->

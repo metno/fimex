@@ -28,7 +28,6 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
-#include "fimex/Logger.h"
 #include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,6 +36,7 @@
 #include <cassert>
 #include <ctime>
 #include <cmath>
+#include <set>
 #include <iostream>
 #include <fstream>
 #include <boost/scoped_array.hpp>
@@ -60,13 +60,39 @@ Felt_File::Felt_File(const string& filename) throw(Felt_File_Error)
 	// else default constructor
 
 	// read the data
-	init();
+	std::map<std::string, std::string> options;
+	init(options);
 }
 
-Felt_File::Felt_File(const std::string& filename, const std::vector<std::string>& dianaParamList) throw(Felt_File_Error)
+Felt_File::Felt_File(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options) throw(Felt_File_Error)
 : filename(filename), feltParameters(dianaParamList)
 {
-	init();
+	init(options);
+}
+
+void Felt_File::setOptions(const std::map<std::string, std::string>& options) {
+	// set gridParameterDelta from string ' ' splitted string of max 6 double values
+	std::set<std::string> knownOptions;
+
+	gridParameterDelta = std::vector<double>(6,0);
+	std::string optName = "gridParameterDelta";
+	std::map<std::string, std::string>::const_iterator gridParOpt = options.find("gridParameterDelta");
+	if (gridParOpt != options.end()) {
+		std::vector<std::string> tokens = tokenize(gridParOpt->second);
+		int end = tokens.size() < gridParameterDelta.size() ? tokens.size() : gridParameterDelta.size();
+		for (int i = 0; i < end; ++i) {
+			gridParameterDelta[i] = string2type<double>(tokens[i]);
+		}
+		LOG4FIMEX(logger, Logger::DEBUG, "adding " << optName << " processing-option: " << gridParOpt->second);
+		knownOptions.insert(optName);
+	}
+
+	// test for unknown options
+	for (std::map<std::string, std::string>::const_iterator oit = options.begin(); oit != options.end(); ++oit) {
+		if (knownOptions.find(oit->first) == knownOptions.end()) {
+			LOG4FIMEX(logger, Logger::WARN, "unknown processing options: " << oit->first);
+		}
+	}
 }
 
 void fdPtrClose(int* fdPtr) {
@@ -79,8 +105,10 @@ void fdPtrClose(int* fdPtr) {
 	delete fdPtr;
 }
 
-void Felt_File::init() throw(Felt_File_Error)
+void Felt_File::init(const std::map<std::string, std::string>& options) throw(Felt_File_Error)
 {
+	logger = getLogger("fimex.Felt_File");
+	setOptions(options);
 	const int MAXNIN = 256;
 	int foundall = 0;
 	int ireq, iexist, nin;
@@ -455,7 +483,8 @@ const boost::array<float, 6>& Felt_File::getGridParameters() const throw(Felt_Fi
 		for (++fait; fait != feltArrayMap.end(); ++fait) {
 			const boost::array<float, 6>& newParams = fait->second.getGridParameters();
 			for (int i = 0; i < 6; i++) {
-				if (newParams[i] != params[i]) {
+				// TODO: allow params to differ by a delta (optional)
+				if (newParams[i] != params[i] && std::fabs(newParams[i]-params[i]) > gridParameterDelta[i]) {
 					throw(Felt_File_Error("cannot change gridParameters within a file for " + fait->second.getName() + " param " + type2string(i) + ": " + type2string(params[i]) + " != " + type2string(newParams[i]) + "("+type2string(newParams[i]-params[i])+")"));
 				}
 			}

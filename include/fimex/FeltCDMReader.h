@@ -68,6 +68,10 @@ private:
 	// be called from elsewhere
 	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc);
 	void initAddGlobalAttributesFromXML(const XMLDoc& doc);
+	/**
+	 * read processOptions/option from the xml file
+	 */
+	std::map<std::string, std::string> initGetOptionsFromXML(const XMLDoc& doc);
 	CDMDimension initAddTimeDimensionFromXML(const XMLDoc& doc);
 	std::map<short, CDMDimension> initAddLevelDimensionsFromXML(const XMLDoc& doc);
 	/**
