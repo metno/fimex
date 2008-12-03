@@ -71,11 +71,12 @@ LIBRARIES = $(lib_LIBRARIES)
 ARFLAGS = cru
 libfimex_a_AR = $(AR) $(ARFLAGS)
 libfimex_a_LIBADD =
-am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
-	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
-	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+am__libfimex_a_SOURCES_DIST = interpolation.c timeInterpolation.c \
+	CachedInterpolation.cc CachedVectorReprojection.cc CDM.cc \
+	CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
-	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
+	CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
+	DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc Logger.cc Null_CDMWriter.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
@@ -86,13 +87,14 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
 am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
-	CachedInterpolation.$(OBJEXT) \
+	timeInterpolation.$(OBJEXT) CachedInterpolation.$(OBJEXT) \
 	CachedVectorReprojection.$(OBJEXT) CDM.$(OBJEXT) \
 	CDMAttribute.$(OBJEXT) CDMDimension.$(OBJEXT) \
 	CDMDataType.$(OBJEXT) CDMExtractor.$(OBJEXT) \
 	CDMInterpolator.$(OBJEXT) CDMNamedEntity.$(OBJEXT) \
-	CDMReader.$(OBJEXT) CDMVariable.$(OBJEXT) Data.$(OBJEXT) \
-	DataTypeChanger.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
+	CDMReader.$(OBJEXT) CDMTimeInterpolator.$(OBJEXT) \
+	CDMVariable.$(OBJEXT) Data.$(OBJEXT) DataTypeChanger.$(OBJEXT) \
+	GribApiCDMWriter.$(OBJEXT) \
 	GribApiCDMWriter_ImplAbstract.$(OBJEXT) \
 	GribApiCDMWriter_Impl1.$(OBJEXT) \
 	GribApiCDMWriter_Impl2.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
@@ -322,11 +324,12 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 lib_LIBRARIES = libfimex.a
-libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
-	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
-	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+libfimex_a_SOURCES = interpolation.c timeInterpolation.c \
+	CachedInterpolation.cc CachedVectorReprojection.cc CDM.cc \
+	CDMAttribute.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMReader.cc \
-	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
+	CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
+	DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribApiCDMWriter.cc Logger.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
@@ -413,6 +416,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMTimeInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Po@am__quote@
@@ -435,6 +439,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timeInterpolation.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

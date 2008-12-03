@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -31,42 +31,42 @@
 extern "C" {
 #endif
 
-	
+
 /**
  * @brief interpolation method
- * 
+ *
  * flag for nearest neighbor interpolation
  */
 #define MIFI_NEAREST_NEIGHBOR 0
 /**
  * @brief interpolation method
- * 
+ *
  * flag for bilinear interpolation
  */
 #define MIFI_BILINEAR         1
 /**
  * @brief interpolation method
- * 
+ *
  * flag for bicubic interpolation
  * @warning not implemented yet
  */
 #define MIFI_BICUBIC          2
 
-	
+
 /**
  * @brief vector projection flag
- * 
+ *
  * new size will be like old size
  */
 #define MIFI_VECTOR_KEEP_SIZE 0
 /**
  * @brief vector projection flag
- * 
+ *
  * vector might change size with projection
  */
 #define MIFI_VECTOR_RESIZE    1
-	
-	
+
+
 /** @brief undefined value for floats */
 #define MIFI_UNDEFINED_F (nanf(""))
 /** @brief undefined value for doubles */
@@ -91,10 +91,10 @@ extern "C" {
  * Interpolation between two projections. Missing values are set to MIFI_UNDEFINED_F
  * which is implemented as C99 nanf. The coordinates of a cell give the midpoint of a cell,
  * i.e. cell (10,20) spans  ([9.5..10.5[,[19.5-20.5[)
- * 
+ *
  * @param method one of MIFI_NEAREST_NEIGHBOR MIFI_BILINEAR MIFI_BICUBIC
  * @param proj_input proj4-string of projection of infield
- * @param infield real rectangular array of dimension infield[iz,iy,ix]  
+ * @param infield real rectangular array of dimension infield[iz,iy,ix]
  * @param in_x_axis field of size ix. Axis needs to be strong monotonous and if longitude/latitude in degree
  * @param in_y_axis field of size iy. Axis needs to be strong monotonous and if longitude/latitude in degree
  * @param in_x_axis_type one of MIFI_LATITUDE, MIFI_LONGITUDE, MIFI_PROJ_AXIS
@@ -112,36 +112,36 @@ extern "C" {
  * @param oy y-dimension of outfield
  */
 extern int mifi_interpolate_f(int method,
-                        const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis, 
+                        const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis,
                         const int in_x_axis_type, const int in_y_axis_type, const int ix, const int iy, const int iz,
-                        const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis, 
+                        const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis,
                         const int out_x_axis_type, const int out_y_axis_type, const int ox, const int oy);
 
 /**
  * @brief not implemented yet
- * 
+ *
  * double version of mifi_interpolate_f
  * @see mifi_interpolate_f
  */
 extern int mifi_interpolate_d(int method,
-                        char* proj_input, double* infield, double* in_x_axis, double* in_y_axis, 
+                        char* proj_input, double* infield, double* in_x_axis, double* in_y_axis,
                         int in_x_axis_type, int in_y_axis_type, int ix, int iy, int iz,
-                        char* proj_output, double* outfield, double* out_x_axis, double* out_y_axis, 
+                        char* proj_output, double* outfield, double* out_x_axis, double* out_y_axis,
                         int out_x_axis_type, int out_y_axis_type, int ox, int oy);
 
 /**
  * @brief interpolate the vector values
- * 
- * When reprojecting a vector (i.e. wind (u, v)) from one projection to another, 
+ *
+ * When reprojecting a vector (i.e. wind (u, v)) from one projection to another,
  * not only the base-position of the vector will change, but also the
  * angle of the vector might change due to rotation and streching within the
  * projection. Thus, the values of (u,v) have to be changed accordingly to
  * projection.
- * 
+ *
  * This function allows to only rotate the vector values (MIFI_VECTOR_KEEP_SIZE)
  * which is useful to keep the windspeed constant, even if the projected plane
  * has a different scale, or to completely reproject the vector (MIFI_VECTOR_RESIZE).
- * 
+ *
  * This function is implemented by using a first order tailor expansion of the
  * projection: (u', v') = A (u,v) with A a matrix defined at each point (x,y) through
  * @code
@@ -149,7 +149,7 @@ extern int mifi_interpolate_d(int method,
  * proj(x,y)_y' = a12*x+a22*y
  * @endcode
  * and the same formulars for (x+delta, y) and (x, y+delta) (with delta a small value against the x or y)
- * 
+ *
  * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
@@ -165,7 +165,7 @@ extern int mifi_interpolate_d(int method,
  * @return MIFI_OK or error value
  */
 extern int mifi_vector_reproject_values_f(int method,
-						const char* proj_input, 
+						const char* proj_input,
 						const char* proj_output,
 						float* u_out, float* v_out,
 						const double* out_x_axis, const double* out_y_axis,
@@ -173,7 +173,7 @@ extern int mifi_vector_reproject_values_f(int method,
 						int ox, int oy, int oz);
 /**
  * calculate the reprojected vectors with a known matrix for #mifi_vector_reproject_values_f
- * 
+ *
  * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param matrix reprojection matrix of size (4,ox,oy)
  * @param u_out values of u, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
@@ -190,7 +190,7 @@ extern int mifi_vector_reproject_values_by_matrix_f(int method,
 
 /**
  * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f
- * 
+ *
  * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
@@ -202,8 +202,8 @@ extern int mifi_vector_reproject_values_by_matrix_f(int method,
  * @param oy y-dimension of outfield
  * @param matrix matrix of size (4*ox*oy)
  * @return MIFI_OK or error value
- */ 
-extern int mifi_get_vector_reproject_matrix(const char* proj_input, 
+ */
+extern int mifi_get_vector_reproject_matrix(const char* proj_input,
 						const char* proj_output,
 						const double* out_x_axis, const double* out_y_axis,
 						int out_x_axis_type, int out_y_axis_type,
@@ -211,7 +211,9 @@ extern int mifi_get_vector_reproject_matrix(const char* proj_input,
 						double* matrix);
 
 
-/** 
+/**
+ * Get the nearest neighbor of a value. Values are rounded to array-position.
+ *
  * @param infield 3d fortran array of size ix,iy,iz
  * @param outfield 1d array of size iz containing the values
  */
@@ -221,51 +223,51 @@ extern int mifi_get_values_f(const float* infield, float* outfield, const double
  *  Bilinear interpolation requires a neighborhood extending one pixel to the right and below the central sample. If the fractional subsample position is given by (xfrac, yfrac), the resampled pixel value will be:
  *
  * @verbatim
-     (1 - yfrac) * [(1 - xfrac)*s00 + xfrac*s01] + 
+     (1 - yfrac) * [(1 - xfrac)*s00 + xfrac*s01] +
      yfrac       * [(1 - xfrac)*s10 + xfrac*s11]
    @endverbatim
- * 
+ *
  * This is documented by the following diagram:
  * @verbatim
-                         s00    s01                                     
-                                                                        
-                             .      < yfrac                      
-                                                                        
-                         s10    s11                                     
-                             ^                                           
+                         s00    s01
+
+                             .      < yfrac
+
+                         s10    s11
+                             ^
                             xfrac
-   @endverbatim                                        
+   @endverbatim
  * @see http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/InterpolationBilinear.html
- * @warning if any of the 4 used values of infield is undefined or outside of infield, the return value will be undefined 
+ * @warning if any of the 4 used values of infield is undefined or outside of infield, the return value will be undefined
  */
 extern int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 
 
 /**
  * @brief not implemented yet
- * 
+ *
  * @see http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/InterpolationBicubic.html
  */
-extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);                        
-                        
-              
+extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
+
+
 /**
  *  @brief find position in array of position in projection
- * 
- * points2position uses linear splines to find the array-position of points in the given axis 
- * 
+ *
+ * points2position uses linear splines to find the array-position of points in the given axis
+ *
  *  @param points the values will get changed from points in axis coordinates to array coordinates
  *  @param n number of values in points
  *  @param axis coordinate axis
  *  @param num number of elements in coordinate axis
  *  @param axis_type type of axis, one of MIFI_LONGITUDE, MIFI_LATITUDE, MIFI_PROJ_AXIS
  */
-extern int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type); 
-       
-       
+extern int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type);
+
+
 /**
  * gives the position of an fortran like array of size ix, iy, iz
- * 
+ *
  *  @return the position of x, y, z
  */
 inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz) {
@@ -274,9 +276,9 @@ inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz) {
 
 /**
  * @brief project axes so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)
- * 
+ *
  * all axes must be given or will be returned in radians when converted from/to latlon
- * 
+ *
  * @param proj_input input projection proj string
  * @param proj_output output projection proj string
  * @param in_x_axis x-axis in input-projection
@@ -286,7 +288,7 @@ inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz) {
  * @param out_xproj_axis output-values of x_proj(x,y), field needs to be allocated in at least ix*iy size
  * @param out_yproj_axis output-values of y_proj(x,y), field needs to be allocated in at least ix*iy size
  * @return error-code
- * 
+ *
  */
 extern int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis);
 
@@ -294,7 +296,7 @@ extern int mifi_project_axes(const char* proj_input, const char* proj_output, co
  * Convert bad-values to nan. The mifi_ functions don't handle bad values generally, but
  * forward this work to the floating-point IEEE NaN's. This function converts a general bad value
  * to a nan in a float array.
- * 
+ *
  * @param posPtr start pointer of the float array
  * @param endPtr end-pointer of the float array (excluded from conversion)
  * @param badVal bad value to be converted to nan
@@ -306,7 +308,7 @@ extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
 
  * @param posPtr start pointer of the float array
  * @param endPtr end-pointer of the float array (excluded from conversion)
- * @param badVal value NaNs will be  converted to  
+ * @param badVal value NaNs will be  converted to
  * @return number of conversions
  */
 extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
