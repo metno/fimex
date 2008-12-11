@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -65,20 +65,21 @@ static int bsearchDoubleIndex(const double key, const double* base, int num, int
     	}
   	}
   	if (comp == 0) return pos;
-  	else if (comp > 0) return (-1 + (-1 * (pos+1))); 
-  	else return (-1 + (-1 * pos)); 
+  	else if (comp > 0) return (-1 + (-1 * (pos+1)));
+  	else return (-1 + (-1 * pos));
 }
 
-// c99: one implementation of inline function must exist
-extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
+int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz) {
+	return (z*iy + y)*ix + x;
+}
 
 
-int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type) 
+int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type)
 {
 	int (*comparator)(const void * a, const void * b);
 	if (axis[0] < axis[num-1]) comparator = ascendingDoubleComparator;
 	else comparator = descendingDoubleComparator;
-	
+
 	for (int i = 0; i < n; i++) {
 		int pos = bsearchDoubleIndex(points[i], axis, num, comparator);
 		if (pos >= 0) {
@@ -114,9 +115,9 @@ static void convertAxis(const double* orgAxis, const int num, const int type, do
 }
 
 static int mifi_interpolate_f_functional(int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz),
-                        const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis, 
+                        const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis,
                         const int in_x_axis_type, const int in_y_axis_type, const int ix, const int iy, const int iz,
-                        const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis, 
+                        const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis,
                         const int out_x_axis_type, const int out_y_axis_type, const int ox, const int oy)
 {
 	double inXAxis[ix];
@@ -127,46 +128,46 @@ static int mifi_interpolate_f_functional(int (*func)(const float* infield, float
 	convertAxis(in_y_axis, iy, in_y_axis_type, inYAxis);
 	convertAxis(out_x_axis, ox, out_x_axis_type, outXAxis);
 	convertAxis(out_y_axis, oy, out_y_axis_type, outYAxis);
-	
+
 	if (MIFI_DEBUG > 0) {
 		fprintf(stderr, "in axis conversion: x %f -> %f; y %f -> %f\n", in_x_axis[0], inXAxis[0], in_y_axis[0], inYAxis[0]);
 		fprintf(stderr, "out axis conversion: x %f -> %f; y %f -> %f\n", out_x_axis[0], outXAxis[0], out_y_axis[0], outYAxis[0]);
 	}
-	
-	/* 
+
+	/*
 	 * transforming from output to input, to receive later the correct input-values
 	 * for the output coordinates
 	 */
 	double pointsX[ox*oy];
 	double pointsY[ox*oy];
 	mifi_project_axes(proj_output, proj_input, outXAxis, outYAxis, ox, oy, pointsX, pointsY);
-	
+
 	mifi_points2position(pointsX, ox*oy, inXAxis, ix, in_x_axis_type);
 	mifi_points2position(pointsY, ox*oy, inYAxis, iy, in_y_axis_type);
-	
+
 	if (MIFI_DEBUG > 0) {
-		fprintf(stderr, "projection: (%f, %f) <- (%f, %f)\n", out_x_axis[0], out_y_axis[0], pointsX[0], pointsY[0]); 
+		fprintf(stderr, "projection: (%f, %f) <- (%f, %f)\n", out_x_axis[0], out_y_axis[0], pointsX[0], pointsY[0]);
 	}
-	
+
 	float zValues[iz];
 	for (int y = 0; y < oy; ++y) {
 		for (int x = 0; x < ox; ++x) {
 			if (func(infield, zValues, pointsX[y*ox+x], pointsY[y*ox+x], ix, iy, iz) != MIFI_ERROR) {
 				for (int z = 0; z < iz; ++z) {
 					outfield[mifi_3d_array_position(x, y, z, ox, oy, iz)] = zValues[z];
-				}			
-			}		
+				}
+			}
 		}
 	}
-	
-		
+
+
 	return MIFI_OK;
 }
 
 int mifi_interpolate_f(const int method,
-                       const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis, 
+                       const char* proj_input, const float* infield, const double* in_x_axis, const double* in_y_axis,
                        const int in_x_axis_type, const int in_y_axis_type, const int ix, const int iy, const int iz,
-                       const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis, 
+                       const char* proj_output, float* outfield, const double* out_x_axis, const double* out_y_axis,
                        const int out_x_axis_type, const int out_y_axis_type, const int ox, const int oy)
 {
 	int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
@@ -177,11 +178,11 @@ int mifi_interpolate_f(const int method,
 		case MIFI_BICUBIC:          ;//not implemented: func = mifi_get_values_bicubic_f; break;
 		default:                    return MIFI_ERROR; /* error */
 	}
-	
+
 	return mifi_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
-int mifi_get_vector_reproject_matrix(const char* proj_input, 
+int mifi_get_vector_reproject_matrix(const char* proj_input,
 						const char* proj_output,
 						const double* out_x_axis, const double* out_y_axis,
 						int out_x_axis_type, int out_y_axis_type,
@@ -195,7 +196,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 		fprintf(stderr, "input proj: %s\n", proj_input);
 		fprintf(stderr, "output proj: %s\n", proj_output);
 	}
-		
+
 	if (!(inputPJ = pj_init_plus(proj_input))) {
 		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
 		return MIFI_ERROR;
@@ -211,8 +212,8 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	double outYAxis[oy];
 	convertAxis(out_x_axis, ox, out_x_axis_type, outXAxis);
 	convertAxis(out_y_axis, oy, out_y_axis_type, outYAxis);
-	
-	
+
+
 	double* in_xproj_axis = malloc(ox*oy*sizeof(double));
 	double* in_yproj_axis = malloc(ox*oy*sizeof(double));
 	if (in_xproj_axis == NULL || in_yproj_axis == NULL) {
@@ -237,7 +238,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 		free(in_xproj_axis);
 		return MIFI_ERROR;
 	}
-	
+
 	// calculation of deltas: (x+d, y), (x, y+d) -> proj-values
 	double* out_x_delta_proj_axis = malloc(ox*oy*sizeof(double));
 	double* out_y_delta_proj_axis = malloc(ox*oy*sizeof(double));
@@ -288,7 +289,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			}
 		}
 	}
-	
+
 	{	// conversion along y axis
 		delta[0] = 1e-3; // will be overwritten if x > 1
 		for (int x = 0; x < ox; ++x) {
@@ -339,7 +340,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	free(delta);
 	free(out_y_delta_proj_axis);
 	free(out_x_delta_proj_axis);
-	return MIFI_OK;	
+	return MIFI_OK;
 }
 
 int mifi_vector_reproject_values_by_matrix_f(int method,
@@ -366,7 +367,7 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 				u_new = u_old * m0 + v_old * m1;
 				v_new = u_old * m2 + v_old * m3;
 				if (method == MIFI_VECTOR_KEEP_SIZE) {
-					double norm = sqrt( (u_old*u_old + v_old*v_old) / 
+					double norm = sqrt( (u_old*u_old + v_old*v_old) /
 										(u_new*u_new + v_new*v_new) );
 					u_new *= norm;
 					v_new *= norm;
@@ -380,7 +381,7 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 }
 
 int mifi_vector_reproject_values_f(int method,
-						const char* proj_input, 
+						const char* proj_input,
 						const char* proj_output,
 						float* u_out, float* v_out,
 						const double* out_x_axis, const double* out_y_axis,
@@ -433,14 +434,14 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
 		((0 <= y0) && (y0 < iy)) &&
 		((0 <= x1) && (x1 < ix)) &&
 		((0 <= y1) && (y1 < iy))) { // pos in range
-			
+
 		for (int z = 0; z < iz; ++z) {
 			float s00 = infield[mifi_3d_array_position(x0, y0, z, ix, iy, iz)];
 			float s01 = infield[mifi_3d_array_position(x1, y0, z, ix, iy, iz)];
 			float s10 = infield[mifi_3d_array_position(x0, y1, z, ix, iy, iz)];
 			float s11 = infield[mifi_3d_array_position(x1, y1, z, ix, iy, iz)];
 			// Missing values: NANs will be propagated by IEEE
-			outvalues[z] = (1 - yfrac) * ((1 - xfrac)*s00 + xfrac*s01) + 
+			outvalues[z] = (1 - yfrac) * ((1 - xfrac)*s00 + xfrac*s01) +
 							yfrac      * ((1 - xfrac)*s10 + xfrac*s11);
 		}
 	} else {
@@ -466,7 +467,7 @@ int mifi_project_axes(const char* proj_input, const char* proj_output, const dou
 		fprintf(stderr, "input proj: %s\n", proj_input);
 		fprintf(stderr, "output proj: %s\n", proj_output);
 	}
-		
+
 	if (!(inputPJ = pj_init_plus(proj_input))) {
 		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
 		return MIFI_ERROR;
@@ -520,7 +521,7 @@ size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal) {
 				retVal++;
 			}
 			posPtr++;
-		}		
+		}
 	}
 	return retVal;
 }
