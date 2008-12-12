@@ -32,6 +32,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 ReplaceStringTimeObject.cc \
 					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
+					 TimeSpec.cc \
 					 Units.cc \
 					 Utils.cc \
 					 XMLDoc.cc

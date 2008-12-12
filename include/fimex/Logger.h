@@ -47,7 +47,7 @@ public:
     	ERROR = 800,
     	WARN = 700,
     	INFO = 600,
-    	DEBUG = 500,
+    	DEBUG = 500
     };
 	Logger(const std::string& className);
 	virtual ~Logger();

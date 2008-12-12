@@ -29,6 +29,7 @@
 
 
 #include "CDMReader.h"
+#include <map>
 
 namespace MetNoFimex
 {
@@ -54,7 +55,9 @@ public:
 	virtual void changeTimeAxis(std::string timeSpec) throw(CDMException);
 
 private:
+	typedef std::map<std::string, std::map<int, std::pair<int,int> > > TimeChangeMap;
 	boost::shared_ptr<CDMReader> dataReader;
+	TimeChangeMap timeChangeMap;
 };
 
 } /* MetNoFimex */

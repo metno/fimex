@@ -56,6 +56,7 @@ struct FimexTime {
 };
 
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime);
+FimexTime string2FimexTime(const std::string& str) throw(CDMException);
 
 /**
  * TimeUnit calculates times from a time given in a unit as

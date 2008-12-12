@@ -25,9 +25,12 @@
  */
 
 #include "../include/fimex/CDMTimeInterpolator.h"
+#include <set>
 
 namespace MetNoFimex
 {
+
+using namespace std;
 
 CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader)
    : dataReader(dataReader)
@@ -42,11 +45,34 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 const boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	// TODO
+
+	// if unlimdim = time-axis, fetch all needed original slices
+	// else get original slice, subslice the needed time-slices
+	//
+	// interpolate and return the time-slices
 }
 
 void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMException)
 {
 	// TODO
+	const CDM& orgCDM = dataReader->getCDM();
+	const CDM::VarVec& vars = orgCDM.getVariables();
+	set<string> changedTimes;
+	for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
+		// change time-axis of each variable, possibly different time-axis
+		std::string timeDimName = orgCDM.getTimeAxis(varIt->getName());
+		if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
+			changedTimes.insert(timeDimName); // avoid double changes
+
+			// find start date
+
+			// create mapping of new time value positions to old time value positions (per time-axis)
+
+			// change cdm timeAxis values
+
+
+		}
+	}
 }
 
 

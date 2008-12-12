@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -31,6 +31,7 @@
 #include "fimex/NetCDF_CDMWriter.h"
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
@@ -39,8 +40,8 @@ using namespace MetNoFelt;
 using namespace MetNoFimex;
 
 
-void
-test_feltNetcdfWrite(void) {
+BOOST_AUTO_TEST_CASE( test_feltNetcdfWrite )
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -58,8 +59,8 @@ test_feltNetcdfWrite(void) {
 	}
 }
 
-void
-test_feltNetcdfWriteConfig(void) {
+BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -75,16 +76,6 @@ test_feltNetcdfWriteConfig(void) {
 	BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
 }
 
-
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-
-    test->add( BOOST_TEST_CASE( &test_feltNetcdfWrite ) );
-    test->add( BOOST_TEST_CASE( &test_feltNetcdfWriteConfig ) );
-    return test;
-}
 
 #else
 // no boost testframework

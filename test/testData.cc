@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -25,6 +25,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
@@ -35,7 +36,8 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-void test_slicing() {
+BOOST_AUTO_TEST_CASE( test_slicing )
+{
 	DataImpl<int> data(10);
 	for (int i = 0; i < 10; i++) {
 		data.setValue(i, i);
@@ -43,7 +45,7 @@ void test_slicing() {
 	BOOST_CHECK(data.asBase()[0] == 0);
 	int start = 4;
 	BOOST_CHECK(data.asBase()[start] == start);
-	
+
 	std::vector<size_t> orgDimSize(1, 10);
 	std::vector<size_t> newDimStart(1, start);
 	size_t newSize = 2;
@@ -54,7 +56,8 @@ void test_slicing() {
 	BOOST_CHECK((slice->asInt())[0] == start);
 }
 
-void test_slicing2D() {
+BOOST_AUTO_TEST_CASE( test_slicing2D )
+{
 	DataImpl<int> data(100);
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
@@ -64,7 +67,7 @@ void test_slicing2D() {
 	BOOST_CHECK(data.asBase()[0] == 0);
 	int start = 4;
 	BOOST_CHECK(data.asBase()[start] == start);
-	
+
 	std::vector<size_t> orgDimSize(2, 10);
 	std::vector<size_t> newDimStart(2, start);
 	size_t newSize = 2;
@@ -76,7 +79,8 @@ void test_slicing2D() {
 	BOOST_CHECK((slice->asInt())[newSize] == (newDimStart[1]*10 + (newSize-1)*10 + start)); // 44
 }
 
-void test_slicing3D() {
+BOOST_AUTO_TEST_CASE( test_slicing3D )
+{
 	DataImpl<int> data(1000);
 	for (int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
@@ -87,7 +91,7 @@ void test_slicing3D() {
 	BOOST_CHECK(data.asBase()[0] == 0);
 	int start = 4;
 	BOOST_CHECK(data.asBase()[start] == start);
-	
+
 	std::vector<size_t> orgDimSize(3, 10);
 	std::vector<size_t> newDimStart(3, start);
 	size_t newSize = 2;
@@ -99,19 +103,20 @@ void test_slicing3D() {
 	BOOST_CHECK((slice->asInt())[newSize*newSize+1] == 545); // 545
 }
 
-void test_slice_asym() {
+BOOST_AUTO_TEST_CASE( test_slice_asym )
+{
 	size_t sigma = 1;
 	size_t y = 3;
 	size_t x = 5;
 	DataImpl<int> data(x*y*sigma);
-	for (size_t i = 0; i < sigma; i++) 
+	for (size_t i = 0; i < sigma; i++)
 		for (size_t j = 0; j < y; j++)
 			for (size_t k = 0; k < x; k++) {
 				int pos = i*(x*y) + j*x + k;
-				// cerr << i << ":" << j << ":" << k << " = " << pos << ":" << j << endl; 
+				// cerr << i << ":" << j << ":" << k << " = " << pos << ":" << j << endl;
 				data.setValue(pos, j);
 			}
-	
+
 	std::vector<size_t> orgDimSize(3, 0);
 	orgDimSize[0] = x;
 	orgDimSize[1] = y;
@@ -134,7 +139,8 @@ void test_slice_asym() {
 			}
 }
 
-void test_slice_segfault() {
+BOOST_AUTO_TEST_CASE( test_slice_segfault )
+{
 	// this is a hirlam20 case which caused a segfault, keeping it for interest
 	size_t sigma = 1;
 	size_t y = 196;
@@ -144,7 +150,7 @@ void test_slice_segfault() {
 		for (size_t j = 0; j < x; j++)
 			for (size_t k = 0; k < y; k++)
 				data.setValue(k+(i*10+j)*10, k+(i*10+j)*10);
-	
+
 	std::vector<size_t> orgDimSize(3, 0);
 	orgDimSize[0] = sigma;
 	orgDimSize[1] = y;
@@ -160,17 +166,6 @@ void test_slice_segfault() {
 
 }
 
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-   	test->add( BOOST_TEST_CASE( &test_slicing ) );
-   	test->add( BOOST_TEST_CASE( &test_slicing2D ) );
-   	test->add( BOOST_TEST_CASE( &test_slicing3D ) );
-   	test->add( BOOST_TEST_CASE( &test_slice_asym ) );
-   	test->add( BOOST_TEST_CASE( &test_slice_segfault ) );
-    return test;
-}
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

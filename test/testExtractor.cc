@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -25,6 +25,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
@@ -37,8 +38,8 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-void
-test_extract() {
+BOOST_AUTO_TEST_CASE( test_extract )
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -60,14 +61,6 @@ test_extract() {
 	extract->reduceDimension("time", 10, 12);
 	NetCDF_CDMWriter(extract, "test3.nc");
 	BOOST_CHECK(true);
-}
-
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-   	test->add( BOOST_TEST_CASE( &test_extract ) );
-    return test;
 }
 
 #else

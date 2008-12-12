@@ -25,10 +25,11 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-
+#include "fimex/Utils.h"
 #include "fimex/Units.h"
 #include "fimex/TimeUnit.h"
 #include <cmath>
@@ -37,7 +38,8 @@ using namespace std;
 using namespace MetNoFimex;
 
 #if HAVE_UDUNITS
-void test_Units() {
+BOOST_AUTO_TEST_CASE( test_Units )
+{
 	double slope, offset;
 	Units units;
 	units.convert("km", "m", slope, offset);
@@ -45,7 +47,8 @@ void test_Units() {
 	BOOST_CHECK(offset == 0);
 }
 
-void test_UnitsError() {
+BOOST_AUTO_TEST_CASE( test_UnitsError )
+{
 	double slope, offset;
 	Units units;
 	try {
@@ -56,19 +59,22 @@ void test_UnitsError() {
 	}
 }
 
-void test_UnitsConvertible() {
+BOOST_AUTO_TEST_CASE( test_UnitsConvertible )
+{
 	Units units;
 	BOOST_CHECK(!units.areConvertible("km", "s"));
 	BOOST_CHECK(units.areConvertible("hours since 2000-01-01 19:30:00", "seconds since 1970-01-01"));
 }
 
-void test_UnitsTime() {
+BOOST_AUTO_TEST_CASE( test_UnitsTime )
+{
 	Units units;
 	BOOST_CHECK(!units.isTime("km"));
 	BOOST_CHECK(units.isTime("hours since 2000-01-01 19:30:00"));
 }
 
-void test_TimeUnit() {
+BOOST_AUTO_TEST_CASE( test_TimeUnit )
+{
 	TimeUnit tu("seconds since 1970-01-01 01:00:00");
 	BOOST_CHECK(true);
 	double epoch = tu.unitTime2epochSeconds(0);
@@ -83,6 +89,12 @@ void test_TimeUnit() {
 	BOOST_CHECK(ft.minute == 0);
 	BOOST_CHECK(ft.second == 0);
 
+	ft.msecond = 11;
+	// std::cerr << type2string(ft) << std::endl;
+	BOOST_CHECK(type2string(ft) == "1970-02-03 01:00:00.011");
+	// std::cerr << type2string(string2FimexTime(type2string(ft))) << std::endl;
+	BOOST_CHECK(type2string(string2FimexTime(type2string(ft))) == "1970-02-03 01:00:00.011");
+	ft.msecond = 0;
 
 	ft.month = 1;
 	ft.mday = 1;
@@ -92,20 +104,6 @@ void test_TimeUnit() {
 
 #endif // UDUNITS
 
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-
-#if HAVE_UDUNITS
-    test->add( BOOST_TEST_CASE( &test_Units ) );
-	test->add( BOOST_TEST_CASE( &test_UnitsError ) );
-	test->add( BOOST_TEST_CASE( &test_UnitsConvertible ) );
-	test->add( BOOST_TEST_CASE( &test_UnitsTime ) );
-	test->add( BOOST_TEST_CASE( &test_TimeUnit ) );
-#endif
-    return test;
-}
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

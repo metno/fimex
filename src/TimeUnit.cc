@@ -23,6 +23,7 @@
 
 #include "fimex/TimeUnit.h"
 #include "fimex/config.h"
+#include "fimex/Utils.h"
 #if HAVE_UDUNITS
 extern "C" {
 #include "udunits.h"
@@ -32,14 +33,62 @@ extern "C" {
 namespace MetNoFimex
 {
 
+static std::string twoDigits(int i) {
+	std::string s = type2string(i);
+	if (s.length() < 2) {
+		return "0" + s;
+	} else {
+		return s;
+	}
+}
+
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
 {
-	out << fTime.year << "-" << fTime.month << "-" << fTime.mday << " ";
-	double secMSec = fTime.second + fTime.msecond/1000;
-	out << fTime.hour << ":" << fTime.minute << ":" << secMSec;
+	out << fTime.year << "-" << twoDigits(fTime.month) << "-" << twoDigits(fTime.mday) << " ";
+	out << twoDigits(fTime.hour) << ":" << twoDigits(fTime.minute) << ":" << twoDigits(fTime.second);
+	if (fTime.msecond > 0) {
+		out << ".";
+		if (fTime.msecond < 10) {
+			out << "00";
+		} else if (fTime.msecond < 100) {
+			out << "0";
+		}
+		out << fTime.msecond;
+	}
 	return out;
 }
 
+FimexTime string2FimexTime(const std::string& str) throw(CDMException)
+{
+	FimexTime ft;
+	std::vector<std::string> dateTime = tokenize(str, " ");
+	if (dateTime.size() != 2) {
+		throw CDMException("string2FimexTime: date and time not found");
+	}
+	std::vector<std::string> dateParts = tokenize(dateTime[0], "-");
+	if (dateParts.size() != 3) {
+		throw CDMException("string2FimexTime: date does not consist of 3 parts");
+	}
+	ft.year = string2type<int>(dateParts[0]);
+	ft.month = string2type<int>(dateParts[1]);
+	ft.mday = string2type<int>(dateParts[2]);
+
+	std::vector<std::string> timeParts = tokenize(dateTime[1], ":");
+	if (timeParts.size() != 3) {
+		throw CDMException("string2FimexTime: time does not consist of 3 parts");
+	}
+	ft.hour = string2type<int>(timeParts[0]);
+	ft.minute = string2type<int>(timeParts[1]);
+
+	std::vector<std::string> secondParts = tokenize(timeParts[2], ".");
+	ft.second = string2type<int>(secondParts[0]);
+	if (secondParts.size() > 1) {
+		ft.msecond = static_cast<int>(string2type<double>("."+secondParts[1]) * 1000);
+	} else {
+		ft.msecond = 0;
+	}
+	return ft;
+}
 
 void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 {

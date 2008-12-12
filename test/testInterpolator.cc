@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -25,6 +25,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
@@ -39,8 +40,8 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-void
-test_interpolator() {
+BOOST_AUTO_TEST_CASE(test_interpolator)
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -57,7 +58,7 @@ test_interpolator() {
 	interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
 	//interpolator->getCDM().toXMLStream(cerr);
 	BOOST_CHECK(true);
-	
+
 	NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	BOOST_CHECK(true);
 
@@ -80,14 +81,6 @@ test_interpolator() {
 		NetCDF_CDMWriter(interpolator, "testInterpolator2.nc");
 		BOOST_CHECK(true);
 	}
-}
-
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-   	test->add( BOOST_TEST_CASE( &test_interpolator ) );
-    return test;
 }
 
 #else

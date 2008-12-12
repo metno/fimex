@@ -1,4 +1,4 @@
-AC_INIT([fimex], [0.10beta], [heiko.klein@met.no])
+AC_INIT([fimex],[0.10beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -6,7 +6,7 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 # C99 testing only available starting in autoconf 2.60
-# AC_PROG_CC_C99
+AC_PROG_CC_C99
 
 AC_ARG_WITH([NetCDF],
             [AS_HELP_STRING([--with-NetCDF],
@@ -103,7 +103,7 @@ AC_CHECK_FUNCS([memset pow sqrt strstr])
 
 AC_LANG_POP(C++)
 
-DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
+#DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([include/fimex/config.h])
 AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile])

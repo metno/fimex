@@ -25,6 +25,7 @@
 #ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
@@ -34,14 +35,14 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-void test_cdm() {
+BOOST_AUTO_TEST_CASE(test_cdm) {
 	CDM cdm;
 	BOOST_CHECK(true); // cdm initialized
 
 }
 
 
-void test_variable(void) {
+BOOST_AUTO_TEST_CASE( test_variable) {
 	vector<std::string> noDim;
 	string varName("test");
 	CDMVariable testVar(varName, CDM_NAT, noDim);
@@ -70,7 +71,8 @@ void test_variable(void) {
 	BOOST_CHECK(true);
 }
 
-void test_attributes(void) {
+BOOST_AUTO_TEST_CASE( test_attributes)
+{
 	CDM cdm;
 	string varName("test");
 	vector<std::string> noDim;
@@ -106,11 +108,13 @@ void test_attributes(void) {
 	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() == 0);
 }
 
-void test_dimension(void) {
+BOOST_AUTO_TEST_CASE( test_dimension)
+{
 
 }
 
-void test_coordinateSystem(void) {
+BOOST_AUTO_TEST_CASE( test_coordinateSystem)
+{
 	// preparing a cs
 	CDM cdm;
 	string x("x");
@@ -181,18 +185,6 @@ void test_coordinateSystem(void) {
 
 }
 
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-
-	test->add( BOOST_TEST_CASE( &test_cdm ) );
-	test->add( BOOST_TEST_CASE( &test_variable ) );
-	test->add( BOOST_TEST_CASE( &test_attributes ) );
-	test->add( BOOST_TEST_CASE( &test_dimension ) );
-	test->add( BOOST_TEST_CASE( &test_coordinateSystem ) );
-    return test;
-}
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

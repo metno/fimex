@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src include test share/etc
 
-include doxygen_aminclude.am
+#include doxygen_aminclude.am
 
 EXTRA_DIST = $(DX_CONFIG) libstdc++.tag share/doc/html
 

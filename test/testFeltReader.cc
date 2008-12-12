@@ -36,6 +36,7 @@
 #include "fimex/Data.h"
 
 #define BOOST_TEST_MAIN
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
@@ -43,8 +44,8 @@ using namespace std;
 using namespace MetNoFelt;
 using namespace MetNoFimex;
 
-void
-test_feltparameter(void) {
+BOOST_AUTO_TEST_CASE( test_feltparameter )
+{
 	string topSrcDir(TOP_SRCDIR);
 	FeltParameters fp = FeltParameters(topSrcDir + "/test/diana.setup");
 	const boost::array<short, 16>  tksoil = fp.getParameters(string("tksoil"));
@@ -65,8 +66,8 @@ test_feltparameter(void) {
 	//cout << "special array is: " << fp.getParameterName(special) << endl;
 }
 
-void
-test_feltfile() {
+BOOST_AUTO_TEST_CASE( test_feltfile )
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -125,8 +126,8 @@ test_feltfile() {
 
 }
 
-void
-test_felt_axis() {
+BOOST_AUTO_TEST_CASE( test_felt_axis )
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -143,8 +144,8 @@ test_felt_axis() {
 	BOOST_CHECK((ff.getYData()->asInt())[(int)gridPar[1]] == 50162);
 }
 
-void
-test_felt_cdm_reader() {
+BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
+{
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -167,19 +168,6 @@ test_felt_cdm_reader() {
 
 	const CDMAttribute& attr = feltCDM.getCDM().getAttribute(feltCDM.getCDM().globalAttributeNS(), "min_time");
 	BOOST_CHECK(attr.getStringValue().substr(0,4) == "2007");
-}
-
-
-test_suite*
-init_unit_test_suite( int argc, char* argv[] )
-{
-    test_suite* test = BOOST_TEST_SUITE( "Master test suite" );
-
-    test->add( BOOST_TEST_CASE( &test_feltparameter ) );
-	test->add( BOOST_TEST_CASE( &test_feltfile ) );
-	test->add( BOOST_TEST_CASE( &test_felt_axis ) );
-	test->add( BOOST_TEST_CASE( &test_felt_cdm_reader ) );
-    return test;
 }
 
 #else
