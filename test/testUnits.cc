@@ -94,10 +94,22 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	BOOST_CHECK(type2string(ft) == "1970-02-03 01:00:00.011");
 	// std::cerr << type2string(string2FimexTime(type2string(ft))) << std::endl;
 	BOOST_CHECK(type2string(string2FimexTime(type2string(ft))) == "1970-02-03 01:00:00.011");
-	ft.msecond = 0;
+
+	// check comparison
+	FimexTime ft2 = string2FimexTime(type2string(ft));
+	BOOST_CHECK(ft2 == ft);
+	ft2.msecond = 0;
+	BOOST_CHECK(ft2 != ft);
+	BOOST_CHECK(ft2 < ft);
+	BOOST_CHECK(ft2 <= ft);
+	BOOST_CHECK(ft > ft2);
+	BOOST_CHECK(ft >= ft2);
+
+
 
 	ft.month = 1;
 	ft.mday = 1;
+	ft.msecond = 0;
 	BOOST_CHECK(fabs(tu.fimexTime2unitTime(ft)) < 1e-5);
 
 }

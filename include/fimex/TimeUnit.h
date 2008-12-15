@@ -36,24 +36,44 @@ namespace MetNoFimex
 {
 
 /**
- * time representation
+ * time representation and some overloaded operators
+ *
+ * @warning: the implementor needs to make sure, that all values are
+ * given correctly, i.e. seconds between 0 and 59
  */
-struct FimexTime {
+class FimexTime {
+public:
 	/// millisecond
-	int msecond;
+	unsigned short msecond;
 	/// second (0-59)
-	int second;
+	char second;
 	/// minute (0-59)
-	int minute;
+	char minute;
 	/// hour (0-23)
-	int hour;
+	char hour;
 	/// day of month (1-31)
-	int mday;
+	char mday;
 	/// month (1-12)
-	int month;
+	char month;
 	/// year (2008 as of writing)
-	int year;
+	unsigned short year;
+	/// compare two fimexTimes
+	bool operator==(const FimexTime &rhs) const;
+	/// compare two fimexTimes
+	bool operator!=(const FimexTime &rhs) const { return !(*this == rhs); }
+	/// compare two fimexTimes
+	bool operator>(const FimexTime &rhs) const { return (toLong() > rhs.toLong()); }
+	/// compare two fimexTimes
+	bool operator<(const FimexTime &rhs) const { return (rhs > *this); }
+	/// compare two fimexTimes
+	bool operator>=(const FimexTime &rhs) const { return !(rhs > *this); }
+	/// compare two fimexTimes
+	bool operator<=(const FimexTime &rhs) const { return !(*this > rhs); }
+
+private:
+	long long toLong() const { return year*1e13 + month*1e11 + mday*1e9 + hour*1e7 + minute*1e5 + second*1e3 + msecond; }
 };
+
 
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime);
 FimexTime string2FimexTime(const std::string& str) throw(CDMException);

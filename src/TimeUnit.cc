@@ -42,6 +42,17 @@ static std::string twoDigits(int i) {
 	}
 }
 
+bool FimexTime::operator==(const FimexTime &rhs) const
+{
+	return year == rhs.year &&
+		month == rhs.month &&
+		mday == rhs.mday &&
+		hour == rhs.hour &&
+		minute == rhs.minute &&
+		second == rhs.second &&
+		msecond == rhs.msecond;
+}
+
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
 {
 	out << fTime.year << "-" << twoDigits(fTime.month) << "-" << twoDigits(fTime.mday) << " ";
@@ -126,9 +137,16 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 {
 	FimexTime fiTime;
 	float second;
-	handleUdUnitError(utCalendar(unitTime, pUnit.get(), &(fiTime.year), &(fiTime.month), &(fiTime.mday), &(fiTime.hour), &(fiTime.minute), &second), "converting double to calendar");
-	fiTime.second = static_cast<int>(second);
-	fiTime.msecond = static_cast<int>((second - fiTime.second)*1000);
+	int year, month, mday, hour, minute;
+	handleUdUnitError(utCalendar(unitTime, pUnit.get(), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+	fiTime.year = static_cast<unsigned int>(year);
+	fiTime.month = static_cast<char>(month);
+	fiTime.mday = static_cast<char>(mday);
+	fiTime.hour = static_cast<char>(hour);
+	fiTime.minute = static_cast<char>(minute);
+	fiTime.second = static_cast<char>(second);
+	fiTime.msecond = static_cast<unsigned int>((second - fiTime.second)*1000);
+
 	return fiTime;
 }
 double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)

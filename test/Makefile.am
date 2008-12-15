@@ -4,8 +4,8 @@ SH_TESTS =
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS}
-AM_CXXFLAGS = -Wall -pedantic 
-AM_CFLAGS = -std=c99 -Wall -pedantic
+AM_CXXFLAGS = -Wall
+AM_CFLAGS = -std=c99 -Wall
 
 if HAVE_UDUNITS
   LDADD += ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}

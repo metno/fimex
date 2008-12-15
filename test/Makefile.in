@@ -311,8 +311,8 @@ LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(am__append_1) $(am__append_3) $(am__append_4) \
 	$(am__append_6)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS}
-AM_CXXFLAGS = -Wall -pedantic 
-AM_CFLAGS = -std=c99 -Wall -pedantic
+AM_CXXFLAGS = -Wall
+AM_CFLAGS = -std=c99 -Wall
 @HAVE_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
 @HAVE_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg
