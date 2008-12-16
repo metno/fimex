@@ -73,12 +73,14 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		transform(times.begin(), times.end(), back_inserter(timeSteps), string2FimexTime);
 	} else {
 		// relative times
+		throw CDMException("relative times not implemented yet");
+	}
+	if (unit != "") {
+		throw CDMException("unit not implemented yet in TimeSpec");
 	}
 
 	LOG4FIMEX(logger, Logger::DEBUG, "got parameters unit:" << unit << ";relativeStart:" << relativeStart << ";steps:"<<timeStepStr);
-
-
-
 }
+
 
 } /* MetNoFimex */

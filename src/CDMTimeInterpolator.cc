@@ -24,8 +24,10 @@
  *      Author: heikok
  */
 
-#include "../include/fimex/CDMTimeInterpolator.h"
+#include "fimex/CDMTimeInterpolator.h"
 #include <set>
+#include <functional>
+#include "fimex/TimeSpec.h"
 
 namespace MetNoFimex
 {
@@ -63,10 +65,19 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMExceptio
 		std::string timeDimName = orgCDM.getTimeAxis(varIt->getName());
 		if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
 			changedTimes.insert(timeDimName); // avoid double changes
-
-			// find start date
+			boost::shared_ptr<Data> times = dataReader->getData(timeDimName);
+			string unit = cdm.getAttribute(timeDimName, "units").getStringValue();
+			TimeUnit tu(unit);
+			vector<FimexTime> oldTimes;
+			boost::shared_array<double> oldTimesPtr = times->asConstDouble();
+			transform(oldTimesPtr.get(),oldTimesPtr.get()+(times->size()),back_inserter(oldTimes),bind1st(mem_fun(&TimeUnit::unitTime2fimexTime),&tu));
+			FimexTime startTime = tu.unitTime2fimexTime(times->asConstDouble()[0]);
+			FimexTime endTime = tu.unitTime2fimexTime(times->asConstDouble()[times->size()-1]);
+			TimeSpec ts(timeSpec, startTime, endTime);
 
 			// create mapping of new time value positions to old time value positions (per time-axis)
+
+
 
 			// change cdm timeAxis values
 
@@ -74,6 +85,5 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMExceptio
 		}
 	}
 }
-
 
 } /* MetNoFimex */
