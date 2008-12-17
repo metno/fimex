@@ -27,6 +27,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeLevelDataSliceFetcher.h"
 #include <cmath>
+#include <functional>
 
 namespace MetNoFimex
 {
@@ -47,15 +48,6 @@ class UnScale : public Scale
 public:
 	UnScale(double scale_factor, double add_offset) : Scale(1/scale_factor, -1 * add_offset/scale_factor) {}
 	virtual ~UnScale() {}
-};
-
-/** TimeUnit 2 FimexTime converter*/
-class TimeUnit2FimexTime : public std::unary_function<double, FimexTime>
-{
-	const TimeUnit& tu;
-public:
-	TimeUnit2FimexTime(const TimeUnit& tu) : tu(tu) {}
-	FimexTime operator() (double unitTime) {return tu.unitTime2fimexTime(unitTime);}
 };
 
 GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
@@ -264,7 +256,10 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
 		const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
 		std::vector<double> timeDataVector(&timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
 		TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
-		std::transform(timeDataVector.begin(), timeDataVector.end(), std::back_inserter(timeData), TimeUnit2FimexTime(tu));
+		std::transform(timeDataVector.begin(),
+				       timeDataVector.end(),
+				       std::back_inserter(timeData),
+				       std::bind1st(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu));
 	} else {
 		// TODO find a more useful default
 		timeData.push_back(FimexTime());
