@@ -149,7 +149,7 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 
 	return fiTime;
 }
-double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
+double TimeUnit::fimexTime2unitTime(FimexTime fiTime) const throw(CDMException)
 {
 	float second = fiTime.second + (fiTime.msecond/1000.);
 	double retVal;

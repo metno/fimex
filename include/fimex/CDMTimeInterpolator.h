@@ -55,8 +55,9 @@ public:
 	virtual void changeTimeAxis(std::string timeSpec) throw(CDMException);
 
 private:
-	typedef std::map<std::string, std::map<int, std::pair<int,int> > > TimeChangeMap;
 	boost::shared_ptr<CDMReader> dataReader;
+	// map each new time-position to the closest time-positions in the old times
+	typedef std::map<std::string, std::vector<std::pair<size_t,size_t> > > TimeChangeMap;
 	TimeChangeMap timeChangeMap;
 };
 
