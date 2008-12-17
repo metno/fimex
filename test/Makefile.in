@@ -37,14 +37,14 @@ build_triplet = @build@
 host_triplet = @host@
 @HAVE_UDUNITS_TRUE@am__append_1 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
 @HAVE_UDUNITS_TRUE@am__append_2 = testUnits
-#  CC_TESTS += testUnits
-@HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
-@HAVE_MILIB_TRUE@am__append_4 = ${milib_LIBS}
-@HAVE_MILIB_TRUE@am__append_5 = testFeltReader
-@HAVE_NETCDF_TRUE@am__append_6 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-@HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_MI_TESTS}
-@HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_SH_TESTS}
-check_PROGRAMS = $(am__EXEEXT_5)
+@HAVE_GRIBAPI_TRUE@am__append_3 = testGribWriter
+@HAVE_PROJ4_TRUE@am__append_4 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
+@HAVE_MILIB_TRUE@am__append_5 = ${milib_LIBS}
+@HAVE_MILIB_TRUE@am__append_6 = testFeltReader
+@HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
+@HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_TESTS}
+@HAVE_NETCDF_TRUE@am__append_9 = ${NETCDF_MI_SH_TESTS}
+check_PROGRAMS = $(am__EXEEXT_6)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -67,14 +67,15 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/include/fimex/config.h
 CONFIG_CLEAN_FILES =
 @HAVE_UDUNITS_TRUE@am__EXEEXT_1 = testUnits$(EXEEXT)
-@HAVE_MILIB_TRUE@am__EXEEXT_2 = testFeltReader$(EXEEXT)
-@HAVE_MILIB_TRUE@am__EXEEXT_3 = testNetcdfWriter$(EXEEXT) \
+@HAVE_GRIBAPI_TRUE@am__EXEEXT_2 = testGribWriter$(EXEEXT)
+@HAVE_MILIB_TRUE@am__EXEEXT_3 = testFeltReader$(EXEEXT)
+@HAVE_MILIB_TRUE@am__EXEEXT_4 = testNetcdfWriter$(EXEEXT) \
 @HAVE_MILIB_TRUE@	testExtractor$(EXEEXT) \
 @HAVE_MILIB_TRUE@	testInterpolator$(EXEEXT)
-@HAVE_NETCDF_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
-am__EXEEXT_5 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
+@HAVE_NETCDF_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
+am__EXEEXT_6 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
 	testCDM$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
-	$(am__EXEEXT_4)
+	$(am__EXEEXT_3) $(am__EXEEXT_5)
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
@@ -111,6 +112,14 @@ am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
 testFeltReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
+am_testGribWriter_OBJECTS = testGribWriter.$(OBJEXT)
+testGribWriter_OBJECTS = $(am_testGribWriter_OBJECTS)
+testGribWriter_LDADD = $(LDADD)
+testGribWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -160,12 +169,14 @@ CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
-	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testUnits_SOURCES)
+	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
+	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testUnits_SOURCES)
 DIST_SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
-	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testUnits_SOURCES)
+	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
+	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testUnits_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -301,15 +312,15 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc
+CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
 CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
-	$(am__append_5) $(am__append_7)
-SH_TESTS = $(am__append_8)
+	$(am__append_3) $(am__append_6) $(am__append_8)
+SH_TESTS = $(am__append_9)
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@ \
-	$(am__append_1) $(am__append_3) $(am__append_4) \
-	$(am__append_6)
+	$(am__append_1) $(am__append_4) $(am__append_5) \
+	$(am__append_7)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS}
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
@@ -323,6 +334,7 @@ testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testGribWriter_SOURCES = testGribWriter.cc
 testExtractor_SOURCES = testExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
 testUnits_SOURCES = testUnits.cc
@@ -378,6 +390,9 @@ testExtractor$(EXEEXT): $(testExtractor_OBJECTS) $(testExtractor_DEPENDENCIES)
 testFeltReader$(EXEEXT): $(testFeltReader_OBJECTS) $(testFeltReader_DEPENDENCIES) 
 	@rm -f testFeltReader$(EXEEXT)
 	$(CXXLINK) $(testFeltReader_LDFLAGS) $(testFeltReader_OBJECTS) $(testFeltReader_LDADD) $(LIBS)
+testGribWriter$(EXEEXT): $(testGribWriter_OBJECTS) $(testGribWriter_DEPENDENCIES) 
+	@rm -f testGribWriter$(EXEEXT)
+	$(CXXLINK) $(testGribWriter_LDFLAGS) $(testGribWriter_OBJECTS) $(testGribWriter_LDADD) $(LIBS)
 testInterpolation$(EXEEXT): $(testInterpolation_OBJECTS) $(testInterpolation_DEPENDENCIES) 
 	@rm -f testInterpolation$(EXEEXT)
 	$(CXXLINK) $(testInterpolation_LDFLAGS) $(testInterpolation_OBJECTS) $(testInterpolation_LDADD) $(LIBS)
@@ -401,6 +416,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testFeltReader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testGribWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetcdfWriter.Po@am__quote@

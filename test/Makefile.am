@@ -1,4 +1,4 @@
-CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc
+CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
 CC_TESTS = testInterpolation testData testCDM
 SH_TESTS = 
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
@@ -12,7 +12,7 @@ if HAVE_UDUNITS
   CC_TESTS += testUnits
 endif
 if HAVE_GRIBAPI
-#  CC_TESTS += testUnits
+  CC_TESTS += testGribWriter
 endif
 if HAVE_PROJ4
   LDADD += ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
@@ -39,6 +39,7 @@ testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testGribWriter_SOURCES = testGribWriter.cc
 testExtractor_SOURCES = testExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
 testUnits_SOURCES = testUnits.cc
