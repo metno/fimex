@@ -59,7 +59,7 @@
  *
  * - TIMESTAMP format: YYYY-MM-DD HH:MM:SS
  * - TIMESTAMPS: comma-separated list of values with possible ... extension, ... meaning continuation of the difference of the previous two values
- * - UNIT: second, minute, hour, month, year, see <a href="http://www.unidata.ucar.edu/software/udunits/">udunit</a>, default: second
+ * - UNIT: see <a href="http://www.unidata.ucar.edu/software/udunits/">udunit</a>, default: second
  * - VALUE: float-number
  * - VALUES: comma-separated list of values with possible ... extension, ... meaning continuation of the difference of the previous two values
  *         0 is the first time in the original time-axis, x is the last time-value in the original time-axis
@@ -82,7 +82,7 @@
  * @subsubsection secTimeSpecEx2 Example: relative time, each 3rd hour starting at 00 o'clock, one extrapolation
  *
  * @code
- * timespec = -3,0,3,...,x,x+3;relativeStart=2000-01-01 00:00:00;unit=hour;
+ * timespec = -3,0,3,...,x,x+3;relativeStart=2000-01-01 00:00:00;unit=hours since 2000-01-01 00:00:00;
  * @endcode
  */
 

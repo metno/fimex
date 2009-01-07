@@ -51,12 +51,12 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 	}
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
 	boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
-	timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,2007-05-16 16:00:00,2007-05-16 19:00:00,2007-05-16 22:00:00");
+	timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
 	boost::shared_ptr<Data> times = timeInterpol->getCDM().getVariable("time").getData();
 	BOOST_CHECK_EQUAL(times->size(), 5);
 	const boost::shared_array<int> timeAry = times->asConstInt();
-	BOOST_CHECK_EQUAL(timeAry[0], 1179309600);
-	BOOST_CHECK_EQUAL(timeAry[4], 1179309600+12*3600);
+	BOOST_CHECK_EQUAL(timeAry[0], 10);
+	BOOST_CHECK_EQUAL(timeAry[4], 10+12);
 	string airTemp = "air_temperature";
 	BOOST_ASSERT(feltReader->getCDM().getVariable(airTemp).getName() == airTemp);
 	BOOST_CHECK(timeInterpol->getCDM().getVariable(airTemp).getName() == airTemp);

@@ -24,14 +24,19 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/config.h"
 #include "fimex/Utils.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 #if HAVE_UDUNITS
 extern "C" {
 #include "udunits.h"
 }
 
 
+
 namespace MetNoFimex
 {
+
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 static std::string twoDigits(int i) {
 	std::string s = type2string(i);
@@ -41,6 +46,39 @@ static std::string twoDigits(int i) {
 		return s;
 	}
 }
+
+boost::posix_time::ptime FimexTime::toPTime() const
+{
+	using namespace boost::posix_time;
+	using namespace boost::gregorian;
+	return ptime(date(year, month, mday),
+			hours(hour)+minutes(minute)+seconds(second)+millisec(msecond));
+}
+FimexTime::FimexTime(const boost::posix_time::ptime& time)
+{
+	date d = time.date();
+	year = d.year();
+	month = d.month();
+	mday = d.day();
+	time_duration t = time.time_of_day();
+	hour = t.hours();
+	minute = t.minutes();
+	second = t.seconds();
+	msecond = t.total_milliseconds() - t.total_seconds()*1000;
+}
+bool FimexTime::operator>(const FimexTime &rhs) const
+{
+	return (toPTime() > rhs.toPTime());
+}
+FimexTime FimexTime::operator+(const boost::posix_time::time_duration& timeDuration) const
+{
+	return FimexTime(toPTime()+timeDuration);
+}
+boost::posix_time::time_duration FimexTime::operator-(const FimexTime& rhs) const
+{
+	return toPTime()-rhs.toPTime();
+}
+
 
 bool FimexTime::operator==(const FimexTime &rhs) const
 {
