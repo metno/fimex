@@ -32,12 +32,36 @@
 #include "fimex/Logger.h"
 #include "fimex/TimeUnit.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
-
+#include <boost/regex.hpp>
 
 namespace MetNoFimex
 {
 
 using namespace std;
+
+LoggerPtr logger = getLogger("fimex.TimeSpec");
+
+double translateRelativeTime(string value, double startOffset, double finalValue)
+{
+	double retVal;
+	boost::smatch what;
+	boost::regex finalVals("x\\s*([+-])?\\s*(\\d\\.?\\d*)?\\s*");
+	if (boost::regex_search(value, what, finalVals)) {
+		if (what.size() >= 3) {
+			if (what[1] == '+') {
+				retVal = finalValue + string2type<double>(what[2]);
+			} else {
+				retVal = finalValue - string2type<double>(what[2]);
+			}
+		} else {
+			retVal = finalValue;
+		}
+	} else {
+		retVal = startOffset + string2type<double>(value);
+	}
+	LOG4FIMEX(logger, Logger::DEBUG, "translateRelativeTime(" << value << "," << startOffset << ","<<finalValue << ")="<<retVal)
+	return retVal;
+}
 
 TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
 	: outputUnit("seconds since 1970-01-01 00:00:00")
@@ -46,7 +70,7 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 	LOG4FIMEX(logger, Logger::DEBUG, "getting timespec of " << timeSpec);
 	vector<string> toks = tokenize(timeSpec, ";");
 	std::string timeStepStr;
-	std::string relativeStart;
+	std::string relativeUnit;
 	for(vector<string>::iterator it = toks.begin(); it != toks.end(); ++it) {
 		vector<string> extraParam = tokenize(*it, "=");
 		if (extraParam.size() == 1) {
@@ -58,8 +82,8 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		} else if (extraParam.size() == 2) {
 			if (extraParam[0] == "unit") {
 				outputUnit = extraParam[1];
-			} else if (extraParam[0] == "relativeStart") {
-				relativeStart = extraParam[1];
+			} else if (extraParam[0] == "relativeUnit") {
+				relativeUnit = extraParam[1];
 			} else {
 				throw CDMException("unknown timeSpec parameter: '" + extraParam[0] + "'");
 			}
@@ -68,7 +92,7 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		}
 	}
 
-	if (relativeStart == "") {
+	if (relativeUnit == "") {
 		// absolute time in spec
 		vector<string> times = tokenize(timeStepStr, ",");
 		vector<string>::iterator dotsIt = find(times.begin(), times.end(), "...");
@@ -94,10 +118,48 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		}
 	} else {
 		// relative times
-		throw CDMException("relative times not implemented yet");
+		vector<string> times = tokenize(timeStepStr, ",");
+		if (times.size() < 2) {
+			throw CDMException("TimeSpec requires at least 2 times for relative time definition, got: " + timeStepStr);
+		}
+		double delta = string2type<double>(times[1]) - string2type<double>(times[0]);
+		TimeUnit tu(relativeUnit);
+		// find the position 0 in the relative times
+		double startTimeU = tu.fimexTime2unitTime(startTime);
+		double startOffset = static_cast<int>(startTimeU / delta) * delta;
+		if (startTimeU < startOffset) {
+			// cast to largest value below startTimeU
+			// but I want smallest value above startTimeU
+			startOffset += delta;
+		}
+		// find position x in the relative times
+		double endTimeU = tu.fimexTime2unitTime(endTime);
+		double finalTimeU = static_cast<int>(endTimeU / delta) * delta;
+		vector<double> timeDoubles;
+		// expand ... list and translate all times to doubles in timeUnits
+		for (size_t i = 0; i < times.size(); i++) {
+			string current = times[i];
+			if (current == "...") {
+				if (i < times.size()-1) {
+					double last = translateRelativeTime(times[i+1], startOffset, finalTimeU);
+					double curDelta = timeDoubles[i-1] - timeDoubles[i-2];
+					double next = timeDoubles[i-1] + curDelta;
+					while (next < last) {
+						timeDoubles.push_back(next);
+						next += curDelta;
+					}
+				} else {
+					throw CDMException("TimeSpec cannot find continuation after ... in " + timeStepStr);
+				}
+			} else {
+				timeDoubles.push_back(translateRelativeTime(times[i], startOffset, finalTimeU));
+			}
+		}
+		// add the times as fimexTimes to timeSteps
+		transform(timeDoubles.begin(), timeDoubles.end(), back_inserter(timeSteps), bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime),tu));
 	}
 
-	LOG4FIMEX(logger, Logger::DEBUG, "got parameters unit:" << outputUnit << ";relativeStart:" << relativeStart << ";steps:"<<timeStepStr);
+	LOG4FIMEX(logger, Logger::DEBUG, "got parameters unit:" << outputUnit << ";relativeUnit:" << relativeUnit << ";steps:"<<timeStepStr);
 }
 
 

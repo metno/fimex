@@ -64,6 +64,30 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 	BOOST_CHECK(true);
 }
 
+BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
+{
+	string topSrcDir(TOP_SRCDIR);
+	string fileName(topSrcDir+"/test/flth00.dat");
+	if (!ifstream(fileName.c_str())) {
+		// no testfile, skip test
+		return;
+	}
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+	boost::shared_ptr<CDMTimeInterpolator> timeInterpol(new CDMTimeInterpolator(feltReader));
+	timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
+	boost::shared_ptr<Data> times = timeInterpol->getCDM().getVariable("time").getData();
+	BOOST_CHECK_EQUAL(times->size(), 21);
+	const boost::shared_array<int> timeAry = times->asConstInt();
+	BOOST_CHECK_EQUAL(timeAry[0], -2);
+	BOOST_CHECK_EQUAL(timeAry[4], 10);
+	string airTemp = "air_temperature";
+	BOOST_ASSERT(feltReader->getCDM().getVariable(airTemp).getName() == airTemp);
+	BOOST_CHECK(timeInterpol->getCDM().getVariable(airTemp).getName() == airTemp);
+	NetCDF_CDMWriter(timeInterpol, "test4.nc");
+	BOOST_CHECK(true);
+}
+
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

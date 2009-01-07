@@ -51,10 +51,11 @@ namespace MetNoFimex
  *
  * A TimeSpec consists of at least of timestamps or values:
  *
- * - timespec := (TIMESTAMPS | VALUES[;relativeStart=TIMESTAMP])[;unit=UNIT]
+ * - timespec := (TIMESTAMPS | VALUES[;relativeUnit=UNIT])[;unit=UNIT]
  *
- * relativeStart will reset 0 to the first value larger than t0 (original start time)
- * with timestamp + i* (v1-v0)* unit with i being a integer.
+ * relativeUnit will reset the relative value 0 to the first value larger
+ * than t0 (original start time)
+ * with t0 =  i * (v1-v0)* unit with i being a integer.
  *
  * @subsubsection secTimeSpecEx1 Example: absolute times, every 4th hour
  *
@@ -67,7 +68,7 @@ namespace MetNoFimex
  * @subsubsection secTimeSpecEx2 Example: relative time, each 3rd hour starting at 00 o'clock, one extrapolation
  *
  * @code
- * timespec = -3,0,3,...,x,x+3;relativeStart=2000-01-01 00:00:00;unit=hours since 2000-01-01 00:00:00;
+ * timespec = -3,0,3,...,x,x+3;relativeUnit=hours since 2000-01-01 00:00:00;unit=hours since 2000-01-01 00:00:00;
  * @endcode
  */
 class TimeSpec
