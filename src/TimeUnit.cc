@@ -74,11 +74,11 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 	FimexTime ft;
 	std::vector<std::string> dateTime = tokenize(str, " ");
 	if (dateTime.size() != 2) {
-		throw CDMException("string2FimexTime: date and time not found");
+		throw CDMException("string2FimexTime: date and time not found:" + str);
 	}
 	std::vector<std::string> dateParts = tokenize(dateTime[0], "-");
 	if (dateParts.size() != 3) {
-		throw CDMException("string2FimexTime: date does not consist of 3 parts");
+		throw CDMException("string2FimexTime: date does not consist of 3 parts:" +str);
 	}
 	ft.year = string2type<int>(dateParts[0]);
 	ft.month = string2type<int>(dateParts[1]);
@@ -149,7 +149,7 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 
 	return fiTime;
 }
-double TimeUnit::fimexTime2unitTime(FimexTime fiTime) const throw(CDMException)
+double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
 {
 	float second = fiTime.second + (fiTime.msecond/1000.);
 	double retVal;

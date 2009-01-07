@@ -71,7 +71,8 @@ CONFIG_CLEAN_FILES =
 @HAVE_MILIB_TRUE@am__EXEEXT_3 = testFeltReader$(EXEEXT)
 @HAVE_MILIB_TRUE@am__EXEEXT_4 = testNetcdfWriter$(EXEEXT) \
 @HAVE_MILIB_TRUE@	testExtractor$(EXEEXT) \
-@HAVE_MILIB_TRUE@	testInterpolator$(EXEEXT)
+@HAVE_MILIB_TRUE@	testInterpolator$(EXEEXT) \
+@HAVE_MILIB_TRUE@	testTimeInterpolator$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
 am__EXEEXT_6 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
 	testCDM$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
@@ -148,6 +149,15 @@ testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
+testTimeInterpolator_SOURCES = testTimeInterpolator.c
+testTimeInterpolator_OBJECTS = testTimeInterpolator.$(OBJEXT)
+testTimeInterpolator_LDADD = $(LDADD)
+testTimeInterpolator_DEPENDENCIES =  \
+	../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testUnits_OBJECTS = testUnits.$(OBJEXT)
 testUnits_OBJECTS = $(am_testUnits_OBJECTS)
 testUnits_LDADD = $(LDADD)
@@ -159,6 +169,14 @@ testUnits_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
@@ -171,12 +189,12 @@ SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
-	$(testUnits_SOURCES)
+	testTimeInterpolator.c $(testUnits_SOURCES)
 DIST_SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
-	$(testUnits_SOURCES)
+	testTimeInterpolator.c $(testUnits_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -312,7 +330,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
 CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
 	$(am__append_3) $(am__append_6) $(am__append_8)
 SH_TESTS = $(am__append_9)
@@ -325,7 +343,7 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../includ
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
 @HAVE_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
-@HAVE_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator
+@HAVE_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
@@ -341,7 +359,7 @@ testUnits_SOURCES = testUnits.cc
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .lo .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -402,6 +420,9 @@ testInterpolator$(EXEEXT): $(testInterpolator_OBJECTS) $(testInterpolator_DEPEND
 testNetcdfWriter$(EXEEXT): $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_DEPENDENCIES) 
 	@rm -f testNetcdfWriter$(EXEEXT)
 	$(CXXLINK) $(testNetcdfWriter_LDFLAGS) $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_LDADD) $(LIBS)
+testTimeInterpolator$(EXEEXT): $(testTimeInterpolator_OBJECTS) $(testTimeInterpolator_DEPENDENCIES) 
+	@rm -f testTimeInterpolator$(EXEEXT)
+	$(LINK) $(testTimeInterpolator_LDFLAGS) $(testTimeInterpolator_OBJECTS) $(testTimeInterpolator_LDADD) $(LIBS)
 testUnits$(EXEEXT): $(testUnits_OBJECTS) $(testUnits_DEPENDENCIES) 
 	@rm -f testUnits$(EXEEXT)
 	$(CXXLINK) $(testUnits_LDFLAGS) $(testUnits_OBJECTS) $(testUnits_LDADD) $(LIBS)
@@ -420,7 +441,29 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetcdfWriter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ `$(CYGPATH_W) '$<'`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	if $(LTCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Plo"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

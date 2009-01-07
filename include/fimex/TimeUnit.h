@@ -106,7 +106,9 @@ public:
 	/// calculate the time in a calendar form
 	FimexTime unitTime2fimexTime(double unitTime) const throw(CDMException);
 	/// calculate the time in the current unit from the calendar form
-	double fimexTime2unitTime(FimexTime fiTime) const throw(CDMException);
+	double fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException);
+	/// same as #fimexTime2unitTime but copying fiTime instead of referencing, needed for i.e. bind1st(mem_fun())
+	double fimexTime2unitTimeX(FimexTime fiTime) const throw(CDMException) { return fimexTime2unitTime(fiTime); }
 private:
 	void init(const std::string& timeUnitString = "seconds since 1970-01-01 00:00:00") throw(CDMException);
 };

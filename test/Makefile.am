@@ -1,4 +1,4 @@
-CLEANFILES = test.nc test2.nc test3.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
 CC_TESTS = testInterpolation testData testCDM
 SH_TESTS = 
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
@@ -21,7 +21,7 @@ if HAVE_MILIB
   LDADD += ${milib_LIBS}
   CC_TESTS += testFeltReader
   NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
-  NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator
+  NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
 endif
 if HAVE_NETCDF
   LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}

@@ -31,6 +31,7 @@
 #include <utility>
 #include "fimex/TimeSpec.h"
 #include "fimex/DataImpl.h"
+#include "fimex/timeInterpolation.h"
 
 namespace MetNoFimex
 {
@@ -41,6 +42,15 @@ CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader
    : dataReader(dataReader)
 {
 	cdm = dataReader->getCDM();
+	// removing all time-dependant data in cdm
+	// just to be sure it's read from the dataReader or assigned in #changeTimeAxis
+	const CDM::VarVec& variables = cdm.getVariables();
+	for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+		std::string timeDimName = cdm.getTimeAxis(it->getName());
+		if (timeDimName != "") {
+			cdm.getVariable(it->getName()).setData(boost::shared_ptr<Data>());
+		}
+	}
 }
 
 CDMTimeInterpolator::~CDMTimeInterpolator()
@@ -49,12 +59,40 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 
 const boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-	// TODO
+	std::string timeAxis = cdm.getTimeAxis(varName);
+	if (timeAxis == "") {
+		// not time-axis, no changes, simply forward
+		return dataReader->getDataSlice(varName, unLimDimPos);
+	}
+
+	const CDMVariable& variable = cdm.getVariable(varName);
+	if (variable.hasData()) {
+		return getDataSliceFromMemory(variable, unLimDimPos);
+	}
+
+	// interpolate the data
+	boost::shared_ptr<Data> data;
 
 	// if unlimdim = time-axis, fetch all needed original slices
-	// else get original slice, subslice the needed time-slices
-	//
-	// interpolate and return the time-slices
+	CDMDimension timeDim = cdm.getDimension(timeAxis);
+	if (timeDim.isUnlimited()) {
+		double currentTime = getDataSliceFromMemory(cdm.getVariable(timeAxis), unLimDimPos)->asConstDouble()[0];
+		// interpolate and return the time-slices
+		pair<size_t, size_t> orgTimes = timeChangeMap[timeAxis][unLimDimPos];
+		boost::shared_ptr<Data> d1 = dataReader->getDataSlice(varName, orgTimes.first);
+		boost::shared_ptr<Data> d2 = dataReader->getDataSlice(varName, orgTimes.second);
+		double d1Time = dataReader->getDataSlice(timeAxis, orgTimes.first)->asConstDouble()[0];
+		double d2Time = dataReader->getDataSlice(timeAxis, orgTimes.second)->asConstDouble()[0];
+		boost::shared_array<float> out(new float[d1->size()]);
+		mifi_get_values_linear_f(d1->asConstFloat().get(), d1->asConstFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
+		data = boost::shared_ptr<Data>(new DataImpl<float>(out, d1->size()));
+	} else {
+		// TODO
+		// else get original slice, subslice the needed time-slices
+		// interpolate and return the time-slices
+		throw CDMException("TimeDimension != unlimited dimension not implemented yet in CDMTimeInterpolator");
+	}
+	return data;
 }
 
 /**
@@ -78,12 +116,12 @@ size_t lower_bound_pos(const vector<FimexTime>& ft, size_t startPos, const Fimex
 
 void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMException)
 {
-	// TODO
+	// changing time-axes
 	const CDM& orgCDM = dataReader->getCDM();
 	const CDM::VarVec& vars = orgCDM.getVariables();
 	set<string> changedTimes;
 	for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-		// change time-axis of each variable, possibly different time-axis
+		// change all different time-axes
 		std::string timeDimName = orgCDM.getTimeAxis(varIt->getName());
 		if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
 			changedTimes.insert(timeDimName); // avoid double changes
@@ -103,7 +141,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMExceptio
 			const vector<FimexTime>& newTimes = ts.getTimeSteps();
 			size_t newTimePos = 0;
 			size_t lastPos = 0;
-			vector<pair<size_t, size_t> > timeMapping;
+			vector<pair<size_t, size_t> > timeMapping(newTimes.size());
 			for (vector<FimexTime>::const_iterator it = newTimes.begin(); it != newTimes.end(); ++it, ++newTimePos) {
 				size_t pos = lower_bound_pos(oldTimes, lastPos, *it);
 				size_t t1, t2;
@@ -130,15 +168,12 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMExceptio
 
 			// change cdm timeAxis values
 			cdm.addOrReplaceAttribute(timeDimName, CDMAttribute("units", ts.getUnitString()));
-			CDMVariable timeVar = cdm.getVariable(timeDimName);
 			boost::shared_array<double> timeData(new double[newTimes.size()]);
 			TimeUnit newTU(ts.getUnitString());
-			typedef const FimexTime& cftref;
 			transform(newTimes.begin(), newTimes.end(), timeData.get(),
-					  bind1st(mem_fun_ref(&TimeUnit::fimexTime2unitTime),newTU));
-			timeVar.setData(boost::shared_ptr<Data>(new DataImpl<double>(timeData, newTimes.size())));
-			cdm.removeVariable(timeDimName);
-			cdm.addVariable(timeVar);
+					  bind1st(mem_fun_ref(&TimeUnit::fimexTime2unitTimeX),newTU));
+			cdm.getVariable(timeDimName).setData(boost::shared_ptr<Data>(new DataImpl<double>(timeData, newTimes.size())));
+			cdm.getDimension(timeDimName).setLength(newTimes.size());
 
 		}
 	}

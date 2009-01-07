@@ -28,7 +28,7 @@
 
 void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
 {
-	double f = x / (a - b);
+	const double f = x / (a - b);
 	int i = 0;
 	while (n > i++) {
 		const float* iA = infieldA++;
