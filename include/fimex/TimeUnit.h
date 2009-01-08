@@ -31,13 +31,6 @@
 
 // pre-declaration of utUnit pointer
 struct utUnit;
-namespace boost
-{
-	namespace posix_time {
-		struct ptime;
-		struct time_duration;
-	}
-}
 
 namespace MetNoFimex
 {
@@ -50,9 +43,6 @@ namespace MetNoFimex
  */
 class FimexTime {
 public:
-	FimexTime() {}
-	/// construct by ptime
-	FimexTime(const boost::posix_time::ptime& time);
 	/// millisecond
 	unsigned short msecond;
 	/// second (0-59)
@@ -72,20 +62,17 @@ public:
 	/// compare two fimexTimes
 	bool operator!=(const FimexTime &rhs) const { return !(*this == rhs); }
 	/// compare two fimexTimes
-	bool operator>(const FimexTime &rhs) const;
+	bool operator>(const FimexTime &rhs) const { return (toLong() > rhs.toLong()); }
 	/// compare two fimexTimes
 	bool operator<(const FimexTime &rhs) const { return (rhs > *this); }
 	/// compare two fimexTimes
 	bool operator>=(const FimexTime &rhs) const { return !(rhs > *this); }
 	/// compare two fimexTimes
 	bool operator<=(const FimexTime &rhs) const { return !(*this > rhs); }
-	/// add a time_duration to a FimexTime
-	FimexTime operator+(const boost::posix_time::time_duration& timeDuration) const;
-	/// get the difference of two FimexTimes
-	boost::posix_time::time_duration operator-(const FimexTime &rhs) const;
 
 private:
-	boost::posix_time::ptime toPTime() const;
+	/// this representation can be used for comparison (==, <, >) not for calculation
+	long long toLong() const { return year*1e13 + month*1e11 + mday*1e9 + hour*1e7 + minute*1e5 + second*1e3 + msecond; }
 };
 
 

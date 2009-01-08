@@ -31,7 +31,6 @@
 #include <iterator>
 #include "fimex/Logger.h"
 #include "fimex/TimeUnit.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/regex.hpp>
 
 namespace MetNoFimex
@@ -101,12 +100,15 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 				(dotsIt-1 != times.begin()) && // two predecessors
 				(dotsIt+1 != times.end())) { // one successor
 				transform(times.begin(), dotsIt, back_inserter(timeSteps), string2FimexTime);
-				boost::posix_time::time_duration delta = timeSteps[timeSteps.size()-1] - timeSteps[timeSteps.size()-2];
+				TimeUnit tu(outputUnit); // all times should be representable in outputUnit
+				double delta = tu.fimexTime2unitTime(timeSteps[timeSteps.size()-1])
+													 - tu.fimexTime2unitTime(timeSteps[timeSteps.size()-2]);
 				FimexTime last = string2FimexTime(*(dotsIt+1));
-				FimexTime next = timeSteps[timeSteps.size()-1] + delta;
-				while (next < last) {
-					timeSteps.push_back(next);
-					next = next + delta;
+				double lastTu = tu.fimexTime2unitTime(last);
+				double nextTu = tu.fimexTime2unitTime(timeSteps[timeSteps.size()-1]) + delta;
+				while (nextTu < lastTu) {
+					timeSteps.push_back(tu.unitTime2fimexTime(nextTu));
+					nextTu += delta;
 				}
 				dotsIt++; // forward from "..."
 				transform(dotsIt, times.end(), back_inserter(timeSteps), string2FimexTime);
