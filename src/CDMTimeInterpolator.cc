@@ -31,7 +31,7 @@
 #include <utility>
 #include "fimex/TimeSpec.h"
 #include "fimex/DataImpl.h"
-#include "fimex/timeInterpolation.h"
+#include "fimex/interpolation.h"
 
 namespace MetNoFimex
 {

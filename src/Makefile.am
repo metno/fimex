@@ -6,7 +6,6 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} 
 
 lib_LIBRARIES = libfimex.a
 libfimex_a_SOURCES = interpolation.c \
-					 timeInterpolation.c \
 					 CachedInterpolation.cc \
 					 CachedVectorReprojection.cc \
 					 CDM.cc \
