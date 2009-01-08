@@ -1,0 +1,119 @@
+/*! @mainpage Fimex User Documentation
+
+Fimex is a the File Interpolation, Manipulation and EXtraction library for
+gridded geospatial data. It converts between different, extensible dataformats
+(currently netcdf, grib1/2 and felt). It enables you to change the projection
+and interpolation of scalar and vector grids. It makes it possible subset the
+gridded data and to extract only parts of the files.
+
+Fimex can be used as library called @em Fimex and a command-line program
+called @em fimex, which gives access to most but not all functions of the
+library.
+
+Fimex is build around the Common Data Model version 1 developped by Unidata
+and uses a describes data using the CF-Convention http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.0/cf-conventions.html .
+Knowledge of that convention is not required, but will help understanding the config files needed for conversion.
+
+The API of Fimex as included in this document is not stable yet and can
+change without warning. The setup-files are considered to be mostly stable.
+The fimex-program can thus savely be used. If you want to use the API, please
+contact me.
+
+@section fimex The fimex Program
+
+@em fimex is a command-line program. It has the following options:
+
+@verbatim
+usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]
+             --output.file FILENAME [--output.type OUTPUT_TYPE]
+             [--input.config CFGFILENAME] [--output.config CFGFILENAME]
+             [--extract....]
+             [--interpolate....]
+             [--timeInterpolate....]
+
+Generic options:
+  -h [ --help ]                    help message
+  --version                        program version
+  --debug                          debug program
+  --print-options                  print all options
+  -c [ --config ] arg (=fimex.cfg) configuration file
+
+Configurational options:
+  --input.file arg                    input file
+  --input.type arg                    filetype of intput file
+  --input.config arg                  non-standard input configuration
+  --input.printNcML                   print NcML description of input file
+  --output.file arg                   output file
+  --output.type arg                   filetype of output file
+  --output.config arg                 non-standard output configuration
+  --extract.removeVariable arg        remove variables
+  --extract.reduceDimension.name arg  name of a dimension to reduce
+  --extract.reduceDimension.start arg start position of the dimension to reduce (>=0)
+  --extract.reduceDimension.end arg   end position of the dimension to reduce
+  --extract.printNcML                 print NcML description of extractor
+  --interpolate.projString arg        proj4 input string describing the new projection
+  --interpolate.method arg            interpolation method, one of nearestneighbor,
+                                      bilinear or bicubic
+  --interpolate.xAxisValues arg       string with values on x-Axis, use ... to
+                                      continue, i.e. 10.5,11,...,29.5
+  --interpolate.yAxisValues arg       string with values on x-Axis, use ... to
+                                      continue, i.e. 10.5,11,...,29.5
+  --interpolate.xAxisUnit arg         unit of x-Axis given as udunits string,
+                                      i.e. m or degrees_east
+  --interpolate.yAxisUnit arg         unit of y-Axis given as udunits string,
+                                      i.e. m or degrees_north
+  --interpolate.latitudeName arg      name for auto-generated projection coordinate latitude
+  --interpolate.longitudeName arg     name for auto-generated projection coordinate longitude
+  --interpolate.printNcML             print NcML description of interpolator
+  --timeInterpolate.timeSpec arg      specification of times to interpolate to,
+                                      see Fimex::TimeSpec for a full definition
+  --timeInterpolate.printNcML         print NcML description of timeInterpolator
+@endverbatim
+
+All the configurational options can be configured using a configuration file which is supplied
+using the --config option. All command line options (CLO) will overwrite the config-file. As a rule of
+thump, use the CLO for testing and use the config-file for productive usage. The CLOs will be further
+explained in @ref fimex_config.
+
+
+
+
+@section setup Setup Files
+@subsection fimex_config fimex Configuration
+
+@verbinclude test/felt2netcdf.cfg
+
+The @em TimeSpec string used for the timeInterpolate should be formatted as explained in
+detail in MetNoFimex::TimeSpec.
+
+@subsection felt_config Configuration files for felt reader
+The xml configuration files are defined by the /felt2nc_variables.dtd/
+definition. Since part of this configuration are quite stable, e.g.
+the axes (time, level, lat, lon, x, y), other parts change, e.g.
+the variables to translate change very often. It is therefore useful
+to split the variables from the rest of the configuration via /xinclude/
+
+Before running fimex with a new felt configuration, make sure the file
+is valid, e.g. with
+@code
+xmllint --valid --noout felt2nc_config.xml
+@endcode
+
+Unfortuneatly, xinclude and validation don't play well together, since
+usual validation happens before the inclusion of external parts. xmllint
+uses special options to fix those problem:
+@code
+xmllint --xinclude --postvalid --noout felt2nc_config.xml
+@endcode
+
+@verbinclude share/etc/felt2nc_variables.xml
+
+@subsection gribWriterConfig gribWriter Configuration
+
+@verbinclude share/etc/cdmGribWriterConfig.xml
+
+@subsection netcdfWriterConfig netcdfWriter Configuration
+
+@verbinclude share/etc/cdmWriterConfig.xml
+
+*/
