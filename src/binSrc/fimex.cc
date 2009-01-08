@@ -31,6 +31,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMInterpolator.h"
+#include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
 #ifdef HAVE_LIBMIC
@@ -56,6 +57,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
     out << "             [--extract....]" << endl;
     out << "             [--interpolate....]" << endl;
+    out << "             [--timeInterpolate....]" << endl;
     out << endl;
     out << generic << endl;
     out << config << endl;
@@ -123,6 +125,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionString(out, "interpolate.latitudeName", vm);
 	writeOptionString(out, "interpolate.longitudeName", vm);
 	writeOptionAny(out, "interpolate.printNcML", vm);
+	writeOptionString(out, "timeInterpolate.timeSpec", vm);
+	writeOptionAny(out, "timeInterpolate.printNcML", vm);
 }
 
 static string getType(const string& io, po::variables_map& vm) {
@@ -263,6 +267,21 @@ static vector<double> parseDoubleString(const string& str) {
 	  return vals;
 }
 
+static auto_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
+	if (! vm.count("timeInterpolate.timeSpec")) {
+		LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec not found, no interpolation used");
+		return dataReader;
+	}
+	auto_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
+	timeInterpolator->changeTimeAxis(vm["timeInterpolate.timeSpec"].as<string>());
+	if (vm.count("timeInterpolate.printNcML")) {
+		cout << "TimeInterpolator as NcML:" << endl;
+		timeInterpolator->getCDM().toXMLStream(cout);
+		cout << endl;
+	}
+	return auto_ptr<CDMReader>(timeInterpolator);
+}
+
 static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! vm.count("interpolate.projString")) {
 		LOG4FIMEX(logger, Logger::DEBUG, "interpolate.projString not found, no interpolation used");
@@ -399,7 +418,9 @@ int main(int argc, char* args[])
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
-        ("interpolate.printNcML", "print NcML description of extractor")
+        ("interpolate.printNcML", "print NcML description of interpolator")
+        ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
+        ("timeInterpolate.printNcML", "print NcML description of timeInterpolator")
 		;
 
 
@@ -452,6 +473,7 @@ int main(int argc, char* args[])
     try {
     	auto_ptr<CDMReader> dataReader = getCDMFileReader(vm);
     	dataReader = getCDMExtractor(vm, dataReader);
+    	dataReader = getCDMTimeInterpolator(vm, dataReader);
     	dataReader = getCDMInterpolator(vm, dataReader);
     	writeCDM(dataReader, vm);
     } catch (CDMException& cdmex) {
