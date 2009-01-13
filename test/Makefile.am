@@ -42,4 +42,5 @@ testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testExtractor_SOURCES = testExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
+testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
