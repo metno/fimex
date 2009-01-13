@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -26,9 +26,15 @@
 #include <cstring>
 #include <iostream>
 #include <exception>
+#include <cmath>
 
 namespace MetNoFimex
 {
+
+int round(double num) {
+  return static_cast<int>(std::floor(num+0.5));
+}
+
 std::string string2lowerCase(const std::string& str)
 {
 	std::string s(str);

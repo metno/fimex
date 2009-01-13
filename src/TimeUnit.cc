@@ -94,7 +94,7 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 	std::vector<std::string> secondParts = tokenize(timeParts[2], ".");
 	ft.second = string2type<int>(secondParts[0]);
 	if (secondParts.size() > 1) {
-		ft.msecond = static_cast<int>(string2type<double>("."+secondParts[1]) * 1000);
+		ft.msecond = static_cast<int>(round(string2type<double>("."+secondParts[1]) * 1000));
 	} else {
 		ft.msecond = 0;
 	}
