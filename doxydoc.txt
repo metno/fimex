@@ -19,7 +19,17 @@ change without warning. The setup-files are considered to be mostly stable.
 The fimex-program can thus savely be used. If you want to use the API, please
 contact me.
 
-@section fimex The fimex Program
+@section setup Setup Files
+
+Detailed information on the differnt configuration files can be found at:
+
+- @ref programDoc
+- @ref feltConfigDoc
+- @ref gribWriterDoc
+- @ref netcdfWriterDoc
+
+@page programDoc fimex Program Options 
+@section fimex fimex Program Options
 
 @em fimex is a command-line program. It has the following options:
 
@@ -75,23 +85,47 @@ using the --config option. All command line options (CLO) will overwrite the con
 thump, use the CLO for testing and use the config-file for productive usage. The CLOs will be further
 explained in @ref fimex_config.
 
-
-
-
-@section setup Setup Files
-@subsection fimex_config fimex Configuration
+@subsection fimex_config fimex Setup File
 
 @verbinclude test/felt2netcdf.cfg
 
 The @em TimeSpec string used for the timeInterpolate should be formatted as explained in
 detail in MetNoFimex::TimeSpec.
 
+@page feltConfigDoc Configuration files for felt reader
 @subsection felt_config Configuration files for felt reader
-The xml configuration files are defined by the /felt2nc_variables.dtd/
+
+The xml configuration files are defined by the @em felt2nc_variables.dtd
 definition. Since part of this configuration are quite stable, e.g.
 the axes (time, level, lat, lon, x, y), other parts change, e.g.
 the variables to translate change very often. It is therefore useful
-to split the variables from the rest of the configuration via /xinclude/
+to split the variables from the rest of the configuration via @em xinclude
+
+When writing a new configuration for a new set of felt-files, usually from
+a new model, it is wise to group the configuration by
+
+-# time resolution, i.e. one config for 3hourly files, one config for hourly files
+-# spatial resolution: fimex doesn't allow different spatial resolutions, but some
+   models use coarser resoluton for higher levels
+-# vertical levels: it is difficult to have the same parameter with sigma levels
+   and with height in m
+   
+Grouping can be done in two ways, the first one being faster in operation,
+the second is easier to configure/change consistently:
+
+-# write different configuration-files for each group of parameter, stating
+   the parameter as well as possible.
+-# write one configuration-file for all parameter, keeping the parameters as
+   variable as possible. Use a preprocess-step to extract each group.
+   Use e.g. @em nyfelt or @em felt2felt as preprocessor
+   
+By default, all data is read as @em type="short" data with a scaling factor. While
+felt allows for one scaling factor for each timestep, height and parameter,
+the CDM allows only for one scaling factor per parameter. When the scaling factor
+changes withing height or timestep, @em fimex will fail to read the data as short.
+It is therefore useful to read data as @em type="float", which will automatically expand
+the scaling factor. If the resulting file is to big, it is possible to
+convert to short with one scaling factor and offset using the @ref netcdfWriterConfig.
 
 Before running fimex with a new felt configuration, make sure the file
 is valid, e.g. with
@@ -106,14 +140,33 @@ uses special options to fix those problem:
 xmllint --xinclude --postvalid --noout felt2nc_config.xml
 @endcode
 
+
+
+Below follows a complete felt-configuration.
+
 @verbinclude share/etc/felt2nc_variables.xml
 
-@subsection gribWriterConfig gribWriter Configuration
+
+
+@page gribWriterDoc gribWriter Configuration
+@section gribWriterConfig gribWriter Configuration
 
 @verbinclude share/etc/cdmGribWriterConfig.xml
 
-@subsection netcdfWriterConfig netcdfWriter Configuration
+@page netcdfWriterDoc netcdfWriter Configuration
+@section netcdfWriterConfig netcdfWriter Configuration
 
+The CDM resembles a netcdf datastructure. In general, there is
+no need to use a configuration for this writer, but it might be useful
+in the following cases:
+
+- Output-files are to big, and a change of datatype i.e. from float to short
+  is desired
+- Different attribute are required for special usages, but the input-configuration
+  of the reader shouldn't been changed.
+- Different variable or dimension names are required for special usages.
+- Different units are required for special usages.
+  
 @verbinclude share/etc/cdmWriterConfig.xml
 
 */
