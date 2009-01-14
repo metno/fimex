@@ -72,7 +72,8 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		size_t newSize = 0;
 		boost::shared_array<float> iArray = cachedInterpolation.interpolateValues(array, data->size(), newSize);
 		if (variable.isSpatialVector()) {
-			// TODO: the current implementation is sub-optimal since it will fetch and transpose all vector-data twice (once for each direction)
+			// fetch and transpose vector-data
+			// transposing needed once for each direction (or caching, but that needs to much memory)
 			const std::string& counterpart = variable.getSpatialVectorCounterpart();
 			boost::shared_array<float> counterPartArray = data2InterpolationArray(dataReader->getDataSlice(counterpart, unLimDimPos), cdm.getFillValue(counterpart));
 			boost::shared_array<float> counterpartiArray = cachedInterpolation.interpolateValues(counterPartArray, data->size(), newSize);
@@ -171,10 +172,6 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	} else {
 		xStandardName = "projection_x_coordinate";
 		yStandardName = "projection_y_coordinate";
-		//TODO: the following lines are required by damocles and should be moved to an output
-		// changer for netcdf. remove here when output changer is in place
-		cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("long_name", "x-coordinate in Cartesian system"));
-		cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("long_name", "y-coordinate in Cartesian system"));
 	}
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
@@ -250,7 +247,6 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
 
 	// prepare interpolation of vectors
-	// TODO: only prepare if at least one vector exists
 	boost::shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
 	mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], miupXAxis, miupYAxis, out_x_axis.size(), out_y_axis.size(), matrix.get());
 	cachedVectorReprojection = CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size());

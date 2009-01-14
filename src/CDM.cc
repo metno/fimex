@@ -548,7 +548,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	latVar.setData(createData(CDM_DOUBLE, fieldSize, &latVal[0], &latVal[fieldSize]));
 	addVariable(lonVar);
 	addVariable(latVar);
-	// TODO: those values should be configurable
+	// add the coordinate attributes
 	addAttribute(lonVar.getName(),CDMAttribute("units", "degree_east"));
 	addAttribute(lonVar.getName(),CDMAttribute("long_name", "longitude"));
 	addAttribute(lonVar.getName(),CDMAttribute("standard_name", "longitude"));

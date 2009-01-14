@@ -175,7 +175,7 @@ int mifi_interpolate_f(const int method,
 	switch (method) {
 		case MIFI_NEAREST_NEIGHBOR: func = mifi_get_values_f; break;
 		case MIFI_BILINEAR:         func = mifi_get_values_bilinear_f; break;
-		case MIFI_BICUBIC:          ;//not implemented: func = mifi_get_values_bicubic_f; break;
+		case MIFI_BICUBIC:          func = mifi_get_values_bicubic_f; break;
 		default:                    return MIFI_ERROR; /* error */
 	}
 
@@ -455,8 +455,74 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
 
 int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
-	// TODO implement and reset error value to 0
-	return 1;
+	// TODO: better tests
+	// convolution matrix for a = -0.5
+	double M[4][4] = {{ 0, 2, 0, 0},
+				      {-1, 0, 1, 0},
+				      { 2,-5, 4,-1},
+				      {-1, 3,-3, 1}};
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			M[i][j] *= .5;
+
+	int x0 = floor(x);
+	double xfrac = x - x0;
+	int y0 = floor(y);
+	double yfrac = y - y0;
+
+	if (((-1 <= x0) && ((x0+2) < ix)) &&
+		((-1 <= y0) && ((y0+2) < iy))) {
+		double X[4];
+		double XM[4]; /* X*M */
+		double Y[4];
+		double MY[4]; /* M*Y */
+		X[0] = 1;
+		X[1] = xfrac;
+		X[2] = xfrac * xfrac;
+		X[3] = X[2] * xfrac;
+		for (int i = 0; i < 4; i++) {
+			XM[i] = 0;
+			for (int j = 0; j < 4; j++) {
+				XM[i] += X[j] * M[j][i];
+			}
+		}
+		Y[0] = 1;
+		Y[1] = yfrac;
+		Y[2] = yfrac * yfrac;
+		Y[3] = Y[2] * yfrac;
+		for (int i = 0; i < 4; i++) {
+			MY[i] = 0;
+			for (int j = 0; j < 4; j++) {
+				MY[i] += Y[j] * M[j][i];
+			}
+		}
+
+		for (int z = 0; z < iz; ++z) {
+			double F[4][4];
+			double XMF[4];
+			outvalues[z] = 0;
+			for (int i = 0; i < 4; i++) {
+				for (int j = 0; j < 4; j++) {
+					F[i][j] = infield[mifi_3d_array_position(x0+i-1, y0+j-1, z, ix, iy, iz)];
+				}
+			}
+
+			for (int i = 0; i < 4; i++) {
+				XMF[i] = 0;
+				for (int j = 0; j < 4; j++) {
+					XMF[i] += XM[j] * F[j][i];
+				}
+			}
+			for (int i = 0; i < 4; i++) {
+				outvalues[z] += XMF[i] * MY[i];
+			}
+		}
+	} else { // border cases
+		for (int z = 0; z < iz; ++z) {
+			outvalues[z] = MIFI_UNDEFINED_F;
+		}
+	}
+	return MIFI_OK;
 }
 
 void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)

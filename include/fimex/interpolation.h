@@ -246,6 +246,15 @@ extern int mifi_get_values_bilinear_f(const float* infield, float* outvalues, co
 /**
  * @brief not implemented yet
  *
+ * The bicubic convolution algorithm assigns a value f(x,y) = X * M * F * Mt * Yt
+ * with x, y between (0 <= x < 1), X = (1,x, x2, x3), Y = (1, y, y^2, y^3) and F a 4*4 matrix consisting
+ * of the original values of f(-1,-1) to f(2,2).
+ *
+ * M is the convolution matrix with a = -0.5 as described by wikipedia (or Catmull-Rom for a = 1, not used here)
+ *
+ * Mt and Yt are the transposed matrices/vector.
+ *
+ * @see http://en.wikipedia.org/wiki/Bicubic_interpolation
  * @see http://java.sun.com/products/java-media/jai/forDevelopers/jai-apidocs/javax/media/jai/InterpolationBicubic.html
  */
 extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
