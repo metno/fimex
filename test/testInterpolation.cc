@@ -37,6 +37,8 @@
 #define BOOST_TEST_DYN_LINK
 
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+
 using boost::unit_test_framework::test_suite;
 
 
@@ -97,6 +99,64 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
 	mifi_get_values_bilinear_f(infield, outvalues, 0.0001, 0.3, 2, 2, 1);
 	//std::cerr << outvalues[0] << std::endl;
 	BOOST_CHECK(std::fabs(outvalues[0] - 1.3) < 1e-4);
+
+	// check for border values / nan
+	mifi_get_values_bilinear_f(infield, outvalues, 0, 0, 2, 2, 1);
+	BOOST_CHECK(!isnanf(outvalues[0]));
+	mifi_get_values_bilinear_f(infield, outvalues, 1, 1, 2, 2, 1);
+	BOOST_CHECK(!isnanf(outvalues[0]));
+	mifi_get_values_bilinear_f(infield, outvalues, 1.5, 0.5, 2, 2, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+	mifi_get_values_bilinear_f(infield, outvalues, 0.5, 1.5, 2, 2, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+	mifi_get_values_bilinear_f(infield, outvalues, 0.5, -0.5, 2, 2, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+	mifi_get_values_bilinear_f(infield, outvalues, -0.5, 0.5, 2, 2, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+
+}
+
+BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
+{
+	/* infield constant in x-direction */
+	float infield[16] = {1, 1, 1, 1,
+						 2, 2, 2, 2,
+						 2, 2, 2, 2,
+						 1, 1, 1, 1};
+	float outvalues[1];
+	float infield_t[16]; /* transposed */
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			infield_t[i+4*j] = infield[j+4*i];
+	mifi_get_values_bicubic_f(infield, outvalues, 1, 1, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+	mifi_get_values_bicubic_f(infield, outvalues, 1, 1.99999, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+	mifi_get_values_bicubic_f(infield, outvalues, 1, 1.5, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.125f, outvalues[0], 1e-3);
+	mifi_get_values_bicubic_f(infield, outvalues, 1.5, 1, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+
+	// and transposed
+	mifi_get_values_bicubic_f(infield_t, outvalues, 1, 1, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+	mifi_get_values_bicubic_f(infield_t, outvalues, 1.99999, 1, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+	mifi_get_values_bicubic_f(infield_t, outvalues, 1.5, 1, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.125f, outvalues[0], 1e-3);
+	mifi_get_values_bicubic_f(infield_t, outvalues, 1, 1.5, 4, 4, 1);
+	BOOST_CHECK_CLOSE(2.f, outvalues[0], 1e-3);
+
+	// check for border values / nan
+	mifi_get_values_bicubic_f(infield, outvalues, .5, 1, 4, 4, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+	mifi_get_values_bicubic_f(infield, outvalues, 1, .5, 4, 4, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+	mifi_get_values_bicubic_f(infield, outvalues, 2.5, 1, 4, 4, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+	mifi_get_values_bicubic_f(infield, outvalues, 1, 2.5, 4, 4, 1);
+	BOOST_CHECK(isnanf(outvalues[0]));
+
 }
 
 BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )

@@ -1,4 +1,4 @@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testInterpolation testData testCDM
 SH_TESTS = 
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@

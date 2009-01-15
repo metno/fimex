@@ -470,8 +470,8 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
 	int y0 = floor(y);
 	double yfrac = y - y0;
 
-	if (((-1 <= x0) && ((x0+2) < ix)) &&
-		((-1 <= y0) && ((y0+2) < iy))) {
+	if (((1 <= x0) && ((x0+2) < ix)) &&
+		((1 <= y0) && ((y0+2) < iy))) {
 		double X[4];
 		double XM[4]; /* X*M */
 		double Y[4];

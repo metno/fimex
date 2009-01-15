@@ -322,7 +322,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
 	$(am__append_3) $(am__append_6) $(am__append_8)
 SH_TESTS = $(am__append_9)
