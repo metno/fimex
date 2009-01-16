@@ -158,7 +158,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 	}
 #endif
 #ifdef HAVE_NETCDF
-	if (type == "nc" || type == "cdf" || type == "netcdf") {
+	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
 		LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " without config");
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
 	}
@@ -344,13 +344,15 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	// auto_ptr to shared_ptr
 	boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
 #ifdef HAVE_NETCDF
-	if (type == "nc" || type == "cdf" || type == "netcdf") {
+	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
+		int version = 3;
+		if (type == "nc4") version = 4;
 		if (vm.count("output.config")) {
 			LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
-			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>());
+			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>(), version);
 		} else {
 			LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " without config");
-			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
+			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), version);
 		}
 		return;
 	}
