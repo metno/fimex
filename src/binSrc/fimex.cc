@@ -352,7 +352,7 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>(), version);
 		} else {
 			LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " without config");
-			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), version);
+			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), "", version);
 		}
 		return;
 	}

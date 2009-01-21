@@ -2,6 +2,10 @@
 <!DOCTYPE cdm_ncwriter_config SYSTEM "cdmWriterConfig.dtd">
 <cdm_ncwriter_config>
 
+<!-- filetype are netcdf3 netcdf3_64bit netcdf4 netcdf4classic -->
+<!-- compression levels are 0 (no compression) to 9 -->
+<default filetype="netcdf4" compressionLevel="9" />
+
 <!-- all operations below can (and must) be joined if the -->
 <!-- same attribute/dimension/variable is concerned -->
 <!-- i.e. a <variable name="x"... may not occur twice!!! -->
@@ -15,7 +19,7 @@
 </variable>
 
 <!-- change the type of a variable -->
-<variable name="precipitation_amount" type="short">
+<variable name="precipitation_amount" type="short" compressionLevel="0">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="scale_factor" value="0.001" type="float" />
 	<attribute name="add_offset" value="0" type="double" />

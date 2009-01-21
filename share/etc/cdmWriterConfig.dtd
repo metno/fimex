@@ -18,7 +18,15 @@
 -->
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT cdm_ncwriter_config (dimension|variable|attribute)*>
+<!ELEMENT cdm_ncwriter_config (default|dimension|variable|attribute)*>
+
+<!--- filetypes are: netcdf3 netcdf4 netcdf3_64bit netcdf4classic -->
+<!--- compressionLevel are 0 (no compression) to 9 -->
+<!ELEMENT default EMPTY>
+<!ATTLIST default
+    filetype CDATA #IMPLIED
+    compressionLevel CDATA #IMPLIED
+  >
 
 <!--- Put your DTDDoc comment here. -->
 <!ELEMENT attribute EMPTY>
@@ -35,6 +43,7 @@
     newname CDATA #IMPLIED
     type CDATA #IMPLIED
     name ID #REQUIRED
+    compressionLevel CDATA #IMPLIED
   >
 
 <!--- Put your DTDDoc comment here. -->

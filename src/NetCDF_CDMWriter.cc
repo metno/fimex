@@ -89,63 +89,87 @@ static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 
 NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 {
-	// TODO: test for installation of netcdf4
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	NcFile::FileFormat retVal = NcFile::Classic;
 	switch (version) {
 		case 3: retVal = NcFile::Classic; break;
+#ifdef NC_NETCDF4
 		case 4: retVal = NcFile::Netcdf4; break;
+#endif
 		default: LOG4FIMEX(logger, Logger::ERROR, "unknown netcdf-version "<< version << " using 3 instead");
 	}
 	if (doc.get() != 0) {
-		// TODO: extract version from config-file
+		// set the default filetype
+		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@filetype]");
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		if (nodes->nodeNr) {
+			std::string filetype = string2lowerCase(getXmlProp(nodes->nodeTab[0], "filetype"));
+			if (filetype == "netcdf3") {
+				retVal = NcFile::Classic;
+			} else if (filetype == "netcdf3_64bit") {
+				retVal = NcFile::Offset64Bits;
+			}
+#ifdef NC_NETCDF4
+			else if (filetype == "netcdf4") {
+				retVal = NcFile::Netcdf4;
+			} else if (filetype == "netcdf4classic") {
+				retVal = NcFile::Netcdf4Classic;
+			}
+#endif
+			else {
+				throw CDMException("unknown netcdf-filetype: " + filetype);
+			}
+		}
 	}
 	return retVal;
 }
 
-NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, int version)
+NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
 : CDMWriter(cdmReader, outputFile)
 {
+	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
+	std::auto_ptr<XMLDoc> doc;
+	if (configFile == "") {
+		doc = std::auto_ptr<XMLDoc>(0);
+	} else {
+		doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
+	}
 	ncErr = std::auto_ptr<NcError>(new NcError(NcError::verbose_nonfatal));
-	std::auto_ptr<XMLDoc> doc(0);
+	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
 	NcFile::FileFormat ncVersion = getNcVersion(version, doc);
 	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace, 0, 0, ncVersion));
 	switch (ncFile->get_format()) {
-		case NcFile::Classic: std::cerr << "classic format, version: "<< version << std::endl; break;
-		case NcFile::Netcdf4: std::cerr << "netcdf4 format, version: "<< version << std::endl; break;
-		default: std::cerr << "format: " << ncFile->get_format() << std::endl;
+		case NcFile::Classic: LOG4FIMEX(logger, Logger::DEBUG, "classic format, version: "); break;
+#ifdef NC_NETCDF4
+		case NcFile::Netcdf4: LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format, version: "); break;
+#endif
+		default: LOG4FIMEX(logger, Logger::DEBUG, "format: " << ncFile->get_format());
 	}
 	// make a local copy of attributes (required for config)
 	attributes = cdmReader->getCDM().getAttributes();
-	init();
-}
-
-NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, const std::string& configFile, int version)
-: CDMWriter(cdmReader, outputFile)
-{
-	ncErr = std::auto_ptr<NcError>(new NcError(NcError::verbose_nonfatal));
-	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
-	std::auto_ptr<XMLDoc> doc(new XMLDoc(configFile));
 	// variable needs to be called before dimension!!!
 	initFillRenameVariable(doc);
 	initFillRenameDimension(doc);
 	initFillRenameAttribute(doc);
 	init();
+
 }
 
 void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
 {
-	XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	int size = (nodes) ? nodes->nodeNr : 0;
-	for (int i = 0; i < size; i++) {
-		std::string name = getXmlProp(nodes->nodeTab[i], "name");
-		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
-		cdmReader->getCDM().getDimension(name); // check existence, throw exception
-		dimensionNameChanges[name] = newname;
-		// change dimension variable unless it has been changed
-		if (variableNameChanges.find(name) == variableNameChanges.end()) {
-			variableNameChanges[name] = newname;
+	if (doc.get() != 0) {
+		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int i = 0; i < size; i++) {
+			std::string name = getXmlProp(nodes->nodeTab[i], "name");
+			std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+			cdmReader->getCDM().getDimension(name); // check existence, throw exception
+			dimensionNameChanges[name] = newname;
+			// change dimension variable unless it has been changed
+			if (variableNameChanges.find(name) == variableNameChanges.end()) {
+				variableNameChanges[name] = newname;
+			}
 		}
 	}
 }
@@ -161,30 +185,60 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName) throw(CDME
 
 void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
 {
-	XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	int size = (nodes) ? nodes->nodeNr : 0;
-	for (int i = 0; i < size; i++) {
-		std::string name = getXmlProp(nodes->nodeTab[i], "name");
-		testVariableExists(name);
-		std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
-		variableNameChanges[name] = newname;
+	if (doc.get() != 0) {
+		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int i = 0; i < size; i++) {
+			std::string name = getXmlProp(nodes->nodeTab[i], "name");
+			testVariableExists(name);
+			std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
+			variableNameChanges[name] = newname;
+		}
 	}
-	// read 'type' attribute and enable re-typeing of data
-	xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@type]");
-	nodes = xpathObj->nodesetval;
-	size = (nodes) ? nodes->nodeNr : 0;
-	for (int i = 0; i < size; i++) {
-		std::string name = getXmlProp(nodes->nodeTab[i], "name");
-		CDMDataType type = string2datatype(getXmlProp(nodes->nodeTab[i], "type"));
-		variableTypeChanges[name] = type;
+	if (doc.get() != 0) {
+		// read 'type' attribute and enable re-typeing of data
+		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@type]");
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int i = 0; i < size; i++) {
+			std::string name = getXmlProp(nodes->nodeTab[i], "name");
+			CDMDataType type = string2datatype(getXmlProp(nodes->nodeTab[i], "type"));
+			variableTypeChanges[name] = type;
+		}
 	}
+	unsigned int defaultCompression = 3;
+	if (doc.get() != 0) {
+		// set the default compression level for all variables
+		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@compressionLevel]");
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		if (nodes->nodeNr) {
+			defaultCompression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[0], "compressionLevel"));
+		}
+	}
+	const CDM::VarVec& vars = cdmReader->getCDM().getVariables();
+	for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
+		variableCompression[varIt->getName()] = defaultCompression;
+	}
+	if (doc.get() != 0) {
+		// set the compression level for all variables
+		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@compressionLevel]");
+		xmlNodeSetPtr nodes = xpathObj->nodesetval;
+		int size = (nodes) ? nodes->nodeNr : 0;
+		for (int i = 0; i < size; i++) {
+			std::string name = getXmlProp(nodes->nodeTab[i], "name");
+			unsigned int compression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[0], "compressionLevel"));
+			variableCompression[name] = compression;
+		}
+	}
+
 }
 
 void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
 {
 	// make a complete copy of the original attributes
 	attributes = cdmReader->getCDM().getAttributes();
+	if (doc.get() != 0) {
 	XPathObjPtr xpathObj = doc->getXPathObject("//attribute");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
@@ -221,6 +275,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw
 			}
 		}
 	}
+	}
 }
 
 
@@ -240,6 +295,7 @@ NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
 }
 
 NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncDimMap) {
+	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	const CDM& cdm = cdmReader->getCDM();
 	const CDM::VarVec& cdmVars = cdm.getVariables();
 	NcVarMap ncVarMap;
@@ -266,6 +322,23 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 		if (! ncVar) {
 			throw CDMException(nc_strerror(ncErr->get_err()));
 		}
+#ifdef NC_NETCDF4
+		// set compression
+		if (ncFile->get_format() == NcFile::Netcdf4) {
+			int compression = 0;
+			assert(variableCompression.find(var.getName()) != variableCompression.end());
+			if (variableCompression.find(var.getName()) != variableCompression.end()) {
+				compression = variableCompression[var.getName()];
+			}
+			if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
+				LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
+				int ncerr = nc_def_var_deflate(ncFile->id(), ncVar->id(), 0, 1, compression);
+				if (ncerr != NC_NOERR) {
+					throw CDMException(nc_strerror(ncErr->get_err()));
+				}
+			}
+		}
+#endif
 		ncVarMap[var.getName()] = ncVar;
 	}
 	return ncVarMap;
