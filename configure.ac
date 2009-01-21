@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.10],[heiko.klein@met.no])
+AC_INIT([fimex],[0.11beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -81,7 +81,7 @@ PKG_CHECK_MODULES([milib], [milib])
 METNO_CHECK_HEADERS([milib/milib.h], , , ,
                     [$milib_CFLAGS], [the milib package])
 
-METNO_CHECK_LIB([mic], [mrfelt], , , , [$milib_LIBS] -lg2c,
+METNO_CHECK_LIB([mic], [mrfelt], , , , [$milib_LIBS],
                  [the milib package])
 fi
 
