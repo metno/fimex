@@ -61,13 +61,17 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 
 	NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	BOOST_CHECK(true);
-
+}
+BOOST_AUTO_TEST_CASE(test_interpolator2)
+{
+	string topSrcDir(TOP_SRCDIR);
 	string grdFile("/disk1/opdata/hirlam20/grdn06.dat");
 	ifstream inputFile(grdFile.c_str());
 	if (inputFile.is_open()) {
 		inputFile.close();
-		feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
-		interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
+		boost::shared_ptr<CDMReader> feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
+		boost::shared_ptr<CDMInterpolator> interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
+		vector<double> xAxis, yAxis;
 		xAxis = vector<double>();
 		yAxis = vector<double>();
 		for (int i = -114; i < 114; i++) {

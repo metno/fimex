@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.11],[heiko.klein@met.no])
+AC_INIT([fimex],[0.12beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX

@@ -239,7 +239,7 @@ public:
 	 * @param latDim name of the latitude variable
 	 * @throw CDMException if any information is missing
 	 */
-		void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
+	void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
 	/**
 	 * @brief extract the names of the projection-variable and the corresponding projection-axes
 	 *

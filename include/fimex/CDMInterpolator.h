@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -33,26 +33,28 @@ namespace MetNoFimex
 
 class CDMInterpolator : public MetNoFimex::CDMReader
 {
-private: 
+private:
 	boost::shared_ptr<CDMReader> dataReader;
 	std::vector<std::string> projectionVariables;
 	CachedInterpolation cachedInterpolation;
 	CachedVectorReprojection cachedVectorReprojection;
 	std::string latitudeName;
 	std::string longitudeName;
-	
+	void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+	void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMInterpolator();
 	/**
-	 * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection 
-	 * 
+	 * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
+	 *
 	 */
 	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 	/**
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
-	 * 
-	 * @param method Interpolation method 
+	 *
+	 * @param method Interpolation method
 	 */
 	virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
 	/**
