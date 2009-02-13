@@ -135,7 +135,7 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 	string newProj = getProjectionName(proj_input);
 
 	// remove projection and coordinates (lon lat)
-	if (orgProjection != "" && orgProjection != "latlong") {
+	if (orgProjection != "" && orgProjection != "latitude_longitude") {
 		cdm.removeVariable(orgProjection);
 		std::string var = (cdm.findVariables("grid_mapping", orgProjection))[0];
 		if (var != "") {
@@ -202,6 +202,14 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 	std::string lat(latitudeName);
 	std::string lon(longitudeName);
 	if (newProj != "latlong") {
+		int i = 0;
+		while (cdm.hasVariable(lon)) {
+			lon = lon + type2string(++i);
+		}
+		i = 0;
+		while (cdm.hasVariable(lat)) {
+			lat = lat + type2string(++i);
+		}
 		cdm.generateProjectionCoordinates(newProjection, orgXAxis, orgYAxis, lon, lat);
 	}
 
@@ -222,25 +230,35 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
-	throw CDMException("not implemented yet");
-	// detect coordinates axes
+	// detect a variable with coordinates axes, the interpolator does not allow for
+	// conversion of variable with different dimensions, converting only all variables
+	// with the same dimensions/coordinates as the first variable with coordinates
 	std::string var = (cdm.findVariables("coordinates", ".*"))[0];
 	if (var == "") throw CDMException("could not find coordinates needed for projection");
 	std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
-	std::string coord1, coord2;
-	size_t sepPos = coordinates.find(" ");
-	if (sepPos != std::string::npos) {
-		coord1 = coordinates.substr(0, sepPos);
-		coord2 = coordinates.substr(sepPos+1);
-	} else {
-		throw CDMException("could not find two coordinates in " + coordinates);
-	}
+	string longitude, latitude;
+	if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
+	const vector<string>& dims = cdm.getVariable(latitude).getShape();
 
+	// mapping all variables with matching orgX/orgY dimensions
+	std::map<std::string, std::string> attrs;
+	attrs["coordinates"] = coordinates;
+	projectionVariables = cdm.findVariables(attrs, dims);
+
+	size_t xDimSize = cdm.getDimension(dims[0]).getLength();
+	size_t yDimSize = cdm.getDimension(dims[1]).getLength();
+
+	changeCDM(cdm, proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
+
+	//boost::shared_array<double> latVals = dataReader->getData(latitude);
+	//boost::shared_array<double> lonVals = dataReader->getData(longitude);
+	throw CDMException("not implemented yet");
 }
 
 void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
-	// detect original projection and axes
+	// detect original projection and axes of the first variable with projection, only convert those
+	// projection and the according axes. No support for multiple axes yes.
 	std::string orgProjection;
 	std::string orgXAxis;
 	std::string orgYAxis;
@@ -250,7 +268,9 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	// mapping all variables with matching orgX/orgY dimensions
 	std::vector<std::string> dims;
 	std::map<std::string, std::string> attrs;
-	attrs["grid_mapping"] = orgProjection;
+	if (orgProjection != "latitude_longitude") {
+		attrs["grid_mapping"] = orgProjection;
+	}
 	dims.push_back(orgXAxis);
 	dims.push_back(orgYAxis);
 	projectionVariables = cdm.findVariables(attrs, dims);
@@ -276,7 +296,10 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	size_t fieldSize = outXAxis.size() * outYAxis.size();
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
-	std::string orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
+	std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+	if (orgProjection != "latitude_longitude") {
+		attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
+	}
 	if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
 	}

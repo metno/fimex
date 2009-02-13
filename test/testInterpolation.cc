@@ -159,6 +159,21 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
 
 }
 
+BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
+{
+	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::string latlongProj("+elips=sphere +a=6370 +e=0 +proj=latlong");
+
+	double emepX[] = {6,7,8};
+	double emepY[] = {108,109,110};
+	double outX[9];
+	double outY[9];
+	BOOST_CHECK(MIFI_OK == mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), &emepX[0], &emepY[0], 3, 3, &outX[0], &outY[0]));
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++) BOOST_CHECK((RAD_TO_DEG * outY[j+3*i]) > 89);
+
+}
+
 BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 {
 	const int iSize = 170;
