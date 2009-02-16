@@ -104,7 +104,6 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	} catch (CDMException& ex) {
 		LoggerPtr logger = getLogger("fimex.CDMInterpolator.changeProjection");
 		LOG4FIMEX(logger, Logger::INFO, "no original projection found, trying coordinate-projection: "<< ex.what());
-		throw ex;
 		changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit);
 	}
 }
@@ -137,7 +136,7 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 	// remove projection and coordinates (lon lat)
 	if (orgProjection != "" && orgProjection != "latitude_longitude") {
 		cdm.removeVariable(orgProjection);
-		std::string var = (cdm.findVariables("grid_mapping", orgProjection))[0];
+		std::string var = projectionVariables[0];
 		if (var != "") {
 			std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
 			std::string coord1, coord2;
@@ -152,11 +151,12 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 			}
 		}
 	}
-
 	// add new projection and parameters
 	std::string newProjection = "latlong";
 	if (newProj != "latlong") {
 		newProjection = "projection_"+newProj;
+		int i = 0;
+		while (cdm.hasVariable(newProjection)) newProjection = "projection_"+newProj+type2string(++i);
 		CDMVariable projVar(newProjection, CDM_NAT, std::vector<std::string>());
 		projVar.setData(createData(CDM_NAT, 0)); // define empty data
 		cdm.addVariable(projVar);
@@ -167,6 +167,7 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 	}
 
 	if (DEBUG) {
+		std::cerr << "orgX, orgY: " << orgXAxis << ", "<< orgYAxis << std::endl;
 		std::cerr << "original projection: " << orgProjection << std::endl;
 		std::cerr << "new projection: " << newProjection << std::endl;
 		std::cerr << "new proj: " << newProj << std::endl;
@@ -204,11 +205,11 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 	if (newProj != "latlong") {
 		int i = 0;
 		while (cdm.hasVariable(lon)) {
-			lon = lon + type2string(++i);
+			lon = longitudeName + type2string(++i);
 		}
 		i = 0;
 		while (cdm.hasVariable(lat)) {
-			lat = lat + type2string(++i);
+			lat = latitudeName + type2string(++i);
 		}
 		cdm.generateProjectionCoordinates(newProjection, orgXAxis, orgYAxis, lon, lat);
 	}
@@ -230,29 +231,124 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
+	if (method != MIFI_NEAREST_NEIGHBOR) {
+		throw CDMException("changeProjectionByCoordinates works only with nearest neighbor interpolation method");
+	}
 	// detect a variable with coordinates axes, the interpolator does not allow for
 	// conversion of variable with different dimensions, converting only all variables
 	// with the same dimensions/coordinates as the first variable with coordinates
-	std::string var = (cdm.findVariables("coordinates", ".*"))[0];
-	if (var == "") throw CDMException("could not find coordinates needed for projection");
+	std::vector<std::string> variables = cdm.findVariables("coordinates", ".*");
+	if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
+	std::string var = variables[0];
 	std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
 	string longitude, latitude;
 	if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
-	const vector<string>& dims = cdm.getVariable(latitude).getShape();
+	const vector<string> dims = cdm.getVariable(latitude).getShape();
+	// remove the old coordinates
+	cdm.removeVariable(longitude);
+	cdm.removeVariable(latitude);
 
 	// mapping all variables with matching orgX/orgY dimensions
 	std::map<std::string, std::string> attrs;
 	attrs["coordinates"] = coordinates;
 	projectionVariables = cdm.findVariables(attrs, dims);
 
-	size_t xDimSize = cdm.getDimension(dims[0]).getLength();
-	size_t yDimSize = cdm.getDimension(dims[1]).getLength();
+	size_t orgXDimSize = cdm.getDimension(dims[0]).getLength();
+	size_t orgYDimSize = cdm.getDimension(dims[1]).getLength();
 
 	changeCDM(cdm, proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
 
-	//boost::shared_array<double> latVals = dataReader->getData(latitude);
-	//boost::shared_array<double> lonVals = dataReader->getData(longitude);
-	throw CDMException("not implemented yet");
+	boost::shared_array<double> latVals = dataReader->getData(latitude)->asDouble();
+	size_t latSize = dataReader->getData(latitude)->size();
+	boost::shared_array<double> lonVals = dataReader->getData(longitude)->asDouble();
+	for_each(&latVals[0], &latVals[latSize], degreeToRad);
+	for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+
+	// store projection changes to be used in data-section
+	// translate temporary new axes from deg2rad if required
+	vector<double> outXAxis = out_x_axis;
+	vector<double> outYAxis = out_y_axis;
+	boost::regex degree(".*degree.*");
+	if (boost::regex_match(out_x_axis_unit, degree)) {
+		for_each(outXAxis.begin(), outXAxis.end(), degreeToRad);
+	}
+	if (boost::regex_match(out_y_axis_unit, degree)) {
+		for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
+	}
+	// get output axes expressed in latitude, longitude
+	size_t fieldSize = outXAxis.size() * outYAxis.size();
+	vector<double> pointsOnXAxis(fieldSize);
+	vector<double> pointsOnYAxis(fieldSize);
+	if (getProjectionName(proj_input) != "latlong") {
+		std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+		if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
+			throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
+		}
+	}
+
+	//translatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], xDimSize, yDimSize);
+	{
+		// try to determine a average grid-distance, take some example points, evaluate the max,
+		// multiply that with a number slightly bigger than 1 (i use 1.414
+		// and define that as grid distance
+		std::vector<double> samples;
+		for (size_t ik = 0; ik < 10; ik++) {
+			size_t samplePos = static_cast<int>(fieldSize/10) * ik;
+			double lon0 = lonVals[samplePos];
+			double lat0 = latVals[samplePos];
+			double min_cos_d = -2; // max possible distance on unit-sphere has cos_d -1 -> d= pi * r
+			for (size_t ix = 0; ix < orgXDimSize; ix++) {
+				for (size_t iy = 0; iy < orgYDimSize; iy++) {
+					// find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
+					if (ix+iy*orgYDimSize != samplePos) {
+						double lon1 = lonVals[ix+iy*orgYDimSize];
+						double lat1 = latVals[ix+iy*orgYDimSize];
+						double dlon = lon0 - lon1;
+
+						double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
+						if (cos_d > min_cos_d) {
+							min_cos_d = cos_d;
+						}
+					}
+				}
+			}
+			samples.push_back(min_cos_d);
+		}
+		double max_grid_d = acos(*(max_element(samples.begin(), samples.end())));
+		max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
+		if (max_grid_d > PI) max_grid_d = PI;
+		double min_grid_cos_d = cos(max_grid_d);
+
+		for (size_t i = 0; i < fieldSize; i++) {
+			double lon0 = pointsOnXAxis[i];
+			double lat0 = pointsOnYAxis[i];
+			double min_cos_d = min_grid_cos_d; // max allowed distance
+			int minI = -1; // default: outside array
+			int minY = -1;
+			for (size_t ix = 0; ix < orgXDimSize; ix++) {
+				for (size_t iy = 0; iy < orgYDimSize; iy++) {
+					// find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
+					double lon1 = lonVals[ix+iy*orgYDimSize];
+					double lat1 = latVals[ix+iy*orgYDimSize];
+					double dlon = lon0 - lon1;
+
+					double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
+					if (cos_d > min_cos_d) {
+						// std::cerr << i << ": " << cos_d << "->" << (RAD_TO_DEG * acos(cos_d)) << " : (" << (RAD_TO_DEG * lat0) << "," << (RAD_TO_DEG * lon0) << ") <->" << "(" << (RAD_TO_DEG * lat1) << "," << (RAD_TO_DEG * lon1) << ")" << std::endl;
+						// smaller distance
+						min_cos_d = cos_d;
+						minI = ix;
+						minY = iy;
+					}
+				}
+			}
+			pointsOnXAxis[i] = minI;
+			pointsOnYAxis[i] = minY;
+		}
+	}
+	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
+
+	//TODO: prepare interpolation of vectors???
 }
 
 void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)

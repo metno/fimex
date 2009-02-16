@@ -24,8 +24,6 @@
 #include "fimex/interpolation.h"
 #include <string.h>
 #include <stdio.h>
-// M_PI no longer in c99
-#define PI 3.1415926535897932384626433832795
 
 static int ascendingDoubleComparator(const void * a, const void * b)
 {

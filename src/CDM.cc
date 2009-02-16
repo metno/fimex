@@ -508,22 +508,24 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	const CDMVariable& yVar = getVariable(yDim);
 	boost::shared_array<double> xData = xVar.getData()->asDouble();
 	boost::shared_array<double> yData = yVar.getData()->asDouble();
+	size_t xDimLength = getDimension(xDim).getLength();
+	size_t yDimLength = getDimension(yDim).getLength();
+	assert(xDimLength == xVar.getData()->size());
+	assert(yDimLength == yVar.getData()->size());
 	std::string xUnits = getAttribute(xDim, "units").getData()->asString();
 	if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
 		// convert degrees to radians
-		for (size_t i = 0; i < xVar.getData()->size(); ++i) {
+		for (size_t i = 0; i < xDimLength; ++i) {
 			xData[i] *= DEG_TO_RAD;
 		}
 	}
 	std::string yUnits = getAttribute(yDim, "units").getData()->asString();;
 	if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
 		// convert degrees to radians
-		for (size_t i = 0; i < yVar.getData()->size(); ++i) {
+		for (size_t i = 0; i < yDimLength; ++i) {
 			yData[i] *= DEG_TO_RAD;
 		}
 	}
-	size_t xDimLength = getDimension(xDim).getLength();
-	size_t yDimLength = getDimension(yDim).getLength();
 	size_t fieldSize = xDimLength * yDimLength;
 	boost::shared_array<double> longVal(new double[fieldSize]);
 	boost::shared_array<double> latVal(new double[fieldSize]);
