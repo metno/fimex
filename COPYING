@@ -1,3 +1,7 @@
+This software comes bundled with libkdtree++-0.7.0, which has the
+'Artistic License', see include/kdtree++/COPYING. Everything else is:
+ 
+
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991
 
