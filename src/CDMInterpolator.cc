@@ -24,9 +24,12 @@
 #include "fimex/CDMInterpolator.h"
 
 #include <boost/regex.hpp>
+#include <functional>
+#include <limits>
 #include "fimex/interpolation.h"
 #include "fimex/DataImpl.h"
 #include "fimex/Logger.h"
+#include "kdtree++/kdtree.hpp"
 
 namespace MetNoFimex
 {
@@ -99,12 +102,13 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 {
 	cdm = dataReader->getCDM(); // reset previous changes
 	projectionVariables.assign(0, ""); // reset variables
-	try {
-		changeProjectionByProjectionParameters(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit);
-	} catch (CDMException& ex) {
-		LoggerPtr logger = getLogger("fimex.CDMInterpolator.changeProjection");
-		LOG4FIMEX(logger, Logger::INFO, "no original projection found, trying coordinate-projection: "<< ex.what());
-		changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit);
+	switch (method) {
+	case MIFI_NEAREST_NEIGHBOR:
+	case MIFI_BILINEAR:
+	case MIFI_BICUBIC: changeProjectionByProjectionParameters(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+	case MIFI_COORD_NN:
+	case MIFI_COORD_NN_KD: changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+	default: throw CDMException("unknown projection method: " + type2string(method));
 	}
 }
 
@@ -190,6 +194,18 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 		xStandardName = "projection_x_coordinate";
 		yStandardName = "projection_y_coordinate";
 	}
+	if (!cdm.hasVariable(orgXAxis)) {
+		// create dimension-variable
+		vector<string> shape;
+		shape.push_back(orgXAxis);
+		cdm.addVariable(CDMVariable(orgXAxis, CDM_DOUBLE, shape));
+	}
+	if (!cdm.hasVariable(orgYAxis)) {
+		// create dimension-variable
+		vector<string> shape;
+		shape.push_back(orgYAxis);
+		cdm.addVariable(CDMVariable(orgYAxis, CDM_DOUBLE, shape));
+	}
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("units", out_x_axis_unit));
@@ -229,11 +245,230 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 
 }
 
+// internal setup for kd-tree
+typedef double p2dtype;
+class point2d {
+private:
+	p2dtype x;
+	p2dtype y;
+	int i;
+	int j;
+public:
+	point2d(p2dtype x, p2dtype y, int i, int j) : x(x), y(y), i(i), j(j) {}
+	point2d() : x(0), y(0), i(-1), j(-1) {}
+	// squared distance
+	double distance_to(const point2d& rhs) const {return (x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y);}
+	p2dtype operator[](size_t N) const { assert(N<2); return (N == 0) ? x : y; }
+	p2dtype getX() const {return x;}
+	p2dtype getY() const {return y;}
+	int getI() const {return i;}
+	int getJ() const {return j;}
+};
+inline bool operator==(const point2d& A, const point2d& B)
+{
+	return A.getX() == B.getX() && A.getY() == B.getY();
+}
+std::ostream& operator<<(std::ostream& out, const point2d& P)
+{
+	return out << '(' << P.getX() << ',' << P.getY() << ')';
+}
+// p2d accessor
+inline p2dtype pac(point2d p, size_t k) { return p[k]; }
+typedef KDTree::KDTree<2,point2d,std::pointer_to_binary_function<point2d,size_t,p2dtype> > tree_type;
+
+class DoesNotEqual {
+	point2d p;
+public:
+	DoesNotEqual(point2d p) : p(p) {}
+	bool operator()( const point2d& rhs ) const { return !(p == rhs); };
+};
+
+
+void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+{
+	// find the max distance of two neighboring points in the output
+	double maxDist = 0;
+	{
+		tree_type xyTree(std::ptr_fun(pac));
+		for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
+			xyTree.insert(point2d(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1));
+		}
+		for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
+			point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
+			std::pair<tree_type::const_iterator,double> found = xyTree.find_nearest_if(target, std::numeric_limits<double>::max(), DoesNotEqual(target));
+			assert(found.first != xyTree.end());
+			if (found.second> maxDist) {
+				maxDist = found.second;
+			}
+		}
+	}
+	assert(maxDist != 0);
+
+	// pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in m on projectionSpace
+	tree_type lonLatTree(std::ptr_fun(pac));
+	for (size_t ix = 0; ix < orgXDimSize; ix++) {
+		for (size_t iy = 0; iy < orgYDimSize; iy++) {
+			size_t pos = iy+ix*orgYDimSize;
+			lonLatTree.insert(point2d(lonVals[pos], latVals[pos], iy, ix));
+		}
+	}
+	for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
+		point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
+		std::pair<tree_type::const_iterator,double> found = lonLatTree.find_nearest(target, maxDist);
+		if (found.first != lonLatTree.end()) {
+			pointsOnXAxis[i] = found.first->getI();
+			pointsOnYAxis[i] = found.first->getJ();
+		}
+	}
+}
+
+double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize) {
+	// try to determine a average grid-distance, take some example points, evaluate the max,
+	// multiply that with a number slightly bigger than 1 (i use 1.414
+	// and define that as grid distance
+	std::vector<double> samples;
+	for (size_t ik = 0; ik < 10; ik++) {
+		size_t samplePos = static_cast<int>(pointsOnXAxis.size()/10) * ik;
+		double lon0 = lonVals[samplePos];
+		double lat0 = latVals[samplePos];
+		double min_cos_d = -2; // max possible distance on unit-sphere has cos_d -1 -> d= pi * r
+		for (size_t ix = 0; ix < orgXDimSize; ix++) {
+			for (size_t iy = 0; iy < orgYDimSize; iy++) {
+				// find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
+				if (ix+iy*orgYDimSize != samplePos) {
+					double lon1 = lonVals[ix+iy*orgXDimSize];
+					double lat1 = latVals[ix+iy*orgXDimSize];
+					double dlon = lon0 - lon1;
+
+					double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
+					if (cos_d > min_cos_d) {
+						min_cos_d = cos_d;
+					}
+				}
+			}
+		}
+		samples.push_back(min_cos_d);
+	}
+	double max_grid_d = acos(*(max_element(samples.begin(), samples.end())));
+	//max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
+	if (max_grid_d > PI) max_grid_d = PI;
+	return max_grid_d;
+}
+
+// internal setup for binary search lat/long
+class LL_POINT {
+public:
+	double lat;
+	double lon;
+	size_t x;
+	size_t y;
+	LL_POINT() : lat(0), lon(0), x(-1), y(-1) {}
+	LL_POINT(double lat, double lon, size_t x, size_t y) : lat(lat), lon(lon), x(x), y(y) {}
+	bool operator<(const LL_POINT& rhs) const { return (this->lat < rhs.lat); }
+};
+
+// this is approx 4 times faster by  using a binary search in latitude
+void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+{
+	double max_grid_d = getGridDistance(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+	double min_grid_cos_d = cos(max_grid_d);
+
+	// 1. order lat/lon after latitude
+	// 2. search for closest latitude
+	// 3. go up and down in list as long as dlat < min_dist
+	std::vector<LL_POINT> latlons(orgXDimSize*orgYDimSize);
+	for (size_t ix = 0; ix < orgXDimSize; ix++) {
+		for (size_t iy = 0; iy < orgYDimSize; iy++) {
+			size_t pos = ix+iy*orgXDimSize;
+			latlons[pos] = LL_POINT(latVals[pos],lonVals[pos], ix, iy);
+		}
+	}
+	// sort latlons by latitudes
+	sort(latlons.begin(), latlons.end());
+
+	for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
+		//                   lat                   lon
+		LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1, -1);
+		size_t steps = 0;
+		double min_cos_d = min_grid_cos_d; // max allowed distance
+		double min_d = acos(min_cos_d);
+		vector<LL_POINT>::const_iterator it = lower_bound(latlons.begin(), latlons.end(), p);
+		vector<LL_POINT>::const_iterator it2 = it;
+		// loop until end
+		while (it != latlons.end()) {
+			steps++;
+			double dlon = it->lon - p.lon;
+			if (fabs(it->lat - p.lat) > min_d) {
+				it = latlons.end(); // all successing
+			} else {
+				double cos_d = cos(it->lat) * cos(p.lat) * cos(dlon) + sin(it->lat) * sin(p.lat);
+				if (cos_d > min_cos_d) { // closer distance
+					min_cos_d = cos_d;
+					min_d = acos(min_cos_d);
+					p.x = it->x;
+					p.y = it->y;
+				}
+				it++;
+			}
+		}
+		// loop until beginning
+		it2--;
+		while (it2 != (latlons.begin()-1)) {
+			steps++;
+			double dlon = it2->lon - p.lon;
+			if (fabs(it2->lat - p.lat) > min_d) {
+				it2 = latlons.begin()-1; // all successing
+			} else {
+				double cos_d = cos(it2->lat) * cos(p.lat) * cos(dlon) + sin(it2->lat) * sin(p.lat);
+				if (cos_d > min_cos_d) { // closer distance
+					min_cos_d = cos_d;
+					min_d = acos(min_cos_d);
+					p.x = it2->x;
+					p.y = it2->y;
+				}
+				it2--;
+			}
+		}
+		pointsOnYAxis[i] = p.y;
+		pointsOnXAxis[i] = p.x;
+	}
+}
+
+void translatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+{
+	double max_grid_d = getGridDistance(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+	double min_grid_cos_d = cos(max_grid_d);
+
+	for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
+		double lon0 = pointsOnXAxis[i];
+		double lat0 = pointsOnYAxis[i];
+		double min_cos_d = min_grid_cos_d; // max allowed distance
+		int minI = -1; // default: outside array
+		int minY = -1;
+		for (size_t ix = 0; ix < orgXDimSize; ix++) {
+			for (size_t iy = 0; iy < orgYDimSize; iy++) {
+				// find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
+				double lon1 = lonVals[ix+iy*orgXDimSize];
+				double lat1 = latVals[ix+iy*orgXDimSize];
+				double dlon = lon0 - lon1;
+
+				double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
+				if (cos_d > min_cos_d) {
+					// std::cerr << i << ": " << cos_d << "->" << (RAD_TO_DEG * acos(cos_d)) << " : (" << (RAD_TO_DEG * lat0) << "," << (RAD_TO_DEG * lon0) << ") <->" << "(" << (RAD_TO_DEG * lat1) << "," << (RAD_TO_DEG * lon1) << ")" << std::endl;
+					// smaller distance
+					min_cos_d = cos_d;
+					minI = ix;
+					minY = iy;
+				}
+			}
+		}
+		pointsOnXAxis[i] = minI;
+		pointsOnYAxis[i] = minY;
+	}
+}
+
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
-	if (method != MIFI_NEAREST_NEIGHBOR) {
-		throw CDMException("changeProjectionByCoordinates works only with nearest neighbor interpolation method");
-	}
 	// detect a variable with coordinates axes, the interpolator does not allow for
 	// conversion of variable with different dimensions, converting only all variables
 	// with the same dimensions/coordinates as the first variable with coordinates
@@ -279,73 +514,35 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 	size_t fieldSize = outXAxis.size() * outYAxis.size();
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
-	if (getProjectionName(proj_input) != "latlong") {
-		std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
-		if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
-			throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
+	if (method == MIFI_COORD_NN) {
+		if (getProjectionName(proj_input) != "latlong") {
+			std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+			if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
+				throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
+			}
 		}
+		fastTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+	} else if (method == MIFI_COORD_NN_KD) {
+		for (size_t ix = 0; ix < outXAxis.size(); ix++) {
+			for (size_t iy = 0; iy < outYAxis.size(); iy++) {
+				size_t pos = ix+iy*outXAxis.size();
+				pointsOnXAxis[pos] = outXAxis[ix];
+				pointsOnYAxis[pos] = outYAxis[iy];
+			}
+		}
+		if (getProjectionName(proj_input) != "latlong") {
+			std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+			if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
+				throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
+			}
+		} else {
+			throw CDMException("unable to use kd-tree interpolation when output-projection in degree");
+		}
+		kdTreeTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+	} else {
+		throw CDMException("unkown interpolation method for coordinates: " + type2string(method));
 	}
 
-	//translatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], xDimSize, yDimSize);
-	{
-		// try to determine a average grid-distance, take some example points, evaluate the max,
-		// multiply that with a number slightly bigger than 1 (i use 1.414
-		// and define that as grid distance
-		std::vector<double> samples;
-		for (size_t ik = 0; ik < 10; ik++) {
-			size_t samplePos = static_cast<int>(fieldSize/10) * ik;
-			double lon0 = lonVals[samplePos];
-			double lat0 = latVals[samplePos];
-			double min_cos_d = -2; // max possible distance on unit-sphere has cos_d -1 -> d= pi * r
-			for (size_t ix = 0; ix < orgXDimSize; ix++) {
-				for (size_t iy = 0; iy < orgYDimSize; iy++) {
-					// find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
-					if (ix+iy*orgYDimSize != samplePos) {
-						double lon1 = lonVals[ix+iy*orgYDimSize];
-						double lat1 = latVals[ix+iy*orgYDimSize];
-						double dlon = lon0 - lon1;
-
-						double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
-						if (cos_d > min_cos_d) {
-							min_cos_d = cos_d;
-						}
-					}
-				}
-			}
-			samples.push_back(min_cos_d);
-		}
-		double max_grid_d = acos(*(max_element(samples.begin(), samples.end())));
-		max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
-		if (max_grid_d > PI) max_grid_d = PI;
-		double min_grid_cos_d = cos(max_grid_d);
-
-		for (size_t i = 0; i < fieldSize; i++) {
-			double lon0 = pointsOnXAxis[i];
-			double lat0 = pointsOnYAxis[i];
-			double min_cos_d = min_grid_cos_d; // max allowed distance
-			int minI = -1; // default: outside array
-			int minY = -1;
-			for (size_t ix = 0; ix < orgXDimSize; ix++) {
-				for (size_t iy = 0; iy < orgYDimSize; iy++) {
-					// find smallest distance (= max cosinus value): http://en.wikipedia.org/wiki/Great-circle_distance
-					double lon1 = lonVals[ix+iy*orgYDimSize];
-					double lat1 = latVals[ix+iy*orgYDimSize];
-					double dlon = lon0 - lon1;
-
-					double cos_d = cos(lat0) * cos(lat1) * cos(dlon) + sin(lat0) * sin(lat1);
-					if (cos_d > min_cos_d) {
-						// std::cerr << i << ": " << cos_d << "->" << (RAD_TO_DEG * acos(cos_d)) << " : (" << (RAD_TO_DEG * lat0) << "," << (RAD_TO_DEG * lon0) << ") <->" << "(" << (RAD_TO_DEG * lat1) << "," << (RAD_TO_DEG * lon1) << ")" << std::endl;
-						// smaller distance
-						min_cos_d = cos_d;
-						minI = ix;
-						minY = iy;
-					}
-				}
-			}
-			pointsOnXAxis[i] = minI;
-			pointsOnYAxis[i] = minY;
-		}
-	}
 	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
 
 	//TODO: prepare interpolation of vectors???
@@ -359,7 +556,11 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	std::string orgXAxis;
 	std::string orgYAxis;
 	std::string orgXAxisUnits, orgYAxisUnits;
-	cdm.getProjectionAndAxesUnits(orgProjection, orgXAxis, orgYAxis, orgXAxisUnits, orgYAxisUnits);
+	try {
+		cdm.getProjectionAndAxesUnits(orgProjection, orgXAxis, orgYAxis, orgXAxisUnits, orgYAxisUnits);
+	} catch (CDMException& ex) {
+		throw CDMException(string("unable to get original projection, maybe you should try coordinate interpolation: ") + ex.what());
+	}
 
 	// mapping all variables with matching orgX/orgY dimensions
 	std::vector<std::string> dims;

@@ -159,7 +159,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 #endif
 #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
-		LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " without config");
+		LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
 	}
 #endif
@@ -305,6 +305,10 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 			method = MIFI_NEAREST_NEIGHBOR;
 		} else if (m == "bicubic") {
 			method = MIFI_BICUBIC;
+		} else if (m == "coord_nearestneighbor") {
+			method = MIFI_COORD_NN;
+		} else if (m == "coord_kdtree") {
+			method = MIFI_COORD_NN_KD;
 		} else {
 			cerr << "WARNING: unknown interpolate.method: " << m << " using nearestneighbor" << endl;
 		}
@@ -413,7 +417,7 @@ int main(int argc, char* args[])
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
         ("extract.printNcML", "print NcML description of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
-        ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear or bicubic")
+        ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor or coord_kdtree")
         ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
         ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
         ("interpolate.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")

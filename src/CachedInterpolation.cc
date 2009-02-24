@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -33,7 +33,9 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 	case MIFI_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
 	case MIFI_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;
 	case MIFI_NEAREST_NEIGHBOR: this->func = mifi_get_values_f; break;
-	default: throw CDMException("unknown interpolation function: " + funcType);
+	case MIFI_COORD_NN: this->func = mifi_get_values_f; break;
+	case MIFI_COORD_NN_KD: this->func = mifi_get_values_f; break;
+	default: throw CDMException("unknown interpolation function: " + type2string(funcType));
 	}
 }
 
@@ -47,7 +49,7 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
 			if (func(inData.get(), zValues.get(), pointsOnXAxis[y*outX+x], pointsOnYAxis[y*outX+x], inX, inY, inZ) != MIFI_ERROR) {
 				for (size_t z = 0; z < inZ; ++z) {
 					outfield[mifi_3d_array_position(x, y, z, outX, outY, inZ)] = zValues[z];
-				}			
+				}
 			} else (throw CDMException("error during interpolation"));
 		}
 	}

@@ -553,6 +553,46 @@ void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, floa
 	return;
 }
 
+int mifi_project_values(const char* proj_input, const char* proj_output, const double* in_out_x_vals, const double* in_out_y_vals, const int num)
+{
+	// init projections
+	projPJ inputPJ;
+	projPJ outputPJ;
+	if (MIFI_DEBUG > 0) {
+		fprintf(stderr, "input proj: %s\n", proj_input);
+		fprintf(stderr, "output proj: %s\n", proj_output);
+	}
+
+	if (!(inputPJ = pj_init_plus(proj_input))) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		return MIFI_ERROR;
+	}
+	if (!(outputPJ = pj_init_plus(proj_output))) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		pj_free(inputPJ);
+		return MIFI_ERROR;
+	}
+	// z currently of no interest, no height attached to values
+	double* pointsZ= (double*) calloc(num, sizeof(double));
+	if (pointsZ == NULL) {
+		fprintf(stderr, "memory allocation error");
+		pj_free(inputPJ);
+		pj_free(outputPJ);
+	}
+	if (pj_transform(inputPJ, outputPJ, num, 0, in_out_x_vals, in_out_y_vals, pointsZ) != 0) {
+		fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+		pj_free(inputPJ);
+		pj_free(outputPJ);
+		free(pointsZ);
+		return MIFI_ERROR;
+	}
+	pj_free(inputPJ);
+	pj_free(outputPJ);
+	free(pointsZ);
+	return MIFI_OK;
+
+}
+
 int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis) {
 	// init projections
 	projPJ inputPJ;

@@ -50,10 +50,39 @@ extern "C" {
  * @brief interpolation method
  *
  * flag for bicubic interpolation
- * @warning not implemented yet
  */
 #define MIFI_BICUBIC          2
-
+/**
+ * @brief interpolation method
+ *
+ * Flag for nearest neighbor interpolation
+ * using lon/lat coordinates rather than the input
+ * projection. This is largely a brute force method
+ * which may take long time.
+ *
+ * Vector projection is not implemented (not defined?)
+ *
+ * @warning this works only from CDMInterpolator
+ */
+#define MIFI_COORD_NN         3
+/**
+ * @brief interpolation method
+ *
+ * Flag for nearest neighbor interpolation
+ * using coordinates with KD-tree. This works
+ * as nearest neighbor in the output-projection
+ * and has therefore numerical problems in some points,
+ * i.e. near southpole when using northpole-polarstereographic.
+ *
+ * It doesn't work with output projections in degree, i.e.
+ * rotated latitude longitude.
+ *
+ * Vector projection is not implemented (not defined?)
+ *
+ * @warning this works only from CDMInterpolator
+ *
+ */
+#define MIFI_COORD_NN_KD      4
 
 /**
  * @brief vector projection flag
@@ -299,6 +328,22 @@ extern int mifi_points2position(double* points, const int n, const double* axis,
  *  @return the position of x, y, z
  */
 extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
+
+
+/**
+ * @brief project values so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)
+ *
+ * all values must be given or will be returned in radians when converted from/to latlon
+ *
+ * @param proj_input input projection proj string
+ * @param proj_output output projection proj string
+ * @param in_out_x_vals x-values, will be input and output
+ * @param in_out_y_vals y-values, will be input and output
+ * @param num size of arrays
+ * @return error-code
+ *
+ */
+int mifi_project_values(const char* proj_input, const char* proj_output, const double* in_out_x_vals, const double* in_out_y_vals, const int num);
 
 /**
  * @brief project axes so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)
