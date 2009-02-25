@@ -63,16 +63,42 @@ public:
 	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
 	 */
 	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) = 0;
+
 	/**
 	 * @brief data-reading function to be called from the CDMWriter
 	 *
-	 * The getData function is a convenience function to retrieve all data from a file.
+	 * The getData function is a convenient function to retrieve all data from a file.
 	 * It is implemented using getDataSlice. It should be used with care, since a complete
 	 * variable might be bigger than available memory.
 	 *
 	 * @param varName name of the variable to read
 	 */
 	virtual const boost::shared_ptr<Data> getData(const std::string& varName) throw(CDMException);
+
+	/**
+	 * @brief read and scale a dataslice
+	 *
+	 * This functions uses getDataSlice internally. It tries to read
+	 * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
+	 * to the read data. Output-datatype will be double, output _FillValue
+	 * will be MIFI_UNDEFINED_D
+	 *
+	 * @param varName name of the variable to read
+	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+	 */
+	virtual const boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+
+	/**
+	 * @brief read and scale the complete data
+	 *
+	 * This functions uses getData internally. It tries to read
+	 * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
+	 * to the read data. Output-datatype will be double, output _FillValue
+	 * will be MIFI_UNDEFINED_D
+	 *
+	 * @param varName name of the variable to read
+	 */
+	virtual const boost::shared_ptr<Data> getScaledData(const std::string& varName) throw(CDMException);
 protected:
 	CDM cdm;
 	/**
@@ -82,6 +108,8 @@ protected:
 	 * @param unLimDimPos (optional) the unlimited position
 	 */
 	virtual const boost::shared_ptr<Data> getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException);
+private:
+	virtual const boost::shared_ptr<Data> scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data) throw(CDMException);
 
 };
 

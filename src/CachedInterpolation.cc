@@ -32,8 +32,8 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 	switch (funcType) {
 	case MIFI_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
 	case MIFI_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;
-	case MIFI_NEAREST_NEIGHBOR: this->func = mifi_get_values_f; break;
-	case MIFI_COORD_NN: this->func = mifi_get_values_f; break;
+	case MIFI_NEAREST_NEIGHBOR:
+	case MIFI_COORD_NN:
 	case MIFI_COORD_NN_KD: this->func = mifi_get_values_f; break;
 	default: throw CDMException("unknown interpolation function: " + type2string(funcType));
 	}
