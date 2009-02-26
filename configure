@@ -1508,6 +1508,7 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-xmltest       Do not try to compile and run a test LIBXML program
+  --enable-felt           enable felt-reader [default=yes]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1543,7 +1544,6 @@ Optional Packages:
                           is possible to specify a certain library for the
                           linker e.g.
                           --with-boost-unit-test-framework=boost_unit_test_framework-gcc
-  --with-miLib            use the mi library
 
 Some influential environment variables:
   CC          C compiler command
@@ -23412,21 +23412,20 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 # Check for the libmi library.
+# Check whether --enable-felt was given.
+if test "${enable_felt+set}" = set; then
+  enableval=$enable_felt;
+  if test "$enableval" = no; then
+    use_milib=no
+  else
+    use_milib=yes
+  fi
 
-# Check whether --with-miLib was given.
-if test "${with_miLib+set}" = set; then
-  withval=$with_miLib; case "${enableval}" in
-               yes) use_milib=true ;;
-               no)  use_milib=false ;;
-               *) { { echo "$as_me:$LINENO: error: bad value ${enableval} for --with-miLib" >&5
-echo "$as_me: error: bad value ${enableval} for --with-miLib" >&2;}
-   { (exit 1); exit 1; }; } ;;
-             esac
 else
-  use_milib=true
+   use_milib=yes
 fi
 
- if test x$use_milib = xtrue; then
+ if test x$use_milib = xyes; then
   HAVE_MILIB_TRUE=
   HAVE_MILIB_FALSE='#'
 else
@@ -23435,7 +23434,7 @@ else
 fi
 
 
-if test "$use_milib" = true; then
+if test "$use_milib" = yes; then
 # Check for the milib library.
 
 

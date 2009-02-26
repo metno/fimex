@@ -11,9 +11,6 @@ if HAVE_UDUNITS
   LDADD += ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
   CC_TESTS += testUnits
 endif
-if HAVE_GRIBAPI
-  CC_TESTS += testGribWriter
-endif
 if HAVE_PROJ4
   LDADD += ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 endif
@@ -22,11 +19,15 @@ if HAVE_MILIB
   CC_TESTS += testFeltReader
   NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
   NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
+  GRIBAPI_MI_TESTS = testGribWriter
 endif
 if HAVE_NETCDF
   LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
   CC_TESTS += ${NETCDF_MI_TESTS}
   SH_TESTS += ${NETCDF_MI_SH_TESTS}
+endif
+if HAVE_GRIBAPI
+  CC_TESTS += ${GRIBAPI_MI_TESTS}
 endif
 
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg

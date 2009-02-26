@@ -71,17 +71,16 @@ AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
 AC_LANG_POP(C++)
 
 # Check for the libmi library.
-AC_ARG_WITH([miLib],
-            [AS_HELP_STRING([--with-miLib],
-                            [use the mi library])],
-            [case "${enableval}" in
-               yes) use_milib=true ;;
-               no)  use_milib=false ;;
-               *) AC_MSG_ERROR([bad value ${enableval} for --with-miLib]) ;;
-             esac], [use_milib=true])
-AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xtrue])
+AC_ARG_ENABLE(felt, [  --enable-felt           enable felt-reader [[default=yes]]],[
+  if test "$enableval" = no; then
+    use_milib=no
+  else
+    use_milib=yes
+  fi
+  ],[ use_milib=yes ])
+AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xyes])
 
-if test "$use_milib" = true; then
+if test "$use_milib" = yes; then
 # Check for the milib library.
 PKG_CHECK_MODULES([milib], [milib])
 METNO_CHECK_HEADERS([milib/milib.h], , , ,

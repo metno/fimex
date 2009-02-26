@@ -33,15 +33,15 @@ build_triplet = @build@
 host_triplet = @host@
 @HAVE_UDUNITS_TRUE@am__append_1 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
 @HAVE_UDUNITS_TRUE@am__append_2 = testUnits
-@HAVE_GRIBAPI_TRUE@am__append_3 = testGribWriter
-@HAVE_PROJ4_TRUE@am__append_4 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
-@HAVE_MILIB_TRUE@am__append_5 = ${milib_LIBS}
-@HAVE_MILIB_TRUE@am__append_6 = testFeltReader
-@HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-@HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_TESTS}
-@HAVE_NETCDF_TRUE@am__append_9 = ${NETCDF_MI_SH_TESTS}
-TESTS = $(am__EXEEXT_6) $(am__EXEEXT_8)
-check_PROGRAMS = $(am__EXEEXT_6)
+@HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
+@HAVE_MILIB_TRUE@am__append_4 = ${milib_LIBS}
+@HAVE_MILIB_TRUE@am__append_5 = testFeltReader
+@HAVE_NETCDF_TRUE@am__append_6 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
+@HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_MI_TESTS}
+@HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_SH_TESTS}
+@HAVE_GRIBAPI_TRUE@am__append_9 = ${GRIBAPI_MI_TESTS}
+TESTS = $(am__EXEEXT_7) $(am__EXEEXT_9)
+check_PROGRAMS = $(am__EXEEXT_7)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -65,16 +65,17 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/include/fimex/config.h
 CONFIG_CLEAN_FILES =
 @HAVE_UDUNITS_TRUE@am__EXEEXT_1 = testUnits$(EXEEXT)
-@HAVE_GRIBAPI_TRUE@am__EXEEXT_2 = testGribWriter$(EXEEXT)
-@HAVE_MILIB_TRUE@am__EXEEXT_3 = testFeltReader$(EXEEXT)
-@HAVE_MILIB_TRUE@am__EXEEXT_4 = testNetcdfWriter$(EXEEXT) \
+@HAVE_MILIB_TRUE@am__EXEEXT_2 = testFeltReader$(EXEEXT)
+@HAVE_MILIB_TRUE@am__EXEEXT_3 = testNetcdfWriter$(EXEEXT) \
 @HAVE_MILIB_TRUE@	testExtractor$(EXEEXT) \
 @HAVE_MILIB_TRUE@	testInterpolator$(EXEEXT) \
 @HAVE_MILIB_TRUE@	testTimeInterpolator$(EXEEXT)
-@HAVE_NETCDF_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
-am__EXEEXT_6 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
+@HAVE_NETCDF_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
+@HAVE_MILIB_TRUE@am__EXEEXT_5 = testGribWriter$(EXEEXT)
+@HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
+am__EXEEXT_7 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
 	testCDM$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
-	$(am__EXEEXT_3) $(am__EXEEXT_5)
+	$(am__EXEEXT_4) $(am__EXEEXT_6)
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
@@ -188,8 +189,8 @@ DIST_SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testTimeInterpolator_SOURCES) $(testUnits_SOURCES)
 ETAGS = etags
 CTAGS = ctags
-@HAVE_NETCDF_TRUE@am__EXEEXT_7 = $(NETCDF_MI_SH_TESTS)
-am__EXEEXT_8 = $(am__EXEEXT_7)
+@HAVE_NETCDF_TRUE@am__EXEEXT_8 = $(NETCDF_MI_SH_TESTS)
+am__EXEEXT_9 = $(am__EXEEXT_8)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -319,18 +320,19 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
-	$(am__append_3) $(am__append_6) $(am__append_8)
-SH_TESTS = $(am__append_9)
+	$(am__append_5) $(am__append_7) $(am__append_9)
+SH_TESTS = $(am__append_8)
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@ \
-	$(am__append_1) $(am__append_4) $(am__append_5) \
-	$(am__append_7)
+	$(am__append_1) $(am__append_3) $(am__append_4) \
+	$(am__append_6)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS}
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
 @HAVE_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
 @HAVE_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
+@HAVE_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg
 check_SCRIPTS = $(SH_TESTS)
 testInterpolation_SOURCES = testInterpolation.cc
