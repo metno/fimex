@@ -43,6 +43,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 \
 	$(top_srcdir)/m4/have_netcdf_check.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
 	$(top_srcdir)/m4/metno_have_udunits.m4 \

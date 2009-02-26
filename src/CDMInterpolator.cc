@@ -21,8 +21,12 @@
  * USA.
  */
 
-#include "fimex/CDMInterpolator.h"
 
+#include "fimex/config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
+#include "fimex/CDMInterpolator.h"
 #include <boost/regex.hpp>
 #include <functional>
 #include <limits>
@@ -35,7 +39,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-const int DEBUG = 1;
+const int DEBUG = 0;
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
 : dataReader(dataReader), latitudeName("lat"), longitudeName("lon")
@@ -288,10 +292,13 @@ void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vect
 	// find the max distance of two neighboring points in the output
 	double maxDist = 0;
 	{
-		tree_type xyTree(std::ptr_fun(pac));
+		vector<point2d> xyPoints;
+		xyPoints.reserve(pointsOnXAxis.size());
 		for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
-			xyTree.insert(point2d(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1));
+			xyPoints.push_back(point2d(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1));
 		}
+		tree_type xyTree(xyPoints.begin(), xyPoints.end(), std::ptr_fun(pac));
+		xyPoints.clear(); // release memory
 		for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
 			point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
 			std::pair<tree_type::const_iterator,double> found = xyTree.find_nearest_if(target, std::numeric_limits<double>::max(), DoesNotEqual(target));
@@ -305,15 +312,19 @@ void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vect
 	if (DEBUG) cerr << "maxDist: " << maxDist << endl;
 
 	// pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in m on projectionSpace
-	tree_type lonLatTree(std::ptr_fun(pac));
+	vector<point2d> llPoints;
+	llPoints.reserve(orgXDimSize*orgYDimSize);
 	for (size_t ix = 0; ix < orgXDimSize; ix++) {
 		for (size_t iy = 0; iy < orgYDimSize; iy++) {
 			size_t pos = ix+iy*orgXDimSize;
 			if (!(isnan(lonVals[pos]) || isnan(latVals[pos]))) {
-				lonLatTree.insert(point2d(lonVals[pos], latVals[pos], ix, iy));
+				llPoints.push_back(point2d(lonVals[pos], latVals[pos], ix, iy));
 			}
 		}
 	}
+	tree_type lonLatTree(llPoints.begin(), llPoints.end(), std::ptr_fun(pac));
+	llPoints.clear(); // release memory
+
 	for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
 		point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
 		std::pair<tree_type::const_iterator,double> found = lonLatTree.find_nearest(target, maxDist);
@@ -331,7 +342,14 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
 	// and define that as grid distance
 	vector<double> samples;
 	size_t sampler = 13; // unusual grid-dimension
-	for (size_t ik = 0; ik < (pointsOnXAxis.size()/sampler); ik++) {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(shared)
+	{
+		omp_lock_t my_lock;
+		omp_init_lock(&my_lock);
+#pragma omp for
+#endif
+	for (int ik = 0; ik < (pointsOnXAxis.size()/sampler); ik++) {
 		size_t samplePos = sampler * ik;
 		double lon0 = lonVals[samplePos];
 		double lat0 = latVals[samplePos];
@@ -356,9 +374,19 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
 					}
 				}
 			}
+#ifdef HAVE_OPENMP
+			omp_set_lock (&my_lock);
+#endif
 			samples.push_back(min_cos_d);
+#ifdef HAVE_OPENMP
+			omp_unset_lock (&my_lock);
+#endif
 		}
 	}
+#ifdef HAVE_OPENMP
+	omp_destroy_lock(&my_lock);
+	}
+#endif
 	double max_grid_d = acos(*(max_element(samples.begin(), samples.end())));
 	max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
 	if (max_grid_d > PI) max_grid_d = PI;
@@ -399,8 +427,12 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 	}
 	// sort latlons by latitudes
 	sort(latlons.begin(), latlons.end());
-
-	for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(shared)
+	{
+#pragma omp for
+#endif
+	for (int i = 0; i < pointsOnXAxis.size(); i++) {
 		//                   lat                   lon
 		LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1, -1);
 		size_t steps = 0;
@@ -446,6 +478,9 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 		pointsOnYAxis[i] = p.y;
 		pointsOnXAxis[i] = p.x;
 	}
+#ifdef HAVE_OPENMP
+	}
+#endif
 }
 
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)

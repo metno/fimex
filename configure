@@ -23307,6 +23307,110 @@ echo "$as_me: error: Could not link against $ax_lib !" >&2;}
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
 
+ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+# Check compiler supporting openmp in C++
+
+
+{ echo "$as_me:$LINENO: checking for OpenMP flag of C++ compiler" >&5
+echo $ECHO_N "checking for OpenMP flag of C++ compiler... $ECHO_C" >&6; }
+if test "${ax_cv_cxx_openmp+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  saveCXXFLAGS=$CXXFLAGS
+ax_cv_cxx_openmp=unknown
+# Flags to try:  -fopenmp (gcc), -openmp (icc), -mp (SGI & PGI),
+#                -xopenmp (Sun), -omp (Tru64), -qsmp=omp (AIX), none
+ax_openmp_flags="-fopenmp -openmp -mp -xopenmp -omp -qsmp=omp none"
+if test "x$OPENMP_CXXFLAGS" != x; then
+  ax_openmp_flags="$OPENMP_CXXFLAGS $ax_openmp_flags"
+fi
+for ax_openmp_flag in $ax_openmp_flags; do
+  case $ax_openmp_flag in
+    none) CXXFLAGS=$saveCXX ;;
+    *) CXXFLAGS="$saveCXXFLAGS $ax_openmp_flag" ;;
+  esac
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char omp_set_num_threads ();
+int
+main ()
+{
+return omp_set_num_threads ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ax_cv_cxx_openmp=$ax_openmp_flag; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+done
+CXXFLAGS=$saveCXXFLAGS
+
+fi
+{ echo "$as_me:$LINENO: result: $ax_cv_cxx_openmp" >&5
+echo "${ECHO_T}$ax_cv_cxx_openmp" >&6; }
+if test "x$ax_cv_cxx_openmp" = "xunknown"; then
+  :
+else
+  if test "x$ax_cv_cxx_openmp" != "xnone"; then
+    OPENMP_CXXFLAGS=$ax_cv_cxx_openmp
+  fi
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_OPENMP 1
+_ACEOF
+
+           CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+fi
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
 # Check for the libmi library.
 
 # Check whether --with-miLib was given.

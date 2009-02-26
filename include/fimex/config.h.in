@@ -54,6 +54,9 @@
 /* have netcdf */
 #undef HAVE_NETCDF
 
+/* Define if OpenMP is enabled */
+#undef HAVE_OPENMP
+
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 

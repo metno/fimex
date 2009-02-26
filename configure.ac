@@ -64,6 +64,12 @@ AX_BOOST_UNIT_TEST_FRAMEWORK
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
 
+AC_LANG_PUSH(C++)
+# Check compiler supporting openmp in C++
+AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
+           CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],[])
+AC_LANG_POP(C++)
+
 # Check for the libmi library.
 AC_ARG_WITH([miLib],
             [AS_HELP_STRING([--with-miLib],
