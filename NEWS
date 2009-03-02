@@ -1,7 +1,21 @@
-  * .... fimex-0.9beta
+  * 2009-03-02 fimex-0.12
+    * adding coordinate interpolation (kdtree and brute force)
+    * fixing bugs in lat-lon interpolation
+    * enabling interpolation of ghrsst satellite data files
+    * easier build without felt-library
+    * using optional OpenMP for time-critical routines
+  * 2009-01-23 fimex-0.11
+    * adding bicubic spatial interpolation
+    * enabling netcdf-4 output with hdf5-zlib compression
+  * 2009-01-13 fimex-0.10
+    * adding time-interpolation
+    * adding documentation
+    * fix for erroneous felt projections
+  * 2008-09-23 fimex-0.9
+    * adding grib-writer (v1 and v2) via [[http://www.ecmwf.int/publications/manuals/grib_api/index.html|grib_api]]
+    * improved logging
     * switching to svn
     * adding proj4 to automake
-    * adding grib-api to automake
   * 2008-06-20 fimex-0.8
     * moving headers to fimex/*.h
     * throw exception when renaming non-existing field in NetCDF-writer (instead of segfault)

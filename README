@@ -9,10 +9,10 @@ compilation
 	* c99/c++ compiler
 	* libxml2 >= 2.5.0
 	* boost library >= 1.32 (1.33 for running tests)
-    * proj-4 >= 4.4.9
+   * proj-4 >= 4.4.9
 	
 To configure the different file formats it requires:
-    * NetCDF (netcdf-3 > 3.6)
+    * NetCDF (netcdf > 3.6)
     * Grib_API (grib_api > 1.4)
     * Felt (libmi)
 

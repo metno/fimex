@@ -1,1 +1,1 @@
-SUBDIRS = fimex
+SUBDIRS = fimex kdtree++

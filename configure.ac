@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.12beta],[heiko.klein@met.no])
+AC_INIT([fimex],[0.12],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -111,5 +111,5 @@ AC_LANG_POP(C++)
 #DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([include/fimex/config.h])
-AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile])
+AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/kdtree++/Makefile])
 AC_OUTPUT
