@@ -125,7 +125,7 @@ NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 }
 
 NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
-: CDMWriter(cdmReader, outputFile)
+: CDMWriter(cdmReader, outputFile), cdm(cdmReader->getCDM())
 {
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	std::auto_ptr<XMLDoc> doc;
@@ -145,14 +145,51 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 #endif
 		default: LOG4FIMEX(logger, Logger::DEBUG, "format: " << ncFile->get_format());
 	}
-	// make a local copy of attributes (required for config)
-	attributes = cdmReader->getCDM().getAttributes();
+	initRemove(doc);
 	// variable needs to be called before dimension!!!
 	initFillRenameVariable(doc);
 	initFillRenameDimension(doc);
 	initFillRenameAttribute(doc);
 	init();
 
+}
+
+void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+{
+	if (doc.get() != 0) {
+		{
+			// remove global attributes
+			XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='attribute']");
+			xmlNodeSetPtr nodes = xpathObj->nodesetval;
+			int size = (nodes) ? nodes->nodeNr : 0;
+			for (int i = 0; i < size; i++) {
+				std::string name = getXmlProp(nodes->nodeTab[i], "name");
+				cdm.removeAttribute(CDM::globalAttributeNS(), name);
+			}
+		}
+		{
+			// remove variable attributes
+			XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable/remove[@type='attribute']");
+			xmlNodeSetPtr nodes = xpathObj->nodesetval;
+			int size = (nodes) ? nodes->nodeNr : 0;
+			for (int i = 0; i < size; i++) {
+				std::string name = getXmlProp(nodes->nodeTab[i], "name");
+				std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
+				cdm.removeAttribute(varName, name);
+			}
+		}
+		{
+			// remove variables
+			XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='variable']");
+			xmlNodeSetPtr nodes = xpathObj->nodesetval;
+			int size = (nodes) ? nodes->nodeNr : 0;
+			for (int i = 0; i < size; i++) {
+				std::string name = getXmlProp(nodes->nodeTab[i], "name");
+				cdm.removeVariable(name);
+			}
+		}
+
+	}
 }
 
 void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
@@ -164,7 +201,7 @@ void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw
 		for (int i = 0; i < size; i++) {
 			std::string name = getXmlProp(nodes->nodeTab[i], "name");
 			std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
-			cdmReader->getCDM().getDimension(name); // check existence, throw exception
+			cdm.getDimension(name); // check existence, throw exception
 			dimensionNameChanges[name] = newname;
 			// change dimension variable unless it has been changed
 			if (variableNameChanges.find(name) == variableNameChanges.end()) {
@@ -177,7 +214,7 @@ void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw
 void NetCDF_CDMWriter::testVariableExists(const std::string& varName) throw(CDMException)
 {
 	try {
-		cdmReader->getCDM().getVariable(varName);
+		cdm.getVariable(varName);
 	} catch (CDMException& e) {
 		throw CDMException(std::string("error modifying variable in writer: ") + e.what());
 	}
@@ -216,7 +253,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(
 			defaultCompression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[0], "compressionLevel"));
 		}
 	}
-	const CDM::VarVec& vars = cdmReader->getCDM().getVariables();
+	const CDM::VarVec& vars = cdm.getVariables();
 	for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
 		variableCompression[varIt->getName()] = defaultCompression;
 	}
@@ -237,7 +274,6 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(
 void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
 {
 	// make a complete copy of the original attributes
-	attributes = cdmReader->getCDM().getAttributes();
 	if (doc.get() != 0) {
 	XPathObjPtr xpathObj = doc->getXPathObject("//attribute");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -260,27 +296,22 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw
 		std::string attValue = getXmlProp(node, "value");
 		std::string attType = getXmlProp(node, "type");
 		std::string attNewName = getXmlProp(node, "newname");
-		if (attNewName != "") {
-			cdmReader->getCDM().getAttribute(varName, attName); // throw error
-			attributeNameChanges[varName][attName] = attNewName;
-		}
+		std::string newAttrName = attNewName != "" ? attNewName : attName;
+		CDMAttribute attr;
 		if (attType != "") {
-			CDMAttribute attr(attName, attType, attValue);
-			CDM::AttrVec& av = attributes[varName];
-			CDM::AttrVec::iterator ait = find_if(av.begin(), av.end(), CDMNameEqual(attName));
-			if (ait == av.end()) {
-				av.push_back(attr);
-			} else {
-				*ait = attr;
-			}
+			attr = CDMAttribute(newAttrName, attType, attValue);
+		} else {
+			const CDMAttribute& oldAttr = cdm.getAttribute(varName, attName);
+			attr = CDMAttribute(newAttrName, oldAttr.getDataType(), oldAttr.getData());
 		}
+		cdm.removeAttribute(varName, attName); // remove the attribute with the old name
+		cdm.addOrReplaceAttribute(varName, attr); // set the attribute with the new name and data
 	}
 	}
 }
 
 
 NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
-	const CDM& cdm = cdmReader->getCDM();
 	const CDM::DimVec& cdmDims = cdm.getDimensions();
 	NcDimMap ncDimMap;
 	for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
@@ -296,7 +327,6 @@ NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
 
 NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncDimMap) {
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
-	const CDM& cdm = cdmReader->getCDM();
 	const CDM::VarVec& cdmVars = cdm.getVariables();
 	NcVarMap ncVarMap;
 	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
@@ -346,6 +376,7 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 
 void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 	// using C interface since it offers a combined interface to global and var attributes
+	const CDM::StrAttrVecMap& attributes = cdm.getAttributes();
 	for (CDM::StrAttrVecMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
 		int varId;
 		if (it->first == CDM::globalAttributeNS()) {
@@ -360,19 +391,19 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 			switch (dt) {
 			case CDM_STRING: ;
 			case CDM_CHAR:
-				errCode = nc_put_att_text(ncFile->id(), varId, getAttributeName(it->first, attr.getName()).c_str(), attr.getData()->size(), attr.getData()->asChar().get() );
+				errCode = nc_put_att_text(ncFile->id(), varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asChar().get() );
 				break;
 			case CDM_SHORT:
-				errCode = nc_put_att_short(ncFile->id(), varId, getAttributeName(it->first, attr.getName()).c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asShort().get() );
+				errCode = nc_put_att_short(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asShort().get() );
 				break;
 			case CDM_INT:
-				errCode = nc_put_att_int(ncFile->id(), varId, getAttributeName(it->first, attr.getName()).c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asInt().get() );
+				errCode = nc_put_att_int(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asInt().get() );
 				break;
 			case CDM_FLOAT:
-				errCode = nc_put_att_float(ncFile->id(), varId, getAttributeName(it->first, attr.getName()).c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asFloat().get() );
+				errCode = nc_put_att_float(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asFloat().get() );
 				break;
 			case CDM_DOUBLE:
-				errCode = nc_put_att_double(ncFile->id(), varId, getAttributeName(it->first, attr.getName()).c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asDouble().get() );
+				errCode = nc_put_att_double(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asDouble().get() );
 				break;
 			case CDM_NAT:
 			default: throw CDMException("unknown datatype for attribute " + attr.getName());
@@ -406,7 +437,6 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 
 void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 	Units units;
-	const CDM& cdm = cdmReader->getCDM();
 	const CDM::VarVec& cdmVars = cdm.getVariables();
 	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		const CDMVariable& cdmVar = *it;
@@ -487,31 +517,13 @@ NetCDF_CDMWriter::~NetCDF_CDMWriter()
 
 const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException)
 {
-	CDM::StrAttrVecMap::const_iterator varAttsIt = attributes.find(varName);
-	if (varAttsIt == attributes.end()) {
-		throw CDMException("could not find variable "+varName+" in NetcdfWriter attribute list");
-	}
-	CDM::AttrVec::const_iterator ait = find_if(varAttsIt->second.begin(), varAttsIt->second.end(), CDMNameEqual(attName));
-	if (ait == varAttsIt->second.end()) {
-		throw CDMException("could not find attribute "+attName+" for variable "+varName+" in NetcdfWriter attribute list");
-	}
-	return *ait;
-}
-
-const std::string& NetCDF_CDMWriter::getAttributeName(const std::string& varName, const std::string& attName) const
-{
-	if (attributeNameChanges.find(varName) != attributeNameChanges.end()) {
-		if (attributeNameChanges.find(varName)->second.find(attName) != attributeNameChanges.find(varName)->second.end()) {
-			return attributeNameChanges.find(varName)->second.find(attName)->second;
-		}
-	}
-	return attName;
+	return cdm.getAttribute(varName, attName);
 }
 
 const std::string& NetCDF_CDMWriter::getVariableName(const std::string& varName) const
 {
 	if (variableNameChanges.find(varName) == variableNameChanges.end()) {
-		return varName;
+		return cdm.getVariable(varName).getName();
 	} else {
 		return variableNameChanges.find(varName)->second;
 	}

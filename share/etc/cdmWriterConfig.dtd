@@ -18,7 +18,7 @@
 -->
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT cdm_ncwriter_config (default|dimension|variable|attribute)*>
+<!ELEMENT cdm_ncwriter_config (default|dimension|variable|attribute|remove)*>
 
 <!--- filetypes are: netcdf3 netcdf4 netcdf3_64bit netcdf4classic -->
 <!--- compressionLevel are 0 (no compression) to 9 -->
@@ -37,12 +37,12 @@
     name CDATA #REQUIRED
   >
 
-<!--- Put your DTDDoc comment here. -->
-<!ELEMENT variable (attribute)*>
+<!--- modify a variable -->
+<!ELEMENT variable (attribute|remove)*>
 <!ATTLIST variable
     newname CDATA #IMPLIED
     type CDATA #IMPLIED
-    name ID #REQUIRED
+    name CDATA #REQUIRED
     compressionLevel CDATA #IMPLIED
   >
 
@@ -50,5 +50,13 @@
 <!ELEMENT dimension EMPTY>
 <!ATTLIST dimension
     newname CDATA #REQUIRED
-    name ID #REQUIRED
+    name CDATA #REQUIRED
   >
+
+<!--- Remove a type='attribute' or 'variable' -->
+<!ELEMENT remove EMPTY>
+<!ATTLIST remove
+    name CDATA #REQUIRED
+    type CDATA #REQUIRED
+  >
+  

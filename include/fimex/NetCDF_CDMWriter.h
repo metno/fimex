@@ -25,6 +25,7 @@
 #define NETCDF_CDMWRITER_H_
 
 #include "fimex/CDMWriter.h"
+#include "fimex/CDM.h"
 #include "fimex/config.h"
 #include <map>
 #include <string>
@@ -58,8 +59,6 @@ public:
 	const std::string& getVariableName(const std::string& varName) const;
 	/** @return the new name of a dimension, eventually changed by the writers config */
 	const std::string& getDimensionName(const std::string& dimName) const;
-	/** @return the new name of an attribute, eventually changed by the writers config */
-	const std::string& getAttributeName(const std::string& varName, const std::string& attName) const;
 	/**
 	 * @param varName original variable name  (before config: newname)
 	 * @param attName original attribute name (before config: newname)
@@ -74,6 +73,8 @@ private:
 	void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
+	/** clear all fields to remove */
+	void initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	/** test if the variable exists in the cdmReader or throw an CDMException */
 	void testVariableExists(const std::string& varName) throw(CDMException);
 
@@ -83,14 +84,13 @@ private:
 	void writeData(const NcVarMap& varMap);
 	double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
 	double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
+	CDM cdm; /* local storage of the changed cdm-outline, except variable name changes */
 	std::auto_ptr<NcFile> ncFile;
-	std::auto_ptr<NcError> ncErr;;
+	std::auto_ptr<NcError> ncErr;
 	std::map<std::string, std::string> variableNameChanges;
 	std::map<std::string, CDMDataType> variableTypeChanges;
 	std::map<std::string, unsigned int> variableCompression;
 	std::map<std::string, std::string> dimensionNameChanges;
-	std::map<std::string, std::map<std::string, std::string> > attributeNameChanges;
-	CDM::StrAttrVecMap attributes;
 };
 
 }

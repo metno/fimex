@@ -40,4 +40,15 @@
 
 <!-- rename a attribute -->
 <attribute name="min_time" newname="minimum_time" />
+
+<!-- remove a global attribute -->
+<remove name="comment" type="attribute" />
+<!-- remove a variable -->
+<remove name="land_ice_area_fraction" type="variable" />
+
+<variable name="surface_snow_sickness">
+   <!--remove a variable-attribute -->
+   <remove name="long_name" type="attribute"/>
+</variable>
+
 </cdm_ncwriter_config>  
