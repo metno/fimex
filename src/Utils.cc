@@ -35,6 +35,12 @@ int round(double num) {
   return static_cast<int>(std::floor(num+0.5));
 }
 
+std::string trim(const std::string& str) {
+	int pos1 = str.find_first_not_of(" ");
+	int pos2 = str.find_last_not_of(" ");
+	return str.substr(pos1, pos2+1);
+}
+
 std::string string2lowerCase(const std::string& str)
 {
 	std::string s(str);
@@ -62,6 +68,5 @@ std::vector<std::string> tokenize(const std::string& str, const std::string& del
     }
     return tokens;
 }
-
 
 }

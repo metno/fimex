@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <sstream>
+#include "fimex/CDMException.h"
 
 namespace MetNoFimex
 {
@@ -33,6 +34,12 @@ namespace MetNoFimex
  * Round a double to integer.
  */
 int round(double num);
+
+/**
+ * Remove leading and trailing spaces.
+ * @param str string to trim
+ */
+std::string trim(const std::string& str);
 
 /**
  * Tokenize a string by a delimiter. This function will automaticall remove empty strings
@@ -70,6 +77,42 @@ T string2type(std::string s) {
 	return retVal;
 }
 
+/**
+ * convert a string with dots to a vector with type T
+ * @param str f.e. 3.5,4.5,...,17.5
+ * @param delimiter optional delimiter, defaults to ,
+ */
+template<typename T>
+std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimiter = ",") throw(CDMException)
+{
+	std::vector<std::string> tokens = tokenize(str, delimiter);
+    std::vector<T> vals;
+	bool pricks = false;
+	for (std::vector<std::string>::iterator tok = tokens.begin(); tok != tokens.end(); ++tok) {
+		std::string current = trim(*tok);
+		if (current == "...") {
+			pricks = true;
+		} else {
+			T val = string2type<T>(current);
+			if (pricks == true) {
+				pricks = false;
+				size_t end = vals.size();
+				if (end < 2) {
+					throw CDMException("tokenizeDotted: cannot use ... expansion at position " + type2string(end-1) +", need at least two values before");
+				}
+				T last = vals[end-1];
+				T dist = last - vals[end-2];
+				T curVal = last + dist;
+				while (curVal < val) {
+					vals.push_back(curVal);
+					curVal += dist;
+				}
+			}
+			vals.push_back(val);
+		}
+	}
+	return vals;
+}
 
 }
 

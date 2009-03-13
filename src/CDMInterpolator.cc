@@ -101,6 +101,27 @@ static void degreeToRad(double& val) {
 	val *= DEG_TO_RAD;
 }
 
+void CDMInterpolator::axisString2Vector(const std::string& axis, vector<double>& axis_vals, int axisId)
+{
+	boost::smatch what;
+	if (boost::regex_match(axis, what, boost::regex("auto"))) {
+		if (boost::regex_match(axis, what, boost::regex("d=(\\d+\\.?\\d+)"))) {
+			double distance = string2type<double>(what[1].str());
+		}
+	} else {
+		// TODO
+	}
+
+}
+
+void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+{
+	vector<double> x_axis_vals, y_axis_vals;
+	axisString2Vector(out_x_axis, x_axis_vals, 0);
+	axisString2Vector(out_y_axis, y_axis_vals, 1);
+	changeProjection(method, proj_input, x_axis_vals, y_axis_vals, out_x_axis_unit, out_y_axis_unit);
+}
+
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
 	cdm = dataReader->getCDM(); // reset previous changes

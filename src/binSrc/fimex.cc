@@ -220,53 +220,6 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 	return auto_ptr<CDMReader>(extractor);
 }
 
-static string trim(const string& str) {
-	int pos1 = str.find_first_not_of(" ");
-	int pos2 = str.find_last_not_of(" ");
-	return str.substr(pos1, pos2+1);
-}
-
-static double toDouble(const string& str) {
-	stringstream ss;
-	ss << str;
-	double d;
-	ss >> d;
-	return d;
-}
-static vector<double> parseDoubleString(const string& str) {
-	typedef boost::tokenizer<boost::char_separator<char> >
-	    tokenizer;
-	  boost::char_separator<char> sep(",");
-	  tokenizer tokens(str, sep);
-	  vector<double> vals;
-	  bool pricks = false;
-	  for (tokenizer::iterator tok = tokens.begin(); tok != tokens.end(); ++tok) {
-		  string current = trim(*tok);
-		  if (current == "...") {
-			  pricks = true;
-		  } else {
-			  double val = toDouble(current);
-			  if (pricks == true) {
-				  pricks = false;
-				  size_t end = vals.size();
-				  if (end < 2) {
-					  cerr << "ERROR: cannot use ... expansion at position " << end-1 <<", need at least two values before" << endl;;
-					  exit(1);
-				  }
-				  double last = vals[end-1];
-				  double dist = last - vals[end-2];
-				  double curVal = last + dist;
-				  while (curVal < val) {
-					  vals.push_back(curVal);
-					  curVal += dist;
-				  }
-			  }
-			  vals.push_back(val);
-		  }
-	  }
-	  return vals;
-}
-
 static auto_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! vm.count("timeInterpolate.timeSpec")) {
 		LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec not found, no interpolation used");
@@ -316,14 +269,14 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 
 	vector<double> xAxisVals;
 	if (vm.count("interpolate.xAxisValues")) {
-		xAxisVals = parseDoubleString(vm["interpolate.xAxisValues"].as<string>());
+		xAxisVals = tokenizeDotted<double>(vm["interpolate.xAxisValues"].as<string>(),",");
 	} else {
 		cerr << "ERROR: no xAxisValues given" << endl;
 		exit(1);
 	}
 	vector<double> yAxisVals;
 	if (vm.count("interpolate.yAxisValues")) {
-		yAxisVals = parseDoubleString(vm["interpolate.yAxisValues"].as<string>());
+		yAxisVals = tokenizeDotted<double>(vm["interpolate.yAxisValues"].as<string>(),",");
 	} else {
 		cerr << "ERROR: no yAxisValues given" << endl;
 		exit(1);

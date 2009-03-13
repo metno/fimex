@@ -24,6 +24,7 @@
 #ifndef CDMINTERPOLATOR_H_
 #define CDMINTERPOLATOR_H_
 
+#include <vector>
 #include "fimex/CDMReader.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
@@ -40,6 +41,8 @@ private:
 	CachedVectorReprojection cachedVectorReprojection;
 	std::string latitudeName;
 	std::string longitudeName;
+	/** converter for axes-strings */
+	void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
 	void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
 	void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
 
@@ -55,8 +58,24 @@ public:
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
 	 *
 	 * @param method Interpolation method
+	 * @param proj_input input-string for proj4, used as output projection
+	 * @param out_x_axis values of the output x-axis
+	 * @param out_y_axis values of the output y-axis
+	 * @param out_x_axis_unit unit of the output x-axis
+	 * @param out_y_axis_unit unit of the output y-axis
 	 */
 	virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+	/**
+	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
+	 *
+	 * @param method Interpolation method
+	 * @param proj_input input-string for proj4, used as output projection
+	 * @param out_x_axis config-string for x_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
+	 * @param out_y_axis config-string for y_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
+	 * @param out_x_axis_unit unit of the output x-axis
+	 * @param out_y_axis_unit unit of the output y-axis
+	 */
+	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
 	/**
 	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for latitude
