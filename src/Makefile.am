@@ -29,6 +29,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
+					 SpatialAxisSpec.cc \
 					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
 					 TimeSpec.cc \

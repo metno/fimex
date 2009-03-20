@@ -1,5 +1,5 @@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
-CC_TESTS = testInterpolation testData testCDM
+CC_TESTS = testTimeSpec testSpatialAxisSpec testInterpolation testData testCDM
 SH_TESTS = 
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
@@ -36,6 +36,8 @@ TESTS = $(CC_TESTS) $(SH_TESTS)
 
 check_PROGRAMS = $(CC_TESTS)
 testInterpolation_SOURCES = testInterpolation.cc
+testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
+testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc

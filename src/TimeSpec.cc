@@ -38,7 +38,7 @@ namespace MetNoFimex
 
 using namespace std;
 
-LoggerPtr logger = getLogger("fimex.TimeSpec");
+static LoggerPtr logger = getLogger("fimex.TimeSpec");
 
 double translateRelativeTime(string value, double startOffset, double finalValue)
 {
@@ -65,7 +65,6 @@ double translateRelativeTime(string value, double startOffset, double finalValue
 TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
 	: outputUnit("seconds since 1970-01-01 00:00:00")
 {
-	LoggerPtr logger = getLogger("fimex.TimeSpec");
 	LOG4FIMEX(logger, Logger::DEBUG, "getting timespec of " << timeSpec);
 	vector<string> toks = tokenize(timeSpec, ";");
 	std::string timeStepStr;
@@ -91,6 +90,7 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		}
 	}
 
+    // TODO: convert all times to double using tu and use tokenizeDotted, see SpatialAxisSpec
 	if (relativeUnit == "") {
 		// absolute time in spec
 		vector<string> times = tokenize(timeStepStr, ",");

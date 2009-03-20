@@ -267,27 +267,12 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 		}
 	}
 
-	vector<double> xAxisVals;
-	if (vm.count("interpolate.xAxisValues")) {
-		xAxisVals = tokenizeDotted<double>(vm["interpolate.xAxisValues"].as<string>(),",");
-	} else {
-		cerr << "ERROR: no xAxisValues given" << endl;
-		exit(1);
-	}
-	vector<double> yAxisVals;
-	if (vm.count("interpolate.yAxisValues")) {
-		yAxisVals = tokenizeDotted<double>(vm["interpolate.yAxisValues"].as<string>(),",");
-	} else {
-		cerr << "ERROR: no yAxisValues given" << endl;
-		exit(1);
-	}
-
 	if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
 		cerr << "ERROR: xAxisUnit and yAxisUnit required" << endl;
 		exit(1);
 	}
 
-	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), xAxisVals, yAxisVals, vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
+	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(), vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
 	if (vm.count("interpolate.printNcML")) {
 		cout << "Interpolator as NcML:" << endl;
 		interpolator->getCDM().toXMLStream(cout);
@@ -371,8 +356,8 @@ int main(int argc, char* args[])
         ("extract.printNcML", "print NcML description of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor or coord_kdtree")
-        ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
-        ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5")
+        ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
+        ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
         ("interpolate.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")

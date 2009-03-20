@@ -76,9 +76,9 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc Logger.cc Null_CDMWriter.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
-	NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
+	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
+	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
@@ -96,7 +96,7 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	GribApiCDMWriter_Impl2.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
 	Logger.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
 	ReplaceStringObject.$(OBJEXT) \
-	ReplaceStringTimeObject.$(OBJEXT) \
+	ReplaceStringTimeObject.$(OBJEXT) SpatialAxisSpec.$(OBJEXT) \
 	TimeLevelDataSliceFetcher.$(OBJEXT) TimeUnit.$(OBJEXT) \
 	TimeSpec.$(OBJEXT) Units.$(OBJEXT) Utils.$(OBJEXT) \
 	XMLDoc.$(OBJEXT) $(am__objects_1)
@@ -277,9 +277,9 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribApiCDMWriter.cc Logger.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc TimeLevelDataSliceFetcher.cc \
-	TimeUnit.cc TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
-	$(am__append_1)
+	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
+	Utils.cc XMLDoc.cc $(am__append_1)
 all: all-recursive
 
 .SUFFIXES:
@@ -378,6 +378,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpatialAxisSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Po@am__quote@

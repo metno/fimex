@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -24,6 +24,7 @@
 #include "fimex/CachedVectorReprojection.h"
 #include "fimex/CDMException.h"
 #include "fimex/DataImpl.h"
+#include "fimex/Logger.h"
 #include <iostream>
 
 namespace MetNoFimex
@@ -32,7 +33,9 @@ namespace MetNoFimex
 void CachedVectorReprojection::reprojectValues(boost::shared_array<float>& uValues, boost::shared_array<float>& vValues, size_t size) const throw(CDMException)
 {
 	if (ox == 0 || oy == 0 || matrix.get() == 0) {
-		throw CDMException("CachedVectorReprojection not initialized"); 
+	    LoggerPtr logger = getLogger("fimex.CachedVectorReprojection");
+	    LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
+	    return;
 	}
 	size_t oz = size / (ox*oy);
 	int errcode = mifi_vector_reproject_values_by_matrix_f(method, matrix.get(), &uValues[0], &vValues[0], ox, oy, oz);

@@ -73,9 +73,10 @@ CONFIG_CLEAN_FILES =
 @HAVE_NETCDF_TRUE@am__EXEEXT_4 = $(am__EXEEXT_3)
 @HAVE_MILIB_TRUE@am__EXEEXT_5 = testGribWriter$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
-am__EXEEXT_7 = testInterpolation$(EXEEXT) testData$(EXEEXT) \
-	testCDM$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
-	$(am__EXEEXT_4) $(am__EXEEXT_6)
+am__EXEEXT_7 = testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
+	testInterpolation$(EXEEXT) testData$(EXEEXT) testCDM$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_4) \
+	$(am__EXEEXT_6)
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
@@ -148,12 +149,28 @@ testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
+am_testSpatialAxisSpec_OBJECTS = testSpatialAxisSpec.$(OBJEXT)
+testSpatialAxisSpec_OBJECTS = $(am_testSpatialAxisSpec_OBJECTS)
+testSpatialAxisSpec_LDADD = $(LDADD)
+testSpatialAxisSpec_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testTimeInterpolator_OBJECTS = testTimeInterpolator.$(OBJEXT)
 testTimeInterpolator_OBJECTS = $(am_testTimeInterpolator_OBJECTS)
 testTimeInterpolator_LDADD = $(LDADD)
 testTimeInterpolator_DEPENDENCIES =  \
 	../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
+am_testTimeSpec_OBJECTS = testTimeSpec.$(OBJEXT)
+testTimeSpec_OBJECTS = $(am_testTimeSpec_OBJECTS)
+testTimeSpec_LDADD = $(LDADD)
+testTimeSpec_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
@@ -181,12 +198,14 @@ SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
-	$(testTimeInterpolator_SOURCES) $(testUnits_SOURCES)
+	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
+	$(testTimeSpec_SOURCES) $(testUnits_SOURCES)
 DIST_SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
-	$(testTimeInterpolator_SOURCES) $(testUnits_SOURCES)
+	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
+	$(testTimeSpec_SOURCES) $(testUnits_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 @HAVE_NETCDF_TRUE@am__EXEEXT_8 = $(NETCDF_MI_SH_TESTS)
@@ -319,8 +338,9 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
-CC_TESTS = testInterpolation testData testCDM $(am__append_2) \
-	$(am__append_5) $(am__append_7) $(am__append_9)
+CC_TESTS = testTimeSpec testSpatialAxisSpec testInterpolation testData \
+	testCDM $(am__append_2) $(am__append_5) $(am__append_7) \
+	$(am__append_9)
 SH_TESTS = $(am__append_8)
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
@@ -336,6 +356,8 @@ AM_CFLAGS = -std=c99 -Wall
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg
 check_SCRIPTS = $(SH_TESTS)
 testInterpolation_SOURCES = testInterpolation.cc
+testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
+testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
@@ -409,9 +431,15 @@ testInterpolator$(EXEEXT): $(testInterpolator_OBJECTS) $(testInterpolator_DEPEND
 testNetcdfWriter$(EXEEXT): $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_DEPENDENCIES) 
 	@rm -f testNetcdfWriter$(EXEEXT)
 	$(CXXLINK) $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_LDADD) $(LIBS)
+testSpatialAxisSpec$(EXEEXT): $(testSpatialAxisSpec_OBJECTS) $(testSpatialAxisSpec_DEPENDENCIES) 
+	@rm -f testSpatialAxisSpec$(EXEEXT)
+	$(CXXLINK) $(testSpatialAxisSpec_OBJECTS) $(testSpatialAxisSpec_LDADD) $(LIBS)
 testTimeInterpolator$(EXEEXT): $(testTimeInterpolator_OBJECTS) $(testTimeInterpolator_DEPENDENCIES) 
 	@rm -f testTimeInterpolator$(EXEEXT)
 	$(CXXLINK) $(testTimeInterpolator_OBJECTS) $(testTimeInterpolator_LDADD) $(LIBS)
+testTimeSpec$(EXEEXT): $(testTimeSpec_OBJECTS) $(testTimeSpec_DEPENDENCIES) 
+	@rm -f testTimeSpec$(EXEEXT)
+	$(CXXLINK) $(testTimeSpec_OBJECTS) $(testTimeSpec_LDADD) $(LIBS)
 testUnits$(EXEEXT): $(testUnits_OBJECTS) $(testUnits_DEPENDENCIES) 
 	@rm -f testUnits$(EXEEXT)
 	$(CXXLINK) $(testUnits_OBJECTS) $(testUnits_LDADD) $(LIBS)
@@ -430,7 +458,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetcdfWriter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testSpatialAxisSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeInterpolator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
 
 .cc.o:

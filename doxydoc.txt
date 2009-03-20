@@ -66,8 +66,10 @@ Configurational options:
                                       bilinear or bicubic
   --interpolate.xAxisValues arg       string with values on x-Axis, use ... to
                                       continue, i.e. 10.5,11,...,29.5
+                                      see Fimex::SpatialAxisSpec for full definition
   --interpolate.yAxisValues arg       string with values on x-Axis, use ... to
                                       continue, i.e. 10.5,11,...,29.5
+                                      see Fimex::SpatialAxisSpec for full definition
   --interpolate.xAxisUnit arg         unit of x-Axis given as udunits string,
                                       i.e. m or degrees_east
   --interpolate.yAxisUnit arg         unit of y-Axis given as udunits string,
@@ -88,6 +90,10 @@ explained in @ref fimex_config.
 @subsection fimex_config fimex Setup File
 
 @verbinclude test/felt2netcdf.cfg
+
+The @em SpatialAxisSpec used in xAxisValues or yAxisValues for the spatial interpolation
+should be formatted as explained in detail in MetNoFimex::SpatialAxisSpec. It allows also
+autotuning to the orignal data-values. 
 
 The @em TimeSpec string used for the timeInterpolate should be formatted as explained in
 detail in MetNoFimex::TimeSpec.

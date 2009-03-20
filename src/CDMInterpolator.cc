@@ -29,9 +29,11 @@
 #include "fimex/CDMInterpolator.h"
 #include <boost/regex.hpp>
 #include <functional>
+#include <algorithm>
 #include <limits>
 #include "fimex/DataImpl.h"
 #include "fimex/Logger.h"
+#include "fimex/SpatialAxisSpec.h"
 #include "kdtree++/kdtree.hpp"
 
 namespace MetNoFimex
@@ -39,6 +41,7 @@ namespace MetNoFimex
 
 using namespace std;
 
+static LoggerPtr logger = getLogger("fimex.CDMInterpolator");
 const int DEBUG = 0;
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
@@ -101,25 +104,56 @@ static void degreeToRad(double& val) {
 	val *= DEG_TO_RAD;
 }
 
-void CDMInterpolator::axisString2Vector(const std::string& axis, vector<double>& axis_vals, int axisId)
-{
-	boost::smatch what;
-	if (boost::regex_match(axis, what, boost::regex("auto"))) {
-		if (boost::regex_match(axis, what, boost::regex("d=(\\d+\\.?\\d+)"))) {
-			double distance = string2type<double>(what[1].str());
-		}
-	} else {
-		// TODO
-	}
-
+static string getProjectionName(const string& proj_input) {
+    // get the new projection
+    std::string newProj;
+    boost::smatch what;
+    if (boost::regex_search(proj_input, what, boost::regex("\\+proj=(\\S+)"))) {
+        newProj = what[1].str();
+    } else {
+        throw CDMException("cannot find +proj=... in proj-string: " + proj_input);
+    }
+    return newProj;
 }
+
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
-	vector<double> x_axis_vals, y_axis_vals;
-	axisString2Vector(out_x_axis, x_axis_vals, 0);
-	axisString2Vector(out_y_axis, y_axis_vals, 1);
-	changeProjection(method, proj_input, x_axis_vals, y_axis_vals, out_x_axis_unit, out_y_axis_unit);
+    SpatialAxisSpec xAxisSpec(out_x_axis);
+    SpatialAxisSpec yAxisSpec(out_y_axis);
+    if (xAxisSpec.requireStartEnd() || yAxisSpec.requireStartEnd()) {
+        // detect the bounding box in the final projection
+        std::vector<std::string> variables = cdm.findVariables("coordinates", ".*");
+        if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
+        std::string var = variables[0];
+        std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
+        string longitude, latitude;
+        if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
+        const vector<string> dims = cdm.getVariable(latitude).getShape();
+        boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
+        size_t latSize = dataReader->getData(latitude)->size();
+        boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
+        for_each(&latVals[0], &latVals[latSize], degreeToRad);
+        for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+        if (getProjectionName(proj_input) != "latlong") {
+            std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+            if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
+                throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input);
+            }
+            // lonVals contains now all x-values, latVals all y-values
+            // get bounding box:
+            double xMin = *(min_element(&lonVals[0], &lonVals[latSize]));
+            double yMin = *(min_element(&latVals[0], &latVals[latSize]));
+            double xMax = *(max_element(&lonVals[0], &lonVals[latSize]));
+            double yMax = *(max_element(&latVals[0], &latVals[latSize]));
+            xAxisSpec.setStartEnd(xMin, xMax);
+            yAxisSpec.setStartEnd(yMin, yMax);
+            LOG4FIMEX(logger, Logger::INFO, "changeProjection, boundingbox: (" <<  xMin << "," << yMin << "), (" << xMax << "," << yMax << ")");
+        } else {
+            throw CDMException("changeProjection with autotuning axes only implemented for projections in m, not degree yet");
+        }
+    }
+	changeProjection(method, proj_input, xAxisSpec.getAxisSteps(), yAxisSpec.getAxisSteps(), out_x_axis_unit, out_y_axis_unit);
 }
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
@@ -134,18 +168,6 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	case MIFI_COORD_NN_KD: changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
 	default: throw CDMException("unknown projection method: " + type2string(method));
 	}
-}
-
-string getProjectionName(const string& proj_input) {
-	// get the new projection
-	std::string newProj;
-	boost::smatch what;
-	if (boost::regex_search(proj_input, what, boost::regex("\\+proj=(\\S+)"))) {
-		newProj = what[1].str();
-	} else {
-		throw CDMException("cannot find +proj=... in proj-string: " + proj_input);
-	}
-	return newProj;
 }
 
 /**
@@ -520,6 +542,12 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 	cdm.removeVariable(longitude);
 	cdm.removeVariable(latitude);
 
+	std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
+	for (size_t i = 0; i < gridMappings.size(); i++) {
+	    // remove all other projections, those might confuse other programs, i.e. IDV
+	    cdm.removeVariable(gridMappings[i]);
+	}
+
 	// mapping all variables with matching orgX/orgY dimensions
 	std::map<std::string, std::string> attrs;
 	attrs["coordinates"] = coordinates;
@@ -641,11 +669,14 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	vector<double> pointsOnYAxis(fieldSize);
 	std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
 	if (orgProjection != "latitude_longitude") {
-		attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
+		orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
 	}
 	if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
 	}
+    if (DEBUG) {
+        cerr << "mifi_project_axes: "<< proj_input << "," << orgProjStr << "," << outXAxis[0] << "," << outYAxis[0] << " => " << pointsOnXAxis[0] << "," << pointsOnYAxis[0] << endl;
+    }
 
 	// translate original axes from deg2rad if required
 	int miupXAxis = MIFI_PROJ_AXIS;

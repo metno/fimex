@@ -204,7 +204,6 @@ extern int mifi_vector_reproject_values_f(int method,
 						int ox, int oy, int oz);
 /**
  * calculate the reprojected vectors with a known matrix for #mifi_vector_reproject_values_f
- *
  * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param matrix reprojection matrix of size (4,ox,oy)
  * @param u_out values of u, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
@@ -343,7 +342,7 @@ extern int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz);
  * @return error-code
  *
  */
-int mifi_project_values(const char* proj_input, const char* proj_output, const double* in_out_x_vals, const double* in_out_y_vals, const int num);
+int mifi_project_values(const char* proj_input, const char* proj_output, double* in_out_x_vals, double* in_out_y_vals, const int num);
 
 /**
  * @brief project axes so that the projetion (x,y) => (x_proj), (y_proj) can be expressed as x_proj(x,y), y_proj(x,y)

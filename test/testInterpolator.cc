@@ -55,9 +55,18 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 		xAxis.push_back(i * 50000);
 		yAxis.push_back(i * 50000);
 	}
-	interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+	interpolator->changeProjection(MIFI_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
 	//interpolator->getCDM().toXMLStream(cerr);
 	BOOST_CHECK(true);
+    boost::shared_ptr<Data> altitudeData = interpolator->getDataSlice("altitude");
+    boost::shared_array<double> altArray = altitudeData->asDouble();
+    int found = 0;
+    for (size_t i = 0; i < altitudeData->size(); i++) {
+        if (altArray[i] > 2000) {
+            found++;
+        }
+    }
+    BOOST_CHECK(found > 100); // at least 100 cells above 2000m
 
 	NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	BOOST_CHECK(true);
@@ -85,6 +94,23 @@ BOOST_AUTO_TEST_CASE(test_interpolator2)
 		NetCDF_CDMWriter(interpolator, "testInterpolator2.nc");
 		BOOST_CHECK(true);
 	}
+}
+
+BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/flth00.dat");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
+    interpolator->changeProjection(MIFI_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
+    //interpolator->getCDM().toXMLStream(cerr);
+    BOOST_CHECK(true);
+    BOOST_CHECK(interpolator->getDataSlice("x")->size() == 297);
+    BOOST_CHECK(interpolator->getDataSlice("y")->size() == 286);
 }
 
 #else

@@ -42,6 +42,26 @@ int round(double num);
 std::string trim(const std::string& str);
 
 /**
+ * Join values from an iterator to a string, using delimiter as separator.
+ *
+ * @param start
+ * @param end
+ * @param delim separator, default to ","
+ */
+template<class InputIterator>
+std::string join(InputIterator start, InputIterator end, std::string delim = ",")
+{
+    std::ostringstream buffer;
+    if (start == end) return "";
+    while (start+1 != end) {
+        buffer << *start << delim;
+        start++;
+    }
+    buffer << *start;
+    return buffer.str();
+}
+
+/**
  * Tokenize a string by a delimiter. This function will automaticall remove empty strings
  * at the beginning or anywhere inside the string.
  *
