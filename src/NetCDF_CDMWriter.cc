@@ -87,6 +87,7 @@ static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 
 }
 
+#ifdef HAVE_NCFILE_FILEFORMAT
 NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 {
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
@@ -123,6 +124,7 @@ NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 	}
 	return retVal;
 }
+#endif /* HAVE_NCFILE_FILEFORMAT */
 
 NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
 : CDMWriter(cdmReader, outputFile), cdm(cdmReader->getCDM())
@@ -136,6 +138,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 	}
 	ncErr = std::auto_ptr<NcError>(new NcError(NcError::verbose_nonfatal));
 	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
+#ifdef HAVE_NCFILE_FILEFORMAT
 	NcFile::FileFormat ncVersion = getNcVersion(version, doc);
 	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace, 0, 0, ncVersion));
 	switch (ncFile->get_format()) {
@@ -145,6 +148,9 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 #endif
 		default: LOG4FIMEX(logger, Logger::DEBUG, "format: " << ncFile->get_format());
 	}
+#else
+    ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
+#endif /* HAVE_NCFILE_FILEFORMAT */
 	initRemove(doc);
 	// variable needs to be called before dimension!!!
 	initFillRenameVariable(doc);

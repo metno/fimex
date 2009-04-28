@@ -77,4 +77,12 @@ AC_SUBST(NETCDF_LIBS, [$NC_LIBS])
 AC_DEFINE_UNQUOTED([NETCDF_CPP_INCLUDE], "$NC_INCLUDES_DIR/netcdfcpp.h", [absolute header for netcdfcpp.h])
 AC_DEFINE_UNQUOTED([NETCDF_C_INCLUDE], "$NC_INCLUDES_DIR/netcdf.h", [absolute header for netcdfcpp.h])
 
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+AC_CHECK_TYPE([NcFile::FileFormat],[  AC_DEFINE([HAVE_NCFILE_FILEFORMAT],[1],
+            [define netcdf knows NcFile::FileFormat enum])
+],[],[#include "netcdfcpp.h"])
+AC_LANG_RESTORE
+
+
 ])

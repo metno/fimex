@@ -1,3 +1,7 @@
+  * 2009-03-20 fimex-0.13
+    * allowing for auto-tuning axes in interpolation (SpatialAxisSpec)
+    * removal of variables/attributes in cdmWriterConfig
+    * fixing broken projection-interpolation (broken since 0.12)
   * 2009-03-02 fimex-0.12
     * adding coordinate interpolation (kdtree and brute force)
     * fixing bugs in lat-lon interpolation

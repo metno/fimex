@@ -51,6 +51,9 @@
 /* define if the compiler implements namespaces */
 #undef HAVE_NAMESPACES
 
+/* define netcdf knows NcFile::FileFormat enum */
+#undef HAVE_NCFILE_FILEFORMAT
+
 /* have netcdf */
 #undef HAVE_NETCDF
 
