@@ -22,7 +22,8 @@
  */
 
 #include "fimex/config.h"
-#ifdef HAVE_BOOST_UNIT_TEST_FRAMEWORK
+#include <boost/version.hpp>
+#if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
