@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -36,7 +36,7 @@ namespace MetNoFimex
 
 class CDMAttribute : public CDMNamedEntity
 {
-	
+
 public:
 	CDMAttribute();
 	/// create a string attribute
@@ -58,6 +58,8 @@ public:
 	virtual ~CDMAttribute();
 	/// retrieve the name of the attribute
 	const std::string& getName() const {return name;}
+    /// set the name of the attribute
+    void setName(std::string newName) {name = newName;}
 	/// retrieve the stringified value of the attribute
 	const std::string getStringValue() const {return data->asString();}
 	/// retrieve the data-pointer of the attribute
@@ -75,13 +77,13 @@ private:
 
 /**
  * @brief convert a proj4 string to a list of CDMAttributes usable for CF-1.0 projection variable
- * 
+ *
  * currently, projStrings of the form +proj=[stere] +lat_0=? +lon_0=? +lat_ts=?
  */
 std::vector<CDMAttribute> projStringToAttributes(std::string projStr);
 /**
  * @brief convert attributes of a projection-variable to a projString
- * 
+ *
  * @param attrs attributes of the projection variable
  * @return proj4 string
  */

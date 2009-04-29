@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -38,13 +38,14 @@ public:
 	CDMDimension(std::string name, long length);
 	virtual ~CDMDimension();
 	const std::string& getName() const {return name;}
+	void setName(std::string newName) {name = newName;}
 	size_t getLength() const {return length;}
 	void setLength(size_t length) {this->length = length;}
 	void setUnlimited(int unlimited) {this->unlimited = unlimited;}
 	int isUnlimited() const {return unlimited;}
 	/**
 	 *  @brief print xml representation to stream
-	 * 
+	 *
 	 * @param out stream to write xml to
 	 */
 	void toXMLStream(std::ostream& out) const;

@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -41,11 +41,13 @@ public:
 	explicit CDMVariable(std::string name, CDMDataType datatype, std::vector<std::string> shape);
 	virtual ~CDMVariable();
 	const std::string& getName() const {return name;}
+	void setName(std::string newName) {name = newName;}
 	CDMDataType getDataType() const {return datatype;}
 	const std::vector<std::string>& getShape() const {return shape;}
+	void setShape(std::vector<std::string> newShape) {shape = newShape;}
 	/**
 	 * Declare this variable to be part of a spatial vector, e.g. (x-wind, y-wind)
-	 * 
+	 *
 	 * @param counterpart name of the other variable being part of this vector
 	 * @param direction comma-separated list of possible directions for this vector, e.g. "x,longitude"
 	 */
@@ -60,7 +62,7 @@ public:
 	const std::string& getSpatialVectorDirection() const {return spatialVectorDirection;}
 	/**
 	 * check the dimension of a variable
-	 * 
+	 *
 	 * @param dimension the dimension to check for
 	 */
 	bool checkDimension(const std::string& dimension) const;
@@ -72,10 +74,10 @@ public:
 	void setData(boost::shared_ptr<Data> data) {this->data = data;}
 	/**
 	 * @brief retrieve data from this variable
-	 * 
+	 *
 	 * retrieve data, but only if it has been set previously by {@link setData()}
 	 * this method will not try to read data from the disk
-	 */ 
+	 */
 	const boost::shared_ptr<Data> getData() const {return data;}
 	/// check if real data has been set with @link{setData()} (null-pointer reference returns false)
 	int hasData() const {return (data.get() != 0);}

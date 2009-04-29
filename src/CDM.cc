@@ -200,6 +200,27 @@ std::vector<std::string> CDM::findVariables(const std::string& attrName, const s
 	return findVariables(findAttributes, dims);
 }
 
+bool CDM::renameVariable(const std::string& oldName, const std::string& newName)
+{
+    // change variable in VarVec variables and variableNames as keys in StrAttrVecMap attributes
+    try {
+        removeVariable(newName); // make sure none of the same name exists
+        CDMVariable& var = getVariable(oldName);
+        var.setName(newName);
+        // working in places, addVariable(newName); not needed
+        std::vector<CDMAttribute> attrs = getAttributes(oldName);
+        for (std::vector<CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
+            addAttribute(newName, *it);
+        }
+        removeVariable(oldName);
+        return true;
+    } catch (CDMException& ex) {
+        // variable not found, return false
+        return false;
+    }
+    return false;
+}
+
 bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const
 {
 	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
@@ -297,6 +318,42 @@ CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException)
 	return const_cast<CDMDimension&>(
 			static_cast<const CDM&>(*this).getDimension(dimName)
 			);
+}
+
+bool CDM::renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException)
+{
+    if (!hasDimension(oldName)) return false;
+    if (hasDimension(newName)) {
+        /* check if dimension is in use */
+        bool inUse = false;
+        for (VarVec::iterator it = variables.begin(); it != variables.end(); ++it) {
+            if (it->checkDimension(newName)) {
+                inUse = true;
+            }
+        }
+        if (inUse) {
+            throw CDMException("Cannot rename dimension to "+newName+". Name already in use.");
+        } else {
+            // remove newName dimension
+            DimVec::iterator newEnd = remove_if(dimensions.begin(), dimensions.end(), CDMNameEqual(newName));
+            dimensions.erase(newEnd, dimensions.end());
+        }
+    }
+    CDMDimension& dim = getDimension(oldName);
+    dim.setName(newName);
+    /* change the shape of all variables having the dimensions */
+    for (VarVec::iterator it = variables.begin(); it != variables.end(); ++it) {
+        if (it->checkDimension(oldName)) {
+            std::vector<std::string> shape = it->getShape();
+            for (size_t i = 0; i < shape.size(); i++) {
+                if (shape[i] == oldName) {
+                    shape[i] = newName;
+                }
+            }
+            it->setShape(shape);
+        }
+    }
+    return true;
 }
 
 

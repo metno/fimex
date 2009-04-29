@@ -101,6 +101,16 @@ public:
 	 */
 	std::vector<std::string> findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const;
 	/**
+	 * @brief rename a variable
+	 *
+	 * @param oldName the old name of the variable
+	 * @param newName the new name of the variable
+	 * @return 1 on success (oldName exists), 0 on failure
+	 *
+	 * @warning this will not change the spatialVectorCounterPart of all other variables
+	 */
+	bool renameVariable(const std::string& oldName, const std::string& newName);
+	/**
 	 * check if a variable contains a attributes with a matching string-value
 	 *
 	 * @param varName variable
@@ -137,6 +147,15 @@ public:
 	CDMDimension& getDimension(const std::string& dimName) throw(CDMException);
 	const CDMDimension& getDimension(const std::string& dimName) const throw(CDMException);
 
+	/**
+	 * @brief rename a dimension
+	 *
+	 * Rename a dimension.
+	 *
+	 * @return false if the original name does not exist.
+	 * @throw CDMException if newName already in use in a variable but for a different dimension
+	 */
+	bool renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException);
 
 	/**
 	 * @brief retrieve the unlimited dimension

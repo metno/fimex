@@ -74,11 +74,12 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
 	DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc Logger.cc Null_CDMWriter.cc \
-	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
-	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
-	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
-	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	GribApiCDMWriter_Impl2.cc Logger.cc NcmlCDMReader.cc \
+	Null_CDMWriter.cc ReplaceStringObject.cc \
+	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
+	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
+	NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.$(OBJEXT) \
 @HAVE_NETCDF_TRUE@	NetCDF_Utils.$(OBJEXT)
@@ -94,8 +95,8 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	GribApiCDMWriter_ImplAbstract.$(OBJEXT) \
 	GribApiCDMWriter_Impl1.$(OBJEXT) \
 	GribApiCDMWriter_Impl2.$(OBJEXT) GribApiCDMWriter.$(OBJEXT) \
-	Logger.$(OBJEXT) Null_CDMWriter.$(OBJEXT) \
-	ReplaceStringObject.$(OBJEXT) \
+	Logger.$(OBJEXT) NcmlCDMReader.$(OBJEXT) \
+	Null_CDMWriter.$(OBJEXT) ReplaceStringObject.$(OBJEXT) \
 	ReplaceStringTimeObject.$(OBJEXT) SpatialAxisSpec.$(OBJEXT) \
 	TimeLevelDataSliceFetcher.$(OBJEXT) TimeUnit.$(OBJEXT) \
 	TimeSpec.$(OBJEXT) Units.$(OBJEXT) Utils.$(OBJEXT) \
@@ -276,7 +277,7 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribApiCDMWriter.cc Logger.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc $(am__append_1)
@@ -372,6 +373,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_ImplAbstract.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CF10_CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Po@am__quote@

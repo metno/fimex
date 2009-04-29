@@ -68,7 +68,12 @@ BOOST_AUTO_TEST_CASE( test_variable) {
 		BOOST_CHECK(true);
 	}
 
-	cdm.removeVariable(varName);
+	string newName = varName + "xx";
+	cdm.renameVariable(varName, newName);
+	BOOST_CHECK(cdm.hasVariable(newName));
+	BOOST_CHECK(!cdm.hasVariable(varName));
+
+	cdm.removeVariable(newName);
 	BOOST_CHECK(true);
 }
 
@@ -82,6 +87,7 @@ BOOST_AUTO_TEST_CASE( test_attributes)
 	string varName2("test2");
 	CDMVariable testVar2(varName2, CDM_NAT, noDim);
 	cdm.addVariable(testVar2);
+	string varName3("test3");
 
 	cdm.addAttribute(varName, CDMAttribute("attr", "value"));
 	cdm.addAttribute(varName, CDMAttribute("attr2", "value"));
@@ -95,6 +101,13 @@ BOOST_AUTO_TEST_CASE( test_attributes)
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
 	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
 
+	/* find attributes of renamed variables */
+	cdm.renameVariable(varName2, varName3);
+    vars = cdm.findVariables("attr", "value");
+    BOOST_CHECK(find(vars.begin(), vars.end(), varName2) == vars.end());
+    BOOST_CHECK(find(vars.begin(), vars.end(), varName3) != vars.end());
+
+
 	try {
 		cdm.addAttribute(varName, CDMAttribute("attr", "value"));
 		BOOST_CHECK(false); // should throw an error
@@ -105,12 +118,46 @@ BOOST_AUTO_TEST_CASE( test_attributes)
 	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() > 0);
 	cdm.removeAttribute("bla", "blub");
 	BOOST_CHECK(true); // no error
+
 	cdm.removeAttribute(varName, "attr");
 	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE( test_dimension)
 {
+    CDM cdm;
+    string dim1Str("dim1");
+    string dim2Str("dim2");
+    string dim3Str("dim3");
+    CDMDimension dim1(dim1Str, 5);
+    CDMDimension dim2(dim2Str, 6);
+
+    cdm.addDimension(dim1);
+    cdm.addDimension(dim2);
+
+    vector<std::string> varDims;
+    varDims.push_back(dim1Str);
+    varDims.push_back(dim2Str);
+    CDMVariable var("var", CDM_NAT, varDims);
+    cdm.addVariable(var);
+
+    BOOST_CHECK(cdm.getDimension(dim1Str).getName() == dim1Str);
+    BOOST_CHECK(cdm.hasDimension(dim2Str));
+    BOOST_CHECK(!cdm.hasDimension(dim3Str));
+    BOOST_CHECK(cdm.getVariable("var").checkDimension(dim2Str));
+
+    cdm.renameDimension(dim2Str, dim3Str);
+    BOOST_CHECK(cdm.hasDimension(dim3Str));
+    BOOST_CHECK(!cdm.hasDimension(dim2Str));
+    BOOST_CHECK(cdm.getVariable("var").checkDimension(dim3Str));
+    BOOST_CHECK(!cdm.getVariable("var").checkDimension(dim2Str));
+
+    try {
+        cdm.renameDimension(dim3Str, dim1Str); // fails, dim1Str in use
+        BOOST_CHECK(false);
+    } catch (CDMException& ex) {
+        BOOST_CHECK(true);
+    }
 
 }
 

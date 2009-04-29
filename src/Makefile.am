@@ -26,6 +26,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 GribApiCDMWriter_Impl2.cc \
 					 GribApiCDMWriter.cc \
 					 Logger.cc \
+					 NcmlCDMReader.cc \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
