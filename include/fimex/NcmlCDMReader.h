@@ -75,12 +75,14 @@ private:
      */
     void init() throw(CDMException);
     /* log a info of msg if xpath in config file */
+    void initRemove();
     void warnUnsupported(std::string xpath, std::string msg);
     void initWarnUnsupported();
     void initVariableNameChange();
+    void initVariableTypeChange();
     void initDimensionNameChange();
     void initAttributeNameChange();
-
+    void initAddReassignAttribute();
 
     std::string configFile;
     std::auto_ptr<XMLDoc> doc;

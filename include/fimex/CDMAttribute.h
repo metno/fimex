@@ -55,6 +55,8 @@ public:
 	explicit CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data);
 	/// create a attribute from a string representation
 	explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException);
+	/// create a attribute with a vector of values in string representation
+	explicit CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException);
 	virtual ~CDMAttribute();
 	/// retrieve the name of the attribute
 	const std::string& getName() const {return name;}
@@ -73,6 +75,15 @@ private:
 	std::string name;
 	CDMDataType datatype;
 	boost::shared_ptr<Data> data;
+    /* datatype and name must be set to call this init function */
+    void initDataByArray(const std::vector<std::string>& values);
+    /* init data arrays for all types */
+    template<typename T>
+    void initDataArray(const std::vector<std::string>& values) {
+        std::vector<T> vec;
+        std::transform(values.begin(), values.end(), std::back_inserter(vec), &string2type<T>);
+        data = createData(datatype, values.size(), vec.begin(), vec.end());
+    }
 };
 
 /**

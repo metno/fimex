@@ -146,11 +146,16 @@ BOOST_AUTO_TEST_CASE( test_dimension)
     BOOST_CHECK(!cdm.hasDimension(dim3Str));
     BOOST_CHECK(cdm.getVariable("var").checkDimension(dim2Str));
 
+    BOOST_CHECK(cdm.testDimensionInUse(dim2Str));
+    BOOST_CHECK(!cdm.testDimensionInUse(dim3Str));
+
+
     cdm.renameDimension(dim2Str, dim3Str);
     BOOST_CHECK(cdm.hasDimension(dim3Str));
     BOOST_CHECK(!cdm.hasDimension(dim2Str));
     BOOST_CHECK(cdm.getVariable("var").checkDimension(dim3Str));
     BOOST_CHECK(!cdm.getVariable("var").checkDimension(dim2Str));
+
 
     try {
         cdm.renameDimension(dim3Str, dim1Str); // fails, dim1Str in use
@@ -158,6 +163,11 @@ BOOST_AUTO_TEST_CASE( test_dimension)
     } catch (CDMException& ex) {
         BOOST_CHECK(true);
     }
+
+    cdm.addDimension(dim2);
+    BOOST_CHECK(!cdm.testDimensionInUse(dim2Str));
+    BOOST_CHECK(cdm.removeDimension(dim2Str));
+    BOOST_CHECK(!cdm.removeDimension(dim2Str));
 
 }
 

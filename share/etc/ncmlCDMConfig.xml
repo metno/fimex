@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 ncml-2.2.xsd ">
+
+
+<!-- rename a dimension -->
+<dimension name="x_new" orgName="x" />
+
+<!-- add/reassign a new variable attribute -->
+<variable name="air_temperature">
+   <attribute name="standard_name" value="temperature" type="string" />
+</variable>
+
+<!-- change the type of a variable -->
+<variable name="precipitation_amount" type="short">
+   <attribute name="_FillValue" value="-32767" type="short" />
+   <attribute name="scale_factor" value="0.001" type="float" />
+   <attribute name="add_offset" value="0" type="double" />
+</variable>
+
+<!-- rename a variable -->
+<variable orgName="sea_level_pressure" name="sea_pressure" />
+
+<!--  change units from m to km-->
+<!--  make sure to put the type to change the data, too!!! -->
+<variable name="x" type="double">
+   <attribute name="units" value="km" type="string" />
+</variable>
+
+<variable name="surface_snow_sickness">
+   <!--remove a variable-attribute -->
+   <remove name="long_name" type="attribute"/>
+</variable>
+
+
+
+<!-- add/reassign a new global attribute -->
+<attribute name="max_time" value="2008-05-28" type="string" />
+<!-- rename a attribute -->
+<attribute orgName="min_time" name="minimum_time" />
+
+
+
+<!-- remove a global attribute -->
+<remove name="comment" type="attribute" />
+<!-- remove a variable -->
+<remove name="land_ice_area_fraction" type="variable" />
+
+
+</netcdf>

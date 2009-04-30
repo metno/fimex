@@ -43,6 +43,7 @@ public:
 	const std::string& getName() const {return name;}
 	void setName(std::string newName) {name = newName;}
 	CDMDataType getDataType() const {return datatype;}
+	void setDataType(CDMDataType type) {datatype = type;}
 	const std::vector<std::string>& getShape() const {return shape;}
 	void setShape(std::vector<std::string> newShape) {shape = newShape;}
 	/**

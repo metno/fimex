@@ -148,6 +148,13 @@ public:
 	const CDMDimension& getDimension(const std::string& dimName) const throw(CDMException);
 
 	/**
+	 * @brief test if a dimension is actively in use
+	 *
+	 * @param name dimensionName
+	 */
+	bool testDimensionInUse(const std::string& name) const;
+
+	/**
 	 * @brief rename a dimension
 	 *
 	 * Rename a dimension.
@@ -156,6 +163,16 @@ public:
 	 * @throw CDMException if newName already in use in a variable but for a different dimension
 	 */
 	bool renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException);
+
+	/**
+	 * @brief remove a dimension
+	 *
+	 * Remove a dimension, if it is not in use by a variable.
+	 *
+	 * @return true if dimension existed, false otherwise
+	 * @throw CDMException if dimension in us in a variable
+	 */
+	bool removeDimension(const std::string& name) throw(CDMException);
 
 	/**
 	 * @brief retrieve the unlimited dimension

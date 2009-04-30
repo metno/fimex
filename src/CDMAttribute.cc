@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -99,59 +99,57 @@ CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, boost::shared
 CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException)
 : name(name)
 {
-	CDMDataType dtype = string2datatype(datatype);
-	switch (dtype) {
-	case CDM_FLOAT: {
-		float f;
-		std::stringstream str(value);
-		str >> f;
-		*this = CDMAttribute(name, f);
-		break;
-	}
-	case CDM_DOUBLE: {
-		double d;
-		std::stringstream str(value); 
-		str >> d;
-		*this = CDMAttribute(name, d);
-		break;
-	}
-	case CDM_INT:  {
-		int i;
-		std::stringstream str(value);
-		str >> i;
-		*this = CDMAttribute(name, i);
-		break;
-	} 
-	case CDM_SHORT: {
-		short s;
-		std::stringstream str(value);
-		str >> s;
-		*this = CDMAttribute(name, s);
-		break;
-	}
-	case CDM_CHAR: {
-		char c;
-		std::stringstream str(value);
-		str >> c;
-		*this = CDMAttribute(name, c);
-		break;
-	} 
-	case CDM_STRING: {
-		*this = CDMAttribute(name, value);
-		break;
-	}
-	default: {
-		throw CDMException("Unknown type to generate attribute " + name + ": " + datatype);
-	}
-	}
+	this->datatype = string2datatype(datatype);
+	std::vector<std::string> vals;
+	vals.push_back(value);
+	initDataByArray(vals);
 }
 
+CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException)
+: name(name), datatype(datatype)
+{
+    initDataByArray(values);
+}
+
+void CDMAttribute::initDataByArray(const std::vector<std::string>& values)
+{
+    switch (datatype) {
+    case CDM_FLOAT: {
+        initDataArray<float>(values);
+        break;
+    }
+    case CDM_DOUBLE: {
+        initDataArray<double>(values);
+        break;
+    }
+    case CDM_INT:  {
+        initDataArray<int>(values);
+        break;
+    }
+    case CDM_SHORT: {
+        initDataArray<short>(values);
+        break;
+    }
+    case CDM_CHAR: {
+        initDataArray<char>(values);
+        break;
+    }
+    case CDM_STRING: {
+        /* string may only have one dimension */
+        *this = CDMAttribute(name, join(values.begin(), values.end(), " "));
+        break;
+    }
+    default: {
+        throw CDMException("Unknown type to generate attribute " + name);
+    }
+    }
+}
 
 CDMAttribute::~CDMAttribute()
 {
 }
 
-void CDMAttribute::toXMLStream(std::ostream& out) const 
+void CDMAttribute::toXMLStream(std::ostream& out) const
 {
 	out << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
 }
@@ -161,7 +159,7 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 {
 	// init projections
 	// make sure that pj is freed when going out of scope
-	boost::shared_ptr<PJ> pj(pj_init_plus(projStr.c_str()), pj_free); 
+	boost::shared_ptr<PJ> pj(pj_init_plus(projStr.c_str()), pj_free);
 	if (!pj.get()) {
 		std::cerr << "pj_init error: " << pj_errno << " " << pj_strerrno(pj_errno) << std::endl;
 		throw std::exception(); // not initialized
@@ -233,12 +231,12 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 			attrList.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
 			 // TODO: find out if its 180-lon or lon-180 (find example file and test with java-netcdf 4.0 toolsUI)
 			attrList.push_back(CDMAttribute("grid_north_pole_longitude", 180-north_pole_lon));
-			attrList.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));			
+			attrList.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));
 		}
-		
+
 	}
 	// TODO implement more projections (merc, ...)
-	
+
 	return attrList;
 }
 

@@ -320,23 +320,26 @@ CDMDimension& CDM::getDimension(const std::string& dimName) throw(CDMException)
 			);
 }
 
+bool CDM::testDimensionInUse(const std::string& name) const
+{
+    if (!hasDimension(name)) return false;
+    bool inUse = false;
+    for (VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+        if (it->checkDimension(name)) {
+            inUse = true;
+        }
+    }
+    return inUse;
+}
+
 bool CDM::renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException)
 {
     if (!hasDimension(oldName)) return false;
     if (hasDimension(newName)) {
-        /* check if dimension is in use */
-        bool inUse = false;
-        for (VarVec::iterator it = variables.begin(); it != variables.end(); ++it) {
-            if (it->checkDimension(newName)) {
-                inUse = true;
-            }
-        }
-        if (inUse) {
+        if (testDimensionInUse(newName)) {
             throw CDMException("Cannot rename dimension to "+newName+". Name already in use.");
         } else {
-            // remove newName dimension
-            DimVec::iterator newEnd = remove_if(dimensions.begin(), dimensions.end(), CDMNameEqual(newName));
-            dimensions.erase(newEnd, dimensions.end());
+            removeDimension(newName);
         }
     }
     CDMDimension& dim = getDimension(oldName);
@@ -354,6 +357,21 @@ bool CDM::renameDimension(const std::string& oldName, const std::string& newName
         }
     }
     return true;
+}
+
+bool CDM::removeDimension(const std::string& name) throw(CDMException)
+{
+    bool didErase = false;
+    if (testDimensionInUse(name)) {
+        throw CDMException("Cannot remove dimension "+name+". Dimension in use.");
+    } else {
+        DimVec::iterator it = remove_if(dimensions.begin(), dimensions.end(), CDMNameEqual(name));
+        if (it != dimensions.end()) {
+            dimensions.erase(it, dimensions.end());
+            didErase = true;
+        }
+    }
+    return didErase;
 }
 
 
