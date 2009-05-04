@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -29,7 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/regex.hpp> 
+#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
 namespace MetNoFelt {
@@ -47,7 +47,7 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) 
 	for (std::vector<std::string>::const_iterator it = dianaFeltParams.begin(); it != dianaFeltParams.end(); ++it) {
 		std::string paramName(*it);
 		std::string dataType("none");
-		boost::smatch what; 
+		boost::smatch what;
 		boost::regex dTypeRegex(":dataType=([a-z]*)");
 		// cerr << "paramName: " << paramName;
 		if (boost::regex_search(paramName, what, dTypeRegex)) {
@@ -70,15 +70,15 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) 
 		if (dataType != "none") {
 			parameterDatatypeMap[paramName] = dataType;
 		}
-		//cerr << "Parameter " << paramName << ": " << parameterDatatypeMap[paramName] << " " << parameterFillValueMap[paramName] << endl; 
+		//cerr << "Parameter " << paramName << ": " << parameterDatatypeMap[paramName] << " " << parameterFillValueMap[paramName] << endl;
 	}
 }
 
 void FeltParameters::init(std::string configFile) {
 	boost::regex sectionEx("\\s*<([^/].*)>\\s*");
 	boost::regex parameterEx("\\s*([^=\\s]+)=(\\S+)");
-	boost::smatch what; 
-	
+	boost::smatch what;
+
 	std::ifstream dianaFeltDeclarations(configFile.c_str());
 	if (dianaFeltDeclarations.is_open()) {
 		std::string line;
@@ -107,23 +107,23 @@ void FeltParameters::init(std::string configFile) {
    				section.erase();
    			} else if (section == "METNOFIELDFILE_PARAMETERS") {
 				std::string::const_iterator start, end;
-				boost::match_flag_type flags = boost::match_default; 
-   				start = line.begin(); 
+				boost::match_flag_type flags = boost::match_default;
+   				start = line.begin();
    				end = line.end();
 				while (boost::regex_search(start, end, what, parameterEx)) {
 					//std::cerr << "Debug: " << what[1] << "===" << what[2] << std::endl;
 					// update start position
 					start = what[0].second;
 					// update flags to allow for --first as start-position
-      				flags |= boost::match_prev_avail; 
+      				flags |= boost::match_prev_avail;
       				flags |= boost::match_not_bob;
-      				
+
       				parameterMap[ what[1].str() ] = diana2feltparameters(what[2].str());
 	    		}
 			}
-			
+
 		}
-	}	
+	}
 }
 FeltParameters::~FeltParameters()
 {
@@ -142,7 +142,7 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
 	boost::char_separator<char> commaSep(",");
 	boost::tokenizer<boost::char_separator<char> > tok(dianaString, colonSep);
 	boost::tokenizer<boost::char_separator<char> >::iterator tokIt = tok.begin();
-	
+
 	boost::tokenizer<boost::char_separator<char> > tok2(*tokIt, commaSep);
 	boost::tokenizer<boost::char_separator<char> >::iterator tok2It = tok2.begin();
 	for (int i = 0; tok2It != tok2.end(); ++tok2It, ++i) {
@@ -153,7 +153,7 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
 			case 2: diana2feltParameters[12] = value; break; // level
 		}
 	}
-	
+
 	++tokIt;
 	for (;tokIt != tok.end(); ++tokIt) {
 		if (boost::regex_match(*tokIt, what, equalSeparatedRegex)) {
@@ -169,7 +169,7 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
 			} else if (what[1].str() == "idnum") {
 				diana2feltParameters[13] = id;
 			}
-		}	
+		}
 	}
 	return diana2feltParameters;
 }
@@ -223,14 +223,14 @@ double FeltParameters::getParameterFillValue(const std::string& parameterName) c
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error)
 {
 	std::ostringstream tempProj;
-	std::string earth("+elips=sphere +a="+MetNoFimex::type2string(MIFI_EARTH_RADIUS_M)+" +e=0");
+	std::string earth("+ellps=sphere +a="+MetNoFimex::type2string(MIFI_EARTH_RADIUS_M)+" +e=0");
 	switch (gridType) {
-		case 1: 
-		case 4: tempProj << "+proj=stere +lat_0=90 +lat_ts=" << gridParameters[4] << " +lon_0=" << gridParameters[3] << " " << earth; 
+		case 1:
+		case 4: tempProj << "+proj=stere +lat_0=90 +lat_ts=" << gridParameters[4] << " +lon_0=" << gridParameters[3] << " " << earth;
 				break;
 		case 2: tempProj << "+proj=latlong " << earth; // geographic
 				break;
-		case 3: tempProj << "+proj=ob_tran +o_proj=latlong +o_lat_p="<< (90-gridParameters[5]) << " +o_lon_b=" << gridParameters[4] <<  " " << earth; // rotated geographic 
+		case 3: tempProj << "+proj=ob_tran +o_proj=latlong +o_lat_p="<< (90-gridParameters[5]) << " +o_lon_b=" << gridParameters[4] <<  " " << earth; // rotated geographic
 //		case 3: tempProj << "+proj=latlong" <<  " " << earth; // rotated geographic ??
 				break;
 		case 5: tempProj << "+proj=tmerc +lat_1=" << gridParameters[4] << " " << earth; // mercator ???
@@ -240,7 +240,7 @@ std::string getProjString(int gridType, const boost::array<float, 6>& gridParame
 	return tempProj.str();
 }
 
-const std::string& UNDEFINED() {	
+const std::string& UNDEFINED() {
 	static std::string s("");
 	return s;
 }
@@ -251,7 +251,7 @@ const boost::array<short, 16>& ANY_ARRAY() {
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
 	return ary;
-}	   
+}
 const boost::array<short, 20>& ANY_ARRAY20() {
 	const static boost::array<short, 20> ary =
 	{ {ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
@@ -260,7 +260,7 @@ const boost::array<short, 20>& ANY_ARRAY20() {
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE(),
 	   ANY_VALUE(), ANY_VALUE(), ANY_VALUE(), ANY_VALUE()} };
 	return ary;
-}	   
+}
 
 
 } // end namespace MetNoFelt

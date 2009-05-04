@@ -136,7 +136,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         for_each(&latVals[0], &latVals[latSize], degreeToRad);
         for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
         if (getProjectionName(proj_input) != "latlong") {
-            std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+            std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
             if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
                 throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input);
             }
@@ -581,7 +581,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 	vector<double> pointsOnYAxis(fieldSize);
 	if (method == MIFI_COORD_NN) {
 		if (getProjectionName(proj_input) != "latlong") {
-			std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+			std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
 			if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 				throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
 			}
@@ -596,7 +596,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 			}
 		}
 		if (getProjectionName(proj_input) != "latlong") {
-			std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+			std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
 			if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
 				throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
 			}
@@ -667,7 +667,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	size_t fieldSize = outXAxis.size() * outYAxis.size();
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
-	std::string orgProjStr = "+elips=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+	std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
 	if (orgProjection != "latitude_longitude") {
 		orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
 	}

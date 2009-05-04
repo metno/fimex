@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
 
 BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
 {
-	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-	std::string latlongProj("+elips=sphere +a=6370 +e=0 +proj=latlong");
+	std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
 
 	double emepX[] = {6,7,8};
 	double emepY[] = {108,109,110};
@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 	const int latSize = 90;
 	float inArray[iSize*jSize*zSize]; // emep i, j, z
 	float outArray[lonSize*latSize*zSize]; // long, lat, z
-	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-	std::string latlongProj("+elips=sphere +a=6370 +e=0 +proj=latlong");
+	std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
 	double emepIAxis[iSize];
 	double emepJAxis[jSize];
 	double latitudeAxis[latSize];
@@ -298,8 +298,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 
 BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
 {
-	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
-	std::string emepProj2("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
+	std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
+	std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=90 +lat_ts=60");
 	double emepIAxis[5];
 	double emepJAxis[5];
 	double emepIOutAxis[5];
@@ -348,8 +348,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
 
 BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
 {
-	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
-	std::string emepProj2("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=180 +lat_ts=60");
+	std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
+	std::string emepProj2("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=180 +lat_ts=60");
 	double emepIAxis[5];
 	double emepJAxis[5];
 	double emepIOutAxis[5];
@@ -399,8 +399,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
 
 BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
 {
-	std::string emepProj("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
-	std::string latlongProj("+elips=sphere +a=6370 +e=0 +proj=latlong");
+	std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
 	double emepIAxis[4];
 	double emepJAxis[4];
 	double latitudeAxis[4];
@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
 
 BOOST_AUTO_TEST_CASE( test_Utils )
 {
-	std::vector<MetNoFimex::CDMAttribute> attrs = MetNoFimex::projStringToAttributes("+elips=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
+	std::vector<MetNoFimex::CDMAttribute> attrs = MetNoFimex::projStringToAttributes("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");
 	int found = 4;
 	for (std::vector<MetNoFimex::CDMAttribute>::iterator it = attrs.begin(); it != attrs.end(); ++it) {
 		if (it->getName() == "grid_mapping_name") {
