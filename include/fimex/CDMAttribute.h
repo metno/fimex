@@ -25,14 +25,17 @@
 #define CDMATTRIBUTE_H_
 
 #include<string>
+#include<vector>
 #include<ostream>
 #include<boost/shared_ptr.hpp>
-#include "fimex/Data.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"
+#include "fimex/CDMException.h"
 
 namespace MetNoFimex
 {
+/* forward declaration */
+class Data;
 
 class CDMAttribute : public CDMNamedEntity
 {
@@ -63,7 +66,7 @@ public:
     /// set the name of the attribute
     void setName(std::string newName) {name = newName;}
 	/// retrieve the stringified value of the attribute
-	const std::string getStringValue() const {return data->asString();}
+	const std::string getStringValue() const;
 	/// retrieve the data-pointer of the attribute
 	const boost::shared_ptr<Data> getData() const {return data;}
 	/// set the data for this attribute
@@ -79,11 +82,7 @@ private:
     void initDataByArray(const std::vector<std::string>& values);
     /* init data arrays for all types */
     template<typename T>
-    void initDataArray(const std::vector<std::string>& values) {
-        std::vector<T> vec;
-        std::transform(values.begin(), values.end(), std::back_inserter(vec), &string2type<T>);
-        data = createData(datatype, values.size(), vec.begin(), vec.end());
-    }
+    void initDataArray(const std::vector<std::string>& values);
 };
 
 /**

@@ -33,6 +33,7 @@
 #include <string>
 
 #include "fimex/CDMAttribute.h"
+#include "fimex/Data.h"
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK

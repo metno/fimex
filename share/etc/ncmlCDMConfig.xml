@@ -48,4 +48,6 @@
 <remove name="land_ice_area_fraction" type="variable" />
 
 
+<!-- not supported -->
+<group name="x" orgName="y"/>
 </netcdf>

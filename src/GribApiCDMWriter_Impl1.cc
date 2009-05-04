@@ -27,6 +27,8 @@
 #include "fimex/interpolation.h"
 #include "fimex/GribApiCDMWriter_Impl1.h"
 #include "fimex/Units.h"
+#include "fimex/Utils.h"
+#include "Data.h"
 
 namespace MetNoFimex
 {

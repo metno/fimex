@@ -33,6 +33,7 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
+#include "fimex/NcmlCDMReader.h"
 #include "fimex/Logger.h"
 #ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
@@ -58,6 +59,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             [--extract....]" << endl;
     out << "             [--interpolate....]" << endl;
     out << "             [--timeInterpolate....]" << endl;
+    out << "             [--ncml.config NCMLFILE]" << endl;
     out << endl;
     out << generic << endl;
     out << config << endl;
@@ -127,6 +129,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionAny(out, "interpolate.printNcML", vm);
 	writeOptionString(out, "timeInterpolate.timeSpec", vm);
 	writeOptionAny(out, "timeInterpolate.printNcML", vm);
+	writeOptionString(out, "ncml.config", vm);
+    writeOptionAny(out, "ncml.printNcML", vm);
 }
 
 static string getType(const string& io, po::variables_map& vm) {
@@ -163,6 +167,10 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
 	}
 #endif
+	if (type == "ncml") {
+	    LOG4FIMEX(logger, Logger::DEBUG, "reading file via NcML file '" << vm["input.file"].as<string>() << "'");
+        returnPtr = auto_ptr<CDMReader>(new NcmlCDMReader(vm["input.file"].as<string>()));
+	}
 
 	if (returnPtr.get() == 0) {
 		LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
@@ -281,6 +289,20 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 	return auto_ptr<CDMReader>(interpolator);
 }
 
+static auto_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
+    if (! vm.count("ncml.config")) {
+        return dataReader;
+    }
+    auto_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),vm["ncml.config"].as<string>()));
+    if (vm.count("ncml.printNcML")) {
+        cout << "NcmlCDMReader as NcML:" << endl;
+        ncmlReader->getCDM().toXMLStream(cout);
+        cout << endl;
+    }
+    return auto_ptr<CDMReader>(ncmlReader);
+}
+
+
 static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	string type = getType("output", vm);
 	// auto_ptr to shared_ptr
@@ -365,6 +387,8 @@ int main(int argc, char* args[])
         ("interpolate.printNcML", "print NcML description of interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
         ("timeInterpolate.printNcML", "print NcML description of timeInterpolator")
+        ("ncml.config", "modify/configure with ncml-file")
+        ("ncml.printNcML", "print NcML description after ncml-configuration")
 		;
 
 
@@ -419,6 +443,7 @@ int main(int argc, char* args[])
     	dataReader = getCDMExtractor(vm, dataReader);
     	dataReader = getCDMTimeInterpolator(vm, dataReader);
     	dataReader = getCDMInterpolator(vm, dataReader);
+    	dataReader = getNcmlCDMReader(vm, dataReader);
     	writeCDM(dataReader, vm);
     } catch (CDMException& cdmex) {
     	cout << "CDMException occured: " << cdmex.what() << endl;

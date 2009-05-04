@@ -22,6 +22,7 @@
  */
 
 #include "fimex/CDMExtractor.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

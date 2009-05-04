@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -23,7 +23,7 @@
 
 #include "fimex/XMLDoc.h"
 #include <libxml/xinclude.h>
-
+#include <libxml/xpathInternals.h>
 
 namespace MetNoFimex
 {
@@ -49,6 +49,15 @@ XMLDoc::XMLDoc(const std::string& filename) throw(CDMException)
 	}
 }
 
+void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href) throw(CDMException)
+{
+    /* do register namespace */
+    if(xmlXPathRegisterNs(xpathCtx, reinterpret_cast<const xmlChar *>(prefix.c_str()), reinterpret_cast<const xmlChar *>(href.c_str())) != 0) {
+        throw CDMException("unable to register NS with prefix "+prefix + " and href " + href);
+    }
+}
+
+
 void XMLDoc::cleanup()
 {
 	if (doc != 0) {
@@ -58,7 +67,7 @@ void XMLDoc::cleanup()
 		xmlXPathFreeContext(xpathCtx);
 	}
 	xmlCleanupParser();
-	
+
 }
 
 XMLDoc::~XMLDoc()
@@ -77,7 +86,7 @@ XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath) const throw(CDMExce
 
 /**
  * a memory-save form of xmlGetProp
- * 
+ *
  * @return a string of the attribute, "" if attribute doesn't exist
  */
 std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
@@ -90,7 +99,7 @@ std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
 }
 
 std::string getXmlName(const xmlNodePtr node) {
-	return std::string (reinterpret_cast<const char *>(node->name)); 
+	return std::string (reinterpret_cast<const char *>(node->name));
 }
 
 

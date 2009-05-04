@@ -28,6 +28,8 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {
@@ -39,8 +41,8 @@ static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
     : configFile(configFile)
 {
-    doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
-    XPathObjPtr xpathObj = doc->getXPathObject("/netcdf[@location]");
+    doc = new XMLDoc(configFile);
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
         throw CDMException("config-file "+configFile+" does not contain location-attribute");
@@ -53,18 +55,34 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
 NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile) throw(CDMException)
     : configFile(configFile), dataReader(dataReader)
 {
-    doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
+    doc = new XMLDoc(configFile);
     init();
+}
+
+NcmlCDMReader::~NcmlCDMReader()
+{
+    // doc cannot get copied, just created or deleted
+    delete doc;
 }
 
 void NcmlCDMReader::init() throw(CDMException)
 {
+    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
+    int size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
+    if (size == 0) {
+        LOG4FIMEX(logger, Logger::WARN, "config-file " << configFile << " not a ncml-file, ignoring");
+        return;
+    }
     cdm = dataReader->getCDM();
+    LOG4FIMEX(logger, Logger::DEBUG, "initializing");
 
     initRemove();
     initVariableNameChange();
+    initVariableTypeChange();
     initDimensionNameChange();
     initAttributeNameChange();
+    initAddReassignAttribute();
     initWarnUnsupported();
 }
 
@@ -73,26 +91,30 @@ void NcmlCDMReader::warnUnsupported(std::string xpath, std::string msg) {
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size > 0) {
-        LOG4FIMEX(logger, Logger::INFO, msg);
+        LOG4FIMEX(logger, Logger::DEBUG, msg);
     }
 }
 
 void NcmlCDMReader::initRemove() {
-    XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/remove");
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:remove");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        if (name == "") throw CDMException("name attribute required for /netcdf/remove element in "+configFile);
+        if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configFile);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
-        if (type == "") throw CDMException("type attribute required for /netcdf/remove element in "+configFile);
+        if (type == "") throw CDMException("type attribute required for /nc:netcdf/nc:remove element in "+configFile);
         if (type == "variable") {
+            LOG4FIMEX(logger, Logger::DEBUG, "removing variable " << name);
             cdm.removeVariable(name);
         } else if (type == "dimension") {
+            LOG4FIMEX(logger, Logger::DEBUG, "removing dimension " << name);
             cdm.removeDimension(name);
         } else if (type == "attribute") {
+            LOG4FIMEX(logger, Logger::DEBUG, "removing attribute " << name);
             cdm.removeAttribute(CDM::globalAttributeNS(), name);
         } else if (type == "group") {
+            LOG4FIMEX(logger, Logger::DEBUG, "request to remove group " << name << " ignored");
             // groups not supported
         } else {
             LOG4FIMEX(logger, Logger::FATAL, "unknown type to remove in "+configFile);
@@ -102,14 +124,14 @@ void NcmlCDMReader::initRemove() {
 
 
     /* remove the variable attributes */
-    xpathObj = doc->getXPathObject("/netcdf/remove");
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:remove");
     nodes = xpathObj->nodesetval;
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        if (name == "") throw CDMException("name attribute required for /netcdf/remove element in "+configFile);
+        if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configFile);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
-        if (type == "attribute") throw CDMException("type attribute required = 'attribute' for /netcdf/variable/remove element in "+configFile);
+        if (type != "attribute") throw CDMException("type attribute required = 'attribute' for /nc:netcdf/nc:variable/nc:remove element in "+configFile);
         std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
         if (varName == "") throw CDMException("name attribute required for all variable element in "+configFile);
         cdm.removeAttribute(varName, name);
@@ -118,14 +140,14 @@ void NcmlCDMReader::initRemove() {
 
 /* warn about features not supported in this class */
 void NcmlCDMReader::initWarnUnsupported() {
-    warnUnsupported("/netcdf/aggregation", "aggregation not supported");
-    warnUnsupported("/netcdf/dimension[isUnlimited]", "setting of unlimited dimension not supported");
-    warnUnsupported("/netcdf/group]","groups not supported");
+    warnUnsupported("/nc:netcdf/nc:aggregation", "aggregation not supported");
+    warnUnsupported("/nc:netcdf/nc:dimension[isUnlimited]", "setting of unlimited dimension not supported");
+    warnUnsupported("/nc:netcdf/nc:group","groups not supported");
 }
 
 void NcmlCDMReader::initVariableTypeChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/variable[@type]");
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@type]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -134,6 +156,7 @@ void NcmlCDMReader::initVariableTypeChange()
         if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
         if (cdm.hasVariable(name)) {
             variableTypeChanges[name] = string2datatype(type);
+            LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
             cdm.getVariable(name).setDataType(string2datatype(type));
         }
     }
@@ -141,7 +164,7 @@ void NcmlCDMReader::initVariableTypeChange()
 
 void NcmlCDMReader::initAddReassignAttribute()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/attribute[@value]");
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@value]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -152,12 +175,13 @@ void NcmlCDMReader::initAddReassignAttribute()
         vector<string> values = tokenize(value, separator);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         if (type == "") type = "string";
+        LOG4FIMEX(logger, Logger::DEBUG, "adding global attribute: " + name);
         cdm.removeAttribute(CDM::globalAttributeNS(), name);
         cdm.addAttribute(CDM::globalAttributeNS(), CDMAttribute(name, string2datatype(type), values));
     }
 
     /* the variable attributes */
-    xpathObj = doc->getXPathObject("/netcdf/variable/attribute[@value]");
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:attribute[@value]");
     nodes = xpathObj->nodesetval;
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -170,6 +194,7 @@ void NcmlCDMReader::initAddReassignAttribute()
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         if (type == "") type = "string";
         cdm.removeAttribute(varName, name);
+        LOG4FIMEX(logger, Logger::DEBUG, "adding variable attribute to "<< varName << ": " << name);
         cdm.addAttribute(varName, CDMAttribute(name, string2datatype(type), values));
     }
 }
@@ -177,7 +202,7 @@ void NcmlCDMReader::initAddReassignAttribute()
 /* change the variable names */
 void NcmlCDMReader::initVariableNameChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/variable[@orgName]");
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@orgName]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -194,7 +219,7 @@ void NcmlCDMReader::initVariableNameChange()
 /* change the dimension names */
 void NcmlCDMReader::initDimensionNameChange()
 {
-    XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/dimension[@orgName]");
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@orgName]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -211,7 +236,7 @@ void NcmlCDMReader::initDimensionNameChange()
 void NcmlCDMReader::initAttributeNameChange()
 {
     { /* the global attributes */
-        XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/attribute[@orgName]");
+        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@orgName]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -228,7 +253,7 @@ void NcmlCDMReader::initAttributeNameChange()
         }
     }
     { /* the variable attributes */
-        XPathObjPtr xpathObj = doc->getXPathObject("/netcdf/variable[@name]/attribute[@orgName]");
+        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@name]/nc:attribute[@orgName]");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
@@ -250,8 +275,48 @@ void NcmlCDMReader::initAttributeNameChange()
 
 const boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-    // TODO Auto-generated constructor stub
+    // return unchanged data from this CDM
+    const CDMVariable& variable = cdm.getVariable(varName);
+    if (variable.hasData()) {
+        return getDataSliceFromMemory(variable, unLimDimPos);
+    }
 
+    // find the original name, to fetch the data from the dataReader
+    std::string orgVarName = varName;
+    map<string, string>::iterator vit = variableNameChanges.find(varName);
+    if (vit != variableNameChanges.end()) {
+        orgVarName = vit->second;
+    }
+    boost::shared_ptr<Data> data = dataReader->getDataSlice(orgVarName, unLimDimPos);
+
+    // eventually, change the type from the old type to the new type
+    map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);
+    if (dtIt != variableTypeChanges.end()) {
+        const CDM& orgCDM = dataReader->getCDM();
+        double orgFill = orgCDM.getFillValue(orgVarName);
+        CDMAttribute attr;
+        double orgScale = 1.;
+        double orgOffset = 0.;
+        if (orgCDM.getAttribute(varName, "scale_factor", attr)) {
+            orgScale = attr.getData()->asConstDouble()[0];
+        }
+        if (orgCDM.getAttribute(varName, "add_offset", attr)) {
+            orgOffset = attr.getData()->asConstDouble()[0];
+        }
+        double newFill = cdm.getFillValue(varName);
+        double newScale = 1.;
+        double newOffset = 0.;
+        if (cdm.getAttribute(varName, "scale_factor", attr)) {
+            newScale = attr.getData()->asConstDouble()[0];
+        }
+        if (cdm.getAttribute(varName, "add_offset", attr)) {
+            newOffset = attr.getData()->asConstDouble()[0];
+        }
+
+        data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
+    }
+
+    return data;
 }
 
 

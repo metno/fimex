@@ -24,6 +24,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/interpolation.h"
 #include <boost/bind.hpp>
+#include "fimex/Data.h"
 
 namespace MetNoFimex {
 

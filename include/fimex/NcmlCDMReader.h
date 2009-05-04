@@ -28,6 +28,7 @@
 #define NCMLCDMREADER_H_
 
 #include "CDMReader.h"
+#include "boost/noncopyable.hpp"
 
 namespace MetNoFimex
 {
@@ -47,7 +48,7 @@ class XMLDoc;
  * @warning The current version does not support aggregation.
  *
  */
-class NcmlCDMReader: public MetNoFimex::CDMReader
+class NcmlCDMReader: public MetNoFimex::CDMReader,boost::noncopyable
 {
 
 public:
@@ -62,7 +63,7 @@ public:
      * @throw CDMException
      */
     NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile) throw(CDMException);
-    virtual ~NcmlCDMReader() {}
+    virtual ~NcmlCDMReader();
     /**
      * reading the data from the required source
      */
@@ -85,7 +86,7 @@ private:
     void initAddReassignAttribute();
 
     std::string configFile;
-    std::auto_ptr<XMLDoc> doc;
+    XMLDoc* doc;
     boost::shared_ptr<CDMReader> dataReader;
     /*
      * maps containing the changes. The key will reflect

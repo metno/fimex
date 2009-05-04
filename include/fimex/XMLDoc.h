@@ -58,6 +58,14 @@ public:
 	 * @throw CDMException if xpath is not parsable
 	 */
 	XPathObjPtr getXPathObject(const std::string& xpath) const throw(CDMException);
+	/**
+	 * @brief register a namespace for later xpath
+	 *
+	 * register a namespace with a prefix for later xpath retrievals
+	 * @param prefix short name for namespace
+	 * @param href full namespace name
+	 */
+	void registerNamespace(const std::string& prefix, const std::string& uri) throw(CDMException);
 
 private:
 	xmlDoc* doc;

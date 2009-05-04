@@ -149,9 +149,22 @@ CDMAttribute::~CDMAttribute()
 {
 }
 
+const std::string CDMAttribute::getStringValue() const
+{
+    return data->asString();
+}
+
 void CDMAttribute::toXMLStream(std::ostream& out) const
 {
 	out << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
+}
+
+/* init data arrays for all types */
+template<typename T>
+void CDMAttribute::initDataArray(const std::vector<std::string>& values) {
+    std::vector<T> vec;
+    std::transform(values.begin(), values.end(), std::back_inserter(vec), &string2type<T>);
+    data = createData(datatype, values.size(), vec.begin(), vec.end());
 }
 
 

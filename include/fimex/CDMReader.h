@@ -26,11 +26,11 @@
 
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDM.h"
-#include "fimex/Data.h"
-#include "fimex/CDMVariable.h"
 
 namespace MetNoFimex
 {
+/* forward declaration */
+class Data;
 
 /**
  * @brief Basic interface for CDM reading and manipulation classes

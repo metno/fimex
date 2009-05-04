@@ -25,6 +25,7 @@
 #include <boost/shared_array.hpp>
 #include "fimex/CDMDataType.h"
 #include "fimex/Utils.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {
