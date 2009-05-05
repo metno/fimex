@@ -78,9 +78,9 @@ void NcmlCDMReader::init() throw(CDMException)
     LOG4FIMEX(logger, Logger::DEBUG, "initializing");
 
     initRemove();
+    initDimensionNameChange();
     initVariableNameChange();
     initVariableTypeChange();
-    initDimensionNameChange();
     initAttributeNameChange();
     initAddReassignAttribute();
     initWarnUnsupported();

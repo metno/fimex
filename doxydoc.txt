@@ -25,6 +25,7 @@ Detailed information on the differnt configuration files can be found at:
 
 - @ref programDoc
 - @ref feltConfigDoc
+- @ref ncmlConfiugration
 - @ref gribWriterDoc
 - @ref netcdfWriterDoc
 
@@ -80,6 +81,8 @@ Configurational options:
   --timeInterpolate.timeSpec arg      specification of times to interpolate to,
                                       see Fimex::TimeSpec for a full definition
   --timeInterpolate.printNcML         print NcML description of timeInterpolator
+  --ncml.config                       modify/configure with ncml-file
+  --ncml.printNcML                    print NcML description after ncml-configuration
 @endverbatim
 
 All the configurational options can be configured using a configuration file which is supplied
@@ -153,6 +156,22 @@ Below follows a complete felt-configuration.
 @verbinclude share/etc/felt2nc_variables.xml
 
 
+@page ncmlConfiguration ncml Configuration
+@section ncmlConfiguration ncml Configuration
+
+@verbinclude share/etc/ncmlCDMConfig.ncml
+
+Unidata's NetCDF Markup Language (NcML) as described in http://www.unidata.ucar.edu/software/netcdf/ncml/
+gives the opportunity to change all information written in the CDM. With the --ncml.config option, the CDM
+will be configured immediately after reading a file. It is also possilbe to read in a ncml file with the
+--input.file=xxx.ncml option. In this case, the real data must be linked with the 'location' markup.
+
+Input-files can and should be validated against the included ncml-2.2.xsd.
+
+@warning not all features are supported in the current implementation. Missing features are: aggregation,
+changing dimension sizes, unlimited dimensions, adding/changing values of variables, groups
+
+
 
 @page gribWriterDoc gribWriter Configuration
 @section gribWriterConfig gribWriter Configuration
@@ -161,6 +180,16 @@ Below follows a complete felt-configuration.
 
 @page netcdfWriterDoc netcdfWriter Configuration
 @section netcdfWriterConfig netcdfWriter Configuration
+
+The netcdfWriterConfig gives the opportunity to set some features
+explicit only for netcdf-files, i.e. file-format (netcdf3/4) or compression.
+
+It is also possible to add an @ref ncmlConfiguration to the output to change the
+internal structure just before writing.
+
+It is also possible ot change units including all value in the netcdfWriterDoc.
+Changing the units in the ncmlConfiguration would change the attribute value only, but
+not the data.
 
 The CDM resembles a netcdf datastructure. In general, there is
 no need to use a configuration for this writer, but it might be useful
@@ -171,7 +200,6 @@ in the following cases:
 - Different attribute are required for special usages, but the input-configuration
   of the reader shouldn't been changed.
 - Different variable or dimension names are required for special usages.
-- Different units are required for special usages.
   
 @verbinclude share/etc/cdmWriterConfig.xml
 

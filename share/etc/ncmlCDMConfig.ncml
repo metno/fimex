@@ -4,8 +4,8 @@
            xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 ncml-2.2.xsd ">
 
 
-<!-- rename a dimension -->
-<dimension name="x_new" orgName="x" />
+<!-- rename a dimension, make sure to rename the variable-dimension, too -->
+<dimension name="x_c" orgName="x" />
 
 <!-- add/reassign a new variable attribute -->
 <variable name="air_temperature">
@@ -24,7 +24,7 @@
 
 <!--  change units from m to km-->
 <!--  make sure to put the type to change the data, too!!! -->
-<variable name="x" type="double">
+<variable name="x_c" type="double" orgName="x">
    <attribute name="units" value="km" type="string" />
 </variable>
 
@@ -38,7 +38,7 @@
 <!-- add/reassign a new global attribute -->
 <attribute name="max_time" value="2008-05-28" type="string" />
 <!-- rename a attribute -->
-<attribute orgName="min_time" name="minimum_time" />
+<!-- <attribute orgName="min_time" name="minimum_time" /> -->
 
 
 

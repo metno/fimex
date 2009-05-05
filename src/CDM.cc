@@ -278,14 +278,8 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 
 void CDM::removeVariable(const std::string& variableName)
 {
-	VarVec::iterator newEnd = remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName));
-	if (newEnd != variables.end()) {
-		variables.erase(newEnd, variables.end());
-		StrAttrVecMap::iterator varAttrPos = attributes.find(variableName);
-		if (varAttrPos != attributes.end()) {
-			attributes.erase(varAttrPos);
-		}
-	}
+	variables.erase(remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName)), variables.end());
+    attributes.erase(variableName);
 }
 
 

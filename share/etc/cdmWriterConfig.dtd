@@ -1,11 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
 <!--
-    TODO define vocabulary identification
-    PUBLIC ID: -//vendor//vocabulary//EN
-    SYSTEM ID: http://server/path/cdmWriterConfig.dtd
-
---><!--
     An example how to use this DTD from your XML document:
 
     <?xml version="1.0"?>
@@ -18,7 +13,7 @@
 -->
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT cdm_ncwriter_config (default|dimension|variable|attribute|remove)*>
+<!ELEMENT cdm_ncwriter_config (default|ncmlConfig|dimension|variable|attribute|remove)*>
 
 <!--- filetypes are: netcdf3 netcdf4 netcdf3_64bit netcdf4classic -->
 <!--- compressionLevel are 0 (no compression) to 9 -->
@@ -28,7 +23,12 @@
     compressionLevel CDATA #IMPLIED
   >
 
-<!--- Put your DTDDoc comment here. -->
+<!ELEMENT ncmlConfig EMPTY>
+<!ATTLIST ncmlConfig
+    filename CDATA #REQUIRED
+  >
+
+<!--- DEPRECATED, use Ncml instead -->
 <!ELEMENT attribute EMPTY>
 <!ATTLIST attribute
     newname CDATA #IMPLIED
@@ -37,7 +37,7 @@
     name CDATA #REQUIRED
   >
 
-<!--- modify a variable -->
+<!--- Everything except compressionLevel is DEPRECATED, use Ncml instead -->
 <!ELEMENT variable (attribute|remove)*>
 <!ATTLIST variable
     newname CDATA #IMPLIED
@@ -46,13 +46,14 @@
     compressionLevel CDATA #IMPLIED
   >
 
-<!--- Put your DTDDoc comment here. -->
+<!--- DEPRECATED, use Ncml instead -->
 <!ELEMENT dimension EMPTY>
 <!ATTLIST dimension
     newname CDATA #REQUIRED
     name CDATA #REQUIRED
   >
 
+<!--- DEPRECATED, use Ncml instead -->
 <!--- Remove a type='attribute' or 'variable' -->
 <!ELEMENT remove EMPTY>
 <!ATTLIST remove

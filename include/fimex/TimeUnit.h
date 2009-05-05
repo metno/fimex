@@ -83,7 +83,7 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException);
  * TimeUnit calculates times from a time given in a unit as
  * of CF-1.0 (e.g. 'days since 2000-01-01 00:00:00') to a
  * unix time (i.e. 'seconds since 1970-01-01 00:00:00') or a
- * time struct #FimexTime
+ * time struct #MetNoFimex::FimexTime
  *
  * All times are assumed to be UTC, and we use the Gregorian Calendar
  * (not 100% true for times before 1600AD, depending on implementation)

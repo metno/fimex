@@ -70,6 +70,7 @@ public:
 
 private:
 	void init() throw(CDMException);
+	void initNcmlReader(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
 	void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw(CDMException);

@@ -72,6 +72,7 @@ BOOST_AUTO_TEST_CASE( test_variable) {
 	cdm.renameVariable(varName, newName);
 	BOOST_CHECK(cdm.hasVariable(newName));
 	BOOST_CHECK(!cdm.hasVariable(varName));
+	BOOST_CHECK(cdm.getVariable(newName).getName() == newName);
 
 	cdm.removeVariable(newName);
 	BOOST_CHECK(true);

@@ -63,7 +63,7 @@ public:
 	 *
 	 * register a namespace with a prefix for later xpath retrievals
 	 * @param prefix short name for namespace
-	 * @param href full namespace name
+	 * @param uri full namespace name
 	 */
 	void registerNamespace(const std::string& prefix, const std::string& uri) throw(CDMException);
 

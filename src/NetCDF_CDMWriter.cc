@@ -28,6 +28,7 @@ extern "C" {
 #include NETCDF_C_INCLUDE             // the C interface
 }
 
+#include <iostream>
 #include <boost/shared_array.hpp>
 #include "fimex/interpolation.h"
 #include "fimex/CDMDataType.h"
@@ -37,9 +38,13 @@ extern "C" {
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/Logger.h"
+#include "fimex/NcmlCDMReader.h"
 
 namespace MetNoFimex
 {
+
+static LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
+
 
 static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
 	if (data->size() == 0) return true;
@@ -90,7 +95,6 @@ static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 #ifdef HAVE_NCFILE_FILEFORMAT
 NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 {
-	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	NcFile::FileFormat retVal = NcFile::Classic;
 	switch (version) {
 		case 3: retVal = NcFile::Classic; break;
@@ -126,8 +130,8 @@ NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 }
 #endif /* HAVE_NCFILE_FILEFORMAT */
 
-NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
-: CDMWriter(cdmReader, outputFile), cdm(cdmReader->getCDM())
+NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
+: CDMWriter(cdmReader, outputFile)
 {
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	std::auto_ptr<XMLDoc> doc;
@@ -151,13 +155,30 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader,
 #else
     ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
 #endif /* HAVE_NCFILE_FILEFORMAT */
+    initNcmlReader(doc);
 	initRemove(doc);
 	// variable needs to be called before dimension!!!
 	initFillRenameVariable(doc);
 	initFillRenameDimension(doc);
 	initFillRenameAttribute(doc);
+
 	init();
 
+}
+
+void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+{
+    if (doc.get() != 0) {
+        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/ncmlConfig");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        if (size > 0) {
+            std::string configFile = getXmlProp(nodes->nodeTab[0], "filename");
+            LOG4FIMEX(logger, Logger::DEBUG, "configuring CDMWriter with ncml config file: " << configFile);
+            cdmReader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(cdmReader, configFile));
+        }
+    }
+    cdm = cdmReader->getCDM();
 }
 
 void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
@@ -190,6 +211,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException
 			xmlNodeSetPtr nodes = xpathObj->nodesetval;
 			int size = (nodes) ? nodes->nodeNr : 0;
 			for (int i = 0; i < size; i++) {
+		        LOG4FIMEX(logger, Logger::WARN, "Removing variables in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
 				std::string name = getXmlProp(nodes->nodeTab[i], "name");
 				cdm.removeVariable(name);
 			}
@@ -205,6 +227,7 @@ void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 		int size = (nodes) ? nodes->nodeNr : 0;
 		for (int i = 0; i < size; i++) {
+		    LOG4FIMEX(logger, Logger::WARN, "Changing renaming dimensions in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
 			std::string name = getXmlProp(nodes->nodeTab[i], "name");
 			std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
 			cdm.getDimension(name); // check existence, throw exception
@@ -233,6 +256,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 		int size = (nodes) ? nodes->nodeNr : 0;
 		for (int i = 0; i < size; i++) {
+		    LOG4FIMEX(logger, Logger::WARN, "Changing variable-names in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
 			std::string name = getXmlProp(nodes->nodeTab[i], "name");
 			testVariableExists(name);
 			std::string newname = getXmlProp(nodes->nodeTab[i], "newname");
@@ -287,6 +311,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw
 	for (int i = 0; i < size; i++) {
 		xmlNodePtr node = nodes->nodeTab[i];
 		std::string attName = getXmlProp(node, "name");
+		if (attName != "units") LOG4FIMEX(logger, Logger::WARN, "Changing attributes in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
 		std::string varName = CDM::globalAttributeNS();
 		xmlNodePtr parent = node->parent;
 		std::string parentName = getXmlName(parent);
@@ -311,7 +336,7 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw
 			attr = CDMAttribute(newAttrName, oldAttr.getDataType(), oldAttr.getData());
 		}
 		cdm.removeAttribute(varName, attName); // remove the attribute with the old name
-		cdm.addOrReplaceAttribute(varName, attr); // set the attribute with the new name and data
+		cdm.addAttribute(varName, attr); // set the attribute with the new name and data
 	}
 	}
 }
@@ -415,6 +440,7 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 			default: throw CDMException("unknown datatype for attribute " + attr.getName());
 			}
 			if (errCode != NC_NOERR) {
+			    std::cerr << "attribute writing error: " << it->first << " " << varId << std::endl;
 				throw CDMException(nc_strerror(ncErr->get_err()));
 			}
 		}
@@ -529,7 +555,7 @@ const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, c
 const std::string& NetCDF_CDMWriter::getVariableName(const std::string& varName) const
 {
 	if (variableNameChanges.find(varName) == variableNameChanges.end()) {
-		return cdm.getVariable(varName).getName();
+		return varName;
 	} else {
 		return variableNameChanges.find(varName)->second;
 	}

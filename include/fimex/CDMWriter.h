@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -34,12 +34,12 @@ namespace MetNoFimex
 class CDMWriter
 {
 public:
-	CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile) 
+	CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
 	: cdmReader(cdmReader), outputFile(outputFile) {}
 	virtual ~CDMWriter() {}
 
 protected:
-	const boost::shared_ptr<CDMReader> cdmReader;
+	boost::shared_ptr<CDMReader> cdmReader;
 	const std::string outputFile;
 };
 
