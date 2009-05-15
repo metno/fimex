@@ -12,7 +12,7 @@ compilation
    * proj-4 >= 4.4.9
 	
 To configure the different file formats it requires:
-    * NetCDF (netcdf > 3.6)
+    * NetCDF (netcdf > 3.5)
     * Grib_API (grib_api > 1.4)
     * Felt (libmi)
 

@@ -69,31 +69,22 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
 		return;
 	}
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfig.xml");
+	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfigDeprecated.xml");
 	BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");
 	BOOST_CHECK(writer.getVariableName("x") == "x_c");
-	BOOST_CHECK(writer.getAttribute(CDM::globalAttributeNS(), "minimum_time").getName() == "minimum_time");
 	BOOST_CHECK(writer.getAttribute("air_temperature", "standard_name").getStringValue() == "temperature");
 	bool exceptionThrown = false;
 	try {
-		writer.getAttribute(CDM::globalAttributeNS(), "comment");
-	} catch (CDMException& ex) {
+	    writer.getAttribute(CDM::globalAttributeNS(), "comment");
+	} catch (exception& ex) {
 		exceptionThrown = true;
 	}
-	BOOST_CHECK(exceptionThrown);
+	BOOST_CHECK(exceptionThrown == true);
 
 	exceptionThrown = false;
 	try {
 		writer.getAttribute("surface_snow_sickness", "long_name");
-	} catch (CDMException& ex) {
-		exceptionThrown = true;
-	}
-	BOOST_CHECK(exceptionThrown);
-
-	exceptionThrown = false;
-	try {
-		writer.getVariableName("land_ice_area_fraction");
 	} catch (CDMException& ex) {
 		exceptionThrown = true;
 	}

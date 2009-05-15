@@ -28,7 +28,7 @@
 #include "fimex/GribApiCDMWriter_Impl2.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
-#include "Data.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

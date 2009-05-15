@@ -1,3 +1,7 @@
+  * 2009-05-15 fimex-0.14
+    * support for reading/configuring with NcML
+    * backporting to netcdf-3.5
+    * skipping of tests with boost < 1.34
   * 2009-03-20 fimex-0.13
     * allowing for auto-tuning axes in interpolation (SpatialAxisSpec)
     * removal of variables/attributes in cdmWriterConfig
