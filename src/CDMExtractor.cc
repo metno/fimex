@@ -92,8 +92,8 @@ void CDMExtractor::removeVariable(std::string variable) throw(CDMException)
 void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length) throw(CDMException)
 {
 	CDMDimension& dim = cdm.getDimension(dimName);
-	if (start+length >= dim.getLength()) {
-		throw CDMException("can't enlarge dimension " + dimName + ": start+length ("+type2string(start)+"+"+type2string(length)+") out of bounds");
+	if (start+length > dim.getLength()) {
+		throw CDMException("can't enlarge dimension " + dimName + ": start+length ("+type2string(start)+"+"+type2string(length)+") out of bounds: "+ type2string(dim.getLength()));
 	}
 	// keep track of changes
 	dim.setLength(length);
@@ -115,7 +115,7 @@ void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, lo
 {
 	size_t length = 0;
 	if (end > 0) {
-		length = end - start;
+		length = end - start + 1;
 	} else {
 		CDMDimension& dim = cdm.getDimension(dimName);
 		length = dim.getLength();
