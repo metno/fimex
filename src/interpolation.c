@@ -188,9 +188,9 @@ int mifi_interpolate_f(const int method,
 	int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 
 	switch (method) {
-		case MIFI_NEAREST_NEIGHBOR: func = mifi_get_values_f; break;
-		case MIFI_BILINEAR:         func = mifi_get_values_bilinear_f; break;
-		case MIFI_BICUBIC:          func = mifi_get_values_bicubic_f; break;
+		case MIFI_INTERPOL_NEAREST_NEIGHBOR: func = mifi_get_values_f; break;
+		case MIFI_INTERPOL_BILINEAR:         func = mifi_get_values_bilinear_f; break;
+		case MIFI_INTERPOL_BICUBIC:          func = mifi_get_values_bicubic_f; break;
 		default:                    return MIFI_ERROR; /* error */
 	}
 

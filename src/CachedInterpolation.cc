@@ -30,16 +30,17 @@ namespace MetNoFimex
 CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
 : pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY) {
 	switch (funcType) {
-	case MIFI_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
-	case MIFI_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;
-	case MIFI_NEAREST_NEIGHBOR:
-	case MIFI_COORD_NN:
-	case MIFI_COORD_NN_KD: this->func = mifi_get_values_f; break;
+	case MIFI_INTERPOL_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
+	case MIFI_INTERPOL_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;
+	case MIFI_INTERPOL_NEAREST_NEIGHBOR:
+	case MIFI_INTERPOL_COORD_NN:
+	case MIFI_INTERPOL_COORD_NN_KD: this->func = mifi_get_values_f; break;
 	default: throw CDMException("unknown interpolation function: " + type2string(funcType));
 	}
 }
 
-boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) {
+boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
+{
 	size_t inZ = size / (inX*inY);
 	newSize = outX*outY*inZ;
 	boost::shared_array<float> zValues(new float[inZ]);

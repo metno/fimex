@@ -257,19 +257,29 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 	}
 
 
-	int method = MIFI_NEAREST_NEIGHBOR;
+	int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
 	if (vm.count("interpolate.method")) {
 		string m = vm["interpolate.method"].as<string>();
 		if (m == "bilinear") {
-			method = MIFI_BILINEAR;
+			method = MIFI_INTERPOL_BILINEAR;
 		} else if (m == "nearestneighbor") {
-			method = MIFI_NEAREST_NEIGHBOR;
+			method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
 		} else if (m == "bicubic") {
-			method = MIFI_BICUBIC;
+			method = MIFI_INTERPOL_BICUBIC;
 		} else if (m == "coord_nearestneighbor") {
-			method = MIFI_COORD_NN;
+			method = MIFI_INTERPOL_COORD_NN;
 		} else if (m == "coord_kdtree") {
-			method = MIFI_COORD_NN_KD;
+			method = MIFI_INTERPOL_COORD_NN_KD;
+        } else if (m == "forward_sum") {
+            method = MIFI_INTERPOL_FORWARD_SUM;
+        } else if (m == "forward_mean") {
+            method = MIFI_INTERPOL_FORWARD_MEAN;
+        } else if (m == "forward_median") {
+            method = MIFI_INTERPOL_FORWARD_MEDIAN;
+        } else if (m == "forward_max") {
+            method = MIFI_INTERPOL_FORWARD_MAX;
+        } else if (m == "forward_min") {
+            method = MIFI_INTERPOL_FORWARD_MIN;
 		} else {
 			cerr << "WARNING: unknown interpolate.method: " << m << " using nearestneighbor" << endl;
 		}

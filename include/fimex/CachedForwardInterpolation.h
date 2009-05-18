@@ -27,26 +27,29 @@
 #ifndef CACHEDFORWARDINTERPOLATION_H_
 #define CACHEDFORWARDINTERPOLATION_H_
 
+#include "fimex/CachedInterpolation.h"
 #include <boost/shared_array.hpp>
 #include <vector>
 
 namespace MetNoFimex
 {
 
-class CachedForwardInterpolation
+class CachedForwardInterpolation : public CachedInterpolationInterface
 {
 private:
+//    All defined in CachedInterpolation
     std::vector<double> pointsOnXAxis; // x*inX+y maps to x in out
     std::vector<double> pointsOnYAxis; // x*inX+y maps to y in out
     size_t inX;
     size_t inY;
     size_t outX;
     size_t outY;
+    float (*aggrFunc)(const std::vector<float>& vec);
 
 public:
     CachedForwardInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
-    virtual ~CachedForwardInterpolation();
-    boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize);
+    virtual ~CachedForwardInterpolation() {}
+    virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
 };
 
 }

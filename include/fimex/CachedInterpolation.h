@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -33,10 +33,18 @@ namespace MetNoFimex
 {
 
 /**
+ * Interface for new cached spatial interpolation as used in #MetNoFimex::CDMInterpolator
+ */
+class CachedInterpolationInterface {
+public:
+    virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
+};
+
+/**
  * Container to cache projection details to speed up
  * interpolation of lots of fields.
  */
-class CachedInterpolation
+class CachedInterpolation : public CachedInterpolationInterface
 {
 private:
 	std::vector<double> pointsOnXAxis;
@@ -47,7 +55,6 @@ private:
 	size_t outY;
 	int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
-	CachedInterpolation() : inX(0), inY(0), outX(0), outY(0), func(mifi_get_values_f) {}
 	/**
 	 * @param funcType {@link interpolation.h} interpolation method
 	 * @param pointsOnXAxis projected values of the new projections coordinates expressed in the current x-coordinate (size = outX*outY)
@@ -61,12 +68,12 @@ public:
 	virtual ~CachedInterpolation() {}
 	/**
 	 * Actually interpolate the data. The data will be interpolated as floats internally.
-	 * 
+	 *
 	 * @param inData the input data
 	 * @param the size of the input data array
 	 * @param newSize return the size of the output-array
 	 */
-	boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize);
+	virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
 };
 
 

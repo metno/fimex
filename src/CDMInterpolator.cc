@@ -27,6 +27,8 @@
 #include <omp.h>
 #endif
 #include "fimex/CDMInterpolator.h"
+#include "fimex/CachedForwardInterpolation.h"
+#include "fimex/CachedInterpolation.h"
 #include <boost/regex.hpp>
 #include <functional>
 #include <algorithm>
@@ -80,13 +82,13 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		double badValue = cdm.getFillValue(varName);
 		boost::shared_array<float> array = data2InterpolationArray(data, badValue);
 		size_t newSize = 0;
-		boost::shared_array<float> iArray = cachedInterpolation.interpolateValues(array, data->size(), newSize);
+		boost::shared_array<float> iArray = cachedInterpolation->interpolateValues(array, data->size(), newSize);
 		if (variable.isSpatialVector()) {
 			// fetch and transpose vector-data
 			// transposing needed once for each direction (or caching, but that needs to much memory)
 			const std::string& counterpart = variable.getSpatialVectorCounterpart();
 			boost::shared_array<float> counterPartArray = data2InterpolationArray(dataReader->getDataSlice(counterpart, unLimDimPos), cdm.getFillValue(counterpart));
-			boost::shared_array<float> counterpartiArray = cachedInterpolation.interpolateValues(counterPartArray, data->size(), newSize);
+			boost::shared_array<float> counterpartiArray = cachedInterpolation->interpolateValues(counterPartArray, data->size(), newSize);
 			const std::string& direction = variable.getSpatialVectorDirection();
 			if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
 				cachedVectorReprojection.reprojectValues(iArray, counterpartiArray, newSize);
@@ -161,11 +163,19 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	cdm = dataReader->getCDM(); // reset previous changes
 	projectionVariables.assign(0, ""); // reset variables
 	switch (method) {
-	case MIFI_NEAREST_NEIGHBOR:
-	case MIFI_BILINEAR:
-	case MIFI_BICUBIC: changeProjectionByProjectionParameters(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
-	case MIFI_COORD_NN:
-	case MIFI_COORD_NN_KD: changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+	case MIFI_INTERPOL_NEAREST_NEIGHBOR:
+	case MIFI_INTERPOL_BILINEAR:
+	case MIFI_INTERPOL_BICUBIC:
+	    changeProjectionByProjectionParameters(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+	case MIFI_INTERPOL_COORD_NN:
+	case MIFI_INTERPOL_COORD_NN_KD:
+	    changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+    case MIFI_INTERPOL_FORWARD_SUM:
+	case MIFI_INTERPOL_FORWARD_MEAN:
+	case MIFI_INTERPOL_FORWARD_MEDIAN:
+    case MIFI_INTERPOL_FORWARD_MAX:
+    case MIFI_INTERPOL_FORWARD_MIN:
+	    changeProjectionByForwardInterpolation(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
 	default: throw CDMException("unknown projection method: " + type2string(method));
 	}
 }
@@ -392,7 +402,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
 		omp_init_lock(&my_lock);
 #pragma omp for
 #endif
-	for (int ik = 0; ik < (pointsOnXAxis.size()/sampler); ik++) {
+	for (int ik = 0; ik < (pointsOnXAxis.size()/sampler); ik++) { // using int instead of size_t because of openMP < 3.0
 		size_t samplePos = sampler * ik;
 		double lon0 = lonVals[samplePos];
 		double lat0 = latVals[samplePos];
@@ -475,7 +485,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 	{
 #pragma omp for
 #endif
-	for (int i = 0; i < pointsOnXAxis.size(); i++) {
+	for (int i = 0; i < pointsOnXAxis.size(); i++) { // using int instead of size_t because of openMP < 3.0
 		//                   lat                   lon
 		LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1, -1);
 		size_t steps = 0;
@@ -524,6 +534,82 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 #ifdef HAVE_OPENMP
 	}
 #endif
+}
+
+void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+{
+    // detect a variable with coordinates axes, the interpolator does not allow for
+    // conversion of variable with different dimensions, converting only all variables
+    // with the same dimensions/coordinates as the first variable with coordinates
+    std::vector<std::string> variables = cdm.findVariables("coordinates", ".*");
+    if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
+    std::string var = variables[0];
+    std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
+    string longitude, latitude;
+    if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
+    const vector<string> dims = cdm.getVariable(latitude).getShape();
+    // remove the old coordinates
+    cdm.removeVariable(longitude);
+    cdm.removeVariable(latitude);
+
+    std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
+    for (size_t i = 0; i < gridMappings.size(); i++) {
+        // remove all other projections, those might confuse other programs, i.e. IDV
+        cdm.removeVariable(gridMappings[i]);
+    }
+
+    // mapping all variables with matching orgX/orgY dimensions
+    std::map<std::string, std::string> attrs;
+    attrs["coordinates"] = coordinates;
+    projectionVariables = cdm.findVariables(attrs, dims);
+
+    size_t orgXDimSize = cdm.getDimension(dims[0]).getLength();
+    size_t orgYDimSize = cdm.getDimension(dims[1]).getLength();
+
+    changeCDM(cdm, proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
+
+    boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
+    size_t latSize = dataReader->getData(latitude)->size();
+    boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
+    for_each(&latVals[0], &latVals[latSize], degreeToRad);
+    for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+
+    // store projection changes to be used in data-section
+    // translate temporary new axes from deg2rad if required
+    int miupXAxis = MIFI_PROJ_AXIS;
+    int miupYAxis = MIFI_PROJ_AXIS;
+    vector<double> outXAxis = out_x_axis;
+    vector<double> outYAxis = out_y_axis;
+    boost::regex degree(".*degree.*");
+    if (boost::regex_match(out_x_axis_unit, degree)) {
+        for_each(outXAxis.begin(), outXAxis.end(), degreeToRad);
+        miupXAxis = MIFI_LONGITUDE;
+    }
+    if (boost::regex_match(out_y_axis_unit, degree)) {
+        for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
+        miupYAxis = MIFI_LATITUDE;
+    }
+
+    // translate all input points to output-coordinates, stored in lonVals and latVals
+    std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+    if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
+        throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
+    }
+
+    // translate the converted input-coordinates (lonvals and latvals) to cell-positions in output
+    mifi_points2position(&lonVals[0], latSize, &outXAxis[0], outXAxis.size(), miupXAxis);
+    mifi_points2position(&latVals[0], latSize, &outYAxis[0], outYAxis.size(), miupYAxis);
+
+    //convert lonVals and latVals to vector
+    vector<double> pointsOnXAxis, pointsOnYAxis;
+    pointsOnXAxis.reserve(latSize);
+    pointsOnYAxis.reserve(latSize);
+    copy(&lonVals[0], &lonVals[latSize], back_inserter(pointsOnXAxis));
+    copy(&latVals[0], &latVals[latSize], back_inserter(pointsOnYAxis));
+
+    // store the interpolation
+    cachedInterpolation = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+
 }
 
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
@@ -579,7 +665,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 	size_t fieldSize = outXAxis.size() * outYAxis.size();
 	vector<double> pointsOnXAxis(fieldSize);
 	vector<double> pointsOnYAxis(fieldSize);
-	if (method == MIFI_COORD_NN) {
+	if (method == MIFI_INTERPOL_COORD_NN) {
 		if (getProjectionName(proj_input) != "latlong") {
 			std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
 			if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
@@ -587,7 +673,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 			}
 		}
 		fastTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
-	} else if (method == MIFI_COORD_NN_KD) {
+	} else if (method == MIFI_INTERPOL_COORD_NN_KD) {
 		for (size_t ix = 0; ix < outXAxis.size(); ix++) {
 			for (size_t iy = 0; iy < outYAxis.size(); iy++) {
 				size_t pos = ix+iy*outXAxis.size();
@@ -617,7 +703,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 		throw CDMException("unkown interpolation method for coordinates: " + type2string(method));
 	}
 
-	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size());
+	cachedInterpolation = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
 
 	//TODO: prepare interpolation of vectors???
 }
@@ -695,7 +781,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	mifi_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
 	mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 
-	cachedInterpolation = CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size());
+	cachedInterpolation = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
 
 	// prepare interpolation of vectors
 	boost::shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);

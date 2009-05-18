@@ -39,19 +39,19 @@ extern "C" {
  *
  * flag for nearest neighbor interpolation
  */
-#define MIFI_NEAREST_NEIGHBOR 0
+#define MIFI_INTERPOL_NEAREST_NEIGHBOR 0
 /**
  * @brief interpolation method
  *
  * flag for bilinear interpolation
  */
-#define MIFI_BILINEAR         1
+#define MIFI_INTERPOL_BILINEAR         1
 /**
  * @brief interpolation method
  *
  * flag for bicubic interpolation
  */
-#define MIFI_BICUBIC          2
+#define MIFI_INTERPOL_BICUBIC          2
 /**
  * @brief interpolation method
  *
@@ -64,7 +64,7 @@ extern "C" {
  *
  * @warning this works only from CDMInterpolator
  */
-#define MIFI_COORD_NN         3
+#define MIFI_INTERPOL_COORD_NN         3
 /**
  * @brief interpolation method
  *
@@ -82,7 +82,43 @@ extern "C" {
  * @warning this works only from CDMInterpolator
  *
  */
-#define MIFI_COORD_NN_KD      4
+#define MIFI_INTERPOL_COORD_NN_KD      4
+
+/**
+ * @brief interpolation method
+ *
+ * forward interpolation, summing over all matching input-cells
+ */
+#define MIFI_INTERPOL_FORWARD_SUM      5
+
+/**
+  * @brief interpolation method
+  *
+  * forward interpolation, averaging (mean) over all matching defined input-cells
+  */
+#define MIFI_INTERPOL_FORWARD_MEAN      6
+
+/**
+  * @brief interpolation method
+  *
+  * forward interpolation, median over all matching defined input-cells
+  */
+#define MIFI_INTERPOL_FORWARD_MEDIAN      7
+
+
+/**
+  * @brief interpolation method
+  *
+  * forward interpolation, maximum over all matching defined input-cells
+  */
+#define MIFI_INTERPOL_FORWARD_MAX      8
+
+/**
+  * @brief interpolation method
+  *
+  * forward interpolation, minimum over all matching defined input-cells
+  */
+#define MIFI_INTERPOL_FORWARD_MIN      9
 
 /**
  * @brief vector projection flag
@@ -123,7 +159,7 @@ extern "C" {
  * which is implemented as C99 nanf. The coordinates of a cell give the midpoint of a cell,
  * i.e. cell (10,20) spans  ([9.5..10.5[,[19.5-20.5[)
  *
- * @param method one of MIFI_NEAREST_NEIGHBOR MIFI_BILINEAR MIFI_BICUBIC
+ * @param method one of MIFI_INTERPOL_NEAREST_NEIGHBOR MIFI_INTERPOL_BILINEAR MIFI_INTERPOL_BICUBIC
  * @param proj_input proj4-string of projection of infield
  * @param infield real rectangular array of dimension infield[iz,iy,ix]
  * @param in_x_axis field of size ix. Axis needs to be strong monotonous and if longitude/latitude in degree

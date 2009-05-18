@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 
 	//std::cerr << "emepProj: " << emepProj.c_str() << " latlonProj: " << latlongProj.c_str() << std::endl;
 	BOOST_CHECK(
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR,
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR,
 					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
 					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
 	== MIFI_OK);
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 		outArray[i] = MIFI_UNDEFINED_F;
 	}
 	BOOST_CHECK(
-	mifi_interpolate_f(MIFI_BILINEAR,
+	mifi_interpolate_f(MIFI_INTERPOL_BILINEAR,
 					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
 					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
 	== MIFI_OK);
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
 		outArray[i] = MIFI_UNDEFINED_F;
 	}
 	BOOST_CHECK(
-	mifi_interpolate_f(MIFI_BICUBIC,
+	mifi_interpolate_f(MIFI_INTERPOL_BICUBIC,
 					   emepProj.c_str(), inArray, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, iSize, jSize, zSize,
 					   latlongProj.c_str(), outArray, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, lonSize, latSize)
 	== MIFI_OK);
@@ -323,8 +323,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
 	float vOut[5*5];
 	float uRot[5*5];
 	float vRot[5*5];
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
 			uRot[j*5+i] = uOut[j*5+i];
@@ -373,8 +373,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_180 )
 	float vOut[5*5];
 	float uRot[5*5];
 	float vRot[5*5];
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), uOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1, emepProj2.c_str(), vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5);
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
 			uRot[j*5+i] = uOut[j*5+i];
@@ -430,8 +430,8 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
 	float vOut[4*4];
 	float uRot[4*4];
 	float vRot[4*4];
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), uOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
-	mifi_interpolate_f(MIFI_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), u, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), uOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
+	mifi_interpolate_f(MIFI_INTERPOL_NEAREST_NEIGHBOR, emepProj.c_str(), v, emepIAxis, emepJAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 4, 4, 1, latlongProj.c_str(), vOut, longitudeAxis, latitudeAxis, MIFI_LONGITUDE, MIFI_LATITUDE, 4, 4);
 	for (int i = 0; i < 4; ++i) {
 		for (int j = 0; j < 4; ++j) {
 			//std::cerr << "uOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << uOut[j*4+i] << std::endl;

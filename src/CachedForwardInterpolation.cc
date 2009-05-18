@@ -27,26 +27,51 @@
 #include "fimex/CachedForwardInterpolation.h"
 #include "fimex/interpolation.h"
 #include <numeric>
+#include <algorithm>
 
 using namespace std;
 
 namespace MetNoFimex
 {
 
+float aggrSum(const vector<float>& vec) {
+    return accumulate(vec.begin(), vec.end(), 0.f);
+}
+float aggrMean(const vector<float>& vec) {
+    if (vec.size() > 0) {
+        return aggrSum(vec)/vec.size();
+    } else {
+        return MIFI_UNDEFINED_F;
+    }
+}
+float aggrMedian(const vector<float>& vec) {
+    vector<float> vecCopy = vec;
+    nth_element(vecCopy.begin(), vecCopy.begin()+vecCopy.size()/2, vecCopy.end());
+    float median = vecCopy[vecCopy.size()/2];
+    return median;
+}
+float aggrMax(const vector<float>& vec) {
+    return *(max_element(vec.begin(), vec.end()));
+}
+float aggrMin(const vector<float>& vec) {
+    return *(min_element(vec.begin(), vec.end()));
+}
+
 // pointsOnXAxis map each point in inData[y*inX+x] to a x-position in outData
 CachedForwardInterpolation::CachedForwardInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
 : pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY)
 {
-    // TODO Auto-generated constructor stub
-
+    switch (funcType) {
+    case MIFI_INTERPOL_FORWARD_SUM: aggrFunc = aggrSum; break;
+    case MIFI_INTERPOL_FORWARD_MEAN: aggrFunc = aggrMean; break;
+    case MIFI_INTERPOL_FORWARD_MEDIAN: aggrFunc = aggrMedian; break;
+    case MIFI_INTERPOL_FORWARD_MAX: aggrFunc = aggrMax; break;
+    case MIFI_INTERPOL_FORWARD_MIN: aggrFunc = aggrMin; break;
+    default: throw CDMException("unknown forward interpolation method: " + type2string(funcType));
+    }
 }
 
-CachedForwardInterpolation::~CachedForwardInterpolation()
-{
-    // TODO Auto-generated destructor stub
-}
-
-boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize)
+boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
 {
 
     size_t outLayerSize = outX*outY;
@@ -65,7 +90,7 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
                     if (xOutPos > 0 && xOutPos < outX) {
                         size_t yOutPos = pointsOnYAxis[y*inX+x];
                         if (yOutPos > 0 && yOutPos < outY) {
-                            tempOut[xOutPos*outX + yOutPos].push_back(val);
+                            tempOut[yOutPos*outX + xOutPos].push_back(val);
                         }
                     }
                 }
@@ -80,8 +105,7 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
             if (vals.empty()) {
                 *outDataIt++ = MIFI_UNDEFINED_F;
             } else {
-                // TODO: here should be a selection of functions (min,max,sum,avg,median)
-                *outDataIt++ = accumulate(vals.begin(), vals.end(), 0.f) / vals.size();
+                *outDataIt++ = aggrFunc(vals);
             }
         }
     }
