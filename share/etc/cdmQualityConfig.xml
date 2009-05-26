@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdmQualityConfig>
+
+<variable name="">
+   <status_flag_variable name="">
+      <allowed_values>1,2,...,6</allowed_values>
+      <!-- or config by highest valid or lowest valid or all valid values  -->
+      <!-- highest and lowest will be retrieved per data-slice, not for the whole variable -->
+      <!-- <allowed_values use="(highest|lowest|valid)" /> -->
+   </status_flag_variable>
+</variable>
+
+</cdmQualityConfig>

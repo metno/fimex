@@ -71,8 +71,8 @@ am__libfimex_a_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
 	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
-	DataTypeChanger.cc GribApiCDMWriter.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
+	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc Logger.cc NcmlCDMReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
@@ -90,8 +90,9 @@ am_libfimex_a_OBJECTS = interpolation.$(OBJEXT) \
 	CDMAttribute.$(OBJEXT) CDMDimension.$(OBJEXT) \
 	CDMDataType.$(OBJEXT) CDMExtractor.$(OBJEXT) \
 	CDMInterpolator.$(OBJEXT) CDMNamedEntity.$(OBJEXT) \
-	CDMReader.$(OBJEXT) CDMTimeInterpolator.$(OBJEXT) \
-	CDMVariable.$(OBJEXT) Data.$(OBJEXT) DataTypeChanger.$(OBJEXT) \
+	CDMQualityExtractor.$(OBJEXT) CDMReader.$(OBJEXT) \
+	CDMTimeInterpolator.$(OBJEXT) CDMVariable.$(OBJEXT) \
+	Data.$(OBJEXT) DataTypeChanger.$(OBJEXT) \
 	GribApiCDMWriter.$(OBJEXT) \
 	GribApiCDMWriter_ImplAbstract.$(OBJEXT) \
 	GribApiCDMWriter_Impl1.$(OBJEXT) \
@@ -274,8 +275,8 @@ libfimex_a_SOURCES = interpolation.c CachedInterpolation.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
 	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
-	DataTypeChanger.cc GribApiCDMWriter.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
+	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribApiCDMWriter.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
@@ -362,6 +363,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMQualityExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMTimeInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Po@am__quote@

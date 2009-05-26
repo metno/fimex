@@ -16,6 +16,7 @@ libfimex_a_SOURCES = interpolation.c \
 					 CDMExtractor.cc \
 					 CDMInterpolator.cc \
 					 CDMNamedEntity.cc \
+					 CDMQualityExtractor.cc \
 					 CDMReader.cc \
 					 CDMTimeInterpolator.cc \
 					 CDMVariable.cc \
