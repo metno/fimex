@@ -57,7 +57,7 @@ public:
 	 * @return an xpathobj, which is != 0, but might have 0 elements, i.e. nodesetval == 0 or nodesetval->nodeNr == 0
 	 * @throw CDMException if xpath is not parsable
 	 */
-	XPathObjPtr getXPathObject(const std::string& xpath) const throw(CDMException);
+	XPathObjPtr getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const throw(CDMException);
 	/**
 	 * @brief register a namespace for later xpath
 	 *

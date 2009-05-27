@@ -68,7 +68,18 @@ public:
      * Read and manipulate the data
      */
     virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
-
+    /**
+     * Read the internals of statusVariable. This code is mainly thought for testing/debugging.
+     */
+    const std::map<std::string, std::string> getStatusVariable() const {return statusVariable;}
+    /**
+     * Read the internals of variableFlags, for testing/debugging.
+     */
+    const std::map<std::string, std::string> getVariableFlags() const {return variableFlags;}
+    /**
+     * Read the internals of variableValues, for testing/debugging.
+     */
+    const std::map<std::string, std::vector<double> > getVariableValues() const {return variableValues;}
 private:
     const boost::shared_ptr<CDMReader> dataReader;
     /* map of variableName to the variable which contains the flags */

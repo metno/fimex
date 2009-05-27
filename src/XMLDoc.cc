@@ -75,8 +75,13 @@ XMLDoc::~XMLDoc()
 	cleanup();
 }
 
-XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath) const throw(CDMException)
+XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const throw(CDMException)
 {
+    if (node == 0) {
+        xpathCtx->node = xmlDocGetRootElement(doc);
+    } else {
+        xpathCtx->node = node;
+    }
 	XPathObjPtr xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx), xmlXPathFreeObject);
 	if (xpathObj.get() == 0) {
 		throw CDMException("unable to parse xpath: " + xpath);
