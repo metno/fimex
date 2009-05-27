@@ -38,6 +38,8 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
+//#define TEST_DEBUG
+
 BOOST_AUTO_TEST_CASE( test_qualityExtract )
 {
 	string topSrcDir(TOP_SRCDIR);
@@ -52,6 +54,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 	map<string, string> statusVariables = extract->getStatusVariable();
 	map<string, string> variableFlags = extract->getVariableFlags();
 	map<string, vector<double> > variableValues = extract->getVariableValues();
+#ifdef TEST_DEBUG
 	for (map<string, string>::iterator svIt = statusVariables.begin(); svIt != statusVariables.end(); ++svIt) {
 	    string varName = svIt->first;
 	    string statusVarName = svIt->second;
@@ -68,6 +71,10 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 	    }
 	    cerr << endl;
 	}
+#endif /* TEST_DEBUG */
+    BOOST_CHECK(statusVariables["bla"] == "blub");
+    BOOST_CHECK(variableFlags.find("bla") == variableFlags.end());
+    BOOST_CHECK(variableValues["bla"][2] == 3);
 }
 
 #else
