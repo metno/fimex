@@ -143,7 +143,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 			throw CDMException("Cannot find grid_mapping_name for projection of variable " + varName);
 		}
 	} else {
-		throw CDMException("No projectionn found");
+		throw CDMException("No projection found");
 	}
 }
 

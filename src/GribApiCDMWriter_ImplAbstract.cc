@@ -76,32 +76,32 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 	for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
 		const std::string& varName = vi->getName();
 		try {
-		std::vector<FimexTime> times = getTimes(varName);
-		std::vector<double> levels = getLevels(varName);
-		TimeLevelDataSliceFetcher tld(cdmReader, varName);
-		try {
-			setProjection(varName);
-		} catch (CDMException& e) {
-			LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << varName << " due to projection problems: " << e.what());
-			continue;
-		}
-		for (size_t t = 0; t < times.size(); t++) {
-			for (size_t l = 0; l < levels.size(); l++) {
-				boost::shared_ptr<Data> data = tld.getTimeLevelSlice(t, l);
-				if (data->size() == 0) {
-					// no data, silently skip to next level/time
-					continue;
-				}
-				double levelVal = levels[l];
-				const FimexTime& fTime = times[t];
-				data = handleTypeScaleAndMissingData(varName, fTime, levelVal, data);
-				setData(data);
-				setLevel(varName, levelVal);
-				setTime(varName, fTime);
-				setParameter(varName, fTime, levelVal);
-				writeGribHandleToFile();
-			}
-		}
+		    std::vector<FimexTime> times = getTimes(varName);
+		    std::vector<double> levels = getLevels(varName);
+		    TimeLevelDataSliceFetcher tld(cdmReader, varName);
+		    try {
+		        setProjection(varName);
+		    } catch (CDMException& e) {
+		        LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << varName << " due to projection problems: " << e.what());
+		        continue;
+		    }
+		    for (size_t t = 0; t < times.size(); t++) {
+		        for (size_t l = 0; l < levels.size(); l++) {
+		            boost::shared_ptr<Data> data = tld.getTimeLevelSlice(t, l);
+		            if (data->size() == 0) {
+		                // no data, silently skip to next level/time
+		                continue;
+		            }
+		            double levelVal = levels[l];
+		            const FimexTime& fTime = times[t];
+		            data = handleTypeScaleAndMissingData(varName, fTime, levelVal, data);
+		            setData(data);
+		            setLevel(varName, levelVal);
+		            setTime(varName, fTime);
+		            setParameter(varName, fTime, levelVal);
+		            writeGribHandleToFile();
+		        }
+		    }
 		} catch (CDMException& e) {
 			LOG4FIMEX(logger, Logger::WARN, "unable to write parameter "<< varName << ": " << e.what());
 		}
@@ -321,7 +321,7 @@ xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, c
 	} else if (size > 1) {
 		throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
 	} else {
-		throw CDMException("could not find " + varName + " in " + configFile + ", skipping parameter");
+		throw CDMException("could not find " + varName + " in " + configFile + " ("+parameterXPath+"), skipping parameter");
 	}
 	return node;
 }

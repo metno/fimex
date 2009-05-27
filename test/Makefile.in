@@ -76,8 +76,8 @@ CONFIG_CLEAN_FILES =
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_5)
 am__EXEEXT_7 = testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
 	testInterpolation$(EXEEXT) testData$(EXEEXT) testCDM$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_4) \
-	$(am__EXEEXT_6)
+	testXMLDoc$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_4) $(am__EXEEXT_6)
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
@@ -192,6 +192,14 @@ testUnits_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
+am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
+testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
+testXMLDoc_LDADD = $(LDADD)
+testXMLDoc_DEPENDENCIES = ../src/felt_reader/libfimex_felt.a \
+	../src/libfimex.a $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -210,14 +218,14 @@ SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
 	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
-	$(testUnits_SOURCES)
+	$(testUnits_SOURCES) $(testXMLDoc_SOURCES)
 DIST_SOURCES = $(testCDM_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
 	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
-	$(testUnits_SOURCES)
+	$(testUnits_SOURCES) $(testXMLDoc_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 @HAVE_NETCDF_TRUE@am__EXEEXT_8 = $(NETCDF_MI_SH_TESTS)
@@ -351,15 +359,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testTimeSpec testSpatialAxisSpec testInterpolation testData \
-	testCDM $(am__append_2) $(am__append_5) $(am__append_7) \
-	$(am__append_9)
+	testCDM testXMLDoc $(am__append_2) $(am__append_5) \
+	$(am__append_7) $(am__append_9)
 SH_TESTS = $(am__append_8)
 LDADD = ../src/felt_reader/libfimex_felt.a ../src/libfimex.a \
 	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@ \
 	$(am__append_1) $(am__append_3) $(am__append_4) \
 	$(am__append_6)
-AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS}
+AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
 @HAVE_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
@@ -380,6 +388,7 @@ testQualityExtractor_SOURCES = testQualityExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
 testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
+testXMLDoc_SOURCES = testXMLDoc.cc
 all: all-am
 
 .SUFFIXES:
@@ -459,6 +468,9 @@ testTimeSpec$(EXEEXT): $(testTimeSpec_OBJECTS) $(testTimeSpec_DEPENDENCIES)
 testUnits$(EXEEXT): $(testUnits_OBJECTS) $(testUnits_DEPENDENCIES) 
 	@rm -f testUnits$(EXEEXT)
 	$(CXXLINK) $(testUnits_OBJECTS) $(testUnits_LDADD) $(LIBS)
+testXMLDoc$(EXEEXT): $(testXMLDoc_OBJECTS) $(testXMLDoc_DEPENDENCIES) 
+	@rm -f testXMLDoc$(EXEEXT)
+	$(CXXLINK) $(testXMLDoc_OBJECTS) $(testXMLDoc_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -479,6 +491,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
