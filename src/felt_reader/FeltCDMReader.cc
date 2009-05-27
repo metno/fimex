@@ -126,7 +126,7 @@ std::vector<double> FeltCDMReader::readValuesFromXPath(const XMLDoc& doc, const 
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
 	for (int i = 0; i < size; i++) {
-		xmlNodePtr node = nodes->nodeTab[0];
+		xmlNodePtr node = nodes->nodeTab[i];
 		if (node->type == XML_ELEMENT_NODE) {
 			std::string mode = getXmlProp(node, "mode");
 			if (mode == "" || mode == "inline") {
