@@ -6,7 +6,13 @@
       <allowed_values>1,2,...,6</allowed_values>
       <!-- or config by highest valid or lowest valid or all valid values  -->
       <!-- highest and lowest will be retrieved per data-slice, not for the whole variable -->
-      <!-- <allowed_values use="(highest|lowest|valid)" /> -->
+      <!-- <allowed_values use="(highest|lowest|all|min:xxx.x|max:xxx.x)" /> -->
+   </status_flag_variable>
+</variable>
+
+<variable name="air_temperature">
+   <status_flag_variable name="altitude">
+      <allowed_values use="min:1000" />
    </status_flag_variable>
 </variable>
 

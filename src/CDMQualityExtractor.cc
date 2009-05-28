@@ -29,7 +29,9 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/interpolation.h" // for constants
 #include <boost/regex.hpp>
+#include <algorithm>
 
 using namespace std;
 
@@ -96,6 +98,7 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
 CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString, std::string configFile) throw(CDMException)
 : dataReader(dataReader)
 {
+    cdm = dataReader->getCDM();
     const CDM& cdm = dataReader->getCDM();
     if (autoConfString != "") {
         vector<string> vars = cdm.findVariables("flag_values",".*");
@@ -161,9 +164,147 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
 
 }
 
+static double findDefinedExtreme(double* begin, double* end, const double& (*minmax)(const double& a, const double& b)) {
+    double extreme = MIFI_UNDEFINED_D;
+    double* pos = begin;
+    // forward to first defined element
+    while ((pos != end) && (!isnan(*pos))) {
+        ++pos;
+    }
+    if (pos == end) {
+        extreme = MIFI_UNDEFINED_D;
+    } else {
+        extreme = *pos;
+        while (pos != end) {
+            if (!isnan(*pos)) {
+                extreme = minmax(extreme, *pos);
+            }
+        }
+    }
+    return extreme;
+}
+
 const boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-    // TODO
+    // no change in cdm-data in CDMQualityExtractor, so no need to check for in-memory data
+
+    boost::shared_ptr<Data> data = dataReader->getDataSlice(varName, unLimDimPos);
+    // test if variable has quality assignment
+    if (statusVariable.find(varName) != statusVariable.end()) {
+        string statusVar = statusVariable[varName];
+        boost::shared_ptr<Data> statusData = getDataSlice(statusVar, unLimDimPos); // reading statusData after applying QualityExtractor
+        if (statusData->size() == 0) {
+            statusData = getDataSlice(statusVar, 0); // get the default slice
+        }
+
+        if (data->size() == statusData->size()) {
+            size_t size = data->size();
+            boost::shared_array<double> sd = statusData->asDouble();
+            vector<double> useVals;
+            if (variableValues.find(varName) != variableValues.end()) {
+                useVals = variableValues[varName];
+                sort(useVals.begin(), useVals.end());
+            } else if (variableFlags.find(varName) != variableFlags.end()) {
+                string flag = variableFlags[varName];
+                double statusFill = cdm.getFillValue(statusVar);
+                double minFlag = MIFI_UNDEFINED_D;
+                double maxFlag = MIFI_UNDEFINED_D;
+                CDMAttribute attr;
+                if (cdm.getAttribute(statusVar, "valid_min", attr)) {
+                    minFlag = attr.getData()->asDouble()[0];
+                }
+                if (cdm.getAttribute(statusVar, "valid_max", attr)) {
+                    maxFlag = attr.getData()->asDouble()[0];
+                }
+                if (cdm.getAttribute(statusVar, "valid_range", attr)) {
+                    minFlag = attr.getData()->asDouble()[0];
+                    maxFlag = attr.getData()->asDouble()[1];
+                }
+                if (!isnan(minFlag)) {
+                    double* sdIt = &sd[0];
+                    while (sdIt != &sd[size]) {
+                        if (*sdIt < minFlag) {
+                            *sdIt = MIFI_UNDEFINED_D;
+                        }
+                        sdIt++;
+                    }
+                }
+                if (!isnan(maxFlag)) {
+                    double* sdIt = &sd[0];
+                    while (sdIt != &sd[size]) {
+                        if (*sdIt > maxFlag) {
+                            *sdIt = MIFI_UNDEFINED_D;
+                        }
+                        sdIt++;
+                    }
+                }
+                if (!isnan(statusFill)) {
+                    double* sdIt = &sd[0];
+                    while (sdIt != &sd[size]) {
+                        if (*sdIt == statusFill) {
+                            *sdIt = MIFI_UNDEFINED_D;
+                        }
+                        sdIt++;
+                    }
+                }
+                boost::smatch match;
+                if (flag == "all") {
+                    // no more to do
+                } else if (boost::regex_match(flag, match, boost::regex("max:(.+)"))) {
+                    double max = string2type<double>(match[1]);
+                    LOG4FIMEX(logger, Logger::DEBUG, "using max="<<max<<" for statusVar "<<statusVar<< " on var "<< varName);
+                    double* sdIt = &sd[0];
+                    while (sdIt != &sd[size]) {
+                        if (*sdIt > max) {
+                            *sdIt = MIFI_UNDEFINED_D;
+                        }
+                        sdIt++;
+                    }
+                } else if (boost::regex_match(flag, match, boost::regex("min:(.+)"))) {
+                    double min = string2type<double>(match[1]);
+                    double* sdIt = &sd[0];
+                    size_t count = 0;
+                    while (sdIt != &sd[size]) {
+                        if (*sdIt < min) {
+                            *sdIt = MIFI_UNDEFINED_D;
+                            ++count;
+                        }
+                        sdIt++;
+                    }
+                    LOG4FIMEX(logger, Logger::DEBUG, "using min="<<min<<" for statusVar "<<statusVar<< " on var "<< varName << ": removed points: " << count);
+                } else if (flag == "highest") {
+                    double testVal = findDefinedExtreme(&sd[0], &sd[size], &max<double>);
+                    if (!isnan(testVal)) useVals.push_back(testVal);
+                } else if (flag == "lowest") {
+                    double testVal = findDefinedExtreme(&sd[0], &sd[size], &min<double>);
+                    if (!isnan(testVal)) useVals.push_back(testVal);
+                } else {
+                    throw CDMException("undefined quality-flag: "+flag+" for variable: "+varName);
+                }
+            }
+            if (useVals.size() > 0) {
+                // useVals are externally given flag-values or internally derived min/max
+                double* sdIt = &sd[0];
+                while (sdIt != &sd[size]) {
+                    if (!binary_search(useVals.begin(), useVals.end(), *sdIt)) {
+                        *sdIt = MIFI_UNDEFINED_D;
+                    }
+                    sdIt++;
+                }
+            }
+            double fillValue = cdm.getFillValue(varName);
+            double *sdIt = &sd[0];
+            for (size_t i = 0; i < size; ++i) {
+                if (isnan(*sdIt)) {
+                    data->setValue(i, fillValue);
+                }
+                ++sdIt;
+            }
+        } else {
+            LOG4FIMEX(logger, Logger::WARN, "different size in data of variable and statusVariable at slice "<< unLimDimPos << ": "<<varName << ","<<statusVar<<": "<< data->size() << "<>" << statusData->size());
+        }
+    }
+    return data;
 }
 
 }
