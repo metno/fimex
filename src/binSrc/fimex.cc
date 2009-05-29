@@ -30,6 +30,7 @@
 #include "fimex/config.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMExtractor.h"
+#include "fimex/CDMQualityExtractor.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
@@ -57,6 +58,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             --output.file FILENAME [--output.type OUTPUT_TYPE]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
     out << "             [--extract....]" << endl;
+    out << "             [--qualityExtract....]" << endl;
     out << "             [--interpolate....]" << endl;
     out << "             [--timeInterpolate....]" << endl;
     out << "             [--ncml.config NCMLFILE]" << endl;
@@ -113,6 +115,9 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionString(out, "output.file", vm);
 	writeOptionString(out, "output.type", vm);
 	writeOptionString(out, "output.config", vm);
+    writeOptionString(out, "qualityExtract.autoConfigString", vm);
+    writeOptionString(out, "qualityExtract.config", vm);
+    writeOptionString(out, "qualityExtract.printNcML", vm);
 	writeVectorOptionString(out, "extract.removeVariable", vm);
 	writeVectorOptionString(out, "extract.reduceDimension.name", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
@@ -227,6 +232,23 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 	}
 	return auto_ptr<CDMReader>(extractor);
 }
+
+static auto_ptr<CDMReader> getCDMQualityExtractor(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
+    string autoConf, config;
+    if (vm.count("qualityExtract.autoConfigString")) autoConf = vm["qualityExtract.autoConfigString"].as<string>();
+    if (vm.count("qualityExtract.config")) config = vm["qualityExtract.config"].as<string>();
+    if (autoConf != "" || config != "") {
+        LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
+        dataReader = auto_ptr<CDMReader>(new CDMQualityExtractor(boost::shared_ptr<CDMReader>(dataReader), autoConf, config));
+    }
+    if (vm.count("qualityExtract.printNcML")) {
+        cout << "QualityExtractor as NcML:" << endl;
+        dataReader->getCDM().toXMLStream(cout);
+        cout << endl;
+    }
+    return dataReader;
+}
+
 
 static auto_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! vm.count("timeInterpolate.timeSpec")) {
@@ -348,7 +370,6 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 
 	if (type == "null") {
 		LOG4FIMEX(logger, Logger::DEBUG, "emulating writing without file without config");
-		boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
 		Null_CDMWriter(sharedDataReader, vm["output.file"].as<string>());
 		return;
 	}
@@ -386,6 +407,9 @@ int main(int argc, char* args[])
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
         ("extract.printNcML", "print NcML description of extractor")
+        ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
+        ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
+        ("qualityExtract.printNcML", "print NcML description of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor or coord_kdtree")
         ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
@@ -450,6 +474,7 @@ int main(int argc, char* args[])
 
     try {
     	auto_ptr<CDMReader> dataReader = getCDMFileReader(vm);
+    	dataReader = getCDMQualityExtractor(vm, dataReader);
     	dataReader = getCDMExtractor(vm, dataReader);
     	dataReader = getCDMTimeInterpolator(vm, dataReader);
     	dataReader = getCDMInterpolator(vm, dataReader);

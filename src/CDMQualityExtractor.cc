@@ -32,6 +32,7 @@
 #include "fimex/interpolation.h" // for constants
 #include <boost/regex.hpp>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 
@@ -101,6 +102,16 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
     cdm = dataReader->getCDM();
     const CDM& cdm = dataReader->getCDM();
     if (autoConfString != "") {
+        // precheck allowed autoConfStrings, in case no variable is found, but string
+        // is wrong
+        set<string> allowedString;
+        allowedString.insert("all");
+        allowedString.insert("highest");
+        allowedString.insert("lowest");
+        if (allowedString.find(autoConfString) == allowedString.end()) {
+            throw CDMException("auto-configure-string '"+ autoConfString +"' unknown");
+        }
+
         vector<string> vars = cdm.findVariables("flag_values",".*");
         for (vector<string>::iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
             vector<string> correspondingVars = findCorrespondingVariables(cdm, *varIt);
@@ -192,9 +203,15 @@ const boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::strin
     // test if variable has quality assignment
     if (statusVariable.find(varName) != statusVariable.end()) {
         string statusVar = statusVariable[varName];
-        boost::shared_ptr<Data> statusData = getDataSlice(statusVar, unLimDimPos); // reading statusData after applying QualityExtractor
-        if (statusData->size() == 0) {
-            statusData = getDataSlice(statusVar, 0); // get the default slice
+        boost::shared_ptr<Data> statusData;
+        if (statusVar == varName) {
+            // reuse data in case of own status data
+            statusData = data;
+        } else {
+            statusData = getDataSlice(statusVar, unLimDimPos); // reading statusData after applying QualityExtractor
+            if (statusData->size() == 0) {
+                statusData = getDataSlice(statusVar, 0); // get the default slice
+            }
         }
 
         if (data->size() == statusData->size()) {

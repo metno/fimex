@@ -1,3 +1,6 @@
+  * 2009-05-29 fimex-0.15
+    * enabling forward projection interpolation
+    * adding configurable quality-status evaluation/extraction 
   * 2009-05-15 fimex-0.14
     * support for reading/configuring with NcML
     * backporting to netcdf-3.5

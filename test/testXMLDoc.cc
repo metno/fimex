@@ -38,7 +38,8 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_xmlDoc )
 {
-    XMLDoc doc("testXMLDoc.xml");
+    string topSrcDir(TOP_SRCDIR);
+    XMLDoc doc(topSrcDir+"/test/testXMLDoc.xml");
     {
         XPathObjPtr xpathObj = doc.getXPathObject("/cdmQualityConfig");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;

@@ -30,7 +30,7 @@ if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS}
 endif
 
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 

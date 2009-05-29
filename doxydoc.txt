@@ -25,9 +25,10 @@ Detailed information on the differnt configuration files can be found at:
 
 - @ref programDoc
 - @ref feltConfigDoc
-- @ref ncmlConfiugration
+- @ref ncmlConfiguration
 - @ref gribWriterDoc
 - @ref netcdfWriterDoc
+- @ref qualityExtractorDoc
 
 @page programDoc fimex Program Options 
 @section fimex fimex Program Options
@@ -57,6 +58,9 @@ Configurational options:
   --output.file arg                   output file
   --output.type arg                   filetype of output file
   --output.config arg                 non-standard output configuration
+  --qualityExtract.autoConfString arg quality-restrictions using CF-1.3 and a flag
+  --qualityExtract.config arg         quality-restrictions configuration file
+  --qualityExtract.printNcML          print NcML description of qualityExtractor                
   --extract.removeVariable arg        remove variables
   --extract.reduceDimension.name arg  name of a dimension to reduce
   --extract.reduceDimension.start arg start position of the dimension to reduce (>=0)
@@ -170,6 +174,35 @@ Input-files can and should be validated against the included ncml-2.2.xsd.
 
 @warning not all features are supported in the current implementation. Missing features are: aggregation,
 changing dimension sizes, unlimited dimensions, adding/changing values of variables, groups
+
+
+
+@page qualityExtractorDoc quality-extraction Configuration
+@section qualityExtractorDoc quality-extraction Configuration
+
+@warning The quality-extraction is still in a very early stage of development. The configuration
+and the outcome is very likely to change in further developments. Any feedback is strongly welcome.
+
+@verbinclude share/etc/cdmQualityConfig.xml
+
+In cases where the data should be extracted if certain conditions (qualities) apply, i.e.
+the status-flag indicates a properly working instrument, or the sea-surface-temperature is
+above 300K, the #MetNoFimex::CDMQualityExtractor allows to add these rules. The cdmQualityConfig.xml
+file as shown above gives an example of such an configuration. 
+
+@li The variable "bla" will only be set, if "blub" has integer-values between 1 and 6.
+@li The variable "air_temperature" will only be extracted for an "altitude" above 1000. The value
+1000 is the actual data value in the variable "altitude" without any scaling or unit-conversion applied.
+
+The following use-values can be selected:
+@li @c all select all valid values (within valid_max, valid_min or valid_range, without _FillValue) 
+@li @c highest the highest numerical value found in the data-slice which is valid
+@li @c lowest the lowest numerical value fond in the data-slice which is valid
+@li @c max:xxx.x all valid-values below or equal xxx.x
+@li @c min:xxx.x all valid values above or equal xxx.x
+
+All values which do not match the quality-criteria will be set to the _FillValue of the
+variable.
 
 
 
