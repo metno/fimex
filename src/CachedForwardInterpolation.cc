@@ -86,9 +86,9 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
             for (size_t x = 0; x < inX; ++x) {
                 float val = *inDataIt++;
                 if (!isnanf(val)) {
-                    size_t xOutPos = pointsOnXAxis[y*inX+x];
+                    int xOutPos = round(pointsOnXAxis[y*inX+x]);
                     if (xOutPos > 0 && xOutPos < outX) {
-                        size_t yOutPos = pointsOnYAxis[y*inX+x];
+                        int yOutPos = round(pointsOnYAxis[y*inX+x]);
                         if (yOutPos > 0 && yOutPos < outY) {
                             tempOut[yOutPos*outX + xOutPos].push_back(val);
                         }

@@ -72,7 +72,7 @@ public:
 
 private:
 	/// this representation can be used for comparison (==, <, >) not for calculation
-	long long toLong() const { return year*1e13 + month*1e11 + mday*1e9 + hour*1e7 + minute*1e5 + second*1e3 + msecond; }
+	long long toLong() const { return year*10000000000000LL + month*100000000000LL + mday*1000000000LL + hour*10000000LL + minute*100000 + second*1000 + msecond; }
 };
 
 

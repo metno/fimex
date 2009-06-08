@@ -196,6 +196,7 @@ configdir = $(datadir)/etc
 config_DATA = \
 	cdmGribWriterConfig.xml\
 	cdmWriterConfig.xml\
+	cdmWriterConfigDeprecated.xml\
 	cdmWriterConfig.dtd\
 	damocles_ec_felt_global_attributes.xml\
 	damocles_felt2nc_variables.xml\

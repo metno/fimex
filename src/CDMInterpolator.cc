@@ -402,7 +402,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
 		omp_init_lock(&my_lock);
 #pragma omp for
 #endif
-	for (int ik = 0; ik < (pointsOnXAxis.size()/sampler); ik++) { // using int instead of size_t because of openMP < 3.0
+	for (int ik = 0; ik < static_cast<int>(pointsOnXAxis.size()/sampler); ik++) { // using int instead of size_t because of openMP < 3.0
 		size_t samplePos = sampler * ik;
 		double lon0 = lonVals[samplePos];
 		double lat0 = latVals[samplePos];
@@ -451,10 +451,10 @@ class LL_POINT {
 public:
 	double lat;
 	double lon;
-	size_t x;
-	size_t y;
-	LL_POINT() : lat(0), lon(0), x(-1), y(-1) {}
-	LL_POINT(double lat, double lon, size_t x, size_t y) : lat(lat), lon(lon), x(x), y(y) {}
+	double x;
+	double y;
+	LL_POINT() : lat(0), lon(0), x(-1.), y(-1.) {}
+	LL_POINT(double lat, double lon, double x, double y) : lat(lat), lon(lon), x(x), y(y) {}
 	bool operator<(const LL_POINT& rhs) const { return (this->lat < rhs.lat); }
 };
 
@@ -487,7 +487,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 #endif
 	for (int i = 0; i < pointsOnXAxis.size(); i++) { // using int instead of size_t because of openMP < 3.0
 		//                   lat                   lon
-		LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1, -1);
+		LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1., -1.);
 		size_t steps = 0;
 		double min_cos_d = min_grid_cos_d; // max allowed distance
 		double min_d = acos(min_cos_d);

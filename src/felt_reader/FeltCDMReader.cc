@@ -286,7 +286,8 @@ std::vector<std::string> FeltCDMReader::initGetKnownFeltIdsFromXML(const XMLDoc&
 	std::vector<std::string> knownFeltIds;
 	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	for (int i = 0; i < nodes->nodeNr; ++i) {
+    int size = (nodes) ? nodes->nodeNr : 0;
+	for (int i = 0; i < size; ++i) {
 		xmlNodePtr node = nodes->nodeTab[i];
 		string id = getXmlProp(node, "id");
 		// get the datatype
@@ -297,7 +298,7 @@ std::vector<std::string> FeltCDMReader::initGetKnownFeltIdsFromXML(const XMLDoc&
 		// get the fill value
 		XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
 		std::string fillValue;
-		if (xpathObj->nodesetval->nodeNr > 0) {
+		if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
 			fillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
 			if (fillValue != "") {
 				fillValue = ":fillValue=" + fillValue;
@@ -311,9 +312,11 @@ std::vector<std::string> FeltCDMReader::initGetKnownFeltIdsFromXML(const XMLDoc&
 std::map<std::string, std::string> FeltCDMReader::initGetOptionsFromXML(const XMLDoc& doc)
 {
 	std::map<std::string, std::string> options;
+	// optional processing options
 	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/processOptions/option");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	for (int i = 0; i < nodes->nodeNr; ++i) {
+    int size = (nodes) ? nodes->nodeNr : 0;
+	for (int i = 0; i < size; ++i) {
 		std::string name = getXmlProp(nodes->nodeTab[i], "name");
 		std::string value = getXmlProp(nodes->nodeTab[i], "value");
 		options[name] = value;
@@ -325,10 +328,11 @@ void FeltCDMReader::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 	std::string xpathString("/cdm_felt_config/global_attributes");
 	XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	if (nodes->nodeNr != 1) {
+    int size = (nodes) ? nodes->nodeNr : 0;
+	if (size != 1) {
 		throw MetNoFelt::Felt_File_Error("unable to find " + xpathString + " in config: " + configFilename);
 	}
-	for (int i = 0; i < nodes->nodeNr; ++i) {
+	for (int i = 0; i < size; ++i) {
 		xmlNodePtr node = nodes->nodeTab[i];
 		assert(node->type == XML_ELEMENT_NODE);
 		std::vector<CDMAttribute> globAttributes;
@@ -354,7 +358,8 @@ CDMDimension FeltCDMReader::initAddTimeDimensionFromXML(const XMLDoc& doc)
 {
 	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	if (nodes->nodeNr != 1) {
+    int size = (nodes) ? nodes->nodeNr : 0;
+	if (size != 1) {
 		throw MetNoFelt::Felt_File_Error("unable to find exactly 1 'time'-axis in config: " + configFilename);
 	}
 	xmlNodePtr node = nodes->nodeTab[0];
@@ -390,7 +395,8 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 		std::string xpathLevelString("/cdm_felt_config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
 		XPathObjPtr xpathObj = doc.getXPathObject(xpathLevelString);
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
-		if (nodes->nodeNr != 1) {
+	    int size = (nodes) ? nodes->nodeNr : 0;
+		if (size != 1) {
 			throw MetNoFelt::Felt_File_Error("unable to find 'vertical'-axis "+type2string(it->first)+" in config: " + configFilename);
 		}
 		xmlNodePtr node = nodes->nodeTab[0];
