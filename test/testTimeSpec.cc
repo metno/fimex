@@ -65,17 +65,19 @@ BOOST_AUTO_TEST_CASE( test_TimeSpec )
 	end = start;
 	end.mday = 3;
 	end.hour = 8;
-	string tspec2("0,3,...,x;relativeUnit=hours since 2000-01-01 00:00:00");
+	string tspec2("0,3,...,x,x+3;relativeUnit=hours since 2000-01-01 00:00:00");
 	TimeSpec ts2(tspec2, start, end);
 	const vector<FimexTime>& fTimes2 = ts2.getTimeSteps();
 	//cerr << fTimes2.size() << endl;
-	BOOST_CHECK(fTimes2.size() == 11);
-	//for (size_t i = 0; i < fTimes2.size(); i++)
-	//	cerr << "time["<<i<<"]: " << fTimes2[i] << endl;
+	BOOST_CHECK(fTimes2.size() == 12);
+//	for (size_t i = 0; i < fTimes2.size(); i++)
+//		cerr << "time["<<i<<"]: " << fTimes2[i] << endl;
 	BOOST_CHECK(fTimes2[0].hour == 0);
 	BOOST_CHECK(fTimes2[0].year == 2001);
 	BOOST_CHECK(fTimes2[10].mday == 3);
 	BOOST_CHECK(fTimes2[10].hour == 6);
+    BOOST_CHECK(fTimes2[11].mday == 3);
+    BOOST_CHECK(fTimes2[11].hour == 9);
 
 }
 

@@ -40,18 +40,17 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex.TimeSpec");
 
-double translateRelativeTime(string value, double startOffset, double finalValue)
+static double translateRelativeTime(string value, double startOffset, double finalValue)
 {
 	double retVal;
 	boost::smatch what;
 	boost::regex finalVals("x\\s*([+-])?\\s*(\\d\\.?\\d*)?\\s*");
 	if (boost::regex_search(value, what, finalVals)) {
-		if (what.size() >= 3) {
-			if (what[1] == '+') {
-				retVal = finalValue + string2type<double>(what[2]);
-			} else {
-				retVal = finalValue - string2type<double>(what[2]);
-			}
+	    assert(what.size() == 3); // defined by regex
+		if (what[1] == '+') {
+			retVal = finalValue + string2type<double>(what[2]);
+		} else if (what[2] != "") {
+			retVal = finalValue - string2type<double>(what[2]);
 		} else {
 			retVal = finalValue;
 		}
