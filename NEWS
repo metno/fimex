@@ -1,3 +1,7 @@
+  * 2009-06-08 fimex-0.15.1
+    * bugfix for translation of rotated lat-long from felt to proj
+    * removing some compiler warnings
+    * improving compatibility with older versions of libxml
   * 2009-05-29 fimex-0.15
     * enabling forward projection interpolation
     * adding configurable quality-status evaluation/extraction 

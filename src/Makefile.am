@@ -4,8 +4,9 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 
-lib_LIBRARIES = libfimex.a
-libfimex_a_SOURCES = interpolation.c \
+lib_LTLIBRARIES = libfimex.la
+libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION)
+libfimex_la_SOURCES = interpolation.c \
 					 CachedInterpolation.cc \
 					 CachedForwardInterpolation.cc \
 					 CachedVectorReprojection.cc \
@@ -26,7 +27,6 @@ libfimex_a_SOURCES = interpolation.c \
 					 GribApiCDMWriter_ImplAbstract.cc \
 					 GribApiCDMWriter_Impl1.cc \
 					 GribApiCDMWriter_Impl2.cc \
-					 GribApiCDMWriter.cc \
 					 Logger.cc \
 					 NcmlCDMReader.cc \
 					 Null_CDMWriter.cc \
@@ -41,5 +41,5 @@ libfimex_a_SOURCES = interpolation.c \
 					 XMLDoc.cc
 
 if HAVE_NETCDF
-  libfimex_a_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+  libfimex_la_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 endif

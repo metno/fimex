@@ -197,7 +197,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 fimexincdir = $(includedir)/fimex
 fimexinc_HEADERS = $(top_srcdir)/include/fimex/*.h config.h
-DISTCLEANFILES = $(top_srcdir)/include/fimex/config.h
+DISTCLEANFILES = config.h
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

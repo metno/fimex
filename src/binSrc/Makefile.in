@@ -73,7 +73,7 @@ am__DEPENDENCIES_1 =
 @HAVE_PROJ4_TRUE@	$(am__DEPENDENCIES_1)
 @HAVE_NETCDF_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
-fimex_DEPENDENCIES = ../felt_reader/libfimex_felt.a ../libfimex.a \
+fimex_DEPENDENCIES = ../felt_reader/libfimex_felt.la ../libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -235,8 +235,8 @@ SUBDIRS = .
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS} -Ifelt_reader
-LDADD = ../felt_reader/libfimex_felt.a ../libfimex.a $(BOOST_LDFLAGS) \
-	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
+LDADD = ../felt_reader/libfimex_felt.la ../libfimex.la \
+	$(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
 	$(BOOST_PROGRAM_OPTIONS_LIB) -lm @XML_LIBS@ $(am__append_1) \
 	$(am__append_2) $(am__append_3) $(am__append_4)
 fimex_SOURCES = fimex.cc

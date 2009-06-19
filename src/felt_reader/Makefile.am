@@ -3,9 +3,10 @@ AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${XML_CPPFLAGS}
 
 
-lib_LIBRARIES = libfimex_felt.a
-libfimex_felt_a_SOURCES = 
+lib_LTLIBRARIES = libfimex_felt.la
+libfimex_felt_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION)
+libfimex_felt_la_SOURCES = 
 
 if HAVE_MILIB
-libfimex_felt_a_SOURCES += FeltCDMReader.cc Felt_Array.cc Felt_File.cc FeltParameters.cc Felt_File_Error.cc
+libfimex_felt_la_SOURCES += FeltCDMReader.cc Felt_Array.cc Felt_File.cc FeltParameters.cc Felt_File_Error.cc
 endif
