@@ -27,6 +27,7 @@
 #include <iostream>
 #include <exception>
 #include <cmath>
+#include <iomanip>
 
 namespace MetNoFimex
 {
@@ -49,6 +50,18 @@ std::string string2lowerCase(const std::string& str)
 	}
 	return s;
 }
+
+/**
+ * specialization for high prececision
+ */
+template<>
+std::string type2string<double>(double in)
+{
+    std::ostringstream buffer;
+    buffer << std::setprecision(24) << in;
+    return buffer.str();
+}
+
 
 std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters)
 {

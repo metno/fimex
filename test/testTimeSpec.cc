@@ -36,12 +36,17 @@ using boost::unit_test_framework::test_suite;
 #include <iostream>
 #include <fstream>
 #include "fimex/TimeSpec.h"
+#include "fimex/Logger.h"
 
 using namespace std;
 using namespace MetNoFimex;
+//#define TEST_DEBUG
 
 BOOST_AUTO_TEST_CASE( test_TimeSpec )
 {
+#ifdef TEST_DEBUG
+    defaultLogLevel(Logger::DEBUG);
+#endif
 	string tspec("2000-01-01 00:00:00,2000-01-01 04:00:00,...,2000-01-02 08:00:00");
 	FimexTime start;
 	FimexTime end;
@@ -68,10 +73,10 @@ BOOST_AUTO_TEST_CASE( test_TimeSpec )
 	string tspec2("0,3,...,x,x+3;relativeUnit=hours since 2000-01-01 00:00:00");
 	TimeSpec ts2(tspec2, start, end);
 	const vector<FimexTime>& fTimes2 = ts2.getTimeSteps();
-	//cerr << fTimes2.size() << endl;
+//	cerr << fTimes2.size() << endl;
 	BOOST_CHECK(fTimes2.size() == 12);
-//	for (size_t i = 0; i < fTimes2.size(); i++)
-//		cerr << "time["<<i<<"]: " << fTimes2[i] << endl;
+	for (size_t i = 0; i < fTimes2.size(); i++)
+		cerr << "time["<<i<<"]: " << fTimes2[i] << endl;
 	BOOST_CHECK(fTimes2[0].hour == 0);
 	BOOST_CHECK(fTimes2[0].year == 2001);
 	BOOST_CHECK(fTimes2[10].mday == 3);

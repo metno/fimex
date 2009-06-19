@@ -88,6 +88,13 @@ std::string type2string(T in) {
 	return buffer.str();
 }
 
+/**
+ * specialization for high prececision
+ */
+template<>
+std::string type2string<double>(double in);
+
+
 template<typename T>
 T string2type(std::string s) {
 	T retVal;

@@ -40,6 +40,14 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex.TimeSpec");
 
+
+/**
+ * Translate the relative time-strings, e.g. 0,3,x,x+1 to startOffset,startOffset+3,finalTime,finalTime+1
+ * @param value
+ * @param startOffset
+ * @param finalValue
+ * @return
+ */
 static double translateRelativeTime(string value, double startOffset, double finalValue)
 {
 	double retVal;
@@ -47,18 +55,41 @@ static double translateRelativeTime(string value, double startOffset, double fin
 	boost::regex finalVals("x\\s*([+-])?\\s*(\\d\\.?\\d*)?\\s*");
 	if (boost::regex_search(value, what, finalVals)) {
 	    assert(what.size() == 3); // defined by regex
-		if (what[1] == '+') {
-			retVal = finalValue + string2type<double>(what[2]);
-		} else if (what[2] != "") {
-			retVal = finalValue - string2type<double>(what[2]);
-		} else {
-			retVal = finalValue;
-		}
+	    if (what[2] == "") {
+            // only x is set
+            retVal = finalValue;
+	    } else {
+	        if (what[1] == '+') {
+	            retVal = finalValue + string2type<double>(what[2]);
+	        } else if (what[1] != "-") {
+	            retVal = finalValue - string2type<double>(what[2]);
+	        } else {
+	            LOG4FIMEX(logger, Logger::WARN, "translateRelativeTime(" << value << "," << startOffset << ","<<finalValue << ")="<<retVal<< " ignoring value after x")
+	        }
+	    }
 	} else {
 		retVal = startOffset + string2type<double>(value);
 	}
 	LOG4FIMEX(logger, Logger::DEBUG, "translateRelativeTime(" << value << "," << startOffset << ","<<finalValue << ")="<<retVal)
 	return retVal;
+}
+
+/**
+ * convenience function to convert a comma-separated dotted string of iso-times
+ * to a dotted string of doubles, representing time in TimeUnit
+ * @param timeString string like YYYY-MM-DD HH:MM:SS,...,YYYY-MM-DD HH:MM:SS
+ * @param tu unit to represent the time as doubles
+ * @return string of doubles or ..., comma-separated
+ */
+string timeString2timeUnitString(string timeString, const TimeUnit& tu) {
+    vector<string> times = tokenize(timeString, ",");
+    for (size_t i = 0; i < times.size(); ++i) {
+        if (times[i] != "...") {
+            // convert iso-time to double time of time-unit
+            times[i] = type2string(tu.fimexTime2unitTime(string2FimexTime(times[i])));
+        }
+    }
+    return join(times.begin(), times.end(), ",");
 }
 
 TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
@@ -89,37 +120,18 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		}
 	}
 
-    // TODO: convert all times to double using tu and use tokenizeDotted, see SpatialAxisSpec
 	if (relativeUnit == "") {
-		// absolute time in spec
-		vector<string> times = tokenize(timeStepStr, ",");
-		vector<string>::iterator dotsIt = find(times.begin(), times.end(), "...");
-		if (dotsIt != times.end()) {
-			if ((dotsIt != times.begin()) &&
-				(dotsIt-1 != times.begin()) && // two predecessors
-				(dotsIt+1 != times.end())) { // one successor
-				transform(times.begin(), dotsIt, back_inserter(timeSteps), string2FimexTime);
-				TimeUnit tu(outputUnit); // all times should be representable in outputUnit
-				double delta = tu.fimexTime2unitTime(timeSteps[timeSteps.size()-1])
-													 - tu.fimexTime2unitTime(timeSteps[timeSteps.size()-2]);
-				FimexTime last = string2FimexTime(*(dotsIt+1));
-				double lastTu = tu.fimexTime2unitTime(last);
-				double nextTu = tu.fimexTime2unitTime(timeSteps[timeSteps.size()-1]) + delta;
-				while (nextTu < lastTu) {
-					timeSteps.push_back(tu.unitTime2fimexTime(nextTu));
-					nextTu += delta;
-				}
-				dotsIt++; // forward from "..."
-				transform(dotsIt, times.end(), back_inserter(timeSteps), string2FimexTime);
-			} else {
-				throw CDMException("... in TimeSpec("+timeStepStr+") needs two predecessors and one successor");
-			}
-		} else {
-			transform(times.begin(), times.end(), back_inserter(timeSteps), string2FimexTime);
-		}
+	    // convert all times to double using tu and using tokenizeDotted
+        const TimeUnit tu(outputUnit); // all times should be representable in outputUnit
+	    string timeDoubles = timeString2timeUnitString(timeStepStr, tu);
+	    vector<double> timeDoubleVec = tokenizeDotted<double>(timeDoubles, ",");
+        // add the times as fimexTimes to timeSteps
+	    transform(timeDoubleVec.begin(), timeDoubleVec.end(), back_inserter(timeSteps),
+	            std::bind1st(std::mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
 	} else {
+	    // including x
 		// relative times
-		vector<string> times = tokenize(timeStepStr, ",");
+	    vector<string> times = tokenize(timeStepStr, ",");
 		if (times.size() < 2) {
 			throw CDMException("TimeSpec requires at least 2 times for relative time definition, got: " + timeStepStr);
 		}
@@ -136,28 +148,18 @@ TimeSpec::TimeSpec(const string& timeSpec, const FimexTime& startTime, const Fim
 		// find position x in the relative times
 		double endTimeU = tu.fimexTime2unitTime(endTime);
 		double finalTimeU = static_cast<int>(endTimeU / delta) * delta;
-		vector<double> timeDoubles;
-		// expand ... list and translate all times to doubles in timeUnits
+
+		// convert list with x and ... to timeUnitString
 		for (size_t i = 0; i < times.size(); i++) {
-			string current = times[i];
-			if (current == "...") {
-				if (i < times.size()-1) {
-					double last = translateRelativeTime(times[i+1], startOffset, finalTimeU);
-					double curDelta = timeDoubles[i-1] - timeDoubles[i-2];
-					double next = timeDoubles[i-1] + curDelta;
-					while (next < last) {
-						timeDoubles.push_back(next);
-						next += curDelta;
-					}
-				} else {
-					throw CDMException("TimeSpec cannot find continuation after ... in " + timeStepStr);
-				}
-			} else {
-				timeDoubles.push_back(translateRelativeTime(times[i], startOffset, finalTimeU));
-			}
+		    if (times[i] != "...") {
+		        times[i] = type2string(translateRelativeTime(times[i], startOffset, finalTimeU));
+		    }
 		}
-		// add the times as fimexTimes to timeSteps
-		transform(timeDoubles.begin(), timeDoubles.end(), back_inserter(timeSteps), bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime),tu));
+		string timeDoubles = join(times.begin(), times.end(), ",");
+		vector<double> timeDoubleVec = tokenizeDotted<double>(timeDoubles, ",");
+        // add the times as fimexTimes to timeSteps
+        transform(timeDoubleVec.begin(), timeDoubleVec.end(), back_inserter(timeSteps),
+                std::bind1st(std::mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
 	}
 
 	LOG4FIMEX(logger, Logger::DEBUG, "got parameters unit:" << outputUnit << ";relativeUnit:" << relativeUnit << ";steps:"<<timeStepStr);
