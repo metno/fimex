@@ -21,12 +21,7 @@
 
 <!-- rename a variable -->
 <variable orgName="sea_level_pressure" name="sea_pressure" />
-
-<!--  change units from m to km-->
-<!--  make sure to put the type to change the data, too!!! -->
-<variable name="x_c" type="double" orgName="x">
-   <attribute name="units" value="km" type="string" />
-</variable>
+<variable orgName="x" name="x_c" />
 
 <variable name="surface_snow_sickness">
    <!--remove a variable-attribute -->

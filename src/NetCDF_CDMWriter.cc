@@ -489,7 +489,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 			std::string oldUnit;
 			std::string newUnit;
 			try {
-				oldUnit = cdm.getAttribute(varName, "units").getData()->asString();
+				oldUnit = cdmReader->getCDM().getAttribute(varName, "units").getData()->asString();
 				newUnit = getAttribute(varName, "units").getData()->asString();
 				if (oldUnit != newUnit) {
 					units.convert(oldUnit, newUnit, unitSlope, unitOffset);

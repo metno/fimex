@@ -55,11 +55,18 @@ public:
 	 */
 	NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile = "", int version = 3);
 	virtual ~NetCDF_CDMWriter();
-	/** @return the new name of a variable, eventually changed by the writers config */
+	/**
+	 * @warning only public for testing
+	 * @return the new name of a variable, eventually changed by the writers config
+	 */
 	const std::string& getVariableName(const std::string& varName) const;
-	/** @return the new name of a dimension, eventually changed by the writers config */
+	/**
+	 * @warning only public for testing
+	 * @return the new name of a dimension, eventually changed by the writers config
+	 */
 	const std::string& getDimensionName(const std::string& dimName) const;
 	/**
+     * @warning only public for testing
 	 * @param varName original variable name  (before config: newname)
 	 * @param attName original attribute name (before config: newname)
 	 * @return an attribute contained in the writers attribute, possibly added by config
