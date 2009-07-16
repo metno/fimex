@@ -85,6 +85,7 @@ AC_DEFUN([METNO_HAVE_UDUNITS], [
       AC_CHECK_FUNCS([fmod log10 ceil pow])
       
       saved_LIBS="$LIBS"
+      have_udunits=no
       AC_CHECK_LIB([udunits], [utInit],
         [AC_SUBST(UDUNITS_CPPFLAGS, [-I$ac_udunits_path/include])
          AC_SUBST(UDUNITS_LDFLAGS, [-L$ac_udunits_path/lib])
@@ -92,13 +93,25 @@ AC_DEFUN([METNO_HAVE_UDUNITS], [
          AC_DEFINE([HAVE_UDUNITS])
          have_udunits=yes
          $1
-        ], [
-        :
-        $2
-        ])
+        ], [])
+      if test $have_udunits == "no"; then
+         # check for udunits2 whith compatibility layer
+         AC_CHECK_LIB([udunits2], [utInit],
+            [AC_SUBST(UDUNITS_CPPFLAGS, [-I$ac_udunits_path/include])
+               AC_SUBST(UDUNITS_LDFLAGS, [-L$ac_udunits_path/lib])
+               AC_SUBST(UDUNITS_LIBS, [-ludunits])
+               AC_DEFINE([HAVE_UDUNITS])
+               have_udunits=yes
+               $1
+            ], [])         
+      fi
       AC_LANG_POP(C)
       LIBS="$saved_LIBS"
       LDFLAGS="$saved_LDFLAGS"
+      if test $have_udunits == "no"; then
+         echo "error: udunits not found. Please make sure that udunits is properly installed when compiling with NetCDF.";
+         exit 1;
+      fi
     ], [
       :
       $2

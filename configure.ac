@@ -63,6 +63,7 @@ AX_BOOST_UNIT_TEST_FRAMEWORK
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
+PKG_PROG_PKG_CONFIG()
 
 AC_LANG_PUSH(C++)
 # Check compiler supporting openmp in C++
@@ -82,7 +83,9 @@ AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xyes])
 
 if test "$use_milib" = yes; then
 # Check for the milib library.
-PKG_CHECK_MODULES([milib], [milib])
+if test "x$PKG_CONFIG" != "x"; then
+   PKG_CHECK_MODULES([milib], [milib])
+fi
 METNO_CHECK_HEADERS([milib/milib.h], , , ,
                     [$milib_CFLAGS], [the milib package])
 
