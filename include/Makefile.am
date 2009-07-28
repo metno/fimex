@@ -1,1 +1,1 @@
-SUBDIRS = fimex kdtree++
+SUBDIRS = fimex kdtree++ felt

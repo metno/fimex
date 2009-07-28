@@ -32,7 +32,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HAVE_MILIB_TRUE@am__append_1 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc FeltParameters.cc Felt_File_Error.cc
+@HAVE_MILIB_TRUE@am__append_1 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 subdir = src/felt_reader
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -40,6 +40,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ac_cxx_have_stl.m4 \
 	$(top_srcdir)/m4/ac_cxx_namespaces.m4 \
 	$(top_srcdir)/m4/ax_boost_base.m4 \
+	$(top_srcdir)/m4/ax_boost_date_time.m4 \
+	$(top_srcdir)/m4/ax_boost_filesystem.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
@@ -65,12 +67,14 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfimex_felt_la_LIBADD =
-am__libfimex_felt_la_SOURCES_DIST = FeltCDMReader.cc Felt_Array.cc \
-	Felt_File.cc FeltParameters.cc Felt_File_Error.cc
+am__libfimex_felt_la_SOURCES_DIST = FeltCDMReader2.cc Felt_Array2.cc \
+	Felt_File2.cc FeltParameters.cc Felt_File_Error.cc \
+	FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_MILIB_TRUE@am__objects_1 = FeltCDMReader.lo Felt_Array.lo \
-@HAVE_MILIB_TRUE@	Felt_File.lo FeltParameters.lo \
-@HAVE_MILIB_TRUE@	Felt_File_Error.lo
-am_libfimex_felt_la_OBJECTS = $(am__objects_1)
+@HAVE_MILIB_TRUE@	Felt_File.lo
+am_libfimex_felt_la_OBJECTS = FeltCDMReader2.lo Felt_Array2.lo \
+	Felt_File2.lo FeltParameters.lo Felt_File_Error.lo \
+	$(am__objects_1)
 libfimex_felt_la_OBJECTS = $(am_libfimex_felt_la_OBJECTS)
 libfimex_felt_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -100,6 +104,8 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
+BOOST_DATE_TIME_LIB = @BOOST_DATE_TIME_LIB@
+BOOST_FILESYSTEM_LIB = @BOOST_FILESYSTEM_LIB@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_PROGRAM_OPTIONS_LIB = @BOOST_PROGRAM_OPTIONS_LIB@
 BOOST_REGEX_LIB = @BOOST_REGEX_LIB@
@@ -223,7 +229,9 @@ AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${XML_CPPFLAGS}
 lib_LTLIBRARIES = libfimex_felt.la
 libfimex_felt_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION)
-libfimex_felt_la_SOURCES = $(am__append_1)
+libfimex_felt_la_SOURCES = FeltCDMReader2.cc Felt_Array2.cc \
+	Felt_File2.cc FeltParameters.cc Felt_File_Error.cc \
+	$(am__append_1)
 all: all-am
 
 .SUFFIXES:
@@ -294,9 +302,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltParameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_Array.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_Array2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_File.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_File2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_File_Error.Plo@am__quote@
 
 .cc.o:

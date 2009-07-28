@@ -59,6 +59,8 @@ http://www.libxml.org/.]))
 AX_BOOST_BASE([1.32.0])
 AX_BOOST_REGEX
 AX_BOOST_PROGRAM_OPTIONS
+AX_BOOST_FILESYSTEM
+AX_BOOST_DATE_TIME
 AX_BOOST_UNIT_TEST_FRAMEWORK
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
@@ -114,5 +116,5 @@ AC_LANG_POP(C++)
 #DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([include/fimex/config.h])
-AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/kdtree++/Makefile])
+AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/felt/Makefile include/kdtree++/Makefile])
 AC_OUTPUT
