@@ -66,6 +66,7 @@ public:
 	int verticalCoordinate() const { return header_[10]; }
 	int level1() const {return header_[12]; }
 	int level2() const {return header_[13]; }
+    int gridType() const { return header_[14]; }
 
 	/**
 	 * Read the grid from file.
@@ -96,7 +97,6 @@ private:
 
 	int dataType() const { return header_[8]; }
 	int timeParameter() const { return header_[9]; }
-	int gridType() const { return header_[14]; }
 
 
 	/**

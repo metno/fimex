@@ -42,6 +42,7 @@
 #include <iostream>
 #include <cassert>
 #include <ctime>
+#include <cstdlib>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace MetNoFimex
@@ -253,7 +254,9 @@ void FeltCDMReader2::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
 		std::vector<boost::posix_time::ptime> feltTimes = feltFile.getFeltTimes();
-		tm tm0 = boost::posix_time::to_tm(feltTimes[0]);
+	    // TODO: switch to boost::posix_time
+        putenv("TZ=UTC");
+        tm tm0 = boost::posix_time::to_tm(feltTimes[0]);
 		tm tm_last = boost::posix_time::to_tm(feltTimes[feltTimes.size() - 1]);
 		templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(mktime(&tm0)));
 		templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(mktime(&tm_last)));
@@ -381,9 +384,10 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	CDMVariable timeVar(timeName, timeDataType, timeShape);
 	timeVec = feltFile.getFeltTimes();
 	vector<long> timeVecLong;
+	boost::gregorian::date epochDate(1970,boost::date_time::Jan,1);
+	boost::posix_time::ptime epochStart(epochDate, boost::posix_time::hours(0));
 	for (vector<boost::posix_time::ptime>::iterator tit = timeVec.begin(); tit != timeVec.end(); ++tit) {
-	    tm tm_t = boost::posix_time::to_tm(*tit);
-	    timeVecLong.push_back(static_cast<long>(mktime(&tm_t)));
+	    timeVecLong.push_back((*tit-epochStart).total_seconds());
 	}
 	boost::shared_ptr<Data> timeData = createData(timeDataType, timeSize, timeVecLong.begin(), timeVecLong.end());
 	timeVar.setData(timeData);
@@ -464,11 +468,7 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, std::string& pr
 {
 	boost::shared_ptr<felt::FeltGridDefinition> gridDef = feltFile.getGridDefinition();
 	std::string projStr = gridDef->projDefinition();
-	std::string gridType;
-	boost::smatch matcher;
-	if (boost::regex_search(projStr, matcher, boost::regex("\\+proj=(\\S+)\\s"))) {
-	    gridType = matcher[1];
-	}
+	int gridType = feltFile.getGridType();
 	projName = std::string("projection_" + type2string(gridType));
 	// projection-variable without datatype and dimension
 	CDMVariable projVar(projName, CDM_NAT, std::vector<std::string>());

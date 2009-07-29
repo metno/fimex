@@ -51,7 +51,7 @@ Felt_Array2::~Felt_Array2()
 // add field to feltFields, check first for non-existence
 void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
 {
-    boost::posix_time::ptime time = field->referenceTime();
+    boost::posix_time::ptime time = field->validTime();
     LevelPair level = make_pair(field->level1(), field->level2());
 
     TimeLevelFieldMap::iterator timeSliceIt = feltFields_.find(time);
@@ -92,7 +92,8 @@ void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField>
 }
 
 vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
-	vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>(feltFields_.size());
+	vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>();
+	vTimes.reserve(feltFields_.size());
 	for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
 	    vTimes.push_back(tlm->first);
 	}
@@ -128,6 +129,11 @@ int Felt_Array2::getIdent19(boost::posix_time::ptime time, LevelPair levelPair) 
     return getField(time, levelPair)->miscField();
 }
 
+int Felt_Array2::scaleFactor() const
+{
+    return defaultField_->scaleFactor();
+}
+
 double Felt_Array2::getScalingFactor() const
 {
 	return (dataType_ == "short") ? std::pow(10,static_cast<double>(defaultField_->scaleFactor())) : 1;
@@ -157,6 +163,11 @@ void Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, ve
 {
     return getField(time, levelPair)->grid(gridOut);
 }
+int Felt_Array2::getGridType() const
+{
+    return defaultField_->gridType();
+}
+
 boost::shared_ptr<felt::FeltGridDefinition> Felt_Array2::getGridDefinition() const
 {
     return defaultField_->projectionInformation();

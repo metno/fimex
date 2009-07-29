@@ -121,9 +121,12 @@ public:
 	int getX() const;
 	/** return y/latitude size */
 	int getY() const;
+	/** get the files scaleFactor, this corresponds to scalingFactor by 10^(scaleFactor) == scalingFactor */
+	int scaleFactor() const;
 	/** return scalingFactor */
 	double getScalingFactor() const;
 	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
+	int getGridType() const;
     const boost::shared_ptr<felt::FeltField> getField(boost::posix_time::ptime time, LevelPair levelPair) const throw(Felt_File_Error);
 };
 

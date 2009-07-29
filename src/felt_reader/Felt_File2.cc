@@ -44,6 +44,7 @@
 #include <boost/scoped_array.hpp>
 #include <algorithm>
 #include <iostream>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace MetNoFelt {
 
@@ -194,14 +195,14 @@ boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared
 	ff->grid(data);
 	boost::shared_ptr<MetNoFimex::Data> returnData;
 	if (feltArray->getDatatype() == "short") {
-		if (ff->scaleFactor() != feltArray->getScalingFactor()) {
+		if (ff->scaleFactor() != feltArray->scaleFactor()) {
 			throw Felt_File_Error("change in scaling factor for parameter: " + feltArray->getName() + " consider using float or double datatpye");
 		}
 		returnData = createScaledData<short>(data, feltArray->getFillValue(), 1.);
 	} else if (feltArray->getDatatype() == "float") {
-		returnData = createScaledData<float>(data, feltArray->getFillValue(), ff->scaleFactor());
+		returnData = createScaledData<float>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(ff->scaleFactor())));
 	} else if (feltArray->getDatatype() == "double") {
-		returnData = createScaledData<double>(data, feltArray->getFillValue(), ff->scaleFactor());
+		returnData = createScaledData<double>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(ff->scaleFactor())));
 	} else {
 		throw Felt_File_Error("unknown datatype for feltArray " + feltArray->getName() + ": " + feltArray->getDatatype());
 	}
@@ -259,7 +260,8 @@ boost::shared_ptr<Data> Felt_File2::getXData() const throw(Felt_File_Error) {
 	return xData;
 }
 
-boost::shared_ptr<Data> Felt_File2::getYData() const throw(Felt_File_Error) {
+boost::shared_ptr<Data> Felt_File2::getYData() const throw(Felt_File_Error)
+{
 	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNY());
     boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
     for (int i = 0; i < getNY(); i++) {
@@ -269,6 +271,14 @@ boost::shared_ptr<Data> Felt_File2::getYData() const throw(Felt_File_Error) {
     return yData;
 }
 
+int Felt_File2::getGridType() const throw(Felt_File_Error)
+{
+    // TODO: check against delta, check changes
+    if (feltArrayMap_.size() > 0) {
+        return feltArrayMap_.begin()->second->getGridType();
+    }
+    return -1; // default
+}
 
 boost::shared_ptr<felt::FeltGridDefinition> Felt_File2::getGridDefinition() const throw(Felt_File_Error) {
 	std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin();

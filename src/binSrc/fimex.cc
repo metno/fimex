@@ -36,6 +36,7 @@
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Logger.h"
+#include "fimex/FeltCDMReader2.h"
 #ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
 #endif
@@ -155,6 +156,15 @@ static string getType(const string& io, po::variables_map& vm) {
 static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 	string type = getType("input", vm);
 	auto_ptr<CDMReader> returnPtr;
+    if (type == "flt2" || type == "dat2" || type == "felt2") {
+        string config(DATADIR);
+        config += "/flt2nc_variables.xml";
+        if (vm.count("input.config")) {
+            config = vm["input.config"].as<string>();
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm["input.file"].as<string>() << " with config " << config);
+        returnPtr = auto_ptr<CDMReader>(new FeltCDMReader2(vm["input.file"].as<string>(), config));
+    }
 #ifdef HAVE_LIBMIC
 	if (type == "flt" || type == "dat" || type == "felt") {
 		string config(DATADIR);

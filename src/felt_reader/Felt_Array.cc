@@ -91,6 +91,8 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int f
 
 time_t index16toTime(const boost::array<short, 16>& idx)
 {
+    // TODO: switch to boost::posix_time
+    putenv("TZ=UTC");
 	time_t rawtime;
 	struct tm * timeinfo;
 	time ( &rawtime );
