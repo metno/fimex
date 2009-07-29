@@ -114,11 +114,14 @@ FeltGridDefinition::polarStereographicProj( int gridType,
     float gs[gsSize];
     if ( extraData.empty() )
     {
+        double pi = 3.14159265358979323844;
         gs[0] = poleX;
         gs[1] = poleY;
-        gs[2] = gridD;
         gs[3] = rot;
         gs[4] = 60.0;
+        // grid-distance due to scale-factor and old 150km grid correction
+        // make sure to set gs[4], in particular with gridType 5
+        gs[2] = gridD * (6371.* (1+std::sin(pi/180.*gs[4]))) / (79.*150.);
         gs[5] = 0.0;
     }
 	else
@@ -136,8 +139,8 @@ FeltGridDefinition::polarStereographicProj( int gridType,
     FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
 
     orientation_ = LeftLowerHorizontal; // Default
-    startX_ = ( 0 - gs[0] ) * gs[2];
-    startY_ = ( 0 - gs[1] ) * gs[2];
+    startX_ = ( 1 - gs[0] ) * gs[2];
+    startY_ = ( 1 - gs[1] ) * gs[2];
     incrementX_ = gs[2];
     incrementY_ = gs[2];
 }
