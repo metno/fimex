@@ -28,11 +28,16 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
-#include "fimex/Felt_File2.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/Felt_Types.h"
+#include "fimex/Felt_File_Error.h"
 #include "fimex/ReplaceStringObject.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+
+namespace MetNoFelt {
+    class Felt_File2; // forward decl.
+}
 
 namespace MetNoFimex
 {
@@ -50,12 +55,12 @@ public:
 private:
 	const std::string filename;
 	const std::string configFilename;
-	MetNoFelt::Felt_File2 feltFile;
+	boost::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
 	CDMDimension xDim;
 	CDMDimension yDim;
 	std::map<std::string, std::string> varNameFeltIdMap;
 	std::vector<boost::posix_time::ptime> timeVec;
-	std::map<std::string, std::vector<MetNoFelt::Felt_Array2::LevelPair> > levelVecMap;
+	std::map<std::string, std::vector<MetNoFelt::LevelPair> > levelVecMap;
 	/**
 	 * config attributes may contain template parameters marked with %PARAM%
 	 * which should be replaced by dynamic values from the felt-file and stored

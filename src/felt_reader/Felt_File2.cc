@@ -22,6 +22,7 @@
  */
 
 #include "fimex/Felt_File2.h"
+#include "fimex/Felt_Array2.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltField.h"
 #include <milib/milib.h>
@@ -120,7 +121,7 @@ void Felt_File2::init(const std::map<std::string, std::string>& options) throw(F
 	        findOrCreateFeltArray(field);
 	        if (field->verticalCoordinate() == 10) {
 	            // hybrid levels, read all level-parameters once for each level-pairs
-	            Felt_Array2::LevelPair lp = make_pair(field->level1(), field->level2());
+	            LevelPair lp = make_pair(field->level1(), field->level2());
 	            if (hybridLevels_.find(lp) == hybridLevels_.end()) {
 	                hybridLevels_[lp] = field->miscField();
 	            }
@@ -185,7 +186,7 @@ boost::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata
 	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, indata.size()));
 }
 
-boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const Felt_Array2::LevelPair level) throw(Felt_File_Error)
+boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level) throw(Felt_File_Error)
 {
     size_t dataSize = feltArray->getX() * feltArray->getY();
     vector<short> data;
@@ -208,17 +209,17 @@ boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared
 	return returnData;
 }
 
-std::map<short, std::vector<Felt_Array2::LevelPair> > Felt_File2::getFeltLevelPairs() const {
+std::map<short, std::vector<LevelPair> > Felt_File2::getFeltLevelPairs() const {
 	// put level values of each id into the levelSet (sort and unique)
-	std::map<short, set<Felt_Array2::LevelPair, Felt_Array2::LevelPairLess> > typeLevelSet;
+	std::map<short, set<LevelPair, LevelPairLess> > typeLevelSet;
 	for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-		vector<Felt_Array2::LevelPair> levels = fait->second->getLevelPairs();
+		vector<LevelPair> levels = fait->second->getLevelPairs();
 		typeLevelSet[fait->second->getLevelType()].insert(levels.begin(), levels.end());
 	}
 	// convert the set into a vector
-	std::map<short, std::vector<Felt_Array2::LevelPair> > typeLevelVector;
-	for (std::map<short, set<Felt_Array2::LevelPair, Felt_Array2::LevelPairLess> >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
-		typeLevelVector[it->first] = std::vector<Felt_Array2::LevelPair>(it->second.begin(), it->second.end());
+	std::map<short, std::vector<LevelPair> > typeLevelVector;
+	for (std::map<short, set<LevelPair, LevelPairLess> >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
+		typeLevelVector[it->first] = std::vector<LevelPair>(it->second.begin(), it->second.end());
 	}
 	return typeLevelVector;
 }

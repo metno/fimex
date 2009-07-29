@@ -30,17 +30,20 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include "fimex/Data.h"
-#include "fimex/Felt_Array2.h"
+#include "fimex/Felt_Types.h"
 #include "fimex/Felt_File_Error.h"
 #include "fimex/FeltParameters.h"
 #include "fimex/Logger.h"
 
 namespace felt {
     class FeltFile; // forward declaration
+    class FeltField;
     class FeltGridDefinition;
 }
 
 namespace MetNoFelt {
+
+class Felt_Array2; // forward decl.
 
 /// Felt File access
 /**
@@ -55,7 +58,7 @@ private:
 	boost::shared_ptr<felt::FeltFile> feltFile_;
 	std::map<std::string, boost::shared_ptr<Felt_Array2> > feltArrayMap_;
 	FeltParameters feltParameters;
-	std::map<Felt_Array2::LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
+	std::map<LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
 	std::vector<double> gridParameterDelta; // allowed deviation between two grids
 	MetNoFimex::LoggerPtr logger;
 
@@ -99,7 +102,7 @@ public:
 	 * @param time time of slice
 	 * @param level level of slice
 	 */
-	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const Felt_Array2::LevelPair level) throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level) throw(Felt_File_Error);
 
 	/**
 	 *  retrieve all felt arrays
@@ -115,8 +118,8 @@ public:
 	 *  Z-axis types and values
 	 * @return map consisting of felt level-ids and a sorted vector of level-pairs of values
 	 */
-	std::map<short, std::vector<Felt_Array2::LevelPair> > getFeltLevelPairs() const;
-	const std::map<Felt_Array2::LevelPair, int>& getHybridLevels() const {return hybridLevels_;}
+	std::map<short, std::vector<LevelPair> > getFeltLevelPairs() const;
+	const std::map<LevelPair, int>& getHybridLevels() const {return hybridLevels_;}
 	/// all time values, sorted
 	std::vector<boost::posix_time::ptime> getFeltTimes() const;
 	/// get size in x direction

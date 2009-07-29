@@ -100,7 +100,7 @@ vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
 	return vTimes; 
 }
 
-vector<Felt_Array2::LevelPair> Felt_Array2::getLevelPairs() const {
+vector<LevelPair> Felt_Array2::getLevelPairs() const {
     set<LevelPair, LevelPairLess> lset; // unique, sorted set of levels
     for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
         for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {

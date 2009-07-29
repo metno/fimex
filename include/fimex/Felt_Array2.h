@@ -30,6 +30,7 @@
 #include <boost/array.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include <fimex/Felt_Types.h>
 #include "fimex/Felt_File_Error.h"
 
 namespace felt {
@@ -48,20 +49,6 @@ using namespace std;
  */
 class Felt_Array2
 {
-public:
-    typedef pair<short, short> LevelPair;
-    /**
-     * comparison operator for pair<short, short> used for LevelPairs
-     *
-     */
-    struct LevelPairLess : public binary_function<const LevelPair, const LevelPair, bool>
-    {
-        bool operator()(const LevelPair& p1, const LevelPair& p2) const {
-            if (p1.first == p2.first) return p1.second < p2.second;
-            return p1.first < p2.first;
-        }
-    };
-
 private:
     // sorted container for level -> field associations
     typedef map<LevelPair, boost::shared_ptr<felt::FeltField>, LevelPairLess> LevelFieldMap;
