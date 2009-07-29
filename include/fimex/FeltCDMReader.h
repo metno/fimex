@@ -32,6 +32,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDimension.h"
 #include "fimex/ReplaceStringObject.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {
@@ -53,7 +54,7 @@ private:
 	CDMDimension xDim;
 	CDMDimension yDim;
 	std::map<std::string, std::string> varNameFeltIdMap;
-	std::vector<std::time_t> timeVec;
+	std::vector<epoch_seconds> timeVec;
 	std::map<std::string, std::vector<short> > levelVecMap;
 	/**
 	 * config attributes may contain template parameters marked with %PARAM%

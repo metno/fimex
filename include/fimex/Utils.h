@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <sstream>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "fimex/CDMException.h"
 
 namespace MetNoFimex
@@ -103,6 +104,14 @@ T string2type(std::string s) {
 	buffer >> retVal;
 	return retVal;
 }
+
+typedef long epoch_seconds;
+/**
+ * convert a posixTime to seconds sinc 1970-01-01
+ * @param time time to convert
+ */
+epoch_seconds posixTime2epochTime(const boost::posix_time::ptime& time);
+
 
 /**
  * convert a string with dots to a vector with type T

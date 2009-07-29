@@ -34,7 +34,6 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <cassert>
-#include <ctime>
 #include <cmath>
 #include <set>
 #include <iostream>
@@ -268,7 +267,7 @@ std::vector<short> Felt_File::getDataSlice(Felt_Array& fa, boost::array<short, 1
 	return data;
 }
 
-vector<short> Felt_File::getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error) {
+vector<short> Felt_File::getDataSlice(const std::string& compName, const epoch_seconds time, const short level) throw(Felt_File_Error) {
 	Felt_Array& fa = getFeltArray(compName);
 	boost::array<short, 16> idx(fa.getIndex(time, level));
 	int fieldSize(fa.getFieldSize(time, level));
@@ -295,7 +294,7 @@ boost::shared_ptr<MetNoFimex::Data> createScaledData(const boost::shared_array<s
 	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, dataSize));
 }
 
-boost::shared_ptr<MetNoFimex::Data> Felt_File::getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error) {
+boost::shared_ptr<MetNoFimex::Data> Felt_File::getScaledDataSlice(const std::string& compName, const epoch_seconds time, const short level, double fillValue) throw(Felt_File_Error) {
 	Felt_Array& fa = getFeltArray(compName);
 	boost::array<short, 16> idx(fa.getIndex(time, level));
 	int fieldSize(fa.getFieldSize(time, level));
@@ -347,13 +346,13 @@ std::map<short, std::vector<pair<short,short> > > Felt_File::getFeltLevelPairs()
 	return typeLevelVector;
 }
 
-std::vector<time_t> Felt_File::getFeltTimes() const {
-	std::set<time_t> times;
+std::vector<epoch_seconds> Felt_File::getFeltTimes() const {
+	std::set<epoch_seconds> times;
 	for (std::map<std::string, Felt_Array>::const_iterator fait = feltArrayMap.begin(); fait != feltArrayMap.end(); ++fait) {
-		vector<time_t> fa_times = fait->second.getTimes();
+		vector<epoch_seconds> fa_times = fait->second.getTimes();
 		times.insert(fa_times.begin(), fa_times.end());
 	}	// times automatically sorted due to set
-	std::vector<time_t> sortedTimes(times.begin(), times.end());
+	std::vector<epoch_seconds> sortedTimes(times.begin(), times.end());
 	return sortedTimes;
 }
 

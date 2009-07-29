@@ -27,12 +27,13 @@
 #include <set>
 #include <vector>
 #include <map>
-#include <ctime>
 #include <boost/array.hpp>
 #include "fimex/Felt_File_Error.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFelt {
 using namespace std;
+using MetNoFimex::epoch_seconds;
 
 /**
  * comparison operator for pair<short, short> used for levelPairs
@@ -59,14 +60,14 @@ typedef map<pair<short,short>, short, ShortPairLess > ShortPairMap;
 class Felt_Array
 {
 private:
-	typedef map<time_t, boost::array<short, 4> > TIME_MAP;
+	typedef map<epoch_seconds, boost::array<short, 4> > TIME_MAP;
 	string feltArrayName;
 	ShortPairSet levelPairs;
 	// the time-array[0,1,2,3] correspond to index-array[2,3,4,9]
 	TIME_MAP times;
-	map<time_t, map<short, int> > fieldSizeMap;
+	map<epoch_seconds, map<short, int> > fieldSizeMap;
 	// ident19 stores extra informations which might be time/level dependent
-	map<time_t, ShortPairMap> ident19;
+	map<epoch_seconds, ShortPairMap> ident19;
 	int nx;
 	int ny;
 	long scaling_factor;
@@ -127,7 +128,7 @@ public:
 	/** set the fill value to be used in #Felt_File::getScaledDataSlice */
 	void setFillValue(double fillValue) {this->fillValue = fillValue;}
 	/** return the times available for this parameter, sorted */
-	vector<time_t> getTimes() const;
+	vector<epoch_seconds> getTimes() const;
 	/** return the levels available for this parameter, sorted */
 	vector<short> getLevels() const;
 	/** 
@@ -137,12 +138,12 @@ public:
 	/**
 	 * add the ident19 parameter from the data-header
 	 */
-	void addIdent19(time_t time, pair<short, short> levelPair, short value) {ident19[time][levelPair] = value;}
+	void addIdent19(epoch_seconds time, pair<short, short> levelPair, short value) {ident19[time][levelPair] = value;}
 	/** 
 	 * get the ident19 parameter from the data-header, throw error if levelPair/time doesn't exists
 	 *  @warning only ident19 of data already read will be taken into account  
 	 */
-	short getIdent19(time_t time, pair<short, short> levelPair) const throw(Felt_File_Error);
+	short getIdent19(epoch_seconds time, pair<short, short> levelPair) const throw(Felt_File_Error);
 	/** 
 	 * get the ident19 parameter from the data-header, assures that the parameters keep constant
 	 * across all times for each levelPair or throws a Felt_File_Error
@@ -154,7 +155,7 @@ public:
 	 * across all levelPair for each time or throws a Felt_File_Error
 	 * @warning only ident19 of data already read will be taken into account
 	 */
-	short getIdent19(time_t time) const throw(Felt_File_Error);
+	short getIdent19(epoch_seconds time) const throw(Felt_File_Error);
 	/** 
 	 * get the ident19 parameter from the data-header, assures that the parameters keep constant
 	 * across all levelPair and times or throws a Felt_File_Error
@@ -172,8 +173,8 @@ public:
 	double getScalingFactor() const;
 	
 	/** return a copy of the index used within this Felt_Array */
-	boost::array<short, 16> const getIndex(time_t time, short level) throw(Felt_File_Error);
-	int getFieldSize(time_t time, short level) const throw (Felt_File_Error);
+	boost::array<short, 16> const getIndex(epoch_seconds time, short level) throw(Felt_File_Error);
+	int getFieldSize(epoch_seconds time, short level) const throw (Felt_File_Error);
 	
 private:
 	void testHeaderElement(short oldVal, short newVal, const std::string& msg) const throw(Felt_File_Error);
@@ -182,7 +183,7 @@ private:
 /**
  * convert the 16-short header to a time
  */
-time_t index16toTime(const boost::array<short,16>& idx);
+epoch_seconds index16toTime(const boost::array<short,16>& idx);
 /**
  * convert the 16-short header to a levelPair
  */

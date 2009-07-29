@@ -28,6 +28,7 @@
 #include <exception>
 #include <cmath>
 #include <iomanip>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace MetNoFimex
 {
@@ -80,6 +81,12 @@ std::vector<std::string> tokenize(const std::string& str, const std::string& del
         pos = str.find_first_of(delimiters, lastPos);
     }
     return tokens;
+}
+
+static boost::posix_time::ptime epochBase(boost::gregorian::date(1970, boost::date_time::Jan, 1));
+epoch_seconds posixTime2epochTime(const boost::posix_time::ptime& time)
+{
+    return (time - epochBase).total_seconds();
 }
 
 }

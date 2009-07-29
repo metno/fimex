@@ -40,7 +40,7 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
-#include <ctime>
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 namespace MetNoFimex
 {
@@ -249,7 +249,7 @@ void FeltCDMReader::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
 	feltFile = MetNoFelt::Felt_File(filename, knownFeltIds, options);
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
-		std::vector<time_t> feltTimes = feltFile.getFeltTimes();
+		std::vector<epoch_seconds> feltTimes = feltFile.getFeltTimes();
 		templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(feltTimes[0]));
 		templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(feltTimes[feltTimes.size() - 1]));
 	}
@@ -342,15 +342,8 @@ void FeltCDMReader::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 		}
 	}
 	if (! cdm.checkVariableAttribute(cdm.globalAttributeNS(), "history", boost::regex(".*"))) {
-		tm my_tmtime;
-		time_t mytime;
-		time(&mytime);
-		gmtime_r(&mytime, &my_tmtime);
-		std::stringstream stime;
-		int month = (my_tmtime.tm_mon + 1);
-		stime << (my_tmtime.tm_year + 1900) << "-" <<  (month < 10 ? "0" : "") << month << "-" << ( my_tmtime.tm_mday < 10 ? "0" : "") << my_tmtime.tm_mday;
-		//stime << (my_tmtime.tm_hour) << ":" << my_tmtime.tm_min << ":" << my_tmtime.tm_sec << "Z";
-		cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", stime.str() + " creation by fimex from file '"+ filename+"'"));
+        boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
+        cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex from file '"+ filename+"'"));
 	}
 }
 

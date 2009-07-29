@@ -41,9 +41,8 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
-#include <ctime>
 #include <cstdlib>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 namespace MetNoFimex
 {
@@ -254,12 +253,8 @@ void FeltCDMReader2::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
 		std::vector<boost::posix_time::ptime> feltTimes = feltFile.getFeltTimes();
-	    // TODO: switch to boost::posix_time
-        putenv("TZ=UTC");
-        tm tm0 = boost::posix_time::to_tm(feltTimes[0]);
-		tm tm_last = boost::posix_time::to_tm(feltTimes[feltTimes.size() - 1]);
-		templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(mktime(&tm0)));
-		templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(mktime(&tm_last)));
+		templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
+		templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[feltTimes.size()-1])));
 	}
 
 	// fill the CDM;
@@ -350,15 +345,8 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 		}
 	}
 	if (! cdm.checkVariableAttribute(cdm.globalAttributeNS(), "history", boost::regex(".*"))) {
-		tm my_tmtime;
-		time_t mytime;
-		time(&mytime);
-		gmtime_r(&mytime, &my_tmtime);
-		std::stringstream stime;
-		int month = (my_tmtime.tm_mon + 1);
-		stime << (my_tmtime.tm_year + 1900) << "-" <<  (month < 10 ? "0" : "") << month << "-" << ( my_tmtime.tm_mday < 10 ? "0" : "") << my_tmtime.tm_mday;
-		//stime << (my_tmtime.tm_hour) << ":" << my_tmtime.tm_min << ":" << my_tmtime.tm_sec << "Z";
-		cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", stime.str() + " creation by fimex from file '"+ filename+"'"));
+	    boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
+		cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex from file '"+ filename+"'"));
 	}
 }
 
@@ -384,11 +372,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	CDMVariable timeVar(timeName, timeDataType, timeShape);
 	timeVec = feltFile.getFeltTimes();
 	vector<long> timeVecLong;
-	boost::gregorian::date epochDate(1970,boost::date_time::Jan,1);
-	boost::posix_time::ptime epochStart(epochDate, boost::posix_time::hours(0));
-	for (vector<boost::posix_time::ptime>::iterator tit = timeVec.begin(); tit != timeVec.end(); ++tit) {
-	    timeVecLong.push_back((*tit-epochStart).total_seconds());
-	}
+	transform(timeVec.begin(), timeVec.end(), back_inserter(timeVecLong), posixTime2epochTime);
 	boost::shared_ptr<Data> timeData = createData(timeDataType, timeSize, timeVecLong.begin(), timeVecLong.end());
 	timeVar.setData(timeData);
 	cdm.addVariable(timeVar);

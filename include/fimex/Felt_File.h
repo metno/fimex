@@ -24,7 +24,6 @@
 #ifndef FELT_FILE_H_
 #define FELT_FILE_H_
 
-#include <ctime>
 #include <map>
 #include <vector>
 #include <string>
@@ -35,9 +34,10 @@
 #include "fimex/Felt_File_Error.h"
 #include "fimex/FeltParameters.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFelt {
-
+using MetNoFimex::epoch_seconds;
 /// Felt File access
 /**
  * Felt_File gives c++ style access to felt files. It uses internally
@@ -95,7 +95,7 @@ public:
 	 * @param time time of slice
 	 * @param level level of slice
 	 */
-	std::vector<short> getDataSlice(const std::string& compName, const std::time_t time, const short level) throw(Felt_File_Error);
+	std::vector<short> getDataSlice(const std::string& compName, const epoch_seconds time, const short level) throw(Felt_File_Error);
 	/**
 	 * retrieve the data prescaled (if float or double) and replaced with the new fill value
 	 *
@@ -103,7 +103,7 @@ public:
 	 * @param time time of slice
 	 * @param level level of slice
 	 */
-	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(const std::string& compName, const std::time_t time, const short level, double fillValue) throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(const std::string& compName, const epoch_seconds time, const short level, double fillValue) throw(Felt_File_Error);
 
 	/**
 	 *  retrieve all felt arrays
@@ -122,7 +122,7 @@ public:
 	std::map<short, std::vector<pair<short,short> > > getFeltLevelPairs() const;
 	const ShortPairMap& getHybridLevels() const {return hybridLevels;}
 	/// all time values, sorted
-	std::vector<time_t> getFeltTimes() const;
+	std::vector<epoch_seconds> getFeltTimes() const;
 	/// get size in x direction
 	int getNX() const;
 	/// get size in y direction

@@ -15,7 +15,7 @@
 	<attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string" />
 	<attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string" />	
 	<attribute name="references" value="unknown" type="string" />
-	<attribute name="history" value="unknown" type="string" />
+	<!-- <attribute name="history" value="unknown" type="string" /> -->
 	<attribute name="comment" value="none" type="string" />
 </global_attributes>
 <axes>

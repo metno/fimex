@@ -24,7 +24,6 @@
 #ifndef FELT_FILE2_H_
 #define FELT_FILE2_H_
 
-#include <ctime>
 #include <map>
 #include <vector>
 #include <string>

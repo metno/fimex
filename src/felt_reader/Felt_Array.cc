@@ -32,6 +32,8 @@
 
 namespace MetNoFelt {
 
+using namespace MetNoFimex;
+
 Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx, const string& dataType)
 : feltArrayName(name),
   idx(idx),
@@ -82,28 +84,18 @@ void Felt_Array::addInformationByIndex(const boost::array<short, 16>& idx, int f
 	}
 	
 	// required to be able to go back from tm_hour to idx[4], idx[9]
-	time_t thisTime = index16toTime(idx); 
+	epoch_seconds thisTime = index16toTime(idx);
 	boost::array<short, 4> timeIdx= { { idx[2], idx[3], idx[4], idx[9] } };
 	times[thisTime] = timeIdx;
 	levelPairs.insert(index16toLevelPair(idx));
 	fieldSizeMap[thisTime][idx[12]] = fieldSize;
 }
 
-time_t index16toTime(const boost::array<short, 16>& idx)
+epoch_seconds index16toTime(const boost::array<short, 16>& idx)
 {
-    // TODO: switch to boost::posix_time
-    putenv("TZ=UTC");
-	time_t rawtime;
-	struct tm * timeinfo;
-	time ( &rawtime );
-	timeinfo = gmtime ( &rawtime );
-	timeinfo->tm_year = idx[2] - 1900;
-	timeinfo->tm_mon = idx[3] / 100 - 1;
-	timeinfo->tm_mday = idx[3] % 100;
-	timeinfo->tm_hour = idx[4] / 100 + idx[9];
-	timeinfo->tm_min = idx[4] % 100;
-	timeinfo->tm_sec = 0;
-	return mktime(timeinfo);
+    boost::gregorian::date date(idx[2], idx[3] / 100, idx[3] % 100);
+    boost::posix_time::time_duration clock(idx[4]/100 + idx[9], idx[4] % 100, 0);
+	return posixTime2epochTime(boost::posix_time::ptime(date, clock));
 }
 pair<short, short> index16toLevelPair(const boost::array<short, 16>& idx)
 {
@@ -134,12 +126,12 @@ void Felt_Array::setDataHeader(boost::array<short, 20> header) throw(Felt_File_E
 	this->header = header;
 }
 
-vector<time_t> Felt_Array::getTimes() const {
-	vector<time_t> vTimes = vector<time_t>(times.size());
+vector<epoch_seconds> Felt_Array::getTimes() const {
+	vector<epoch_seconds> vTimes = vector<epoch_seconds>(times.size());
 	// below follows something similar to STL-copy, but for map-keys
 	TIME_MAP::const_iterator now(times.begin());
 	TIME_MAP::const_iterator last(times.end());
-	vector<time_t>::iterator result(vTimes.begin());
+	vector<epoch_seconds>::iterator result(vTimes.begin());
 	while (now!=last) {
 		*result++ = now->first;
 		now++;
@@ -167,9 +159,9 @@ vector<pair<short, short> > Felt_Array::getLevelPairs() const {
 	return retVal;
 }
 
-short Felt_Array::getIdent19(time_t time, pair<short, short> levelPair) const throw(Felt_File_Error)
+short Felt_Array::getIdent19(epoch_seconds time, pair<short, short> levelPair) const throw(Felt_File_Error)
 {
-	map<time_t, ShortPairMap>::const_iterator tit = ident19.find(time);
+	map<epoch_seconds, ShortPairMap>::const_iterator tit = ident19.find(time);
 	if (tit != ident19.end()) {
 		ShortPairMap::const_iterator lit = tit->second.find(levelPair);
 		if (lit != tit->second.end()) {
@@ -182,7 +174,7 @@ short Felt_Array::getIdent19(pair<short, short> levelPair) const throw(Felt_File
 {
 	short retVal = ANY_VALUE();
 	int found = 0;
-	for (map<time_t, ShortPairMap>::const_iterator tit = ident19.begin(); tit != ident19.end(); ++tit) {
+	for (map<epoch_seconds, ShortPairMap>::const_iterator tit = ident19.begin(); tit != ident19.end(); ++tit) {
 		ShortPairMap::const_iterator lit = tit->second.find(levelPair);
 		if (lit != tit->second.end()) {
 			found++;
@@ -198,12 +190,12 @@ short Felt_Array::getIdent19(pair<short, short> levelPair) const throw(Felt_File
 	}
 	return retVal;
 }
-short Felt_Array::getIdent19(time_t time) const throw(Felt_File_Error) 
+short Felt_Array::getIdent19(epoch_seconds time) const throw(Felt_File_Error)
 {
 	short retVal = ANY_VALUE();
 	int found = 0;
 	
-	map<time_t, ShortPairMap>::const_iterator tit = ident19.find(time);
+	map<epoch_seconds, ShortPairMap>::const_iterator tit = ident19.find(time);
 	if (tit != ident19.end()) {
 		for (ShortPairMap::const_iterator lit = tit->second.begin(); lit != tit->second.end(); ++lit) {
 			found++;
@@ -223,7 +215,7 @@ short Felt_Array::getIdent19() const throw(Felt_File_Error)
 {
 	short retVal = ANY_VALUE();
 	int found = 0;
-	for (map<time_t, ShortPairMap>::const_iterator tit = ident19.begin(); tit != ident19.end(); ++tit) {
+	for (map<epoch_seconds, ShortPairMap>::const_iterator tit = ident19.begin(); tit != ident19.end(); ++tit) {
 		for (ShortPairMap::const_iterator lit = tit->second.begin(); lit != tit->second.end(); ++lit) {
 			found++;
 			if (retVal == ANY_VALUE()) {
@@ -249,7 +241,7 @@ const string& Felt_Array::getName() const {
 	return feltArrayName;
 } 
 
-boost::array<short, 16> const Felt_Array::getIndex(time_t time, short level) throw(Felt_File_Error) {
+boost::array<short, 16> const Felt_Array::getIndex(epoch_seconds time, short level) throw(Felt_File_Error) {
 	boost::array<short, 16> index(idx); // get a copy
 	TIME_MAP::iterator it = times.find(time);
 	if (it != times.end()) {
@@ -273,8 +265,8 @@ boost::array<short, 16> const Felt_Array::getIndex(time_t time, short level) thr
 	return index;
 }
 
-int Felt_Array::getFieldSize(time_t time, short level) const throw(Felt_File_Error) {
-	map<time_t, map<short, int> >::const_iterator timeMap = fieldSizeMap.find(time); 
+int Felt_Array::getFieldSize(epoch_seconds time, short level) const throw(Felt_File_Error) {
+	map<epoch_seconds, map<short, int> >::const_iterator timeMap = fieldSizeMap.find(time);
 	if (timeMap != fieldSizeMap.end()) {
 		map<short, int>::const_iterator levelMap = timeMap->second.find(level);
 		if (levelMap != timeMap->second.end()) {
