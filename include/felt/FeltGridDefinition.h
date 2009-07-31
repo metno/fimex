@@ -32,10 +32,23 @@
 #include <string>
 #include <vector>
 #include <iosfwd>
+#include <boost/array.hpp>
 
 namespace felt
 {
 
+/**
+ * retrieve the 6 gridparameters from the felt-data
+ * @param gridType id of the grid,  (header[8] < 1000) ? header[8] : (int) header[8] / 1000
+ * @param xNum number of points in x-direction, header[9]
+ * @param yNum number of points in x-direction, header[10]
+ * @param a used for different depending on gridType, header[14]
+ * @param b used for different depending on gridType, header[15]
+ * @param c used for different depending on gridType, header[16]
+ * @param d used for different depending on gridType, header[17]
+ * @param extraData data at the end of the data-region, used for high resolution information (header[8] < 1000) ? 0 : header[8] % 1000
+ */
+boost::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int> & extraData);
 
 class FeltGridDefinition
 {
