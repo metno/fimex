@@ -31,8 +31,93 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
 
 namespace felt {
+
+// first scaling method
+void scaleGridInfoFirst_(boost::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int> & extraData)
+{
+    assert(parsUsed <= 6);
+    for (int i = 0; i < parsUsed; ++i) {
+        int i2 = 2*i;
+        int iGrid1 = extraData.at(i2);
+        int iGrid2 = extraData.at(i2 + 1);
+
+        gridPar[i] = (iGrid1 * 10000. + iGrid2) / scale;
+    }
+}
+
+// second scaling method, internal scaling factor, int scale not used
+void scaleGridInfoSecond_(boost::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int> & extraData)
+{
+    assert(parsUsed <= 6);
+    assert(extraData.at(0) == parsUsed);
+    assert(extraData.at(1) == 3);
+    for (int i = 0; i < parsUsed; ++i) {
+        int i3 = i*3 + 2; // 2 offset
+        scale = std::pow(10., extraData.at(i3));
+        int iGrid1 = extraData.at(i3 + 1);
+        int iGrid2 = extraData.at(i3 + 2);
+
+        gridPar[i] = (iGrid1 * 10000. + iGrid2) / scale;
+    }
+}
+
+
+boost::array<float, 6> gridParametersPolarStereo_(int gridTypeFlag, int xNum, int yNum, int ixp, int iyp, int idist, int iphi, const std::vector<short int> & extraData)
+{
+    const int parsUsed = 5; // gridPar 6 not used
+    boost::array<float, 6> gridPar;
+    for (int i = 0; i < 6; ++i) {
+        gridPar[i] = 0.;
+    }
+    // default at 60 degree
+    gridPar[4] = 60.;
+    if (idist > 0) {
+        // standard
+        gridPar[0] = ixp * .01;
+        gridPar[1] = iyp * .01;
+        gridPar[2] = idist * .1;
+        gridPar[3] = iphi;
+    } else {
+        // old extension
+        gridPar[0] = ixp;
+        gridPar[1] = iyp;
+        gridPar[2] = idist * -.1;
+        gridPar[3] = iphi;
+    }
+
+    // corrections from extraData
+    switch (gridTypeFlag) {
+        case (2*parsUsed): scaleGridInfoFirst_(gridPar, parsUsed, 100, extraData); break;
+        case (2+3*parsUsed): scaleGridInfoSecond_(gridPar, parsUsed, 100, extraData); break;
+        default: throw std::runtime_error("unknown gridTypeFlag");
+    }
+
+    if (gridPar[2] != 0) gridPar[2] = 79.*150./gridPar[2];
+    else throw std::runtime_error("polar-stereographic: cells between equator and pole cannot be 0");
+
+    if (gridPar[4] == 0 || gridPar[4] < -90. || gridPar[4] > 90.)
+        throw std::runtime_error("polar-stereographic: undefined angle phi");
+
+    return gridPar;
+}
+
+boost::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int> & extraData)
+{
+    int gridTypeFlag = 0;
+    if (gridType >= 1000) {
+        gridTypeFlag = gridType % 1000;
+        gridType /= 1000;
+    }
+
+    switch (gridType/1000) {
+        case 1:
+        case 4: return gridParametersPolarStereo_(gridTypeFlag, xNum, yNum, a, b, c, d, extraData); break;
+    }
+}
+
 
 std::string FeltGridDefinition::getProjDefinition_(int gridType, const float * gs) const
 {
