@@ -29,11 +29,14 @@
 #ifndef FELTFILE_H_
 #define FELTFILE_H_
 
-#include "felt/feltConstants.h"
-#include "felt/FeltField.h"
+#include "FeltConstants.h"
+#include "FeltTypes.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/shared_array.hpp>
+
 #include <iterator>
 #include <vector>
 #include <iosfwd>
@@ -72,7 +75,7 @@ public:
 	const_iterator end() const;
 
     /// throws std::out_of_range if idx is too large.
-	const FeltField & getField(size_t idx) const;
+	const FeltField & at(size_t idx) const;
 
 
 

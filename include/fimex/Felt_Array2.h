@@ -33,10 +33,7 @@
 #include <fimex/Felt_Types.h>
 #include "fimex/Felt_File_Error.h"
 
-namespace felt {
-    class FeltField; // forward declaration
-    class FeltGridDefinition;
-}
+#include "felt/FeltTypes.h"
 
 namespace MetNoFelt {
 using namespace std;

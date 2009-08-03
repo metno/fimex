@@ -27,7 +27,8 @@
  */
 
 #include "felt/FeltFile.h"
-#include "felt/feltTypeConversion.h"
+#include "felt/FeltTypeConversion.h"
+#include "felt/FeltField.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -217,7 +218,7 @@ void FeltFile::get_(std::vector<word> & out, size_type fromWord, size_type noOfW
 }
 
 
-const FeltField & FeltFile::getField(size_t idx) const
+const FeltField & FeltFile::at(size_t idx) const
 {
 	return * fields_.at(idx);
 }

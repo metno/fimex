@@ -93,10 +93,13 @@ private:
     float incrementX_;
     float incrementY_;
     Orientation orientation_;
+    boost::array<float, 6> gridPars;
 
-
-	std::string getProjDefinition_(int gridType, const float * gs) const;
-    Orientation getScanMode_(float * gs, int jNum) const;
+	std::string getProjDefinition_(int gridType, const boost::array<float,6>& gs) const;
+    Orientation getScanMode_();
+    void polarStereographicProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);
+    void geographicProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);
+    // those two below are deprecated
     void polarStereographicProj(int gridType, float poleX, float poleY, float gridD, float rot, const std::vector<short int> & extraData);
     void geographicProj(int gridType, float startLongitude, float startLatitude, float iInc, float jInc, const std::vector<short int> & extraData);
 

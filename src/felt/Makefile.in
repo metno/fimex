@@ -67,7 +67,7 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfelt_la_LIBADD =
 am_libfelt_la_OBJECTS = FeltField.lo FeltFile.lo FeltGridDefinition.lo \
-	feltTypeConversion.lo
+	FeltTypeConversion.lo
 libfelt_la_OBJECTS = $(am_libfelt_la_OBJECTS)
 libfelt_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -222,7 +222,7 @@ AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include
 lib_LTLIBRARIES = libfelt.la
 libfelt_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION)
-libfelt_la_SOURCES = FeltField.cpp FeltFile.cpp FeltGridDefinition.cpp feltTypeConversion.cpp
+libfelt_la_SOURCES = FeltField.cpp FeltFile.cpp FeltGridDefinition.cpp FeltTypeConversion.cpp
 all: all-am
 
 .SUFFIXES:
@@ -295,7 +295,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltField.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltFile.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltGridDefinition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/feltTypeConversion.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltTypeConversion.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

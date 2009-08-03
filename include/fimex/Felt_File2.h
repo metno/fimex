@@ -34,12 +34,7 @@
 #include "fimex/Felt_File_Error.h"
 #include "fimex/FeltParameters.h"
 #include "fimex/Logger.h"
-
-namespace felt {
-    class FeltFile; // forward declaration
-    class FeltField;
-    class FeltGridDefinition;
-}
+#include "felt/FeltTypes.h"
 
 namespace MetNoFelt {
 

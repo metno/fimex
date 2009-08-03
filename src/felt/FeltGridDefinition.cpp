@@ -51,7 +51,7 @@ void scaleGridInfoFirst_(boost::array<float, 6>& gridPar, int parsUsed, float sc
 // second scaling method, internal scaling factor
 void scaleGridInfoSecond_(boost::array<float, 6>& gridPar, int parsUsed, const std::vector<short int> & extraData)
 {
-    assert(parsUsed <= 6);
+
     // two shorts for consistency checks
     if(extraData[0] != parsUsed)
         throw std::runtime_error("First word in the grid encoding does not correspond to the gridspec size");
@@ -68,8 +68,28 @@ void scaleGridInfoSecond_(boost::array<float, 6>& gridPar, int parsUsed, const s
     }
 }
 
+/**
+ *
+ * @param gridPar the 6 gridParameters, these values will be changed!
+ * @param parsUsed the number of relevant gridParameters for the projection, must be <= 6
+ * @param scale scaling factor for the extraData used for the projection in scaleMethod 1
+ * @param extraData the extra data at the end of the grid in a felt-grid on disk
+ * @throw runtime_error if extraData.size doesn't match any scaling method
+ */
+void scaleExtraData_(boost::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int> & extraData)
+{
+    assert(parsUsed <= 6);
+    assert(parsUsed > 0);
+    if (extraData.size() == (2*static_cast<unsigned int>(parsUsed))) {
+        scaleGridInfoFirst_(gridPar, parsUsed, scale, extraData);
+    } else if (extraData.size() == (2+3*static_cast<unsigned int>(parsUsed))) {
+        scaleGridInfoSecond_(gridPar, parsUsed, extraData);
+    } else {
+        throw std::runtime_error("unknown gridTypeFlag");
+    }
+}
 
-boost::array<float, 6> gridParametersPolarStereo_(int xNum, int yNum, int ixp, int iyp, int idist, int iphi, const std::vector<short int> & extraData)
+boost::array<float, 6> gridParametersPolarStereo_(int ixp, int iyp, int idist, int iphi, const std::vector<short int> & extraData)
 {
     const int parsUsed = 5; // gridPar 6 not used
     boost::array<float, 6> gridPar;
@@ -93,12 +113,9 @@ boost::array<float, 6> gridParametersPolarStereo_(int xNum, int yNum, int ixp, i
     }
 
     // corrections from extraData
-    switch (extraData.size()) {
-        case (2*parsUsed): scaleGridInfoFirst_(gridPar, parsUsed, 100., extraData); break;
-        case (2+3*parsUsed): scaleGridInfoSecond_(gridPar, parsUsed, extraData); break;
-        default: throw std::runtime_error("unknown gridTypeFlag");
-    }
+    scaleExtraData_(gridPar, parsUsed, 100., extraData);
 
+    // check consistency
     if (gridPar[2] != 0) gridPar[2] = 79.*150./gridPar[2];
     else throw std::runtime_error("polar-stereographic: cells between equator and pole cannot be 0");
 
@@ -108,7 +125,7 @@ boost::array<float, 6> gridParametersPolarStereo_(int xNum, int yNum, int ixp, i
     return gridPar;
 }
 
-boost::array<float, 6> gridParametersGeographic_(int xNum, int yNum, int ilat, int ilon, int latDist, int lonDist, const std::vector<short int> & extraData)
+boost::array<float, 6> gridParametersGeographic_(int ilat, int ilon, int latDist, int lonDist, const std::vector<short int> & extraData)
 {
     // longlat and rotated longlat
     const int parsUsed = 6;
@@ -123,19 +140,16 @@ boost::array<float, 6> gridParametersGeographic_(int xNum, int yNum, int ilat, i
     gridPar[3] = latDist * .01;
 
     // corrections from extraData
-    switch (extraData.size()) {
-        case (2*parsUsed): scaleGridInfoFirst_(gridPar, parsUsed, 10000., extraData); break;
-        case (2+3*parsUsed): scaleGridInfoSecond_(gridPar, parsUsed, extraData); break;
-        default: throw std::runtime_error("unknown gridTypeFlag");
-    }
+    scaleExtraData_(gridPar, parsUsed, 10000., extraData);
 
+    // check consistency
     if (gridPar[2] == 0 || gridPar[3] == 0)
         throw std::runtime_error("(rotated) geographic: gridDistance > 0 required");
 
     return gridPar;
 }
 
-boost::array<float, 6> gridParametersMercator_(int xNum, int yNum, int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int> & extraData)
+boost::array<float, 6> gridParametersMercator_(int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int> & extraData)
 {
     const int parsUsed = 5; // par 6 is empty
     boost::array<float, 6> gridPar;
@@ -149,38 +163,40 @@ boost::array<float, 6> gridParametersMercator_(int xNum, int yNum, int iWestBoun
     gridPar[3] = iYincr * .1;
 
     // corrections from extraData
-    switch (extraData.size()) {
-        case (2*parsUsed): scaleGridInfoFirst_(gridPar, parsUsed, 10000., extraData); break;
-        case (2+3*parsUsed): scaleGridInfoSecond_(gridPar, parsUsed, extraData); break;
-        default: throw std::runtime_error("unknown gridTypeFlag");
-    }
+    scaleExtraData_(gridPar, parsUsed, 10000., extraData);
 
+    // check consistency
     if (gridPar[2] == 0 || gridPar[3] == 0)
         throw std::runtime_error("mercator projection: gridDistance > 0 required");
 
     return gridPar;
 }
 
-
-
-boost::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int> & extraData)
+boost::array<float, 6> gridParametersLambert_(int iWestBound, int iSouthBound, int iXincr, int iYincr, const std::vector<short int> & extraData)
 {
-    switch (gridType/1000) {
+    throw std::runtime_error("lambert not implemented yet");
+}
+
+boost::array<float, 6> gridParameters(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData)
+{
+    switch (gridType) {
         case 1:
-        case 4: return gridParametersPolarStereo_(xNum, yNum, a, b, c, d, extraData); break;
+        case 4: return gridParametersPolarStereo_(a, b, c, d, extraData); break;
         case 2:
-        case 3: return gridParametersGeographic_(xNum, yNum, a, b, c, d, extraData); break;
-        case 5: return gridParametersMercator_(xNum, yNum, a, b, c, d, extraData); break;
+        case 3: return gridParametersGeographic_(a, b, c, d, extraData); break;
+        case 5: return gridParametersMercator_(a, b, c, d, extraData); break;
+        case 6: return gridParametersLambert_(a, b, c, d, extraData); break;
     }
     throw std::invalid_argument("Unknown grid specification");
 }
 
 
-std::string FeltGridDefinition::getProjDefinition_(int gridType, const float * gs) const
+std::string FeltGridDefinition::getProjDefinition_(int gridType, const boost::array<float, 6>& gs) const
 {
     std::ostringstream projStr;
     switch (gridType) {
     case 1:
+    case 4:
     	projStr << "+proj=stere +lat_0=90 +lon_0=" << (gs[3]) << " +lat_ts=" << (gs[4]) << " +a=6371000 +units=m +no_defs";
     	break;
     // TODO: Check the earth diameter ... again
@@ -194,14 +210,15 @@ std::string FeltGridDefinition::getProjDefinition_(int gridType, const float * g
     return projStr.str();
 }
 
-FeltGridDefinition::Orientation FeltGridDefinition::getScanMode_(float * gs, int jNum) const
+FeltGridDefinition::Orientation FeltGridDefinition::getScanMode_()
 {
+    boost::array<float, 6> & gs = gridPars;
 	float & jIncrement = gs[3];
 	float & startLatitude = gs[1];
 	if(jIncrement < 0)
     {
 		jIncrement = jIncrement * -1;
-		startLatitude = startLatitude - (jNum * jIncrement) + jIncrement;
+		startLatitude = startLatitude - (yNum_ * jIncrement) + jIncrement;
         return LeftUpperHorizontal;
     }
     return LeftLowerHorizontal;
@@ -216,25 +233,18 @@ FeltGridDefinition::FeltGridDefinition( int gridType,
     case 0:
         throw std::invalid_argument("Unspecified grid is not supported");
     case 1:
-        // a, b - scaled up by 100 if c (grid distance) is positive
-        // c - convert km to m, scaled up by 10
-    	if (c >= 0) {
-		    FeltFile::log("FeltGridDefinition: Low granularity grids");
-    		polarStereographicProj( gridType, a/100.0, b/100.0, (c * 1000.0) / 10.0, d, extraData );
-    	}
-    	else {
-			FeltFile::log("FeltGridDefinition: High granularity grids");
-   			polarStereographicProj( gridType, a, b, (c * -1000.0) / 10.0, d, extraData );
-    	}
-        break;
+    case 4:
+        FeltFile::log("FeltGridDefinition: stereograhpic grids");
+   		polarStereographicProj_( gridType, a, b, c, d, extraData );
+    	break;
     case 2:
     case 3:
-      	geographicProj( gridType, b/100.0, a/100.0, d/100.0, c/100.0, extraData );
+      	geographicProj_( gridType, a, b, c, d, extraData );
         break;
-    case 4:
-		throw std::invalid_argument("Non-standard polar stereographic grid is not supported");
     case 5:
         throw std::invalid_argument("Mercator grid is not supported");
+    case 6:
+        throw std::invalid_argument("Lambert grid is not supported");
     default:
         throw std::invalid_argument("Unknown grid specification");
     }
@@ -245,14 +255,68 @@ FeltGridDefinition::~FeltGridDefinition()
 }
 
 void
+FeltGridDefinition::polarStereographicProj_( int gridType,
+                                             int a, int b,
+                                             int c, int d,
+                                             const std::vector<short int> & extraData)
+{
+    gridPars = gridParameters(gridType, a, b, c, d, extraData);
+    const boost::array<float, 6>& gs = gridPars;
+
+    if (FeltFile::isLogging()) {
+        std::ostringstream buffer;
+        buffer << "FeltGridDefinition: " << std::endl;
+        buffer << "Size of Grid: " << xNum_ << " x " << yNum_ << std::endl;
+        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Type: " << gridType << std::endl;
+        FeltFile::log(buffer.str());
+    }
+    projDef_ = getProjDefinition_(gridType, gs);
+    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+
+    orientation_ = LeftLowerHorizontal; // Default
+    float incr = 6371.* (1+std::sin(PI/180.*gs[4])) / gs[2];
+
+    startX_ = ( 1 - gs[0] ) * incr;
+    startY_ = ( 1 - gs[1] ) * incr;
+    incrementX_ = incr;
+    incrementY_ = incr;
+}
+
+void
+FeltGridDefinition::geographicProj_( int gridType,
+                                     int a, int b,
+                                     int c, int d,
+                                     const std::vector<short int> & extraData)
+{
+    gridPars = gridParameters(gridType, a, b, c, d, extraData);
+    const boost::array<float, 6>& gs = gridPars;
+
+    if (FeltFile::isLogging()) {
+        std::ostringstream buffer;
+        buffer << "FeltGridDefinition: " << std::endl;
+        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Type: " << gridType << std::endl;
+        FeltFile::log(buffer.str());
+    }
+    projDef_ = getProjDefinition_(gridType, gs);
+    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+
+    orientation_ = getScanMode_();
+    incrementX_ = gs[2];
+    incrementY_ = gs[3];
+    startX_ = gs[0];
+    startY_= gs[1];
+}
+
+void
 FeltGridDefinition::polarStereographicProj( int gridType,
 									        float poleX, float poleY,
 									        float gridD, float rot,
 									        const std::vector<short int> & extraData)
 {
     FeltFile::log("FeltGridDefinition: Polar stereographic projection identified in FELT file");
-    const int gsSize = 6;
-    float gs[gsSize];
+    boost::array<float, 6> & gs = gridPars;
     if ( extraData.empty() )
     {
         double pi = 3.14159265358979323844;
@@ -295,7 +359,8 @@ FeltGridDefinition::geographicProj( int gridType,
     FeltFile::log("FeltGridDefinition: Geographic projection identified in FELT file");
     const int gsSize = 6;
     float scale = 10000.0;
-    float gs[gsSize];
+    boost::array<float, 6> & gs = gridPars;
+
     if ( extraData.empty() )
     {
         gs[0] = startLongitude;
@@ -335,7 +400,10 @@ FeltGridDefinition::geographicProj( int gridType,
     projDef_ = getProjDefinition_(gridType, gs);
     FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
 
-    orientation_ = getScanMode_(gs, yNum_);
+    /* no longer supported
+     * orientation_ = getScanMode_(gs, yNum_);
+     */
+    orientation_ = getScanMode();
     incrementX_ = gs[2];
     incrementY_ = gs[3];
     startX_ = gs[0];

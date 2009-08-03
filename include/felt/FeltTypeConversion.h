@@ -9,7 +9,7 @@
  0313 OSLO
  NORWAY
  E-mail: wdb@met.no
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
@@ -22,33 +22,29 @@
 
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA  02110-1301, USA
  */
 
-#include "felt/feltTypeConversion.h"
+#ifndef FELTTYPECONVERSION_H_
+#define FELTTYPECONVERSION_H_
+
+#include "FeltConstants.h"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace felt
 {
-
-boost::posix_time::ptime parseTime(const word data[3])
+template<typename T>
+T get(word w)
 {
-	boost::gregorian::date date(data[0], data[1]/100, data[1]%100);
-	boost::posix_time::time_duration clock(data[2]/100, data[2]%100, 0);
-
-	return boost::posix_time::ptime(date, clock);
+	return (T) w;
 }
 
-boost::posix_time::ptime parseTimeNoThrow(const word * data)
-{
-	try
-	{
-		return parseTime(data);
-	}
-	catch(std::exception &)
-	{
-		return boost::posix_time::ptime();
-	}
-}
+boost::posix_time::ptime parseTime(const word * data);
+
+boost::posix_time::ptime parseTimeNoThrow(const word * data);
+
 
 }
+
+#endif /*FELTTYPECONVERSION_H_*/

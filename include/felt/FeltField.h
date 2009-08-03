@@ -28,8 +28,8 @@
 #ifndef FELTFIELD_H_
 #define FELTFIELD_H_
 
-#include "felt/feltConstants.h"
-#include "felt/FeltGridDefinition.h"
+#include "FeltConstants.h"
+#include "FeltGridDefinition.h"
 #include <boost/shared_array.hpp>
 #include <boost/array.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>

@@ -43,6 +43,8 @@ const size_t blockWords = 1024;
 const size_t blockSize = blockWords * sizeof(word);
 const size_t offsetToContentDefinition = 2;
 
+const double PI = 3.14159265358979323844;
+
 /**
  * Is the given word a "missing" value? This means that there exist no valid
  * data for the given point
