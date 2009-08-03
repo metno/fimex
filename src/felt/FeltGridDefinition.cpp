@@ -80,12 +80,16 @@ void scaleExtraData_(boost::array<float, 6>& gridPar, int parsUsed, float scale,
 {
     assert(parsUsed <= 6);
     assert(parsUsed > 0);
-    if (extraData.size() == (2*static_cast<unsigned int>(parsUsed))) {
+    if (extraData.size() == 0) {
+        // do nothing
+    } else if (extraData.size() == (2*static_cast<unsigned int>(parsUsed))) {
         scaleGridInfoFirst_(gridPar, parsUsed, scale, extraData);
     } else if (extraData.size() == (2+3*static_cast<unsigned int>(parsUsed))) {
         scaleGridInfoSecond_(gridPar, parsUsed, extraData);
     } else {
-        throw std::runtime_error("unknown gridTypeFlag");
+        std::ostringstream oss;
+        oss << "inconsistent extra data in felt: extraData.size=" << extraData.size() << " required_parameters=" << parsUsed;
+        throw std::runtime_error(oss.str());
     }
 }
 
@@ -275,7 +279,7 @@ FeltGridDefinition::polarStereographicProj_( int gridType,
     FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
 
     orientation_ = LeftLowerHorizontal; // Default
-    float incr = 6371.* (1+std::sin(PI/180.*gs[4])) / gs[2];
+    float incr = 6371000.* (1+std::sin(PI/180.*gs[4])) / gs[2];
 
     startX_ = ( 1 - gs[0] ) * incr;
     startY_ = ( 1 - gs[1] ) * incr;
