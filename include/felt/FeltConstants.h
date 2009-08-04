@@ -32,7 +32,6 @@
 #include <algorithm>
 #include <boost/static_assert.hpp>
 
-
 namespace felt
 {
 
@@ -43,7 +42,15 @@ const size_t blockWords = 1024;
 const size_t blockSize = blockWords * sizeof(word);
 const size_t offsetToContentDefinition = 2;
 
-const double PI = 3.14159265358979323844;
+/* M_PI not in <cmath> for C++98 */
+#ifndef M_PI
+#define M_PI  3.14159265358979323846  /* pi */
+#endif
+
+/** mathematical pi */
+const double PI = M_PI;
+/** earth-radius in m, taken from libmi rearth.f */
+const double EARTH_RADIUS = 6371000.;
 
 /**
  * Is the given word a "missing" value? This means that there exist no valid

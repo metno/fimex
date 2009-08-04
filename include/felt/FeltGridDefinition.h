@@ -50,6 +50,15 @@ namespace felt
  */
 boost::array<float, 6> gridParameters(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int> & extraData);
 
+/**
+ * convert the libmi-gridparameters to proj4 strings
+ * @param gridType type defining the projection (1..6)
+ * @param gridPars array containing libmi's six gridparameters
+ * @return proj.4 string
+ */
+std::string gridParametersToProjDefinition(int gridType, const boost::array<float, 6>& gridPars);
+
+
 class FeltGridDefinition
 {
 public:
@@ -93,12 +102,13 @@ private:
     float incrementX_;
     float incrementY_;
     Orientation orientation_;
-    boost::array<float, 6> gridPars;
+    boost::array<float, 6> gridPars_;
 
-	std::string getProjDefinition_(int gridType, const boost::array<float,6>& gs) const;
     Orientation getScanMode_();
     void polarStereographicProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);
     void geographicProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);
+    void mercatorProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);
+    void lambertConicProj_(int gridType, int a, int b, int c, int d, const std::vector<short int> & extraData);
     // those two below are deprecated
     void polarStereographicProj(int gridType, float poleX, float poleY, float gridD, float rot, const std::vector<short int> & extraData);
     void geographicProj(int gridType, float startLongitude, float startLatitude, float iInc, float jInc, const std::vector<short int> & extraData);
