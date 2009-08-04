@@ -126,7 +126,9 @@ public:
 	/// get the values of the y axis
 	boost::shared_ptr<MetNoFimex::Data> getYData() const throw(Felt_File_Error);
 
-    /// assumes one set of grid-parameters for the whole file
+    /**
+     *  assumes one set of grid-parameters for the whole file, returns parameter between 1 and 6, without extra definition
+     */
     int getGridType() const throw(Felt_File_Error);
 	/// assumes one set of grid-parameters for the whole file
 	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const throw(Felt_File_Error);

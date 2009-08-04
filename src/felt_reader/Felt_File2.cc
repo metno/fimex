@@ -275,7 +275,9 @@ int Felt_File2::getGridType() const throw(Felt_File_Error)
 {
     // TODO: check against delta, check changes
     if (feltArrayMap_.size() > 0) {
-        return feltArrayMap_.begin()->second->getGridType();
+        int gridType = feltArrayMap_.begin()->second->getGridType();
+        if (gridType >= 1000) gridType = gridType / 1000;
+        return gridType;
     }
     return -1; // default
 }
