@@ -28,8 +28,6 @@ in large loops, it is advisable to switch on SIMD/SSE operations in your
 compiler. On a Xeon machine with a x386 machine and gcc, I use the 
 following flags (those are default for x86-64)
 
-export milib_CFLAGS=-I/disk1/metno/local/include
-export milib_LIBS=-L/disk1/metno/local/lib -lmic -lmi -lg2c
 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-NetCDF-lib-dir=/usr/lib/netcdf-3 -with-NetCDF-include-dir=/usr/include/netcdf-3 --with-udunits=/usr
 
 Testing the Installation
