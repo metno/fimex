@@ -32,13 +32,16 @@ using boost::unit_test_framework::test_suite;
 
 #include <iostream>
 #include <fstream>
+#ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
+#endif
+#ifdef HAVE_FELT
+#include "fimex/FeltCDMReader2.h"
+#endif
+
 #include "fimex/CDMQualityExtractor.h"
 #ifdef HAVE_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
-#endif
-#ifdef HAVE_LIBMIC
-#include "fimex/FeltCDMReader.h"
 #endif
 #include "fimex/Logger.h"
 
@@ -55,7 +58,11 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 		// no testfile, skip test
 		return;
 	}
+#ifdef HAVE_LIBMIC
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+#else
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
+#endif
 #ifdef TEST_DEBUG
 	defaultLogLevel(Logger::DEBUG);
 #endif
@@ -99,7 +106,11 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
         // no testfile, skip test
         return;
     }
+#ifdef HAVE_LIBMIC
     boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+#else
+    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+#endif
     boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/share/etc/cdmQualityConfig.xml"));
 
 #ifdef HAVE_NETCDF

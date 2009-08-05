@@ -28,7 +28,12 @@
 #include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
+#ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
+#else
+#include "fimex/FeltCDMReader2.h"
+#endif
+
 #include "fimex/NetCDF_CDMWriter.h"
 
 #define BOOST_TEST_MAIN
@@ -49,13 +54,21 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWrite )
 		// no testfile, skip test
 		return;
 	}
+#ifdef HAVE_LIBMIC
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+#else
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+#endif
 	NetCDF_CDMWriter(feltReader, "test.nc");
 	string testFile2("/disk1/opdata/hirlam20/grdn06.dat");
 	ifstream grdFile(testFile2.c_str());
 	if (grdFile.is_open()) {
 		grdFile.close();
+#ifdef HAVE_LIBMIC
 		feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader(testFile2, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
+#else
+        feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader2(testFile2, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
+#endif
 		NetCDF_CDMWriter(feltReader, "test2.nc");
 	}
 }
@@ -68,7 +81,11 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
 		// no testfile, skip test
 		return;
 	}
+#ifdef HAVE_LIBMIC
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+#else
+	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+#endif
 	NetCDF_CDMWriter writer(feltReader, "test.nc", topSrcDir+"/share/etc/cdmWriterConfigDeprecated.xml");
 	BOOST_CHECK(writer.getVariableName("sea_level_pressure") == "sea_pressure");
 	BOOST_CHECK(writer.getDimensionName("x") == "x_c");

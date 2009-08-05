@@ -36,7 +36,9 @@
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Logger.h"
+#ifdef HAVE_FELT
 #include "fimex/FeltCDMReader2.h"
+#endif
 #ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
 #endif
@@ -156,27 +158,30 @@ static string getType(const string& io, po::variables_map& vm) {
 static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 	string type = getType("input", vm);
 	auto_ptr<CDMReader> returnPtr;
-    if (type == "flt2" || type == "dat2" || type == "felt2") {
+#if defined (HAVE_FELT) || defined (HAVE_LIBMIC)
+    if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2") {
         string config(DATADIR);
         config += "/flt2nc_variables.xml";
         if (vm.count("input.config")) {
             config = vm["input.config"].as<string>();
         }
+#ifdef HAVE_LIBMIC
+        if (type == "flt" || type == "dat" || type == "felt") {
+            LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " with config " << config);
+            returnPtr = auto_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
+        } else {
+#endif // HAVE_LIBMIC
+        // use FELT library for all flt2 files, and for flt files if LIBMIC not available
         LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm["input.file"].as<string>() << " with config " << config);
         returnPtr = auto_ptr<CDMReader>(new FeltCDMReader2(vm["input.file"].as<string>(), config));
-    }
 #ifdef HAVE_LIBMIC
-	if (type == "flt" || type == "dat" || type == "felt") {
-		string config(DATADIR);
-		config += "/flt2nc_variables.xml";
-		if (vm.count("input.config")) {
-			config = vm["input.config"].as<string>();
-		}
-		LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " with config " << config);
-		returnPtr = auto_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
-	}
-#endif
-#ifdef HAVE_NETCDF
+        }
+#endif // HAVE_LIBMIC
+
+    }
+#endif // HAVE_LIBMIC || HAVE_FELT
+
+    #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
 		LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));

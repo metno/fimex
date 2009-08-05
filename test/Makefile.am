@@ -16,7 +16,10 @@ if HAVE_PROJ4
 endif
 if HAVE_MILIB
   LDADD += ${milib_LIBS}
-  CC_TESTS += testFeltReader testQualityExtractor
+  CC_TESTS += testFeltReader
+endif
+if HAVE_FELT_OR_MILIB 
+  CC_TESTS += testQualityExtractor
   NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
   NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
   GRIBAPI_MI_TESTS = testGribWriter

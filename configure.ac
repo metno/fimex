@@ -73,15 +73,30 @@ AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
            CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],[])
 AC_LANG_POP(C++)
 
-# Check for the libmi library.
-AC_ARG_ENABLE(felt, [  --enable-felt           enable felt-reader [[default=yes]]],[
-  if test "$enableval" = no; then
-    use_milib=no
-  else
+# Check for the libmi / milib library.
+AC_ARG_ENABLE(milib, [  --enable-milib           enable milib felt-reader [[default=no]]],[
+  if test "$enableval" = yes; then
     use_milib=yes
+  else
+    use_milib=no
   fi
-  ],[ use_milib=yes ])
+  ],[ use_milib=no ])
 AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xyes])
+
+# Check for felt c++ library, currently always src included
+AC_ARG_ENABLE(felt, [  --enable-felt           enable the c++ felt-reader [[default=yes]]],[
+  if test "$enableval" = no; then
+    use_felt=no
+  else
+    use_felt=yes
+  fi
+  ],[ use_felt=yes ])
+AM_CONDITIONAL([HAVE_FELT], [test x$use_felt = xyes])
+if test x$use_felt = xyes; then
+    AC_DEFINE([HAVE_FELT], [1], [define if felt/FeltFile.h is available])
+fi
+AM_CONDITIONAL([HAVE_FELT_OR_MILIB], [test x$use_felt = xyes || test x$use_milib = xyes]) 
+
 
 if test "$use_milib" = yes; then
 # Check for the milib library.

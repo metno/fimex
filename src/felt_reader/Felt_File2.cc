@@ -26,7 +26,6 @@
 #include "felt/FeltFile.h"
 #include "felt/FeltField.h"
 #include "felt/FeltGridDefinition.h"
-#include <milib/milib.h>
 #include "fimex/CDMDataType.h"
 #include "fimex/DataImpl.h"
 #include "fimex/CDMconstants.h"
@@ -98,16 +97,6 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 			LOG4FIMEX(logger, Logger::WARN, "unknown processing options: " << oit->first);
 		}
 	}
-}
-
-void fdPtrClose2(int* fdPtr) {
-	// close(*fdPtr) and release fortran data
-	// dummy variables needed for mrfelt, so not used there for close
-	short is;
-	int i;
-	float f;
-	mrfelt(3,"", *fdPtr, &is, 0, 1, &f, 1.f, 1024, &is, &i);
-	delete fdPtr;
 }
 
 void Felt_File2::init(const std::map<std::string, std::string>& options) throw(Felt_File_Error)

@@ -900,6 +900,10 @@ BOOST_UNIT_TEST_FRAMEWORK_LIB
 PKG_CONFIG
 HAVE_MILIB_TRUE
 HAVE_MILIB_FALSE
+HAVE_FELT_TRUE
+HAVE_FELT_FALSE
+HAVE_FELT_OR_MILIB_TRUE
+HAVE_FELT_OR_MILIB_FALSE
 milib_CFLAGS
 milib_LIBS
 LIBOBJS
@@ -1510,7 +1514,8 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-xmltest       Do not try to compile and run a test LIBXML program
-  --enable-felt           enable felt-reader [default=yes]
+  --enable-milib           enable milib felt-reader [default=no]
+  --enable-felt           enable the c++ felt-reader [default=yes]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -5202,7 +5207,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5205 "configure"' > conftest.$ac_ext
+  echo '#line 5210 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7476,11 +7481,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7479: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7484: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7483: \$? = $ac_status" >&5
+   echo "$as_me:7488: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7766,11 +7771,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7769: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7774: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7773: \$? = $ac_status" >&5
+   echo "$as_me:7778: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7870,11 +7875,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7873: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7878: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7877: \$? = $ac_status" >&5
+   echo "$as_me:7882: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10232,7 +10237,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10235 "configure"
+#line 10240 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10332,7 +10337,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10335 "configure"
+#line 10340 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12756,11 +12761,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12759: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12764: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12763: \$? = $ac_status" >&5
+   echo "$as_me:12768: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12860,11 +12865,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12863: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12868: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12867: \$? = $ac_status" >&5
+   echo "$as_me:12872: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14437,11 +14442,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14440: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14445: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14444: \$? = $ac_status" >&5
+   echo "$as_me:14449: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14541,11 +14546,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14544: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14549: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14548: \$? = $ac_status" >&5
+   echo "$as_me:14553: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16745,11 +16750,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16748: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16753: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16752: \$? = $ac_status" >&5
+   echo "$as_me:16757: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17035,11 +17040,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17038: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17043: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17042: \$? = $ac_status" >&5
+   echo "$as_me:17047: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17139,11 +17144,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17142: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17147: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17146: \$? = $ac_status" >&5
+   echo "$as_me:17151: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -24359,18 +24364,18 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-# Check for the libmi library.
-# Check whether --enable-felt was given.
-if test "${enable_felt+set}" = set; then
-  enableval=$enable_felt;
-  if test "$enableval" = no; then
-    use_milib=no
-  else
+# Check for the libmi / milib library.
+# Check whether --enable-milib was given.
+if test "${enable_milib+set}" = set; then
+  enableval=$enable_milib;
+  if test "$enableval" = yes; then
     use_milib=yes
+  else
+    use_milib=no
   fi
 
 else
-   use_milib=yes
+   use_milib=no
 fi
 
  if test x$use_milib = xyes; then
@@ -24380,6 +24385,45 @@ else
   HAVE_MILIB_TRUE='#'
   HAVE_MILIB_FALSE=
 fi
+
+
+# Check for felt c++ library, currently always src included
+# Check whether --enable-felt was given.
+if test "${enable_felt+set}" = set; then
+  enableval=$enable_felt;
+  if test "$enableval" = no; then
+    use_felt=no
+  else
+    use_felt=yes
+  fi
+
+else
+   use_felt=yes
+fi
+
+ if test x$use_felt = xyes; then
+  HAVE_FELT_TRUE=
+  HAVE_FELT_FALSE='#'
+else
+  HAVE_FELT_TRUE='#'
+  HAVE_FELT_FALSE=
+fi
+
+if test x$use_felt = xyes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FELT 1
+_ACEOF
+
+fi
+ if test x$use_felt = xyes || test x$use_milib = xyes; then
+  HAVE_FELT_OR_MILIB_TRUE=
+  HAVE_FELT_OR_MILIB_FALSE='#'
+else
+  HAVE_FELT_OR_MILIB_TRUE='#'
+  HAVE_FELT_OR_MILIB_FALSE=
+fi
+
 
 
 if test "$use_milib" = yes; then
@@ -25793,6 +25837,20 @@ echo "$as_me: error: conditional \"HAVE_MILIB\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${HAVE_FELT_TRUE}" && test -z "${HAVE_FELT_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"HAVE_FELT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"HAVE_FELT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_FELT_OR_MILIB_TRUE}" && test -z "${HAVE_FELT_OR_MILIB_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"HAVE_FELT_OR_MILIB\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"HAVE_FELT_OR_MILIB\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
@@ -26509,13 +26567,17 @@ BOOST_UNIT_TEST_FRAMEWORK_LIB!$BOOST_UNIT_TEST_FRAMEWORK_LIB$ac_delim
 PKG_CONFIG!$PKG_CONFIG$ac_delim
 HAVE_MILIB_TRUE!$HAVE_MILIB_TRUE$ac_delim
 HAVE_MILIB_FALSE!$HAVE_MILIB_FALSE$ac_delim
+HAVE_FELT_TRUE!$HAVE_FELT_TRUE$ac_delim
+HAVE_FELT_FALSE!$HAVE_FELT_FALSE$ac_delim
+HAVE_FELT_OR_MILIB_TRUE!$HAVE_FELT_OR_MILIB_TRUE$ac_delim
+HAVE_FELT_OR_MILIB_FALSE!$HAVE_FELT_OR_MILIB_FALSE$ac_delim
 milib_CFLAGS!$milib_CFLAGS$ac_delim
 milib_LIBS!$milib_LIBS$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 39; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 43; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
