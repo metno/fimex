@@ -560,7 +560,14 @@ FeltGridDefinition::startY() const
 FeltGridDefinition::Orientation FeltGridDefinition::getScanMode() const
 {
 	return orientation_;
+};
+
+const boost::array<float, 6>&
+FeltGridDefinition::getGridParameters() const
+{
+    return gridPars_;
 }
+
 
 std::ostream & contentSummary(std::ostream & out, const FeltGridDefinition & grid)
 {

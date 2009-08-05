@@ -36,6 +36,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/noncopyable.hpp>
+
 
 #include <iterator>
 #include <vector>
@@ -44,7 +46,7 @@
 namespace felt
 {
 
-class FeltFile
+class FeltFile : boost::noncopyable
 {
 public:
 	explicit FeltFile(const boost::filesystem::path & file);

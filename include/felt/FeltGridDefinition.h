@@ -89,6 +89,7 @@ public:
     virtual float startLatitude() const;
     virtual float startX() const;
     virtual float startY() const;
+    virtual const boost::array<float, 6>& getGridParameters() const;
     Orientation getScanMode() const;
 
 

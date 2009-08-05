@@ -273,10 +273,18 @@ boost::shared_ptr<Data> Felt_File2::getYData() const throw(Felt_File_Error)
 
 int Felt_File2::getGridType() const throw(Felt_File_Error)
 {
-    // TODO: check against delta, check changes
     if (feltArrayMap_.size() > 0) {
         int gridType = feltArrayMap_.begin()->second->getGridType();
-        if (gridType >= 1000) gridType = gridType / 1000;
+        for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator it = feltArrayMap_.begin(); it != feltArrayMap_.end(); ++it) {
+            // check for changes of projection
+            int otherGridType = it->second->getGridType();
+            if (otherGridType != gridType) {
+                ostringstream oss;
+                oss << "gridType changes from: " << gridType << " to " << otherGridType << " between parameter " << feltArrayMap_.begin()->first << " and " << it->first;
+                throw(Felt_File_Error(oss.str()));
+            }
+        }
+
         return gridType;
     }
     return -1; // default

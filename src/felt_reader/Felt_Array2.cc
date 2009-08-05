@@ -165,7 +165,20 @@ void Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, ve
 }
 int Felt_Array2::getGridType() const
 {
-    return defaultField_->gridType();
+    int gridType = defaultField_->gridType();
+    gridType = (gridType >= 1000) ? (gridType / 1000) : gridType;
+    for (TimeLevelFieldMap::const_iterator tlf = feltFields_.begin(); tlf != feltFields_.end(); ++tlf) {
+        for (LevelFieldMap::const_iterator lf = tlf->second.begin(); lf != tlf->second.end(); ++lf) {
+            int otherGridType = lf->second->gridType();
+            otherGridType = (otherGridType >= 1000) ? (otherGridType / 1000) : otherGridType;
+            if (otherGridType != gridType) {
+                ostringstream oss;
+                oss << "gridType changes from " << gridType << " to " << otherGridType << " in parameter " << getName();
+                throw(Felt_File_Error(oss.str()));
+            }
+        }
+    }
+    return gridType;
 }
 
 boost::shared_ptr<felt::FeltGridDefinition> Felt_Array2::getGridDefinition() const
