@@ -25,6 +25,7 @@
 #include "fimex/Felt_Array2.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltField.h"
+#include "felt/FeltGridDefinition.h"
 #include <milib/milib.h>
 #include "fimex/CDMDataType.h"
 #include "fimex/DataImpl.h"
@@ -77,14 +78,15 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 	// set gridParameterDelta from string ' ' splitted string of max 6 double values
 	std::set<std::string> knownOptions;
 
-	gridParameterDelta = std::vector<double>(6,0);
+    for (int i = 0; i < 6; i++) gridParameterDelta_[i] = 0;
+
 	std::string optName = "gridParameterDelta";
 	std::map<std::string, std::string>::const_iterator gridParOpt = options.find("gridParameterDelta");
 	if (gridParOpt != options.end()) {
 		std::vector<std::string> tokens = tokenize(gridParOpt->second);
-		int end = tokens.size() < gridParameterDelta.size() ? tokens.size() : gridParameterDelta.size();
+		int end = tokens.size() < gridParameterDelta_.size() ? tokens.size() : gridParameterDelta_.size();
 		for (int i = 0; i < end; ++i) {
-			gridParameterDelta[i] = string2type<double>(tokens[i]);
+			gridParameterDelta_.at(i) = string2type<double>(tokens[i]);
 		}
 		LOG4FIMEX(logger, Logger::DEBUG, "adding " << optName << " processing-option: " << gridParOpt->second);
 		knownOptions.insert(optName);
@@ -191,18 +193,18 @@ boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared
     size_t dataSize = feltArray->getX() * feltArray->getY();
     vector<short> data;
     data.reserve(dataSize);
-    const boost::shared_ptr<felt::FeltField> ff = feltArray->getField(time, level);
-	ff->grid(data);
-	boost::shared_ptr<MetNoFimex::Data> returnData;
+    int fieldScaleFactor = feltArray->getGridAllowDelta(time, level, data, gridParameterDelta_);
+
+    boost::shared_ptr<MetNoFimex::Data> returnData;
 	if (feltArray->getDatatype() == "short") {
-		if (ff->scaleFactor() != feltArray->scaleFactor()) {
+		if (fieldScaleFactor != feltArray->scaleFactor()) {
 			throw Felt_File_Error("change in scaling factor for parameter: " + feltArray->getName() + " consider using float or double datatpye");
 		}
 		returnData = createScaledData<short>(data, feltArray->getFillValue(), 1.);
 	} else if (feltArray->getDatatype() == "float") {
-		returnData = createScaledData<float>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(ff->scaleFactor())));
+		returnData = createScaledData<float>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(fieldScaleFactor)));
 	} else if (feltArray->getDatatype() == "double") {
-		returnData = createScaledData<double>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(ff->scaleFactor())));
+		returnData = createScaledData<double>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(fieldScaleFactor)));
 	} else {
 		throw Felt_File_Error("unknown datatype for feltArray " + feltArray->getName() + ": " + feltArray->getDatatype());
 	}
@@ -292,27 +294,9 @@ int Felt_File2::getGridType() const throw(Felt_File_Error)
 
 boost::shared_ptr<felt::FeltGridDefinition> Felt_File2::getGridDefinition() const throw(Felt_File_Error) {
 	std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin();
-	// TODO: check against delta, check changes
 	if (feltArrayMap_.size() > 0) {
 	    return fait->second->getGridDefinition();
-	}
-
-#if 0
-	if (feltArrayMap_.size() > 0) {
-		const boost::array<float, 6>& params = fait->second.getGridParameters();
-		for (++fait; fait != feltArrayMap_.end(); ++fait) {
-			const boost::array<float, 6>& newParams = fait->second.getGridParameters();
-			for (int i = 0; i < 6; i++) {
-				// allow params to differ by a delta (optional)
-				if (newParams[i] != params[i] && std::fabs(newParams[i]-params[i]) > gridParameterDelta[i]) {
-					throw(Felt_File_Error("cannot change gridParameters within a file for " + fait->second.getName() + " param " + type2string(i) + ": " + type2string(params[i]) + " != " + type2string(newParams[i]) + "("+type2string(newParams[i]-params[i])+")"));
-				}
-			}
-		}
-		return params;
-	}
-#endif
-	else {
+	} else {
 		throw(Felt_File_Error("cannot read gridParameters: no Felt_Array2 available"));
 	}
 }

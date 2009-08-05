@@ -265,7 +265,7 @@ FeltGridDefinition::Orientation FeltGridDefinition::getScanMode_()
 FeltGridDefinition::FeltGridDefinition( int gridType,
 										int xNum, int yNum, int a, int b, int c, int d,
 										const std::vector<short int> & extraData) :
-										    xNum_(xNum), yNum_(yNum)
+										    gridType_(gridType), xNum_(xNum), yNum_(yNum)
 {
     switch (gridType){
     case 0:
@@ -309,8 +309,8 @@ FeltGridDefinition::polarStereographicProj_( int gridType,
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
-    projDef_ = gridParametersToProjDefinition(gridType, gs);
-    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+    if (FeltFile::isLogging())
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
 
     orientation_ = LeftLowerHorizontal; // Default
     float incr = EARTH_RADIUS * (1+std::sin(PI/180.*gs[4])) / gs[2];
@@ -337,8 +337,8 @@ FeltGridDefinition::geographicProj_( int gridType,
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
-    projDef_ = gridParametersToProjDefinition(gridType, gs);
-    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+    if (FeltFile::isLogging())
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
 
     orientation_ = getScanMode_();
     incrementX_ = gs[2];
@@ -363,8 +363,8 @@ FeltGridDefinition::mercatorProj_( int gridType,
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
-    projDef_ = gridParametersToProjDefinition(gridType, gs);
-    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+    if (FeltFile::isLogging())
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
 
     orientation_ = LeftLowerHorizontal; // Default
     incrementX_ = gs[2];
@@ -389,8 +389,8 @@ FeltGridDefinition::lambertConicProj_( int gridType,
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
-    projDef_ = gridParametersToProjDefinition(gridType, gs);
-    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+    if (FeltFile::isLogging())
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
 
     orientation_ = LeftLowerHorizontal; // Default
     incrementX_ = gs[2];
@@ -434,8 +434,8 @@ FeltGridDefinition::polarStereographicProj( int gridType,
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
-    projDef_ = gridParametersToProjDefinition(gridType, gs);
-    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+    if (FeltFile::isLogging())
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
 
     orientation_ = LeftLowerHorizontal; // Default
     startX_ = ( 1 - gs[0] ) * gs[2];
@@ -491,8 +491,8 @@ FeltGridDefinition::geographicProj( int gridType,
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
-    projDef_ = gridParametersToProjDefinition(gridType, gs);
-    FeltFile::log("FeltGridDefinition: Proj Specification: " + projDef_);
+    if (FeltFile::isLogging())
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
 
     /* no longer supported
      * orientation_ = getScanMode_(gs, yNum_);
@@ -506,7 +506,7 @@ FeltGridDefinition::geographicProj( int gridType,
 
 std::string FeltGridDefinition::projDefinition() const
 {
-	return projDef_;
+	return gridParametersToProjDefinition(gridType_, getGridParameters());
 };
 
 int

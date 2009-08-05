@@ -48,21 +48,6 @@ class Felt_Array2; // forward decl.
  */
 class Felt_File2
 {
-private:
-	std::string filename_;
-	boost::shared_ptr<felt::FeltFile> feltFile_;
-	std::map<std::string, boost::shared_ptr<Felt_Array2> > feltArrayMap_;
-	FeltParameters feltParameters;
-	std::map<LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
-	std::vector<double> gridParameterDelta; // allowed deviation between two grids
-	MetNoFimex::LoggerPtr logger;
-
-	bool findOrCreateFeltArray(const boost::shared_ptr<felt::FeltField>);
-	/// actually read the data with the parameters from the felt_file, should be called from constructors
-	void init(const std::map<std::string, std::string>& options) throw(Felt_File_Error);
-	/// add processing options by strings, called from init()
-	void setOptions(const std::map<std::string, std::string>& options);
-
 public:
 	/// constructor
 	/**
@@ -132,6 +117,22 @@ public:
     int getGridType() const throw(Felt_File_Error);
 	/// assumes one set of grid-parameters for the whole file
 	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const throw(Felt_File_Error);
+
+private:
+    std::string filename_;
+    boost::shared_ptr<felt::FeltFile> feltFile_;
+    std::map<std::string, boost::shared_ptr<Felt_Array2> > feltArrayMap_;
+    FeltParameters feltParameters;
+    std::map<LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
+    boost::array<float, 6> gridParameterDelta_; // allowed deviation between two grids
+    MetNoFimex::LoggerPtr logger;
+
+    bool findOrCreateFeltArray(const boost::shared_ptr<felt::FeltField>);
+    /// actually read the data with the parameters from the felt_file, should be called from constructors
+    void init(const std::map<std::string, std::string>& options) throw(Felt_File_Error);
+    /// add processing options by strings, called from init()
+    void setOptions(const std::map<std::string, std::string>& options);
+
 
 };
 

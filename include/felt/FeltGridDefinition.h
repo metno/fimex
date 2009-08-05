@@ -93,11 +93,10 @@ public:
     Orientation getScanMode() const;
 
 
-protected:
-    std::string projDef_;
 private:
-    size_t xNum_;
-    size_t yNum_;
+    const int gridType_;
+    const size_t xNum_;
+    const size_t yNum_;
     float startX_;
     float startY_;
     float incrementX_;

@@ -82,7 +82,20 @@ public:
 	const string& getName() const;
 	/** return the datatype as string short|float|double */
 	const string& getDatatype() const {return dataType_;}
-	void getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut) throw(Felt_File_Error);
+	/**
+	 * read a grid for a time and a levelPair
+	 * @param time The time of the field
+	 * @param levelPair The levelPair of the field
+	 * @param gridOut The data of this field will be put into this grid
+	 * @return the scaleFactor as tenth exponent of this field (grid * 10^scaleFactor)
+	 * @throws Felt_File_Error if the gridDefinition (gridType or gridParameters) change
+	 */
+	int getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut) throw(Felt_File_Error);
+	/**
+	 * same as getGrid, but the gridParameters to
+	 * change up to the value provided in gridParameterDelta
+	 */
+	int getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta) throw(Felt_File_Error);
     /// get the felt level type of this array
     int getLevelType() const;
 	/** return the changed fill used in #Felt_File::getScaledDataSlice */

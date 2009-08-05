@@ -35,6 +35,8 @@
 
 namespace MetNoFelt {
 
+using MetNoFimex::type2string;
+
 Felt_Array2::Felt_Array2(const string name, const boost::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue)
 : feltArrayName_(name),
   defaultField_(feltField),
@@ -159,25 +161,42 @@ int Felt_Array2::getY() const
 {
     return defaultField_->yNum();
 }
-void Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut) throw(Felt_File_Error)
+int Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut) throw(Felt_File_Error)
 {
-    return getField(time, levelPair)->grid(gridOut);
+    boost::array<float, 6> nullDelta;
+    for (int i = 0; i < 6; i++) nullDelta[i] = 0;
+    return getGridAllowDelta(time, levelPair, gridOut, nullDelta);
 }
+
+int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta) throw(Felt_File_Error)
+{
+    const boost::shared_ptr<felt::FeltField>& field = getField(time, levelPair);
+
+    // make consistency checks
+     int fieldGridType = field->gridType();
+     fieldGridType = (fieldGridType >= 1000) ? (fieldGridType / 1000) : fieldGridType;
+     if (getGridType() != fieldGridType)
+         throw(Felt_File_Error("gridType changes from "+type2string(getGridType()) +" to " + type2string(fieldGridType) + " in parameter " + getName()));
+
+    // set the output data
+    field->grid(gridOut);
+
+     // check parameters against delta
+    const boost::array<float, 6>& newParams = field->projectionInformation()->getGridParameters();
+    const boost::array<float, 6>& defaultParams = defaultField_->projectionInformation()->getGridParameters();
+    for (int i = 0; i < 6; i++) {
+        // allow params to differ by a delta (optional)
+        if (newParams[i] != defaultParams[i] && std::fabs(newParams[i]-defaultParams[i]) > gridParameterDelta[i]) {
+            throw(Felt_File_Error("cannot change gridParameters within a file for " + getName() + " gridParameter (c-counting) " + type2string(i) + ": " + type2string(defaultParams[i]) + " != " + type2string(newParams[i]) + "("+type2string(newParams[i]-defaultParams[i])+")"));
+        }
+    }
+    return field->scaleFactor();
+}
+
 int Felt_Array2::getGridType() const
 {
     int gridType = defaultField_->gridType();
     gridType = (gridType >= 1000) ? (gridType / 1000) : gridType;
-    for (TimeLevelFieldMap::const_iterator tlf = feltFields_.begin(); tlf != feltFields_.end(); ++tlf) {
-        for (LevelFieldMap::const_iterator lf = tlf->second.begin(); lf != tlf->second.end(); ++lf) {
-            int otherGridType = lf->second->gridType();
-            otherGridType = (otherGridType >= 1000) ? (otherGridType / 1000) : otherGridType;
-            if (otherGridType != gridType) {
-                ostringstream oss;
-                oss << "gridType changes from " << gridType << " to " << otherGridType << " in parameter " << getName();
-                throw(Felt_File_Error(oss.str()));
-            }
-        }
-    }
     return gridType;
 }
 

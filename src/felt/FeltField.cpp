@@ -72,8 +72,7 @@ boost::posix_time::ptime FeltField::validTime() const
 
 FeltGridDefinitionPtr FeltField::projectionInformation() const
 {
-	std::vector<short> extraGeometrySpec;
-	getExtraGeometrySpecification_(extraGeometrySpec);
+	const std::vector<short>& extraGeometrySpec = getExtraGeometrySpecification_();
 	int gType = gridType();
 	if ( gType > 999 )
 		gType /= 1000;
@@ -162,8 +161,7 @@ std::string FeltField::gridInformation() const
 	cont << "\tScale\t\t" << scaleFactor() << "\n";
 	cont << "\n\tGrid size\t" << gridSize() << "\n";
 	cont << "{ ";
-	vector<short> extraGs;
-	getExtraGeometrySpecification_(extraGs);
+	const vector<short>& extraGs = getExtraGeometrySpecification_();
 	for ( vector<short>::const_iterator it = extraGs.begin(); it != extraGs.end(); ++ it )
 		cont << * it << " ";
 	cont << " }\n";
@@ -178,9 +176,13 @@ bool FeltField::isSane() const
 
 void FeltField::grid(std::vector<word> & out) const
 {
+    // read header together with data, unless read before
+    getGridHeader_();
 	size_t from = (startingGridBlock() * blockWords) + 20;
 	size_t size = gridSize();
 	feltFile_.get_(out, from, size);
+	// read footer together with data, unless read before
+	getExtraGeometrySpecification_();
 }
 
 
@@ -230,25 +232,20 @@ const std::vector<word> & FeltField::getGridHeader_() const
 	return gridHeader_;
 }
 
-void FeltField::getExtraGeometrySpecification_(std::vector<short int> & out) const
+const std::vector<short int>& FeltField::getExtraGeometrySpecification_() const
 {
-	int gt = gridType();
-	if ( gt < 1000 ) // No extra spec
-		return;
-	size_t readSize = gt % 1000; // last three digits is size of appended data
-	out.resize(readSize);
+    if ( extraGridSpec_.empty() )
+    {
+        int gt = gridType();
+        if ( gt > 1000 ) { // Otherwise no extra spec
+            size_t readSize = gt % 1000; // last three digits is size of appended data
+            extraGridSpec_.resize(readSize);
 
-	size_t readFrom = (startingGridBlock() * blockWords) + gridSize() + 20;
-	std::vector<word> gs;
-	feltFile_.get_(gs, readFrom, readSize);
-
-//	for_each(gs.get(), gs.get() + readSize, swapByteOrder);
-
-//	for ( int i = 0; i < readSize; ++ i )
-//		std::cout << "_"<<gs[i];
-//	std::cout << "_  ";
-
-	copy(gs.begin(), gs.end(), out.begin());
+            size_t readFrom = (startingGridBlock() * blockWords) + gridSize() + 20;
+            feltFile_.get_(extraGridSpec_, readFrom, readSize);
+        }
+    }
+    return extraGridSpec_;
 }
 
 

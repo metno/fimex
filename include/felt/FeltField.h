@@ -108,9 +108,10 @@ private:
 	size_t startingGridBlock() const;
 
 	const std::vector<word> & getGridHeader_() const;
-	void getExtraGeometrySpecification_(std::vector<short int> & out) const;
+	const std::vector<word> & getExtraGeometrySpecification_() const;
 
 	mutable std::vector<word> gridHeader_;
+	mutable std::vector<word> extraGridSpec_;
 	Header header_;
 	const FeltFile & feltFile_;
 	size_t index_;
