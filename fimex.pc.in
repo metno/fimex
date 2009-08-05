@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: @PACKAGE_NAME@
 Description: The fimex Library
 Version: @VERSION@
-Requires.private: libmi >= 3.0.0, milib >= 3.0.0, libxml-2.0 >= 2.6.0
-Libs: -L${libdir} -l@PACKAGE_NAME@ @NETCDF_LDFLAGS@ @UDUNITS_LDFLAGS@ 
+Requires.private: libxml-2.0 >= 2.6.0
+Libs: -L${libdir} -l@PACKAGE_NAME@ -lfelt -lfimex_felt @NETCDF_LDFLAGS@ @UDUNITS_LDFLAGS@ 
 Libs.private: -lm @NETCDF_LIBS@ @BOOST_LDFLAGS@ @BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@  @BOOST_PROGRAM_OPTIONS_LIB@  @BOOST_REGEX_LIB@ @UDUNITS_LIBS@
 Cflags: -I${includedir} @UDUNITS_CPPFLAGS@ @BOOST_CPPFLAGS@
