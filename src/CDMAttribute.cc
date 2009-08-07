@@ -27,6 +27,8 @@
 #include <boost/regex.hpp>
 #include <cmath>
 #include "fimex/DataImpl.h"
+#include "fimex/Utils.h"
+#include "fimex/CDMException.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam
@@ -232,27 +234,87 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 			std::cerr << "no o_proj found" << std::endl;
 			throw std::exception();
 		}
-		if (orgProj == "latlong" || orgProj == "longlat") {
+		if (orgProj == "latlong" || orgProj == "longlat" || orgProj == "eqc") {
 			double north_pole_lat = 90;
 			double north_pole_lon = 0;
 			if (boost::regex_search(projStr, what, boost::regex("\\+o_lat_p=(\\S+)"))) {
-				north_pole_lat = std::strtod(what[1].str().c_str(), (char **)NULL);
+				north_pole_lat = string2type<double>(what[1].str());
 			}
             // ignore optional o_lon_b (rotation after lat rotation)
             // since it doesn't match with FGDC parameters
 			// just use lon_0 (lon rotation in the original system)
 			if (boost::regex_search(projStr, what, boost::regex("\\+lon_0=(\\S+)"))) {
-				north_pole_lon = std::strtod(what[1].str().c_str(), (char **)NULL);
+				north_pole_lon = string2type<double>(what[1].str());
 			}
 			attrList.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
 			attrList.push_back(CDMAttribute("grid_north_pole_longitude", 180+north_pole_lon));
 			attrList.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));
 		}
 
-	} else {
-	    // TODO implement more projections (merc, ...)
+	} else if (projStr == "merc") {
+        attrList.push_back(CDMAttribute("grid_mapping_name", "mercator"));
+
+        // longitude at origin
+        double longOfProjOrigin = 0.;
+	    if (boost::regex_search(projStr, what, boost::regex("\\+lon_0=(\\S+)"))) {
+	        longOfProjOrigin = string2type<double>(what[1].str());
+	    }
+        attrList.push_back(CDMAttribute("longitude_of_projection_origin", longOfProjOrigin));
+
+        // standard_paralll or scale_factor
+        if (boost::regex_search(projStr, what, boost::regex("\\+lat_ts=(\\S+)"))) {
+            double standardParallel = string2type<double>(what[1].str());
+            attrList.push_back(CDMAttribute("standard_parallel", standardParallel));
+        }
+        if (boost::regex_search(projStr, what, boost::regex("\\+k=(\\S+)"))) {
+            attrList.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
+        }
+    } else if (projStr == "lcc") {
+	    // lambert conic conformal
+        attrList.push_back(CDMAttribute("grid_mapping_name", "lambert_conformal_conic"));
+
+        double lat1 = 0.;
+        double lat2 = 0.;
+        if (boost::regex_search(projStr, what, boost::regex("\\+lat_1=(\\S+)"))) {
+            lat1 = string2type<double>(what[1].str());
+        }
+        if (boost::regex_search(projStr, what, boost::regex("\\+lat_2=(\\S+)"))) {
+            lat2 = string2type<double>(what[1].str());
+        }
+        if (lat1 == lat2) {
+            attrList.push_back(CDMAttribute("standard_parallel", lat1));
+        } else {
+            boost::shared_ptr<Data> stdParallels = createData(CDM_DOUBLE, 2);
+            stdParallels->setValue(0, lat1);
+            stdParallels->setValue(1, lat2);
+            CDMAttribute("standard_parallel", CDM_DOUBLE, stdParallels);
+        }
+        attrList.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
+
+        double lon0 = 0.;
+        if (boost::regex_search(projStr, what, boost::regex("\\+lon_0=(\\S+)"))) {
+            lon0 = string2type<double>(what[1].str());
+        }
+        attrList.push_back(CDMAttribute("longitude_of_central_meridian", lon0));
+
+        double lat0 = 0.;
+        if (boost::regex_search(projStr, what, boost::regex("\\+lat_0=(\\S+)"))) {
+            lat0 = string2type<double>(what[1].str());
+        }
+        attrList.push_back(CDMAttribute("latitude_of_projection_origin", lat0));
+    } else {
 	    std::cerr << "translation of proj4 '" << projStr << "' to FGDC/CF not supported" << std::endl;
+	    throw CDMException("proj-string "+projStr+" to FGDC/CF not supported");
 	}
+
+	// convert x_0 to false_easting, y_0 to false_northing
+	if (boost::regex_search(projStr, what, boost::regex("\\+x_0=(\\S+)"))) {
+	    attrList.push_back(CDMAttribute("false_easting", string2type<double>(what[1].str())));
+	}
+    if (boost::regex_search(projStr, what, boost::regex("\\+y_0=(\\S+)"))) {
+        attrList.push_back(CDMAttribute("false_northing", string2type<double>(what[1].str())));
+    }
+
 	return attrList;
 }
 
@@ -265,6 +327,8 @@ std::string attributesToProjString(const std::vector<CDMAttribute>& attrs)
 			projString = atIt->getStringValue();
 		}
 	}
+
+
 	return projString;
 }
 

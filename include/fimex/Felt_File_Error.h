@@ -24,21 +24,17 @@
 #ifndef FELT_FILE_ERROR_H_
 #define FELT_FILE_ERROR_H_
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace MetNoFelt {
 	
 using namespace std;
 
-class Felt_File_Error : public std::exception
+class Felt_File_Error : public std::runtime_error
 {
-private:
-	std::string message;
 public:
-	explicit Felt_File_Error(const std::string& message);
-	virtual ~Felt_File_Error() throw();
-	virtual const char* what() const throw();
+	explicit Felt_File_Error(const std::string& message) : std::runtime_error("FeltError: " + message) {}
 };
 
 } // end namespace MetNoFelt

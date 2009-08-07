@@ -234,7 +234,11 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
         projStr << "+proj=ob_tran +o_proj=longlat +lon_0=" << (gs[4]) << " +o_lat_p=" << (90 - gs[5]);
         break;
     case 5:
-        projStr << "+proj=merc +lat_0="<< (gs[1]) << " +lon_0="<< (gs[0]) << " +lon_0=0 +lat_ts=" << (gs[4]);
+        // TODO: proj4 does not work with lat_0 != 0 with mercator in proj
+        projStr << "+proj=merc +lat_0="<< (gs[1]) << " +lon_0="<< (gs[0]) << " +lat_ts=" << (gs[4]);
+        if (gs[1] != 0) {
+            throw std::runtime_error("Mercator projection not supported with lat_0 != 0");
+        }
     case 6:                  // libmi supports only lat_0=0 = non-oblique (pole) mercator
         projStr << "+proj=lcc +lat_0=0 +lon_0=" << (gs[4]) << " +lat_1="<< (gs[5]) << " +lat_2=" << (gs[5]);
         break;

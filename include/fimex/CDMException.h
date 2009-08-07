@@ -24,23 +24,17 @@
 #ifndef CDMEXCEPTION_H_
 #define CDMEXCEPTION_H_
 
-#include <exception>
+#include <stdexcept>
 #include <string>
 
 namespace MetNoFimex
 {
 
-class CDMException : public std::exception
+class CDMException : public std::runtime_error
 {
 public:
-	CDMException() {}
-	explicit CDMException (const std::string& msg) : msg(msg) {}
-	CDMException(const CDMException& rhs) throw() : msg(rhs.msg) {}
-	CDMException& operator=(const CDMException& rhs) throw() {if (this == &rhs) return *this; msg = rhs.msg; return *this;}
-	virtual ~CDMException() throw() {}
-    virtual const char* what() const throw() {return msg.c_str();}
-private:
-	std::string msg;	
+    CDMException() : std::runtime_error("CDMException") {}
+    explicit CDMException(std::string msg) : std::runtime_error("CDMException: " + msg) {}
 };
 
 }
