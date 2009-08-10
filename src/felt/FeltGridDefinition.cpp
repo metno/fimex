@@ -247,7 +247,7 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
     }
 
     // libmi used constant earth radius for all projections (earthr.f); no_defs = no (US) defaults
-    projStr << " +a=" << EARTH_RADIUS << " +ellps=sphere +e=0 +no_defs";
+    projStr << " +a=" << EARTH_RADIUS << " +e=0 +no_defs";
 
     return projStr.str();
 }
