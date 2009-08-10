@@ -29,6 +29,7 @@
 #include "fimex/DataImpl.h"
 #include "fimex/Utils.h"
 #include "fimex/CDMException.h"
+#include "fimex/CDMNamedEntity.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam
@@ -318,17 +319,106 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 	return attrList;
 }
 
+/**
+ * Add the numeric value of attribute named attrName as projName to oproj, e.g. attrName = false_easting, projName = x_0, sets "+x_0=... "
+ * Assume only one value at maximum
+ * @param attrs
+ * @param oproj
+ * @param attrName
+ * @param projName
+ * @return true if attribute found and set
+ */
+bool addAttributeToStream(const std::vector<CDMAttribute>& attrs, std::ostringstream& oproj, const std::string& attrName, const std::string& projName)
+{
+    std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual(attrName));
+    if (foundAttr != attrs.end()) {
+        if (foundAttr->getData()->size() > 0) {
+            oproj << "+lon_0=" << foundAttr->getData()->asConstDouble()[0] << " ";
+            return true;
+        }
+    }
+    return false;
+}
 std::string attributesToProjString(const std::vector<CDMAttribute>& attrs)
 {
-	// TODO really implement conversion from FGDC, currently only using proj4 attribute (non-standard)
 	std::string projString;
-	for (std::vector<CDMAttribute>::const_iterator atIt = attrs.begin(); atIt != attrs.end(); ++atIt) {
-		if (atIt->getName() == "proj4") {
-			projString = atIt->getStringValue();
-		}
+	std::vector<CDMAttribute>::const_iterator foundAttr;
+
+	// use proj4 string if exists
+	foundAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("proj4"));
+	if (foundAttr != attrs.end()) {
+		projString = foundAttr->getStringValue();
+		return projString;
 	}
 
+	// translate
+	foundAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_mapping_name"));
+	if (foundAttr != attrs.end()) {
+	    std::string projection = foundAttr->getStringValue();
+	    std::ostringstream oproj;
+	    if (projection == "lambert_conformal_conic") {
+              oproj << "+proj=lcc ";
+              foundAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("standard_parallel"));
+              if (foundAttr != attrs.end()) {
+                  // standard_parallel - There may be 1 or 2 values.
+                  boost::shared_ptr<Data> spData = foundAttr->getData();
+                  oproj << "+lat_1=" << spData->asConstDouble()[0] << " ";
+                  if (spData->size() > 2) {
+                      oproj << "+lat_2=" << spData->asConstDouble()[1] << " ";
+                  } else {
+                      oproj << "+lat_2=" << spData->asConstDouble()[0] << " ";
+                  }
+              } else {
+                  oproj << "+lat_1=0 +lat_2=0 ";
+              }
+              addAttributeToStream(attrs, oproj, "longitude_of_central_meridian", "lon_0");
+              addAttributeToStream(attrs, oproj, "latitude_of_projection_origin", "lat_0");
+              addAttributeToStream(attrs, oproj, "false_easting", "x_0");
+              addAttributeToStream(attrs, oproj, "false_northing", "y_0");
+	    } else if (projection == "latitude_longitude") {
+	        oproj << "+proj=latlong ";
+	    } else if (projection == "rotated_latitude_longitude") {
+	        oproj << "+proj=ob_tran +o_proj=longlat ";
+            std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_north_pole_longitude"));
+            if (foundAttr != attrs.end()) {
+                if (foundAttr->getData()->size() > 0) {
+                    oproj << "+lon_0=" << (foundAttr->getData()->asConstDouble()[0]-180) << " ";
+                }
+            }
+	        addAttributeToStream(attrs, oproj, "grid_north_pole_latitude", "o_lat_p");
+	        addAttributeToStream(attrs, oproj, "north_pole_grid_longitude", "o_lon_b");
+	    } else if (projection == "polar_stereographic" || projection == "stereographic") {
+	        oproj << "+proj=stere ";
+	        addAttributeToStream(attrs, oproj, "latitude_of_projection_origin", "lat_0");
+	        addAttributeToStream(attrs, oproj, "straight_vertical_longitude_from_pole", "lon_0"); // polar-stereographic
+	        addAttributeToStream(attrs, oproj, "longitude_of_projection_origin", "lon_0"); // stereographic
+	        addAttributeToStream(attrs, oproj, "scale_factor_at_projection_origin", "k");
+	        addAttributeToStream(attrs, oproj, "standard_parallel", "lat_ts"); // only polar-stereographic, exclusive with k
+	        addAttributeToStream(attrs, oproj, "false_easting", "x_0");
+	        addAttributeToStream(attrs, oproj, "false_northing", "y_0");
+	    } else {
+	        // mercator not in CF up to 1.3
+	        throw CDMException("unsupported projection: " + projection);
+	    }
 
+	    // earth parameters
+	    if (addAttributeToStream(attrs, oproj, "earth_radius", "a")) {
+	        oproj << "+e=0 ";
+	    } else if (addAttributeToStream(attrs, oproj, "semi_major_axis", "a")) {
+	        if (addAttributeToStream(attrs, oproj, "semi_minor_axis", "b") ||
+	            addAttributeToStream(attrs, oproj, "inverse_flattening", "rf")) {
+	            // completely given
+	        } else {
+	            oproj << "+e=0 "; // sphere
+	        }
+	    } else {
+	        oproj << "+a=6371000 +e=0 "; // default
+	    }
+
+	    // remove default definitions
+	    oproj << "+no_defs ";
+	    projString = oproj.str();
+	}
 	return projString;
 }
 
