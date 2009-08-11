@@ -1,3 +1,8 @@
+  * 2009-11-08 fimex-0.16
+    * support for more projections, lambert conformal conic and mercator
+    * integrated felt library, fortran no longer required, simpler build process
+    * support for static and dynamic library
+    * support for udunits2
   * 2009-06-08 fimex-0.15.1
     * bugfix for translation of rotated lat-long from felt to proj
     * removing some compiler warnings

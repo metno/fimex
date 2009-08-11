@@ -9,15 +9,16 @@ compilation
 	* c99/c++ compiler
 	* libxml2 >= 2.5.0
 	* boost library >= 1.32 (1.33 for running tests)
-   * proj-4 >= 4.4.9
+    * proj-4 >= 4.4.9
 	
+Highly recommended, but not required:
+    * udunits (> 1.12), or udunits2 (> 2.1.8)
+
 To configure the different file formats it requires:
     * NetCDF (netcdf > 3.5)
     * Grib_API (grib_api > 1.4)
     * Felt (libmi)
 
-Optional packages:
-    * udunits (> 1.12)
         
 
 INSTALLATION
