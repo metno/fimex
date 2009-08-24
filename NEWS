@@ -1,4 +1,5 @@
-  * 2009-11-08 fimex-0.16
+  * 2009-08-11 fimex-0.16
+    * support for earth-ellipsoids as supported by CF-1.2 (earth_radius)
     * support for more projections, lambert conformal conic and mercator
     * integrated felt library, fortran no longer required, simpler build process
     * support for static and dynamic library
