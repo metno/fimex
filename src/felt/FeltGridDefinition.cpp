@@ -34,8 +34,43 @@
 #include <stdexcept>
 #include <cmath>
 #include "felt/FeltConstants.h"
+#include "proj_api.h"
 
 namespace felt {
+
+/**
+ * converts a point on earth to a projection plane
+ * @param projStr projection definition for proj4
+ * @param lon longitude in degree
+ * @param lat latitutde in degree
+ * @param x output of proj (usually m, but dependent on projStr)
+ * @param y output of proj
+ * @throws runtime_error on proj-failure
+ */
+static void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
+{
+    projPJ outputPJ;
+    if ( !(outputPJ = pj_init_plus(projStr.c_str())) ) {
+        std::string errorMsg(pj_strerrno(pj_errno));
+        throw std::runtime_error("Proj error: " + errorMsg);
+    }
+
+    projUV uv;
+    uv.u = lon * DEG_TO_RAD;
+    uv.v = lat * DEG_TO_RAD;
+
+    uv = pj_fwd(uv, outputPJ);
+    pj_free(outputPJ);
+
+    if (uv.u == HUGE_VAL) {
+        std::ostringstream errMsg;
+        errMsg <<  "projection fails:" << projStr << " (lon,lat)=(" << lon << "," << lat << ")";
+        throw std::runtime_error(errMsg.str());
+    }
+    x = uv.u;
+    y = uv.v;
+}
+
 
 // first scaling method
 void scaleGridInfoFirst_(boost::array<float, 6>& gridPar, int parsUsed, float scale, const std::vector<short int> & extraData)
@@ -234,13 +269,13 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
         projStr << "+proj=ob_tran +o_proj=longlat +lon_0=" << (gs[4]) << " +o_lat_p=" << (90 - gs[5]);
         break;
     case 5:
-        // TODO: proj4 does not work with lat_0 != 0 with mercator in proj
-        projStr << "+proj=merc +lat_0="<< (gs[1]) << " +lon_0="<< (gs[0]) << " +lat_ts=" << (gs[4]);
-        if (gs[1] != 0) {
-            throw std::runtime_error("Mercator projection not supported with lat_0 != 0");
-        }
-    case 6:                  // libmi supports only lat_0=0 = non-oblique (pole) mercator
-        projStr << "+proj=lcc +lat_0=0 +lon_0=" << (gs[4]) << " +lat_1="<< (gs[5]) << " +lat_2=" << (gs[5]);
+        // lat_0!=0 not supported for merc, lon_0 and lat_0 part of startx, starty
+        // TODO: untested, missing test case
+        projStr << "+proj=merc +lat_ts=" << (gs[4]);
+    case 6:
+        // libmi supports only lat_0=0 = non-oblique (pole) lcc
+        // TODO: untested, missing test case
+        projStr << "+proj=lcc +lon_0="<< (gs[4]) << " +lat_1="<< (gs[5]) << " +lat_2=" << (gs[5]);
         break;
     default: throw std::invalid_argument("Unknown grid specification");
 
@@ -284,9 +319,9 @@ FeltGridDefinition::FeltGridDefinition( int gridType,
       	geographicProj_( gridType, a, b, c, d, extraData );
         break;
     case 5:
-        throw std::invalid_argument("Mercator grid is not supported");
+        mercatorProj_( gridType, a, b, c, d, extraData );
     case 6:
-        throw std::invalid_argument("Lambert grid is not supported");
+        lambertConicProj_( gridType, a, b, c, d, extraData );
     default:
         throw std::invalid_argument("Unknown grid specification");
     }
@@ -373,8 +408,12 @@ FeltGridDefinition::mercatorProj_( int gridType,
     orientation_ = LeftLowerHorizontal; // Default
     incrementX_ = gs[2];
     incrementY_ = gs[3];
-    startX_ = 0.;
-    startY_= 0.;
+
+    // gs[0] and gs[1] are startX and startY given in degree, not in projection-plane, convert using proj
+    double startX, startY;
+    projConvert(gridParametersToProjDefinition(gridType, gs), gs[0], gs[1], startX, startY);
+    startX_ = static_cast<float>(startX);
+    startY_ = static_cast<float>(startY);
 }
 
 void
@@ -400,10 +439,11 @@ FeltGridDefinition::lambertConicProj_( int gridType,
     incrementX_ = gs[2];
     incrementY_ = gs[3];
 
-    // TODO:
-    throw std::runtime_error("startX and startY definition in libmi not decided yet for lambertConic, either in km, m or degree");
-    //startX_ = gs[0];
-    //startY_= gs[1];
+    // gs[0] and gs[1] are startX and startY given in degree, not in projection-plane, convert using proj
+    double startX, startY;
+    projConvert(gridParametersToProjDefinition(gridType, gs), gs[0], gs[1], startX, startY);
+    startX_ = static_cast<float>(startX);
+    startY_ = static_cast<float>(startY);
 }
 
 
