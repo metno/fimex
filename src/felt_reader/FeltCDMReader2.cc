@@ -696,4 +696,11 @@ const boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& va
 	return data;
 }
 
+
+boost::shared_ptr<FeltCDMReader2> getFeltReader(std::string filename, std::string configFilename)
+{
+    return boost::shared_ptr<FeltCDMReader2>(new FeltCDMReader2(filename, configFilename));
+}
+
+
 }
