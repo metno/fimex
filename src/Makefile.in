@@ -32,7 +32,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HAVE_NETCDF_TRUE@am__append_1 = NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+# grib-api libs are automatically added to LDFLAGS
+@HAVE_MILIB_TRUE@am__append_1 = ${milib_LIBS}
+@HAVE_UDUNITS_TRUE@am__append_2 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
+@HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
+@HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
+@HAVE_NETCDF_TRUE@am__append_5 = NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -74,8 +79,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc Logger.cc NcmlCDMReader.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
+	GribApiCDMWriter_Impl2.cc GribFileIndex.cc Logger.cc \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
@@ -89,8 +94,8 @@ am_libfimex_la_OBJECTS = interpolation.lo CachedInterpolation.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMTimeInterpolator.lo \
 	CDMVariable.lo Data.lo DataTypeChanger.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
-	GribApiCDMWriter_Impl2.lo Logger.lo NcmlCDMReader.lo \
-	Null_CDMWriter.lo ReplaceStringObject.lo \
+	GribApiCDMWriter_Impl2.lo GribFileIndex.lo Logger.lo \
+	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo \
 	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
 	Utils.lo XMLDoc.lo $(am__objects_1)
@@ -267,7 +272,12 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 lib_LTLIBRARIES = libfimex.la
-libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION)
+libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) \
+	felt_reader/libfimex_felt.la felt/libfelt.la $(BOOST_LDFLAGS) \
+	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
+	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lm \
+	@XML_LIBS@ $(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_4)
 libfimex_la_SOURCES = interpolation.c CachedInterpolation.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
 	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
@@ -275,11 +285,11 @@ libfimex_la_SOURCES = interpolation.c CachedInterpolation.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc Logger.cc NcmlCDMReader.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
+	GribApiCDMWriter_Impl2.cc GribFileIndex.cc Logger.cc \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc $(am__append_1)
+	Utils.cc XMLDoc.cc $(am__append_5)
 all: all-recursive
 
 .SUFFIXES:
@@ -369,6 +379,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_ImplAbstract.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Plo@am__quote@

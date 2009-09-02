@@ -36,7 +36,8 @@ host_triplet = @host@
 @HAVE_UDUNITS_TRUE@am__append_2 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
 @HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-bin_PROGRAMS = fimex$(EXEEXT)
+bin_PROGRAMS = fimex$(EXEEXT) $(am__EXEEXT_1)
+@HAVE_GRIBAPI_TRUE@am__append_5 = indexGribs
 subdir = src/binSrc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -61,6 +62,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/include/fimex/config.h
 CONFIG_CLEAN_FILES =
+@HAVE_GRIBAPI_TRUE@am__EXEEXT_1 = indexGribs$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -81,6 +83,16 @@ fimex_DEPENDENCIES = ../felt_reader/libfimex_felt.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
+am__indexGribs_SOURCES_DIST = indexGribs.cc
+@HAVE_GRIBAPI_TRUE@am_indexGribs_OBJECTS = indexGribs.$(OBJEXT)
+indexGribs_OBJECTS = $(am_indexGribs_OBJECTS)
+indexGribs_LDADD = $(LDADD)
+indexGribs_DEPENDENCIES = ../felt_reader/libfimex_felt.la \
+	../felt/libfelt.la ../libfimex.la $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -93,8 +105,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(fimex_SOURCES)
-DIST_SOURCES = $(fimex_SOURCES)
+SOURCES = $(fimex_SOURCES) $(indexGribs_SOURCES)
+DIST_SOURCES = $(fimex_SOURCES) $(am__indexGribs_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -246,6 +258,7 @@ LDADD = ../felt_reader/libfimex_felt.la ../felt/libfelt.la \
 	$(BOOST_DATE_TIME_LIB) -lm @XML_LIBS@ $(am__append_1) \
 	$(am__append_2) $(am__append_3) $(am__append_4)
 fimex_SOURCES = fimex.cc
+@HAVE_GRIBAPI_TRUE@indexGribs_SOURCES = indexGribs.cc
 all: all-recursive
 
 .SUFFIXES:
@@ -310,6 +323,9 @@ clean-binPROGRAMS:
 fimex$(EXEEXT): $(fimex_OBJECTS) $(fimex_DEPENDENCIES) 
 	@rm -f fimex$(EXEEXT)
 	$(CXXLINK) $(fimex_OBJECTS) $(fimex_LDADD) $(LIBS)
+indexGribs$(EXEEXT): $(indexGribs_OBJECTS) $(indexGribs_DEPENDENCIES) 
+	@rm -f indexGribs$(EXEEXT)
+	$(CXXLINK) $(indexGribs_OBJECTS) $(indexGribs_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -318,6 +334,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fimex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indexGribs.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

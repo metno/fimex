@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.16],[heiko.klein@met.no])
+AC_INIT([fimex],[0.17_beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -69,12 +69,16 @@ PKG_PROG_PKG_CONFIG()
 
 AC_LANG_PUSH(C++)
 # Check compiler supporting openmp in C++
+AC_ARG_ENABLE(openmp, [  --enable-openmp         enable use of openmp [[default=no]]],[
+  if test "$enableval" = yes; then
 AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
            CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],[])
+  fi
+], [])
 AC_LANG_POP(C++)
 
 # Check for the libmi / milib library.
-AC_ARG_ENABLE(milib, [  --enable-milib           enable milib felt-reader [[default=no]]],[
+AC_ARG_ENABLE(milib, [  --enable-milib          enable milib felt-reader [[default=no]]],[
   if test "$enableval" = yes; then
     use_milib=yes
   else

@@ -50,7 +50,7 @@ static LoggerPtr logger = getLogger("fimex.TimeSpec");
  */
 static double translateRelativeTime(string value, double startOffset, double finalValue)
 {
-	double retVal;
+	double retVal = 0.;
 	boost::smatch what;
 	boost::regex finalVals("x\\s*([+-])?\\s*(\\d\\.?\\d*)?\\s*");
 	if (boost::regex_search(value, what, finalVals)) {

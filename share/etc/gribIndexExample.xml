@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<gribFileIndex url="" xmlns="http://www.met.no/schema/fimex/gribFileIndex">
+    <gribMessage seekPos="0" messagePos="0">
+        <parameter name="" short_name="">
+            <!-- for grib-edition 1 --> 
+            <!-- identificationOfOriginatingGeneratingCentre optional -->
+            <grib1 indicatorOfParameter="80" gridTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+            <!-- for grib-edition2
+                <grib2 discipline="10" parameterCategory="3" parameterNumber="0"/>
+            -->
+        </parameter>
+        <level type="" no="" />
+        <time dataDate="20080206" dataTime="1200" /> <!-- YYYYMMDD HHMM format -->
+        <gridDefinition projectionName="" startX="" startY="" sizeX="" sizeY="" incrX="" incrY="" scanMode="" />
+    </gribMessage>
+    <!-- and so on 
+    <gribMessage seekPos="1847">
+        ...   
+    </gribMessage>
+    -->
+</gribFileIndex>

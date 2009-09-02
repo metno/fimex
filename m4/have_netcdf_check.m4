@@ -31,7 +31,7 @@ if eval "test ! -d $NC_INCLUDES_DIR"; then
 fi
 
 if eval "test -d $NC_LIBS_DIR"; then
-    NC_LIBS="-L$NC_LIBS_DIR $NC_LIBS_DIR/libnetcdf_c++.a $NC_LIBS_DIR/libnetcdf.a"
+    NC_LIBS="-L$NC_LIBS_DIR -lnetcdf_c++ -lnetcdf"
 else
     AC_MSG_ERROR([$NC_LIBS_DIR not found])
 fi
@@ -56,7 +56,7 @@ if test "x$netcdf" = xno; then
 fi
 
 AC_LANG_CPLUSPLUS
-AC_CHECKING([for libnetcdf_c++.a])
+AC_CHECKING([for libnetcdf_c++])
 AC_CHECK_LIB([netcdf_c++], [main],
            [netcdf=yes], [netcdf=no])
 AC_LANG_C

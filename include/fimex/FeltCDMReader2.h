@@ -95,6 +95,9 @@ private:
 
 };
 
+/// convenience function to retrieve a reader as shared_ptr instead of calling new
+boost::shared_ptr<FeltCDMReader2> getFeltReader(std::string filename, std::string configFilename);
+
 }
 
 #endif /*FELTCDMREADER2_H_*/

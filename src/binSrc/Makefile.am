@@ -22,3 +22,8 @@ endif
 
 bin_PROGRAMS = fimex
 fimex_SOURCES = fimex.cc
+
+if HAVE_GRIBAPI
+  bin_PROGRAMS += indexGribs
+  indexGribs_SOURCES = indexGribs.cc
+endif
