@@ -23,29 +23,30 @@
 
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #include "fimex/NetCDF_Utils.h"
+#include "netcdfcpp.h"
 
 namespace MetNoFimex
 {
 
 NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
-: filename(filename), ncFile(filename.c_str(), NcFile::ReadOnly)
+: filename(filename), ncFile(std::auto_ptr<NcFile>(new NcFile(filename.c_str(), NcFile::ReadOnly)))
 {
 	NcError ncErr(NcError::verbose_nonfatal);
-	if (!ncFile.is_valid()) {
+	if (!ncFile->is_valid()) {
 		throw CDMException(nc_strerror(ncErr.get_err()));
 	}
 
 	// read metadata to cdm
 	// define dimensions
-	for (int i = 0; i < ncFile.num_dims(); ++i) {
-		NcDim* dim = ncFile.get_dim(i);
+	for (int i = 0; i < ncFile->num_dims(); ++i) {
+		NcDim* dim = ncFile->get_dim(i);
 		CDMDimension d(dim->name(), dim->size());
 		d.setUnlimited(dim->is_unlimited());
 		cdm.addDimension(d);
 	}
 	// define variables
-	for (int i = 0; i < ncFile.num_vars(); ++i) {
-		NcVar* var = ncFile.get_var(i);
+	for (int i = 0; i < ncFile->num_vars(); ++i) {
+		NcVar* var = ncFile->get_var(i);
 		CDMDataType type = ncType2cdmDataType(var->type());
 		std::vector<std::string> shape;
 		// reverse dimensions
@@ -60,8 +61,8 @@ NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
 		}
 	}
 	// define global attributes
-	for (int i = 0; i < ncFile.num_atts(); ++i) {
-		addAttribute(cdm.globalAttributeNS(), ncFile.get_att(i));
+	for (int i = 0; i < ncFile->num_atts(); ++i) {
+		addAttribute(cdm.globalAttributeNS(), ncFile->get_att(i));
 	}
 }
 
@@ -76,7 +77,7 @@ const boost::shared_ptr<Data> NetCDF_CF10_CDMReader::getDataSlice(const std::str
 		return getDataSliceFromMemory(var, unLimDimPos);
 	}
 
-	NcVar* ncVar = ncFile.get_var(var.getName().c_str());
+	NcVar* ncVar = ncFile->get_var(var.getName().c_str());
 	if (cdm.hasUnlimitedDim(var)) {
 		return ncValues2Data(ncVar->get_rec(unLimDimPos), ncVar->type(), ncVar->rec_size());
 	} else {

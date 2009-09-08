@@ -45,9 +45,9 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 }
 
 void
-indexGrib(const fs::path& input, const fs::path& output)
+indexGrib(const fs::path& input, const fs::path& output, bool force)
 {
-    MetNoFimex::GribFileIndex gfi(input, true);
+    MetNoFimex::GribFileIndex gfi(input, false);
     fs::ofstream os(output);
     os << gfi;
     os.close();
@@ -60,6 +60,7 @@ main(int argc, char* args[])
     options.add_options()
         ("help,h", "help message")
         ("version", "program version")
+        ("force,f", "force update of index-file")
         ("outputDir,o", po::value<string>(), "output directory")
         ("inputFile,i", po::value<string>(), "input gribFile")
         ;
@@ -99,12 +100,10 @@ main(int argc, char* args[])
         }
     }
     std::string filename = fullInput.leaf();
-    size_t dotPos = filename.rfind(".", string::npos);
-    if (dotPos != string::npos) {
-        filename.resize(dotPos);
-    }
     fs::path outFile = outDir / (filename + ".grbml");
 
-    indexGrib(fullInput, outFile);
+    bool forceUpdate = false;
+    if (vm.count("force")) forceUpdate = true;
+    indexGrib(fullInput, outFile, forceUpdate);
     return 0;
 }

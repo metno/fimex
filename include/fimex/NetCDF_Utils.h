@@ -25,8 +25,7 @@
 #define NETCDF_UTILS_H_
 
 #include <boost/shared_ptr.hpp>
-#include "fimex/config.h"
-#include NETCDF_CPP_INCLUDE
+#include "netcdfcpp.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 

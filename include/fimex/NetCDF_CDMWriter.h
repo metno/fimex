@@ -26,7 +26,6 @@
 
 #include "fimex/CDMWriter.h"
 #include "fimex/CDM.h"
-#include "fimex/config.h"
 #include <map>
 #include <string>
 

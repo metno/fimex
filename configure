@@ -20358,17 +20358,6 @@ NETCDF_LIBS=$NC_LIBS
 
 
 
-cat >>confdefs.h <<_ACEOF
-#define NETCDF_CPP_INCLUDE "$NC_INCLUDES_DIR/netcdfcpp.h"
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define NETCDF_C_INCLUDE "$NC_INCLUDES_DIR/netcdf.h"
-_ACEOF
-
-
-
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'

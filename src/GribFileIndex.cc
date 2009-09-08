@@ -37,9 +37,23 @@
 #include <iostream>
 #include <cstdio>
 
+
 namespace MetNoFimex
 {
-
+#define MIFI_GRIB_CHECK(error, msg) mifi_grib_check(error, msg, __LINE__, __FILE__);
+void mifi_grib_check(int error, const char* msg, int line, const char* file) throw(std::runtime_error)
+{
+    if (error) {
+        const char* errMsg = grib_get_error_message(error);
+        std::ostringstream oss;
+        oss << "gribError occured in " << file << " at line "<< line;
+        oss << " : " << errMsg;
+        if (msg != 0) {
+            oss << "; " << msg;
+        }
+        throw std::runtime_error(oss.str());
+    }
+}
 using namespace std;
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
@@ -49,37 +63,49 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
     if (gh.get() == 0)
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
 
-    GRIB_CHECK(grib_get_long(gh.get(), "editionNumber", &edition_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "editionNumber", &edition_), 0);
 
     char msg[1024];
     size_t msgLength = 1024;
-    GRIB_CHECK(grib_get_string(gh.get(), "name", msg, &msgLength), 0);
-    parameterName_ = msg;
-    GRIB_CHECK(grib_get_string(gh.get(), "short_name", msg, &msgLength), 0);
-    shortName_ = msg;
 
     if (edition_ == 1) {
         gridParmeterIds_ = vector<long> (3, 0);
-        GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParmeterIds_[0]), 0);
-        GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParmeterIds_[1]), 0);
-        GRIB_CHECK(grib_get_long(gh.get(), "identificationOfOriginatingGeneratingCentre", &gridParmeterIds_[2]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParmeterIds_[0]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParmeterIds_[1]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "identificationOfOriginatingGeneratingCentre", &gridParmeterIds_[2]), 0);
         // additional information
-        GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfTypeOfLevel", &levelType_), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfTypeOfLevel", &levelType_), 0);
     } else if (edition_ == 2) {
         gridParmeterIds_ = vector<long> (3, 0);
-        GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParmeterIds_[0]), 0);
-        GRIB_CHECK(grib_get_long(gh.get(), "parameterCategory", &gridParmeterIds_[1]), 0);
-        GRIB_CHECK(grib_get_long(gh.get(), "discipline", &gridParmeterIds_[2]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParmeterIds_[0]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterCategory", &gridParmeterIds_[1]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "discipline", &gridParmeterIds_[2]), 0);
         // additional information
-        GRIB_CHECK(grib_get_long(gh.get(), "typeOfFirstFixedSurface", &levelType_), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "typeOfFirstFixedSurface", &levelType_), 0);
     } else {
         throw runtime_error("unknown grib version: " + type2string(edition_));
     }
 
-    GRIB_CHECK(grib_get_long(gh.get(), "level", &levelNo_), 0);
+    int nameError = grib_get_string(gh.get(), "name", msg, &msgLength);
+    if (nameError != GRIB_NOT_FOUND) {
+        MIFI_GRIB_CHECK(nameError, 0);
+        parameterName_ = msg;
+    } else {
+        parameterName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), ",");
+    }
+    int shortNameError = grib_get_string(gh.get(), "short_name", msg, &msgLength);
+    if (shortNameError != GRIB_NOT_FOUND) {
+        MIFI_GRIB_CHECK(shortNameError, 0);
+        shortName_ = msg;
+    } else {
+        shortName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), ",");
+    }
+
+
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &levelNo_), 0);
     // time
-    GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
-    GRIB_CHECK(grib_get_long(gh.get(), "dataTime", &dataTime_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataTime", &dataTime_), 0);
 
     // TODO: gridDefinition_
 
@@ -279,21 +305,18 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
     if (ignoreExistingXml) {
         initByGrib(gribFilePath);
     } else {
+        // find gribml-file younger than original file
         std::string filename = gribFilePath.leaf();
-        size_t dotPos = filename.rfind(".", string::npos);
-        if (dotPos != string::npos) {
-            filename.resize(dotPos);
-        }
         fs::path xmlDir = gribFilePath.branch_path();
         fs::path xmlFile = xmlDir / (filename + ".grbml");
-        if (fs::exists(xmlFile) ) {
+        if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
             initByXML(xmlFile);
         } else {
             // try environment path: GRIB_INDEX_PATH
             char* indexDir = getenv("GRIB_INDEX_PATH");
             if (indexDir != 0) {
                 xmlFile = fs::path(indexDir) / (filename + ".grbml");
-                if (fs::exists(xmlFile)) {
+                if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
                     initByXML(xmlFile);
                 } else {
                     initByGrib(gribFilePath);

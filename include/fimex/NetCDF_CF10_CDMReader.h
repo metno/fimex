@@ -24,9 +24,11 @@
 #ifndef NETCDF_CF10_CDMREADER_H_
 #define NETCDF_CF10_CDMREADER_H_
 
-#include "fimex/config.h"
 #include "fimex/CDMReader.h"
-#include NETCDF_CPP_INCLUDE
+
+// forward decl
+class NcFile;
+class NcAtt;
 
 namespace MetNoFimex
 {
@@ -34,7 +36,7 @@ namespace MetNoFimex
 class NetCDF_CF10_CDMReader : public MetNoFimex::CDMReader
 {
 	std::string filename;
-	NcFile ncFile;
+	const std::auto_ptr<NcFile> ncFile;
 public:
 	NetCDF_CF10_CDMReader(const std::string& fileName);
 	virtual ~NetCDF_CF10_CDMReader();

@@ -125,12 +125,6 @@
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
-/* absolute header for netcdfcpp.h */
-#undef NETCDF_CPP_INCLUDE
-
-/* absolute header for netcdfcpp.h */
-#undef NETCDF_C_INCLUDE
-
 /* Name of package */
 #undef PACKAGE
 

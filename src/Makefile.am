@@ -1,4 +1,4 @@
-SUBDIRS = . felt felt_reader binSrc
+SUBDIRS = felt felt_reader . binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
