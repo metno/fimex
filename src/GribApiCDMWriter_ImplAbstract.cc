@@ -26,6 +26,9 @@
 #include "fimex/GribApiCDMWriter_ImplAbstract.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeLevelDataSliceFetcher.h"
+#include "fimex/CDM.h"
+#include "fimex/Utils.h"
+#include "fimex/Data.h"
 #include <cmath>
 #include <functional>
 
@@ -51,7 +54,7 @@ public:
 };
 
 GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
-: gribVersion(gribVersion), cdmReader(cdmReader), outputFile(outputFile), configFile(configFile), xmlConfig(new XMLDoc(configFile)), gribFile(outputFile.c_str(), std::ios::binary|std::ios::out)
+: CDMWriter(cdmReader, outputFile), gribVersion(gribVersion), configFile(configFile), xmlConfig(new XMLDoc(configFile)), gribFile(outputFile.c_str(), std::ios::binary|std::ios::out)
 {
 	logger = getLogger("fimex.GribApi_CDMWriter");
 	std::string gribTemplate("GRIB" + type2string(gribVersion));

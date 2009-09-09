@@ -30,6 +30,7 @@
 
 #include "CDMReader.h"
 #include <map>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -45,7 +46,7 @@ public:
 	 * @param varName name of variable
 	 * @param size_t unLimDimPos position of the unlimited dimension, most commonly time-position of the output as set in #changeTimeAxis
 	 */
-	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 	/**
 	 * change the time-axis from from the one given to a new specification
 	 * @param timeSpec string of time-specification

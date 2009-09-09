@@ -23,6 +23,7 @@
 
 #include "fimex/CDMExtractor.h"
 #include "fimex/Data.h"
+#include "CDM.h"
 
 namespace MetNoFimex
 {
@@ -30,16 +31,16 @@ namespace MetNoFimex
 CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)
 : dataReader(datareader)
 {
-	cdm = dataReader->getCDM();
+	*cdm_ = dataReader->getCDM();
 }
 
 CDMExtractor::~CDMExtractor()
 {
  }
 
-const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-	const CDMVariable& variable = cdm.getVariable(varName);
+	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
 		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
@@ -86,12 +87,12 @@ const boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varN
 
 void CDMExtractor::removeVariable(std::string variable) throw(CDMException)
 {
-	cdm.removeVariable(variable);
+	cdm_->removeVariable(variable);
 }
 
 void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length) throw(CDMException)
 {
-	CDMDimension& dim = cdm.getDimension(dimName);
+	CDMDimension& dim = cdm_->getDimension(dimName);
 	if (start+length > dim.getLength()) {
 		throw CDMException("can't enlarge dimension " + dimName + ": start+length ("+type2string(start)+"+"+type2string(length)+") out of bounds: "+ type2string(dim.getLength()));
 	}
@@ -102,11 +103,11 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 
 
 	// removing all data containing this dimension, just to be sure it's read from the dataReader
-	const CDM::VarVec& variables = cdm.getVariables();
+	const CDM::VarVec& variables = cdm_->getVariables();
 	for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
 		const std::vector<std::string>& shape = it->getShape();
 		if (std::find(shape.begin(), shape.end(), dim.getName()) != shape.end()) {
-			cdm.getVariable(it->getName()).setData(boost::shared_ptr<Data>());
+			cdm_->getVariable(it->getName()).setData(boost::shared_ptr<Data>());
 		}
 	}
 }
@@ -117,7 +118,7 @@ void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, lo
 	if (end > 0) {
 		length = end - start + 1;
 	} else {
-		CDMDimension& dim = cdm.getDimension(dimName);
+		CDMDimension& dim = cdm_->getDimension(dimName);
 		length = dim.getLength();
 		length -= start;
 		length += end;

@@ -25,6 +25,7 @@
  */
 
 #include "fimex/CDMQualityExtractor.h"
+#include "CDM.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
@@ -99,7 +100,7 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
 CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString, std::string configFile) throw(CDMException)
 : dataReader(dataReader)
 {
-    cdm = dataReader->getCDM();
+    *cdm_.get() = dataReader->getCDM();
     const CDM& cdm = dataReader->getCDM();
     if (autoConfString != "") {
         // precheck allowed autoConfStrings, in case no variable is found, but string
@@ -195,7 +196,7 @@ static double findDefinedExtreme(double* begin, double* end, const double& (*min
     return extreme;
 }
 
-const boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
     // no change in cdm-data in CDMQualityExtractor, so no need to check for in-memory data
 
@@ -223,17 +224,17 @@ const boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::strin
                 sort(useVals.begin(), useVals.end());
             } else if (variableFlags.find(varName) != variableFlags.end()) {
                 string flag = variableFlags[varName];
-                double statusFill = cdm.getFillValue(statusVar);
+                double statusFill = cdm_->getFillValue(statusVar);
                 double minFlag = MIFI_UNDEFINED_D;
                 double maxFlag = MIFI_UNDEFINED_D;
                 CDMAttribute attr;
-                if (cdm.getAttribute(statusVar, "valid_min", attr)) {
+                if (cdm_->getAttribute(statusVar, "valid_min", attr)) {
                     minFlag = attr.getData()->asDouble()[0];
                 }
-                if (cdm.getAttribute(statusVar, "valid_max", attr)) {
+                if (cdm_->getAttribute(statusVar, "valid_max", attr)) {
                     maxFlag = attr.getData()->asDouble()[0];
                 }
-                if (cdm.getAttribute(statusVar, "valid_range", attr)) {
+                if (cdm_->getAttribute(statusVar, "valid_range", attr)) {
                     minFlag = attr.getData()->asDouble()[0];
                     maxFlag = attr.getData()->asDouble()[1];
                 }
@@ -309,7 +310,7 @@ const boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::strin
                     sdIt++;
                 }
             }
-            double fillValue = cdm.getFillValue(varName);
+            double fillValue = cdm_->getFillValue(varName);
             double *sdIt = &sd[0];
             for (size_t i = 0; i < size; ++i) {
                 if (isnan(*sdIt)) {

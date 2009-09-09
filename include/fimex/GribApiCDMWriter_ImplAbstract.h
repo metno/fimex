@@ -38,7 +38,7 @@
 namespace MetNoFimex
 {
 
-class GribApiCDMWriter_ImplAbstract
+class GribApiCDMWriter_ImplAbstract : public CDMWriter
 {
 public:
 	/**
@@ -100,8 +100,6 @@ protected:
 
 protected:
 	int gribVersion;
-	const boost::shared_ptr<CDMReader> cdmReader;
-	const std::string outputFile;
 	const std::string configFile;
 	const boost::shared_ptr<XMLDoc> xmlConfig;
 	boost::shared_ptr<grib_handle> gribHandle;

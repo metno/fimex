@@ -29,6 +29,7 @@
 #include <functional>
 #include <algorithm>
 #include <utility>
+#include <fimex/CDM.h>
 #include "fimex/TimeSpec.h"
 #include "fimex/DataImpl.h"
 #include "fimex/interpolation.h"
@@ -41,14 +42,14 @@ using namespace std;
 CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader)
    : dataReader(dataReader)
 {
-	cdm = dataReader->getCDM();
+	*cdm_.get() = dataReader->getCDM();
 	// removing all time-dependant data in cdm
 	// just to be sure it's read from the dataReader or assigned in #changeTimeAxis
-	const CDM::VarVec& variables = cdm.getVariables();
+	const CDM::VarVec& variables = cdm_->getVariables();
 	for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-		std::string timeDimName = cdm.getTimeAxis(it->getName());
+		std::string timeDimName = cdm_->getTimeAxis(it->getName());
 		if (timeDimName != "") {
-			cdm.getVariable(it->getName()).setData(boost::shared_ptr<Data>());
+			cdm_->getVariable(it->getName()).setData(boost::shared_ptr<Data>());
 		}
 	}
 }
@@ -57,15 +58,15 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 {
 }
 
-const boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-	std::string timeAxis = cdm.getTimeAxis(varName);
+	std::string timeAxis = cdm_->getTimeAxis(varName);
 	if (timeAxis == "") {
 		// not time-axis, no changes, simply forward
 		return dataReader->getDataSlice(varName, unLimDimPos);
 	}
 
-	const CDMVariable& variable = cdm.getVariable(varName);
+	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
 		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
@@ -74,9 +75,9 @@ const boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::strin
 	boost::shared_ptr<Data> data;
 
 	// if unlimdim = time-axis, fetch all needed original slices
-	CDMDimension timeDim = cdm.getDimension(timeAxis);
+	CDMDimension timeDim = cdm_->getDimension(timeAxis);
 	if (timeDim.isUnlimited()) {
-		double currentTime = getDataSliceFromMemory(cdm.getVariable(timeAxis), unLimDimPos)->asConstDouble()[0];
+		double currentTime = getDataSliceFromMemory(cdm_->getVariable(timeAxis), unLimDimPos)->asConstDouble()[0];
 		// interpolate and return the time-slices
 		pair<size_t, size_t> orgTimes = timeChangeMap[timeAxis][unLimDimPos];
 		boost::shared_ptr<Data> d1 = dataReader->getDataSlice(varName, orgTimes.first);
@@ -126,7 +127,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMExceptio
 		if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
 			changedTimes.insert(timeDimName); // avoid double changes
 			boost::shared_ptr<Data> times = dataReader->getData(timeDimName);
-			string unit = cdm.getAttribute(timeDimName, "units").getStringValue();
+			string unit = cdm_->getAttribute(timeDimName, "units").getStringValue();
 			TimeUnit tu(unit);
 			vector<FimexTime> oldTimes;
 			boost::shared_array<double> oldTimesPtr = times->asConstDouble();
@@ -167,13 +168,13 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMExceptio
 
 
 			// change cdm timeAxis values
-			cdm.addOrReplaceAttribute(timeDimName, CDMAttribute("units", ts.getUnitString()));
+			cdm_->addOrReplaceAttribute(timeDimName, CDMAttribute("units", ts.getUnitString()));
 			boost::shared_array<double> timeData(new double[newTimes.size()]);
 			TimeUnit newTU(ts.getUnitString());
 			transform(newTimes.begin(), newTimes.end(), timeData.get(),
 					  bind1st(mem_fun_ref(&TimeUnit::fimexTime2unitTimeX),newTU));
-			cdm.getVariable(timeDimName).setData(boost::shared_ptr<Data>(new DataImpl<double>(timeData, newTimes.size())));
-			cdm.getDimension(timeDimName).setLength(newTimes.size());
+			cdm_->getVariable(timeDimName).setData(boost::shared_ptr<Data>(new DataImpl<double>(timeData, newTimes.size())));
+			cdm_->getDimension(timeDimName).setLength(newTimes.size());
 
 		}
 	}

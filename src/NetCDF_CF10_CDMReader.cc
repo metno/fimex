@@ -23,6 +23,7 @@
 
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #include "fimex/NetCDF_Utils.h"
+#include "fimex/CDM.h"
 #include "netcdfcpp.h"
 
 namespace MetNoFimex
@@ -42,7 +43,7 @@ NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
 		NcDim* dim = ncFile->get_dim(i);
 		CDMDimension d(dim->name(), dim->size());
 		d.setUnlimited(dim->is_unlimited());
-		cdm.addDimension(d);
+		cdm_->addDimension(d);
 	}
 	// define variables
 	for (int i = 0; i < ncFile->num_vars(); ++i) {
@@ -54,7 +55,7 @@ NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
 			NcDim* dim = var->get_dim(j);
 			shape.push_back(dim->name());
 		}
-		cdm.addVariable(CDMVariable(var->name(), type, shape));
+		cdm_->addVariable(CDMVariable(var->name(), type, shape));
 		// define the attributes of the variable
 		for (int j = 0; j < var->num_atts(); ++j) {
 			addAttribute(var->name(), var->get_att(j));
@@ -62,7 +63,7 @@ NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
 	}
 	// define global attributes
 	for (int i = 0; i < ncFile->num_atts(); ++i) {
-		addAttribute(cdm.globalAttributeNS(), ncFile->get_att(i));
+		addAttribute(cdm_->globalAttributeNS(), ncFile->get_att(i));
 	}
 }
 
@@ -70,15 +71,15 @@ NetCDF_CF10_CDMReader::~NetCDF_CF10_CDMReader()
 {
 }
 
-const boost::shared_ptr<Data> NetCDF_CF10_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> NetCDF_CF10_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-	const CDMVariable& var = cdm.getVariable(varName);
+	const CDMVariable& var = cdm_->getVariable(varName);
 	if (var.hasData()) {
 		return getDataSliceFromMemory(var, unLimDimPos);
 	}
 
 	NcVar* ncVar = ncFile->get_var(var.getName().c_str());
-	if (cdm.hasUnlimitedDim(var)) {
+	if (cdm_->hasUnlimitedDim(var)) {
 		return ncValues2Data(ncVar->get_rec(unLimDimPos), ncVar->type(), ncVar->rec_size());
 	} else {
 		return ncValues2Data(ncVar->values(), ncVar->type(), ncVar->num_vals());
@@ -89,7 +90,7 @@ void NetCDF_CF10_CDMReader::addAttribute(const std::string& varName, NcAtt* ncAt
 {
 	CDMDataType dt(ncType2cdmDataType(ncAtt->type()));
 	boost::shared_ptr<Data> attrData = ncValues2Data(ncAtt->values(), ncAtt->type(), ncAtt->num_vals());
-	cdm.addAttribute(varName, CDMAttribute(ncAtt->name(), dt, attrData));
+	cdm_->addAttribute(varName, CDMAttribute(ncAtt->name(), dt, attrData));
 }
 
 

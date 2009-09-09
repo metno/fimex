@@ -25,12 +25,16 @@
 #define TIMELEVELDATASLICEFETCHER_H_
 
 #include <boost/shared_ptr.hpp>
-#include "fimex/CDMReader.h"
-#include "fimex/Data.h"
+#include <vector>
 #include "fimex/Logger.h"
+#include "fimex/CDMException.h"
 
 namespace MetNoFimex
 {
+// forward decl.
+class Data;
+class CDMReader;
+
 
 /**
  * @brief read a slice of a given time/level combination from a cdmReader

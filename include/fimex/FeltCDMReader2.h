@@ -49,8 +49,7 @@ public:
 	FeltCDMReader2(std::string filename, std::string configFilename) throw(CDMException);
 	virtual ~FeltCDMReader2();
 
-	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
-	virtual const CDM& getCDM() const {return cdm;}
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
 
 private:
 	const std::string filename;

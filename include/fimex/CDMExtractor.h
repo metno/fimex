@@ -24,10 +24,12 @@
 #ifndef CDMEXTRACTOR_H_
 #define CDMEXTRACTOR_H_
 
+#include <map>
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "fimex/CDMReader.h"
+#include "fimex/CDMDataType.h"
 
 namespace MetNoFimex
 {
@@ -47,7 +49,7 @@ public:
 	CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMExtractor();
 	
-	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 
 	/**
 	 * @brief Remove a variable from the CDM

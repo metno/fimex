@@ -32,7 +32,7 @@ namespace MetNoFimex
 {
 class TimeUnit;
 
-class GribApiCDMWriter : public MetNoFimex::CDMWriter
+class GribApiCDMWriter : public CDMWriter
 {
 
 public:

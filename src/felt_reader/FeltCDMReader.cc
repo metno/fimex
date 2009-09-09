@@ -31,6 +31,7 @@
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/CDM.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
@@ -212,14 +213,14 @@ void FeltCDMReader::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, cons
 			shape.push_back(axis);
 			CDMVariable var(name, dataType, shape);
 			var.setData(createData(dataType, values.size(), values.begin(), values.end()));
-			cdm.addVariable(var);
+			cdm_->addVariable(var);
 
 
 			// add the attributes of the extra variables
 			std::vector<CDMAttribute> attributes;
 			fillAttributeList(attributes, node->children, templateReplacements);
 			for (std::vector<CDMAttribute>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
-				cdm.addAttribute(name, *it);
+				cdm_->addAttribute(name, *it);
 			}
 		}
 	}
@@ -338,12 +339,12 @@ void FeltCDMReader::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 		std::vector<CDMAttribute> globAttributes;
 		fillAttributeList(globAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 		for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
-			cdm.addAttribute(cdm.globalAttributeNS(), *it);
+			cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
 		}
 	}
-	if (! cdm.checkVariableAttribute(cdm.globalAttributeNS(), "history", boost::regex(".*"))) {
+	if (! cdm_->checkVariableAttribute(cdm_->globalAttributeNS(), "history", boost::regex(".*"))) {
         boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
-        cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex from file '"+ filename+"'"));
+        cdm_->addAttribute(cdm_->globalAttributeNS(), CDMAttribute("history", boost::gregorian::to_iso_extended_string(now.date()) + " creation by fimex from file '"+ filename+"'"));
 	}
 }
 
@@ -363,18 +364,18 @@ CDMDimension FeltCDMReader::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	long timeSize = feltFile.getFeltTimes().size();
 	CDMDimension timeDim(timeName, timeSize);
 	timeDim.setUnlimited(true);
-	cdm.addDimension(timeDim);
+	cdm_->addDimension(timeDim);
 	std::vector<std::string> timeShape;
 	timeShape.push_back(timeDim.getName());
 	CDMVariable timeVar(timeName, timeDataType, timeShape);
 	timeVec = feltFile.getFeltTimes();
 	boost::shared_ptr<Data> timeData = createData(timeDataType, timeSize, timeVec.begin(), timeVec.end());
 	timeVar.setData(timeData);
-	cdm.addVariable(timeVar);
+	cdm_->addVariable(timeVar);
 	std::vector<CDMAttribute> timeAttributes;
 	fillAttributeList(timeAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 	for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
-		cdm.addAttribute(timeVar.getName(), *it);
+		cdm_->addAttribute(timeVar.getName(), *it);
 	}
 	return timeDim;
 }
@@ -401,20 +402,20 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 		long levelSize = it->second.size();
 		CDMDimension levelDim(levelId, levelSize);
 		levelDims.insert(std::pair<short, CDMDimension>(it->first, levelDim));
-		cdm.addDimension(levelDim);
+		cdm_->addDimension(levelDim);
 		levelVecMap[levelDim.getName()] = it->second;
 
 		// create level variable without data!
 		std::vector<std::string> levelShape;
 		levelShape.push_back(levelDim.getName());
 		CDMVariable levelVar(levelId, levelDataType, levelShape);
-		cdm.addVariable(levelVar);
+		cdm_->addVariable(levelVar);
 
 		// add attributes
 		std::vector<CDMAttribute> levelAttributes;
 		fillAttributeList(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 		for (std::vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
-			cdm.addAttribute(levelVar.getName(), *ait);
+			cdm_->addAttribute(levelVar.getName(), *ait);
 		}
 
 		// read additional axis variables
@@ -432,7 +433,7 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 			std::vector<short> lvs = it->second;
 			data = createData(levelDataType, levelSize, lvs.begin(), lvs.end());
 		}
-		cdm.getVariable(levelDim.getName()).setData(data);
+		cdm_->getVariable(levelDim.getName()).setData(data);
 
 
 	}
@@ -447,10 +448,10 @@ void FeltCDMReader::initAddProjectionFromXML(const XMLDoc& doc, std::string& pro
 	projName = std::string("projection_" + type2string(gridType));
 	// projection-variable without datatype and dimension
 	CDMVariable projVar(projName, CDM_NAT, std::vector<std::string>());
-	cdm.addVariable(projVar);
+	cdm_->addVariable(projVar);
 	std::vector<CDMAttribute> projAttr = projStringToAttributes(projStr);
 	for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
-		cdm.addAttribute(projName, *attrIt);
+		cdm_->addAttribute(projName, *attrIt);
 	}
 
 	{
@@ -469,10 +470,10 @@ void FeltCDMReader::initAddProjectionFromXML(const XMLDoc& doc, std::string& pro
 		xDimShape.push_back(xDim.getName());
 		CDMVariable xVar(xName, xDataType, xDimShape);
 		xVar.setData(feltFile.getXData());
-		cdm.addDimension(xDim);
-		cdm.addVariable(xVar);
+		cdm_->addDimension(xDim);
+		cdm_->addVariable(xVar);
 		for (std::vector<CDMAttribute>::iterator attrIt = xVarAttributes.begin(); attrIt != xVarAttributes.end(); ++attrIt) {
-			cdm.addAttribute(xName, *attrIt);
+			cdm_->addAttribute(xName, *attrIt);
 		}
 	}
 	{
@@ -491,10 +492,10 @@ void FeltCDMReader::initAddProjectionFromXML(const XMLDoc& doc, std::string& pro
 		yDimShape.push_back(yDim.getName());
 		CDMVariable yVar(yName, yDataType, yDimShape);
 		yVar.setData(feltFile.getYData());
-		cdm.addDimension(yDim);
-		cdm.addVariable(yVar);
+		cdm_->addDimension(yDim);
+		cdm_->addVariable(yVar);
 		for (std::vector<CDMAttribute>::iterator attrIt = yVarAttributes.begin(); attrIt != yVarAttributes.end(); ++attrIt) {
-			cdm.addAttribute(yName, *attrIt);
+			cdm_->addAttribute(yName, *attrIt);
 		}
 	}
 
@@ -522,7 +523,7 @@ void FeltCDMReader::initAddProjectionFromXML(const XMLDoc& doc, std::string& pro
 	if (xDim.getName() != longName && yDim.getName() != latName) {
 		coordinates = longName + " " + latName;
 		try {
-			cdm.generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), longName, latName);
+			cdm_->generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), longName, latName);
 		} catch (MetNoFimex::CDMException& ex) {
 			throw MetNoFelt::Felt_File_Error(ex.what());
 		}
@@ -584,7 +585,7 @@ void FeltCDMReader::initAddVariablesFromXML(const XMLDoc& doc, const std::string
     		if (vectorCounterpart != "") {
     			var.setAsSpatialVector(vectorCounterpart, vectorDirection);
     		}
-    		cdm.addVariable(var);
+    		cdm_->addVariable(var);
     		varNameFeltIdMap[varName] = it->getName();
     		//  update scaling factor attribute with value from felt-file and xml-setup (only for short-values)
     		if (it->getScalingFactor() != 1) {
@@ -601,14 +602,14 @@ void FeltCDMReader::initAddVariablesFromXML(const XMLDoc& doc, const std::string
         		}
     		}
     		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
-    			cdm.addAttribute(varName, *attrIt);
+    			cdm_->addAttribute(varName, *attrIt);
     		}
     	}
 	}
 }
 
-const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
-	const CDMVariable& variable = cdm.getVariable(varName);
+boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
+	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
 		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
@@ -622,7 +623,7 @@ const boost::shared_ptr<Data> FeltCDMReader::getDataSlice(const std::string& var
 	const CDMDimension* layerDim = 0;
 	size_t xy_size = 1;
 	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-		CDMDimension& dim = cdm.getDimension(*it);
+		CDMDimension& dim = cdm_->getDimension(*it);
 		if (dim.getName() != xDim.getName() &&
 			dim.getName() != yDim.getName() &&
 			!dim.isUnlimited())

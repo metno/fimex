@@ -40,7 +40,7 @@ class NetCDF_CF10_CDMReader : public MetNoFimex::CDMReader
 public:
 	NetCDF_CF10_CDMReader(const std::string& fileName);
 	virtual ~NetCDF_CF10_CDMReader();
-	virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
 private:
 	void addAttribute(const std::string& varName, NcAtt* ncAtt);
 };

@@ -23,6 +23,7 @@
 
 #include "fimex/Null_CDMWriter.h"
 #include <boost/shared_array.hpp>
+#include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"

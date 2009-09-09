@@ -22,6 +22,9 @@
  */
 
 #include "fimex/TimeLevelDataSliceFetcher.h"
+#include "fimex/CDMReader.h"
+#include "fimex/Data.h"
+#include "fimex/CDM.h"
 
 namespace MetNoFimex
 {

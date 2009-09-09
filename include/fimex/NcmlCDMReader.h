@@ -27,8 +27,10 @@
 #ifndef NCMLCDMREADER_H_
 #define NCMLCDMREADER_H_
 
-#include "CDMReader.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMDataType.h"
 #include "boost/noncopyable.hpp"
+#include <map>
 
 namespace MetNoFimex
 {
@@ -67,7 +69,7 @@ public:
     /**
      * reading the data from the required source
      */
-    virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
 
 
 private:

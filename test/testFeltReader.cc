@@ -35,6 +35,7 @@
 #include "fimex/Felt_File.h"
 #include "fimex/FeltCDMReader.h"
 #include "fimex/Data.h"
+#include "fimex/CDM.h"
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK

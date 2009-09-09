@@ -30,6 +30,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include "fimex/CDM.h"
 
 namespace MetNoFimex
 {
@@ -74,7 +75,7 @@ void NcmlCDMReader::init() throw(CDMException)
         LOG4FIMEX(logger, Logger::WARN, "config-file " << configFile << " not a ncml-file, ignoring");
         return;
     }
-    cdm = dataReader->getCDM();
+    *cdm_.get() = dataReader->getCDM();
     LOG4FIMEX(logger, Logger::DEBUG, "initializing");
 
     initRemove();
@@ -106,13 +107,13 @@ void NcmlCDMReader::initRemove() {
         if (type == "") throw CDMException("type attribute required for /nc:netcdf/nc:remove element in "+configFile);
         if (type == "variable") {
             LOG4FIMEX(logger, Logger::DEBUG, "removing variable " << name);
-            cdm.removeVariable(name);
+            cdm_->removeVariable(name);
         } else if (type == "dimension") {
             LOG4FIMEX(logger, Logger::DEBUG, "removing dimension " << name);
-            cdm.removeDimension(name);
+            cdm_->removeDimension(name);
         } else if (type == "attribute") {
             LOG4FIMEX(logger, Logger::DEBUG, "removing attribute " << name);
-            cdm.removeAttribute(CDM::globalAttributeNS(), name);
+            cdm_->removeAttribute(CDM::globalAttributeNS(), name);
         } else if (type == "group") {
             LOG4FIMEX(logger, Logger::DEBUG, "request to remove group " << name << " ignored");
             // groups not supported
@@ -134,7 +135,7 @@ void NcmlCDMReader::initRemove() {
         if (type != "attribute") throw CDMException("type attribute required = 'attribute' for /nc:netcdf/nc:variable/nc:remove element in "+configFile);
         std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
         if (varName == "") throw CDMException("name attribute required for all variable element in "+configFile);
-        cdm.removeAttribute(varName, name);
+        cdm_->removeAttribute(varName, name);
     }
 }
 
@@ -154,10 +155,10 @@ void NcmlCDMReader::initVariableTypeChange()
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
         if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
-        if (cdm.hasVariable(name)) {
+        if (cdm_->hasVariable(name)) {
             variableTypeChanges[name] = string2datatype(type);
             LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
-            cdm.getVariable(name).setDataType(string2datatype(type));
+            cdm_->getVariable(name).setDataType(string2datatype(type));
         }
     }
 }
@@ -176,8 +177,8 @@ void NcmlCDMReader::initAddReassignAttribute()
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         if (type == "") type = "string";
         LOG4FIMEX(logger, Logger::DEBUG, "adding global attribute: " + name);
-        cdm.removeAttribute(CDM::globalAttributeNS(), name);
-        cdm.addAttribute(CDM::globalAttributeNS(), CDMAttribute(name, string2datatype(type), values));
+        cdm_->removeAttribute(CDM::globalAttributeNS(), name);
+        cdm_->addAttribute(CDM::globalAttributeNS(), CDMAttribute(name, string2datatype(type), values));
     }
 
     /* the variable attributes */
@@ -193,9 +194,9 @@ void NcmlCDMReader::initAddReassignAttribute()
         vector<string> values = tokenize(value, separator);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         if (type == "") type = "string";
-        cdm.removeAttribute(varName, name);
+        cdm_->removeAttribute(varName, name);
         LOG4FIMEX(logger, Logger::DEBUG, "adding variable attribute to "<< varName << ": " << name);
-        cdm.addAttribute(varName, CDMAttribute(name, string2datatype(type), values));
+        cdm_->addAttribute(varName, CDMAttribute(name, string2datatype(type), values));
     }
 }
 
@@ -207,10 +208,10 @@ void NcmlCDMReader::initVariableNameChange()
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
-        if (cdm.hasVariable(orgName)) {
+        if (cdm_->hasVariable(orgName)) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable with orgName: "+ orgName);
-            cdm.renameVariable(orgName, name);
+            cdm_->renameVariable(orgName, name);
             variableNameChanges[name] = orgName;
         }
     }
@@ -224,10 +225,10 @@ void NcmlCDMReader::initDimensionNameChange()
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
-        if (cdm.hasVariable(orgName)) {
+        if (cdm_->hasVariable(orgName)) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for dimension with orgName: "+ orgName);
-            cdm.renameDimension(orgName, name);
+            cdm_->renameDimension(orgName, name);
         }
     }
 }
@@ -244,8 +245,8 @@ void NcmlCDMReader::initAttributeNameChange()
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for attribute with orgName: "+ orgName);
             try {
-                CDMAttribute& attr = cdm.getAttribute(CDM::globalAttributeNS(), orgName);
-                cdm.removeAttribute(CDM::globalAttributeNS(), name); // remove other attributes with same name
+                CDMAttribute& attr = cdm_->getAttribute(CDM::globalAttributeNS(), orgName);
+                cdm_->removeAttribute(CDM::globalAttributeNS(), name); // remove other attributes with same name
                 attr.setName(name);
             } catch (CDMException ex) {
                 // no such attribute, don't care
@@ -262,8 +263,8 @@ void NcmlCDMReader::initAttributeNameChange()
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for attribute with orgName: "+ orgName);
             try {
-                CDMAttribute& attr = cdm.getAttribute(varName, orgName);
-                cdm.removeAttribute(varName, name); // remove other attributes with same name
+                CDMAttribute& attr = cdm_->getAttribute(varName, orgName);
+                cdm_->removeAttribute(varName, name); // remove other attributes with same name
                 attr.setName(name);
             } catch (CDMException ex) {
                 // no such attribute, don't care
@@ -273,10 +274,10 @@ void NcmlCDMReader::initAttributeNameChange()
 }
 
 
-const boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
     // return unchanged data from this CDM
-    const CDMVariable& variable = cdm.getVariable(varName);
+    const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
@@ -303,13 +304,13 @@ const boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& var
         if (orgCDM.getAttribute(varName, "add_offset", attr)) {
             orgOffset = attr.getData()->asConstDouble()[0];
         }
-        double newFill = cdm.getFillValue(varName);
+        double newFill = cdm_->getFillValue(varName);
         double newScale = 1.;
         double newOffset = 0.;
-        if (cdm.getAttribute(varName, "scale_factor", attr)) {
+        if (cdm_->getAttribute(varName, "scale_factor", attr)) {
             newScale = attr.getData()->asConstDouble()[0];
         }
-        if (cdm.getAttribute(varName, "add_offset", attr)) {
+        if (cdm_->getAttribute(varName, "add_offset", attr)) {
             newOffset = attr.getData()->asConstDouble()[0];
         }
 

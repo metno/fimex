@@ -26,6 +26,7 @@
 #ifdef HAVE_OPENMP
 #include <omp.h>
 #endif
+#include "fimex/CDM.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CachedForwardInterpolation.h"
 #include "fimex/CachedInterpolation.h"
@@ -49,7 +50,7 @@ const int DEBUG = 0;
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
 : dataReader(dataReader), latitudeName("lat"), longitudeName("lon")
 {
-	cdm = dataReader->getCDM();
+	*cdm_ = dataReader->getCDM();
 }
 
 CDMInterpolator::~CDMInterpolator()
@@ -68,9 +69,9 @@ static boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float
 	return boost::shared_ptr<Data>(new DataImpl<float>(iData, size));
 }
 
-const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-	const CDMVariable& variable = cdm.getVariable(varName);
+	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
 		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
@@ -79,7 +80,7 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 		return dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
 		boost::shared_ptr<Data> data = dataReader->getDataSlice(varName, unLimDimPos);
-		double badValue = cdm.getFillValue(varName);
+		double badValue = cdm_->getFillValue(varName);
 		boost::shared_array<float> array = data2InterpolationArray(data, badValue);
 		size_t newSize = 0;
 		boost::shared_array<float> iArray = cachedInterpolation->interpolateValues(array, data->size(), newSize);
@@ -87,7 +88,7 @@ const boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& v
 			// fetch and transpose vector-data
 			// transposing needed once for each direction (or caching, but that needs to much memory)
 			const std::string& counterpart = variable.getSpatialVectorCounterpart();
-			boost::shared_array<float> counterPartArray = data2InterpolationArray(dataReader->getDataSlice(counterpart, unLimDimPos), cdm.getFillValue(counterpart));
+			boost::shared_array<float> counterPartArray = data2InterpolationArray(dataReader->getDataSlice(counterpart, unLimDimPos), cdm_->getFillValue(counterpart));
 			boost::shared_array<float> counterpartiArray = cachedInterpolation->interpolateValues(counterPartArray, data->size(), newSize);
 			const std::string& direction = variable.getSpatialVectorDirection();
 			if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
@@ -125,13 +126,13 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
     SpatialAxisSpec yAxisSpec(out_y_axis);
     if (xAxisSpec.requireStartEnd() || yAxisSpec.requireStartEnd()) {
         // detect the bounding box in the final projection
-        std::vector<std::string> variables = cdm.findVariables("coordinates", ".*");
+        std::vector<std::string> variables = cdm_->findVariables("coordinates", ".*");
         if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
         std::string var = variables[0];
-        std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
+        std::string coordinates = cdm_->getAttribute(var, "coordinates").getStringValue();
         string longitude, latitude;
-        if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
-        const vector<string> dims = cdm.getVariable(latitude).getShape();
+        if (!cdm_->getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
+        const vector<string> dims = cdm_->getVariable(latitude).getShape();
         boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
         size_t latSize = dataReader->getData(latitude)->size();
         boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
@@ -160,7 +161,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
 {
-	cdm = dataReader->getCDM(); // reset previous changes
+	*cdm_ = dataReader->getCDM(); // reset previous changes
 	projectionVariables.assign(0, ""); // reset variables
 	switch (method) {
 	case MIFI_INTERPOL_NEAREST_NEIGHBOR:
@@ -541,32 +542,32 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
     // detect a variable with coordinates axes, the interpolator does not allow for
     // conversion of variable with different dimensions, converting only all variables
     // with the same dimensions/coordinates as the first variable with coordinates
-    std::vector<std::string> variables = cdm.findVariables("coordinates", ".*");
+    std::vector<std::string> variables = cdm_->findVariables("coordinates", ".*");
     if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
     std::string var = variables[0];
-    std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
+    std::string coordinates = cdm_->getAttribute(var, "coordinates").getStringValue();
     string longitude, latitude;
-    if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
-    const vector<string> dims = cdm.getVariable(latitude).getShape();
+    if (!cdm_->getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
+    const vector<string> dims = cdm_->getVariable(latitude).getShape();
     // remove the old coordinates
-    cdm.removeVariable(longitude);
-    cdm.removeVariable(latitude);
+    cdm_->removeVariable(longitude);
+    cdm_->removeVariable(latitude);
 
-    std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
+    std::vector<std::string> gridMappings = cdm_->findVariables("grid_mapping_name", ".*");
     for (size_t i = 0; i < gridMappings.size(); i++) {
         // remove all other projections, those might confuse other programs, i.e. IDV
-        cdm.removeVariable(gridMappings[i]);
+        cdm_->removeVariable(gridMappings[i]);
     }
 
     // mapping all variables with matching orgX/orgY dimensions
     std::map<std::string, std::string> attrs;
     attrs["coordinates"] = coordinates;
-    projectionVariables = cdm.findVariables(attrs, dims);
+    projectionVariables = cdm_->findVariables(attrs, dims);
 
-    size_t orgXDimSize = cdm.getDimension(dims[0]).getLength();
-    size_t orgYDimSize = cdm.getDimension(dims[1]).getLength();
+    size_t orgXDimSize = cdm_->getDimension(dims[0]).getLength();
+    size_t orgYDimSize = cdm_->getDimension(dims[1]).getLength();
 
-    changeCDM(cdm, proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
+    changeCDM(*cdm_.get(), proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
 
     boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
     size_t latSize = dataReader->getData(latitude)->size();
@@ -617,32 +618,32 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 	// detect a variable with coordinates axes, the interpolator does not allow for
 	// conversion of variable with different dimensions, converting only all variables
 	// with the same dimensions/coordinates as the first variable with coordinates
-	std::vector<std::string> variables = cdm.findVariables("coordinates", ".*");
+	std::vector<std::string> variables = cdm_->findVariables("coordinates", ".*");
 	if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
 	std::string var = variables[0];
-	std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
+	std::string coordinates = cdm_->getAttribute(var, "coordinates").getStringValue();
 	string longitude, latitude;
-	if (!cdm.getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
-	const vector<string> dims = cdm.getVariable(latitude).getShape();
+	if (!cdm_->getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
+	const vector<string> dims = cdm_->getVariable(latitude).getShape();
 	// remove the old coordinates
-	cdm.removeVariable(longitude);
-	cdm.removeVariable(latitude);
+	cdm_->removeVariable(longitude);
+	cdm_->removeVariable(latitude);
 
-	std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
+	std::vector<std::string> gridMappings = cdm_->findVariables("grid_mapping_name", ".*");
 	for (size_t i = 0; i < gridMappings.size(); i++) {
 	    // remove all other projections, those might confuse other programs, i.e. IDV
-	    cdm.removeVariable(gridMappings[i]);
+	    cdm_->removeVariable(gridMappings[i]);
 	}
 
 	// mapping all variables with matching orgX/orgY dimensions
 	std::map<std::string, std::string> attrs;
 	attrs["coordinates"] = coordinates;
-	projectionVariables = cdm.findVariables(attrs, dims);
+	projectionVariables = cdm_->findVariables(attrs, dims);
 
-	size_t orgXDimSize = cdm.getDimension(dims[0]).getLength();
-	size_t orgYDimSize = cdm.getDimension(dims[1]).getLength();
+	size_t orgXDimSize = cdm_->getDimension(dims[0]).getLength();
+	size_t orgYDimSize = cdm_->getDimension(dims[1]).getLength();
 
-	changeCDM(cdm, proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
+	changeCDM(*cdm_.get(), proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
 
 	boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
 	size_t latSize = dataReader->getData(latitude)->size();
@@ -717,7 +718,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	std::string orgYAxis;
 	std::string orgXAxisUnits, orgYAxisUnits;
 	try {
-		cdm.getProjectionAndAxesUnits(orgProjection, orgXAxis, orgYAxis, orgXAxisUnits, orgYAxisUnits);
+		cdm_->getProjectionAndAxesUnits(orgProjection, orgXAxis, orgYAxis, orgXAxisUnits, orgYAxisUnits);
 	} catch (CDMException& ex) {
 		throw CDMException(string("unable to get original projection, maybe you should try coordinate interpolation: ") + ex.what());
 	}
@@ -730,10 +731,10 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	}
 	dims.push_back(orgXAxis);
 	dims.push_back(orgYAxis);
-	projectionVariables = cdm.findVariables(attrs, dims);
+	projectionVariables = cdm_->findVariables(attrs, dims);
 
 
-	changeCDM(cdm, proj_input, orgProjection, projectionVariables, orgXAxis, orgYAxis, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
+	changeCDM(*cdm_.get(), proj_input, orgProjection, projectionVariables, orgXAxis, orgYAxis, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
 
 	boost::shared_ptr<Data> orgXAxisVals = dataReader->getData(orgXAxis);
 	boost::shared_ptr<Data >orgYAxisVals = dataReader->getData(orgYAxis);
