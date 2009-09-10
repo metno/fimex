@@ -79,12 +79,12 @@ am__libfimex_la_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc GribFileIndex.cc Logger.cc \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
-	NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	GribApiCDMWriter_Impl2.cc GribFileIndex.cc GridDefinition.cc \
+	Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
+	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
+	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 am_libfimex_la_OBJECTS = interpolation.lo CachedInterpolation.lo \
@@ -94,11 +94,11 @@ am_libfimex_la_OBJECTS = interpolation.lo CachedInterpolation.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMTimeInterpolator.lo \
 	CDMVariable.lo Data.lo DataTypeChanger.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
-	GribApiCDMWriter_Impl2.lo GribFileIndex.lo Logger.lo \
-	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
-	ReplaceStringTimeObject.lo SpatialAxisSpec.lo \
-	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
-	Utils.lo XMLDoc.lo $(am__objects_1)
+	GribApiCDMWriter_Impl2.lo GribFileIndex.lo GridDefinition.lo \
+	Logger.lo NcmlCDMReader.lo Null_CDMWriter.lo \
+	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
+	SpatialAxisSpec.lo TimeLevelDataSliceFetcher.lo TimeUnit.lo \
+	TimeSpec.lo Units.lo Utils.lo XMLDoc.lo $(am__objects_1)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -285,11 +285,11 @@ libfimex_la_SOURCES = interpolation.c CachedInterpolation.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc GribFileIndex.cc Logger.cc \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc $(am__append_5)
+	GribApiCDMWriter_Impl2.cc GribFileIndex.cc GridDefinition.cc \
+	Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
+	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc $(am__append_5)
 all: all-recursive
 
 .SUFFIXES:
@@ -380,6 +380,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_ImplAbstract.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Plo@am__quote@
