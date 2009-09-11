@@ -29,15 +29,29 @@
 
 #include "fimex/binaryConstants.h"
 #include <string>
+#include "boost/shared_ptr.hpp"
 
 namespace MetNoFimex
 {
 
-
+// forward declaration
+struct GridDefImpl;
 
 class GridDefinition
 {
 public:
+    /**
+     *  Use these flags to build an Orientation.
+     *  Left, Upper, Horizontal and not Alternating are defaults and don't require flags.
+     *
+     */
+    enum OrientationFlags {
+        ScanStartRight =    binary<010000000>::value,
+        ScanStartBottom =   binary<001000000>::value,
+        ScanIsVertical =    binary<000100000>::value,
+        /// change direction between succeeding rows (horizontal) or columns (vertical)
+        ScanIsAlternating = binary<000010000>::value
+    };
     // grib2 binary representations
     enum Orientation {
         LeftUpperHorizontal =             binary<000000000>::value,
@@ -60,22 +74,42 @@ public:
     };
 
     GridDefinition();
+    GridDefinition(
+            std::string projDefinition,
+            size_t xSize,
+            size_t ySize,
+            double xIncr,
+            double yIncr,
+            double xStart,
+            double yStart,
+            Orientation orient);
     virtual ~GridDefinition();
     /// return a proj4 string
     virtual std::string getProjDefinition() const;
+    virtual void setProjDefinition(std::string proj);
     /// number of points in x or longitude direction
     virtual size_t getXSize() const;
+    virtual void setXSize(size_t xSize);
     /// number of points in y or latitude direction
     virtual size_t getYSize() const;
+    virtual void setYSize(size_t ySize);
     /// x or longitude increment in m or degree
     virtual double getXIncrement() const;
+    virtual void setXIncrement(double xIncr);
     /// y or latitude increment in m or degree
     virtual double getYIncrement() const;
+    virtual void setYIncrement(double yIncr);
     /// x or longitude start in m or degree
-    virtual double getStartX() const;
+    virtual double getXStart() const;
+    virtual void setXStart(double startX);
     /// y or latitude start in m or degree
-    virtual double getStartY() const;
+    virtual double getYStart() const;
+    virtual void setYStart(double startY);
     virtual Orientation getScanMode() const;
+    virtual void setScanMode(Orientation orient);
+private:
+    boost::shared_ptr<GridDefImpl> gridDef;
+
 };
 
 }

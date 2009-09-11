@@ -56,6 +56,64 @@ void mifi_grib_check(int error, const char* msg, int line, const char* file) thr
 }
 using namespace std;
 
+GridDefinition::Orientation getGridOrientation(boost::shared_ptr<grib_handle> gh)
+{
+    unsigned long mode = 0;
+    long val = 0;
+    long error = 0;
+    error = grib_get_long(gh.get(), "iScansNegatively", &val);
+    if ((error == GRIB_SUCCESS) && val) {
+        mode |= GridDefinition::ScanStartRight;
+    }
+    val = 0;
+    error = grib_get_long(gh.get(), "jScansNegatively", &val);
+    if ((error == GRIB_SUCCESS) && val) {
+            mode |= GridDefinition::ScanStartBottom;
+    }
+    val = 0;
+    error = grib_get_long(gh.get(), "jPointsAreConsecutive", &val);
+    if ((error == GRIB_SUCCESS) && val) {
+        mode |= GridDefinition::ScanIsVertical;
+    }
+    val = 0;
+    error = grib_get_long(gh.get(), "alternativeRowScanning", &val);
+    if ((error == GRIB_SUCCESS) && val) {
+        mode |= GridDefinition::ScanIsAlternating;
+    }
+
+    return static_cast<GridDefinition::Orientation>(mode);
+}
+
+GridDefinition getGridDefRegularLL(boost::shared_ptr<grib_handle> gh)
+{
+    long sizeX, sizeY;
+    double startX, startY, incrX, incrY;
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+
+    // TODO
+    return GridDefinition("ll_proj_string TODO", sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+}
+GridDefinition getGridDefPolarStereographic(boost::shared_ptr<grib_handle> gh)
+{
+    long sizeX, sizeY;
+    double startX, startY, incrX, incrY, startLon, startLat;
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startLon), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startLat), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "xDirectionGridLengthInMetres", &incrX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "yDirectionGridLengthInMetres", &incrY), 0);
+
+    // TODO: proj-string, convert from startLon, startLat to startX, startY
+
+    return GridDefinition("ps_proj_string TODO", sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+}
+
 GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
         long filePos, long msgPos) :
     filePos_(filePos), msgPos_(msgPos)
@@ -63,7 +121,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
     if (gh.get() == 0)
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
 
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "editionNumber", &edition_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "edition", &edition_), 0);
 
     char msg[1024];
     size_t msgLength = 1024;
@@ -72,16 +130,12 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
         gridParmeterIds_ = vector<long> (3, 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParmeterIds_[0]), 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParmeterIds_[1]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "identificationOfOriginatingGeneratingCentre", &gridParmeterIds_[2]), 0);
-        // additional information
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfTypeOfLevel", &levelType_), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "centre", &gridParmeterIds_[2]), 0);
     } else if (edition_ == 2) {
         gridParmeterIds_ = vector<long> (3, 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParmeterIds_[0]), 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterCategory", &gridParmeterIds_[1]), 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "discipline", &gridParmeterIds_[2]), 0);
-        // additional information
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "typeOfFirstFixedSurface", &levelType_), 0);
     } else {
         throw runtime_error("unknown grib version: " + type2string(edition_));
     }
@@ -93,7 +147,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
     } else {
         parameterName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), ",");
     }
-    int shortNameError = grib_get_string(gh.get(), "short_name", msg, &msgLength);
+    int shortNameError = grib_get_string(gh.get(), "shortName", msg, &msgLength);
     if (shortNameError != GRIB_NOT_FOUND) {
         MIFI_GRIB_CHECK(shortNameError, 0);
         shortName_ = msg;
@@ -102,12 +156,29 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
     }
 
 
+    // level
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "levtype", &levelType_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &levelNo_), 0);
     // time
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataTime", &dataTime_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
 
-    // TODO: gridDefinition_
+    // TODO: gridDefinition_, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
+    msgLength = 1024;
+    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
+    string typeOfGrid(msg);
+    // =  regular_ll | reduced_ll | mercator | lambert | polar_stereographic | UTM | simple_polyconic | albers |
+    //        miller | rotated_ll | stretched_ll | stretched_rotated_ll | regular_gg | rotated_gg | stretched_gg | stretched_rotated_gg |
+    //        reduced_gg | sh | rotated_sh | stretched_sh | stretched_rotated_sh | space_view
+    if (typeOfGrid == "regular_ll") {
+        gridDefinition_ = getGridDefRegularLL(gh);
+    } else if (typeOfGrid == "polar_stereographic") {
+        gridDefinition_ = getGridDefPolarStereographic(gh);
+    } else if (typeOfGrid == "rotated_ll") {
+        gridDefinition_ = getGridDefRegularLL(gh); // TODO, switch to rotated!!!
+    } else {
+        throw CDMException("unknown gridType: "+ typeOfGrid);
+    }
 
 }
 
@@ -137,7 +208,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             edition_ = 1;
             xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
             gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "indicatorOfParameter")));
-            gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "gridTablesVersionNo")));
+            gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "gribTablesVersionNo")));
             gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "identificationOfOriginatingGeneratingCentre")));
         } else {
             xpG = doc->getXPathObject(nsPrefix+":grib2", pNode);
@@ -174,19 +245,19 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         }
     }
     {
-       // TODO: gridDefinition not implemented yet fully
         XPathObjPtr xp = doc->getXPathObject(nsPrefix+":gridDefinition", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
-            string projectionName = getXmlProp(lNode, "projectionName");
+            string proj4 = getXmlProp(lNode, "proj4");
             long startX = string2type<long>(getXmlProp(lNode, "startX"));
             long startY = string2type<long>(getXmlProp(lNode, "startY"));
             long sizeX = string2type<long>(getXmlProp(lNode, "sizeX"));
             long sizeY = string2type<long>(getXmlProp(lNode, "sizeY"));
             long incrX = string2type<long>(getXmlProp(lNode, "incrX"));
             long incrY = string2type<long>(getXmlProp(lNode, "incrY"));
-            long scanMode = string2type<long>(getXmlProp(lNode, "scanMode"));
+            GridDefinition::Orientation scanMode = static_cast<GridDefinition::Orientation>(string2type<long>(getXmlProp(lNode, "scanMode")));
+            gridDefinition_ = GridDefinition(proj4, sizeX, sizeY, incrX, incrY, startX, startY, scanMode);
         }
     }
 }
@@ -236,7 +307,7 @@ string GribFileMessage::toString() const
                     "indicatorOfParameter"), xmlCast(type2string(
                     gridParmeterIds_.at(0)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
-                    "gridTablesVersionNo"), xmlCast(type2string(
+                    "gribTablesVersionNo"), xmlCast(type2string(
                     gridParmeterIds_.at(1)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
                     "identificationOfOriginatingGeneratingCentre"), xmlCast(
@@ -275,10 +346,24 @@ string GribFileMessage::toString() const
                 xmlCast(type2string(dataTime_))));
         checkLXML(xmlTextWriterEndElement(writer.get()));
 
-        // gribDefinition
-        checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("gribDefinition")));
-        checkLXML(xmlTextWriterWriteComment(writer.get(), xmlCast(
-                "not implemented yet")));
+        // gridDefinition
+        checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("gridDefinition")));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("proj4"),
+                        xmlCast(gridDefinition_.getProjDefinition())));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("startX"),
+                        xmlCast(type2string(gridDefinition_.getXStart()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("startY"),
+                        xmlCast(type2string(gridDefinition_.getYStart()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("incrX"),
+                        xmlCast(type2string(gridDefinition_.getXIncrement()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("incrY"),
+                        xmlCast(type2string(gridDefinition_.getYIncrement()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("sizeX"),
+                        xmlCast(type2string(gridDefinition_.getXSize()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("sizeY"),
+                        xmlCast(type2string(gridDefinition_.getYSize()))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("scanMode"),
+                        xmlCast(type2string(gridDefinition_.getScanMode()))));
         checkLXML(xmlTextWriterEndElement(writer.get()));
 
         // end the message
@@ -326,13 +411,11 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
             }
         }
     }
-    // TODO
 }
 
 void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
 {
     url_ = "file:"+ gribFilePath.file_string();
-    size_t fsize = boost::filesystem::file_size(gribFilePath);
     boost::shared_ptr<FILE> fh(fopen(gribFilePath.file_string().c_str(), "r"), fclose);
     if (fh.get() == 0) {
         throw runtime_error("cannot open file: " + gribFilePath.file_string());
@@ -358,7 +441,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
                 msgPos++;
                 // don't change lastPos
             }
-                messages_.push_back(GribFileMessage(gh, lastPos, msgPos));
+            messages_.push_back(GribFileMessage(gh, lastPos, msgPos));
         }
     }
 

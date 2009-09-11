@@ -30,6 +30,7 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 #include "fimex/XMLDoc.h"
+#include "fimex/GridDefinition.h"
 
 // forward decl of grib_api
 struct grib_handle;
@@ -59,7 +60,7 @@ private:
     long dataDate_;
     long levelType_;
     long levelNo_;
-    std::string gridDefinition_;
+    GridDefinition gridDefinition_;
 };
 
 class GribFileIndex

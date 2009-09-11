@@ -29,56 +29,124 @@
 namespace MetNoFimex
 {
 
+struct GridDefImpl {
+    std::string projDefinition;
+    size_t xSize;
+    size_t ySize;
+    double xIncr;
+    double yIncr;
+    double xStart;
+    double yStart;
+    GridDefinition::Orientation orientation;
+};
+
+
+
 GridDefinition::GridDefinition()
+: gridDef(new GridDefImpl())
 {
-    // TODO Auto-generated constructor stub
-
+    gridDef->projDefinition = "";
+    gridDef->xSize = 0;
+    gridDef->ySize = 0;
+    gridDef->xIncr = 0.;
+    gridDef->yIncr = 0.;
+    gridDef->xStart = 0.;
+    gridDef->yStart = 0.;
+    gridDef->orientation = GridDefinition::LeftLowerHorizontal;
 }
-
+GridDefinition::GridDefinition(
+        std::string projDefinition,
+        size_t xSize,
+        size_t ySize,
+        double xIncr,
+        double yIncr,
+        double xStart,
+        double yStart,
+        Orientation orient)
+: gridDef(new GridDefImpl())
+{
+            gridDef->projDefinition = projDefinition;
+            gridDef->xSize = xSize;
+            gridDef->ySize = ySize;
+            gridDef->xIncr = xIncr;
+            gridDef->yIncr = yIncr;
+            gridDef->xStart = xStart;
+            gridDef->yStart = yStart;
+            gridDef->orientation = orient;
+}
 GridDefinition::~GridDefinition()
 {
-    // TODO Auto-generated destructor stub
 }
 
 std::string GridDefinition::getProjDefinition() const
 {
-    // TODO Auto-generated destructor stub
-
+    return gridDef->projDefinition;
 }
+void GridDefinition::setProjDefinition(std::string proj)
+{
+    gridDef->projDefinition = proj;
+}
+
+
 size_t GridDefinition::getXSize() const
 {
-    // TODO Auto-generated destructor stub
-
+    return gridDef->xSize;
 }
+void GridDefinition::setXSize(size_t xSize)
+{
+    gridDef->xSize = xSize;
+}
+
 size_t GridDefinition::getYSize() const
 {
-    // TODO Auto-generated destructor stub
+    return gridDef->ySize;
 
+}
+void GridDefinition::setYSize(size_t ySize)
+{
+    gridDef->ySize = ySize;
 }
 double GridDefinition::getXIncrement() const
 {
-    // TODO Auto-generated destructor stub
-
+    return gridDef->xIncr;
+}
+void GridDefinition::setXIncrement(double xIncr)
+{
+    gridDef->xIncr = xIncr;
 }
 double GridDefinition::getYIncrement() const
 {
-    // TODO Auto-generated destructor stub
+    return gridDef->yIncr;
+}
+void GridDefinition::setYIncrement(double yIncr)
+{
+    gridDef->yIncr = yIncr;
+}
+double GridDefinition::getXStart() const
+{
+    return gridDef->xStart;
 
 }
-double GridDefinition::getStartX() const
+void GridDefinition::setXStart(double xStart)
 {
-    // TODO Auto-generated destructor stub
+    gridDef->xStart = xStart;
+}
+double GridDefinition::getYStart() const
+{
+    return gridDef->yStart;
 
 }
-double GridDefinition::getStartY() const
+void GridDefinition::setYStart(double yStart)
 {
-    // TODO Auto-generated destructor stub
-
+    gridDef->yStart = yStart;
 }
 GridDefinition::Orientation GridDefinition::getScanMode() const
 {
-    // TODO Auto-generated destructor stub
-
+    return gridDef->orientation;
+}
+void GridDefinition::setScanMode(Orientation orient)
+{
+    gridDef->orientation = orient;
 }
 
 

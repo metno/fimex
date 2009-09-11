@@ -47,7 +47,7 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 void
 indexGrib(const fs::path& input, const fs::path& output, bool force)
 {
-    MetNoFimex::GribFileIndex gfi(input, false);
+    MetNoFimex::GribFileIndex gfi(input, force);
     fs::ofstream os(output);
     os << gfi;
     os.close();

@@ -5,7 +5,7 @@
         <parameter name="" short_name="">
             <!-- for grib-edition 1 --> 
             <!-- identificationOfOriginatingGeneratingCentre optional -->
-            <grib1 indicatorOfParameter="80" gridTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+            <grib1 indicatorOfParameter="80" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
             <!-- for grib-edition2
                 <grib2 discipline="10" parameterCategory="3" parameterNumber="0"/>
             -->
