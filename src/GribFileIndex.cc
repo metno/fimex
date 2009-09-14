@@ -29,6 +29,7 @@
 #include "fimex/GribFileIndex.h"
 #include "fimex/Utils.h"
 #include "grib_api.h"
+#include "proj_api.h"
 #include <stdexcept>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -55,6 +56,40 @@ void mifi_grib_check(int error, const char* msg, int line, const char* file) thr
     }
 }
 using namespace std;
+
+/**
+ * converts a point on earth to a projection plane
+ * @param projStr projection definition for proj4
+ * @param lon longitude in degree
+ * @param lat latitutde in degree
+ * @param x output of proj (usually m, but dependent on projStr)
+ * @param y output of proj
+ * @throws runtime_error on proj-failure
+ */
+static void projConvert(const std::string& projStr, double lon, double lat, double& x, double& y)
+{
+    projPJ outputPJ;
+    if ( !(outputPJ = pj_init_plus(projStr.c_str())) ) {
+        std::string errorMsg(pj_strerrno(pj_errno));
+        throw std::runtime_error("Proj error: " + errorMsg);
+    }
+
+    projUV uv;
+    uv.u = lon * DEG_TO_RAD;
+    uv.v = lat * DEG_TO_RAD;
+
+    uv = pj_fwd(uv, outputPJ);
+    pj_free(outputPJ);
+
+    if (uv.u == HUGE_VAL) {
+        std::ostringstream errMsg;
+        errMsg <<  "projection fails:" << projStr << " (lon,lat)=(" << lon << "," << lat << ")";
+        throw std::runtime_error(errMsg.str());
+    }
+    x = uv.u;
+    y = uv.v;
+}
+
 
 GridDefinition::Orientation getGridOrientation(boost::shared_ptr<grib_handle> gh)
 {
@@ -83,22 +118,122 @@ GridDefinition::Orientation getGridOrientation(boost::shared_ptr<grib_handle> gh
 
     return static_cast<GridDefinition::Orientation>(mode);
 }
-
-GridDefinition getGridDefRegularLL(boost::shared_ptr<grib_handle> gh)
+std::string getEarthsOblateFigure(boost::shared_ptr<grib_handle> gh, long factorToM)
 {
-    long sizeX, sizeY;
+    long majorFactor, minorFactor;
+    double majorValue, minorValue;
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "scaleFactorOfMajorAxisOfOblateSpheroidEarth", &majorFactor), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "scaledValueOfMajorAxisOfOblateSpheroidEarth", &majorValue), 0);
+    while (majorFactor > 0) {majorValue *= 10; majorFactor--;}
+    while (majorFactor < 0) {majorValue /= 10; majorFactor++;}
+    // transfer km to m
+    majorFactor *= factorToM;
+
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "scaleFactorOfMinorAxisOfOblateSpheroidEarth", &majorFactor), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "scaledValueOfMinorAxisOfOblateSpheroidEarth", &majorValue), 0);
+    while (minorFactor > 0) {minorValue *= 10; minorFactor--;}
+    while (minorFactor < 0) {minorValue /= 10; minorFactor++;}
+    // transfer (km|m) to m
+    minorFactor *= factorToM;
+
+    return "+a=" + type2string(majorValue) + " +b=" + type2string(minorValue);
+}
+
+std::string getEarthsSphericalFigure(boost::shared_ptr<grib_handle> gh)
+{
+    double radius;
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "radiusInMetres", &radius), 0);
+    return "+a=" + type2string(radius) + " +e=0";
+}
+
+std::string getEarthsFigure(long edition, boost::shared_ptr<grib_handle> gh)
+{
+    // earth specific parameters, depending on grib-edition
+    string earth;
+    if (edition == 1) {
+        long earthIsOblate;
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "earthIsOblate", &earthIsOblate), 0);
+        if (earthIsOblate == 0) {
+            earth = "+a=6367470 +e=0"; // sphere
+        } else {
+            earth = "+a=6378160 +b=6356775"; // oblate, maybe more or better defined in grib2???
+        }
+    } else {
+        long shapeOfTheEarth;
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "shapeOfTheEarth", &shapeOfTheEarth), 0);
+        switch (shapeOfTheEarth) { // see code table 3.2
+            case 0: earth = "+a=6367470 +e=0"; break;
+            case 1: earth = getEarthsSphericalFigure(gh); break;
+            case 2: earth = "+a=6378160 +b=6356775"; break;
+            case 3: earth = getEarthsOblateFigure(gh, 1000); break;// number in km
+            case 4: earth = "+a=6378137 +b=6356752.314"; break;
+            case 5: earth = "+a=6378137 +b=6356752.314245"; break;// WGS84
+            case 6: earth = "+a=6371229"; break;
+            case 7: earth = getEarthsOblateFigure(gh, 1); break;// numbers in m
+            case 8: earth = "+a=6371200 +e=0"; break;// TODO: definition not fully understood
+            default: throw CDMException("undefined shape of the earth: " + type2string(shapeOfTheEarth));
+        }
+    }
+    return earth;
+}
+
+GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> gh)
+{
+    long sizeX, sizeY, ijDirectionIncrementGiven;
     double startX, startY, incrX, incrY;
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startX), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
 
-    // TODO
-    return GridDefinition("ll_proj_string TODO", sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
+    if (ijDirectionIncrementGiven == 0) {
+        double endX, endY;
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
+        incrX = (endX - startX) / sizeX;
+        incrY = (endY - startY) / sizeY;
+    } else {
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+    }
+
+    string proj = "+proj=longlat " + getEarthsFigure(edition, gh);
+
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
 }
-GridDefinition getGridDefPolarStereographic(boost::shared_ptr<grib_handle> gh)
+GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> gh)
+{
+    long sizeX, sizeY, ijDirectionIncrementGiven;
+    double startX, startY, incrX, incrY, latRot, lonRot;
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfSouthernPoleInDegrees", &lonRot), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfSouthernPoleInDegrees", &latRot), 0);
+
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
+    if (ijDirectionIncrementGiven == 0) {
+        double endX, endY;
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
+        incrX = (endX - startX) / sizeX;
+        incrY = (endY - startY) / sizeY;
+    } else {
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+    }
+
+    // TODO: test, might be rotation by lat/long = 180degree
+    ostringstream oss;
+    oss << "+proj=ob_tran +o_proj=longlat +lon_0=" << (lonRot) << " +o_lat_p=" << (-1 * latRot);
+    oss << " " + getEarthsFigure(edition, gh);
+    string proj =  oss.str();
+
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+}
+GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib_handle> gh)
 {
     long sizeX, sizeY;
     double startX, startY, incrX, incrY, startLon, startLat;
@@ -109,9 +244,33 @@ GridDefinition getGridDefPolarStereographic(boost::shared_ptr<grib_handle> gh)
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "xDirectionGridLengthInMetres", &incrX), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "yDirectionGridLengthInMetres", &incrY), 0);
 
-    // TODO: proj-string, convert from startLon, startLat to startX, startY
 
-    return GridDefinition("ps_proj_string TODO", sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+    long projectionCentreFlag;
+    double orientationOfGrid, lat0, lat_ts;
+    string earth;
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "orientationOfTheGridInDegrees", &orientationOfGrid), 0);
+    if (edition == 1) {
+        // MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", &lat_ts), 0); // defined in grib-api > 1.6 to 60
+        lat_ts = 60.;
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "projectionCenterFlag", &projectionCentreFlag), 0); // changed to centre in grib-api > 1.8
+    } else {
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", &lat_ts), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "projectionCentreFlag", &projectionCentreFlag), 0);
+    }
+    if (projectionCentreFlag == 0) {
+        lat0 = 90.; // northpole
+    } else {
+        lat0 = -90.; // southpole
+    }
+    ostringstream oss;
+    oss << "+proj=stere +lat_0="<<lat0 << " +lon_0="<< orientationOfGrid << " +lat_ts=" << lat_ts << " ";
+    oss << getEarthsFigure(edition, gh);
+    string proj = oss.str();
+
+    // calculate startX and startY from lat/lon
+    projConvert(proj, startLon, startLat, startX, startY);
+
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
 }
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
@@ -163,7 +322,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
 
-    // TODO: gridDefinition_, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
+    // TODO: more definitions, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
     string typeOfGrid(msg);
@@ -171,11 +330,11 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
     //        miller | rotated_ll | stretched_ll | stretched_rotated_ll | regular_gg | rotated_gg | stretched_gg | stretched_rotated_gg |
     //        reduced_gg | sh | rotated_sh | stretched_sh | stretched_rotated_sh | space_view
     if (typeOfGrid == "regular_ll") {
-        gridDefinition_ = getGridDefRegularLL(gh);
+        gridDefinition_ = getGridDefRegularLL(edition_, gh);
     } else if (typeOfGrid == "polar_stereographic") {
-        gridDefinition_ = getGridDefPolarStereographic(gh);
+        gridDefinition_ = getGridDefPolarStereographic(edition_, gh);
     } else if (typeOfGrid == "rotated_ll") {
-        gridDefinition_ = getGridDefRegularLL(gh); // TODO, switch to rotated!!!
+        gridDefinition_ = getGridDefRotatedLL(edition_, gh); // TODO, switch to rotated!!!
     } else {
         throw CDMException("unknown gridType: "+ typeOfGrid);
     }
