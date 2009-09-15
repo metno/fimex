@@ -27,39 +27,39 @@
 #ifndef GRIBCDMREADER_H_
 #define GRIBCDMREADER_H_
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-#include "CDMReader.h"
 #include <vector>
+#include <map>
 #include "boost/shared_ptr.hpp"
+#include "fimex/GribFileIndex.h"
+#include "fimex/CDMReader.h"
 
 namespace MetNoFimex
 {
 
 // forward decl.
 class CDM;
+class CDMDimension;
+class Data;
 
 class GribCDMReader: public MetNoFimex::CDMReader
 {
 public:
-    GribCDMReader(std::vector<std::string> fileNames, std::string configFile);
+    GribCDMReader(const std::vector<std::string>& fileNames, const std::string& configFile);
     virtual ~GribCDMReader();
-
-    virtual const boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
 
 private:
     std::string configFile_;
-    std::vector<GribFileIndex> indices_;
+    std::vector<GribFileMessage> indices_;
+    boost::shared_ptr<XMLDoc> doc_;
+    void initAddGlobalAttributes();
+    std::map<long, CDMDimension> initAddLevelDimensions();
+    CDMDimension initAddTimeDimension();
+    void initAddProjection(std::string& projName, std::string& coordinates);
+    void initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<long, CDMDimension>& levelDims);
 
 };
 
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* GRIBCDMREADER_H_ */

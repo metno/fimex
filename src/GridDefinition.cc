@@ -24,7 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#include "../include/fimex/GridDefinition.h"
+#include "fimex/GridDefinition.h"
+#include <cmath>
 
 namespace MetNoFimex
 {
@@ -149,6 +150,21 @@ void GridDefinition::setScanMode(Orientation orient)
     gridDef->orientation = orient;
 }
 
+
+static bool deltaCompare(double a, double b, double delta)
+{
+    return (a == 0) ? (fabs(b) <= delta) : (fabs(1-b/a) <= delta);
+}
+bool GridDefinition::comparableTo(const GridDefinition& rhs, double delta) const
+{
+    if (gridDef->xSize != rhs.gridDef->xSize) return false;
+    if (gridDef->ySize != rhs.gridDef->ySize) return false;
+    if (!deltaCompare(gridDef->xIncr, rhs.gridDef->xIncr, delta)) return false;
+    if (!deltaCompare(gridDef->yIncr, rhs.gridDef->yIncr, delta)) return false;
+    if (!deltaCompare(gridDef->xStart, rhs.gridDef->xStart, delta)) return false;
+    if (!deltaCompare(gridDef->yStart, rhs.gridDef->yStart, delta)) return false;
+    return true;
+}
 
 
 }

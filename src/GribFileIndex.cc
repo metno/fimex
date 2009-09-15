@@ -32,6 +32,7 @@
 #include "proj_api.h"
 #include <stdexcept>
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <libxml/xmlwriter.h>
 #include <cstdlib>
@@ -129,8 +130,8 @@ std::string getEarthsOblateFigure(boost::shared_ptr<grib_handle> gh, long factor
     // transfer km to m
     majorFactor *= factorToM;
 
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "scaleFactorOfMinorAxisOfOblateSpheroidEarth", &majorFactor), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "scaledValueOfMinorAxisOfOblateSpheroidEarth", &majorValue), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "scaleFactorOfMinorAxisOfOblateSpheroidEarth", &minorFactor), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "scaledValueOfMinorAxisOfOblateSpheroidEarth", &minorValue), 0);
     while (minorFactor > 0) {minorValue *= 10; minorFactor--;}
     while (minorFactor < 0) {minorValue /= 10; minorFactor++;}
     // transfer (km|m) to m
@@ -273,9 +274,8 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
-        long filePos, long msgPos) :
-    filePos_(filePos), msgPos_(msgPos)
+GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos)
+: fileURL_(fileURL), filePos_(filePos), msgPos_(msgPos)
 {
     if (gh.get() == 0)
         throw runtime_error("GribFileMessage initialized with NULL-ptr");
@@ -343,6 +343,10 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh,
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix, xmlNodePtr node)
 {
+    string fileURL_ = getXmlProp(node, "fileURL");
+    if (fileURL_ == "") {
+        throw runtime_error("could not find fileURL for node");
+    }
     string posStr = getXmlProp(node, "seekPos");
     if (posStr == "") {
         throw runtime_error("could not find seekPos for node");
@@ -442,6 +446,56 @@ static const xmlChar* xmlCast(const std::string& msg)
     return reinterpret_cast<const xmlChar*> (msg.c_str());
 }
 
+const std::string& GribFileMessage::getFileURL()
+{
+    return fileURL_;
+}
+const size_t GribFileMessage::getFilePosition()
+{
+    return filePos_;
+}
+/// messages number within a multi-message
+const size_t GribFileMessage::getMessageNumber()
+{
+    return msgPos_;
+}
+const std::string& GribFileMessage::getName()
+{
+    return parameterName_;
+}
+const std::string& GribFileMessage::getShortName()
+{
+    return shortName_;
+}
+boost::posix_time::ptime GribFileMessage::getDateTime() const
+{
+    long year = dataDate_ / 10000;
+    long month = (dataDate_ - year*10000) / 100;
+    long day = dataDate_ - (year*10000 + month) * 100;
+
+    long hour = dataTime_ / 100;
+    long minutes = dataTime_ % 100;
+
+    boost::gregorian::date date(year, month, day);
+    boost::posix_time::time_duration clock(hour, minutes, 0);
+    return boost::posix_time::ptime(date, clock);
+}
+long GribFileMessage::getLevelNumber() const
+{
+    return levelNo_;
+}
+long GribFileMessage::getLevelType() const
+{
+    return levelType_;
+}
+
+
+const GridDefinition& GribFileMessage::getGridDefinition() const
+{
+    return gridDefinition_;
+}
+
+
 string GribFileMessage::toString() const
 {
 #if defined(LIBXML_WRITER_ENABLED)
@@ -454,6 +508,8 @@ string GribFileMessage::toString() const
                 xmlFreeTextWriter);
 
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("gribMessage")));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("url"),
+                xmlCast(fileURL_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("seekPos"),
                 xmlCast(type2string(filePos_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("messagePos"),
@@ -600,7 +656,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
                 msgPos++;
                 // don't change lastPos
             }
-            messages_.push_back(GribFileMessage(gh, lastPos, msgPos));
+            messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos));
         }
     }
 

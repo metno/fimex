@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <gribFileIndex url="" xmlns="http://www.met.no/schema/fimex/gribFileIndex">
-    <gribMessage seekPos="0" messagePos="0">
+    <gribMessage seekPos="0" messagePos="0" url="file:/absolut/path/to/gribFile">
         <parameter name="" short_name="">
             <!-- for grib-edition 1 --> 
             <!-- identificationOfOriginatingGeneratingCentre optional -->

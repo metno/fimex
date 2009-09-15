@@ -107,6 +107,17 @@ public:
     virtual void setYStart(double startY);
     virtual Orientation getScanMode() const;
     virtual void setScanMode(Orientation orient);
+
+    /**
+     * Compare two GridDefinitions. They are comparable if they have
+     * \li same size(XY)
+     * \li same incr(XY) within the delta
+     * \li same start(XY) within the delta
+     *
+     * @param rhs the other gridDefinition
+     * @param delta the relative delta to compare to (a == 0) ? (abs(b) <= delta) : abs((b-a)/a) <= delta
+     */
+    virtual bool comparableTo(const GridDefinition& rhs, double delta = 0.) const;
 private:
     boost::shared_ptr<GridDefImpl> gridDef;
 

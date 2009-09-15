@@ -31,6 +31,7 @@
 #include <vector>
 #include "fimex/XMLDoc.h"
 #include "fimex/GridDefinition.h"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 // forward decl of grib_api
 struct grib_handle;
@@ -42,12 +43,24 @@ class GribFileMessage
 {
 public:
     GribFileMessage();
-    GribFileMessage(boost::shared_ptr<grib_handle> gh, long filePos, long msgPos);
+    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos);
     GribFileMessage(boost::shared_ptr<XMLDoc>, std::string nsPrefix, xmlNodePtr node);
     ~GribFileMessage();
     /// give a xml-string representation
     std::string toString() const;
+    /// accessors
+    const std::string& getFileURL();
+    const size_t getFilePosition();
+    /// messages number within a multi-message
+    const size_t getMessageNumber();
+    const std::string& getName();
+    const std::string& getShortName();
+    boost::posix_time::ptime getDateTime() const;
+    long getLevelNumber() const;
+    long getLevelType() const;
+    const GridDefinition& getGridDefinition() const;
 private:
+    std::string fileURL_;
     size_t filePos_;
     size_t msgPos_; // for multiMessages: multimessages
     std::string parameterName_;
@@ -87,9 +100,9 @@ private:
 };
 
 /// outputstream for a GribFileMessage
-std::ostream& operator<<( std::ostream& os, const GribFileMessage& gfm);
+std::ostream& operator<<(std::ostream& os, const GribFileMessage& gfm);
 /// outputstream for a GribFileIndex
-std::ostream& operator<<( std::ostream& os, const GribFileIndex& gfm);
+std::ostream& operator<<(std::ostream& os, const GribFileIndex& gfm);
 
 
 }

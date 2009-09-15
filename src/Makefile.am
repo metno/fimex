@@ -40,6 +40,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 GribApiCDMWriter_ImplAbstract.cc \
 					 GribApiCDMWriter_Impl1.cc \
 					 GribApiCDMWriter_Impl2.cc \
+					 GribCDMReader.cc \
 					 GribFileIndex.cc \
 					 GridDefinition.cc \
 					 Logger.cc \
