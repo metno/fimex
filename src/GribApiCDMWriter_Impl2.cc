@@ -286,7 +286,7 @@ void GribApiCDMWriter_Impl2::setLevel(const std::string& varName, double levelVa
 	if (size == 1) {
 		xmlNodePtr node = nodes->nodeTab[0];
 		std::string levelId = getXmlProp(node, "id");
-		GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfTypeOfLevel", string2type<long>(levelId)),"setting levelId");
+		GRIB_CHECK(grib_set_long(gribHandle.get(), "levelType", string2type<long>(levelId)),("setting levelId "+levelId).c_str());
 	} else if (size > 1) {
 		throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
 	} else {
