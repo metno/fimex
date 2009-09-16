@@ -68,12 +68,13 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfimex_felt_la_LIBADD =
 am__libfimex_felt_la_SOURCES_DIST = FeltCDMReader2.cc Felt_Array2.cc \
-	Felt_File2.cc FeltParameters.cc FeltCDMReader.cc Felt_Array.cc \
-	Felt_File.cc
+	Felt_File2.cc FeltParameters.cc CDM_XMLConfigHelper.cc \
+	FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_MILIB_TRUE@am__objects_1 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
 am_libfimex_felt_la_OBJECTS = FeltCDMReader2.lo Felt_Array2.lo \
-	Felt_File2.lo FeltParameters.lo $(am__objects_1)
+	Felt_File2.lo FeltParameters.lo CDM_XMLConfigHelper.lo \
+	$(am__objects_1)
 libfimex_felt_la_OBJECTS = $(am_libfimex_felt_la_OBJECTS)
 libfimex_felt_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -229,7 +230,8 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} 
 lib_LTLIBRARIES = libfimex_felt.la
 libfimex_felt_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION)
 libfimex_felt_la_SOURCES = FeltCDMReader2.cc Felt_Array2.cc \
-	Felt_File2.cc FeltParameters.cc $(am__append_1)
+	Felt_File2.cc FeltParameters.cc CDM_XMLConfigHelper.cc \
+	$(am__append_1)
 all: all-am
 
 .SUFFIXES:
@@ -299,6 +301,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM_XMLConfigHelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltParameters.Plo@am__quote@

@@ -58,6 +58,7 @@ public:
     boost::posix_time::ptime getDateTime() const;
     long getLevelNumber() const;
     long getLevelType() const;
+    const std::string& getTypeOfGrid() const;
     const GridDefinition& getGridDefinition() const;
 private:
     std::string fileURL_;
@@ -73,6 +74,7 @@ private:
     long dataDate_;
     long levelType_;
     long levelNo_;
+    std::string typeOfGrid_;
     GridDefinition gridDefinition_;
 };
 

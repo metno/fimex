@@ -325,18 +325,18 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     // TODO: more definitions, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
-    string typeOfGrid(msg);
+    typeOfGrid_ = msg;
     // =  regular_ll | reduced_ll | mercator | lambert | polar_stereographic | UTM | simple_polyconic | albers |
     //        miller | rotated_ll | stretched_ll | stretched_rotated_ll | regular_gg | rotated_gg | stretched_gg | stretched_rotated_gg |
     //        reduced_gg | sh | rotated_sh | stretched_sh | stretched_rotated_sh | space_view
-    if (typeOfGrid == "regular_ll") {
+    if (typeOfGrid_ == "regular_ll") {
         gridDefinition_ = getGridDefRegularLL(edition_, gh);
-    } else if (typeOfGrid == "polar_stereographic") {
+    } else if (typeOfGrid_ == "polar_stereographic") {
         gridDefinition_ = getGridDefPolarStereographic(edition_, gh);
-    } else if (typeOfGrid == "rotated_ll") {
+    } else if (typeOfGrid_ == "rotated_ll") {
         gridDefinition_ = getGridDefRotatedLL(edition_, gh); // TODO, switch to rotated!!!
     } else {
-        throw CDMException("unknown gridType: "+ typeOfGrid);
+        throw CDMException("unknown gridType: "+ typeOfGrid_);
     }
 
 }
@@ -407,6 +407,16 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
         }
     }
+    {
+        // typeOfGrid
+        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":typeOfGrid", node);
+        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
+        if (size > 0) {
+            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+            typeOfGrid_ = getXmlProp(lNode, "name");
+        }
+    }
+
     {
         XPathObjPtr xp = doc->getXPathObject(nsPrefix+":gridDefinition", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
@@ -489,6 +499,10 @@ long GribFileMessage::getLevelType() const
     return levelType_;
 }
 
+const std::string& GribFileMessage::getTypeOfGrid() const
+{
+    return typeOfGrid_;
+}
 
 const GridDefinition& GribFileMessage::getGridDefinition() const
 {
@@ -559,6 +573,12 @@ string GribFileMessage::toString() const
                 xmlCast(type2string(dataDate_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("dataTime"),
                 xmlCast(type2string(dataTime_))));
+        checkLXML(xmlTextWriterEndElement(writer.get()));
+
+        // typeOfGrid
+        checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("typeOfGrid")));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("name"),
+                xmlCast(typeOfGrid_)));
         checkLXML(xmlTextWriterEndElement(writer.get()));
 
         // gridDefinition

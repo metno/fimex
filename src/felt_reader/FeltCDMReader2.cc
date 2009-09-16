@@ -33,13 +33,11 @@
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/CDM_XMLConfigHelper.h"
 #include "felt/FeltGridDefinition.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
-#include <libxml/xinclude.h>
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 #include <sstream>
 #include <iostream>
 #include <cassert>
@@ -51,77 +49,6 @@ namespace MetNoFimex
 
 using namespace std;
 using namespace MetNoFelt;
-
-static string replaceTemplateAttribute(string value, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) {
-	for (map<string, boost::shared_ptr<ReplaceStringObject> >::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
-		boost::smatch matches;
-		boost::regex rgx(boost::regex(".*%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%.*"));
-		if (boost::regex_match(value, matches, rgx)) {
-			boost::shared_ptr<ReplaceStringObject> rso = it->second;
-			if (matches.size() > 2) {
-				std::vector<std::string> options;
-				if (matches.size() > 3) {
-					options = tokenize(matches[3], ",");
-				}
-				// values within the inner brackets
-				rso->setFormatStringAndOptions(matches[2], options);
-			}
-			stringstream ss;
-			rso->put(ss);
-			value = boost::regex_replace(value, rgx, ss.str());
-		}
-	}
-	return value;
-}
-
-/**
- * read all <attribute .../> subnodes of this node and add them to attributes, replace values by templateReplacements as needed
- */
-static void fillAttributeList(vector<CDMAttribute>& attributes, const xmlNodePtr node, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) {
-	if (node == 0) return;
-	if ((node->type == XML_ELEMENT_NODE) &&
-		(string("attribute") == reinterpret_cast<const char *>(node->name))) {
-			string name = getXmlProp(node, "name");
-			string value = getXmlProp(node, "value");
-			string type = getXmlProp(node, "type");
-
-			value = replaceTemplateAttribute(value, templateReplacements);
-			attributes.push_back(CDMAttribute(name,type,value));
-	}
-	fillAttributeList(attributes, node->next, templateReplacements);
-}
-
-/**
- * read a xml-node retrieved by the xpathString and extract the nodes attributes and all <attributes> sub-elements with name, value and type
- *
- * @param doc the document to read from
- * @param xpathString the string leading to the node
- * @param xmlAttributes returns all attributes of the first node matched
- * @param varAttributes returns all <attribute .../> sub elements of this node
- * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
- * @return number of nodes matched (only the first has been read)
- */
-static int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(CDMException)
-{
-	XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	int size = (nodes) ? nodes->nodeNr : 0;
-	if (size == 0) return 0;
-	// only parsing node[0]
-	xmlNodePtr node = nodes->nodeTab[0];
-	if (node->type != XML_ELEMENT_NODE) {
-		throw CDMException("xpath does not point to XML_ELEMENT_NODE: " + xpathString);
-	}
-	xmlAttrPtr attr = node->properties;
-	while (attr != 0) {
-		string name(reinterpret_cast<const char *>(attr->name));
-		string value(reinterpret_cast<const char *>(attr->children->content));
-		xmlAttributes[name] = value;
-		attr = attr->next;
-	}
-	fillAttributeList(varAttributes, node->children, templateReplacements);
-	return size;
-}
 
 std::vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath)
 {
@@ -222,7 +149,7 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 
 			// add the attributes of the extra variables
 			std::vector<CDMAttribute> attributes;
-			fillAttributeList(attributes, node->children, templateReplacements);
+			fillAttributeListFromXMLNode(attributes, node->children, templateReplacements);
 			for (std::vector<CDMAttribute>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
 				cdm_->addAttribute(name, *it);
 			}
@@ -341,7 +268,7 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 		xmlNodePtr node = nodes->nodeTab[i];
 		assert(node->type == XML_ELEMENT_NODE);
 		std::vector<CDMAttribute> globAttributes;
-		fillAttributeList(globAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
+		fillAttributeListFromXMLNode(globAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 		for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
 			cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
 		}
@@ -379,7 +306,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	timeVar.setData(timeData);
 	cdm_->addVariable(timeVar);
 	std::vector<CDMAttribute> timeAttributes;
-	fillAttributeList(timeAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
+	fillAttributeListFromXMLNode(timeAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 	for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
 		cdm_->addAttribute(timeVar.getName(), *it);
 	}
@@ -419,7 +346,7 @@ std::map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(cons
 
 		// add attributes
 		std::vector<CDMAttribute> levelAttributes;
-		fillAttributeList(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
+		fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
 		for (std::vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
 			cdm_->addAttribute(levelVar.getName(), *ait);
 		}
@@ -558,7 +485,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
     		assert(nodes->nodeTab[0]->type == XML_ELEMENT_NODE);
     		std::string varName = getXmlProp(nodes->nodeTab[0], "name");
     		std::vector<CDMAttribute> attributes;
-    		fillAttributeList(attributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
+    		fillAttributeListFromXMLNode(attributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
     		// add the projection
     		attributes.push_back(CDMAttribute("grid_mapping",projName));
     		if (coordinates != "") {

@@ -12,6 +12,7 @@
         </parameter>
         <level type="" no="" />
         <time dataDate="20080206" dataTime="1200" /> <!-- YYYYMMDD HHMM format -->
+        <typeOfGrid value="regular_ll" />
         <gridDefinition proj4="" startX="" startY="" sizeX="" sizeY="" incrX="" incrY="" scanMode="" />
     </gribMessage>
     <!-- and so on 

@@ -28,7 +28,9 @@
 #include "fimex/GribCDMReader.h"
 #include "fimex/GridDefinition.h"
 #include "fimex/GribFileIndex.h"
+#include "fimex/XMLDoc.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
 #include <algorithm>
 #include <map>
 #include <set>
@@ -44,6 +46,13 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     : configFile_(configFile)
 {
     doc_ = boost::shared_ptr<XMLDoc>(new XMLDoc(configFile_));
+    doc_->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
+    {
+        // check config for root element
+        XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig");
+        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
+        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + configFile);
+    }
 
 
     for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
@@ -56,10 +65,20 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     // search indices for params with same gridDefinition (size,start,incr)
     if (indices_.size() == 0) return;
 
+    double gridDefinitionDelta = 0.01;
+    {
+        // check config for root element
+        XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[name='gridDefinitionDelta']");
+        size_t size = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
+        if (size > 0) {
+            gridDefinitionDelta = string2type<double>(getXmlProp(xpathObj->nodesetval->nodeTab[0], "value"));
+        }
+    }
+
     GridDefinition gd = indices_.at(0).getGridDefinition();
     vector<GribFileMessage> newIndices;
     for (vector<GribFileMessage>::const_iterator gfmIt = indices_.begin(); gfmIt != indices_.end(); ++gfmIt) {
-        if (gd.comparableTo(gfmIt->getGridDefinition(), 0.1)) {
+        if (gd.comparableTo(gfmIt->getGridDefinition(), gridDefinitionDelta)) {
             newIndices.push_back(*gfmIt);
         } else {
             LOG4FIMEX(logger, Logger::INFO, "different gridDefinitions between " << indices_.at(0) << " and " << *gfmIt);
