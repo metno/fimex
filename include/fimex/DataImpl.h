@@ -124,7 +124,6 @@ namespace MetNoFimex
 	 * @brief create a Data-pointer of the datatype and fill with the data from the iterator
 	 * 
 	 * @param datatype
-	 * @param size_t length of the data array
 	 * @param first start of container containing the data to fill the array with
 	 * @param last end (excluded) of the container containing the data to fill the array with
 	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
