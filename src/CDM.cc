@@ -614,9 +614,9 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	xyDims.push_back(xDim);
 	xyDims.push_back(yDim);
 	CDMVariable lonVar(lonDim, CDM_DOUBLE, xyDims);
-	lonVar.setData(createData(CDM_DOUBLE, fieldSize, &longVal[0], &longVal[fieldSize]));
+	lonVar.setData(createData(CDM_DOUBLE, &longVal[0], &longVal[fieldSize]));
 	CDMVariable latVar(latDim, CDM_DOUBLE, xyDims);
-	latVar.setData(createData(CDM_DOUBLE, fieldSize, &latVal[0], &latVal[fieldSize]));
+	latVar.setData(createData(CDM_DOUBLE, &latVal[0], &latVal[fieldSize]));
 	addVariable(lonVar);
 	addVariable(latVar);
 	// add the coordinate attributes

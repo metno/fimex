@@ -29,6 +29,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <iterator>
 #include <cmath>
 #include "fimex/Data.h"
 #include "fimex/CDMDataType.h"
@@ -129,7 +130,7 @@ namespace MetNoFimex
 	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
 	 */
 	template<class InputIterator>
-	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException);
+	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) throw(CDMException);
 	
 	// below follow implementations of templates
 	// (template definitions should be in header files (depending on compiler))
@@ -308,7 +309,8 @@ namespace MetNoFimex
 	}
 
 	template<class InputIterator>
-	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, InputIterator first, InputIterator last) throw(CDMException) {
+	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) throw(CDMException) {
+	    size_t length = std::distance(first, last);
 		switch (datatype) {
 			case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > data(new DataImpl<double>(length)); data->setValues(first, last); return data; }  
 			case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > data(new DataImpl<float>(length));   data->setValues(first, last); return data; }

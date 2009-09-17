@@ -31,8 +31,8 @@ namespace MetNoFimex
 Data::~Data() {}
 
 boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException) {
-	int i = 0; // used as 0 InputIterator for first and last
-	return createData(datatype, length, &i, &i);
+	std::vector<short> v(length, 0);
+	return createData(datatype, v.begin(), v.end());
 }
 
 boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length) throw(CDMException)  {

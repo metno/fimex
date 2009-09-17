@@ -167,7 +167,7 @@ template<typename T>
 void CDMAttribute::initDataArray(const std::vector<std::string>& values) {
     std::vector<T> vec;
     std::transform(values.begin(), values.end(), std::back_inserter(vec), &string2type<T>);
-    data = createData(datatype, values.size(), vec.begin(), vec.end());
+    data = createData(datatype, vec.begin(), vec.end());
 }
 
 

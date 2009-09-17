@@ -267,8 +267,8 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
 	cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("units", out_x_axis_unit));
 	cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("units", out_y_axis_unit));
-	cdm.getVariable(orgXAxis).setData(createData(CDM_DOUBLE, out_x_axis.size(), out_x_axis.begin(), out_x_axis.end()));
-	cdm.getVariable(orgYAxis).setData(createData(CDM_DOUBLE, out_y_axis.size(), out_y_axis.begin(), out_y_axis.end()));
+	cdm.getVariable(orgXAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
+	cdm.getVariable(orgYAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
 
 	cdm.getDimension(orgXAxis).setLength(out_x_axis.size());
 	cdm.getDimension(orgYAxis).setLength(out_y_axis.size());

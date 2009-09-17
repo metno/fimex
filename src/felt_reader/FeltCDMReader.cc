@@ -212,7 +212,7 @@ void FeltCDMReader::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, cons
 			std::vector<std::string> shape;
 			shape.push_back(axis);
 			CDMVariable var(name, dataType, shape);
-			var.setData(createData(dataType, values.size(), values.begin(), values.end()));
+			var.setData(createData(dataType, values.begin(), values.end()));
 			cdm_->addVariable(var);
 
 
@@ -369,7 +369,7 @@ CDMDimension FeltCDMReader::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	timeShape.push_back(timeDim.getName());
 	CDMVariable timeVar(timeName, timeDataType, timeShape);
 	timeVec = feltFile.getFeltTimes();
-	boost::shared_ptr<Data> timeData = createData(timeDataType, timeSize, timeVec.begin(), timeVec.end());
+	boost::shared_ptr<Data> timeData = createData(timeDataType, timeVec.begin(), timeVec.end());
 	timeVar.setData(timeData);
 	cdm_->addVariable(timeVar);
 	std::vector<CDMAttribute> timeAttributes;
@@ -427,11 +427,11 @@ std::map<short, CDMDimension> FeltCDMReader::initAddLevelDimensionsFromXML(const
 		boost::shared_ptr<Data> data;
 		if (lv.size() > 0) {
 			// use values from xml-file
-			data = createData(levelDataType, levelSize, lv.begin(), lv.end());
+			data = createData(levelDataType, lv.begin(), lv.end());
 		} else {
 			//use values from felt-file
 			std::vector<short> lvs = it->second;
-			data = createData(levelDataType, levelSize, lvs.begin(), lvs.end());
+			data = createData(levelDataType, lvs.begin(), lvs.end());
 		}
 		cdm_->getVariable(levelDim.getName()).setData(data);
 
