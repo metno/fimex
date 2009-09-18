@@ -456,24 +456,30 @@ static const xmlChar* xmlCast(const std::string& msg)
     return reinterpret_cast<const xmlChar*> (msg.c_str());
 }
 
-const std::string& GribFileMessage::getFileURL()
+const long GribFileMessage::getEdition() const
+{
+    return edition_;
+}
+
+
+const std::string& GribFileMessage::getFileURL() const
 {
     return fileURL_;
 }
-const size_t GribFileMessage::getFilePosition()
+const size_t GribFileMessage::getFilePosition() const
 {
     return filePos_;
 }
 /// messages number within a multi-message
-const size_t GribFileMessage::getMessageNumber()
+const size_t GribFileMessage::getMessageNumber() const
 {
     return msgPos_;
 }
-const std::string& GribFileMessage::getName()
+const std::string& GribFileMessage::getName() const
 {
     return parameterName_;
 }
-const std::string& GribFileMessage::getShortName()
+const std::string& GribFileMessage::getShortName() const
 {
     return shortName_;
 }
@@ -498,6 +504,12 @@ long GribFileMessage::getLevelType() const
 {
     return levelType_;
 }
+
+const vector<long>& GribFileMessage::getParameterIds() const
+{
+    return gridParmeterIds_;
+}
+
 
 const std::string& GribFileMessage::getTypeOfGrid() const
 {

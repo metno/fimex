@@ -29,9 +29,11 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include "boost/shared_ptr.hpp"
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMReader.h"
+#include "fimex/ReplaceStringObject.h"
 
 namespace MetNoFimex
 {
@@ -52,11 +54,27 @@ private:
     std::string configFile_;
     std::vector<GribFileMessage> indices_;
     boost::shared_ptr<XMLDoc> doc_;
+    CDMDimension xDim_;
+    CDMDimension yDim_;
+    /**
+     * config attributes may contain template parameters marked with %PARAM%
+     * which should be replaced by dynamic values from the felt-file and stored
+     * temporary in this map
+     *
+     * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
+     */
+    std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes_;
+    /** Define which parameters to select
+     * @param select can be "all", "definedOnly"
+     */
+    void initSelectParamters(const std::string& select);
     void initAddGlobalAttributes();
-    std::map<long, CDMDimension> initAddLevelDimensions();
+    /// key of the levelDimensions is gribEdition_levelType, i.e. 2_100
+    void initLevels(long edition, const std::map<long, std::set<long> >& levelsOfType, std::map<std::string, CDMDimension>& levelDimsOfType);
+    std::map<std::string, CDMDimension> initAddLevelDimensions();
     CDMDimension initAddTimeDimension();
     void initAddProjection(std::string& projName, std::string& coordinates);
-    void initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<long, CDMDimension>& levelDims);
+    void initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<std::string, CDMDimension>& levelDims);
 
 };
 

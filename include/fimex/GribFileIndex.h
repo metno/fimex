@@ -49,15 +49,22 @@ public:
     /// give a xml-string representation
     std::string toString() const;
     /// accessors
-    const std::string& getFileURL();
-    const size_t getFilePosition();
+    const long getEdition() const;
+    const std::string& getFileURL() const;
+    const size_t getFilePosition() const;
     /// messages number within a multi-message
-    const size_t getMessageNumber();
-    const std::string& getName();
-    const std::string& getShortName();
+    const size_t getMessageNumber() const;
+    const std::string& getName() const;
+    const std::string& getShortName() const;
     boost::posix_time::ptime getDateTime() const;
     long getLevelNumber() const;
     long getLevelType() const;
+    /**
+     * Get the parameter ids as list with the following meanings:
+     * @li ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
+     * @li ed2: parameterNumber, paramterCategory, discipline
+     */
+    const std::vector<long>& getParameterIds() const;
     const std::string& getTypeOfGrid() const;
     const GridDefinition& getGridDefinition() const;
 private:

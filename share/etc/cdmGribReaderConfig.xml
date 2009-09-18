@@ -3,6 +3,8 @@
 <processOptions>
     <!-- allow up to 1% numerical errors in gridDefinition -->
     <option name="gridDefinitionDelta" value="0.01"/>
+    <!-- parameters to select: all, definedOnly -->
+    <option name="selectParameters" value="all" />
 </processOptions>
 <global_attributes>
     <attribute name="Conventions" value="CF-1.0" type="string" />
@@ -22,12 +24,12 @@
     <attribute name="standard_name" value="time" type="string" />
     <attribute name="units" value="seconds since 1970-01-01 00:00:00 +00:00" type="string" />
 </time>
-<spatial_axis typeOfGrid="polar_stereographic" id="x" name="x" type="int">
+<spatial_axis typeOfGrid="polar_stereographic" id="x" name="x" type="float">
     <attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
     <attribute name="standard_name" value="projection_x_coordinate" type="string" />
     <attribute name="units" value="m" type="string" />
 </spatial_axis>
-<spatial_axis typeOfGrid="polar_stereographic" id="y" name="y" type="int">
+<spatial_axis typeOfGrid="polar_stereographic" id="y" name="y" type="float">
     <attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
     <attribute name="standard_name" value="projection_y_coordinate" type="string" />
     <attribute name="units" value="m" type="string" />
@@ -137,9 +139,9 @@
     <attribute name="description" value="isentropic layer" type="string" />
     <attribute name="units" value="K" type="string" />
 </vertical_axis>
-<vertical_axis id="depth" name="depth" grib2_id="160" grib1_id="160" type="short">
+<vertical_axis id="depth_below_sea" name="depth_below_sea" grib2_id="160" grib1_id="160" type="short">
     <attribute name="description" value="depth below sea surface" type="string" />
-    <attribute name="long_name" value="depth" type="string" />
+    <attribute name="long_name" value="depth_below_sea" type="string" />
     <attribute name="positive" value="down" type="string" />
     <attribute name="standard_name" value="depth" type="string" />
     <attribute name="units" value="m" type="string" />
