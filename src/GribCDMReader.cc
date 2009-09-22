@@ -43,6 +43,46 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex.GribCDMReader");
 
+/**
+ * generating a unique index for a multidimensional grib-variable
+ * which is fast to copy and to find
+ */
+class GribVarIdx
+{
+public:
+    GribVarIdx() : edition_(0), params_(vector<long>(3,0)) {}
+    GribVarIdx(long edition, vector<long> params) : edition_(edition), params_(params) {}
+    bool operator<(GribVarIdx rhs) const {
+        // order: edition_, param[0], param[...]
+        if (edition_ < rhs.edition_) return true;
+        else if (edition_ > rhs.edition_) return false;
+
+        // editions equals, test the param-vectors
+        return std::lexicographical_compare(params_.begin(), params_.end(),
+                                            rhs.params_.begin(), rhs.params_.end());
+
+    }
+    bool operator==(GribVarIdx rhs) const {
+        if (edition_ == rhs.edition_) {
+            if ((params_.size() == rhs.params_.size()) &&
+                std::equal(params_.begin(), params_.end(), rhs.params_.begin())) {
+                return true;
+            }
+        }
+        return false;
+    }
+private:
+    const long edition_;
+    const vector<long> params_;
+};
+// based upon ==
+bool operator!=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(lhs == rhs); }
+// based upon <
+bool operator>=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(lhs < rhs);}
+bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs);}
+bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
+
+
 GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const std::string& configFile)
     : configFile_(configFile)
 {
@@ -103,6 +143,24 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     initAddVariables(projName, coordinates, timeDim, levelDims);
 }
 
+xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
+{
+    string xpathString;
+    const vector<long>& pars = msg.getParameterIds();
+    if (msg.getEdition() == 1) {
+        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"' and @gribTablesVersionNo='"+type2string(pars.at(1))+"' and @identificationOfOriginatingGeneratingCentre='"+type2string(pars.at(2))+"']");
+    } else {
+        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"' and @paramterCategory='"+type2string(pars.at(1))+"' and @discipline='"+type2string(pars.at(2))+"']");
+    }
+    XPathObjPtr xpathObj = doc_->getXPathObject(xpathString);
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    if (size == 1) {
+        return nodes->nodeTab[0]->parent; // return the parent, since xpath looks for grib1/2 node
+    }
+    return 0;
+}
+
 void GribCDMReader::initSelectParamters(const std::string& select)
 {
     if (select == "all") {
@@ -110,17 +168,7 @@ void GribCDMReader::initSelectParamters(const std::string& select)
     } else if (select == "definedOnly") {
         vector<GribFileMessage> newIndices;
         for (vector<GribFileMessage>::const_iterator gfmIt = indices_.begin(); gfmIt != indices_.end(); ++gfmIt) {
-            string xpathString;
-            const vector<long>& pars = gfmIt->getParameterIds();
-            if (gfmIt->getEdition() == 1) {
-                xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"' and @gribTablesVersionNo='"+type2string(pars.at(1))+"' and @identificationOfOriginatingGeneratingCentre='"+type2string(pars.at(2))+"']");
-            } else {
-                xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"' and @paramterCategory='"+type2string(pars.at(1))+"' and @discipline='"+type2string(pars.at(2))+"']");
-            }
-            XPathObjPtr xpathObj = doc_->getXPathObject(xpathString);
-            xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            int size = (nodes) ? nodes->nodeNr : 0;
-            if (size == 1) {
+            if (findVariableXMLNode(*gfmIt) != 0) {
                 // parameter found
                 newIndices.push_back(*gfmIt);
             }
@@ -354,10 +402,72 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
     }
 }
 
-void GribCDMReader::initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const map<string, CDMDimension>& levelDims)
+void GribCDMReader::initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const map<string, CDMDimension>& levelDimsOfType)
 {
     for (vector<GribFileMessage>::const_iterator gfmIt = indices_.begin(); gfmIt != indices_.end(); ++gfmIt) {
+        CDMDataType type = CDM_DOUBLE;
+        xmlNodePtr node = findVariableXMLNode(*gfmIt);
+        string varName;
+        if (node == 0) {
+            varName = gfmIt->getShortName();
+        } else {
+            varName = getXmlProp(node, "name");
+        }
+        if (varName2gribMessages_.find(varName) == varName2gribMessages_.end()) {
+            std::vector<CDMAttribute> attributes;
+            // add the projection
+            attributes.push_back(CDMAttribute("grid_mapping",projName));
+            if (coordinates != "") {
+                attributes.push_back(CDMAttribute("coordinates", coordinates));
+            }
 
+            string vectorDirection;
+            string vectorCounterpart;
+            if (node != 0) {
+                // set the datatype if exists
+                string stype = getXmlProp(node, "type");
+                if (stype != "") {
+                    type = string2datatype(stype);
+                }
+                // check if variable is part of vector
+                {
+                    xmlNodePtr varNodeChild = node->children;
+                    while (varNodeChild != 0) {
+                        if ((varNodeChild->type == XML_ELEMENT_NODE) &&
+                                (string("spatial_vector") == reinterpret_cast<const char *>(varNodeChild->name))) {
+                            vectorDirection = getXmlProp(varNodeChild, "direction");
+                            vectorCounterpart = getXmlProp(varNodeChild, "counterpart");
+                        }
+                        varNodeChild = varNodeChild->next;
+                    }
+                }
+            }
+
+            // map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
+             std::vector<std::string> shape;
+             shape.push_back(xDim_.getName());
+             shape.push_back(yDim_.getName());
+             string levelDimName = type2string(gfmIt->getEdition()) + "_" + type2string(gfmIt->getLevelType());
+             // TODO: add level values at one place or another
+             map<string, CDMDimension>::const_iterator levelIt = levelDimsOfType.find(levelDimName);
+             if (levelIt != levelDimsOfType.end()) {
+                 shape.push_back(levelIt->second.getName());
+             }
+             shape.push_back(timeDim.getName());
+
+             CDMVariable var(varName, type, shape);
+             if (vectorCounterpart != "") {
+                 var.setAsSpatialVector(vectorCounterpart, vectorDirection);
+             }
+             cdm_->addVariable(var);
+             for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
+                 cdm_->addAttribute(varName, *attrIt);
+             }
+
+
+        }
+        // add the index
+        varName2gribMessages_[varName].push_back(*gfmIt);
     }
 }
 

@@ -92,10 +92,15 @@ public:
     /**
      * Initialize the gribFileIndex for the gribFile gribFilePath.
      * If ignoreExistingXml = false, searches for existing indexes in
-     * 1. file.grbml
-     * 2. ENV{GRIB_FILE_INDEX}/file.grbml
+     * @li file.grbml
+     * @li ENV{GRIB_FILE_INDEX}/file.grbml
      *
      * Otherwise, it parses the grib-file and creates a index.
+     *
+     * Performance for getting an index of a 150MB grib-file with some 10s of messages:
+     * @li remote NFS file, first time: 16s
+     * @li file completely in memory: 1.1s
+     * @li xml-file: 0.1s
      */
     GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreExistingXml = false);
     virtual ~GribFileIndex();

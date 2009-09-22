@@ -64,10 +64,20 @@ private:
      * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
      */
     std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes_;
+    /**
+     * map from cdm variable names to list of gribMessages
+     */
+    std::map<std::string, std::vector<GribFileMessage> > varName2gribMessages_;
+
     /** Define which parameters to select
      * @param select can be "all", "definedOnly"
      */
     void initSelectParamters(const std::string& select);
+    /**
+     * find the node in the xml-config corresponding to the GribFileMessage
+     * @return 0 if not found, otherwise a valid node
+     */
+    xmlNodePtr findVariableXMLNode(const GribFileMessage& msg) const;
     void initAddGlobalAttributes();
     /// key of the levelDimensions is gribEdition_levelType, i.e. 2_100
     void initLevels(long edition, const std::map<long, std::set<long> >& levelsOfType, std::map<std::string, CDMDimension>& levelDimsOfType);
@@ -77,6 +87,7 @@ private:
     void initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<std::string, CDMDimension>& levelDims);
 
 };
+
 
 }
 
