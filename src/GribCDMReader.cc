@@ -136,11 +136,11 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     indices_ = newIndices;
 
     initAddGlobalAttributes();
-    CDMDimension timeDim = initAddTimeDimension();
+    timeDim_ = initAddTimeDimension();
     map<string, CDMDimension> levelDims = initAddLevelDimensions();
     string projName, coordinates;
     initAddProjection(projName, coordinates);
-    initAddVariables(projName, coordinates, timeDim, levelDims);
+    initAddVariables(projName, coordinates, timeDim_, levelDims);
 }
 
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
@@ -264,13 +264,12 @@ map<string, CDMDimension> GribCDMReader::initAddLevelDimensions()
 CDMDimension GribCDMReader::initAddTimeDimension()
 {
     // get all times, unique and sorted
-    vector<boost::posix_time::ptime> times;
     {
         set<boost::posix_time::ptime> timesSet;
         for (vector<GribFileMessage>::const_iterator gfmIt = indices_.begin(); gfmIt != indices_.end(); ++gfmIt) {
             timesSet.insert(gfmIt->getDateTime());
         }
-        times = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
+        times_ = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
     }
 
     XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig/gr:axes/gr:time");
@@ -285,7 +284,7 @@ CDMDimension GribCDMReader::initAddTimeDimension()
     string timeType = getXmlProp(node, "type");
     CDMDataType timeDataType = string2datatype(timeType);
 
-    CDMDimension timeDim(timeName, times.size());
+    CDMDimension timeDim(timeName, times_.size());
     timeDim.setUnlimited(true);
     cdm_->addDimension(timeDim);
     std::vector<std::string> timeShape;
@@ -293,7 +292,7 @@ CDMDimension GribCDMReader::initAddTimeDimension()
     CDMVariable timeVar(timeName, timeDataType, timeShape);
     vector<double> timeVecLong;
     // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
-    transform(times.begin(), times.end(), back_inserter(timeVecLong), posixTime2epochTime);
+    transform(times_.begin(), times_.end(), back_inserter(timeVecLong), posixTime2epochTime);
     boost::shared_ptr<Data> timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
     timeVar.setData(timeData);
     cdm_->addVariable(timeVar);
@@ -303,7 +302,7 @@ CDMDimension GribCDMReader::initAddTimeDimension()
         cdm_->addAttribute(timeVar.getName(), *it);
     }
 
-    return timeDim;
+    return timeDim_;
 }
 
 void GribCDMReader::initAddProjection(std::string& projName, std::string& coordinates)
@@ -478,7 +477,53 @@ GribCDMReader::~GribCDMReader()
 
 boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
-    // TODO: implement
+    const CDMVariable& variable = cdm_->getVariable(varName);
+    if (variable.hasData()) {
+        return getDataSliceFromMemory(variable, unLimDimPos);
+    }
+    // only time can be unLimDim for grib
+    if (unLimDimPos >= getData(timeDim_.getName())->size()) {
+        throw CDMException("requested time outside data-region");
+    }
+
+    // grib data can be (x,y,level,time) or (x,y,level) or just (x,y)
+    // TODO: ensembles?
+    const vector<std::string>& dims = variable.getShape();
+    const CDMDimension* layerDim = 0;
+    size_t xy_size = 1;
+    for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+        CDMDimension& dim = cdm_->getDimension(*it);
+        if (dim.getName() != xDim_.getName() &&
+            dim.getName() != yDim_.getName() &&
+            !dim.isUnlimited())
+        {
+            // level
+            layerDim = &dim;
+        }
+        if (! dim.isUnlimited()) {
+            xy_size *= dim.getLength();
+        }
+    }
+    boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size);
+    // fetch the xy-slices from the grib
+    std::map<std::string, std::vector<GribFileMessage> >::const_iterator gribMessagesIt = varName2gribMessages_.find(varName);
+    if (gribMessagesIt != varName2gribMessages_.end()) {
+        const std::vector<GribFileMessage>& gfmVec = gribMessagesIt->second;
+        std::vector<GribFileMessage> slices;
+        if (layerDim == 0) {
+            GribFileMessageEqualTime gfmet(times_.at(unLimDimPos));
+            vector<GribFileMessage>::const_iterator gfmIt = find_if(gfmVec.begin(), gfmVec.end(), gfmet);
+            while (gfmIt != gfmVec.end()) {
+                slices.push_back(*gfmIt);
+                gfmIt = find_if(++gfmIt, gfmVec.end(), gfmet);
+            }
+        } else {
+            // TODO for all levels, search time x and add to  data
+        }
+    }
+    // TODO: read data
+
+    return data;
 }
 
 

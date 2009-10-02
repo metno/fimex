@@ -56,6 +56,9 @@ private:
     boost::shared_ptr<XMLDoc> doc_;
     CDMDimension xDim_;
     CDMDimension yDim_;
+    CDMDimension timeDim_;
+    // store ptimes of all times
+    std::vector<boost::posix_time::ptime> times_;
     /**
      * config attributes may contain template parameters marked with %PARAM%
      * which should be replaced by dynamic values from the felt-file and stored

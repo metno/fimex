@@ -38,7 +38,6 @@ struct grib_handle;
 
 namespace MetNoFimex
 {
-
 class GribFileMessage
 {
 public:
@@ -84,6 +83,29 @@ private:
     std::string typeOfGrid_;
     GridDefinition gridDefinition_;
 };
+
+/// Functor to find Messages with equal time
+class GribFileMessageEqualTime : public std::unary_function<bool, const GribFileMessage&> {
+public:
+    GribFileMessageEqualTime(boost::posix_time::ptime time) : time_(time) {}
+    ~GribFileMessageEqualTime() {}
+    bool operator()(const GribFileMessage& gfm) { return gfm.getDateTime() == time_; }
+private:
+    boost::posix_time::ptime time_;
+};
+
+/// Functor to find messages with equal level and time
+class GribFileMessageEqualLevelTime : public std::unary_function<bool, const GribFileMessage&> {
+public:
+    GribFileMessageEqualLevelTime(long levelType, long levelNo, boost::posix_time::ptime time) : levelType_(levelType), levelNo_(levelNo), time_(time) {}
+    ~GribFileMessageEqualLevelTime() {}
+    bool operator()(const GribFileMessage& gfm) { return (gfm.getLevelType() == levelType_) && (gfm.getLevelNumber() == levelNo_) && (gfm.getDateTime() == time_); }
+private:
+    long levelType_;
+    long levelNo_;
+    boost::posix_time::ptime time_;
+};
+
 
 class GribFileIndex
 {
