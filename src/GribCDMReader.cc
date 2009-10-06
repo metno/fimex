@@ -226,11 +226,24 @@ void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levels
         levelDimsOfType.insert(std::pair<string, CDMDimension>(type2string(edition)+"_"+type2string(lit->first), levelDim));
         cdm_->addDimension(levelDim);
 
-        // create level variable without data!
+        // create level variable
         std::vector<std::string> levelShape;
         levelShape.push_back(levelDim.getName());
         CDMVariable levelVar(levelId, levelDataType, levelShape);
         cdm_->addVariable(levelVar);
+
+        // add level variable data
+        cdm_->getVariable(levelVar.getName()).setData(createData(CDM_INT, lit->second.begin(), lit->second.end()));
+        // enable search of level-information by level-name required by getDataSlice
+        for (set<long>::iterator lnit = lit->second.begin(); lnit != lit->second.end(); ++lnit) {
+            // add a vector with editon, levelType and levelNumber
+            vector<long> v(0,3);
+            v.push_back(edition);
+            v.push_back(lit->first);
+            v.push_back(*lnit);
+            levels_[levelVar.getName()].push_back(v);
+        }
+
 
         // add attributes
         std::vector<CDMAttribute> levelAttributes;
@@ -504,24 +517,49 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
             xy_size *= dim.getLength();
         }
     }
-    boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size);
+    boost::shared_ptr<Data> data;
+    std::vector<GribFileMessage> slices;
     // fetch the xy-slices from the grib
     std::map<std::string, std::vector<GribFileMessage> >::const_iterator gribMessagesIt = varName2gribMessages_.find(varName);
     if (gribMessagesIt != varName2gribMessages_.end()) {
         const std::vector<GribFileMessage>& gfmVec = gribMessagesIt->second;
-        std::vector<GribFileMessage> slices;
-        if (layerDim == 0) {
-            GribFileMessageEqualTime gfmet(times_.at(unLimDimPos));
-            vector<GribFileMessage>::const_iterator gfmIt = find_if(gfmVec.begin(), gfmVec.end(), gfmet);
-            while (gfmIt != gfmVec.end()) {
+        GribFileMessageEqualTime gfmet(times_.at(unLimDimPos));
+        vector<GribFileMessage>::const_iterator gfmIt = find_if(gfmVec.begin(), gfmVec.end(), gfmet);
+        if (gfmIt != gfmVec.end()) {
+            if (layerDim == 0) {
+                // add one xy slice
                 slices.push_back(*gfmIt);
-                gfmIt = find_if(++gfmIt, gfmVec.end(), gfmet);
+            } else {
+                // add slice for all levels, search time x
+                vector< vector<long> >& levels = levels_[layerDim->getName()];
+                for (vector<vector<long> >::iterator lit = levels.begin(); lit != levels.end(); ++lit) {
+                    GribFileMessageEqualLevelTime gfmelt(lit->at(0), lit->at(1), lit->at(2), times_.at(unLimDimPos));
+                    vector<GribFileMessage>::const_iterator gfmLevelIt = find_if(gfmVec.begin(), gfmVec.end(), gfmelt);
+                    if (gfmLevelIt != gfmVec.end()) {
+                        slices.push_back(*gfmLevelIt);
+                    } else {
+                        slices.push_back(GribFileMessage()); // dummy
+                    }
+                }
             }
-        } else {
-            // TODO for all levels, search time x and add to  data
         }
     }
     // TODO: read data
+    if (slices.size() == 0) return createData(variable.getDataType(), 0);
+
+    // storage for complete data
+    boost::shared_ptr<DataImpl<double> > doubleData(new DataImpl<double>(xy_size));
+    // storage for on layer
+    vector<double> gridData;
+    gridData.reserve(xy_size/slices.size());
+    size_t dataCurrentPos = 0;
+    for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
+        // join the data of the different levels
+        size_t dataRead = gribDataRead(*gfmIt, gridData);
+        doubleData->setValues(gridData.begin(), gridData.end(), dataCurrentPos);
+        dataCurrentPos += dataRead;
+    }
+    data = doubleData;
 
     return data;
 }

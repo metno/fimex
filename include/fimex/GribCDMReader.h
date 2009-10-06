@@ -59,6 +59,8 @@ private:
     CDMDimension timeDim_;
     // store ptimes of all times
     std::vector<boost::posix_time::ptime> times_;
+    // store level parameters of level-ids: edition, level-type, level-no
+    std::map<std::string, std::vector<std::vector<long> > > levels_;
     /**
      * config attributes may contain template parameters marked with %PARAM%
      * which should be replaced by dynamic values from the felt-file and stored

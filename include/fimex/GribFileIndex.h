@@ -45,6 +45,9 @@ public:
     GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos);
     GribFileMessage(boost::shared_ptr<XMLDoc>, std::string nsPrefix, xmlNodePtr node);
     ~GribFileMessage();
+
+    /// test if this is a proper GribFileMessage or just the default constructor
+    bool isValid() const {return "" != getFileURL();}
     /// give a xml-string representation
     std::string toString() const;
     /// accessors
@@ -97,15 +100,22 @@ private:
 /// Functor to find messages with equal level and time
 class GribFileMessageEqualLevelTime : public std::unary_function<bool, const GribFileMessage&> {
 public:
-    GribFileMessageEqualLevelTime(long levelType, long levelNo, boost::posix_time::ptime time) : levelType_(levelType), levelNo_(levelNo), time_(time) {}
+    GribFileMessageEqualLevelTime(long edition, long levelType, long levelNo, boost::posix_time::ptime time) : edition_(edition), levelType_(levelType), levelNo_(levelNo), time_(time) {}
     ~GribFileMessageEqualLevelTime() {}
-    bool operator()(const GribFileMessage& gfm) { return (gfm.getLevelType() == levelType_) && (gfm.getLevelNumber() == levelNo_) && (gfm.getDateTime() == time_); }
+    bool operator()(const GribFileMessage& gfm) { return (gfm.getEdition() == edition_) && (gfm.getLevelType() == levelType_) && (gfm.getLevelNumber() == levelNo_) && (gfm.getDateTime() == time_); }
 private:
+    long edition_;
     long levelType_;
     long levelNo_;
     boost::posix_time::ptime time_;
 };
 
+/**
+ * read the data corresponding to the gfm to the vector data
+ * data of at maximum data.size() will be read.
+ * @return the actual amount of data read
+ */
+size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data);
 
 class GribFileIndex
 {

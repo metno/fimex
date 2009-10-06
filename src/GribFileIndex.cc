@@ -623,6 +623,38 @@ string GribFileMessage::toString() const
     return string(reinterpret_cast<const char*> (buffer->content));
 }
 
+size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data)
+{
+    if (!gfm.isValid()) return 0;
+    string url = gfm.getFileURL();
+    // remove the 'file:' prefix, needs to be improved when streams are allowed
+    url = url.substr(5);
+    boost::shared_ptr<FILE> fh(fopen(url.c_str(), "r"), fclose);
+    if (fh.get() == 0) {
+        throw runtime_error("cannot open file: " + gfm.getFileURL());
+    }
+    fseek(fh.get(), gfm.getFilePosition(), SEEK_SET);
+
+    // enable multi-messages
+    grib_multi_support_on(0);
+
+    int err = 0;
+    for (size_t i = 0; i < gfm.getMessageNumber(); i++) {
+        // forward to correct multimessage
+        boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    }
+    // read the message of interest
+    boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    size_t size = 0;
+    if (gh.get() != 0) {
+        if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
+        size = data.size();
+        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "data", &data[0], &size), 0);
+    }
+    return size;
+}
+
+
 GribFileIndex::GribFileIndex()
 {
     // dummy generator
