@@ -128,6 +128,8 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
     BOOST_CHECK(true);
     BOOST_CHECK(interpolator->getDataSlice("x")->size() == 297);
     BOOST_CHECK(interpolator->getDataSlice("y")->size() == 286);
+//    NetCDF_CDMWriter(interpolator, "testInterpolator3.nc");
+//    BOOST_CHECK(true);
 }
 
 #else

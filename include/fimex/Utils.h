@@ -150,6 +150,42 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
 	return vals;
 }
 
+/** static_cast as a functor */
+template<typename OUT>
+struct staticCast {
+    template<typename IN>
+    OUT operator()(const IN& in) { return static_cast<OUT>(in); }
+};
+
+
+/**
+ * Scale a value using fill, offset and scale
+ */
+template<typename IN, typename OUT>
+class ScaleValue : public std::unary_function<IN, OUT>
+{
+private:
+    IN oldFill_;
+    double oldScale_;
+    double oldOffset_;
+    OUT newFill_;
+    double newScale_;
+    double newOffset_;
+public:
+    ScaleValue(double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) :
+        oldFill_(static_cast<IN>(oldFill)), oldScale_(oldScale), oldOffset_(oldOffset),
+        newFill_(static_cast<OUT>(newFill)), newScale_(newScale), newOffset_(newOffset) {}
+    OUT operator()(const IN& in) const {
+        if (in == oldFill_ || isinf(static_cast<double>(in))) {
+            return newFill_;
+        } else {
+            return static_cast<OUT>(((oldScale_*in + oldOffset_)-newOffset_)/newScale_);
+        }
+    }
+};
+
+
+
 }
 
 #endif /*UTILS_H_*/

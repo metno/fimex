@@ -31,6 +31,7 @@
 #include <iostream>
 #include <iterator>
 #include <cmath>
+#include <algorithm>
 #include "fimex/Data.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
@@ -112,7 +113,7 @@ namespace MetNoFimex
 		 * set the values of the data by the input-iterator
 		 */
 		template<class InputIterator>
-		void setValues(InputIterator first, InputIterator last, size_t dataStartPos = 0) throw(CDMException);
+		void setValues(InputIterator begin, InputIterator end, size_t dataStartPos = 0) throw(CDMException);
 		
 	private:
 		size_t length;
@@ -160,10 +161,13 @@ namespace MetNoFimex
 			std::copy(&otherData[otherFirst], &otherData[otherLast], &theData[startPos]);
 		}
 	}
-	template<typename C>
-	void DataImpl<C>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
-		throw(CDMException("setValues not implemented for this datatype"));
-	}
+// don't implement all possible setValues functions, link-time error
+//	template<typename C>
+//	void DataImpl<C>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+//		throw(CDMException("setValues not implemented for this datatype"));
+//	}
+
+	// declaration of implemented function (in Data.cc)
 	template<>
 	void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
 	template<>
@@ -193,10 +197,8 @@ namespace MetNoFimex
 	void recursiveCopyMultiDimData(C** orgData, C** newData, const std::vector<size_t>& orgDimSize, const std::vector<size_t>& orgSliceSize, const std::vector<size_t>& newStart, const std::vector<size_t>& newSize, size_t currentDim) {
 		(*orgData) += newStart[currentDim] * orgSliceSize[currentDim];
 		if (currentDim == 0) {
-			// putting loop inside if/else for performance
-			for (size_t i = 0; i < newSize[0]; i++) {
-				*(*newData)++ = *(*orgData)++;
-			}
+		    *newData = std::copy(&(*orgData)[0], &(*orgData)[newSize[0]], *newData);
+		    (*orgData) += newSize[0]; // forward orgData pointer
 		} else {
 			for (size_t i = 0; i < newSize[currentDim]; i++) {
 				recursiveCopyMultiDimData(orgData, newData, orgDimSize, orgSliceSize, newStart, newSize, currentDim - 1);
@@ -234,44 +236,23 @@ namespace MetNoFimex
 		
 		return output;
 	}
-	
-	
+
 	template<typename C>
 	template<class InputIterator>
-	void DataImpl<C>::setValues(InputIterator first, InputIterator last, size_t dataStartPos) throw(CDMException) {
-		size_t dataPos = dataStartPos;
-		if (dataPos < 0) {
-			throw CDMException("dataPos < 0, cannot set data");
-		}
-		for (; first != last; ++first) {
-			if (dataPos < length) {
-				theData[dataPos] = static_cast<C>(*first);
-			} else {
-				throw CDMException("dataPos " + type2string(dataPos) + " >= dataLength " + type2string(length));
-			}
-			++dataPos;
-		}
+	void DataImpl<C>::setValues(InputIterator begin, InputIterator end, size_t dataStartPos) throw(CDMException) {
+	    size_t dist = std::distance(begin, end);
+	    if ((dist + dataStartPos) > length)
+	        throw CDMException("dataPos " + type2string(dist+dataStartPos) + " >= dataLength " + type2string(length));
+	    std::transform(begin, end, &theData[dataStartPos], staticCast<C>());
 	}
 
-	template<typename T1, typename T2>
-	boost::shared_array<T1> convertArrayType(const boost::shared_array<T2>& inData, size_t length, double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) {
-		boost::shared_array<T1> outData(new T1[length]);
-		T2* inDataPos = &inData[0];
-		T2* inDataLast = &inData[length];
-		T1* outDataPos = &outData[0];
-		T1 fill = static_cast<T1>(newFill);
-		while (inDataPos != inDataLast) {
-			if (*inDataPos == oldFill || isinf(static_cast<double>(*inDataPos))) {
-				*outDataPos = fill;
-			} else {
-				*outDataPos = static_cast<T1>(((oldScale*(*inDataPos) + oldOffset)-newOffset)/newScale);
-			}
-			*inDataPos++;
-			*outDataPos++;
-		}
+	template<typename OUT, typename IN>
+	boost::shared_array<OUT> convertArrayType(const boost::shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) {
+		boost::shared_array<OUT> outData(new OUT[length]);
+		std::transform(&inData[0], &inData[length], &outData[0], ScaleValue<IN, OUT>(oldFill, oldScale, oldOffset, newFill, newScale, newOffset));
 		return outData;
 	}
-	
+
 	template<typename C>
 	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException) 
 	{
@@ -292,12 +273,7 @@ namespace MetNoFimex
 	template<typename T1, typename T2>
 	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length) {
 		boost::shared_array<T1> outData(new T1[length]);
-		T2* inDataPos = &inData[0];
-		T2* inDataLast = &inData[length];
-		T1* outDataPos = &outData[0];
-		while (inDataPos != inDataLast) {
-			*outDataPos++ = static_cast<T1>(*inDataPos++);
-		}
+		std::transform(&inData[0], &inData[length], &outData[0], staticCast<T2>());
 		return outData;
 	}
 	// this version is identical to duplicateArrayType one, except that it allows for specializations

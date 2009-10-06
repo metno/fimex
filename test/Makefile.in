@@ -77,11 +77,12 @@ CONFIG_CLEAN_FILES =
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_6 = testGribWriter$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_7 = $(am__EXEEXT_6)
-am__EXEEXT_8 = testBinaryConstants$(EXEEXT) testTimeSpec$(EXEEXT) \
-	testSpatialAxisSpec$(EXEEXT) testInterpolation$(EXEEXT) \
-	testData$(EXEEXT) testCDM$(EXEEXT) testXMLDoc$(EXEEXT) \
-	testQualityExtractor$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
-	$(am__EXEEXT_3) $(am__EXEEXT_5) $(am__EXEEXT_7)
+am__EXEEXT_8 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
+	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
+	testInterpolation$(EXEEXT) testData$(EXEEXT) testCDM$(EXEEXT) \
+	testXMLDoc$(EXEEXT) testQualityExtractor$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+	$(am__EXEEXT_5) $(am__EXEEXT_7)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
@@ -230,6 +231,16 @@ testUnits_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
+am_testUtils_OBJECTS = testUtils.$(OBJEXT)
+testUtils_OBJECTS = $(am_testUtils_OBJECTS)
+testUtils_LDADD = $(LDADD)
+testUtils_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
+	../src/felt/libfelt.la ../src/libfimex.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
 testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
 testXMLDoc_LDADD = $(LDADD)
@@ -259,7 +270,7 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testNetcdfWriter_SOURCES) $(testQualityExtractor_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testXMLDoc_SOURCES)
+	$(testUtils_SOURCES) $(testXMLDoc_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
 	$(testFeltReader_SOURCES) $(testGribWriter_SOURCES) \
@@ -267,7 +278,7 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testNetcdfWriter_SOURCES) $(testQualityExtractor_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testXMLDoc_SOURCES)
+	$(testUtils_SOURCES) $(testXMLDoc_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 @HAVE_NETCDF_TRUE@am__EXEEXT_9 = $(NETCDF_MI_SH_TESTS)
@@ -401,11 +412,12 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
-CC_TESTS = testBinaryConstants testTimeSpec testSpatialAxisSpec \
-	testInterpolation testData testCDM testXMLDoc \
-	testQualityExtractor $(am__append_2) $(am__append_5) \
-	$(am__append_6) $(am__append_8) $(am__append_10)
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
+CC_TESTS = testBinaryConstants testUtils testTimeSpec \
+	testSpatialAxisSpec testInterpolation testData testCDM \
+	testXMLDoc testQualityExtractor $(am__append_2) \
+	$(am__append_5) $(am__append_6) $(am__append_8) \
+	$(am__append_10)
 SH_TESTS = $(am__append_9)
 LDADD = ../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la \
 	../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) \
@@ -422,6 +434,7 @@ AM_CFLAGS = -std=c99 -Wall
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
+testUtils_SOURCES = testUtils.cc
 testInterpolation_SOURCES = testInterpolation.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
@@ -518,6 +531,9 @@ testTimeSpec$(EXEEXT): $(testTimeSpec_OBJECTS) $(testTimeSpec_DEPENDENCIES)
 testUnits$(EXEEXT): $(testUnits_OBJECTS) $(testUnits_DEPENDENCIES) 
 	@rm -f testUnits$(EXEEXT)
 	$(CXXLINK) $(testUnits_OBJECTS) $(testUnits_LDADD) $(LIBS)
+testUtils$(EXEEXT): $(testUtils_OBJECTS) $(testUtils_DEPENDENCIES) 
+	@rm -f testUtils$(EXEEXT)
+	$(CXXLINK) $(testUtils_OBJECTS) $(testUtils_LDADD) $(LIBS)
 testXMLDoc$(EXEEXT): $(testXMLDoc_OBJECTS) $(testXMLDoc_DEPENDENCIES) 
 	@rm -f testXMLDoc$(EXEEXT)
 	$(CXXLINK) $(testXMLDoc_OBJECTS) $(testXMLDoc_LDADD) $(LIBS)
@@ -542,6 +558,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 
 .cc.o:

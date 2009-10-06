@@ -1,5 +1,13 @@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
-CC_TESTS = testBinaryConstants testTimeSpec testSpatialAxisSpec testInterpolation testData testCDM testXMLDoc testQualityExtractor
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
+CC_TESTS = testBinaryConstants \
+           testUtils \
+           testTimeSpec \
+           testSpatialAxisSpec \
+           testInterpolation \
+           testData \
+           testCDM \
+           testXMLDoc \
+           testQualityExtractor
 SH_TESTS = 
 LDADD = ../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
@@ -39,6 +47,7 @@ TESTS = $(CC_TESTS) $(SH_TESTS)
 
 check_PROGRAMS = $(CC_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
+testUtils_SOURCES = testUtils.cc
 testInterpolation_SOURCES = testInterpolation.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
