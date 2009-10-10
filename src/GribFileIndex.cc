@@ -300,18 +300,18 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     }
 
     int nameError = grib_get_string(gh.get(), "name", msg, &msgLength);
-    if (nameError != GRIB_NOT_FOUND) {
+    if ((nameError != GRIB_NOT_FOUND) && (string("unknown") != string(msg))) {
         MIFI_GRIB_CHECK(nameError, 0);
         parameterName_ = msg;
     } else {
         parameterName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), ",");
     }
     int shortNameError = grib_get_string(gh.get(), "shortName", msg, &msgLength);
-    if (shortNameError != GRIB_NOT_FOUND) {
+    if ((shortNameError != GRIB_NOT_FOUND) && (string("unknown") != string(msg))) {
         MIFI_GRIB_CHECK(shortNameError, 0);
         shortName_ = msg;
     } else {
-        shortName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), ",");
+        shortName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), "_");
     }
 
 
@@ -343,17 +343,17 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix, xmlNodePtr node)
 {
-    string fileURL_ = getXmlProp(node, "fileURL");
-    if (fileURL_ == "") {
-        throw runtime_error("could not find fileURL for node");
+    fileURL_ = getXmlProp(node, "url");
+    if (fileURL_.size() == 0) {
+        throw runtime_error("could not find url for node");
     }
     string posStr = getXmlProp(node, "seekPos");
-    if (posStr == "") {
+    if (posStr.size() == 0) {
         throw runtime_error("could not find seekPos for node");
     }
     filePos_ = string2type<size_t>(posStr);
     string msgPosStr = getXmlProp(node, "messagePos");
-    if (msgPosStr == "") msgPos_ = 0;
+    if (msgPosStr.size() == 0) msgPos_ = 0;
     else msgPos_ = string2type<size_t>(msgPosStr);
 
 
@@ -363,7 +363,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         if (size == 0) throw runtime_error("parameter not found in node");
         xmlNodePtr pNode = xp->nodesetval->nodeTab[0];
         parameterName_ = getXmlProp(pNode, "name");
-        shortName_ = getXmlProp(pNode, "short_name");
+        shortName_ = getXmlProp(pNode, "shortName");
         // grib
         XPathObjPtr xpG = doc->getXPathObject(nsPrefix+":grib1", pNode);
         int gSize = xpG->nodesetval ? xpG->nodesetval->nodeNr : 0;
@@ -487,7 +487,7 @@ boost::posix_time::ptime GribFileMessage::getDateTime() const
 {
     long year = dataDate_ / 10000;
     long month = (dataDate_ - year*10000) / 100;
-    long day = dataDate_ - (year*10000 + month) * 100;
+    long day = dataDate_ % 100;
 
     long hour = dataTime_ / 100;
     long minutes = dataTime_ % 100;
@@ -542,6 +542,10 @@ string GribFileMessage::toString() const
                 xmlCast(type2string(msgPos_))));
         // parameter
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("parameter")));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(),
+                xmlCast("shortName"), xmlCast(shortName_)));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(),
+                xmlCast("name"), xmlCast(parameterName_)));
         if (edition_ == 1) {
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib1")));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
@@ -648,8 +652,11 @@ size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data)
     size_t size = 0;
     if (gh.get() != 0) {
         if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
+        // TODO: check data-size with grib_get_size(gh.get(), "values", &size)
         size = data.size();
-        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "data", &data[0], &size), 0);
+        MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &data[0], &size), 0);
+    } else {
+        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(gfm.getFilePosition()) + " msg: " + type2string(gfm.getMessageNumber()));
     }
     return size;
 }

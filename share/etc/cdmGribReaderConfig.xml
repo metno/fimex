@@ -86,6 +86,12 @@
         <attribute name="units" value="Pa" type="string" />
     </grib2>    
 </vertical_axis>
+<vertical_axis id="height" name="height" grib2_id="103" grib1_id="105" type="float">
+    <attribute name="description" value="height above ground" type="string" />
+    <attribute name="long_name" value="height" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <attribute name="units" value="m" type="string" />
+</vertical_axis>
 <vertical_axis id="sigma" name="sigma" grib2_id="104" grib1_id="107" type="float">
     <attribute name="description" value="atmosphere sigma coordinate" type="string" />
     <attribute name="long_name" value="atmosphere_sigma_coordinate" type="string" />

@@ -136,11 +136,11 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     indices_ = newIndices;
 
     initAddGlobalAttributes();
-    timeDim_ = initAddTimeDimension();
+    initAddTimeDimension();
     map<string, CDMDimension> levelDims = initAddLevelDimensions();
     string projName, coordinates;
     initAddProjection(projName, coordinates);
-    initAddVariables(projName, coordinates, timeDim_, levelDims);
+    initAddVariables(projName, coordinates, levelDims);
 }
 
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
@@ -208,12 +208,12 @@ void GribCDMReader::initAddGlobalAttributes()
 void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levelsOfType, map<string, CDMDimension>& levelDimsOfType)
 {
     for (map<long, set<long> >::const_iterator lit = levelsOfType.begin(); lit != levelsOfType.end(); ++lit) {
-        string xpathLevelString("/gr:cdmGribReaderConfig/gr:axes/gr:vertical_axis[grib"+type2string(edition)+"_id='"+type2string(lit->first)+"']");
+        string xpathLevelString("/gr:cdmGribReaderConfig/gr:axes/gr:vertical_axis[@grib"+type2string(edition)+"_id='"+type2string(lit->first)+"']");
         XPathObjPtr xpathObj = doc_->getXPathObject(xpathLevelString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size != 1) {
-            throw CDMException("unable to find 'vertical'-axis "+type2string(lit->first)+" in config: " + configFile_);
+            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(lit->first)+" in config: " + configFile_ +" and xpath: " + xpathLevelString);
         }
         xmlNodePtr node = nodes->nodeTab[0];
         assert(node->type == XML_ELEMENT_NODE);
@@ -274,7 +274,7 @@ map<string, CDMDimension> GribCDMReader::initAddLevelDimensions()
     return levelDimsOfType;
 }
 
-CDMDimension GribCDMReader::initAddTimeDimension()
+void GribCDMReader::initAddTimeDimension()
 {
     // get all times, unique and sorted
     {
@@ -293,16 +293,16 @@ CDMDimension GribCDMReader::initAddTimeDimension()
     }
     xmlNodePtr node = nodes->nodeTab[0];
     assert(node->type == XML_ELEMENT_NODE);
-    string timeName = getXmlProp(node, "name");
+    timeDimName_ = getXmlProp(node, "name");
     string timeType = getXmlProp(node, "type");
     CDMDataType timeDataType = string2datatype(timeType);
 
-    CDMDimension timeDim(timeName, times_.size());
+    CDMDimension timeDim(timeDimName_, times_.size());
     timeDim.setUnlimited(true);
     cdm_->addDimension(timeDim);
     std::vector<std::string> timeShape;
     timeShape.push_back(timeDim.getName());
-    CDMVariable timeVar(timeName, timeDataType, timeShape);
+    CDMVariable timeVar(timeDimName_, timeDataType, timeShape);
     vector<double> timeVecLong;
     // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
     transform(times_.begin(), times_.end(), back_inserter(timeVecLong), posixTime2epochTime);
@@ -314,8 +314,6 @@ CDMDimension GribCDMReader::initAddTimeDimension()
     for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
         cdm_->addAttribute(timeVar.getName(), *it);
     }
-
-    return timeDim_;
 }
 
 void GribCDMReader::initAddProjection(std::string& projName, std::string& coordinates)
@@ -341,22 +339,22 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
         if (found != 1) {
             throw CDMException("error in config-file: not exactly 1 entry for xpath: " + xpathStringX);
         }
-        std::string xName(xXmlAttributes["name"]);
-        xDim_ = CDMDimension(xName, gridDef.getXSize());
+        xDimName_ = xXmlAttributes["name"];
+        CDMDimension xDim(xDimName_, gridDef.getXSize());
         CDMDataType xDataType = string2datatype(xXmlAttributes["type"]);
         std::vector<std::string> xDimShape;
-        xDimShape.push_back(xDim_.getName());
-        CDMVariable xVar(xName, xDataType, xDimShape);
+        xDimShape.push_back(xDimName_);
+        CDMVariable xVar(xDimName_, xDataType, xDimShape);
         vector<double> xData;
         xData.reserve(gridDef.getXSize());
         for (size_t i=0; i < gridDef.getXSize(); i++) {
             xData.push_back(gridDef.getXStart() + i*gridDef.getXIncrement());
         }
         xVar.setData(createData(xDataType, xData.begin(), xData.end()));
-        cdm_->addDimension(xDim_);
+        cdm_->addDimension(xDim);
         cdm_->addVariable(xVar);
         for (std::vector<CDMAttribute>::iterator attrIt = xVarAttributes.begin(); attrIt != xVarAttributes.end(); ++attrIt) {
-            cdm_->addAttribute(xName, *attrIt);
+            cdm_->addAttribute(xDimName_, *attrIt);
         }
     }
     {
@@ -368,22 +366,22 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
         if (found != 1) {
             throw CDMException("error in config-file: not exactly 1 entry for xpath: " + xpathStringY);
         }
-        std::string yName(yXmlAttributes["name"]);
-        yDim_ = CDMDimension(yName, gridDef.getYSize());
+        yDimName_ = yXmlAttributes["name"];
+        CDMDimension yDim(yDimName_, gridDef.getYSize());
         CDMDataType yDataType = string2datatype(yXmlAttributes["type"]);
         std::vector<std::string> yDimShape;
-        yDimShape.push_back(yDim_.getName());
-        CDMVariable yVar(yName, yDataType, yDimShape);
+        yDimShape.push_back(yDimName_);
+        CDMVariable yVar(yDimName_, yDataType, yDimShape);
         vector<double> yData;
         yData.reserve(gridDef.getYSize());
         for (size_t i=0; i < gridDef.getYSize(); i++) {
             yData.push_back(gridDef.getYStart() + i*gridDef.getYIncrement());
         }
         yVar.setData(createData(yDataType, yData.begin(), yData.end()));
-        cdm_->addDimension(yDim_);
+        cdm_->addDimension(yDim);
         cdm_->addVariable(yVar);
         for (std::vector<CDMAttribute>::iterator attrIt = yVarAttributes.begin(); attrIt != yVarAttributes.end(); ++attrIt) {
-            cdm_->addAttribute(yName, *attrIt);
+            cdm_->addAttribute(yDimName_, *attrIt);
         }
     }
 
@@ -391,7 +389,7 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
     std::string latName;
     {
         // read longitude and latitude names for projection axes
-        std::string xpathStringLong("/gr:cdmGridReaderConfig/gr:axes/gr:spatial_axis[@id='longitude']");
+        std::string xpathStringLong("/gr:cdmGribReaderConfig/gr:axes/gr:spatial_axis[@id='longitude']");
         std::vector<CDMAttribute> lonlatVarAttributes;
         std::map<string, string> lonlatXmlAttributes;
         int found = readXPathNodeWithCDMAttributes(*doc_, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes_);
@@ -399,7 +397,7 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
             throw CDMException("error in config-file: not exactly 1 entry for xpath: " + xpathStringLong);
         }
         longName = lonlatXmlAttributes["name"];
-        std::string xpathStringLat("/gr:cdmGridReaderConfig/gr:axes/gr:spatial_axis[@id='latitude']");
+        std::string xpathStringLat("/gr:cdmGribReaderConfig/gr:axes/gr:spatial_axis[@id='latitude']");
         found = readXPathNodeWithCDMAttributes(*doc_, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes_);
         if (found != 1) {
             throw CDMException("error in config-file: not exactly 1 entry for xpath: " + xpathStringLat);
@@ -408,13 +406,13 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
     }
 
     // add projection axes 'coordinates = "lon lat";
-    if (xDim_.getName() != longName && yDim_.getName() != latName) {
+    if (xDimName_ != longName && yDimName_ != latName) {
         coordinates = longName + " " + latName;
-        cdm_->generateProjectionCoordinates(projName, xDim_.getName(), yDim_.getName(), longName, latName);
+        cdm_->generateProjectionCoordinates(projName, xDimName_, yDimName_, longName, latName);
     }
 }
 
-void GribCDMReader::initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const map<string, CDMDimension>& levelDimsOfType)
+void GribCDMReader::initAddVariables(const std::string& projName, const std::string& coordinates, const map<string, CDMDimension>& levelDimsOfType)
 {
     for (vector<GribFileMessage>::const_iterator gfmIt = indices_.begin(); gfmIt != indices_.end(); ++gfmIt) {
         CDMDataType type = CDM_DOUBLE;
@@ -457,15 +455,14 @@ void GribCDMReader::initAddVariables(const std::string& projName, const std::str
 
             // map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
              std::vector<std::string> shape;
-             shape.push_back(xDim_.getName());
-             shape.push_back(yDim_.getName());
+             shape.push_back(xDimName_);
+             shape.push_back(yDimName_);
              string levelDimName = type2string(gfmIt->getEdition()) + "_" + type2string(gfmIt->getLevelType());
-             // TODO: add level values at one place or another
              map<string, CDMDimension>::const_iterator levelIt = levelDimsOfType.find(levelDimName);
              if (levelIt != levelDimsOfType.end()) {
                  shape.push_back(levelIt->second.getName());
              }
-             shape.push_back(timeDim.getName());
+             shape.push_back(timeDimName_);
 
              CDMVariable var(varName, type, shape);
              if (vectorCounterpart != "") {
@@ -495,7 +492,7 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
     // only time can be unLimDim for grib
-    if (unLimDimPos >= getData(timeDim_.getName())->size()) {
+    if (unLimDimPos >= getData(timeDimName_)->size()) {
         throw CDMException("requested time outside data-region");
     }
 
@@ -506,8 +503,8 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
     size_t xy_size = 1;
     for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
         CDMDimension& dim = cdm_->getDimension(*it);
-        if (dim.getName() != xDim_.getName() &&
-            dim.getName() != yDim_.getName() &&
+        if (dim.getName() != xDimName_ &&
+            dim.getName() != yDimName_ &&
             !dim.isUnlimited())
         {
             // level
@@ -544,19 +541,20 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
             }
         }
     }
-    // TODO: read data
+    // read data from file
     if (slices.size() == 0) return createData(variable.getDataType(), 0);
 
     // storage for complete data
+    // TODO: prefill with missing values
     boost::shared_ptr<DataImpl<double> > doubleData(new DataImpl<double>(xy_size));
     // storage for on layer
-    vector<double> gridData;
-    gridData.reserve(xy_size/slices.size());
+    vector<double> gridData(xy_size/slices.size(), 0);
     size_t dataCurrentPos = 0;
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels
         size_t dataRead = gribDataRead(*gfmIt, gridData);
-        doubleData->setValues(gridData.begin(), gridData.end(), dataCurrentPos);
+        LOG4FIMEX(logger, Logger::DEBUG, "reading " << dataRead << " doubles for variable " << gfmIt->getShortName() << " size " << (xy_size/slices.size()));
+        doubleData->setValues(&gridData[0], &gridData[dataRead], dataCurrentPos);
         dataCurrentPos += dataRead;
     }
     data = doubleData;

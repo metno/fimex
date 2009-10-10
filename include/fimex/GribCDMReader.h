@@ -54,9 +54,9 @@ private:
     std::string configFile_;
     std::vector<GribFileMessage> indices_;
     boost::shared_ptr<XMLDoc> doc_;
-    CDMDimension xDim_;
-    CDMDimension yDim_;
-    CDMDimension timeDim_;
+    std::string xDimName_;
+    std::string yDimName_;
+    std::string timeDimName_;
     // store ptimes of all times
     std::vector<boost::posix_time::ptime> times_;
     // store level parameters of level-ids: edition, level-type, level-no
@@ -87,9 +87,9 @@ private:
     /// key of the levelDimensions is gribEdition_levelType, i.e. 2_100
     void initLevels(long edition, const std::map<long, std::set<long> >& levelsOfType, std::map<std::string, CDMDimension>& levelDimsOfType);
     std::map<std::string, CDMDimension> initAddLevelDimensions();
-    CDMDimension initAddTimeDimension();
+    void initAddTimeDimension();
     void initAddProjection(std::string& projName, std::string& coordinates);
-    void initAddVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<std::string, CDMDimension>& levelDims);
+    void initAddVariables(const std::string& projName, const std::string& coordinates, const std::map<std::string, CDMDimension>& levelDims);
 
 };
 

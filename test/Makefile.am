@@ -35,10 +35,11 @@ endif
 if HAVE_NETCDF
   LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
   CC_TESTS += ${NETCDF_MI_TESTS}
+  GRIBAPI_NC_TESTS = testGribReader
   SH_TESTS += ${NETCDF_MI_SH_TESTS}
 endif
 if HAVE_GRIBAPI
-  CC_TESTS += ${GRIBAPI_MI_TESTS}
+  CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
 
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
@@ -55,6 +56,7 @@ testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testExtractor_SOURCES = testExtractor.cc
 testQualityExtractor_SOURCES = testQualityExtractor.cc

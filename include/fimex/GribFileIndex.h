@@ -47,7 +47,7 @@ public:
     ~GribFileMessage();
 
     /// test if this is a proper GribFileMessage or just the default constructor
-    bool isValid() const {return "" != getFileURL();}
+    bool isValid() const {return fileURL_ != "";}
     /// give a xml-string representation
     std::string toString() const;
     /// accessors

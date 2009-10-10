@@ -40,9 +40,9 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 @HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_TESTS}
 @HAVE_NETCDF_TRUE@am__append_9 = ${NETCDF_MI_SH_TESTS}
-@HAVE_GRIBAPI_TRUE@am__append_10 = ${GRIBAPI_MI_TESTS}
-TESTS = $(am__EXEEXT_8) $(am__EXEEXT_10)
-check_PROGRAMS = $(am__EXEEXT_8)
+@HAVE_GRIBAPI_TRUE@am__append_10 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
+TESTS = $(am__EXEEXT_9) $(am__EXEEXT_11)
+check_PROGRAMS = $(am__EXEEXT_9)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -76,13 +76,14 @@ CONFIG_CLEAN_FILES =
 @HAVE_FELT_OR_MILIB_TRUE@	testTimeInterpolator$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_6 = testGribWriter$(EXEEXT)
-@HAVE_GRIBAPI_TRUE@am__EXEEXT_7 = $(am__EXEEXT_6)
-am__EXEEXT_8 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
+@HAVE_NETCDF_TRUE@am__EXEEXT_7 = testGribReader$(EXEEXT)
+@HAVE_GRIBAPI_TRUE@am__EXEEXT_8 = $(am__EXEEXT_6) $(am__EXEEXT_7)
+am__EXEEXT_9 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
 	testInterpolation$(EXEEXT) testData$(EXEEXT) testCDM$(EXEEXT) \
 	testXMLDoc$(EXEEXT) testQualityExtractor$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
-	$(am__EXEEXT_5) $(am__EXEEXT_7)
+	$(am__EXEEXT_5) $(am__EXEEXT_8)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
@@ -135,6 +136,16 @@ am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
 testFeltReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
+	../src/felt/libfelt.la ../src/libfimex.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
+am_testGribReader_OBJECTS = testGribReader.$(OBJEXT)
+testGribReader_OBJECTS = $(am_testGribReader_OBJECTS)
+testGribReader_LDADD = $(LDADD)
+testGribReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 	../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -265,24 +276,26 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
-	$(testFeltReader_SOURCES) $(testGribWriter_SOURCES) \
-	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testQualityExtractor_SOURCES) \
-	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
-	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testXMLDoc_SOURCES)
+	$(testFeltReader_SOURCES) $(testGribReader_SOURCES) \
+	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
+	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
+	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
+	$(testUnits_SOURCES) $(testUtils_SOURCES) \
+	$(testXMLDoc_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
-	$(testFeltReader_SOURCES) $(testGribWriter_SOURCES) \
-	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testQualityExtractor_SOURCES) \
-	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
-	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testXMLDoc_SOURCES)
+	$(testFeltReader_SOURCES) $(testGribReader_SOURCES) \
+	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
+	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
+	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
+	$(testUnits_SOURCES) $(testUtils_SOURCES) \
+	$(testXMLDoc_SOURCES)
 ETAGS = etags
 CTAGS = ctags
-@HAVE_NETCDF_TRUE@am__EXEEXT_9 = $(NETCDF_MI_SH_TESTS)
-am__EXEEXT_10 = $(am__EXEEXT_9)
+@HAVE_NETCDF_TRUE@am__EXEEXT_10 = $(NETCDF_MI_SH_TESTS)
+am__EXEEXT_11 = $(am__EXEEXT_10)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -431,6 +444,7 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
+@HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
@@ -442,6 +456,7 @@ testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc 
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testExtractor_SOURCES = testExtractor.cc
 testQualityExtractor_SOURCES = testQualityExtractor.cc
@@ -504,6 +519,9 @@ testExtractor$(EXEEXT): $(testExtractor_OBJECTS) $(testExtractor_DEPENDENCIES)
 testFeltReader$(EXEEXT): $(testFeltReader_OBJECTS) $(testFeltReader_DEPENDENCIES) 
 	@rm -f testFeltReader$(EXEEXT)
 	$(CXXLINK) $(testFeltReader_OBJECTS) $(testFeltReader_LDADD) $(LIBS)
+testGribReader$(EXEEXT): $(testGribReader_OBJECTS) $(testGribReader_DEPENDENCIES) 
+	@rm -f testGribReader$(EXEEXT)
+	$(CXXLINK) $(testGribReader_OBJECTS) $(testGribReader_LDADD) $(LIBS)
 testGribWriter$(EXEEXT): $(testGribWriter_OBJECTS) $(testGribWriter_DEPENDENCIES) 
 	@rm -f testGribWriter$(EXEEXT)
 	$(CXXLINK) $(testGribWriter_OBJECTS) $(testGribWriter_LDADD) $(LIBS)
@@ -549,6 +567,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testFeltReader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testGribReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testGribWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolator.Po@am__quote@
