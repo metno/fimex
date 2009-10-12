@@ -184,7 +184,26 @@ public:
     }
 };
 
-
+/**
+ * Change the missing value
+ */
+template<typename IN, typename OUT>
+class ChangeMissingValue : public std::unary_function<IN, OUT>
+{
+private:
+    IN oldFill_;
+    OUT newFill_;
+public:
+    ChangeMissingValue(double oldFill, double newFill) :
+        oldFill_(static_cast<IN>(oldFill)), newFill_(static_cast<OUT>(newFill)) {}
+    OUT operator()(const IN& in) const {
+        if (in == oldFill_ || isinf(static_cast<double>(in))) {
+            return newFill_;
+        } else {
+            return static_cast<OUT>(in);
+        }
+    }
+};
 
 }
 

@@ -113,9 +113,12 @@ private:
 /**
  * read the data corresponding to the gfm to the vector data
  * data of at maximum data.size() will be read.
+ * @param gfm GribFileMessage to read from
+ * @param data the storage the data will be read to
+ * @param missingValue the missing- / fill-value the returned data will have
  * @return the actual amount of data read
  */
-size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data);
+size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, double missingValue);
 
 class GribFileIndex
 {

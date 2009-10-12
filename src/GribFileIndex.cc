@@ -627,7 +627,7 @@ string GribFileMessage::toString() const
     return string(reinterpret_cast<const char*> (buffer->content));
 }
 
-size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data)
+size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, double missingValue)
 {
     if (!gfm.isValid()) return 0;
     string url = gfm.getFileURL();
@@ -652,9 +652,15 @@ size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data)
     size_t size = 0;
     if (gh.get() != 0) {
         if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
-        // TODO: check data-size with grib_get_size(gh.get(), "values", &size)
-        size = data.size();
+        MIFI_GRIB_CHECK(grib_get_size(gh.get(), "values", &size), 0);
+        if (size > data.size()) size = data.size();
         MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &data[0], &size), 0);
+        double inputMissing;
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "missingValue", &inputMissing), 0);
+        if (inputMissing != missingValue) {
+            transform(&data[0], &data[size], &data[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
+        }
+
     } else {
         throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(gfm.getFilePosition()) + " msg: " + type2string(gfm.getMessageNumber()));
     }

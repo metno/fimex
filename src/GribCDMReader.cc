@@ -545,19 +545,25 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
     if (slices.size() == 0) return createData(variable.getDataType(), 0);
 
     // storage for complete data
-    // TODO: prefill with missing values
-    boost::shared_ptr<DataImpl<double> > doubleData(new DataImpl<double>(xy_size));
-    // storage for on layer
-    vector<double> gridData(xy_size/slices.size(), 0);
+    boost::shared_array<double> doubleArray(new double[xy_size]);
+    // prefill with missing values
+    double missingValue = cdm_->getFillValue(varName);
+    fill(&doubleArray[0], &doubleArray[xy_size], missingValue);
+    data = boost::shared_ptr<Data>(new DataImpl<double>(doubleArray, xy_size));
+    // storage for one layer
+    vector<double> gridData(xy_size/slices.size());
     size_t dataCurrentPos = 0;
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels
-        size_t dataRead = gribDataRead(*gfmIt, gridData);
-        LOG4FIMEX(logger, Logger::DEBUG, "reading " << dataRead << " doubles for variable " << gfmIt->getShortName() << " size " << (xy_size/slices.size()));
-        doubleData->setValues(&gridData[0], &gridData[dataRead], dataCurrentPos);
-        dataCurrentPos += dataRead;
+        if (gfmIt->isValid()) {
+            size_t dataRead = gribDataRead(*gfmIt, gridData, missingValue);
+            LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
+            copy(&gridData[0], &gridData[dataRead], &doubleArray[dataCurrentPos]);
+        } else {
+            LOG4FIMEX(logger, Logger::DEBUG, "skipping variable " << varName << ", 1 level, " << " size " << gridData.size());
+        }
+        dataCurrentPos += gridData.size(); // always forward a complete slice
     }
-    data = doubleData;
 
     return data;
 }
