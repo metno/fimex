@@ -1,3 +1,8 @@
+  * 2009-10-13 fimex-0.17
+    * adding grib version 1 and 2 reader (beta)
+    * adding program indexGribs to create index-files for large or distributed grib-files
+    * better integration to other projects started (api-changes)
+    * better support for ellipsoids
   * 2009-08-11 fimex-0.16
     * support for earth-ellipsoids as supported by CF-1.2 (earth_radius)
     * support for more projections, lambert conformal conic and mercator

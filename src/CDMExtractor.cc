@@ -23,7 +23,7 @@
 
 #include "fimex/CDMExtractor.h"
 #include "fimex/Data.h"
-#include "CDM.h"
+#include "fimex/CDM.h"
 
 namespace MetNoFimex
 {

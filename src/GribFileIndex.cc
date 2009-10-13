@@ -744,7 +744,6 @@ void GribFileIndex::initByXML(boost::filesystem::path xmlFilePath)
     boost::shared_ptr<XMLDoc> doc(new XMLDoc(xmlFilePath.file_string()));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     XPathObjPtr xp = doc->getXPathObject("/gfi:gribFileIndex");
-    cerr << xp->nodesetval->nodeNr;
     int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;
     if (size == 0) {
         throw runtime_error("grib-index xmlfile does not contain root node at: " + xmlFilePath.file_string());

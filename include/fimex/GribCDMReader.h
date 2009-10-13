@@ -77,7 +77,7 @@ private:
     /** Define which parameters to select
      * @param select can be "all", "definedOnly"
      */
-    void initSelectParamters(const std::string& select);
+    void initSelectParameters(const std::string& select);
     /**
      * find the node in the xml-config corresponding to the GribFileMessage
      * @return 0 if not found, otherwise a valid node

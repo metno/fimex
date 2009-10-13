@@ -35,6 +35,7 @@
 
 #include "fimex/GribCDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
 
 #define BOOST_TEST_MAIN
@@ -45,7 +46,7 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE(test_read) {
+BOOST_AUTO_TEST_CASE(test_read_grb1) {
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/test.grb1");
     if (!ifstream(fileName.c_str())) {
@@ -54,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_read) {
     }
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
-    defaultLogLevel(Logger::DEBUG);
+    defaultLogLevel(Logger::INFO);
     boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, topSrcDir+"/share/etc/cdmGribReaderConfig.xml"));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(true); // made it so far
@@ -62,6 +63,25 @@ BOOST_AUTO_TEST_CASE(test_read) {
     BOOST_CHECK(true); // and it is even writeable
 
 }
+
+BOOST_AUTO_TEST_CASE(test_read_grb2) {
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/test.grb2");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    vector<string> gribFiles;
+    gribFiles.push_back(fileName);
+    defaultLogLevel(Logger::INFO);
+    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, topSrcDir+"/share/etc/cdmGribReaderConfig.xml"));
+    //grbReader->getCDM().toXMLStream(cout);
+    BOOST_CHECK(true); // made it so far
+    Null_CDMWriter(grbReader, "");
+    BOOST_CHECK(true); // and it is even writeable
+
+}
+
 
 #else
 // no boost testframework

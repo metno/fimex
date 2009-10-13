@@ -164,6 +164,22 @@
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
+    <parameter name="cloud_cover" type="float">
+        <!-- multi-id for grib1 and grib2 -->
+        <!-- high clouds -->
+        <grib1 indicatorOfParameter="188" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <!-- medium clouds -->
+        <grib1 indicatorOfParameter="187" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <!-- low clouds -->
+        <grib1 indicatorOfParameter="186" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <!-- fog -->
+        <grib1 indicatorOfParameter="248" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <grib2 discipline="" parameterCategory="" parameterNumber=""/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="cloud coverage" type="string" />
+        <attribute name="units" value="%" type="string" />
+    </parameter>
+    
 </variables>
 
 </cdmGribReaderConfig>

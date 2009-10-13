@@ -22,7 +22,7 @@
  */
 
 #include "fimex/CDMReader.h"
-#include "CDM.h"
+#include "fimex/CDM.h"
 #include "fimex/interpolation.h"
 #include <boost/bind.hpp>
 #include "fimex/Data.h"

@@ -25,7 +25,7 @@
  */
 
 #include "fimex/CDMQualityExtractor.h"
-#include "CDM.h"
+#include "fimex/CDM.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"

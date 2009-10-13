@@ -34,6 +34,7 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/DataImpl.h"
+#include "fimex/ReplaceStringTimeObject.h"
 #include <algorithm>
 
 namespace MetNoFimex
@@ -103,10 +104,12 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
 
     // select wanted indices from doc, default to all
     {
-        XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[name='selectParameters']");
+        XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[@name='selectParameters']");
         size_t size = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
         if (size > 0) {
-            initSelectParamters(getXmlProp(xpathObj->nodesetval->nodeTab[0], "value"));
+            string select = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            LOG4FIMEX(logger, Logger::DEBUG, "selecting parameters: " << select);
+            initSelectParameters(select);
         }
     }
 
@@ -117,7 +120,7 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     // search indices for params with same gridDefinition (size,start,incr)
     double gridDefinitionDelta = 0.01;
     {
-        XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[name='gridDefinitionDelta']");
+        XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig/gr:processOptions/gr:option[@name='gridDefinitionDelta']");
         size_t size = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
         if (size > 0) {
             gridDefinitionDelta = string2type<double>(getXmlProp(xpathObj->nodesetval->nodeTab[0], "value"));
@@ -135,8 +138,15 @@ GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const st
     }
     indices_ = newIndices;
 
-    initAddGlobalAttributes();
+    // time-dimension needs to be added before global attributes due to replacements
     initAddTimeDimension();
+    // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
+    if (times_.size() > 0) {
+        templateReplacementAttributes_["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(times_.at(0))));
+        templateReplacementAttributes_["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(times_.at(times_.size()-1))));
+    }
+
+    initAddGlobalAttributes();
     map<string, CDMDimension> levelDims = initAddLevelDimensions();
     string projName, coordinates;
     initAddProjection(projName, coordinates);
@@ -161,7 +171,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     return 0;
 }
 
-void GribCDMReader::initSelectParamters(const std::string& select)
+void GribCDMReader::initSelectParameters(const std::string& select)
 {
     if (select == "all") {
         // nothing to do
@@ -425,6 +435,10 @@ void GribCDMReader::initAddVariables(const std::string& projName, const std::str
         }
         if (varName2gribMessages_.find(varName) == varName2gribMessages_.end()) {
             std::vector<CDMAttribute> attributes;
+            if (node != 0) {
+                fillAttributeListFromXMLNode(attributes, node->children, templateReplacementAttributes_);
+            }
+
             // add the projection
             attributes.push_back(CDMAttribute("grid_mapping",projName));
             if (coordinates != "") {
