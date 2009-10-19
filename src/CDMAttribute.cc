@@ -30,6 +30,7 @@
 #include "fimex/Utils.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMNamedEntity.h"
+#include "fimex/CDMconstants.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam
@@ -333,7 +334,7 @@ bool addAttributeToStream(const std::vector<CDMAttribute>& attrs, std::ostringst
     std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual(attrName));
     if (foundAttr != attrs.end()) {
         if (foundAttr->getData()->size() > 0) {
-            oproj << "+lon_0=" << foundAttr->getData()->asConstDouble()[0] << " ";
+            oproj << "+" << projName << "=" << foundAttr->getData()->asConstDouble()[0] << " ";
             return true;
         }
     }
@@ -412,7 +413,7 @@ std::string attributesToProjString(const std::vector<CDMAttribute>& attrs)
 	            oproj << "+e=0 "; // sphere
 	        }
 	    } else {
-	        oproj << "+a=6371000 +e=0 "; // default
+	        oproj << "+a=" << MIFI_EARTH_RADIUS_M << " +e=0 "; // default
 	    }
 
 	    // remove default definitions
