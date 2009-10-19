@@ -128,6 +128,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         // detect the bounding box in the final projection
         std::vector<std::string> variables = cdm_->findVariables("coordinates", ".*");
         if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
+        LOG4FIMEX(logger, Logger::DEBUG, "variables with coordinates: " << join(variables.begin(), variables.end(), ","));
         std::string var = variables[0];
         std::string coordinates = cdm_->getAttribute(var, "coordinates").getStringValue();
         string longitude, latitude;
@@ -728,10 +729,12 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	std::map<std::string, std::string> attrs;
 	if (orgProjection != "latitude_longitude") {
 		attrs["grid_mapping"] = orgProjection;
+		attrs["coordinates"] = ".*"; // double check
 	}
 	dims.push_back(orgXAxis);
 	dims.push_back(orgYAxis);
 	projectionVariables = cdm_->findVariables(attrs, dims);
+    LOG4FIMEX(logger, Logger::DEBUG, "projection variables (grid_mapping + coordinates, or latlong): " << join(projectionVariables.begin(), projectionVariables.end(), ","));
 
 
 	changeCDM(*cdm_.get(), proj_input, orgProjection, projectionVariables, orgXAxis, orgYAxis, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
