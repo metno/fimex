@@ -20,6 +20,7 @@ if HAVE_NETCDF
   libfimex_la_LDFLAGS += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 endif
 libfimex_la_SOURCES = interpolation.c \
+                     c_fimex.cc \
 					 CachedInterpolation.cc \
 					 CachedForwardInterpolation.cc \
 					 CachedVectorReprojection.cc \

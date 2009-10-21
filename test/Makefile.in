@@ -73,7 +73,8 @@ CONFIG_CLEAN_FILES =
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_4 = testNetcdfWriter$(EXEEXT) \
 @HAVE_FELT_OR_MILIB_TRUE@	testExtractor$(EXEEXT) \
 @HAVE_FELT_OR_MILIB_TRUE@	testInterpolator$(EXEEXT) \
-@HAVE_FELT_OR_MILIB_TRUE@	testTimeInterpolator$(EXEEXT)
+@HAVE_FELT_OR_MILIB_TRUE@	testTimeInterpolator$(EXEEXT) \
+@HAVE_FELT_OR_MILIB_TRUE@	test_c_consumer$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = $(am__EXEEXT_4)
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_6 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_7 = testGribReader$(EXEEXT)
@@ -262,9 +263,28 @@ testXMLDoc_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
+am_test_c_consumer_OBJECTS = test_c_consumer.$(OBJEXT)
+test_c_consumer_OBJECTS = $(am_test_c_consumer_OBJECTS)
+test_c_consumer_LDADD = $(LDADD)
+test_c_consumer_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
+	../src/felt/libfelt.la ../src/libfimex.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -282,7 +302,7 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
 	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
 	$(testUnits_SOURCES) $(testUtils_SOURCES) \
-	$(testXMLDoc_SOURCES)
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
 	$(testFeltReader_SOURCES) $(testGribReader_SOURCES) \
@@ -291,7 +311,7 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
 	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
 	$(testUnits_SOURCES) $(testUtils_SOURCES) \
-	$(testXMLDoc_SOURCES)
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 @HAVE_NETCDF_TRUE@am__EXEEXT_10 = $(NETCDF_MI_SH_TESTS)
@@ -442,7 +462,7 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../includ
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
-@HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
+@HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
@@ -464,10 +484,11 @@ testInterpolator_SOURCES = testInterpolator.cc
 testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
+test_c_consumer_SOURCES = test_c_consumer.c
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .lo .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -555,6 +576,9 @@ testUtils$(EXEEXT): $(testUtils_OBJECTS) $(testUtils_DEPENDENCIES)
 testXMLDoc$(EXEEXT): $(testXMLDoc_OBJECTS) $(testXMLDoc_DEPENDENCIES) 
 	@rm -f testXMLDoc$(EXEEXT)
 	$(CXXLINK) $(testXMLDoc_OBJECTS) $(testXMLDoc_LDADD) $(LIBS)
+test_c_consumer$(EXEEXT): $(test_c_consumer_OBJECTS) $(test_c_consumer_DEPENDENCIES) 
+	@rm -f test_c_consumer$(EXEEXT)
+	$(LINK) $(test_c_consumer_OBJECTS) $(test_c_consumer_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -579,6 +603,28 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

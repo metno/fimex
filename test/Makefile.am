@@ -29,7 +29,7 @@ endif
 if HAVE_FELT_OR_MILIB 
   CC_TESTS += testQualityExtractor
   NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
-  NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator
+  NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
   GRIBAPI_MI_TESTS = testGribWriter
 endif
 if HAVE_NETCDF
@@ -64,3 +64,4 @@ testInterpolator_SOURCES = testInterpolator.cc
 testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
+test_c_consumer_SOURCES = test_c_consumer.c

@@ -72,12 +72,13 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfimex_la_LIBADD =
-am__libfimex_la_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
-	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
-	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
-	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
-	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
+am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
+	CachedInterpolation.cc CachedForwardInterpolation.cc \
+	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
+	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
+	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
+	DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
@@ -87,12 +88,13 @@ am__libfimex_la_SOURCES_DIST = interpolation.c CachedInterpolation.cc \
 	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
-am_libfimex_la_OBJECTS = interpolation.lo CachedInterpolation.lo \
-	CachedForwardInterpolation.lo CachedVectorReprojection.lo \
-	CDM.lo CDMAttribute.lo CDMDimension.lo CDMDataType.lo \
-	CDMExtractor.lo CDMInterpolator.lo CDMNamedEntity.lo \
-	CDMQualityExtractor.lo CDMReader.lo CDMTimeInterpolator.lo \
-	CDMVariable.lo Data.lo DataTypeChanger.lo GribApiCDMWriter.lo \
+am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo \
+	CachedInterpolation.lo CachedForwardInterpolation.lo \
+	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
+	CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
+	CDMInterpolator.lo CDMNamedEntity.lo CDMQualityExtractor.lo \
+	CDMReader.lo CDMTimeInterpolator.lo CDMVariable.lo Data.lo \
+	DataTypeChanger.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
 	GribApiCDMWriter_Impl2.lo GribCDMReader.lo GribFileIndex.lo \
 	GridDefinition.lo Logger.lo NcmlCDMReader.lo Null_CDMWriter.lo \
@@ -278,12 +280,13 @@ libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lm \
 	@XML_LIBS@ $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4)
-libfimex_la_SOURCES = interpolation.c CachedInterpolation.cc \
-	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
-	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
-	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
-	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
+libfimex_la_SOURCES = interpolation.c c_fimex.cc \
+	CachedInterpolation.cc CachedForwardInterpolation.cc \
+	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
+	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
+	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
+	DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
@@ -397,6 +400,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_fimex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Plo@am__quote@
 
 .c.o:

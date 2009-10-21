@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.17.1],[heiko.klein@met.no])
+AC_INIT([fimex],[0.18beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -68,11 +68,11 @@ export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
 PKG_PROG_PKG_CONFIG()
 
 AC_LANG_PUSH(C++)
-# Check compiler supporting openmp in C++
+# Check compiler supporting openmp in C++ and C
 AC_ARG_ENABLE(openmp, [  --enable-openmp         enable use of openmp [[default=no]]],[
   if test "$enableval" = yes; then
 AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
-           CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],[])
+           CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS";CFLAGS="$CFLAGS $OPENMP_CXXFLAGS"],[])
   fi
 ], [])
 AC_LANG_POP(C++)
