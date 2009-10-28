@@ -73,12 +73,12 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfimex_la_LIBADD =
 am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
-	CachedInterpolation.cc CachedForwardInterpolation.cc \
-	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
-	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
-	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
-	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
-	DataTypeChanger.cc GribApiCDMWriter.cc \
+	C_CDMReader.cc CachedInterpolation.cc \
+	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
+	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
+	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
+	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
@@ -88,7 +88,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
-am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo \
+am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
 	CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
@@ -280,7 +280,7 @@ libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) \
 	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lm \
 	@XML_LIBS@ $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4)
-libfimex_la_SOURCES = interpolation.c c_fimex.cc \
+libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
@@ -373,6 +373,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMTimeInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/C_CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedForwardInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@

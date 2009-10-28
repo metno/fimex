@@ -40,6 +40,12 @@ extern "C" {
 typedef struct mifi_cdm_reader mifi_cdm_reader;
 
 /**
+ * Function pointer as used for the get_double_dataslice callback function
+ * @return 0 on success, error otherwise
+ */
+typedef int (*doubleDatasliceCallbackPtr)(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double* scaledData, size_t dataSize);
+
+/**
  * Free the reader. This won't free the resources immediately, but reduce the reference counter.
  * It is therefore possible to free a reader, while it still is used within another part of the fimex-chain.
  */
@@ -70,6 +76,27 @@ mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename);
  * @return 0 on success.
  */
 int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
+
+/**
+ * Get a new reader which allows setting c-callback functions.
+ * @param the original data-source
+ * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ */
+mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader);
+
+/**
+ * Add a callback for a variable. The variable will be converted to datatype double.
+ * @param c_reader the reader as created by #mifi_new_c_reader
+ * @param varName the name of the variable
+ * @param callback a function-ptr to the callback function
+ * @return 0 on success, else error
+ *
+ * @warning the callback function will only be able to modify data which is available
+ * in the reader. It cannot change any information the writer request, but the reader doesn't
+ * now about. This data will continue to be undefined!
+ */
+int mifi_set_callback_double(mifi_cdm_reader* c_reader, const char* varName, doubleDatasliceCallbackPtr callback);
+
 
 /**
  * Get the number of the variables from the reader.

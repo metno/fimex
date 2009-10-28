@@ -21,6 +21,7 @@ if HAVE_NETCDF
 endif
 libfimex_la_SOURCES = interpolation.c \
                      c_fimex.cc \
+                     C_CDMReader.cc \
 					 CachedInterpolation.cc \
 					 CachedForwardInterpolation.cc \
 					 CachedVectorReprojection.cc \

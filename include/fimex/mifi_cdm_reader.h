@@ -1,5 +1,5 @@
 /*
- * Fimex, C_CDMReader.h
+ * Fimex, mifi_cdm_reader.h
  *
  * (C) Copyright 2009, met.no
  *
@@ -20,40 +20,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- *  Created on: Oct 19, 2009
+ *  Created on: Oct 28, 2009
  *      Author: Heiko Klein
  */
 
-#ifndef C_CDMREADER_H_
-#define C_CDMREADER_H_
+#ifndef MIFI_CDM_READER_H_
+#define MIFI_CDM_READER_H_
 
-
+#include <boost/shared_ptr.hpp>
 #include "fimex/CDMReader.h"
-#include "fimex/c_fimex.h"
-#include <map>
-
-namespace MetNoFimex
-{
 
 /**
- * This class should be used by people who want write an implementation of a CDMReader in C. They should set
- * a callback-function to retrieve a variable with the getDataSlice functions.
- *
- * TODO: This class is under development, be careful when using it.
+ * wrapper class for boost::shared_ptr<CDMReader>, mainly for usage by
+ * C/C++ wrapper
  */
-class C_CDMReader: public CDMReader
-{
+class mifi_cdm_reader {
 public:
-    C_CDMReader(boost::shared_ptr<CDMReader> dataReader);
-    virtual ~C_CDMReader();
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
-    virtual void setDoubleCallbackFunction(const std::string& varName, doubleDatasliceCallbackPtr callback);
+    mifi_cdm_reader(boost::shared_ptr<MetNoFimex::CDMReader> reader) : reader_(reader) {}
+    boost::shared_ptr<MetNoFimex::CDMReader> get() {return reader_;}
 private:
-    boost::shared_ptr<CDMReader> dataReader_;
-    std::map<std::string, doubleDatasliceCallbackPtr> doubleCallbacks_;
-
+    boost::shared_ptr<MetNoFimex::CDMReader> reader_;
 };
 
-}
 
-#endif /* C_CDMREADER_H_ */
+#endif /* MIFI_CDM_READER_H_ */

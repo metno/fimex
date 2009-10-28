@@ -181,10 +181,43 @@ int testNetcdfReadNetcdfWrite() {
     return retVal;
 }
 
+int doubleCallback(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double* scaledData, size_t dataSize)
+{
+    for (int i = 0; i < dataSize; ++i) {
+        *scaledData++ = (double) i;
+    }
+    return 0;
+}
+
+int testCReader(const char* feltFile, const char* configFile) {
+    int retVal = 0;
+
+    mifi_cdm_reader *feltReader = mifi_new_felt_reader(feltFile, configFile);
+    if (feltReader == NULL) {
+        retVal++;
+        fprintf(stderr, "error reading felt-file\n");
+    }
+
+    mifi_cdm_reader *cReader = mifi_new_c_reader(feltReader);
+    if (mifi_set_callback_double(cReader, "land_ice_area_fraction", &doubleCallback) != 0) {
+        retVal++;
+        fprintf(stderr, "error in setting a callback");
+    }
+
+    if (mifi_netcdf_writer(cReader, "test.nc",0,3) != 0) {
+        retVal++;
+        fprintf(stderr, "error in writing netcdf-file test.nc\n");
+    }
+
+    mifi_free_cdm_reader(cReader);
+    mifi_free_cdm_reader(feltReader);
+    return retVal;
+}
+
 
 int main(int argc, char* argv[])
 {
-    int tests = 5;
+    int tests = 6;
     int retVal = tests;
 
     // setup
@@ -214,6 +247,7 @@ int main(int argc, char* argv[])
     if (testFeltData(feltFile, configFile) == 0) retVal--;
     if (testFeltReadNetcdfWrite(feltFile, configFile) == 0) retVal--;
     if (testNetcdfReadNetcdfWrite(feltFile, configFile) == 0) retVal--;
+    if (testCReader(feltFile, configFile) == 0) retVal--;
 
 
     if (retVal == 0) {

@@ -27,6 +27,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include "fimex/c_fimex.h"
+#include "fimex/mifi_cdm_reader.h"
 #include "fimex/config.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
@@ -36,6 +37,7 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #endif
+#include "fimex/C_CDMReader.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
 
@@ -47,17 +49,6 @@ using namespace std;
  */
 
 static LoggerPtr logger = getLogger("c_fimex");
-
-/**
- * wrapper class for boost::shared_ptr<CDMReader>
- */
-class mifi_cdm_reader {
-public:
-    mifi_cdm_reader(boost::shared_ptr<CDMReader> reader) : reader_(reader) {}
-    boost::shared_ptr<CDMReader> get() {return reader_;}
-private:
-    boost::shared_ptr<CDMReader> reader_;
-};
 
 void mifi_free_cdm_reader(mifi_cdm_reader* reader)
 {
@@ -102,6 +93,34 @@ int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char
     return -1;
 }
 #endif
+
+mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader)
+{
+    try {
+        boost::shared_ptr<C_CDMReader> c_reader(new C_CDMReader(reader->get()));
+        return new mifi_cdm_reader(c_reader);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_c_reader: " << ex.what());
+    }
+    return 0;
+}
+
+int mifi_set_callback_double(mifi_cdm_reader* c_reader, const char* varName, doubleDatasliceCallbackPtr callback)
+{
+    try {
+        boost::shared_ptr<CDMReader> reader = c_reader->get();
+        C_CDMReader* cReaderPtr = dynamic_cast<C_CDMReader*>(reader.get());
+        cReaderPtr->setDoubleCallbackFunction(string(varName), callback);
+        return 0;
+    } catch (std::bad_cast& bc) {
+        LOG4FIMEX(logger, Logger::WARN, "mifi_set_callback_double called with a different CDMReader, not C_CDMReader: " + string(bc.what()));
+        return -2;
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_c_reader: " << ex.what());
+    }
+    return -1;
+}
+
 
 size_t mifi_get_variable_number(mifi_cdm_reader* reader)
 {
