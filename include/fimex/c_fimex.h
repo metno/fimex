@@ -68,6 +68,32 @@ mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFi
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename);
 
 /**
+ * Get a new reader from a grib1/2 file.
+ * @param filename name of the grib-file
+ * @param configFile configuration file for the grib-file
+ * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ */
+mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile);
+
+
+/**
+ * Get a new reader from a ncml file.
+ * @param ncmlFile name of the ncml config file
+ * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ */
+mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile);
+
+/**
+ * Modify a reader using a ncml file.
+ * @param reader the data/cdm source
+ * @param ncmlFile name of the ncml config file
+ * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ */
+mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile);
+
+
+
+/**
  * Write the content of the reader to the filename.
  * @param reader the data source
  * @param filename the name of the netcdf-file to write
@@ -76,6 +102,37 @@ mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename);
  * @return 0 on success.
  */
 int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
+
+/**
+ * Write the content of the reader to the filename as gribfile.
+ * @param reader the data source
+ * @param filename the name of the grib-file to write
+ * @param configFile an optional configFile, use "" or 0 if not needed
+ * @param version, the version of the grib-edition. Implemented are 1 or 2.
+ * @return 0 on success.
+ */
+int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
+
+
+/**
+ * Fetch the whole data belonging to the cdm, but don't write it anywhere.
+ * @param reader the data source
+ * @return 0 on success.
+ */
+int mifi_nullcdm_writer(mifi_cdm_reader* reader);
+
+/**
+ * @brief change the projection of the reader to this new projection
+ *
+ * @param method Interpolation method
+ * @param proj_input input-string for proj4, used as output projection
+ * @param out_x_axis config-string for x_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
+ * @param out_y_axis config-string for y_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
+ * @param out_x_axis_unit unit of the output x-axis
+ * @param out_y_axis_unit unit of the output y-axis
+ * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ */
+mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, const char* proj_input, const char* out_x_axis, const char* out_y_axis, const char* out_x_axis_unit, const char* out_y_axis_unit);
 
 /**
  * Get a new reader which allows setting c-callback functions.

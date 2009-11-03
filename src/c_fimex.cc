@@ -26,6 +26,7 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <vector>
 #include "fimex/c_fimex.h"
 #include "fimex/mifi_cdm_reader.h"
 #include "fimex/config.h"
@@ -37,7 +38,14 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #endif
+#ifdef HAVE_GRIBAPI_H
+#include "fimex/GribApiCDMWriter.h"
+#include "fimex/GribCDMReader.h"
+#endif
+#include "fimex/NcmlCDMReader.h"
+#include "fimex/Null_CDMWriter.h"
 #include "fimex/C_CDMReader.h"
+#include "fimex/CDMInterpolator.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
 
@@ -73,11 +81,50 @@ mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
         boost::shared_ptr<NetCDF_CF10_CDMReader> reader(new NetCDF_CF10_CDMReader(filename));
         return new mifi_cdm_reader(reader);
     } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in netcdf-cdmwriter: " << ex.what());
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_netcdf_reader: " << ex.what());
     }
     return 0;
 }
 #endif
+
+#ifdef HAVE_GRIBAPI_H
+mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile)
+{
+    try {
+        std::vector<string> files;
+        files.push_back(filename);
+        boost::shared_ptr<GribCDMReader> reader(new GribCDMReader(files, configFile));
+        return new mifi_cdm_reader(reader);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_grib_reader: " << ex.what());
+    }
+    return 0;
+}
+#endif
+
+
+mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
+{
+    try {
+        boost::shared_ptr<NcmlCDMReader> reader(new NcmlCDMReader(ncmlFile));
+        return new mifi_cdm_reader(reader);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in ncmlCDMReader: " << ex.what());
+    }
+    return 0;
+}
+
+mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile)
+{
+    try {
+        boost::shared_ptr<NcmlCDMReader> ncml_reader(new NcmlCDMReader(reader->get(), ncmlFile));
+        return new mifi_cdm_reader(ncml_reader);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in ncml_modifier: " << ex.what());
+    }
+    return 0;
+}
+
 
 #ifdef HAVE_NETCDF
 int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
@@ -93,6 +140,45 @@ int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char
     return -1;
 }
 #endif
+
+#ifdef HAVE_GRIBAPI_H
+int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
+{
+    try {
+        string file = (filename == 0) ? "" : filename;
+        string config = (configFile == 0) ? "" : configFile;
+        GribApiCDMWriter(reader->get(), file, version, config);
+        return 0;
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_grib_writer: " << ex.what());
+    }
+    return -1;
+}
+#endif
+
+int mifi_nullcdm_writer(mifi_cdm_reader* reader)
+{
+    try {
+        Null_CDMWriter(reader->get(),"");
+        return 0;
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in null-cdmwriter: " << ex.what());
+    }
+    return -1;
+}
+
+mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, const char* proj_input, const char* out_x_axis, const char* out_y_axis, const char* out_x_axis_unit, const char* out_y_axis_unit)
+{
+    try {
+        boost::shared_ptr<CDMInterpolator> interpol(new CDMInterpolator(reader->get()));
+        interpol->changeProjection(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit);
+        return new mifi_cdm_reader(interpol);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_cdminterpolator: " << ex.what());
+    }
+    return 0;
+}
+
 
 mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader)
 {
