@@ -232,9 +232,9 @@ int main(int argc, char* argv[])
     FILE *fh = fopen(feltFile, "r");
     if (fh == NULL) {
         tests = 0;
+    } else {
+        fclose(fh);
     }
-    fclose(fh);
-
 
     printf("Running %d test cases...\n", tests);
     if (tests == 0) {
