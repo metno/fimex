@@ -218,7 +218,6 @@ int testCReader(const char* feltFile, const char* configFile) {
 int main(int argc, char* argv[])
 {
     int tests = 6;
-    int retVal = tests;
 
     // setup
     char* feltFile = (char*) calloc(1024, sizeof(char));
@@ -236,9 +235,10 @@ int main(int argc, char* argv[])
         fclose(fh);
     }
 
+    int retVal = tests;
     printf("Running %d test cases...\n", tests);
     if (tests == 0) {
-        exit(retVal);
+        exit(0);
     }
 
     // the tests

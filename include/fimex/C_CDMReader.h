@@ -39,7 +39,6 @@ namespace MetNoFimex
  * This class should be used by people who want write an implementation of a CDMReader in C. They should set
  * a callback-function to retrieve a variable with the getDataSlice functions.
  *
- * TODO: This class is under development, be careful when using it.
  */
 class C_CDMReader: public CDMReader
 {

@@ -1,3 +1,8 @@
+  * 2009-11-13 fimex-0.18
+    * addition of C-API (c-fimex.h)
+  * 2009-10-19 fimex-0.17.1
+    * bugfix in translation of CF projection parameters to proj4
+    * double-check of projected variables to contain 'grid_parameter' and 'coordinates' attributes
   * 2009-10-13 fimex-0.17
     * adding grib version 1 and 2 reader (beta)
     * adding program indexGribs to create index-files for large or distributed grib-files
