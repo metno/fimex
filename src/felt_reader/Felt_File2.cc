@@ -104,6 +104,7 @@ void Felt_File2::init(const std::map<std::string, std::string>& options) throw(F
 	logger = getLogger("fimex.Felt_File2");
 	setOptions(options);
 	feltFile_ = boost::shared_ptr<felt::FeltFile>(new felt::FeltFile(boost::filesystem::path(filename_)));
+	feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
 	for (felt::FeltFile::const_iterator ffit = feltFile_->begin(); ffit != feltFile_->end(); ++ffit) {
 	    felt::FeltFile::FeltFieldPtr field = *ffit;
 	    const felt::FeltField::Header& header = field->getHeader();
