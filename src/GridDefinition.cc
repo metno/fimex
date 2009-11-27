@@ -24,6 +24,8 @@
  *      Author: Heiko Klein
  */
 
+#include "fimex/config.h"
+#ifdef HAVE_GRIBAPI_H
 #include "fimex/GridDefinition.h"
 #include <cmath>
 
@@ -168,3 +170,5 @@ bool GridDefinition::comparableTo(const GridDefinition& rhs, double delta) const
 
 
 }
+
+#endif /* HAVE_GRIB_API */

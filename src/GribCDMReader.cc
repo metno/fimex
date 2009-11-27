@@ -24,6 +24,8 @@
  *      Author: Heiko Klein
  */
 
+#include "fimex/config.h"
+#ifdef HAVE_GRIBAPI_H
 #include "fimex/CDM.h"
 #include "fimex/GribCDMReader.h"
 #include "fimex/GridDefinition.h"
@@ -584,3 +586,4 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
 
 
 }
+#endif /* HAVE_GRIBAPI_H */

@@ -99,7 +99,7 @@ AC_DEFUN([METNO_HAVE_UDUNITS], [
          AC_CHECK_LIB([udunits2], [utInit],
             [AC_SUBST(UDUNITS_CPPFLAGS, [-I$ac_udunits_path/include])
                AC_SUBST(UDUNITS_LDFLAGS, [-L$ac_udunits_path/lib])
-               AC_SUBST(UDUNITS_LIBS, [-ludunits])
+               AC_SUBST(UDUNITS_LIBS, [-ludunits2])
                AC_DEFINE([HAVE_UDUNITS])
                have_udunits=yes
                $1

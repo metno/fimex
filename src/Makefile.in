@@ -38,6 +38,7 @@ host_triplet = @host@
 @HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 @HAVE_NETCDF_TRUE@am__append_5 = NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+@HAVE_MILIB_TRUE@am__append_6 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -78,29 +79,37 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
-	CDMVariable.cc Data.cc DataTypeChanger.cc GribApiCDMWriter.cc \
+	CDMVariable.cc CDM_XMLConfigHelper.cc Data.cc \
+	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
+	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
 	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
 	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
-	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
+	FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
+@HAVE_MILIB_TRUE@am__objects_2 = FeltCDMReader.lo Felt_Array.lo \
+@HAVE_MILIB_TRUE@	Felt_File.lo
 am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
 	CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMInterpolator.lo CDMNamedEntity.lo CDMQualityExtractor.lo \
-	CDMReader.lo CDMTimeInterpolator.lo CDMVariable.lo Data.lo \
-	DataTypeChanger.lo GribApiCDMWriter.lo \
+	CDMReader.lo CDMTimeInterpolator.lo CDMVariable.lo \
+	CDM_XMLConfigHelper.lo Data.lo DataTypeChanger.lo \
+	Felt_Array2.lo FeltCDMReader2.lo Felt_File2.lo \
+	FeltParameters.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
 	GribApiCDMWriter_Impl2.lo GribCDMReader.lo GribFileIndex.lo \
 	GridDefinition.lo Logger.lo NcmlCDMReader.lo Null_CDMWriter.lo \
 	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
 	SpatialAxisSpec.lo TimeLevelDataSliceFetcher.lo TimeUnit.lo \
-	TimeSpec.lo Units.lo Utils.lo XMLDoc.lo $(am__objects_1)
+	TimeSpec.lo Units.lo Utils.lo XMLDoc.lo $(am__objects_1) \
+	$(am__objects_2)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -269,30 +278,32 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = felt felt_reader . binSrc
+SUBDIRS = felt . binSrc
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 lib_LTLIBRARIES = libfimex.la
 libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) \
-	felt_reader/libfimex_felt.la felt/libfelt.la $(BOOST_LDFLAGS) \
-	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
-	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lm \
-	@XML_LIBS@ $(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4)
+	felt/libfelt.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) \
+	$(BOOST_FILESYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) \
+	$(BOOST_DATE_TIME_LIB) -lm @XML_LIBS@ $(am__append_1) \
+	$(am__append_2) $(am__append_3) $(am__append_4)
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
-	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc Data.cc \
-	DataTypeChanger.cc GribApiCDMWriter.cc \
+	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc \
+	CDM_XMLConfigHelper.cc Data.cc DataTypeChanger.cc \
+	Felt_Array2.cc FeltCDMReader2.cc Felt_File2.cc \
+	FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
 	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
-	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc $(am__append_5)
+	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc $(am__append_5) \
+	$(am__append_6)
 all: all-recursive
 
 .SUFFIXES:
@@ -373,12 +384,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMTimeInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM_XMLConfigHelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/C_CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedForwardInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltParameters.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_Array.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_Array2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_File.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_File2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl2.Plo@am__quote@

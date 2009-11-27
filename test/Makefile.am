@@ -9,7 +9,7 @@ CC_TESTS = testBinaryConstants \
            testXMLDoc \
            testQualityExtractor
 SH_TESTS = 
-LDADD = ../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
+LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 AM_CXXFLAGS = -Wall

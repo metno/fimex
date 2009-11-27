@@ -96,8 +96,7 @@ am__DEPENDENCIES_1 =
 @HAVE_MILIB_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
 @HAVE_NETCDF_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
-testBinaryConstants_DEPENDENCIES =  \
-	../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la \
+testBinaryConstants_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -106,8 +105,7 @@ testBinaryConstants_DEPENDENCIES =  \
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
-testCDM_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testCDM_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -116,8 +114,7 @@ testCDM_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testData_OBJECTS = testData.$(OBJEXT)
 testData_OBJECTS = $(am_testData_OBJECTS)
 testData_LDADD = $(LDADD)
-testData_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testData_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -126,8 +123,7 @@ testData_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
 testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
 testExtractor_LDADD = $(LDADD)
-testExtractor_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testExtractor_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -136,9 +132,8 @@ testExtractor_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
-testFeltReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+testFeltReader_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -146,9 +141,8 @@ testFeltReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testGribReader_OBJECTS = testGribReader.$(OBJEXT)
 testGribReader_OBJECTS = $(am_testGribReader_OBJECTS)
 testGribReader_LDADD = $(LDADD)
-testGribReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+testGribReader_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -156,9 +150,8 @@ testGribReader_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testGribWriter_OBJECTS = testGribWriter.$(OBJEXT)
 testGribWriter_OBJECTS = $(am_testGribWriter_OBJECTS)
 testGribWriter_LDADD = $(LDADD)
-testGribWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+testGribWriter_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -166,9 +159,8 @@ testGribWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
-testInterpolation_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+testInterpolation_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -176,9 +168,8 @@ testInterpolation_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
 testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
-testInterpolator_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+testInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -186,9 +177,8 @@ testInterpolator_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
-testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+testNetcdfWriter_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -196,8 +186,7 @@ testNetcdfWriter_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testQualityExtractor_OBJECTS = testQualityExtractor.$(OBJEXT)
 testQualityExtractor_OBJECTS = $(am_testQualityExtractor_OBJECTS)
 testQualityExtractor_LDADD = $(LDADD)
-testQualityExtractor_DEPENDENCIES =  \
-	../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la \
+testQualityExtractor_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -206,8 +195,7 @@ testQualityExtractor_DEPENDENCIES =  \
 am_testSpatialAxisSpec_OBJECTS = testSpatialAxisSpec.$(OBJEXT)
 testSpatialAxisSpec_OBJECTS = $(am_testSpatialAxisSpec_OBJECTS)
 testSpatialAxisSpec_LDADD = $(LDADD)
-testSpatialAxisSpec_DEPENDENCIES =  \
-	../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la \
+testSpatialAxisSpec_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -216,8 +204,7 @@ testSpatialAxisSpec_DEPENDENCIES =  \
 am_testTimeInterpolator_OBJECTS = testTimeInterpolator.$(OBJEXT)
 testTimeInterpolator_OBJECTS = $(am_testTimeInterpolator_OBJECTS)
 testTimeInterpolator_LDADD = $(LDADD)
-testTimeInterpolator_DEPENDENCIES =  \
-	../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la \
+testTimeInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -226,8 +213,7 @@ testTimeInterpolator_DEPENDENCIES =  \
 am_testTimeSpec_OBJECTS = testTimeSpec.$(OBJEXT)
 testTimeSpec_OBJECTS = $(am_testTimeSpec_OBJECTS)
 testTimeSpec_LDADD = $(LDADD)
-testTimeSpec_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testTimeSpec_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -236,8 +222,7 @@ testTimeSpec_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testUnits_OBJECTS = testUnits.$(OBJEXT)
 testUnits_OBJECTS = $(am_testUnits_OBJECTS)
 testUnits_LDADD = $(LDADD)
-testUnits_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testUnits_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -246,8 +231,7 @@ testUnits_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testUtils_OBJECTS = testUtils.$(OBJEXT)
 testUtils_OBJECTS = $(am_testUtils_OBJECTS)
 testUtils_LDADD = $(LDADD)
-testUtils_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testUtils_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -256,8 +240,7 @@ testUtils_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
 testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
 testXMLDoc_LDADD = $(LDADD)
-testXMLDoc_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
+testXMLDoc_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -266,9 +249,8 @@ testXMLDoc_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
 am_test_c_consumer_OBJECTS = test_c_consumer.$(OBJEXT)
 test_c_consumer_OBJECTS = $(am_test_c_consumer_OBJECTS)
 test_c_consumer_LDADD = $(LDADD)
-test_c_consumer_DEPENDENCIES = ../src/felt_reader/libfimex_felt.la \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
@@ -452,11 +434,10 @@ CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	$(am__append_5) $(am__append_6) $(am__append_8) \
 	$(am__append_10)
 SH_TESTS = $(am__append_9)
-LDADD = ../src/felt_reader/libfimex_felt.la ../src/felt/libfelt.la \
-	../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) \
-	$(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) \
-	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@ \
-	$(am__append_1) $(am__append_3) $(am__append_4) \
+LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) \
+	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
+	$(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm \
+	@XML_LIBS@ $(am__append_1) $(am__append_3) $(am__append_4) \
 	$(am__append_7)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 AM_CXXFLAGS = -Wall

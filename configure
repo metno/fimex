@@ -20906,7 +20906,7 @@ if test $ac_cv_lib_udunits2_utInit = yes; then
 
                UDUNITS_LDFLAGS=-L$ac_udunits_path/lib
 
-               UDUNITS_LIBS=-ludunits
+               UDUNITS_LIBS=-ludunits2
 
                cat >>confdefs.h <<\_ACEOF
 #define HAVE_UDUNITS 1
@@ -25681,7 +25681,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_config_headers="$ac_config_headers include/fimex/config.h"
 
-ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt/Makefile src/felt_reader/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/felt/Makefile include/kdtree++/Makefile"
+ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/felt/Makefile include/kdtree++/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -26322,7 +26322,6 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/felt/Makefile") CONFIG_FILES="$CONFIG_FILES src/felt/Makefile" ;;
-    "src/felt_reader/Makefile") CONFIG_FILES="$CONFIG_FILES src/felt_reader/Makefile" ;;
     "src/binSrc/Makefile") CONFIG_FILES="$CONFIG_FILES src/binSrc/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "share/etc/Makefile") CONFIG_FILES="$CONFIG_FILES share/etc/Makefile" ;;
