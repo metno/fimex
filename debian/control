@@ -1,0 +1,42 @@
+Source: fimex
+Priority: extra
+Maintainer: Heiko Klein <heiko.klein@met.no>
+Build-Depends: debhelper (>= 5), autotools-dev, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libboost-test1.34.1, libc6-dev, libxml2-dev, proj, udunits-dev, libnetcdf-dev
+Standards-Version: 3.7.2
+Section: libs
+
+Package: libfimex-dev
+Section: libdevel
+Architecture: any
+Depends: libfimex (= ${Source-Version}), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-program-options-dev, libboost-regex-dev, libc6-dev, libxml2-dev, proj, libudunits-dev, libnetcdf-dev
+Description: fimex library for geo-spatial gridded data
+ Fimex is a program for File Interpolations, Manipulations and EXtraction
+ of gridded geo-spatial data.
+
+Package: libfimex
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libudunits2, libnetcdf4, libboost-date-time1.34.1, libboost-filesystem1.34.1, libboost-regex1.34.1, libxml2, proj 
+Description: fimex library for geo-spatial gridded data
+ Fimex is a program for File Interpolations, Manipulations and EXtraction
+ of gridded geo-spatial data.
+
+Package: fimex-bin
+Section: science
+Architecture: any
+Depends: libfimex (= ${Source-Version}), libboost-program-options
+Description: fimex command line utility
+ Fimex is a program for File Interpolations, Manipulations and EXtraction
+ of gridded geo-spatial data.
+
+Package: libfelt
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-date-time1.34.1, libboost-filesystem1.34.1, proj
+Description: libfelt is a c++ library for reading met.no's felt-files
+
+Package: libfelt-dev
+Section: libdevel
+Architecture: any
+Depends: libfelt (= ${Source-Version}), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libc6-dev, proj
+Description: libfelt is a c++ library for reading met.no's felt-files

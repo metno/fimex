@@ -1,0 +1,6 @@
+usr/include/fimex/*
+usr/include/kdtree++/*
+usr/lib/libfimex*.a
+usr/lib/libfimex*.so
+usr/lib/*fimex*.la
+usr/lib/pkgconfig/*
