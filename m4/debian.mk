@@ -3,6 +3,7 @@
 # requires: all debian-files are in 'debian_files' catalogue
 #           update changelog for correct version
 #           dpkg-buildpackage
+#           devscripts
 #           lintian
 # generates targets: update-debian
 #                    debian
