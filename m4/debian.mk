@@ -28,7 +28,7 @@ update-debian:
 	chmod 774 $(DEBIAN_DIR)/rules
 	cd $(PKG_DIR) && dpkg-buildpackage -rfakeroot -us -uc -nc
 
-lintian: update-debian
+lintian:
 	lintian libfelt_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 	lintian libfelt-dev_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 	lintian libfimex_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
