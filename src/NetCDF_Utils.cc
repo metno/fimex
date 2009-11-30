@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "fimex/NetCDF_Utils.h"
+#include "NetCDF_Utils.h"
 #include <boost/shared_array.hpp>
 #include "fimex/DataImpl.h"
 

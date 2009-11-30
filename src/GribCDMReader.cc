@@ -27,10 +27,11 @@
 #include "fimex/config.h"
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/CDM.h"
+#include <boost/regex.hpp>
 #include "fimex/GribCDMReader.h"
 #include "fimex/GridDefinition.h"
 #include "fimex/GribFileIndex.h"
-#include "fimex/CDM_XMLConfigHelper.h"
+#include "CDM_XMLConfigHelper.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"

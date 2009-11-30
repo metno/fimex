@@ -26,10 +26,18 @@
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 #include "fimex/CDMException.h"
-#include "fimex/XMLDoc.h"
+
+//forward decl;
+struct _xmlDoc;
+struct _xmlXPathContext;
+struct _xmlXPathObject;
+struct _xmlNode;
+typedef struct _xmlDoc xmlDoc;
+typedef struct _xmlNode xmlNode;
+typedef struct _xmlXPathContext xmlXPathContext;
+typedef xmlNode* xmlNodePtr;
+typedef struct _xmlXPathObject xmlXPathObject;
 
 namespace MetNoFimex
 {

@@ -38,6 +38,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <cstdio>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 
 namespace MetNoFimex

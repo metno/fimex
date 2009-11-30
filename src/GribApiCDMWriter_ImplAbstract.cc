@@ -31,6 +31,8 @@
 #include "fimex/Data.h"
 #include <cmath>
 #include <functional>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 namespace MetNoFimex
 {

@@ -33,7 +33,7 @@
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
-#include "fimex/CDM_XMLConfigHelper.h"
+#include "CDM_XMLConfigHelper.h"
 #include "felt/FeltGridDefinition.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>

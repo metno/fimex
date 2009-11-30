@@ -22,7 +22,7 @@
  */
 
 #include "fimex/NetCDF_CF10_CDMReader.h"
-#include "fimex/NetCDF_Utils.h"
+#include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
 #include "netcdfcpp.h"
 

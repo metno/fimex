@@ -33,10 +33,12 @@ extern "C" {
 #include "fimex/interpolation.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataTypeChanger.h"
-#include "fimex/NetCDF_Utils.h"
+#include "NetCDF_Utils.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
 

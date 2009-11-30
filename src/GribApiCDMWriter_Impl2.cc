@@ -30,6 +30,8 @@
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 namespace MetNoFimex
 {

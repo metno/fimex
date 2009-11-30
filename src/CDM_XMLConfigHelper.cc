@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/CDM_XMLConfigHelper.h"
+#include "CDM_XMLConfigHelper.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMAttribute.h"
 #include "fimex/ReplaceStringObject.h"

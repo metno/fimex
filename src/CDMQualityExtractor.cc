@@ -30,6 +30,8 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/XMLDoc.h"
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 #include "fimex/interpolation.h" // for constants
 #include <boost/regex.hpp>
 #include <algorithm>

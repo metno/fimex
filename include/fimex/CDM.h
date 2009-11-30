@@ -28,7 +28,7 @@
 #include <vector>
 #include <string>
 #include <ostream>
-#include <boost/regex.hpp>
+#include <boost/regex_fwd.hpp>
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"

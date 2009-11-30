@@ -26,6 +26,8 @@
 
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/XMLDoc.h"
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"

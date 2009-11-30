@@ -32,6 +32,8 @@ using boost::unit_test_framework::test_suite;
 
 #include <iostream>
 #include "fimex/XMLDoc.h"
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 using namespace std;
 using namespace MetNoFimex;
