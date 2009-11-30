@@ -716,13 +716,15 @@ update-debian:
 	cp -r $(top_srcdir)/debian_files/* $(DEBIAN_DIR)
 	chmod 774 $(DEBIAN_DIR)/rules
 	cd $(PKG_DIR) && dpkg-buildpackage -rfakeroot -us -uc -nc
+
+lintian:
 	lintian libfelt_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 	lintian libfelt-dev_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 	lintian libfimex_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 	lintian libfimex-dev_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 	lintian fimex-bin_$(DEBIAN_PACKAGE_VERSION)_$(ARCH).deb
 
-debian: prepare-debian update-debian
+debian: prepare-debian update-debian lintian
 
 clean-debian:
 	debclean
