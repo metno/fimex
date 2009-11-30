@@ -37,7 +37,7 @@ host_triplet = @host@
 @HAVE_UDUNITS_TRUE@am__append_2 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
 @HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-@HAVE_NETCDF_TRUE@am__append_5 = NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+@HAVE_NETCDF_TRUE@am__append_5 = NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
 @HAVE_MILIB_TRUE@am__append_6 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -79,8 +79,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDM.cc CDMAttribute.cc CDMDimension.cc CDMDataType.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
-	CDMVariable.cc CDM_XMLConfigHelper.cc Data.cc \
-	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
+	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
+	Data.cc DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
@@ -89,7 +89,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
 	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
 	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
-	FeltCDMReader.cc Felt_Array.cc Felt_File.cc
+	NetCDF_Utils.h FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 @HAVE_MILIB_TRUE@am__objects_2 = FeltCDMReader.lo Felt_Array.lo \
@@ -294,9 +294,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
 	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc \
-	CDM_XMLConfigHelper.cc Data.cc DataTypeChanger.cc \
-	Felt_Array2.cc FeltCDMReader2.cc Felt_File2.cc \
-	FeltParameters.cc GribApiCDMWriter.cc \
+	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h Data.cc \
+	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
+	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \

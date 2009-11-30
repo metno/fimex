@@ -12,3 +12,5 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = @PACKAGE_TARNAME@.pc
 
 $(pkgconfig_DATA): config.status
+
+include m4/debian.mk

@@ -37,6 +37,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 CDMTimeInterpolator.cc \
 					 CDMVariable.cc \
                      CDM_XMLConfigHelper.cc \
+                     CDM_XMLConfigHelper.h \
 					 Data.cc \
 					 DataTypeChanger.cc \
 					 Felt_Array2.cc \
@@ -64,7 +65,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 XMLDoc.cc
 
 if HAVE_NETCDF
-  libfimex_la_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc
+  libfimex_la_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
 endif
 
 if HAVE_MILIB
