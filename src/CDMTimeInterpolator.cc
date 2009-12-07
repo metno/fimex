@@ -33,11 +33,14 @@
 #include "fimex/TimeSpec.h"
 #include "fimex/DataImpl.h"
 #include "fimex/interpolation.h"
+#include "fimex/Logger.h"
 
 namespace MetNoFimex
 {
 
 using namespace std;
+
+static LoggerPtr logger = getLogger("fimex.CDMTimeInterpolator");
 
 CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader)
    : dataReader(dataReader)
@@ -85,7 +88,8 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
 		double d1Time = dataReader->getDataSlice(timeAxis, orgTimes.first)->asConstDouble()[0];
 		double d2Time = dataReader->getDataSlice(timeAxis, orgTimes.second)->asConstDouble()[0];
 		boost::shared_array<float> out(new float[d1->size()]);
-		mifi_get_values_linear_f(d1->asConstFloat().get(), d1->asConstFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
+		LOG4FIMEX(logger, Logger::DEBUG, "interpolation between " << d1Time << " and " << d2Time << " at " << currentTime);
+		mifi_get_values_linear_f(d1->asConstFloat().get(), d2->asConstFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
 		data = boost::shared_ptr<Data>(new DataImpl<float>(out, d1->size()));
 	} else {
 		// TODO
