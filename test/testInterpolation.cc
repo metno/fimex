@@ -161,6 +161,32 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
 
 }
 
+BOOST_AUTO_TEST_CASE( test_mifi_get_values_linear_f )
+{
+    const int nr = 4;
+    float infield1[nr] = {0, 1, -1, 1};
+    float infield2[nr] = {1, -1, 0, 1};
+    float outfield[nr];
+    // infield1 and infield2 at same position (a=b), take field1
+    mifi_get_values_linear_f(infield1, infield2, outfield, nr, 1., 1., .5);
+    for (int i = 0; i < nr; i++) {
+        BOOST_CHECK_CLOSE(outfield[i], infield1[i], 1e-5);
+    }
+
+    // real values between a and b
+    mifi_get_values_linear_f(infield1, infield2, outfield, nr, 1., 2., 1.5);
+    for (int i = 0; i < nr; i++) {
+        BOOST_CHECK_CLOSE(outfield[i], (float).5*(infield1[i]+infield2[i]), 1e-5);
+    }
+
+
+    // extrapolation values between a and b
+    mifi_get_values_linear_f(infield1, infield2, outfield, nr, 0., 1., 2.);
+    for (int i = 0; i < nr; i++) {
+        BOOST_CHECK_CLOSE(outfield[i], (float)infield1[i]+2*(infield2[i]-infield1[i]), 1e-5);
+    }
+}
+
 BOOST_AUTO_TEST_CASE( test_mifi_project_axes)
 {
 	std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");

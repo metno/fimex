@@ -542,13 +542,13 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
 
 void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
 {
-	const double f = (x - a) / (b - a);
+	const double f = (a == b) ? 0 :  ((x - a) / (b - a));
 	int i = 0;
 	while (n > i++) {
-		const float* iA = infieldA++;
-		const float* iB = infieldB++;
+		float iA = *infieldA++;
+		float iB = *infieldB++;
 		float* o = outfield++;
-		*o = *iA + f * (*iB - *iA);
+		*o = iA + f * (iB - iA);
 	}
 	return;
 }
