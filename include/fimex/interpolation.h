@@ -327,7 +327,7 @@ extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, con
 
 /**
  * Linear interpolation/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x
- * with o(x) = in(a) + x * (in(a) - in(b)) / (a - b)
+ * with o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
  *
  * This interpolation can be used for linear time-interpolation.
  *
@@ -338,7 +338,6 @@ extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, con
  * @param a position of infieldA
  * @param b position of infieldB
  * @param x position of outfield
- *
  */
 extern void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
 

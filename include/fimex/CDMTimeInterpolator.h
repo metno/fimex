@@ -56,10 +56,12 @@ public:
 	virtual void changeTimeAxis(std::string timeSpec) throw(CDMException);
 
 private:
-	boost::shared_ptr<CDMReader> dataReader;
+	boost::shared_ptr<CDMReader> dataReader_;
 	// map each new time-position to the closest time-positions in the old times
 	typedef std::map<std::string, std::vector<std::pair<size_t,size_t> > > TimeChangeMap;
-	TimeChangeMap timeChangeMap;
+	TimeChangeMap timeChangeMap_;
+	// store the datareaders times as doubles of the new units
+	std::map<std::string, std::vector<double> > dataReaderTimesInNewUnits_;
 };
 
 } /* MetNoFimex */
