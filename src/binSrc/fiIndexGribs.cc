@@ -1,5 +1,5 @@
 /*
- * Fimex, indexGribs.cc
+ * Fimex, fiIndexGribs.cc
  *
  * (C) Copyright 2009, met.no
  *
@@ -39,7 +39,7 @@ namespace fs = boost::filesystem;
 using namespace std;
 
 static void writeUsage(ostream& out, const po::options_description& options) {
-    out << "usage: indexGribs --outputDirectory DIRNAME --inputFile gribFile" << endl;
+    out << "usage: fiIndexGribs --outputDirectory DIRNAME --inputFile gribFile" << endl;
     out << endl;
     out << options << endl;
 }
@@ -75,7 +75,7 @@ main(int argc, char* args[])
         return 0;
     }
     if (vm.count("version")) {
-        cout << "indexGribs version " << VERSION << endl;
+        cout << "fiIndexGribs version " << VERSION << endl;
         return 0;
     }
     if (vm.count("inputFile") == 0) {

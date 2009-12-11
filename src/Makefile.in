@@ -84,12 +84,13 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
-	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
-	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
-	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
-	NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
-	NetCDF_Utils.h FeltCDMReader.cc Felt_Array.cc Felt_File.cc
+	GridDefinition.cc GribUtils.cc GribUtils.h Logger.cc \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
+	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
+	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
+	NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h \
+	FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CF10_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 @HAVE_MILIB_TRUE@am__objects_2 = FeltCDMReader.lo Felt_Array.lo \
@@ -105,11 +106,11 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	FeltParameters.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
 	GribApiCDMWriter_Impl2.lo GribCDMReader.lo GribFileIndex.lo \
-	GridDefinition.lo Logger.lo NcmlCDMReader.lo Null_CDMWriter.lo \
-	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
-	SpatialAxisSpec.lo TimeLevelDataSliceFetcher.lo TimeUnit.lo \
-	TimeSpec.lo Units.lo Utils.lo XMLDoc.lo $(am__objects_1) \
-	$(am__objects_2)
+	GridDefinition.lo GribUtils.lo Logger.lo NcmlCDMReader.lo \
+	Null_CDMWriter.lo ReplaceStringObject.lo \
+	ReplaceStringTimeObject.lo SpatialAxisSpec.lo \
+	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
+	Utils.lo XMLDoc.lo $(am__objects_1) $(am__objects_2)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -299,11 +300,11 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GridDefinition.cc Logger.cc NcmlCDMReader.cc Null_CDMWriter.cc \
-	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
-	SpatialAxisSpec.cc TimeLevelDataSliceFetcher.cc TimeUnit.cc \
-	TimeSpec.cc Units.cc Utils.cc XMLDoc.cc $(am__append_5) \
-	$(am__append_6)
+	GridDefinition.cc GribUtils.cc GribUtils.h Logger.cc \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
+	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
+	Utils.cc XMLDoc.cc $(am__append_5) $(am__append_6)
 all: all-recursive
 
 .SUFFIXES:
@@ -404,6 +405,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_ImplAbstract.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@

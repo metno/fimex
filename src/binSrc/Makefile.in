@@ -37,7 +37,7 @@ host_triplet = @host@
 @HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 bin_PROGRAMS = fimex$(EXEEXT) $(am__EXEEXT_1)
-@HAVE_GRIBAPI_TRUE@am__append_5 = indexGribs
+@HAVE_GRIBAPI_TRUE@am__append_5 = fiIndexGribs fiGribCut
 subdir = src/binSrc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -62,13 +62,15 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/include/fimex/config.h
 CONFIG_CLEAN_FILES =
-@HAVE_GRIBAPI_TRUE@am__EXEEXT_1 = indexGribs$(EXEEXT)
+@HAVE_GRIBAPI_TRUE@am__EXEEXT_1 = fiIndexGribs$(EXEEXT) \
+@HAVE_GRIBAPI_TRUE@	fiGribCut$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_fimex_OBJECTS = fimex.$(OBJEXT)
-fimex_OBJECTS = $(am_fimex_OBJECTS)
-fimex_LDADD = $(LDADD)
+am__fiGribCut_SOURCES_DIST = fiGribCut.cc
+@HAVE_GRIBAPI_TRUE@am_fiGribCut_OBJECTS = fiGribCut.$(OBJEXT)
+fiGribCut_OBJECTS = $(am_fiGribCut_OBJECTS)
+fiGribCut_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @HAVE_MILIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
 @HAVE_UDUNITS_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) \
@@ -77,17 +79,26 @@ am__DEPENDENCIES_1 =
 @HAVE_PROJ4_TRUE@	$(am__DEPENDENCIES_1)
 @HAVE_NETCDF_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) \
 @HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
-fimex_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
+fiGribCut_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
 	$(am__DEPENDENCIES_5)
-am__indexGribs_SOURCES_DIST = indexGribs.cc
-@HAVE_GRIBAPI_TRUE@am_indexGribs_OBJECTS = indexGribs.$(OBJEXT)
-indexGribs_OBJECTS = $(am_indexGribs_OBJECTS)
-indexGribs_LDADD = $(LDADD)
-indexGribs_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
+am__fiIndexGribs_SOURCES_DIST = fiIndexGribs.cc
+@HAVE_GRIBAPI_TRUE@am_fiIndexGribs_OBJECTS = fiIndexGribs.$(OBJEXT)
+fiIndexGribs_OBJECTS = $(am_fiIndexGribs_OBJECTS)
+fiIndexGribs_LDADD = $(LDADD)
+fiIndexGribs_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
+	$(am__DEPENDENCIES_5)
+am_fimex_OBJECTS = fimex.$(OBJEXT)
+fimex_OBJECTS = $(am_fimex_OBJECTS)
+fimex_LDADD = $(LDADD)
+fimex_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
@@ -105,8 +116,10 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(fimex_SOURCES) $(indexGribs_SOURCES)
-DIST_SOURCES = $(fimex_SOURCES) $(am__indexGribs_SOURCES_DIST)
+SOURCES = $(fiGribCut_SOURCES) $(fiIndexGribs_SOURCES) \
+	$(fimex_SOURCES)
+DIST_SOURCES = $(am__fiGribCut_SOURCES_DIST) \
+	$(am__fiIndexGribs_SOURCES_DIST) $(fimex_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -258,7 +271,8 @@ LDADD = ../felt/libfelt.la ../libfimex.la $(BOOST_LDFLAGS) \
 	@XML_LIBS@ $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4)
 fimex_SOURCES = fimex.cc
-@HAVE_GRIBAPI_TRUE@indexGribs_SOURCES = indexGribs.cc
+@HAVE_GRIBAPI_TRUE@fiIndexGribs_SOURCES = fiIndexGribs.cc
+@HAVE_GRIBAPI_TRUE@fiGribCut_SOURCES = fiGribCut.cc
 all: all-recursive
 
 .SUFFIXES:
@@ -320,12 +334,15 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+fiGribCut$(EXEEXT): $(fiGribCut_OBJECTS) $(fiGribCut_DEPENDENCIES) 
+	@rm -f fiGribCut$(EXEEXT)
+	$(CXXLINK) $(fiGribCut_OBJECTS) $(fiGribCut_LDADD) $(LIBS)
+fiIndexGribs$(EXEEXT): $(fiIndexGribs_OBJECTS) $(fiIndexGribs_DEPENDENCIES) 
+	@rm -f fiIndexGribs$(EXEEXT)
+	$(CXXLINK) $(fiIndexGribs_OBJECTS) $(fiIndexGribs_LDADD) $(LIBS)
 fimex$(EXEEXT): $(fimex_OBJECTS) $(fimex_DEPENDENCIES) 
 	@rm -f fimex$(EXEEXT)
 	$(CXXLINK) $(fimex_OBJECTS) $(fimex_LDADD) $(LIBS)
-indexGribs$(EXEEXT): $(indexGribs_OBJECTS) $(indexGribs_DEPENDENCIES) 
-	@rm -f indexGribs$(EXEEXT)
-	$(CXXLINK) $(indexGribs_OBJECTS) $(indexGribs_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -333,8 +350,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fiGribCut.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fiIndexGribs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fimex.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/indexGribs.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

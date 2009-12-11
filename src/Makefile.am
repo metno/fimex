@@ -51,6 +51,8 @@ libfimex_la_SOURCES = interpolation.c \
 					 GribCDMReader.cc \
 					 GribFileIndex.cc \
 					 GridDefinition.cc \
+					 GribUtils.cc \
+					 GribUtils.h \
 					 Logger.cc \
 					 NcmlCDMReader.cc \
 					 Null_CDMWriter.cc \

@@ -28,6 +28,7 @@
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribFileIndex.h"
 #include "fimex/Utils.h"
+#include "GribUtils.h"
 #include "grib_api.h"
 #include "proj_api.h"
 #include <stdexcept>
@@ -94,33 +95,6 @@ static void projConvert(const std::string& projStr, double lon, double lat, doub
 }
 
 
-GridDefinition::Orientation getGridOrientation(boost::shared_ptr<grib_handle> gh)
-{
-    unsigned long mode = 0;
-    long val = 0;
-    long error = 0;
-    error = grib_get_long(gh.get(), "iScansNegatively", &val);
-    if ((error == GRIB_SUCCESS) && val) {
-        mode |= GridDefinition::ScanStartRight;
-    }
-    val = 0;
-    error = grib_get_long(gh.get(), "jScansNegatively", &val);
-    if ((error == GRIB_SUCCESS) && val) {
-            mode |= GridDefinition::ScanStartBottom;
-    }
-    val = 0;
-    error = grib_get_long(gh.get(), "jPointsAreConsecutive", &val);
-    if ((error == GRIB_SUCCESS) && val) {
-        mode |= GridDefinition::ScanIsVertical;
-    }
-    val = 0;
-    error = grib_get_long(gh.get(), "alternativeRowScanning", &val);
-    if ((error == GRIB_SUCCESS) && val) {
-        mode |= GridDefinition::ScanIsAlternating;
-    }
-
-    return static_cast<GridDefinition::Orientation>(mode);
-}
 std::string getEarthsOblateFigure(boost::shared_ptr<grib_handle> gh, long factorToM)
 {
     long majorFactor, minorFactor;
@@ -203,7 +177,7 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
 
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh);
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, gribGetGridOrientation(gh));
 }
 GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> gh)
 {
@@ -234,7 +208,7 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
     oss << " " + getEarthsFigure(edition, gh);
     string proj =  oss.str();
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, gribGetGridOrientation(gh));
 }
 GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib_handle> gh)
 {
@@ -273,7 +247,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     // calculate startX and startY from lat/lon
     projConvert(proj, startLon, startLat, startX, startY);
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, getGridOrientation(gh));
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos)
