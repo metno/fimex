@@ -28,9 +28,22 @@
 #define GRIBUTILS_H_
 
 #include "fimex/GridDefinition.h"
+#include <stdexcept>
+
 
 // forward declaration
 class grib_handle;
+
+/**
+ *  macro to call #mifi_grib_check with correct line and file
+ */
+#define MIFI_GRIB_CHECK(error, msg) mifi_grib_check(error, msg, __LINE__, __FILE__);
+
+/**
+ * runtime-exception checker for grib_check
+ */
+void mifi_grib_check(int error, const char* msg, int line, const char* file) throw(std::runtime_error);
+
 
 namespace MetNoFimex
 {

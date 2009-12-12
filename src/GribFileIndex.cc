@@ -28,10 +28,9 @@
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribFileIndex.h"
 #include "fimex/Utils.h"
-#include "GribUtils.h"
+#include "fimex/GribUtils.h"
 #include "grib_api.h"
 #include "proj_api.h"
-#include <stdexcept>
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -45,20 +44,6 @@
 
 namespace MetNoFimex
 {
-#define MIFI_GRIB_CHECK(error, msg) mifi_grib_check(error, msg, __LINE__, __FILE__);
-void mifi_grib_check(int error, const char* msg, int line, const char* file) throw(std::runtime_error)
-{
-    if (error) {
-        const char* errMsg = grib_get_error_message(error);
-        std::ostringstream oss;
-        oss << "gribError occured in " << file << " at line "<< line;
-        oss << " : " << errMsg;
-        if (msg != 0) {
-            oss << "; " << msg;
-        }
-        throw std::runtime_error(oss.str());
-    }
-}
 using namespace std;
 
 /**

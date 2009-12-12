@@ -26,9 +26,23 @@
 
 #include "fimex/config.h"
 #ifdef HAVE_GRIBAPI_H
-#include "GribUtils.h"
-
+#include "fimex/GribUtils.h"
+#include <sstream>
 #include <grib_api.h>
+
+void mifi_grib_check(int error, const char* msg, int line, const char* file) throw(std::runtime_error)
+{
+    if (error) {
+        const char* errMsg = grib_get_error_message(error);
+        std::ostringstream oss;
+        oss << "gribError occured in " << file << " at line "<< line;
+        oss << " : " << errMsg;
+        if (msg != 0) {
+            oss << "; " << msg;
+        }
+        throw std::runtime_error(oss.str());
+    }
+}
 
 namespace MetNoFimex {
 
@@ -36,24 +50,20 @@ GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle
 {
     unsigned long mode = 0;
     long val = 0;
-    long error = 0;
-    error = grib_get_long(gh.get(), "iScansNegatively", &val);
-    if ((error == GRIB_SUCCESS) && val) {
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "iScansNegatively", &val), "iScansNegatively");
+    if (val) {
         mode |= GridDefinition::ScanStartRight;
     }
-    val = 0;
-    error = grib_get_long(gh.get(), "jScansNegatively", &val);
-    if ((error == GRIB_SUCCESS) && val) {
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "jScansPositively", &val), "jScansPositively");
+    if (!val) {
             mode |= GridDefinition::ScanStartBottom;
     }
-    val = 0;
-    error = grib_get_long(gh.get(), "jPointsAreConsecutive", &val);
-    if ((error == GRIB_SUCCESS) && val) {
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "jPointsAreConsecutive", &val), "jPointsAreConsecutive");
+    if (val) {
         mode |= GridDefinition::ScanIsVertical;
     }
-    val = 0;
-    error = grib_get_long(gh.get(), "alternativeRowScanning", &val);
-    if ((error == GRIB_SUCCESS) && val) {
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "alternativeRowScanning", &val), "alternativeRowScanning");
+    if (val) {
         mode |= GridDefinition::ScanIsAlternating;
     }
 

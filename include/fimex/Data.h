@@ -86,7 +86,7 @@ namespace MetNoFimex
 		 */		
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException) = 0;
 		/**
-		 * @brief get a slice of the data
+		 * @brief get a multi-dimensional slice of the data
 		 * 
 		 * This slices a multidimensional chunk out of the data.
 		 * All parameters must be vectors of the same size (dimension of array).
@@ -120,9 +120,9 @@ namespace MetNoFimex
 	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException);
 
 	/**
-	 * @brief create a dataslice from another Data object
+	 * @brief create a one-dimensional dataslice from another Data object
 	 * 
-	 * @param datatype
+	 * @param datatype of the return-data
 	 * @param data the data to read the values from, should be convertible data-format 
 	 * @param dataStartPos the first element of data to fetch
 	 * @param dataSize the size of the data

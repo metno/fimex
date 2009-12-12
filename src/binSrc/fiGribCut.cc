@@ -28,15 +28,20 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include <fstream>
 #include <iostream>
 #include <cstdio>
 #include <grib_api.h>
 #include "fimex/Utils.h"
+#include "fimex/GribUtils.h"
+#include "fimex/Data.h"
+#include "fimex/DataImpl.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using namespace std;
+using namespace MetNoFimex;
 
 static int debug = 0;
 
@@ -47,41 +52,149 @@ static void writeUsage(ostream& out, const po::options_description& options) {
     out << options << endl;
 }
 
-static bool gribMatchParameters(boost::shared_ptr<grib_handle>& gh, vector<long> parameters)
+static bool gribMatchParameters(const boost::shared_ptr<grib_handle>& gh, vector<long> parameters)
 {
     if (parameters.size() == 0) return true; // all parameters requested
     long param;
-    GRIB_CHECK(grib_get_long(gh.get(), "paramId", &param), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "paramId", &param), 0);
     return find(parameters.begin(), parameters.end(), param) != parameters.end();
 }
 
+/**
+ * find the first and last index of 'first' and 'last' in
+ * the linear data described by 'start + i*incr', 0 <= i < n
+ * first and last are included in the
+ * range f(firstPos), f(lastPos) if firstPos >= 0 and lastPos < n (first and last inside data-range)
+ * The algorithm tends to select a rather larger area to make sure above is true.
+ *
+ * @param start of the linear data
+ * @param incr of the linear data
+ * @param n size of the linear elements
+ * @param first value of position to find
+ * @param last value of position to find
+ * @return firstPos, lastPos
+ */
+static pair<size_t, size_t> findFirstLastIndex(double start, double incr, size_t n, double first, double last)
+{
+    if (incr <= 0) throw runtime_error("cannot detect bounding-box with negative increment: "+type2string(incr));
+    first -= 1e-5; // avoid rounding errors, use a bit more
+    last += 1e-5; // avoid rounding errors, use a bit more
+    if (first > last) throw runtime_error("cannot detect inverse bounding-box with: " + type2string(first) + " > " + type2string(last));
+
+    size_t firstPos = 0;
+    size_t lastPos = 0;
+    for (size_t i = 0; i < n; ++i) {
+        double current = start + i * incr;
+        if (first >= current) firstPos = i; // forward position
+        if (last > current) lastPos = i; // forward position
+    }
+    // last should be <= f(lastPos)
+    lastPos += 1;
+
+    return make_pair(firstPos, lastPos);
+}
+
+static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<grib_handle>& gh, map<string, double> bb)
+{
+    boost::shared_ptr<grib_handle> newGh = gh;
+    if (bb.size() == 4) {
+        char msg[1024];
+        size_t msgLength = 1024;
+        MIFI_GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
+        string typeOfGrid(msg);
+        if (typeOfGrid != "regular_ll") {
+            throw runtime_error("cannot only attach bounding-box to type regular_ll, got type " + MetNoFimex::type2string(typeOfGrid));
+        } else {
+            // create a clone of the handle for later modifications
+            newGh = boost::shared_ptr<grib_handle>(grib_handle_clone(gh.get()), grib_handle_delete);
+            MetNoFimex::GridDefinition::Orientation orient = MetNoFimex::gribGetGridOrientation(gh);
+            if (orient != MetNoFimex::GridDefinition::LeftLowerHorizontal) {
+                throw runtime_error("cannot change bounding-box of data without LeftLowerHorizontal orientation/scanning mode "+type2string(orient));
+            }
+            // modify bounding box
+            double latFirst, lonFirst, latIncr, lonIncr;
+            long latN, lonN;
+            // latitude scans starts in south
+            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &latFirst), 0);
+            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &latIncr), 0);
+
+            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &lonFirst), 0);
+            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &lonIncr), 0);
+            MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &latN), 0);
+            MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &lonN), 0);
+
+            pair<size_t,size_t> latFirstLast = findFirstLastIndex(latFirst,latIncr,latN, bb["south"], bb["north"]);
+            if (debug) cerr << "found latitude bounds at (" << latFirstLast.first << ","<< latFirstLast.second << ") of max " << latN << endl;
+            pair<size_t,size_t> lonFirstLast = findFirstLastIndex(lonFirst,lonIncr,lonN, bb["west"], bb["east"]);
+            if (debug) cerr << "found longitude bounds at (" << lonFirstLast.first << ","<< lonFirstLast.second << ") of max " << lonN << endl;
+
+            // read the data
+            size_t nv;
+            MIFI_GRIB_CHECK(grib_get_size(gh.get(), "values", &nv), 0);
+            if (nv != static_cast<unsigned long>(latN*lonN)) {
+                throw runtime_error("numberOfValues ("+type2string(nv) + ") != latN*lonN ("+type2string(latN)+"*"+type2string(lonN)+")");
+            }
+            boost::shared_array<double> array(new double[nv]);
+            if (debug) cerr << "reading " << nv << " values" << endl;
+            MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &array[0], &nv), 0);
+            if (debug) cerr << "got " << nv << " values" << endl;
+            DataImpl<double> data(array, nv);
+
+            // slice the data
+            // TODO: check if lat/lon order of slicing is correct
+            vector<size_t> orgDim(2,0);
+            orgDim[0] = latN;
+            orgDim[1] = lonN;
+            vector<size_t> newDim(2,0);
+            newDim[0] = latFirstLast.second - latFirstLast.first;
+            newDim[1] = lonFirstLast.second - lonFirstLast.first;
+            vector<size_t> startPos(2,0);
+            startPos[0] = latFirstLast.first;
+            startPos[1] = lonFirstLast.first;
+            if (debug) cerr << "slicing values" << endl;
+            boost::shared_ptr<Data> outData = data.slice(orgDim, startPos, newDim);
+            assert(outData->size() == (newDim[0]*newDim[1]));
+
+            // write the new data
+            string gridSimple("grid_simple");
+            size_t size = gridSimple.size();
+            // don't support other packing types
+            if (debug) cerr << "setting packing type" << endl;
+            MIFI_GRIB_CHECK(grib_set_string(newGh.get(), "typeOfPacking", gridSimple.c_str(), &size),0);
+
+            // set the bounding-box
+            if (debug) cerr << "setting new bounding box" << endl;
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "latitudeOfFirstGridPointInDegrees", (latFirst + latIncr*latFirstLast.second)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "latitudeOfLastGridPointInDegrees", (latFirst + latIncr*latFirstLast.first)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "Nj", (latFirstLast.second-latFirstLast.first)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "longitudeOfFirstGridPointInDegrees", (lonFirst + lonIncr*lonFirstLast.first)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "longitudeOfLastGridPointInDegrees", (lonFirst + lonIncr*lonFirstLast.second)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "Ni", (lonFirstLast.second-lonFirstLast.first)),0);
+
+            // set the data
+            boost::shared_array<double> outArray = outData->asConstDouble();
+            if (debug) cerr << "setting new data" << endl;
+            MIFI_GRIB_CHECK(grib_set_double_array(newGh.get(), "values", &outArray[0], outData->size()), 0);
+
+        }
+    }
+    return newGh;
+}
+
 // work on one grib_hanlde, return number of errors
-static int gribCutHandle(ofstream& outStream, boost::shared_ptr<grib_handle>& gh, const vector<long>& parameters, const map<string, double>& bb)
+static int gribCutHandle(ofstream& outStream, const boost::shared_ptr<grib_handle>& gh, const vector<long>& parameters, const map<string, double>& bb)
 {
     // skip parameters if not matching
     if (!gribMatchParameters(gh, parameters)) return 0;
 
+    // test the bounding box
+    boost::shared_ptr<grib_handle> output_gh = cutBoundingBox(gh, bb);
 
-    if (bb.size() == 4) {
-        char msg[1024];
-        size_t msgLength = 1024;
-        GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
-        string typeOfGrid(msg);
-        if (typeOfGrid != "regular_ll") {
-            cerr << "cannot only attach bounding-box to type regular_ll, got type " << typeOfGrid << endl;
-            return 1;
-        } else {
-            // create a clone of the handle for later modifications
-            gh = boost::shared_ptr<grib_handle>(grib_handle_clone(gh.get()), grib_handle_delete);
-            // TODO modify bounding box
-
-        }
-    }
     // write data to file
     size_t bufferSize;
     const void* buffer;
     /* get the coded message in a buffer */
-    GRIB_CHECK(grib_get_message(gh.get(),&buffer,&bufferSize),0);
+    MIFI_GRIB_CHECK(grib_get_message(output_gh.get(),&buffer,&bufferSize),0);
     outStream.write(reinterpret_cast<const char*>(buffer), bufferSize);
     return 0;
 }
@@ -110,9 +223,14 @@ static int gribCut(ofstream& outStream, const vector<string>& inputFiles, const 
                 // check for errors
                 if (gh.get() != 0) {
                     // something wrong with file, abbort
-                    if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
-                    // parse the grib handle
-                    errors += gribCutHandle(outStream, gh, parameters, bb);
+                    try {
+                        if (err != GRIB_SUCCESS) MIFI_GRIB_CHECK(err,0);
+                        // parse the grib handle
+                        errors += gribCutHandle(outStream, gh, parameters, bb);
+                    } catch (exception& ex) {
+                        errors++;
+                        cerr << "ERROR: " << ex.what() << endl;
+                    }
                 }
             }
         }
@@ -178,9 +296,9 @@ main(int argc, char* args[])
 
     map<string, double> bb;
     if (vm.count("boundingBox") > 0) {
-        vector<string> bbVec = vm["boundingBox"].as<vector<string> >();
+        vector<string> bbVec = tokenize(vm["boundingBox"].as<string>(), ",");
         if (bbVec.size() < 4) {
-            cerr << "boundingBox requires 4 values: north,east,south,west, got " << bb.size() << " values" << endl;
+            cerr << "boundingBox requires 4 values: north,east,south,west, got " << bb.size() << " values: "<< vm["boundingBox"].as<string>() << endl;
             return 1;
         }
         double north = MetNoFimex::string2type<double>(bbVec.at(0));

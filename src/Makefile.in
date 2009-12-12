@@ -84,8 +84,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GridDefinition.cc GribUtils.cc GribUtils.h Logger.cc \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
+	GridDefinition.cc GribUtils.cc Logger.cc NcmlCDMReader.cc \
+	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
@@ -300,8 +300,8 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GridDefinition.cc GribUtils.cc GribUtils.h Logger.cc \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
+	GridDefinition.cc GribUtils.cc Logger.cc NcmlCDMReader.cc \
+	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc $(am__append_5) $(am__append_6)
