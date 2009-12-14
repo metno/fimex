@@ -204,7 +204,7 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
 }
 
 // work on one grib_hanlde, return number of errors
-static int gribCutHandle(ofstream& outStream, const boost::shared_ptr<grib_handle>& gh, const vector<long>& parameters, const map<string, double>& bb)
+static int gribCutHandle(ostream& outStream, const boost::shared_ptr<grib_handle>& gh, const vector<long>& parameters, const map<string, double>& bb)
 {
     // skip parameters if not matching
     if (!gribMatchParameters(gh, parameters)) return 0;
@@ -222,7 +222,7 @@ static int gribCutHandle(ofstream& outStream, const boost::shared_ptr<grib_handl
 }
 
 // work on all files/all messages, return number of errors
-static int gribCut(ofstream& outStream, const vector<string>& inputFiles, const vector<long>& parameters, const map<string, double>& bb)
+static int gribCut(ostream& outStream, const vector<string>& inputFiles, const vector<long>& parameters, const map<string, double>& bb)
 {
     int errors = 0;
     for (vector<string>::const_iterator file = inputFiles.begin(); file != inputFiles.end(); ++file) {
@@ -309,7 +309,12 @@ main(int argc, char* args[])
         writeUsage(cout, options);
         return 1;
     }
-    ofstream outStream(vm["outputFile"].as<string>().c_str(), std::ios::binary|std::ios::out);
+
+    ofstream realOutStream;
+    if (vm["outputFile"].as<string>() != "-") {
+        realOutStream.open(vm["outputFile"].as<string>().c_str(), std::ios::binary|std::ios::out);
+    }
+    ostream& outStream = (vm["outputFile"].as<string>() != "-") ? realOutStream : cout;
 
     vector<long> parameters;
     if (vm.count("parameter") > 0) {
@@ -360,6 +365,8 @@ main(int argc, char* args[])
     int errors = gribCut(outStream, inputFiles, parameters, bb);
     if (errors > 0) {
         cerr << "found " << errors << " errors" << endl;
+    } else {
+        if (debug) cerr << "success, no errors detected" << endl;
     }
     return errors;
 }
