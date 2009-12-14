@@ -64,7 +64,7 @@ sub display {
           $cgi->h2("Bounding Box"),
           'leave &quot;east&quot; emtpy for original data-region', '<br>',
           'north', $cgi->textfield(-name => 'northernmost_latitude', size=> 5),
-          'west', $cgi->textfield(-name => 'easternmost_longitude', size=> 5),
+          'west', $cgi->textfield(-name => 'westernmost_longitude', size=> 5),
           'south', $cgi->textfield(-name => 'southernmost_latitude', size=> 5),
           'east', $cgi->textfield(-name => 'easternmost_longitude', size=> 5);
     foreach my $file (@Files) {
@@ -89,8 +89,8 @@ sub gribCut {
     my $error = params2gribCut(\@gribCutProg);
     if ($error) {
     	print $cgi->header(-status => 400),
-              $cgi->start_html('problems with $FiGribCut parameters'),
-              $cgi->h1('problems with $FiGribCut parameters:'),
+              $cgi->start_html('problems with fiGribCut parameters'),
+              $cgi->h1('problems with fiGribCut parameters:'),
               $cgi->pre($cgi->escapeHTML($error)),
               $cgi->end_html();
     } else {
@@ -99,8 +99,8 @@ sub gribCut {
     		my $errMsg = `$prg`;
     		$cgi->delete('debug');
     		print $cgi->header(),
-    		      $cgi->start_html('debug output of $FiGribCut'),
-    		      $cgi->h1('debug output of $FiGribCut'),
+    		      $cgi->start_html('debug output of fiGribCut'),
+    		      $cgi->h1('debug output of fiGribCut'),
     		      $cgi->h2('URL'),
     		      $cgi->escapeHTML($cgi->url(-path => 1, -query => 1)),
     		      $cgi->h2('command: '.$prg),
