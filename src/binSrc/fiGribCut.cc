@@ -120,9 +120,10 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
         } else {
             // create a clone of the handle for later modifications
             newGh = boost::shared_ptr<grib_handle>(grib_handle_clone(gh.get()), grib_handle_delete);
-            MetNoFimex::GridDefinition::Orientation orient = MetNoFimex::gribGetGridOrientation(gh);
-            if (orient != MetNoFimex::GridDefinition::LeftLowerHorizontal) {
-                throw runtime_error("cannot change bounding-box of data without LeftLowerHorizontal orientation/scanning mode "+type2string(orient));
+            GridDefinition::Orientation orient = MetNoFimex::gribGetGridOrientation(gh);
+            if (!(orient == GridDefinition::LeftLowerHorizontal
+                  || orient == MetNoFimex::GridDefinition::LeftUpperHorizontal)) {
+                throw runtime_error("cannot change bounding-box of data without LeftLowerHorizontal/LeftUpperHorizontal orientation/scanning mode "+type2string(orient));
             }
             // modify bounding box
             double latFirst, lonFirst, latIncr, lonIncr;
@@ -130,15 +131,22 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             // latitude scans starts in south
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &latFirst), 0);
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &latIncr), 0);
-            latIncr *= -1; // j scans (usually) negatively (see orientation check above)
+            if (orient == GridDefinition::LeftLowerHorizontal) {
+                latIncr *= -1; // j scans (usually) negatively (see orientation check above)
+            }
 
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &lonFirst), 0);
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &lonIncr), 0);
             MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &latN), 0);
             MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &lonN), 0);
 
-            // north > south, due to negative scan
-            pair<size_t,size_t> latFirstLast = findFirstLastIndex(latFirst,latIncr,latN, bb["north"], bb["south"]);
+            pair<size_t,size_t> latFirstLast;
+            if (orient == GridDefinition::LeftLowerHorizontal) {
+                // north > south, due to negative scan
+                latFirstLast = findFirstLastIndex(latFirst,latIncr,latN, bb["north"], bb["south"]);
+            } else {
+                latFirstLast = findFirstLastIndex(latFirst,latIncr,latN, bb["south"], bb["north"]);
+            }
             if (debug) cerr << "found latitude bounds at (" << latFirstLast.first << ","<< latFirstLast.second << ") of max " << latN << endl;
             pair<size_t,size_t> lonFirstLast = findFirstLastIndex(lonFirst,lonIncr,lonN, bb["west"], bb["east"]);
             if (debug) cerr << "found longitude bounds at (" << lonFirstLast.first << ","<< lonFirstLast.second << ") of max " << lonN << endl;
