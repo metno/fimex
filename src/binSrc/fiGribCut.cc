@@ -76,20 +76,33 @@ static bool gribMatchParameters(const boost::shared_ptr<grib_handle>& gh, vector
  */
 static pair<size_t, size_t> findFirstLastIndex(double start, double incr, size_t n, double first, double last)
 {
-    if (incr <= 0) throw runtime_error("cannot detect bounding-box with negative increment: "+type2string(incr));
-    first -= 1e-5; // avoid rounding errors, use a bit more
-    last += 1e-5; // avoid rounding errors, use a bit more
-    if (first > last) throw runtime_error("cannot detect inverse bounding-box with: " + type2string(first) + " > " + type2string(last));
+    // avoid rounding errors, use a bit more
+    if (incr > 0) {
+        first -= 1e-5;
+        last += 1e-5;
+        if (first > last) throw runtime_error("cannot detect inverse bounding-box with: " + type2string(first) + " > " + type2string(last));
+    } else {
+        first += 1e-5;
+        last += 1e-5;
+        if (first < last) throw runtime_error("cannot detect inverse bounding-box with: " + type2string(first) + " < " + type2string(last));
+    }
 
     size_t firstPos = 0;
     size_t lastPos = 0;
     for (size_t i = 0; i < n; ++i) {
         double current = start + i * incr;
-        if (first >= current) firstPos = i; // forward position
-        if (last > current) lastPos = i; // forward position
+        if (incr > 0) {
+            if (first >= current) firstPos = i; // forward position
+            if (last > current) lastPos = i; // forward position
+        } else {
+            if (first <= current) firstPos = i; // forward position
+            if (last < current) lastPos = i; // forward position
+        }
     }
     // last should be <= f(lastPos)
     lastPos += 1;
+    // range-check
+    if (lastPos >= n) lastPos = n-1;
 
     return make_pair(firstPos, lastPos);
 }
@@ -115,15 +128,17 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             double latFirst, lonFirst, latIncr, lonIncr;
             long latN, lonN;
             // latitude scans starts in south
-            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &latFirst), 0);
+            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &latFirst), 0);
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &latIncr), 0);
+            latIncr *= -1; // j scans (usually) negatively (see orientation check above)
 
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &lonFirst), 0);
             MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &lonIncr), 0);
             MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &latN), 0);
             MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &lonN), 0);
 
-            pair<size_t,size_t> latFirstLast = findFirstLastIndex(latFirst,latIncr,latN, bb["south"], bb["north"]);
+            // north > south, due to negative scan
+            pair<size_t,size_t> latFirstLast = findFirstLastIndex(latFirst,latIncr,latN, bb["north"], bb["south"]);
             if (debug) cerr << "found latitude bounds at (" << latFirstLast.first << ","<< latFirstLast.second << ") of max " << latN << endl;
             pair<size_t,size_t> lonFirstLast = findFirstLastIndex(lonFirst,lonIncr,lonN, bb["west"], bb["east"]);
             if (debug) cerr << "found longitude bounds at (" << lonFirstLast.first << ","<< lonFirstLast.second << ") of max " << lonN << endl;
@@ -141,16 +156,15 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             DataImpl<double> data(array, nv);
 
             // slice the data
-            // TODO: check if lat/lon order of slicing is correct
             vector<size_t> orgDim(2,0);
-            orgDim[0] = latN;
-            orgDim[1] = lonN;
+            orgDim[0] = lonN;
+            orgDim[1] = latN;
             vector<size_t> newDim(2,0);
-            newDim[0] = latFirstLast.second - latFirstLast.first;
-            newDim[1] = lonFirstLast.second - lonFirstLast.first;
+            newDim[0] = lonFirstLast.second - lonFirstLast.first;
+            newDim[1] = latFirstLast.second - latFirstLast.first;
             vector<size_t> startPos(2,0);
-            startPos[0] = latFirstLast.first;
-            startPos[1] = lonFirstLast.first;
+            startPos[0] = lonFirstLast.first;
+            startPos[1] = latFirstLast.first;
             if (debug) cerr << "slicing values" << endl;
             boost::shared_ptr<Data> outData = data.slice(orgDim, startPos, newDim);
             assert(outData->size() == (newDim[0]*newDim[1]));
@@ -164,8 +178,8 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
 
             // set the bounding-box
             if (debug) cerr << "setting new bounding box" << endl;
-            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "latitudeOfFirstGridPointInDegrees", (latFirst + latIncr*latFirstLast.second)),0);
-            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "latitudeOfLastGridPointInDegrees", (latFirst + latIncr*latFirstLast.first)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "latitudeOfFirstGridPointInDegrees", (latFirst + latIncr*latFirstLast.first)),0);
+            MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "latitudeOfLastGridPointInDegrees", (latFirst + latIncr*latFirstLast.second)),0);
             MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "Nj", (latFirstLast.second-latFirstLast.first)),0);
             MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "longitudeOfFirstGridPointInDegrees", (lonFirst + lonIncr*lonFirstLast.first)),0);
             MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "longitudeOfLastGridPointInDegrees", (lonFirst + lonIncr*lonFirstLast.second)),0);
