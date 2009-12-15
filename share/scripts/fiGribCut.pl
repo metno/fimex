@@ -78,6 +78,7 @@ sub display {
           
     print $cgi->hr(),
           $cgi->checkbox(-name => 'debug'),$cgi->br,
+          $cgi->checkbox(-name => 'gzip'), $cgi->br,
           $cgi->submit(-name => 'action', -value => 'Fetch Data'),
           $cgi->end_form(),
           $cgi->end_html();
@@ -107,9 +108,11 @@ sub gribCut {
     		      $cgi->pre($cgi->escapeHTML($errMsg)),
     		      $cgi->end_html();
     	} else {
+    		my $filename = join('_', $cgi->param('fileName'),"").$$.'.grb';
+    		$filename .= '.gz' if ($cgi->param('gzip'));
             print $cgi->header(-type => 'application/octet-stream',
                                -expires => '+5m',
-                               -attachment => join('_', $cgi->param('fileName'),"").$$.'.grb');
+                               -attachment => $filename);
             binmode STDOUT;    
 	        system(@gribCutProg);
     	}
@@ -125,6 +128,8 @@ sub gribCut {
 #     $southernmost_latitude
 #     $easternmost_longitude
 #     $westernmost_longitude
+#     $debug
+#     $gzip
 sub params2gribCut(\@) {
 	my ($gribCutProg) = @_;
 	my $errors = '';
@@ -157,7 +162,7 @@ sub params2gribCut(\@) {
 	}
 	
 	# boundingbox
-	if (defined $cgi->param('easternmost_latitude') and $cgi->param('easternmost_latitude') =~ /\d/) {
+	if (defined $cgi->param('easternmost_longitude') and $cgi->param('easternmost_longitude') =~ /\d/) {
 		my ($north, $west, $south, $east) = map {$cgi->param($_)} qw(northernmost_latitude
 		                                                             westernmost_longitude
 		                                                             southernmost_latitude
@@ -205,6 +210,9 @@ sub params2gribCut(\@) {
 		push @$gribCutProg, '-o', '/dev/null';
 	} else {
 		push @$gribCutProg, '-o', '-';
+	}
+	if ($cgi->param('gzip')) {
+		push @$gribCutProg, '-c';
 	}
 	
 	return undef;

@@ -47,6 +47,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_base.m4 \
 	$(top_srcdir)/m4/ax_boost_date_time.m4 \
 	$(top_srcdir)/m4/ax_boost_filesystem.m4 \
+	$(top_srcdir)/m4/ax_boost_iostreams.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
@@ -82,9 +83,9 @@ am__DEPENDENCIES_1 =
 fiGribCut_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
-	$(am__DEPENDENCIES_5)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
 am__fiIndexGribs_SOURCES_DIST = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@am_fiIndexGribs_OBJECTS = fiIndexGribs.$(OBJEXT)
 fiIndexGribs_OBJECTS = $(am_fiIndexGribs_OBJECTS)
@@ -92,18 +93,18 @@ fiIndexGribs_LDADD = $(LDADD)
 fiIndexGribs_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
-	$(am__DEPENDENCIES_5)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
 am_fimex_OBJECTS = fimex.$(OBJEXT)
 fimex_OBJECTS = $(am_fimex_OBJECTS)
 fimex_LDADD = $(LDADD)
 fimex_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_3) $(am__DEPENDENCIES_4) \
-	$(am__DEPENDENCIES_5)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
+	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -143,6 +144,7 @@ AWK = @AWK@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
 BOOST_DATE_TIME_LIB = @BOOST_DATE_TIME_LIB@
 BOOST_FILESYSTEM_LIB = @BOOST_FILESYSTEM_LIB@
+BOOST_IOSTREAMS_LIB = @BOOST_IOSTREAMS_LIB@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_PROGRAM_OPTIONS_LIB = @BOOST_PROGRAM_OPTIONS_LIB@
 BOOST_REGEX_LIB = @BOOST_REGEX_LIB@
@@ -267,9 +269,9 @@ AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
 LDADD = ../felt/libfelt.la ../libfimex.la $(BOOST_LDFLAGS) \
 	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
-	$(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lm \
-	@XML_LIBS@ $(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4)
+	$(BOOST_IOSTREAMS_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) \
+	$(BOOST_DATE_TIME_LIB) -lm @XML_LIBS@ $(am__append_1) \
+	$(am__append_2) $(am__append_3) $(am__append_4)
 fimex_SOURCES = fimex.cc
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_SOURCES = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@fiGribCut_SOURCES = fiGribCut.cc

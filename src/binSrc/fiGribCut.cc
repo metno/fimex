@@ -27,6 +27,9 @@
 #include "fimex/config.h"
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <fstream>
@@ -40,6 +43,8 @@
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
+namespace io = boost::iostreams;
+
 using namespace std;
 using namespace MetNoFimex;
 
@@ -280,6 +285,7 @@ main(int argc, char* args[])
         ("inputFile,i", po::value<vector<string> >()->composing(), "input gribFile")
         ("parameter,p", po::value<vector<long> >()->composing(), "grib-parameterID")
         ("boundingBox,b", po::value<string>(), "bounding-box, north,east,south,west")
+        ("compress,c", "enable gzip compression")
         ;
 
     // read the options
@@ -310,11 +316,19 @@ main(int argc, char* args[])
         return 1;
     }
 
+    // open stream before filter, required for closing order
     ofstream realOutStream;
+    io::filtering_ostream outStream;
+    if (vm.count("compress") != 0) {
+        // simple compression gives already small size
+        outStream.push(io::gzip_compressor(io::zlib::best_speed));
+    }
     if (vm["outputFile"].as<string>() != "-") {
         realOutStream.open(vm["outputFile"].as<string>().c_str(), std::ios::binary|std::ios::out);
+        outStream.push(realOutStream);
+    } else {
+        outStream.push(cout);
     }
-    ostream& outStream = (vm["outputFile"].as<string>() != "-") ? realOutStream : cout;
 
     vector<long> parameters;
     if (vm.count("parameter") > 0) {

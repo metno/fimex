@@ -8,7 +8,7 @@ Fimex requires at least the following libraries to be installed for
 compilation
 	* c99/c++ compiler
 	* libxml2 >= 2.5.0
-	* boost library >= 1.32 (1.33 for running tests)
+	* boost library >= 1.33
     * proj-4 >= 4.4.9
 	
 Highly recommended, but not required:
