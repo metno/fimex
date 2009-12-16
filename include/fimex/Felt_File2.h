@@ -125,7 +125,6 @@ private:
     FeltParameters feltParameters;
     std::map<LevelPair, int> hybridLevels_; // only set for files with idx[10] = 11
     boost::array<float, 6> gridParameterDelta_; // allowed deviation between two grids
-    MetNoFimex::LoggerPtr logger;
 
     bool findOrCreateFeltArray(const boost::shared_ptr<felt::FeltField>);
     /// actually read the data with the parameters from the felt_file, should be called from constructors

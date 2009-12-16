@@ -31,6 +31,7 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
+#include "fimex/Logger.h"
 #include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,6 +50,9 @@
 namespace MetNoFelt {
 
 using namespace MetNoFimex;
+
+static LoggerPtr logger = getLogger("fimex.Felt_File2");
+
 
 Felt_File2::Felt_File2(const string& filename) throw(Felt_File_Error)
 	: filename_(filename)
@@ -101,10 +105,10 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 
 void Felt_File2::init(const std::map<std::string, std::string>& options) throw(Felt_File_Error)
 {
-	logger = getLogger("fimex.Felt_File2");
 	setOptions(options);
 	feltFile_ = boost::shared_ptr<felt::FeltFile>(new felt::FeltFile(boost::filesystem::path(filename_)));
 	feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
+	LOG4FIMEX(logger, Logger::DEBUG, feltFile_->information());
 	for (felt::FeltFile::const_iterator ffit = feltFile_->begin(); ffit != feltFile_->end(); ++ffit) {
 	    felt::FeltFile::FeltFieldPtr field = *ffit;
 	    const felt::FeltField::Header& header = field->getHeader();
@@ -132,7 +136,7 @@ bool Felt_File2::findOrCreateFeltArray(boost::shared_ptr<felt::FeltField> field)
 	string dataType = feltParameters.getParameterDatatype(name);
 	map<string, boost::shared_ptr<Felt_Array2> >::iterator it = feltArrayMap_.find(name);
 	if (it == feltArrayMap_.end()) {
-		//cerr << "new FeltArray " << name << ": " << dataType << " " << feltParameters.getParameterFillValue(name) << endl;
+		LOG4FIMEX(logger, Logger::DEBUG, "new FeltArray " << name << ": " << dataType << " " << feltParameters.getParameterFillValue(name) << " vTime: " << field->validTime());
 		boost::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters.getParameterFillValue(name)));
 		feltArrayMap_[name] = fa;   // copy to map
 		return false; // reference from map
