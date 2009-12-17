@@ -619,7 +619,7 @@ size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, doubl
         double inputMissing;
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "missingValue", &inputMissing), 0);
         if (inputMissing != missingValue) {
-            transform(&data[0], &data[size], &data[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
+            transform(&data[0], &data[0]+size, &data[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
         }
 
     } else {

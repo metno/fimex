@@ -575,7 +575,7 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
         if (gfmIt->isValid()) {
             size_t dataRead = gribDataRead(*gfmIt, gridData, missingValue);
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
-            copy(&gridData[0], &gridData[dataRead], &doubleArray[dataCurrentPos]);
+            copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
         } else {
             LOG4FIMEX(logger, Logger::DEBUG, "skipping variable " << varName << ", 1 level, " << " size " << gridData.size());
         }

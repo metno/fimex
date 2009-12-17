@@ -225,8 +225,7 @@ namespace MetNoFimex
 		C* oldData = theData.get();
 
 		// pre-calculation of the slice-size of the different dimensions
-		std::vector<size_t> orgSliceSize; 
-		orgSliceSize.reserve(orgDimSize.size());
+		std::vector<size_t> orgSliceSize(orgDimSize.size(), 0);
 		orgSliceSize[0] = 1;
 		for (size_t dim = 1; dim < orgDimSize.size(); dim++) {
 			orgSliceSize[dim] = orgSliceSize[dim-1] * orgDimSize[dim-1];

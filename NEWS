@@ -1,3 +1,8 @@
+  * xxxxxxxxxx fimex-0.19
+    * debian packages (without grib support)
+    * fixing time-interpolator
+    * fiGribCut program to extract parameters and geographical region
+      from grib-files
   * 2009-11-13 fimex-0.18
     * addition of C-API (c-fimex.h)
   * 2009-10-19 fimex-0.17.1
