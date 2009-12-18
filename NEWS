@@ -1,4 +1,4 @@
-  * xxxxxxxxxx fimex-0.19
+  * 2009-12-18 fimex-0.19
     * debian packages (without grib support)
     * fixing time-interpolator
     * fiGribCut program to extract parameters and geographical region

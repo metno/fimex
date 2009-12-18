@@ -8,15 +8,15 @@ Section: libs
 Package: libfimex-dev
 Section: libdevel
 Architecture: any
-Depends: libfimex (= ${Source-Version}), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-regex-dev
+Depends: libfimex-0.19-0 (= ${Source-Version}), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-regex-dev
 Description: library for geo-spatial gridded data
  Development library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
 
-Package: libfimex
+Package: libfimex-0.19-0
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt, libudunits2, libnetcdf4, libboost-date-time1.34.1, libboost-filesystem1.34.1, libboost-regex1.34.1, libxml2, proj 
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt-0.19-0, libudunits2, libnetcdf4, libboost-date-time1.34.1, libboost-filesystem1.34.1, libboost-regex1.34.1, libxml2, proj 
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
@@ -24,12 +24,12 @@ Description: library for geo-spatial gridded data
 Package: fimex-bin
 Section: science
 Architecture: any
-Depends: ${shlibs:Depends}, libfimex (= ${Source-Version}), libboost-iostreams1.34.1, libboost-program-options1.34.1
+Depends: ${shlibs:Depends}, libfimex-0.19-0 (= ${Source-Version}), libboost-iostreams1.34.1, libboost-program-options1.34.1
 Description: command line utility for geo-spatial gridded data
  The program fimex is a program for File Interpolations, Manipulations and
  EXtraction of gridded geo-spatial data.
 
-Package: libfelt
+Package: libfelt-0.19-0
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-date-time1.34.1, libboost-filesystem1.34.1, proj
@@ -40,7 +40,7 @@ Description: A c++ library for reading met.no's felt-files
 Package: libfelt-dev
 Section: libdevel
 Architecture: any
-Depends: libfelt (= ${Source-Version}), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev
+Depends: libfelt-0.19-0 (= ${Source-Version}), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev
 Description: A c++ library for reading met.no's felt-files
  Dev-library for reading the internal file-format of the
  Norwegian Meteorological Institute
