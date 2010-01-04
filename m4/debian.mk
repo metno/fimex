@@ -27,7 +27,7 @@ update-debian:
 	cp -r $(top_srcdir)/debian_files/* $(DEBIAN_DIR)
 	mv $(DEBIAN_DIR)/libfimex.install $(DEBIAN_DIR)/libfimex-$(VERSION)-0.install
 	mv $(DEBIAN_DIR)/libfelt.install $(DEBIAN_DIR)/libfelt-$(VERSION)-0.install
-	perl -pi "s/libfimex-0\.19-0/libfimex-$(VERSION)-0/g; s/libfelt-0\.19-0/libfelt-$(VERSION)-0/g;" $(DEBIAN_DIR)/control
+	perl -pi -e "s/libfimex-0\.19-0/libfimex-$(VERSION)-0/g; s/libfelt-0\.19-0/libfelt-$(VERSION)-0/g;" $(DEBIAN_DIR)/control
 	chmod 774 $(DEBIAN_DIR)/rules
 	cd $(PKG_DIR) && dpkg-buildpackage -rfakeroot -us -uc -nc
 
