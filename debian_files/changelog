@@ -1,4 +1,10 @@
-fimex (0.19-2) ubuntu; urgency=low
+fimex (0.19-3) hardy; urgency=low
+
+  * no longer deleting config.guess/config.sub in rules
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon,  4 Jan 2010 14:16:04 +0100
+
+fimex (0.19-2) hardy; urgency=low
 
   * fixing debian/ubuntu build
 
