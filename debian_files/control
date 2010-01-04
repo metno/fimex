@@ -1,7 +1,7 @@
 Source: fimex
 Priority: extra
 Maintainer: Heiko Klein <heiko.klein@met.no>
-Build-Depends: debhelper (>= 5), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libc6-dev, libxml2-dev, proj, libudunits2-dev, libnetcdf-dev
+Build-Depends: debhelper (>= 5), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, proj, libudunits2-dev, libnetcdf-dev
 Standards-Version: 3.7.2
 Section: libs
 
