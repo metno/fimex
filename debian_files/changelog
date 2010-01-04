@@ -1,6 +1,12 @@
+fimex (0.19-2) ubuntu; urgency=low
+
+  * fixing debian/ubuntu build
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon,  4 Jan 2010 12:44:04 +0100
+
 fimex (0.19-1) unstable; urgency=low
 
   * Initial release
 
- -- Heiko Klein <heiko.klein@met.no>  Fri, 18 Dec 2009 08:21:55 -0500
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 18 Dec 2009 08:21:55 +0100
 
