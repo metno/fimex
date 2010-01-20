@@ -116,6 +116,7 @@ sub gribCut {
             binmode STDOUT;    
             open my $gcp, "@gribCutProg |"
                 or die "Cannot read pipe from @gribCutProg: $!\n";
+            binmode $gcp;
             while (defined (my $data = <$gcp>)) {
                 print $data;
             }
