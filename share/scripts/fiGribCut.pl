@@ -45,14 +45,14 @@ our @Files = (
 
 
 # The program allows the states:
-my %states = (
+our %states = (
 	'gribCut' => \&gribCut,
 	'Fetch Data' => \&gribCut,
 	'display' => \&display
 );
-my $cgi = new CGI();
-my $action = $cgi->param('action') || '';
-my $runState = exists $states{$action} ? $states{$action} : \&display;
+our $cgi = new CGI();
+our $action = $cgi->param('action') || '';
+our $runState = exists $states{$action} ? $states{$action} : \&display;
 $runState->();
 
 sub display {
@@ -114,7 +114,12 @@ sub gribCut {
                                -expires => '+5m',
                                -attachment => $filename);
             binmode STDOUT;    
-	        system(@gribCutProg);
+            open my $gcp, "@gribCutProg |"
+                or die "Cannot read pipe from @gribCutProg: $!\n";
+            while (defined (my $data = <$gcp>)) {
+                print $data;
+            }
+            close $gcp;
     	}
     }
 }
