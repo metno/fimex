@@ -594,7 +594,7 @@ size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, doubl
     string url = gfm.getFileURL();
     // remove the 'file:' prefix, needs to be improved when streams are allowed
     url = url.substr(5);
-    boost::shared_ptr<FILE> fh(fopen(url.c_str(), "r"), fclose);
+    boost::shared_ptr<FILE> fh(fopen(url.c_str(), "rb"), fclose);
     if (fh.get() == 0) {
         throw runtime_error("cannot open file: " + gfm.getFileURL());
     }

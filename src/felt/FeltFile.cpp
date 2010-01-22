@@ -54,7 +54,7 @@ FeltFile::FeltFile(const path & file)
 		throw runtime_error(file.native_directory_string() + " is a directory, not a file");
 
 	string fileName = file.native_file_string();
-	feltFile_ = new boost::filesystem::ifstream(file);
+	feltFile_ = new boost::filesystem::ifstream(file, std::ios::binary);
 
 	word head;
 	feltFile_->read(reinterpret_cast<char*>(& head), sizeof(word));

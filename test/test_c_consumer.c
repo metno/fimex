@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
     strcat(configFile, "/share/etc/felt2nc_variables.xml");
 
     // check if file exists
-    FILE *fh = fopen(feltFile, "r");
+    FILE *fh = fopen(feltFile, "rb");
     if (fh == NULL) {
         tests = 0;
     } else {

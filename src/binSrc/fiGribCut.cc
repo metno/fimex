@@ -231,7 +231,7 @@ static int gribCut(ostream& outStream, const vector<string>& inputFiles, const v
 {
     int errors = 0;
     for (vector<string>::const_iterator file = inputFiles.begin(); file != inputFiles.end(); ++file) {
-        boost::shared_ptr<FILE> fh(fopen(file->c_str(), "r"), fclose);
+        boost::shared_ptr<FILE> fh(fopen(file->c_str(), "rb"), fclose);
         if (fh.get() == 0) {
             cerr << "cannot open file: " << *file << endl;
             ++errors;
