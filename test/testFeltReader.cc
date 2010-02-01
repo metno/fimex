@@ -32,8 +32,17 @@
 #include <ctime>
 #include <cmath>
 #include "fimex/FeltParameters.h"
+#ifdef HAVE_LIBMIC
 #include "fimex/Felt_File.h"
 #include "fimex/FeltCDMReader.h"
+#else
+#include "fimex/Felt_Array2.h"
+#include "fimex/Felt_File2.h"
+#include "fimex/FeltCDMReader2.h"
+#include "felt/FeltGridDefinition.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
+#endif /* HAVE_LIBMIC */
+
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 
@@ -76,18 +85,33 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
 		// no testfile, skip test
 		return;
 	}
+#ifdef HAVE_LIBMIC
+	typedef vector<time_t> timeVec;
 	Felt_File ff(fileName);
 	vector<Felt_Array> vec = ff.listFeltArrays();
 	for (vector<Felt_Array>::iterator it = vec.begin(); it != vec.end(); ++it) {
 		//cout << it->getName() << endl;
 	}
 	Felt_Array& fa = ff.getFeltArray("u10m");
-	vector<short> levels = fa.getLevels();
-	//cout << fa.getName() << ": "<<levels.size() << ": " << fa.getTimes().size() << " size: " << fa.getFieldSize(fa.getTimes().at(0), levels.at(0)) << endl;
-	BOOST_CHECK( levels.size() == 1 );
+    vector<short> levels = fa.getLevels();
+    //cout << fa.getName() << ": "<<levels.size() << ": " << fa.getTimes().size() << " size: " << fa.getFieldSize(fa.getTimes().at(0), levels.at(0)) << endl;
+    BOOST_CHECK( fa.getFieldSize(fa.getTimes().at(50), levels.at(0)) == 44904 );
+    vector<short> data = ff.getDataSlice(fa.getName(), fa.getTimes().at(50), levels.at(0));
+#else
+    typedef vector<boost::posix_time::ptime> timeVec;
+    //defaultLogLevel(Logger::DEBUG);
+
+	Felt_File2 ff(fileName);
+	vector<boost::shared_ptr<Felt_Array2> > vec = ff.listFeltArrays();
+    Felt_Array2& fa = *(ff.getFeltArray("u10m").get());
+    vector<LevelPair> levels = fa.getLevelPairs();
+    BOOST_CHECK((fa.getX() * fa.getY()) == 44884);
+    vector<short> data(fa.getX()*fa.getY());
+    int scaleFacter = fa.getGrid(fa.getTimes().at(50), levels.at(0), data);
+#endif
+    BOOST_CHECK( levels.size() == 1 );
 	BOOST_CHECK( fa.getName() == "u10m" );
 	BOOST_CHECK( fa.getTimes().size() == 61);
-	BOOST_CHECK( fa.getFieldSize(fa.getTimes().at(50), levels.at(0)) == 44904 );
 	//cout << fa.getX() << "x" << fa.getY() << ": " << fa.getScalingFactor() << endl;
 	BOOST_CHECK( fa.getX() == 229 );
 	BOOST_CHECK( fa.getY() == 196 );
@@ -102,7 +126,6 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
 	}
 	//FeltParameters xx("/home/heikok/bla/test");
 
-	vector<short> data = ff.getDataSlice(fa.getName(), fa.getTimes().at(50), levels.at(0));
 	BOOST_CHECK(static_cast<int>(data.size()) == (fa.getX()*fa.getY()));
 	// u10m not defined on border
 	//cerr << "data: " << data[1000] << " " << data[10000] << " " << data[20000] << endl;
@@ -110,14 +133,18 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
 	BOOST_CHECK(data[10000] == 820);
 	BOOST_CHECK(data[20000] == 8964);
 
-	vector<time_t> ff_times = ff.getFeltTimes();
-	vector<time_t> fa_times = fa.getTimes();
-	for (vector<time_t>::iterator it = fa_times.begin(); it < fa_times.end(); ++it) {
+
+	// check consistency of Felt_File and Felt_Array for time
+	timeVec ff_times = ff.getFeltTimes();
+	timeVec fa_times = fa.getTimes();
+	for (timeVec::iterator it = fa_times.begin(); it < fa_times.end(); ++it) {
 		if (find(ff_times.begin(), ff_times.end(), *it) == ff_times.end()) {
 			BOOST_CHECK(false); // not found
 		}
 	}
 
+    // check consistency of Felt_File and Felt_Array for levels
+#ifdef HAVE_LIBMIC
 	vector<short> ff_levels = ff.getFeltLevels()[fa.getLevelType()];
 	vector<short> fa_levels = fa.getLevels();
 	for (vector<short>::iterator it = fa_levels.begin(); it < fa_levels.end(); ++it) {
@@ -125,6 +152,15 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
 			BOOST_CHECK(false); // not found
 		}
 	}
+#else
+	vector<LevelPair> ff_levels = ff.getFeltLevelPairs()[fa.getLevelType()];
+    vector<LevelPair> fa_levels = fa.getLevelPairs();
+    for (vector<LevelPair>::iterator it = fa_levels.begin(); it < fa_levels.end(); ++it) {
+        if (find(ff_levels.begin(), ff_levels.end(), *it) == ff_levels.end()) {
+            BOOST_CHECK(false); // not found
+        }
+    }
+#endif
 
 }
 
@@ -136,9 +172,16 @@ BOOST_AUTO_TEST_CASE( test_felt_axis )
 		// no testfile, skip test
 		return;
 	}
+#ifdef HAVE_LIBMIC
 	Felt_File ff(fileName);
+    const boost::array<float, 6>& gridPar = ff.getGridParameters();
+#else
+	Felt_File2 ff(fileName);
+	// gridPar needs to be a copy here, since the reference of gridPar will disappear with the gridDefinition
+    boost::array<float, 6> gridPar = ff.getGridDefinition()->getGridParameters();
+#endif
 	BOOST_CHECK(ff.getGridType() == 1);
-	const boost::array<float, 6>& gridPar = ff.getGridParameters();
+
 	boost::shared_ptr<Data> xdata = ff.getXData();
 	BOOST_CHECK((xdata->asFloat())[(int)gridPar[0]-1] == 0);
 	BOOST_CHECK((xdata->asInt())[(int)gridPar[0]] == 50162);
@@ -154,8 +197,12 @@ BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
 		// no testfile, skip test
 		return;
 	}
+#ifdef HAVE_LIBMIC
 	FeltCDMReader feltCDM(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml");
-	//feltCDM.getCDM().toXMLStream(std::cerr);
+#else
+    FeltCDMReader2 feltCDM(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml");
+#endif
+    //feltCDM.getCDM().toXMLStream(std::cerr);
 	string projName, projXAxis, projYAxis, projXUnit, projYUnit;
 	feltCDM.getCDM().getProjectionAndAxesUnits(projName, projXAxis, projYAxis, projXUnit, projYUnit);
 	BOOST_CHECK(projName == "projection_1");

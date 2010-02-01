@@ -24,6 +24,7 @@
 #include "fimex/Felt_Array2.h"
 #include "fimex/FeltParameters.h"
 #include "fimex/Utils.h"
+#include "fimex/Logger.h"
 #include "felt/FeltField.h"
 #include <sstream>
 
@@ -36,6 +37,9 @@
 namespace MetNoFelt {
 
 using MetNoFimex::type2string;
+
+static MetNoFimex::LoggerPtr logger = MetNoFimex::getLogger("fimex.Felt_Array2");
+
 
 Felt_Array2::Felt_Array2(const string name, const boost::shared_ptr<felt::FeltField> feltField, const string& dataType, double fillValue)
 : feltArrayName_(name),
@@ -55,13 +59,21 @@ void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
 {
     boost::posix_time::ptime time = field->validTime();
     LevelPair level = make_pair(field->level1(), field->level2());
+    LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG, "adding field to param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second);
 
     TimeLevelFieldMap::iterator timeSliceIt = feltFields_.find(time);
     if (timeSliceIt != feltFields_.end()) {
-        if (timeSliceIt->second.find(level) != timeSliceIt->second.end()) {
-            ostringstream msg;
-            msg << "level " << level.first << ","<< level.second << " and time " << boost::posix_time::to_simple_string(time) << " already exists for " << getName();
-            throw Felt_File_Error(msg.str());
+        LevelFieldMap::iterator timeLevelIt = timeSliceIt->second.find(level);
+        if (timeLevelIt != timeSliceIt->second.end()) {
+            if (timeLevelIt->second->dataType() == field->dataType()) {
+                ostringstream msg;
+                msg << "level " << level.first << ","<< level.second << " and time " << boost::posix_time::to_simple_string(time) << " already exists for " << getName();
+                throw Felt_File_Error(msg.str());
+            } else {
+                // overwrite existing field with the new datatype field
+                timeSliceIt->second[level] = field;
+                LOG4FIMEX(logger, MetNoFimex::Logger::INFO, "overwriting field of param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second << " with data of datatype: " << field->dataType());
+            }
         } else {
             LevelFieldMap& lfm = timeSliceIt->second;
             lfm.insert(make_pair(level, field));

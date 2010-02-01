@@ -54,7 +54,7 @@ Felt_Array::Felt_Array(const string name, const boost::array<short, 16> idx, con
 	this->idx[6] = ANY_VALUE();
 	this->idx[7] = ANY_VALUE();
 	this->idx[15] = ANY_VALUE();
-	// clear data type - what is that???
+	// clear data type - (analysis, initialization, prognose) - use whichever
 	this->idx[8] = ANY_VALUE();
 	
 }

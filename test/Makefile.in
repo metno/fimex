@@ -35,7 +35,7 @@ host_triplet = @host@
 @HAVE_UDUNITS_TRUE@am__append_2 = testUnits
 @HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
 @HAVE_MILIB_TRUE@am__append_4 = ${milib_LIBS}
-@HAVE_MILIB_TRUE@am__append_5 = testFeltReader
+@HAVE_MILIB_TRUE@am__append_5 = 
 @HAVE_FELT_OR_MILIB_TRUE@am__append_6 = testQualityExtractor
 @HAVE_NETCDF_TRUE@am__append_7 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 @HAVE_NETCDF_TRUE@am__append_8 = ${NETCDF_MI_TESTS}
@@ -69,7 +69,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/include/fimex/config.h
 CONFIG_CLEAN_FILES =
 @HAVE_UDUNITS_TRUE@am__EXEEXT_1 = testUnits$(EXEEXT)
-@HAVE_MILIB_TRUE@am__EXEEXT_2 = testFeltReader$(EXEEXT)
+am__EXEEXT_2 =
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_3 = testQualityExtractor$(EXEEXT)
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_4 = testNetcdfWriter$(EXEEXT) \
 @HAVE_FELT_OR_MILIB_TRUE@	testExtractor$(EXEEXT) \
@@ -84,8 +84,8 @@ am__EXEEXT_9 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
 	testInterpolation$(EXEEXT) testData$(EXEEXT) testCDM$(EXEEXT) \
 	testXMLDoc$(EXEEXT) testQualityExtractor$(EXEEXT) \
-	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
-	$(am__EXEEXT_5) $(am__EXEEXT_8)
+	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_3) $(am__EXEEXT_5) $(am__EXEEXT_8)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
@@ -432,7 +432,7 @@ top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	testSpatialAxisSpec testInterpolation testData testCDM \
-	testXMLDoc testQualityExtractor $(am__append_2) \
+	testXMLDoc testQualityExtractor testFeltReader $(am__append_2) \
 	$(am__append_5) $(am__append_6) $(am__append_8) \
 	$(am__append_10)
 SH_TESTS = $(am__append_9)

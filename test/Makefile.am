@@ -7,7 +7,8 @@ CC_TESTS = testBinaryConstants \
            testData \
            testCDM \
            testXMLDoc \
-           testQualityExtractor
+           testQualityExtractor \
+           testFeltReader
 SH_TESTS = 
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
 
@@ -24,7 +25,7 @@ if HAVE_PROJ4
 endif
 if HAVE_MILIB
   LDADD += ${milib_LIBS}
-  CC_TESTS += testFeltReader
+  CC_TESTS += 
 endif
 if HAVE_FELT_OR_MILIB 
   CC_TESTS += testQualityExtractor
