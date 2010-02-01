@@ -289,9 +289,8 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
 
 FeltGridDefinition::Orientation FeltGridDefinition::getScanMode_()
 {
-    boost::array<float, 6> & gs = gridPars_;
-	float & jIncrement = gs[3];
-	float & startLatitude = gs[1];
+	float & jIncrement = gridPars_[3];
+	float & startLatitude = gridPars_[1];
 	if(jIncrement < 0)
     {
 		jIncrement = jIncrement * -1;
@@ -338,24 +337,23 @@ FeltGridDefinition::polarStereographicProj_( int gridType,
                                              const std::vector<short int> & extraData)
 {
     gridPars_ = gridParameters(gridType, a, b, c, d, extraData);
-    const boost::array<float, 6>& gs = gridPars_;
 
     if (FeltFile::isLogging()) {
         std::ostringstream buffer;
         buffer << "FeltGridDefinition: " << std::endl;
         buffer << "Size of Grid: " << xNum_ << " x " << yNum_ << std::endl;
-        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Specification: " << gridPars_[0] << " | " << gridPars_[1] << " | " << gridPars_[2] << " | " << gridPars_[3] << " | " << gridPars_[4] << " | " << gridPars_[5] << std::endl;
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
     if (FeltFile::isLogging())
-        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = LeftLowerHorizontal; // Default
-    float incr = EARTH_RADIUS * (1+std::sin(PI/180.*gs[4])) / gs[2];
+    float incr = EARTH_RADIUS * (1+std::sin(PI/180.*gridPars_[4])) / gridPars_[2];
 
-    startX_ = ( 1 - gs[0] ) * incr;
-    startY_ = ( 1 - gs[1] ) * incr;
+    startX_ = ( 1 - gridPars_[0] ) * incr;
+    startY_ = ( 1 - gridPars_[1] ) * incr;
     incrementX_ = incr;
     incrementY_ = incr;
 }
@@ -367,23 +365,22 @@ FeltGridDefinition::geographicProj_( int gridType,
                                      const std::vector<short int> & extraData)
 {
     gridPars_ = gridParameters(gridType, a, b, c, d, extraData);
-    const boost::array<float, 6>& gs = gridPars_;
 
     if (FeltFile::isLogging()) {
         std::ostringstream buffer;
         buffer << "FeltGridDefinition: " << std::endl;
-        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Specification: " << gridPars_[0] << " | " << gridPars_[1] << " | " << gridPars_[2] << " | " << gridPars_[3] << " | " << gridPars_[4] << " | " << gridPars_[5] << std::endl;
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
     if (FeltFile::isLogging())
-        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = getScanMode_();
-    incrementX_ = gs[2];
-    incrementY_ = gs[3];
-    startX_ = gs[0];
-    startY_= gs[1];
+    incrementX_ = gridPars_[2];
+    incrementY_ = gridPars_[3];
+    startX_ = gridPars_[0];
+    startY_= gridPars_[1];
 }
 
 void
@@ -393,25 +390,24 @@ FeltGridDefinition::mercatorProj_( int gridType,
                                    const std::vector<short int> & extraData)
 {
     gridPars_ = gridParameters(gridType, a, b, c, d, extraData);
-    const boost::array<float, 6>& gs = gridPars_;
 
     if (FeltFile::isLogging()) {
         std::ostringstream buffer;
         buffer << "FeltGridDefinition: " << std::endl;
-        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Specification: " << gridPars_[0] << " | " << gridPars_[1] << " | " << gridPars_[2] << " | " << gridPars_[3] << " | " << gridPars_[4] << " | " << gridPars_[5] << std::endl;
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
     if (FeltFile::isLogging())
-        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = LeftLowerHorizontal; // Default
-    incrementX_ = gs[2];
-    incrementY_ = gs[3];
+    incrementX_ = gridPars_[2];
+    incrementY_ = gridPars_[3];
 
-    // gs[0] and gs[1] are startX and startY given in degree, not in projection-plane, convert using proj
+    // gridPars_[0] and gridPars_[1] are startX and startY given in degree, not in projection-plane, convert using proj
     double startX, startY;
-    projConvert(gridParametersToProjDefinition(gridType, gs), gs[0], gs[1], startX, startY);
+    projConvert(gridParametersToProjDefinition(gridType, gridPars_), gridPars_[0], gridPars_[1], startX, startY);
     startX_ = static_cast<float>(startX);
     startY_ = static_cast<float>(startY);
 }
@@ -423,25 +419,24 @@ FeltGridDefinition::lambertConicProj_( int gridType,
                                        const std::vector<short int> & extraData)
 {
     gridPars_ = gridParameters(gridType, a, b, c, d, extraData);
-    const boost::array<float, 6>& gs = gridPars_;
 
     if (FeltFile::isLogging()) {
         std::ostringstream buffer;
         buffer << "FeltGridDefinition: " << std::endl;
-        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Specification: " << gridPars_[0] << " | " << gridPars_[1] << " | " << gridPars_[2] << " | " << gridPars_[3] << " | " << gridPars_[4] << " | " << gridPars_[5] << std::endl;
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
     if (FeltFile::isLogging())
-        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = LeftLowerHorizontal; // Default
-    incrementX_ = gs[2];
-    incrementY_ = gs[3];
+    incrementX_ = gridPars_[2];
+    incrementY_ = gridPars_[3];
 
-    // gs[0] and gs[1] are startX and startY given in degree, not in projection-plane, convert using proj
+    // gridPars_[0] and gridPars_[1] are startX and startY given in degree, not in projection-plane, convert using proj
     double startX, startY;
-    projConvert(gridParametersToProjDefinition(gridType, gs), gs[0], gs[1], startX, startY);
+    projConvert(gridParametersToProjDefinition(gridType, gridPars_), gridPars_[0], gridPars_[1], startX, startY);
     startX_ = static_cast<float>(startX);
     startY_ = static_cast<float>(startY);
 }
@@ -454,18 +449,17 @@ FeltGridDefinition::polarStereographicProj( int gridType,
 									        const std::vector<short int> & extraData)
 {
     FeltFile::log("FeltGridDefinition: Polar stereographic projection identified in FELT file");
-    boost::array<float, 6> & gs = gridPars_;
     if ( extraData.empty() )
     {
         double pi = 3.14159265358979323844;
-        gs[0] = poleX;
-        gs[1] = poleY;
-        gs[3] = rot;
-        gs[4] = 60.0;
+        gridPars_[0] = poleX;
+        gridPars_[1] = poleY;
+        gridPars_[3] = rot;
+        gridPars_[4] = 60.0;
         // grid-distance due to scale-factor and old 150km grid correction
-        // make sure to set gs[4], in particular with gridType 5
-        gs[2] = gridD * (6371.* (1+std::sin(pi/180.*gs[4]))) / (79.*150.);
-        gs[5] = 0.0;
+        // make sure to set gridPars_[4], in particular with gridType 5
+        gridPars_[2] = gridD * (6371.* (1+std::sin(pi/180.*gridPars_[4]))) / (79.*150.);
+        gridPars_[5] = 0.0;
     }
 	else
 		throw std::runtime_error("The encoded polar stereographic grid specification in the FELT file is not supported");
@@ -474,18 +468,18 @@ FeltGridDefinition::polarStereographicProj( int gridType,
         std::ostringstream buffer;
         buffer << "FeltGridDefinition: " << std::endl;
         buffer << "Size of Grid: " << xNum_ << " x " << yNum_ << std::endl;
-        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Specification: " << gridPars_[0] << " | " << gridPars_[1] << " | " << gridPars_[2] << " | " << gridPars_[3] << " | " << gridPars_[4] << " | " << gridPars_[5] << std::endl;
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
     if (FeltFile::isLogging())
-        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = LeftLowerHorizontal; // Default
-    startX_ = ( 1 - gs[0] ) * gs[2];
-    startY_ = ( 1 - gs[1] ) * gs[2];
-    incrementX_ = gs[2];
-    incrementY_ = gs[2];
+    startX_ = ( 1 - gridPars_[0] ) * gridPars_[2];
+    startY_ = ( 1 - gridPars_[1] ) * gridPars_[2];
+    incrementX_ = gridPars_[2];
+    incrementY_ = gridPars_[2];
 }
 
 void
@@ -497,21 +491,20 @@ FeltGridDefinition::geographicProj( int gridType,
     FeltFile::log("FeltGridDefinition: Geographic projection identified in FELT file");
     const int gsSize = 6;
     float scale = 10000.0;
-    boost::array<float, 6> & gs = gridPars_;
 
     if ( extraData.empty() )
     {
-        gs[0] = startLongitude;
-        gs[1] = startLatitude;
-        gs[2] = iInc;
-        gs[3] = jInc;
-        gs[4] = 0.0;
-        gs[5] = 0.0;
+        gridPars_[0] = startLongitude;
+        gridPars_[1] = startLatitude;
+        gridPars_[2] = iInc;
+        gridPars_[3] = jInc;
+        gridPars_[4] = 0.0;
+        gridPars_[5] = 0.0;
     }
     else if ( extraData.size() == gsSize * 2 )
     {
 		for(int i = 0;i < gsSize;i++)
-			gs[i] = static_cast<float>((extraData[i * 2] * scale) + extraData[(i * 2) + 1]) / scale;
+			gridPars_[i] = static_cast<float>((extraData[i * 2] * scale) + extraData[(i * 2) + 1]) / scale;
 	}
 	else if ( extraData.size() == 2 + (gsSize * 3) )
 	{
@@ -522,7 +515,7 @@ FeltGridDefinition::geographicProj( int gridType,
 			throw std::runtime_error("Second word in the grid encoding does not correspond to 3 (rotated grid)");
 
 		for(int i = 0;i < gsSize;i++)
-			gs[i] = static_cast<float>((extraData[(i * 3) + 3] * scale) + extraData[(i * 3) + 4]) / (extraData[(i * 3) + 2] * 10.0);
+			gridPars_[i] = static_cast<float>((extraData[(i * 3) + 3] * scale) + extraData[(i * 3) + 4]) / (extraData[(i * 3) + 2] * 10.0);
 	}
 	else
 		throw std::runtime_error("The encoded grid specification in the FELT file is not supported");
@@ -531,21 +524,21 @@ FeltGridDefinition::geographicProj( int gridType,
     if (FeltFile::isLogging()) {
         std::ostringstream buffer;
         buffer << "FeltGridDefinition: " << std::endl;
-        buffer << "Grid Specification: " << gs[0] << " | " << gs[1] << " | " << gs[2] << " | " << gs[3] << " | " << gs[4] << " | " << gs[5] << std::endl;
+        buffer << "Grid Specification: " << gridPars_[0] << " | " << gridPars_[1] << " | " << gridPars_[2] << " | " << gridPars_[3] << " | " << gridPars_[4] << " | " << gridPars_[5] << std::endl;
         buffer << "Grid Type: " << gridType << std::endl;
         FeltFile::log(buffer.str());
     }
     if (FeltFile::isLogging())
-        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gs));
+        FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     /* no longer supported
      * orientation_ = getScanMode_(gs, yNum_);
      */
     orientation_ = getScanMode();
-    incrementX_ = gs[2];
-    incrementY_ = gs[3];
-    startX_ = gs[0];
-    startY_= gs[1];
+    incrementX_ = gridPars_[2];
+    incrementY_ = gridPars_[3];
+    startX_ = gridPars_[0];
+    startY_= gridPars_[1];
 }
 
 std::string FeltGridDefinition::projDefinition() const
