@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_f )
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
 {
-	float infield[4] = {1., 2., 2., 1+sqrt(2)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
+	float infield[4] = {1., 2., 2., 1+sqrt(2.)}; // (0,0), (0,1), (1,0), (1,1) #(y,x)
 	float outvalues[1];
 
 	mifi_get_values_bilinear_f(infield, outvalues, 0.3, 0., 2, 2, 1);

@@ -248,7 +248,7 @@ void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levels
         // add level variable data
         cdm_->getVariable(levelVar.getName()).setData(createData(CDM_INT, lit->second.begin(), lit->second.end()));
         // enable search of level-information by level-name required by getDataSlice
-        for (set<long>::iterator lnit = lit->second.begin(); lnit != lit->second.end(); ++lnit) {
+        for (set<long>::const_iterator lnit = lit->second.begin(); lnit != lit->second.end(); ++lnit) {
             // add a vector with editon, levelType and levelNumber
             vector<long> v(0,3);
             v.push_back(edition);

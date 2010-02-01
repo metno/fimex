@@ -25,6 +25,7 @@
 #define CDMNAMEDENTITY_H_
 
 #include <string>
+#include <functional>
 
 namespace MetNoFimex
 {

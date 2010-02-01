@@ -32,7 +32,7 @@
 
 
 // forward declaration
-class grib_handle;
+struct grib_handle;
 
 /**
  *  macro to call #mifi_grib_check with correct line and file

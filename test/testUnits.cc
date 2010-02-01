@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	BOOST_CHECK(true);
 	double epoch = tu.unitTime2epochSeconds(0);
 	BOOST_CHECK(fabs(epoch-3600) < 1e-5);
-	BOOST_CHECK(fabs(tu.epochSeconds2unitTime(epoch) < 1e-5));
+	BOOST_CHECK(fabs(tu.epochSeconds2unitTime(epoch)) < 1e-5);
 
 	FimexTime ft = tu.unitTime2fimexTime(3600*24*33); // 03.02.1970
 	BOOST_CHECK(ft.year == 1970);
