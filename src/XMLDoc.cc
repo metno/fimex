@@ -29,6 +29,7 @@ namespace MetNoFimex
 {
 
 XMLDoc::XMLDoc(const std::string& filename) throw(CDMException)
+: xpathCtx(0)
 {
 	xmlInitParser();
     LIBXML_TEST_VERSION

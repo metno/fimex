@@ -253,7 +253,7 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
 			attrList.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));
 		}
 
-	} else if (projStr == "merc") {
+	} else if (projType == "merc") {
         attrList.push_back(CDMAttribute("grid_mapping_name", "mercator"));
 
         // longitude at origin
@@ -271,7 +271,7 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
         if (boost::regex_search(projStr, what, boost::regex("\\+k=(\\S+)"))) {
             attrList.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
         }
-    } else if (projStr == "lcc") {
+    } else if (projType == "lcc") {
 	    // lambert conic conformal
         attrList.push_back(CDMAttribute("grid_mapping_name", "lambert_conformal_conic"));
 
