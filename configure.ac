@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.19],[heiko.klein@met.no])
+AC_INIT([fimex],[0.20beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
@@ -138,3 +138,30 @@ AC_LANG_POP(C++)
 AC_CONFIG_HEADERS([include/fimex/config.h])
 AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/felt/Makefile include/kdtree++/Makefile])
 AC_OUTPUT
+
+
+# ########################################################### 
+# Print Out Summary of Configuration
+#
+AC_MSG_RESULT([ ])
+AC_MSG_RESULT([$PACKAGE_NAME $PACKAGE_VERSION])
+AC_MSG_RESULT([Configuration:])
+AC_MSG_RESULT([------------------------------------------------------------])
+AC_MSG_RESULT([ ])
+AC_MSG_RESULT([Source Code:      $srcdir])
+AC_MSG_RESULT([Host System:      $host])
+AC_MSG_RESULT([  ])
+AC_MSG_RESULT([Prefix:           $prefix])
+AC_MSG_RESULT([Binaries:         $exec_prefix])
+AC_MSG_RESULT([Manuals:          $mandir])
+AC_MSG_RESULT([Data:             $datadir])
+AC_MSG_RESULT([System Config:    $sysconfdir])
+AC_MSG_RESULT([ ])
+AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS])
+AC_MSG_RESULT([LDFLAGS:          $LDFLAGS])
+AC_MSG_RESULT([LIBS:             $LIBS])
+AC_MSG_RESULT([DEFS:             $DEFS])
+AC_MSG_RESULT([  ])
+AC_MSG_RESULT([------------------------------------------------------------])
+AC_MSG_RESULT([ ])
+
