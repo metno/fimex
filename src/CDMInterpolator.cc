@@ -513,23 +513,25 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 			}
 		}
 		// loop until beginning
-		it2--;
-		while (it2 != (latlons.begin()-1)) {
-			steps++;
-			double dlon = it2->lon - p.lon;
-			if (fabs(it2->lat - p.lat) > min_d) {
-				it2 = latlons.begin()-1; // all successing
-			} else {
-				double cos_d = cos(it2->lat) * cos(p.lat) * cos(dlon) + sin(it2->lat) * sin(p.lat);
-				if (cos_d > min_cos_d) { // closer distance
-					min_cos_d = cos_d;
-					min_d = acos(min_cos_d);
-					p.x = it2->x;
-					p.y = it2->y;
-				}
-				it2--;
-			}
+		if (it2 != latlons.begin()) {
+		    do {
+		        steps++;
+		        it2--;
+		        double dlon = it2->lon - p.lon;
+		        if (fabs(it2->lat - p.lat) > min_d) {
+		            it2 = latlons.begin(); // all successing
+		        } else {
+		            double cos_d = cos(it2->lat) * cos(p.lat) * cos(dlon) + sin(it2->lat) * sin(p.lat);
+		            if (cos_d > min_cos_d) { // closer distance
+		                min_cos_d = cos_d;
+		                min_d = acos(min_cos_d);
+		                p.x = it2->x;
+		                p.y = it2->y;
+		            }
+		        }
+		    } while (it2 != latlons.begin());
 		}
+
 		pointsOnYAxis[i] = p.y;
 		pointsOnXAxis[i] = p.x;
 	}
