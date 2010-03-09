@@ -1,3 +1,6 @@
+  * 2010-03-09 fimex-0.20
+    * porting to Visual C++
+    * fixing bugs in lambert-projection
   * 2009-12-18 fimex-0.19
     * debian packages (without grib support)
     * fixing time-interpolator
