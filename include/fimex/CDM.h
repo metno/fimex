@@ -87,7 +87,7 @@ public:
 	 *
 	 * @param attrName name of the attribute
 	 * @param attrValueRegExp regular expression the 'string'-value needs to match
-	 * @return copies of the attributes matching the request
+	 * @return variable names of the variable with attributes matching
 	 */
 	std::vector<std::string> findVariables(const std::string& attrName, const std::string& attrValueRegExp) const;
 	/**
@@ -97,7 +97,7 @@ public:
 	 *
 	 * @param findAttributes map with (attribute => string-value regExp) pairs
 	 * @param findDimensions vector with dimensions contained in variable
-	 * @return copies of the attributes matching the request
+	 * @return variable names of the variable with attributes matching the request and containing all dimensions
 	 */
 	std::vector<std::string> findVariables(const std::map<std::string, std::string>& findAttributes, const std::vector<std::string>& findDimensions) const;
 	/**

@@ -35,7 +35,9 @@
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
 #ifdef HAVE_FELT
 #include "fimex/FeltCDMReader2.h"
 #endif
@@ -115,17 +117,20 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionString(out, "input.type", vm);
 	writeOptionString(out, "input.config", vm);
 	writeOptionAny(out, "input.printNcML", vm);
+    writeOptionAny(out, "input.printCS", vm);
 	writeOptionString(out, "output.file", vm);
 	writeOptionString(out, "output.type", vm);
 	writeOptionString(out, "output.config", vm);
     writeOptionString(out, "qualityExtract.autoConfigString", vm);
     writeOptionString(out, "qualityExtract.config", vm);
     writeOptionString(out, "qualityExtract.printNcML", vm);
+    writeOptionString(out, "qualityExtract.printCS", vm);
 	writeVectorOptionString(out, "extract.removeVariable", vm);
 	writeVectorOptionString(out, "extract.reduceDimension.name", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
 	writeOptionAny(out, "extract.printNcML", vm);
+    writeOptionAny(out, "extract.printCS", vm);
 	writeOptionString(out, "interpolate.projString", vm);
 	writeOptionString(out, "interpolate.method", vm);
 	writeOptionString(out, "interpolate.xAxisValues", vm);
@@ -135,10 +140,13 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionString(out, "interpolate.latitudeName", vm);
 	writeOptionString(out, "interpolate.longitudeName", vm);
 	writeOptionAny(out, "interpolate.printNcML", vm);
+    writeOptionAny(out, "interpolate.printCS", vm);
 	writeOptionString(out, "timeInterpolate.timeSpec", vm);
 	writeOptionAny(out, "timeInterpolate.printNcML", vm);
+	writeOptionAny(out, "timeInterpolate.printCS", vm);
 	writeOptionString(out, "ncml.config", vm);
     writeOptionAny(out, "ncml.printNcML", vm);
+    writeOptionAny(out, "ncml.printCS", vm);
 }
 
 static string getType(const string& io, po::variables_map& vm) {
@@ -201,6 +209,12 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 			returnPtr->getCDM().toXMLStream(cout);
 			cout << endl;
 		}
+        if (vm.count("input.printCS")) {
+            cout << "InputFile CoordinateSystems: ";
+            vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(returnPtr->getCDM());
+            cout << joinPtr(csVec.begin(), csVec.end(), " | ");
+            cout << endl;
+        }
 	}
 
 	return returnPtr;
@@ -414,6 +428,7 @@ int main(int argc, char* args[])
 		("input.type", po::value<string>(), "filetype of intput file")
 		("input.config", po::value<string>(), "non-standard input configuration")
 		("input.printNcML", "print NcML description of input file")
+		("input.printCS", "print CoordinateSystems of input file")
 		("output.file", po::value<string>(), "output file")
 		("output.type", po::value<string>(), "filetype of output file")
 		("output.config", po::value<string>(), "non-standard output configuration")
@@ -422,9 +437,11 @@ int main(int argc, char* args[])
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
         ("extract.printNcML", "print NcML description of extractor")
+        ("extract.printCS", "print CoordinateSystems of extractor")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
         ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
         ("qualityExtract.printNcML", "print NcML description of extractor")
+        ("qualityExtract.printCS", "print CoordinateSystems of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor or coord_kdtree")
         ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
@@ -434,10 +451,13 @@ int main(int argc, char* args[])
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.printNcML", "print NcML description of interpolator")
+        ("interpolate.printCS", "print CoordinateSystems of interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
         ("timeInterpolate.printNcML", "print NcML description of timeInterpolator")
+        ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
         ("ncml.config", "modify/configure with ncml-file")
         ("ncml.printNcML", "print NcML description after ncml-configuration")
+        ("ncml.printCS", "print CoordinateSystems after ncml-configuration")
 		;
 
 

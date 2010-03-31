@@ -52,13 +52,35 @@ std::string trim(const std::string& str);
 template<class InputIterator>
 std::string join(InputIterator start, InputIterator end, std::string delim = ",")
 {
-    std::ostringstream buffer;
     if (start == end) return "";
-    while (start+1 != end) {
-        buffer << *start << delim;
-        start++;
+    std::ostringstream buffer;
+    InputIterator current = start++;
+    while (start != end) {
+        buffer << *current << delim;
+        current = start++;
     }
-    buffer << *start;
+    buffer << *current;
+    return buffer.str();
+}
+
+/**
+ * Join values from an iterator of pointers to a string, using delimiter as separator.
+ *
+ * @param start
+ * @param end
+ * @param delim separator, default to ","
+ */
+template<class InputIterator>
+std::string joinPtr(InputIterator start, InputIterator end, std::string delim = ",")
+{
+    if (start == end) return "";
+    std::ostringstream buffer;
+    InputIterator current = start++;
+    while (start+1 != end) {
+        buffer << **current << delim;
+        current = start++;
+    }
+    buffer << **current;
     return buffer.str();
 }
 

@@ -81,13 +81,14 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
-	Data.cc DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
+	coordSys/CoordinateSystem.cc coordSys/CoordSysImpl.h Data.cc \
+	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc GribUtils.cc Logger.cc NcmlCDMReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
+	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc NetCDF_CF10_CDMReader.cc \
 	NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h \
@@ -102,14 +103,14 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMInterpolator.lo CDMNamedEntity.lo CDMQualityExtractor.lo \
 	CDMReader.lo CDMTimeInterpolator.lo CDMVariable.lo \
-	CDM_XMLConfigHelper.lo Data.lo DataTypeChanger.lo \
-	Felt_Array2.lo FeltCDMReader2.lo Felt_File2.lo \
-	FeltParameters.lo GribApiCDMWriter.lo \
+	CDM_XMLConfigHelper.lo CoordinateSystem.lo Data.lo \
+	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
+	Felt_File2.lo FeltParameters.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
 	GribApiCDMWriter_Impl2.lo GribCDMReader.lo GribFileIndex.lo \
 	GridDefinition.lo GribUtils.lo Logger.lo NcmlCDMReader.lo \
 	Null_CDMWriter.lo ReplaceStringObject.lo \
-	ReplaceStringTimeObject.lo SpatialAxisSpec.lo \
+	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
 	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
 	Utils.lo XMLDoc.lo $(am__objects_1) $(am__objects_2)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
@@ -297,14 +298,15 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
 	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc \
-	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h Data.cc \
+	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
+	coordSys/CoordinateSystem.cc coordSys/CoordSysImpl.h Data.cc \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc GribUtils.cc Logger.cc NcmlCDMReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc \
+	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc $(am__append_5) $(am__append_6)
 all: all-recursive
@@ -392,6 +394,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedForwardInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader.Plo@am__quote@
@@ -417,6 +420,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpatialAxisSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
@@ -468,6 +472,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+CoordinateSystem.lo: coordSys/CoordinateSystem.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CoordinateSystem.lo -MD -MP -MF $(DEPDIR)/CoordinateSystem.Tpo -c -o CoordinateSystem.lo `test -f 'coordSys/CoordinateSystem.cc' || echo '$(srcdir)/'`coordSys/CoordinateSystem.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/CoordinateSystem.Tpo $(DEPDIR)/CoordinateSystem.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordinateSystem.cc' object='CoordinateSystem.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordinateSystem.lo `test -f 'coordSys/CoordinateSystem.cc' || echo '$(srcdir)/'`coordSys/CoordinateSystem.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

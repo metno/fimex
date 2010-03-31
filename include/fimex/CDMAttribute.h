@@ -24,10 +24,10 @@
 #ifndef CDMATTRIBUTE_H_
 #define CDMATTRIBUTE_H_
 
-#include<string>
-#include<vector>
-#include<ostream>
-#include<boost/shared_ptr.hpp>
+#include <string>
+#include <vector>
+#include <ostream>
+#include <boost/shared_ptr.hpp>
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"
 #include "fimex/CDMException.h"

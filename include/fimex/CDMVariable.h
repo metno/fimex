@@ -28,7 +28,6 @@
 #include <vector>
 #include <ostream>
 #include "fimex/CDMAttribute.h"
-#include "fimex/CDMDimension.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"
 

@@ -741,6 +741,8 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 
 	changeCDM(*cdm_.get(), proj_input, orgProjection, projectionVariables, orgXAxis, orgYAxis, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
 
+	// TODO translate axes to 'm' if given in other metric units
+	// TODO scale axes eventually
 	boost::shared_ptr<Data> orgXAxisVals = dataReader->getData(orgXAxis);
 	boost::shared_ptr<Data >orgYAxisVals = dataReader->getData(orgYAxis);
 	// store projection changes to be used in data-section
