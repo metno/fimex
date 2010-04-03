@@ -54,6 +54,13 @@ const CDM& CDMReader::getCDM() const
     return *(cdm_.get());
 }
 
+boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+{
+    // TODO: stupid implementation, should be improved by looking at unlimited dimension
+    boost::shared_ptr<Data> data = getData(varName);
+    return data->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
+}
+
 boost::shared_ptr<Data> CDMReader::getData(const std::string& varName) throw(CDMException)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
@@ -98,6 +105,11 @@ boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost
 boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	return scaleDataOf(varName, getDataSlice(varName, unLimDimPos));
+}
+
+boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+{
+    return scaleDataOf(varName, getDataSlice(varName, sb));
 }
 
 boost::shared_ptr<Data> CDMReader::getScaledData(const std::string& varName) throw(CDMException)

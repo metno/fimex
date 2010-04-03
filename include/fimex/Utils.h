@@ -76,7 +76,7 @@ std::string joinPtr(InputIterator start, InputIterator end, std::string delim = 
     if (start == end) return "";
     std::ostringstream buffer;
     InputIterator current = start++;
-    while (start+1 != end) {
+    while (start != end) {
         buffer << **current << delim;
         current = start++;
     }

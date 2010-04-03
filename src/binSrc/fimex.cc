@@ -212,6 +212,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         if (vm.count("input.printCS")) {
             cout << "InputFile CoordinateSystems: ";
             vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(returnPtr->getCDM());
+            cout << csVec.size() << ": ";
             cout << joinPtr(csVec.begin(), csVec.end(), " | ");
             cout << endl;
         }

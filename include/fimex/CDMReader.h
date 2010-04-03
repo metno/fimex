@@ -26,6 +26,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMException.h"
+#include "fimex/SliceBuilder.h"
 
 namespace MetNoFimex
 {
@@ -57,7 +58,7 @@ public:
 	/**
 	 * @brief data-reading function to be called from the CDMWriter
 	 *
-	 * This function needs to be implemented by the CDMReader. It should provide the data
+	 * This methods needs to be implemented by the CDMReader. It should provide the data
 	 * for each variable, either by reading from disk, converting from another CDMReader or
 	 * reading from an in-memory data-section.
      *
@@ -68,6 +69,16 @@ public:
 	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
 	 */
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) = 0;
+
+    /**
+     * @brief data-reading function to be called from the CDMWriter
+     *
+     * @param varName name of the variable to read
+     * @param sb a SliceBuilder generated from this CDMReaders CDM
+     * @warn This method has a default implementation depending on #getDataSlice(varName, unLimDimPos),
+     *       but should be implemented for performance reasons.
+     */
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
 
 	/**
 	 * @brief data-reading function to be called from the CDMWriter
@@ -92,6 +103,14 @@ public:
 	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
 	 */
 	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+
+	/**
+	 * @brief read and scale a dataslice
+	 * @param varName name of the variable to read
+	 * @param sb SliceBuilder to restrict the data
+	 * @see getScaledDataSlice(varName, unLimDimPos)
+	 */
+	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
 
 	/**
 	 * @brief read and scale the complete data

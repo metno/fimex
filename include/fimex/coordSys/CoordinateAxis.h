@@ -81,16 +81,8 @@ private:
 
 };
 
-std::ostream& operator<<(std::ostream& out, CoordinateAxis ca)
-{
-    return out << ca.getName();
-}
-
-std::ostream& operator<<(std::ostream& out, CoordinateAxis::AxisType t)
-{
-    out << CoordinateAxis::type2string(t);
-    return out;
-}
+std::ostream& operator<<(std::ostream& out, CoordinateAxis ca);
+std::ostream& operator<<(std::ostream& out, CoordinateAxis::AxisType t);
 
 }
 

@@ -39,6 +39,7 @@ libfimex_la_SOURCES = interpolation.c \
                      CDM_XMLConfigHelper.cc \
                      CDM_XMLConfigHelper.h \
                      coordSys/CoordinateSystem.cc \
+                     coordSys/CoordinateAxis.cc \
                      coordSys/CoordSysImpl.h \
 					 Data.cc \
 					 DataTypeChanger.cc \

@@ -155,14 +155,21 @@ bool CoordinateSystem::hasAxisType(CoordinateAxis::AxisType type) const
     return found != v.end();
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
+CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
 {
     ConstAxisList& axes = pimpl_->axes_;
+    ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    if (axis != axes.end()) {
+        return *axis;
+    }
+    // return 0/NULL Ptr
+    return ConstAxisPtr();
+}
+CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
+{
     for (vector<CoordinateAxis::AxisType>::const_iterator typeIt = types.begin(); typeIt != types.end(); ++typeIt) {
-        ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(*typeIt));
-        if (axis != axes.end()) {
-            return *axis;
-        }
+        ConstAxisPtr axis = findAxisOfType(*typeIt);
+        if (axis.get() != 0) return axis;
     }
     // return 0/NULL Ptr
     return ConstAxisPtr();
@@ -219,7 +226,8 @@ void CoordinateSystem::setAxis(AxisPtr axis)
     // add new axis
     if (axis->getAxisType() != CoordinateAxis::Undefined &&
         hasAxisType(axis->getAxisType())) {
-        throw CDMException("adding axis "+axis->getName()+" to CS: type already exists: " + CoordinateAxis::type2string(axis->getAxisType()));
+        ConstAxisPtr otherAxis = findAxisOfType(axis->getAxisType());
+        throw CDMException("adding axis "+axis->getName()+" to CS: type already exists: " + CoordinateAxis::type2string(axis->getAxisType()) + " in " + otherAxis->getName());
     }
     v.push_back(axis);
 }
@@ -310,7 +318,7 @@ CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& varName)
              lcSName == "ocean_double_sigma_coordinate" ||
              lcSName == "ocean_s_coordinate_g1" ||
              lcSName == "ocean_s_coordinate_g2" )
-            return CoordinateAxis::GeoX;
+            return CoordinateAxis::GeoZ;
     }
     // test unit
     Units uc;

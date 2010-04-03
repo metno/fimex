@@ -106,6 +106,12 @@ public:
      */
     virtual bool hasAxisType(CoordinateAxis::AxisType type) const;
     /**
+     * find the first axis with exactly the types
+     * @param type
+     * @return an axis or null
+     */
+    virtual ConstAxisPtr findAxisOfType(CoordinateAxis::AxisType type) const;
+    /**
      * find the first axis with one of the types
      * @param types list of types
      * @return an axis or null

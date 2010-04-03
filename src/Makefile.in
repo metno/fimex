@@ -81,9 +81,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMExtractor.cc CDMInterpolator.cc CDMNamedEntity.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
-	coordSys/CoordinateSystem.cc coordSys/CoordSysImpl.h Data.cc \
-	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
-	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
+	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
+	coordSys/CoordSysImpl.h Data.cc DataTypeChanger.cc \
+	Felt_Array2.cc FeltCDMReader2.cc Felt_File2.cc \
+	FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc GribUtils.cc Logger.cc NcmlCDMReader.cc \
@@ -103,8 +104,8 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMInterpolator.lo CDMNamedEntity.lo CDMQualityExtractor.lo \
 	CDMReader.lo CDMTimeInterpolator.lo CDMVariable.lo \
-	CDM_XMLConfigHelper.lo CoordinateSystem.lo Data.lo \
-	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
+	CDM_XMLConfigHelper.lo CoordinateSystem.lo CoordinateAxis.lo \
+	Data.lo DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
 	Felt_File2.lo FeltParameters.lo GribApiCDMWriter.lo \
 	GribApiCDMWriter_ImplAbstract.lo GribApiCDMWriter_Impl1.lo \
 	GribApiCDMWriter_Impl2.lo GribCDMReader.lo GribFileIndex.lo \
@@ -299,9 +300,10 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
 	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
-	coordSys/CoordinateSystem.cc coordSys/CoordSysImpl.h Data.cc \
-	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
-	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
+	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
+	coordSys/CoordSysImpl.h Data.cc DataTypeChanger.cc \
+	Felt_Array2.cc FeltCDMReader2.cc Felt_File2.cc \
+	FeltParameters.cc GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GridDefinition.cc GribUtils.cc Logger.cc NcmlCDMReader.cc \
@@ -394,6 +396,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedForwardInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateAxis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Plo@am__quote@
@@ -479,6 +482,13 @@ CoordinateSystem.lo: coordSys/CoordinateSystem.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordinateSystem.cc' object='CoordinateSystem.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordinateSystem.lo `test -f 'coordSys/CoordinateSystem.cc' || echo '$(srcdir)/'`coordSys/CoordinateSystem.cc
+
+CoordinateAxis.lo: coordSys/CoordinateAxis.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CoordinateAxis.lo -MD -MP -MF $(DEPDIR)/CoordinateAxis.Tpo -c -o CoordinateAxis.lo `test -f 'coordSys/CoordinateAxis.cc' || echo '$(srcdir)/'`coordSys/CoordinateAxis.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/CoordinateAxis.Tpo $(DEPDIR)/CoordinateAxis.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordinateAxis.cc' object='CoordinateAxis.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordinateAxis.lo `test -f 'coordSys/CoordinateAxis.cc' || echo '$(srcdir)/'`coordSys/CoordinateAxis.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo
