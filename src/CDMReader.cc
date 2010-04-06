@@ -24,23 +24,20 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/interpolation.h"
-#include <boost/bind.hpp>
 #include "fimex/Data.h"
 
 namespace MetNoFimex {
-
-static void addSizeUnlessUnlimited(const CDM& cdm, const std::string& dimName, size_t& size) {
-	const CDMDimension& dim = cdm.getDimension(dimName);
-	if (!dim.isUnlimited()) {
-		size *= dim.getLength();
-	}
-}
 
 // retrieve size of data slice
 static size_t getSliceSize(const CDM& cdm, const CDMVariable& variable) {
 	size_t sliceSize = 1;
 	std::vector<std::string> shape = variable.getShape();
-	for_each(shape.begin(), shape.end(), boost::bind(addSizeUnlessUnlimited, cdm, _1, sliceSize));
+	for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
+	    const CDMDimension& dim = cdm.getDimension(*dimIt);
+	    if (!dim.isUnlimited()) {
+	        sliceSize *= dim.getLength();
+	    }
+	}
 	return sliceSize;
 }
 

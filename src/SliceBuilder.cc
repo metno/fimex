@@ -39,13 +39,16 @@ SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName)
 {
     const CDMVariable& var = cdm.getVariable(varName);
     const vector<string>& shape = var.getShape();
+    start_.resize(shape.size());
+    size_.resize(shape.size());
+    maxSize_.resize(shape.size());
     size_t pos = 0;
     for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt, ++pos) {
         const CDMDimension& dim = cdm.getDimension(*dimIt);
         dimPos_[dim.getName()] = pos;
-        start_[pos] = 0;
-        size_[pos] = dim.getLength();
-        maxSize_[pos] = dim.getLength();
+        start_.at(pos) = 0;
+        size_.at(pos) = dim.getLength();
+        maxSize_.at(pos) = dim.getLength();
     }
 }
 
@@ -71,7 +74,7 @@ void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, si
     size_.at(pos) = size;
 }
 
-void SliceBuilder::setStartAndSize(boost::shared_ptr<CoordinateAxis> axis, size_t start, size_t size)
+void SliceBuilder::setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size)
 {
     if (axis.get() == 0) return;
     setStartAndSize(axis->getName(), start, size);

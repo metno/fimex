@@ -68,7 +68,7 @@ public:
      * @throw CDMException if axis not part of the dimensions of the variable
      * @throw out_of_range depending on startPos or size
      */
-    void setStartAndSize(boost::shared_ptr<CoordinateAxis> axis, size_t start, size_t size);
+    void setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size);
     /**
      * @return vector with start-positions of shape-size and order of the variable
      */

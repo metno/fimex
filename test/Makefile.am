@@ -35,7 +35,7 @@ if HAVE_FELT_OR_MILIB
 endif
 if HAVE_NETCDF
   LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-  CC_TESTS += ${NETCDF_MI_TESTS}
+  CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys
   GRIBAPI_NC_TESTS = testGribReader
   SH_TESTS += ${NETCDF_MI_SH_TESTS}
 endif
@@ -54,7 +54,8 @@ testInterpolation_SOURCES = testInterpolation.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
-testCDM_SOURCES = testCDM.cc 
+testCDM_SOURCES = testCDM.cc
+testCoordSys_SOURCES = testCoordSys.cc 
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testGribReader_SOURCES = testGribReader.cc

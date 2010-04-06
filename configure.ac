@@ -136,7 +136,17 @@ AC_LANG_POP(C++)
 #DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([include/fimex/config.h])
-AC_CONFIG_FILES([fimex.pc Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/felt/Makefile include/kdtree++/Makefile])
+AC_CONFIG_FILES([fimex.pc Makefile
+                          src/Makefile 
+                          src/felt/Makefile 
+                          src/binSrc/Makefile 
+                          test/Makefile 
+                          share/etc/Makefile 
+                          include/Makefile 
+                          include/fimex/Makefile 
+                          include/fimex/coordSys/Makefile 
+                          include/felt/Makefile 
+                          include/kdtree++/Makefile])
 AC_OUTPUT
 
 
