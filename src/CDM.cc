@@ -25,6 +25,7 @@
 #include "fimex/interpolation.h"
 #include "fimex/DataImpl.h"
 #include "fimex/Units.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include <boost/bind.hpp>
 #include <boost/regex.hpp>
 #include <functional>
@@ -35,48 +36,6 @@ namespace MetNoFimex
 {
 
 /** Comparator to check if units are comparable to the initialized one */
-class CDMCompatibleUnit : public std::unary_function<std::string, bool>
-{
-	const CDM& cdm;
-	const std::string& unitString;
-	Units units;
-public:
-	CDMCompatibleUnit(const CDM& cdm, const std::string& unitString) : cdm(cdm), unitString(unitString) {}
-	bool operator() (const std::string& varName) const
-	{
-		try {
-			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
-			std::string testUnit(unitAttr.getData()->asString());
-			if (testUnit == "") return false;
-			return units.areConvertible(unitString, testUnit);
-		} catch (CDMException& ex) {
-			// nothing to do
-		}
-		return false;
-	}
-};
-
-/** Comparator to check if units is time */
-class CDMCompatibleTime : public std::unary_function<std::string, bool>
-{
-	const CDM& cdm;
-	Units units;
-public:
-	CDMCompatibleTime(const CDM& cdm) : cdm(cdm) {}
-	bool operator() (const std::string& varName) const
-	{
-		try {
-			const CDMAttribute& unitAttr = cdm.getAttribute(varName, "units");
-			std::string testUnit(unitAttr.getData()->asString());
-			if (testUnit == "") return false;
-			return units.isTime(testUnit);
-		} catch (CDMException& ex) {
-			// nothing to do
-		}
-		return false;
-	}
-};
-
 
 /**
  * Comparator to check if units is latitude or longitude as of CF-1.2
@@ -152,15 +111,27 @@ public:
 	}
 };
 
+typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
+
 struct CDMImpl {
     CDM::StrAttrVecMap attributes;
     CDM::VarVec variables;
     CDM::DimVec dimensions;
+    bool coordsInitialized;
+    CoordSysList coordSystems;
 };
 
+static void enhance(CDMImpl* pimpl, const CDM& cdm)
+{
+    if (!pimpl->coordsInitialized) {
+        pimpl->coordSystems = listCoordinateSystems(cdm);
+        pimpl->coordsInitialized = true;
+    }
+}
 
 CDM::CDM() : pimpl_(new CDMImpl())
 {
+    pimpl_->coordsInitialized = false;
 }
 
 CDM::CDM(const CDM& rhs) : pimpl_(new CDMImpl())
@@ -183,6 +154,8 @@ CDM& CDM::operator=(const CDM& rhs)
 
 void CDM::addVariable(const CDMVariable& var) throw(CDMException)
 {
+    // TODO: check var.dims for existence!!!
+    pimpl_->coordsInitialized = false;
 	if (!hasVariable(var.getName())) {
 		pimpl_->variables.push_back(var);
 	} else {
@@ -221,6 +194,7 @@ std::vector<std::string> CDM::findVariables(const std::string& attrName, const s
 
 bool CDM::renameVariable(const std::string& oldName, const std::string& newName)
 {
+    pimpl_->coordsInitialized = false;
     // change variable in VarVec variables and variableNames as keys in StrAttrVecMap attributes
     try {
         removeVariable(newName); // make sure none of the same name exists
@@ -297,6 +271,7 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 
 void CDM::removeVariable(const std::string& variableName)
 {
+    pimpl_->coordsInitialized = false;
 	pimpl_->variables.erase(remove_if(pimpl_->variables.begin(), pimpl_->variables.end(), CDMNameEqual(variableName)), pimpl_->variables.end());
     pimpl_->attributes.erase(variableName);
 }
@@ -304,6 +279,7 @@ void CDM::removeVariable(const std::string& variableName)
 
 void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
 {
+    pimpl_->coordsInitialized = false;
 	if (!hasDimension(dim.getName())) {
 		pimpl_->dimensions.push_back(dim);
 	} else {
@@ -347,6 +323,7 @@ bool CDM::testDimensionInUse(const std::string& name) const
 
 bool CDM::renameDimension(const std::string& oldName, const std::string& newName) throw(CDMException)
 {
+    pimpl_->coordsInitialized = false;
     if (!hasDimension(oldName)) return false;
     if (hasDimension(newName)) {
         if (testDimensionInUse(newName)) {
@@ -384,6 +361,7 @@ bool CDM::removeDimension(const std::string& name) throw(CDMException)
             didErase = true;
         }
     }
+    if (didErase) pimpl_->coordsInitialized = false;
     return didErase;
 }
 
@@ -412,6 +390,7 @@ bool CDM::hasUnlimitedDim(const CDMVariable& var) const
 
 void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
 {
+    pimpl_->coordsInitialized = false;
 	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
@@ -426,6 +405,7 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 
 void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& attr) throw(CDMException)
 {
+    pimpl_->coordsInitialized = false;
 	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
@@ -436,6 +416,7 @@ void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& 
 
 void CDM::removeAttribute(const std::string& varName, const std::string& attrName)
 {
+    pimpl_->coordsInitialized = false;
 	StrAttrVecMap::iterator varIt = pimpl_->attributes.find(varName);
 	if (varIt != pimpl_->attributes.end()) {
 		AttrVec& attrVec = varIt->second;
@@ -690,109 +671,72 @@ CDM::AttrVec CDM::getProjection(std::string varName) const
 
 std::string CDM::getHorizontalXAxis(std::string varName) const
 {
-	std::string retVal;
-	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_x_coordinate"));
-	if (shapeIt != shape.end()) {
-		retVal = *shapeIt;
-	} else {
-		shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "grid_longitude"));
-		if (shapeIt != shape.end()) {
-			retVal = *shapeIt;
-		} else {
-			// longitude
-			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this));
-			if (shapeIt != shape.end()) {
-				retVal = *shapeIt;
-			}
-		}
-	}
-	return retVal;
+    enhance(this->pimpl_, *this);
+
+    const CoordSysList& csList = pimpl_->coordSystems;
+    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == csList.end()) {
+        return "";
+    }
+    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getGeoXAxis();
+    return (axis.get() == 0) ? "" : axis->getName();
 }
 std::string CDM::getHorizontalYAxis(std::string varName) const
 {
-	std::string retVal;
-	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "projection_y_coordinate"));
-	if (shapeIt != shape.end()) {
-		retVal = *shapeIt;
-	} else {
-		shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "standard_name", "grid_latitude"));
-		if (shapeIt != shape.end()) {
-			retVal = *shapeIt;
-		} else {
-			// latitude
-			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this));
-			if (shapeIt != shape.end()) {
-				retVal = *shapeIt;
-			}
-		}
-	}
-	return retVal;
+    enhance(this->pimpl_, *this);
+
+    const CoordSysList& csList = pimpl_->coordSystems;
+    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == csList.end()) {
+        return "";
+    }
+    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getGeoYAxis();
+    return (axis.get() == 0) ? "" : axis->getName();
 }
 
 bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::string& longitude) const
 {
-	try {
-		std::string coordinates = getAttribute(varName, "coordinates").getData()->asString();
-		std::vector<std::string> tokens = tokenize(coordinates, " ");
-		std::vector<std::string>::const_iterator latIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleLatitudeUnit(*this));
-		if (latIt != tokens.end()) {
-			std::vector<std::string>::const_iterator lonIt = find_if(tokens.begin(), tokens.end(), CDMCompatibleLongitudeUnit(*this));
-			if (lonIt != tokens.end()) {
-				latitude = *latIt;
-				longitude = *lonIt;
-				return true;
-			}
-		}
-	} catch (CDMException& e) {
-		// coordinates not found for varName, doesn't matter
-	}
-	// try the shape axis
-	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator latIt = find_if(shape.begin(), shape.end(), CDMCompatibleLatitudeUnit(*this));
-	if (latIt != shape.end()) {
-		std::vector<std::string>::const_iterator lonIt = find_if(shape.begin(), shape.end(), CDMCompatibleLongitudeUnit(*this));
-		if (lonIt != shape.end()) {
-			latitude = *latIt;
-			longitude = *lonIt;
-			return true;
-		}
-	}
-	return false;
+    enhance(this->pimpl_, *this);
+
+    const CoordSysList& csList = pimpl_->coordSystems;
+    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == csList.end()) {
+        return false;
+    }
+    CoordinateSystem::ConstAxisPtr latAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::Lat);
+    CoordinateSystem::ConstAxisPtr lonAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::Lon);
+    if (latAxis.get() != 0 && lonAxis.get() != 0) {
+        latitude = latAxis->getName();
+        longitude = lonAxis->getName();
+        return true;
+    }
+    return false;
 }
 
 std::string CDM::getTimeAxis(std::string varName) const
 {
-	std::string retVal;
-	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleTime(*this));
-	if (shapeIt != shape.end()) retVal = *shapeIt;
-	return retVal;
+    enhance(this->pimpl_, *this);
+
+    const CoordSysList& csList = pimpl_->coordSystems;
+    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == csList.end()) {
+        return "";
+    }
+    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getTimeAxis();
+    return (axis.get() == 0) ? "" : axis->getName();
 }
 
 std::string CDM::getVerticalAxis(std::string varName) const
 {
-	// detect attribute 'positive' = up/down (case insensitive)
-	// detect pressure units
-	std::string retVal;
-	const std::vector<std::string>& shape = getVariable(varName).getShape();
-	std::vector<std::string>::const_iterator shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "positive", boost::regex("up", boost::regex::perl|boost::regex::icase)));
-	if (shapeIt != shape.end()) {
-		retVal = *shapeIt;
-	} else {
-		shapeIt = find_if(shape.begin(), shape.end(), CDMAttributeEquals(*this, "positive", boost::regex("down", boost::regex::perl|boost::regex::icase)));
-		if (shapeIt != shape.end()) {
-			retVal = *shapeIt;
-		} else {
-			shapeIt = find_if(shape.begin(), shape.end(), CDMCompatibleUnit(*this, "Pa"));
-			if (shapeIt != shape.end()) {
-				retVal = *shapeIt;
-			}
-		}
-	}
+    enhance(this->pimpl_, *this);
 
-	return retVal;
+    const CoordSysList& csList = pimpl_->coordSystems;
+    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == csList.end()) {
+        return "";
+    }
+    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getGeoZAxis();
+    return (axis.get() == 0) ? "" : axis->getName();
 }
 
 

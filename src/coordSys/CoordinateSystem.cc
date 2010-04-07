@@ -351,14 +351,22 @@ CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& varName)
              lcUnit == "layer" ||
              lcUnit == "sigma_level")
             return CoordinateAxis::GeoZ;
-        if (cdm.getAttribute(varName, "positive", attr)) {
+    }
+
+    // test 'positive' attribute
+    if (cdm.getAttribute(varName, "positive", attr)) {
+        if (cdm.getAttribute(varName, "units", attr)) {
+            string unit = attr.getStringValue();
             if (uc.areConvertible("m", unit)) {
                 return CoordinateAxis::Height;
             } else {
                 return CoordinateAxis::GeoZ;
             }
+        } else {
+            return CoordinateAxis::GeoZ;
         }
     }
+
     // test axis
     if (cdm.getAttribute(varName, "axis", attr)) {
         string axis = attr.getStringValue();
@@ -444,8 +452,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystemsCF1
                     CoordinateSystem cs("CF-1.X");
                     for (set<string>::iterator axis = axes.begin(); axis != axes.end(); ++axis) {
                         map<string, AxisPtr >::iterator foundAxis = coordinateAxes.find(*axis);
-                        assert(foundAxis != coordinateAxes.end());
-                        cs.setAxis(foundAxis->second);
+                        if (foundAxis != coordinateAxes.end()) {
+                            // only dims with variable can be coordinate axis
+                            cs.setAxis(foundAxis->second);
+                        }
                     }
                     coordSystems.insert(make_pair(cs.id(), cs));
                 }

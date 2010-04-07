@@ -32,6 +32,8 @@ using boost::unit_test_framework::test_suite;
 
 
 #include "fimex/CDM.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include <iostream>
 
 using namespace std;
 using namespace MetNoFimex;
@@ -176,6 +178,9 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
 {
 	// preparing a cs
 	CDM cdm;
+
+	cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("Conventions", "CF-1.0"));
+
 	string x("x");
 	string y("y");
 	string p("p");
@@ -187,6 +192,7 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
 	cdm.addDimension(CDMDimension(x, 1));
 	cdm.addDimension(CDMDimension(y, 1));
 	cdm.addDimension(CDMDimension(p, 1));
+    cdm.addDimension(CDMDimension(l, 1));
 	cdm.addDimension(CDMDimension(t, 1));
 	vector<std::string> shape;
 	shape.push_back(x);
@@ -217,6 +223,14 @@ BOOST_AUTO_TEST_CASE( test_coordinateSystem)
 	// define projection params
 	cdm.addAttribute(x, CDMAttribute("standard_name", "projection_x_coordinate"));
 	cdm.addAttribute(y, CDMAttribute("standard_name", "projection_y_coordinate"));
+
+#if 0
+	typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CsList;
+	CsList cs = listCoordinateSystems(cdm);
+	for (CsList::const_iterator cit = cs.begin(); cit != cs.end(); ++cit) {
+	    std::cerr << **cit << std::endl;
+	}
+#endif
 
 	BOOST_CHECK(x == cdm.getHorizontalXAxis(var));
 	BOOST_CHECK(y == cdm.getHorizontalYAxis(var));
