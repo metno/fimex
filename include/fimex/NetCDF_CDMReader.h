@@ -21,8 +21,8 @@
  * USA.
  */
 
-#ifndef NETCDF_CF10_CDMREADER_H_
-#define NETCDF_CF10_CDMREADER_H_
+#ifndef NETCDF_CDMREADER_H_
+#define NETCDF_CDMREADER_H_
 
 #include "fimex/CDMReader.h"
 
@@ -33,13 +33,13 @@ class NcAtt;
 namespace MetNoFimex
 {
 
-class NetCDF_CF10_CDMReader : public MetNoFimex::CDMReader
+class NetCDF_CDMReader : public MetNoFimex::CDMReader
 {
 	std::string filename;
 	const std::auto_ptr<NcFile> ncFile;
 public:
-	NetCDF_CF10_CDMReader(const std::string& fileName);
-	virtual ~NetCDF_CF10_CDMReader();
+	NetCDF_CDMReader(const std::string& fileName);
+	virtual ~NetCDF_CDMReader();
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
 private:
 	void addAttribute(const std::string& varName, NcAtt* ncAtt);
@@ -47,4 +47,4 @@ private:
 
 }
 
-#endif /*NETCDF_CF10_CDMREADER_H_*/
+#endif /*NETCDF_CDMREADER_H_*/

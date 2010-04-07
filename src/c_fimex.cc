@@ -36,7 +36,7 @@
 #include "fimex/FeltCDMReader2.h"
 #ifdef HAVE_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NetCDF_CF10_CDMReader.h"
+#include "fimex/NetCDF_CDMReader.h"
 #endif
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter.h"
@@ -78,7 +78,7 @@ mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFi
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 {
     try {
-        boost::shared_ptr<NetCDF_CF10_CDMReader> reader(new NetCDF_CF10_CDMReader(filename));
+        boost::shared_ptr<NetCDF_CDMReader> reader(new NetCDF_CDMReader(filename));
         return new mifi_cdm_reader(reader);
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_netcdf_reader: " << ex.what());

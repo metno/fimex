@@ -36,7 +36,7 @@ using boost::unit_test_framework::test_suite;
 #include <fstream>
 #include <numeric>
 
-#include "fimex/NetCDF_CF10_CDMReader.h"
+#include "fimex/NetCDF_CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(new NetCDF_CF10_CDMReader(fileName));
+    boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
     const CDM& cdm = reader->getCDM();
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)

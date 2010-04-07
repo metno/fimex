@@ -28,7 +28,7 @@
 #include "fimex/XMLDoc.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include "fimex/NetCDF_CF10_CDMReader.h"
+#include "fimex/NetCDF_CDMReader.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
@@ -51,7 +51,7 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
         throw CDMException("config-file "+configFile+" does not contain location-attribute");
     }
     string ncFile = getXmlProp(nodes->nodeTab[0], "location");
-    dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CF10_CDMReader(ncFile));
+    dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     init();
 }
 

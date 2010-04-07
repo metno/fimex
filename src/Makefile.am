@@ -70,7 +70,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 XMLDoc.cc
 
 if HAVE_NETCDF
-  libfimex_la_SOURCES += NetCDF_CF10_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
+  libfimex_la_SOURCES += NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
 endif
 
 if HAVE_MILIB

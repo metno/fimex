@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "fimex/NetCDF_CF10_CDMReader.h"
+#include "fimex/NetCDF_CDMReader.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
 #include "netcdfcpp.h"
@@ -29,7 +29,7 @@
 namespace MetNoFimex
 {
 
-NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
+NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 : filename(filename), ncFile(std::auto_ptr<NcFile>(new NcFile(filename.c_str(), NcFile::ReadOnly)))
 {
 	NcError ncErr(NcError::verbose_nonfatal);
@@ -67,11 +67,11 @@ NetCDF_CF10_CDMReader::NetCDF_CF10_CDMReader(const std::string& filename)
 	}
 }
 
-NetCDF_CF10_CDMReader::~NetCDF_CF10_CDMReader()
+NetCDF_CDMReader::~NetCDF_CDMReader()
 {
 }
 
-boost::shared_ptr<Data> NetCDF_CF10_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	const CDMVariable& var = cdm_->getVariable(varName);
 	if (var.hasData()) {
@@ -86,7 +86,7 @@ boost::shared_ptr<Data> NetCDF_CF10_CDMReader::getDataSlice(const std::string& v
 	}
 }
 
-void NetCDF_CF10_CDMReader::addAttribute(const std::string& varName, NcAtt* ncAtt)
+void NetCDF_CDMReader::addAttribute(const std::string& varName, NcAtt* ncAtt)
 {
 	CDMDataType dt(ncType2cdmDataType(ncAtt->type()));
 	boost::shared_ptr<Data> attrData = ncValues2Data(ncAtt->values(), ncAtt->type(), ncAtt->num_vals());

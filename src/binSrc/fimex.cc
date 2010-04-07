@@ -46,7 +46,7 @@
 #endif
 #ifdef HAVE_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NetCDF_CF10_CDMReader.h"
+#include "fimex/NetCDF_CDMReader.h"
 #endif
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter.h"
@@ -192,7 +192,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
     #ifdef HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
 		LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
-		returnPtr = auto_ptr<CDMReader>(new NetCDF_CF10_CDMReader(vm["input.file"].as<string>()));
+		returnPtr = auto_ptr<CDMReader>(new NetCDF_CDMReader(vm["input.file"].as<string>()));
 	}
 #endif
 	if (type == "ncml") {
