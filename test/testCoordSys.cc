@@ -34,6 +34,7 @@ using boost::unit_test_framework::test_suite;
 
 #include <iostream>
 #include <fstream>
+#include <numeric>
 
 #include "fimex/NetCDF_CF10_CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -118,13 +119,63 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         //string projStr = (*varSysIt)->getProjString();
 
     } else {
-        // TODO: implement other grid-types, i.e.
-        // var(r)
-        // lon(r)
-        // lat(r)
-        // time(r)
+        BOOST_CHECK(false); // not simpleSpatialGrid
     }
-        BOOST_CHECK(true);
+
+    // slice check, varName is 4d sequence, starting at 0
+    string varName("cloud_area_fraction_in_atmosphere_layer");
+    varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == coordSys.end()) {
+        cerr << "no coordinate system found for " << varName << endl;
+        BOOST_CHECK(false);
+        return;
+    }
+    if (!(*varSysIt)->isSimpleSpatialGridded()) {
+        BOOST_CHECK(false);
+    }
+    const CoordinateSystem& cs = **varSysIt;
+    boost::shared_ptr<Data> allData = reader->getData("cloud_area_fraction_in_atmosphere_layer");
+    size_t n = 11 * 11 * 4 * 4;
+    BOOST_CHECK(allData->size() == n);
+    boost::shared_array<short> all = allData->asConstShort();
+    BOOST_CHECK(accumulate(all.get(), all.get()+n, 0) == (n*(n-1)/2)); // gauss computation of sum of sequence
+
+    SliceBuilder sb(cdm, varName);
+    // last slice
+    sb.setStartAndSize(cs.getGeoZAxis(), 3, 1);
+    sb.setStartAndSize(cs.getTimeAxis(), 3, 1);
+    boost::shared_ptr<Data> sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
+    size_t s = 11*11;
+    BOOST_CHECK(sData->size() == s);
+    boost::shared_array<short> slice = sData->asConstShort();
+    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0) == (n*(n-1)/2 - (n-s)*(n-s-1)/2));
+
+    // vertical slice
+    sb.setStartAndSize(cs.getGeoXAxis(), 1, 1);
+    sb.setStartAndSize(cs.getGeoYAxis(), 2, 1);
+    sb.setStartAndSize(cs.getGeoZAxis(), 0, 4);
+    sb.setStartAndSize(cs.getTimeAxis(), 2, 1);
+    sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
+    slice = sData->asConstShort();
+    BOOST_CHECK(sData->size() == 4);
+    short firstVal = slice[0];
+    for (size_t i = 1; i < 4; i++) {
+        BOOST_CHECK(slice[i] == firstVal+(i*s));
+    }
+
+    // time slice
+    sb.setStartAndSize(cs.getGeoXAxis(), 2, 1);
+    sb.setStartAndSize(cs.getGeoYAxis(), 3, 1);
+    sb.setStartAndSize(cs.getGeoZAxis(), 2, 1);
+    sb.setStartAndSize(cs.getTimeAxis(), 0, 4);
+    sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
+    slice = sData->asConstShort();
+    BOOST_CHECK(sData->size() == 4);
+    firstVal = slice[0];
+    for (size_t i = 1; i < 4; i++) {
+        BOOST_CHECK(slice[i] == firstVal+(i*s*4));
+    }
+
 }
 
 #else
