@@ -22,12 +22,15 @@
  */
 
 #include "fimex/NetCDF_CDMReader.h"
+#include "fimex/DataImpl.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
 #include "netcdfcpp.h"
+#include <numeric>
 
 namespace MetNoFimex
 {
+using namespace std;
 
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 : filename(filename), ncFile(std::auto_ptr<NcFile>(new NcFile(filename.c_str(), NcFile::ReadOnly)))
@@ -84,6 +87,59 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
 	} else {
 		return ncValues2Data(ncVar->values(), ncVar->type(), ncVar->num_vals());
 	}
+}
+
+template<typename T>
+boost::shared_ptr<Data> getData_(NcVar* ncVar, long* count)
+{
+    cerr << "in NetCDF" << endl;
+    size_t length = accumulate(count, count + ncVar->num_dims(), 1, multiplies<size_t>());
+    cerr << ncVar->name() << " ("<<length<<"): ";
+    for (int i = 0; i < ncVar->num_dims(); ++i) {
+        cerr << count[i] << ",";
+    }
+    cerr << endl;
+    boost::shared_array<T> vals(new T[length]);
+    if (!ncVar->get(&vals[0], &count[0])) throw CDMException("cannot get netcdf dataslice values");
+    return boost::shared_ptr<Data>(new DataImpl<T>(vals, length));
+}
+
+boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+{
+    const CDMVariable& var = cdm_->getVariable(varName);
+    if (var.hasData()) {
+        return var.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionStartPositions());
+    }
+
+    NcVar* ncVar = ncFile->get_var(var.getName().c_str());
+    vector<long> ncStartPos;
+    copy(sb.getDimensionStartPositions().begin(), sb.getDimensionStartPositions().end(), back_inserter(ncStartPos));
+    reverse(ncStartPos.begin(), ncStartPos.end()); // netcdf/c++ uses opposite dimension numbering
+    if (ncStartPos.size() != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf variable "+ varName);
+    if (!ncVar->set_cur(&ncStartPos[0])) throw CDMException("cannot set the netcdf dataslice start-position");
+
+    vector<long> count;
+    copy(sb.getDimensionSizes().begin(), sb.getDimensionSizes().end(), back_inserter(count));
+    reverse(count.begin(), count.end()); // netcdf/c++ uses opposite dimension numbering
+    if (count.size() != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf size of variable "+ varName);
+
+    boost::shared_ptr<Data> retData;
+    switch (var.getDataType()) {
+    case CDM_CHAR:
+    case CDM_STRING:
+        retData = getData_<char>(ncVar, &count[0]); break;
+    case CDM_SHORT:
+        retData = getData_<short>(ncVar, &count[0]); break;
+    case CDM_INT:
+        retData = getData_<int>(ncVar, &count[0]); break;
+    case CDM_FLOAT:
+        retData = getData_<float>(ncVar, &count[0]); break;
+    case CDM_DOUBLE:
+        retData = getData_<double>(ncVar, &count[0]); break;
+    default:
+        throw CDMException("Cannot read netcdf-data without know type: "+var.getDataType());
+    }
+    return retData;
 }
 
 void NetCDF_CDMReader::addAttribute(const std::string& varName, NcAtt* ncAtt)
