@@ -152,33 +152,52 @@ public:
 	}
 };
 
+struct CDMImpl {
+    CDM::StrAttrVecMap attributes;
+    CDM::VarVec variables;
+    CDM::DimVec dimensions;
+};
 
 
-CDM::CDM()
+CDM::CDM() : pimpl_(new CDMImpl())
 {
+}
+
+CDM::CDM(const CDM& rhs) : pimpl_(new CDMImpl())
+{
+    *pimpl_ = *rhs.pimpl_;
 }
 
 CDM::~CDM()
 {
+    delete pimpl_;
+}
+
+CDM& CDM::operator=(const CDM& rhs)
+{
+    if (this == &rhs) return *this;
+    delete pimpl_;
+    pimpl_ = new CDMImpl(*rhs.pimpl_);
+    return *this;
 }
 
 void CDM::addVariable(const CDMVariable& var) throw(CDMException)
 {
 	if (!hasVariable(var.getName())) {
-		variables.push_back(var);
+		pimpl_->variables.push_back(var);
 	} else {
 		throw CDMException("cannot add variable: " + var.getName() + " already exists");
 	}
 }
 bool CDM::hasVariable(const std::string& varName) const
 {
-	return (find_if(variables.begin(), variables.end(), CDMNameEqual(varName)) != variables.end());
+	return (find_if(pimpl_->variables.begin(), pimpl_->variables.end(), CDMNameEqual(varName)) != pimpl_->variables.end());
 }
 
 const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDMException)
 {
-	VarVec::const_iterator varPos = find_if(variables.begin(), variables.end(), CDMNameEqual(varName));
-	if (varPos != variables.end()) {
+	VarVec::const_iterator varPos = find_if(pimpl_->variables.begin(), pimpl_->variables.end(), CDMNameEqual(varName));
+	if (varPos != pimpl_->variables.end()) {
 		return *varPos;
 	} else {
 		throw CDMException("cannot find variable: " + varName);
@@ -223,8 +242,8 @@ bool CDM::renameVariable(const std::string& oldName, const std::string& newName)
 
 bool CDM::checkVariableAttribute(const std::string& varName, const std::string& attribute, const boost::regex& attrValue) const
 {
-	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
-	if (varIt != attributes.end()) {
+	StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
+	if (varIt != pimpl_->attributes.end()) {
 		AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attribute));
 		if (attrIt != varIt->second.end()) {
 			boost::smatch what;
@@ -263,7 +282,7 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 	for (std::map<std::string, std::string>::const_iterator attrIt = findAttributes.begin(); attrIt != findAttributes.end(); ++attrIt) {
 		attrRegExps[attrIt->first] = boost::regex(attrIt->second);
 	}
-	for (VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
+	for (VarVec::const_iterator varIt = pimpl_->variables.begin(); varIt != pimpl_->variables.end(); ++varIt) {
 		// test if all attributes are found in variable (find_if finds the first not found)
 		if (find_if(attrRegExps.begin(), attrRegExps.end(), std::not1(VariableAttributeCheck(*this, varIt->getName()))) == attrRegExps.end()) {
 			// test if all dimensions are found in variable (find_if finds the first not found)
@@ -278,15 +297,15 @@ std::vector<std::string> CDM::findVariables(const std::map<std::string, std::str
 
 void CDM::removeVariable(const std::string& variableName)
 {
-	variables.erase(remove_if(variables.begin(), variables.end(), CDMNameEqual(variableName)), variables.end());
-    attributes.erase(variableName);
+	pimpl_->variables.erase(remove_if(pimpl_->variables.begin(), pimpl_->variables.end(), CDMNameEqual(variableName)), pimpl_->variables.end());
+    pimpl_->attributes.erase(variableName);
 }
 
 
 void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
 {
 	if (!hasDimension(dim.getName())) {
-		dimensions.push_back(dim);
+		pimpl_->dimensions.push_back(dim);
 	} else {
 		throw CDMException("cannot add dimension: " + dim.getName() + " already exists");
 	}
@@ -294,13 +313,13 @@ void CDM::addDimension(const CDMDimension& dim) throw(CDMException)
 
 bool CDM::hasDimension(const std::string& dimName) const
 {
-	return (find_if(dimensions.begin(), dimensions.end(), CDMNameEqual(dimName)) != dimensions.end());
+	return (find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), CDMNameEqual(dimName)) != pimpl_->dimensions.end());
 }
 
 const CDMDimension& CDM::getDimension(const std::string& dimName) const throw(CDMException)
 {
-	DimVec::const_iterator dimIt = find_if(dimensions.begin(), dimensions.end(), CDMNameEqual(dimName));
-	if (dimIt != dimensions.end()) {
+	DimVec::const_iterator dimIt = find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), CDMNameEqual(dimName));
+	if (dimIt != pimpl_->dimensions.end()) {
 		return *dimIt;
 	} else {
 		throw CDMException("cannot find dimension: " + dimName);
@@ -318,7 +337,7 @@ bool CDM::testDimensionInUse(const std::string& name) const
 {
     if (!hasDimension(name)) return false;
     bool inUse = false;
-    for (VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
+    for (VarVec::const_iterator it = pimpl_->variables.begin(); it != pimpl_->variables.end(); ++it) {
         if (it->checkDimension(name)) {
             inUse = true;
         }
@@ -339,7 +358,7 @@ bool CDM::renameDimension(const std::string& oldName, const std::string& newName
     CDMDimension& dim = getDimension(oldName);
     dim.setName(newName);
     /* change the shape of all variables having the dimensions */
-    for (VarVec::iterator it = variables.begin(); it != variables.end(); ++it) {
+    for (VarVec::iterator it = pimpl_->variables.begin(); it != pimpl_->variables.end(); ++it) {
         if (it->checkDimension(oldName)) {
             std::vector<std::string> shape = it->getShape();
             for (size_t i = 0; i < shape.size(); i++) {
@@ -359,9 +378,9 @@ bool CDM::removeDimension(const std::string& name) throw(CDMException)
     if (testDimensionInUse(name)) {
         throw CDMException("Cannot remove dimension "+name+". Dimension in use.");
     } else {
-        DimVec::iterator it = remove_if(dimensions.begin(), dimensions.end(), CDMNameEqual(name));
-        if (it != dimensions.end()) {
-            dimensions.erase(it, dimensions.end());
+        DimVec::iterator it = remove_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), CDMNameEqual(name));
+        if (it != pimpl_->dimensions.end()) {
+            pimpl_->dimensions.erase(it, pimpl_->dimensions.end());
             didErase = true;
         }
     }
@@ -371,8 +390,8 @@ bool CDM::removeDimension(const std::string& name) throw(CDMException)
 
 const CDMDimension* CDM::getUnlimitedDim() const
 {
-	DimVec::const_iterator it = find_if(dimensions.begin(), dimensions.end(), std::mem_fun_ref(&CDMDimension::isUnlimited));
-	if (it == dimensions.end()) {
+	DimVec::const_iterator it = find_if(pimpl_->dimensions.begin(), pimpl_->dimensions.end(), std::mem_fun_ref(&CDMDimension::isUnlimited));
+	if (it == pimpl_->dimensions.end()) {
 		return 0;
 	} else {
 		return &(*it);
@@ -396,7 +415,7 @@ void CDM::addAttribute(const std::string& varName, const CDMAttribute& attr) thr
 	if ((varName != globalAttributeNS ()) && !hasVariable(varName)) {
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
-		AttrVec& attrVec = attributes[varName];
+		AttrVec& attrVec = pimpl_->attributes[varName];
 		if (find_if(attrVec.begin(), attrVec.end(), CDMNameEqual(attr.getName())) == attrVec.end()) {
 			attrVec.push_back(attr);
 		} else {
@@ -411,14 +430,14 @@ void CDM::addOrReplaceAttribute(const std::string& varName, const CDMAttribute& 
 		throw CDMException("cannot add attribute: variable " + varName + " does not exist");
 	} else {
 		removeAttribute(varName, attr.getName());
-		attributes[varName].push_back(attr);
+		pimpl_->attributes[varName].push_back(attr);
 	}
 }
 
 void CDM::removeAttribute(const std::string& varName, const std::string& attrName)
 {
-	StrAttrVecMap::iterator varIt = attributes.find(varName);
-	if (varIt != attributes.end()) {
+	StrAttrVecMap::iterator varIt = pimpl_->attributes.find(varName);
+	if (varIt != pimpl_->attributes.end()) {
 		AttrVec& attrVec = varIt->second;
 		attrVec.erase(remove_if(attrVec.begin(), attrVec.end(), CDMNameEqual(attrName)), attrVec.end());
 	}
@@ -427,8 +446,8 @@ void CDM::removeAttribute(const std::string& varName, const std::string& attrNam
 
 const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
 {
-	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
-	if (varIt != attributes.end()) {
+	StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
+	if (varIt != pimpl_->attributes.end()) {
 		AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attrName));
 		if (attrIt != (varIt->second).end()) {
 			return *attrIt;
@@ -459,8 +478,8 @@ bool CDM::getAttribute(const std::string& varName, const std::string& attrName, 
 std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const
 {
 	std::vector<CDMAttribute> results;
-	StrAttrVecMap::const_iterator varIt = attributes.find(varName);
-	if (varIt != attributes.end()) {
+	StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
+	if (varIt != pimpl_->attributes.end()) {
 		results.insert(results.begin(), varIt->second.begin(), varIt->second.end());
 	}
 	return results;
@@ -480,18 +499,18 @@ double CDM::getFillValue(const std::string& varName) const
 void CDM::toXMLStream(std::ostream& out) const
 {
 	out << "<cdm>" << std::endl;
-	for (DimVec::const_iterator it = dimensions.begin(); it != dimensions.end(); ++it) {
+	for (DimVec::const_iterator it = pimpl_->dimensions.begin(); it != pimpl_->dimensions.end(); ++it) {
 		it->toXMLStream(out);
 	}
-	if (attributes.find(globalAttributeNS()) != attributes.end()) {
-		const AttrVec& attrs = attributes.find(globalAttributeNS())->second;
+	if (pimpl_->attributes.find(globalAttributeNS()) != pimpl_->attributes.end()) {
+		const AttrVec& attrs = pimpl_->attributes.find(globalAttributeNS())->second;
 		for (AttrVec::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
 			it->toXMLStream(out);
 		}
 	}
-	for (VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-		if (attributes.find(it->getName()) != attributes.end()) {
-			it->toXMLStream(out, attributes.find(it->getName())->second);
+	for (VarVec::const_iterator it = pimpl_->variables.begin(); it != pimpl_->variables.end(); ++it) {
+		if (pimpl_->attributes.find(it->getName()) != pimpl_->attributes.end()) {
+			it->toXMLStream(out, pimpl_->attributes.find(it->getName())->second);
 		} else {
 			it->toXMLStream(out);
 		}
@@ -499,6 +518,20 @@ void CDM::toXMLStream(std::ostream& out) const
 
 	out << "</cdm>" << std::endl;
 }
+
+const CDM::DimVec& CDM::getDimensions() const
+{
+    return pimpl_->dimensions;
+}
+const CDM::VarVec& CDM::getVariables() const
+{
+    return pimpl_->variables;
+}
+const CDM::StrAttrVecMap& CDM::getAttributes() const
+{
+    return pimpl_->attributes;
+}
+
 
 // TODO: in CF: projection belongs to variable, not to file!!
 bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException)

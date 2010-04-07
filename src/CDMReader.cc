@@ -54,7 +54,6 @@ const CDM& CDMReader::getCDM() const
 boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
 {
     using namespace std;
-    cerr << "in CDMReader" << endl;
     boost::shared_ptr<Data> retData;
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {

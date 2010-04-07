@@ -37,6 +37,8 @@
 
 namespace MetNoFimex
 {
+//forward declaration
+struct CDMImpl;
 
 /**
  * @brief Data structure of the Common %Data Model
@@ -52,7 +54,9 @@ public:
 	typedef std::vector<CDMDimension> DimVec;
 	typedef std::vector<CDMVariable> VarVec;
 	CDM();
+	CDM(const CDM& rhs);
 	virtual ~CDM();
+	CDM& operator=(const CDM& rhs);
 	/**
 	 * @brief add variable to cdm
 	 *
@@ -216,14 +220,14 @@ public:
 	const static std::string& globalAttributeNS() {const static std::string global("_GLOBAL"); return global;}
 
 	/// @brief get the dimension
-	const DimVec& getDimensions() const {return dimensions;}
+	const DimVec& getDimensions() const;
 	/// @brief get the variables
-	const VarVec& getVariables() const {return variables;}
+	const VarVec& getVariables() const;
 	/**
 	 *  @brief get the attributes
 	 *  @return map of type <variableName <attributeName, attribute>>
 	 */
-	const StrAttrVecMap& getAttributes() const {return attributes;}
+	const StrAttrVecMap& getAttributes() const;
 	/**
 	 * @brief get the attributes of an variable
 	 * @param varName name of variable
@@ -338,9 +342,7 @@ public:
 	std::string getVerticalAxis(std::string varName) const;
 
 private:
-	StrAttrVecMap attributes;
-	VarVec variables;
-	DimVec dimensions;
+	CDMImpl* pimpl_;
 };
 
 }

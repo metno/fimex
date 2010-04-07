@@ -92,13 +92,7 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
 template<typename T>
 boost::shared_ptr<Data> getData_(NcVar* ncVar, long* count)
 {
-    cerr << "in NetCDF" << endl;
     size_t length = accumulate(count, count + ncVar->num_dims(), 1, multiplies<size_t>());
-    cerr << ncVar->name() << " ("<<length<<"): ";
-    for (int i = 0; i < ncVar->num_dims(); ++i) {
-        cerr << count[i] << ",";
-    }
-    cerr << endl;
     boost::shared_array<T> vals(new T[length]);
     if (!ncVar->get(&vals[0], &count[0])) throw CDMException("cannot get netcdf dataslice values");
     return boost::shared_ptr<Data>(new DataImpl<T>(vals, length));
