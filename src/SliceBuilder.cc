@@ -80,6 +80,15 @@ void SliceBuilder::setStartAndSize(const boost::shared_ptr<const CoordinateAxis>
     setStartAndSize(axis->getName(), start, size);
 }
 
+vector<string> SliceBuilder::getDimensionNames() const
+{
+    vector<string> names;
+    names.resize(dimPos_.size());
+    for (map<string, size_t>::const_iterator posIt = dimPos_.begin(); posIt != dimPos_.end(); ++posIt) {
+       names.at(posIt->second) = posIt->first;
+    }
+    return names;
+}
 
 
 }

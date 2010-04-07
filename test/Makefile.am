@@ -7,7 +7,6 @@ CC_TESTS = testBinaryConstants \
            testData \
            testCDM \
            testXMLDoc \
-           testQualityExtractor \
            testFeltReader
 SH_TESTS = 
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@

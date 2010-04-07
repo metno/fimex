@@ -53,9 +53,57 @@ const CDM& CDMReader::getCDM() const
 
 boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
 {
-    // TODO: stupid implementation, should be improved by looking at unlimited dimension
-    boost::shared_ptr<Data> data = getData(varName);
-    return data->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
+    using namespace std;
+    boost::shared_ptr<Data> retData;
+    const CDMVariable& variable = cdm_->getVariable(varName);
+    if (variable.hasData()) {
+        retData = variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
+    } else {
+        if (cdm_->hasUnlimitedDim(variable)) {
+            string unLimDim = cdm_->getUnlimitedDim()->getName();
+            vector<string> dimNames = sb.getDimensionNames();
+            // get the data along the unlimited dimension and join
+            // unlimited dimension must be outer=first dimension!
+            size_t unLimDimStart = 0;
+            size_t unLimDimSize = 0;
+            vector<size_t> dimStart;
+            vector<size_t> dimSize;
+            vector<size_t> maxDimSize;
+            const vector<size_t>& orgDimStart = sb.getDimensionStartPositions();
+            const vector<size_t>& orgDimSize = sb.getDimensionSizes();
+            const vector<size_t>& orgMaxDimSize = sb.getMaxDimensionSizes();
+            size_t unLimSliceSize = 1;
+            for (size_t i = 0; i < dimNames.size(); ++i) {
+                if (dimNames.at(i) == unLimDim) {
+                    unLimDimStart = orgDimStart.at(i);
+                    unLimDimSize = orgDimSize.at(i);
+                } else {
+                    dimStart.push_back(orgDimStart.at(i));
+                    dimSize.push_back(orgDimSize.at(i));
+                    maxDimSize.push_back(orgMaxDimSize.at(i));
+                    unLimSliceSize *= orgDimSize.at(i);
+                }
+            }
+            if (unLimDimSize == 0) {
+                return createData(variable.getDataType(), 0);
+            }
+            // read now each unlimdim-slice
+            // slice that slice according to the other dimensions
+            // join those slices
+            retData = createData(variable.getDataType(), unLimSliceSize*unLimDimSize, cdm_->getFillValue(varName));
+            for (size_t i = 0; i < unLimDimSize; ++i) {
+                boost::shared_ptr<Data> unLimDimData = getDataSlice(varName, i+unLimDimStart);
+                if (unLimDimData->size() != 0) {
+                    unLimDimData = unLimDimData->slice(maxDimSize, dimStart, dimSize);
+                    assert(unLimDimData->size() == unLimSliceSize);
+                    retData->setValues(i*unLimSliceSize, *unLimDimData);
+                }
+            }
+        } else {
+            retData = getData(varName)->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
+        }
+    }
+    return retData;
 }
 
 boost::shared_ptr<Data> CDMReader::getData(const std::string& varName) throw(CDMException)

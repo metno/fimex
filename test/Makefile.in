@@ -83,9 +83,9 @@ am__EXEEXT_2 =
 am__EXEEXT_9 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
 	testInterpolation$(EXEEXT) testData$(EXEEXT) testCDM$(EXEEXT) \
-	testXMLDoc$(EXEEXT) testQualityExtractor$(EXEEXT) \
-	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
-	$(am__EXEEXT_3) $(am__EXEEXT_5) $(am__EXEEXT_8)
+	testXMLDoc$(EXEEXT) testFeltReader$(EXEEXT) $(am__EXEEXT_1) \
+	$(am__EXEEXT_2) $(am__EXEEXT_3) $(am__EXEEXT_5) \
+	$(am__EXEEXT_8)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
@@ -443,9 +443,8 @@ top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	testSpatialAxisSpec testInterpolation testData testCDM \
-	testXMLDoc testQualityExtractor testFeltReader $(am__append_2) \
-	$(am__append_5) $(am__append_6) $(am__append_8) \
-	$(am__append_10)
+	testXMLDoc testFeltReader $(am__append_2) $(am__append_5) \
+	$(am__append_6) $(am__append_8) $(am__append_10)
 SH_TESTS = $(am__append_9)
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) \
 	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \

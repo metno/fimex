@@ -79,6 +79,10 @@ public:
      */
     const std::vector<size_t>& getDimensionSizes() const {return size_;}
     /**
+     * @return vector with names of dimensions in correct order
+     */
+    std::vector<std::string> getDimensionNames() const;
+    /**
      * @return vector with maximum sizes of the dimenions of the variable
      * in the order and size of the variables dimensions
      */

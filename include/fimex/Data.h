@@ -82,9 +82,14 @@ namespace MetNoFimex
 		 * @param startPos the first position the data should be written to
 		 * @param data the other data-source
 		 * @param first the first data-entry
-		 * @param last the last (excluded) data-entry, defaults to MAX size_t, automatically shrunken to fit size
+		 * @param end the last (excluded) data-entry, defaults to MAX size_t, automatically shrunken to fit size
 		 */		
-		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException) = 0;
+		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) throw(CDMException) = 0;
+		/**
+		 * set all values to the submitted value
+		 * @param val value to set
+		 */
+		virtual void setAllValues(double val) = 0;
 		/**
 		 * @brief get a multi-dimensional slice of the data
 		 * 
@@ -115,9 +120,10 @@ namespace MetNoFimex
 	 * 
 	 * @param datatype
 	 * @param size_t length of the data array
+	 * @param val default value for data elements, 0 by default
 	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
 	 */
-	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException);
+	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val = 0) throw(CDMException);
 
 	/**
 	 * @brief create a one-dimensional dataslice from another Data object

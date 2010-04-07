@@ -30,9 +30,11 @@ namespace MetNoFimex
 // pure abstract class, impl. required for linker
 Data::~Data() {}
 
-boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length) throw(CDMException) {
-	std::vector<short> v(length, 0);
-	return createData(datatype, v.begin(), v.end());
+boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val) throw(CDMException) {
+	std::vector<char> v(length);
+	boost::shared_ptr<Data> data = createData(datatype, v.begin(), v.end());
+	data->setAllValues(val);
+	return data;
 }
 
 boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length) throw(CDMException)  {
