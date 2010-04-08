@@ -33,6 +33,11 @@ class NcAtt;
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile "fimex/NetCDF_CDMReader.h"
+ */
+
+
 class NetCDF_CDMReader : public MetNoFimex::CDMReader
 {
 	std::string filename;

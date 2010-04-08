@@ -40,6 +40,10 @@
 namespace MetNoFimex
 {
 
+    /**
+     * @headerfile "fimex/DataImpl.h"
+     */
+
 	/**
 	 * @brief create a new shared array with a different type using static_cast
 	 * 

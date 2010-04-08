@@ -35,6 +35,9 @@
 
 namespace MetNoFimex
 {
+    /**
+     * @headerfile "fimex/Data.h"
+     */
 
 	/**
 	 * General class for storing different basic array pointers plus length

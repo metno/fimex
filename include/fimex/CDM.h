@@ -41,6 +41,10 @@ namespace MetNoFimex
 struct CDMImpl;
 
 /**
+ * @headerfile "fimex/CDM.h"
+ */
+
+/**
  * @brief Data structure of the Common %Data Model
  *
  * This class implements the data-structure of the Common %Data Model version 1
@@ -304,13 +308,17 @@ public:
 	/**
 	 * @brief get the x-(lon) axis of the variable
 	 *
+	 * This is the same as using the CoordinateSystem::getGeoXAxis().
+	 *
 	 * @param varName name of variable
 	 * @return name of x-axis dimension (or "" if not defined)
 	 */
 	std::string getHorizontalXAxis(std::string varName) const;
 	/**
 	 * @brief get the y-(lat) axis of the variable
-	 *
+     *
+     * This is the same as using the CoordinateSystem::getGeoYAxis().
+     *
 	 * @param varName name of variable
 	 * @return name of y-axis dimension (or "" if not defined)
 	 */
@@ -318,8 +326,8 @@ public:
 	/**
 	 * @brief detect the latitude and longitude coordinates of the variable
 	 *
-	 * Detect the  the latitude and longitude coordinates of the variable, this might be
-	 * one of the dimensions, or a multi-dimensional field of lat(x,y) lon(x,y) variables
+     * This is the same as using the CoordinateSystem::findAxisOfType() with CoordinateAxis::Lon and CoordinateAxis::Lat.
+     *
 	 * @param varName name of variable
 	 * @param latitude return value of the latitude
 	 * @param longitude return value of the longitude
@@ -329,6 +337,8 @@ public:
 	/**
 	 * @brief get the time axis of the variable
 	 *
+     * This is the same as using the CoordinateSystem::getTimeAxis().
+     *
 	 * @param varName name of variable
 	 * @return name of time dimension (or "" if not defined)
 	 */
@@ -336,6 +346,8 @@ public:
 	/**
 	 * @brief get the vertical axis of the variable
 	 *
+     * This is the same as using the CoordinateSystem::getGeoZAxis().
+     *
 	 * @param varName name of variable
 	 * @return name of vertical dimension (or "" if not defined)
 	 */

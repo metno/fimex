@@ -34,6 +34,10 @@
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile "fimex/CDMVariable.h"
+ */
+
 class CDMVariable : public CDMNamedEntity
 {
 public:
@@ -73,13 +77,14 @@ public:
 	/// add data to the variable
 	void setData(boost::shared_ptr<Data> data) {this->data = data;}
 	/**
-	 * @brief retrieve data from this variable
+	 * @brief retrieve volatile data from this variable
 	 *
-	 * retrieve data, but only if it has been set previously by {@link setData()}
-	 * this method will not try to read data from the disk
+	 * Retrieve data, but only if it has been set previously by setData()
+	 * this method will not try to read data from the disk. Use CDMReader::getData(const std::string& varName)
+	 * to get the data from memory or from disk.
 	 */
 	const boost::shared_ptr<Data> getData() const {return data;}
-	/// check if real data has been set with @link{setData()} (null-pointer reference returns false)
+	/// check if real data has been set with setData() (null-pointer reference returns false)
 	int hasData() const {return (data.get() != 0);}
 private:
 	std::string name;

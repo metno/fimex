@@ -31,6 +31,9 @@
 
 namespace MetNoFimex
 {
+/**
+ * @headerfile "fimex/NetCDF_Utils.h"
+ */
 
 /**
  * conversion from CDMDataType to NcType

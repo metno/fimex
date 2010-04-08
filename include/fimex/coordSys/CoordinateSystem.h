@@ -41,7 +41,12 @@ class CDM;
 struct CoordSysImpl;
 
 /**
- * CoordinateSystems are usually created using the #listCoordinateSystem function
+ * @headerfile "fimex/coordSys/CoordinateSystem.h"
+ */
+/**
+ * CoordinateSystems are usually created using the listCoordinateSystems(const CDM& cdm) function, see example there.
+ *
+ * To investigate the coordinate systems of a file, use {\em fimex --printCS}.
  */
 class CoordinateSystem
 {
@@ -59,11 +64,16 @@ public:
      */
     typedef std::vector<ConstAxisPtr> ConstAxisList;
 
+    /**
+     * CoordinateSystems are usually created within the listCoordinateSystems(const CDM& cdm) funcion.
+     */
     CoordinateSystem();
     explicit CoordinateSystem(const std::string& conventionName);
     virtual ~CoordinateSystem() {}
 
-
+    /**
+     * unique identifier for a coordinate system
+     */
     virtual std::string id() const;
     /**
      * @return the name of convention used to build the CS
@@ -158,7 +168,11 @@ private:
 std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
 
 /**
- * fetch all coordinate system from a #CDM
+ *  @example coordinateSystem.cpp
+ * Example on using the CoordinateSystem in combination with a CDMReader.
+ */
+/**
+ * fetch all coordinate system from a MetNoFimex::CDM
  */
 std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm);
 

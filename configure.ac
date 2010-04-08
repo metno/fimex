@@ -135,6 +135,10 @@ AC_LANG_POP(C++)
 
 #DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
+# use POSIX tar to support longer filenames (created by doxygen)
+AM_INIT_AUTOMAKE([1.9 tar-pax])
+
+
 AC_CONFIG_HEADERS([include/fimex/config.h])
 AC_CONFIG_FILES([fimex.pc Makefile
                           src/Makefile 

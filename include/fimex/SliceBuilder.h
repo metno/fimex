@@ -37,6 +37,9 @@ namespace MetNoFimex
 // forward decl
 class CDM;
 class CoordinateAxis;
+/**
+ * @headerfile "fimex/SliceBuilder.h"
+ */
 
 
 class SliceBuilder
