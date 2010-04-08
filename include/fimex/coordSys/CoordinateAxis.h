@@ -31,6 +31,9 @@
 
 namespace MetNoFimex
 {
+/**
+ * @headerfile "fimex/coordSys/CoordinateAxis.h"
+ */
 
 class CoordinateAxis: public CDMVariable
 {
