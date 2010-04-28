@@ -41,6 +41,15 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/CoordinateSystem.cc \
                      coordSys/CoordinateAxis.cc \
                      coordSys/CoordSysImpl.h \
+                     coordSys/Projection.cc \
+                     coordSys/ProjectionImpl.h \
+                     coordSys/ProjectionImpl.cc \
+                     coordSys/LambertConformalConicProjection.h \
+                     coordSys/LatitudeLongitudeProjection.h \
+                     coordSys/RotatedLatitudeLongitudeProjection.h \
+                     coordSys/StereographicProjection.h \
+                     coordSys/PolarStereographicProjection.h \
+                     coordSys/StereographicProjection.h \
 					 Data.cc \
 					 DataTypeChanger.cc \
 					 Felt_Array2.cc \

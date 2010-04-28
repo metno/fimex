@@ -28,6 +28,7 @@
 #endif
 #include "fimex/CDM.h"
 #include "fimex/CDMInterpolator.h"
+#include "fimex/coordSys/Projection.h"
 #include "fimex/CachedForwardInterpolation.h"
 #include "fimex/CachedInterpolation.h"
 #include <boost/regex.hpp>
@@ -763,7 +764,8 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 	vector<double> pointsOnYAxis(fieldSize);
 	std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
 	if (orgProjection != "latitude_longitude") {
-		orgProjStr = attributesToProjString(dataReader->getCDM().getAttributes(orgProjection));
+	    boost::shared_ptr<Projection> proj = Projection::create(dataReader->getCDM().getAttributes(orgProjection));
+		orgProjStr = proj->getProj4String();
 	}
 	if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
 		throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());

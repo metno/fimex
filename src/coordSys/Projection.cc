@@ -1,7 +1,7 @@
 /*
- * Fimex
+ * Fimex, Projection.cc
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2009, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -19,19 +19,20 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
+ *
+ *  Created on: Apr 27, 2010
+ *      Author: Heiko Klein
  */
 
-#include "fimex/CDMAttribute.h"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/regex.hpp>
-#include <cmath>
-#include "fimex/DataImpl.h"
-#include "fimex/Utils.h"
-#include "fimex/CDMException.h"
-#include "fimex/CDMNamedEntity.h"
-#include "fimex/CDMconstants.h"
 #include "fimex/coordSys/Projection.h"
+#include <boost/regex.hpp>
+
+// list over supported projections
+#include "StereographicProjection.h"
+#include "PolarStereographicProjection.h"
+#include "LatitudeLongitudeProjection.h"
+#include "LambertConformalConicProjection.h"
+#include "RotatedLatitudeLongitudeProjection.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam
@@ -41,139 +42,34 @@
 namespace MetNoFimex
 {
 
-CDMAttribute::CDMAttribute()
+std::ostream& operator<<(std::ostream& out, const Projection& proj)
 {
-}
-
-CDMAttribute::CDMAttribute(std::string name, std::string value)
-: name(name), datatype(CDM_STRING)
-{
-	boost::shared_array<char> cstr(new char [value.size()]);
-	for (size_t i = 0; i < value.size(); i++) {
-		cstr[i] = value.at(i);
-	}
-	data = boost::shared_ptr<Data>(new DataImpl<char>(cstr, value.size()));
+    out << proj.toString();
+    return out;
 }
 
 
-CDMAttribute::CDMAttribute(std::string name, double value)
-: name(name), datatype(CDM_DOUBLE)
+boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs)
 {
-	boost::shared_array<double> xvalue(new double[1]);
-	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<double>(xvalue, 1));
-}
-
-CDMAttribute::CDMAttribute(std::string name, int value)
-: name(name), datatype(CDM_INT)
-{
-	boost::shared_array<int> xvalue(new int[1]);
-	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<int>(xvalue, 1));
-}
-
-CDMAttribute::CDMAttribute(std::string name, short value)
-: name(name), datatype(CDM_SHORT)
-{
-	boost::shared_array<short> xvalue(new short[1]);
-	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<short>(xvalue, 1));
-}
-
-CDMAttribute::CDMAttribute(std::string name, char value)
-: name(name), datatype(CDM_CHAR)
-{
-	boost::shared_array<char> xvalue(new char[1]);
-	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<char>(xvalue, 1));
-}
-
-CDMAttribute::CDMAttribute(std::string name, float value)
-: name(name), datatype(CDM_FLOAT)
-{
-	boost::shared_array<float> xvalue(new float[1]);
-	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<float>(xvalue, 1));
-}
-
-CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data)
-: name(name), datatype(datatype), data(data)
-{
-}
-
-CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException)
-: name(name)
-{
-	this->datatype = string2datatype(datatype);
-	std::vector<std::string> vals;
-	vals.push_back(value);
-	initDataByArray(vals);
-}
-
-CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException)
-: name(name), datatype(datatype)
-{
-    initDataByArray(values);
-}
-
-void CDMAttribute::initDataByArray(const std::vector<std::string>& values)
-{
-    switch (datatype) {
-    case CDM_FLOAT: {
-        initDataArray<float>(values);
-        break;
+    std::vector<CDMAttribute>::const_iterator projAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_mapping_name"));
+    boost::shared_ptr<Projection> proj;
+    if (projAttr == attrs.end()) {
+        // TODO: longlat
+    } else {
+        std::string projName(projAttr->getStringValue());
+        if (projName == "stereographic") {
+            proj =  boost::shared_ptr<Projection>(new StereographicProjection());
+        } else if (projName == "polar_stereographic") {
+            proj =  boost::shared_ptr<Projection>(new PolarStereographicProjection());
+        } else {
+            throw CDMException("unsupported projection: " + projName);
+        }
     }
-    case CDM_DOUBLE: {
-        initDataArray<double>(values);
-        break;
-    }
-    case CDM_INT:  {
-        initDataArray<int>(values);
-        break;
-    }
-    case CDM_SHORT: {
-        initDataArray<short>(values);
-        break;
-    }
-    case CDM_CHAR: {
-        initDataArray<char>(values);
-        break;
-    }
-    case CDM_STRING: {
-        /* string may only have one dimension */
-        *this = CDMAttribute(name, join(values.begin(), values.end(), " "));
-        break;
-    }
-    default: {
-        throw CDMException("Unknown type to generate attribute " + name);
-    }
-    }
+    proj->addParameters(attrs);
+    return proj;
 }
 
-CDMAttribute::~CDMAttribute()
-{
-}
-
-const std::string CDMAttribute::getStringValue() const
-{
-    return data->asString();
-}
-
-void CDMAttribute::toXMLStream(std::ostream& out) const
-{
-	out << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
-}
-
-/* init data arrays for all types */
-template<typename T>
-void CDMAttribute::initDataArray(const std::vector<std::string>& values) {
-    std::vector<T> vec;
-    std::transform(values.begin(), values.end(), std::back_inserter(vec), &string2type<T>);
-    data = createData(datatype, vec.begin(), vec.end());
-}
-
-
-std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
+boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projStr)
 {
     // init projections
     // make sure that pj is freed when going out of scope
@@ -318,17 +214,8 @@ std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
         attrList.push_back(CDMAttribute("false_northing", string2type<double>(what[1].str())));
     }
 
-    return attrList;
-    // TODO: this whole function should be the same as
-    //boost::shared_ptr<Projection> proj = Projection::createByProj4(projStr);
-    //return proj->getParameters();
-    // but it seems like those Parameters have a limited lifetime: segfault
+    boost::shared_ptr<Projection> proj = create(attrList);
+    return proj;
 }
-
-std::string attributesToProjString(const std::vector<CDMAttribute>& attrs)
-{
-    return Projection::create(attrs)->getProj4String();
-}
-
 
 }

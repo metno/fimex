@@ -25,6 +25,7 @@
 #include "fimex/interpolation.h"
 #include "fimex/DataImpl.h"
 #include "fimex/Units.h"
+#include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include <boost/bind.hpp>
 #include <boost/regex.hpp>
@@ -613,7 +614,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	boost::shared_array<double> longVal(new double[fieldSize]);
 	boost::shared_array<double> latVal(new double[fieldSize]);
 	std::string lonLatProj("+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong");
-	std::string projStr = attributesToProjString(getAttributes(projectionVariable));
+	std::string projStr = Projection::create(getAttributes(projectionVariable))->getProj4String();
 	if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
 	}
