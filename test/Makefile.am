@@ -6,6 +6,7 @@ CC_TESTS = testBinaryConstants \
            testInterpolation \
            testData \
            testCDM \
+           testProjections \
            testXMLDoc \
            testFeltReader
 SH_TESTS = 
@@ -54,6 +55,7 @@ testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc
+testProjections_SOURCES = testProjections.cc
 testCoordSys_SOURCES = testCoordSys.cc 
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc

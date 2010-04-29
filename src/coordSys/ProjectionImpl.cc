@@ -94,7 +94,8 @@ void ProjectionImpl::addParameters(std::vector<CDMAttribute> attributes)
 
 void ProjectionImpl::removeParameter(std::string paramName)
 {
-    params_.erase(find_if(params_.begin(), params_.end(), CDMNameEqual(paramName)));
+    vector<CDMAttribute>::iterator found = find_if(params_.begin(), params_.end(), CDMNameEqual(paramName));
+    if (found != params_.end()) params_.erase(found);
 }
 
 const std::string& ProjectionImpl::getName() const

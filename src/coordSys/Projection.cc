@@ -54,13 +54,17 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
     std::vector<CDMAttribute>::const_iterator projAttr = std::find_if(attrs.begin(), attrs.end(), CDMNameEqual("grid_mapping_name"));
     boost::shared_ptr<Projection> proj;
     if (projAttr == attrs.end()) {
-        // TODO: longlat
+        proj = boost::shared_ptr<Projection>(new LatitudeLongitudeProjection());
     } else {
         std::string projName(projAttr->getStringValue());
         if (projName == "stereographic") {
             proj =  boost::shared_ptr<Projection>(new StereographicProjection());
         } else if (projName == "polar_stereographic") {
             proj =  boost::shared_ptr<Projection>(new PolarStereographicProjection());
+        } else if (projName == "rotated_latitude_longitude") {
+            proj =  boost::shared_ptr<Projection>(new RotatedLatitudeLongitudeProjection());
+        } else if (projName == "lambert_conformal_conic") {
+            proj =  boost::shared_ptr<Projection>(new LambertConformalConicProjection());
         } else {
             throw CDMException("unsupported projection: " + projName);
         }
@@ -71,6 +75,9 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
 
 boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projStr)
 {
+    // TODO: this function should be splitted and moved to the projection implementation classes
+    // in the same way as the create function
+
     // init projections
     // make sure that pj is freed when going out of scope
     boost::shared_ptr<PJ> pj(pj_init_plus(projStr.c_str()), pj_free);
