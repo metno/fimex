@@ -38,7 +38,7 @@ namespace MetNoFimex
  * Implementations only need to implement a constructor calling
  * the ProjectionImpl("proj-name") and the method getProj4ProjectionPart()
  *
- * @note the implemented projection needs to get made visible in Projection.cc create()
+ * @note the implemented projection needs to get made visible in Projection::create() and  Projection::createByProj4
  *
  */
 class ProjectionImpl: public MetNoFimex::Projection
@@ -64,6 +64,14 @@ public:
     /** get a string representation */
     virtual std::string toString() const;
 protected:
+    /** match the +proj= part of a proj4 string */
+    static bool proj4ProjectionMatchesName(const std::string& proj4String, const std::string& name);
+    /**
+     * add the attributes describing the earth from a proj4-string to the outAttrs
+     * @param proj4String string as used for proj4
+     * @param output list of CDMAttributes
+     */
+    static void proj4GetEarthAttributes(const std::string& proj4String, std::vector<CDMAttribute>& attrList);
     // set the name of the projection and assign the isDegree parameter
     explicit ProjectionImpl(std::string name, bool isDegree);
     /**
@@ -79,7 +87,7 @@ protected:
      * @param replaceName the name to use in the stream to the parameter, defaults to original name ("")
      * @return true if parameter found and set
      */
-    virtual bool addParameterToStream(std::ostream& outStream, const std::string& name, std::string replaceName = "") const;
+    bool addParameterToStream(std::ostream& outStream, const std::string& name, std::string replaceName = "") const;
     std::vector<CDMAttribute> params_;
 private:
     const std::string name_;

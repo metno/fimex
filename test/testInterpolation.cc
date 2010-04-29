@@ -490,13 +490,13 @@ BOOST_AUTO_TEST_CASE( test_Utils )
 		if (it->getName() == "grid_mapping_name") {
 			found--;
 			std::cerr << it->getStringValue() << ":" << std::endl;
-			BOOST_CHECK(it->getStringValue() == "stereographic");
+			BOOST_CHECK((it->getStringValue() == "stereographic") || (it->getStringValue() == "polar_stereographic"));
 		}
 		if (it->getName() == "scale_factor_at_projection_origin") {
 			found--;
 			BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - 0.93301) < 0.00001);
 		}
-		if (it->getName() == "longitude_of_projection_origin") {
+		if ((it->getName() == "longitude_of_projection_origin") || (it->getName() == "straight_vertical_longitude_from_pole")) {
 			found--;
 			BOOST_CHECK(std::fabs(it->getData()->asDouble()[0] - -32.) < 0.00001);
 		}

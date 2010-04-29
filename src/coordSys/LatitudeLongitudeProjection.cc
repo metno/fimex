@@ -1,5 +1,5 @@
 /*
- * Fimex, LatitudeLongitudeProjection.h
+ * Fimex, LatitudeLongitudeProjection.cc
  *
  * (C) Copyright 2010, met.no
  *
@@ -20,35 +20,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- *  Created on: Apr 28, 2010
+ *  Created on: Apr 29, 2010
  *      Author: Heiko Klein
  */
 
-#ifndef LATITUDELONGITUDEPROJECTION_H_
-#define LATITUDELONGITUDEPROJECTION_H_
-
-#include "ProjectionImpl.h"
+#include "LatitudeLongitudeProjection.h"
+#include <boost/regex.hpp>
 
 namespace MetNoFimex
 {
 
-class LatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
+using namespace std;
+
+LatitudeLongitudeProjection::LatitudeLongitudeProjection()
+: ProjectionImpl("latitude_longitude", true)
 {
-
-public:
-    LatitudeLongitudeProjection();
-    virtual ~LatitudeLongitudeProjection() {}
-    static bool acceptsProj4(const std::string& proj4Str);
-    static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
-protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
-        return oproj << "+proj=latlong";
-    }
-
-
-};
-
 }
 
+bool LatitudeLongitudeProjection::acceptsProj4(const std::string& proj4Str)
+{
+    return proj4ProjectionMatchesName(proj4Str, "latlong") || proj4ProjectionMatchesName(proj4Str, "longlat");
+}
 
-#endif /* LATITUDELONGITUDEPROJECTION_H_ */
+std::vector<CDMAttribute> LatitudeLongitudeProjection::parametersFromProj4(const std::string& proj4Str)
+{
+    vector<CDMAttribute> attrs;
+    if (!acceptsProj4(proj4Str)) return attrs;
+
+    attrs.push_back(CDMAttribute("grid_mapping_name", "longitude_latitude"));
+
+    proj4GetEarthAttributes(proj4Str, attrs);
+    return attrs;
+}
+
+}

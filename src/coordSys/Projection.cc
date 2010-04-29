@@ -81,6 +81,29 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
 
 boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projStr)
 {
+    std::vector<CDMAttribute> attrs;
+    if (LatitudeLongitudeProjection::acceptsProj4(projStr)) {
+        attrs = LatitudeLongitudeProjection::parametersFromProj4(projStr);
+    } else if (RotatedLatitudeLongitudeProjection::acceptsProj4(projStr)) {
+        attrs = RotatedLatitudeLongitudeProjection::parametersFromProj4(projStr);
+    } else if (PolarStereographicProjection::acceptsProj4(projStr)) {
+        attrs = PolarStereographicProjection::parametersFromProj4(projStr);
+    } else if (StereographicProjection::acceptsProj4(projStr)) {
+        attrs = StereographicProjection::parametersFromProj4(projStr);
+    } else if (LambertConformalConicProjection::acceptsProj4(projStr)) {
+        attrs = LambertConformalConicProjection::parametersFromProj4(projStr);
+    }
+
+    if (attrs.size() == 0) {
+        std::cerr << "translation of proj4 '" << projStr << "' to FGDC/CF not supported" << std::endl;
+        throw CDMException("proj-string "+projStr+" to FGDC/CF not supported");
+    }
+    return Projection::create(attrs);
+}
+
+#if 0
+boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projStr)
+{
     // TODO: this function should be splitted and moved to the projection implementation classes
     // in the same way as the create function
 
@@ -230,5 +253,7 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
     boost::shared_ptr<Projection> proj = create(attrList);
     return proj;
 }
+#endif
+
 
 }

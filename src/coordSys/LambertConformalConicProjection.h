@@ -37,31 +37,12 @@ class LambertConformalConicProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    LambertConformalConicProjection() : ProjectionImpl("lambert_conformal_conic", false) {}
+    LambertConformalConicProjection();
     virtual ~LambertConformalConicProjection() {}
+    static bool acceptsProj4(const std::string& proj4Str);
+    static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
-        oproj << "+proj=lcc";
-        std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(params_.begin(), params_.end(), CDMNameEqual("standard_parallel"));
-        if (foundAttr != params_.end()) {
-            // standard_parallel - There may be 1 or 2 values.
-            boost::shared_ptr<Data> spData = foundAttr->getData();
-            oproj << " +lat_1=" << spData->asConstDouble()[0];
-            if (spData->size() > 2) {
-                oproj << " +lat_2=" << spData->asConstDouble()[1];
-            } else {
-                oproj << " +lat_2=" << spData->asConstDouble()[0];
-            }
-        } else {
-            oproj << " +lat_1=0 +lat_2=0";
-        }
-        addParameterToStream(oproj, "longitude_of_central_meridian", " +lon_0=");
-        addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
-        addParameterToStream(oproj, "false_easting", " +x_0=");
-        addParameterToStream(oproj, "false_northing", " +y_0=");
-
-        return oproj;
-    }
+    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 
 
 };

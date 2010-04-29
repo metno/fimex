@@ -36,23 +36,13 @@ class StereographicProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    StereographicProjection() : ProjectionImpl("stereographic", false) {}
+    StereographicProjection();
     virtual ~StereographicProjection() {}
+    static bool acceptsProj4(const std::string& proj4Str);
+    static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 protected:
     StereographicProjection(std::string name) : ProjectionImpl(name, false) {}
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
-        oproj << "+proj=stere";
-        addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
-        addParameterToStream(oproj, "straight_vertical_longitude_from_pole", " +lon_0="); // polar-stereographic
-        addParameterToStream(oproj, "longitude_of_projection_origin", " +lon_0="); // stereographic
-        addParameterToStream(oproj, "scale_factor_at_projection_origin", " +k=");
-        addParameterToStream(oproj, "standard_parallel", " +lat_ts="); // only polar-stereographic, exclusive with k
-        addParameterToStream(oproj, "false_easting", " +x_0=");
-        addParameterToStream(oproj, "false_northing", " +y_0=");
-        return oproj;
-    }
-
-
+    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 };
 
 }

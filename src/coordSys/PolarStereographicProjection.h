@@ -38,6 +38,8 @@ class PolarStereographicProjection: public MetNoFimex::StereographicProjection
 public:
     PolarStereographicProjection() : StereographicProjection("polar_stereographic") {}
     virtual ~PolarStereographicProjection() {}
+    static bool acceptsProj4(const std::string& proj4Str);
+    static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 };
 
 }

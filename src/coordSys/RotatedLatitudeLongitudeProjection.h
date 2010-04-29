@@ -37,22 +37,12 @@ class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    RotatedLatitudeLongitudeProjection() : ProjectionImpl("rotated_latitude_longitude", true) {}
+    RotatedLatitudeLongitudeProjection();
     virtual ~RotatedLatitudeLongitudeProjection() {}
+    static bool acceptsProj4(const std::string& proj4Str);
+    static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
-        oproj << "+proj=ob_tran +o_proj=longlat";
-        std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(params_.begin(), params_.end(), CDMNameEqual("grid_north_pole_longitude"));
-        if (foundAttr != params_.end()) {
-            if (foundAttr->getData()->size() > 0) {
-                oproj << " +lon_0=" << (foundAttr->getData()->asConstDouble()[0]-180);
-            }
-        }
-        addParameterToStream(oproj, "grid_north_pole_latitude", " +o_lat_p=");
-        addParameterToStream(oproj, "north_pole_grid_longitude", " +o_lon_b=");
-        return oproj;
-    }
-
+    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 
 };
 

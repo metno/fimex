@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include "boost/regex.hpp"
+#include <cmath>
 
 
 namespace MetNoFimex
@@ -164,6 +166,46 @@ std::string ProjectionImpl::toString() const
         buffer << par->getName() << "=" << par->getStringValue() << ";";
     }
     return buffer.str();
+}
+
+bool ProjectionImpl::proj4ProjectionMatchesName(const std::string& proj4Str, const std::string& name)
+{
+    boost::smatch what;
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+proj=(\\S+)"))) {
+        return what[1].str() == name;
+    } else {
+        return false;
+    }
+}
+
+void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::vector<CDMAttribute>& attrList)
+{
+    boost::smatch what;
+    // this assumes currently all units to be 'm'
+    // convert x_0 to false_easting, y_0 to false_northing
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+x_0=(\\S+)"))) {
+        attrList.push_back(CDMAttribute("false_easting", string2type<double>(what[1].str())));
+    }
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+y_0=(\\S+)"))) {
+        attrList.push_back(CDMAttribute("false_northing", string2type<double>(what[1].str())));
+    }
+
+    // a and e (or b) to semi_major_axis and semi_minor_axis
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+a=(\\S+)"))) {
+        double major_axis = string2type<double>(what[1].str());
+        attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
+        if (boost::regex_search(proj4Str, what, boost::regex("\\+e=(\\S+)")) && what[1].str() != "0") {
+            double ecc = string2type<double>(what[1].str());
+            double minor_axis = sqrt(major_axis*major_axis*(1-(ecc*ecc)));
+            attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
+            attrList.push_back(CDMAttribute("semi_minor_axis", minor_axis));
+        } else if (boost::regex_search(proj4Str, what, boost::regex("\\+b=(\\S+)"))) {
+            attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
+            attrList.push_back(CDMAttribute("semi_minor_axis", string2type<double>(what[1].str())));
+        } else {
+            attrList.push_back(CDMAttribute("earth_radius", major_axis));
+        }
+    }
 }
 
 }

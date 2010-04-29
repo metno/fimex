@@ -3,10 +3,10 @@ CC_TESTS = testBinaryConstants \
            testUtils \
            testTimeSpec \
            testSpatialAxisSpec \
-           testInterpolation \
            testData \
-           testCDM \
            testProjections \
+           testInterpolation \
+           testCDM \
            testXMLDoc \
            testFeltReader
 SH_TESTS = 
