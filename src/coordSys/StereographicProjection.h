@@ -36,10 +36,10 @@ class StereographicProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    StereographicProjection() : ProjectionImpl("stereographic", true) {}
+    StereographicProjection() : ProjectionImpl("stereographic", false) {}
     virtual ~StereographicProjection() {}
 protected:
-    StereographicProjection(std::string name) : ProjectionImpl(name, true) {}
+    StereographicProjection(std::string name) : ProjectionImpl(name, false) {}
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
         oproj << "+proj=stere";
         addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");

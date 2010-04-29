@@ -44,11 +44,13 @@ BOOST_AUTO_TEST_CASE( test_projection )
     string proj4stere = "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a=6371000 +e=0";
     boost::shared_ptr<Projection> projs = Projection::createByProj4(proj4stere);
     BOOST_CHECK(projs->getName() == "stereographic");
+    BOOST_CHECK(projs->isDegree() == false);
 
     std::vector<CDMAttribute> attrs = projs->getParameters();
     // generate another projection
     boost::shared_ptr<Projection> projs2 = Projection::create(attrs);
     BOOST_CHECK(projs2->getName() == "stereographic");
+
 
     // TODO: test other projections
 }
