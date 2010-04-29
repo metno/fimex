@@ -53,8 +53,16 @@ public:
     virtual const bool isDegree() const = 0;
     /** get a proj4 string */
     virtual std::string getProj4String() const = 0;
-    /** get a string representation */
+    /**
+     * get a string representation
+     * @note this should be implemented as unique as possible, i.e.
+     */
     virtual std::string toString() const = 0;
+    /**
+     * Comparison of two projections, implemented using the toString() function.
+     * This function does not guarantee that two projections are physically equal.
+     */
+    virtual bool operator==(const  Projection& b) const;
     /** create a projection from some CDMAttributes */
     static boost::shared_ptr<Projection> create(std::vector<CDMAttribute>);
     /** create a projection from a proj4 string */

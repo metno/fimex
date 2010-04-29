@@ -157,13 +157,13 @@ bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::st
 std::string ProjectionImpl::toString() const
 {
     std::ostringstream buffer;
-    buffer << getName() << ": ";
-    for (vector<CDMAttribute>::const_iterator par = params_.begin(); par != params_.end(); ++par) {
-        buffer << par->getName() << "=" << par->getStringValue();
-        buffer << ";";
+    buffer << getName() << ":";
+    vector<CDMAttribute> pars = getParameters();
+    sort(pars.begin(), pars.end(), CDMNameCompare());
+    for (vector<CDMAttribute>::const_iterator par = pars.begin(); par != pars.end(); ++par) {
+        buffer << par->getName() << "=" << par->getStringValue() << ";";
     }
     return buffer.str();
 }
-
 
 }

@@ -42,6 +42,12 @@
 namespace MetNoFimex
 {
 
+bool Projection::operator==(const  Projection& b) const
+{
+    return toString() == b.toString();
+}
+
+
 std::ostream& operator<<(std::ostream& out, const Projection& proj)
 {
     out << proj.toString();
