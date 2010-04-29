@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/coordSys/Projection.h"
 
 namespace MetNoFimex {
 
@@ -39,6 +40,7 @@ struct CoordSysImpl {
     std::vector<std::string> isCSForVec_;
     std::vector<std::string> isCompleteVec_;
     std::vector<boost::shared_ptr<const CoordinateAxis> > axes_;
+    boost::shared_ptr<const Projection> proj_;
 };
 
 }

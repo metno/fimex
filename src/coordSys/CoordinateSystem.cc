@@ -59,6 +59,9 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
         out << (*axis)->getName() << ":" << (*axis)->getAxisType() << "";
         if ((axis+1) != axes.end()) out << ",";
     }
+    if (cs.hasProjection()) {
+        out << ";" << *(cs.getProjection());
+    }
     return out;
 }
 
@@ -141,6 +144,20 @@ void CoordinateSystem::setSimpleSpatialGridded(bool set)
 {
     pimpl_->isSimpleSpatialGridded_ = set;
 }
+
+bool CoordinateSystem::hasProjection() const
+{
+    return pimpl_->proj_.get() != 0;
+}
+boost::shared_ptr<const Projection> CoordinateSystem::getProjection() const
+{
+    return pimpl_->proj_;
+}
+void CoordinateSystem::setProjection(boost::shared_ptr<const Projection> proj)
+{
+    pimpl_->proj_ = proj;
+}
+
 
 struct TypeCheck : public std::unary_function <CoordinateSystem::ConstAxisPtr, bool>{
     CoordinateAxis::AxisType type_;
@@ -513,7 +530,28 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystemsCF1
             cs.setSimpleSpatialGridded(simpleX && simpleY);
         }
     }
-    // TODO: transformations
+
+    // transformations
+    {
+        const CDM::VarVec& vars = cdm.getVariables();
+        for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+            CoordinateSystem& cs = cit->second;
+            // set the projection of the first matching var
+            for (CDM::VarVec::const_iterator var = vars.begin(); (var != vars.end() && !cs.hasProjection()); ++var) {
+                if (cs.isCSFor(var->getName()) && cs.isComplete(var->getName())) {
+                    CDMAttribute mappingAttr;
+                    if (cdm.getAttribute(var->getName(), "grid_mapping", mappingAttr)) {
+                        std::string varName = mappingAttr.getStringValue();
+                        if (cdm.hasVariable(varName)) {
+                            boost::shared_ptr<Projection> proj = Projection::create(cdm.getAttributes(varName));
+                            cs.setProjection(proj);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     // return a const casted version of the coordSystems
     vector<boost::shared_ptr<const CoordinateSystem> > outCSs;

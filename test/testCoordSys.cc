@@ -82,6 +82,10 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis();
         BOOST_CHECK(tAxis->getName() == "time");
 
+        //std::cerr << *((*varSysIt)->getProjection()) << endl;
+        BOOST_CHECK((*varSysIt)->hasProjection());
+        BOOST_CHECK((*varSysIt)->getProjection()->getName() == "stereographic");
+
         // create a slice-builder for the variable
         // the slicebuilder starts with the maximum variable size
         SliceBuilder sb(cdm, altitude);

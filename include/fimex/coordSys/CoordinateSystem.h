@@ -32,6 +32,8 @@
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 #include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/coordSys/Projection.h"
+
 
 namespace MetNoFimex
 {
@@ -110,6 +112,18 @@ public:
      * Set or unset if this coordinate system has spatial axes, i.e. 1-dim x,y or lon/lat axes
      */
     virtual void setSimpleSpatialGridded(bool set = true);
+    /**
+     * Check if the coordinate-system has a projection (of GeoX, GeoY and optionally GeoZ)
+     */
+    virtual bool hasProjection() const;
+    /**
+     * Get the projection of the coordinate-system (projection of GeoX, GeoY and optionally GeoZ)
+     */
+    virtual boost::shared_ptr<const Projection> getProjection() const;
+    /**
+     * Set the projection of the coordinate-system (projection of GeoX, GeoY and optionally GeoZ)
+     */
+    virtual void setProjection(boost::shared_ptr<const Projection> proj);
     /**
      * Check if the CoordinateSystem contains exactly the axis type
      * @param type axis type to check against
