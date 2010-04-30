@@ -33,6 +33,7 @@
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/coordSys/Projection.h"
 #include "CDM_XMLConfigHelper.h"
 #include "felt/FeltGridDefinition.h"
 #include <boost/shared_ptr.hpp>
@@ -386,7 +387,7 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, std::string& pr
 	// projection-variable without datatype and dimension
 	CDMVariable projVar(projName, CDM_NAT, std::vector<std::string>());
 	cdm_->addVariable(projVar);
-	std::vector<CDMAttribute> projAttr = projStringToAttributes(projStr);
+	std::vector<CDMAttribute> projAttr = Projection::createByProj4(projStr)->getParameters();
 	for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
 		cdm_->addAttribute(projName, *attrIt);
 	}

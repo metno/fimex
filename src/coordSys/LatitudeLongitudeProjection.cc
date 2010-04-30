@@ -50,6 +50,7 @@ std::vector<CDMAttribute> LatitudeLongitudeProjection::parametersFromProj4(const
     attrs.push_back(CDMAttribute("grid_mapping_name", "longitude_latitude"));
 
     proj4GetEarthAttributes(proj4Str, attrs);
+    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

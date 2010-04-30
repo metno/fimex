@@ -41,12 +41,16 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/interpolation.h"
+#include "fimex/Logger.h"
 
 using namespace std;
 using namespace MetNoFimex;
 
+static int DEBUG = 0;
+
 BOOST_AUTO_TEST_CASE(test_interpolator)
 {
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {

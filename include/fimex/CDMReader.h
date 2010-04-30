@@ -103,6 +103,19 @@ public:
 	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
 	 */
 	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+	/**
+     * @brief read and scale a dataslice to a known unit
+     *
+     * This functions uses getDataSlice internally. It tries to read
+     * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
+     * to the read data. Output-datatype will be double, output _FillValue
+     * will be MIFI_UNDEFINED_D. The data will be converted to match unit.
+     *
+     * @param varName name of the variable to read
+     * @param unit unit-string
+     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+     */
+	virtual boost::shared_ptr<Data> getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos) throw(CDMException);
 
 	/**
 	 * @brief read and scale a dataslice
@@ -111,6 +124,14 @@ public:
 	 * @see getScaledDataSlice(varName, unLimDimPos)
 	 */
 	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
+    /**
+     * @brief read and scale a dataslice to a set unit
+     * @param varName name of the variable to read
+     * @param unit unit string to scale to
+     * @param sb SliceBuilder to restrict the data
+     * @see getScaledDataSlice(varName, unLimDimPos)
+     */
+    virtual boost::shared_ptr<Data> getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb) throw(CDMException);
 
 	/**
 	 * @brief read and scale the complete data
@@ -118,11 +139,24 @@ public:
 	 * This functions uses getData internally. It tries to read
 	 * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
 	 * to the read data. Output-datatype will be double, output _FillValue
-	 * will be MIFI_UNDEFINED_D
+	 * will be MIFI_UNDEFINED_D.
 	 *
 	 * @param varName name of the variable to read
 	 */
 	virtual boost::shared_ptr<Data> getScaledData(const std::string& varName) throw(CDMException);
+    /**
+     * @brief read and scale the complete data to a set unit
+     *
+     * This functions uses getData internally. It tries to read
+     * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
+     * to the read data. Output-datatype will be double, output _FillValue
+     * will be MIFI_UNDEFINED_D. The data will be converted to match unit.
+     *
+     * @param varName name of the variable to read
+     * @param unit the unit-string to convert the data to
+     */
+    virtual boost::shared_ptr<Data> getScaledDataInUnit(const std::string& varName, const std::string& unit) throw(CDMException);
+
 protected:
 	boost::shared_ptr<CDM> cdm_;
 	/**
@@ -133,8 +167,9 @@ protected:
 	 */
 	virtual boost::shared_ptr<Data> getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException);
 private:
-	virtual boost::shared_ptr<Data> scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data) throw(CDMException);
-
+	boost::shared_ptr<Data> scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale = 1., double unitOffset = 0.) throw(CDMException);
+	boost::shared_ptr<Data> scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& unit)throw(CDMException);
+	void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset);
 };
 
 }

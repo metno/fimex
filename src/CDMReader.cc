@@ -25,6 +25,7 @@
 #include "fimex/CDM.h"
 #include "fimex/interpolation.h"
 #include "fimex/Data.h"
+#include "fimex/Units.h"
 
 namespace MetNoFimex {
 
@@ -128,28 +129,60 @@ boost::shared_ptr<Data> CDMReader::getData(const std::string& varName) throw(CDM
 	}
 }
 
+void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset)
+{
+    // init
+    scale = 1.;
+    offset = 0.;
+
+    CDMAttribute attr;
+    if (cdm_->getAttribute(varName, "scale_factor", attr)) {
+        scale = attr.getData()->asConstDouble()[0];
+    }
+    if (cdm_->getAttribute(varName, "add_offset", attr)) {
+        offset = attr.getData()->asConstDouble()[0];
+    }
+}
+
 // handle data scaling using add_offset, scale_factor and _FillValue from the varName variable
-boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale, double unitOffset) throw(CDMException)
 {
 	// retrieve scale and offset
-	CDMAttribute attr;
-	double scale = 1.;
-	double offset = 0.;
-	if (cdm_->getAttribute(varName, "scale_factor", attr)) {
-		scale = attr.getData()->asConstDouble()[0];
-	}
-	if (cdm_->getAttribute(varName, "add_offset", attr)) {
-		offset = attr.getData()->asConstDouble()[0];
-	}
+	double scale, offset;
+	getScaleAndOffsetOf(varName, scale, offset);
+
+	// v = scale*x + offset
+	// v(newUnit) = unitScale*v + unitOffset;
+	double totalScale = scale * unitScale;
+	double totalOffset = unitScale*offset + unitOffset;
+
 	// fillValue
 	double inFillValue = cdm_->getFillValue(varName);
 
-	return data->convertDataType(inFillValue, scale, offset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
+	return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
 }
+boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& newUnit) throw(CDMException)
+{
+    std::string myUnit = cdm_->getUnits(varName);
+    double unitOffset = 0.;
+    double unitScale = 1.;
+    if (newUnit != myUnit) {
+        Units u;
+        u.convert(myUnit, newUnit, unitScale, unitOffset);
+    }
+    return scaleDataOf(varName, data, unitScale, unitOffset);
+}
+
+
 
 boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	return scaleDataOf(varName, getDataSlice(varName, unLimDimPos));
+}
+
+boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos) throw(CDMException)
+{
+    return scaleDataToUnitOf(varName, getDataSlice(varName, unLimDimPos), unit);
 }
 
 boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
@@ -157,9 +190,19 @@ boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName
     return scaleDataOf(varName, getDataSlice(varName, sb));
 }
 
+boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb) throw(CDMException)
+{
+    return scaleDataToUnitOf(varName, getDataSlice(varName, sb), unit);
+}
+
 boost::shared_ptr<Data> CDMReader::getScaledData(const std::string& varName) throw(CDMException)
 {
 	return scaleDataOf(varName, getData(varName));
+}
+
+boost::shared_ptr<Data> CDMReader::getScaledDataInUnit(const std::string& varName, const std::string& unit) throw(CDMException)
+{
+    return scaleDataToUnitOf(varName, getData(varName), unit);
 }
 
 boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)

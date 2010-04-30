@@ -2,9 +2,7 @@ AC_INIT([fimex],[0.21beta],[heiko.klein@met.no])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
-#AC_PROG_RANLIB
-
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 # C99 testing only available starting in autoconf 2.60
 AC_PROG_CC_C99

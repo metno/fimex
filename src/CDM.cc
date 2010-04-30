@@ -27,6 +27,7 @@
 #include "fimex/Units.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/Logger.h"
 #include <boost/bind.hpp>
 #include <boost/regex.hpp>
 #include <functional>
@@ -35,6 +36,7 @@
 
 namespace MetNoFimex
 {
+static LoggerPtr logger = getLogger("fimex.CDM");
 
 /** Comparator to check if units are comparable to the initialized one */
 
@@ -469,13 +471,18 @@ std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const
 
 double CDM::getFillValue(const std::string& varName) const
 {
-	try {
-		const CDMAttribute& attr = getAttribute(varName, "_FillValue");
-		return attr.getData()->asDouble()[0];
-	} catch (CDMException& ex) {
-
-	}
+    CDMAttribute attr;
+    if (getAttribute(varName, "_FillValue", attr)) {
+        return attr.getData()->asDouble()[0];
+    }
 	return MIFI_UNDEFINED_F;
+}
+
+std::string CDM::getUnits(const std::string& varName) const
+{
+    CDMAttribute attr;
+    getAttribute(varName, "units", attr); // no test, default attr-value is ""
+    return attr.getStringValue();
 }
 
 void CDM::toXMLStream(std::ostream& out) const
@@ -615,6 +622,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	boost::shared_array<double> latVal(new double[fieldSize]);
 	std::string lonLatProj("+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong");
 	std::string projStr = Projection::create(getAttributes(projectionVariable))->getProj4String();
+	LOG4FIMEX(logger, Logger::DEBUG, "generating lat(x,y),lon(x,y) using proj4: "+projStr);
 	if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
 		throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
 	}

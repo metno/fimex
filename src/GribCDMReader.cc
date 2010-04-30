@@ -38,6 +38,7 @@
 #include "fimex/Data.h"
 #include "fimex/DataImpl.h"
 #include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/coordSys/Projection.h"
 #include <algorithm>
 
 namespace MetNoFimex
@@ -338,7 +339,7 @@ void GribCDMReader::initAddProjection(std::string& projName, std::string& coordi
     // projection-variable without datatype and dimension
     CDMVariable projVar(projName, CDM_NAT, std::vector<std::string>());
     cdm_->addVariable(projVar);
-    std::vector<CDMAttribute> projAttr = projStringToAttributes(projStr);
+    std::vector<CDMAttribute> projAttr =  Projection::createByProj4(projStr)->getParameters();
     for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
         cdm_->addAttribute(projName, *attrIt);
     }

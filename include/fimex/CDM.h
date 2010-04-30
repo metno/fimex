@@ -272,7 +272,11 @@ public:
 	 * @return value of _FillValue attribute, or MIFI_UNDEFINED_F
 	 */
 	double getFillValue(const std::string& varName) const;
-
+	/**
+	 * get the value of the "units" attribute
+	 * @return unitsString or ""
+	 */
+	std::string getUnits(const std::string& varName) const;
 	/**
 	 * @brief generate the projection coordinates (usually named "lat lon")
 	 *

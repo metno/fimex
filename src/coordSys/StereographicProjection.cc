@@ -96,6 +96,7 @@ std::vector<CDMAttribute> StereographicProjection::parametersFromProj4(const std
     attrs.push_back(CDMAttribute("latitude_of_projection_origin", lpOrg.v));
 
     proj4GetEarthAttributes(proj4Str, attrs);
+    attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
 }
 

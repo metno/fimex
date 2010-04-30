@@ -546,6 +546,17 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystemsCF1
                             boost::shared_ptr<Projection> proj = Projection::create(cdm.getAttributes(varName));
                             cs.setProjection(proj);
                         }
+                    } else {
+                        // LON/LAT systems don't need  grid_mapping, detect by lat/lon axes
+                        if (cs.hasAxisType(CoordinateAxis::Lon) && cs.hasAxisType(CoordinateAxis::Lat)) {
+                            if ( cs.getGeoXAxis()->getName() == cs.findAxisOfType(CoordinateAxis::Lon)->getName() &&
+                                 cs.getGeoYAxis()->getName() == cs.findAxisOfType(CoordinateAxis::Lat)->getName() ) {
+                                CDMAttribute grid_mapping("grid_mapping_name", "latitude_longitude");
+                                vector<CDMAttribute> attrs(1, grid_mapping);
+                                boost::shared_ptr<Projection> proj = Projection::create(attrs);
+                                cs.setProjection(proj);
+                            }
+                        }
                     }
                 }
             }
