@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "ProjectionImpl.h"
+#include "fimex/coordSys/ProjectionImpl.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
 #include <algorithm>

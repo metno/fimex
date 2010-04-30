@@ -28,6 +28,9 @@
 #define PROJECTIONIMPL_H_
 
 #include "fimex/coordSys/Projection.h"
+/**
+ * @headerfile "fimex/coordSys/ProjectionImpl.h"
+ */
 
 namespace MetNoFimex
 {

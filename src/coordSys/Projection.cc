@@ -28,11 +28,11 @@
 #include <boost/regex.hpp>
 
 // list over supported projections
-#include "StereographicProjection.h"
-#include "PolarStereographicProjection.h"
-#include "LatitudeLongitudeProjection.h"
-#include "LambertConformalConicProjection.h"
-#include "RotatedLatitudeLongitudeProjection.h"
+#include "fimex/coordSys/StereographicProjection.h"
+#include "fimex/coordSys/PolarStereographicProjection.h"
+#include "fimex/coordSys/LatitudeLongitudeProjection.h"
+#include "fimex/coordSys/LambertConformalConicProjection.h"
+#include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam

@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "LatitudeLongitudeProjection.h"
+#include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include <boost/regex.hpp>
 
 namespace MetNoFimex

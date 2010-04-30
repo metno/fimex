@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "StereographicProjection.h"
+#include "fimex/coordSys/StereographicProjection.h"
 #include <boost/regex.hpp>
 #include <cmath>
 #include <sstream>

@@ -1,5 +1,5 @@
 /*
- * Fimex, LatitudeLongitudeProjection.h
+ * Fimex, StereographicProjection.h
  *
  * (C) Copyright 2010, met.no
  *
@@ -24,31 +24,31 @@
  *      Author: Heiko Klein
  */
 
-#ifndef LATITUDELONGITUDEPROJECTION_H_
-#define LATITUDELONGITUDEPROJECTION_H_
+#ifndef STEREOGRAPHICPROJECTION_H_
+#define STEREOGRAPHICPROJECTION_H_
 
-#include "ProjectionImpl.h"
+/**
+ * @headerfile "fimex/coordSys/StereographicProjection.h"
+ */
+#include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
-class LatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
+class StereographicProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    LatitudeLongitudeProjection();
-    virtual ~LatitudeLongitudeProjection() {}
+    StereographicProjection();
+    virtual ~StereographicProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
-        return oproj << "+proj=latlong";
-    }
-
-
+    StereographicProjection(std::string name) : ProjectionImpl(name, false) {}
+    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 };
 
 }
 
 
-#endif /* LATITUDELONGITUDEPROJECTION_H_ */
+#endif /* STEREOGRAPHICPROJECTION_H_ */

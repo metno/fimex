@@ -1,5 +1,5 @@
 /*
- * Fimex, LambertConformalConicProjection.h
+ * Fimex, RotatedLatitudeLongitudeProjection.h
  *
  * (C) Copyright 2010, met.no
  *
@@ -24,30 +24,32 @@
  *      Author: Heiko Klein
  */
 
-#ifndef LAMBERTCONFORMALCONICPROJECTION_H_
-#define LAMBERTCONFORMALCONICPROJECTION_H_
+#ifndef ROTATEDLATITUDELONGITUDEPROJECTION_H_
+#define ROTATEDLATITUDELONGITUDEPROJECTION_H_
 
-#include "ProjectionImpl.h"
+/**
+ * @headerfile "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
+ */
+#include "fimex/coordSys/ProjectionImpl.h"
 #include "fimex/Data.h"
 
 namespace MetNoFimex
 {
 
-class LambertConformalConicProjection: public MetNoFimex::ProjectionImpl
+class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    LambertConformalConicProjection();
-    virtual ~LambertConformalConicProjection() {}
+    RotatedLatitudeLongitudeProjection();
+    virtual ~RotatedLatitudeLongitudeProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 protected:
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
-
 
 };
 
 }
 
 
-#endif /* LAMBERTCONFORMALCONICPROJECTION_H_ */
+#endif /* ROTATEDLATITUDELONGITUDEPROJECTION_H_ */

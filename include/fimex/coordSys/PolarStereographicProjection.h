@@ -1,5 +1,5 @@
 /*
- * Fimex, RotatedLatitudeLongitudeProjection.h
+ * Fimex, PolarStereographicProjection.h
  *
  * (C) Copyright 2010, met.no
  *
@@ -24,29 +24,28 @@
  *      Author: Heiko Klein
  */
 
-#ifndef ROTATEDLATITUDELONGITUDEPROJECTION_H_
-#define ROTATEDLATITUDELONGITUDEPROJECTION_H_
+#ifndef POLARSTEREOGRAPHICPROJECTION_H_
+#define POLARSTEREOGRAPHICPROJECTION_H_
 
-#include "ProjectionImpl.h"
-#include "fimex/Data.h"
+#include "fimex/coordSys/StereographicProjection.h"
+/**
+ * @headerfile "fimex/coordSys/PolarStereographicProjection.h"
+ */
 
 namespace MetNoFimex
 {
 
-class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
+class PolarStereographicProjection: public MetNoFimex::StereographicProjection
 {
 
 public:
-    RotatedLatitudeLongitudeProjection();
-    virtual ~RotatedLatitudeLongitudeProjection() {}
+    PolarStereographicProjection() : StereographicProjection("polar_stereographic") {}
+    virtual ~PolarStereographicProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
-protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
-
 };
 
 }
 
 
-#endif /* ROTATEDLATITUDELONGITUDEPROJECTION_H_ */
+#endif /* POLARSTEREOGRAPHICPROJECTION_H_ */

@@ -1,5 +1,5 @@
 /*
- * Fimex, StereographicProjection.h
+ * Fimex, LambertConformalConicProjection.h
  *
  * (C) Copyright 2010, met.no
  *
@@ -24,28 +24,33 @@
  *      Author: Heiko Klein
  */
 
-#ifndef STEREOGRAPHICPROJECTION_H_
-#define STEREOGRAPHICPROJECTION_H_
+#ifndef LAMBERTCONFORMALCONICPROJECTION_H_
+#define LAMBERTCONFORMALCONICPROJECTION_H_
 
-#include "ProjectionImpl.h"
+#include "fimex/coordSys/ProjectionImpl.h"
+#include "fimex/Data.h"
+/**
+ * @headerfile "fimex/coordSys/LambertConformalConicProjection.h"
+ */
 
 namespace MetNoFimex
 {
 
-class StereographicProjection: public MetNoFimex::ProjectionImpl
+class LambertConformalConicProjection: public MetNoFimex::ProjectionImpl
 {
 
 public:
-    StereographicProjection();
-    virtual ~StereographicProjection() {}
+    LambertConformalConicProjection();
+    virtual ~LambertConformalConicProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
 protected:
-    StereographicProjection(std::string name) : ProjectionImpl(name, false) {}
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
+
+
 };
 
 }
 
 
-#endif /* STEREOGRAPHICPROJECTION_H_ */
+#endif /* LAMBERTCONFORMALCONICPROJECTION_H_ */

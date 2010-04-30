@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "PolarStereographicProjection.h"
+#include "fimex/coordSys/PolarStereographicProjection.h"
 #include <boost/regex.hpp>
 #include <cmath>
 #include "fimex/Utils.h"

@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "LambertConformalConicProjection.h"
+#include "fimex/coordSys/LambertConformalConicProjection.h"
 #include <boost/regex.hpp>
 
 namespace MetNoFimex
