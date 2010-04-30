@@ -3,7 +3,8 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC_STDC
 AC_PROG_CXX
 #AC_PROG_RANLIB
-AC_PROG_LIBTOOL
+
+AM_PROG_LIBTOOL
 
 # C99 testing only available starting in autoconf 2.60
 AC_PROG_CC_C99

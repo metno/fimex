@@ -107,8 +107,6 @@ std::ostream& StereographicProjection::getProj4ProjectionPart(std::ostream& opro
     addParameterToStream(oproj, "longitude_of_projection_origin", " +lon_0="); // stereographic
     addParameterToStream(oproj, "scale_factor_at_projection_origin", " +k=");
     addParameterToStream(oproj, "standard_parallel", " +lat_ts="); // only polar-stereographic, exclusive with k
-    addParameterToStream(oproj, "false_easting", " +x_0=");
-    addParameterToStream(oproj, "false_northing", " +y_0=");
     return oproj;
 }
 

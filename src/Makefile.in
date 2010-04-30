@@ -83,16 +83,12 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
 	coordSys/CoordSysImpl.h coordSys/Projection.cc \
-	coordSys/ProjectionImpl.h coordSys/ProjectionImpl.cc \
-	coordSys/LambertConformalConicProjection.h \
+	coordSys/ProjectionImpl.cc \
 	coordSys/LambertConformalConicProjection.cc \
-	coordSys/LatitudeLongitudeProjection.h \
 	coordSys/LatitudeLongitudeProjection.cc \
-	coordSys/RotatedLatitudeLongitudeProjection.h \
+	coordSys/MercatorProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
-	coordSys/StereographicProjection.h \
 	coordSys/StereographicProjection.cc \
-	coordSys/PolarStereographicProjection.h \
 	coordSys/PolarStereographicProjection.cc Data.cc \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
@@ -118,7 +114,7 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDM_XMLConfigHelper.lo CoordinateSystem.lo CoordinateAxis.lo \
 	Projection.lo ProjectionImpl.lo \
 	LambertConformalConicProjection.lo \
-	LatitudeLongitudeProjection.lo \
+	LatitudeLongitudeProjection.lo MercatorProjection.lo \
 	RotatedLatitudeLongitudeProjection.lo \
 	StereographicProjection.lo PolarStereographicProjection.lo \
 	Data.lo DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
@@ -318,16 +314,12 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
 	coordSys/CoordSysImpl.h coordSys/Projection.cc \
-	coordSys/ProjectionImpl.h coordSys/ProjectionImpl.cc \
-	coordSys/LambertConformalConicProjection.h \
+	coordSys/ProjectionImpl.cc \
 	coordSys/LambertConformalConicProjection.cc \
-	coordSys/LatitudeLongitudeProjection.h \
 	coordSys/LatitudeLongitudeProjection.cc \
-	coordSys/RotatedLatitudeLongitudeProjection.h \
+	coordSys/MercatorProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
-	coordSys/StereographicProjection.h \
 	coordSys/StereographicProjection.cc \
-	coordSys/PolarStereographicProjection.h \
 	coordSys/PolarStereographicProjection.cc Data.cc \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GribApiCDMWriter.cc \
@@ -445,6 +437,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Plo@am__quote@
@@ -551,6 +544,13 @@ LatitudeLongitudeProjection.lo: coordSys/LatitudeLongitudeProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LatitudeLongitudeProjection.cc' object='LatitudeLongitudeProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LatitudeLongitudeProjection.lo `test -f 'coordSys/LatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/LatitudeLongitudeProjection.cc
+
+MercatorProjection.lo: coordSys/MercatorProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MercatorProjection.lo -MD -MP -MF $(DEPDIR)/MercatorProjection.Tpo -c -o MercatorProjection.lo `test -f 'coordSys/MercatorProjection.cc' || echo '$(srcdir)/'`coordSys/MercatorProjection.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/MercatorProjection.Tpo $(DEPDIR)/MercatorProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/MercatorProjection.cc' object='MercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MercatorProjection.lo `test -f 'coordSys/MercatorProjection.cc' || echo '$(srcdir)/'`coordSys/MercatorProjection.cc
 
 RotatedLatitudeLongitudeProjection.lo: coordSys/RotatedLatitudeLongitudeProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT RotatedLatitudeLongitudeProjection.lo -MD -MP -MF $(DEPDIR)/RotatedLatitudeLongitudeProjection.Tpo -c -o RotatedLatitudeLongitudeProjection.lo `test -f 'coordSys/RotatedLatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/RotatedLatitudeLongitudeProjection.cc

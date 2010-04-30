@@ -122,6 +122,10 @@ std::string ProjectionImpl::getProj4String() const
     std::ostringstream out;
     getProj4ProjectionPart(out);
 
+    // offset
+    addParameterToStream(out, "false_easting", " +x_0=");
+    addParameterToStream(out, "false_northing", " +y_0=");
+
     // earth parameters
     if (addParameterToStream(out, "earth_radius", " +a=")) {
         out << " +e=0";

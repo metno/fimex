@@ -102,8 +102,6 @@ std::ostream& LambertConformalConicProjection::getProj4ProjectionPart(std::ostre
     }
     addParameterToStream(oproj, "longitude_of_central_meridian", " +lon_0=");
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
-    addParameterToStream(oproj, "false_easting", " +x_0=");
-    addParameterToStream(oproj, "false_northing", " +y_0=");
 
     return oproj;
 }

@@ -42,17 +42,12 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/CoordinateAxis.cc \
                      coordSys/CoordSysImpl.h \
                      coordSys/Projection.cc \
-                     coordSys/ProjectionImpl.h \
                      coordSys/ProjectionImpl.cc \
-                     coordSys/LambertConformalConicProjection.h \
                      coordSys/LambertConformalConicProjection.cc \
-                     coordSys/LatitudeLongitudeProjection.h \
                      coordSys/LatitudeLongitudeProjection.cc \
-                     coordSys/RotatedLatitudeLongitudeProjection.h \
+                     coordSys/MercatorProjection.cc \
                      coordSys/RotatedLatitudeLongitudeProjection.cc \
-                     coordSys/StereographicProjection.h \
                      coordSys/StereographicProjection.cc \
-                     coordSys/PolarStereographicProjection.h \
                      coordSys/PolarStereographicProjection.cc \
 					 Data.cc \
 					 DataTypeChanger.cc \
