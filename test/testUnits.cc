@@ -38,7 +38,6 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-#if HAVE_UDUNITS
 BOOST_AUTO_TEST_CASE( test_Units )
 {
 	double slope, offset;
@@ -114,8 +113,6 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	BOOST_CHECK(fabs(tu.fimexTime2unitTime(ft)) < 1e-5);
 
 }
-
-#endif // UDUNITS
 
 #else
 // no boost testframework

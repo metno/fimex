@@ -21,17 +21,11 @@
 /* define if the Boost::Unit_Test_Framework library is available */
 #undef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
-/* Define to 1 if you have the `ceil' function. */
-#undef HAVE_CEIL
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* define if felt/FeltFile.h is available */
 #undef HAVE_FELT
-
-/* Define to 1 if you have the `fmod' function. */
-#undef HAVE_FMOD
 
 /* Define if gribapi is available */
 #undef HAVE_GRIBAPI
@@ -48,8 +42,8 @@
 /* Define to 1 if you have the `mic' library (-lmic). */
 #undef HAVE_LIBMIC
 
-/* Define to 1 if you have the `log10' function. */
-#undef HAVE_LOG10
+/* Define to 1 if you have the `netcdf_c++' library (-lnetcdf_c++). */
+#undef HAVE_LIBNETCDF_C__
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -63,20 +57,11 @@
 /* define if the compiler implements namespaces */
 #undef HAVE_NAMESPACES
 
-/* define netcdf knows NcFile::FileFormat enum */
-#undef HAVE_NCFILE_FILEFORMAT
-
-/* have netcdf */
-#undef HAVE_NETCDF
-
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
 
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
-
-/* Define if proj4 is available */
-#undef HAVE_PROJ4
 
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
@@ -115,9 +100,6 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define if udunits is available */
-#undef HAVE_UDUNITS
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
@@ -127,6 +109,9 @@
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
+
+/* 'Define to 1 if you have the <netcdf.h> header file.' */
+#undef MIFI_HAVE_NETCDF
 
 /* Name of package */
 #undef PACKAGE

@@ -32,13 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-# grib-api libs are automatically added to LDFLAGS
-@HAVE_MILIB_TRUE@am__append_1 = ${milib_LIBS}
-@HAVE_UDUNITS_TRUE@am__append_2 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
-@HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
-@HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-@HAVE_NETCDF_TRUE@am__append_5 = NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
-@HAVE_MILIB_TRUE@am__append_6 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
+@HAVE_NETCDF_TRUE@am__append_1 = NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
+@HAVE_MILIB_TRUE@am__append_2 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -52,12 +47,10 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_openmp.m4 \
-	$(top_srcdir)/m4/have_netcdf_check.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/metno_have_udunits.m4 \
-	$(top_srcdir)/m4/mifi_gribapi.m4 \
-	$(top_srcdir)/m4/mifi_proj4.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/metno_check.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 \
+	$(top_srcdir)/m4/mifi_gribapi.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -215,9 +208,6 @@ LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
-NETCDF_CPPFLAGS = @NETCDF_CPPFLAGS@
-NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
-NETCDF_LIBS = @NETCDF_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -227,17 +217,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PROJ4_CPPFLAGS = @PROJ4_CPPFLAGS@
-PROJ4_LDFLAGS = @PROJ4_LDFLAGS@
-PROJ4_LIBS = @PROJ4_LIBS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-UDUNITS_CPPFLAGS = @UDUNITS_CPPFLAGS@
-UDUNITS_LDFLAGS = @UDUNITS_LDFLAGS@
-UDUNITS_LIBS = @UDUNITS_LIBS@
 VERSION = @VERSION@
 XML2_CONFIG = @XML2_CONFIG@
 XML_CPPFLAGS = @XML_CPPFLAGS@
@@ -300,11 +284,7 @@ AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 lib_LTLIBRARIES = libfimex.la
-libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) \
-	felt/libfelt.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) \
-	$(BOOST_FILESYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) \
-	$(BOOST_DATE_TIME_LIB) -lm @XML_LIBS@ $(am__append_1) \
-	$(am__append_2) $(am__append_3) $(am__append_4)
+libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) felt/libfelt.la
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
@@ -329,7 +309,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc $(am__append_5) $(am__append_6)
+	Utils.cc XMLDoc.cc $(am__append_1) $(am__append_2)
 all: all-recursive
 
 .SUFFIXES:

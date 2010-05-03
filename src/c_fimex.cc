@@ -30,11 +30,12 @@
 #include "fimex/c_fimex.h"
 #include "fimex/mifi_cdm_reader.h"
 #include "fimex/config.h"
+#include "fimex/CDM.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
 #include "fimex/CDMReader.h"
 #include "fimex/FeltCDMReader2.h"
-#ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CDMReader.h"
 #endif
@@ -74,7 +75,7 @@ mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFi
     return 0;
 }
 
-#ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 {
     try {
@@ -126,7 +127,7 @@ mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncm
 }
 
 
-#ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
 int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
 {
     try {

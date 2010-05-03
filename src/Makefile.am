@@ -5,20 +5,7 @@ AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
 
 lib_LTLIBRARIES = libfimex.la
-libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) felt/libfelt.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) $(BOOST_DATE_TIME_LIB) -lm @XML_LIBS@
-# grib-api libs are automatically added to LDFLAGS
-if HAVE_MILIB
-  libfimex_la_LDFLAGS += ${milib_LIBS}
-endif
-if HAVE_UDUNITS
-  libfimex_la_LDFLAGS += ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
-endif
-if HAVE_PROJ4
-  libfimex_la_LDFLAGS += ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
-endif
-if HAVE_NETCDF
-  libfimex_la_LDFLAGS += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
-endif
+libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) felt/libfelt.la
 libfimex_la_SOURCES = interpolation.c \
                      c_fimex.cc \
                      C_CDMReader.cc \

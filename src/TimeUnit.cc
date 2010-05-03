@@ -24,7 +24,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/config.h"
 #include "fimex/Utils.h"
-#if HAVE_UDUNITS
+
 extern "C" {
 #include "udunits.h"
 }
@@ -158,4 +158,3 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMExce
 }
 
 }
-#endif // HAVE_UDUNITS

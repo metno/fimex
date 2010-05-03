@@ -62,12 +62,10 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_openmp.m4 \
-	$(top_srcdir)/m4/have_netcdf_check.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/metno_have_udunits.m4 \
-	$(top_srcdir)/m4/mifi_gribapi.m4 \
-	$(top_srcdir)/m4/mifi_proj4.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/metno_check.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 \
+	$(top_srcdir)/m4/mifi_gribapi.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -159,9 +157,6 @@ LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
-NETCDF_CPPFLAGS = @NETCDF_CPPFLAGS@
-NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
-NETCDF_LIBS = @NETCDF_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -171,17 +166,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PROJ4_CPPFLAGS = @PROJ4_CPPFLAGS@
-PROJ4_LDFLAGS = @PROJ4_LDFLAGS@
-PROJ4_LIBS = @PROJ4_LIBS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-UDUNITS_CPPFLAGS = @UDUNITS_CPPFLAGS@
-UDUNITS_LDFLAGS = @UDUNITS_LDFLAGS@
-UDUNITS_LIBS = @UDUNITS_LIBS@
 VERSION = @VERSION@
 XML2_CONFIG = @XML2_CONFIG@
 XML_CPPFLAGS = @XML_CPPFLAGS@

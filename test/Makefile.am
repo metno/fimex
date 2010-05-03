@@ -6,23 +6,17 @@ CC_TESTS = testBinaryConstants \
            testData \
            testProjections \
            testInterpolation \
+           testUnits \
            testCDM \
            testXMLDoc \
            testFeltReader
 SH_TESTS = 
-LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_LDFLAGS) $(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) $(BOOST_DATE_TIME_LIB) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) -lm @XML_LIBS@
+LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
-AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
+AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS}
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
 
-if HAVE_UDUNITS
-  LDADD += ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
-  CC_TESTS += testUnits
-endif
-if HAVE_PROJ4
-  LDADD += ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
-endif
 if HAVE_MILIB
   LDADD += ${milib_LIBS}
   CC_TESTS += 
@@ -34,7 +28,6 @@ if HAVE_FELT_OR_MILIB
   GRIBAPI_MI_TESTS = testGribWriter
 endif
 if HAVE_NETCDF
-  LDADD += ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys
   GRIBAPI_NC_TESTS = testGribReader
   SH_TESTS += ${NETCDF_MI_SH_TESTS}

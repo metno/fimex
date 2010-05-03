@@ -33,11 +33,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @HAVE_MILIB_TRUE@am__append_1 = ${milib_LIBS}
-@HAVE_UDUNITS_TRUE@am__append_2 = ${UDUNITS_LDFLAGS} ${UDUNITS_LIBS}
-@HAVE_PROJ4_TRUE@am__append_3 = ${PROJ4_LDFLAGS} ${PROJ4_LIBS}
-@HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_LDFLAGS} ${NETCDF_LIBS}
 bin_PROGRAMS = fimex$(EXEEXT) $(am__EXEEXT_1)
-@HAVE_GRIBAPI_TRUE@am__append_5 = fiIndexGribs fiGribCut
+@HAVE_GRIBAPI_TRUE@am__append_2 = fiIndexGribs fiGribCut
 subdir = src/binSrc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -51,12 +48,10 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_openmp.m4 \
-	$(top_srcdir)/m4/have_netcdf_check.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/metno_have_udunits.m4 \
-	$(top_srcdir)/m4/mifi_gribapi.m4 \
-	$(top_srcdir)/m4/mifi_proj4.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/metno_check.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 \
+	$(top_srcdir)/m4/mifi_gribapi.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -74,37 +69,19 @@ fiGribCut_OBJECTS = $(am_fiGribCut_OBJECTS)
 fiGribCut_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @HAVE_MILIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
-@HAVE_UDUNITS_TRUE@am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) \
-@HAVE_UDUNITS_TRUE@	$(am__DEPENDENCIES_1)
-@HAVE_PROJ4_TRUE@am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1) \
-@HAVE_PROJ4_TRUE@	$(am__DEPENDENCIES_1)
-@HAVE_NETCDF_TRUE@am__DEPENDENCIES_5 = $(am__DEPENDENCIES_1) \
-@HAVE_NETCDF_TRUE@	$(am__DEPENDENCIES_1)
 fiGribCut_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
+	$(am__DEPENDENCIES_2)
 am__fiIndexGribs_SOURCES_DIST = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@am_fiIndexGribs_OBJECTS = fiIndexGribs.$(OBJEXT)
 fiIndexGribs_OBJECTS = $(am_fiIndexGribs_OBJECTS)
 fiIndexGribs_LDADD = $(LDADD)
 fiIndexGribs_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
+	$(am__DEPENDENCIES_2)
 am_fimex_OBJECTS = fimex.$(OBJEXT)
 fimex_OBJECTS = $(am_fimex_OBJECTS)
 fimex_LDADD = $(LDADD)
 fimex_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__DEPENDENCIES_4) $(am__DEPENDENCIES_5)
+	$(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include/fimex
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -183,9 +160,6 @@ LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
-NETCDF_CPPFLAGS = @NETCDF_CPPFLAGS@
-NETCDF_LDFLAGS = @NETCDF_LDFLAGS@
-NETCDF_LIBS = @NETCDF_LIBS@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -195,17 +169,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
-PROJ4_CPPFLAGS = @PROJ4_CPPFLAGS@
-PROJ4_LDFLAGS = @PROJ4_LDFLAGS@
-PROJ4_LIBS = @PROJ4_LIBS@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
-UDUNITS_CPPFLAGS = @UDUNITS_CPPFLAGS@
-UDUNITS_LDFLAGS = @UDUNITS_LDFLAGS@
-UDUNITS_LIBS = @UDUNITS_LIBS@
 VERSION = @VERSION@
 XML2_CONFIG = @XML2_CONFIG@
 XML_CPPFLAGS = @XML_CPPFLAGS@
@@ -267,11 +235,7 @@ SUBDIRS = .
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
-LDADD = ../felt/libfelt.la ../libfimex.la $(BOOST_LDFLAGS) \
-	$(BOOST_REGEX_LIB) $(BOOST_FILESYSTEM_LIB) \
-	$(BOOST_IOSTREAMS_LIB) $(BOOST_PROGRAM_OPTIONS_LIB) \
-	$(BOOST_DATE_TIME_LIB) -lm @XML_LIBS@ $(am__append_1) \
-	$(am__append_2) $(am__append_3) $(am__append_4)
+LDADD = ../felt/libfelt.la ../libfimex.la $(am__append_1)
 fimex_SOURCES = fimex.cc
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_SOURCES = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@fiGribCut_SOURCES = fiGribCut.cc

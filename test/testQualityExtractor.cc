@@ -40,7 +40,7 @@ using boost::unit_test_framework::test_suite;
 #endif
 
 #include "fimex/CDMQualityExtractor.h"
-#ifdef HAVE_NETCDF
+#ifdef HAVE_MIFI_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
 #endif
 #include "fimex/Logger.h"
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
 #endif
     boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/share/etc/cdmQualityConfig.xml"));
 
-#ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
     string outputFile("testQualityExtractor.nc");
     NetCDF_CDMWriter(qe, outputFile);
     BOOST_CHECK((ifstream(outputFile.c_str()) != 0));

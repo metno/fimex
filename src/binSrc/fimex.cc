@@ -29,6 +29,7 @@
 #include <boost/tokenizer.hpp>
 #include "fimex/config.h"
 #include "fimex/CDMReader.h"
+#include "fimex/CDM.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/CDMInterpolator.h"
@@ -44,7 +45,7 @@
 #ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
 #endif
-#ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CDMReader.h"
 #endif
@@ -189,7 +190,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
     }
 #endif // HAVE_LIBMIC || HAVE_FELT
 
-    #ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
 		LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
 		returnPtr = auto_ptr<CDMReader>(new NetCDF_CDMReader(vm["input.file"].as<string>()));
@@ -369,7 +370,7 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	string type = getType("output", vm);
 	// auto_ptr to shared_ptr
 	boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
-#ifdef HAVE_NETCDF
+#ifdef MIFI_HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
 		int version = 3;
 		if (type == "nc4") version = 4;

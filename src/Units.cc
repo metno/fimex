@@ -23,7 +23,7 @@
 
 #include "fimex/Units.h"
 #include "fimex/config.h"
-#if HAVE_UDUNITS
+
 extern "C" {
 #include "udunits.h"
 }
@@ -109,6 +109,5 @@ bool Units::isTime(const std::string& timeUnit) const throw(UnitException)
 	handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
 	return utIsTime(&unit) != 0;
 }
-#endif // HAVE_UDUNITS
 
 }
