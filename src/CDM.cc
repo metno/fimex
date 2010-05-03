@@ -677,6 +677,16 @@ CDM::AttrVec CDM::getProjection(std::string varName) const
 	return retVal;
 }
 
+boost::shared_ptr<const Projection> CDM::getProjectionOf(std::string varName) const
+{
+    enhance(this->pimpl_, *this);
+    const CoordSysList& csList = pimpl_->coordSystems;
+    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt == csList.end()) {
+        return boost::shared_ptr<Projection>();
+    }
+    return (*varSysIt)->getProjection();
+}
 
 std::string CDM::getHorizontalXAxis(std::string varName) const
 {

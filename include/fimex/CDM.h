@@ -34,6 +34,7 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/coordSys/Projection.h"
 
 namespace MetNoFimex
 {
@@ -307,8 +308,19 @@ public:
 	 *
 	 * @param varName name of variable
 	 * @return vector of attributes of the projection, an empty vector if no projection found
+	 * @deprecated use the getProjectionOf() method
 	 */
 	DEPRECATED(AttrVec getProjection(std::string varName) const);
+    /**
+     * @brief get the projection of a variable
+     *
+     * This is the same as using the CoordinateSystem::getProjection().
+     *
+     * @param varName name of variable
+     * @return projection
+     */
+	boost::shared_ptr<const Projection> getProjectionOf(std::string varName) const;
+
 	/**
 	 * @brief get the x-(lon) axis of the variable
 	 *

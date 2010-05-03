@@ -118,6 +118,7 @@ public:
     virtual bool hasProjection() const;
     /**
      * Get the projection of the coordinate-system (projection of GeoX, GeoY and optionally GeoZ)
+     * @return projection, or null ptr
      */
     virtual boost::shared_ptr<const Projection> getProjection() const;
     /**
