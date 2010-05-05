@@ -29,8 +29,8 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
-#include "fimex/config.h"
 #include "fimex/GribFileIndex.h"
+#include "fimex/CDMconstants.h"
 #include "grib_api.h"
 
 
@@ -75,7 +75,7 @@ main(int argc, char* args[])
         return 0;
     }
     if (vm.count("version")) {
-        cout << "fiIndexGribs version " << VERSION << endl;
+        cout << "fiIndexGribs version " << fimexVersion() << endl;
         return 0;
     }
     if (vm.count("inputFile") == 0) {

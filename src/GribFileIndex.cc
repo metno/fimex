@@ -24,8 +24,6 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/config.h"
-#ifdef HAVE_GRIBAPI_H
 #include "fimex/GribFileIndex.h"
 #include "fimex/Utils.h"
 #include "fimex/GribUtils.h"
@@ -745,5 +743,3 @@ std::ostream& operator<<( std::ostream& os, const GribFileIndex& gfm)
 
 
 }
-
-#endif /* HAVE_GRIB_API */

@@ -29,7 +29,7 @@
 #include <vector>
 #include "fimex/c_fimex.h"
 #include "fimex/mifi_cdm_reader.h"
-#include "fimex/config.h"
+#include "../config.h"
 #include "fimex/CDM.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"

@@ -22,7 +22,6 @@
  */
 
 #include "fimex/Units.h"
-#include "fimex/config.h"
 
 extern "C" {
 #include "udunits.h"

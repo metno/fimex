@@ -24,8 +24,6 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/config.h"
-#ifdef HAVE_GRIBAPI_H
 #include "fimex/GribUtils.h"
 #include <sstream>
 #include <grib_api.h>
@@ -71,4 +69,3 @@ GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle
 }
 
 }
-#endif /* HAVE_GRIBAPI_h */

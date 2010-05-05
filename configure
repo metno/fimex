@@ -25492,7 +25492,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 #DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
-ac_config_headers="$ac_config_headers include/fimex/config.h"
+ac_config_headers="$ac_config_headers config.h"
 
 ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/fimex/coordSys/Makefile include/felt/Makefile include/kdtree++/Makefile"
 
@@ -26116,7 +26116,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
-    "include/fimex/config.h") CONFIG_HEADERS="$CONFIG_HEADERS include/fimex/config.h" ;;
+    "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "fimex.pc") CONFIG_FILES="$CONFIG_FILES fimex.pc" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;

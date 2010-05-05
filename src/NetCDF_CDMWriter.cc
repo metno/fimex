@@ -22,7 +22,7 @@
  */
 
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/config.h"
+#include "../config.h"
 #include "netcdfcpp.h"
 extern "C" {
 #include "netcdf.h"             // the C interface

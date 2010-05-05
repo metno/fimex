@@ -14,9 +14,11 @@ libfimex_la_SOURCES = interpolation.c \
 					 CachedVectorReprojection.cc \
 					 CDM.cc \
 					 CDMAttribute.cc \
+					 CDMconstants.c \
 					 CDMDimension.cc \
 					 CDMDataType.cc \
 					 CDMExtractor.cc \
+                     CDMFileReaderFactory.cc \
 					 CDMInterpolator.cc \
 					 CDMNamedEntity.cc \
 					 CDMQualityExtractor.cc \
@@ -42,14 +44,7 @@ libfimex_la_SOURCES = interpolation.c \
                      FeltCDMReader2.cc \
 					 Felt_File2.cc \
 					 FeltParameters.cc \
-					 GribApiCDMWriter.cc \
-					 GribApiCDMWriter_ImplAbstract.cc \
-					 GribApiCDMWriter_Impl1.cc \
-					 GribApiCDMWriter_Impl2.cc \
-					 GribCDMReader.cc \
-					 GribFileIndex.cc \
-					 GridDefinition.cc \
-					 GribUtils.cc \
+                     GridDefinition.cc \
 					 Logger.cc \
 					 NcmlCDMReader.cc \
 					 Null_CDMWriter.cc \
@@ -65,7 +60,20 @@ libfimex_la_SOURCES = interpolation.c \
 					 XMLDoc.cc
 
 if HAVE_NETCDF
-  libfimex_la_SOURCES += NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h
+  libfimex_la_SOURCES += NetCDF_CDMReader.cc \
+                         NetCDF_CDMWriter.cc \
+                         NetCDF_Utils.cc \
+                         NetCDF_Utils.h
+endif
+
+if HAVE_GRIBAPI
+  libfimex_la_SOURCES += GribApiCDMWriter.cc \
+                         GribApiCDMWriter_ImplAbstract.cc \
+                         GribApiCDMWriter_Impl1.cc \
+                         GribApiCDMWriter_Impl2.cc \
+                         GribCDMReader.cc \
+                         GribFileIndex.cc \
+                         GribUtils.cc 
 endif
 
 if HAVE_MILIB

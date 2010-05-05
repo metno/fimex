@@ -22,7 +22,6 @@
  */
 
 #include "fimex/TimeUnit.h"
-#include "fimex/config.h"
 #include "fimex/Utils.h"
 
 extern "C" {

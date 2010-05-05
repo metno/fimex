@@ -21,8 +21,6 @@
  * USA.
  */
 
-#include "fimex/config.h"
-#ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter.h"
 #include "fimex/GribApiCDMWriter_Impl1.h"
 #include "fimex/GribApiCDMWriter_Impl2.h"
@@ -50,5 +48,3 @@ GribApiCDMWriter::~GribApiCDMWriter()
 
 
 }
-
-#endif //HAVE_GRIBAPI_H

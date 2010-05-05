@@ -24,7 +24,6 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/config.h"
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
@@ -36,6 +35,7 @@
 #include <iostream>
 #include <cstdio>
 #include <grib_api.h>
+#include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/GribUtils.h"
 #include "fimex/Data.h"
@@ -300,7 +300,7 @@ main(int argc, char* args[])
         return 0;
     }
     if (vm.count("version")) {
-        cout << "fiIndexGribs version " << VERSION << endl;
+        cout << "fiIndexGribs version " << fimexVersion() << endl;
         return 0;
     }
     if (vm.count("inputFile") == 0) {

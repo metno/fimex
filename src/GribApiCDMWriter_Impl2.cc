@@ -21,8 +21,6 @@
  * USA.
  */
 
-#include "fimex/config.h"
-#ifdef HAVE_GRIBAPI_H
 #include <cmath>
 #include "fimex/interpolation.h"
 #include "fimex/GribApiCDMWriter_Impl2.h"
@@ -332,4 +330,3 @@ boost::shared_ptr<Data> GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(co
 
 
 }
-#endif /* HAVE_GRIBAPI_H */

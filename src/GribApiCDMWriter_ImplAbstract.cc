@@ -21,8 +21,6 @@
  * USA.
  */
 
-#include "fimex/config.h"
-#ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter_ImplAbstract.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeLevelDataSliceFetcher.h"
@@ -333,5 +331,3 @@ xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, c
 
 
 }
-
-#endif /* HAVE_GRIBAPI_H */

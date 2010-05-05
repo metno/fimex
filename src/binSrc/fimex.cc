@@ -27,7 +27,7 @@
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include "fimex/config.h"
+#include "../../config.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMExtractor.h"
@@ -50,6 +50,7 @@
 #include "fimex/NetCDF_CDMReader.h"
 #endif
 #ifdef HAVE_GRIBAPI_H
+#include "fimex/GribCDMReader.h"
 #include "fimex/GribApiCDMWriter.h"
 #endif
 
@@ -189,6 +190,20 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 
     }
 #endif // HAVE_LIBMIC || HAVE_FELT
+
+#ifdef HAVE_GRIBAPI_H
+    if (type == "grb" || type == "grib" ||
+            type == "grb1" || type == "grib1" ||
+                type == "grb2" || type == "grib2") {
+        std::string config;
+        if (vm.count("input.config")) {
+            config = vm["input.config"].as<string>();
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile " << vm["input.file"].as<string>() << " with config " << config);
+        std::vector<std::string> inputFiles(1, vm["input.file"].as<string>());
+        returnPtr = auto_ptr<CDMReader>(new GribCDMReader(inputFiles, config));
+    }
+#endif
 
 #ifdef MIFI_HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {

@@ -22,7 +22,7 @@
  */
 
 
-#include "fimex/config.h"
+#include "../config.h"
 #ifdef HAVE_OPENMP
 #include <omp.h>
 #endif

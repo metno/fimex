@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "fimex/config.h"
+#include "../config.h"
 #include <boost/version.hpp>
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
