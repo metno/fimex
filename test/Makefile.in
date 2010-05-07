@@ -76,7 +76,8 @@ am__EXEEXT_1 =
 am__EXEEXT_8 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
 	testData$(EXEEXT) testProjections$(EXEEXT) \
-	testInterpolation$(EXEEXT) testUnits$(EXEEXT) testCDM$(EXEEXT) \
+	testInterpolation$(EXEEXT) testUnits$(EXEEXT) \
+	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
 	testXMLDoc$(EXEEXT) testFeltReader$(EXEEXT) $(am__EXEEXT_1) \
 	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_7)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
@@ -110,6 +111,11 @@ am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
 testFeltReader_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am_testFileReaderFactory_OBJECTS = testFileReaderFactory.$(OBJEXT)
+testFileReaderFactory_OBJECTS = $(am_testFileReaderFactory_OBJECTS)
+testFileReaderFactory_LDADD = $(LDADD)
+testFileReaderFactory_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 am_testGribReader_OBJECTS = testGribReader.$(OBJEXT)
 testGribReader_OBJECTS = $(am_testGribReader_OBJECTS)
@@ -205,23 +211,25 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
-	$(testGribReader_SOURCES) $(testGribWriter_SOURCES) \
-	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testProjections_SOURCES) \
-	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
-	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
-	$(testUnits_SOURCES) $(testUtils_SOURCES) \
-	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES)
+	$(testFileReaderFactory_SOURCES) $(testGribReader_SOURCES) \
+	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
+	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
+	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
+	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
+	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
+	$(test_c_consumer_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
-	$(testGribReader_SOURCES) $(testGribWriter_SOURCES) \
-	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testProjections_SOURCES) \
-	$(testQualityExtractor_SOURCES) $(testSpatialAxisSpec_SOURCES) \
-	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
-	$(testUnits_SOURCES) $(testUtils_SOURCES) \
-	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES)
+	$(testFileReaderFactory_SOURCES) $(testGribReader_SOURCES) \
+	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
+	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
+	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
+	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
+	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
+	$(test_c_consumer_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 @HAVE_NETCDF_TRUE@am__EXEEXT_9 = $(NETCDF_MI_SH_TESTS)
@@ -350,8 +358,9 @@ top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	testSpatialAxisSpec testData testProjections testInterpolation \
-	testUnits testCDM testXMLDoc testFeltReader $(am__append_2) \
-	$(am__append_3) $(am__append_4) $(am__append_6)
+	testUnits testFileReaderFactory testCDM testXMLDoc \
+	testFeltReader $(am__append_2) $(am__append_3) $(am__append_4) \
+	$(am__append_6)
 SH_TESTS = $(am__append_5)
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_1)
@@ -362,7 +371,7 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
@@ -377,6 +386,7 @@ testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
+testFileReaderFactory_SOURCES = testFileReaderFactory.cc
 testExtractor_SOURCES = testExtractor.cc
 testQualityExtractor_SOURCES = testQualityExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
@@ -442,6 +452,9 @@ testExtractor$(EXEEXT): $(testExtractor_OBJECTS) $(testExtractor_DEPENDENCIES)
 testFeltReader$(EXEEXT): $(testFeltReader_OBJECTS) $(testFeltReader_DEPENDENCIES) 
 	@rm -f testFeltReader$(EXEEXT)
 	$(CXXLINK) $(testFeltReader_OBJECTS) $(testFeltReader_LDADD) $(LIBS)
+testFileReaderFactory$(EXEEXT): $(testFileReaderFactory_OBJECTS) $(testFileReaderFactory_DEPENDENCIES) 
+	@rm -f testFileReaderFactory$(EXEEXT)
+	$(CXXLINK) $(testFileReaderFactory_OBJECTS) $(testFileReaderFactory_LDADD) $(LIBS)
 testGribReader$(EXEEXT): $(testGribReader_OBJECTS) $(testGribReader_DEPENDENCIES) 
 	@rm -f testGribReader$(EXEEXT)
 	$(CXXLINK) $(testGribReader_OBJECTS) $(testGribReader_LDADD) $(LIBS)
@@ -497,6 +510,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testExtractor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testFeltReader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testFileReaderFactory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testGribReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testGribWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@

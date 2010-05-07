@@ -10,14 +10,12 @@ compilation
 	* libxml2 >= 2.5.0
 	* boost library >= 1.33
     * proj-4 >= 4.4.9
-	
-Highly recommended, but not required:
     * udunits (> 1.12), or udunits2 (> 2.1.8)
 
 To configure the different file formats it requires:
     * NetCDF (netcdf > 3.5)
     * Grib_API (grib_api > 1.4)
-    * Felt (libmi)
+    * Felt (libmi or libfelt (bundled))
 
         
 
@@ -29,7 +27,7 @@ in large loops, it is advisable to switch on SIMD/SSE operations in your
 compiler. On a Xeon machine with a x386 machine and gcc, I use the 
 following flags (those are default for x86-64)
 
-CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-NetCDF-lib-dir=/usr/lib/netcdf-3 -with-NetCDF-include-dir=/usr/include/netcdf-3 --with-udunits=/usr
+CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-netcdf=/usr --with-udunits=/usr
 
 Testing the Installation
 ------------------------

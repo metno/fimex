@@ -1,3 +1,11 @@
+  * 2010-05-07 fimex-0.21
+    * allow data-slicing along any dimension
+    * adding abstract coordinate-systems
+    * adding abstract projections
+    * better coordinate-system support for CF-1.0
+    * adding mercator projection
+    * allow for units compatible to m in CDMInterpolator
+    * simplified and improved build-system
   * 2010-03-09 fimex-0.20 (by M.Eichhorn)
     * porting to Visual C++
     * fixing bugs in lambert-projection

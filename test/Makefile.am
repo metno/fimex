@@ -7,6 +7,7 @@ CC_TESTS = testBinaryConstants \
            testProjections \
            testInterpolation \
            testUnits \
+           testFileReaderFactory \
            testCDM \
            testXMLDoc \
            testFeltReader
@@ -36,7 +37,7 @@ if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
 
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 
@@ -54,6 +55,7 @@ testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
+testFileReaderFactory_SOURCES = testFileReaderFactory.cc
 testExtractor_SOURCES = testExtractor.cc
 testQualityExtractor_SOURCES = testQualityExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
