@@ -56,7 +56,7 @@ std::vector<CDMAttribute> RotatedLatitudeLongitudeProjection::parametersFromProj
     vector<CDMAttribute> attrs;
     if (!acceptsProj4(proj4Str)) return attrs;
 
-    attrs.push_back(CDMAttribute("grid_mapping_name", "rotated_latidude_longitude"));
+    attrs.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
     double north_pole_lat = 90;
     double north_pole_lon = 0;
     boost::smatch what;
