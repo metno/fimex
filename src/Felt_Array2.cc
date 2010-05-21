@@ -107,6 +107,8 @@ void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField>
 
 vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
 	vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>();
+	if (!hasTime()) return vTimes;
+
 	vTimes.reserve(feltFields_.size());
 	for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
 	    vTimes.push_back(tlm->first);
@@ -128,7 +130,12 @@ vector<LevelPair> Felt_Array2::getLevelPairs() const {
 
 const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const throw(Felt_File_Error)
 {
-    TimeLevelFieldMap::const_iterator tlm = feltFields_.find(time);
+    TimeLevelFieldMap::const_iterator tlm;
+    if (hasTime()) {
+        tlm = feltFields_.find(time);
+    } else {
+        tlm = feltFields_.begin();
+    }
     if (tlm != feltFields_.end()) {
         LevelFieldMap::const_iterator lm = tlm->second.find(levelPair);
         if (lm != tlm->second.end()) {
@@ -211,6 +218,17 @@ int Felt_Array2::getGridType() const
     gridType = (gridType >= 1000) ? (gridType / 1000) : gridType;
     return gridType;
 }
+/** @return true if grid has a time-axis, i.e. not a parameter field **/
+bool Felt_Array2::hasTime() const
+{
+    if (feltFields_.size() == 1 &&
+            defaultField_->dataType() == 4) {
+        // felt time-datatype == parameter-field, no time dimension
+        return false;
+    }
+    return true;
+}
+
 
 boost::shared_ptr<felt::FeltGridDefinition> Felt_Array2::getGridDefinition() const
 {

@@ -63,7 +63,7 @@ public:
 
 	int parameter() const { return header_[11]; }
 	/**
-	 * read the dataType, i.e. 1=analysis 2=interpolated/initialization 3=prognosis
+	 * read the time dataType, i.e. 1=analysis 2=interpolated/initialization 3=prognosis 4=parameter-field(no time)
 	 */
 	int dataType() const { return header_[8]; }
 

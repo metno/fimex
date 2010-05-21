@@ -123,6 +123,8 @@ public:
 	double getScalingFactor() const;
 	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
 	int getGridType() const;
+    /** @return true if grid has a time-axis, i.e. not a parameter field **/
+    bool hasTime() const;
     const boost::shared_ptr<felt::FeltField> getField(boost::posix_time::ptime time, LevelPair levelPair) const throw(Felt_File_Error);
 };
 

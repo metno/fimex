@@ -581,10 +581,15 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 			// test for availability of the current time in the variable (getSlice will get data for every time)
 			vector<boost::posix_time::ptime> faTimes = fa->getTimes();
 			short contains = false;
-			for (vector<boost::posix_time::ptime>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
-				if (*it == timeVec[unLimDimPos]) {
-					contains = true;
-				}
+			if (faTimes.size() == 0) {
+			    // time-less variable, time-check irrelevant
+			    contains = true;
+			} else {
+			    for (vector<boost::posix_time::ptime>::const_iterator it = faTimes.begin(); it != faTimes.end(); it++) {
+			        if (*it == timeVec[unLimDimPos]) {
+			            contains = true;
+			        }
+			    }
 			}
 			if (!contains) {
 				// return empty dataset
