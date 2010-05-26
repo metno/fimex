@@ -27,6 +27,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include <cmath>
 #include <functional>
 #include <libxml/tree.h>
@@ -253,19 +254,31 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
 	const CDM& cdm = cdmReader->getCDM();
-	const std::string& time = cdm.getTimeAxis(varName);
+	std::string time = cdm.getTimeAxis(varName);
 	std::vector<FimexTime> timeData;
+	std::vector<double> timeDataVector;
 	if (time != "") {
-		const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
-		std::vector<double> timeDataVector(&timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
-		TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
-		std::transform(timeDataVector.begin(),
-				       timeDataVector.end(),
-				       std::back_inserter(timeData),
-				       std::bind1st(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu));
+	    const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+		timeDataVector.insert(timeDataVector.begin(), &timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
 	} else {
-		// TODO find a more useful default
-		timeData.push_back(FimexTime());
+		// find a somewhat useful default, wild guess: first time in first time-axis found
+	    typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
+	    CoordSysList css = listCoordinateSystems(cdm);
+	    for (CoordSysList::iterator csit = css.begin(); csit != css.end(); ++csit) {
+	        CoordinateSystem::ConstAxisPtr timeAxis = (*csit)->getTimeAxis();
+	        if (timeAxis.get() != 0) {
+	            time = timeAxis->getName();
+	            const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+	            timeDataVector.insert(timeDataVector.begin(), timeDataArray[0]);
+	        }
+	    }
+	}
+	if (timeDataVector.size() > 0) {
+	    TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
+	    std::transform(timeDataVector.begin(),
+	            timeDataVector.end(),
+	            std::back_inserter(timeData),
+	            std::bind1st(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu));
 	}
 	return timeData;
 }
