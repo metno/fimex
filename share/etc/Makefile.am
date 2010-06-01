@@ -1,4 +1,4 @@
-configdir=$(datadir)/etc
+configdir=$(pgkdatadir)
 config_DATA = \
 	cdmGribWriterConfig.xml\
 	cdmWriterConfig.xml\
