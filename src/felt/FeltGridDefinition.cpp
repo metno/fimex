@@ -101,7 +101,7 @@ void scaleGridInfoSecond_(boost::array<float, 6>& gridPar, int parsUsed, const s
         int iGrid1 = extraData.at(i3 + 1);
         int iGrid2 = extraData.at(i3 + 2);
 
-        gridPar[i] = (iGrid1 * 10000. + iGrid2) / scale;
+        gridPar[i] = (iGrid1 * 10000. + iGrid2) * scale;
     }
 }
 
