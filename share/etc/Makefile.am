@@ -1,4 +1,4 @@
-configdir=$(pgkdatadir)
+configdir=$(pkgdatadir)
 config_DATA = \
 	cdmGribWriterConfig.xml\
 	cdmWriterConfig.xml\
