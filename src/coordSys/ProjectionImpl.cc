@@ -210,6 +210,35 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
             attrList.push_back(CDMAttribute("earth_radius", major_axis));
         }
     }
+
+    // get ellipsoid from ellps/datum, source: http://en.wikipedia.org/wiki/Figure_of_earth
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+ellps=(\\S+)"))
+        || boost::regex_search(proj4Str, what, boost::regex("\\+datum=(\\S+)"))) {
+        string ellps = string2lowerCase(what[1].str());
+        if (ellps == "wgs84") {
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378137.0));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356752.3142));
+        } else if (ellps == "nad83") {
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378137.0));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356752.3));
+        } else if (ellps == "grs80") { // grs80 ellipsoid
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378137.0));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356752.3141));
+        } else if (ellps == "nad27") { // clarke 1866 ellipsoid
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378206.4));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356583.8));
+        } else if (ellps == "wgs72") {
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378135.0));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356750.52));
+        } else if (ellps == "iers89") {
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378136.0));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356751.302));
+        } else if (ellps == "iers03") {
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378136.6));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356751.9));
+        }
+
+    }
 }
 
 }

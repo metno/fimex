@@ -34,6 +34,7 @@
 #include "fimex/coordSys/PolarStereographicProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 #include "fimex/coordSys/StereographicProjection.h"
+#include "fimex/coordSys/TransverseMercatorProjection.h"
 
 // include projects.h since I need to access some of projs internals (proj -V)
 // PJ_LIB__ required for LP.phi, LP.lam
@@ -74,6 +75,8 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
             proj =  boost::shared_ptr<Projection>(new RotatedLatitudeLongitudeProjection());
         } else if (projName == "stereographic") {
             proj =  boost::shared_ptr<Projection>(new StereographicProjection());
+        } else if (projName == "transverse_mercator") {
+            proj =  boost::shared_ptr<Projection>(new TransverseMercatorProjection());
         } else {
             throw CDMException("unsupported projection: " + projName);
         }
@@ -97,6 +100,8 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
         attrs = LambertConformalConicProjection::parametersFromProj4(projStr);
     } else if (MercatorProjection::acceptsProj4(projStr)) {
         attrs = MercatorProjection::parametersFromProj4(projStr);
+    } else if (TransverseMercatorProjection::acceptsProj4(projStr)) {
+        attrs = TransverseMercatorProjection::parametersFromProj4(projStr);
     }
 
     if (attrs.size() == 0) {

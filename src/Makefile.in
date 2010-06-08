@@ -93,6 +93,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/LambertConformalConicProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
+	coordSys/TransverseMercatorProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/PolarStereographicProjection.cc Data.cc \
@@ -125,6 +126,7 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CoordinateAxis.lo Projection.lo ProjectionImpl.lo \
 	LambertConformalConicProjection.lo \
 	LatitudeLongitudeProjection.lo MercatorProjection.lo \
+	TransverseMercatorProjection.lo \
 	RotatedLatitudeLongitudeProjection.lo \
 	StereographicProjection.lo PolarStereographicProjection.lo \
 	Data.lo DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
@@ -313,6 +315,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/LambertConformalConicProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
+	coordSys/TransverseMercatorProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/PolarStereographicProjection.cc Data.cc \
@@ -450,6 +453,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransverseMercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Plo@am__quote@
@@ -546,6 +550,13 @@ MercatorProjection.lo: coordSys/MercatorProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/MercatorProjection.cc' object='MercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MercatorProjection.lo `test -f 'coordSys/MercatorProjection.cc' || echo '$(srcdir)/'`coordSys/MercatorProjection.cc
+
+TransverseMercatorProjection.lo: coordSys/TransverseMercatorProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TransverseMercatorProjection.lo -MD -MP -MF $(DEPDIR)/TransverseMercatorProjection.Tpo -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/TransverseMercatorProjection.Tpo $(DEPDIR)/TransverseMercatorProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/TransverseMercatorProjection.cc' object='TransverseMercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
 
 RotatedLatitudeLongitudeProjection.lo: coordSys/RotatedLatitudeLongitudeProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT RotatedLatitudeLongitudeProjection.lo -MD -MP -MF $(DEPDIR)/RotatedLatitudeLongitudeProjection.Tpo -c -o RotatedLatitudeLongitudeProjection.lo `test -f 'coordSys/RotatedLatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/RotatedLatitudeLongitudeProjection.cc

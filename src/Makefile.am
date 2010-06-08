@@ -35,6 +35,7 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/LambertConformalConicProjection.cc \
                      coordSys/LatitudeLongitudeProjection.cc \
                      coordSys/MercatorProjection.cc \
+                     coordSys/TransverseMercatorProjection.cc \
                      coordSys/RotatedLatitudeLongitudeProjection.cc \
                      coordSys/StereographicProjection.cc \
                      coordSys/PolarStereographicProjection.cc \
