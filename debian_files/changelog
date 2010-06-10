@@ -1,3 +1,9 @@
+fimex (0.22-1) hardy; urgency=low
+
+  * initial release of 0.22
+
+ -- Heiko Klein <heiko.klein@met.no>  Thu,  10 Jun 2010 14:16:04 +0100
+
 fimex (0.19-3) hardy; urgency=low
 
   * no longer deleting config.guess/config.sub in rules
