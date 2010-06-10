@@ -23,6 +23,7 @@
 
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 extern "C" {
 #include "udunits.h"
@@ -155,5 +156,16 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMExce
 	handleUdUnitError(utInvCalendar(fiTime.year, fiTime.month, fiTime.mday, fiTime.hour, fiTime.minute, second, pUnit.get(), &retVal), "converting calendar to double");
 	return retVal;
 }
+
+double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const throw(CDMException)
+{
+    boost::gregorian::date pDate = pTime.date();
+    boost::posix_time::time_duration pTimeDur = pTime.time_of_day();
+    double retVal;
+    float seconds = pTimeDur.seconds() + (pTimeDur.fractional_seconds() * 1. / boost::posix_time::time_duration::ticks_per_second());
+    handleUdUnitError(utInvCalendar(pDate.year(), pDate.month(), pDate.day(), pTimeDur.hours(), pTimeDur.minutes(), seconds, pUnit.get(), &retVal), "converting calendar to double");
+    return retVal;
+}
+
 
 }

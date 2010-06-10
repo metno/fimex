@@ -33,6 +33,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Utils.h"
 #include "fimex/Units.h"
 #include "fimex/TimeUnit.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <cmath>
 
 using namespace std;
@@ -112,6 +113,9 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	ft.msecond = 0;
 	BOOST_CHECK(fabs(tu.fimexTime2unitTime(ft)) < 1e-5);
 
+	boost::posix_time::ptime ptime(boost::gregorian::date(1970,1,1), boost::posix_time::time_duration(2,0,0));
+	double unitTime = tu.posixTime2unitTime(ptime);
+	BOOST_CHECK(abs(unitTime-(60*60)) < 1e-5);
 }
 
 #else

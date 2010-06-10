@@ -26994,12 +26994,12 @@ echo "${ECHO_T}Data:             $datadir" >&6; }
 echo "${ECHO_T}System Config:    $sysconfdir" >&6; }
 { echo "$as_me:$LINENO: result:  " >&5
 echo "${ECHO_T} " >&6; }
-{ echo "$as_me:$LINENO: result: CPPFLAGS:         $CPPFLAGS" >&5
-echo "${ECHO_T}CPPFLAGS:         $CPPFLAGS" >&6; }
+{ echo "$as_me:$LINENO: result: CPPFLAGS:         $CPPFLAGS $milib_CFLAGS" >&5
+echo "${ECHO_T}CPPFLAGS:         $CPPFLAGS $milib_CFLAGS" >&6; }
 { echo "$as_me:$LINENO: result: LDFLAGS:          $LDFLAGS" >&5
 echo "${ECHO_T}LDFLAGS:          $LDFLAGS" >&6; }
-{ echo "$as_me:$LINENO: result: LIBS:             $LIBS" >&5
-echo "${ECHO_T}LIBS:             $LIBS" >&6; }
+{ echo "$as_me:$LINENO: result: LIBS:             $LIBS ${milib_LIBS}" >&5
+echo "${ECHO_T}LIBS:             $LIBS ${milib_LIBS}" >&6; }
 { echo "$as_me:$LINENO: result: DEFS:             $DEFS" >&5
 echo "${ECHO_T}DEFS:             $DEFS" >&6; }
 { echo "$as_me:$LINENO: result:   " >&5

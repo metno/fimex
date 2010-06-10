@@ -28,6 +28,7 @@
 #include "fimex/Units.h"
 #include "fimex/CDMException.h"
 #include <iostream>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 // pre-declaration of utUnit pointer
 struct utUnit;
@@ -110,6 +111,8 @@ public:
 	double fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException);
 	/// same as #fimexTime2unitTime but copying fiTime instead of referencing, needed for i.e. bind1st(mem_fun())
 	double fimexTime2unitTimeX(FimexTime fiTime) const throw(CDMException) { return fimexTime2unitTime(fiTime); }
+	/// calculate the unitTime from a boost::posix_time
+	double posixTime2unitTime(boost::posix_time::ptime poTime) const throw(CDMException);
 private:
 	void init(const std::string& timeUnitString = "seconds since 1970-01-01 00:00:00") throw(CDMException);
 };

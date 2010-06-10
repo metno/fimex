@@ -31,11 +31,13 @@
 #include "fimex/CDMDataType.h"
 #include "fimex/DataImpl.h"
 #include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/coordSys/Projection.h"
 #include "CDM_XMLConfigHelper.h"
 #include "felt/FeltGridDefinition.h"
+#include "boost/date_time/gregorian/gregorian.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
@@ -43,7 +45,8 @@
 #include <iostream>
 #include <cassert>
 #include <cstdlib>
-#include "boost/date_time/gregorian/gregorian.hpp"
+#include <functional>
+#include <algorithm>
 
 namespace MetNoFimex
 {
@@ -282,32 +285,52 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 
 CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 {
-	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time");
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-	if (size != 1) {
-		throw MetNoFelt::Felt_File_Error("unable to find exactly 1 'time'-axis in config: " + configFilename);
-	}
-	xmlNodePtr node = nodes->nodeTab[0];
-	assert(node->type == XML_ELEMENT_NODE);
-	string timeName = getXmlProp(node, "name");
-	string timeType = getXmlProp(node, "type");
-	CDMDataType timeDataType = string2datatype(timeType);
+    string timeName;
+    string timeType;
+    xmlNodePtr timeNode;
+    {
+        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        if (size != 1) {
+            throw MetNoFelt::Felt_File_Error("unable to find exactly 1 'time'-axis in config: " + configFilename);
+        }
+        timeNode = nodes->nodeTab[0];
+        assert(timeNode->type == XML_ELEMENT_NODE);
+        timeName = getXmlProp(timeNode, "name");
+        timeType = getXmlProp(timeNode, "type");
+    }
+    string timeUnits;
+    {
+        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/axes/time/attribute[@name='units']");
+	    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	    int size = (nodes) ? nodes->nodeNr : 0;
+	    if (size >= 1) {
+	        xmlNodePtr node = nodes->nodeTab[0];
+	        timeUnits = getXmlProp(node, "value");
+	    }
+    }
+	if (timeUnits == "") timeUnits = "seconds since 1970-01-01 00:00:00 +00:00";
+
 	long timeSize = feltfile_->getFeltTimes().size();
 	CDMDimension timeDim(timeName, timeSize);
 	timeDim.setUnlimited(true);
 	cdm_->addDimension(timeDim);
 	std::vector<std::string> timeShape;
 	timeShape.push_back(timeDim.getName());
+    CDMDataType timeDataType = string2datatype(timeType);
 	CDMVariable timeVar(timeName, timeDataType, timeShape);
 	timeVec = feltfile_->getFeltTimes();
-	vector<long> timeVecLong;
-	transform(timeVec.begin(), timeVec.end(), back_inserter(timeVecLong), posixTime2epochTime);
-	boost::shared_ptr<Data> timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
+	vector<double> timeUnitVec;
+	TimeUnit tu(timeUnits);
+	transform(timeVec.begin(), timeVec.end(),
+	          back_inserter(timeUnitVec),
+	          bind1st(mem_fun(&TimeUnit::posixTime2unitTime), &tu));
+	boost::shared_ptr<Data> timeData = createData(timeDataType, timeUnitVec.begin(), timeUnitVec.end());
 	timeVar.setData(timeData);
 	cdm_->addVariable(timeVar);
 	std::vector<CDMAttribute> timeAttributes;
-	fillAttributeListFromXMLNode(timeAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
+	fillAttributeListFromXMLNode(timeAttributes, timeNode->children, templateReplacementAttributes);
 	for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
 		cdm_->addAttribute(timeVar.getName(), *it);
 	}

@@ -33,6 +33,7 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/Utils.h"
+#include "fimex/deprecated.h"
 
 namespace MetNoFimex
 {
@@ -41,7 +42,10 @@ class XMLDoc; // declaration without import
 class FeltCDMReader : public CDMReader
 {
 public:
-	FeltCDMReader(std::string filename, std::string configFilename) throw(CDMException);
+    /**
+     * @deprecated use FeltCDMReader2(), accessing data through the c++ libfelt instead of fortran libmi
+     */
+	DEPRECATED(FeltCDMReader(std::string filename, std::string configFilename) throw(CDMException));
 	virtual ~FeltCDMReader();
 
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
