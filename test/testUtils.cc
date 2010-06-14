@@ -70,6 +70,12 @@ BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
     BOOST_CHECK_EQUAL(7, tokens3.size());
     BOOST_CHECK_CLOSE(tokens3[2], 3.6, .1);
 
+    // old, now fixed error, due to using abs instead of fabs
+    string dotted4 = "90,89.96,...,50";
+    vector<double> tokens4 = tokenizeDotted<double>(dotted4);
+    BOOST_CHECK_EQUAL(40*25 + 1, tokens4.size());
+    BOOST_CHECK_CLOSE(tokens4.at(tokens4.size()-2), 50.04, .1);
+
 }
 
 #else

@@ -26,6 +26,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "fimex/CDMException.h"
 
@@ -134,7 +135,6 @@ typedef long epoch_seconds;
  */
 epoch_seconds posixTime2epochTime(const boost::posix_time::ptime& time);
 
-
 /**
  * convert a string with dots to a vector with type T
  * @param str f.e. 3.5,4.5,...,17.5
@@ -158,7 +158,7 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
             if (++tok != tokens.end()) {
                 T afterDotVal = string2type<T>(*tok);
                 // expand the dots until before the afterDotVal, compare against rounding error
-                while (abs(static_cast<double>(curVal - afterDotVal)) > 1e-5) {
+                while (fabs(static_cast<double>(curVal - afterDotVal)) > 1e-5) {
                     vals.push_back(curVal);
                     curVal += dist;
                 }
