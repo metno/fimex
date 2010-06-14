@@ -52,6 +52,26 @@ BOOST_AUTO_TEST_CASE(test_scaleValue)
     BOOST_CHECK_CLOSE(2., sv(1), delta);
 }
 
+BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
+{
+    string dotted = "1.2,2.4,...,6";
+    vector<float> tokens = tokenizeDotted<float>(dotted);
+    BOOST_CHECK_EQUAL(5, tokens.size());
+    BOOST_CHECK_CLOSE(tokens[4], 6.f, .1);
+
+    string dotted2 = "1.2,2.4,...,4.8";
+    vector<float> tokens2 = tokenizeDotted<float>(dotted2);
+    BOOST_CHECK_EQUAL(4, tokens2.size());
+    BOOST_CHECK_CLOSE(tokens2[2], 3.6f, .1);
+
+    // backwards
+    string dotted3 = "6,4.8,...,-1.2";
+    vector<double> tokens3 = tokenizeDotted<double>(dotted3);
+    BOOST_CHECK_EQUAL(7, tokens3.size());
+    BOOST_CHECK_CLOSE(tokens3[2], 3.6, .1);
+
+}
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

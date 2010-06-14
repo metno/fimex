@@ -145,27 +145,28 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
 {
 	std::vector<std::string> tokens = tokenize(str, delimiter);
     std::vector<T> vals;
-	bool pricks = false;
-	for (std::vector<std::string>::iterator tok = tokens.begin(); tok != tokens.end(); ++tok) {
+    for (std::vector<std::string>::iterator tok = tokens.begin(); tok != tokens.end(); ++tok) {
 		std::string current = trim(*tok);
 		if (current == "...") {
-			pricks = true;
+            size_t currentPos = vals.size();
+            if (currentPos < 2) {
+                throw CDMException("tokenizeDotted: cannot use ... expansion at position " + type2string(currentPos-1) +", need at least two values before");
+            }
+            T last = vals[currentPos-1];
+            T dist = last - vals[currentPos-2];
+            T curVal = last + dist;
+            if (++tok != tokens.end()) {
+                T afterDotVal = string2type<T>(*tok);
+                // expand the dots until before the afterDotVal, compare against rounding error
+                while (abs(static_cast<double>(curVal - afterDotVal)) > 1e-5) {
+                    vals.push_back(curVal);
+                    curVal += dist;
+                }
+                // add the afterDotVal
+                vals.push_back(afterDotVal);
+            }
 		} else {
 			T val = string2type<T>(current);
-			if (pricks == true) {
-				pricks = false;
-				size_t end = vals.size();
-				if (end < 2) {
-					throw CDMException("tokenizeDotted: cannot use ... expansion at position " + type2string(end-1) +", need at least two values before");
-				}
-				T last = vals[end-1];
-				T dist = last - vals[end-2];
-				T curVal = last + dist;
-				while (curVal < val) {
-					vals.push_back(curVal);
-					curVal += dist;
-				}
-			}
 			vals.push_back(val);
 		}
 	}
