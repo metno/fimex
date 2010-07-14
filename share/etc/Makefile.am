@@ -1,6 +1,8 @@
 configdir=$(pkgdatadir)
 config_DATA = \
+    cdmGribReaderConfig.xml\
 	cdmGribWriterConfig.xml\
+	cdmQualityConfig.xml\
 	cdmWriterConfig.xml\
 	cdmWriterConfigDeprecated.xml\
 	cdmWriterConfig.dtd\
@@ -22,6 +24,7 @@ config_DATA = \
 	felt_axes.xml\
 	felt_global_attributes.xml\
 	felt_variables.dtd\
+	felt2nc_proff.xml\
 	felt_variables_ec_mad_0_25.xml\
 	felt_variables_ec_mad_0_5.xml\
 	felt_variables_ec_wav.xml\
