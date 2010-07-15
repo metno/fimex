@@ -1,3 +1,7 @@
+  * 2010-07-15 fimex-0.23
+    * allowing axes with negative steps
+    * reading units-initialization only once
+    * requiring SSE2 on all i386 machines in debian-packages
   * 2010-06-10 fimex-0.22
     * support for transverse mercator and UTM projection
     * support for several standard ellipsoids, e.g. WGS85, NAD83

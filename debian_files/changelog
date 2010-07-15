@@ -1,3 +1,9 @@
+fimex (0.23-1) hardy; urgency=low
+
+  * initial release of 0.23
+
+ -- Heiko Klein <heiko.klein@met.no>  Thu,  15 Jul 2010 15:30:04 +0100
+
 fimex (0.22-2) hardy; urgency=low
 
   * requiring sse2 on i386 platform
