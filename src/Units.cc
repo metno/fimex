@@ -71,10 +71,19 @@ Units& Units::operator=(const Units& rhs)
 
 Units::~Units()
 {
-	if (--counter == 0) {
-		utTerm();
-	}
+    --counter;
 }
+
+bool Units::unload(bool force) throw(UnitException)
+{
+    if (force || counter <= 0) {
+        utTerm();
+        counter = 0;
+        return true;
+    }
+    return false;
+}
+
 
 void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException)
 {

@@ -40,7 +40,11 @@ class Units
 {
 	static int counter;
 public:
-	/** initialization of unit handling, i.e. parsing of unit file etc if required */
+	/**
+	 * initialization of unit handling, i.e. parsing of unit file etc if required
+	 * the unit file is installation-dependent on the underlying units-package (udunits or udunits2)
+	 * and can be controlled through UDUNITS_PATH environment
+	 */
 	Units();
 	Units(const Units& rhs);
 	Units& operator=(const Units& rhs);
@@ -60,6 +64,16 @@ public:
 	 */
 	bool areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException);
 	bool isTime(const std::string& timeUnit) const throw(UnitException);
+	/**
+	 * Units initialize themselve on first using the default unix-file path
+	 * and keep the internal datastructure until the end of the program, or
+	 * this function is used.
+	 *
+	 * @param force unload units-setup, even if some objects exist, defaults to false
+	 * @return true if unloaded, false if there are still some objects using the
+	 * internal data-structure.
+	 */
+	static bool unload(bool force = false) throw(UnitException);
 };
 
 void handleUdUnitError(int unitErrCode, const std::string& message = "") throw(UnitException);
