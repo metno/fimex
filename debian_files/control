@@ -1,7 +1,7 @@
 Source: fimex
 Priority: extra
 Maintainer: Heiko Klein <heiko.klein@met.no>
-Build-Depends: debhelper (>= 5), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, proj, libudunits2-dev, libnetcdf-dev
+Build-Depends: debhelper (>= 5), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, proj, libudunits2-dev, libnetcdf-dev, libgrib-api-dev
 Standards-Version: 3.7.2
 Section: libs
 
@@ -16,7 +16,7 @@ Description: library for geo-spatial gridded data
 Package: libfimex-0.19-0
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt-0.19-0, libudunits2, libnetcdf4, libboost-date-time1.34.1, libboost-filesystem1.34.1, libboost-regex1.34.1, libxml2, proj 
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt-0.19-0, libudunits2, libnetcdf4, libboost-date-time1.34.1, libboost-filesystem1.34.1, libboost-regex1.34.1, libxml2, proj, libgrib-api-0d-0 
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
