@@ -26,7 +26,6 @@
 #define GRIBAPICDMWRITER_IMPLABSTRACT_H_
 
 #include <vector>
-#include <grib_api.h>
 #include <fstream>
 #include <iostream>
 #include "fimex/Logger.h"
@@ -34,6 +33,9 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/CDMException.h"
 #include "fimex/TimeUnit.h"
+
+// forward declaration
+struct grib_handle;
 
 namespace MetNoFimex
 {
