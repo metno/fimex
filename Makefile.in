@@ -727,7 +727,11 @@ update-debian:
 	mv $(DEBIAN_DIR)/libfelt.install $(DEBIAN_DIR)/libfelt-$(VERSION)-0.install
 	mv $(DEBIAN_DIR)/libfimex.preinst $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst
 	mv $(DEBIAN_DIR)/libfelt.preinst $(DEBIAN_DIR)/libfelt-$(VERSION)-0.preinst
-	perl -pi -e "s/libfimex-0\.19-0/libfimex-$(VERSION)-0/g; s/libfelt-0\.19-0/libfelt-$(VERSION)-0/g;" $(DEBIAN_DIR)/control
+	mv $(DEBIAN_DIR)/libfimex.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs
+	mv $(DEBIAN_DIR)/libfelt.shlibs $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs
+	for i in $(DEBIAN_DIR)/control libfelt-$(VERSION)-0.shlibs libfimex-$(VERSION)-0.shlibs; do \
+	   perl -pi -e "s/0\.19/$(VERSION/g;" $$i; \
+	done
 	chmod 774 $(DEBIAN_DIR)/rules
 	cd $(PKG_DIR) && dpkg-buildpackage -rfakeroot -us -uc -nc
 
