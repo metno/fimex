@@ -28,6 +28,7 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include <grib_api.h>
 #include <cmath>
 #include <functional>
 #include <libxml/tree.h>
