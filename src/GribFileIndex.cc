@@ -382,12 +382,12 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
             string proj4 = getXmlProp(lNode, "proj4");
-            long startX = string2type<long>(getXmlProp(lNode, "startX"));
-            long startY = string2type<long>(getXmlProp(lNode, "startY"));
-            long sizeX = string2type<long>(getXmlProp(lNode, "sizeX"));
-            long sizeY = string2type<long>(getXmlProp(lNode, "sizeY"));
-            long incrX = string2type<long>(getXmlProp(lNode, "incrX"));
-            long incrY = string2type<long>(getXmlProp(lNode, "incrY"));
+            double startX = string2type<double>(getXmlProp(lNode, "startX"));
+            double startY = string2type<double>(getXmlProp(lNode, "startY"));
+            double sizeX = string2type<double>(getXmlProp(lNode, "sizeX"));
+            double sizeY = string2type<double>(getXmlProp(lNode, "sizeY"));
+            double incrX = string2type<double>(getXmlProp(lNode, "incrX"));
+            double incrY = string2type<double>(getXmlProp(lNode, "incrY"));
             GridDefinition::Orientation scanMode = static_cast<GridDefinition::Orientation>(string2type<long>(getXmlProp(lNode, "scanMode")));
             gridDefinition_ = GridDefinition(proj4, sizeX, sizeY, incrX, incrY, startX, startY, scanMode);
         }
