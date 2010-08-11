@@ -72,6 +72,14 @@
     <attribute name="description" value="ground or water surface" type="string" />
     <attribute name="long_name" value="surface" type="string" />
     <attribute name="positive" value="up" type="string" />
+    <attribute name="units" value="m" type="string" />
+</vertical_axis>
+<vertical_axis id="mean_sea_level" name="mean_sea_level" grib2_id="101" grib1_id="102" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="description" value="mean sea level" type="string" />
+    <attribute name="long_name" value="mean_sea_level" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <attribute name="units" value="m" type="string" />
 </vertical_axis>
 <vertical_axis id="pressure" name="pressure" grib2_id="100" grib1_id="100" type="float">
     <!-- Isobaric level -->
@@ -178,6 +186,12 @@
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="long_name" value="cloud coverage" type="string" />
         <attribute name="units" value="%" type="string" />
+    </parameter>
+    <parameter name="total_precipitation" type="float">
+        <grib1 indicatorOfParameter="61" gribTablesVersionNo="3" identificationOfOriginatingGeneratingCentre="88"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="total_precipitation" type="string" />
+        <attribute name="units" value="kg m^-2" type="string" />
     </parameter>
     
 </variables>
