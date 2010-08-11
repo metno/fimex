@@ -10,10 +10,6 @@
 #   the gribapi library object file.  A --with-gribapi option is
 #   supported as well. 
 #
-#   It will also check for jasper and png which might be needed for
-#   grib_api.
-#
-#
 #   The C preprocessor symbol HAVE_GRIBAPI_H will be
 #   defined with AC_DEFINE([HAVE_GRIBAPI_H]) if the library is
 #   available.  Forthermore, the variable have_gribapi will be set to
@@ -35,9 +31,7 @@ AC_DEFUN([MIFI_HAVE_GRIBAPI], [
                         [Define to 1 if you have <grib_api.h>.])],
                      [AC_MSG_ERROR([grib_api.h not found])])
     LDFLAGS="$LDFLAGS -L$GRIBAPI_LIBS_DIR"
-    AC_SEARCH_LIBS(png_read_image, [png],,,[])
-	AC_SEARCH_LIBS(jas_stream_memopen,[jasper],,,[-lm -ljpeg])
-	AC_SEARCH_LIBS(grib_set_string,[grib_api],
+    AC_SEARCH_LIBS(grib_set_string,[grib_api],
         [
          have_gribapi=yes
         ],
