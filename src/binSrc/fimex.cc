@@ -358,6 +358,11 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 		exit(1);
 	}
 
+    if (!(vm.count("interpolate.xAxisValues") && vm.count("interpolate.yAxisValues"))) {
+	    cerr << "ERROR: xAxisValues and yAxisValues required" << endl;
+	    exit(1);
+	}
+
 	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(), vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
 	if (vm.count("interpolate.printNcML")) {
 		cout << "Interpolator as NcML:" << endl;

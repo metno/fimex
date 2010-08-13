@@ -22,6 +22,7 @@
  */
 
 #include "fimex/Units.h"
+#include "fimex/Logger.h"
 
 extern "C" {
 #include "udunits.h"
@@ -31,6 +32,10 @@ extern "C" int utIsInit();
 
 namespace MetNoFimex
 {
+
+
+static LoggerPtr logger = getLogger("fimex.Units");
+
 void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitException)
 {
 	switch (unitErrCode) {
@@ -87,6 +92,7 @@ bool Units::unload(bool force) throw(UnitException)
 
 void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "convert from " << from << " to " << to);
 	if (from == to) {
 		slope = 1.;
 		offset = 0.;
@@ -99,6 +105,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
 	utUnit fromUnit, toUnit;
 	double slope, offset;
 	handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
