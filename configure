@@ -871,6 +871,15 @@ FFLAGS
 ac_ct_F77
 LIBTOOL
 LIBOBJS
+MIFI_PROJ_LIBS
+MIFI_PROJ_CPPFLAGS
+MIFI_PROJ_LDFLAGS
+MIFI_UDUNITS_LIBS
+MIFI_UDUNITS_CPPFLAGS
+MIFI_UDUNITS_LDFLAGS
+MIFI_UDUNITS2_LIBS
+MIFI_UDUNITS2_CPPFLAGS
+MIFI_UDUNITS2_LDFLAGS
 XML2_CONFIG
 XML_CPPFLAGS
 XML_LIBS
@@ -883,6 +892,10 @@ BOOST_IOSTREAMS_LIB
 BOOST_DATE_TIME_LIB
 BOOST_UNIT_TEST_FRAMEWORK_LIB
 PKG_CONFIG
+MIFI_NETCDF_LIBS
+MIFI_NETCDF_CPPFLAGS
+MIFI_NETCDF_LDFLAGS
+MIFI_NETCDF_CPP_LIBS
 HAVE_NETCDF_TRUE
 HAVE_NETCDF_FALSE
 HAVE_MILIB_TRUE
@@ -893,6 +906,9 @@ HAVE_FELT_OR_MILIB_TRUE
 HAVE_FELT_OR_MILIB_FALSE
 milib_CFLAGS
 milib_LIBS
+MIFI_GRIB_API_LIBS
+MIFI_GRIB_API_CPPFLAGS
+MIFI_GRIB_API_LDFLAGS
 HAVE_GRIBAPI_TRUE
 HAVE_GRIBAPI_FALSE
 LTLIBOBJS'
@@ -1517,6 +1533,8 @@ Optional Packages:
                           either as DIR or INC,LIB
   --with-udunits=DIR      the location of optional libudunits files and
                           library either as DIR or INC,LIB
+  --with-udunits2=DIR     the location of optional libudunits2 files and
+                          library either as DIR or INC,LIB
   --with-udunits2=DIR     the location of mandatory libudunits2 files and
                           library either as DIR or INC,LIB
   --with-xml-prefix=PFX   Prefix where libxml is installed (optional)
@@ -1553,9 +1571,8 @@ Optional Packages:
                           --with-boost-unit-test-framework=boost_unit_test_framework-gcc
   --with-netcdf=DIR       the location of optional libnetcdf files and library
                           either as DIR or INC,LIB
-  --with-gribapi          use grib_api library
-  --with-gribapi-lib-dir=DIR      prefix for grib_api library files
-  --with-gribapi-include-dir=DIR      prefix for grib_api headers
+  --with-grib_api=DIR     the location of optional libgrib_api files and
+                          library either as DIR or INC,LIB
 
 Some influential environment variables:
   CC          C compiler command
@@ -5285,7 +5302,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5288 "configure"' > conftest.$ac_ext
+  echo '#line 5305 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7559,11 +7576,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7562: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7579: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7566: \$? = $ac_status" >&5
+   echo "$as_me:7583: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7849,11 +7866,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7852: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7869: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7856: \$? = $ac_status" >&5
+   echo "$as_me:7873: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7953,11 +7970,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7956: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7973: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7960: \$? = $ac_status" >&5
+   echo "$as_me:7977: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10315,7 +10332,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10318 "configure"
+#line 10335 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10415,7 +10432,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10418 "configure"
+#line 10435 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12839,11 +12856,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12842: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12859: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12846: \$? = $ac_status" >&5
+   echo "$as_me:12863: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12943,11 +12960,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12946: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12963: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12950: \$? = $ac_status" >&5
+   echo "$as_me:12967: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14520,11 +14537,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14523: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14540: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14527: \$? = $ac_status" >&5
+   echo "$as_me:14544: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14624,11 +14641,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14627: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14644: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14631: \$? = $ac_status" >&5
+   echo "$as_me:14648: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16828,11 +16845,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16831: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16848: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16835: \$? = $ac_status" >&5
+   echo "$as_me:16852: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17118,11 +17135,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17121: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17138: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17125: \$? = $ac_status" >&5
+   echo "$as_me:17142: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17222,11 +17239,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17225: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17242: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17229: \$? = $ac_status" >&5
+   echo "$as_me:17246: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -21267,6 +21284,7 @@ fi
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
+mifi_LIBS=""
 
 # Check whether --with-proj was given.
 if test "${with_proj+set}" = set; then
@@ -21278,29 +21296,29 @@ fi
 case $with_proj in
     yes)
      echo "Using system implementation of libproj"
-      LIBS="$LIBS -lproj"
      ;;
     no)
-    { { echo "$as_me:$LINENO: error: libproj is required" >&5
+     { { echo "$as_me:$LINENO: error: libproj is required" >&5
 echo "$as_me: error: libproj is required" >&2;}
    { (exit 1); exit 1; }; }
      ;;
     *,*)
       addincdir="`echo $with_proj | cut -f1 -d,`"
       addlibdir="`echo $with_proj | cut -f2 -d,`"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -lproj"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
     *)
       addincdir="$with_proj/include"
       addlibdir="$with_proj/lib"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -lproj"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
 esac
 mifi_have_feat=MIFI_HAVE_LIBPROJ
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_proj != xno; then
     { echo "$as_me:$LINENO: checking for pj_init in -lproj" >&5
 echo $ECHO_N "checking for pj_init in -lproj... $ECHO_C" >&6; }
@@ -21364,23 +21382,33 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_proj_pj_init" >&5
 echo "${ECHO_T}$ac_cv_lib_proj_pj_init" >&6; }
 if test $ac_cv_lib_proj_pj_init = yes; then
-  with_proj=yes
+  with_proj=yes;
+         MIFI_PROJ_LIBS="-lproj $mifi_LIBS";
+         MIFI_PROJ_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_PROJ_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
 else
-  CPPFLAGS="$saved_CPPFLAGS";LDFLAGS="$saved_LDFLAGS";
-         LIBS="$saved_LIBS";with_proj=no;
+  with_proj=no;
          { { echo "$as_me:$LINENO: error: Did not find libproj, this is required to continue" >&5
 echo "$as_me: error: Did not find libproj, this is required to continue" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
 
 
 
-# Checks for libraries that could be dropped.
+# Checks for libraries that can be dropped
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
+mifi_LIBS=""
 
 # Check whether --with-udunits was given.
 if test "${with_udunits+set}" = set; then
@@ -21392,29 +21420,29 @@ fi
 case $with_udunits in
     yes)
      echo "Using system implementation of libudunits"
-      LIBS="$LIBS -ludunits"
      ;;
     no)
-    { echo "$as_me:$LINENO: WARNING: Building library with libudunits dependent functions disabled" >&5
+     { echo "$as_me:$LINENO: WARNING: Building library with libudunits dependent functions disabled" >&5
 echo "$as_me: WARNING: Building library with libudunits dependent functions disabled" >&2;}
      ;;
     *,*)
       addincdir="`echo $with_udunits | cut -f1 -d,`"
       addlibdir="`echo $with_udunits | cut -f2 -d,`"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -ludunits"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
     *)
       addincdir="$with_udunits/include"
       addlibdir="$with_udunits/lib"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -ludunits"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
 esac
-if test  "x$with_udunits" != "xno"; then
-    mifi_have_feat=MIFI_HAVE_LIBUDUNITS
+mifi_have_feat=MIFI_HAVE_LIBUDUNITS
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_udunits != xno; then
     { echo "$as_me:$LINENO: checking for utInit in -ludunits" >&5
 echo $ECHO_N "checking for utInit in -ludunits... $ECHO_C" >&6; }
 if test "${ac_cv_lib_udunits_utInit+set}" = set; then
@@ -21477,10 +21505,16 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_udunits_utInit" >&5
 echo "${ECHO_T}$ac_cv_lib_udunits_utInit" >&6; }
 if test $ac_cv_lib_udunits_utInit = yes; then
-  with_udunits="yes"
+  with_udunits=yes;
+         MIFI_UDUNITS_LIBS="-ludunits $mifi_LIBS";
+         MIFI_UDUNITS_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_UDUNITS_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
 else
-  CPPFLAGS="$saved_CPPFLAGS";LDFLAGS="$saved_LDFLAGS";
-         LIBS="$saved_LIBS";with_udunits="no";
+  with_udunits=no;
          { echo "$as_me:$LINENO: WARNING: =======================================" >&5
 echo "$as_me: WARNING: =======================================" >&2;};
          { echo "$as_me:$LINENO: WARNING: Did not find libudunits" >&5
@@ -21492,14 +21526,18 @@ echo "$as_me: WARNING: =======================================" >&2;}
 fi
 
 fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
 
 if test  "x$with_udunits" != "xyes" ; then
     # check older udunits, at least one is required
 
-# Checks for libraries that are required.
+# Checks for libraries that can be dropped
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
+mifi_LIBS=""
 
 # Check whether --with-udunits2 was given.
 if test "${with_udunits2+set}" = set; then
@@ -21511,29 +21549,28 @@ fi
 case $with_udunits2 in
     yes)
      echo "Using system implementation of libudunits2"
-      LIBS="$LIBS -ludunits2"
      ;;
     no)
-    { { echo "$as_me:$LINENO: error: libudunits2 is required" >&5
-echo "$as_me: error: libudunits2 is required" >&2;}
-   { (exit 1); exit 1; }; }
+     { echo "$as_me:$LINENO: WARNING: Building library with libudunits2 dependent functions disabled" >&5
+echo "$as_me: WARNING: Building library with libudunits2 dependent functions disabled" >&2;}
      ;;
     *,*)
       addincdir="`echo $with_udunits2 | cut -f1 -d,`"
       addlibdir="`echo $with_udunits2 | cut -f2 -d,`"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -ludunits2"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
     *)
       addincdir="$with_udunits2/include"
       addlibdir="$with_udunits2/lib"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -ludunits2"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
 esac
 mifi_have_feat=MIFI_HAVE_LIBUDUNITS2
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_udunits2 != xno; then
     { echo "$as_me:$LINENO: checking for utInit in -ludunits2" >&5
 echo $ECHO_N "checking for utInit in -ludunits2... $ECHO_C" >&6; }
@@ -21597,17 +21634,157 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_udunits2_utInit" >&5
 echo "${ECHO_T}$ac_cv_lib_udunits2_utInit" >&6; }
 if test $ac_cv_lib_udunits2_utInit = yes; then
-  with_udunits2=yes
+  with_udunits2=yes;
+         MIFI_UDUNITS2_LIBS="-ludunits2 $mifi_LIBS";
+         MIFI_UDUNITS2_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_UDUNITS2_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
 else
-  CPPFLAGS="$saved_CPPFLAGS";LDFLAGS="$saved_LDFLAGS";
-         LIBS="$saved_LIBS";with_udunits2=no;
+  with_udunits2=no;
+         { echo "$as_me:$LINENO: WARNING: =======================================" >&5
+echo "$as_me: WARNING: =======================================" >&2;};
+         { echo "$as_me:$LINENO: WARNING: Did not find libudunits2" >&5
+echo "$as_me: WARNING: Did not find libudunits2" >&2;};
+         { echo "$as_me:$LINENO: WARNING: Disabling libudunits2 dependent functions" >&5
+echo "$as_me: WARNING: Disabling libudunits2 dependent functions" >&2;};
+         { echo "$as_me:$LINENO: WARNING: =======================================" >&5
+echo "$as_me: WARNING: =======================================" >&2;}
+fi
+
+fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
+
+    if test  "x$with_udunits2" != "xyes" ; then
+        # check for udunits2 with external expat
+
+# Checks for libraries that are required.
+saved_CPPFLAGS="$CPPFLAGS"
+saved_LDFLAGS="$LDFLAGS"
+saved_LIBS="$LIBS"
+mifi_LIBS="-lexpat"
+
+# Check whether --with-udunits2 was given.
+if test "${with_udunits2+set}" = set; then
+  withval=$with_udunits2;
+else
+  with_udunits2=yes
+fi
+
+case $with_udunits2 in
+    yes)
+     echo "Using system implementation of libudunits2"
+     ;;
+    no)
+     { { echo "$as_me:$LINENO: error: libudunits2 is required" >&5
+echo "$as_me: error: libudunits2 is required" >&2;}
+   { (exit 1); exit 1; }; }
+     ;;
+    *,*)
+      addincdir="`echo $with_udunits2 | cut -f1 -d,`"
+      addlibdir="`echo $with_udunits2 | cut -f2 -d,`"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+    *)
+      addincdir="$with_udunits2/include"
+      addlibdir="$with_udunits2/lib"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+esac
+mifi_have_feat=MIFI_HAVE_LIBUDUNITS2
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_udunits2 != xno; then
+    { echo "$as_me:$LINENO: checking for utInit in -ludunits2" >&5
+echo $ECHO_N "checking for utInit in -ludunits2... $ECHO_C" >&6; }
+if test "${ac_cv_lib_udunits2_utInit+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ludunits2  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char utInit ();
+int
+main ()
+{
+return utInit ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_udunits2_utInit=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_udunits2_utInit=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_udunits2_utInit" >&5
+echo "${ECHO_T}$ac_cv_lib_udunits2_utInit" >&6; }
+if test $ac_cv_lib_udunits2_utInit = yes; then
+  with_udunits2=yes;
+         MIFI_UDUNITS2_LIBS="-ludunits2 $mifi_LIBS";
+         MIFI_UDUNITS2_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_UDUNITS2_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
+else
+  with_udunits2=no;
          { { echo "$as_me:$LINENO: error: Did not find libudunits2, this is required to continue" >&5
 echo "$as_me: error: Did not find libudunits2, this is required to continue" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
 fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
 
+    fi
 fi
 
 
@@ -21925,9 +22102,6 @@ echo "$as_me: error: *** Libxml is required to build fimex; Available at http://
 
   rm -f conf.xmltest
 
-LIBS="$LIBS $XML_LIBS"
-LDFLAGS="$LDFALGS $XML_LDFLAGS"
-CPPFLAGS="$CPPFLAGS $XML_CPPFLAGS"
 
 
 
@@ -24127,9 +24301,6 @@ echo "$as_me: error: Could not link against $ax_lib !" >&2;}
     	LDFLAGS="$LDFLAGS_SAVED"
 	fi
 
-CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
-LIBS="$LIBS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB"
 
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
@@ -24370,10 +24541,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 # optional io libraries
 
 
-# Checks for libraries that could be dropped.
+# Checks for libraries that can be dropped
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
+mifi_LIBS=""
 
 # Check whether --with-netcdf was given.
 if test "${with_netcdf+set}" = set; then
@@ -24385,29 +24557,29 @@ fi
 case $with_netcdf in
     yes)
      echo "Using system implementation of libnetcdf"
-      LIBS="$LIBS -lnetcdf"
      ;;
     no)
-    { echo "$as_me:$LINENO: WARNING: Building library with libnetcdf dependent functions disabled" >&5
+     { echo "$as_me:$LINENO: WARNING: Building library with libnetcdf dependent functions disabled" >&5
 echo "$as_me: WARNING: Building library with libnetcdf dependent functions disabled" >&2;}
      ;;
     *,*)
       addincdir="`echo $with_netcdf | cut -f1 -d,`"
       addlibdir="`echo $with_netcdf | cut -f2 -d,`"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -lnetcdf"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
     *)
       addincdir="$with_netcdf/include"
       addlibdir="$with_netcdf/lib"
-      CPPFLAGS="$CPPFLAGS -I$addincdir"
-      LDFLAGS="$LDFLAGS -L$addlibdir"
-      LIBS="$LIBS -lnetcdf"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
       ;;
 esac
-if test  "x$with_netcdf" != "xno"; then
-    mifi_have_feat=MIFI_HAVE_LIBNETCDF
+mifi_have_feat=MIFI_HAVE_LIBNETCDF
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_netcdf != xno; then
     { echo "$as_me:$LINENO: checking for nc_create in -lnetcdf" >&5
 echo $ECHO_N "checking for nc_create in -lnetcdf... $ECHO_C" >&6; }
 if test "${ac_cv_lib_netcdf_nc_create+set}" = set; then
@@ -24470,10 +24642,16 @@ fi
 { echo "$as_me:$LINENO: result: $ac_cv_lib_netcdf_nc_create" >&5
 echo "${ECHO_T}$ac_cv_lib_netcdf_nc_create" >&6; }
 if test $ac_cv_lib_netcdf_nc_create = yes; then
-  with_netcdf="yes"
+  with_netcdf=yes;
+         MIFI_NETCDF_LIBS="-lnetcdf $mifi_LIBS";
+         MIFI_NETCDF_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_NETCDF_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
 else
-  CPPFLAGS="$saved_CPPFLAGS";LDFLAGS="$saved_LDFLAGS";
-         LIBS="$saved_LIBS";with_netcdf="no";
+  with_netcdf=no;
          { echo "$as_me:$LINENO: WARNING: =======================================" >&5
 echo "$as_me: WARNING: =======================================" >&2;};
          { echo "$as_me:$LINENO: WARNING: Did not find libnetcdf" >&5
@@ -24485,15 +24663,20 @@ echo "$as_me: WARNING: =======================================" >&2;}
 fi
 
 fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
 
 if test  "x$with_netcdf" == "xyes" ; then
-    # check also netcdf-cpp
+    # check also netcdf-cpp, can't use mifi_reqlib because of ++ (not allowed in m4)
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+    save_LIBS="$LIBS"
+    LIBS="-lnetcdf"
 
 { echo "$as_me:$LINENO: checking for main in -lnetcdf_c++" >&5
 echo $ECHO_N "checking for main in -lnetcdf_c++... $ECHO_C" >&6; }
@@ -24562,6 +24745,9 @@ else
 echo "$as_me: error: Did not find libnetcdf_c++, this is required to continue" >&2;}
    { (exit 1); exit 1; }; }
 fi
+
+    LIBS="$save_LIBS"
+    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
 
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -25018,200 +25204,53 @@ fi
 }
 fi
 
-# grib_api has several low-level requirements when build static, not possible with MIFI_USELIB
 
-# Check whether --with-gribapi was given.
-if test "${with_gribapi+set}" = set; then
-  withval=$with_gribapi; if test "$withval" != "no"; then
+# Checks for libraries that can be dropped
+saved_CPPFLAGS="$CPPFLAGS"
+saved_LDFLAGS="$LDFLAGS"
+saved_LIBS="$LIBS"
+mifi_LIBS=""
 
-
-# Check whether --with-gribapi-lib-dir was given.
-if test "${with_gribapi_lib_dir+set}" = set; then
-  withval=$with_gribapi_lib_dir; if test "$withval" = "no"; then
-               GRIBAPI_LIBS_DIR=
-             else
-               GRIBAPI_LIBS_DIR="$withval"
-             fi
+# Check whether --with-grib_api was given.
+if test "${with_grib_api+set}" = set; then
+  withval=$with_grib_api;
 else
-  GRIBAPI_LIBS_DIR=/usr/local/lib
+  with_grib_api=yes
 fi
 
-
-
-# Check whether --with-gribapi-include-dir was given.
-if test "${with_gribapi_include_dir+set}" = set; then
-  withval=$with_gribapi_include_dir; if test "$withval" = "no"; then
-               GRIBAPI_INCLUDES_DIR=
-             else
-               GRIBAPI_INCLUDES_DIR="$withval"
-             fi
-else
-  GRIBAPI_INCLUDES_DIR=/usr/local/include
-fi
-
-
-
-
-
-
-
-    ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-    CPPFLAGS="$CPPFLAGS -I$GRIBAPI_INCLUDES_DIR"
-    if test "${ac_cv_header_grib_api_h+set}" = set; then
-  { echo "$as_me:$LINENO: checking for grib_api.h" >&5
-echo $ECHO_N "checking for grib_api.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_grib_api_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_grib_api_h" >&5
-echo "${ECHO_T}$ac_cv_header_grib_api_h" >&6; }
-else
-  # Is the header compilable?
-{ echo "$as_me:$LINENO: checking grib_api.h usability" >&5
-echo $ECHO_N "checking grib_api.h usability... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <grib_api.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
+case $with_grib_api in
+    yes)
+     echo "Using system implementation of libgrib_api"
+     ;;
+    no)
+     { echo "$as_me:$LINENO: WARNING: Building library with libgrib_api dependent functions disabled" >&5
+echo "$as_me: WARNING: Building library with libgrib_api dependent functions disabled" >&2;}
+     ;;
+    *,*)
+      addincdir="`echo $with_grib_api | cut -f1 -d,`"
+      addlibdir="`echo $with_grib_api | cut -f2 -d,`"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+    *)
+      addincdir="$with_grib_api/include"
+      addlibdir="$with_grib_api/lib"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
 esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_header_compiler=no
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ echo "$as_me:$LINENO: checking grib_api.h presence" >&5
-echo $ECHO_N "checking grib_api.h presence... $ECHO_C" >&6; }
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <grib_api.h>
-_ACEOF
-if { (ac_try="$ac_cpp conftest.$ac_ext"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null && {
-	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       }; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-
-rm -f conftest.err conftest.$ac_ext
-{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: grib_api.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: grib_api.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: grib_api.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: grib_api.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: grib_api.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: grib_api.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: grib_api.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: grib_api.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: grib_api.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: grib_api.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: grib_api.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: grib_api.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: grib_api.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: grib_api.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: grib_api.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: grib_api.h: in the future, the compiler will take precedence" >&2;}
-    ( cat <<\_ASBOX
-## --------------------------------- ##
-## Report this to heiko.klein@met.no ##
-## --------------------------------- ##
-_ASBOX
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-{ echo "$as_me:$LINENO: checking for grib_api.h" >&5
-echo $ECHO_N "checking for grib_api.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_grib_api_h+set}" = set; then
+mifi_have_feat=MIFI_HAVE_LIBGRIB_API
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_grib_api != xno; then
+    { echo "$as_me:$LINENO: checking for grib_set_string in -lgrib_api" >&5
+echo $ECHO_N "checking for grib_set_string in -lgrib_api... $ECHO_C" >&6; }
+if test "${ac_cv_lib_grib_api_grib_set_string+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_grib_api_h=$ac_header_preproc
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_grib_api_h" >&5
-echo "${ECHO_T}$ac_cv_header_grib_api_h" >&6; }
-
-fi
-if test $ac_cv_header_grib_api_h = yes; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_GRIBAPI_H 1
-_ACEOF
-
-else
-  { { echo "$as_me:$LINENO: error: grib_api.h not found" >&5
-echo "$as_me: error: grib_api.h not found" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-
-
-    LDFLAGS="$LDFLAGS -L$GRIBAPI_LIBS_DIR"
-    { echo "$as_me:$LINENO: checking for library containing grib_set_string" >&5
-echo $ECHO_N "checking for library containing grib_set_string... $ECHO_C" >&6; }
-if test "${ac_cv_search_grib_set_string+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_func_search_save_LIBS=$LIBS
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgrib_api  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -25234,14 +25273,7 @@ return grib_set_string ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' grib_api; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  rm -f conftest.$ac_objext conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (ac_try="$ac_link"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
@@ -25255,58 +25287,51 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
   cat conftest.err >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
+	 test -z "$ac_cxx_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest$ac_exeext &&
        $as_test_x conftest$ac_exeext; then
-  ac_cv_search_grib_set_string=$ac_res
+  ac_cv_lib_grib_api_grib_set_string=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-
+	ac_cv_lib_grib_api_grib_set_string=no
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext
-  if test "${ac_cv_search_grib_set_string+set}" = set; then
-  break
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
 fi
-done
-if test "${ac_cv_search_grib_set_string+set}" = set; then
-  :
-else
-  ac_cv_search_grib_set_string=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ echo "$as_me:$LINENO: result: $ac_cv_search_grib_set_string" >&5
-echo "${ECHO_T}$ac_cv_search_grib_set_string" >&6; }
-ac_res=$ac_cv_search_grib_set_string
-if test "$ac_res" != no; then
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_grib_api_grib_set_string" >&5
+echo "${ECHO_T}$ac_cv_lib_grib_api_grib_set_string" >&6; }
+if test $ac_cv_lib_grib_api_grib_set_string = yes; then
+  with_grib_api=yes;
+         MIFI_GRIB_API_LIBS="-lgrib_api $mifi_LIBS";
+         MIFI_GRIB_API_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_GRIB_API_LDFLAGS=$mifi_LDFLAGS;
 
-         have_gribapi=yes
+
+
 
 else
-  { { echo "$as_me:$LINENO: error: -lgrib_api not found" >&5
-echo "$as_me: error: -lgrib_api not found" >&2;}
-   { (exit 1); exit 1; }; }
-
+  with_grib_api=no;
+         { echo "$as_me:$LINENO: WARNING: =======================================" >&5
+echo "$as_me: WARNING: =======================================" >&2;};
+         { echo "$as_me:$LINENO: WARNING: Did not find libgrib_api" >&5
+echo "$as_me: WARNING: Did not find libgrib_api" >&2;};
+         { echo "$as_me:$LINENO: WARNING: Disabling libgrib_api dependent functions" >&5
+echo "$as_me: WARNING: Disabling libgrib_api dependent functions" >&2;};
+         { echo "$as_me:$LINENO: WARNING: =======================================" >&5
+echo "$as_me: WARNING: =======================================" >&2;}
 fi
 
-     ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-          fi
 fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
 
- if test x$have_gribapi = xyes; then
+ if test x$with-grib_api = xyes; then
   HAVE_GRIBAPI_TRUE=
   HAVE_GRIBAPI_FALSE='#'
 else
@@ -26169,6 +26194,15 @@ FFLAGS!$FFLAGS$ac_delim
 ac_ct_F77!$ac_ct_F77$ac_delim
 LIBTOOL!$LIBTOOL$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
+MIFI_PROJ_LIBS!$MIFI_PROJ_LIBS$ac_delim
+MIFI_PROJ_CPPFLAGS!$MIFI_PROJ_CPPFLAGS$ac_delim
+MIFI_PROJ_LDFLAGS!$MIFI_PROJ_LDFLAGS$ac_delim
+MIFI_UDUNITS_LIBS!$MIFI_UDUNITS_LIBS$ac_delim
+MIFI_UDUNITS_CPPFLAGS!$MIFI_UDUNITS_CPPFLAGS$ac_delim
+MIFI_UDUNITS_LDFLAGS!$MIFI_UDUNITS_LDFLAGS$ac_delim
+MIFI_UDUNITS2_LIBS!$MIFI_UDUNITS2_LIBS$ac_delim
+MIFI_UDUNITS2_CPPFLAGS!$MIFI_UDUNITS2_CPPFLAGS$ac_delim
+MIFI_UDUNITS2_LDFLAGS!$MIFI_UDUNITS2_LDFLAGS$ac_delim
 XML2_CONFIG!$XML2_CONFIG$ac_delim
 XML_CPPFLAGS!$XML_CPPFLAGS$ac_delim
 XML_LIBS!$XML_LIBS$ac_delim
@@ -26181,6 +26215,10 @@ BOOST_IOSTREAMS_LIB!$BOOST_IOSTREAMS_LIB$ac_delim
 BOOST_DATE_TIME_LIB!$BOOST_DATE_TIME_LIB$ac_delim
 BOOST_UNIT_TEST_FRAMEWORK_LIB!$BOOST_UNIT_TEST_FRAMEWORK_LIB$ac_delim
 PKG_CONFIG!$PKG_CONFIG$ac_delim
+MIFI_NETCDF_LIBS!$MIFI_NETCDF_LIBS$ac_delim
+MIFI_NETCDF_CPPFLAGS!$MIFI_NETCDF_CPPFLAGS$ac_delim
+MIFI_NETCDF_LDFLAGS!$MIFI_NETCDF_LDFLAGS$ac_delim
+MIFI_NETCDF_CPP_LIBS!$MIFI_NETCDF_CPP_LIBS$ac_delim
 HAVE_NETCDF_TRUE!$HAVE_NETCDF_TRUE$ac_delim
 HAVE_NETCDF_FALSE!$HAVE_NETCDF_FALSE$ac_delim
 HAVE_MILIB_TRUE!$HAVE_MILIB_TRUE$ac_delim
@@ -26191,12 +26229,15 @@ HAVE_FELT_OR_MILIB_TRUE!$HAVE_FELT_OR_MILIB_TRUE$ac_delim
 HAVE_FELT_OR_MILIB_FALSE!$HAVE_FELT_OR_MILIB_FALSE$ac_delim
 milib_CFLAGS!$milib_CFLAGS$ac_delim
 milib_LIBS!$milib_LIBS$ac_delim
+MIFI_GRIB_API_LIBS!$MIFI_GRIB_API_LIBS$ac_delim
+MIFI_GRIB_API_CPPFLAGS!$MIFI_GRIB_API_CPPFLAGS$ac_delim
+MIFI_GRIB_API_LDFLAGS!$MIFI_GRIB_API_LDFLAGS$ac_delim
 HAVE_GRIBAPI_TRUE!$HAVE_GRIBAPI_TRUE$ac_delim
 HAVE_GRIBAPI_FALSE!$HAVE_GRIBAPI_FALSE$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 31; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 47; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -26828,12 +26869,12 @@ echo "${ECHO_T}Data:             $datadir" >&6; }
 echo "${ECHO_T}System Config:    $sysconfdir" >&6; }
 { echo "$as_me:$LINENO: result:  " >&5
 echo "${ECHO_T} " >&6; }
-{ echo "$as_me:$LINENO: result: CPPFLAGS:         $CPPFLAGS $milib_CFLAGS" >&5
-echo "${ECHO_T}CPPFLAGS:         $CPPFLAGS $milib_CFLAGS" >&6; }
-{ echo "$as_me:$LINENO: result: LDFLAGS:          $LDFLAGS" >&5
-echo "${ECHO_T}LDFLAGS:          $LDFLAGS" >&6; }
-{ echo "$as_me:$LINENO: result: LIBS:             $LIBS ${milib_LIBS}" >&5
-echo "${ECHO_T}LIBS:             $LIBS ${milib_LIBS}" >&6; }
+{ echo "$as_me:$LINENO: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&5
+echo "${ECHO_T}CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&6; }
+{ echo "$as_me:$LINENO: result: LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&5
+echo "${ECHO_T}LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&6; }
+{ echo "$as_me:$LINENO: result: LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB" >&5
+echo "${ECHO_T}LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB" >&6; }
 { echo "$as_me:$LINENO: result: DEFS:             $DEFS" >&5
 echo "${ECHO_T}DEFS:             $DEFS" >&6; }
 { echo "$as_me:$LINENO: result:   " >&5

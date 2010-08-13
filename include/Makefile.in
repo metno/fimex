@@ -46,8 +46,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
 	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/mifi_checklib.m4 \
-	$(top_srcdir)/m4/mifi_gribapi.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -117,6 +116,22 @@ LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MIFI_GRIB_API_CPPFLAGS = @MIFI_GRIB_API_CPPFLAGS@
+MIFI_GRIB_API_LDFLAGS = @MIFI_GRIB_API_LDFLAGS@
+MIFI_GRIB_API_LIBS = @MIFI_GRIB_API_LIBS@
+MIFI_NETCDF_CPPFLAGS = @MIFI_NETCDF_CPPFLAGS@
+MIFI_NETCDF_CPP_LIBS = @MIFI_NETCDF_CPP_LIBS@
+MIFI_NETCDF_LDFLAGS = @MIFI_NETCDF_LDFLAGS@
+MIFI_NETCDF_LIBS = @MIFI_NETCDF_LIBS@
+MIFI_PROJ_CPPFLAGS = @MIFI_PROJ_CPPFLAGS@
+MIFI_PROJ_LDFLAGS = @MIFI_PROJ_LDFLAGS@
+MIFI_PROJ_LIBS = @MIFI_PROJ_LIBS@
+MIFI_UDUNITS2_CPPFLAGS = @MIFI_UDUNITS2_CPPFLAGS@
+MIFI_UDUNITS2_LDFLAGS = @MIFI_UDUNITS2_LDFLAGS@
+MIFI_UDUNITS2_LIBS = @MIFI_UDUNITS2_LIBS@
+MIFI_UDUNITS_CPPFLAGS = @MIFI_UDUNITS_CPPFLAGS@
+MIFI_UDUNITS_LDFLAGS = @MIFI_UDUNITS_LDFLAGS@
+MIFI_UDUNITS_LIBS = @MIFI_UDUNITS_LIBS@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@

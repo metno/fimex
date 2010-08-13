@@ -33,13 +33,14 @@ MIFI_REQLIB([proj], [pj_init])
 MIFI_USELIB([udunits], [utInit])
 if test [ "x$with_udunits" != "xyes" ]; then
     # check older udunits, at least one is required
-    MIFI_REQLIB([udunits2], [utInit])
+    MIFI_USELIB([udunits2], [utInit])
+    if test [ "x$with_udunits2" != "xyes" ]; then
+        # check for udunits2 with external expat
+        MIFI_REQLIB([udunits2], [utInit], [-lexpat])
+    fi
 fi
 
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([*** Libxml is required to build fimex; Available at http://www.libxml.org/.]))
-LIBS="$LIBS $XML_LIBS"
-LDFLAGS="$LDFALGS $XML_LDFLAGS"
-CPPFLAGS="$CPPFLAGS $XML_CPPFLAGS"
 
 AX_BOOST_BASE([1.32.0])
 AX_BOOST_REGEX
@@ -48,9 +49,6 @@ AX_BOOST_FILESYSTEM
 AX_BOOST_IOSTREAMS
 AX_BOOST_DATE_TIME
 AX_BOOST_UNIT_TEST_FRAMEWORK
-CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
-LIBS="$LIBS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB"
 
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
@@ -71,9 +69,14 @@ AC_LANG_POP(C++)
 
 MIFI_USELIB([netcdf], [nc_create])
 if test [ "x$with_netcdf" == "xyes" ]; then
-    # check also netcdf-cpp
+    # check also netcdf-cpp, can't use mifi_reqlib because of ++ (not allowed in m4)
     AC_LANG_PUSH(C++)
+    save_LIBS="$LIBS"
+    LIBS="-lnetcdf"
     AC_CHECK_LIB([netcdf_c++], [main],[], [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
+    LIBS="$save_LIBS"
+    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
+    AC_SUBST(MIFI_NETCDF_CPP_LIBS)
     AC_LANG_POP(C++)
     AC_DEFINE([MIFI_HAVE_NETCDF], 1, 'Define to 1 if you have the <netcdf.h> header file.')
 fi
@@ -116,14 +119,8 @@ METNO_CHECK_LIB([mic], [mrfelt], , , , [$milib_LIBS],
                  [the milib package])
 fi
 
-# grib_api has several low-level requirements when build static, not possible with MIFI_USELIB
-AC_ARG_WITH(gribapi,
-      [AS_HELP_STRING([--with-gribapi],[use grib_api library])],
-         [if test "$withval" != "no"; then
-             MIFI_HAVE_GRIBAPI_CHECK()
-             MIFI_HAVE_GRIBAPI( , [AC_MSG_FAILURE([grib-api not found. Please make sure that grib-api is installed.]) ])
-          fi],[])
-AM_CONDITIONAL([HAVE_GRIBAPI], [test x$have_gribapi = xyes])
+MIFI_USELIB([grib_api], [grib_set_string])
+AM_CONDITIONAL([HAVE_GRIBAPI], [test x$with-grib_api = xyes]) 
 
 AC_LANG_POP(C++)
 
@@ -163,9 +160,9 @@ AC_MSG_RESULT([Manuals:          $mandir])
 AC_MSG_RESULT([Data:             $datadir])
 AC_MSG_RESULT([System Config:    $sysconfdir])
 AC_MSG_RESULT([ ])
-AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $milib_CFLAGS])
-AC_MSG_RESULT([LDFLAGS:          $LDFLAGS])
-AC_MSG_RESULT([LIBS:             $LIBS ${milib_LIBS}])
+AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS])
+AC_MSG_RESULT([LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS])
+AC_MSG_RESULT([LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB])
 AC_MSG_RESULT([DEFS:             $DEFS])
 AC_MSG_RESULT([  ])
 AC_MSG_RESULT([------------------------------------------------------------])

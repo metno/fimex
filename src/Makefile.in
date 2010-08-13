@@ -61,8 +61,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
 	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/mifi_checklib.m4 \
-	$(top_srcdir)/m4/mifi_gribapi.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -78,7 +77,7 @@ am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
 am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libfimex_la_LIBADD =
+libfimex_la_DEPENDENCIES = felt/libfelt.la
 am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	C_CDMReader.cc CachedInterpolation.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
@@ -224,6 +223,22 @@ LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MIFI_GRIB_API_CPPFLAGS = @MIFI_GRIB_API_CPPFLAGS@
+MIFI_GRIB_API_LDFLAGS = @MIFI_GRIB_API_LDFLAGS@
+MIFI_GRIB_API_LIBS = @MIFI_GRIB_API_LIBS@
+MIFI_NETCDF_CPPFLAGS = @MIFI_NETCDF_CPPFLAGS@
+MIFI_NETCDF_CPP_LIBS = @MIFI_NETCDF_CPP_LIBS@
+MIFI_NETCDF_LDFLAGS = @MIFI_NETCDF_LDFLAGS@
+MIFI_NETCDF_LIBS = @MIFI_NETCDF_LIBS@
+MIFI_PROJ_CPPFLAGS = @MIFI_PROJ_CPPFLAGS@
+MIFI_PROJ_LDFLAGS = @MIFI_PROJ_LDFLAGS@
+MIFI_PROJ_LIBS = @MIFI_PROJ_LIBS@
+MIFI_UDUNITS2_CPPFLAGS = @MIFI_UDUNITS2_CPPFLAGS@
+MIFI_UDUNITS2_LDFLAGS = @MIFI_UDUNITS2_LDFLAGS@
+MIFI_UDUNITS2_LIBS = @MIFI_UDUNITS2_LIBS@
+MIFI_UDUNITS_CPPFLAGS = @MIFI_UDUNITS_CPPFLAGS@
+MIFI_UDUNITS_LDFLAGS = @MIFI_UDUNITS_LDFLAGS@
+MIFI_UDUNITS_LIBS = @MIFI_UDUNITS_LIBS@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -299,9 +314,10 @@ top_srcdir = @top_srcdir@
 SUBDIRS = felt . binSrc
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
-AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${UDUNITS_CPPFLAGS} ${PROJ4_CPPFLAGS} ${XML_CPPFLAGS}
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@
 lib_LTLIBRARIES = libfimex.la
-libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) felt/libfelt.la
+libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @MIFI_UDUNITS2_LDFLAGS@ @MIFI_UDUNITS_LDFLAGS@ @MIFI_PROJ_LDFLAGS@ @MIFI_NETCDF_LDFLAGS@ ${XML_LDFLAGS} @BOOST_LDFLAGS@
+libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ @MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ @MIFI_NETCDF_CPP_LIBS@ @XML_LIBS@ @BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \

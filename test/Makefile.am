@@ -14,7 +14,7 @@ CC_TESTS = testBinaryConstants \
 SH_TESTS = 
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
-AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS}
+AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
 
