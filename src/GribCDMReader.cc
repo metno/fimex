@@ -431,7 +431,9 @@ void GribCDMReader::initAddVariables(const std::string& projName, const std::str
         xmlNodePtr node = findVariableXMLNode(*gfmIt);
         string varName;
         if (node == 0) {
-            varName = gfmIt->getShortName();
+            // prepend names from grib-api with 'ga_'
+            // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
+            varName = "ga_" + gfmIt->getShortName();
         } else {
             varName = getXmlProp(node, "name");
         }

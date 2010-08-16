@@ -120,7 +120,7 @@ METNO_CHECK_LIB([mic], [mrfelt], , , , [$milib_LIBS],
 fi
 
 MIFI_USELIB([grib_api], [grib_set_string])
-AM_CONDITIONAL([HAVE_GRIBAPI], [test x$with-grib_api = xyes]) 
+AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"]) 
 
 AC_LANG_POP(C++)
 

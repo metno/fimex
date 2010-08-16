@@ -25331,7 +25331,7 @@ CPPFLAGS="$saved_CPPFLAGS";
 LDFLAGS="$saved_LDFLAGS";
 LIBS="$saved_LIBS";
 
- if test x$with-grib_api = xyes; then
+ if test "x$with_grib_api" = "xyes"; then
   HAVE_GRIBAPI_TRUE=
   HAVE_GRIBAPI_FALSE='#'
 else

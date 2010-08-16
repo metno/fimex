@@ -32,9 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@HAVE_MILIB_TRUE@am__append_1 = ${milib_LIBS}
 bin_PROGRAMS = fimex$(EXEEXT) $(am__EXEEXT_1)
-@HAVE_GRIBAPI_TRUE@am__append_2 = fiIndexGribs fiGribCut
+@HAVE_GRIBAPI_TRUE@am__append_1 = fiIndexGribs fiGribCut
 subdir = src/binSrc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -65,20 +64,14 @@ PROGRAMS = $(bin_PROGRAMS)
 am__fiGribCut_SOURCES_DIST = fiGribCut.cc
 @HAVE_GRIBAPI_TRUE@am_fiGribCut_OBJECTS = fiGribCut.$(OBJEXT)
 fiGribCut_OBJECTS = $(am_fiGribCut_OBJECTS)
-fiGribCut_DEPENDENCIES =
+@HAVE_GRIBAPI_TRUE@fiGribCut_DEPENDENCIES = ../libfimex.la
 am__fiIndexGribs_SOURCES_DIST = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@am_fiIndexGribs_OBJECTS = fiIndexGribs.$(OBJEXT)
 fiIndexGribs_OBJECTS = $(am_fiIndexGribs_OBJECTS)
-fiIndexGribs_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
-@HAVE_MILIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
-fiIndexGribs_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
-	$(am__DEPENDENCIES_2)
+@HAVE_GRIBAPI_TRUE@fiIndexGribs_DEPENDENCIES = ../libfimex.la
 am_fimex_OBJECTS = fimex.$(OBJEXT)
 fimex_OBJECTS = $(am_fimex_OBJECTS)
-fimex_LDADD = $(LDADD)
-fimex_DEPENDENCIES = ../felt/libfelt.la ../libfimex.la \
-	$(am__DEPENDENCIES_2)
+fimex_DEPENDENCIES = ../libfimex.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -248,12 +241,12 @@ SUBDIRS = .
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS} ${XML_CPPFLAGS}
-LDADD = ../felt/libfelt.la ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ \
-	$(am__append_1)
 fimex_SOURCES = fimex.cc
+fimex_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_SOURCES = fiIndexGribs.cc
+@HAVE_GRIBAPI_TRUE@fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@
 @HAVE_GRIBAPI_TRUE@fiGribCut_SOURCES = fiGribCut.cc
-@HAVE_GRIBAPI_TRUE@fiGribCut_LDADD = @BOOST_IOSTREAMS_LIB@
+@HAVE_GRIBAPI_TRUE@fiGribCut_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@
 all: all-recursive
 
 .SUFFIXES:
