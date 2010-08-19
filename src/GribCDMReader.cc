@@ -260,6 +260,19 @@ void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levels
         // add attributes
         std::vector<CDMAttribute> levelAttributes;
         fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes_);
+
+        // add special attributes for grib1 / grib2
+        {
+            string xpathGribLevelString("gr:grib"+type2string(edition));
+            XPathObjPtr xpathObj = doc_->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
+            xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
+            int size = (gribNodes) ? gribNodes->nodeNr : 0;
+            if (size == 1) {
+                fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, templateReplacementAttributes_);
+            }
+        }
+
+        // add the attributes to the CDM
         for (std::vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
             cdm_->addAttribute(levelVar.getName(), *ait);
         }

@@ -27,6 +27,9 @@
 /* define if felt/FeltFile.h is available */
 #undef HAVE_FELT
 
+/* 'Define to 1 if you have the <grib_api.h> header file.' */
+#undef HAVE_GRIBAPI_H
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

@@ -121,6 +121,9 @@ fi
 
 MIFI_USELIB([grib_api], [grib_set_string])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"]) 
+if test "x$with_grib_api" = "xyes"; then
+    AC_DEFINE([HAVE_GRIBAPI_H], 1, 'Define to 1 if you have the <grib_api.h> header file.')
+fi
 
 AC_LANG_POP(C++)
 

@@ -25339,6 +25339,13 @@ else
   HAVE_GRIBAPI_FALSE=
 fi
 
+if test "x$with_grib_api" = "xyes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_GRIBAPI_H 1
+_ACEOF
+
+fi
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
