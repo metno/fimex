@@ -280,6 +280,16 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     // time
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
+    msgLength = 1024;
+    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepUnits", msg, &msgLength), 0);
+    stepUnits_ = std::string(msg);
+    msgLength = 1024;
+    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
+    stepType_ = std::string(msg);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "stepRange", &stepRange_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
+
 
     // TODO: more definitions, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
     msgLength = 1024;
@@ -293,7 +303,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     } else if (typeOfGrid_ == "polar_stereographic") {
         gridDefinition_ = getGridDefPolarStereographic(edition_, gh);
     } else if (typeOfGrid_ == "rotated_ll") {
-        gridDefinition_ = getGridDefRotatedLL(edition_, gh); // TODO, switch to rotated!!!
+        gridDefinition_ = getGridDefRotatedLL(edition_, gh);
     } else {
         throw CDMException("unknown gridType: "+ typeOfGrid_);
     }
@@ -364,6 +374,11 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
             dataDate_ = string2type<long>(getXmlProp(lNode, "dataDate"));
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
+            stepUnits_ = getXmlProp(lNode, "stepUnits");
+            stepType_ = getXmlProp(lNode, "stepType");
+            stepRange_ = string2type<long>(getXmlProp(lNode, "stepRange"));
+            stepStart_ = string2type<long>(getXmlProp(lNode, "stepStart"));
+            stepEnd_ = string2type<long>(getXmlProp(lNode, "stepEnd"));
         }
     }
     {
@@ -453,7 +468,41 @@ boost::posix_time::ptime GribFileMessage::getDateTime() const
 
     boost::gregorian::date date(year, month, day);
     boost::posix_time::time_duration clock(hour, minutes, 0);
-    return boost::posix_time::ptime(date, clock);
+    boost::posix_time::ptime reference = boost::posix_time::ptime(date, clock);
+
+    boost::posix_time::time_duration timeOffset(0,0,0);
+    long days(0);
+    long months(0);
+    long years(0);
+    // add step offset:
+    if (stepUnits_ == "s") {
+        timeOffset = boost::posix_time::time_duration(0,0, stepStart_);
+    } else if (stepUnits_ == "m") {
+        timeOffset =  boost::posix_time::time_duration(0,stepStart_, 0);
+    } else if (stepUnits_ == "h") {
+        timeOffset =  boost::posix_time::time_duration(stepStart_, 0, 0);
+    } else if (stepUnits_ == "3h") {
+        timeOffset =  boost::posix_time::time_duration(3*stepStart_, 0, 0);
+    } else if (stepUnits_ == "6h") {
+        timeOffset =  boost::posix_time::time_duration(6*stepStart_, 0, 0);
+    } else if (stepUnits_ == "12h") {
+        timeOffset =  boost::posix_time::time_duration(12*stepStart_, 0, 0);
+    } else if (stepUnits_ == "D") {
+        days = stepStart_;
+    } else if (stepUnits_ == "M") {
+        months = stepStart_;
+    } else if (stepUnits_ == "Y") {
+        years = stepStart_;
+    } else if (stepUnits_ == "10Y") {
+        years = 10*stepStart_;
+    } else if (stepUnits_ == "30Y") {
+        years = 30*stepStart_;
+    } else if (stepUnits_ == "C") {
+        years = 100*stepStart_;
+    } else {
+        throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_);
+    }
+    return reference + timeOffset + boost::gregorian::days(days) + boost::gregorian::months(months) + boost::gregorian::years(years);
 }
 long GribFileMessage::getLevelNumber() const
 {
@@ -548,6 +597,16 @@ string GribFileMessage::toString() const
                 xmlCast(type2string(dataDate_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("dataTime"),
                 xmlCast(type2string(dataTime_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepUnits"),
+                xmlCast(stepUnits_)));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepType"),
+                xmlCast(stepType_)));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepRange"),
+                xmlCast(type2string(stepRange_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepStart"),
+                xmlCast(type2string(stepStart_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepEnd"),
+                xmlCast(type2string(stepEnd_))));
         checkLXML(xmlTextWriterEndElement(writer.get()));
 
         // typeOfGrid

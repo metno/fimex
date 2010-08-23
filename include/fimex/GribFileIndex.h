@@ -81,6 +81,11 @@ private:
     long edition_;
     long dataTime_;
     long dataDate_;
+    std::string stepUnits_;
+    std::string stepType_;
+    long stepStart_;
+    long stepEnd_;
+    long stepRange_;
     long levelType_;
     long levelNo_;
     std::string typeOfGrid_;
