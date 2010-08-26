@@ -22,6 +22,7 @@
  */
 
 #include "fimex/interpolation.h"
+#include "proj_api.h"
 #include <string.h>
 #include <stdio.h>
 

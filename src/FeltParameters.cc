@@ -233,7 +233,7 @@ std::string getProjString(int gridType, const boost::array<float, 6>& gridParame
 		case 3: tempProj << "+proj=ob_tran +o_proj=latlong +o_lat_p="<< (90-gridParameters[5]) << " +o_lon_b=0 +lon_0=" << gridParameters[4] <<  " " << earth; // rotated geographic
 //		case 3: tempProj << "+proj=latlong" <<  " " << earth; // rotated geographic ??
 				break;
-		case 5: tempProj << "+proj=tmerc +lat_1=" << gridParameters[4] << " " << earth; // mercator ???
+		case 5: tempProj << "+proj=gstmerc +lat_1=" << gridParameters[4] << " " << earth; // mercator ???
 				break;
 		default: throw Felt_File_Error("unknown projection-id: " + gridType);
 	}

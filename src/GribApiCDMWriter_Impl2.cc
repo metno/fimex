@@ -24,6 +24,7 @@
 #include <cmath>
 #include <grib_api.h>
 #include "fimex/interpolation.h"
+#include "proj_api.h"
 #include "fimex/GribApiCDMWriter_Impl2.h"
 #include "fimex/CDM.h"
 #include "fimex/Units.h"

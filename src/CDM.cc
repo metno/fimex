@@ -23,6 +23,7 @@
 
 #include "fimex/CDM.h"
 #include "fimex/interpolation.h"
+#include "proj_api.h"
 #include "fimex/DataImpl.h"
 #include "fimex/Units.h"
 #include "fimex/coordSys/Projection.h"

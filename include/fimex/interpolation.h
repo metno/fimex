@@ -24,8 +24,9 @@
 #ifndef INTERPOLATION_H_
 #define INTERPOLATION_H_
 
-#include <proj_api.h>
 #include <math.h>
+#include <string.h>
+
 // M_PI no longer in c99
 #define PI 3.1415926535897932384626433832795
 

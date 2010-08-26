@@ -28,6 +28,7 @@
 #endif
 #include "fimex/CDM.h"
 #include "fimex/CDMInterpolator.h"
+#include "proj_api.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/CachedForwardInterpolation.h"

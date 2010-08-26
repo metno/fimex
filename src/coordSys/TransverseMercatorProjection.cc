@@ -27,10 +27,13 @@
 #include "fimex/coordSys/TransverseMercatorProjection.h"
 #include <boost/regex.hpp>
 #include "fimex/Utils.h"
+#include "fimex/Logger.h"
 
 namespace MetNoFimex
 {
     using namespace std;
+
+static LoggerPtr logger = getLogger("fimex.TransverseMercatorProjection");
 
 TransverseMercatorProjection::TransverseMercatorProjection()
 : ProjectionImpl("transverse_mercator", false)
@@ -41,7 +44,7 @@ TransverseMercatorProjection::~TransverseMercatorProjection()
 
 bool TransverseMercatorProjection::acceptsProj4(const std::string& proj4Str)
 {
-    return proj4ProjectionMatchesName(proj4Str, "tmerc") || proj4ProjectionMatchesName(proj4Str, "utm");
+    return proj4ProjectionMatchesName(proj4Str, "tmerc") || proj4ProjectionMatchesName(proj4Str, "utm") || proj4ProjectionMatchesName(proj4Str, "gstmerc");
 }
 
 std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(const std::string& proj4Str)
@@ -56,18 +59,22 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
         attrs.push_back(CDMAttribute("latitude_of_projection_origin", 0));
         attrs.push_back(CDMAttribute("false_easting", 500000));
         boost::smatch what;
+        double longOfProjOrigin = 0;
         if (boost::regex_search(proj4Str, what, boost::regex("\\+zone=(\\d+)"))) {
             short zone = string2type<short>(what[1].str());
             if (zone <= 0) zone = 1;
             else if (zone > 60) zone = 60;
-            double longOfProjOrigin = (zone-1)*6 - 180 + 3;
+            longOfProjOrigin = (zone-1)*6 - 180 + 3;
             attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
         }
         if (boost::regex_search(proj4Str, what, boost::regex("\\+south"))) {
             attrs.push_back(CDMAttribute("false_northing", 10000000));
         }
-    } else { // projection given as tmerc
-
+        LOG4FIMEX(logger, Logger::WARN, "proj4 utm projection is only valid 6 deg. from center-longitude. Consider using: +proj=gstmerc +k=0.9996 +lon_0="<< longOfProjOrigin << "+x_0=500000");
+    } else { // projection given as tmerc or gstmerc
+        if (proj4ProjectionMatchesName(proj4Str, "tmerc")) {
+            LOG4FIMEX(logger, Logger::WARN, "proj4 tmerc projection is only valid 6 deg. from center-longitude. Consider using: +proj=gstmerc");
+        }
         // longitude at origin
         double longOfProjOrigin = 0.;
         boost::smatch what;
@@ -93,7 +100,7 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
 
 std::ostream& TransverseMercatorProjection::getProj4ProjectionPart(std::ostream& oproj) const
 {
-    oproj << "+proj=tmerc";
+    oproj << "+proj=gstmerc";
     addParameterToStream(oproj, "longitude_of_central_meridian", " +lon_0=");
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
     addParameterToStream(oproj, "scale_factor_at_central_meridian", " +k_0=");
