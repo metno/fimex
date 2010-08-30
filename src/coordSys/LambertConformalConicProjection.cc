@@ -66,7 +66,6 @@ std::vector<CDMAttribute> LambertConformalConicProjection::parametersFromProj4(c
         stdParallels->setValue(1, lat2);
         CDMAttribute("standard_parallel", CDM_DOUBLE, stdParallels);
     }
-    attrs.push_back(CDMAttribute("scale_factor_at_projection_origin", string2type<double>(what[1].str())));
 
     double lon0 = 0.;
     if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
