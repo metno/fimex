@@ -103,6 +103,9 @@ public:
 
 	/** return the times available for this parameter, sorted */
 	vector<boost::posix_time::ptime> getTimes() const;
+	/** return the reference-times for this parameter, sorted by getTimes() */
+	vector<boost::posix_time::ptime> getReferenceTimes() const;
+
 	/** 
 	 * return the level pairs (niveau 1, niveau 2) for this parameter as used by hybrid levels
 	 */

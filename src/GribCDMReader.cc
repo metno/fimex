@@ -305,7 +305,7 @@ void GribCDMReader::initAddTimeDimension()
     {
         set<boost::posix_time::ptime> timesSet;
         for (vector<GribFileMessage>::const_iterator gfmIt = indices_.begin(); gfmIt != indices_.end(); ++gfmIt) {
-            timesSet.insert(gfmIt->getDateTime());
+            timesSet.insert(gfmIt->getValidTime());
         }
         times_ = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
     }
@@ -587,7 +587,7 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels
         if (gfmIt->isValid()) {
-            size_t dataRead = gribDataRead(*gfmIt, gridData, missingValue);
+            size_t dataRead = gfmIt->readData(gridData, missingValue);
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
             copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
         } else {

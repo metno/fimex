@@ -457,7 +457,7 @@ const std::string& GribFileMessage::getShortName() const
 {
     return shortName_;
 }
-boost::posix_time::ptime GribFileMessage::getDateTime() const
+boost::posix_time::ptime GribFileMessage::getReferenceTime() const
 {
     long year = dataDate_ / 10000;
     long month = (dataDate_ - year*10000) / 100;
@@ -470,6 +470,11 @@ boost::posix_time::ptime GribFileMessage::getDateTime() const
     boost::posix_time::time_duration clock(hour, minutes, 0);
     boost::posix_time::ptime reference = boost::posix_time::ptime(date, clock);
 
+    return reference;
+}
+boost::posix_time::ptime GribFileMessage::getValidTime() const
+{
+    boost::posix_time::ptime reference = getReferenceTime();
     boost::posix_time::time_duration timeOffset(0,0,0);
     long days(0);
     long months(0);
@@ -645,23 +650,23 @@ string GribFileMessage::toString() const
     return string(reinterpret_cast<const char*> (buffer->content));
 }
 
-size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, double missingValue)
+size_t GribFileMessage::readData(std::vector<double>& data, double missingValue) const
 {
-    if (!gfm.isValid()) return 0;
-    string url = gfm.getFileURL();
+    if (!isValid()) return 0;
+    string url = getFileURL();
     // remove the 'file:' prefix, needs to be improved when streams are allowed
     url = url.substr(5);
     boost::shared_ptr<FILE> fh(fopen(url.c_str(), "rb"), fclose);
     if (fh.get() == 0) {
-        throw runtime_error("cannot open file: " + gfm.getFileURL());
+        throw runtime_error("cannot open file: " + getFileURL());
     }
-    fseek(fh.get(), gfm.getFilePosition(), SEEK_SET);
+    fseek(fh.get(), getFilePosition(), SEEK_SET);
 
     // enable multi-messages
     grib_multi_support_on(0);
 
     int err = 0;
-    for (size_t i = 0; i < gfm.getMessageNumber(); i++) {
+    for (size_t i = 0; i < getMessageNumber(); i++) {
         // forward to correct multimessage
         boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
     }
@@ -680,7 +685,7 @@ size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, doubl
         }
 
     } else {
-        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(gfm.getFilePosition()) + " msg: " + type2string(gfm.getMessageNumber()));
+        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(getFilePosition()) + " msg: " + type2string(getMessageNumber()));
     }
     return size;
 }

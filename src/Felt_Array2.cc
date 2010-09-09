@@ -105,6 +105,18 @@ void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField>
 	addField_(field);
 }
 
+vector<boost::posix_time::ptime> Felt_Array2::getReferenceTimes() const {
+    vector<boost::posix_time::ptime> refTimes = vector<boost::posix_time::ptime>();
+    refTimes.reserve(feltFields_.size());
+    for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
+        for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
+            boost::shared_ptr<felt::FeltField> field = lm->second;
+            refTimes.push_back(field->referenceTime());
+        }
+    }
+    return refTimes;
+}
+
 vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
 	vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>();
 	if (!hasTime()) return vTimes;

@@ -220,6 +220,20 @@ std::map<short, std::vector<LevelPair> > Felt_File2::getFeltLevelPairs() const {
 	return typeLevelVector;
 }
 
+boost::shared_ptr<boost::posix_time::ptime> Felt_File2::getUniqueReferenceTime() const {
+    std::set<boost::posix_time::ptime> refTimes;
+    for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
+        std::vector<boost::posix_time::ptime> feltRefTimes = fait->second->getReferenceTimes();
+        refTimes.insert(feltRefTimes.begin(), feltRefTimes.end());
+    }
+    if (refTimes.size() != 1) {
+        LOG4FIMEX(logger, Logger::DEBUG, "no unique reference time found, found " << refTimes.size() << " reference times");
+        throw Felt_File_Error("no unique reference time found");
+    }
+    // unique element, return shared ptr of it
+    return boost::shared_ptr<boost::posix_time::ptime>(new boost::posix_time::ptime(*(refTimes.begin())));
+}
+
 std::vector<boost::posix_time::ptime> Felt_File2::getFeltTimes() const {
 	std::set<boost::posix_time::ptime> times;
 	for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {

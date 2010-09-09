@@ -54,6 +54,8 @@ namespace MetNoFimex
 using namespace std;
 using namespace MetNoFelt;
 
+static LoggerPtr logger = getLogger("fimex.FeltCDMReader2");
+
 std::vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath)
 {
 	std::vector<double> retValues;
@@ -334,6 +336,26 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
 		cdm_->addAttribute(timeVar.getName(), *it);
 	}
+
+	// add the unique reference time, if exists
+	try {
+	    boost::shared_ptr<boost::posix_time::ptime> refTime = feltfile_->getUniqueReferenceTime();
+	    if (refTime.get() != 0) {
+	        // TODO: move reference time name to config
+	        std::string referenceTime = "referenceTime";
+	        std::vector<std::string> nullShape;
+	        CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
+	        boost::shared_ptr<Data> timeData = createData(timeDataType, 1);
+	        timeData->setValue(0, tu.posixTime2unitTime(*refTime));
+	        refTimeVar.setData(timeData);
+	        cdm_->addVariable(refTimeVar);
+	        cdm_->addAttribute(referenceTime, CDMAttribute("units", timeUnits));
+	        cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "reference_time"));
+	    }
+	} catch (Felt_File_Error& ffe) {
+	    LOG4FIMEX(logger, Logger::DEBUG, ffe.what());
+	}
+
 	return timeDim;
 }
 

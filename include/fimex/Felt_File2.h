@@ -102,6 +102,12 @@ public:
 	const std::map<LevelPair, int>& getHybridLevels() const {return hybridLevels_;}
 	/// all time values, sorted
 	std::vector<boost::posix_time::ptime> getFeltTimes() const;
+	/**
+	 * get the unique reference time of the felt file
+	 * @return a unique reference time
+	 * @throw exception if no unique reference time exists
+	 */
+	boost::shared_ptr<boost::posix_time::ptime> getUniqueReferenceTime() const;
 	/// get size in x direction
 	int getNX() const;
 	/// get size in y direction

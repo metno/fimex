@@ -25204,12 +25204,16 @@ fi
 }
 fi
 
+# forcing jasper and png libraries on grib_api
+# this might not be required for any build, but as long
+# as grib_api does not provide a list over required libraries (e.g. pkgconfig, libtool)
+# I will just try that
 
 # Checks for libraries that can be dropped
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
-mifi_LIBS=""
+mifi_LIBS="-ljasper -lpng"
 
 # Check whether --with-grib_api was given.
 if test "${with_grib_api+set}" = set; then

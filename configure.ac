@@ -119,7 +119,11 @@ METNO_CHECK_LIB([mic], [mrfelt], , , , [$milib_LIBS],
                  [the milib package])
 fi
 
-MIFI_USELIB([grib_api], [grib_set_string])
+# forcing jasper and png libraries on grib_api
+# this might not be required for any build, but as long
+# as grib_api does not provide a list over required libraries (e.g. pkgconfig, libtool)
+# I will just try that
+MIFI_USELIB([grib_api], [grib_set_string], [-ljasper -lpng])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"]) 
 if test "x$with_grib_api" = "xyes"; then
     AC_DEFINE([HAVE_GRIBAPI_H], 1, 'Define to 1 if you have the <grib_api.h> header file.')

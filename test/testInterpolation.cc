@@ -35,6 +35,9 @@
 #include "fimex/CDMAttribute.h"
 #include "fimex/Data.h"
 
+// definitions from proj_api.h
+#define RAD_TO_DEG      57.29577951308232
+
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 

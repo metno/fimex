@@ -58,7 +58,8 @@ public:
     const size_t getMessageNumber() const;
     const std::string& getName() const;
     const std::string& getShortName() const;
-    boost::posix_time::ptime getDateTime() const;
+    boost::posix_time::ptime getValidTime() const;
+    boost::posix_time::ptime getReferenceTime() const;
     long getLevelNumber() const;
     long getLevelType() const;
     /**
@@ -69,6 +70,14 @@ public:
     const std::vector<long>& getParameterIds() const;
     const std::string& getTypeOfGrid() const;
     const GridDefinition& getGridDefinition() const;
+    /**
+     * Read the data from the underlying source to the vector data.
+     * Data of at maximum data.size() will be read.
+     * @param data the storage the data will be read to
+     * @param missingValue the missing- / fill-value the returned data will have
+     * @return the actual amount of data read
+     */
+    size_t readData(std::vector<double>& data, double missingValue) const;
 private:
     std::string fileURL_;
     size_t filePos_;
@@ -97,7 +106,7 @@ class GribFileMessageEqualTime : public std::unary_function<bool, const GribFile
 public:
     GribFileMessageEqualTime(boost::posix_time::ptime time) : time_(time) {}
     ~GribFileMessageEqualTime() {}
-    bool operator()(const GribFileMessage& gfm) { return gfm.getDateTime() == time_; }
+    bool operator()(const GribFileMessage& gfm) { return gfm.getValidTime() == time_; }
 private:
     boost::posix_time::ptime time_;
 };
@@ -107,7 +116,7 @@ class GribFileMessageEqualLevelTime : public std::unary_function<bool, const Gri
 public:
     GribFileMessageEqualLevelTime(long edition, long levelType, long levelNo, boost::posix_time::ptime time) : edition_(edition), levelType_(levelType), levelNo_(levelNo), time_(time) {}
     ~GribFileMessageEqualLevelTime() {}
-    bool operator()(const GribFileMessage& gfm) { return (gfm.getEdition() == edition_) && (gfm.getLevelType() == levelType_) && (gfm.getLevelNumber() == levelNo_) && (gfm.getDateTime() == time_); }
+    bool operator()(const GribFileMessage& gfm) { return (gfm.getEdition() == edition_) && (gfm.getLevelType() == levelType_) && (gfm.getLevelNumber() == levelNo_) && (gfm.getValidTime() == time_); }
 private:
     long edition_;
     long levelType_;
@@ -115,15 +124,6 @@ private:
     boost::posix_time::ptime time_;
 };
 
-/**
- * read the data corresponding to the gfm to the vector data
- * data of at maximum data.size() will be read.
- * @param gfm GribFileMessage to read from
- * @param data the storage the data will be read to
- * @param missingValue the missing- / fill-value the returned data will have
- * @return the actual amount of data read
- */
-size_t gribDataRead(const GribFileMessage& gfm, std::vector<double>& data, double missingValue);
 
 class GribFileIndex
 {
@@ -135,7 +135,7 @@ public:
      * @li file.grbml
      * @li ENV{GRIB_FILE_INDEX}/file.grbml
      *
-     * Otherwise, it parses the grib-file and creates a index.
+     * Otherwise, it parses the grib-file and creates a index in memory.
      *
      * Performance for getting an index of a 150MB grib-file with some 10s of messages:
      * @li remote NFS file, first time: 16s

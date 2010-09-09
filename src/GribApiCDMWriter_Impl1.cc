@@ -67,12 +67,12 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             CDM::AttrVec projAttrs = proj->getParameters();
             // latitude_of_projection_origin (polar_stereographic, +- 90), via scale_factor_at_projection_origin (stereographic
             // straight_vertical_longitude_from_pole (polar_stereographic), longitude_of_projection_origin (stereographic)
-            double latitudeWhereDxAndDyAreSpecifiedInDegrees = 90.;
+            double latitudeWhereDxAndDyAreSpecifiedInDegrees = 60.;
             double orientationOfTheGridInDegrees = 0.;
             if (proj->getName() == "polar_stereograhpic") {
                 LOG4FIMEX(logger, Logger::INFO, "polar_stereographic projection for" << varName);
                 // get lat_ts fixed
-                latitudeWhereDxAndDyAreSpecifiedInDegrees = 90.;
+                latitudeWhereDxAndDyAreSpecifiedInDegrees = 60.;
                 // get lon0
                 CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("straight_vertical_longitude_from_pole"));
                 if (ait != projAttrs.end()) {
@@ -127,7 +127,11 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 throw CDMException("unable to find latitude/longitude for variable " + varName);
             }
             GRIB_CHECK(grib_set_double(gribHandle.get(), "orientationOfTheGridInDegrees", orientationOfTheGridInDegrees),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
+            if (abs(latitudeWhereDxAndDyAreSpecifiedInDegrees - 60.) > 1.e-5) {
+                LOG4FIMEX(logger, Logger::ERROR, "grib1 does not support polar_stereographic with lat_ts != 60degree, got " << latitudeWhereDxAndDyAreSpecifiedInDegrees);
+                throw CDMException("grib1 does not support polar_stereographic with lat_ts != 60degree");
+                //GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
+            }
         } else if (proj->getName() == "latitude_longitude") {
             throw CDMException("projection " + proj->getName() + " not supported yet by GribApiCDMWriter");
         } else if (proj->getName() == "rotated_latitude_longitude") {
