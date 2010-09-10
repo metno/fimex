@@ -339,6 +339,22 @@ void GribCDMReader::initAddTimeDimension()
     for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
         cdm_->addAttribute(timeVar.getName(), *it);
     }
+
+    // TODO check if reference time changes, assuming they are all alike
+    boost::posix_time::ptime refTime = indices_.begin()->getReferenceTime();
+    // TODO: move reference time name to config
+    std::string referenceTime = "forecast_reference_time";
+    std::vector<std::string> nullShape;
+    CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
+    boost::shared_ptr<Data> refTimeData = createData(timeDataType, 1);
+    // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
+    refTimeData->setValue(0, posixTime2epochTime(refTime));
+    refTimeVar.setData(refTimeData);
+    cdm_->addVariable(refTimeVar);
+    cdm_->addAttribute(referenceTime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
+    cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "forecast_reference_time"));
+
+
 }
 
 void GribCDMReader::initAddProjection(std::string& projName, std::string& coordinates)
