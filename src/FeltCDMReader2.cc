@@ -342,7 +342,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	    boost::shared_ptr<boost::posix_time::ptime> refTime = feltfile_->getUniqueReferenceTime();
 	    if (refTime.get() != 0) {
 	        // TODO: move reference time name to config
-	        std::string referenceTime = "referenceTime";
+	        std::string referenceTime = "forecast_reference_time";
 	        std::vector<std::string> nullShape;
 	        CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
 	        boost::shared_ptr<Data> timeData = createData(timeDataType, 1);
@@ -350,7 +350,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	        refTimeVar.setData(timeData);
 	        cdm_->addVariable(refTimeVar);
 	        cdm_->addAttribute(referenceTime, CDMAttribute("units", timeUnits));
-	        cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "reference_time"));
+	        cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "forecast_reference_time"));
 	    }
 	} catch (Felt_File_Error& ffe) {
 	    LOG4FIMEX(logger, Logger::DEBUG, ffe.what());

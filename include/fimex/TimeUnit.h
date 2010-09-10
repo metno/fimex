@@ -103,6 +103,8 @@ public:
 	virtual ~TimeUnit();
 	/// calculate the epochSeconds for a time in the current unit
 	double unitTime2epochSeconds(double unitTime) const;
+	/// calculate the ptime for a time in the current unit
+	boost::posix_time::ptime unitTime2posixTime(double unitTime) const;
 	/// calculate the time in the current unit from the epoch
 	double epochSeconds2unitTime(double epochSeconds) const;
 	/// calculate the time in a calendar form

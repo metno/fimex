@@ -84,8 +84,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDM.cc CDMAttribute.cc CDMconstants.c CDMDimension.cc \
 	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
-	CDMReader.cc CDMTimeInterpolator.cc CDMVariable.cc \
-	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
+	CDMReader.cc CDMReaderUtils.cc CDMTimeInterpolator.cc \
+	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
 	coordSys/CoordSysImpl.h coordSys/Projection.cc \
 	coordSys/ProjectionImpl.cc \
@@ -120,10 +120,10 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
 	CDMconstants.lo CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMFileReaderFactory.lo CDMInterpolator.lo CDMNamedEntity.lo \
-	CDMQualityExtractor.lo CDMReader.lo CDMTimeInterpolator.lo \
-	CDMVariable.lo CDM_XMLConfigHelper.lo CoordinateSystem.lo \
-	CoordinateAxis.lo Projection.lo ProjectionImpl.lo \
-	LambertConformalConicProjection.lo \
+	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
+	CDMTimeInterpolator.lo CDMVariable.lo CDM_XMLConfigHelper.lo \
+	CoordinateSystem.lo CoordinateAxis.lo Projection.lo \
+	ProjectionImpl.lo LambertConformalConicProjection.lo \
 	LatitudeLongitudeProjection.lo MercatorProjection.lo \
 	TransverseMercatorProjection.lo \
 	RotatedLatitudeLongitudeProjection.lo \
@@ -323,11 +323,11 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMconstants.c CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMQualityExtractor.cc CDMReader.cc CDMTimeInterpolator.cc \
-	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
-	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
-	coordSys/CoordSysImpl.h coordSys/Projection.cc \
-	coordSys/ProjectionImpl.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
+	CDMTimeInterpolator.cc CDMVariable.cc CDM_XMLConfigHelper.cc \
+	CDM_XMLConfigHelper.h coordSys/CoordinateSystem.cc \
+	coordSys/CoordinateAxis.cc coordSys/CoordSysImpl.h \
+	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
 	coordSys/LambertConformalConicProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
@@ -421,6 +421,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMQualityExtractor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReaderUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMTimeInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM_XMLConfigHelper.Plo@am__quote@

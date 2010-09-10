@@ -149,6 +149,15 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 
 	return fiTime;
 }
+boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
+{
+    float second;
+    int year, month, mday, hour, minute;
+    handleUdUnitError(utCalendar(unitTime, pUnit.get(), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+    // TODO nanoseconds?
+    return boost::posix_time::ptime(boost::gregorian::date(year,month,mday), boost::posix_time::time_duration(hour, minute, (int) second));
+}
+
 double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
 {
 	float second = fiTime.second + (fiTime.msecond/1000.);

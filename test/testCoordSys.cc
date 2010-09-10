@@ -38,6 +38,7 @@ using boost::unit_test_framework::test_suite;
 
 #include "fimex/NetCDF_CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 
@@ -213,6 +214,10 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     for (size_t i = 1; i < 4; i++) {
         BOOST_CHECK(slice[i] == firstVal+(i*s*4));
     }
+
+    // check reference time
+    boost::posix_time::ptime refTime = getUniqueForecastReferenceTime(reader);
+    BOOST_CHECK(refTime == boost::posix_time::ptime(boost::gregorian::date(2000,1,1), boost::posix_time::time_duration(10,0,0)));
 
 }
 
