@@ -1,3 +1,10 @@
+  * 2010-09-13 fimex-0.24
+    * grib-support included in debian package
+    * adding forecast-reference-time from felt and grib-files
+    * use grib-steps to determine valid time
+    * using gstmerc istead of tmerc for mercator, requires proj4.4.7
+    * fine grained library dependencies
+    * bugfix when reading grib index-files    
   * 2010-07-15 fimex-0.23
     * allowing axes with negative steps
     * reading units-initialization only once

@@ -1,3 +1,9 @@
+fimex (0.24-1) hardy; urgency=low
+
+  * initial release
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 13 Sep 2010 12:51:00 +0100
+
 fimex (0.23-2) hardy; urgency=low
 
   * linking with grib_api
