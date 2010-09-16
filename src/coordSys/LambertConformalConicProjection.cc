@@ -49,22 +49,19 @@ std::vector<CDMAttribute> LambertConformalConicProjection::parametersFromProj4(c
 
     attrs.push_back(CDMAttribute("grid_mapping_name", "lambert_conformal_conic"));
 
-    double lat1 = 0.;
-    double lat2 = 0.;
     boost::smatch what;
     if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_1=(\\S+)"))) {
-        lat1 = string2type<double>(what[1].str());
-    }
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_2=(\\S+)"))) {
-        lat2 = string2type<double>(what[1].str());
-    }
-    if (lat1 == lat2) {
-        attrs.push_back(CDMAttribute("standard_parallel", lat1));
-    } else {
-        boost::shared_ptr<Data> stdParallels = createData(CDM_DOUBLE, 2);
-        stdParallels->setValue(0, lat1);
-        stdParallels->setValue(1, lat2);
-        CDMAttribute("standard_parallel", CDM_DOUBLE, stdParallels);
+        double lat1 = string2type<double>(what[1].str());
+        if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_2=(\\S+)"))) {
+            double lat2 = string2type<double>(what[1].str());
+
+            boost::shared_ptr<Data> stdParallels = createData(CDM_DOUBLE, 2);
+            stdParallels->setValue(0, lat1);
+            stdParallels->setValue(1, lat2);
+            attrs.push_back(CDMAttribute("standard_parallel", CDM_DOUBLE, stdParallels));
+        } else {
+            attrs.push_back(CDMAttribute("standard_parallel", lat1));
+        }
     }
 
     double lon0 = 0.;
