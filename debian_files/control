@@ -7,7 +7,7 @@ Section: libs
 
 Package: libfimex-dev
 Section: libdevel
-Architecture: any
+Architecture: i386 amd64 ia64 powerpc
 Depends: libfimex-0.19-0 (= ${binary:Version}), ${misc:Depends}
 Description: library for geo-spatial gridded data
  Development library for File Interpolations, Manipulations and EXtraction
@@ -15,7 +15,7 @@ Description: library for geo-spatial gridded data
 
 Package: libfimex-0.19-0
 Section: libs
-Architecture: any
+Architecture: i386 amd64 ia64 powerpc
 Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt-0.19-0 (= ${binary:Version}), libgrib-api-0d-0
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
@@ -23,7 +23,7 @@ Description: library for geo-spatial gridded data
 
 Package: fimex-bin
 Section: science
-Architecture: any
+Architecture: i386 amd64 ia64 powerpc
 Depends: ${shlibs:Depends}${misc:Depends}, libfimex-0.19-0 (= ${binary:Version})
 Description: command line utility for geo-spatial gridded data
  The program fimex is a program for File Interpolations, Manipulations and
@@ -31,7 +31,7 @@ Description: command line utility for geo-spatial gridded data
 
 Package: libfelt-0.19-0
 Section: libs
-Architecture: any
+Architecture: i386 amd64 ia64 powerpc
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: A c++ library for reading met.no's felt-files
  Dev-library for reading the internal file-format of the
@@ -39,7 +39,7 @@ Description: A c++ library for reading met.no's felt-files
  
 Package: libfelt-dev
 Section: libdevel
-Architecture: any
+Architecture: i386 amd64 ia64 powerpc
 Depends: libfelt-0.19-0 (= ${binary:Version}), ${misc:Depends}
 Description: A c++ library for reading met.no's felt-files
  Dev-library for reading the internal file-format of the
