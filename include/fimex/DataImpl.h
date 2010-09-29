@@ -214,6 +214,10 @@ namespace MetNoFimex
 	
 	template<typename C>
 	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) {
+	    // handle empty data
+	    if (orgDimSize.size() == 0 || orgDimSize.size() == 0) {
+	        return boost::shared_ptr<DataImpl<C> >(new DataImpl<C>(0));
+	    }
 		// get the sizes of the original data and the output data
 		size_t orgSize = 1;
 		size_t outputSize = 1;

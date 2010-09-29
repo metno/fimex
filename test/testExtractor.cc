@@ -39,12 +39,14 @@ using boost::unit_test_framework::test_suite;
 #endif
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMExtractor.h"
+#include "fimex/Logger.h"
 
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_extract )
 {
+//    defaultLogLevel(Logger::DEBUG);
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {

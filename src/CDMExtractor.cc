@@ -24,6 +24,7 @@
 #include "fimex/CDMExtractor.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
+#include "fimex/SliceBuilder.h"
 
 namespace MetNoFimex
 {
@@ -50,37 +51,31 @@ boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, s
 		data = dataReader->getDataSlice(varName, unLimDimPos);
 	} else {
 		// translate slice-variable size where dimensions have been transformed, (via data.slice)
-		bool hasChangedDim = false;
-		const std::vector<std::string>& dims = variable.getShape();
-		std::vector<size_t> orgDimSize, newDimSize, newDimStart;
 		const CDM& orgCDM = dataReader->getCDM();
+		SliceBuilder sb(orgCDM, varName);
+        const std::vector<std::string>& dims = sb.getDimensionNames();
+		// loop over variables dimensions and see which to reduce
 		for (std::vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
 			const CDMDimension& dim = orgCDM.getDimension(*it);
-			if (! dim.isUnlimited()) { // this is the slice-dim
-				orgDimSize.push_back(dim.getLength());
-				DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
-				if (foundDim == dimChanges.end()) {
-					newDimStart.push_back(0);
-					newDimSize.push_back(dim.getLength());
-				} else {
-					hasChangedDim = true;
-					newDimStart.push_back((foundDim->second)[0]);
-					newDimSize.push_back((foundDim->second)[1]);
-				}
-			} else {
-				// just changing unLimDimPos
-				DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
-				if (foundDim != dimChanges.end()) {
-					unLimDimPos += (foundDim->second)[0];
-				}
+			if (dim.isUnlimited()) {
+			    sb.setStartAndSize(dim.getName(), unLimDimPos, 1);
+			}
+			DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
+			if (foundDim != dimChanges.end()) {
+                   size_t start = (foundDim->second)[0];
+                   size_t length = (foundDim->second)[1];
+	               if (dim.isUnlimited()) { // this is the slice-dim
+	                   // changing unLimDimPos to readers dimension
+	                   // and fetch only one slice
+                       sb.setStartAndSize(dim.getName(), start + unLimDimPos, 1);
+	               } else {
+	                   sb.setStartAndSize(dim.getName(), start, length);
+	               }
 			}
 		}
 		// read
-		data = dataReader->getDataSlice(varName, unLimDimPos);
-		if (hasChangedDim && (data->size() > 0)) { // datasize might be 0, i.e. if time doesn't exist
-			data = data->slice(orgDimSize, newDimStart, newDimSize);
-		}
-	}
+	    data = dataReader->getDataSlice(varName, sb);
+	 }
 	// TODO: translate datatype where required
 	return data;
 }
