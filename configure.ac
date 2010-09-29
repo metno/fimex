@@ -72,9 +72,15 @@ if test [ "x$with_netcdf" == "xyes" ]; then
     # check also netcdf-cpp, can't use mifi_reqlib because of ++ (not allowed in m4)
     AC_LANG_PUSH(C++)
     save_LIBS="$LIBS"
-    LIBS="-lnetcdf"
+    save_LDFLAGS="$LDFLAGS"
+    save_CPPFLAGS="$CPPFLAGS"
+    LIBS="$LIBS $MIFI_NETCDF_LIBS"
+    LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
+    CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
     AC_CHECK_LIB([netcdf_c++], [main],[], [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
     LIBS="$save_LIBS"
+    LDFLAGS="$save_LDFLAGS"
+    CPPFLAGS="$save_CPPFLAGS"
     MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
     AC_SUBST(MIFI_NETCDF_CPP_LIBS)
     AC_LANG_POP(C++)
