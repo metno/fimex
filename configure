@@ -24676,7 +24676,11 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     save_LIBS="$LIBS"
-    LIBS="-lnetcdf"
+    save_LDFLAGS="$LDFLAGS"
+    save_CPPFLAGS="$CPPFLAGS"
+    LIBS="$LIBS $MIFI_NETCDF_LIBS"
+    LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
+    CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
 
 { echo "$as_me:$LINENO: checking for main in -lnetcdf_c++" >&5
 echo $ECHO_N "checking for main in -lnetcdf_c++... $ECHO_C" >&6; }
@@ -24747,6 +24751,8 @@ echo "$as_me: error: Did not find libnetcdf_c++, this is required to continue" >
 fi
 
     LIBS="$save_LIBS"
+    LDFLAGS="$save_LDFLAGS"
+    CPPFLAGS="$save_CPPFLAGS"
     MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
 
     ac_ext=cpp
