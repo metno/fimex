@@ -66,7 +66,9 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
     } else {
         std::string projName(projAttr->getStringValue());
         if (projName == "lambert_conformal_conic") {
-            proj =  boost::shared_ptr<Projection>(new LambertConformalConicProjection());
+                    proj =  boost::shared_ptr<Projection>(new LambertConformalConicProjection());
+        } else if (projName == "latitude_longitude") {
+            proj =  boost::shared_ptr<Projection>(new LatitudeLongitudeProjection());
         } else if (projName == "mercator") {
             proj =  boost::shared_ptr<Projection>(new MercatorProjection());
         } else if (projName == "polar_stereographic") {
