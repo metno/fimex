@@ -44,22 +44,31 @@ namespace MetNoFimex
  */
 class FimexTime {
 private:
-    /// millisecond
-    unsigned short msecond;
-    /// second (0-59)
-    char second;
-    /// minute (0-59)
-    char minute;
-    /// hour (0-23)
-    char hour;
-    /// day of month (1-31)
-    char mday;
-    /// month (1-12)
-    char month;
     /// year (2008 as of writing)
     unsigned short year;
+    /// month (1-12)
+    char month;
+    /// day of month (1-31)
+    char mday;
+    /// hour (0-23)
+    char hour;
+    /// minute (0-59)
+    char minute;
+    /// second (0-59)
+    char second;
+    /// millisecond
+    unsigned short msecond;
 
 public:
+    enum special_values {
+        min_date_time,
+        max_date_time
+    };
+    FimexTime() {};
+    FimexTime(unsigned short year, char month, char mday, char hour = 0, char minute = 0, char second = 0, unsigned short msecond = 0);
+    FimexTime(special_values val);
+    /// set all the time-parameters at once
+    void setTime(unsigned short year, char month, char mday, char hour = 0, char minute = 0, char second = 0, unsigned short msecond = 0);
     /// year (2008 as of writing)
     unsigned short getYear() const {return year;}
     void setYear(unsigned short year) {this->year = year;}
@@ -98,6 +107,9 @@ private:
 	/// this representation can be used for comparison (==, <, >) not for calculation
     long long toLong() const { return year*10000000000000LL + month*100000000000LL + mday*1000000000LL + hour*10000000LL + minute*100000 + second*1000 + msecond; }
 };
+
+/// minimum FimexTime
+
 
 
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime);

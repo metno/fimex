@@ -24,6 +24,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <limits>
 
 extern "C" {
 #include "udunits.h"
@@ -41,6 +42,33 @@ static std::string twoDigits(int i) {
 		return s;
 	}
 }
+
+void FimexTime::setTime(unsigned short year, char month, char mday, char hour, char minute, char second, unsigned short msecond)
+{
+    this->year = year;
+    this->month = month;
+    this->mday = mday;
+    this->hour = hour;
+    this->minute = minute;
+    this->second = second;
+    this->msecond = msecond;
+}
+
+
+FimexTime::FimexTime(unsigned short year, char month, char mday, char hour, char minute, char second, unsigned short msecond)
+: year(year), month(month), mday(mday), hour(hour), minute(minute), second(second), msecond(msecond)
+{
+}
+
+FimexTime::FimexTime(special_values val)
+{
+    switch (val) {
+        case min_date_time: setTime(0, CHAR_MIN, CHAR_MIN, CHAR_MIN, CHAR_MIN, CHAR_MIN, 0); break;
+        case max_date_time: setTime(USHRT_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, USHRT_MAX); break;
+        default: throw CDMException("unimplemented special_value: "+val);
+    }
+}
+
 
 bool FimexTime::operator==(const FimexTime &rhs) const
 {

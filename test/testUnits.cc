@@ -116,6 +116,14 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	boost::posix_time::ptime ptime(boost::gregorian::date(1970,1,1), boost::posix_time::time_duration(2,0,0));
 	double unitTime = tu.posixTime2unitTime(ptime);
 	BOOST_CHECK(abs(unitTime-(60*60)) < 1e-5);
+
+    FimexTime minTime(FimexTime::min_date_time);
+    FimexTime maxTime(FimexTime::max_date_time);
+    BOOST_CHECK(ft > minTime);
+    BOOST_CHECK(ft2 > minTime);
+    BOOST_CHECK(ft < maxTime);
+    BOOST_CHECK(ft2 < maxTime);
+
 }
 
 #else
