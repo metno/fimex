@@ -83,14 +83,14 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	BOOST_CHECK(fabs(tu.epochSeconds2unitTime(epoch)) < 1e-5);
 
 	FimexTime ft = tu.unitTime2fimexTime(3600*24*33); // 03.02.1970
-	BOOST_CHECK(ft.year == 1970);
-	BOOST_CHECK(ft.month == 2);
-	BOOST_CHECK(ft.mday == 3);
-	BOOST_CHECK(ft.hour == 1);
-	BOOST_CHECK(ft.minute == 0);
-	BOOST_CHECK(ft.second == 0);
+	BOOST_CHECK(ft.getYear() == 1970);
+	BOOST_CHECK(ft.getMonth() == 2);
+	BOOST_CHECK(ft.getMDay() == 3);
+	BOOST_CHECK(ft.getHour() == 1);
+	BOOST_CHECK(ft.getMinute() == 0);
+	BOOST_CHECK(ft.getSecond() == 0);
 
-	ft.msecond = 11;
+	ft.setMSecond(11);
 	// std::cerr << type2string(ft) << std::endl;
 	BOOST_CHECK(type2string(ft) == "1970-02-03 01:00:00.011");
 	// std::cerr << type2string(string2FimexTime(type2string(ft))) << std::endl;
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 	// check comparison
 	FimexTime ft2 = string2FimexTime(type2string(ft));
 	BOOST_CHECK(ft2 == ft);
-	ft2.msecond = 0;
+	ft2.setMSecond(0);
 	BOOST_CHECK(ft2 != ft);
 	BOOST_CHECK(ft2 < ft);
 	BOOST_CHECK(ft2 <= ft);
@@ -108,9 +108,9 @@ BOOST_AUTO_TEST_CASE( test_TimeUnit )
 
 
 
-	ft.month = 1;
-	ft.mday = 1;
-	ft.msecond = 0;
+	ft.setMonth(1);
+	ft.setMDay(1);
+	ft.setMSecond(0);
 	BOOST_CHECK(fabs(tu.fimexTime2unitTime(ft)) < 1e-5);
 
 	boost::posix_time::ptime ptime(boost::gregorian::date(1970,1,1), boost::posix_time::time_duration(2,0,0));

@@ -43,21 +43,44 @@ namespace MetNoFimex
  * given correctly, i.e. seconds between 0 and 59
  */
 class FimexTime {
+private:
+    /// millisecond
+    unsigned short msecond;
+    /// second (0-59)
+    char second;
+    /// minute (0-59)
+    char minute;
+    /// hour (0-23)
+    char hour;
+    /// day of month (1-31)
+    char mday;
+    /// month (1-12)
+    char month;
+    /// year (2008 as of writing)
+    unsigned short year;
+
 public:
-	/// millisecond
-	unsigned short msecond;
-	/// second (0-59)
-	char second;
-	/// minute (0-59)
-	char minute;
-	/// hour (0-23)
-	char hour;
-	/// day of month (1-31)
-	char mday;
-	/// month (1-12)
-	char month;
-	/// year (2008 as of writing)
-	unsigned short year;
+    /// year (2008 as of writing)
+    unsigned short getYear() const {return year;}
+    void setYear(unsigned short year) {this->year = year;}
+    /// month (1-12)
+    char getMonth() const {return month;}
+    void setMonth(char month) {this->month = month;}
+    /// day of month (1-31)
+    char getMDay() const {return mday;}
+    void setMDay(char mday) {this->mday = mday;}
+    /// hour (0-23)
+    char getHour() const {return hour;}
+    void setHour(char hour) {this->hour = hour;}
+    /// minute (0-59)
+    char getMinute() const {return minute;}
+    void setMinute(char minute) {this->minute = minute;}
+    /// second (0-59)
+    char getSecond() const {return second;}
+    void setSecond(char second) {this->second = second;}
+    /// millisecond
+    unsigned short getMSecond() const {return msecond;}
+    void setMSecond(unsigned short msecond) {this->msecond = msecond;}
 	/// compare two fimexTimes
 	bool operator==(const FimexTime &rhs) const;
 	/// compare two fimexTimes
@@ -73,7 +96,7 @@ public:
 
 private:
 	/// this representation can be used for comparison (==, <, >) not for calculation
-	long long toLong() const { return year*10000000000000LL + month*100000000000LL + mday*1000000000LL + hour*10000000LL + minute*100000 + second*1000 + msecond; }
+    long long toLong() const { return year*10000000000000LL + month*100000000000LL + mday*1000000000LL + hour*10000000LL + minute*100000 + second*1000 + msecond; }
 };
 
 

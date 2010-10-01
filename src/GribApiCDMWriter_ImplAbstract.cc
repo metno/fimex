@@ -150,8 +150,8 @@ void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data)
 void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const FimexTime& fTime)
 {
 	LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << fTime << ")" );
-	long date = fTime.year * 10000 + fTime.month * 100 + fTime.mday;
-	long time = fTime.hour * 100 + fTime.minute;
+	long date = fTime.getYear() * 10000 + fTime.getMonth() * 100 + fTime.getMDay();
+	long time = fTime.getHour() * 100 + fTime.getMinute();
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", date), "setting dataDate");
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", time), "setting dataTime");
 }

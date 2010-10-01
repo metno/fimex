@@ -55,16 +55,16 @@ bool FimexTime::operator==(const FimexTime &rhs) const
 
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
 {
-	out << fTime.year << "-" << twoDigits(fTime.month) << "-" << twoDigits(fTime.mday) << " ";
-	out << twoDigits(fTime.hour) << ":" << twoDigits(fTime.minute) << ":" << twoDigits(fTime.second);
-	if (fTime.msecond > 0) {
+	out << fTime.getYear() << "-" << twoDigits(fTime.getMonth()) << "-" << twoDigits(fTime.getMDay()) << " ";
+	out << twoDigits(fTime.getHour()) << ":" << twoDigits(fTime.getMinute()) << ":" << twoDigits(fTime.getSecond());
+	if (fTime.getMSecond() > 0) {
 		out << ".";
-		if (fTime.msecond < 10) {
+		if (fTime.getMSecond() < 10) {
 			out << "00";
-		} else if (fTime.msecond < 100) {
+		} else if (fTime.getMSecond() < 100) {
 			out << "0";
 		}
-		out << fTime.msecond;
+		out << fTime.getMSecond();
 	}
 	return out;
 }
@@ -80,23 +80,23 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 	if (dateParts.size() != 3) {
 		throw CDMException("string2FimexTime: date does not consist of 3 parts:" +str);
 	}
-	ft.year = string2type<int>(dateParts[0]);
-	ft.month = string2type<int>(dateParts[1]);
-	ft.mday = string2type<int>(dateParts[2]);
+	ft.setYear(string2type<int>(dateParts[0]));
+	ft.setMonth(string2type<int>(dateParts[1]));
+	ft.setMDay(string2type<int>(dateParts[2]));
 
 	std::vector<std::string> timeParts = tokenize(dateTime[1], ":");
 	if (timeParts.size() != 3) {
 		throw CDMException("string2FimexTime: time does not consist of 3 parts");
 	}
-	ft.hour = string2type<int>(timeParts[0]);
-	ft.minute = string2type<int>(timeParts[1]);
+	ft.setHour(string2type<int>(timeParts[0]));
+	ft.setMinute(string2type<int>(timeParts[1]));
 
 	std::vector<std::string> secondParts = tokenize(timeParts[2], ".");
-	ft.second = string2type<int>(secondParts[0]);
+	ft.setSecond(string2type<int>(secondParts[0]));
 	if (secondParts.size() > 1) {
-		ft.msecond = static_cast<int>(round(string2type<double>("."+secondParts[1]) * 1000));
+		ft.setMSecond(static_cast<int>(round(string2type<double>("."+secondParts[1]) * 1000)));
 	} else {
-		ft.msecond = 0;
+		ft.setMSecond(0);
 	}
 	return ft;
 }
@@ -139,13 +139,13 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 	float second;
 	int year, month, mday, hour, minute;
 	handleUdUnitError(utCalendar(unitTime, pUnit.get(), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
-	fiTime.year = static_cast<unsigned int>(year);
-	fiTime.month = static_cast<char>(month);
-	fiTime.mday = static_cast<char>(mday);
-	fiTime.hour = static_cast<char>(hour);
-	fiTime.minute = static_cast<char>(minute);
-	fiTime.second = static_cast<char>(second);
-	fiTime.msecond = static_cast<unsigned int>((second - fiTime.second)*1000);
+	fiTime.setYear(static_cast<unsigned int>(year));
+	fiTime.setMonth(static_cast<char>(month));
+	fiTime.setMDay(static_cast<char>(mday));
+	fiTime.setHour(static_cast<char>(hour));
+	fiTime.setMinute(static_cast<char>(minute));
+	fiTime.setSecond(static_cast<char>(second));
+	fiTime.setMSecond(static_cast<unsigned int>((second - fiTime.getSecond())*1000));
 
 	return fiTime;
 }
@@ -160,9 +160,9 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 
 double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
 {
-	float second = fiTime.second + (fiTime.msecond/1000.);
+	float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
 	double retVal;
-	handleUdUnitError(utInvCalendar(fiTime.year, fiTime.month, fiTime.mday, fiTime.hour, fiTime.minute, second, pUnit.get(), &retVal), "converting calendar to double");
+	handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, pUnit.get(), &retVal), "converting calendar to double");
 	return retVal;
 }
 
