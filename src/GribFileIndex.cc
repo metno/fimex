@@ -32,6 +32,8 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/convenience.hpp>
+#include <boost/version.hpp>
 #include <libxml/xmlwriter.h>
 #include <cstdlib>
 #include <iostream>
@@ -39,6 +41,17 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
+#if BOOST_VERSION < 103400
+// declare is_regular function to allways be true
+namespace boost {
+    namespace filesystem {
+        bool is_regular(boost::filesystem::path p) { return true; }
+    }
+}
+std::string file_string(boost::filesystem::path p) { return p.native_file_string(); }
+#else
+std::string file_string(boost::filesystem::path p) { return p.file_string(); }
+#endif
 
 namespace MetNoFimex
 {
@@ -404,7 +417,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             double incrX = string2type<double>(getXmlProp(lNode, "incrX"));
             double incrY = string2type<double>(getXmlProp(lNode, "incrY"));
             GridDefinition::Orientation scanMode = static_cast<GridDefinition::Orientation>(string2type<long>(getXmlProp(lNode, "scanMode")));
-            gridDefinition_ = GridDefinition(proj4, sizeX, sizeY, incrX, incrY, startX, startY, scanMode);
+            gridDefinition_ = GridDefinition(proj4, static_cast<size_t>(sizeX), static_cast<size_t>(sizeY), incrX, incrY, startX, startY, scanMode);
         }
     }
 }
@@ -730,14 +743,14 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
 
 void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
 {
-    url_ = "file:"+ gribFilePath.file_string();
-    boost::shared_ptr<FILE> fh(fopen(gribFilePath.file_string().c_str(), "r"), fclose);
+    url_ = "file:"+ file_string(gribFilePath);
+    boost::shared_ptr<FILE> fh(fopen(file_string(gribFilePath).c_str(), "r"), fclose);
     if (fh.get() == 0) {
-        throw runtime_error("cannot open file: " + gribFilePath.file_string());
+        throw runtime_error("cannot open file: " + file_string(gribFilePath));
     }
     // enable multi-messages
     grib_multi_support_on(0);
-    size_t lastPos = -1;
+    size_t lastPos = static_cast<size_t>(-1);
     size_t msgPos = 0;
     while (!feof(fh.get())) {
         // read the next message
@@ -764,12 +777,12 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
 
 void GribFileIndex::initByXML(boost::filesystem::path xmlFilePath)
 {
-    boost::shared_ptr<XMLDoc> doc(new XMLDoc(xmlFilePath.file_string()));
+    boost::shared_ptr<XMLDoc> doc(new XMLDoc(file_string(xmlFilePath)));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     XPathObjPtr xp = doc->getXPathObject("/gfi:gribFileIndex");
     int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;
     if (size == 0) {
-        throw runtime_error("grib-index xmlfile does not contain root node at: " + xmlFilePath.file_string());
+        throw runtime_error("grib-index xmlfile does not contain root node at: " + file_string(xmlFilePath));
     }
     url_ = getXmlProp(xp->nodesetval->nodeTab[0], "url");
 

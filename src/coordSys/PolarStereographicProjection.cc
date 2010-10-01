@@ -40,7 +40,7 @@ bool PolarStereographicProjection::acceptsProj4(const std::string& proj4Str)
     if (proj4ProjectionMatchesName(proj4Str, "stere")) {
         boost::smatch what;
         if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_0=(\\S+)"))) {
-            int lat0 = string2type<double>(what[1].str());
+            double lat0 = string2type<double>(what[1].str());
             if (fabs(fabs(lat0)-90) < 1e-4) {
                 return true; // +90/-90
             }
