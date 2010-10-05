@@ -96,6 +96,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 	if (from == to) {
 		slope = 1.;
 		offset = 0.;
+		return;
 	}
 	utUnit fromUnit, toUnit;
 	handleUdUnitError(utScan(from.c_str(), &fromUnit), from);

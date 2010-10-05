@@ -31,6 +31,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/coordSys/CoordinateAxis.h"
 
 namespace MetNoFimex
 {
@@ -77,20 +78,47 @@ public:
 	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
 	 */
 	virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0) throw(CDMException);
+    /**
+     * @brief reduce the axes of a file with an explicit unit
+     *
+     * In contrast to #reduceDimension, this method allows the usage of
+     * absolute values, not positions on the dimension. It will try to detect the
+     * reduction of dimensions as needed.
+     *
+     * @warning reduceAxes requires the times to be monotonic
+     * @warning reduceAxes requires the file to come with a known convention, e.g. CF, see listCoordinateSystems()
+     * @warning reduceAxes is not able to reduce multi-dimensional axes-dimensions, e.g. time(time, station), yet
+     *
+     */
+    virtual void reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal) throw(CDMException);
 	/**
 	 * @brief reduce the time explicitly by a timestamp
 	 *
 	 * In contrast to #reduceDimension, this method allows the usage of
 	 * absolute times. It will try to detect the reduction of dimensions as needed
 	 *
-	 * @warning reduceTime requires the times to be monotonic growing
-	 * @warning reduceTime requires the file to come with a known convention, e.g. CF, see listCoordinateSystems()
-	 * @warning reduceTime is not able to reduce multi-dimensional time-dimensions, e.g. time(time, station), yet
-	 *
+     * This is implemented using reduceAxes() and the TimeAxis type.
+     * @warning see warnings in reduceAxes()
 	 */
 	virtual void reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException);
 
-	/**
+    /**
+     * @brief reduce a vertical axis by value
+     *
+     * In contrast to #reduceDimension, this method allows the usage of vertical axes values
+     * having a compatible unit to units.
+     * It will try to detect the reduction of dimensions as needed.
+     *
+     * @param units the units of the start and end value. Only vertical axes with compatible units will be reduced.
+     * @param startVal the lower value of the axis (included)
+     * @param endVal the upper value of the axis (included)
+     *
+     * This is implemented using reduceAxes() and the axis types: pressure, height, geoZ.
+     * @warning see warnings in reduceAxes()
+     */
+    virtual void reduceVerticalAxis(const std::string& units, double startVal, double endVal) throw(CDMException);
+
+    /**
 	 * @brief change the datatype of the variable
 	 * 
 	 * a change of the variable will also change the datatype of the _FillValue attribute

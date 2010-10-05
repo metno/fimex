@@ -117,58 +117,6 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	}
 }
 
-void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
-{
-    if (startTime > endTime) {
-        throw CDMException("reduceTime requires startTime <= endTime");
-    }
-    using namespace std;
-    const CDM& cdm = dataReader->getCDM();
-    typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList coordsys = listCoordinateSystems(cdm);
-    typedef vector<CoordinateSystem::ConstAxisPtr> TAxesList;
-    TAxesList tAxes;
-    for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
-        CoordinateSystem::ConstAxisPtr tAxis = (*cs)->getTimeAxis();
-        if (tAxis.get() != 0) {
-            tAxes.push_back(tAxis);
-        }
-    }
-
-    set<string> usedDimensions;
-    for (TAxesList::const_iterator ta = tAxes.begin(); ta != tAxes.end(); ++ta) {
-        const vector<string>& shape = (*ta)->getShape();
-        if (shape.size() != 1) {
-            LOG4FIMEX(logger, Logger::WARN, "cannot reduce time-axis '" << (*ta)->getName() << "': axis is not 1-dim");
-        } else if (usedDimensions.find(shape[0]) == usedDimensions.end()) {
-            // set usedDimensions to not process dimension again
-            usedDimensions.insert(shape[0]);
-
-            // find start and end time in time-axis
-            string unit = cdm.getUnits((*ta)->getName());
-            if (unit.size() == 0) {
-                throw CDMException("time axis "+ (*ta)->getName() + " without unit-string");
-            }
-            // calculate everything in the original unit
-            TimeUnit tu(unit);
-            double start = tu.fimexTime2unitTime(startTime);
-            double end = tu.fimexTime2unitTime(endTime);
-            boost::shared_ptr<Data> timeData = dataReader->getScaledData((*ta)->getName());
-            const boost::shared_array<double> timeArray = timeData->asConstDouble();
-
-            // timeArray assumed to be monotonic growing
-            double* lower = lower_bound(&timeArray[0], &timeArray[0] + timeData->size(), start);
-            double* upper = upper_bound(&timeArray[0], &timeArray[0] + timeData->size(), end);
-
-            // reduce dimension according to these points (name, startPos, size)
-            size_t startPos = distance(&timeArray[0], lower);
-            size_t size = distance(lower, upper);
-            LOG4FIMEX(logger, Logger::DEBUG, "reducing dimension "<< shape[0] << " from: " << startPos << " size: " << size);
-            reduceDimension(shape[0], startPos, size);
-        }
-    }
-}
-
 void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long end) throw(CDMException)
 {
 	size_t length = 0;
@@ -183,6 +131,109 @@ void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, lo
 	reduceDimension(dimName, start, length);
 }
 
+void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal) throw(CDMException)
+{
+    using namespace std;
+    LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of "<< aUnits << "(" << startVal << "," << endVal <<")");
+    if (startVal > endVal) {
+        // make sure startVal <= endVal
+        double tmp = startVal;
+        startVal = endVal;
+        endVal = tmp;
+    }
+
+    Units units;
+    const CDM& cdm = dataReader->getCDM();
+    typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
+    CsList coordsys = listCoordinateSystems(cdm);
+    typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
+    VAxesList vAxes;
+    for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
+        for (vector<CoordinateAxis::AxisType>::const_iterator vType = types.begin(); vType != types.end(); ++vType) {
+            CoordinateSystem::ConstAxisPtr vAxis = (*cs)->findAxisOfType(*vType);
+            if (vAxis.get() != 0) {
+                string vaUnits = cdm.getUnits(vAxis->getName());
+                if (units.areConvertible(vaUnits, aUnits)) {
+                    vAxes.push_back(vAxis);
+                }
+            }
+        }
+    }
+
+    set<string> usedDimensions;
+    for (VAxesList::const_iterator va = vAxes.begin(); va != vAxes.end(); ++va) {
+        const vector<string>& shape = (*va)->getShape();
+        if (shape.size() != 1) {
+            LOG4FIMEX(logger, Logger::WARN, "cannot reduce axis '" << (*va)->getName() << "': axis is not 1-dim");
+        } else if (usedDimensions.find(shape[0]) == usedDimensions.end()) {
+            // set usedDimensions to not process dimension again
+            usedDimensions.insert(shape[0]);
+            boost::shared_ptr<Data> vData = dataReader->getScaledData((*va)->getName());
+            if (vData->size() > 0) {
+                // calculate everything in the original unit
+                string vaUnits = cdm.getUnits((*va)->getName());
+                double offset,slope;
+                units.convert(aUnits, vaUnits, slope, offset);
+                double roundingDelta = 1e-5;
+                startVal = startVal*slope + offset - roundingDelta;
+                endVal = endVal*slope + offset + roundingDelta;
+                LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of " << (*va)->getName() << " after unit-conversion: ("<< startVal << ","<< endVal<<")");
+
+                // find start and end time in time-axis
+                boost::shared_ptr<Data> vData = dataReader->getScaledData((*va)->getName());
+                const boost::shared_array<double> vArray = vData->asConstDouble();
+                // make sure data is growing
+                bool isReverse = false;
+                if ((vData->size() > 1) && (vArray[0] > vArray[1])) {
+                    isReverse = true;
+                    reverse(&vArray[0], &vArray[0] + vData->size());
+                }
+
+                // vArray assumed to be monotonic growing
+                double* lower = lower_bound(&vArray[0], &vArray[0] + vData->size(), startVal);
+                double* upper = upper_bound(&vArray[0], &vArray[0] + vData->size(), endVal);
+
+                LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes found lower,upper ("<< *lower << ","<< *upper<<")");
+
+
+                // reduce dimension according to these points (name, startPos, size)
+                size_t startPos = distance(&vArray[0], lower);
+                size_t size = distance(lower, upper);
+                if ((size == 0) && (cdm.getUnlimitedDim()->getName() != shape[0])) {
+                    // 0 size only allowed in unlim-dim, using best effort
+                    size = 1;
+                }
+                if (isReverse) {
+                    startPos = vData->size() - size - startPos;
+                    // reverse data back for possible later usage
+                    reverse(&vArray[0], &vArray[0] + vData->size());
+                }
+
+                LOG4FIMEX(logger, Logger::DEBUG, "reducing axes-dimension "<< shape[0] << " from: " << startPos << " size: " << size);
+                reduceDimension(shape[0], startPos, size);
+
+            }
+        }
+    }
+}
+
+void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
+{
+    std::string unit = "seconds since 1970-01-01 00:00:00";
+    TimeUnit tu(unit);
+    std::vector<CoordinateAxis::AxisType> types;
+    types.push_back(CoordinateAxis::Time);
+    reduceAxes(types, unit, tu.fimexTime2unitTime(startTime), tu.fimexTime2unitTime(endTime));
+}
+
+void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal, double endVal) throw(CDMException)
+{
+    std::vector<CoordinateAxis::AxisType> types;
+    types.push_back(CoordinateAxis::GeoZ);
+    types.push_back(CoordinateAxis::Height);
+    types.push_back(CoordinateAxis::Pressure);
+    reduceAxes(types, units, startVal, endVal);
+}
 
 void CDMExtractor::changeDataType(std::string variable, CDMDataType datatype) throw(CDMException)
 {

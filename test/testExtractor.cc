@@ -47,7 +47,7 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_extract )
 {
-//    defaultLogLevel(Logger::DEBUG);
+    //defaultLogLevel(Logger::DEBUG);
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -86,6 +86,13 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(extract->getData("time")->size() == 61);
 
     extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    // reduce sigma from 4 to 2
+    extract->reduceVerticalAxis("", .5, .85);
+    BOOST_CHECK(extract->getData("sigma")->size() == 2);
+
+    // reduce time to 0 and sigma to 0
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceVerticalAxis("", -0.1, -0.05);
     extract->reduceTime(FimexTime(2006,1,1), FimexTime(2006,1,2)); // time out of range
     BOOST_CHECK(extract->getData("time")->size() == 0);
     NetCDF_CDMWriter(extract, "test_0time.nc");
