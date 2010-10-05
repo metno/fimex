@@ -25,9 +25,17 @@
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 #include "fimex/SliceBuilder.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/Logger.h"
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <iterator>
 
 namespace MetNoFimex
 {
+
+LoggerPtr logger(getLogger("fimex.CDMExtractor"));
 
 CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)
 : dataReader(datareader)
@@ -37,12 +45,14 @@ CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)
 
 CDMExtractor::~CDMExtractor()
 {
- }
+}
 
 boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
+	    // remove dimension makes sure that variables with dimensions requiring slicing
+	    // don't have in local in memory data, so return the memory data is save here
 		return getDataSliceFromMemory(variable, unLimDimPos);
 	}
 	boost::shared_ptr<Data> data;
@@ -105,6 +115,58 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 			cdm_->getVariable(it->getName()).setData(boost::shared_ptr<Data>());
 		}
 	}
+}
+
+void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
+{
+    if (startTime > endTime) {
+        throw CDMException("reduceTime requires startTime <= endTime");
+    }
+    using namespace std;
+    const CDM& cdm = dataReader->getCDM();
+    typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
+    CsList coordsys = listCoordinateSystems(cdm);
+    typedef vector<CoordinateSystem::ConstAxisPtr> TAxesList;
+    TAxesList tAxes;
+    for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
+        CoordinateSystem::ConstAxisPtr tAxis = (*cs)->getTimeAxis();
+        if (tAxis.get() != 0) {
+            tAxes.push_back(tAxis);
+        }
+    }
+
+    set<string> usedDimensions;
+    for (TAxesList::const_iterator ta = tAxes.begin(); ta != tAxes.end(); ++ta) {
+        const vector<string>& shape = (*ta)->getShape();
+        if (shape.size() != 1) {
+            LOG4FIMEX(logger, Logger::WARN, "cannot reduce time-axis '" << (*ta)->getName() << "': axis is not 1-dim");
+        } else if (usedDimensions.find(shape[0]) == usedDimensions.end()) {
+            // set usedDimensions to not process dimension again
+            usedDimensions.insert(shape[0]);
+
+            // find start and end time in time-axis
+            string unit = cdm.getUnits((*ta)->getName());
+            if (unit.size() == 0) {
+                throw CDMException("time axis "+ (*ta)->getName() + " without unit-string");
+            }
+            // calculate everything in the original unit
+            TimeUnit tu(unit);
+            double start = tu.fimexTime2unitTime(startTime);
+            double end = tu.fimexTime2unitTime(endTime);
+            boost::shared_ptr<Data> timeData = dataReader->getScaledData((*ta)->getName());
+            const boost::shared_array<double> timeArray = timeData->asConstDouble();
+
+            // timeArray assumed to be monotonic growing
+            double* lower = lower_bound(&timeArray[0], &timeArray[0] + timeData->size(), start);
+            double* upper = upper_bound(&timeArray[0], &timeArray[0] + timeData->size(), end);
+
+            // reduce dimension according to these points (name, startPos, size)
+            size_t startPos = distance(&timeArray[0], lower);
+            size_t size = distance(lower, upper);
+            LOG4FIMEX(logger, Logger::DEBUG, "reducing dimension "<< shape[0] << " from: " << startPos << " size: " << size);
+            reduceDimension(shape[0], startPos, size);
+        }
+    }
 }
 
 void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long end) throw(CDMException)

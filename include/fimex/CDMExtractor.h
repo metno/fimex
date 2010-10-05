@@ -30,6 +30,7 @@
 
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
+#include "fimex/TimeUnit.h"
 
 namespace MetNoFimex
 {
@@ -76,6 +77,19 @@ public:
 	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
 	 */
 	virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0) throw(CDMException);
+	/**
+	 * @brief reduce the time explicitly by a timestamp
+	 *
+	 * In contrast to #reduceDimension, this method allows the usage of
+	 * absolute times. It will try to detect the reduction of dimensions as needed
+	 *
+	 * @warning reduceTime requires the times to be monotonic growing
+	 * @warning reduceTime requires the file to come with a known convention, e.g. CF, see listCoordinateSystems()
+	 * @warning reduceTime is not able to reduce multi-dimensional time-dimensions, e.g. time(time, station), yet
+	 *
+	 */
+	virtual void reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException);
+
 	/**
 	 * @brief change the datatype of the variable
 	 * 

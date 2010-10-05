@@ -40,6 +40,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/Logger.h"
+#include "fimex/Data.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -69,9 +70,27 @@ BOOST_AUTO_TEST_CASE( test_extract )
 
 	extract->reduceDimension("y", 10, 50);
 	extract->reduceDimension("x", 80, 50); // spain
-	extract->reduceDimension("time", 10, 12);
+	FimexTime startTime(2007,5,16, 9);
+    FimexTime endTime(2007,5,16, 20);
+	extract->reduceTime(startTime, endTime); // 12 hours 9..20
+	BOOST_CHECK(extract->getData("y")->size() == 50);
+    BOOST_CHECK(extract->getData("x")->size() == 50);
+    BOOST_CHECK(extract->getData("time")->size() == 12);
+    BOOST_CHECK(extract->getData("altitude")->size() == 50*50);
+    BOOST_CHECK(extract->getData("precipitation_amount")->size() == 50*50*12);
 	NetCDF_CDMWriter(extract, "test3.nc");
 	BOOST_CHECK(true);
+
+	extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+	extract->reduceTime(FimexTime(FimexTime::min_date_time), FimexTime(FimexTime::max_date_time));
+    BOOST_CHECK(extract->getData("time")->size() == 61);
+
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceTime(FimexTime(2006,1,1), FimexTime(2006,1,2)); // time out of range
+    BOOST_CHECK(extract->getData("time")->size() == 0);
+    NetCDF_CDMWriter(extract, "test_0time.nc");
+    BOOST_CHECK(true);
+
 }
 
 #else
