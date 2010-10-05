@@ -42,7 +42,11 @@ namespace MetNoFimex
 {
 
 CDMAttribute::CDMAttribute()
+: name(""), datatype(CDM_STRING)
 {
+    // defining some empty data
+    boost::shared_array<char> cstr(new char[0]);
+    data = boost::shared_ptr<Data>(new DataImpl<char>(cstr, 0));
 }
 
 CDMAttribute::CDMAttribute(std::string name, std::string value)

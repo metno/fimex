@@ -141,10 +141,13 @@ namespace MetNoFimex
 	// (template definitions should be in header files (depending on compiler))
 	template<typename C>
 	void DataImpl<C>::toStream(std::ostream& os, std::string separator) const {
-		for (size_t i = 0; i < (length-1); i++) {
-			os << theData[i] << separator;
-		}
-		os << theData[length-1];
+	    if (length > 0) {
+	        for (size_t i = 0; i < (length-1); i++) {
+	            os << theData[i] << separator;
+	        }
+	        // last element without separator
+	        os << theData[length-1];
+	    }
 	}
 
 	template<typename C>
