@@ -96,7 +96,7 @@ void CDMExtractor::removeVariable(std::string variable)
 	cdm_->removeVariable(variable);
 }
 
-void CDMExtractor::selectVariable(std::set<std::string> variables)
+void CDMExtractor::selectVariables(std::set<std::string> variables)
 {
     using namespace std;
     const CDM::VarVec& allVars = getCDM().getVariables();

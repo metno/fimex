@@ -69,6 +69,53 @@ FimexTime::FimexTime(special_values val)
     }
 }
 
+bool FimexTime::parseISO8601(const std::string& isoStr)
+{
+    using namespace std;
+    string trimStr = trim(isoStr);
+    if (trimStr.size() == 0) return false;
+
+    // T delimiter for date and time
+    vector<string> dateTime = tokenize(trimStr, "T");
+    if (dateTime.size() == 1) {
+        // try space delimiter for date and time
+        dateTime = tokenize(trimStr, " ");
+    }
+
+    // convert date and time 'int' vectors
+    vector<string> time;
+    vector<int> date;
+    if (dateTime.size() == 1) {
+        date = tokenizeDotted<int>(dateTime[0], "-");
+        if (date.size() == 3) {
+            // set time to zero
+            time.push_back("0");
+            time.push_back("0");
+            time.push_back("0.0");
+        } else {
+            return false; // date required
+        }
+    } else if (dateTime.size() == 2) {
+        date = tokenizeDotted<int>(dateTime[0], "-");
+        time = tokenize(dateTime[1], ":");
+    } else {
+        return false;
+    }
+
+    if (time.size() == 2) time.push_back(0);
+    // check date and time and set
+    if ((date.size() == 3) && (time.size() == 3)) {
+        vector<string> seconds = tokenize(time[2], ".");
+        int milliSecs = 0;
+        if (seconds.size() > 1) {
+            milliSecs = static_cast<int>(round(string2type<double>("."+seconds[1]) * 1000));
+        }
+        setTime(date[0], date[1], date[2], string2type<short>(time[0]), string2type<short>(time[1]), string2type<short>(seconds[0]), milliSecs);
+        return true;
+    } else {
+        return false;
+    }
+}
 
 bool FimexTime::operator==(const FimexTime &rhs) const
 {
@@ -100,31 +147,8 @@ std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
 FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 {
 	FimexTime ft;
-	std::vector<std::string> dateTime = tokenize(str, " ");
-	if (dateTime.size() != 2) {
-		throw CDMException("string2FimexTime: date and time not found:" + str);
-	}
-	std::vector<std::string> dateParts = tokenize(dateTime[0], "-");
-	if (dateParts.size() != 3) {
-		throw CDMException("string2FimexTime: date does not consist of 3 parts:" +str);
-	}
-	ft.setYear(string2type<int>(dateParts[0]));
-	ft.setMonth(string2type<int>(dateParts[1]));
-	ft.setMDay(string2type<int>(dateParts[2]));
-
-	std::vector<std::string> timeParts = tokenize(dateTime[1], ":");
-	if (timeParts.size() != 3) {
-		throw CDMException("string2FimexTime: time does not consist of 3 parts");
-	}
-	ft.setHour(string2type<int>(timeParts[0]));
-	ft.setMinute(string2type<int>(timeParts[1]));
-
-	std::vector<std::string> secondParts = tokenize(timeParts[2], ".");
-	ft.setSecond(string2type<int>(secondParts[0]));
-	if (secondParts.size() > 1) {
-		ft.setMSecond(static_cast<int>(round(string2type<double>("."+secondParts[1]) * 1000)));
-	} else {
-		ft.setMSecond(0);
+	if (!ft.parseISO8601(str)) {
+	    throw CDMException("string2FimexTime: date and time not found:" + str);
 	}
 	return ft;
 }

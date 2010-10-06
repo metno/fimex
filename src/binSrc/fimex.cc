@@ -38,6 +38,7 @@
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
 #ifdef HAVE_FELT
 #include "fimex/FeltCDMReader2.h"
@@ -128,9 +129,15 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOptionString(out, "qualityExtract.printNcML", vm);
     writeOptionString(out, "qualityExtract.printCS", vm);
 	writeVectorOptionString(out, "extract.removeVariable", vm);
+    writeVectorOptionString(out, "extract.selectVariable", vm);
 	writeVectorOptionString(out, "extract.reduceDimension.name", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
+    writeOptionString(out, "extract.reduceTime.start", vm);
+    writeOptionString(out, "extract.reduceTime.end", vm);
+    writeOptionString(out, "extract.reduceVerticalAxis.unit", vm);
+    writeOptionString(out, "extract.reduceVerticalAxis.start", vm);
+    writeOptionString(out, "extract.reduceVerticalAxis.end", vm);
 	writeOptionAny(out, "extract.printNcML", vm);
     writeOptionAny(out, "extract.printCS", vm);
 	writeOptionString(out, "interpolate.projString", vm);
@@ -238,17 +245,13 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 }
 
 static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
-	if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable"))) {
+	if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable") ||
+	       vm.count("extract.selectVariable") || vm.count("extract.reduceTime.start") ||
+	       vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit"))) {
 		LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
 		return dataReader;
 	}
 	auto_ptr<CDMExtractor> extractor(new CDMExtractor(boost::shared_ptr<CDMReader>(dataReader)));
-	if (vm.count("extract.removeVariable")) {
-		vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
-		for (vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
-			extractor->removeVariable(*it);
-		}
-	}
 	if (vm.count("extract.reduceDimension.name")) {
 		vector<string> vars = vm["extract.reduceDimension.name"].as<vector<string> >();
 		vector<int> startPos;
@@ -271,6 +274,43 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 			extractor->reduceDimensionStartEnd(vars[i], startPos[i], endPos[i]);
 		}
 	}
+	if (vm.count("extract.reduceTime.start") || vm.count("extract.reduceTime.end")) {
+	    FimexTime start(FimexTime::min_date_time);
+        FimexTime end(FimexTime::max_date_time);
+        if (vm.count("extract.reduceTime.start")) {
+            if (! start.parseISO8601(vm["extract.reduceTime.start"].as<string>()) ) {
+                cerr << "cannot parse time " << vm["extract.reduceTime.start"].as<string>() << endl;
+                exit(1);
+            }
+        }
+        if (vm.count("extract.reduceTime.end")) {
+            if (! start.parseISO8601(vm["extract.reduceTime.end"].as<string>()) ) {
+                cerr << "cannot parse time " << vm["extract.reduceTime.end"].as<string>() << endl;
+                exit(1);
+            }
+        }
+        extractor->reduceTime(start, end);
+	}
+	if (vm.count("extract.reduceVerticalAxis.unit")) {
+	    if (!(vm.count("extract.reduceVerticalAxis.start") && vm.count("extract.reduceVerticalAxis.end"))) {
+	        cerr << "extract.reduceVerticalAxis requires all 'start','end','unit'" << endl;
+	        exit(1);
+	    }
+	    string unit = vm["extract.reduceVerticalAxis.unit"].as<string>();
+	    double start = vm["extract.reduceVerticalAxis.start"].as<double>();
+        double end = vm["extract.reduceVerticalAxis.end"].as<double>();
+        extractor->reduceVerticalAxis(unit, start, end);
+	}
+	if (vm.count("extract.selectVariable")) {
+        vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
+        extractor->selectVariables(set<string>(vars.begin(), vars.end()));
+	}
+	if (vm.count("extract.removeVariable")) {
+        vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
+        for (vector<string>::iterator it = vars.begin(); it != vars.end(); ++it) {
+            extractor->removeVariable(*it);
+        }
+    }
 	if (vm.count("extract.printNcML")) {
 		cout << "Extractor as NcML:" << endl;
 		extractor->getCDM().toXMLStream(cout);
@@ -455,9 +495,15 @@ int main(int argc, char* args[])
 		("output.type", po::value<string>(), "filetype of output file")
 		("output.config", po::value<string>(), "non-standard output configuration")
 		("extract.removeVariable", po::value<vector<string> >()->composing(), "remove variables")
+        ("extract.selectVariable", po::value<vector<string> >()->composing(), "select only those variables")
 		("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
+        ("extract.reduceTime.start", po::value<string>(), "start-time as iso-string")
+        ("extract.reduceTime.end", po::value<string>(), "end-time by iso-string")
+        ("extract.reduceVerticalAxis.unit", po::value<string>(), "unit of vertical axis to reduce")
+        ("extract.reduceVerticalAxis.start", po::value<double>(), "start value of vertical axis")
+        ("extract.reduceVerticalAxis.end", po::value<double>(), "end value of the vertical axis")
         ("extract.printNcML", "print NcML description of extractor")
         ("extract.printCS", "print CoordinateSystems of extractor")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")

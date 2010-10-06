@@ -67,6 +67,13 @@ public:
     FimexTime() {};
     FimexTime(unsigned short year, char month, char mday, char hour = 0, char minute = 0, char second = 0, unsigned short msecond = 0);
     FimexTime(special_values val);
+    /**
+     *  parse and set the time in ISO8601 formats (not all), e.g. YYYY-MM-DD, HH:MM:SS, YYYY-MM-DD HH:MM:SS, YYYY-MM-DDTHH:MM:SS
+     *  (and without seconds)
+     *
+     *  @return true, if time/date has been set, false otherwise
+     */
+    bool parseISO8601(const std::string& isoString);
     /// set all the time-parameters at once
     void setTime(unsigned short year, char month, char mday, char hour = 0, char minute = 0, char second = 0, unsigned short msecond = 0);
     /// year (2008 as of writing)

@@ -71,7 +71,7 @@ public:
 	 * @param variables list of variables-names
      * @warning ignores selection of non-existing variable
 	 */
-    virtual void selectVariable(std::set<std::string> variables);
+    virtual void selectVariables(std::set<std::string> variables);
 	/**
 	 * @brief Reduce a dimension of the file
 	 * 

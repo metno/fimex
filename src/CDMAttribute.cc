@@ -42,7 +42,7 @@ namespace MetNoFimex
 {
 
 CDMAttribute::CDMAttribute()
-: name(""), datatype(CDM_STRING)
+: name(""), datatype(CDM_NAT)
 {
 }
 
