@@ -44,9 +44,6 @@ namespace MetNoFimex
 CDMAttribute::CDMAttribute()
 : name(""), datatype(CDM_STRING)
 {
-    // defining some empty data
-    boost::shared_array<char> cstr(new char[0]);
-    data = boost::shared_ptr<Data>(new DataImpl<char>(cstr, 0));
 }
 
 CDMAttribute::CDMAttribute(std::string name, std::string value)
@@ -160,7 +157,10 @@ CDMAttribute::~CDMAttribute()
 
 const std::string CDMAttribute::getStringValue() const
 {
-    return data->asString();
+    if (data.get() != 0)
+        return data->asString();
+    else
+        return "";
 }
 
 void CDMAttribute::toXMLStream(std::ostream& out) const

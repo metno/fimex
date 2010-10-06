@@ -98,6 +98,26 @@ BOOST_AUTO_TEST_CASE( test_extract )
     NetCDF_CDMWriter(extract, "test_0time.nc");
     BOOST_CHECK(true);
 
+    // test selectVariable
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    std::set<std::string> variables;
+    variables.insert("time");
+    variables.insert("altitude");
+    variables.insert("relative_humidity");
+    extract->selectVariable(variables);
+    BOOST_CHECK(extract->getCDM().hasVariable("time"));
+    BOOST_CHECK(extract->getCDM().hasVariable("altitude"));
+    BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));
+    BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
+
+    // test selection of non existing selectVariable
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    variables.insert("not_there");
+    extract->selectVariable(variables);
+    BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));
+    BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
+
+
 }
 
 #else

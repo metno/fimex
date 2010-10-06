@@ -90,9 +90,35 @@ boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, s
 	return data;
 }
 
-void CDMExtractor::removeVariable(std::string variable) throw(CDMException)
+void CDMExtractor::removeVariable(std::string variable)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "removing variable "<< variable);
 	cdm_->removeVariable(variable);
+}
+
+void CDMExtractor::selectVariable(std::set<std::string> variables)
+{
+    using namespace std;
+    const CDM::VarVec& allVars = getCDM().getVariables();
+
+    set<string> allVarNames;
+    transform(allVars.begin(),
+              allVars.end(),
+              inserter(allVarNames, allVarNames.begin()),
+              mem_fun_ref(&CDMVariable::getName));
+
+    // find the variables in one list, but not in the other
+    set<string> difference;
+    set_difference(allVarNames.begin(),
+                   allVarNames.end(),
+                   variables.begin(),
+                   variables.end(),
+                   inserter(difference, difference.begin()));
+
+    // remove all unnecessary variables
+    for_each(difference.begin(),
+             difference.end(),
+             bind1st(mem_fun(&CDMExtractor::removeVariable),this));
 }
 
 void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length) throw(CDMException)
@@ -137,13 +163,11 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
     LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of "<< aUnits << "(" << startVal << "," << endVal <<")");
     if (startVal > endVal) {
         // make sure startVal <= endVal
-        double tmp = startVal;
-        startVal = endVal;
-        endVal = tmp;
+        swap(startVal, endVal);
     }
 
     Units units;
-    const CDM& cdm = dataReader->getCDM();
+    const CDM& cdm = getCDM();
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
     CsList coordsys = listCoordinateSystems(cdm);
     typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;

@@ -25,6 +25,7 @@
 #define CDMEXTRACTOR_H_
 
 #include <map>
+#include <set>
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -56,10 +57,21 @@ public:
 	/**
 	 * @brief Remove a variable from the CDM
 	 * 
-	 * @param name of the variable
-	 * @throw CDMException if variable doesn't exist
+	 * @param varName name of the variable
+     * @warning ignores removal of non-existing variable
 	 */
-	virtual void removeVariable(std::string variable) throw(CDMException);
+	virtual void removeVariable(std::string variable);
+	/**
+	 * @brief select only a set of variables
+	 *
+	 * This function will remove all variables except the ones selected plus
+	 * eventually some auxiliary variables needed by the selected variables
+	 * (not decided yet)
+	 *
+	 * @param variables list of variables-names
+     * @warning ignores selection of non-existing variable
+	 */
+    virtual void selectVariable(std::set<std::string> variables);
 	/**
 	 * @brief Reduce a dimension of the file
 	 * 
