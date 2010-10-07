@@ -96,16 +96,15 @@ sub processDownload {
     # use external file to lock file-creation
     open my $fileLck, ">>$filePath.lck"
         or die "cannot open $filePath.lck: $!";
-    flock($fileLck, LOCK_SH);
+    flock($fileLck, LOCK_EX); # make sure no other process starts file-creation
     unless (-f $filePath and ((time - (stat(_))[9]) < MAX_CACHE_AGE()) ) {
         # file needs to be created
-        flock($fileLck, LOCK_EX);
         print STDERR "executing: ". join(' ', (FIMEX_BIN, @fiParams)) . "\n" if DEBUG;
         system(FIMEX_BIN, @fiParams) == 0
             or die "system(".join(' ', (FIMEX_BIN, @fiParams)).") failed: $?";
         -f $filePath or die "'$filePath' has not been created by system(".join(' ', (FIMEX_BIN, @fiParams)).")\n";
-        flock($fileLck, LOCK_SH);
     }
+    flock($fileLck, LOCK_SH);
     
     if ($action eq 'productdownload') {
         deliverFile($cgi, $mode, $fileId);
