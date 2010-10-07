@@ -130,8 +130,12 @@ sub deliverFile {
                            -expires => '+'.MAX_CACHE_AGE().'s');
         print DELIVERY_DIR()->[1] . $fileId;
     } elsif ($mode eq 'console') {
+        $| = 1; # unbuffered header, since File::copy works around buffer (syswrite)
         print $cgi->header(-type => 'application/x-netcdf',
-                           -expires => '+'.MAX_CACHE_AGE().'s');
+                           -expires => '+'.MAX_CACHE_AGE().'s',
+                           '-content-Disposition' => "attachment; filename=\"$fileId\"",
+                          );
+        $| = 0;
         File::Copy::copy(DELIVERY_DIR()->[0] . $fileId, \*STDOUT)
             or die "cannot copy ".DELIVERY_DIR()->[0] . $fileId . " to stdout: $!\n";
     } else {
