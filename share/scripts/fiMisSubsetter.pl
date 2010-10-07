@@ -75,7 +75,7 @@ sub processDownload {
     push @fiParams, "--input.file=$opendapUrl";
     push @fiParams, '--input.type=netcdf';
     push @fiParams, '--output.type=netcdf';
-    push @fiParams, '--extract.selectVariables=' . join(',', @variables) if @variables;
+    push @fiParams, map {'--extract.selectVariables='.$_} @variables;
     # ignore x and y bounding box currently
     if (exists $borders{z}) {
         push @fiParams, '--extract.reduceVerticalAxis.start='.$borders{z}->[0];
