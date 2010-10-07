@@ -21,6 +21,7 @@ use constant DEBUG => 1;
 # SETUP, please modify
 use constant FIMEX_BIN => '/home/heikok/bin/fimex';
 # directory where the data will be stored and how to access that dir by url
+#    clean that directory externally with i.e. 'find DIR -mtime +1 -exec rm -f \{\} \;' 
 use constant DELIVERY_DIR => ['/disk1/tmp/fimexData/' => 'http://myocean.met.no/fimexData'];
 # connect service and product id to opendap-baseurl
 use constant SERVICE_PRODUCT =>
@@ -93,7 +94,7 @@ sub processDownload {
     push @fiParams, '--output.file='.$filePath;
     
     # use external file to lock file-creation
-    open my $fileLck, ">$filePath.lck"
+    open my $fileLck, ">>$filePath.lck"
         or die "cannot open $filePath.lck: $!";
     flock($fileLck, LOCK_SH);
     unless (-f $filePath and ((time - (stat(_))[9]) < MAX_CACHE_AGE()) ) {
@@ -114,7 +115,6 @@ sub processDownload {
         die "unknown action '$action'";
     }
     close($fileLck);
-    unlink($fileLck);
 }
 
 sub notAuthorized {
