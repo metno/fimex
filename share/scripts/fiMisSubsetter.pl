@@ -12,7 +12,7 @@ use CGI::Carp 'fatalsToBrowser';
 use File::Temp qw(tempfile);
 use File::Copy qw();
 use Fcntl ':flock';
-use Digest::MD5 qw(md5_base64);
+use Digest::MD5 qw(md5_hex);
 $CGI::POST_MAX=1024 * 100;  # 100k 
 $CGI::DISABLE_UPLOADS = 1;  # no uploads
 use constant DEBUG => 1;
@@ -88,7 +88,7 @@ sub processDownload {
     }
     
     # fileId consists of service_product_ + md5sum of parameters
-    my $fileId = $service . '_' . $product . '_' . md5_base64(join ':', @fiParams) . '.nc';
+    my $fileId = $service . '_' . $product . '_' . md5_hex(join ':', @fiParams) . '.nc';
     my $filePath = DELIVERY_DIR()->[0] . $fileId;
     push @fiParams, '--output.file='.$filePath;
     
@@ -114,6 +114,7 @@ sub processDownload {
         die "unknown action '$action'";
     }
     close($fileLck);
+    unlink($fileLck);
 }
 
 sub notAuthorized {
@@ -141,7 +142,7 @@ sub deliverFile {
 
 sub getSize {
     my ($cgi, $fileId) = @_;
-    my $size = stat(DELIVERY_DIR()->[0] . $fileId);
+    my $size = (stat(DELIVERY_DIR()->[0] . $fileId))[7];
     print $cgi->header(-type => 'application/xml');
     print <<EOT;
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>

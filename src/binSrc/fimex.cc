@@ -129,7 +129,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOptionString(out, "qualityExtract.printNcML", vm);
     writeOptionString(out, "qualityExtract.printCS", vm);
 	writeVectorOptionString(out, "extract.removeVariable", vm);
-    writeVectorOptionString(out, "extract.selectVariable", vm);
+    writeVectorOptionString(out, "extract.selectVariables", vm);
 	writeVectorOptionString(out, "extract.reduceDimension.name", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
@@ -246,7 +246,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 
 static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable") ||
-	       vm.count("extract.selectVariable") || vm.count("extract.reduceTime.start") ||
+	       vm.count("extract.selectVariables") || vm.count("extract.reduceTime.start") ||
 	       vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit"))) {
 		LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
 		return dataReader;
@@ -276,15 +276,15 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 	}
 	if (vm.count("extract.reduceTime.start") || vm.count("extract.reduceTime.end")) {
 	    FimexTime start(FimexTime::min_date_time);
-        FimexTime end(FimexTime::max_date_time);
         if (vm.count("extract.reduceTime.start")) {
             if (! start.parseISO8601(vm["extract.reduceTime.start"].as<string>()) ) {
                 cerr << "cannot parse time " << vm["extract.reduceTime.start"].as<string>() << endl;
                 exit(1);
             }
         }
+        FimexTime end(FimexTime::max_date_time);
         if (vm.count("extract.reduceTime.end")) {
-            if (! start.parseISO8601(vm["extract.reduceTime.end"].as<string>()) ) {
+            if (! end.parseISO8601(vm["extract.reduceTime.end"].as<string>()) ) {
                 cerr << "cannot parse time " << vm["extract.reduceTime.end"].as<string>() << endl;
                 exit(1);
             }
@@ -301,8 +301,8 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
         double end = vm["extract.reduceVerticalAxis.end"].as<double>();
         extractor->reduceVerticalAxis(unit, start, end);
 	}
-	if (vm.count("extract.selectVariable")) {
-        vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
+	if (vm.count("extract.selectVariables")) {
+        vector<string> vars = vm["extract.selectVariables"].as<vector<string> >();
         extractor->selectVariables(set<string>(vars.begin(), vars.end()));
 	}
 	if (vm.count("extract.removeVariable")) {
@@ -495,7 +495,7 @@ int main(int argc, char* args[])
 		("output.type", po::value<string>(), "filetype of output file")
 		("output.config", po::value<string>(), "non-standard output configuration")
 		("extract.removeVariable", po::value<vector<string> >()->composing(), "remove variables")
-        ("extract.selectVariable", po::value<vector<string> >()->composing(), "select only those variables")
+        ("extract.selectVariables", po::value<vector<string> >()->composing(), "select only those variables")
 		("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
