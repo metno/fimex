@@ -83,7 +83,7 @@ sub processDownload {
         push @fiParams, '--extract.reduceToBoundingBox.south', $borders{y}->[0];
         push @fiParams, '--extract.reduceToBoundingBox.north', $borders{y}->[1];
         push @fiParams, '--extract.reduceToBoundingBox.west', $borders{x}->[0];
-        push @fiParams, '--extract.reduceToBoundingBox.east', $borders{x}->[0];
+        push @fiParams, '--extract.reduceToBoundingBox.east', $borders{x}->[1];
     }
     if (exists $borders{z}) {
         push @fiParams, '--extract.reduceVerticalAxis.start='.$borders{z}->[0];
