@@ -127,6 +127,16 @@ std::string ProjectionImpl::getProj4String() const
     addParameterToStream(out, "false_northing", " +y_0=");
 
     // earth parameters
+    out << " " << getProj4EarthString();
+
+    // remove default definitions
+    out << " +no_defs";
+    return out.str();
+}
+
+std::string ProjectionImpl::getProj4EarthString() const
+{
+    std::ostringstream out;
     if (addParameterToStream(out, "earth_radius", " +a=")) {
         out << " +e=0";
     } else if (addParameterToStream(out, "semi_major_axis", " +a=")) {
@@ -139,11 +149,9 @@ std::string ProjectionImpl::getProj4String() const
     } else {
         out << " +a=" << MIFI_EARTH_RADIUS_M << " +e=0"; // default
     }
-
-    // remove default definitions
-    out << " +no_defs";
     return out.str();
 }
+
 
 bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::string& name, std::string replaceName) const
 {

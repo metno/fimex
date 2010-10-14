@@ -110,6 +110,14 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));
     BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
 
+    // test reduceLatLonBoundingBox
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceDimension("time", 0, 1);
+    extract->reduceLatLonBoundingBox(55.,65., 5, 15);
+    //cerr << "sizes: " << extract->getData("x")->size() << " " << extract->getData("y")->size() << endl;
+    BOOST_CHECK(extract->getData("x")->size() == 15);
+    BOOST_CHECK(extract->getData("y")->size() == 24);
+
     // test selection of non existing selectVariable
     extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
     variables.insert("not_there");

@@ -54,6 +54,30 @@ public:
     /** get a proj4 string */
     virtual std::string getProj4String() const = 0;
     /**
+     * get the parts of the proj4 string defining the earth.
+     */
+    virtual std::string getProj4EarthString() const = 0;
+    /**
+     * convert two vectors of values in the projection to latitude and longitude
+     * in degree. The earth ellipsoid will be the same as the input.
+     *
+     * @param xVals input of the projection axis in meter or degree, output is longitude
+     * @param yVals input of the projection axis in meter or degree, output is latitude
+     *
+     * @warning the values will be converted in place
+     */
+    virtual void convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException);
+    /**
+     * convert two vectors of values in the projection to latitude and longitude
+     * in degree. The earth ellipsoid will be the same as the input.
+     *
+     * @param xVals longitude input in degree, output of the projection axis in meter or degree
+     * @param yVals latitude input in degree, output of the projection axis in meter or degree
+     *
+     * @warning the values will be converted in place
+     */
+    virtual void convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException);
+    /**
      * get a string representation
      * @note this should be implemented as unique as possible, i.e.
      */

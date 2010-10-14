@@ -131,6 +131,20 @@ public:
     virtual void reduceVerticalAxis(const std::string& units, double startVal, double endVal) throw(CDMException);
 
     /**
+     * @brief reduce the horizontal layer to the latitude-longitude bounding box
+     *
+     * This method will try to reduce the horizontal layer to the given latitude/longitude
+     * bounding box. It requires the original data to have a simple geospatial gridded CoordinateSystem,
+     * i.e. CoordinateSystem::isSimpleSpatialGridded() and a projection mapping to lat/lon
+     *
+     * @param south southernmost border in dec. degree, -90 < south < north < 90
+     * @param north northernmost border in dec. degree, -90 < south < north < 90
+     * @param west westernmost border in dec. degree, -180 < west < east < 180
+     * @param east easternmost border in dec. degree, -180 < west < east < 180
+     */
+    virtual void reduceLatLonBoundingBox(double south, double north, double west, double east) throw(CDMException);
+
+    /**
 	 * @brief change the datatype of the variable
 	 * 
 	 * a change of the variable will also change the datatype of the _FillValue attribute

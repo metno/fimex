@@ -64,6 +64,10 @@ public:
      * method
      */
     virtual std::string getProj4String() const;
+    /**
+     * get the parts of the proj4 string defining the earth.
+     */
+    virtual std::string getProj4EarthString() const;
     /** get a string representation */
     virtual std::string toString() const;
 protected:

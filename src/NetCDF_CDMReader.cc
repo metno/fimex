@@ -109,13 +109,13 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
     vector<long> ncStartPos;
     copy(sb.getDimensionStartPositions().begin(), sb.getDimensionStartPositions().end(), back_inserter(ncStartPos));
     reverse(ncStartPos.begin(), ncStartPos.end()); // netcdf/c++ uses opposite dimension numbering
-    if (ncStartPos.size() != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf variable "+ varName);
+    if (static_cast<int>(ncStartPos.size()) != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf variable "+ varName);
     if (!ncVar->set_cur(&ncStartPos[0])) throw CDMException("cannot set the netcdf dataslice start-position");
 
     vector<long> count;
     copy(sb.getDimensionSizes().begin(), sb.getDimensionSizes().end(), back_inserter(count));
     reverse(count.begin(), count.end()); // netcdf/c++ uses opposite dimension numbering
-    if (count.size() != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf size of variable "+ varName);
+    if (static_cast<int>(count.size()) != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf size of variable "+ varName);
 
     boost::shared_ptr<Data> retData;
     switch (var.getDataType()) {

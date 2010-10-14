@@ -75,10 +75,11 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << config << endl;
 }
 
-static void writeOptionString(ostream& out, const string& var, const po::variables_map& vm) {
-	if (vm.count(var)) {
-		out << var << ": " << vm[var].as<string>() << endl;
-	}
+template<typename T>
+static void writeOption(ostream& out, const string& var, const po::variables_map& vm) {
+    if (vm.count(var)) {
+        out << var << ": " << vm[var].as<T>() << endl;
+    }
 }
 
 void writeOptionAny(ostream& out, const string& var, const po::variables_map& vm) {
@@ -115,45 +116,49 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionAny(out, "version", vm);
 	writeOptionAny(out, "debug", vm);
 	writeOptionAny(out, "print-options", vm);
-	writeOptionString(out, "config", vm);
-	writeOptionString(out, "input.file", vm);
-	writeOptionString(out, "input.type", vm);
-	writeOptionString(out, "input.config", vm);
+	writeOption<string>(out, "config", vm);
+	writeOption<string>(out, "input.file", vm);
+	writeOption<string>(out, "input.type", vm);
+	writeOption<string>(out, "input.config", vm);
 	writeOptionAny(out, "input.printNcML", vm);
     writeOptionAny(out, "input.printCS", vm);
-	writeOptionString(out, "output.file", vm);
-	writeOptionString(out, "output.type", vm);
-	writeOptionString(out, "output.config", vm);
-    writeOptionString(out, "qualityExtract.autoConfigString", vm);
-    writeOptionString(out, "qualityExtract.config", vm);
-    writeOptionString(out, "qualityExtract.printNcML", vm);
-    writeOptionString(out, "qualityExtract.printCS", vm);
+	writeOption<string>(out, "output.file", vm);
+	writeOption<string>(out, "output.type", vm);
+	writeOption<string>(out, "output.config", vm);
+    writeOption<string>(out, "qualityExtract.autoConfigString", vm);
+    writeOption<string>(out, "qualityExtract.config", vm);
+    writeOption<string>(out, "qualityExtract.printNcML", vm);
+    writeOption<string>(out, "qualityExtract.printCS", vm);
 	writeVectorOptionString(out, "extract.removeVariable", vm);
     writeVectorOptionString(out, "extract.selectVariables", vm);
 	writeVectorOptionString(out, "extract.reduceDimension.name", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
 	writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
-    writeOptionString(out, "extract.reduceTime.start", vm);
-    writeOptionString(out, "extract.reduceTime.end", vm);
-    writeOptionString(out, "extract.reduceVerticalAxis.unit", vm);
-    writeOptionString(out, "extract.reduceVerticalAxis.start", vm);
-    writeOptionString(out, "extract.reduceVerticalAxis.end", vm);
-	writeOptionAny(out, "extract.printNcML", vm);
+    writeOption<string>(out, "extract.reduceTime.start", vm);
+    writeOption<string>(out, "extract.reduceTime.end", vm);
+    writeOption<string>(out, "extract.reduceVerticalAxis.unit", vm);
+    writeOption<double>(out, "extract.reduceVerticalAxis.start", vm);
+    writeOption<double>(out, "extract.reduceVerticalAxis.end", vm);
+    writeOption<double>(out, "extract.reduceToBoundingBox.south", vm);
+    writeOption<double>(out, "extract.reduceToBoundingBox.north", vm);
+    writeOption<double>(out, "extract.reduceToBoundingBox.west", vm);
+    writeOption<double>(out, "extract.reduceToBoundingBox.east", vm);
+    writeOptionAny(out, "extract.printNcML", vm);
     writeOptionAny(out, "extract.printCS", vm);
-	writeOptionString(out, "interpolate.projString", vm);
-	writeOptionString(out, "interpolate.method", vm);
-	writeOptionString(out, "interpolate.xAxisValues", vm);
-	writeOptionString(out, "interpolate.yAxisValues", vm);
-	writeOptionString(out, "interpolate.xAxisUnit", vm);
-	writeOptionString(out, "interpolate.yAxisUnit", vm);
-	writeOptionString(out, "interpolate.latitudeName", vm);
-	writeOptionString(out, "interpolate.longitudeName", vm);
+	writeOption<string>(out, "interpolate.projString", vm);
+	writeOption<string>(out, "interpolate.method", vm);
+	writeOption<string>(out, "interpolate.xAxisValues", vm);
+	writeOption<string>(out, "interpolate.yAxisValues", vm);
+	writeOption<string>(out, "interpolate.xAxisUnit", vm);
+	writeOption<string>(out, "interpolate.yAxisUnit", vm);
+	writeOption<string>(out, "interpolate.latitudeName", vm);
+	writeOption<string>(out, "interpolate.longitudeName", vm);
 	writeOptionAny(out, "interpolate.printNcML", vm);
     writeOptionAny(out, "interpolate.printCS", vm);
-	writeOptionString(out, "timeInterpolate.timeSpec", vm);
+	writeOption<string>(out, "timeInterpolate.timeSpec", vm);
 	writeOptionAny(out, "timeInterpolate.printNcML", vm);
 	writeOptionAny(out, "timeInterpolate.printCS", vm);
-	writeOptionString(out, "ncml.config", vm);
+	writeOption<string>(out, "ncml.config", vm);
     writeOptionAny(out, "ncml.printNcML", vm);
     writeOptionAny(out, "ncml.printCS", vm);
 }
@@ -247,7 +252,9 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMReader> dataReader) {
 	if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable") ||
 	       vm.count("extract.selectVariables") || vm.count("extract.reduceTime.start") ||
-	       vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit"))) {
+	       vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit") ||
+	       vm.count("extract.reduceToBoundingBox.south") || vm.count("extract.reduceToBoundingBox.north") ||
+	       vm.count("extract.reduceToBoundingBox.west") || vm.count("extract.reduceToBoundingBox.east"))) {
 		LOG4FIMEX(logger, Logger::DEBUG, "extract.reduceDimension.name and extract.removeVariable not found, no extraction used");
 		return dataReader;
 	}
@@ -300,6 +307,20 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
 	    double start = vm["extract.reduceVerticalAxis.start"].as<double>();
         double end = vm["extract.reduceVerticalAxis.end"].as<double>();
         extractor->reduceVerticalAxis(unit, start, end);
+	}
+	if (vm.count("extract.reduceToBoundingBox.south") || vm.count("extract.reduceToBoundingBox.north") ||
+	    vm.count("extract.reduceToBoundingBox.west") || vm.count("extract.reduceToBoundingBox.east")) {
+	    string bb[4] = {"south", "north", "west", "east"};
+	    double bbVals[4];
+	    for (int i = 0; i < 4; i++) {
+	        if (!vm.count("extract.reduceToBoundingBox."+bb[i])) {
+	            cerr << "extract.reduceToBoundingBox." << bb[i] << " missing";
+	            exit(1);
+	        }
+	        bbVals[i] = vm["extract.reduceToBoundingBox."+bb[i]].as<double>();
+	    }
+	    LOG4FIMEX(logger, Logger::DEBUG, "reduceLatLonBoudingBox(" << join(&bbVals[0], &bbVals[0]+4, ",")<<")");
+	    extractor->reduceLatLonBoundingBox(bbVals[0], bbVals[1], bbVals[2], bbVals[3]);
 	}
 	if (vm.count("extract.selectVariables")) {
         vector<string> vars = vm["extract.selectVariables"].as<vector<string> >();
@@ -504,6 +525,10 @@ int main(int argc, char* args[])
         ("extract.reduceVerticalAxis.unit", po::value<string>(), "unit of vertical axis to reduce")
         ("extract.reduceVerticalAxis.start", po::value<double>(), "start value of vertical axis")
         ("extract.reduceVerticalAxis.end", po::value<double>(), "end value of the vertical axis")
+        ("extract.reduceToBoundingBox.south", po::value<double>(), "geographical bounding-box in degree")
+        ("extract.reduceToBoundingBox.north", po::value<double>(), "geographical bounding-box in degree")
+        ("extract.reduceToBoundingBox.east", po::value<double>(), "geographical bounding-box in degree")
+        ("extract.reduceToBoundingBox.west", po::value<double>(), "geographical bounding-box in degree")
         ("extract.printNcML", "print NcML description of extractor")
         ("extract.printCS", "print CoordinateSystems of extractor")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")

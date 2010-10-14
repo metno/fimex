@@ -77,7 +77,14 @@ sub processDownload {
     push @fiParams, '--input.type=netcdf';
     push @fiParams, '--output.type=netcdf';
     push @fiParams, map {'--extract.selectVariables='.$_} @variables;
-    # ignore x and y bounding box currently
+    
+    # require x and y to be defined both, otherwise ignoring
+    if (exists $borders{x} && exists $borders{y}) {
+        push @fiParams, '--extract.reduceToBoundingBox.south', $borders{y}->[0];
+        push @fiParams, '--extract.reduceToBoundingBox.north', $borders{y}->[1];
+        push @fiParams, '--extract.reduceToBoundingBox.west', $borders{x}->[0];
+        push @fiParams, '--extract.reduceToBoundingBox.east', $borders{x}->[0];
+    }
     if (exists $borders{z}) {
         push @fiParams, '--extract.reduceVerticalAxis.start='.$borders{z}->[0];
         push @fiParams, '--extract.reduceVerticalAxis.end='.$borders{z}->[1];

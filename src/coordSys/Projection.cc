@@ -26,6 +26,10 @@
 
 #include "fimex/coordSys/Projection.h"
 #include <boost/regex.hpp>
+#include <functional>
+#include <algorithm>
+
+#include "fimex/interpolation.h"
 
 // list over supported projections
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
@@ -36,9 +40,7 @@
 #include "fimex/coordSys/StereographicProjection.h"
 #include "fimex/coordSys/TransverseMercatorProjection.h"
 
-// include projects.h since I need to access some of projs internals (proj -V)
-// PJ_LIB__ required for LP.phi, LP.lam
-#include <projects.h>
+#include <proj_api.h>
 
 
 namespace MetNoFimex
@@ -54,6 +56,81 @@ std::ostream& operator<<(std::ostream& out, const Projection& proj)
 {
     out << proj.toString();
     return out;
+}
+
+void Projection::convertToLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException)
+{
+    // check input
+    if (xVals.size() == 0) return;
+    if (xVals.size() != yVals.size()) throw CDMException("convertToLonLat: xVals.size() != yVals.size()");
+
+    // convert to radian if required
+    if (isDegree()) {
+        std::transform(xVals.begin(),
+                       xVals.end(),
+                       xVals.begin(),
+                       std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+        std::transform(yVals.begin(),
+                       yVals.end(),
+                       yVals.begin(),
+                       std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+    }
+
+    // run projection
+    std::string fromProj = getProj4String();
+    std::string toProj = "+proj=latlong " + getProj4EarthString();
+    if (fromProj == toProj) return;
+    if (MIFI_OK != mifi_project_values(fromProj.c_str(), toProj.c_str(), &xVals[0], &yVals[0], static_cast<int>(xVals.size()))) {
+        throw CDMException("convertToLonLat: unable to convert from '" +fromProj + "' to '"+toProj+"'");
+    }
+
+    // convert to degree
+    std::transform(xVals.begin(),
+                   xVals.end(),
+                   xVals.begin(),
+                   std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+    std::transform(yVals.begin(),
+                   yVals.end(),
+                   yVals.begin(),
+                   std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+
+}
+void Projection::convertFromLonLat(std::vector<double>& xVals, std::vector<double>& yVals) const throw(CDMException)
+{
+    // check input
+    if (xVals.size() == 0) return;
+    if (xVals.size() != yVals.size()) throw CDMException("convertToLonLat: xVals.size() != yVals.size()");
+
+    // convert to radian
+    std::transform(xVals.begin(),
+                   xVals.end(),
+                   xVals.begin(),
+                   std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+    std::transform(yVals.begin(),
+                   yVals.end(),
+                   yVals.begin(),
+                   std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+
+    // run projection
+    std::string fromProj = "+proj=latlong " + getProj4EarthString();
+    std::string toProj = getProj4String();
+    if (fromProj == toProj) return;
+    if (MIFI_OK != mifi_project_values(fromProj.c_str(), toProj.c_str(), &xVals[0], &yVals[0], static_cast<int>(xVals.size()))) {
+        throw CDMException("convertFromLonLat: unable to convert from '" +fromProj + "' to '"+toProj+"'");
+    }
+
+    // convert to degree if required
+    if (isDegree()) {
+        std::transform(xVals.begin(),
+                       xVals.end(),
+                       xVals.begin(),
+                       std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+        std::transform(yVals.begin(),
+                       yVals.end(),
+                       yVals.begin(),
+                       std::bind1st(std::multiplies<double>(), RAD_TO_DEG));
+    }
+
 }
 
 

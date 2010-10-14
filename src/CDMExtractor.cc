@@ -259,6 +259,79 @@ void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal,
     reduceAxes(types, units, startVal, endVal);
 }
 
+void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double west, double east) throw(CDMException)
+{
+    using namespace std;
+    // check input
+    if (south > north) throw CDMException("reduceLatLonBoundingBox south > north: "+type2string(south) + ">" +type2string(north));
+    if (west > east) throw CDMException("reduceLatLonBoundingBox west > east: "+type2string(west) + ">" +type2string(east));
+    if (south < -90. || south > 90) throw CDMException("reduceLatLonBoundingBox south outside domain: " + type2string(south));
+    if (north < -90. || north > 90) throw CDMException("reduceLatLonBoundingBox north outside domain: " + type2string(north));
+    if (west < -180. || west > 180) throw CDMException("reduceLatLonBoundingBox west outside domain: " + type2string(west));
+    if (east < -180. || east > 180) throw CDMException("reduceLatLonBoundingBox east outside domain: " + type2string(east));
+
+    // find coordinate-systems
+    typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
+    CsList coordsys = listCoordinateSystems(getCDM());
+    typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
+    VAxesList vAxes;
+    set<string> convertedAxes;
+    for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
+        if ((*cs)->isSimpleSpatialGridded()) {
+            string xAxisName = (*cs)->getGeoXAxis()->getName();
+            string yAxisName = (*cs)->getGeoYAxis()->getName();
+            // check for projection and if the axes have already been processed by another cs
+            if ((*cs)->hasProjection() &&
+                (convertedAxes.find(xAxisName) == convertedAxes.end()) &&
+                (convertedAxes.find(yAxisName) == convertedAxes.end())) {
+                // create a set of border-points to the projection to avoid singularities in the projected plane
+                vector<double> xLonVals;
+                vector<double> yLatVals;
+                const int steps = 7;
+                double northSouthStep = (north - south) / steps;
+                double eastWestStep = (east - west) / steps;
+                for (int i = 0; i < steps; ++i) {
+                    // going along southern axis to east
+                    xLonVals.push_back(west + i*eastWestStep);
+                    yLatVals.push_back(south);
+                    // going along eastern axis to north
+                    xLonVals.push_back(east);
+                    yLatVals.push_back(south + i*northSouthStep);
+                    // going along northern axis to west
+                    xLonVals.push_back(east - i*eastWestStep);
+                    yLatVals.push_back(north);
+                    // going along western axis to south
+                    xLonVals.push_back(west);
+                    yLatVals.push_back(north - i*northSouthStep);
+                }
+                // reproject the border-points (in place)
+                boost::shared_ptr<const Projection> proj = (*cs)->getProjection();
+                proj->convertFromLonLat(xLonVals, yLatVals);
+
+                // find the minimum and maximum values in each projection-axis
+                double xMin = *min_element(xLonVals.begin(), xLonVals.end());
+                double xMax = *max_element(xLonVals.begin(), xLonVals.end());
+                double yMin = *min_element(yLatVals.begin(), yLatVals.end());
+                double yMax = *max_element(yLatVals.begin(), yLatVals.end());
+
+                // run reduceAxes to the min/max values
+                vector<CoordinateAxis::AxisType> xAxis;
+                xAxis.push_back((*cs)->getGeoXAxis()->getAxisType());
+                vector<CoordinateAxis::AxisType> yAxis;
+                yAxis.push_back((*cs)->getGeoYAxis()->getAxisType());
+                string unit = proj->isDegree() ? "degree" : "m";
+                reduceAxes(xAxis, unit, xMin, xMax);
+                reduceAxes(yAxis, unit, yMin, yMax);
+                // avoid double conversion
+                convertedAxes.insert(xAxisName);
+                convertedAxes.insert(yAxisName);
+            }
+        }
+    }
+
+}
+
+
 void CDMExtractor::changeDataType(std::string variable, CDMDataType datatype) throw(CDMException)
 {
 	// TODO

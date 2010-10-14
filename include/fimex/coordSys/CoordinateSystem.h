@@ -114,10 +114,12 @@ public:
     virtual void setSimpleSpatialGridded(bool set = true);
     /**
      * Check if the coordinate-system has a projection (of GeoX, GeoY and optionally GeoZ)
+     * This includes also coordinate-systems in latitude-longitude 'projection'.
      */
     virtual bool hasProjection() const;
     /**
      * Get the projection of the coordinate-system (projection of GeoX, GeoY and optionally GeoZ)
+     * This includes also coordinate-systems in latitude-longitude 'projection'.
      * @return projection, or null ptr
      */
     virtual boost::shared_ptr<const Projection> getProjection() const;
