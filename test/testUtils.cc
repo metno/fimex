@@ -76,6 +76,16 @@ BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
     BOOST_CHECK_EQUAL(40*25 + 1, tokens4.size());
     BOOST_CHECK_CLOSE(tokens4.at(tokens4.size()-2), 50.04, .1);
 
+    // check in case end doesn't match forward
+    string dotted5 = "10,20,...,35";
+    vector<double> tokens5 = tokenizeDotted<double>(dotted5);
+    BOOST_CHECK_EQUAL(4, tokens5.size());
+
+    // check in case end doesn't match backward
+    string dotted6 = "20,10,...,-35";
+    vector<double> tokens6 = tokenizeDotted<double>(dotted6);
+    BOOST_CHECK_EQUAL(7, tokens6.size());
+
 }
 
 #else

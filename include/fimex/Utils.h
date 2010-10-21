@@ -155,10 +155,13 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
             T last = vals[currentPos-1];
             T dist = last - vals[currentPos-2];
             T curVal = last + dist;
+            // positive if values get larger, negative if curVal gets samller
+            double direction = (dist > 0) ? 1 : -1;
             if (++tok != tokens.end()) {
                 T afterDotVal = string2type<T>(*tok);
                 // expand the dots until before the afterDotVal, compare against rounding error
-                while (fabs(static_cast<double>(curVal - afterDotVal)) > 1e-5) {
+                double roundError = direction*dist*-1.e-5;
+                while ((curVal - afterDotVal)*direction < roundError) {
                     vals.push_back(curVal);
                     curVal += dist;
                 }
