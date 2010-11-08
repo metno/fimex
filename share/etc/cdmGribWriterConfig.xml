@@ -26,6 +26,10 @@
    <grib1 id="100" units="hPa" type="short"/>
    <grib2 id="100" units="Pa" type="double"/>
 </vertical_axis>
+<vertical_axis standard_name="air_pressure">
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
 <vertical_axis standard_name="atmosphere_sigma_coordinate">
 	<grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
 	<grib2 id="104" type="double" />
@@ -44,6 +48,21 @@
 <parameter standard_name="precipitation_amount">
     <grib1 parameterNumber="61" codeTable="128" units="kg/m2"/>
     <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
+</parameter>
+<parameter standard_name="x_wind">
+    <grib1 parameterNumber="131" codeTable="128" units="m/s"/>
+</parameter>
+<parameter standard_name="y_wind">
+    <grib1 parameterNumber="132" codeTable="128" units="m/s"/>
+</parameter>
+<parameter standard_name="relative_humidity">
+    <grib1 parameterNumber="157" codeTable="128" units="%"/>
+</parameter>
+<parameter standard_name="lagrangian_tendency_of_air_pressure">
+    <grib1 parameterNumber="135" codeTable="128" units="Pa/s"/>
+</parameter>
+<parameter standard_name="geopotential_height">
+    <grib1 parameterNumber="129" codeTable="128" units="m"/>
 </parameter>
 <parameter standard_name="cloud_area_fraction">
 <!-- total -->
