@@ -43,12 +43,14 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Data.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMTimeInterpolator.h"
+#include "fimex/Logger.h"
 
 using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 {
+    //defaultLogLevel(Logger::DEBUG);
 	string topSrcDir(TOP_SRCDIR);
 	string fileName(topSrcDir+"/test/flth00.dat");
 	if (!ifstream(fileName.c_str())) {
@@ -64,7 +66,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 	timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
 	boost::shared_ptr<Data> times = timeInterpol->getCDM().getVariable("time").getData();
 	BOOST_CHECK_EQUAL(times->size(), 5);
-	const boost::shared_array<int> timeAry = times->asConstInt();
+	const boost::shared_array<float> timeAry = times->asConstFloat();
 	BOOST_CHECK_EQUAL(timeAry[0], 10);
 	BOOST_CHECK_EQUAL(timeAry[4], 10+12);
 	string airTemp = "air_temperature";
@@ -91,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
 	timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
 	boost::shared_ptr<Data> times = timeInterpol->getCDM().getVariable("time").getData();
 	BOOST_CHECK_EQUAL(times->size(), 21);
-	const boost::shared_array<int> timeAry = times->asConstInt();
+	const boost::shared_array<float> timeAry = times->asConstFloat();
 	BOOST_CHECK_EQUAL(timeAry[0], -2);
 	BOOST_CHECK_EQUAL(timeAry[4], 10);
 	string airTemp = "air_temperature";
