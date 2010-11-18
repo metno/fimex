@@ -738,6 +738,16 @@ std::string CDM::getTimeAxis(std::string varName) const
     enhance(this->pimpl_, *this);
 
     const CoordSysList& csList = pimpl_->coordSystems;
+
+    // check if variable is its own axis (coord-axis don't have coordinate system)
+    for (CoordSysList::const_iterator csIt = csList.begin(); csIt != csList.end(); ++csIt) {
+        CoordinateSystem::ConstAxisPtr timeAxis = (*csIt)->getTimeAxis();
+        if (timeAxis.get() != 0 && timeAxis->getName() == varName) {
+            return varName;
+        }
+    }
+
+    // search for coordinate system for varName
     CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt == csList.end()) {
         return "";
@@ -751,6 +761,15 @@ std::string CDM::getVerticalAxis(std::string varName) const
     enhance(this->pimpl_, *this);
 
     const CoordSysList& csList = pimpl_->coordSystems;
+
+    // check if variable is its own axis (coord-axis don't have coordinate system)
+    for (CoordSysList::const_iterator csIt = csList.begin(); csIt != csList.end(); ++csIt) {
+        CoordinateSystem::ConstAxisPtr vAxis = (*csIt)->getGeoZAxis();
+        if (vAxis.get() != 0 && vAxis->getName() == varName) {
+            return varName;
+        }
+    }
+
     CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt == csList.end()) {
         return "";
