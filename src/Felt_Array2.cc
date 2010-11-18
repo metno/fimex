@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -125,7 +125,7 @@ vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
 	for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
 	    vTimes.push_back(tlm->first);
 	}
-	return vTimes; 
+	return vTimes;
 }
 
 vector<LevelPair> Felt_Array2::getLevelPairs() const {
@@ -175,7 +175,7 @@ double Felt_Array2::getScalingFactor() const
 const string& Felt_Array2::getName() const
 {
 	return feltArrayName_;
-} 
+}
 
 int Felt_Array2::getLevelType() const
 {
@@ -213,8 +213,8 @@ int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair leve
     field->grid(gridOut);
 
      // check parameters against delta
-    const boost::array<float, 6>& newParams = field->projectionInformation()->getGridParameters();
-    const boost::array<float, 6>& defaultParams = defaultField_->projectionInformation()->getGridParameters();
+    const boost::array<float, 6> newParams = field->projectionInformation()->getGridParameters();
+    const boost::array<float, 6> defaultParams = defaultField_->projectionInformation()->getGridParameters();
     for (int i = 0; i < 6; i++) {
         // allow params to differ by a delta (optional)
         if (newParams[i] != defaultParams[i] && std::fabs(newParams[i]-defaultParams[i]) > gridParameterDelta[i]) {
@@ -247,5 +247,5 @@ boost::shared_ptr<felt::FeltGridDefinition> Felt_Array2::getGridDefinition() con
     return defaultField_->projectionInformation();
 }
 
-	
+
 } // end namespace MetNoFelt
