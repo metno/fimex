@@ -145,6 +145,12 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     boost::shared_array<short> all = allData->asConstShort();
     BOOST_CHECK(accumulate(all.get(), all.get()+n, 0) == (n*(n-1)/2)); // gauss computation of sum of sequence
 
+    // check accessor function
+    string timeAxis = reader->getCDM().getTimeAxis("cloud_area_fraction_in_atmosphere_layer");
+    BOOST_CHECK(timeAxis == "time");
+    timeAxis = reader->getCDM().getTimeAxis("time");
+    BOOST_CHECK(timeAxis == "time");
+
     SliceBuilder sb(cdm, varName);
     // last slice
     sb.setStartAndSize(cs.getGeoZAxis(), 3, 1);

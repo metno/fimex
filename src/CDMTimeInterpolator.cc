@@ -64,6 +64,7 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
 {
 	std::string timeAxis = cdm_->getTimeAxis(varName);
+	LOG4FIMEX(logger, Logger::DEBUG, "getting time-interpolated data-slice for " << varName << " with time-axis: " << timeAxis);
 	if (timeAxis == "" || (dataReaderTimesInNewUnits_[timeAxis].size() == 0)) {
 		// not time-axis or "changeTimeAxis" never called
 	    // no changes, simply forward
