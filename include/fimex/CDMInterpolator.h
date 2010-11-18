@@ -38,7 +38,7 @@ private:
 	boost::shared_ptr<CDMReader> dataReader;
 	std::vector<std::string> projectionVariables;
 	boost::shared_ptr<CachedInterpolationInterface> cachedInterpolation;
-	CachedVectorReprojection cachedVectorReprojection;
+	boost::shared_ptr<CachedVectorReprojection> cachedVectorReprojection;
 	std::string latitudeName;
 	std::string longitudeName;
 	/** converter for axes-strings */
@@ -46,6 +46,7 @@ private:
 	void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
 	void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
 	void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+	bool hasSpatialVectors() const;
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMInterpolator();

@@ -86,7 +86,9 @@ string timeString2timeUnitString(string timeString, const TimeUnit& tu) {
     for (size_t i = 0; i < times.size(); ++i) {
         if (times[i] != "...") {
             // convert iso-time to double time of time-unit
+            LOG4FIMEX(logger, Logger::DEBUG, "converting times["<<i<<"]: " << times[i]);
             times[i] = type2string(tu.fimexTime2unitTime(string2FimexTime(times[i])));
+            LOG4FIMEX(logger, Logger::DEBUG, "converted times["<<i<<"] to " << times[i] << " in timeUnit");
         }
     }
     return join(times.begin(), times.end(), ",");
