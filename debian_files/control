@@ -1,7 +1,7 @@
 Source: fimex
 Priority: extra
 Maintainer: Heiko Klein <heiko.klein@met.no>
-Build-Depends: debhelper (>= 5), libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, proj, libudunits2-dev, libnetcdf-dev, libgrib-api-dev, libjasper-dev, libpng12-dev
+Build-Depends: debhelper (>= 5), devscripts, fakeroot, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, proj, libudunits2-dev, libnetcdf-dev, libgrib-api-dev, libjasper-dev, libpng12-dev, libjpeg62-dev
 Standards-Version: 3.7.2
 Section: libs
 
@@ -36,7 +36,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: A c++ library for reading met.no's felt-files
  Dev-library for reading the internal file-format of the
  Norwegian Meteorological Institute
- 
+
 Package: libfelt-dev
 Section: libdevel
 Architecture: i386 amd64 ia64 powerpc

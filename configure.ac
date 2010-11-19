@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.25beta],[heiko.klein@met.no])
+AC_INIT([fimex],[0.25],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall -Werror foreign])
 
@@ -110,7 +110,7 @@ AM_CONDITIONAL([HAVE_FELT], [test x$use_felt = xyes])
 if test x$use_felt = xyes; then
     AC_DEFINE([HAVE_FELT], [1], [define if felt/FeltFile.h is available])
 fi
-AM_CONDITIONAL([HAVE_FELT_OR_MILIB], [test x$use_felt = xyes || test x$use_milib = xyes]) 
+AM_CONDITIONAL([HAVE_FELT_OR_MILIB], [test x$use_felt = xyes || test x$use_milib = xyes])
 
 
 if test "$use_milib" = yes; then
@@ -130,7 +130,7 @@ fi
 # as grib_api does not provide a list over required libraries (e.g. pkgconfig, libtool)
 # I will just try that
 MIFI_USELIB([grib_api], [grib_set_string], [-ljasper -lpng])
-AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"]) 
+AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"])
 if test "x$with_grib_api" = "xyes"; then
     AC_DEFINE([HAVE_GRIBAPI_H], 1, 'Define to 1 if you have the <grib_api.h> header file.')
 fi
@@ -143,20 +143,20 @@ AC_LANG_POP(C++)
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([fimex.pc Makefile
-                          src/Makefile 
-                          src/felt/Makefile 
-                          src/binSrc/Makefile 
-                          test/Makefile 
-                          share/etc/Makefile 
-                          include/Makefile 
-                          include/fimex/Makefile 
-                          include/fimex/coordSys/Makefile 
-                          include/felt/Makefile 
+                          src/Makefile
+                          src/felt/Makefile
+                          src/binSrc/Makefile
+                          test/Makefile
+                          share/etc/Makefile
+                          include/Makefile
+                          include/fimex/Makefile
+                          include/fimex/coordSys/Makefile
+                          include/felt/Makefile
                           include/kdtree++/Makefile])
 AC_OUTPUT
 
 
-# ########################################################### 
+# ###########################################################
 # Print Out Summary of Configuration
 #
 AC_MSG_RESULT([ ])

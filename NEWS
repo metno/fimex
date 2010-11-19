@@ -1,10 +1,18 @@
+  * 2010-11-18 fimex-0.25
+    * reduce memory consumption
+    * allow extraction of lat/lon bounding-boxes, time and vertical axes by values
+    * fimex usable as OpENDAP client
+    * adding a data-subsetter script
+    * fixing edge-cases, fetching of 0-size data
+    * back-porting to boost 1.32
+    * adding standard_parallel for lcc projection
   * 2010-09-13 fimex-0.24
     * grib-support included in debian package
     * adding forecast-reference-time from felt and grib-files
     * use grib-steps to determine valid time
     * using gstmerc istead of tmerc for mercator, requires proj4.4.7
     * fine grained library dependencies
-    * bugfix when reading grib index-files    
+    * bugfix when reading grib index-files
   * 2010-07-15 fimex-0.23
     * allowing axes with negative steps
     * reading units-initialization only once
@@ -16,7 +24,7 @@
     * including examples in fimex-bin debian package
     * best-effort time selection when writing grib-fields without known time
     * fixing typo in rotated latitude longitude projection
-    * fixing bug in second extended grid-type method (felt-files) 
+    * fixing bug in second extended grid-type method (felt-files)
   * 2010-05-07 fimex-0.21
     * allow data-slicing along any dimension
     * adding abstract coordinate-systems
@@ -55,7 +63,7 @@
     * improving compatibility with older versions of libxml
   * 2009-05-29 fimex-0.15
     * enabling forward projection interpolation
-    * adding configurable quality-status evaluation/extraction 
+    * adding configurable quality-status evaluation/extraction
   * 2009-05-15 fimex-0.14
     * support for reading/configuring with NcML
     * backporting to netcdf-3.5
@@ -94,7 +102,7 @@
     * fixing coordinates of polar-stereographic felt-files
   * 2008-06-11 fimex-0.6
     * units-support for netcdf output configuration
-    * keeping input-order of variables/attributes/dimensions within fimex 
+    * keeping input-order of variables/attributes/dimensions within fimex
   * 2008-06-05 fimex-0.5
     * bugfix for short-fields when converting from felt
     * netcdf output configuration
@@ -109,7 +117,7 @@
     * renaming to fimex
   * 2008-04-17 utplukk-0.2
     * backport to routine-machine, BOOST-1.32, hardcoded netcdf-path
-    * dist-checked distribution	
+    * dist-checked distribution
   * 2008-01-02 utplukk-0.1
     * initial release using autotools
   * 2007-09-18 utplukk-0.0

@@ -10,21 +10,21 @@ compilation
 	* libxml2 >= 2.5.0
 	* boost library >= 1.33
     * proj-4 >= 4.4.9
-    * udunits (> 1.12), or udunits2 (> 2.1.8)
+    * udunits (>= 1.12), or udunits2 (>= 2.1.9)
 
 To configure the different file formats it requires:
     * NetCDF (netcdf > 3.5)
     * Grib_API (grib_api > 1.4)
     * Felt (libmi or libfelt (bundled))
 
-        
+
 
 INSTALLATION
 ------------
 The installation follows the usual autoconf rules, see 'INSTALL' for
 extensive information. Since Fimex makes some floating-point calculations
 in large loops, it is advisable to switch on SIMD/SSE operations in your
-compiler. On a Xeon machine with a x386 machine and gcc, I use the 
+compiler. On a Xeon machine with a x386 machine and gcc, I use the
 following flags (those are default for x86-64)
 
 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2' ./configure --with-netcdf=/usr --with-udunits=/usr
@@ -34,7 +34,7 @@ Testing the Installation
 Make sure to download the test-data from
 https://wiki.met.no/_media/fimex/flth00.dat.gz, add it to the test/
 directory and gunzip it.
-Then run 'make check'. 
+Then run 'make check'.
 
 USAGE EXAMPLE
 -------------
@@ -61,6 +61,6 @@ c) create a felt2nc_variables.xml file for each variable group.
    and write the data as short.
 d) validate the felt2nc_variables.xml file, i.e. with
 	xmllint --xinclude --postvalid --noout ../../share/etc/felt2nc_variables.xml
-e) adjust the projection and area you want to extract in fimex_example.cfg (or 
+e) adjust the projection and area you want to extract in fimex_example.cfg (or
    use command line arguments to fimex)
 d) run 'fimex -c fimex_example.cfg'
