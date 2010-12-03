@@ -107,6 +107,10 @@
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* 'Define to 1 if you have the <netcdf.h> header file.' */
 #undef MIFI_HAVE_NETCDF
 

@@ -1,7 +1,8 @@
-AC_INIT([fimex],[0.25],[heiko.klein@met.no])
+AC_INIT([fimex],[0.25.1],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall -Werror foreign])
 
+AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC_STDC
 AC_PROG_CXX
 AC_PROG_LIBTOOL

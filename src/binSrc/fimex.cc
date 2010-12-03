@@ -78,7 +78,14 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
 template<typename T>
 static void writeOption(ostream& out, const string& var, const po::variables_map& vm) {
     if (vm.count(var)) {
-        out << var << ": " << vm[var].as<T>() << endl;
+        out << var << ": ";
+#if defined(__GNUC__) && __GNUC__ < 4
+// Use erroneous syntax hack to work around a compiler bug.
+        out << vm[var].template as<T>();
+#else
+        out << vm[var].as<T>();
+#endif
+        out << endl;
     }
 }
 
