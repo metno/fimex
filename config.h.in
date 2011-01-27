@@ -57,6 +57,9 @@
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
 
+/* postgres.h is present */
+#undef HAVE_POSTGRES_POSTGRES_H
+
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 
