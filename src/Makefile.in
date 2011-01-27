@@ -61,9 +61,10 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_program_options.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/ax_postgres.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/metno_check.m4 \
 	$(top_srcdir)/m4/mifi_checklib.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
@@ -120,11 +121,13 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
-	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
-	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc
+	Utils.cc XMLDoc.cc gridexer/GxWdbDataTypes.cc \
+	gridexer/GxWdbExplorer.cc WdbCDMReader.cc NetCDF_CDMReader.cc \
+	NetCDF_CDMWriter.cc NetCDF_Utils.cc NetCDF_Utils.h \
+	GribApiCDMWriter.cc GribApiCDMWriter_ImplAbstract.cc \
+	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
+	GribCDMReader.cc GribFileIndex.cc GribUtils.cc \
+	FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 @HAVE_GRIBAPI_TRUE@am__objects_2 = GribApiCDMWriter.lo \
@@ -152,8 +155,8 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
 	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
-	Utils.lo XMLDoc.lo $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3)
+	Utils.lo XMLDoc.lo GxWdbDataTypes.lo GxWdbExplorer.lo WdbCDMReader.lo \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -304,6 +307,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PGCONFIG = @PGCONFIG@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
 SED = @SED@
@@ -358,6 +362,9 @@ milib_LIBS = @milib_LIBS@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pgsql_CFLAGS = @pgsql_CFLAGS@
+pgsql_LDFLAGS = @pgsql_LDFLAGS@
+pgsql_LIBS = @pgsql_LIBS@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
@@ -398,8 +405,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc $(am__append_1) $(am__append_2) \
-	$(am__append_3)
+	Utils.cc XMLDoc.cc gridexer/GxWdbDataTypes.cc \
+	gridexer/GxWdbExplorer.cc WdbCDMReader.cc \
+	$(am__append_1) $(am__append_2) $(am__append_3)
 all: all-recursive
 
 .SUFFIXES:
@@ -512,6 +520,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GxWdbDataTypes.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GxWdbExplorer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
@@ -658,6 +669,27 @@ PolarStereographicProjection.lo: coordSys/PolarStereographicProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/PolarStereographicProjection.cc' object='PolarStereographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
+
+GxWdbDataTypes.lo: gridexer/GxWdbDataTypes.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GxWdbDataTypes.lo -MD -MP -MF $(DEPDIR)/GxWdbDataTypes.Tpo -c -o GxWdbDataTypes.lo `test -f 'gridexer/GxWdbDataTypes.cc' || echo '$(srcdir)/'`gridexer/GxWdbDataTypes.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GxWdbDataTypes.Tpo $(DEPDIR)/GxWdbDataTypes.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridexer/GxWdbDataTypes.cc' object='GxWdbDataTypes.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GxWdbDataTypes.lo `test -f 'gridexer/GxWdbDataTypes.cc' || echo '$(srcdir)/'`gridexer/GxWdbDataTypes.cc
+
+GxWdbExplorer.lo: gridexer/GxWdbExplorer.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GxWdbExplorer.lo -MD -MP -MF $(DEPDIR)/GxWdbExplorer.Tpo -c -o GxWdbExplorer.lo `test -f 'gridexer/GxWdbExplorer.cc' || echo '$(srcdir)/'`gridexer/GxWdbExplorer.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GxWdbExplorer.Tpo $(DEPDIR)/GxWdbExplorer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridexer/GxWdbExplorer.cc' object='GxWdbExplorer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GxWdbExplorer.lo `test -f 'gridexer/GxWdbExplorer.cc' || echo '$(srcdir)/'`gridexer/GxWdbExplorer.cc
+
+WdbCDMReader.lo: WdbCDMReader.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbCDMReader.lo -MD -MP -MF $(DEPDIR)/WdbCDMReader.Tpo -c -o WdbCDMReader.lo `test -f 'WdbCDMReader.cc' || echo '$(srcdir)/'`WdbCDMReader.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WdbCDMReader.Tpo $(DEPDIR)/WdbCDMReader.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbCDMReader.cc' object='WdbCDMReader.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WdbCDMReader.lo `test -f 'WdbCDMReader.cc' || echo '$(srcdir)/'`WdbCDMReader.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo
