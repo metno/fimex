@@ -503,7 +503,7 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     paramValues[6] = version.empty() ? 0 : strdataversion.c_str();
 
     pgResult = PQexecParams(wdbPGConn_,
-                       "select value::int4, valueid::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
+                       "select value::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
                        7,
                        NULL,    /* let the backend deduce param type */
                        paramValues,
@@ -524,7 +524,6 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     gidRows.resize(record_count);
 
     int value_fnum = PQfnumber(pgResult, "value");
-    int valueid_fnum = PQfnumber(pgResult, "valueide");
     int valuetype_fnum = PQfnumber(pgResult, "valuetype");
     int referencetime_fnum = PQfnumber(pgResult, "referencetime");
     int dataprovidername_fnum = PQfnumber(pgResult, "dataprovidername");
@@ -542,7 +541,6 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
         GxGidRow row;
         /* Get the field values (ATM ignore possibility they are null!) */
         row.setValue(GxWdbExplorer::getValueAsInt4(pgResult, i, value_fnum));
-        row.setValueId(GxWdbExplorer::getValueAsInt4(pgResult, i, valueid_fnum));
         row.setValueType(GxWdbExplorer::getValueAsString(pgResult, i, valuetype_fnum));
 
         GxDataProviderRow providerRow;
