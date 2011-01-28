@@ -69,6 +69,10 @@ namespace MetNoFimex {
             return wdbExplorer();
         }
 
+        void setWdbExplorer(const boost::shared_ptr<GxWdbExplorer>& wdbExplorer) {
+            wdbExplorer_ = wdbExplorer;
+        }
+
         bool addDataProvider();
         bool addPlace();
         void addGlobalCDMAttributes();
