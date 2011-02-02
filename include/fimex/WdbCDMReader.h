@@ -99,6 +99,7 @@ namespace MetNoFimex {
         std::vector<GxLevelParameterRow> levelparameters_;
         std::vector<GxValueParameterRow> valueparameters_;
         std::vector<GxValidTimeRow> validtimes_; // this should be UNLIMITED dimension
+//          std::vector<GxReferenceTimeRow> referencetimes_; // this should be UNLIMITED dimension
         std::vector<std::pair<boost::posix_time::ptime, boost::posix_time::ptime> > timeVec;
         std::map<std::string,  std::vector<std::pair<double, double> > > levelNamesToPairsMap;
     };
