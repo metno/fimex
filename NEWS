@@ -1,3 +1,7 @@
+  * XXX fimex-0.26
+    * enabling setting of unlimited dimension in ncml
+    * bug-fix in handling of netcdf4
+    * reducing memory consumpting when reading (with unlimited dimension) for opendap
   * 2010-12-03 fimex-0.25.1
     * workaround for compiler-bug in gcc < 4
     * upgrading build-infrastructure to automake-1.11

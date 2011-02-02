@@ -58,7 +58,7 @@ size_t SliceBuilder::getDimPos(const std::string& dimName) const
 {
     map<string, size_t>::const_iterator posIt = dimPos_.find(dimName);
     if (posIt == dimPos_.end()) {
-        throw CDMException("dimName " + dimName + " not part of this sliceBuilder");
+        throw CDMException("dimName '" + dimName + "' not part of this sliceBuilder");
     }
     return posIt->second;
 }

@@ -45,6 +45,7 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
     : configFile(configFile)
 {
     doc = new XMLDoc(configFile);
+    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
@@ -59,6 +60,7 @@ NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std:
     : configFile(configFile), dataReader(dataReader)
 {
     doc = new XMLDoc(configFile);
+    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
     init();
 }
 
@@ -70,7 +72,6 @@ NcmlCDMReader::~NcmlCDMReader()
 
 void NcmlCDMReader::init() throw(CDMException)
 {
-    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
     int size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
     if (size == 0) {
@@ -82,6 +83,7 @@ void NcmlCDMReader::init() throw(CDMException)
 
     initRemove();
     initDimensionNameChange();
+    initDimensionUnlimited();
     initVariableNameChange();
     initVariableTypeChange();
     initAttributeNameChange();
@@ -144,7 +146,6 @@ void NcmlCDMReader::initRemove() {
 /* warn about features not supported in this class */
 void NcmlCDMReader::initWarnUnsupported() {
     warnUnsupported("/nc:netcdf/nc:aggregation", "aggregation not supported");
-    warnUnsupported("/nc:netcdf/nc:dimension[isUnlimited]", "setting of unlimited dimension not supported");
     warnUnsupported("/nc:netcdf/nc:group","groups not supported");
 }
 
@@ -235,6 +236,44 @@ void NcmlCDMReader::initDimensionNameChange()
     }
 }
 
+/*
+ * set isUnlimited for dimensions. No check is made if this
+ * covers the netcdf3 requirements (i.e. just one unlimited dimension and it must be first)
+ */
+void NcmlCDMReader::initDimensionUnlimited()
+{
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@isUnlimited]");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i], "name");
+        std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
+        if (orgName == "") orgName = name;
+        std::string isUnlimited = getXmlProp(nodes->nodeTab[i], "isUnlimited");
+        if (cdm_->hasDimension(name)) {
+            CDMDimension& dim = cdm_->getDimension(name);
+            if (isUnlimited == "true") {
+                if (!dim.isUnlimited()) {
+                    cdm_->getDimension(name).setUnlimited(1);
+                    unlimitedDimensionChanges[name] = orgName;
+                    // prefetch the data of that variable
+                    if (cdm_->hasVariable(name)) {
+                        CDMVariable& var = cdm_->getVariable(name);
+                        var.setData(dataReader->getData(orgName));
+                    }
+                }
+            } else if (isUnlimited == "false") {
+                cdm_->getDimension(name).setUnlimited(0);
+            } else {
+                string warning = "NcML: unlimited of dimension of " + name + " must be 'true' or 'false' but is: " + isUnlimited;
+                LOG4FIMEX(logger, Logger::ERROR, warning);
+                throw CDMException(warning);
+            }
+        }
+    }
+}
+
+
 /* change the attribute names */
 void NcmlCDMReader::initAttributeNameChange()
 {
@@ -290,7 +329,23 @@ boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, 
     if (vit != variableNameChanges.end()) {
         orgVarName = vit->second;
     }
-    boost::shared_ptr<Data> data = dataReader->getDataSlice(orgVarName, unLimDimPos);
+
+    boost::shared_ptr<Data> data;
+    // check if the first new unlimited dimension is part of the variable
+    // (for simplicity check only first)
+    if ( (unlimitedDimensionChanges.size() > 0) &&
+         find(cdm_->getVariable(varName).getShape().begin(),
+              cdm_->getVariable(varName).getShape().end(),
+              unlimitedDimensionChanges.begin()->first) != cdm_->getVariable(varName).getShape().end()
+       ) {
+        string unlimDim = unlimitedDimensionChanges.begin()->second;
+        LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim " << unlimDim);
+        SliceBuilder sb(dataReader->getCDM(), orgVarName);
+        sb.setStartAndSize(unlimDim, unLimDimPos, 1);
+        data = dataReader->getDataSlice(orgVarName, sb);
+    } else {
+        data = dataReader->getDataSlice(orgVarName, unLimDimPos);
+    }
 
     // eventually, change the type from the old type to the new type
     map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);

@@ -144,7 +144,6 @@
     <attribute name="description" value="isentrop layer?" type="string" />
 </vertical_axis>
 <vertical_axis id="depth" name="depth" felt_id="5" type="short">
-    <attribute name="description" value="geopotential level relative to equilibrium surface" type="string" />
     <attribute name="long_name" value="depth" type="string" />
     <attribute name="positive" value="down" type="string" />
     <attribute name="standard_name" value="depth" type="string" />
@@ -289,7 +288,7 @@
     <attribute name="standard_name" value="sea_surface_height_above_geoid" type="string" />
     <attribute name="units" value="m" type="string" />
 </parameter>
-<parameter id="302,5,0" name="x_velocity">
+<parameter id="302,5" name="x_velocity">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="cell_methods" value="time: point" type="string" />
     <attribute name="long_name" value="sea_water_x_velocity" type="string" />
@@ -319,7 +318,7 @@
     <attribute name="units" value="m s-1" type="string" />
 </parameter>
 -->
-<parameter id="303,5,0" name="y_velocity">
+<parameter id="303,5" name="y_velocity">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="cell_methods" value="time: point" type="string" />
     <attribute name="long_name" value="sea_water_y_velocity" type="string" />
@@ -398,7 +397,7 @@
     <attribute name="units" value="m" type="string" />
 </parameter>
 -->
-<parameter id="307,5,0" name="salinity">
+<parameter id="307,5" name="salinity">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="valid_min" value="0" type="short" />
     <attribute name="cell_methods" value="time: point" type="string" />
@@ -432,7 +431,7 @@
     <attribute name="units" value="1e-3" type="string" />
 </parameter>
 -->
-<parameter id="308,5,0" name="sea_temperature">
+<parameter id="308,5" name="sea_temperature">
     <attribute name="add_offset" value="273.15" type="float" />
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="cell_methods" value="time: point" type="string" />

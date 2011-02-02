@@ -66,18 +66,6 @@
 
 
 <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
-<storageModule moduleId="org.eclipse.cdt.core.pathentry">
-<pathentry include="src" kind="inc" path="" system="true"/>
-<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/usr/include" kind="inc" path="" system="true"/>
-<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/home/heikok/Programme/MetSis/Fimex/include" kind="inc" path="" system="true"/>
-<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/disk1/metno/local/include" kind="inc" path="" system="true"/>
-<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/usr/include/libxml2" kind="inc" path="" system="true"/>
-<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/disk1/heiko/local/include" kind="inc" path="" system="true"/>
-<pathentry include="/usr/include/c++/4.2" kind="inc" path="" system="true"/>
-<pathentry kind="out" path=""/>
-<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
-<pathentry kind="src" path=""/>
-</storageModule>
 <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
 <buildTargets>
 <target name="all" path="src" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
@@ -169,6 +157,16 @@
 <runAllBuilders>true</runAllBuilders>
 </target>
 </buildTargets>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+<pathentry include="src" kind="inc" path="" system="true"/>
+<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/usr/include" kind="inc" path="" system="true"/>
+<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/home/heikok/Programme/MetSis/Fimex/include" kind="inc" path="" system="true"/>
+<pathentry base-ref="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO" include="/usr/include/libxml2" kind="inc" path="" system="true"/>
+<pathentry include="/usr/include/c++/4.4" kind="inc" path="" system="true"/>
+<pathentry kind="out" path=""/>
+<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+<pathentry kind="src" path=""/>
 </storageModule>
 </cconfiguration>
 </storageModule>

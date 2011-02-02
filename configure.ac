@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.25.1],[heiko.klein@met.no])
+AC_INIT([fimex],[0.26beta],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall -Werror foreign])
 
@@ -79,6 +79,9 @@ if test [ "x$with_netcdf" == "xyes" ]; then
     LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
     CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
     AC_CHECK_LIB([netcdf_c++], [main],[], [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
+    AC_CHECK_TYPE([NcFile::FileFormat],[  AC_DEFINE([HAVE_NCFILE_FILEFORMAT],[1],
+                                                     [netcdf knows NcFile::FileFormat enum])
+                                                    ],[],[#include "netcdfcpp.h"])
     LIBS="$save_LIBS"
     LDFLAGS="$save_LDFLAGS"
     CPPFLAGS="$save_CPPFLAGS"
