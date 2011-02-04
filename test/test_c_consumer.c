@@ -128,11 +128,11 @@ int testFeltData(const char* feltFile, const char* configFile) {
                     double x = data[i];
                     //printf("i: %f\n", data[i]);
                 }
-                if (fabs(data[0]+5718494.) > 0.e-5) {
+                if (fabs(data[0]+5718494.) > 1) {
                     retVal++;
                     fprintf(stderr, "data[0] != -5718494: %f", data[0]);
                 }
-                if (fabs(data[size - 1]-5718494.) > 0.e-5) {
+                if (fabs(data[size - 1]-5718494.) > 1) {
                     retVal++;
                     fprintf(stderr, "data[size -1] != 5718494: %f", data[size - 1]);
                 }

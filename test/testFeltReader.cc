@@ -182,11 +182,13 @@ BOOST_AUTO_TEST_CASE( test_felt_axis )
 #endif
 	BOOST_CHECK(ff.getGridType() == 1);
 
-	boost::shared_ptr<Data> xdata = ff.getXData();
-	BOOST_CHECK((xdata->asFloat())[(int)gridPar[0]-1] == 0);
-	BOOST_CHECK((xdata->asInt())[(int)gridPar[0]] == 50162);
-	BOOST_CHECK((ff.getYData()->asFloat())[(int)gridPar[1]-1] == 0);
-	BOOST_CHECK((ff.getYData()->asInt())[(int)gridPar[1]] == 50162);
+    boost::shared_ptr<Data> xdata = ff.getXData();
+    //cerr << ff.getGridDefinition()->startX() - 5.71849e+06  << " x " << ff.getGridDefinition()->getXIncrement() - 50162.2<< endl;
+	//cerr << gridPar[0] << "'" << ((int)gridPar[0]-1) << ": "<< (xdata->asFloat())[(int)gridPar[0]-1] << " x " << (xdata->asFloat())[(int)gridPar[0]-1] << endl;
+	BOOST_CHECK(fabs((xdata->asFloat())[(int)gridPar[0]-1]) < .5);
+	BOOST_CHECK((xdata->asInt())[(int)gridPar[0]] == 50162); // tis is 50162.2...
+	BOOST_CHECK(fabs((ff.getYData()->asFloat())[(int)gridPar[1]-1]) < .5);
+	BOOST_CHECK((ff.getYData()->asInt())[(int)gridPar[1]] == 50162); // tis is 50162.2...
 }
 
 BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
