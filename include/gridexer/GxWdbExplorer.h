@@ -123,6 +123,17 @@ public:
                        const std::vector<std::string>& versions,
                        std::vector<GxValidTimeRow>& validTimeRows);
 
+    void getReferenceTimes
+            (
+                 const std::vector<std::string>& providers,
+                 const std::string& place,
+                 const std::string& validtime,
+                 const std::vector<std::string>& values,
+                 const std::string& level,
+                 const std::vector<std::string>& versions,
+                 std::vector<GxReferenceTimeRow>& referenceTimeRows
+            );
+
     void getGids(const std::vector<std::string>& providers,
                  const std::string& place,
                  const std::string& referenceTime,
@@ -167,6 +178,7 @@ private:
     std::vector<GxDataProviderRow>   providers_;
     std::vector<GxPlaceRow>          places_;
     std::vector<GxValidTimeRow>      validtimes_;
+//    std::vector<GxReferenceTimeRow>      referencetimes_;
     std::vector<GxLevelParameterRow> levelparameters_;
     std::vector<GxValueParameterRow> valueparameters_;
     std::vector<GxGidRow>            gids_;

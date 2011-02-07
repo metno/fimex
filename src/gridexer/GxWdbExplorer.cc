@@ -120,6 +120,7 @@ double GxWdbExplorer::getValueAsFloat8(PGresult* pgResult, const int rowPosition
 }
 
 GxWdbExplorer::GxWdbExplorer()
+    : wdbPGConn_(0)
 {
 
 }
@@ -325,6 +326,8 @@ void GxWdbExplorer::clearCache()
     levelparameters_.resize(0);
     validtimes_.clear();
     validtimes_.resize(0);
+//    referencetimes_.clear();
+//    referencetimes_.resize(0);
     places_.clear();
     places_.resize(0);
     providers_.clear();
@@ -502,8 +505,18 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     paramValues[5] = level.empty() ? 0 : level.c_str();
     paramValues[6] = version.empty() ? 0 : strdataversion.c_str();
 
+    std::cout << __FUNCTION__ << "@" << __LINE__ << std::endl;
+    paramValues[0] ? std::cout << "paramValues[0] : " << std::string(paramValues[0]) << std::endl : std::cout << "paramValues[0] : NULL" << std::endl;
+    paramValues[1] ? std::cout << "paramValues[1] : " << std::string(paramValues[1]) << std::endl : std::cout << "paramValues[1] : NULL" << std::endl;
+    paramValues[2] ? std::cout << "paramValues[2] : " << std::string(paramValues[2]) << std::endl : std::cout << "paramValues[2] : NULL" << std::endl;
+    paramValues[3] ? std::cout << "paramValues[3] : " << std::string(paramValues[3]) << std::endl : std::cout << "paramValues[3] : NULL" << std::endl;
+    paramValues[4] ? std::cout << "paramValues[4] : " << std::string(paramValues[4]) << std::endl : std::cout << "paramValues[4] : NULL" << std::endl;
+    paramValues[5] ? std::cout << "paramValues[5] : " << std::string(paramValues[5]) << std::endl : std::cout << "paramValues[5] : NULL" << std::endl;
+    paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
+
+
     pgResult = PQexecParams(wdbPGConn_,
-                       "select value::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
+                       "select value::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by value desc, referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
                        7,
                        NULL,    /* let the backend deduce param type */
                        paramValues,
@@ -541,6 +554,9 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
         GxGidRow row;
         /* Get the field values (ATM ignore possibility they are null!) */
         row.setValue(GxWdbExplorer::getValueAsInt4(pgResult, i, value_fnum));
+
+        std::cout << __FUNCTION__ << "@" << __LINE__ << " :" << "Found GID = " << row.value() << std::endl;
+
         row.setValueType(GxWdbExplorer::getValueAsString(pgResult, i, valuetype_fnum));
 
         GxDataProviderRow providerRow;
@@ -797,6 +813,15 @@ void GxWdbExplorer::getValueParameters(const std::vector<std::string>& providers
     paramValues[5] = level.empty() ? 0 : level.c_str();
     paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
 
+    std::cout << __FUNCTION__ << "@" << __LINE__ << std::endl;
+    paramValues[0] ? std::cout << "paramValues[0] : " << std::string(paramValues[0]) << std::endl : std::cout << "paramValues[0] : NULL" << std::endl;
+    paramValues[1] ? std::cout << "paramValues[1] : " << std::string(paramValues[1]) << std::endl : std::cout << "paramValues[1] : NULL" << std::endl;
+    paramValues[2] ? std::cout << "paramValues[2] : " << std::string(paramValues[2]) << std::endl : std::cout << "paramValues[2] : NULL" << std::endl;
+    paramValues[3] ? std::cout << "paramValues[3] : " << std::string(paramValues[3]) << std::endl : std::cout << "paramValues[3] : NULL" << std::endl;
+    paramValues[4] ? std::cout << "paramValues[4] : " << std::string(paramValues[4]) << std::endl : std::cout << "paramValues[4] : NULL" << std::endl;
+    paramValues[5] ? std::cout << "paramValues[5] : " << std::string(paramValues[5]) << std::endl : std::cout << "paramValues[5] : NULL" << std::endl;
+    paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
+
     pgResult = PQexecParams(wdbPGConn_,
                        "select valueparametername, valueunitname, numberoftuples::int4 from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsevalueparameter)",
                        7,
@@ -1023,6 +1048,96 @@ void GxWdbExplorer::getValidTimes(const std::vector<std::string>& providers,
     PQclear(pgResult);
 }
 
+//void GxWdbExplorer::getReferenceTimes
+//        (
+//                const std::vector<std::string>& providers,
+//                const std::string& place,
+//                const std::string& validtime,
+//                const std::vector<std::string>& values,
+//                const std::string& level,
+//                const std::vector<std::string>& versions,
+//                std::vector<GxReferenceTimeRow>& referenceTimeRows
+//        )
+//{
+//    if(cachePolicy_ == GxWdbCachePolicy(GxWdbCachePolicy::Cache) && !referencetimes_.empty()) {
+//        referenceTimeRows.clear();
+//        referenceTimeRows.insert(referenceTimeRows.begin(), referencetimes_.begin(), referencetimes_.end());
+//        return;
+//    }
+
+//    // prepare data
+//    std::string strdataproviders = "NULL";
+//    std::vector<std::string> tmp_dataproviders(providers);
+//    if(!tmp_dataproviders.empty()) {
+//        strdataproviders = "{";
+//        strdataproviders.append(boost::algorithm::join(tmp_dataproviders, std::string(",")));
+//        strdataproviders.append("}");
+//    }
+
+//    std::string strvalueparameters = "NULL";
+//    std::vector<std::string> tmp_valueparameters(values);
+//    if(!tmp_valueparameters.empty()) {
+//        strvalueparameters = "{";
+//        strvalueparameters.append(boost::algorithm::join(tmp_valueparameters, std::string(",")));
+//        strvalueparameters.append("}");
+//    }
+
+//    std::string strdataversion = "NULL";
+//    std::vector<std::string> tmp_dataversion(versions);
+//    if(!tmp_dataversion.empty()) {
+//        strdataversion = "{";
+//        strdataversion.append(boost::algorithm::join(tmp_dataversion, std::string(",")));
+//        strdataversion.append("}");
+//    }
+
+//    // execute the query
+//    PGresult *pgResult;
+//    const char *paramValues[7];
+
+//    paramValues[0] = providers.empty() ? 0 : strdataproviders.c_str();
+//    paramValues[1] = place.empty() ? 0 : place.c_str();
+//    paramValues[2] = 0;
+//    paramValues[3] = validtime.empty() ? 0 : validtime.c_str();
+//    paramValues[4] = values.empty() ? 0 : strvalueparameters.c_str();
+//    paramValues[5] = level.empty() ? 0 : level.c_str();
+//    paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
+
+//    pgResult = PQexecParams(wdbPGConn_,
+//                       "select DISTINCT(extract(epoch from referencetime)) as referencetime, numberoftuples from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsereferencetime) order by referencetime",
+//                       7,
+//                       NULL,    /* let the backend deduce param type */
+//                       paramValues,
+//                       NULL,    /* don't need param lengths since text */
+//                       NULL,    /* default to all text params */
+//                       1);      /* ask for binary results */
+
+//    if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
+//    {
+//        std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+//        PQclear(pgResult);
+//        PQfinish(wdbPGConn_);
+//        referenceTimeRows.clear();
+//        return; // empty
+//    }
+
+//    int record_count = PQntuples(pgResult);
+//    referenceTimeRows.resize(record_count);
+
+//    int referencetime_fnum = PQfnumber(pgResult, "referencetime");
+//    int numberoftuples_fnum = PQfnumber(pgResult, "numberoftuples");
+
+//    for (int rowIndex = 0; rowIndex < record_count; rowIndex++)
+//    {
+//        GxReferenceTimeRow row;
+//        row.setSinceEpochInSeconds(GxWdbExplorer::getValueAsFloat8(pgResult, rowIndex, referencetime_fnum));
+//        row.setUnitName("seconds since epoch");
+//        row.setNumberOfTuples(GxWdbExplorer::getValueAsInt4(pgResult, rowIndex, numberoftuples_fnum));
+//        referenceTimeRows[rowIndex] = row;
+//    }
+
+//    PQclear(pgResult);
+//}
+
 void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::string& strdatatype, boost::shared_ptr<MetNoFimex::Data>& data)
 {
     PGresult   *pgResult;
@@ -1050,8 +1165,6 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
         return;
     }
 
-//    int numberx_fnum = PQfnumber(pgResult, "numberx");
-//    int numbery_fnum = PQfnumber(pgResult, "numbery");
     int grid_fnum = PQfnumber(pgResult, "grid");
 
     int    row_position = 0;
@@ -1065,8 +1178,16 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
 
     blen = PQgetlength(pgResult, row_position, grid_fnum) / sizeof(float);
 
-    boost::shared_ptr<MetNoFimex::Data> tmpdata =
-            MetNoFimex::createData(MetNoFimex::string2datatype(strdatatype), ptrbinary, ptrbinary + blen);
+//    boost::shared_ptr<MetNoFimex::Data> tmpdata =
+//            MetNoFimex::createData(MetNoFimex::string2datatype(strdatatype), ptrbinary, ptrbinary + blen);
+
+//    for(int index = 0; index < blen; ++index) {
+//        std::cerr << *(ptrbinary + index) << "    ";
+//    }
+
+//    data.swap(tmpdata);
+
+    data = MetNoFimex::createData(MetNoFimex::string2datatype(strdatatype), ptrbinary, ptrbinary + blen);
 
     PQclear(pgResult);
 }
@@ -1106,7 +1227,9 @@ void GxWdbExplorer::getGridData(const std::string& gid, GxGridDataRow& dataRow)
     int     blen;
 
     ptrbinary = PQgetvalue(pgResult, i, grid_fnum);
-    blen = GxWdbExplorer::getValueAsInt4(pgResult, i, grid_fnum);
+    blen = PQgetlength(pgResult, i, grid_fnum);
+    std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << "blen = " << blen << std::endl;
+
     ptrdata = reinterpret_cast<float*>(ptrbinary);
     boost::shared_ptr<std::vector<float> > tmpData =
             boost::shared_ptr<std::vector<float> >(new std::vector<float>(ptrdata, ptrdata + (blen/sizeof(float))));
