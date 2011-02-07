@@ -50,14 +50,15 @@ namespace MetNoFimex {
         std::string  connectString() const;
         std::string  connectString();
 
-        void setWdbToCFNamesMap(const boost::bimap<std::string, std::string>& map);
-        void addWdbToCFNames(const boost::bimap<std::string, std::string>& map);
+//        void setWdbToCFNamesMap(const std::map<std::string, std::string>& wdb2cfmap);
+//        void addWdbToCFNames(const stdmap<std::string, std::string>& wdbmap);
         void addWdbNameToCFName(const std::string& wdbname, const std::string& cfname);
 
-        void addWdbNameToFillValueMap(const boost::bimap<std::string, double>& map);
+//        void addWdbNameToFillValueMap(const boost::bimap<std::string, double>& map);
         void addWdbNameToFillValue(const std::string& wdbname, const double value);
 
         virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
 
     protected:
         boost::shared_ptr<GxWdbExplorer> wdbExplorer()  {
@@ -76,11 +77,20 @@ namespace MetNoFimex {
         bool addPlace();
         void addGlobalCDMAttributes();
         CDMDimension addTimeDimension();
+        CDMDimension addReferenceTimeDimension();
         std::map<short, CDMDimension> addLevelDimensions();
         std::string getStandardNameForDimension(const std::string& name);
         // returning projName and coordinates for given place name
         boost::tuple<std::string, std::string> addProjection(const std::string& strplace);
-        void addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<short, CDMDimension>& levelDims);
+
+        void addVariables
+                (
+                        const std::string& projName,
+                        const std::string& coordinates,
+                        const CDMDimension& timeDim,
+                        const CDMDimension& referenceTimDim,
+                        const std::map<short, CDMDimension>& levelDim
+                );
 
     private:
         std::string                         source_;

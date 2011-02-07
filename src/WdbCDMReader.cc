@@ -360,24 +360,6 @@ namespace MetNoFimex {
             std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
         }
 
-//        if(referencetimes_.empty()) {
-////            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
-//            wdbExplorer()->
-//                    getReferenceTimes
-//                    (
-//                            vecdataproviders,
-//                            strplace,
-//                            std::string(),
-//                            vecvalueparameters,
-//                            strlevelparameterconstraint,
-//                            std::vector<std::string>(),
-//                            referencetimes_
-//                    );
-//        } else {
-//            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
-//        }
-
-
         std::string timeDimensionUnits = "seconds";
         int timeScaleFactor = 1;
 
@@ -427,22 +409,6 @@ namespace MetNoFimex {
              }
         }
 
-        // used with referemnce time
-        // ATM not needed
-//        timeInUnitsVector.resize(referencetimes_.size());
-//        timeVec.resize(referencetimes_.size());
-
-//        for(uint index = 0; index < referencetimes_.size(); ++index) {
-//            std::time_t reftimefrom = referencetimes_[index].sinceEpochInSeconds();
-//            std::time_t reftimeto = referencetimes_[index].sinceEpochInSeconds();
-//            timeInUnitsVector[index] = referencetimes_[index].sinceEpochInSeconds() / timeScaleFactor;
-
-//            std::pair<boost::posix_time::ptime, boost::posix_time::ptime> reftime_from_to;
-//            reftime_from_to.first = boost::posix_time::from_time_t(reftimefrom);
-//            reftime_from_to.second = boost::posix_time::from_time_t(reftimeto);
-//            timeVec[index] = reftime_from_to;
-//        }
-
         long timeDimensionSize = timeVec.size();
         timeDimension.setName(hcTimeDimensionName);
         timeDimension.setLength(timeDimensionSize);
@@ -470,6 +436,115 @@ namespace MetNoFimex {
         cdm_->addAttribute(timeVariable.getName(), timeAxisAttribute);
 
         return timeDimension;
+    }
+
+    CDMDimension GxWdbCDMReader::addReferenceTimeDimension()
+    {
+        std::cerr << __FUNCTION__ << "@" << __LINE__ << " : ================ REFERENCE" << std::endl;
+
+
+        CDMDimension referenceTimeDimension;
+        // let's deal with time axis: we will
+        // look at all validfrom -validto pairs
+        // will take them and find the minmal
+        // interval there
+        std::string hcReferenceTimeDimensionName = "forecast_reference_time";
+        std::string hcReferenceTimeDimensionStandardName = "forecast_reference_time";
+        std::string hcSymbolForReferenceTimeDimension = "T";
+        std::string hcReferenceTimeDimensionType = "float";
+
+        std::vector<std::string> vecdataproviders;
+        if(!providers_.empty()) {
+            for(unsigned int i = 0; i < providers_.size(); ++i) {
+                GxDataProviderRow row = providers_.at(i);
+                vecdataproviders.push_back(row.name());
+            }
+        }
+
+        // ATM we don't need to include level constraints
+        //
+        std::string strlevelparameterconstraint;
+
+        std::string strplace;
+        if(!places_.empty()) {
+            GxPlaceRow row = places_.at(0);
+            strplace = row.name();
+        }
+
+        std::vector<std::string> vecvalueparameters;
+        if(!valueparameters_.empty()) {
+            for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
+                GxValueParameterRow row = valueparameters_.at(i);
+                vecvalueparameters.push_back(row.name());
+            }
+        }
+
+        if(referencetimes_.empty()) {
+
+            wdbExplorer()->
+                    getReferenceTimes
+                    (
+                            vecdataproviders,
+                            strplace,
+                            std::string(),
+                            vecvalueparameters,
+                            strlevelparameterconstraint,
+                            std::vector<std::string>(),
+                            referencetimes_
+                    );
+//            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+        } else {
+            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+        }
+
+
+//        std::string referenceTimeDimensionUnits = "seconds";
+        int referenceTimeScaleFactor = 1;
+
+        // ATM treat everytihing as seconds since epoch
+        // and later make some policies that user can
+        // choose from
+        //
+
+        // watch for the space
+//        referenceTimeDimensionUnits.append(" since 1970-01-01 00:00:00 +00:00");
+
+        std::vector<double> referenceTimeInUnitsVector;
+
+        referenceTimeInUnitsVector.resize(referencetimes_.size());
+        referenceTimeVec.resize(referencetimes_.size());
+
+        for(uint index = 0; index < referencetimes_.size(); ++index) {
+            referenceTimeInUnitsVector[index] = referencetimes_[index].sinceEpochInSeconds() / referenceTimeScaleFactor;
+            referenceTimeVec[index] = boost::posix_time::from_time_t(referencetimes_[index].sinceEpochInSeconds());
+        }
+
+        long referenceTimeDimensionSize = referenceTimeVec.size();
+        referenceTimeDimension.setName(hcReferenceTimeDimensionName);
+        referenceTimeDimension.setLength(referenceTimeDimensionSize);
+
+        referenceTimeDimension.setUnlimited(false);
+        cdm_->addDimension(referenceTimeDimension);
+        std::vector<std::string> referenceTimeDimensionShape;
+        referenceTimeDimensionShape.push_back(referenceTimeDimension.getName());
+        CDMDataType referenceTimeDimensionDataType = string2datatype(hcReferenceTimeDimensionType);
+        CDMVariable referenceTimeVariable(hcReferenceTimeDimensionName, referenceTimeDimensionDataType, referenceTimeDimensionShape);
+
+        boost::shared_ptr<Data> referenceTimeDimensionData = createData(referenceTimeDimensionDataType, referenceTimeInUnitsVector.begin(), referenceTimeInUnitsVector.end());
+        referenceTimeVariable.setData(referenceTimeDimensionData);
+        cdm_->addVariable(referenceTimeVariable);
+
+        // add attributes
+//        CDMAttribute referenceTimeUnitsAttribute("units", "string", referenceTimeDimensionUnits);
+        CDMAttribute referenceTimeLongNameAttribute("long_name", "string", hcReferenceTimeDimensionName);
+        CDMAttribute referenceTimeStandardNameAttribute("standard_name", "string", hcReferenceTimeDimensionStandardName);
+//        CDMAttribute referenceTimeAxisAttribute("axis", "string", hcSymbolForReferenceTimeDimension);
+//        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeUnitsAttribute);
+        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeLongNameAttribute);
+        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeStandardNameAttribute);
+//        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeAxisAttribute);
+
+        return referenceTimeDimension;
     }
 
     boost::tuple<std::string, std::string> GxWdbCDMReader::addProjection(const std::string& strplace)
@@ -660,6 +735,7 @@ namespace MetNoFimex {
 //            }
 
             std::vector<std::string> vecvalueparameters;
+//            vecvalueparameters.push_back(std::string());
 //            if(!valueparameters_.empty()) {
 //                for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
 //                    GxValueParameterRow row = valueparameters_.at(i);
@@ -680,7 +756,7 @@ namespace MetNoFimex {
 
         for(unsigned int index = 0; index < levelparameters_.size(); ++index) {
 //          for(unsigned int index = levelparameters_.size() - 1; index >= 0; --index) {
-            GxLevelParameterRow row = levelparameters_.at(levelparameters_.size() - index - 1);
+            GxLevelParameterRow row = levelparameters_.at(index);
 
             // get level size from database
             std::vector<std::pair<double, double> > levelvaluepairs;
@@ -695,9 +771,9 @@ namespace MetNoFimex {
             // if that fails try some deafault approach
             // but write that this happened in log
             std::string levelCFName;
-            boost::bimap<std::string, std::string>::left_iterator left_iter = wdbtocfnamesmap_.left.find(row.name());
-            if(left_iter != wdbtocfnamesmap_.left.end())
-                levelCFName = left_iter->second;
+            std::map<std::string, std::string>::const_iterator wdbname_iter = wdb2cfnamesmap_.find(row.name());
+            if(wdbname_iter != wdb2cfnamesmap_.end())
+                levelCFName = wdbname_iter->second;
             else
                 levelCFName = getStandardNameForDimension(row.name());
 
@@ -822,12 +898,14 @@ namespace MetNoFimex {
                                      std::string value = getXmlProp(child, "value");
                                      if(name == std::string("standard_cf_name")) {
                                          valueParameterStandardCFName = value;
+                                         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
+                                                   << "name: " << valueParameterNonStandardName << " cf name: " << valueParameterStandardCFName << std::endl;
                                          addWdbNameToCFName(valueParameterNonStandardName, valueParameterStandardCFName);
-                                         std::cerr << "name: " << valueParameterNonStandardName << " cf name: " << valueParameterStandardCFName << std::endl;
                                      } else if(name == std::string("_FillValue")) {
                                          valueParameterFillValue = boost::lexical_cast<float>(value);
+                                         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << std::cerr
+                                                   << "name: " << valueParameterNonStandardName << " fill value: " << valueParameterFillValue << std::endl;
                                          addWdbNameToFillValue(valueParameterNonStandardName, valueParameterFillValue);
-                                         std::cerr << "name: " << valueParameterNonStandardName << " fill value: " << valueParameterFillValue << std::endl;
                                      }
                              }
                              child = child->next;
@@ -858,8 +936,9 @@ namespace MetNoFimex {
                                      std::string value = getXmlProp(child, "value");
                                      if(name == std::string("standard_cf_name")) {
                                          levelParameterStandardCFName = value;
+                                         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
+                                                   << std::cerr << "name: " << levelParameterNonStandardName << " cf name: " << levelParameterStandardCFName << std::endl;
                                          addWdbNameToCFName(levelParameterNonStandardName, levelParameterStandardCFName);
-                                         std::cerr << "name: " << levelParameterNonStandardName << " cf name: " << levelParameterStandardCFName << std::endl;
                                      }
                              }
                              child = child->next;
@@ -969,11 +1048,12 @@ namespace MetNoFimex {
 
         // time
         CDMDimension timeDim = addTimeDimension();
+        CDMDimension refTimeDim = addReferenceTimeDimension();
 
-        addVariables(projectionName, projectionCoordinates, timeDim, levelDims);
+        addVariables(projectionName, projectionCoordinates, timeDim, refTimeDim, levelDims);
     }
 
-    void GxWdbCDMReader::addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<short, CDMDimension>& levelDims)
+    void GxWdbCDMReader::addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const CDMDimension& referenceTimeDim, const std::map<short, CDMDimension>& levelDims)
     {
         // ATM there is not way of determining _FillValue
         // from wdb, so we have to hard code some
@@ -1059,10 +1139,9 @@ namespace MetNoFimex {
             std::cerr << "adding valueparameter [Wdb name]: " << variableWdbName << std::endl;
 
             double variableFillValue;
-            boost::bimap<std::string, double>::left_iterator left_iter =
-                    wdbnametofillvaluemap_.left.find(variableWdbName);
-            if(left_iter != wdbnametofillvaluemap_.left.end())
-                variableFillValue = left_iter->second;
+            std::map<std::string, double>::const_iterator wdbname_iter = wdbname2fillvaluemap_.find(variableWdbName);
+            if(wdbname_iter != wdbname2fillvaluemap_.end())
+                variableFillValue = wdbname_iter->second;
             else
                 variableFillValue = std::numeric_limits<double>::quiet_NaN();
 
@@ -1099,10 +1178,10 @@ namespace MetNoFimex {
             for(unsigned int index = 0; index < levelDims.size(); ++index) {
                 std::string levelCFName = level.cfName();
                 if(levelCFName.empty()) {
-                    boost::bimap<std::string, std::string>::left_iterator left_iter =
-                            wdbtocfnamesmap_.left.find(level.name());
-                    if(left_iter != wdbtocfnamesmap_.left.end())
-                        levelCFName = left_iter->second;
+                    std::map<std::string, std::string>::const_iterator
+                            wdbname_iter = wdb2cfnamesmap_.find(level.name());
+                    if(wdbname_iter != wdb2cfnamesmap_.end())
+                        levelCFName = wdbname_iter->second;
                     else
                         levelCFName = getStandardNameForDimension(level.name());
                 }
@@ -1113,6 +1192,7 @@ namespace MetNoFimex {
             }
 
             shape.push_back(timeDim.getName());
+            shape.push_back(referenceTimeDim.getName());
 
             CDMDataType type = string2datatype(hcDataType);
             CDMVariable var(variableWdbName, type, shape);
@@ -1141,12 +1221,25 @@ namespace MetNoFimex {
         boost::posix_time::ptime validTimeTo = timeVec.at(unLimDimPos).second;
 
         std::cerr << "\nVARIABLE: " << varName << std::endl;
+        std::cerr << "POSITION ON UNLIMITED TIME AXIS: " << unLimDimPos << std::endl;
         std::cerr << "FROM: " << to_iso_string(validTimeFrom).c_str() << std::endl;
         std::cerr << "TO: " << to_iso_string(validTimeTo).c_str() << std::endl;
 
+//        {
+//            std::cerr << "===== DUMPING UNLIMITED TIME AXIS =====" << std::endl;
+//            for(unsigned int position = 0; position < timeVec.size(); ++position) {
+//                std::cerr
+//                        << "[" << position << "] "
+//                        << "FROM: "
+//                        << to_iso_string(timeVec.at(position).first) << " --- "
+//                        << "TO: "
+//                        << to_iso_string(timeVec.at(position).second) << std::endl;
+//            }
+//        }
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         const std::vector<std::string>& dims = variable.getShape();
         const CDMDimension* layerDim = 0;
+        const CDMDimension* referenceTimeDim = 0;
         size_t xy_size = 1;
         for (std::vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
             CDMDimension& dim = cdm_->getDimension(*it);
@@ -1154,105 +1247,376 @@ namespace MetNoFimex {
                 dim.getName() != yDim.getName() &&
                 !dim.isUnlimited())
             {
-                layerDim = &dim;
+                if(dim.getName() == std::string("forecast_reference_time"))
+                    referenceTimeDim = &dim;
+                else
+                    layerDim = &dim;
             }
-            if (! dim.isUnlimited()) {
+            if ( !dim.isUnlimited() && &dim != referenceTimeDim && &dim != layerDim ) {
                 xy_size *= dim.getLength();
             }
         }
 
-        boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size);
-
-        // test for availability of the current time in the variable (getSlice will get data for every time)
-        bool contains = true;
-        // check in snoeskred if there is at all data for given number of dasy since "bla bla"
-
-        // see how to handle timeless data
-        // data like f1(x, y), f2(x,y,level) etc
-
-        // try getting the gid
-        if (!contains) {
-            // return empty dataset
-            return createData(variable.getDataType(), 0);
-        }
-
-        // select all available layers
-        // althought we have only one
+        // we have to extract all possible
+        std::vector<std::string> vecLevels;
         if ((layerDim != 0) && (layerDim->getLength() > 0)) {
-            for (size_t i = 0; i < layerDim->getLength(); ++i) {
-//                layerVals.push_back(levelVecMap[layerDim->getName()][i]);
+            std::string strLevel;
+            std::string levelName = layerDim->getName();
+            std::cout << "finding levels for level dimension name: " << levelName << std::endl;
+            std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
+            for(size_t levelIndex = 0; levelIndex < levelPairs.size(); ++levelIndex) {
+                strLevel =
+                        std::string("exact")
+                        + std::string(" ")
+                        + boost::lexical_cast<std::string>(levelPairs.at(levelIndex).first)
+                        + std::string(" ")
+                        + levelName;
+                vecLevels.push_back(strLevel);
+                std::cout << "level # " << levelIndex << " is " << strLevel << std::endl;
             }
         }
 
-        size_t dataCurrentPos = 0;
-        std::vector<short> gridData;
-        gridData.reserve(xDim.getLength()*yDim.getLength());
-//        for all levels
-//        {
             boost::shared_ptr<Data> levelData; // sql call for reading the data for given variable
             // prepare in data
             // and get the gid
             std::vector<std::string> dataproviders;
             dataproviders.push_back(providers_.at(0).name());
-//            std::string referencetime();
-//            std::string levelparameter();
             std::vector<std::string> dataversion;
             dataversion.push_back("-1");
             std::vector<std::string> valueparameters;
             valueparameters.push_back(varName);
 
-//            std::string referencetime = to_iso_string(validTimeFrom) + "+00";
+            std::string referenceTime;
 
-//            std::cerr << "\nVARIABLE: " << varName << std::endl;
-//            std::cerr << "REFERNCE TIME: " << referencetime << std::endl;
+            if( referenceTimeDim ) {
+                // by default use the latest reference time
+                boost::posix_time::ptime refTime = referenceTimeVec.at(referenceTimeVec.size() - 1);
+                referenceTime = "exact " + to_iso_string(refTime) + "+00";
+                std::cerr << "LATEST REFERENCE TIME: " << referenceTime << std::endl;
+            }
 
-            std::string validtime = "inside " + to_iso_string(validTimeFrom) + "+00" + " TO " + to_iso_string(validTimeTo) + "+00";
+            std::string validtimeExactFromPoint = "exact " + to_iso_string(validTimeFrom) + "+00";
+            std::string validtimeExactToPoint = "exact " + to_iso_string(validTimeTo) + "+00";
+            std::string validtimeFromToInterval = "inside " + to_iso_string(validTimeFrom) + "+00" + " TO " + to_iso_string(validTimeTo) + "+00";
 
             std::vector<GxGidRow> gids;
-            wdbExplorer()->getGids(dataproviders,
-                                   places_.at(0).name(),
-                                   std::string(),
-                                   validtime,
-                                   valueparameters,
-                                   std::string(),
-                                   dataversion,
-                                   gids);
 
-            if(!gids.empty()) {
-                // get the data itself
-                std::cerr << "getting data for GID = " << gids.at(0).value() << " of type " << gids.at(0).valueType() << std::endl;
-                std::stringstream strgid;
-                strgid << gids.at(0).value();
-
-                std::cout << "============ READING GRID DATA AS FIMEX DATA: " << std::endl;
-
-                wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(0).valueType(), levelData);
-                if(levelData != 0) {
-                    data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
-                    dataCurrentPos += levelData->size();
+            for(size_t levelIndex = 0; levelIndex < vecLevels.size(); ++levelIndex) {
+                std::vector<GxGidRow> tmpGids;
+                // try exact from point
+                //
+                wdbExplorer()->getGids(dataproviders,
+                                       places_.at(0).name(),
+                                       referenceTime,
+                                       validtimeExactFromPoint,
+                                       valueparameters,
+                                       vecLevels.at(levelIndex),
+                                       dataversion,
+                                       tmpGids);
+                if(tmpGids.empty()) {
+                    // try whole interval
+                    //
+                    wdbExplorer()->getGids(dataproviders,
+                                           places_.at(0).name(),
+                                           referenceTime,
+                                           validtimeFromToInterval,
+                                           valueparameters,
+                                           vecLevels.at(levelIndex),
+                                           dataversion,
+                                           tmpGids);
+                    if(tmpGids.empty()) {
+                        // try exact to point
+                        //
+                        wdbExplorer()->getGids(dataproviders,
+                                               places_.at(0).name(),
+                                               referenceTime,
+                                               validtimeExactToPoint,
+                                               valueparameters,
+                                               vecLevels.at(levelIndex),
+                                               dataversion,
+                                               tmpGids);
+                    }
                 }
 
-                std::cout << "============ ROW DATA SIZE: " << data->size() << std::endl;
-
-//                std::cout << "============ READING GRID DATA AS FLOAT: " << std::endl;
-
-//                GxGridDataRow dataAsFloat;
-//                wdbExplorer()->getGridData(strgid.str(), dataAsFloat);
-//                std::ostringstream ost;
-//                for(unsigned int position = 0; position < dataAsFloat.data()->size(); position++) {
-//                    ost << dataAsFloat.data()->at(position) << "  ";
-//                    if((position / 80) == 0)
-//                        ost << std::endl;
-//                }
-//                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
-
+                if(!tmpGids.empty()) {
+                    gids.push_back(tmpGids.at(0));
+                    std::cout << "============================== GID = " << tmpGids.at(0).value() << std::endl;
+                }
             }
 
 
-//        }
-        //        }
-//        totalGetDataSliceTime_ += getDataSliceTime_.elapsed();
-//        boost::shared_ptr<Data> data;
+            std::cout << "============================== GIDS SIZE = " << gids.size() << std::endl;
+
+            size_t dataCurrentPos = 0;
+
+            // TODO: optimize based on the actual dimension sizes....
+            //
+            boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size * layerDim->getLength() * referenceTimeDim->getLength());
+
+            if(!gids.empty()) {
+                std::cout << "============ READING GRID DATA AS FIMEX DATA: " << std::endl;
+
+                for(size_t gidIndex = 0; gidIndex < gids.size(); ++gidIndex) {
+                    // get the data itself
+                    std::cerr << "getting data for GID = " << gids.at(gidIndex).value() << " of type " << gids.at(gidIndex).valueType() << std::endl;
+                    std::stringstream strgid;
+                    strgid << gids.at(gidIndex).value();
+
+                    wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(gidIndex).valueType(), levelData);
+                    if(levelData != 0) {
+                        data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
+                        dataCurrentPos += levelData->size();
+                    }
+
+    //                std::cout << "============ READING GRID DATA AS FLOAT: " << std::endl;
+
+    //                GxGridDataRow dataAsFloat;
+    //                wdbExplorer()->getGridData(strgid.str(), dataAsFloat);
+    //                std::ostringstream ost;
+    //                for(unsigned int position = 0; position < dataAsFloat.data()->size(); position++) {
+    //                    ost << dataAsFloat.data()->at(position) << "  ";
+    //                    if((position / 80) == 0)
+    //                        ost << std::endl;
+    //                }
+    //                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
+                }
+                std::cout << "============ ROW DATA SIZE: " << data->size() << std::endl;
+
+            } else {
+                std::cout << "============ NO GIDS -> NO GRID DATA FOUND: " << std::endl;
+                return createData(variable.getDataType(), 0);
+            }
+
+
+        return data;
+    }
+
+    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+    {  
+//        return CDMReader::getDataSlice(varName, sb);
+
+        std::vector<std::string> dimensionNames = sb.getDimensionNames();
+        std::vector<size_t> dimensionSizes = sb.getDimensionSizes();
+        std::vector<size_t> dimensionMaxSizes = sb.getMaxDimensionSizes();
+        std::vector<size_t> dimensionStartPositions = sb.getDimensionStartPositions();
+
+        for(size_t position = 0; position < dimensionNames.size(); ++position) {
+                    std::cout
+                         << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+                         << "   dimension name            "  << dimensionNames.at(position) << std::endl
+                         << " \tdimension sizes           "  << dimensionSizes.at(position) << std::endl
+                         << " \tdimension max sizes       "  << dimensionMaxSizes.at(position) << std::endl
+                         << " \tdimension start positions "  << dimensionStartPositions.at(position)
+                         << std::endl;
+
+        }
+
+        const CDMVariable& variable = cdm_->getVariable(varName);
+
+        // TODO: check if data exists in some cache
+        //
+
+        // find time axis -- validtime in our case
+
+        std::cerr << "\nVARIABLE: " << varName << std::endl;
+
+        // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
+        // -- reference time plays important role
+        //
+        const std::vector<std::string>& dims = variable.getShape();
+        const CDMDimension* timeDim = 0; // UNLIMITED DIMENSION
+        const CDMDimension* layerDim = 0;
+        const CDMDimension* referenceTimeDim = 0;
+        size_t xy_size = 1;
+        for (std::vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+            CDMDimension& dim = cdm_->getDimension(*it);
+            if (dim.getName() != xDim.getName() &&
+                dim.getName() != yDim.getName() &&
+                !dim.isUnlimited())
+            {
+                if(dim.getName() == std::string("forecast_reference_time")) // better if we have it
+                    referenceTimeDim = &dim;
+                else
+                    layerDim = &dim;
+            } else if(dim.isUnlimited()) {
+                // in our case thi is valid time axis
+                timeDim = &dim;
+            }
+            if ( !dim.isUnlimited() && &dim != referenceTimeDim && &dim != layerDim ) {
+                xy_size *= dim.getLength();
+                std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+                          << "\t xy_size = " << xy_size
+                          << std::endl;
+            }
+        }
+
+        // data we need to define for GIDs query
+        //
+        std::string strLevel;
+        size_t levelFrom = 1;
+        size_t levelTo = 1;
+        std::string referenceTime;
+        std::string validtimeExactFromPoint;
+        std::string validtimeExactToPoint;
+        std::string validtimeFromToInterval;
+        for(size_t position = 0; position < dimensionNames.size(); ++position) {
+            std::string currentDimName = dimensionNames.at(position);
+            if(timeDim !=0 && currentDimName == timeDim->getName()){
+                size_t timeIndex = dimensionStartPositions.at(position);
+
+                // check for out of bounds situation
+                //
+                if(timeIndex > timeDim->getLength())
+                    throw CDMException("requested time outside data-region");
+
+                boost::posix_time::ptime validTimeFrom = timeVec.at(timeIndex).first;
+                boost::posix_time::ptime validTimeTo = timeVec.at(timeIndex).second;
+
+                validtimeExactFromPoint = "exact " + to_iso_string(validTimeFrom) + "+00";
+                validtimeExactToPoint = "exact " + to_iso_string(validTimeTo) + "+00";
+                validtimeFromToInterval = "inside " + to_iso_string(validTimeFrom) + "+00" + " TO " + to_iso_string(validTimeTo) + "+00";
+
+                std::cerr << "POSITION ON UNLIMITED TIME AXIS: " << timeIndex << std::endl;
+                std::cerr << "FROM: " << validtimeExactFromPoint << std::endl;
+                std::cerr << "TO: " << validtimeExactToPoint << std::endl;
+            } else if(referenceTimeDim != 0 && currentDimName == referenceTimeDim->getName()) {
+                size_t referenceTimeIndex = dimensionStartPositions.at(position);
+
+                // check for out of bounds situation
+                //
+                if(referenceTimeIndex > referenceTimeDim->getLength())
+                    throw CDMException("requested reference_time outside data-region");
+
+                boost::posix_time::ptime refTime = referenceTimeVec.at(referenceTimeIndex);
+                referenceTime = "exact " + to_iso_string(refTime) + "+00";
+                std::cerr << "reference time: " << referenceTime << std::endl;
+
+            } else if(layerDim != 0 && currentDimName == layerDim->getName()) {
+                std::string levelName = layerDim->getName();
+                std::cout << "finding levels for level dimension name: " << levelName << std::endl;
+                std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
+                levelFrom = dimensionStartPositions.at(position);
+                levelTo = levelFrom + dimensionSizes.at(position) - 1;
+                // check for out of bounds situation
+                //
+                if(levelFrom > layerDim->getLength() || levelTo > layerDim->getLength() )
+                    throw CDMException("requested level outside data-region");
+
+                if(levelFrom == levelTo)
+                    strLevel =
+                        std::string("exact")
+                        + std::string(" ")
+                        + boost::lexical_cast<std::string>(levelPairs.at(levelFrom).first)
+                        + std::string(" ")
+                        + levelName;
+                else
+                    strLevel =
+                        std::string("inside")
+                        + std::string(" ")
+                        + boost::lexical_cast<std::string>(levelPairs.at(levelFrom).first)
+                        + std::string(" TO ")
+                        + boost::lexical_cast<std::string>(levelPairs.at(levelTo).first)
+                        + std::string(" ")
+                        + levelName;
+
+                std::cerr << "level: " << strLevel << std::endl;
+            }
+        }
+
+        boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size * (levelTo - levelFrom + 1));
+
+        size_t dataCurrentPos = 0;
+        std::vector<short> gridData;
+        gridData.reserve(xDim.getLength()*yDim.getLength());
+
+        // in ordinary getDataSlice we would have to run
+        // through lpossible level and get them all at once
+        //
+        boost::shared_ptr<Data> selectedLayerData; // sql call for reading the data for given variable
+        std::vector<std::string> dataproviders;
+        dataproviders.push_back(providers_.at(0).name());
+        std::vector<std::string> dataversion;
+        dataversion.push_back("-1");
+        std::vector<std::string> valueparameters;
+        valueparameters.push_back(varName);
+
+        std::vector<GxGidRow> gids;
+
+        // try exact from
+        //
+        wdbExplorer()->getGids(dataproviders,
+                               places_.at(0).name(),
+                               referenceTime,
+                               validtimeExactFromPoint,
+                               valueparameters,
+                               strLevel,
+                               dataversion,
+                               gids);
+        if(gids.empty()) {
+            // try whole interval
+            //
+            wdbExplorer()->getGids(dataproviders,
+                                   places_.at(0).name(),
+                                   referenceTime,
+                                   validtimeFromToInterval,
+                                   valueparameters,
+                                   strLevel,
+                                   dataversion,
+                                   gids);
+            if(gids.empty()) {
+                // try exact to point
+                //
+                wdbExplorer()->getGids(dataproviders,
+                                       places_.at(0).name(),
+                                       referenceTime,
+                                       validtimeExactToPoint,
+                                       valueparameters,
+                                       strLevel,
+                                       dataversion,
+                                       gids);
+            }
+        }
+
+
+        if(!gids.empty()) {
+            // get the data itself
+            std::cerr << "getting data for GID = " << gids.at(0).value() << " of type " << gids.at(0).valueType() << std::endl;
+            std::stringstream strgid;
+            strgid << gids.at(0).value();
+
+            std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+                      << "\t============ READING GRID DATA AS FIMEX DATA: " << std::endl;
+
+            wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(0).valueType(), selectedLayerData);
+
+            std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+                      << "\t============ SELECTED LAYER DATA size: " << selectedLayerData->size() << std::endl;
+
+            if(selectedLayerData != 0) {
+                data->setValues(dataCurrentPos, *selectedLayerData, 0, selectedLayerData->size());
+                dataCurrentPos += selectedLayerData->size();
+            }
+
+            std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+                      << "\t============ ROW DATA SIZE: " << data->size() << std::endl;
+
+            //                std::cout << "============ READING GRID DATA AS FLOAT: " << std::endl;
+
+            //                GxGridDataRow dataAsFloat;
+            //                wdbExplorer()->getGridData(strgid.str(), dataAsFloat);
+            //                std::ostringstream ost;
+            //                for(unsigned int position = 0; position < dataAsFloat.data()->size(); position++) {
+            //                    ost << dataAsFloat.data()->at(position) << "  ";
+            //                    if((position / 80) == 0)
+            //                        ost << std::endl;
+            //                }
+            //                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
+
+        } else {
+            std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+                      << "\t============ NO GIDS -> NO GRID DATA FOUND: " << std::endl;
+            return createData(variable.getDataType(), 0);
+        }
 
         return data;
     }
