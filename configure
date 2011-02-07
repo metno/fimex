@@ -765,6 +765,10 @@ MIFI_NETCDF_LDFLAGS
 MIFI_NETCDF_CPPFLAGS
 MIFI_NETCDF_LIBS
 PKG_CONFIG
+pgsql_LIBS
+pgsql_LDFLAGS
+pgsql_CFLAGS
+PGCONFIG
 BOOST_UNIT_TEST_FRAMEWORK_LIB
 BOOST_DATE_TIME_LIB
 BOOST_IOSTREAMS_LIB
@@ -921,6 +925,7 @@ with_boost_filesystem
 with_boost_iostreams
 with_boost_date_time
 with_boost_unit_test_framework
+with_pgsql
 enable_openmp
 with_netcdf
 enable_milib
@@ -1620,6 +1625,10 @@ Optional Packages:
                           is possible to specify a certain library for the
                           linker e.g.
                           --with-boost-unit-test-framework=boost_unit_test_framework-gcc
+  --with-pgsql=PATH       Specify the directory in which postgresql is
+                          installed (by default, configure searches your
+                          PATH). If set, configure will search PATH/bin for
+                          pg_config
   --with-netcdf=DIR       the location of optional libnetcdf files and library
                           either as DIR or INC,LIB
   --with-grib_api=DIR     the location of optional libgrib_api files and
@@ -5632,13 +5641,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5635: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5644: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5638: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5647: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5641: output\"" >&5)
+  (eval echo "\"\$as_me:5650: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6844,7 +6853,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6847 "configure"' > conftest.$ac_ext
+  echo '#line 6856 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8901,11 +8910,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8904: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8913: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8908: \$? = $ac_status" >&5
+   echo "$as_me:8917: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9240,11 +9249,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9243: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9252: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9247: \$? = $ac_status" >&5
+   echo "$as_me:9256: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9345,11 +9354,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9348: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9357: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9352: \$? = $ac_status" >&5
+   echo "$as_me:9361: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9400,11 +9409,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9403: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9412: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9407: \$? = $ac_status" >&5
+   echo "$as_me:9416: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11784,7 +11793,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11787 "configure"
+#line 11796 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11880,7 +11889,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11883 "configure"
+#line 11892 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13836,11 +13845,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13839: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13848: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13843: \$? = $ac_status" >&5
+   echo "$as_me:13852: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13935,11 +13944,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13938: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13947: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13942: \$? = $ac_status" >&5
+   echo "$as_me:13951: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13987,11 +13996,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13990: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13999: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13994: \$? = $ac_status" >&5
+   echo "$as_me:14003: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18042,6 +18051,216 @@ $as_echo "$ax_cv_boost_unit_test_framework_link" >&6; }
 	fi
 
 
+# Set up option
+
+# Check whether --with-pgsql was given.
+if test "${with_pgsql+set}" = set; then :
+  withval=$with_pgsql; PGCONFIG="${with_pgsql}/bin/pg_config"
+
+fi
+
+
+# PG_CONFIG
+# Extract the first word of "pg_config", so it can be a program name with args.
+set dummy pg_config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PGCONFIG="$PGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PGCONFIG=$ac_cv_path_PGCONFIG
+if test -n "$PGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PGCONFIG" >&5
+$as_echo "$PGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test -f "${PGCONFIG}"; then
+	pgsql_CPPFLAGS="-I`${PGCONFIG} --includedir` -I`${PGCONFIG} --includedir-server`"
+	pgsql_LDFLAGS="-L`${PGCONFIG} --libdir`"
+	pgsql_LIBS="-lpq"
+	pgsql_VERSION="`${PGCONFIG} --version | sed -e 's#PostgreSQL ##'`"
+else
+	as_fn_error "
+-------------------------------------------------------------------------
+   Unable to find pg_config. If Postgres is installed, make sure
+   pg_config is in your PATH, or specify the path in which postgres
+   is installed with --with-pgsql=PATH
+-------------------------------------------------------------------------
+	" "$LINENO" 5
+fi
+
+# Check version of PostgreSQL
+required_pgsql_version=
+
+if test -n "$required_pgsql_version"; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if PostgreSQL version is >= $required_pgsql_version" >&5
+$as_echo_n "checking if PostgreSQL version is >= $required_pgsql_version... " >&6; }
+
+	# Deconstruct version string (required)
+	required_pgsql_version_major=`expr $required_pgsql_version : '\([0-9]*\)'`
+    required_pgsql_version_minor=`expr $required_pgsql_version : '[0-9]*\.\([0-9]*\)'`
+    required_pgsql_version_micro=`expr $required_pgsql_version : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+	if test "x$required_pgsql_version_micro" = "x"; then
+    	required_pgsql_version_micro="0"
+    fi
+
+	required_pgsql_version_number=`expr $required_pgsql_version_major \* 1000000 \
+                                   \+ $required_pgsql_version_minor \* 1000 \
+                                   \+ $required_pgsql_version_micro`
+
+	# Deconstruct actual version string
+	pgsql_version_major=`expr $pgsql_VERSION : '\([0-9]*\)'`
+	pgsql_version_minor=`expr $pgsql_VERSION : '[0-9]*\.\([0-9]*\)'`
+	pgsql_version_micro=`expr $pgsql_VERSION : '[0-9]*\.[0-9]*\.\([0-9]*\)'`
+	if test "x$pgsql_version_micro" = "x"; then
+		pgsql_version_micro="0"
+	fi
+
+	pgsql_version_number=`expr $pgsql_version_major \* 1000000 \
+                          \+ $pgsql_version_minor \* 1000 \
+                          \+ $pgsql_version_micro`
+
+	pgsql_version_check=`expr $pgsql_version_number \>\= $required_pgsql_version_number`
+	if test "$pgsql_version_check" = "1"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	else
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	fi
+fi
+
+CPPFLAGS="$CPPFLAGS $pgsql_CPPFLAGS"
+LDFLAGSS="$LDFLAGS $pgsql_LDFLAGS"
+
+# Check PQ Libraries
+# Search for the libpq Library
+# automatically adds -lpq to the LIBS variable
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing PQexec" >&5
+$as_echo_n "checking for library containing PQexec... " >&6; }
+if test "${ac_cv_search_PQexec+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PQexec ();
+int
+main ()
+{
+return PQexec ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' pq; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_search_PQexec=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if test "${ac_cv_search_PQexec+set}" = set; then :
+  break
+fi
+done
+if test "${ac_cv_search_PQexec+set}" = set; then :
+
+else
+  ac_cv_search_PQexec=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_PQexec" >&5
+$as_echo "$ac_cv_search_PQexec" >&6; }
+ac_res=$ac_cv_search_PQexec
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  pgsql_LIBS="$pgsql_LIBS -lpq"
+else
+
+		 	as_fn_error "
+-------------------------------------------------------------------------
+    Unable to link with libpq. If the library is installed, make sure
+    -L(PGSQL_PATH)/lib is in your LDFLAGS, or specify the path in which
+    postgres is installed with --with-pgsql=PATH
+-------------------------------------------------------------------------
+			" "$LINENO" 5
+
+
+fi
+
+
+
+
+
+
+	# Header files
+    #AC_LANG_PUSH(C++)
+	ac_fn_cxx_check_header_mongrel "$LINENO" "postgres.h" "ac_cv_header_postgres_h" "$ac_includes_default"
+if test "x$ac_cv_header_postgres_h" = x""yes; then :
+
+$as_echo "#define HAVE_POSTGRES_POSTGRES_H /**/" >>confdefs.h
+
+else
+  as_fn_error "
+-------------------------------------------------------------------------
+    Could not locate postgres.h
+    This indicates that Postgres may not be correctly installed for AX
+    on your site. AX requires the development files for server-side
+    programming of PostgreSQL to be installed.
+
+    CPPFLAGS=$CPPFLAGS
+-------------------------------------------------------------------------
+" "$LINENO" 5
+
+fi
+
+
+	#AC_LANG_POP(C++)
+
+(8.1.x)
+
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$prefix/lib/pkgconfig
@@ -18816,7 +19035,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/fimex/coordSys/Makefile include/felt/Makefile include/kdtree++/Makefile"
+ac_config_files="$ac_config_files fimex.pc Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/fimex/coordSys/Makefile include/felt/Makefile include/kdtree++/Makefile include/gridexer/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19922,6 +20141,7 @@ do
     "include/fimex/coordSys/Makefile") CONFIG_FILES="$CONFIG_FILES include/fimex/coordSys/Makefile" ;;
     "include/felt/Makefile") CONFIG_FILES="$CONFIG_FILES include/felt/Makefile" ;;
     "include/kdtree++/Makefile") CONFIG_FILES="$CONFIG_FILES include/kdtree++/Makefile" ;;
+    "include/gridexer/Makefile") CONFIG_FILES="$CONFIG_FILES include/gridexer/Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -21478,8 +21698,8 @@ $as_echo " " >&6; }
 $as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&5
 $as_echo "LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB" >&5
-$as_echo "LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&5
+$as_echo "LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: DEFS:             $DEFS" >&5
 $as_echo "DEFS:             $DEFS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result:   " >&5
