@@ -13,7 +13,7 @@
 // boost
 //
 #include <boost/regex.hpp>
-//#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 // libxml2
