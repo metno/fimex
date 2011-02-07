@@ -503,7 +503,7 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     paramValues[6] = version.empty() ? 0 : strdataversion.c_str();
 
     pgResult = PQexecParams(wdbPGConn_,
-                       "select value::int4, valueid::int4valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
+                       "select value::int4, valueid::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
                        7,
                        NULL,    /* let the backend deduce param type */
                        paramValues,
@@ -513,7 +513,7 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
-        std::cout << "wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+        std::cout << __FUNCTION__ << " wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         gidRows.clear();
@@ -731,7 +731,7 @@ void GxWdbExplorer::getPlaces(const std::vector<std::string>& providers,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
-        std::cerr << "wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+        std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         placeRows.clear();
@@ -900,7 +900,7 @@ void GxWdbExplorer::getLevelParameters(const std::vector<std::string>& providers
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
-        std::cerr << "wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+        std::cerr << __FUNCTION__ << " wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         levelRows.clear();
@@ -1147,7 +1147,7 @@ void GxWdbExplorer::getLevelParameterFromToPairs(const std::string& provider,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
-        std::cerr << "wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+        std::cerr << __FUNCTION__ << " wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         levelPairs.clear();
