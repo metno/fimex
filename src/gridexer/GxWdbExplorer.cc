@@ -1006,7 +1006,7 @@ void GxWdbExplorer::getValidTimes(const std::vector<std::string>& providers,
     paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
 
     pgResult = PQexecParams(wdbPGConn_,
-                       "SELECT DISTINCT(validtimefrom)::float8, validtimeto::float8, numberoftuples FROM (select extract(epoch from validtimefrom) as validtimefrom, extract(epoch from validtimeto) as validtimeto, numberoftuples as numberoftuples from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsevalidtime) order by validtimefrom) AS VALIDTIMES",
+                       "SELECT DISTINCT(validtimefrom)::float8, validtimeto::float8, numberoftuples FROM (select extract(epoch from validtimefrom) as validtimefrom, extract(epoch from validtimeto) as validtimeto, numberoftuples as numberoftuples from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsevalidtime) where validtimefrom != validtimeto order by validtimefrom) AS VALIDTIMES",
                        7,
                        NULL,    /* let the backend deduce param type */
                        paramValues,
@@ -1048,95 +1048,105 @@ void GxWdbExplorer::getValidTimes(const std::vector<std::string>& providers,
     PQclear(pgResult);
 }
 
-//void GxWdbExplorer::getReferenceTimes
-//        (
-//                const std::vector<std::string>& providers,
-//                const std::string& place,
-//                const std::string& validtime,
-//                const std::vector<std::string>& values,
-//                const std::string& level,
-//                const std::vector<std::string>& versions,
-//                std::vector<GxReferenceTimeRow>& referenceTimeRows
-//        )
-//{
-//    if(cachePolicy_ == GxWdbCachePolicy(GxWdbCachePolicy::Cache) && !referencetimes_.empty()) {
-//        referenceTimeRows.clear();
-//        referenceTimeRows.insert(referenceTimeRows.begin(), referencetimes_.begin(), referencetimes_.end());
-//        return;
-//    }
+void GxWdbExplorer::getReferenceTimes
+        (
+                const std::vector<std::string>& providers,
+                const std::string& place,
+                const std::string& validtime,
+                const std::vector<std::string>& values,
+                const std::string& level,
+                const std::vector<std::string>& versions,
+                std::vector<GxReferenceTimeRow>& referenceTimeRows
+        )
+{
+    if(cachePolicy_ == GxWdbCachePolicy(GxWdbCachePolicy::Cache) && !referencetimes_.empty()) {
+        referenceTimeRows.clear();
+        referenceTimeRows.insert(referenceTimeRows.begin(), referencetimes_.begin(), referencetimes_.end());
+        return;
+    }
 
-//    // prepare data
-//    std::string strdataproviders = "NULL";
-//    std::vector<std::string> tmp_dataproviders(providers);
-//    if(!tmp_dataproviders.empty()) {
-//        strdataproviders = "{";
-//        strdataproviders.append(boost::algorithm::join(tmp_dataproviders, std::string(",")));
-//        strdataproviders.append("}");
-//    }
+    // prepare data
+    std::string strdataproviders = "NULL";
+    std::vector<std::string> tmp_dataproviders(providers);
+    if(!tmp_dataproviders.empty()) {
+        strdataproviders = "{";
+        strdataproviders.append(boost::algorithm::join(tmp_dataproviders, std::string(",")));
+        strdataproviders.append("}");
+    }
 
-//    std::string strvalueparameters = "NULL";
-//    std::vector<std::string> tmp_valueparameters(values);
-//    if(!tmp_valueparameters.empty()) {
-//        strvalueparameters = "{";
-//        strvalueparameters.append(boost::algorithm::join(tmp_valueparameters, std::string(",")));
-//        strvalueparameters.append("}");
-//    }
+    std::string strvalueparameters = "NULL";
+    std::vector<std::string> tmp_valueparameters(values);
+    if(!tmp_valueparameters.empty()) {
+        strvalueparameters = "{";
+        strvalueparameters.append(boost::algorithm::join(tmp_valueparameters, std::string(",")));
+        strvalueparameters.append("}");
+    }
 
-//    std::string strdataversion = "NULL";
-//    std::vector<std::string> tmp_dataversion(versions);
-//    if(!tmp_dataversion.empty()) {
-//        strdataversion = "{";
-//        strdataversion.append(boost::algorithm::join(tmp_dataversion, std::string(",")));
-//        strdataversion.append("}");
-//    }
+    std::string strdataversion = "NULL";
+    std::vector<std::string> tmp_dataversion(versions);
+    if(!tmp_dataversion.empty()) {
+        strdataversion = "{";
+        strdataversion.append(boost::algorithm::join(tmp_dataversion, std::string(",")));
+        strdataversion.append("}");
+    }
 
-//    // execute the query
-//    PGresult *pgResult;
-//    const char *paramValues[7];
+    // execute the query
+    PGresult *pgResult;
+    const char *paramValues[7];
 
-//    paramValues[0] = providers.empty() ? 0 : strdataproviders.c_str();
-//    paramValues[1] = place.empty() ? 0 : place.c_str();
-//    paramValues[2] = 0;
-//    paramValues[3] = validtime.empty() ? 0 : validtime.c_str();
-//    paramValues[4] = values.empty() ? 0 : strvalueparameters.c_str();
-//    paramValues[5] = level.empty() ? 0 : level.c_str();
-//    paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
+    paramValues[0] = providers.empty() ? 0 : strdataproviders.c_str();
+    paramValues[1] = place.empty() ? 0 : place.c_str();
+    paramValues[2] = 0;
+    paramValues[3] = validtime.empty() ? 0 : validtime.c_str();
+    paramValues[4] = values.empty() ? 0 : strvalueparameters.c_str();
+    paramValues[5] = level.empty() ? 0 : level.c_str();
+    paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
 
-//    pgResult = PQexecParams(wdbPGConn_,
-//                       "select DISTINCT(extract(epoch from referencetime)) as referencetime, numberoftuples from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsereferencetime) order by referencetime",
-//                       7,
-//                       NULL,    /* let the backend deduce param type */
-//                       paramValues,
-//                       NULL,    /* don't need param lengths since text */
-//                       NULL,    /* default to all text params */
-//                       1);      /* ask for binary results */
+    std::cout << __FUNCTION__ << "@" << __LINE__ << std::endl;
+    paramValues[0] ? std::cout << "paramValues[0] : " << std::string(paramValues[0]) << std::endl : std::cout << "paramValues[0] : NULL" << std::endl;
+    paramValues[1] ? std::cout << "paramValues[1] : " << std::string(paramValues[1]) << std::endl : std::cout << "paramValues[1] : NULL" << std::endl;
+    paramValues[2] ? std::cout << "paramValues[2] : " << std::string(paramValues[2]) << std::endl : std::cout << "paramValues[2] : NULL" << std::endl;
+    paramValues[3] ? std::cout << "paramValues[3] : " << std::string(paramValues[3]) << std::endl : std::cout << "paramValues[3] : NULL" << std::endl;
+    paramValues[4] ? std::cout << "paramValues[4] : " << std::string(paramValues[4]) << std::endl : std::cout << "paramValues[4] : NULL" << std::endl;
+    paramValues[5] ? std::cout << "paramValues[5] : " << std::string(paramValues[5]) << std::endl : std::cout << "paramValues[5] : NULL" << std::endl;
+    paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
 
-//    if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
-//    {
-//        std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
-//        PQclear(pgResult);
-//        PQfinish(wdbPGConn_);
-//        referenceTimeRows.clear();
-//        return; // empty
-//    }
+    pgResult = PQexecParams(wdbPGConn_,
+                       "select DISTINCT(extract(epoch from referencetime)) as referencetime, numberoftuples from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsereferencetime) order by referencetime",
+                       7,
+                       NULL,    /* let the backend deduce param type */
+                       paramValues,
+                       NULL,    /* don't need param lengths since text */
+                       NULL,    /* default to all text params */
+                       1);      /* ask for binary results */
 
-//    int record_count = PQntuples(pgResult);
-//    referenceTimeRows.resize(record_count);
+    if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
+    {
+        std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+        PQclear(pgResult);
+        PQfinish(wdbPGConn_);
+        referenceTimeRows.clear();
+        return; // empty
+    }
 
-//    int referencetime_fnum = PQfnumber(pgResult, "referencetime");
-//    int numberoftuples_fnum = PQfnumber(pgResult, "numberoftuples");
+    int record_count = PQntuples(pgResult);
+    std::cout << __FUNCTION__ << "@" << __LINE__ << " record_count "<< record_count << std::endl;
+    referenceTimeRows.resize(record_count);
 
-//    for (int rowIndex = 0; rowIndex < record_count; rowIndex++)
-//    {
-//        GxReferenceTimeRow row;
-//        row.setSinceEpochInSeconds(GxWdbExplorer::getValueAsFloat8(pgResult, rowIndex, referencetime_fnum));
-//        row.setUnitName("seconds since epoch");
-//        row.setNumberOfTuples(GxWdbExplorer::getValueAsInt4(pgResult, rowIndex, numberoftuples_fnum));
-//        referenceTimeRows[rowIndex] = row;
-//    }
+    int referencetime_fnum = PQfnumber(pgResult, "referencetime");
+    int numberoftuples_fnum = PQfnumber(pgResult, "numberoftuples");
 
-//    PQclear(pgResult);
-//}
+    for (int rowIndex = 0; rowIndex < record_count; rowIndex++)
+    {
+        GxReferenceTimeRow row;
+        row.setSinceEpochInSeconds(GxWdbExplorer::getValueAsFloat8(pgResult, rowIndex, referencetime_fnum));
+        row.setUnitName("seconds since epoch");
+        row.setNumberOfTuples(GxWdbExplorer::getValueAsInt4(pgResult, rowIndex, numberoftuples_fnum));
+        referenceTimeRows[rowIndex] = row;
+    }
+
+    PQclear(pgResult);
+}
 
 void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::string& strdatatype, boost::shared_ptr<MetNoFimex::Data>& data)
 {
@@ -1166,14 +1176,16 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
     }
 
     int grid_fnum = PQfnumber(pgResult, "grid");
+    int numberx_fnum = PQfnumber(pgResult, "numberx");
+    int numbery_fnum = PQfnumber(pgResult, "numbery");
 
     int    row_position = 0;
     int    blen;
     float* ptrbinary;
 
     /* Get the field values (we ignore possibility they are null!) */
-//    int numberX = GxWdbExplorer::getValueAsInt4(pgResult, row_position, numberx_fnum);
-//    int numberY = GxWdbExplorer::getValueAsInt4(pgResult, row_position, numbery_fnum);
+    int numberX = GxWdbExplorer::getValueAsInt4(pgResult, row_position, numberx_fnum);
+    int numberY = GxWdbExplorer::getValueAsInt4(pgResult, row_position, numbery_fnum);
     ptrbinary = reinterpret_cast<float *>(PQgetvalue(pgResult, row_position, grid_fnum));
 
     blen = PQgetlength(pgResult, row_position, grid_fnum) / sizeof(float);
@@ -1188,6 +1200,13 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
 //    data.swap(tmpdata);
 
     data = MetNoFimex::createData(MetNoFimex::string2datatype(strdatatype), ptrbinary, ptrbinary + blen);
+
+    std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
+              << "\tnumberX = "   << numberX
+              << "\tnumberY = "   << numberY
+              << "\tblen = "      << blen
+              << "\tdata size = " << data->size()
+              << std::endl;
 
     PQclear(pgResult);
 }

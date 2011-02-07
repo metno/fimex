@@ -178,7 +178,7 @@ private:
     std::vector<GxDataProviderRow>   providers_;
     std::vector<GxPlaceRow>          places_;
     std::vector<GxValidTimeRow>      validtimes_;
-//    std::vector<GxReferenceTimeRow>      referencetimes_;
+    std::vector<GxReferenceTimeRow>  referencetimes_;
     std::vector<GxLevelParameterRow> levelparameters_;
     std::vector<GxValueParameterRow> valueparameters_;
     std::vector<GxGidRow>            gids_;
