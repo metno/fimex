@@ -1,1 +1,1 @@
-SUBDIRS = fimex kdtree++ felt
+SUBDIRS = fimex kdtree++ felt gridexer
