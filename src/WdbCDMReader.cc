@@ -13,8 +13,7 @@
 // boost
 //
 #include <boost/regex.hpp>
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 // libxml2
@@ -127,12 +126,11 @@ namespace MetNoFimex {
         if(map.empty())
             return;
 
-        typedef boost::bimap<std::string, std::string>::left_const_reference bm_citerator_type;
+        boost::bimap<std::string, std::string>::left_const_iterator lci = map.left.begin();
 
-        BOOST_FOREACH(bm_citerator_type lr, map.left)
-        {
-            addWdbNameToCFName(lr.first, lr.second);
-        };
+        for(; lci != map.left.end(); ++lci) {
+            addWdbNameToCFName(lci->first, lci->second);
+        }
     }
 
     void GxWdbCDMReader::addWdbNameToFillValue(const std::string& wdbname, const double fillvalue)
@@ -145,12 +143,11 @@ namespace MetNoFimex {
         if(map.empty())
             return;
 
-        typedef boost::bimap<std::string, double>::left_const_reference bm_citerator_type;
+        boost::bimap<std::string, double>::left_const_iterator lci = map.left.begin();
 
-        BOOST_FOREACH(bm_citerator_type lr, map.left)
-        {
-            addWdbNameToFillValue(lr.first, lr.second);
-        };
+        for(; lci != map.left.end(); ++lci) {
+            addWdbNameToFillValue(lci->first, lci->second);
+        }
     }
 
     GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename)
@@ -853,14 +850,13 @@ namespace MetNoFimex {
             boost::algorithm::split(splitvector, source_, boost::algorithm::is_any_of(";"));
             assert(splitvector.size() != 0);
             std::map<std::string, std::string> splitmap;
-            BOOST_FOREACH(std::string& parameter, splitvector)
-            {
+            for(int i = 0; i < splitvector.size(); ++i) {
                 std::vector<std::string> subsplit;
-                boost::algorithm::split(subsplit, parameter, boost::algorithm::is_any_of("="));
+                boost::algorithm::split(subsplit, splitvector.at(i), boost::algorithm::is_any_of("="));
                 if(subsplit.size() != 2)
                     continue;
                 splitmap[subsplit.at(0)] = subsplit.at(1);
-            };
+            }
             setDbHost(splitmap["dbHost"]);
             setDbName(splitmap["dbName"]);
             setDbUser(splitmap["dbUser"]);
