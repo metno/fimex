@@ -165,31 +165,31 @@ namespace MetNoFimex {
             return true;
 
         std::string strlevelparameterconstraint;
-        if(!levelparameters_.empty()) {
-            // get the first one
-            GxLevelParameterRow row = levelparameters_.at(0);
-            strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
-        }
+//        if(!levelparameters_.empty()) {
+//            // get the first one
+//            GxLevelParameterRow row = levelparameters_.at(0);
+//            strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
+//        }
 
         std::string strvalidtimeconstraint;
-        if(!validtimes_.empty()) {
-            // get the first one
-            GxValidTimeRow firstRow = validtimes_.at(0);
-            boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
+//        if(!validtimes_.empty()) {
+//            // get the first one
+//            GxValidTimeRow firstRow = validtimes_.at(0);
+//            boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
 
-            GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
-            boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
+//            GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
+//            boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
 
-            strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
-        }
+//            strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
+//        }
 
         std::vector<std::string> vecvalueparameters;
-        if(!valueparameters_.empty()) {
-            for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
-                GxValueParameterRow row = valueparameters_.at(i);
-                vecvalueparameters.push_back(row.name());
-            }
-        }
+//        if(!valueparameters_.empty()) {
+//            for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
+//                GxValueParameterRow row = valueparameters_.at(i);
+//                vecvalueparameters.push_back(row.name());
+//            }
+//        }
 
         std::string strplace;
         if(!places_.empty()) {
@@ -219,31 +219,31 @@ namespace MetNoFimex {
             return true;
 
         std::vector<std::string> vecdataproviders;
-        if(!providers_.empty()) {
-            for(unsigned int i = 0; i < providers_.size(); ++i) {
-                GxDataProviderRow row = providers_.at(i);
-                vecdataproviders.push_back(row.name());
-            }
-        }
+//        if(!providers_.empty()) {
+//            for(unsigned int i = 0; i < providers_.size(); ++i) {
+//                GxDataProviderRow row = providers_.at(i);
+//                vecdataproviders.push_back(row.name());
+//            }
+//        }
 
         std::string strlevelparameterconstraint;
-        if(!levelparameters_.empty()) {
-            // get the first one
-            GxLevelParameterRow row = levelparameters_.at(0);
-            strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
-        }
+//        if(!levelparameters_.empty()) {
+//            // get the first one
+//            GxLevelParameterRow row = levelparameters_.at(0);
+//            strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
+//        }
 
         std::string strvalidtimeconstraint;
-        if(!validtimes_.empty()) {
-            // get the first one
-            GxValidTimeRow firstRow = validtimes_.at(0);
-            boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
+//        if(!validtimes_.empty()) {
+//            // get the first one
+//            GxValidTimeRow firstRow = validtimes_.at(0);
+//            boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
 
-            GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
-            boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
+//            GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
+//            boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
 
-            strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
-        }
+//            strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
+//        }
 
         std::vector<std::string> vecvalueparameters;
         if(!valueparameters_.empty()) {
@@ -323,19 +323,20 @@ namespace MetNoFimex {
             }
         }
 
+        // AAM we don't need to include level constraints
+        //
         std::string strlevelparameterconstraint;
-        if(!levelparameters_.empty()) {
-            // get the first one
-            GxLevelParameterRow row = levelparameters_.at(0);
-            strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
-        }
+//        if(!levelparameters_.empty()) {
+//            // get the first one
+//            GxLevelParameterRow row = levelparameters_.at(0);
+//            strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
+//        }
 
         std::string strplace;
         if(!places_.empty()) {
             GxPlaceRow row = places_.at(0);
             strplace = row.name();
         }
-
 
         std::vector<std::string> vecvalueparameters;
         if(!valueparameters_.empty()) {
@@ -358,31 +359,53 @@ namespace MetNoFimex {
             std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
         }
 
+//        if(referencetimes_.empty()) {
+////            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+//            wdbExplorer()->
+//                    getReferenceTimes
+//                    (
+//                            vecdataproviders,
+//                            strplace,
+//                            std::string(),
+//                            vecvalueparameters,
+//                            strlevelparameterconstraint,
+//                            std::vector<std::string>(),
+//                            referencetimes_
+//                    );
+//        } else {
+//            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+//        }
+
+
         std::string timeDimensionUnits = "seconds";
         int timeScaleFactor = 1;
 
+        // ATM treat everytihing as seconds since epoch
+        // and later make some policies that user can
+        // choose from
+        //
         // find miniumum validtime.. from<->to distance
-        long long validtimeminimumdelta;
-        if(validtimes_.at(0).to().sinceEpochInSeconds() != validtimes_.at(0).from().sinceEpochInSeconds())
-            validtimeminimumdelta = std::abs(validtimes_.at(0).to().sinceEpochInSeconds() - validtimes_.at(0).from().sinceEpochInSeconds());
-        else
-            validtimeminimumdelta = std::abs(validtimes_.at(0).to().sinceEpochInSeconds() - validtimes_.at(1).to().sinceEpochInSeconds());
+//        long long validtimeminimumdelta;
+//        if(validtimes_.at(0).to().sinceEpochInSeconds() != validtimes_.at(0).from().sinceEpochInSeconds())
+//            validtimeminimumdelta = std::abs(validtimes_.at(0).to().sinceEpochInSeconds() - validtimes_.at(0).from().sinceEpochInSeconds());
+//        else
+//            validtimeminimumdelta = std::abs(validtimes_.at(0).to().sinceEpochInSeconds() - validtimes_.at(1).to().sinceEpochInSeconds());
 
-        for(unsigned int index = 1; index < validtimes_.size(); ++index) {
-            if(abs(validtimes_.at(index).to().sinceEpochInSeconds() - validtimes_.at(index).from().sinceEpochInSeconds()))
-                validtimeminimumdelta = std::abs(validtimes_.at(index).to().sinceEpochInSeconds() - validtimes_.at(index).from().sinceEpochInSeconds());
-        }
+//        for(unsigned int index = 1; index < validtimes_.size(); ++index) {
+//            if(abs(validtimes_.at(index).to().sinceEpochInSeconds() - validtimes_.at(index).from().sinceEpochInSeconds()))
+//                validtimeminimumdelta = std::abs(validtimes_.at(index).to().sinceEpochInSeconds() - validtimes_.at(index).from().sinceEpochInSeconds());
+//        }
 
-        if(validtimeminimumdelta >= 24 * 60 * 60 && validtimeminimumdelta % (24 * 60 * 60) == 0) {
-            timeDimensionUnits = std::string("days");
-            timeScaleFactor = 24 * 60 * 60;
-        } else if(validtimeminimumdelta >= 60 * 60 && validtimeminimumdelta % (60 * 60) == 0) {
-            timeDimensionUnits = std::string("hours");
-            timeScaleFactor = 60 * 60;
-        } else if(validtimeminimumdelta % (60) == 0) {
-            timeDimensionUnits = std::string("minutes");
-            timeScaleFactor = 60;
-        }
+//        if(validtimeminimumdelta >= 24 * 60 * 60 && validtimeminimumdelta % (24 * 60 * 60) == 0) {
+//            timeDimensionUnits = std::string("days");
+//            timeScaleFactor = 24 * 60 * 60;
+//        } else if(validtimeminimumdelta >= 60 * 60 && validtimeminimumdelta % (60 * 60) == 0) {
+//            timeDimensionUnits = std::string("hours");
+//            timeScaleFactor = 60 * 60;
+//        } else if(validtimeminimumdelta % (60) == 0) {
+//            timeDimensionUnits = std::string("minutes");
+//            timeScaleFactor = 60;
+//        }
 
         // watch for the space
         timeDimensionUnits.append(" since 1970-01-01 00:00:00 +00:00");
@@ -402,6 +425,22 @@ namespace MetNoFimex {
                  timeVec[index] = validtime_from_to;
              }
         }
+
+        // used with referemnce time
+        // ATM not needed
+//        timeInUnitsVector.resize(referencetimes_.size());
+//        timeVec.resize(referencetimes_.size());
+
+//        for(uint index = 0; index < referencetimes_.size(); ++index) {
+//            std::time_t reftimefrom = referencetimes_[index].sinceEpochInSeconds();
+//            std::time_t reftimeto = referencetimes_[index].sinceEpochInSeconds();
+//            timeInUnitsVector[index] = referencetimes_[index].sinceEpochInSeconds() / timeScaleFactor;
+
+//            std::pair<boost::posix_time::ptime, boost::posix_time::ptime> reftime_from_to;
+//            reftime_from_to.first = boost::posix_time::from_time_t(reftimefrom);
+//            reftime_from_to.second = boost::posix_time::from_time_t(reftimeto);
+//            timeVec[index] = reftime_from_to;
+//        }
 
         long timeDimensionSize = timeVec.size();
         timeDimension.setName(hcTimeDimensionName);
@@ -452,17 +491,21 @@ namespace MetNoFimex {
             if(projmatch.size() > 1)
                 gridMappingType = projmatch[1];
         } else {
-          std::cerr << "Oops - not found?\n";
+          std::cerr << __FUNCTION__  << ":" << __LINE__  << " Oops - not found?\n";
         }
         assert(!gridMappingType.empty());
 
         projectionName = std::string("projection_" + gridMappingType);
 
+        std::cerr << __FUNCTION__  << ":" << __LINE__ << " projectionName = " << projectionName << std::endl;
+
         // projection-variable without datatype and dimension
         CDMVariable projVar(projectionName, CDM_FLOAT, std::vector<std::string>());
         cdm_->addVariable(projVar);
+        std::cerr << __FUNCTION__  << ":" << __LINE__  << " projString = " << projStr << std::endl;
         boost::shared_ptr<Projection> projection = Projection::createByProj4(projStr);
         assert(projection.get());
+        std::cerr << __FUNCTION__  << ":" << __LINE__  << " proj4String = " << projection->getProj4String() << std::endl;
         std::vector<CDMAttribute> projAttr = projection->getParameters();
         for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
             cdm_->addAttribute(projectionName, *attrIt);
@@ -475,13 +518,14 @@ namespace MetNoFimex {
             if(unitsmatch.size() > 1)
                 projUnits = unitsmatch[1];
         } else {
-          std::cerr << "Oops - not found?\n";
+          std::cerr << __FUNCTION__  << ":" << __LINE__  << " Oops - not found?\n";
         }
 
         // TODO:
         // must cover third possibility
         // lat-long rotated
         if(projection->isDegree()) { // check if projection is lot-lat
+            std::cerr << __FUNCTION__  << ":" << __LINE__  << " isDegree() = TRUE" << std::endl;
             // long and lat as dimensions on its own
             std::string xName("longitude");
             xDim = CDMDimension(xName, row.numberX());
@@ -603,24 +647,24 @@ namespace MetNoFimex {
 
         if(levelparameters_.empty()) {
             std::string strvalidtimeconstraint;
-            if(!validtimes_.empty()) {
-                // get the first one
-                GxValidTimeRow firstRow = validtimes_.at(0);
-                boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
+//            if(!validtimes_.empty()) {
+//                // get the first one
+//                GxValidTimeRow firstRow = validtimes_.at(0);
+//                boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
 
-                GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
-                boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
+//                GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
+//                boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
 
-                strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
-            }
+//                strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
+//            }
 
             std::vector<std::string> vecvalueparameters;
-            if(!valueparameters_.empty()) {
-                for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
-                    GxValueParameterRow row = valueparameters_.at(i);
-                    vecvalueparameters.push_back(row.name());
-                }
-            }
+//            if(!valueparameters_.empty()) {
+//                for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
+//                    GxValueParameterRow row = valueparameters_.at(i);
+//                    vecvalueparameters.push_back(row.name());
+//                }
+//            }
 
              wdbExplorer()->getLevelParameters(vecdataproviders,
                                                strplace,
@@ -634,7 +678,8 @@ namespace MetNoFimex {
         std::string hcLevelType = "float";
 
         for(unsigned int index = 0; index < levelparameters_.size(); ++index) {
-            GxLevelParameterRow row = levelparameters_.at(index);
+//          for(unsigned int index = levelparameters_.size() - 1; index >= 0; --index) {
+            GxLevelParameterRow row = levelparameters_.at(levelparameters_.size() - index - 1);
 
             // get level size from database
             std::vector<std::pair<double, double> > levelvaluepairs;
@@ -671,13 +716,23 @@ namespace MetNoFimex {
             cdm_->addAttribute(levelVar.getName(), levelLongNameAttribute);
             CDMAttribute levelStandardNameAttribute("standard_name", "string", levelCFName);
             cdm_->addAttribute(levelVar.getName(), levelStandardNameAttribute);
+            CDMAttribute levelAxisAttribute("axis", "string", "z");
+            cdm_->addAttribute(levelVar.getName(), levelAxisAttribute);
+
+            std::cout << __FUNCTION__ << __LINE__ << " level long     name: " << row.name() << std::endl;
+            std::cout << __FUNCTION__ << __LINE__ << " level standard name: " << levelCFName << std::endl;
+            std::cout << __FUNCTION__ << __LINE__ << " level unit     name: " << row.unitName() << std::endl;
+            std::cout << __FUNCTION__ << __LINE__ << " level axis     name: " << "z" << std::endl;
+            std::cout << __FUNCTION__ << __LINE__ << " level data     size: " << levelSize << std::endl;
 
 //            CDMAttribute levelPositiveAttribute("positive", "string", "up");
 //            cdm_->addAttribute(levelVar.getName(), levelPositiveAttribute);
 
             std::vector<float> lv;
-            for(unsigned int index = 0; index < levelvaluepairs.size(); ++index)
+            for(unsigned int index = 0; index < levelvaluepairs.size(); ++index) {
                 lv.push_back(levelvaluepairs.at(index).first);
+                std::cout << __FUNCTION__ << __LINE__ << " level : " << levelvaluepairs.at(index).first << std::endl;
+            }
 
             boost::shared_ptr<Data> data;
             if (lv.size() > 0) {
@@ -693,7 +748,7 @@ namespace MetNoFimex {
 
     void GxWdbCDMReader::init() throw(CDMException)
     {
-        assert(wdbExplorer().get() == 0);
+//        assert(wdbExplorer().get() == 0);
 
         setWdbExplorer(boost::shared_ptr<GxWdbExplorer>(new GxWdbExplorer()));
 
@@ -901,6 +956,8 @@ namespace MetNoFimex {
         // levels
         std::map<short, CDMDimension> levelDims = addLevelDimensions();
 
+        std::cerr << "NUMBER of LEVELS ADDED : " << levelDims.size() << std::endl;
+
         addGlobalCDMAttributes();
 
         // projection of the array (currently only one allowed)
@@ -937,38 +994,48 @@ namespace MetNoFimex {
 
 
         if(valueparameters_.empty()) {
-            std::vector<std::string> veclevelpatametersconstraints;
+            // ATM we want all parameters
+            // no matter level constraints
+            //
+            std::vector<std::string> veclevelparametersconstraints;
+            veclevelparametersconstraints.push_back(std::string());
 
-            for(unsigned int index = 0; index < levelparameters_.size(); ++index) {
-                std::string strlevelparameterconstraint;
-                GxLevelParameterRow row = levelparameters_.at(index);
-                strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
-                veclevelpatametersconstraints.push_back(strlevelparameterconstraint);
-            }
-            if(veclevelpatametersconstraints.empty())
-                veclevelpatametersconstraints.push_back(std::string());
+//            for(unsigned int index = 0; index < levelparameters_.size(); ++index) {
+//                std::string strlevelparameterconstraint;
+//                GxLevelParameterRow row = levelparameters_.at(index);
+//                strlevelparameterconstraint.append("inside").append(" ").append(boost::lexical_cast<std::string>(row.from())).append(" TO ").append(boost::lexical_cast<std::string>(row.to())).append(" ").append(row.name());
+//                veclevelparametersconstraints.push_back(strlevelparameterconstraint);
+//            }
+
+//            if(veclevelparametersconstraints.empty())
+//                veclevelparametersconstraints.push_back(std::string());
 
             std::string strvalidtimeconstraint;
-            if(!validtimes_.empty()) {
-                // get the first one
-                GxValidTimeRow firstRow = validtimes_.at(0);
-                boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
+            // ATM we want all parameters
+            // no matter time validity
+            //
+//            if(!validtimes_.empty()) {
+//                // get the first one
+//                GxValidTimeRow firstRow = validtimes_.at(0);
+//                boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
 
-                GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
-                boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
+//                GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
+//                boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
 
-                strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
-            }
+//                strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
+//            }
 
-            for(unsigned int index = 0; index < veclevelpatametersconstraints.size(); ++index) {
+            for(unsigned int index = 0; index < veclevelparametersconstraints.size(); ++index) {
+                std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << " finding value parameters with level contraints : " << veclevelparametersconstraints.at(index) << std::endl;
                 std::vector<GxValueParameterRow> tmp;
                 wdbExplorer()->getValueParameters(vecdataproviders,
                                                   strplace,
                                                   std::string(),
                                                   strvalidtimeconstraint,
-                                                  veclevelpatametersconstraints.at(index),
+                                                  veclevelparametersconstraints.at(index),
                                                   std::vector<std::string>(),
                                                   tmp);
+                std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << " found  : " << tmp.size() << std::endl;
                 valueparameters_.insert(valueparameters_.end(), tmp.begin(), tmp.end());
             }
 
@@ -1040,7 +1107,7 @@ namespace MetNoFimex {
                 }
                 if(levelDims.find(index)->second.getName() == levelCFName) {
                     shape.push_back(levelDims.find(index)->second.getName());
-                    std::cerr << "adding level parameter: " << levelCFName << " to valueparameter: " << variableWdbName << std::endl;
+//                    std::cout << "adding level parameter: " << levelCFName << " to valueparameter: " << variableWdbName << std::endl;
                 }
             }
 
@@ -1072,12 +1139,9 @@ namespace MetNoFimex {
         boost::posix_time::ptime validTimeFrom = timeVec.at(unLimDimPos).first;
         boost::posix_time::ptime validTimeTo = timeVec.at(unLimDimPos).second;
 
-        std::cerr << "\nFROM: " << to_iso_string(validTimeFrom).c_str() << std::endl;
+        std::cerr << "\nVARIABLE: " << varName << std::endl;
+        std::cerr << "FROM: " << to_iso_string(validTimeFrom).c_str() << std::endl;
         std::cerr << "TO: " << to_iso_string(validTimeTo).c_str() << std::endl;
-
-//        boost::gregorian::days oneDay(1);
-//        boost::posix_time::ptime validTimeTo = validTimeFrom + oneDay;
-//        qDebug() << to_iso_string(validTimeTo).c_str();
 
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         const std::vector<std::string>& dims = variable.getShape();
@@ -1135,6 +1199,12 @@ namespace MetNoFimex {
             dataversion.push_back("-1");
             std::vector<std::string> valueparameters;
             valueparameters.push_back(varName);
+
+//            std::string referencetime = to_iso_string(validTimeFrom) + "+00";
+
+//            std::cerr << "\nVARIABLE: " << varName << std::endl;
+//            std::cerr << "REFERNCE TIME: " << referencetime << std::endl;
+
             std::string validtime = "inside " + to_iso_string(validTimeFrom) + "+00" + " TO " + to_iso_string(validTimeTo) + "+00";
 
             std::vector<GxGidRow> gids;
@@ -1149,21 +1219,31 @@ namespace MetNoFimex {
 
             if(!gids.empty()) {
                 // get the data itself
-//                qDebug() << "getting data for GID = " << gids.at(0).value_ << " of type " << gids.at(0).valuetype_.c_str();
+                std::cerr << "getting data for GID = " << gids.at(0).value() << " of type " << gids.at(0).valueType() << std::endl;
                 std::stringstream strgid;
                 strgid << gids.at(0).value();
+
+                std::cout << "============ READING GRID DATA AS FIMEX DATA: " << std::endl;
+
                 wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(0).valueType(), levelData);
                 if(levelData != 0) {
                     data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
                     dataCurrentPos += levelData->size();
                 }
-//                std::vector<float> floatData = wdbexplorer_.getGridData<float>(strgid.str());
-//                if(!floatData.empty()) {
-//                    for(int i = 0; i < floatData.size(); i++)
-//                        std::cerr << floatData.at(i) << "    ";
-//                    data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
-//                    dataCurrentPos += levelData->size();
+
+                std::cout << "============ ROW DATA SIZE: " << data->size() << std::endl;
+
+//                std::cout << "============ READING GRID DATA AS FLOAT: " << std::endl;
+
+//                GxGridDataRow dataAsFloat;
+//                wdbExplorer()->getGridData(strgid.str(), dataAsFloat);
+//                std::ostringstream ost;
+//                for(unsigned int position = 0; position < dataAsFloat.data()->size(); position++) {
+//                    ost << dataAsFloat.data()->at(position) << "  ";
+//                    if((position / 80) == 0)
+//                        ost << std::endl;
 //                }
+//                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
 
             }
 
@@ -1172,6 +1252,7 @@ namespace MetNoFimex {
         //        }
 //        totalGetDataSliceTime_ += getDataSliceTime_.elapsed();
 //        boost::shared_ptr<Data> data;
+
         return data;
     }
 }
