@@ -60,7 +60,10 @@ libfimex_la_SOURCES = interpolation.c \
 					 TimeSpec.cc \
 					 Units.cc \
 					 Utils.cc \
-					 XMLDoc.cc
+					 XMLDoc.cc \
+					 gridexer/GxWdbDataTypes.cc \
+					 gridexer/GxWdbExplorer.cc \
+					 WdbCDMReader.cc
 
 if HAVE_NETCDF
   libfimex_la_SOURCES += NetCDF_CDMReader.cc \
