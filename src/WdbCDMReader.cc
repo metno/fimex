@@ -348,7 +348,6 @@ namespace MetNoFimex {
         }
 
         if(validtimes_.empty()) {
-//            std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
             wdbExplorer()->getValidTimes(vecdataproviders,
                                          strplace,
                                          std::string(),
@@ -357,7 +356,9 @@ namespace MetNoFimex {
                                          std::vector<std::string>(),
                                          validtimes_);
         } else {
+#ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
+#endif
         }
 
         std::string timeDimensionUnits = "seconds";
@@ -440,8 +441,9 @@ namespace MetNoFimex {
 
     CDMDimension GxWdbCDMReader::addReferenceTimeDimension()
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : ================ REFERENCE" << std::endl;
-
+#endif
 
         CDMDimension referenceTimeDimension;
         // let's deal with time axis: we will
@@ -494,7 +496,9 @@ namespace MetNoFimex {
                     );
 //            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
         } else {
+#ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+#endif
         }
 
 
@@ -567,21 +571,27 @@ namespace MetNoFimex {
             if(projmatch.size() > 1)
                 gridMappingType = projmatch[1];
         } else {
+#ifdef GXDEBUG
           std::cerr << __FUNCTION__  << ":" << __LINE__  << " Oops - not found?\n";
+#endif
         }
         assert(!gridMappingType.empty());
 
         projectionName = std::string("projection_" + gridMappingType);
-
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__  << ":" << __LINE__ << " projectionName = " << projectionName << std::endl;
-
+#endif
         // projection-variable without datatype and dimension
         CDMVariable projVar(projectionName, CDM_FLOAT, std::vector<std::string>());
         cdm_->addVariable(projVar);
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__  << ":" << __LINE__  << " projString = " << projStr << std::endl;
+#endif
         boost::shared_ptr<Projection> projection = Projection::createByProj4(projStr);
         assert(projection.get());
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__  << ":" << __LINE__  << " proj4String = " << projection->getProj4String() << std::endl;
+#endif
         std::vector<CDMAttribute> projAttr = projection->getParameters();
         for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
             cdm_->addAttribute(projectionName, *attrIt);
@@ -594,14 +604,18 @@ namespace MetNoFimex {
             if(unitsmatch.size() > 1)
                 projUnits = unitsmatch[1];
         } else {
+#ifdef GXDEBUG
           std::cerr << __FUNCTION__  << ":" << __LINE__  << " Oops - not found?\n";
+#endif
         }
 
         // TODO:
         // must cover third possibility
         // lat-long rotated
         if(projection->isDegree()) { // check if projection is lot-lat
+#ifdef GXDEBUG
             std::cerr << __FUNCTION__  << ":" << __LINE__  << " isDegree() = TRUE" << std::endl;
+#endif
             // long and lat as dimensions on its own
             std::string xName("longitude");
             xDim = CDMDimension(xName, row.numberX());
@@ -795,20 +809,22 @@ namespace MetNoFimex {
             cdm_->addAttribute(levelVar.getName(), levelStandardNameAttribute);
             CDMAttribute levelAxisAttribute("axis", "string", "z");
             cdm_->addAttribute(levelVar.getName(), levelAxisAttribute);
-
+#ifdef GXDEBUG
             std::cout << __FUNCTION__ << __LINE__ << " level long     name: " << row.name() << std::endl;
             std::cout << __FUNCTION__ << __LINE__ << " level standard name: " << levelCFName << std::endl;
             std::cout << __FUNCTION__ << __LINE__ << " level unit     name: " << row.unitName() << std::endl;
             std::cout << __FUNCTION__ << __LINE__ << " level axis     name: " << "z" << std::endl;
             std::cout << __FUNCTION__ << __LINE__ << " level data     size: " << levelSize << std::endl;
-
+#endif
 //            CDMAttribute levelPositiveAttribute("positive", "string", "up");
 //            cdm_->addAttribute(levelVar.getName(), levelPositiveAttribute);
 
             std::vector<float> lv;
             for(unsigned int index = 0; index < levelvaluepairs.size(); ++index) {
                 lv.push_back(levelvaluepairs.at(index).first);
+#ifdef GXDEBUG
                 std::cout << __FUNCTION__ << __LINE__ << " level : " << levelvaluepairs.at(index).first << std::endl;
+#endif
             }
 
             boost::shared_ptr<Data> data;
@@ -857,16 +873,24 @@ namespace MetNoFimex {
                                     std::string value = getXmlProp(child, "value");
                                     if(name == std::string("dbhost")) {
                                         setDbHost(value);
+#ifdef GXDEBUG
                                         std::cerr << "wdb dbhost: " << dbHost() << std::endl;
+#endif
                                     } else if(name == std::string("dbname")) {
                                         setDbName(value);
+#ifdef GXDEBUG
                                         std::cerr << "wdb dbname: " << dbName() << std::endl;
+#endif
                                     } else if(name == std::string("dbuser")) {
                                         setDbUser(value);
+#ifdef GXDEBUG
                                         std::cerr << "wdb dbuser: " << dbUser() << std::endl;
+#endif
                                     } else if(name == std::string("dbport")) {
                                         setDbPort(value.empty() ? std::numeric_limits<unsigned int>::quiet_NaN() : boost::lexical_cast<unsigned int>(value));
+#ifdef GXDEBUG
                                         std::cerr << "wdb dbport: " << dbPort() << std::endl;
+#endif
                                     }
                             }
                             child = child->next;
@@ -898,13 +922,17 @@ namespace MetNoFimex {
                                      std::string value = getXmlProp(child, "value");
                                      if(name == std::string("standard_cf_name")) {
                                          valueParameterStandardCFName = value;
+#ifdef GXDEBUG
                                          std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
                                                    << "name: " << valueParameterNonStandardName << " cf name: " << valueParameterStandardCFName << std::endl;
+#endif
                                          addWdbNameToCFName(valueParameterNonStandardName, valueParameterStandardCFName);
                                      } else if(name == std::string("_FillValue")) {
                                          valueParameterFillValue = boost::lexical_cast<float>(value);
+#ifdef GXDEBUG
                                          std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << std::cerr
                                                    << "name: " << valueParameterNonStandardName << " fill value: " << valueParameterFillValue << std::endl;
+#endif
                                          addWdbNameToFillValue(valueParameterNonStandardName, valueParameterFillValue);
                                      }
                              }
@@ -936,8 +964,10 @@ namespace MetNoFimex {
                                      std::string value = getXmlProp(child, "value");
                                      if(name == std::string("standard_cf_name")) {
                                          levelParameterStandardCFName = value;
+#ifdef GXDEBUG
                                          std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
                                                    << std::cerr << "name: " << levelParameterNonStandardName << " cf name: " << levelParameterStandardCFName << std::endl;
+#endif
                                          addWdbNameToCFName(levelParameterNonStandardName, levelParameterStandardCFName);
                                      }
                              }
@@ -962,7 +992,9 @@ namespace MetNoFimex {
                          row.setName(providerName);
                          row.setNumberOfTuples(std::numeric_limits<float>::quiet_NaN());
                          providers_.push_back(row);
+#ifdef GXDEBUG
                          std::cerr << "xml config adding provider: " << row.name() << std::endl;
+#endif
                     }
                 }
             }
@@ -982,7 +1014,9 @@ namespace MetNoFimex {
                          row.setName(placeName);
                          row.setNumberOfTuples(std::numeric_limits<float>::quiet_NaN());
                          places_.push_back(row);
+#ifdef GXDEBUG
                          std::cerr << "xml config adding place: " << row.name() << std::endl;
+#endif
                     }
                 }
             }
@@ -1035,9 +1069,9 @@ namespace MetNoFimex {
 
         // levels
         std::map<short, CDMDimension> levelDims = addLevelDimensions();
-
+#ifdef GXDEBUG
         std::cerr << "NUMBER of LEVELS ADDED : " << levelDims.size() << std::endl;
-
+#endif
         addGlobalCDMAttributes();
 
         // projection of the array (currently only one allowed)
@@ -1107,7 +1141,9 @@ namespace MetNoFimex {
 //            }
 
             for(unsigned int index = 0; index < veclevelparametersconstraints.size(); ++index) {
+#ifdef GXDEBUG
                 std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << " finding value parameters with level contraints : " << veclevelparametersconstraints.at(index) << std::endl;
+#endif
                 std::vector<GxValueParameterRow> tmp;
                 wdbExplorer()->getValueParameters(vecdataproviders,
                                                   strplace,
@@ -1116,7 +1152,9 @@ namespace MetNoFimex {
                                                   veclevelparametersconstraints.at(index),
                                                   std::vector<std::string>(),
                                                   tmp);
+#ifdef GXDEBUG
                 std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << " found  : " << tmp.size() << std::endl;
+#endif
                 valueparameters_.insert(valueparameters_.end(), tmp.begin(), tmp.end());
             }
 
@@ -1136,8 +1174,9 @@ namespace MetNoFimex {
 //                variableCFName = getStandardNameForDimension(variable.valueparametername_);
 
             std::string variableWdbName = variable.name();
+#ifdef GXDEBUG
             std::cerr << "adding valueparameter [Wdb name]: " << variableWdbName << std::endl;
-
+#endif
             double variableFillValue;
             std::map<std::string, double>::const_iterator wdbname_iter = wdbname2fillvaluemap_.find(variableWdbName);
             if(wdbname_iter != wdbname2fillvaluemap_.end())
@@ -1219,12 +1258,12 @@ namespace MetNoFimex {
 
         boost::posix_time::ptime validTimeFrom = timeVec.at(unLimDimPos).first;
         boost::posix_time::ptime validTimeTo = timeVec.at(unLimDimPos).second;
-
+#ifdef GXDEBUG
         std::cerr << "\nVARIABLE: " << varName << std::endl;
         std::cerr << "POSITION ON UNLIMITED TIME AXIS: " << unLimDimPos << std::endl;
         std::cerr << "FROM: " << to_iso_string(validTimeFrom).c_str() << std::endl;
         std::cerr << "TO: " << to_iso_string(validTimeTo).c_str() << std::endl;
-
+#endif
 //        {
 //            std::cerr << "===== DUMPING UNLIMITED TIME AXIS =====" << std::endl;
 //            for(unsigned int position = 0; position < timeVec.size(); ++position) {
@@ -1262,7 +1301,9 @@ namespace MetNoFimex {
         if ((layerDim != 0) && (layerDim->getLength() > 0)) {
             std::string strLevel;
             std::string levelName = layerDim->getName();
+#ifdef GXDEBUG
             std::cout << "finding levels for level dimension name: " << levelName << std::endl;
+#endif
             std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
             for(size_t levelIndex = 0; levelIndex < levelPairs.size(); ++levelIndex) {
                 strLevel =
@@ -1272,7 +1313,9 @@ namespace MetNoFimex {
                         + std::string(" ")
                         + levelName;
                 vecLevels.push_back(strLevel);
+#ifdef GXDEBUG
                 std::cout << "level # " << levelIndex << " is " << strLevel << std::endl;
+#endif
             }
         }
 
@@ -1292,7 +1335,9 @@ namespace MetNoFimex {
                 // by default use the latest reference time
                 boost::posix_time::ptime refTime = referenceTimeVec.at(referenceTimeVec.size() - 1);
                 referenceTime = "exact " + to_iso_string(refTime) + "+00";
-                std::cerr << "LATEST REFERENCE TIME: " << referenceTime << std::endl;
+#ifdef GXDEBUG
+                std::cerr << "NEWEST REFERENCE TIME: " << referenceTime << std::endl;
+#endif
             }
 
             std::string validtimeExactFromPoint = "exact " + to_iso_string(validTimeFrom) + "+00";
@@ -1340,13 +1385,15 @@ namespace MetNoFimex {
 
                 if(!tmpGids.empty()) {
                     gids.push_back(tmpGids.at(0));
+#ifdef GXDEBUG
                     std::cout << "============================== GID = " << tmpGids.at(0).value() << std::endl;
+#endif
                 }
             }
 
-
+#ifdef GXDEBUG
             std::cout << "============================== GIDS SIZE = " << gids.size() << std::endl;
-
+#endif
             size_t dataCurrentPos = 0;
 
             // TODO: optimize based on the actual dimension sizes....
@@ -1354,11 +1401,14 @@ namespace MetNoFimex {
             boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size * layerDim->getLength() * referenceTimeDim->getLength());
 
             if(!gids.empty()) {
+#ifdef GXDEBUG
                 std::cout << "============ READING GRID DATA AS FIMEX DATA: " << std::endl;
-
+#endif
                 for(size_t gidIndex = 0; gidIndex < gids.size(); ++gidIndex) {
                     // get the data itself
+#ifdef GXDEBUG
                     std::cerr << "getting data for GID = " << gids.at(gidIndex).value() << " of type " << gids.at(gidIndex).valueType() << std::endl;
+#endif
                     std::stringstream strgid;
                     strgid << gids.at(gidIndex).value();
 
@@ -1380,10 +1430,14 @@ namespace MetNoFimex {
     //                }
     //                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
                 }
+#ifdef GXDEBUG
                 std::cout << "============ ROW DATA SIZE: " << data->size() << std::endl;
+#endif
 
             } else {
+#ifdef GXDEBUG
                 std::cout << "============ NO GIDS -> NO GRID DATA FOUND: " << std::endl;
+#endif
                 return createData(variable.getDataType(), 0);
             }
 
@@ -1399,7 +1453,7 @@ namespace MetNoFimex {
         std::vector<size_t> dimensionSizes = sb.getDimensionSizes();
         std::vector<size_t> dimensionMaxSizes = sb.getMaxDimensionSizes();
         std::vector<size_t> dimensionStartPositions = sb.getDimensionStartPositions();
-
+#ifdef GXDEBUG
         for(size_t position = 0; position < dimensionNames.size(); ++position) {
                     std::cout
                          << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
@@ -1410,16 +1464,16 @@ namespace MetNoFimex {
                          << std::endl;
 
         }
-
+#endif
         const CDMVariable& variable = cdm_->getVariable(varName);
 
         // TODO: check if data exists in some cache
         //
 
         // find time axis -- validtime in our case
-
+#ifdef GXDEBUG
         std::cerr << "\nVARIABLE: " << varName << std::endl;
-
+#endif
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         // -- reference time plays important role
         //
@@ -1444,9 +1498,11 @@ namespace MetNoFimex {
             }
             if ( !dim.isUnlimited() && &dim != referenceTimeDim && &dim != layerDim ) {
                 xy_size *= dim.getLength();
+#ifdef GXDEBUG
                 std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
                           << "\t xy_size = " << xy_size
                           << std::endl;
+#endif
             }
         }
 
@@ -1475,10 +1531,11 @@ namespace MetNoFimex {
                 validtimeExactFromPoint = "exact " + to_iso_string(validTimeFrom) + "+00";
                 validtimeExactToPoint = "exact " + to_iso_string(validTimeTo) + "+00";
                 validtimeFromToInterval = "inside " + to_iso_string(validTimeFrom) + "+00" + " TO " + to_iso_string(validTimeTo) + "+00";
-
-                std::cerr << "POSITION ON UNLIMITED TIME AXIS: " << timeIndex << std::endl;
-                std::cerr << "FROM: " << validtimeExactFromPoint << std::endl;
-                std::cerr << "TO: " << validtimeExactToPoint << std::endl;
+#ifdef GXDEBUG
+                std::cout << "POSITION ON UNLIMITED TIME AXIS: " << timeIndex << std::endl;
+                std::cout << "FROM: " << validtimeExactFromPoint << std::endl;
+                std::cout << "TO: " << validtimeExactToPoint << std::endl;
+#endif
             } else if(referenceTimeDim != 0 && currentDimName == referenceTimeDim->getName()) {
                 size_t referenceTimeIndex = dimensionStartPositions.at(position);
 
@@ -1489,11 +1546,14 @@ namespace MetNoFimex {
 
                 boost::posix_time::ptime refTime = referenceTimeVec.at(referenceTimeIndex);
                 referenceTime = "exact " + to_iso_string(refTime) + "+00";
-                std::cerr << "reference time: " << referenceTime << std::endl;
-
+#ifdef GXDEBUG
+                std::cout << "reference time: " << referenceTime << std::endl;
+#endif
             } else if(layerDim != 0 && currentDimName == layerDim->getName()) {
                 std::string levelName = layerDim->getName();
+#ifdef GXDEBUG
                 std::cout << "finding levels for level dimension name: " << levelName << std::endl;
+#endif
                 std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
                 levelFrom = dimensionStartPositions.at(position);
                 levelTo = levelFrom + dimensionSizes.at(position) - 1;
@@ -1518,8 +1578,9 @@ namespace MetNoFimex {
                         + boost::lexical_cast<std::string>(levelPairs.at(levelTo).first)
                         + std::string(" ")
                         + levelName;
-
+#ifdef GXDEBUG
                 std::cerr << "level: " << strLevel << std::endl;
+#endif
             }
         }
 
@@ -1580,23 +1641,25 @@ namespace MetNoFimex {
 
         if(!gids.empty()) {
             // get the data itself
+#ifdef GXDEBUG
             std::cerr << "getting data for GID = " << gids.at(0).value() << " of type " << gids.at(0).valueType() << std::endl;
+#endif
             std::stringstream strgid;
             strgid << gids.at(0).value();
-
+#ifdef GXDEBUG
             std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
                       << "\t============ READING GRID DATA AS FIMEX DATA: " << std::endl;
-
+#endif
             wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(0).valueType(), selectedLayerData);
-
+#ifdef GXDEBUG
             std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
                       << "\t============ SELECTED LAYER DATA size: " << selectedLayerData->size() << std::endl;
-
+#endif
             if(selectedLayerData != 0) {
                 data->setValues(dataCurrentPos, *selectedLayerData, 0, selectedLayerData->size());
                 dataCurrentPos += selectedLayerData->size();
             }
-
+#ifdef GXDEBUG
             std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
                       << "\t============ ROW DATA SIZE: " << data->size() << std::endl;
 
@@ -1611,10 +1674,12 @@ namespace MetNoFimex {
             //                        ost << std::endl;
             //                }
             //                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
-
+#endif
         } else {
+#ifdef GXDEBUG
             std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
                       << "\t============ NO GIDS -> NO GRID DATA FOUND: " << std::endl;
+#endif
             return createData(variable.getDataType(), 0);
         }
 

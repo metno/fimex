@@ -20,7 +20,6 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-
 void GxWdbExplorer::getValueAsString(PGresult* pgResult, const int rowPosition, const int columnPosition, std::string& stringHolder)
 {
     stringHolder = std::string(PQgetvalue(pgResult, rowPosition, columnPosition));
@@ -258,7 +257,9 @@ bool GxWdbExplorer::connectToWdb()
 
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << "wci.begin failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQfinish(wdbPGConn_);
         wdbPGConn_ = 0;
         return false;
@@ -292,7 +293,9 @@ std::string GxWdbExplorer::wdbVersion()
 
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << "wci.version failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(res);
         PQfinish(wdbPGConn_);
         return std::string(); // empty
@@ -306,8 +309,9 @@ std::string GxWdbExplorer::wdbVersion()
     for (int i = 0; i < record_count; ++i)
     {
         wdbVersion_ = std::string(PQgetvalue(res, i, version_fnum));
-
+#ifdef GXDEBUG
         std::cerr << wdbVersion_.c_str() << std::endl;
+#endif
     }
 
     PQclear(res);
@@ -352,7 +356,9 @@ bool GxWdbExplorer::init()
 
 bool GxWdbExplorer::deinit()
 {
+#ifdef GXDEBUG
     std::cerr << __FUNCTION__ << " don't forget cleanup " << std::endl;
+#endif
     clearCache();
     return true;
 }
@@ -391,7 +397,9 @@ void GxWdbExplorer::getGridDescription(const std::string& placeName, std::vector
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << "wci.placespecification() failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         gridDescriptionRows.clear();
@@ -402,9 +410,9 @@ void GxWdbExplorer::getGridDescription(const std::string& placeName, std::vector
     //
     int record_count = PQntuples(pgResult);
     gridDescriptionRows.resize(record_count);
-
+#ifdef GXDEBUG
     std::cerr << record_count << std::endl;
-
+#endif
     int placename_fnum = -1;
     int projdefinition_fnum = -1;
     int numberx_fnum = -1;
@@ -504,7 +512,7 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     paramValues[4] = values.empty() ? 0 : strvalueparameters.c_str();
     paramValues[5] = level.empty() ? 0 : level.c_str();
     paramValues[6] = version.empty() ? 0 : strdataversion.c_str();
-
+#ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << std::endl;
     paramValues[0] ? std::cout << "paramValues[0] : " << std::string(paramValues[0]) << std::endl : std::cout << "paramValues[0] : NULL" << std::endl;
     paramValues[1] ? std::cout << "paramValues[1] : " << std::string(paramValues[1]) << std::endl : std::cout << "paramValues[1] : NULL" << std::endl;
@@ -513,7 +521,7 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     paramValues[4] ? std::cout << "paramValues[4] : " << std::string(paramValues[4]) << std::endl : std::cout << "paramValues[4] : NULL" << std::endl;
     paramValues[5] ? std::cout << "paramValues[5] : " << std::string(paramValues[5]) << std::endl : std::cout << "paramValues[5] : NULL" << std::endl;
     paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
-
+#endif
 
     pgResult = PQexecParams(wdbPGConn_,
                        "select value::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by value desc, referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
@@ -526,7 +534,9 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cout << __FUNCTION__ << " wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         gidRows.clear();
@@ -554,9 +564,9 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
         GxGidRow row;
         /* Get the field values (ATM ignore possibility they are null!) */
         row.setValue(GxWdbExplorer::getValueAsInt4(pgResult, i, value_fnum));
-
+#ifdef GXDEBUG
         std::cout << __FUNCTION__ << "@" << __LINE__ << " :" << "Found GID = " << row.value() << std::endl;
-
+#endif
         row.setValueType(GxWdbExplorer::getValueAsString(pgResult, i, valuetype_fnum));
 
         GxDataProviderRow providerRow;
@@ -658,7 +668,9 @@ void GxWdbExplorer::getDataProviders(const std::string& place,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         providerRows.clear();
@@ -745,7 +757,9 @@ void GxWdbExplorer::getPlaces(const std::vector<std::string>& providers,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         placeRows.clear();
@@ -812,7 +826,7 @@ void GxWdbExplorer::getValueParameters(const std::vector<std::string>& providers
     paramValues[4] = 0;
     paramValues[5] = level.empty() ? 0 : level.c_str();
     paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
-
+#ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << std::endl;
     paramValues[0] ? std::cout << "paramValues[0] : " << std::string(paramValues[0]) << std::endl : std::cout << "paramValues[0] : NULL" << std::endl;
     paramValues[1] ? std::cout << "paramValues[1] : " << std::string(paramValues[1]) << std::endl : std::cout << "paramValues[1] : NULL" << std::endl;
@@ -821,7 +835,7 @@ void GxWdbExplorer::getValueParameters(const std::vector<std::string>& providers
     paramValues[4] ? std::cout << "paramValues[4] : " << std::string(paramValues[4]) << std::endl : std::cout << "paramValues[4] : NULL" << std::endl;
     paramValues[5] ? std::cout << "paramValues[5] : " << std::string(paramValues[5]) << std::endl : std::cout << "paramValues[5] : NULL" << std::endl;
     paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
-
+#endif
     pgResult = PQexecParams(wdbPGConn_,
                        "select valueparametername, valueunitname, numberoftuples::int4 from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsevalueparameter)",
                        7,
@@ -833,7 +847,9 @@ void GxWdbExplorer::getValueParameters(const std::vector<std::string>& providers
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << "wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         valueRows.clear();
@@ -923,7 +939,9 @@ void GxWdbExplorer::getLevelParameters(const std::vector<std::string>& providers
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << " wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         levelRows.clear();
@@ -1016,7 +1034,9 @@ void GxWdbExplorer::getValidTimes(const std::vector<std::string>& providers,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         validTimeRows.clear();
@@ -1101,7 +1121,7 @@ void GxWdbExplorer::getReferenceTimes
     paramValues[4] = values.empty() ? 0 : strvalueparameters.c_str();
     paramValues[5] = level.empty() ? 0 : level.c_str();
     paramValues[6] = versions.empty() ? 0 : strdataversion.c_str();
-
+#ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << std::endl;
     paramValues[0] ? std::cout << "paramValues[0] : " << std::string(paramValues[0]) << std::endl : std::cout << "paramValues[0] : NULL" << std::endl;
     paramValues[1] ? std::cout << "paramValues[1] : " << std::string(paramValues[1]) << std::endl : std::cout << "paramValues[1] : NULL" << std::endl;
@@ -1110,7 +1130,7 @@ void GxWdbExplorer::getReferenceTimes
     paramValues[4] ? std::cout << "paramValues[4] : " << std::string(paramValues[4]) << std::endl : std::cout << "paramValues[4] : NULL" << std::endl;
     paramValues[5] ? std::cout << "paramValues[5] : " << std::string(paramValues[5]) << std::endl : std::cout << "paramValues[5] : NULL" << std::endl;
     paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
-
+#endif
     pgResult = PQexecParams(wdbPGConn_,
                        "select DISTINCT(extract(epoch from referencetime)) as referencetime, numberoftuples from wci.browse($1, $2, $3, $4, $5, $6, $7, NULL::wci.browsereferencetime) order by referencetime",
                        7,
@@ -1122,7 +1142,9 @@ void GxWdbExplorer::getReferenceTimes
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << " wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         referenceTimeRows.clear();
@@ -1130,7 +1152,9 @@ void GxWdbExplorer::getReferenceTimes
     }
 
     int record_count = PQntuples(pgResult);
+#ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << " record_count "<< record_count << std::endl;
+#endif
     referenceTimeRows.resize(record_count);
 
     int referencetime_fnum = PQfnumber(pgResult, "referencetime");
@@ -1168,7 +1192,9 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << "wci.fetch failed: " << PQerrorMessage(wdbPGConn_);
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         data = boost::shared_ptr<MetNoFimex::Data>();
@@ -1176,16 +1202,19 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
     }
 
     int grid_fnum = PQfnumber(pgResult, "grid");
+#ifdef GXDEBUG
     int numberx_fnum = PQfnumber(pgResult, "numberx");
     int numbery_fnum = PQfnumber(pgResult, "numbery");
-
+#endif
     int    row_position = 0;
     int    blen;
     float* ptrbinary;
 
     /* Get the field values (we ignore possibility they are null!) */
+#ifdef GXDEBUG
     int numberX = GxWdbExplorer::getValueAsInt4(pgResult, row_position, numberx_fnum);
     int numberY = GxWdbExplorer::getValueAsInt4(pgResult, row_position, numbery_fnum);
+#endif
     ptrbinary = reinterpret_cast<float *>(PQgetvalue(pgResult, row_position, grid_fnum));
 
     blen = PQgetlength(pgResult, row_position, grid_fnum) / sizeof(float);
@@ -1200,14 +1229,14 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
 //    data.swap(tmpdata);
 
     data = MetNoFimex::createData(MetNoFimex::string2datatype(strdatatype), ptrbinary, ptrbinary + blen);
-
+#ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
               << "\tnumberX = "   << numberX
               << "\tnumberY = "   << numberY
               << "\tblen = "      << blen
               << "\tdata size = " << data->size()
               << std::endl;
-
+#endif
     PQclear(pgResult);
 }
 
@@ -1229,7 +1258,9 @@ void GxWdbExplorer::getGridData(const std::string& gid, GxGridDataRow& dataRow)
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << "wci.fetch failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         dataRow = GxGridDataRow();
@@ -1247,8 +1278,9 @@ void GxWdbExplorer::getGridData(const std::string& gid, GxGridDataRow& dataRow)
 
     ptrbinary = PQgetvalue(pgResult, i, grid_fnum);
     blen = PQgetlength(pgResult, i, grid_fnum);
+#ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << "blen = " << blen << std::endl;
-
+#endif
     ptrdata = reinterpret_cast<float*>(ptrbinary);
     boost::shared_ptr<std::vector<float> > tmpData =
             boost::shared_ptr<std::vector<float> >(new std::vector<float>(ptrdata, ptrdata + (blen/sizeof(float))));
@@ -1287,7 +1319,9 @@ void GxWdbExplorer::getLevelParameterFromToPairs(const std::string& provider,
 
     if (PQresultStatus(pgResult) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << __FUNCTION__ << " wci.read failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
         levelPairs.clear();
@@ -1345,7 +1379,9 @@ void GxWdbExplorer::getLevelParametersForValueParameter(const std::string& provi
 
     if (PQresultStatus(res) != PGRES_TUPLES_OK)
     {
+#ifdef GXDEBUG
         std::cerr << "wci.browse failed: " << PQerrorMessage(wdbPGConn_) << std::endl;
+#endif
         PQclear(res);
         PQfinish(wdbPGConn_);
         levelRows.clear();
