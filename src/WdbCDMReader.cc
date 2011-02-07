@@ -151,7 +151,7 @@ namespace MetNoFimex {
     }
 
     GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename)
-        : source_(source), configFileName_(configfilename)
+        : source_(source), configFileName_(configfilename), wdbExplorer_(boost::shared_ptr<GxWdbExplorer>(reinterpret_cast<GxWdbExplorer*>(0)))
     {
         try {
             init();
@@ -687,8 +687,9 @@ namespace MetNoFimex {
 
     void GxWdbCDMReader::init() throw(CDMException)
     {
-        assert(wdbExplorer() == 0);
-        wdbExplorer_ = boost::shared_ptr<GxWdbExplorer>(new GxWdbExplorer());
+        assert(wdbExplorer().get() == 0);
+
+        setWdbExplorer(boost::shared_ptr<GxWdbExplorer>(new GxWdbExplorer()));
 
         // use XML config file information
         XMLDoc doc(configFileName_);
@@ -850,7 +851,7 @@ namespace MetNoFimex {
             boost::algorithm::split(splitvector, source_, boost::algorithm::is_any_of(";"));
             assert(splitvector.size() != 0);
             std::map<std::string, std::string> splitmap;
-            for(int i = 0; i < splitvector.size(); ++i) {
+            for(unsigned int i = 0; i < splitvector.size(); ++i) {
                 std::vector<std::string> subsplit;
                 boost::algorithm::split(subsplit, splitvector.at(i), boost::algorithm::is_any_of("="));
                 if(subsplit.size() != 2)
@@ -881,7 +882,7 @@ namespace MetNoFimex {
 
         // lets use data --- cmd parameters have precedance
         //
-        assert(wdbExplorer());
+        assert(wdbExplorer().get());
         wdbExplorer()->init();
 
         addDataProvider();
