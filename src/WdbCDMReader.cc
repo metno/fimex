@@ -111,44 +111,45 @@ namespace MetNoFimex {
         return boost::algorithm::replace_all_copy(name, " ", "_");
     }
 
-    void GxWdbCDMReader::setWdbToCFNamesMap(const boost::bimap<std::string, std::string>& map)
-    {
-        wdbtocfnamesmap_ = map;
-    }
+//    void GxWdbCDMReader::setWdbToCFNamesMap(const boost::bimap<std::string, std::string>& map)
+//    {
+//        wdbtocfnamesmap_ = map;
+//    }
 
     void GxWdbCDMReader::addWdbNameToCFName(const std::string& wdbname, const std::string& cfname)
     {
-        wdbtocfnamesmap_.insert(boost::bimap<std::string, std::string>::value_type(wdbname, cfname));
+        wdb2cfnamesmap_[wdbname] = cfname;
+        cf2wdbnamesmap_[cfname]  = wdbname;
     }
 
-    void GxWdbCDMReader::addWdbToCFNames(const boost::bimap<std::string, std::string>& map)
-    {
-        if(map.empty())
-            return;
+//    void GxWdbCDMReader::addWdbToCFNames(const boost::bimap<std::string, std::string>& map)
+//    {
+//        if(map.empty())
+//            return;
 
-        boost::bimap<std::string, std::string>::left_const_iterator lci = map.left.begin();
+//        boost::bimap<std::string, std::string>::left_const_iterator lci = map.left.begin();
 
-        for(; lci != map.left.end(); ++lci) {
-            addWdbNameToCFName(lci->first, lci->second);
-        }
-    }
+//        for(; lci != map.left.end(); ++lci) {
+//            addWdbNameToCFName(lci->first, lci->second);
+//        }
+//    }
 
     void GxWdbCDMReader::addWdbNameToFillValue(const std::string& wdbname, const double fillvalue)
     {
-        wdbnametofillvaluemap_.insert(boost::bimap<std::string, double>::value_type(wdbname, fillvalue));
+        wdbname2fillvaluemap_[wdbname] = fillvalue;
     }
 
-    void GxWdbCDMReader::addWdbNameToFillValueMap(const boost::bimap<std::string, double>& map)
-    {
-        if(map.empty())
-            return;
+//    void GxWdbCDMReader::addWdbNameToFillValueMap(const boost::bimap<std::string, double>& map)
+//    {
+//        if(map.empty())
+//            return;
 
-        boost::bimap<std::string, double>::left_const_iterator lci = map.left.begin();
+//        boost::bimap<std::string, double>::left_const_iterator lci = map.left.begin();
 
-        for(; lci != map.left.end(); ++lci) {
-            addWdbNameToFillValue(lci->first, lci->second);
-        }
-    }
+//        for(; lci != map.left.end(); ++lci) {
+//            addWdbNameToFillValue(lci->first, lci->second);
+//        }
+//    }
 
     GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename)
         : source_(source), configFileName_(configfilename), wdbExplorer_(boost::shared_ptr<GxWdbExplorer>(reinterpret_cast<GxWdbExplorer*>(0)))

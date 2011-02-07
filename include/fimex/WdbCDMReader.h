@@ -15,7 +15,6 @@
 
 // boost
 //
-#include <boost/bimap.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -92,16 +91,20 @@ namespace MetNoFimex {
         // todo: use smart pointers
         CDMDimension xDim;
         CDMDimension yDim;
-        boost::bimap<std::string, std::string> wdbtocfnamesmap_;
-        boost::bimap<std::string, double> wdbnametofillvaluemap_;
+
+        std::map<std::string, std::string> wdb2cfnamesmap_;
+        std::map<std::string, std::string> cf2wdbnamesmap_;
+        std::map<std::string, double> wdbname2fillvaluemap_;
+
         std::vector<GxDataProviderRow> providers_; // we support only one ATM
         std::vector<GxPlaceRow> places_; // we support only one ATM
         std::vector<GxLevelParameterRow> levelparameters_;
         std::vector<GxValueParameterRow> valueparameters_;
         std::vector<GxValidTimeRow> validtimes_; // this should be UNLIMITED dimension
-//          std::vector<GxReferenceTimeRow> referencetimes_; // this should be UNLIMITED dimension
+        std::vector<GxReferenceTimeRow> referencetimes_;
         std::vector<std::pair<boost::posix_time::ptime, boost::posix_time::ptime> > timeVec;
-        std::map<std::string,  std::vector<std::pair<double, double> > > levelNamesToPairsMap;
+        std::vector<boost::posix_time::ptime > referenceTimeVec;
+        std::map<std::string, std::vector<std::pair<double, double> > > levelNamesToPairsMap;
     };
 
 } // end namespace
