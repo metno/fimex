@@ -67,6 +67,11 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
             longOfProjOrigin = (zone-1)*6 - 180 + 3;
             attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
         }
+        // some people use utm with lon_0 instead of zone
+        if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\d+|\\d+\\.\\d+)"))) {
+            longOfProjOrigin = string2type<double>(what[1].str());
+            attrs.push_back(CDMAttribute("longitude_of_central_meridian", longOfProjOrigin));
+        }
         if (boost::regex_search(proj4Str, what, boost::regex("\\+south"))) {
             attrs.push_back(CDMAttribute("false_northing", 10000000));
         }
