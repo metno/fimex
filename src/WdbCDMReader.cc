@@ -461,7 +461,9 @@ namespace MetNoFimex {
         // projection-variable without datatype and dimension
         CDMVariable projVar(projectionName, CDM_FLOAT, std::vector<std::string>());
         cdm_->addVariable(projVar);
-        std::vector<CDMAttribute> projAttr = Projection::createByProj4(projStr)->getParameters();
+        boost::shared_ptr<Projection> projection = Projection::createByProj4(projStr);
+        assert(projection.get());
+        std::vector<CDMAttribute> projAttr = projection->getParameters();
         for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
             cdm_->addAttribute(projectionName, *attrIt);
         }
@@ -476,50 +478,10 @@ namespace MetNoFimex {
           std::cerr << "Oops - not found?\n";
         }
 
-        if(projUnits == std::string("m")) {
-            // long and lat as function of x, y
-            std::string xName("x");
-            xDim = CDMDimension(xName, row.numberX());
-            CDMDataType xDataType = string2datatype("float");
-            std::vector<std::string> xDimShape;
-            xDimShape.push_back(xDim.getName());
-            CDMVariable xVar(xName, xDataType, xDimShape);
-            boost::shared_ptr<Data> xData = createData(CDM_FLOAT, row.numberX());
-            for (int i = 0; i < row.numberX(); i++) {
-                int value = row.startX() + i * row.incrementX();
-                xData->setValue(i, value);
-            }
-            xVar.setData(xData);
-            cdm_->addDimension(xDim);
-            cdm_->addVariable(xVar);
-            CDMAttribute xDimLongNameAttribute("long_name", "string", "x-coordinate in Cartesian system");
-            CDMAttribute xDimStandardNameAttribute("standard_name", "string", "projection_x_coordinate");
-            CDMAttribute xDimUnitsAttribute("units", "string", projUnits);
-            cdm_->addAttribute(xName, xDimLongNameAttribute);
-            cdm_->addAttribute(xName, xDimStandardNameAttribute);
-            cdm_->addAttribute(xName, xDimUnitsAttribute);
-
-            std::string yName("y");
-            yDim = CDMDimension(yName, row.numberY());
-            CDMDataType yDataType = string2datatype("float");
-            std::vector<std::string> yDimShape;
-            yDimShape.push_back(yDim.getName());
-            CDMVariable yVar(yName, yDataType, yDimShape);
-            boost::shared_ptr<Data> yData = createData(CDM_FLOAT, row.numberY());
-            for (int i = 0; i < row.numberY(); i++) {
-                int value = row.startY() + i * row.incrementY();
-                yData->setValue(i, value);
-            }
-            yVar.setData(yData);
-            cdm_->addDimension(yDim);
-            cdm_->addVariable(yVar);
-            CDMAttribute yDimLongNameAttribute("long_name", "string", "y-coordinate in Cartesian system");
-            CDMAttribute yDimStandardNameAttribute("standard_name", "string", "projection_y_coordinate");
-            CDMAttribute yDimUnitsAttribute("units", "string", projUnits);
-            cdm_->addAttribute(yName, yDimLongNameAttribute);
-            cdm_->addAttribute(yName, yDimStandardNameAttribute);
-            cdm_->addAttribute(yName, yDimUnitsAttribute);
-        } else if(projUnits == std::string("degree")){
+        // TODO:
+        // must cover third possibility
+        // lat-long rotated
+        if(projection->isDegree()) { // check if projection is lot-lat
             // long and lat as dimensions on its own
             std::string xName("longitude");
             xDim = CDMDimension(xName, row.numberX());
@@ -559,6 +521,50 @@ namespace MetNoFimex {
             CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
             CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
             CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
+            cdm_->addAttribute(yName, yDimLongNameAttribute);
+            cdm_->addAttribute(yName, yDimStandardNameAttribute);
+            cdm_->addAttribute(yName, yDimUnitsAttribute);
+        } else {
+            // ATM we'll assume that it is metric
+            // long and lat as function of x, y
+            std::string xName("x");
+            xDim = CDMDimension(xName, row.numberX());
+            CDMDataType xDataType = string2datatype("float");
+            std::vector<std::string> xDimShape;
+            xDimShape.push_back(xDim.getName());
+            CDMVariable xVar(xName, xDataType, xDimShape);
+            boost::shared_ptr<Data> xData = createData(CDM_FLOAT, row.numberX());
+            for (int i = 0; i < row.numberX(); i++) {
+                int value = row.startX() + i * row.incrementX();
+                xData->setValue(i, value);
+            }
+            xVar.setData(xData);
+            cdm_->addDimension(xDim);
+            cdm_->addVariable(xVar);
+            CDMAttribute xDimLongNameAttribute("long_name", "string", "x-coordinate in Cartesian system");
+            CDMAttribute xDimStandardNameAttribute("standard_name", "string", "projection_x_coordinate");
+            CDMAttribute xDimUnitsAttribute("units", "string", projUnits);
+            cdm_->addAttribute(xName, xDimLongNameAttribute);
+            cdm_->addAttribute(xName, xDimStandardNameAttribute);
+            cdm_->addAttribute(xName, xDimUnitsAttribute);
+
+            std::string yName("y");
+            yDim = CDMDimension(yName, row.numberY());
+            CDMDataType yDataType = string2datatype("float");
+            std::vector<std::string> yDimShape;
+            yDimShape.push_back(yDim.getName());
+            CDMVariable yVar(yName, yDataType, yDimShape);
+            boost::shared_ptr<Data> yData = createData(CDM_FLOAT, row.numberY());
+            for (int i = 0; i < row.numberY(); i++) {
+                int value = row.startY() + i * row.incrementY();
+                yData->setValue(i, value);
+            }
+            yVar.setData(yData);
+            cdm_->addDimension(yDim);
+            cdm_->addVariable(yVar);
+            CDMAttribute yDimLongNameAttribute("long_name", "string", "y-coordinate in Cartesian system");
+            CDMAttribute yDimStandardNameAttribute("standard_name", "string", "projection_y_coordinate");
+            CDMAttribute yDimUnitsAttribute("units", "string", projUnits);
             cdm_->addAttribute(yName, yDimLongNameAttribute);
             cdm_->addAttribute(yName, yDimStandardNameAttribute);
             cdm_->addAttribute(yName, yDimUnitsAttribute);
