@@ -54,6 +54,9 @@
 #include "fimex/GribCDMReader.h"
 #include "fimex/GribApiCDMWriter.h"
 #endif
+#ifdef HAVE_LIBPQ
+#include "fimex/WdbCDMReader.h"
+#endif
 
 namespace po = boost::program_options;
 using namespace std;
@@ -221,6 +224,17 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile " << vm["input.file"].as<string>() << " with config " << config);
         std::vector<std::string> inputFiles(1, vm["input.file"].as<string>());
         returnPtr = auto_ptr<CDMReader>(new GribCDMReader(inputFiles, config));
+    }
+#endif
+
+#ifdef HAVE_LIBPQ
+    if (type == "wdb") {
+        std::string config;
+        if (vm.count("input.config")) {
+            config = vm["input.config"].as<string>();
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "connectiong to WDB " << vm["input.file"].as<string>() << " with config " << config);
+        returnPtr = auto_ptr<CDMReader>(new GxWdbCDMReader(vm["input.file"].as<string>(), config));
     }
 #endif
 
