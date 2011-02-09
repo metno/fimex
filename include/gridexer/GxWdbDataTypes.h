@@ -12,7 +12,6 @@
 
 // postgresql
 #include <postgresql/libpq-fe.h>
-#include <pqxx/pqxx>
 
 class GxWdbRow
 {
