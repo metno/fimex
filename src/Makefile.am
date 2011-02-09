@@ -60,10 +60,8 @@ libfimex_la_SOURCES = interpolation.c \
 					 TimeSpec.cc \
 					 Units.cc \
 					 Utils.cc \
-					 XMLDoc.cc \
-					 gridexer/GxWdbDataTypes.cc \
-					 gridexer/GxWdbExplorer.cc \
-					 WdbCDMReader.cc
+					 XMLDoc.cc
+
 
 if HAVE_NETCDF
   libfimex_la_SOURCES += NetCDF_CDMReader.cc \
@@ -84,4 +82,13 @@ endif
 
 if HAVE_MILIB
   libfimex_la_SOURCES += FeltCDMReader.cc Felt_Array.cc Felt_File.cc
+endif
+
+if HAVE_LIBPQ
+  libfimex_la_SOURCES += gridexer/GxWdbDataTypes.cc \
+                         gridexer/GxWdbDataTypes.h \
+                         gridexer/GxWdbExplorer.cc \
+                         gridexer/GxWdbExplorer.h \
+                         WdbCDMReader.cc \
+                         WdbCDMReader.h
 endif

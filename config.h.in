@@ -42,6 +42,9 @@
 /* Define to 1 if you have the `netcdf_c++' library (-lnetcdf_c++). */
 #undef HAVE_LIBNETCDF_C__
 
+/* Define if you have libpq */
+#undef HAVE_LIBPQ
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -59,9 +62,6 @@
 
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
-
-/* postgres.h is present */
-#undef HAVE_POSTGRES_POSTGRES_H
 
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW

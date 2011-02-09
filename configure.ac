@@ -50,7 +50,7 @@ AX_BOOST_FILESYSTEM
 AX_BOOST_IOSTREAMS
 AX_BOOST_DATE_TIME
 AX_BOOST_UNIT_TEST_FRAMEWORK
-AX_POSTGRES_CHECK[(8.1.x)]
+AX_POSTGRES_CHECK
 
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
@@ -68,6 +68,8 @@ AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
 AC_LANG_POP(C++)
 
 # optional io libraries
+
+AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
 
 MIFI_USELIB([netcdf], [nc_create])
 if test [ "x$with_netcdf" == "xyes" ]; then
@@ -116,7 +118,6 @@ if test x$use_felt = xyes; then
     AC_DEFINE([HAVE_FELT], [1], [define if felt/FeltFile.h is available])
 fi
 AM_CONDITIONAL([HAVE_FELT_OR_MILIB], [test x$use_felt = xyes || test x$use_milib = xyes])
-
 
 if test "$use_milib" = yes; then
 # Check for the milib library.
