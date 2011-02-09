@@ -1081,8 +1081,8 @@ namespace MetNoFimex {
         std::string projectionCoordinates = projectionTuple.get<1>();
 
         // time
-        CDMDimension timeDim = addTimeDimension();
         CDMDimension refTimeDim = addReferenceTimeDimension();
+        CDMDimension timeDim = addTimeDimension();
 
         addVariables(projectionName, projectionCoordinates, timeDim, refTimeDim, levelDims);
     }
@@ -1230,8 +1230,8 @@ namespace MetNoFimex {
                 }
             }
 
-            shape.push_back(timeDim.getName());
             shape.push_back(referenceTimeDim.getName());
+            shape.push_back(timeDim.getName());
 
             CDMDataType type = string2datatype(hcDataType);
             CDMVariable var(variableWdbName, type, shape);
