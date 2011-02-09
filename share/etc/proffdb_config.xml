@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wdb_fimex_config>
+<wdb_fimex_config xmlns:xi="http://www.w3.org/2001/XInclude">
+<global_attributes>
+    <attribute name="Conventions" value="CF-1.0" type="string" />
+    <attribute name="institution" value="Norwegian Meteorological Institute" type="string" />
+    <attribute name="product_name" value="WdbCDMReader" type="string" />
+    <attribute name="project_name" value="WdbCDMReader" type="string" />
+    <attribute name="title" value="Wdb data extraction via Fimex" type="string" />
+    <attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere" type="string" />
+    <attribute name="contact" value="fimex@lists.met.no" type="string" />
+    <attribute name="distribution_statement" value="Free" type="string" />
+</global_attributes>
+
+<wdb_parameters>
+
+    <wdb_connection id="0" name="proffdb" type="string">
+        <attribute name="dbhost" value="proffdb-devel.met.no" type="string" />
+        <attribute name="dbport" value="5432" type="short" />
+        <attribute name="dbname" value="wdb" type="string" />
+        <attribute name="dbuser" value="proffread" type="string" />
+        <attribute name="wciuser" value="proffwrite" type="string" />
+    </wdb_connection>
+
+    <data_providers>
+        <provider id="0" name="proff.h12h8um4"></provider>
+    </data_providers>
+
+    <grid_places>
+        <place id="0" name="proff grid"></place>
+    </grid_places>
+
+    <level_parameter id="0" name="isobaric surface pressure">
+        <attribute name="standard_cf_name" value="trykk" type="string" />
+    </level_parameter>
+
+    <level_parameter id="1" name="height above ground distance">
+        <attribute name="standard_cf_name" value="height" type="string" />
+    </level_parameter>
+
+    <level_parameter id="2" name="height above mean sea level distance">
+        <attribute name="standard_cf_name" value="GeoZ" type="string" />
+    </level_parameter>
+
+    <value_parameter id="air_temperature" name="air_temperature">
+        <attribute name="standard_cf_name" value="air_temperature" type="string" />
+        <attribute name="_FillValue" value="0.0" type="float" />
+    </value_parameter>
+
+    <value_parameter id="high cloud cover" name="high cloud cover">
+        <attribute name="standard_cf_name" value="cloud_area_fraction" type="string" />
+        <attribute name="_FillValue" value="0.0" type="float" />
+    </value_parameter>
+
+</wdb_parameters>
+</wdb_fimex_config>
