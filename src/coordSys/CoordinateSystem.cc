@@ -435,6 +435,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystemsCF1
         for (set<string>::iterator coord = tmpCoordinateAxes.begin(); coord != tmpCoordinateAxes.end(); ++coord) {
             if (cdm.hasVariable(*coord)) {
                 coordinateAxes[*coord] = AxisPtr(new CoordinateAxis(cdm.getVariable(*coord)));
+            } else {
+                // add a dimension without a variable with a 'virtual' variable
+                vector<string> shape(1, *coord);
+                coordinateAxes[*coord] = AxisPtr(new CoordinateAxis(CDMVariable(*coord, CDM_INT, shape)));
             }
         }
     }
