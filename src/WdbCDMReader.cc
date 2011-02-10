@@ -439,6 +439,105 @@ namespace MetNoFimex {
         return timeDimension;
     }
 
+    void GxWdbCDMReader::addReferenceTimeVariable()
+    {
+#ifdef GXDEBUG
+        std::cerr << __FUNCTION__ << "@" << __LINE__ << " : REFERENCE TIME VARIABLE" << std::endl;
+#endif
+        std::string hcReferenceTimeDimensionName = "forecast_reference_time";
+        std::string hcReferenceTimeDimensionStandardName = "forecast_reference_time";
+        std::string hcReferenceTimeDimensionType = "float";
+
+        std::vector<std::string> vecdataproviders;
+        if(!providers_.empty()) {
+            for(unsigned int i = 0; i < providers_.size(); ++i) {
+                GxDataProviderRow row = providers_.at(i);
+                vecdataproviders.push_back(row.name());
+            }
+        }
+
+        // ATM we don't need to include level constraints
+        //
+        std::string strlevelparameterconstraint;
+
+        std::string strplace;
+        if(!places_.empty()) {
+            GxPlaceRow row = places_.at(0);
+            strplace = row.name();
+        }
+
+        std::vector<std::string> vecvalueparameters;
+        if(!valueparameters_.empty()) {
+            for(unsigned int i = 0; i < valueparameters_.size(); ++i) {
+                GxValueParameterRow row = valueparameters_.at(i);
+                vecvalueparameters.push_back(row.name());
+            }
+        }
+
+        if(referencetimes_.empty()) {
+
+            wdbExplorer()->
+                    getReferenceTimes
+                    (
+                            vecdataproviders,
+                            strplace,
+                            std::string(),
+                            vecvalueparameters,
+                            strlevelparameterconstraint,
+                            std::vector<std::string>(),
+                            referencetimes_
+                    );
+//#ifdef GXDEBUG
+//            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+//#endif
+        } else {
+//#ifdef GXDEBUG
+            std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
+//#endif
+        }
+
+
+        std::string referenceTimeDimensionUnits = "seconds";
+        int referenceTimeScaleFactor = 1;
+
+        // ATM treat everytihing as seconds since epoch
+        // and later make some policies that user can
+        // choose from
+        //
+
+        // watch for the space
+        referenceTimeDimensionUnits.append(" since 1970-01-01 00:00:00 +00:00");
+
+        std::vector<double> referenceTimeInUnitsVector;
+
+        referenceTimeInUnitsVector.resize(referencetimes_.size());
+        referenceTimeVec.resize(referencetimes_.size());
+
+        for(uint index = 0; index < referencetimes_.size(); ++index) {
+            referenceTimeInUnitsVector[index] = referencetimes_[index].sinceEpochInSeconds() / referenceTimeScaleFactor;
+            referenceTimeVec[index] = boost::posix_time::from_time_t(referencetimes_[index].sinceEpochInSeconds());
+        }
+
+        std::vector<std::string> referenceTimeDimensionShape;
+        referenceTimeDimensionShape.push_back("reference_time");
+        CDMDataType referenceTimeDimensionDataType = string2datatype(hcReferenceTimeDimensionType);
+        CDMVariable referenceTimeVariable(hcReferenceTimeDimensionName, referenceTimeDimensionDataType, std::vector<std::string>());
+
+      //  boost::shared_ptr<Data> referenceTimeDimensionData = createData(referenceTimeDimensionDataType, referenceTimeInUnitsVector.begin(), referenceTimeInUnitsVector.end());
+      //  referenceTimeVariable.setData(referenceTimeDimensionData);
+        cdm_->addVariable(referenceTimeVariable);
+
+        // add attributes
+        CDMAttribute referenceTimeUnitsAttribute("units", "string", referenceTimeDimensionUnits);
+        CDMAttribute referenceTimeLongNameAttribute("long_name", "string", hcReferenceTimeDimensionName);
+        CDMAttribute referenceTimeStandardNameAttribute("standard_name", "string", hcReferenceTimeDimensionStandardName);
+        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeUnitsAttribute);
+        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeLongNameAttribute);
+        cdm_->addAttribute(referenceTimeVariable.getName(), referenceTimeStandardNameAttribute);
+
+        return;
+    }
+
     CDMDimension GxWdbCDMReader::addReferenceTimeDimension()
     {
 #ifdef GXDEBUG
@@ -494,11 +593,13 @@ namespace MetNoFimex {
                             std::vector<std::string>(),
                             referencetimes_
                     );
+//#ifdef GXDEBUG
 //            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+//#endif
         } else {
-#ifdef GXDEBUG
-            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
-#endif
+//#ifdef GXDEBUG
+            std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
+//#endif
         }
 
 
@@ -978,6 +1079,31 @@ namespace MetNoFimex {
             }
 
             {
+                std::string refTimeValue;
+                xmlNodePtr refTimeNode;
+                {
+                    XPathObjPtr xpathRefTimeObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/reference_times/time");
+                    xmlNodeSetPtr nodes = xpathRefTimeObj->nodesetval;
+                    size_t size = (nodes) ? nodes->nodeNr : 0;
+                    for(size_t index = 0; index < size; ++index) {
+                         refTimeNode = nodes->nodeTab[index];
+                         assert(refTimeNode->type == XML_ELEMENT_NODE);
+                         refTimeValue = getXmlProp(refTimeNode, "value");
+                         boost::posix_time::ptime referenceTime(boost::posix_time::from_iso_string(refTimeValue));
+                         GxReferenceTimeRow row;
+                         boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
+                         boost::posix_time::time_duration::sec_type x = (referenceTime - epoch).total_seconds();
+                         row.setSinceEpochInSeconds(x);
+                         referencetimes_.push_back(row);
+//#ifdef GXDEBUG
+                         std::cerr << "xml config adding reference tine: " << boost::posix_time::to_iso_string(referenceTime)
+                                   << " that is seconds since epoch " << row.sinceEpochInSeconds() << std::endl;
+//#endif
+                    }
+                }
+            }
+
+            {
                 std::string providerName;
                 xmlNodePtr providerNode;
                 {
@@ -1024,7 +1150,8 @@ namespace MetNoFimex {
 
         if(!source_.empty()) {
             // the source that has format
-// dbHost=<string>;dbName=<string>;dbPort=<string>;dbUser=<string>;wciUser=<string>;provider=<string>;place=<string>
+            // refTime is  given as iso string "20110210T000000"
+// dbHost=<string>;dbName=<string>;dbPort=<string>;dbUser=<string>;wciUser=<string>;provider=<string>;place=<string>;refTime=<string>
             std::vector<std::string> splitvector;
             boost::algorithm::split(splitvector, source_, boost::algorithm::is_any_of(";"));
             assert(splitvector.size() != 0);
@@ -1056,6 +1183,23 @@ namespace MetNoFimex {
                 row.setNumberOfTuples(std::numeric_limits<int>::infinity());
                 places_.push_back(row);
             }
+            if(!splitmap["refTime"].empty()) {
+                // override reference time that
+                // may have come via config file
+                //
+                GxReferenceTimeRow row;
+                referencetimes_.clear();
+                boost::posix_time::ptime referenceTime(boost::posix_time::from_iso_string(splitmap["refTime"]));
+                boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
+                boost::posix_time::time_duration::sec_type x = (referenceTime - epoch).total_seconds();
+                row.setSinceEpochInSeconds(x);
+                row.setNumberOfTuples(std::numeric_limits<int>::infinity());
+                referencetimes_.push_back(row);
+//#ifdef GXDEBUG
+                std::cerr << "OVERRIDING reference time via cmd line: " << boost::posix_time::to_iso_string(referenceTime)
+                          << " that is seconds since epoch " << row.sinceEpochInSeconds() << std::endl;
+//#endif
+            }
         }
 
         // lets use data --- cmd parameters have precedance
@@ -1081,13 +1225,14 @@ namespace MetNoFimex {
         std::string projectionCoordinates = projectionTuple.get<1>();
 
         // time
-        CDMDimension refTimeDim = addReferenceTimeDimension();
+//        CDMDimension refTimeDim; = addReferenceTimeDimension();
+        addReferenceTimeVariable();
         CDMDimension timeDim = addTimeDimension();
 
-        addVariables(projectionName, projectionCoordinates, timeDim, refTimeDim, levelDims);
+        addVariables(projectionName, projectionCoordinates, timeDim,/* refTimeDim,*/ levelDims);
     }
 
-    void GxWdbCDMReader::addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const CDMDimension& referenceTimeDim, const std::map<short, CDMDimension>& levelDims)
+    void GxWdbCDMReader::addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, /*const CDMDimension& referenceTimeDim,*/ const std::map<short, CDMDimension>& levelDims)
     {
         // ATM there is not way of determining _FillValue
         // from wdb, so we have to hard code some
@@ -1230,7 +1375,7 @@ namespace MetNoFimex {
                 }
             }
 
-            shape.push_back(referenceTimeDim.getName());
+//            shape.push_back(referenceTimeDim.getName());
             shape.push_back(timeDim.getName());
 
             CDMDataType type = string2datatype(hcDataType);
@@ -1335,8 +1480,9 @@ namespace MetNoFimex {
 
             std::string referenceTime;
 
-            if( referenceTimeDim ) {
+            if( referenceTimeDim || referenceTimeVec.size() > 0 ) {
                 // by default use the latest reference time
+                // identified as the last index in vector
                 boost::posix_time::ptime refTime = referenceTimeVec.at(referenceTimeVec.size() - 1);
                 referenceTime = "exact " + to_iso_string(refTime) + "+00";
 #ifdef GXDEBUG
@@ -1592,6 +1738,17 @@ namespace MetNoFimex {
                 std::cerr << "level: " << strLevel << std::endl;
 #endif
             }
+        }
+
+        // handle exteranly added referenceTime
+        if(referenceTime.empty() && referenceTimeVec.size() > 0) {
+            // take latest reference time identified
+            // by the last element in vector
+            boost::posix_time::ptime refTime = referenceTimeVec.at(referenceTimeVec.size() - 1);
+            referenceTime = "exact " + to_iso_string(refTime) + "+00";
+#ifdef GXDEBUG
+            std::cerr << "REFERENCE TIME: " << referenceTime << std::endl;
+#endif
         }
 
         boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size * (levelTo - levelFrom + 1));

@@ -77,6 +77,7 @@ namespace MetNoFimex {
         bool addPlace();
         void addGlobalCDMAttributes();
         CDMDimension addTimeDimension();
+        void addReferenceTimeVariable();
         CDMDimension addReferenceTimeDimension();
         std::map<short, CDMDimension> addLevelDimensions();
         std::string getStandardNameForDimension(const std::string& name);
@@ -88,7 +89,7 @@ namespace MetNoFimex {
                         const std::string& projName,
                         const std::string& coordinates,
                         const CDMDimension& timeDim,
-                        const CDMDimension& referenceTimDim,
+                        /*const CDMDimension& referenceTimDim,*/
                         const std::map<short, CDMDimension>& levelDim
                 );
 
