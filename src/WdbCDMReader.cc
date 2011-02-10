@@ -1243,10 +1243,8 @@ namespace MetNoFimex {
         }
     }
 
-    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
-//        ++totalGetDataSliceCount_;
-//        getDataSliceTime_.restart();
-        // unLimDimPos is days since "bla bla"
+    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+    {
         const CDMVariable& variable = cdm_->getVariable(varName);
         if (variable.hasData()) {
             return getDataSliceFromMemory(variable, unLimDimPos);
@@ -1264,7 +1262,7 @@ namespace MetNoFimex {
         std::cerr << "FROM: " << to_iso_string(validTimeFrom).c_str() << std::endl;
         std::cerr << "TO: " << to_iso_string(validTimeTo).c_str() << std::endl;
 #endif
-//        {
+        {
 //            std::cerr << "===== DUMPING UNLIMITED TIME AXIS =====" << std::endl;
 //            for(unsigned int position = 0; position < timeVec.size(); ++position) {
 //                std::cerr
@@ -1274,7 +1272,7 @@ namespace MetNoFimex {
 //                        << "TO: "
 //                        << to_iso_string(timeVec.at(position).second) << std::endl;
 //            }
-//        }
+        }
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         const std::vector<std::string>& dims = variable.getShape();
         const CDMDimension* layerDim = 0;
@@ -1293,9 +1291,15 @@ namespace MetNoFimex {
             }
             if ( !dim.isUnlimited() && &dim != referenceTimeDim && &dim != layerDim ) {
                 xy_size *= dim.getLength();
+#ifdef GXDEBUG
+                std::cout << "xy_size       " << xy_size << std::endl;
+#endif
             }
         }
 
+#ifdef GXDEBUG
+        std::cout << "xy_size       " << xy_size << std::endl;
+#endif
         // we have to extract all possible
         std::vector<std::string> vecLevels;
         if ((layerDim != 0) && (layerDim->getLength() > 0)) {
@@ -1347,6 +1351,9 @@ namespace MetNoFimex {
             std::vector<GxGidRow> gids;
 
             for(size_t levelIndex = 0; levelIndex < vecLevels.size(); ++levelIndex) {
+#ifdef GXDEBUG
+                std::cout << "LEVEL: " << vecLevels.at(levelIndex) << std::endl;
+#endif
                 std::vector<GxGidRow> tmpGids;
                 // try exact from point
                 //
@@ -1398,7 +1405,12 @@ namespace MetNoFimex {
 
             // TODO: optimize based on the actual dimension sizes....
             //
-            boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size * layerDim->getLength() * referenceTimeDim->getLength());
+
+            unsigned int totalDataDimension = xy_size;
+            (layerDim != 0) ? totalDataDimension * layerDim->getLength() : 1;
+            (referenceTimeDim != 0) ? totalDataDimension * referenceTimeDim->getLength() : 1;
+            boost::shared_ptr<Data> data = createData(variable.getDataType(), totalDataDimension);
+
 
             if(!gids.empty()) {
 #ifdef GXDEBUG
@@ -1447,8 +1459,6 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
     {  
-//        return CDMReader::getDataSlice(varName, sb);
-
         std::vector<std::string> dimensionNames = sb.getDimensionNames();
         std::vector<size_t> dimensionSizes = sb.getDimensionSizes();
         std::vector<size_t> dimensionMaxSizes = sb.getMaxDimensionSizes();
