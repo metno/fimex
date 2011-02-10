@@ -347,14 +347,27 @@ namespace MetNoFimex {
             }
         }
 
+        // take into accoint the reference time
+        std::string strreferencetime;
+        if(!referencetimes_.empty()) {
+            // take the last (most fresh) value
+            //
+            GxReferenceTimeRow refTimeRow = referencetimes_.at(referencetimes_.size() -1);
+            boost::posix_time::ptime refTime = boost::posix_time::from_time_t(refTimeRow.sinceEpochInSeconds());
+            strreferencetime = "exact " + to_iso_string(refTime) + "+00";
+        }
+
         if(validtimes_.empty()) {
             wdbExplorer()->getValidTimes(vecdataproviders,
                                          strplace,
-                                         std::string(),
+                                         strreferencetime,
                                          vecvalueparameters,
                                          strlevelparameterconstraint,
                                          std::vector<std::string>(),
                                          validtimes_);
+#ifdef GXDEBUG
+            std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
+#endif
         } else {
 #ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
@@ -491,9 +504,9 @@ namespace MetNoFimex {
 //            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
 //#endif
         } else {
-//#ifdef GXDEBUG
+#ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
-//#endif
+#endif
         }
 
 
