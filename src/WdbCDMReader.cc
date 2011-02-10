@@ -523,8 +523,8 @@ namespace MetNoFimex {
         CDMDataType referenceTimeDimensionDataType = string2datatype(hcReferenceTimeDimensionType);
         CDMVariable referenceTimeVariable(hcReferenceTimeDimensionName, referenceTimeDimensionDataType, std::vector<std::string>());
 
-      //  boost::shared_ptr<Data> referenceTimeDimensionData = createData(referenceTimeDimensionDataType, referenceTimeInUnitsVector.begin(), referenceTimeInUnitsVector.end());
-      //  referenceTimeVariable.setData(referenceTimeDimensionData);
+        boost::shared_ptr<Data> referenceTimeDimensionData = createData(referenceTimeDimensionDataType, referenceTimeInUnitsVector.begin(), referenceTimeInUnitsVector.end());
+        referenceTimeVariable.setData(referenceTimeDimensionData);
         cdm_->addVariable(referenceTimeVariable);
 
         // add attributes
