@@ -357,9 +357,9 @@ namespace MetNoFimex {
             GxReferenceTimeRow refTimeRow = referencetimes_.at(referencetimes_.size() -1);
             boost::posix_time::ptime refTime = boost::posix_time::from_time_t(refTimeRow.sinceEpochInSeconds());
             strreferencetime = "exact " + to_iso_string(refTime) + "+00";
-
+#ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " =========================== REFERENCE TIME " << strreferencetime << std::endl;
-
+#endif
         }
 
         if(validtimes_.empty()) {
@@ -370,9 +370,9 @@ namespace MetNoFimex {
                                          strlevelparameterconstraint,
                                          std::vector<std::string>(),
                                          validtimes_);
-//#ifdef GXDEBUG
+#ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " ==================================== validtimes.size() " << validtimes_.size() << std::endl;
-//#endif
+#endif
         } else {
 #ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
@@ -1268,10 +1268,10 @@ namespace MetNoFimex {
                 row.setSinceEpochInSeconds(x);
                 row.setNumberOfTuples(std::numeric_limits<int>::infinity());
                 referencetimes_.push_back(row);
-//#ifdef GXDEBUG
+#ifdef GXDEBUG
                 std::cerr << "OVERRIDING reference time via cmd line: " << boost::posix_time::to_iso_string(referenceTime)
                           << " that is seconds since epoch " << row.sinceEpochInSeconds() << std::endl;
-//#endif
+#endif
             }
         }
 
@@ -1530,7 +1530,9 @@ namespace MetNoFimex {
             std::string wdbLevelName = levelName;
             if(cit != cf2wdbnamesmap_.end()) {
                 wdbLevelName = GxWdbCDMReader::getStandardNameForDimension(cit->second);
+#ifdef GXDEBUG
                 std::cout << "===================== and the WDB name is : " << wdbLevelName << std::endl;
+#endif
             }
 
             std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
@@ -1542,9 +1544,9 @@ namespace MetNoFimex {
                         + std::string(" ")
                         + wdbLevelName;
                 vecLevels.push_back(strLevel);
-//#ifdef GXDEBUG
+#ifdef GXDEBUG
                 std::cout << "level # " << levelIndex << " is " << strLevel << std::endl;
-//#endif
+#endif
             }
         }
 
@@ -1577,9 +1579,9 @@ namespace MetNoFimex {
             std::vector<GxGidRow> gids;
 
             for(size_t levelIndex = 0; levelIndex < vecLevels.size(); ++levelIndex) {
-//#ifdef GXDEBUG
+#ifdef GXDEBUG
                 std::cout << "LEVEL: " << vecLevels.at(levelIndex) << std::endl;
-//#endif
+#endif
                 std::vector<GxGidRow> tmpGids;
                 // try exact from point
                 //
