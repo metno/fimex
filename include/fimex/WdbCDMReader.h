@@ -58,7 +58,7 @@ namespace MetNoFimex {
         void addWdbNameToFillValue(const std::string& wdbname, const double value);
 
         virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
+//        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
 
     protected:
         boost::shared_ptr<GxWdbExplorer> wdbExplorer()  {
