@@ -21,6 +21,8 @@
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
 
+//#define GXDEBUG 1
+
 namespace MetNoFimex {
 
     void GxWdbCDMReader::setDbHost(const std::string& dbHost)
@@ -355,6 +357,9 @@ namespace MetNoFimex {
             GxReferenceTimeRow refTimeRow = referencetimes_.at(referencetimes_.size() -1);
             boost::posix_time::ptime refTime = boost::posix_time::from_time_t(refTimeRow.sinceEpochInSeconds());
             strreferencetime = "exact " + to_iso_string(refTime) + "+00";
+
+            std::cerr << __FUNCTION__ << " =========================== REFERENCE TIME " << strreferencetime << std::endl;
+
         }
 
         if(validtimes_.empty()) {
@@ -365,9 +370,9 @@ namespace MetNoFimex {
                                          strlevelparameterconstraint,
                                          std::vector<std::string>(),
                                          validtimes_);
-#ifdef GXDEBUG
-            std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
-#endif
+//#ifdef GXDEBUG
+            std::cerr << __FUNCTION__ << " ==================================== validtimes.size() " << validtimes_.size() << std::endl;
+//#endif
         } else {
 #ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " validtimes.size() " << validtimes_.size() << std::endl;
@@ -1521,6 +1526,13 @@ namespace MetNoFimex {
 #ifdef GXDEBUG
             std::cout << "finding levels for level dimension name: " << levelName << std::endl;
 #endif
+            std::map<std::string, std::string>::const_iterator cit = cf2wdbnamesmap_.find(levelName);
+            std::string wdbLevelName = levelName;
+            if(cit != cf2wdbnamesmap_.end()) {
+                wdbLevelName = GxWdbCDMReader::getStandardNameForDimension(cit->second);
+                std::cout << "===================== and the WDB name is : " << wdbLevelName << std::endl;
+            }
+
             std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
             for(size_t levelIndex = 0; levelIndex < levelPairs.size(); ++levelIndex) {
                 strLevel =
@@ -1528,11 +1540,11 @@ namespace MetNoFimex {
                         + std::string(" ")
                         + boost::lexical_cast<std::string>(levelPairs.at(levelIndex).first)
                         + std::string(" ")
-                        + levelName;
+                        + wdbLevelName;
                 vecLevels.push_back(strLevel);
-#ifdef GXDEBUG
+//#ifdef GXDEBUG
                 std::cout << "level # " << levelIndex << " is " << strLevel << std::endl;
-#endif
+//#endif
             }
         }
 
@@ -1565,9 +1577,9 @@ namespace MetNoFimex {
             std::vector<GxGidRow> gids;
 
             for(size_t levelIndex = 0; levelIndex < vecLevels.size(); ++levelIndex) {
-#ifdef GXDEBUG
+//#ifdef GXDEBUG
                 std::cout << "LEVEL: " << vecLevels.at(levelIndex) << std::endl;
-#endif
+//#endif
                 std::vector<GxGidRow> tmpGids;
                 // try exact from point
                 //
@@ -1775,9 +1787,15 @@ namespace MetNoFimex {
 #endif
             } else if(layerDim != 0 && currentDimName == layerDim->getName()) {
                 std::string levelName = layerDim->getName();
-#ifdef GXDEBUG
-                std::cout << "finding levels for level dimension name: " << levelName << std::endl;
-#endif
+//#ifdef GXDEBUG
+                std::cout << "finding levels for level dimension with cf name: " << levelName << std::endl;
+                std::map<std::string, std::string>::const_iterator cit = cf2wdbnamesmap_.find(levelName);
+                std::string wdbLevelName = levelName;
+                if(cit != cf2wdbnamesmap_.end()) {
+                    wdbLevelName = GxWdbCDMReader::getStandardNameForDimension(cit->second);
+                    std::cout << "===================== and the WDB name is : " << wdbLevelName << std::endl;
+                }
+//#endif
                 std::vector<std::pair<double, double> > levelPairs = levelNamesToPairsMap[getStandardNameForDimension(levelName)];
                 levelFrom = dimensionStartPositions.at(position);
                 levelTo = levelFrom + dimensionSizes.at(position) - 1;
@@ -1792,19 +1810,20 @@ namespace MetNoFimex {
                         + std::string(" ")
                         + boost::lexical_cast<std::string>(levelPairs.at(levelFrom).first)
                         + std::string(" ")
-                        + levelName;
+                        + wdbLevelName;
                 else
                     strLevel =
                         std::string("inside")
+//                        std::string("above")
                         + std::string(" ")
                         + boost::lexical_cast<std::string>(levelPairs.at(levelFrom).first)
-                        + std::string(" TO ")
+                        + std::string(" to ")
                         + boost::lexical_cast<std::string>(levelPairs.at(levelTo).first)
                         + std::string(" ")
-                        + levelName;
-#ifdef GXDEBUG
+                        + wdbLevelName;
+//#ifdef GXDEBUG
                 std::cerr << "level: " << strLevel << std::endl;
-#endif
+//#endif
             }
         }
 
