@@ -1,0 +1,18 @@
+fimex (0.26beta-1) lucid; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 11 Feb 2011 11:00:00 +0100
+
+fimex (0.25.1-2) lucid; urgency=low
+
+  * using versioned udunits2 package
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 12 Jan 2011 09:00:00 +0100
+
+fimex (0.25.1-1) lucid; urgency=low
+
+  * initial release
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 07 Jan 2011 16:00:00 +0100
+

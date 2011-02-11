@@ -28,7 +28,9 @@
 #include "fimex/XMLDoc.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#ifdef MIFI_HAVE_NETCDF
 #include "fimex/NetCDF_CDMReader.h"
+#endif
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
@@ -44,6 +46,7 @@ static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
     : configFile(configFile)
 {
+#ifdef MIFI_HAVE_NETCDF
     doc = new XMLDoc(configFile);
     doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
@@ -54,6 +57,11 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
     string ncFile = getXmlProp(nodes->nodeTab[0], "location");
     dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     init();
+#else
+    string msg("cannot read data through ncml - no netcdf-support compiled in fimex");
+    LOG4FIMEX(logger, Logger::FATAL, msg);
+    throw CDMException(msg);
+#endif
 }
 
 NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile) throw(CDMException)
