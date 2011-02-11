@@ -18,6 +18,9 @@
 /* define if the Boost::Regex library is available */
 #undef HAVE_BOOST_REGEX
 
+/* define if the Boost::System library is available */
+#undef HAVE_BOOST_SYSTEM
+
 /* define if the Boost::Unit_Test_Framework library is available */
 #undef HAVE_BOOST_UNIT_TEST_FRAMEWORK
 
