@@ -457,6 +457,8 @@ namespace MetNoFimex {
 #ifdef GXDEBUG
         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : REFERENCE TIME VARIABLE" << std::endl;
 #endif
+//        CDMDimension referenceTimeDimension;
+
         std::string hcReferenceTimeDimensionName = "forecast_reference_time";
         std::string hcReferenceTimeDimensionStandardName = "forecast_reference_time";
         std::string hcReferenceTimeDimensionType = "float";
@@ -503,9 +505,18 @@ namespace MetNoFimex {
             // only use the latest reference time (unless initialized with all)
             referencetimes_.push_back(tmpRefTimes.at(tmpRefTimes.size()-1));
 
-//#ifdef GXDEBUG
-//            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
-//#endif
+#ifdef GXDEBUG
+            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
+#endif
+            // we need to take the latest
+            // (most fresh) reference value
+            GxReferenceTimeRow row = referencetimes_.at(referencetimes_.size() - 1);
+            referencetimes_.clear();
+            referencetimes_.push_back(row);
+//            std::cerr << __FUNCTION__
+//                      << " referencetimes.size() cut to "
+//                      << referencetimes_.size()
+//                      << std::endl;
         } else {
 #ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
@@ -534,8 +545,12 @@ namespace MetNoFimex {
             referenceTimeVec[index] = boost::posix_time::from_time_t(referencetimes_[index].sinceEpochInSeconds());
         }
 
+//        referenceTimeDimension.setName("forecast_reference_time");
+//        referenceTimeDimension.setLength(1);
+//        cdm_->addDimension(referenceTimeDimension);
+
         std::vector<std::string> referenceTimeDimensionShape;
-        referenceTimeDimensionShape.push_back("reference_time");
+        referenceTimeDimensionShape.push_back("forecast_reference_time");
         CDMDataType referenceTimeDimensionDataType = string2datatype(hcReferenceTimeDimensionType);
         CDMVariable referenceTimeVariable(hcReferenceTimeDimensionName, referenceTimeDimensionDataType, std::vector<std::string>());
 
@@ -612,6 +627,13 @@ namespace MetNoFimex {
 //#ifdef GXDEBUG
 //            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
 //#endif
+            GxReferenceTimeRow row = referencetimes_.at(referencetimes_.size() - 1);
+            referencetimes_.clear();
+            referencetimes_.push_back(row);
+            std::cerr << __FUNCTION__
+                      << " referencetimes.size() cut to "
+                      << referencetimes_.size()
+                      << std::endl;
         } else {
 //#ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
@@ -734,7 +756,23 @@ namespace MetNoFimex {
             std::cerr << __FUNCTION__  << ":" << __LINE__  << " isDegree() = TRUE" << std::endl;
 #endif
             // long and lat as dimensions on its own
-            std::string xName("longitude");
+            std::string xName;
+            CDMAttribute xDimLongNameAttribute;
+            CDMAttribute xDimStandardNameAttribute;
+            CDMAttribute xDimUnitsAttribute;
+            if(projection->getName() == "rotated_latitude_longitude") {
+//                std::cerr << __FUNCTION__  << ":" << __LINE__  << " projectionName = rotated_latitude_longitude" << std::endl;
+                xName = "x";
+                xDimLongNameAttribute = CDMAttribute("long_name", "string", "x-coordinate in Cartesian system");
+                xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "grid_longitude");
+                xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
+            } else {
+                xName = "latitude";
+                xDimLongNameAttribute = CDMAttribute("long_name", "string", "longitude");
+                xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "longitude");
+                xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
+            }
+
             xDim = CDMDimension(xName, row.numberX());
             CDMDataType xDataType = string2datatype("float");
             std::vector<std::string> xDimShape;
@@ -748,14 +786,27 @@ namespace MetNoFimex {
             xVar.setData(xData);
             cdm_->addDimension(xDim);
             cdm_->addVariable(xVar);
-            CDMAttribute xDimLongNameAttribute("long_name", "string", "longitude");
-            CDMAttribute xDimStandardNameAttribute("standard_name", "string", "longitude");
-            CDMAttribute xDimUnitsAttribute("units", "string", "degree_east");
             cdm_->addAttribute(xName, xDimLongNameAttribute);
             cdm_->addAttribute(xName, xDimStandardNameAttribute);
             cdm_->addAttribute(xName, xDimUnitsAttribute);
 
-            std::string yName("latitude");
+            std::string yName;
+            CDMAttribute yDimLongNameAttribute;
+            CDMAttribute yDimStandardNameAttribute;
+            CDMAttribute yDimUnitsAttribute;
+            if(projection->getName() == "rotated_latitude_longitude") {
+//                std::cerr << __FUNCTION__  << ":" << __LINE__  << " isDegree() = rotated_latitude_longitude" << std::endl;
+                yName = "y";
+                yDimLongNameAttribute = CDMAttribute("long_name", "string", "y-coordinate in Cartesian system");
+                yDimStandardNameAttribute = CDMAttribute("standard_name", "string", "grid_latitude");
+                yDimUnitsAttribute = CDMAttribute("units", "string", "degree_north");
+            } else {
+                yName = "latitude";
+                CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
+                CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
+                CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
+            }
+
             yDim = CDMDimension(yName, row.numberY());
             CDMDataType yDataType = string2datatype("float");
             std::vector<std::string> yDimShape;
@@ -769,13 +820,14 @@ namespace MetNoFimex {
             yVar.setData(yData);
             cdm_->addDimension(yDim);
             cdm_->addVariable(yVar);
-            CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
-            CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
-            CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
+
             cdm_->addAttribute(yName, yDimLongNameAttribute);
             cdm_->addAttribute(yName, yDimStandardNameAttribute);
             cdm_->addAttribute(yName, yDimUnitsAttribute);
         } else {
+
+//            std::cerr << __FUNCTION__  << ":" << __LINE__  << " isDegree() = FALSE" << std::endl;
+
             // ATM we'll assume that it is metric
             // long and lat as function of x, y
             std::string xName("x");
