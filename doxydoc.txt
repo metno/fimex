@@ -26,11 +26,12 @@ Detailed information on the differnt configuration files can be found at:
 - @ref programDoc
 - @ref feltConfigDoc
 - @ref ncmlConfiguration
+- @ref wdbReaderDoc
 - @ref gribWriterDoc
 - @ref netcdfWriterDoc
 - @ref qualityExtractorDoc
 
-@page programDoc fimex Program Options 
+@page programDoc fimex Program Options
 @section fimex fimex Program Options
 
 @em fimex is a command-line program. It has the following options:
@@ -51,48 +52,80 @@ Generic options:
   -c [ --config ] arg (=fimex.cfg) configuration file
 
 Configurational options:
-  --input.file arg                    input file
-  --input.type arg                    filetype of intput file
-  --input.config arg                  non-standard input configuration
-  --input.printNcML                   print NcML description of input file
-  --input.printCS                     print CoordinateSystem
-  --output.file arg                   output file
-  --output.type arg                   filetype of output file
-  --output.config arg                 non-standard output configuration
-  --qualityExtract.autoConfString arg quality-restrictions using CF-1.3 and a flag
-  --qualityExtract.config arg         quality-restrictions configuration file
-  --qualityExtract.printNcML          print NcML description of qualityExtractor                
-  --quality.printCS                   print CoordinateSystem
-  --extract.removeVariable arg        remove variables
-  --extract.reduceDimension.name arg  name of a dimension to reduce
-  --extract.reduceDimension.start arg start position of the dimension to reduce (>=0)
-  --extract.reduceDimension.end arg   end position of the dimension to reduce
-  --extract.printNcML                 print NcML description of extractor
-  --extract.printCS                   print CoordinateSystem
-  --interpolate.projString arg        proj4 input string describing the new projection
-  --interpolate.method arg            interpolation method, one of nearestneighbor,
-                                      bilinear or bicubic
-  --interpolate.xAxisValues arg       string with values on x-Axis, use ... to
-                                      continue, i.e. 10.5,11,...,29.5
-                                      see Fimex::SpatialAxisSpec for full definition
-  --interpolate.yAxisValues arg       string with values on x-Axis, use ... to
-                                      continue, i.e. 10.5,11,...,29.5
-                                      see Fimex::SpatialAxisSpec for full definition
-  --interpolate.xAxisUnit arg         unit of x-Axis given as udunits string,
-                                      i.e. m or degrees_east
-  --interpolate.yAxisUnit arg         unit of y-Axis given as udunits string,
-                                      i.e. m or degrees_north
-  --interpolate.latitudeName arg      name for auto-generated projection coordinate latitude
-  --interpolate.longitudeName arg     name for auto-generated projection coordinate longitude
-  --interpolate.printNcML             print NcML description of interpolator
-  --interpolate.printCS               print CoordinateSystem
-  --timeInterpolate.timeSpec arg      specification of times to interpolate to,
-                                      see Fimex::TimeSpec for a full definition
-  --timeInterpolate.printNcML         print NcML description of timeInterpolator
-  --timeInterpolate.printCS           print CoordinateSystem
-  --ncml.config                       modify/configure with ncml-file
-  --ncml.printNcML                    print NcML description after ncml-configuration
-  --ncml.printCS                      print CoordinateSystem
+  --input.file arg                        input file
+  --input.type arg                        filetype of input file, e.g. nc, nc4,
+                                          ncml, felt, grib1, grib2, wdb
+  --input.config arg                      non-standard input configuration
+  --input.printNcML                       print NcML description of input file
+  --input.printCS                         print CoordinateSystems of input file
+  --output.file arg                       output file
+  --output.type arg                       filetype of output file, e.g. nc,
+                                          nc4, grib1, grib2
+  --output.config arg                     non-standard output configuration
+  --extract.removeVariable arg            remove variables
+  --extract.selectVariables arg           select only those variables
+  --extract.reduceDimension.name arg      name of a dimension to reduce
+  --extract.reduceDimension.start arg     start position of the dimension to
+                                          reduce (>=0)
+  --extract.reduceDimension.end arg       end position of the dimension to
+                                          reduce
+  --extract.reduceTime.start arg          start-time as iso-string
+  --extract.reduceTime.end arg            end-time by iso-string
+  --extract.reduceVerticalAxis.unit arg   unit of vertical axis to reduce
+  --extract.reduceVerticalAxis.start arg  start value of vertical axis
+  --extract.reduceVerticalAxis.end arg    end value of the vertical axis
+  --extract.reduceToBoundingBox.south arg geographical bounding-box in degree
+  --extract.reduceToBoundingBox.north arg geographical bounding-box in degree
+  --extract.reduceToBoundingBox.east arg  geographical bounding-box in degree
+  --extract.reduceToBoundingBox.west arg  geographical bounding-box in degree
+  --extract.printNcML                     print NcML description of extractor
+  --extract.printCS                       print CoordinateSystems of extractor
+  --qualityExtract.autoConfString arg     configure the quality-assignment
+                                          using CF-1.3 status-flag
+  --qualityExtract.config arg             configure the quality-assignment with
+                                          a xml-config file
+  --qualityExtract.printNcML              print NcML description of extractor
+  --qualityExtract.printCS                print CoordinateSystems of extractor
+  --interpolate.projString arg            proj4 input string describing the new
+                                          projection
+  --interpolate.method arg                interpolation method, one of
+                                          nearestneighbor, bilinear, bicubic,
+                                          coord_nearestneighbor, coord_kdtree,
+                                          forward_max, forward_mean,
+                                          forward_median or forward_sum
+  --interpolate.xAxisValues arg           string with values on x-Axis, use ...
+                                          to continue, i.e. 10.5,11,...,29.5,
+                                          see Fimex::SpatialAxisSpec for full
+                                          definition
+  --interpolate.yAxisValues arg           string with values on x-Axis, use ...
+                                          to continue, i.e. 10.5,11,...,29.5,
+                                          see Fimex::SpatialAxisSpec for full
+                                          definition
+  --interpolate.xAxisUnit arg             unit of x-Axis given as udunits
+                                          string, i.e. m or degrees_east
+  --interpolate.yAxisUnit arg             unit of y-Axis given as udunits
+                                          string, i.e. m or degrees_north
+  --interpolate.latitudeName arg          name for auto-generated projection
+                                          coordinate latitude
+  --interpolate.longitudeName arg         name for auto-generated projection
+                                          coordinate longitude
+  --interpolate.printNcML                 print NcML description of
+                                          interpolator
+  --interpolate.printCS                   print CoordinateSystems of
+                                          interpolator
+  --timeInterpolate.timeSpec arg          specification of times to interpolate
+                                          to, see Fimex::TimeSpec for a full
+                                          definition
+  --timeInterpolate.printNcML             print NcML description of
+                                          timeInterpolator
+  --timeInterpolate.printCS               print CoordinateSystems of
+                                          timeInterpolator
+  --ncml.config                           modify/configure with ncml-file
+  --ncml.printNcML                        print NcML description after
+                                          ncml-configuration
+  --ncml.printCS                          print CoordinateSystems after
+                                          ncml-configuration
+
 @endverbatim
 
 All the configurational options can be configured using a configuration file which is supplied
@@ -106,7 +139,7 @@ explained in @ref fimex_config.
 
 The @em SpatialAxisSpec used in xAxisValues or yAxisValues for the spatial interpolation
 should be formatted as explained in detail in MetNoFimex::SpatialAxisSpec. It allows also
-autotuning to the orignal data-values. 
+autotuning to the orignal data-values.
 
 The @em TimeSpec string used for the timeInterpolate should be formatted as explained in
 detail in MetNoFimex::TimeSpec.
@@ -128,7 +161,7 @@ a new model, it is wise to group the configuration by
    models use coarser resoluton for higher levels
 -# vertical levels: it is difficult to have the same parameter with sigma levels
    and with height in m
-   
+
 Grouping can be done in two ways, the first one being faster in operation,
 the second is easier to configure/change consistently:
 
@@ -137,7 +170,7 @@ the second is easier to configure/change consistently:
 -# write one configuration-file for all parameter, keeping the parameters as
    variable as possible. Use a preprocess-step to extract each group.
    Use e.g. @em nyfelt or @em felt2felt as preprocessor
-   
+
 By default, all data is read as @em type="short" data with a scaling factor. While
 felt allows for one scaling factor for each timestep, height and parameter,
 the CDM allows only for one scaling factor per parameter. When the scaling factor
@@ -182,6 +215,30 @@ Input-files can and should be validated against the included ncml-2.2.xsd.
 changing dimension sizes, unlimited dimensions, adding/changing values of variables, groups
 
 
+@page wdbReader wdb Reader Configuration
+@section wdbReader wdb Reader Configuration
+
+@em This feature is still alpha-quality and will change!
+
+Fimex is able to read data from instances of the WDB (http://wdb.sourceforge.net) by using
+the WdbCDMReader (or on the command line: input.type=wdb). The usual 'file'-location is in that
+case reinterpreted as wdb-connetction string, e.g. 'dbHost=proffdb-devel.met.no;dbPort=5432;dbName=wdb;dbUser=proffread;wciUser=proffwrite'
+would connect to the host proffdb-devel on port 5432 and the databse wdb with the user proffread.
+Additonal options:
+@li refTime use exactly this reference time
+@li provider use this provider
+@li place use this place
+
+Example:
+@code
+fimex --input.file='dbHost=proffdb-devel.met.no;dbPort=5432;dbName=wdb;dbUser=proffread;refTime=20110211T000000' --input.type=wdb --input.config=/home/heikok/Programme/MetSis/Fimex/share/etc/proffdb_config.xml --output.file=test.nc --output.type=nc4 --extract.reduceDimension.name=time --extract.reduceDimension.start=1 --extract.reduceDimension.end=3
+@endcode
+
+
+Most of these options, and additional one adding correct metadata can be given in the config file, e.g. in proffdb_config.xml :
+
+@verbinclude share/etc/proffdb_config.xml
+
 
 @page qualityExtractorDoc quality-extraction Configuration
 @section qualityExtractorDoc quality-extraction Configuration
@@ -194,14 +251,14 @@ and the outcome is very likely to change in further developments. Any feedback i
 In cases where the data should be extracted if certain conditions (qualities) apply, i.e.
 the status-flag indicates a properly working instrument, or the sea-surface-temperature is
 above 300K, the #MetNoFimex::CDMQualityExtractor allows to add these rules. The cdmQualityConfig.xml
-file as shown above gives an example of such an configuration. 
+file as shown above gives an example of such an configuration.
 
 @li The variable "bla" will only be set, if "blub" has integer-values between 1 and 6.
 @li The variable "air_temperature" will only be extracted for an "altitude" above 1000. The value
 1000 is the actual data value in the variable "altitude" without any scaling or unit-conversion applied.
 
 The following use-values can be selected:
-@li @c all select all valid values (within valid_max, valid_min or valid_range, without _FillValue) 
+@li @c all select all valid values (within valid_max, valid_min or valid_range, without _FillValue)
 @li @c highest the highest numerical value found in the data-slice which is valid
 @li @c lowest the lowest numerical value fond in the data-slice which is valid
 @li @c max:xxx.x all valid-values below or equal xxx.x
@@ -239,7 +296,7 @@ in the following cases:
 - Different attribute are required for special usages, but the input-configuration
   of the reader shouldn't been changed.
 - Different variable or dimension names are required for special usages.
-  
+
 @verbinclude share/etc/cdmWriterConfig.xml
 
 */

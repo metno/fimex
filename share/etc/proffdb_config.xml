@@ -44,6 +44,7 @@
 
     <value_parameter id="air_temperature" name="air_temperature">
         <attribute name="standard_cf_name" value="air_temperature" type="string" />
+        <attribute name="units" value="K" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>
 
