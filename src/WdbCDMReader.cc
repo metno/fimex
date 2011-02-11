@@ -488,7 +488,7 @@ namespace MetNoFimex {
         }
 
         if(referencetimes_.empty()) {
-
+            std::vector<GxReferenceTimeRow> tmpRefTimes;
             wdbExplorer()->
                     getReferenceTimes
                     (
@@ -498,8 +498,11 @@ namespace MetNoFimex {
                             vecvalueparameters,
                             strlevelparameterconstraint,
                             std::vector<std::string>(),
-                            referencetimes_
+                            tmpRefTimes
                     );
+            // only use the latest reference time (unless initialized with all)
+            referencetimes_.push_back(tmpRefTimes.at(tmpRefTimes.size()-1));
+
 //#ifdef GXDEBUG
 //            std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
 //#endif
@@ -1566,8 +1569,8 @@ namespace MetNoFimex {
             //
 
             unsigned int totalDataDimension = xy_size;
-            (layerDim != 0) ? totalDataDimension * layerDim->getLength() : 1;
-            (referenceTimeDim != 0) ? totalDataDimension * referenceTimeDim->getLength() : 1;
+            totalDataDimension *= (layerDim != 0) ? layerDim->getLength() : 1;
+            totalDataDimension *= (referenceTimeDim != 0) ? referenceTimeDim->getLength() : 1;
             boost::shared_ptr<Data> data = createData(variable.getDataType(), totalDataDimension);
 
 
@@ -1617,7 +1620,7 @@ namespace MetNoFimex {
     }
 
     boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
-    {  
+    {
         std::vector<std::string> dimensionNames = sb.getDimensionNames();
         std::vector<size_t> dimensionSizes = sb.getDimensionSizes();
         std::vector<size_t> dimensionMaxSizes = sb.getMaxDimensionSizes();
