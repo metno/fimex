@@ -28,6 +28,7 @@
 #include "fimex/XMLDoc.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include "../config.h"
 #ifdef MIFI_HAVE_NETCDF
 #include "fimex/NetCDF_CDMReader.h"
 #endif

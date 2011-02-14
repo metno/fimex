@@ -1,7 +1,9 @@
+  * 2011-02-11 fimex-0.26.1
+    * adding config.h to NcmlCDMReader to detect netcdf-support
   * 2011-02-11 fimex-0.26
     * improved detection of coordinate-systems with variable-less dimensions
     * compilation improvements for newer boost-versions / ubuntu maverick
-    * beta version of WDB-reader
+    * alpha version of WDB-reader
     * enabling setting of unlimited dimension in ncml
     * bug-fix in handling of netcdf4
     * reducing memory consumpting when reading (with unlimited dimension) for opendap
