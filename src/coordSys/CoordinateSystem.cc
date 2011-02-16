@@ -34,6 +34,7 @@
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/Logger.h"
 #include "CoordSysImpl.h"
 
 namespace MetNoFimex
@@ -278,11 +279,14 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(co
     } else {
         // handle conventions which don't have the conventions attribute, e.g. WRF
     }
-
+    string logCat = "fimex/coordSys/CoordinateSystem";
     if (find_if(conventions.begin(), conventions.end(), RegexMatch(boost::regex("\\s*CF-1\\.\\d+\\s*"))) != conventions.end()) {
+        LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "found convention: CF-1.X");
         // add all cf coordinate systems to the list
         vector<boost::shared_ptr<const CoordinateSystem> > cfCoordSystems = listCoordinateSystemsCF1_x(cdm);
         copy(cfCoordSystems.begin(), cfCoordSystems.end(), back_inserter(coordSystems));
+    } else {
+        LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "no convention found");
     }
     // TODO: support more conventions
 
