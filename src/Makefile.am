@@ -34,13 +34,19 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/CoordSysImpl.h \
                      coordSys/Projection.cc \
                      coordSys/ProjectionImpl.cc \
+                     coordSys/AlbersConicalEqualAreaProjection.cc \
+                     coordSys/AzimuthalEquidistantProjection.cc \
+                     coordSys/LambertAzimuthalEqualAreaProjection.cc \
                      coordSys/LambertConformalConicProjection.cc \
+                     coordSys/LambertCylindricalEqualAreaProjection.cc \
                      coordSys/LatitudeLongitudeProjection.cc \
                      coordSys/MercatorProjection.cc \
-                     coordSys/TransverseMercatorProjection.cc \
+                     coordSys/OrthographicProjection.cc \
+                     coordSys/PolarStereographicProjection.cc \
                      coordSys/RotatedLatitudeLongitudeProjection.cc \
                      coordSys/StereographicProjection.cc \
-                     coordSys/PolarStereographicProjection.cc \
+                     coordSys/TransverseMercatorProjection.cc \
+                     coordSys/VerticalPerspectiveProjection.cc \
 					 Data.cc \
 					 DataTypeChanger.cc \
 					 Felt_Array2.cc \

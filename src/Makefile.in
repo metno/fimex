@@ -114,13 +114,19 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
 	coordSys/CoordSysImpl.h coordSys/Projection.cc \
 	coordSys/ProjectionImpl.cc \
+	coordSys/AlbersConicalEqualAreaProjection.cc \
+	coordSys/AzimuthalEquidistantProjection.cc \
+	coordSys/LambertAzimuthalEqualAreaProjection.cc \
 	coordSys/LambertConformalConicProjection.cc \
+	coordSys/LambertCylindricalEqualAreaProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
-	coordSys/TransverseMercatorProjection.cc \
+	coordSys/OrthographicProjection.cc \
+	coordSys/PolarStereographicProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
 	coordSys/StereographicProjection.cc \
-	coordSys/PolarStereographicProjection.cc Data.cc \
+	coordSys/TransverseMercatorProjection.cc \
+	coordSys/VerticalPerspectiveProjection.cc Data.cc \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
@@ -152,14 +158,19 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
 	CDMTimeInterpolator.lo CDMVariable.lo CDM_XMLConfigHelper.lo \
 	CoordinateSystem.lo CoordinateAxis.lo Projection.lo \
-	ProjectionImpl.lo LambertConformalConicProjection.lo \
+	ProjectionImpl.lo AlbersConicalEqualAreaProjection.lo \
+	AzimuthalEquidistantProjection.lo \
+	LambertAzimuthalEqualAreaProjection.lo \
+	LambertConformalConicProjection.lo \
+	LambertCylindricalEqualAreaProjection.lo \
 	LatitudeLongitudeProjection.lo MercatorProjection.lo \
-	TransverseMercatorProjection.lo \
+	OrthographicProjection.lo PolarStereographicProjection.lo \
 	RotatedLatitudeLongitudeProjection.lo \
-	StereographicProjection.lo PolarStereographicProjection.lo \
-	Data.lo DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
-	Felt_File2.lo FeltParameters.lo GridDefinition.lo Logger.lo \
-	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
+	StereographicProjection.lo TransverseMercatorProjection.lo \
+	VerticalPerspectiveProjection.lo Data.lo DataTypeChanger.lo \
+	Felt_Array2.lo FeltCDMReader2.lo Felt_File2.lo \
+	FeltParameters.lo GridDefinition.lo Logger.lo NcmlCDMReader.lo \
+	Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
 	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
 	Utils.lo XMLDoc.lo $(am__objects_1) $(am__objects_2) \
@@ -398,13 +409,19 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDM_XMLConfigHelper.h coordSys/CoordinateSystem.cc \
 	coordSys/CoordinateAxis.cc coordSys/CoordSysImpl.h \
 	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
+	coordSys/AlbersConicalEqualAreaProjection.cc \
+	coordSys/AzimuthalEquidistantProjection.cc \
+	coordSys/LambertAzimuthalEqualAreaProjection.cc \
 	coordSys/LambertConformalConicProjection.cc \
+	coordSys/LambertCylindricalEqualAreaProjection.cc \
 	coordSys/LatitudeLongitudeProjection.cc \
 	coordSys/MercatorProjection.cc \
-	coordSys/TransverseMercatorProjection.cc \
+	coordSys/OrthographicProjection.cc \
+	coordSys/PolarStereographicProjection.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
 	coordSys/StereographicProjection.cc \
-	coordSys/PolarStereographicProjection.cc Data.cc \
+	coordSys/TransverseMercatorProjection.cc \
+	coordSys/VerticalPerspectiveProjection.cc Data.cc \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
@@ -486,6 +503,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AlbersConicalEqualAreaProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMAttribute.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMDataType.Plo@am__quote@
@@ -526,7 +545,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GxWdbDataTypes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GxWdbExplorer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
@@ -535,6 +556,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OrthographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PolarStereographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Projection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProjectionImpl.Plo@am__quote@
@@ -550,6 +572,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransverseMercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_fimex.Plo@am__quote@
@@ -625,12 +648,40 @@ ProjectionImpl.lo: coordSys/ProjectionImpl.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ProjectionImpl.lo `test -f 'coordSys/ProjectionImpl.cc' || echo '$(srcdir)/'`coordSys/ProjectionImpl.cc
 
+AlbersConicalEqualAreaProjection.lo: coordSys/AlbersConicalEqualAreaProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT AlbersConicalEqualAreaProjection.lo -MD -MP -MF $(DEPDIR)/AlbersConicalEqualAreaProjection.Tpo -c -o AlbersConicalEqualAreaProjection.lo `test -f 'coordSys/AlbersConicalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/AlbersConicalEqualAreaProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AlbersConicalEqualAreaProjection.Tpo $(DEPDIR)/AlbersConicalEqualAreaProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/AlbersConicalEqualAreaProjection.cc' object='AlbersConicalEqualAreaProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AlbersConicalEqualAreaProjection.lo `test -f 'coordSys/AlbersConicalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/AlbersConicalEqualAreaProjection.cc
+
+AzimuthalEquidistantProjection.lo: coordSys/AzimuthalEquidistantProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT AzimuthalEquidistantProjection.lo -MD -MP -MF $(DEPDIR)/AzimuthalEquidistantProjection.Tpo -c -o AzimuthalEquidistantProjection.lo `test -f 'coordSys/AzimuthalEquidistantProjection.cc' || echo '$(srcdir)/'`coordSys/AzimuthalEquidistantProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AzimuthalEquidistantProjection.Tpo $(DEPDIR)/AzimuthalEquidistantProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/AzimuthalEquidistantProjection.cc' object='AzimuthalEquidistantProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AzimuthalEquidistantProjection.lo `test -f 'coordSys/AzimuthalEquidistantProjection.cc' || echo '$(srcdir)/'`coordSys/AzimuthalEquidistantProjection.cc
+
+LambertAzimuthalEqualAreaProjection.lo: coordSys/LambertAzimuthalEqualAreaProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LambertAzimuthalEqualAreaProjection.lo -MD -MP -MF $(DEPDIR)/LambertAzimuthalEqualAreaProjection.Tpo -c -o LambertAzimuthalEqualAreaProjection.lo `test -f 'coordSys/LambertAzimuthalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertAzimuthalEqualAreaProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LambertAzimuthalEqualAreaProjection.Tpo $(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LambertAzimuthalEqualAreaProjection.cc' object='LambertAzimuthalEqualAreaProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LambertAzimuthalEqualAreaProjection.lo `test -f 'coordSys/LambertAzimuthalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertAzimuthalEqualAreaProjection.cc
+
 LambertConformalConicProjection.lo: coordSys/LambertConformalConicProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LambertConformalConicProjection.lo -MD -MP -MF $(DEPDIR)/LambertConformalConicProjection.Tpo -c -o LambertConformalConicProjection.lo `test -f 'coordSys/LambertConformalConicProjection.cc' || echo '$(srcdir)/'`coordSys/LambertConformalConicProjection.cc
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LambertConformalConicProjection.Tpo $(DEPDIR)/LambertConformalConicProjection.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LambertConformalConicProjection.cc' object='LambertConformalConicProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LambertConformalConicProjection.lo `test -f 'coordSys/LambertConformalConicProjection.cc' || echo '$(srcdir)/'`coordSys/LambertConformalConicProjection.cc
+
+LambertCylindricalEqualAreaProjection.lo: coordSys/LambertCylindricalEqualAreaProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LambertCylindricalEqualAreaProjection.lo -MD -MP -MF $(DEPDIR)/LambertCylindricalEqualAreaProjection.Tpo -c -o LambertCylindricalEqualAreaProjection.lo `test -f 'coordSys/LambertCylindricalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertCylindricalEqualAreaProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LambertCylindricalEqualAreaProjection.Tpo $(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LambertCylindricalEqualAreaProjection.cc' object='LambertCylindricalEqualAreaProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LambertCylindricalEqualAreaProjection.lo `test -f 'coordSys/LambertCylindricalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertCylindricalEqualAreaProjection.cc
 
 LatitudeLongitudeProjection.lo: coordSys/LatitudeLongitudeProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LatitudeLongitudeProjection.lo -MD -MP -MF $(DEPDIR)/LatitudeLongitudeProjection.Tpo -c -o LatitudeLongitudeProjection.lo `test -f 'coordSys/LatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/LatitudeLongitudeProjection.cc
@@ -646,12 +697,19 @@ MercatorProjection.lo: coordSys/MercatorProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MercatorProjection.lo `test -f 'coordSys/MercatorProjection.cc' || echo '$(srcdir)/'`coordSys/MercatorProjection.cc
 
-TransverseMercatorProjection.lo: coordSys/TransverseMercatorProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TransverseMercatorProjection.lo -MD -MP -MF $(DEPDIR)/TransverseMercatorProjection.Tpo -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/TransverseMercatorProjection.Tpo $(DEPDIR)/TransverseMercatorProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/TransverseMercatorProjection.cc' object='TransverseMercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
+OrthographicProjection.lo: coordSys/OrthographicProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OrthographicProjection.lo -MD -MP -MF $(DEPDIR)/OrthographicProjection.Tpo -c -o OrthographicProjection.lo `test -f 'coordSys/OrthographicProjection.cc' || echo '$(srcdir)/'`coordSys/OrthographicProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OrthographicProjection.Tpo $(DEPDIR)/OrthographicProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/OrthographicProjection.cc' object='OrthographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OrthographicProjection.lo `test -f 'coordSys/OrthographicProjection.cc' || echo '$(srcdir)/'`coordSys/OrthographicProjection.cc
+
+PolarStereographicProjection.lo: coordSys/PolarStereographicProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT PolarStereographicProjection.lo -MD -MP -MF $(DEPDIR)/PolarStereographicProjection.Tpo -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PolarStereographicProjection.Tpo $(DEPDIR)/PolarStereographicProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/PolarStereographicProjection.cc' object='PolarStereographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
 
 RotatedLatitudeLongitudeProjection.lo: coordSys/RotatedLatitudeLongitudeProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT RotatedLatitudeLongitudeProjection.lo -MD -MP -MF $(DEPDIR)/RotatedLatitudeLongitudeProjection.Tpo -c -o RotatedLatitudeLongitudeProjection.lo `test -f 'coordSys/RotatedLatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/RotatedLatitudeLongitudeProjection.cc
@@ -667,12 +725,19 @@ StereographicProjection.lo: coordSys/StereographicProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o StereographicProjection.lo `test -f 'coordSys/StereographicProjection.cc' || echo '$(srcdir)/'`coordSys/StereographicProjection.cc
 
-PolarStereographicProjection.lo: coordSys/PolarStereographicProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT PolarStereographicProjection.lo -MD -MP -MF $(DEPDIR)/PolarStereographicProjection.Tpo -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PolarStereographicProjection.Tpo $(DEPDIR)/PolarStereographicProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/PolarStereographicProjection.cc' object='PolarStereographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
+TransverseMercatorProjection.lo: coordSys/TransverseMercatorProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TransverseMercatorProjection.lo -MD -MP -MF $(DEPDIR)/TransverseMercatorProjection.Tpo -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/TransverseMercatorProjection.Tpo $(DEPDIR)/TransverseMercatorProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/TransverseMercatorProjection.cc' object='TransverseMercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
+
+VerticalPerspectiveProjection.lo: coordSys/VerticalPerspectiveProjection.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VerticalPerspectiveProjection.lo -MD -MP -MF $(DEPDIR)/VerticalPerspectiveProjection.Tpo -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VerticalPerspectiveProjection.Tpo $(DEPDIR)/VerticalPerspectiveProjection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/VerticalPerspectiveProjection.cc' object='VerticalPerspectiveProjection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
 
 GxWdbDataTypes.lo: gridexer/GxWdbDataTypes.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GxWdbDataTypes.lo -MD -MP -MF $(DEPDIR)/GxWdbDataTypes.Tpo -c -o GxWdbDataTypes.lo `test -f 'gridexer/GxWdbDataTypes.cc' || echo '$(srcdir)/'`gridexer/GxWdbDataTypes.cc

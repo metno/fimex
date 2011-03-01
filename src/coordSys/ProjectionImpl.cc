@@ -229,7 +229,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         } else if (ellps == "nad83") {
             attrList.push_back(CDMAttribute("semi_major_axis", 6378137.0));
             attrList.push_back(CDMAttribute("semi_minor_axis", 6356752.3));
-        } else if (ellps == "grs80") { // grs80 ellipsoid
+        } else if (ellps == "grs80" || ellps == "etrs89") { // grs80 ellipsoid
             attrList.push_back(CDMAttribute("semi_major_axis", 6378137.0));
             attrList.push_back(CDMAttribute("semi_minor_axis", 6356752.3141));
         } else if (ellps == "nad27") { // clarke 1866 ellipsoid

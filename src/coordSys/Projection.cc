@@ -32,13 +32,19 @@
 #include "fimex/interpolation.h"
 
 // list over supported projections
-#include "fimex/coordSys/LatitudeLongitudeProjection.h"
+#include "fimex/coordSys/AlbersConicalEqualAreaProjection.h"
+#include "fimex/coordSys/AzimuthalEquidistantProjection.h"
+#include "fimex/coordSys/LambertAzimuthalEqualAreaProjection.h"
 #include "fimex/coordSys/LambertConformalConicProjection.h"
+#include "fimex/coordSys/LambertCylindricalEqualAreaProjection.h"
+#include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include "fimex/coordSys/MercatorProjection.h"
+#include "fimex/coordSys/OrthographicProjection.h"
 #include "fimex/coordSys/PolarStereographicProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 #include "fimex/coordSys/StereographicProjection.h"
 #include "fimex/coordSys/TransverseMercatorProjection.h"
+#include "fimex/coordSys/VerticalPerspectiveProjection.h"
 
 #include <proj_api.h>
 
@@ -142,12 +148,22 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
         proj = boost::shared_ptr<Projection>(new LatitudeLongitudeProjection());
     } else {
         std::string projName(projAttr->getStringValue());
-        if (projName == "lambert_conformal_conic") {
+        if (projName == "albers_conical_equal_area") {
+            proj = boost::shared_ptr<Projection>(new AlbersConicalEqualAreaProjection());
+        } else if (projName == "azimuthal_equidistant") {
+                    proj =  boost::shared_ptr<Projection>(new AzimuthalEquidistantProjection());
+        } else if (projName == "lambert_azimuthal_equal_area") {
+            proj =  boost::shared_ptr<Projection>(new LambertAzimuthalEqualAreaProjection());
+        } else if (projName == "lambert_conformal_conic") {
                     proj =  boost::shared_ptr<Projection>(new LambertConformalConicProjection());
+        } else if (projName == "lambert_cylindrical_equal_area") {
+                    proj =  boost::shared_ptr<Projection>(new LambertCylindricalEqualAreaProjection());
         } else if (projName == "latitude_longitude") {
             proj =  boost::shared_ptr<Projection>(new LatitudeLongitudeProjection());
         } else if (projName == "mercator") {
             proj =  boost::shared_ptr<Projection>(new MercatorProjection());
+        } else if (projName == "orthographic") {
+            proj =  boost::shared_ptr<Projection>(new OrthographicProjection());
         } else if (projName == "polar_stereographic") {
             proj =  boost::shared_ptr<Projection>(new PolarStereographicProjection());
         } else if (projName == "rotated_latitude_longitude") {
@@ -156,6 +172,8 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
             proj =  boost::shared_ptr<Projection>(new StereographicProjection());
         } else if (projName == "transverse_mercator") {
             proj =  boost::shared_ptr<Projection>(new TransverseMercatorProjection());
+        } else if (projName == "vertical_perspective") {
+            proj =  boost::shared_ptr<Projection>(new VerticalPerspectiveProjection());
         } else {
             throw CDMException("unsupported projection: " + projName);
         }
