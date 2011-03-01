@@ -202,8 +202,8 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         attrList.push_back(CDMAttribute("false_northing", string2type<double>(what[1].str())));
     }
 
-    // a and e (or b) to semi_major_axis and semi_minor_axis
-    if (boost::regex_search(proj4Str, what, boost::regex("\\+a=(\\S+)"))) {
+    // a (or R) and e (or b) to semi_major_axis and semi_minor_axis
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+[aR]=(\\S+)"))) {
         double major_axis = string2type<double>(what[1].str());
         attrList.push_back(CDMAttribute("semi_major_axis", major_axis));
         if (boost::regex_search(proj4Str, what, boost::regex("\\+e=(\\S+)")) && what[1].str() != "0") {
