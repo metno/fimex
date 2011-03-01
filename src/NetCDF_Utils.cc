@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -31,7 +31,7 @@ namespace MetNoFimex
 NcType cdmDataType2ncType(CDMDataType dt) {
 	switch (dt) {
 	case CDM_NAT: return ncNoType;
-	case CDM_CHAR: return ncChar;
+	case CDM_CHAR: return ncByte;
 	case CDM_STRING: return ncChar;
 	case CDM_SHORT: return ncShort;
 	case CDM_INT: return ncInt;
@@ -64,7 +64,7 @@ boost::shared_ptr<Data> ncValues2Data(NcValues* values, NcType dt, size_t length
 //	case ncLong: return CDM_INT; // ncLong is deprecated, and identical to ncInt
 	case ncFloat: return boost::shared_ptr<Data>(new DataImpl<float>(boost::shared_array<float>(reinterpret_cast<float*>(values->base())), length));
 	case ncDouble: return boost::shared_ptr<Data>(new DataImpl<double>(boost::shared_array<double>(reinterpret_cast<double*>(values->base())), length));
-	case ncNoType: 
+	case ncNoType:
 	default: delete values; return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(boost::shared_array<int>(new int[0]), 0));
 	}
 }

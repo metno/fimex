@@ -510,7 +510,7 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 	exit(1);
 }
 
-int main(int argc, char* args[])
+int run(int argc, char* args[])
 {
 	// Declare the supported options.
 	po::options_description generic("Generic options");
@@ -638,3 +638,16 @@ int main(int argc, char* args[])
     }
 	return 0;
 }
+
+int main(int argc, char* args[])
+{
+    // wrapping main-functions in run to catch all exceptions
+    try {
+        return run(argc, args);
+    } catch (exception& ex) {
+        cout << "exception occured: " << ex.what() << endl;
+        exit(1);
+    }
+    return 0;
+}
+

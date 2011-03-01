@@ -55,7 +55,7 @@ static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 	var->set_rec(dim, recNum);
 	switch (dt) {
 	case CDM_NAT: return false;
-	case CDM_CHAR:
+	case CDM_CHAR: return var->put_rec(dim, reinterpret_cast<const ncbyte*>(data->asConstChar().get()));
 	case CDM_STRING: return var->put_rec(dim, data->asConstChar().get());
 	case CDM_SHORT:  return var->put_rec(dim, data->asConstShort().get());
 	case CDM_INT: return var->put_rec(dim, data->asConstInt().get());
@@ -83,12 +83,12 @@ static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> dat
 
 	switch (dt) {
 	case CDM_NAT: return false;
-	case CDM_CHAR:
-	case CDM_STRING: return var->put(data->asChar().get(),  edges.get());
-	case CDM_SHORT:  return var->put(data->asShort().get(), edges.get());
-	case CDM_INT:    return var->put(data->asInt().get(),   edges.get());
-	case CDM_FLOAT:  return var->put(data->asFloat().get(), edges.get());
-	case CDM_DOUBLE: return var->put(data->asDouble().get(),edges.get());
+	case CDM_CHAR:   return var->put(reinterpret_cast<const ncbyte*>(data->asChar().get()),  edges.get());
+	case CDM_STRING: return var->put(data->asConstChar().get(),  edges.get());
+	case CDM_SHORT:  return var->put(data->asConstShort().get(), edges.get());
+	case CDM_INT:    return var->put(data->asConstInt().get(),   edges.get());
+	case CDM_FLOAT:  return var->put(data->asConstFloat().get(), edges.get());
+	case CDM_DOUBLE: return var->put(data->asConstDouble().get(),edges.get());
 	default: return false;
 	}
 
@@ -143,7 +143,6 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 		doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
 	}
 	ncErr = std::auto_ptr<NcError>(new NcError(NcError::verbose_nonfatal));
-	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
 #ifdef HAVE_NCFILE_FILEFORMAT
 	NcFile::FileFormat ncVersion = getNcVersion(version, doc);
 	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace, 0, 0, ncVersion));
@@ -157,6 +156,14 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 #else
     ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
 #endif /* HAVE_NCFILE_FILEFORMAT */
+    if (!ncFile->is_valid()) {
+        // ncErr.get_err does not work in new NcFile, try to get the error message manually
+        size_t *bufrsizeptr = new size_t;
+        int the_id;
+        int error = nc__create(outputFile.c_str(), NC_WRITE|NC_NOCLOBBER, 0, bufrsizeptr, &the_id);
+        throw CDMException(nc_strerror(error));
+        //throw CDMException(nc_strerror(ncErr.get_err()));
+    }
     initNcmlReader(doc);
 	initRemove(doc);
 	// variable needs to be called before dimension!!!
@@ -397,7 +404,7 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 				LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
 				int ncerr = nc_def_var_deflate(ncFile->id(), ncVar->id(), 0, 1, compression);
 				if (ncerr != NC_NOERR) {
-					throw CDMException(nc_strerror(ncErr->get_err()));
+					throw CDMException(nc_strerror(ncerr));
 				}
 			}
 		}
@@ -423,27 +430,29 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 			CDMDataType dt = attr.getDataType();
 			switch (dt) {
 			case CDM_STRING: ;
+                errCode = nc_put_att_text(ncFile->id(), varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asConstChar().get() );
+                break;
 			case CDM_CHAR:
-				errCode = nc_put_att_text(ncFile->id(), varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asChar().get() );
+			    errCode = nc_put_att_schar(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asConstChar().get()) );
 				break;
 			case CDM_SHORT:
-				errCode = nc_put_att_short(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asShort().get() );
+				errCode = nc_put_att_short(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstShort().get() );
 				break;
 			case CDM_INT:
-				errCode = nc_put_att_int(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asInt().get() );
+				errCode = nc_put_att_int(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstInt().get() );
 				break;
 			case CDM_FLOAT:
-				errCode = nc_put_att_float(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asFloat().get() );
+				errCode = nc_put_att_float(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstFloat().get() );
 				break;
 			case CDM_DOUBLE:
-				errCode = nc_put_att_double(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asDouble().get() );
+				errCode = nc_put_att_double(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstDouble().get() );
 				break;
 			case CDM_NAT:
 			default: throw CDMException("unknown datatype for attribute " + attr.getName());
 			}
 			if (errCode != NC_NOERR) {
 			    std::cerr << "attribute writing error: " << it->first << " " << varId << std::endl;
-				throw CDMException(nc_strerror(ncErr->get_err()));
+				throw CDMException(nc_strerror(errCode));
 			}
 		}
 	}

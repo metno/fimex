@@ -37,7 +37,12 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 {
 	NcError ncErr(NcError::verbose_nonfatal);
 	if (!ncFile->is_valid()) {
-		throw CDMException(nc_strerror(ncErr.get_err()));
+	    // ncErr.get_err does not work in new NcFile, try to get the error message manually
+	    size_t *bufrsizeptr = new size_t;
+	    int the_id;
+	    int error = nc__open(filename.c_str(), NC_NOWRITE, bufrsizeptr, &the_id);
+        throw CDMException(nc_strerror(error));
+		//throw CDMException(nc_strerror(ncErr.get_err()));
 	}
 
 	// read metadata to cdm
@@ -67,6 +72,9 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 	// define global attributes
 	for (int i = 0; i < ncFile->num_atts(); ++i) {
 		addAttribute(cdm_->globalAttributeNS(), ncFile->get_att(i));
+	}
+	if (ncErr.get_err() != NC_NOERR) {
+	    throw CDMException(nc_strerror(ncErr.get_err()));
 	}
 }
 

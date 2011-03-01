@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -27,6 +27,7 @@
 namespace MetNoFimex
 {
 
+/** Be aware that the CDM_CHAR datatype maps to NC_BYTE, while the CDM_SHORT maps to NC_CHAR */
 enum CDMDataType {
 	CDM_NAT = 0,
 	CDM_CHAR,
