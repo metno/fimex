@@ -214,8 +214,8 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startLon), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startLat), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "xDirectionGridLengthInMetres", &incrX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "yDirectionGridLengthInMetres", &incrY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DxInMetres", &incrX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DyInMetres", &incrY), 0);
 
 
     long projectionCentreFlag;

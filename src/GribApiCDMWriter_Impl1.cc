@@ -116,9 +116,9 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()),"");
             // grib1 doesn't allow to set double values for this! // (grib2 not checked)
             const boost::shared_array<double> xArray = xData->asConstDouble();
-            GRIB_CHECK(grib_set_long(gribHandle.get(), "xDirectionGridLengthInMetres", static_cast<long>(xArray[1] - xArray[0])),"");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "DxInMetres", static_cast<long>(xArray[1] - xArray[0])),"");
             const boost::shared_array<double> yArray = yData->asConstDouble();
-            GRIB_CHECK(grib_set_long(gribHandle.get(), "yDirectionGridLengthInMetres", static_cast<long>(yArray[1] - yArray[0])),"");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "DyInMetres", static_cast<long>(yArray[1] - yArray[0])),"");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
                 GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asConstDouble()[0]),"");
