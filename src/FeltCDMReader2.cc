@@ -188,8 +188,11 @@ void FeltCDMReader2::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
 		std::vector<boost::posix_time::ptime> feltTimes = feltfile_->getFeltTimes();
-		templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
-		templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[feltTimes.size()-1])));
+		if (feltTimes.size() > 0) {
+		    templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
+		    size_t lastTime = (feltTimes.size() > 1) ? (feltTimes.size() - 1) : 0;
+		    templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[lastTime])));
+		}
 	}
 
 	// fill the CDM;
@@ -592,6 +595,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
 }
 
 boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
+    LOG4FIMEX(logger, Logger::DEBUG, "reading var: "<< varName << " slice: " << unLimDimPos);
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
 		return getDataSliceFromMemory(variable, unLimDimPos);
@@ -663,8 +667,13 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 			vector<short> gridData;
 			gridData.reserve(xDim*yDim);
 			for (std::vector<LevelPair>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
-			    // read the slice
-				boost::shared_ptr<Data> levelData = feltfile_->getScaledDataSlice(fa, timeVec[unLimDimPos], *lit);
+			    // get the posix-time, if available
+			    boost::posix_time::ptime t;
+			    if (timeVec.size() > 0) {
+			        t = timeVec[unLimDimPos];
+			    }
+                // read the slice
+			    boost::shared_ptr<Data> levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
 				data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
 				dataCurrentPos += levelData->size();
 			}
