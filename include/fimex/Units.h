@@ -36,6 +36,10 @@ public:
 	UnitException(std::string message) : CDMException(message) {}
 };
 
+/**
+ * The class Units describes a units-system, not a single unit. Different units
+ * can be compared and converted if comparable within the system.
+ */
 class Units
 {
 	static int counter;
@@ -74,6 +78,13 @@ public:
 	 * internal data-structure.
 	 */
 	static bool unload(bool force = false) throw(UnitException);
+	/**
+	 * expose the internals of the implementation as a void*
+	 * you need to be sure that you know the internals!
+	 *
+	 * Needed in TimeUnit.
+	 */
+	const void* exposeInternals() const;
 };
 
 void handleUdUnitError(int unitErrCode, const std::string& message = "") throw(UnitException);

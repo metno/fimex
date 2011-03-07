@@ -34,11 +34,16 @@ MIFI_REQLIB([proj], [pj_init])
 MIFI_USELIB([udunits], [utInit])
 if test [ "x$with_udunits" != "xyes" ]; then
     # check older udunits, at least one is required
-    MIFI_USELIB([udunits2], [utInit])
+    MIFI_USELIB([udunits2], [ut_new_system])
     if test [ "x$with_udunits2" != "xyes" ]; then
         # check for udunits2 with external expat
-        MIFI_REQLIB([udunits2], [utInit], [-lexpat])
+        MIFI_REQLIB([udunits2], [ut_new_system], [-lexpat])
     fi
+    if test [ "x$with_udunits2" == "xyes" ]; then
+        AC_DEFINE(HAVE_UDUNITS2,1,[Define if UDUNITS2 is enabled])
+    fi
+else
+    AC_DEFINE(HAVE_UDUNITS,1,[Define if UDUNITS is enabled])
 fi
 
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([*** Libxml is required to build fimex; Available at http://www.libxml.org/.]))

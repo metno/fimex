@@ -16077,9 +16077,9 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_udunits2 != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utInit in -ludunits2" >&5
-$as_echo_n "checking for utInit in -ludunits2... " >&6; }
-if test "${ac_cv_lib_udunits2_utInit+set}" = set; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ut_new_system in -ludunits2" >&5
+$as_echo_n "checking for ut_new_system in -ludunits2... " >&6; }
+if test "${ac_cv_lib_udunits2_ut_new_system+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -16093,27 +16093,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char utInit ();
+char ut_new_system ();
 int
 main ()
 {
-return utInit ();
+return ut_new_system ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_udunits2_utInit=yes
+  ac_cv_lib_udunits2_ut_new_system=yes
 else
-  ac_cv_lib_udunits2_utInit=no
+  ac_cv_lib_udunits2_ut_new_system=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits2_utInit" >&5
-$as_echo "$ac_cv_lib_udunits2_utInit" >&6; }
-if test "x$ac_cv_lib_udunits2_utInit" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits2_ut_new_system" >&5
+$as_echo "$ac_cv_lib_udunits2_ut_new_system" >&6; }
+if test "x$ac_cv_lib_udunits2_ut_new_system" = x""yes; then :
   with_udunits2=yes;
          MIFI_UDUNITS2_LIBS="-ludunits2 $mifi_LIBS";
          MIFI_UDUNITS2_CPPFLAGS=$mifi_CPPFLAGS;
@@ -16180,9 +16180,9 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_udunits2 != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utInit in -ludunits2" >&5
-$as_echo_n "checking for utInit in -ludunits2... " >&6; }
-if test "${ac_cv_lib_udunits2_utInit+set}" = set; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ut_new_system in -ludunits2" >&5
+$as_echo_n "checking for ut_new_system in -ludunits2... " >&6; }
+if test "${ac_cv_lib_udunits2_ut_new_system+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -16196,27 +16196,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char utInit ();
+char ut_new_system ();
 int
 main ()
 {
-return utInit ();
+return ut_new_system ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_udunits2_utInit=yes
+  ac_cv_lib_udunits2_ut_new_system=yes
 else
-  ac_cv_lib_udunits2_utInit=no
+  ac_cv_lib_udunits2_ut_new_system=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits2_utInit" >&5
-$as_echo "$ac_cv_lib_udunits2_utInit" >&6; }
-if test "x$ac_cv_lib_udunits2_utInit" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits2_ut_new_system" >&5
+$as_echo "$ac_cv_lib_udunits2_ut_new_system" >&6; }
+if test "x$ac_cv_lib_udunits2_ut_new_system" = x""yes; then :
   with_udunits2=yes;
          MIFI_UDUNITS2_LIBS="-ludunits2 $mifi_LIBS";
          MIFI_UDUNITS2_CPPFLAGS=$mifi_CPPFLAGS;
@@ -16236,6 +16236,15 @@ LDFLAGS="$saved_LDFLAGS";
 LIBS="$saved_LIBS";
 
     fi
+    if test  "x$with_udunits2" == "xyes" ; then
+
+$as_echo "#define HAVE_UDUNITS2 1" >>confdefs.h
+
+    fi
+else
+
+$as_echo "#define HAVE_UDUNITS 1" >>confdefs.h
+
 fi
 
 

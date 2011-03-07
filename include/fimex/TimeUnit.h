@@ -30,9 +30,6 @@
 #include <iostream>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-// pre-declaration of utUnit pointer
-struct utUnit;
-
 namespace MetNoFimex
 {
 
@@ -135,7 +132,7 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException);
 class TimeUnit
 {
 	Units units; // unit initialization
-	boost::shared_ptr<utUnit> pUnit; // pointer to unit implementation
+	boost::shared_ptr<void> pUnit; // pointer to unit implementation
 	double epochOffset;
 	double epochSlope;
 public:

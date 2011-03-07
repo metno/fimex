@@ -21,14 +21,20 @@
  * USA.
  */
 
+#include "config.h"
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits>
 
+#ifdef HAVE_UDUNITS2
+#include "udunits2.h"
+#include "converter.h"
+#else
 extern "C" {
 #include "udunits.h"
 }
+#endif
 
 
 namespace MetNoFimex
@@ -153,14 +159,28 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 	return ft;
 }
 
+void void_ut_free(void* ptr) {
+    //    std::cerr << "trying to dealloc pUnit" << std::endl;
+#ifdef HAVE_UDUNITS2
+    ut_free(reinterpret_cast<ut_unit*>(ptr));
+#else
+    utFree(reinterpret_cast<utUnit*>(ptr));
+#endif
+}
+
 void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 {
 	if (!units.isTime(timeUnitString)) {
 		throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
 	} else {
 		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
-		pUnit = boost::shared_ptr<utUnit>(new utUnit);
-		utScan(timeUnitString.c_str(), pUnit.get());
+#ifdef HAVE_UDUNITS2
+		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
+		handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
+#else
+		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
+        utScan(timeUnitString.c_str(), reinterpret_cast<utUnit*>(pUnit.get()));
+#endif
 	}
 }
 
@@ -190,7 +210,19 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 	FimexTime fiTime;
 	float second;
 	int year, month, mday, hour, minute;
-	handleUdUnitError(utCalendar(unitTime, pUnit.get(), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+#ifdef HAVE_UDUNITS2
+    ut_unit* baseTime = ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second");
+    cv_converter* conv = ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime);
+    handleUdUnitError(ut_get_status(), "converting double to calendar");
+    double encodedTime = cv_convert_double(conv, unitTime);
+    double res, sec;
+    ut_decode_time(encodedTime, &year, &month, &mday, &hour, &minute, &sec, &res);
+    second = static_cast<float>(sec);
+    cv_free(conv);
+    ut_free(baseTime);
+#else
+	handleUdUnitError(utCalendar(unitTime, reinterpret_cast<utUnit*>(pUnit.get()), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+#endif
 	fiTime.setYear(static_cast<unsigned int>(year));
 	fiTime.setMonth(static_cast<char>(month));
 	fiTime.setMDay(static_cast<char>(mday));
@@ -205,7 +237,19 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 {
     float second;
     int year, month, mday, hour, minute;
-    handleUdUnitError(utCalendar(unitTime, pUnit.get(), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+#ifdef HAVE_UDUNITS2
+    ut_unit* baseTime = ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second");
+    cv_converter* conv = ut_get_converter(reinterpret_cast<ut_unit*>(pUnit.get()), baseTime);
+    handleUdUnitError(ut_get_status(), "converting double to calendar");
+    double encodedTime = cv_convert_double(conv, unitTime);
+    double res, sec;
+    ut_decode_time(encodedTime, &year, &month, &mday, &hour, &minute, &sec, &res);
+    second = static_cast<float>(sec);
+    cv_free(conv);
+    ut_free(baseTime);
+#else
+    handleUdUnitError(utCalendar(unitTime, reinterpret_cast<utUnit*>(pUnit.get()), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+#endif
     // TODO nanoseconds?
     return boost::posix_time::ptime(boost::gregorian::date(year,month,mday), boost::posix_time::time_duration(hour, minute, (int) second));
 }
@@ -213,19 +257,43 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
 {
 	float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
-	double retVal;
-	handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, pUnit.get(), &retVal), "converting calendar to double");
-	return retVal;
+	double unitTime;
+#ifdef HAVE_UDUNITS2
+    ut_unit* baseTime = ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second");
+    double encodedTime = ut_encode_time(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second);
+    handleUdUnitError(ut_get_status(), "encoding fimexTime");
+    cv_converter* conv = ut_get_converter(baseTime, reinterpret_cast<ut_unit*>(pUnit.get()));
+    handleUdUnitError(ut_get_status(), "converter calendar to double");
+    unitTime = cv_convert_double(conv, encodedTime);
+    handleUdUnitError(ut_get_status(), "converting calendar to double");
+    ut_free(baseTime);
+    cv_free(conv);
+#else
+	handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, reinterpret_cast<utUnit*>(pUnit.get()), &unitTime), "converting calendar to double");
+#endif
+	return unitTime;
 }
 
 double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const throw(CDMException)
 {
     boost::gregorian::date pDate = pTime.date();
     boost::posix_time::time_duration pTimeDur = pTime.time_of_day();
-    double retVal;
+    double unitTime;
     float seconds = pTimeDur.seconds() + (pTimeDur.fractional_seconds() * 1. / boost::posix_time::time_duration::ticks_per_second());
-    handleUdUnitError(utInvCalendar(pDate.year(), pDate.month(), pDate.day(), pTimeDur.hours(), pTimeDur.minutes(), seconds, pUnit.get(), &retVal), "converting calendar to double");
-    return retVal;
+#ifdef HAVE_UDUNITS2
+    ut_unit* baseTime = ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second");
+    double encodedTime = ut_encode_time(pDate.year(), pDate.month(), pDate.day(), pTimeDur.hours(), pTimeDur.minutes(), seconds);
+    handleUdUnitError(ut_get_status(), "encoding fimexTime");
+    cv_converter* conv = ut_get_converter(baseTime, reinterpret_cast<ut_unit*>(pUnit.get()));
+    handleUdUnitError(ut_get_status(), "converter calendar to double");
+    unitTime = cv_convert_double(conv, encodedTime);
+    handleUdUnitError(ut_get_status(), "converting calendar to double");
+    cv_free(conv);
+    ut_free(baseTime);
+#else
+    handleUdUnitError(utInvCalendar(pDate.year(), pDate.month(), pDate.day(), pTimeDur.hours(), pTimeDur.minutes(), seconds, reinterpret_cast<utUnit*>(pUnit.get()), &unitTime), "converting calendar to double");
+#endif
+    return unitTime;
 }
 
 
