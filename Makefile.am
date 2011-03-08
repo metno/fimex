@@ -4,7 +4,7 @@ SUBDIRS = src include test share/etc
 
 #include doxygen_aminclude.am
 
-EXTRA_DIST = Doxyfile doxydoc.txt libstdc++.tag share/doc/examples share/doc/html
+EXTRA_DIST = doxydoc.txt libstdc++.tag share/doc/examples share/doc/html
 
 DISTCHECK_CONFIGURE_FLAGS=--with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.1.1
 
