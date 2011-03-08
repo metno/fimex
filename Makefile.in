@@ -47,11 +47,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(srcdir)/fimex.pc.in $(srcdir)/m4/debian.mk \
-	$(top_srcdir)/configure AUTHORS COPYING INSTALL NEWS \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+DIST_COMMON = README $(am__configure_deps) $(srcdir)/Doxyfile.in \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/config.h.in $(srcdir)/fimex.pc.in \
+	$(srcdir)/m4/debian.mk $(top_srcdir)/configure AUTHORS COPYING \
+	INSTALL NEWS config.guess config.sub depcomp install-sh \
+	ltmain.sh missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
@@ -78,7 +79,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = fimex.pc
+CONFIG_CLEAN_FILES = fimex.pc Doxyfile
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -308,7 +309,7 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src include test share/etc
 
 #include doxygen_aminclude.am
-EXTRA_DIST = Doxyfile doxydoc.txt libstdc++.tag share/doc/examples share/doc/html
+EXTRA_DIST = doxydoc.txt libstdc++.tag share/doc/examples share/doc/html
 DISTCHECK_CONFIGURE_FLAGS = --with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.1.1
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = @PACKAGE_TARNAME@.pc
@@ -374,6 +375,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 distclean-hdr:
 	-rm -f config.h stamp-h1
 fimex.pc: $(top_builddir)/config.status $(srcdir)/fimex.pc.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+Doxyfile: $(top_builddir)/config.status $(srcdir)/Doxyfile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
