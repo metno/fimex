@@ -154,57 +154,8 @@ void GxWdbExplorer::setDbPort(const unsigned int dbPort)
     this->dbPort_ = dbPort;
 }
 
-std::string GxWdbExplorer::dbName()
-{
-    return dbName_;
-}
 
-std::string GxWdbExplorer::dbName() const
-{
-    return dbName();
-}
-
-std::string GxWdbExplorer::dbHost()
-{
-    return dbHost_;
-}
-
-std::string GxWdbExplorer::dbHost() const
-{
-    return dbHost();
-}
-
-std::string GxWdbExplorer::dbUser()
-{
-    return dbUser_;
-}
-
-std::string GxWdbExplorer::dbUser() const
-{
-    return dbUser();
-}
-
-unsigned int GxWdbExplorer::dbPort()
-{
-    return dbPort_;
-}
-
-unsigned int GxWdbExplorer::dbPort() const
-{
-    return dbPort();
-}
-
-std::string GxWdbExplorer::wciUser() const
-{
-    return dbUser();
-}
-
-std::string GxWdbExplorer::wciUser()
-{
-    return dbUser();
-}
-
-std::string GxWdbExplorer::connectString()
+std::string GxWdbExplorer::connectString() const
 {
     // make the string used
     // to initialise db conn
@@ -212,11 +163,6 @@ std::string GxWdbExplorer::connectString()
     std::ostringstream ost;
     ost << "dbname=" << dbName() << " port=" << dbPort() << " user=" << dbUser() << " host=" << dbHost();
     return ost.str();
-}
-
-std::string GxWdbExplorer::connectString() const
-{
-    return connectString();
 }
 
 // TODO:

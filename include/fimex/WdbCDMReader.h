@@ -38,17 +38,11 @@ namespace MetNoFimex {
         void setDbPort(const unsigned int dbPort);
 
         std::string  dbHost() const;
-        std::string  dbHost();
         std::string  dbName() const;
-        std::string  dbName();
         std::string  dbUser() const;
-        std::string  dbUser();
         unsigned int dbPort() const;
-        unsigned int dbPort();
         std::string  wciUser() const;
-        std::string  wciUser();
         std::string  connectString() const;
-        std::string  connectString();
 
 //        void setWdbToCFNamesMap(const std::map<std::string, std::string>& wdb2cfmap);
 //        void addWdbToCFNames(const stdmap<std::string, std::string>& wdbmap);
@@ -65,8 +59,8 @@ namespace MetNoFimex {
             return wdbExplorer_;
         }
 
-        boost::shared_ptr<GxWdbExplorer> wdbExplorer() const {
-            return wdbExplorer();
+        const boost::shared_ptr<GxWdbExplorer> & wdbExplorer() const {
+            return wdbExplorer_;
         }
 
         void setWdbExplorer(const boost::shared_ptr<GxWdbExplorer>& wdbExplorer) {

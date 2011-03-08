@@ -49,18 +49,12 @@ public:
     void setDbUser(const std::string& dbUser);
     void setDbPort(const unsigned int dbPort);
 
-    std::string  dbHost() const;
-    std::string  dbHost();
-    std::string  dbName() const;
-    std::string  dbName();
-    std::string  dbUser() const;
-    std::string  dbUser();
-    unsigned int dbPort() const;
-    unsigned int dbPort();
-    std::string  wciUser() const;
-    std::string  wciUser();
+    const std::string & dbHost() const { return dbHost_; }
+    const std::string & dbName() const { return dbName_; }
+    const std::string & dbUser() const { return dbUser_; }
+    unsigned int dbPort() const { return dbPort_; }
+    const std::string & wciUser() const { return dbUser(); }
     std::string  connectString() const;
-    std::string  connectString();
 
     void clearCache();
 

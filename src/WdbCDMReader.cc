@@ -45,65 +45,36 @@ namespace MetNoFimex {
         wdbExplorer()->setDbPort(dbPort);
     }
 
-    std::string GxWdbCDMReader::dbHost()
+    std::string GxWdbCDMReader::dbHost() const
     {
         return wdbExplorer()->dbHost();
     }
 
-    std::string GxWdbCDMReader::dbHost() const
-    {
-        return dbHost();
-    }
-
-    std::string GxWdbCDMReader::dbName()
+    std::string GxWdbCDMReader::dbName() const
     {
         return wdbExplorer()->dbName();
     }
 
-    std::string GxWdbCDMReader::dbName() const
-    {
-        return dbName();
-    }
-
-    std::string GxWdbCDMReader::dbUser()
+    std::string GxWdbCDMReader::dbUser() const
     {
         return wdbExplorer()->dbUser();
     }
 
-    std::string GxWdbCDMReader::dbUser() const
-    {
-        return dbUser();
-    }
-
-    std::string GxWdbCDMReader::wciUser()
+    std::string GxWdbCDMReader::wciUser() const
     {
         return wdbExplorer()->wciUser();
     }
 
-    std::string GxWdbCDMReader::wciUser() const
-    {
-        return wciUser();
-    }
-
-    std::string GxWdbCDMReader::connectString()
+    std::string GxWdbCDMReader::connectString() const
     {
         return wdbExplorer()->connectString();
     }
 
-    std::string GxWdbCDMReader::connectString() const
-    {
-        return connectString();
-    }
-
-    unsigned int GxWdbCDMReader::dbPort()
+    unsigned int GxWdbCDMReader::dbPort() const
     {
         return wdbExplorer()->dbPort();
     }
 
-    unsigned int GxWdbCDMReader::dbPort() const
-    {
-        return dbPort();
-    }
 
     std::string GxWdbCDMReader::getStandardNameForDimension(const std::string& name)
     {
