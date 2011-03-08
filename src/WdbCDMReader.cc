@@ -772,7 +772,7 @@ namespace MetNoFimex {
                 xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "grid_longitude");
                 xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
             } else {
-                xName = "latitude";
+                xName = "longitude";
                 xDimLongNameAttribute = CDMAttribute("long_name", "string", "longitude");
                 xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "longitude");
                 xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
@@ -807,9 +807,9 @@ namespace MetNoFimex {
                 yDimUnitsAttribute = CDMAttribute("units", "string", "degree_north");
             } else {
                 yName = "latitude";
-                CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
-                CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
-                CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
+                yDimLongNameAttribute = CDMAttribute("long_name", "string", "latitude");
+                yDimStandardNameAttribute = CDMAttribute("standard_name", "string", "latitude");
+                yDimUnitsAttribute = CDMAttribute("units", "string", "degree_north");
             }
 
             yDim = CDMDimension(yName, row.numberY());
