@@ -37,12 +37,12 @@ namespace MetNoFimex {
         void setDbUser(const std::string& dbUser);
         void setDbPort(const unsigned int dbPort);
 
-        std::string  dbHost() const;
-        std::string  dbName() const;
-        std::string  dbUser() const;
+        const std::string & dbHost() const;
+        const std::string & dbName() const;
+        const std::string & dbUser() const;
         unsigned int dbPort() const;
-        std::string  wciUser() const;
-        std::string  connectString() const;
+        const std::string & wciUser() const;
+        std::string connectString() const;
 
 //        void setWdbToCFNamesMap(const std::map<std::string, std::string>& wdb2cfmap);
 //        void addWdbToCFNames(const stdmap<std::string, std::string>& wdbmap);

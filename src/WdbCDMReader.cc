@@ -45,22 +45,22 @@ namespace MetNoFimex {
         wdbExplorer()->setDbPort(dbPort);
     }
 
-    std::string GxWdbCDMReader::dbHost() const
+    const std::string & GxWdbCDMReader::dbHost() const
     {
         return wdbExplorer()->dbHost();
     }
 
-    std::string GxWdbCDMReader::dbName() const
+    const std::string & GxWdbCDMReader::dbName() const
     {
         return wdbExplorer()->dbName();
     }
 
-    std::string GxWdbCDMReader::dbUser() const
+    const std::string & GxWdbCDMReader::dbUser() const
     {
         return wdbExplorer()->dbUser();
     }
 
-    std::string GxWdbCDMReader::wciUser() const
+    const std::string & GxWdbCDMReader::wciUser() const
     {
         return wdbExplorer()->wciUser();
     }
