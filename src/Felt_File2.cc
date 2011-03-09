@@ -106,23 +106,29 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 void Felt_File2::init(const std::map<std::string, std::string>& options) throw(Felt_File_Error)
 {
 	setOptions(options);
-	feltFile_ = boost::shared_ptr<felt::FeltFile>(new felt::FeltFile(boost::filesystem::path(filename_)));
-	feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
-	LOG4FIMEX(logger, Logger::DEBUG, feltFile_->information());
-	for (felt::FeltFile::const_iterator ffit = feltFile_->begin(); ffit != feltFile_->end(); ++ffit) {
-	    felt::FeltFile::FeltFieldPtr field = *ffit;
-	    const felt::FeltField::Header& header = field->getHeader();
-	    std::string name = feltParameters.getParameterName(header);
-	    if (name != UNDEFINED()) {
-	        findOrCreateFeltArray(field);
-	        if (field->verticalCoordinate() == 10) {
-	            // hybrid levels, read all level-parameters once for each level-pairs
-	            LevelPair lp = make_pair(field->level1(), field->level2());
-	            if (hybridLevels_.find(lp) == hybridLevels_.end()) {
-	                hybridLevels_[lp] = field->miscField();
-	            }
-	        }
-	    }
+	try {
+        feltFile_ = boost::shared_ptr<felt::FeltFile>(new felt::FeltFile(
+                boost::filesystem::path(filename_)));
+        feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
+        LOG4FIMEX(logger, Logger::DEBUG, feltFile_->information());
+        for (felt::FeltFile::const_iterator ffit = feltFile_->begin(); ffit
+                != feltFile_->end(); ++ffit) {
+            felt::FeltFile::FeltFieldPtr field = *ffit;
+            const felt::FeltField::Header& header = field->getHeader();
+            std::string name = feltParameters.getParameterName(header);
+            if (name != UNDEFINED()) {
+                findOrCreateFeltArray(field);
+                if (field->verticalCoordinate() == 10) {
+                    // hybrid levels, read all level-parameters once for each level-pairs
+                    LevelPair lp = make_pair(field->level1(), field->level2());
+                    if (hybridLevels_.find(lp) == hybridLevels_.end()) {
+                        hybridLevels_[lp] = field->miscField();
+                    }
+                }
+            }
+        }
+	} catch (runtime_error& re) {
+	    throw Felt_File_Error(re.what());
 	}
 }
 
