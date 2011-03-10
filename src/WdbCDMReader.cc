@@ -1387,7 +1387,7 @@ namespace MetNoFimex {
             CDMAttribute gridMappingAttribute("grid_mapping", projName);
             attributes.push_back(gridMappingAttribute);
 
-            CDMAttribute varUnitsAttribute("units", "string", variable.name());
+            CDMAttribute varUnitsAttribute("units", "string", variable.unitName());
             attributes.push_back(varUnitsAttribute);
 
             CDMAttribute varFillValueAttribute("_FillValue", "float", boost::lexical_cast<std::string>(variableFillValue));
