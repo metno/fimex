@@ -287,7 +287,7 @@ namespace MetNoFimex {
         // interval there
         std::string hcTimeDimensionName = "time";
         std::string hcSymbolForTimeDimension = "T";
-        std::string hcTimeDimensionType = "float";
+        std::string hcTimeDimensionType = "int";
 
         std::vector<std::string> vecdataproviders;
         if(!providers_.empty()) {
@@ -437,15 +437,7 @@ namespace MetNoFimex {
 
         std::string hcReferenceTimeDimensionName = "forecast_reference_time";
         std::string hcReferenceTimeDimensionStandardName = "forecast_reference_time";
-        std::string hcReferenceTimeDimensionType = "float";
-
-        std::vector<std::string> vecdataproviders;
-        if(!providers_.empty()) {
-            for(unsigned int i = 0; i < providers_.size(); ++i) {
-                GxDataProviderRow row = providers_.at(i);
-                vecdataproviders.push_back(row.name());
-            }
-        }
+        std::string hcReferenceTimeDimensionType = "int";
 
         // ATM we don't need to include level constraints
         //
@@ -465,12 +457,17 @@ namespace MetNoFimex {
             }
         }
 
-        if(referencetimes_.empty()) {
-            std::vector<GxReferenceTimeRow> tmpRefTimes;
+        if (referencetimes_.empty())
+        {
+			std::vector<std::string> dataprovidernames;
+			for ( std::vector<GxDataProviderRow>::const_iterator it = providers_.begin(); it != providers_.end(); ++ it )
+				dataprovidernames.push_back(it->name());
+
+        	std::vector<GxReferenceTimeRow> tmpRefTimes;
             wdbExplorer()->
                     getReferenceTimes
                     (
-                            vecdataproviders,
+                            dataprovidernames,
                             strplace,
                             std::string(),
                             vecvalueparameters,
@@ -479,25 +476,19 @@ namespace MetNoFimex {
                             tmpRefTimes
                     );
             // only use the latest reference time (unless initialized with all)
-            referencetimes_.push_back(tmpRefTimes.at(tmpRefTimes.size()-1));
+            if ( not tmpRefTimes.empty() )
+            	referencetimes_.push_back(tmpRefTimes.back());
 
 #ifdef GXDEBUG
             std::cerr << __FUNCTION__ << " referencetimes.size() " << referencetimes_.size() << std::endl;
 #endif
-            // we need to take the latest
-            // (most fresh) reference value
-            GxReferenceTimeRow row = referencetimes_.at(referencetimes_.size() - 1);
-            referencetimes_.clear();
-            referencetimes_.push_back(row);
-//            std::cerr << __FUNCTION__
-//                      << " referencetimes.size() cut to "
-//                      << referencetimes_.size()
-//                      << std::endl;
-        } else {
-#ifdef GXDEBUG
-            std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
-#endif
         }
+#ifdef GXDEBUG
+        else
+        {
+            std::cerr << __FUNCTION__ << " REFERENCE TIME not empty referencetimes.size() " << referencetimes_.size() << std::endl;
+        }
+#endif
 
 
         std::string referenceTimeDimensionUnits = "seconds";
@@ -547,6 +538,9 @@ namespace MetNoFimex {
 
     CDMDimension GxWdbCDMReader::addReferenceTimeDimension()
     {
+    	// unused
+
+
 #ifdef GXDEBUG
         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : ================ REFERENCE" << std::endl;
 #endif
@@ -998,6 +992,11 @@ namespace MetNoFimex {
             //
             {
                 xmlNodePtr wdbConnectionNode;
+
+
+                //
+                // configuration for wdb database connection
+                //
                 {
                     XPathObjPtr xpathWdbConnectionObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/wdb_connection");
                     xmlNodeSetPtr wdbconnectionnodes = xpathWdbConnectionObj->nodesetval;
@@ -1044,6 +1043,10 @@ namespace MetNoFimex {
                 }
             }
 
+
+            //
+            // Value parameters
+            //
             {
                 std::string valueParameterNonStandardName;
                 std::string valueParameterStandardCFName;
@@ -1087,6 +1090,9 @@ namespace MetNoFimex {
                 }
             }
 
+            //
+            // Level parameters
+            //
             {
                 std::string levelParameterNonStandardName;
                 std::string levelParameterStandardCFName;
@@ -1122,6 +1128,9 @@ namespace MetNoFimex {
                 }
             }
 
+            //
+            // Reference time
+            //
             {
                 std::string refTimeValue;
                 xmlNodePtr refTimeNode;
@@ -1147,6 +1156,7 @@ namespace MetNoFimex {
                 }
             }
 
+            // Data provider
             {
                 std::string providerName;
                 xmlNodePtr providerNode;
@@ -1169,6 +1179,9 @@ namespace MetNoFimex {
                 }
             }
 
+            //
+            // Places
+            //
             {
                 std::string placeName;
                 xmlNodePtr placeNode;

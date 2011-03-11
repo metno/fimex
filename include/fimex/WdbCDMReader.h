@@ -26,11 +26,7 @@ namespace MetNoFimex {
     class GxWdbCDMReader : public CDMReader
     {
     public:
-
         explicit GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-
-        void init() throw(CDMException);
-        bool deinit();
 
         void setDbHost(const std::string& dbHost);
         void setDbName(const std::string& dbName);
@@ -72,7 +68,7 @@ namespace MetNoFimex {
         void addGlobalCDMAttributes();
         CDMDimension addTimeDimension();
         void addReferenceTimeVariable();
-        CDMDimension addReferenceTimeDimension();
+        CDMDimension addReferenceTimeDimension(); // unused
         std::map<short, CDMDimension> addLevelDimensions();
         std::string getStandardNameForDimension(const std::string& name);
         // returning projName and coordinates for given place name
@@ -88,6 +84,8 @@ namespace MetNoFimex {
                 );
 
     private:
+        void init() throw(CDMException);
+
         std::string                         source_;
         std::string                         configFileName_;
         boost::shared_ptr<GxWdbExplorer>    wdbExplorer_;
