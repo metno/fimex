@@ -125,11 +125,12 @@ namespace MetNoFimex {
 //    }
 
     GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename)
-        : source_(source), configFileName_(configfilename), wdbExplorer_(boost::shared_ptr<GxWdbExplorer>(reinterpret_cast<GxWdbExplorer*>(0)))
     {
-        try {
-            init();
-        } catch (std::runtime_error& exp) {
+        try
+        {
+            init(source, configfilename);
+        }
+        catch (std::runtime_error& exp) {
             throw CDMException(std::string("WdbCDMReader error: ") + exp.what());
         }
     }
@@ -212,10 +213,10 @@ namespace MetNoFimex {
 //            // get the first one
 //            GxValidTimeRow firstRow = validtimes_.at(0);
 //            boost::posix_time::ptime fromdt = boost::posix_time::from_time_t(firstRow.from().sinceEpochInSeconds());
-
+//
 //            GxValidTimeRow lastRow = validtimes_.at(validtimes_.size() - 1);
 //            boost::posix_time::ptime todt = boost::posix_time::from_time_t(lastRow.to().sinceEpochInSeconds());
-
+//
 //            strvalidtimeconstraint.append("inside").append(" ").append(boost::posix_time::to_iso_extended_string(fromdt)).append("+00").append(" TO ").append(boost::posix_time::to_iso_extended_string(todt)).append("+00");
 //        }
 
@@ -978,239 +979,213 @@ namespace MetNoFimex {
         return levelDims;
     }
 
-    void GxWdbCDMReader::init() throw(CDMException)
+    void GxWdbCDMReader::parseWdbConnectionData_(const XMLDoc & doc)
     {
-//        assert(wdbExplorer().get() == 0);
+		xmlNodePtr wdbConnectionNode;
 
-        setWdbExplorer(boost::shared_ptr<GxWdbExplorer>(new GxWdbExplorer()));
+		XPathObjPtr xpathWdbConnectionObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/wdb_connection");
+		xmlNodeSetPtr wdbconnectionnodes = xpathWdbConnectionObj->nodesetval;
+		int wdbconnectionssize = (wdbconnectionnodes) ? wdbconnectionnodes->nodeNr : 0;
 
-        if(!configFileName_.empty()) {
-            // use XML config file information
-            //
-            XMLDoc doc(configFileName_);
-            // try parsing wdb conneciton data
-            //
-            {
-                xmlNodePtr wdbConnectionNode;
+		assert(wdbconnectionssize <= 1);
 
-
-                //
-                // configuration for wdb database connection
-                //
-                {
-                    XPathObjPtr xpathWdbConnectionObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/wdb_connection");
-                    xmlNodeSetPtr wdbconnectionnodes = xpathWdbConnectionObj->nodesetval;
-                    int wdbconnectionssize = (wdbconnectionnodes) ? wdbconnectionnodes->nodeNr : 0;
-
-                    assert(wdbconnectionssize <= 1);
-
-                    if(wdbconnectionssize == 1) {
-                        wdbConnectionNode = wdbconnectionnodes->nodeTab[0];
-                        assert(wdbConnectionNode->type == XML_ELEMENT_NODE);
-                        // fetch attributes for this node
-                        //
-                        xmlNodePtr child = wdbConnectionNode->children;
-                        while(child != 0) {
-                            if ((child->type == XML_ELEMENT_NODE) &&
-                                (std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
-                                    std::string name = getXmlProp(child, "name");
-                                    std::string value = getXmlProp(child, "value");
-                                    if(name == std::string("dbhost")) {
-                                        setDbHost(value);
+		if(wdbconnectionssize == 1) {
+			wdbConnectionNode = wdbconnectionnodes->nodeTab[0];
+			assert(wdbConnectionNode->type == XML_ELEMENT_NODE);
+			// fetch attributes for this node
+			//
+			xmlNodePtr child = wdbConnectionNode->children;
+			while(child != 0) {
+				if ((child->type == XML_ELEMENT_NODE) && (std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
+					std::string name = getXmlProp(child, "name");
+					std::string value = getXmlProp(child, "value");
+					if(name == std::string("dbhost")) {
+						setDbHost(value);
 #ifdef GXDEBUG
-                                        std::cerr << "wdb dbhost: " << dbHost() << std::endl;
+						std::cerr << "wdb dbhost: " << dbHost() << std::endl;
 #endif
-                                    } else if(name == std::string("dbname")) {
-                                        setDbName(value);
+					} else if(name == std::string("dbname")) {
+						setDbName(value);
 #ifdef GXDEBUG
-                                        std::cerr << "wdb dbname: " << dbName() << std::endl;
+						std::cerr << "wdb dbname: " << dbName() << std::endl;
 #endif
-                                    } else if(name == std::string("dbuser")) {
-                                        setDbUser(value);
+					} else if(name == std::string("dbuser")) {
+						setDbUser(value);
 #ifdef GXDEBUG
-                                        std::cerr << "wdb dbuser: " << dbUser() << std::endl;
+						std::cerr << "wdb dbuser: " << dbUser() << std::endl;
 #endif
-                                    } else if(name == std::string("dbport")) {
-                                        setDbPort(value.empty() ? std::numeric_limits<unsigned int>::quiet_NaN() : boost::lexical_cast<unsigned int>(value));
+					} else if(name == std::string("dbport")) {
+						setDbPort(value.empty() ? std::numeric_limits<unsigned int>::quiet_NaN() : boost::lexical_cast<unsigned int>(value));
 #ifdef GXDEBUG
-                                        std::cerr << "wdb dbport: " << dbPort() << std::endl;
+						std::cerr << "wdb dbport: " << dbPort() << std::endl;
 #endif
-                                    }
-                            }
-                            child = child->next;
-                        }
-                    }
-                }
-            }
+					}
+				}
+				child = child->next;
+			}
+		}
+    }
 
-
-            //
-            // Value parameters
-            //
-            {
-                std::string valueParameterNonStandardName;
-                std::string valueParameterStandardCFName;
-                double valueParameterFillValue = std::numeric_limits<float>::quiet_NaN();
-                xmlNodePtr valueParameterNode;
-                {
-                    XPathObjPtr xpathValueParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
-                    xmlNodeSetPtr nodes = xpathValueParameterObj->nodesetval;
-                    int size = (nodes) ? nodes->nodeNr : 0;
-                    for(int node_index = 0; node_index < size; ++node_index) {
-                         valueParameterNode = nodes->nodeTab[node_index];
-                         assert(valueParameterNode->type == XML_ELEMENT_NODE);
-                         valueParameterNonStandardName = getXmlProp(valueParameterNode, "name");
-                         // fetch attributes for this node
-                         //
-                         xmlNodePtr child = valueParameterNode->children;
-                         while(child != 0) {
-                             if ((child->type == XML_ELEMENT_NODE) &&
-                                 (std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
-                                     std::string name = getXmlProp(child, "name");
-                                     std::string value = getXmlProp(child, "value");
-                                     if(name == std::string("standard_cf_name")) {
-                                         valueParameterStandardCFName = value;
+    void GxWdbCDMReader::parseValueParameters_(const XMLDoc & doc)
+    {
+        std::string valueParameterNonStandardName;
+        std::string valueParameterStandardCFName;
+        double valueParameterFillValue = std::numeric_limits<float>::quiet_NaN();
+        xmlNodePtr valueParameterNode;
+        {
+            XPathObjPtr xpathValueParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
+            xmlNodeSetPtr nodes = xpathValueParameterObj->nodesetval;
+            int size = (nodes) ? nodes->nodeNr : 0;
+            for(int node_index = 0; node_index < size; ++node_index) {
+                 valueParameterNode = nodes->nodeTab[node_index];
+                 assert(valueParameterNode->type == XML_ELEMENT_NODE);
+                 valueParameterNonStandardName = getXmlProp(valueParameterNode, "name");
+                 // fetch attributes for this node
+                 //
+                 xmlNodePtr child = valueParameterNode->children;
+                 while(child != 0) {
+                     if ((child->type == XML_ELEMENT_NODE) &&
+                         (std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
+                             std::string name = getXmlProp(child, "name");
+                             std::string value = getXmlProp(child, "value");
+                             if(name == std::string("standard_cf_name")) {
+                                 valueParameterStandardCFName = value;
 #ifdef GXDEBUG
-                                         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
-                                                   << "name: " << valueParameterNonStandardName << " cf name: " << valueParameterStandardCFName << std::endl;
+                                 std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
+                                           << "name: " << valueParameterNonStandardName << " cf name: " << valueParameterStandardCFName << std::endl;
 #endif
-                                         addWdbNameToCFName(valueParameterNonStandardName, valueParameterStandardCFName);
-                                     } else if(name == std::string("_FillValue")) {
-                                         valueParameterFillValue = boost::lexical_cast<float>(value);
+                                 addWdbNameToCFName(valueParameterNonStandardName, valueParameterStandardCFName);
+                             } else if(name == std::string("_FillValue")) {
+                                 valueParameterFillValue = boost::lexical_cast<float>(value);
 #ifdef GXDEBUG
-                                         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << std::cerr
-                                                   << "name: " << valueParameterNonStandardName << " fill value: " << valueParameterFillValue << std::endl;
+                                 std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << std::cerr
+                                           << "name: " << valueParameterNonStandardName << " fill value: " << valueParameterFillValue << std::endl;
 #endif
-                                         addWdbNameToFillValue(valueParameterNonStandardName, valueParameterFillValue);
-                                     }
+                                 addWdbNameToFillValue(valueParameterNonStandardName, valueParameterFillValue);
                              }
-                             child = child->next;
-                         }
-                    }
-                }
-            }
-
-            //
-            // Level parameters
-            //
-            {
-                std::string levelParameterNonStandardName;
-                std::string levelParameterStandardCFName;
-                xmlNodePtr levelParameterNode;
-                {
-                    XPathObjPtr xpathLevelParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/level_parameter");
-                    xmlNodeSetPtr levelnodes = xpathLevelParameterObj->nodesetval;
-                    int levelnodessize = (levelnodes) ? levelnodes->nodeNr : 0;
-                    for(int node_index = 0; node_index < levelnodessize; ++node_index) {
-                         levelParameterNode = levelnodes->nodeTab[node_index];
-                         assert(levelParameterNode->type == XML_ELEMENT_NODE);
-                         levelParameterNonStandardName = getXmlProp(levelParameterNode, "name");
-                         // fetch attributes for this node
-                         //
-                         xmlNodePtr child = levelParameterNode->children;
-                         while(child != 0) {
-                             if ((child->type == XML_ELEMENT_NODE) &&
-                                 (std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
-                                     std::string name = getXmlProp(child, "name");
-                                     std::string value = getXmlProp(child, "value");
-                                     if(name == std::string("standard_cf_name")) {
-                                         levelParameterStandardCFName = value;
-#ifdef GXDEBUG
-                                         std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
-                                                   << std::cerr << "name: " << levelParameterNonStandardName << " cf name: " << levelParameterStandardCFName << std::endl;
-#endif
-                                         addWdbNameToCFName(levelParameterNonStandardName, levelParameterStandardCFName);
-                                     }
-                             }
-                             child = child->next;
-                         }
-                    }
-                }
-            }
-
-            //
-            // Reference time
-            //
-            {
-                std::string refTimeValue;
-                xmlNodePtr refTimeNode;
-                {
-                    XPathObjPtr xpathRefTimeObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/reference_times/time");
-                    xmlNodeSetPtr nodes = xpathRefTimeObj->nodesetval;
-                    size_t size = (nodes) ? nodes->nodeNr : 0;
-                    for(size_t index = 0; index < size; ++index) {
-                         refTimeNode = nodes->nodeTab[index];
-                         assert(refTimeNode->type == XML_ELEMENT_NODE);
-                         refTimeValue = getXmlProp(refTimeNode, "value");
-                         boost::posix_time::ptime referenceTime(boost::posix_time::from_iso_string(refTimeValue));
-                         GxReferenceTimeRow row;
-                         boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
-                         boost::posix_time::time_duration::sec_type x = (referenceTime - epoch).total_seconds();
-                         row.setSinceEpochInSeconds(x);
-                         referencetimes_.push_back(row);
-//#ifdef GXDEBUG
-                         std::cerr << "xml config adding reference tine: " << boost::posix_time::to_iso_string(referenceTime)
-                                   << " that is seconds since epoch " << row.sinceEpochInSeconds() << std::endl;
-//#endif
-                    }
-                }
-            }
-
-            // Data provider
-            {
-                std::string providerName;
-                xmlNodePtr providerNode;
-                {
-                    XPathObjPtr xpathProviderParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/data_providers/provider");
-                    xmlNodeSetPtr providernodes = xpathProviderParameterObj->nodesetval;
-                    int providernodessize = (providernodes) ? providernodes->nodeNr : 0;
-                    for(int provider_index = 0; provider_index < providernodessize; ++provider_index) {
-                         providerNode = providernodes->nodeTab[provider_index];
-                         assert(providerNode->type == XML_ELEMENT_NODE);
-                         providerName = getXmlProp(providerNode, "name");
-                         GxDataProviderRow row;
-                         row.setName(providerName);
-                         row.setNumberOfTuples(std::numeric_limits<float>::quiet_NaN());
-                         providers_.push_back(row);
-#ifdef GXDEBUG
-                         std::cerr << "xml config adding provider: " << row.name() << std::endl;
-#endif
-                    }
-                }
-            }
-
-            //
-            // Places
-            //
-            {
-                std::string placeName;
-                xmlNodePtr placeNode;
-                {
-                    XPathObjPtr xpathPlaceParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/grid_places/place");
-                    xmlNodeSetPtr placenodes = xpathPlaceParameterObj->nodesetval;
-                    int placenodessize = (placenodes) ? placenodes->nodeNr : 0;
-                    for(int place_index = 0; place_index < placenodessize; ++place_index) {
-                         placeNode = placenodes->nodeTab[place_index];
-                         assert(placeNode->type == XML_ELEMENT_NODE);
-                         placeName = getXmlProp(placeNode, "name");
-                         GxPlaceRow row;
-                         row.setName(placeName);
-                         row.setNumberOfTuples(std::numeric_limits<float>::quiet_NaN());
-                         places_.push_back(row);
-#ifdef GXDEBUG
-                         std::cerr << "xml config adding place: " << row.name() << std::endl;
-#endif
-                    }
-                }
+                     }
+                     child = child->next;
+                 }
             }
         }
+    }
 
-        if(!source_.empty()) {
+    void GxWdbCDMReader::parseLevelParameters_(const XMLDoc & doc)
+    {
+        std::string levelParameterNonStandardName;
+        std::string levelParameterStandardCFName;
+        xmlNodePtr levelParameterNode;
+        {
+            XPathObjPtr xpathLevelParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/level_parameter");
+            xmlNodeSetPtr levelnodes = xpathLevelParameterObj->nodesetval;
+            int levelnodessize = (levelnodes) ? levelnodes->nodeNr : 0;
+            for(int node_index = 0; node_index < levelnodessize; ++node_index) {
+                 levelParameterNode = levelnodes->nodeTab[node_index];
+                 assert(levelParameterNode->type == XML_ELEMENT_NODE);
+                 levelParameterNonStandardName = getXmlProp(levelParameterNode, "name");
+                 // fetch attributes for this node
+                 //
+                 xmlNodePtr child = levelParameterNode->children;
+                 while(child != 0) {
+                     if ((child->type == XML_ELEMENT_NODE) &&
+                         (std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
+                             std::string name = getXmlProp(child, "name");
+                             std::string value = getXmlProp(child, "value");
+                             if(name == std::string("standard_cf_name")) {
+                                 levelParameterStandardCFName = value;
+#ifdef GXDEBUG
+                                 std::cerr << __FUNCTION__ << "@" << __LINE__ << " : "
+                                           << std::cerr << "name: " << levelParameterNonStandardName << " cf name: " << levelParameterStandardCFName << std::endl;
+#endif
+                                 addWdbNameToCFName(levelParameterNonStandardName, levelParameterStandardCFName);
+                             }
+                     }
+                     child = child->next;
+                 }
+            }
+        }
+    }
+
+    void GxWdbCDMReader::parseReferenceTime_(const XMLDoc & doc)
+    {
+        std::string refTimeValue;
+        xmlNodePtr refTimeNode;
+        {
+            XPathObjPtr xpathRefTimeObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/reference_times/time");
+            xmlNodeSetPtr nodes = xpathRefTimeObj->nodesetval;
+            size_t size = (nodes) ? nodes->nodeNr : 0;
+            for(size_t index = 0; index < size; ++index) {
+                 refTimeNode = nodes->nodeTab[index];
+                 assert(refTimeNode->type == XML_ELEMENT_NODE);
+                 refTimeValue = getXmlProp(refTimeNode, "value");
+                 boost::posix_time::ptime referenceTime(boost::posix_time::from_iso_string(refTimeValue));
+                 GxReferenceTimeRow row;
+                 boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
+                 boost::posix_time::time_duration::sec_type x = (referenceTime - epoch).total_seconds();
+                 row.setSinceEpochInSeconds(x);
+                 referencetimes_.push_back(row);
+//#ifdef GXDEBUG
+                 std::cerr << "xml config adding reference tine: " << boost::posix_time::to_iso_string(referenceTime)
+                           << " that is seconds since epoch " << row.sinceEpochInSeconds() << std::endl;
+//#endif
+            }
+        }
+    }
+
+    void GxWdbCDMReader::parseDataProvider_(const XMLDoc & doc)
+    {
+        std::string providerName;
+        xmlNodePtr providerNode;
+        {
+            XPathObjPtr xpathProviderParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/data_providers/provider");
+            xmlNodeSetPtr providernodes = xpathProviderParameterObj->nodesetval;
+            int providernodessize = (providernodes) ? providernodes->nodeNr : 0;
+            for(int provider_index = 0; provider_index < providernodessize; ++provider_index) {
+                 providerNode = providernodes->nodeTab[provider_index];
+                 assert(providerNode->type == XML_ELEMENT_NODE);
+                 providerName = getXmlProp(providerNode, "name");
+                 GxDataProviderRow row;
+                 row.setName(providerName);
+                 row.setNumberOfTuples(std::numeric_limits<float>::quiet_NaN());
+                 providers_.push_back(row);
+#ifdef GXDEBUG
+                 std::cerr << "xml config adding provider: " << row.name() << std::endl;
+#endif
+            }
+        }
+    }
+
+    void GxWdbCDMReader::parsePlaces_(const XMLDoc & doc)
+    {
+        std::string placeName;
+        xmlNodePtr placeNode;
+        {
+            XPathObjPtr xpathPlaceParameterObj = doc.getXPathObject("/wdb_fimex_config/wdb_parameters/grid_places/place");
+            xmlNodeSetPtr placenodes = xpathPlaceParameterObj->nodesetval;
+            int placenodessize = (placenodes) ? placenodes->nodeNr : 0;
+            for(int place_index = 0; place_index < placenodessize; ++place_index) {
+                 placeNode = placenodes->nodeTab[place_index];
+                 assert(placeNode->type == XML_ELEMENT_NODE);
+                 placeName = getXmlProp(placeNode, "name");
+                 GxPlaceRow row;
+                 row.setName(placeName);
+                 row.setNumberOfTuples(std::numeric_limits<float>::quiet_NaN());
+                 places_.push_back(row);
+#ifdef GXDEBUG
+                 std::cerr << "xml config adding place: " << row.name() << std::endl;
+#endif
+            }
+        }
+    }
+
+    void GxWdbCDMReader::parseSourceString(const std::string & source)
+    {
+        if(!source.empty()) {
             // the source that has format
             // refTime is  given as iso string "20110210T000000"
 // dbHost=<string>;dbName=<string>;dbPort=<string>;dbUser=<string>;wciUser=<string>;provider=<string>;place=<string>;refTime=<string>
             std::vector<std::string> splitvector;
-            boost::algorithm::split(splitvector, source_, boost::algorithm::is_any_of(";"));
+            boost::algorithm::split(splitvector, source, boost::algorithm::is_any_of(";"));
             assert(splitvector.size() != 0);
             std::map<std::string, std::string> splitmap;
             for(unsigned int i = 0; i < splitvector.size(); ++i) {
@@ -1258,6 +1233,30 @@ namespace MetNoFimex {
 #endif
             }
         }
+    }
+
+    void GxWdbCDMReader::parseConfigFile(const std::string & configFileName)
+    {
+        if(!configFileName.empty()) {
+			XMLDoc doc(configFileName);
+			parseWdbConnectionData_(doc);
+			parseValueParameters_(doc);
+			parseLevelParameters_(doc);
+			parseReferenceTime_(doc);
+			parseDataProvider_(doc);
+			parsePlaces_(doc);
+        }
+    }
+
+
+    void GxWdbCDMReader::init(const std::string & source, const std::string & configFileName)
+    {
+        setWdbExplorer(boost::shared_ptr<GxWdbExplorer>(new GxWdbExplorer()));
+
+        // parse all configurations
+		parseConfigFile(configFileName);
+        parseSourceString(source);
+
 
         // lets use data --- cmd parameters have precedance
         //

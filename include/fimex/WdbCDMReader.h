@@ -23,6 +23,9 @@ class GxWdbExplorer;
 
 namespace MetNoFimex {
 
+	class XMLDoc;
+
+
     class GxWdbCDMReader : public CDMReader
     {
     public:
@@ -84,10 +87,16 @@ namespace MetNoFimex {
                 );
 
     private:
-        void init() throw(CDMException);
+        void init(const std::string & source, const std::string & configFileName);
+        void parseConfigFile(const std::string & configFileName);
+        void parseSourceString(const std::string & source);
+        void parseWdbConnectionData_(const XMLDoc & doc);
+        void parseValueParameters_(const XMLDoc & doc);
+        void parseLevelParameters_(const XMLDoc & doc);
+        void parseReferenceTime_(const XMLDoc & doc);
+        void parseDataProvider_(const XMLDoc & doc);
+        void parsePlaces_(const XMLDoc & doc);
 
-        std::string                         source_;
-        std::string                         configFileName_;
         boost::shared_ptr<GxWdbExplorer>    wdbExplorer_;
 
         // data to build the reader on
