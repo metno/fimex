@@ -469,8 +469,9 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     paramValues[6] ? std::cout << "paramValues[6] : " << std::string(paramValues[6]) << std::endl : std::cout << "paramValues[6] : NULL" << std::endl;
 #endif
 
+
     pgResult = PQexecParams(wdbPGConn_,
-                       "select value::int4, valuetype, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by value desc, referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
+                       "select value, dataprovidername, placename, valueparametername, levelparametername, levelfrom::float4, levelto::float4, extract(epoch from referencetime)::float8 as referencetime, extract(epoch from validtimefrom)::float8 as validtimefrom, extract(epoch from validtimeto)::float8 as validtimeto, extract(epoch from storetime)::float8 as storetime from wci.read($1, $2, $3, $4, $5, $6, $7, NULL::wci.returngid) order by value desc, referencetime desc, validtimeto asc, levelfrom asc, storetime desc, validtimeindeterminatecode asc, levelindeterminatecode asc",
                        7,
                        NULL,    /* let the backend deduce param type */
                        paramValues,
@@ -493,7 +494,6 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     gidRows.resize(record_count);
 
     int value_fnum = PQfnumber(pgResult, "value");
-    int valuetype_fnum = PQfnumber(pgResult, "valuetype");
     int referencetime_fnum = PQfnumber(pgResult, "referencetime");
     int dataprovidername_fnum = PQfnumber(pgResult, "dataprovidername");
     int placename_fnum = PQfnumber(pgResult, "placename");
@@ -509,11 +509,10 @@ void GxWdbExplorer::getGids(const std::vector<std::string>& providers,
     {
         GxGidRow row;
         /* Get the field values (ATM ignore possibility they are null!) */
-        row.setValue(GxWdbExplorer::getValueAsInt4(pgResult, i, value_fnum));
+        row.setValue(GxWdbExplorer::getValueAsInt8(pgResult, i, value_fnum));
 #ifdef GXDEBUG
         std::cout << __FUNCTION__ << "@" << __LINE__ << " :" << "Found GID = " << row.value() << std::endl;
 #endif
-        row.setValueType(GxWdbExplorer::getValueAsString(pgResult, i, valuetype_fnum));
 
         GxDataProviderRow providerRow;
         providerRow.setName(GxWdbExplorer::getValueAsString(pgResult, i, dataprovidername_fnum));
@@ -1118,7 +1117,11 @@ void GxWdbExplorer::getReferenceTimes
     PQclear(pgResult);
 }
 
-void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::string& strdatatype, boost::shared_ptr<MetNoFimex::Data>& data)
+
+
+
+boost::shared_ptr<MetNoFimex::Data> GxWdbExplorer::getGridDataAsFimexData(const std::string& gid,
+                            const std::string& datatype)
 {
     PGresult   *pgResult;
     const char *paramValues[1];
@@ -1143,8 +1146,7 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
 #endif
         PQclear(pgResult);
         PQfinish(wdbPGConn_);
-        data = boost::shared_ptr<MetNoFimex::Data>();
-        return;
+        return boost::shared_ptr<MetNoFimex::Data>();
     }
 
     int grid_fnum = PQfnumber(pgResult, "grid");
@@ -1174,7 +1176,7 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
 
 //    data.swap(tmpdata);
 
-    data = MetNoFimex::createData(MetNoFimex::string2datatype(strdatatype), ptrbinary, ptrbinary + blen);
+    boost::shared_ptr<MetNoFimex::Data> data = MetNoFimex::createData(MetNoFimex::string2datatype("float"), ptrbinary, ptrbinary + blen);
 #ifdef GXDEBUG
     std::cout << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
               << "\tnumberX = "   << numberX
@@ -1183,7 +1185,9 @@ void GxWdbExplorer::getGridDataAsFimexData(const std::string& gid, const std::st
               << "\tdata size = " << data->size()
               << std::endl;
 #endif
+
     PQclear(pgResult);
+    return data;
 }
 
 void GxWdbExplorer::getGridData(const std::string& gid, GxGridDataRow& dataRow)

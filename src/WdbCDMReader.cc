@@ -1446,7 +1446,7 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
     {
-        const CDMVariable& variable = cdm_->getVariable(varName);
+    	const CDMVariable& variable = cdm_->getVariable(varName);
         if (variable.hasData()) {
             return getDataSliceFromMemory(variable, unLimDimPos);
         }
@@ -1533,7 +1533,6 @@ namespace MetNoFimex {
             }
         }
 
-            boost::shared_ptr<Data> levelData; // sql call for reading the data for given variable
             // prepare in data
             // and get the gid
             std::vector<std::string> dataproviders;
@@ -1612,57 +1611,64 @@ namespace MetNoFimex {
 #ifdef GXDEBUG
             std::cout << "============================== GIDS SIZE = " << gids.size() << std::endl;
 #endif
-            size_t dataCurrentPos = 0;
 
-            // TODO: optimize based on the actual dimension sizes....
-            //
+		// TODO: optimize based on the actual dimension sizes....
+		//
 
-            unsigned int totalDataDimension = xy_size;
-            totalDataDimension *= (layerDim != 0) ? layerDim->getLength() : 1;
-            totalDataDimension *= (referenceTimeDim != 0) ? referenceTimeDim->getLength() : 1;
-            boost::shared_ptr<Data> data = createData(variable.getDataType(), totalDataDimension);
+		unsigned int totalDataDimension = xy_size;
+		totalDataDimension *= (layerDim != 0) ? layerDim->getLength() : 1;
+		totalDataDimension *= (referenceTimeDim != 0) ? referenceTimeDim->getLength() : 1;
+		boost::shared_ptr<Data> data = createData(variable.getDataType(), totalDataDimension);
 
 
-            if(!gids.empty()) {
+		if(!gids.empty()) {
 #ifdef GXDEBUG
-                std::cout << "============ READING GRID DATA AS FIMEX DATA: " << std::endl;
+			std::cout << "============ READING GRID DATA AS FIMEX DATA: " << std::endl;
 #endif
-                for(size_t gidIndex = 0; gidIndex < gids.size(); ++gidIndex) {
-                    // get the data itself
+			size_t dataCurrentPos = 0;
+			for(size_t gidIndex = 0; gidIndex < gids.size(); ++gidIndex)
+			{
+				// get the data itself
 #ifdef GXDEBUG
-                    std::cerr << "getting data for GID = " << gids.at(gidIndex).value() << " of type " << gids.at(gidIndex).valueType() << std::endl;
+				std::cerr << "getting data for GID = " << gids.at(gidIndex).value() << " of type " << gids.at(gidIndex).valueType() << std::endl;
 #endif
-                    std::stringstream strgid;
-                    strgid << gids.at(gidIndex).value();
+				std::stringstream strgid;
+				strgid << gids.at(gidIndex).value();
 
-                    wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(gidIndex).valueType(), levelData);
-                    if(levelData != 0) {
-                        data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
-                        dataCurrentPos += levelData->size();
-                    }
+				boost::shared_ptr<Data> levelData = wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(gidIndex).valueType());
 
-    //                std::cout << "============ READING GRID DATA AS FLOAT: " << std::endl;
+				const boost::shared_array<float> grid = levelData->asFloat();
+				std::clog << "Point for data[0], gid " << gids[gidIndex].value() << ": " << grid[gidIndex] << std::endl;
 
-    //                GxGridDataRow dataAsFloat;
-    //                wdbExplorer()->getGridData(strgid.str(), dataAsFloat);
-    //                std::ostringstream ost;
-    //                for(unsigned int position = 0; position < dataAsFloat.data()->size(); position++) {
-    //                    ost << dataAsFloat.data()->at(position) << "  ";
-    //                    if((position / 80) == 0)
-    //                        ost << std::endl;
-    //                }
-    //                std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
-                }
+				if (levelData)
+				{
+					data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
+					dataCurrentPos += levelData->size();
+				}
+
+
+//                    std::cout << "============ READING GRID DATA AS FLOAT: " << std::endl;
+//
+//                    GxGridDataRow dataAsFloat;
+//                    wdbExplorer()->getGridData(strgid.str(), dataAsFloat);
+//                    std::ostringstream ost;
+//                    for(unsigned int position = 0; position < dataAsFloat.data()->size(); position++) {
+//                        ost << dataAsFloat.data()->at(position) << "  ";
+//                        if((position / 80) == 0)
+//                            ost << std::endl;
+//                    }
+//                    std::cout << "============ DATA : " << std::endl << ost.str() << std::endl;
+			}
 #ifdef GXDEBUG
-                std::cout << "============ ROW DATA SIZE: " << data->size() << std::endl;
+			std::cout << "============ ROW DATA SIZE: " << data->size() << std::endl;
 #endif
 
-            } else {
+		} else {
 #ifdef GXDEBUG
-                std::cout << "============ NO GIDS -> NO GRID DATA FOUND: " << std::endl;
+			std::cout << "============ NO GIDS -> NO GRID DATA FOUND: " << std::endl;
 #endif
-                return createData(variable.getDataType(), 0);
-            }
+			return createData(variable.getDataType(), 0);
+		}
 
 
         return data;

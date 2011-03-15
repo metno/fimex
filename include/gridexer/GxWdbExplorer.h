@@ -137,9 +137,9 @@ public:
                  const std::vector<std::string>& version,
                  std::vector<GxGidRow>& gidRows);
 
-    void getGridDataAsFimexData(const std::string& gid,
-                                const std::string& datatype,
-                                boost::shared_ptr<MetNoFimex::Data>& data);
+
+    boost::shared_ptr<MetNoFimex::Data> getGridDataAsFimexData(const std::string& gid,
+                                const std::string& datatype);
 
     void getGridData(const std::string& gid, GxGridDataRow& dataRow);
 
