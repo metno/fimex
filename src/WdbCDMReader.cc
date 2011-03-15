@@ -1638,7 +1638,6 @@ namespace MetNoFimex {
 				boost::shared_ptr<Data> levelData = wdbExplorer()->getGridDataAsFimexData(strgid.str(), gids.at(gidIndex).valueType());
 
 				const boost::shared_array<float> grid = levelData->asFloat();
-				std::clog << "Point for data[0], gid " << gids[gidIndex].value() << ": " << grid[gidIndex] << std::endl;
 
 				if (levelData)
 				{
