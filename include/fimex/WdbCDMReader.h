@@ -37,6 +37,7 @@
 #include <iosfwd>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <libpq-fe.h>
 
@@ -45,8 +46,14 @@
 
 namespace MetNoFimex
 {
+namespace wdb
+{
+class WdbConnection;
+class Level;
+}
 
-class GxWdbCDMReader: public CDMReader
+
+class GxWdbCDMReader: public CDMReader, boost::noncopyable
 {
 public:
 	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
@@ -58,17 +65,9 @@ public:
 
 private:
 
-	PGconn * wdbConnection_;
+	wdb::WdbConnection * wdbConnection_;
 
-	void connectToDatabase_();
-	void closeDatabaseConnection_();
 
-	/**
-	 * make a database call
-	 *
-	 * You may should call PQclear on result to free memory.
-	 */
-	PGresult * call_(const std::string & query);
 	void setupIndex_();
 	void setupCDM_();
 
@@ -78,15 +77,11 @@ private:
 	typedef boost::posix_time::ptime Time;
 	typedef std::map<Time, gid> TimeEntry;
 	typedef std::map<int, TimeEntry> VersionEntry;
-	class Level;
-	typedef std::map<Level, VersionEntry> LevelEntry;
+	typedef std::map<wdb::Level, VersionEntry> LevelEntry;
 	typedef std::string Parameter;
 	typedef std::map<Parameter, LevelEntry> ParameterEntry;
 
-	Time referenceTime_;
 	ParameterEntry data_;
-
-	friend bool operator < (const GxWdbCDMReader::Level & a, const GxWdbCDMReader::Level & b);
 };
 
 

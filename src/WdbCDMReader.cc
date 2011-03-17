@@ -28,6 +28,8 @@
 
 #include "fimex/WdbCDMReader.h"
 #include "fimex/CDM.h"
+#include "wdb/WdbConnection.h"
+#include "wdb/Level.h"
 #include <sstream>
 #include <set>
 #include <functional>
@@ -36,62 +38,28 @@
 
 namespace MetNoFimex
 {
-class GxWdbCDMReader::Level
+
+
+
+GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename) :
+		wdbConnection_(0)
 {
-	std::string levelName_;
-	float from_;
-	float to_;
-public:
-	Level(const std::string & levelName, float from, float to) :
-		levelName_(levelName), from_(from), to_(to)
-	{}
-
-	const std::string & levelName() const { return levelName_; }
-	float from() const { return from_; }
-	float to() const { return to_; }
-
-	std::string str() const
+	try
 	{
-		std::ostringstream s;
-		if ( from() != to() )
-			s << from() << " to ";
-		s << to() << " " << levelName();
-		return s.str();
-	}
-};
-
-bool operator < (const GxWdbCDMReader::Level & a, const GxWdbCDMReader::Level & b)
-{
-	if ( a.levelName() != b.levelName() )
-		return a.levelName() < b.levelName();
-	if ( a.from() != b.from() )
-		return a.from() < b.from();
-	return a.to() < b.to();
-}
-
-
-
-GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename)
-{
-//	try
-//	{
-		connectToDatabase_();
+		wdbConnection_ = new wdb::WdbConnection("dbname=wdb");
 		setupIndex_();
-
 		cdm_->toXMLStream(std::cout);
-
-//	}
-//	catch (...)
-//	{
-//		std::cout << PQerrorMessage(wdbConnection_) << std::endl;
-//		PQfinish(wdbConnection_);
-//		throw;
-//	}
+	}
+	catch (...)
+	{
+		delete wdbConnection_;
+		throw;
+	}
 }
 
 GxWdbCDMReader::~GxWdbCDMReader()
 {
-	closeDatabaseConnection_();
+	delete wdbConnection_;
 }
 
 boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
@@ -108,7 +76,7 @@ std::ostream & GxWdbCDMReader::indexSummary(std::ostream & s) const
 		s << pe->first << '\n';
 		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
 		{
-			s << " " << le->first.str() << '\n';
+			s << " " << le->first << '\n';
 			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
 			{
 				s << "  " << ve->first << '\n';
@@ -122,32 +90,6 @@ std::ostream & GxWdbCDMReader::indexSummary(std::ostream & s) const
 	return s;
 }
 
-
-void GxWdbCDMReader::connectToDatabase_()
-{
-	wdbConnection_ = PQconnectdb("dbname=wdb");
-	if ( CONNECTION_OK != PQstatus(wdbConnection_) )
-		throw CDMException("Unable to connect to wdb database");
-
-	PQclear(call_("SELECT wci.begin('wdb')"));
-}
-
-void GxWdbCDMReader::closeDatabaseConnection_()
-{
-	if (wdbConnection_)
-		PQfinish(wdbConnection_);
-}
-
-PGresult * GxWdbCDMReader::call_(const std::string & query)
-{
-	PGresult * result = PQexec(wdbConnection_, query.c_str());
-	if ( PQresultStatus(result) != PGRES_TUPLES_OK )
-	{
-		PQclear(result);
-		throw CDMException(std::string("wdb database error: ") + PQerrorMessage(wdbConnection_));
-	}
-	return result;
-}
 
 namespace
 {
@@ -166,30 +108,11 @@ enum ReadIdx
 
 void GxWdbCDMReader::setupIndex_()
 {
-	std::string query = "SELECT "
-			"ValueParameterName, "
-			"LevelParameterName, LevelFrom, LevelTo, "
-			"DataVersion, "
-			"extract(epoch from ValidTimeFrom), "
-			"extract(epoch from ValidTimeTo), "
-			"value"
-			" FROM "
-			"wci.read('{met.no eceps modification}',NULL, NULL,NULL, NULL,NULL, NULL,NULL::wci.returngid)";
+	std::vector<wdb::GridData> data;
+	wdbConnection_->readGid(data, "met.no eceps modification");
 
-	PGresult * indexBase = call_(query);
-
-	int tuples = PQntuples(indexBase);
-	for ( int i = 0; i < tuples; ++ i )
-	{
-		data_
-		[GET(ValueParameterName)]
-		 [Level(GET(LevelParameterName), GETFLOAT(LevelFrom), GETFLOAT(LevelTo)) ]
-		  [GETINT32(DataVersion)]
-		   [GETTIME(ValidTimeTo)] =
-				   GETINT64(Value);
-	}
-
-	PQclear(indexBase);
+	for ( std::vector<wdb::GridData>::const_iterator d = data.begin(); d != data.end(); ++ d )
+		data_[d->parameter()] [d->level()] [d->version()] [d->validTo()] = d->gridIdentifier();
 
 	setupCDM_();
 }
@@ -225,7 +148,7 @@ void GxWdbCDMReader::setupCDM_()
 
 		for ( LevelEntry::const_iterator le = levelEntry.begin(); le != levelEntry.end(); ++ le )
 		{
-			const Level & level = le->first;
+			const wdb::Level & level = le->first;
 			const VersionEntry & versionEntry = le->second;
 
 
