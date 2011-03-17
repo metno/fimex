@@ -26,51 +26,52 @@
  MA  02110-1301, USA
  */
 
-#include "fimex/WdbCDMReader.h"
-#include "fimex/CDM.h"
-#include "wdb/WdbConnection.h"
-#include "wdb/DataIndex.h"
+#ifndef DATAINDEX_H_
+#define DATAINDEX_H_
+
+#include "GridData.h"
+#include <vector>
+#include <map>
+#include <string>
+#include <iosfwd>
+
 
 namespace MetNoFimex
 {
+class CDM;
 
 
-
-GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename) :
-		wdbConnection_(0), dataIndex_(0)
+namespace wdb
 {
-	try
-	{
-		wdbConnection_ = new wdb::WdbConnection("dbname=wdb");
+class Level;
 
-		std::vector<wdb::GridData> data;
-		wdbConnection_->readGid(data, "met.no eceps modification");
-
-		dataIndex_ = new wdb::DataIndex(data);
-		dataIndex_->populate(* cdm_);
-
-		cdm_->toXMLStream(std::cout);
-	}
-	catch (...)
-	{
-		delete wdbConnection_;
-		delete dataIndex_;
-		throw;
-	}
-}
-
-GxWdbCDMReader::~GxWdbCDMReader()
+class DataIndex
 {
-	delete wdbConnection_;
-	delete dataIndex_;
+public:
+	explicit DataIndex(const std::vector<wdb::GridData> & data);
+	~DataIndex();
+
+	std::ostream & summary(std::ostream & s) const;
+
+	void populate(CDM & cdm) const;
+
+
+private:
+
+	// referencetime -> parameter -> level -> version -> validtime -> gid
+	typedef GridData::gid gid;
+	typedef GridData::Time Time;
+	typedef std::map<Time, gid> TimeEntry;
+	typedef std::map<int, TimeEntry> VersionEntry;
+	typedef std::map<wdb::Level, VersionEntry> LevelEntry;
+	typedef std::string Parameter;
+	typedef std::map<Parameter, LevelEntry> ParameterEntry;
+
+	ParameterEntry data_;
+};
+
 }
 
-boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
-		const std::string& varName, size_t unLimDimPos) throw (CDMException)
-{
-	return boost::shared_ptr<Data>();
 }
 
-
-
-}
+#endif /* DATAINDEX_H_ */

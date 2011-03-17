@@ -66,7 +66,8 @@ ARFLAGS = cru
 libwdb_a_AR = $(AR) $(ARFLAGS)
 libwdb_a_LIBADD =
 am_libwdb_a_OBJECTS = libwdb_a-WdbConnection.$(OBJEXT) \
-	libwdb_a-GridData.$(OBJEXT) libwdb_a-Level.$(OBJEXT)
+	libwdb_a-GridData.$(OBJEXT) libwdb_a-DataIndex.$(OBJEXT) \
+	libwdb_a-Level.$(OBJEXT)
 libwdb_a_OBJECTS = $(am_libwdb_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -252,6 +253,7 @@ libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/
 libwdb_a_SOURCES = \
 	WdbConnection.h WdbConnection.cpp \
 	GridData.h GridData.cpp \
+	DataIndex.h DataIndex.cpp \
 	Level.h Level.cpp
 
 all: all-am
@@ -302,6 +304,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-DataIndex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Level.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbConnection.Po@am__quote@
@@ -354,6 +357,20 @@ libwdb_a-GridData.obj: GridData.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GridData.cpp' object='libwdb_a-GridData.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridData.obj `if test -f 'GridData.cpp'; then $(CYGPATH_W) 'GridData.cpp'; else $(CYGPATH_W) '$(srcdir)/GridData.cpp'; fi`
+
+libwdb_a-DataIndex.o: DataIndex.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-DataIndex.o -MD -MP -MF $(DEPDIR)/libwdb_a-DataIndex.Tpo -c -o libwdb_a-DataIndex.o `test -f 'DataIndex.cpp' || echo '$(srcdir)/'`DataIndex.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-DataIndex.Tpo $(DEPDIR)/libwdb_a-DataIndex.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DataIndex.cpp' object='libwdb_a-DataIndex.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-DataIndex.o `test -f 'DataIndex.cpp' || echo '$(srcdir)/'`DataIndex.cpp
+
+libwdb_a-DataIndex.obj: DataIndex.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-DataIndex.obj -MD -MP -MF $(DEPDIR)/libwdb_a-DataIndex.Tpo -c -o libwdb_a-DataIndex.obj `if test -f 'DataIndex.cpp'; then $(CYGPATH_W) 'DataIndex.cpp'; else $(CYGPATH_W) '$(srcdir)/DataIndex.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-DataIndex.Tpo $(DEPDIR)/libwdb_a-DataIndex.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DataIndex.cpp' object='libwdb_a-DataIndex.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-DataIndex.obj `if test -f 'DataIndex.cpp'; then $(CYGPATH_W) 'DataIndex.cpp'; else $(CYGPATH_W) '$(srcdir)/DataIndex.cpp'; fi`
 
 libwdb_a-Level.o: Level.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-Level.o -MD -MP -MF $(DEPDIR)/libwdb_a-Level.Tpo -c -o libwdb_a-Level.o `test -f 'Level.cpp' || echo '$(srcdir)/'`Level.cpp
