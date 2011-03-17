@@ -1,117 +1,95 @@
-#ifndef WDBCDMREADER_H
-#define WDBCDMREADER_H
+/*
+ fimex
 
-#include "gridexer/GxWdbDataTypes.h"
+ Copyright (C) 2011 met.no
 
-// fimex
-//
+ Contact information:
+ Norwegian Meteorological Institute
+ Box 43 Blindern
+ 0313 OSLO
+ NORWAY
+ E-mail: post@met.no
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ MA  02110-1301, USA
+ */
+
+#ifndef GXWDBCDMREADER_H_
+#define GXWDBCDMREADER_H_
+
 #include "fimex/CDMReader.h"
-#include "fimex/CDMDimension.h"
 
-// standard
-//
-#include <string>
+#include <map>
 #include <vector>
+#include <string>
+#include <iosfwd>
 
-// boost
-//
-#include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-class GxWdbExplorer;
+#include <libpq-fe.h>
 
-namespace MetNoFimex {
 
-    class GxWdbCDMReader : public CDMReader
-    {
-    public:
 
-        explicit GxWdbCDMReader(const std::string& source, const std::string& configfilename);
 
-        void init() throw(CDMException);
-        bool deinit();
+namespace MetNoFimex
+{
 
-        void setDbHost(const std::string& dbHost);
-        void setDbName(const std::string& dbName);
-        void setDbUser(const std::string& dbUser);
-        void setDbPort(const unsigned int dbPort);
+class GxWdbCDMReader: public CDMReader
+{
+public:
+	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
+	virtual ~GxWdbCDMReader();
 
-        const std::string & dbHost() const;
-        const std::string & dbName() const;
-        const std::string & dbUser() const;
-        unsigned int dbPort() const;
-        const std::string & wciUser() const;
-        std::string connectString() const;
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
 
-//        void setWdbToCFNamesMap(const std::map<std::string, std::string>& wdb2cfmap);
-//        void addWdbToCFNames(const stdmap<std::string, std::string>& wdbmap);
-        void addWdbNameToCFName(const std::string& wdbname, const std::string& cfname);
+	std::ostream & indexSummary(std::ostream & s) const;
 
-//        void addWdbNameToFillValueMap(const boost::bimap<std::string, double>& map);
-        void addWdbNameToFillValue(const std::string& wdbname, const double value);
+private:
 
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
-//        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
+	PGconn * wdbConnection_;
 
-    protected:
-        boost::shared_ptr<GxWdbExplorer> wdbExplorer()  {
-            return wdbExplorer_;
-        }
+	void connectToDatabase_();
+	void closeDatabaseConnection_();
 
-        const boost::shared_ptr<GxWdbExplorer> & wdbExplorer() const {
-            return wdbExplorer_;
-        }
+	/**
+	 * make a database call
+	 *
+	 * You may should call PQclear on result to free memory.
+	 */
+	PGresult * call_(const std::string & query);
+	void setupIndex_();
+	void setupCDM_();
 
-        void setWdbExplorer(const boost::shared_ptr<GxWdbExplorer>& wdbExplorer) {
-            wdbExplorer_ = wdbExplorer;
-        }
+	// referencetime -> parameter -> level -> version -> validtime -> gid
 
-        bool addDataProvider();
-        bool addPlace();
-        void addGlobalCDMAttributes();
-        CDMDimension addTimeDimension();
-        void addReferenceTimeVariable();
-        CDMDimension addReferenceTimeDimension();
-        std::map<short, CDMDimension> addLevelDimensions();
-        std::string getStandardNameForDimension(const std::string& name);
-        // returning projName and coordinates for given place name
-        boost::tuple<std::string, std::string> addProjection(const std::string& strplace);
+	typedef long long gid;
+	typedef boost::posix_time::ptime Time;
+	typedef std::map<Time, gid> TimeEntry;
+	typedef std::map<int, TimeEntry> VersionEntry;
+	class Level;
+	typedef std::map<Level, VersionEntry> LevelEntry;
+	typedef std::string Parameter;
+	typedef std::map<Parameter, LevelEntry> ParameterEntry;
 
-        void addVariables
-                (
-                        const std::string& projName,
-                        const std::string& coordinates,
-                        const CDMDimension& timeDim,
-                        /*const CDMDimension& referenceTimDim,*/
-                        const std::map<short, CDMDimension>& levelDim
-                );
+	Time referenceTime_;
+	ParameterEntry data_;
 
-    private:
-        std::string                         source_;
-        std::string                         configFileName_;
-        boost::shared_ptr<GxWdbExplorer>    wdbExplorer_;
+	friend bool operator < (const GxWdbCDMReader::Level & a, const GxWdbCDMReader::Level & b);
+};
 
-        // data to build the reader on
-        // todo: use smart pointers
-        CDMDimension xDim;
-        CDMDimension yDim;
 
-        std::map<std::string, std::string> wdb2cfnamesmap_;
-        std::map<std::string, std::string> cf2wdbnamesmap_;
-        std::map<std::string, double> wdbname2fillvaluemap_;
+}
 
-        std::vector<GxDataProviderRow> providers_; // we support only one ATM
-        std::vector<GxPlaceRow> places_; // we support only one ATM
-        std::vector<GxLevelParameterRow> levelparameters_;
-        std::vector<GxValueParameterRow> valueparameters_;
-        std::vector<GxValidTimeRow> validtimes_; // this should be UNLIMITED dimension
-        std::vector<GxReferenceTimeRow> referencetimes_;
-        std::vector<std::pair<boost::posix_time::ptime, boost::posix_time::ptime> > timeVec;
-        std::vector<boost::posix_time::ptime > referenceTimeVec;
-        std::map<std::string, std::vector<std::pair<double, double> > > levelNamesToPairsMap;
-    };
-
-} // end namespace
-
-#endif // WDBCDMREADER_H
+#endif /* GXWDBCDMREADER_H_ */

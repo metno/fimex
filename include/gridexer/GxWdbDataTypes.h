@@ -260,11 +260,12 @@ public:
     ~GxGidRow() {}
     static std::string getReturnType() { return "NULL::wci.returngid";}
 
-    void setValue(const unsigned int value);
-    unsigned int value() const;
-    void setValueId(const unsigned int valueId);
-    unsigned int valueId() const;
-    void setValueType(const std::string& valueType);
+    typedef long long gid;
+
+    void setValue(gid value);
+    gid value() const;
+    void setValueId(long long valueId);
+    long long valueId() const;
     std::string valueType() const;
     void setProvider(const GxDataProviderRow& provider);
     GxDataProviderRow provider() const;
@@ -284,9 +285,8 @@ public:
 
 
 protected:
-    unsigned int value_;
-    unsigned int valueID_;
-    std::string valueType_;
+    unsigned long long value_;
+    unsigned long long valueID_;
     GxDataProviderRow provider_;
     GxPlaceRow place_;
     GxLevelParameterRow levelParameter_;

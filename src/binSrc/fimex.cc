@@ -481,7 +481,8 @@ static void writeCDM(auto_ptr<CDMReader> dataReader, po::variables_map& vm) {
 			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>(), version);
 		} else {
 			LOG4FIMEX(logger, Logger::DEBUG, "writing NetCDF-file " << vm["output.file"].as<string>() << " without config");
-			NetCDF_CDMWriter(sharedDataReader, vm["output.file"].as<string>(), "", version);
+			const std::string outputFile = vm["output.file"].as<string>();
+			NetCDF_CDMWriter(sharedDataReader, outputFile, "", version);
 		}
 		return;
 	}
@@ -621,7 +622,7 @@ int run(int argc, char* args[])
     	exit(1);
     }
 
-    try {
+//    try {
     	auto_ptr<CDMReader> dataReader = getCDMFileReader(vm);
     	dataReader = getCDMQualityExtractor(vm, dataReader);
     	dataReader = getCDMExtractor(vm, dataReader);
@@ -629,25 +630,26 @@ int run(int argc, char* args[])
     	dataReader = getCDMInterpolator(vm, dataReader);
     	dataReader = getNcmlCDMReader(vm, dataReader);
     	writeCDM(dataReader, vm);
-    } catch (CDMException& cdmex) {
-    	cout << "CDMException occured: " << cdmex.what() << endl;
-    	exit(1);
-    } catch (std::exception& ex) {
-    	cout << "exception occured: " << ex.what() << endl;
-    	exit(1);
-    }
+//    }
+//    catch (CDMException& cdmex) {
+//    	cout << "CDMException occured: " << cdmex.what() << endl;
+//    	exit(1);
+//    } catch (std::exception& ex) {
+//    	cout << "exception occured: " << ex.what() << endl;
+//    	exit(1);
+//    }
 	return 0;
 }
 
 int main(int argc, char* args[])
 {
     // wrapping main-functions in run to catch all exceptions
-    try {
+//    try {
         return run(argc, args);
-    } catch (exception& ex) {
-        cout << "exception occured: " << ex.what() << endl;
-        exit(1);
-    }
+//    } catch (exception& ex) {
+//        cout << "exception occured: " << ex.what() << endl;
+//        exit(1);
+//    }
     return 0;
 }
 

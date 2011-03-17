@@ -97,34 +97,29 @@ float GxPlaceRegularGridRow::incrementY() const
 
 // ############################################################################
 
-void GxGidRow::setValue(const unsigned int value)
+void GxGidRow::setValue(GxGidRow::gid value)
 {
     value_ = value;
 }
 
-unsigned int GxGidRow::value() const
+GxGidRow::gid GxGidRow::value() const
 {
     return value_;
 }
 
-void GxGidRow::setValueId(const unsigned int valueId)
+void GxGidRow::setValueId(GxGidRow::gid valueId)
 {
     valueID_ = valueId;
 }
 
-unsigned int GxGidRow::valueId() const
+GxGidRow::gid GxGidRow::valueId() const
 {
     return valueID_;
 }
 
-void GxGidRow::setValueType(const std::string& valueType)
-{
-    valueType_ = valueType;
-}
-
 std::string GxGidRow::valueType() const
 {
-    return valueType_;
+    return "float";
 }
 
 void GxGidRow::setProvider(const GxDataProviderRow& provider)
