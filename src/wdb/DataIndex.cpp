@@ -196,15 +196,17 @@ void DataIndex::getTimes_(std::set<Time> & out) const
 {
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
 	{
+		std::set<Time> timesForParameter;
 		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
 		{
 			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
 			{
-				if ( ve->second.size() > 1 )
-					for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
-						out.insert(te->first);
+				for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
+					timesForParameter.insert(te->first);
 			}
 		}
+		if ( timesForParameter.size() > 1 )
+			out.insert(timesForParameter.begin(), timesForParameter.end());
 	}
 }
 

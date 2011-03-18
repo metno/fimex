@@ -51,12 +51,13 @@ class Level;
 class DataIndex
 {
 public:
-	explicit DataIndex(const std::vector<wdb::GridData> & data);
+	explicit DataIndex(const std::vector<GridData> & data);
 	~DataIndex();
 
 	std::ostream & summary(std::ostream & s) const;
 
 	void populate(CDM & cdm) const;
+
 
 private:
 
@@ -65,7 +66,7 @@ private:
 	typedef GridData::Time Time;
 	typedef std::map<Time, gid> TimeEntry;
 	typedef std::map<int, TimeEntry> VersionEntry;
-	typedef std::map<wdb::Level, VersionEntry> LevelEntry;
+	typedef std::map<Level, VersionEntry> LevelEntry;
 	typedef std::map<Parameter, LevelEntry> ParameterEntry;
 
 
