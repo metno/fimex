@@ -166,7 +166,10 @@ void DataIndex::populate(CDM & cdm) const
 
 void DataIndex::addDimensions_(CDM & cdm) const
 {
-	CDMDimension time("time", 0); // get correct number
+	std::set<Time> times;
+	getTimes_(times);
+
+	CDMDimension time("time", times.size()); // get correct number
 	time.setUnlimited(true);
 	cdm.addDimension(time);
 
@@ -188,6 +191,23 @@ void DataIndex::addDimensions_(CDM & cdm) const
 	cdm.addDimension(CDMDimension("latitude", 100));
 	cdm.addDimension(CDMDimension("longitude", 100));
 }
+
+void DataIndex::getTimes_(std::set<Time> & out) const
+{
+	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
+	{
+		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
+		{
+			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
+			{
+				if ( ve->second.size() > 1 )
+					for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
+						out.insert(te->first);
+			}
+		}
+	}
+}
+
 
 void DataIndex::addParameters_(CDM & cdm) const
 {
