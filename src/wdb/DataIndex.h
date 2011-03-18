@@ -43,7 +43,9 @@ class CDM;
 
 namespace wdb
 {
+class Parameter;
 class Level;
+
 
 class DataIndex
 {
@@ -55,7 +57,6 @@ public:
 
 	void populate(CDM & cdm) const;
 
-
 private:
 
 	// referencetime -> parameter -> level -> version -> validtime -> gid
@@ -64,8 +65,13 @@ private:
 	typedef std::map<Time, gid> TimeEntry;
 	typedef std::map<int, TimeEntry> VersionEntry;
 	typedef std::map<wdb::Level, VersionEntry> LevelEntry;
-	typedef std::string Parameter;
 	typedef std::map<Parameter, LevelEntry> ParameterEntry;
+
+
+	void addDimensions_(CDM & cdm) const;
+	void addParameters_(CDM & cdm) const;
+	void getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
+	void getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
 
 	ParameterEntry data_;
 };

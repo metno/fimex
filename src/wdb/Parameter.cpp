@@ -26,42 +26,35 @@
  MA  02110-1301, USA
  */
 
-#ifndef LEVEL_H_
-#define LEVEL_H_
-
-#include "fimex/CDMDimension.h"
-#include <string>
-#include <iosfwd>
-
+#include "Parameter.h"
+#include "fimex/CDMAttribute.h"
 
 namespace MetNoFimex
 {
 namespace wdb
 {
 
-/**
- * A level in the wdb database.
- */
-class Level
+Parameter::Parameter(const std::string & name, const std::string & unit) :
+		name_(name), unit_(unit)
 {
-public:
-	Level();
-	Level(const std::string & levelName, float from, float to);
+}
 
-	const std::string & levelName() const { return levelName_; }
-	float from() const { return from_; }
-	float to() const { return to_; }
+Parameter::~Parameter()
+{
+}
 
-private:
-	std::string levelName_;
-	float from_;
-	float to_;
-};
+//CDMVariable Parameter::getVariable(const std::vector<std::string> & dimensions) const
+//{
+//	// lag frittstående oversetterfunksjoner eller noe...
+//	CDMVariable parameter(toCdmName(parameter), CDM_FLOAT, dimensions);
+//
+//	CDMAttribute unit("units", unit());
+//
+//
+//
+//	return parameter;
+//}
 
-bool operator < (const Level & a, const Level & b);
-std::ostream & operator << (std::ostream & s, const Level & l);
 
 }
 }
-
-#endif /* LEVEL_H_ */

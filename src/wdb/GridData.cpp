@@ -34,11 +34,24 @@ namespace MetNoFimex
 namespace wdb
 {
 
+GridData::GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, gid gridId) :
+		parameter_(param),
+		level_(lvl),
+		version_(version),
+		validTo_(validTo),
+		gridIdentifier_(gridId)
+{
+}
+
+
 std::string GridData::query(const std::string & dataProvider)
 {
 	return "SELECT "
 		"ValueParameterName, "
-		"LevelParameterName, LevelFrom, LevelTo, "
+		"ValueParameterUnit, "
+		"LevelParameterName, "
+		"LevelUnitName, "
+		"LevelFrom, LevelTo, "
 		"DataVersion, "
 		"extract(epoch from ValidTimeFrom), "
 		"extract(epoch from ValidTimeTo), "
@@ -53,7 +66,9 @@ namespace
 enum ReadIdx
 {
 	ValueParameterName,
+	ValueParameterUnit,
 	LevelParameterName,
+	LevelUnitName,
 	LevelFrom,
 	LevelTo,
 	DataVersion,
@@ -70,7 +85,7 @@ enum ReadIdx
 
 GridData::GridData(PGresult * result, int row)
 {
-	parameter_ = GET(ValueParameterName);
+	parameter_ = Parameter(GET(ValueParameterName), GET(ValueParameterUnit));
 	level_ = Level(GET(LevelParameterName), GETFLOAT(LevelFrom),
 			GETFLOAT(LevelTo));
 	version_ = GETINT32(DataVersion);

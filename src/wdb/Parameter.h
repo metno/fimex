@@ -26,12 +26,13 @@
  MA  02110-1301, USA
  */
 
-#ifndef LEVEL_H_
-#define LEVEL_H_
+#ifndef PARAMETER_H_
+#define PARAMETER_H_
 
-#include "fimex/CDMDimension.h"
+#include "fimex/CDMVariable.h"
 #include <string>
-#include <iosfwd>
+#include <vector>
+
 
 
 namespace MetNoFimex
@@ -39,29 +40,31 @@ namespace MetNoFimex
 namespace wdb
 {
 
-/**
- * A level in the wdb database.
- */
-class Level
+class Parameter
 {
 public:
-	Level();
-	Level(const std::string & levelName, float from, float to);
+	Parameter() {}
+	Parameter(const std::string & name, const std::string & unit);
+	~Parameter();
 
-	const std::string & levelName() const { return levelName_; }
-	float from() const { return from_; }
-	float to() const { return to_; }
+	const std::string & name() const { return name_; }
+	const std::string & unit() const { return unit_; }
+
+//	void getVariable(const std::vector<std::string> & dimensions) const;
 
 private:
-	std::string levelName_;
-	float from_;
-	float to_;
+	std::string name_;
+	std::string unit_;
+
 };
 
-bool operator < (const Level & a, const Level & b);
-std::ostream & operator << (std::ostream & s, const Level & l);
+inline bool operator < (const Parameter & a, const Parameter & b)
+{
+	return a.name() < b.name();
+}
 
 }
+
 }
 
-#endif /* LEVEL_H_ */
+#endif /* PARAMETER_H_ */

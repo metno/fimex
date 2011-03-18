@@ -29,6 +29,7 @@
 #ifndef GRIDDATA_H_
 #define GRIDDATA_H_
 
+#include "Parameter.h"
 #include "Level.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <libpq-fe.h>
@@ -51,14 +52,20 @@ public:
 	typedef boost::posix_time::ptime Time;
 	typedef long long gid;
 
-	const std::string & parameter() const { return parameter_; };
+	const Parameter & parameter() const { return parameter_; };
 	const Level & level() const { return level_; }
 	int version() const { return version_; };
 	const Time & validTo() const { return validTo_; };
 	gid gridIdentifier() const { return gridIdentifier_; };
 
+protected:
+	/**
+	 * This constructor is meant for artificially generating objects for tests
+	 * - via subclasses
+	 */
+	GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, gid gridId);
 private:
-	std::string parameter_;
+	Parameter parameter_;
 	Level level_;
 	int version_;
 	Time validTo_;

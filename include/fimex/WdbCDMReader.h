@@ -42,7 +42,6 @@ namespace wdb
 {
 class WdbConnection;
 class DataIndex;
-class Level;
 }
 
 

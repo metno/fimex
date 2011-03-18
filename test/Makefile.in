@@ -39,8 +39,9 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_MI_TESTS} testCoordSys
 @HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS}
 @HAVE_GRIBAPI_TRUE@am__append_6 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
-TESTS = $(am__EXEEXT_8) $(am__EXEEXT_10)
-check_PROGRAMS = $(am__EXEEXT_8)
+@HAVE_LIBPQ_TRUE@am__append_7 = wdbTest
+TESTS = $(am__EXEEXT_9) $(am__EXEEXT_11)
+check_PROGRAMS = $(am__EXEEXT_9)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -79,13 +80,15 @@ am__EXEEXT_1 =
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_5 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_6 = testGribReader$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_7 = $(am__EXEEXT_5) $(am__EXEEXT_6)
-am__EXEEXT_8 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
+@HAVE_LIBPQ_TRUE@am__EXEEXT_8 = wdbTest$(EXEEXT)
+am__EXEEXT_9 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
 	testData$(EXEEXT) testProjections$(EXEEXT) \
 	testInterpolation$(EXEEXT) testUnits$(EXEEXT) \
 	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
 	testXMLDoc$(EXEEXT) testFeltReader$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_7)
+	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_7) \
+	$(am__EXEEXT_8)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
@@ -193,6 +196,13 @@ test_c_consumer_OBJECTS = $(am_test_c_consumer_OBJECTS)
 test_c_consumer_LDADD = $(LDADD)
 test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc
+@HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
+@HAVE_LIBPQ_TRUE@	wdbTest-wdbDataIndexTest.$(OBJEXT)
+wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
+wdbTest_LDADD = $(LDADD)
+wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -225,7 +235,7 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
 	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES)
+	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
@@ -236,13 +246,13 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
 	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES)
+	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
-@HAVE_NETCDF_TRUE@am__EXEEXT_9 = $(NETCDF_MI_SH_TESTS)
-am__EXEEXT_10 = $(am__EXEEXT_9)
+@HAVE_NETCDF_TRUE@am__EXEEXT_10 = $(NETCDF_MI_SH_TESTS)
+am__EXEEXT_11 = $(am__EXEEXT_10)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -397,7 +407,7 @@ CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	testSpatialAxisSpec testData testProjections testInterpolation \
 	testUnits testFileReaderFactory testCDM testXMLDoc \
 	testFeltReader $(am__append_2) $(am__append_3) $(am__append_4) \
-	$(am__append_6)
+	$(am__append_6) $(am__append_7)
 SH_TESTS = $(am__append_5)
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_1)
@@ -408,6 +418,8 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
+@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = wdbDataIndexTest.cc
+@HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
@@ -537,6 +549,9 @@ testXMLDoc$(EXEEXT): $(testXMLDoc_OBJECTS) $(testXMLDoc_DEPENDENCIES)
 test_c_consumer$(EXEEXT): $(test_c_consumer_OBJECTS) $(test_c_consumer_DEPENDENCIES) 
 	@rm -f test_c_consumer$(EXEEXT)
 	$(LINK) $(test_c_consumer_OBJECTS) $(test_c_consumer_LDADD) $(LIBS)
+wdbTest$(EXEEXT): $(wdbTest_OBJECTS) $(wdbTest_DEPENDENCIES) 
+	@rm -f wdbTest$(EXEEXT)
+	$(CXXLINK) $(wdbTest_OBJECTS) $(wdbTest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -565,6 +580,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbDataIndexTest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -607,6 +623,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+wdbTest-wdbDataIndexTest.o: wdbDataIndexTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbDataIndexTest.o -MD -MP -MF $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo -c -o wdbTest-wdbDataIndexTest.o `test -f 'wdbDataIndexTest.cc' || echo '$(srcdir)/'`wdbDataIndexTest.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo $(DEPDIR)/wdbTest-wdbDataIndexTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbDataIndexTest.cc' object='wdbTest-wdbDataIndexTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbDataIndexTest.o `test -f 'wdbDataIndexTest.cc' || echo '$(srcdir)/'`wdbDataIndexTest.cc
+
+wdbTest-wdbDataIndexTest.obj: wdbDataIndexTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbDataIndexTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo -c -o wdbTest-wdbDataIndexTest.obj `if test -f 'wdbDataIndexTest.cc'; then $(CYGPATH_W) 'wdbDataIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbDataIndexTest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo $(DEPDIR)/wdbTest-wdbDataIndexTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbDataIndexTest.cc' object='wdbTest-wdbDataIndexTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbDataIndexTest.obj `if test -f 'wdbDataIndexTest.cc'; then $(CYGPATH_W) 'wdbDataIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbDataIndexTest.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -907,6 +937,9 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
 
+
+@HAVE_LIBPQ_TRUE@test_wdb: wdbTest
+@HAVE_LIBPQ_TRUE@	@./wdbTest
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
