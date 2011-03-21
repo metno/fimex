@@ -30,6 +30,7 @@
 #include "fimex/CDM.h"
 #include "wdb/WdbConnection.h"
 #include "wdb/DataIndex.h"
+#include "wdb/CdmNameTranslator.h"
 
 namespace MetNoFimex
 {
@@ -37,22 +38,25 @@ namespace MetNoFimex
 
 
 GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename) :
-		wdbConnection_(0), dataIndex_(0)
+		wdbConnection_(0), dataIndex_(0), translator_(0)
 {
 	try
 	{
+		translator_ = new wdb::CdmNameTranslator;
+
 		wdbConnection_ = new wdb::WdbConnection("dbname=wdb");
 
 		std::vector<wdb::GridData> data;
 		wdbConnection_->readGid(data, "met.no eceps modification");
 
-		dataIndex_ = new wdb::DataIndex(data);
+		dataIndex_ = new wdb::DataIndex(data, * translator_);
 		dataIndex_->populate(* cdm_);
 
 		cdm_->toXMLStream(std::cout);
 	}
 	catch (...)
 	{
+		delete translator_;
 		delete wdbConnection_;
 		delete dataIndex_;
 		throw;
@@ -61,6 +65,7 @@ GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& con
 
 GxWdbCDMReader::~GxWdbCDMReader()
 {
+	delete translator_;
 	delete wdbConnection_;
 	delete dataIndex_;
 }

@@ -9,6 +9,7 @@ libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/
 
 libwdb_a_SOURCES = \
 	WdbConnection.h WdbConnection.cpp \
+	CdmNameTranslator.h CdmNameTranslator.cpp \
 	GridData.h GridData.cpp \
 	DataIndex.h DataIndex.cpp \
 	Parameter.h Parameter.cpp \

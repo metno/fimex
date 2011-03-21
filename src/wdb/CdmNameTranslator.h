@@ -26,42 +26,28 @@
  MA  02110-1301, USA
  */
 
-#include "Level.h"
-#include <ostream>
+#ifndef CDMNAMETRANSLATOR_H_
+#define CDMNAMETRANSLATOR_H_
+
+#include <string>
 
 namespace MetNoFimex
 {
+
 namespace wdb
 {
 
-Level::Level() :
-		from_(0), to_(0)
-{}
-
-Level::Level(const std::string & levelName, float from, float to) :
-	levelName_(levelName), from_(from), to_(to)
+class CdmNameTranslator
 {
-}
+public:
+	CdmNameTranslator();
+	~CdmNameTranslator();
 
-
-bool operator <(const Level & a, const Level & b)
-{
-	if (a.name() != b.name())
-		return a.name() < b.name();
-	if (a.from() != b.from())
-		return a.from() < b.from();
-	return a.to() < b.to();
-}
-
-std::ostream & operator << (std::ostream & s, const Level & l)
-{
-	if (l.from() != l.to())
-		s << l.from() << " to ";
-	s << l.to() << " " << l.name();
-
-	return s;
-}
-
+	std::string toCdmName(const std::string & wdbName) const;
+};
 
 }
+
 }
+
+#endif /* CDMNAMETRANSLATOR_H_ */

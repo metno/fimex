@@ -44,6 +44,7 @@ class CDM;
 
 namespace wdb
 {
+class CdmNameTranslator;
 class Parameter;
 class Level;
 
@@ -51,7 +52,7 @@ class Level;
 class DataIndex
 {
 public:
-	explicit DataIndex(const std::vector<GridData> & data);
+	explicit DataIndex(const std::vector<GridData> & data, const CdmNameTranslator & translator);
 	~DataIndex();
 
 	std::ostream & summary(std::ostream & s) const;
@@ -78,6 +79,7 @@ private:
 	void getVersionDimensions_(std::vector<std::string> & out, const VersionEntry & versionEntry) const;
 
 	ParameterEntry data_;
+	const CdmNameTranslator & translator_;
 };
 
 }

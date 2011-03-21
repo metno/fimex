@@ -86,8 +86,7 @@ enum ReadIdx
 GridData::GridData(PGresult * result, int row)
 {
 	parameter_ = Parameter(GET(ValueParameterName), GET(ValueParameterUnit));
-	level_ = Level(GET(LevelParameterName), GETFLOAT(LevelFrom),
-			GETFLOAT(LevelTo));
+	level_ = Level(GET(LevelParameterName), GETFLOAT(LevelFrom), GETFLOAT(LevelTo));
 	version_ = GETINT32(DataVersion);
 	validTo_ = GETTIME(ValidTimeTo);
 	gridIdentifier_ = GETINT64(Value);

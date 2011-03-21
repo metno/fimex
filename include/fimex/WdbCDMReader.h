@@ -42,6 +42,7 @@ namespace wdb
 {
 class WdbConnection;
 class DataIndex;
+class CdmNameTranslator;
 }
 
 
@@ -56,6 +57,7 @@ public:
 private:
 	wdb::WdbConnection * wdbConnection_;
 	wdb::DataIndex * dataIndex_;
+	wdb::CdmNameTranslator * translator_;
 };
 
 

@@ -30,6 +30,7 @@
 #define LEVEL_H_
 
 #include "fimex/CDMDimension.h"
+#include "fimex/CDMAttribute.h"
 #include <string>
 #include <iosfwd>
 
@@ -48,9 +49,10 @@ public:
 	Level();
 	Level(const std::string & levelName, float from, float to);
 
-	const std::string & levelName() const { return levelName_; }
+	const std::string & name() const { return levelName_; }
 	float from() const { return from_; }
 	float to() const { return to_; }
+
 
 private:
 	std::string levelName_;

@@ -1507,7 +1507,7 @@ namespace MetNoFimex {
             std::string strLevel;
             std::string levelName = layerDim->getName();
 #ifdef GXDEBUG
-            std::cout << "finding levels for level dimension name: " << levelName << std::endl;
+            std::cout << "finding levels for level dimension name: " << name << std::endl;
 #endif
             std::map<std::string, std::string>::const_iterator cit = cf2wdbnamesmap_.find(levelName);
             std::string wdbLevelName = levelName;

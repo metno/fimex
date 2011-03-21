@@ -27,6 +27,7 @@
  */
 
 #include "DataIndex.h"
+#include "CdmNameTranslator.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMDimension.h"
 #include <set>
@@ -36,7 +37,8 @@ namespace MetNoFimex
 namespace wdb
 {
 
-DataIndex::DataIndex(const std::vector<wdb::GridData> & data)
+DataIndex::DataIndex(const std::vector<wdb::GridData> & data, const CdmNameTranslator & translator) :
+		translator_(translator)
 {
 	for ( std::vector<wdb::GridData>::const_iterator d = data.begin(); d != data.end(); ++ d )
 		data_[d->parameter()] [d->level()] [d->version()] [d->validTo()] = d->gridIdentifier();
@@ -67,15 +69,6 @@ std::ostream & DataIndex::summary(std::ostream & s) const
 	return s;
 }
 
-namespace
-{
-std::string toCdmName(const std::string & what)
-{
-	return boost::algorithm::replace_all_copy(what, " ", "_");
-}
-}
-
-
 
 void DataIndex::populate(CDM & cdm) const
 {
@@ -83,86 +76,6 @@ void DataIndex::populate(CDM & cdm) const
 	addParameters_(cdm);
 
 	//cdm.toXMLStream(std::cout);
-
-//	typedef std::map<std::string, std::set<std::pair<float, float> > > LevelMap;
-//	// Collection of all levels in use
-//	LevelMap levelDimensions;
-//
-//	// Highest number of dataversions in data set.
-//	std::size_t maxDataVersionSize = 1;
-//
-//	// All times that are used in data set.
-//	std::set<Time> times;
-//
-//	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
-//	{
-//		const Parameter & parameter = pe->first;
-//		const LevelEntry & levelEntry = pe->second;
-//
-//		// collects names of all dimensions a particular varialbe has.
-//		std::vector<std::string> dimensions;
-//
-//		for ( LevelEntry::const_iterator le = levelEntry.begin(); le != levelEntry.end(); ++ le )
-//		{
-//			const wdb::Level & level = le->first;
-//			const VersionEntry & versionEntry = le->second;
-//
-//
-//			// Find and register time dimension
-//			for ( VersionEntry::const_iterator ve = versionEntry.begin(); ve != versionEntry.end(); ++ ve )
-//			{
-//				const TimeEntry & timeEntry = ve->second;
-//				for ( TimeEntry::const_iterator te = timeEntry.begin(); te != timeEntry.end(); ++ te )
-//					times.insert(te->first);
-//				if ( timeEntry.size() > 1 and (dimensions.empty() or dimensions.front() != "time") )
-//					dimensions.push_back("time");
-//			}
-//
-//			// Register data versions
-//			if ( versionEntry.size() > 1 )
-//			{
-//				maxDataVersionSize = std::max(maxDataVersionSize, versionEntry.size());
-//				dimensions.push_back("dataversion");
-//			}
-//
-//			// Register levels
-//			if  (levelEntry.size() > 1 )
-//			{
-//				std::string levelName = toCdmName(level.levelName());
-//				levelDimensions[levelName].insert(std::make_pair(level.from(), level.to()));
-//				dimensions.push_back(levelName);
-//			}
-//		}
-//		dimensions.push_back("longitude");
-//		dimensions.push_back("latitude");
-//
-//
-//		std::string parameterName = toCdmName(parameter.name());
-//		cdm.addVariable(CDMVariable(parameterName, CDM_FLOAT, dimensions));
-//		cdm.addAttribute(parameterName, CDMAttribute("units", parameter.unit()));
-//
-//	}
-//
-//	for ( LevelMap::const_iterator it = levelDimensions.begin(); it != levelDimensions.end(); ++ it )
-//	{
-//		if ( it->second.size() > 1 )
-//		{
-//			CDMDimension dim(it->first, it->second.size());
-//			cdm.addDimension(dim);
-//		}
-//	}
-//	if ( maxDataVersionSize > 1 )
-//	{
-//		CDMDimension dataVersion("dataversion", maxDataVersionSize);
-//		cdm.addDimension(dataVersion);
-//	}
-//
-//	cdm.addDimension(CDMDimension("longitude", 100));
-//	cdm.addDimension(CDMDimension("latitude", 100));
-//
-//	CDMDimension time("time", times.size());
-//	time.setUnlimited(true);
-//	cdm.addDimension(time);
 }
 
 void DataIndex::addDimensions_(CDM & cdm) const
@@ -183,17 +96,40 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
 		{
 			const Level & lvl = le->first;
-			dimensions[lvl.levelName()].insert(std::make_pair(lvl.from(), lvl.to()));
+			dimensions[lvl.name()].insert(std::make_pair(lvl.from(), lvl.to()));
 
 			maxVersionCount = std::max(maxVersionCount, le->second.size());
 		}
 	}
 	for ( LevelMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
 		if ( it->second.size() > 1 )
-			cdm.addDimension(CDMDimension(toCdmName(it->first), it->second.size()));
+		{
+			const std::string & lvl = it->first;
+			std::string cdmName = translator_.toCdmName(lvl);
+
+			cdm.addDimension(CDMDimension(cdmName, it->second.size()));
+
+			std::vector<std::string> shape;
+			shape.push_back(cdmName);
+			cdm.addVariable(CDMVariable(cdmName, CDM_FLOAT, shape));
+			cdm.addAttribute(cdmName, CDMAttribute("long_name", lvl));
+			cdm.addAttribute(cdmName, CDMAttribute("standard_name", cdmName));
+
+			cdm.addAttribute(cdmName, CDMAttribute("units", "m"));
+			cdm.addAttribute(cdmName, CDMAttribute("axis", "z"));
+		}
 
 	if ( maxVersionCount > 1 )
-		cdm.addDimension(CDMDimension("version", maxVersionCount));
+	{
+		std::string dimesion = "version";
+		cdm.addDimension(CDMDimension(dimesion, maxVersionCount));
+
+		std::vector<std::string> shape;
+		shape.push_back(dimesion);
+		cdm.addVariable(CDMVariable(dimesion, CDM_FLOAT, shape));
+		cdm.addAttribute(dimesion, CDMAttribute("long_name", "data version"));
+		cdm.addAttribute(dimesion, CDMAttribute("standard_name", "version"));
+	}
 
 	cdm.addDimension(CDMDimension("latitude", 100));
 	cdm.addDimension(CDMDimension("longitude", 100));
@@ -227,7 +163,7 @@ void DataIndex::addParameters_(CDM & cdm) const
 		std::vector<std::string> dimensions;
 		getDimensions_(dimensions, it->second);
 
-		const std::string cdmName = toCdmName(parameter.name());
+		const std::string cdmName = translator_.toCdmName(parameter.name());
 
 		cdm.addVariable(CDMVariable(cdmName, CDM_FLOAT, dimensions));
 		cdm.addAttribute(cdmName, CDMAttribute("grid_mapping", "unknown"));
@@ -260,14 +196,14 @@ void DataIndex::getLevelDimensions_(std::vector<std::string> & out, const LevelE
 	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
 	{
 		const Level & level = it->first;
-		levels[level.levelName()].insert(std::make_pair(level.from(), level.to()));
+		levels[level.name()].insert(std::make_pair(level.from(), level.to()));
 	}
 
 	for ( LevelEntries::const_iterator it = levels.begin(); it != levels.end(); ++ it )
 	{
 		if ( it->second.size() > 1 )
 		{
-			out.push_back(toCdmName(it->first));
+			out.push_back(translator_.toCdmName(it->first));
 			break; // We only support a single type of level atm
 		}
 	}
