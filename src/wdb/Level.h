@@ -29,8 +29,6 @@
 #ifndef LEVEL_H_
 #define LEVEL_H_
 
-#include "fimex/CDMDimension.h"
-#include "fimex/CDMAttribute.h"
 #include <string>
 #include <iosfwd>
 
@@ -47,15 +45,17 @@ class Level
 {
 public:
 	Level();
-	Level(const std::string & levelName, float from, float to);
+	Level(const std::string & levelName, const std::string & unit, float from, float to);
 
-	const std::string & name() const { return levelName_; }
+	const std::string & name() const { return name_; }
+	const std::string & unit() const { return unit_; }
 	float from() const { return from_; }
 	float to() const { return to_; }
 
 
 private:
-	std::string levelName_;
+	std::string name_;
+	std::string unit_;
 	float from_;
 	float to_;
 };

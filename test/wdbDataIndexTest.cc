@@ -75,7 +75,7 @@ public:
 	}
 };
 const wdb::Parameter TestingGridData::defaultParameter("air temperature", "C");
-const wdb::Level TestingGridData::defaultLevel("distance above ground", 0, 0);
+const wdb::Level TestingGridData::defaultLevel("distance above ground", "m", 0, 0);
 const std::string TestingGridData::defaultTime = "2011-03-18 06:00:00";
 
 wdb::CdmNameTranslator tr;
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_SUITE(DataIndexTest)
 BOOST_AUTO_TEST_CASE(setsBaseDimensions)
 {
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 1, 1)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
 
 	const wdb::DataIndex di(gridData, tr);
 	CDM cdm;
@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_CASE(setsBaseDimensions)
 BOOST_AUTO_TEST_CASE(setsDimensionSizes)
 {
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 1, 1)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2)));
 
 	const wdb::DataIndex di(gridData, tr);
 	CDM cdm;
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep)
 	// (todo: is there any problems with this?)
 
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2)));
 
 	const wdb::DataIndex di(gridData, tr);
 	CDM cdm;
@@ -157,9 +157,9 @@ BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep)
 BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSize)
 {
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2), "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2), "2010-03-18 07:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 0, 0), "2010-03-18 07:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0), "2010-03-18 07:00:00"));
 
 	const wdb::DataIndex di(gridData, tr);
 	CDM cdm;
@@ -177,9 +177,9 @@ BOOST_AUTO_TEST_CASE(picksUpAllTimesFromSameParameter)
 	// All times for varying levels should be picked up
 
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2), "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2), "2010-03-18 07:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 0, 0), "2000-01-01 00:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0), "2000-01-01 00:00:00"));
 
 	const wdb::DataIndex di(gridData, tr);
 	CDM cdm;
@@ -198,8 +198,8 @@ BOOST_AUTO_TEST_CASE(ignoresIrrelevantTimeDimensions)
 	// This makes sense for such fields as topography
 
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2), "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2), "2010-03-18 07:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00"));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00"));
 	gridData.push_back(TestingGridData(wdb::Parameter("timeless", "stuff"), "2000-01-01 00:00:00"));
 
 	const wdb::DataIndex di(gridData, tr);
@@ -263,9 +263,9 @@ BOOST_AUTO_TEST_CASE(versionsAddThemselvesAsVariables)
 BOOST_AUTO_TEST_CASE(zDimensionsAddThemselvesAsVariables)
 {
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 1, 1)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 2, 2)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2)));
 
 	const wdb::DataIndex di(gridData, tr);
 
@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
 BOOST_AUTO_TEST_CASE(singleLevelInData)
 {
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 0, 0)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
 
 	const wdb::DataIndex di(gridData, tr);
 	CDM cdm;
@@ -344,8 +344,8 @@ BOOST_AUTO_TEST_CASE(singleLevelInData)
 BOOST_AUTO_TEST_CASE(severalLevelsInData)
 {
 	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", 1, 1)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
 
 	const wdb::DataIndex di(gridData, tr);
 

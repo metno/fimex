@@ -38,8 +38,8 @@ Level::Level() :
 		from_(0), to_(0)
 {}
 
-Level::Level(const std::string & levelName, float from, float to) :
-	levelName_(levelName), from_(from), to_(to)
+Level::Level(const std::string & levelName, const std::string & unit, float from, float to) :
+	name_(levelName), unit_(unit), from_(from), to_(to)
 {
 }
 
