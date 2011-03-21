@@ -72,7 +72,7 @@ private:
 
 
 	void addDimensions_(CDM & cdm) const;
-	void getTimes_(std::set<Time> & out) const;
+	void addTimes_(CDM & cdm) const;
 	void addParameters_(CDM & cdm) const;
 	void getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
 	void getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;

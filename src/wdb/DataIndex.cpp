@@ -78,14 +78,19 @@ void DataIndex::populate(CDM & cdm) const
 	//cdm.toXMLStream(std::cout);
 }
 
+namespace
+{
+CDMVariable getSelfReferencingVariable(const std::string & name, CDMDataType dataType = CDM_FLOAT)
+{
+	std::vector<std::string> dims;
+	dims.push_back(name);
+	return CDMVariable(name, dataType, dims);
+}
+}
+
 void DataIndex::addDimensions_(CDM & cdm) const
 {
-	std::set<Time> times;
-	getTimes_(times);
-
-	CDMDimension time("time", times.size()); // get correct number
-	time.setUnlimited(true);
-	cdm.addDimension(time);
+	addTimes_(cdm);
 
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelMap;
 	LevelMap dimensions;
@@ -114,9 +119,7 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		std::string dimesion = "version";
 		cdm.addDimension(CDMDimension(dimesion, maxVersionCount));
 
-		std::vector<std::string> shape;
-		shape.push_back(dimesion);
-		cdm.addVariable(CDMVariable(dimesion, CDM_FLOAT, shape));
+		cdm.addVariable(getSelfReferencingVariable(dimesion, CDM_INT));
 		cdm.addAttribute(dimesion, CDMAttribute("long_name", "data version"));
 		cdm.addAttribute(dimesion, CDMAttribute("standard_name", "version"));
 	}
@@ -125,8 +128,10 @@ void DataIndex::addDimensions_(CDM & cdm) const
 	cdm.addDimension(CDMDimension("longitude", 100));
 }
 
-void DataIndex::getTimes_(std::set<Time> & out) const
+void DataIndex::addTimes_(CDM & cdm) const
 {
+	std::set<Time> times;
+
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
 	{
 		std::set<Time> timesForParameter;
@@ -139,8 +144,17 @@ void DataIndex::getTimes_(std::set<Time> & out) const
 			}
 		}
 		if ( timesForParameter.size() > 1 )
-			out.insert(timesForParameter.begin(), timesForParameter.end());
+			times.insert(timesForParameter.begin(), timesForParameter.end());
 	}
+
+	CDMDimension time("time", times.size()); // get correct number
+	time.setUnlimited(true);
+	cdm.addDimension(time);
+
+	cdm.addVariable(getSelfReferencingVariable("time", CDM_DOUBLE));
+	cdm.addAttribute("time", CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
+	cdm.addAttribute("time", CDMAttribute("long_name", "time"));
+	cdm.addAttribute("time", CDMAttribute("standard_name", "time"));
 }
 
 

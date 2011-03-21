@@ -65,7 +65,11 @@ public:
 		wdb::GridData(parameter, defaultLevel, 0, t(time), 0)
 	{}
 
-	TestingGridData(int dataVersion) :
+	explicit TestingGridData(const std::string & time) :
+		wdb::GridData(defaultParameter, defaultLevel, 0, t(time), 0)
+	{}
+
+	explicit TestingGridData(int dataVersion) :
 		wdb::GridData(defaultParameter, defaultLevel, dataVersion, t(defaultTime), 0)
 	{}
 
@@ -290,7 +294,6 @@ BOOST_AUTO_TEST_CASE(zDimensionsAddThemselvesAsVariables)
 
 BOOST_AUTO_TEST_CASE(manyZDimensions)
 {
-
 	std::vector<wdb::GridData> gridData;
 	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
 	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
@@ -325,6 +328,31 @@ BOOST_AUTO_TEST_CASE(manyZDimensions)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(addsTimeVariable)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData("2011-03-21 06:00:00"));
+	gridData.push_back(TestingGridData("2011-03-21 12:00:00"));
+	gridData.push_back(TestingGridData("2011-03-21 18:00:00"));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		cdm.getVariable("time");
+		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute("time", "units").getStringValue());
+		BOOST_CHECK_EQUAL("time", cdm.getAttribute("time", "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("time", cdm.getAttribute("time", "standard_name").getStringValue());
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+
+}
 
 
 
