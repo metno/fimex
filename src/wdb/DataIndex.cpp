@@ -173,20 +173,26 @@ void DataIndex::addDimensions_(CDM & cdm) const
 	time.setUnlimited(true);
 	cdm.addDimension(time);
 
-	typedef std::map<std::string, std::set<std::pair<float, float> > > DimensionMap;
-	DimensionMap dimensions;
+	typedef std::map<std::string, std::set<std::pair<float, float> > > LevelMap;
+	LevelMap dimensions;
 
+	std::size_t maxVersionCount = 0;
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
 	{
 		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
 		{
 			const Level & lvl = le->first;
 			dimensions[lvl.levelName()].insert(std::make_pair(lvl.from(), lvl.to()));
+
+			maxVersionCount = std::max(maxVersionCount, le->second.size());
 		}
 	}
-	for ( DimensionMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
+	for ( LevelMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
 		if ( it->second.size() > 1 )
 			cdm.addDimension(CDMDimension(toCdmName(it->first), it->second.size()));
+
+	if ( maxVersionCount > 1 )
+		cdm.addDimension(CDMDimension("version", maxVersionCount));
 
 	cdm.addDimension(CDMDimension("latitude", 100));
 	cdm.addDimension(CDMDimension("longitude", 100));
@@ -234,6 +240,9 @@ void DataIndex::getDimensions_(std::vector<std::string> & out, const LevelEntry 
 {
 	getLevelDimensions_(out, levelEntry);
 
+	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
+		getVersionDimensions_(out, it->second);
+
 	out.push_back("longitude");
 	out.push_back("latitude");
 }
@@ -256,6 +265,12 @@ void DataIndex::getLevelDimensions_(std::vector<std::string> & out, const LevelE
 			break; // We only support a single type of level atm
 		}
 	}
+}
+
+void DataIndex::getVersionDimensions_(std::vector<std::string> & out, const VersionEntry & versionEntry) const
+{
+	if ( versionEntry.size() > 1 )
+		out.push_back("version");
 }
 
 }

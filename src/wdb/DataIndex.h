@@ -75,6 +75,7 @@ private:
 	void addParameters_(CDM & cdm) const;
 	void getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
 	void getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
+	void getVersionDimensions_(std::vector<std::string> & out, const VersionEntry & versionEntry) const;
 
 	ParameterEntry data_;
 };

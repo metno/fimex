@@ -44,23 +44,38 @@
 
 using namespace MetNoFimex;
 
-/// Do not add any fields to this class they will disappear
+/// Do not add any non-static fields to this class; they will disappear in tests
 class TestingGridData : public wdb::GridData
 {
+	static const wdb::Parameter defaultParameter;
+	static const wdb::Level defaultLevel;
+	static const std::string defaultTime;
 	static boost::posix_time::ptime t(const std::string & time)
 	{
 		return boost::posix_time::time_from_string(time);
 	}
 public:
-	TestingGridData(const wdb::Level & lvl, const std::string & time = "2011-03-18 06:00:00") :
-		wdb::GridData(wdb::Parameter("air temperature", "C"), lvl, 0, t(time), 0)
+	TestingGridData(const wdb::Level & lvl, const std::string & time = defaultTime) :
+		wdb::GridData(defaultParameter, lvl, 0, t(time), 0)
 	{}
 
-	TestingGridData(const wdb::Parameter & parameter, const std::string & time = "2011-03-18 06:00:00") :
-		wdb::GridData(parameter, wdb::Level("distance above ground", 0, 0), 0, t(time), 0)
+	TestingGridData(const wdb::Parameter & parameter, const std::string & time = defaultTime) :
+		wdb::GridData(parameter, defaultLevel, 0, t(time), 0)
 	{}
 
+	TestingGridData(int dataVersion) :
+		wdb::GridData(defaultParameter, defaultLevel, dataVersion, t(defaultTime), 0)
+	{}
+
+	static std::string cdmId()
+	{
+		return "air_temperature";
+	}
 };
+const wdb::Parameter TestingGridData::defaultParameter("air temperature", "C");
+const wdb::Level TestingGridData::defaultLevel("distance above ground", 0, 0);
+const std::string TestingGridData::defaultTime = "2011-03-18 06:00:00";
+
 
 struct same_entity
 {
@@ -195,6 +210,30 @@ BOOST_AUTO_TEST_CASE(ignoresIrrelevantTimeDimensions)
 	BOOST_CHECK_EQUAL(2, timeDimension->getLength());
 }
 
+BOOST_AUTO_TEST_CASE(setsVersionDimensions)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(0));
+	gridData.push_back(TestingGridData(1));
+	gridData.push_back(TestingGridData(2));
+
+	const wdb::DataIndex di(gridData);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		const CDMDimension & dim = cdm.getDimension("version");
+		BOOST_CHECK_EQUAL(3, dim.getLength());
+	}
+	catch ( CDMException & )
+	{
+		BOOST_FAIL("Unable to find dimension 'version'");
+	}
+}
+
+
 
 
 BOOST_AUTO_TEST_CASE(singleLevelInData)
@@ -208,9 +247,9 @@ BOOST_AUTO_TEST_CASE(singleLevelInData)
 
 	try
 	{
-		const CDMVariable & var = cdm.getVariable("air_temperature");
+		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
 		const std::vector<std::string> & shape = var.getShape();
-		BOOST_REQUIRE(shape.size() >= 2);
+		BOOST_REQUIRE_LE(2, shape.size());
 		BOOST_CHECK_EQUAL("longitude", shape[0]);
 		BOOST_CHECK_EQUAL("latitude", shape[1]);
 		BOOST_CHECK_EQUAL(2, shape.size());
@@ -234,9 +273,9 @@ BOOST_AUTO_TEST_CASE(severalLevelsInData)
 
 	try
 	{
-		const CDMVariable & var = cdm.getVariable("air_temperature");
+		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
 		const std::vector<std::string> & shape = var.getShape();
-		BOOST_REQUIRE(shape.size() >= 3);
+		BOOST_REQUIRE_LE(3, shape.size());
 		BOOST_CHECK_EQUAL("lvl", shape[0]);
 		BOOST_CHECK_EQUAL("longitude", shape[1]);
 		BOOST_CHECK_EQUAL("latitude", shape[2]);
@@ -246,6 +285,28 @@ BOOST_AUTO_TEST_CASE(severalLevelsInData)
 	{
 		BOOST_FAIL(e.what());
 	}
+}
+
+BOOST_AUTO_TEST_CASE(severalDataVersions)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(0));
+	gridData.push_back(TestingGridData(1));
+	gridData.push_back(TestingGridData(2));
+
+	const wdb::DataIndex di(gridData);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+
+	const std::vector<std::string> & shape = var.getShape();
+	BOOST_REQUIRE_LE(3, shape.size());
+	BOOST_CHECK_EQUAL("version", shape[0]);
+	BOOST_CHECK_EQUAL("longitude", shape[1]);
+	BOOST_CHECK_EQUAL("latitude", shape[2]);
+	BOOST_CHECK_EQUAL(3, shape.size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
