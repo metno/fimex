@@ -27,6 +27,8 @@
  */
 
 #include "Level.h"
+#include "CdmNameTranslator.h"
+#include <fimex/CDM.h>
 #include <ostream>
 
 namespace MetNoFimex
@@ -34,20 +36,48 @@ namespace MetNoFimex
 namespace wdb
 {
 
-Level::Level() :
-		from_(0), to_(0)
+LevelType::LevelType(const std::string & name, const std::string & unit) :
+		name_(name), unit_(unit)
 {}
 
-Level::Level(const std::string & levelName, const std::string & unit, float from, float to) :
-	name_(levelName), unit_(unit), from_(from), to_(to)
+void LevelType::addToCdm(CDM & cdm, long length, const CdmNameTranslator & translator) const
 {
+	const std::string & cdmName = translator.toCdmName(name_);
+
+	cdm.addDimension(CDMDimension(cdmName, length));
+
+	std::vector<std::string> shape;
+	shape.push_back(cdmName);
+
+	cdm.addVariable(CDMVariable(cdmName, CDM_FLOAT, shape));
+
+	cdm.addAttribute(cdmName, CDMAttribute("long_name", name_));
+	cdm.addAttribute(cdmName, CDMAttribute("standard_name", cdmName));
+	cdm.addAttribute(cdmName, CDMAttribute("units", unit_));
+	cdm.addAttribute(cdmName, CDMAttribute("axis", "z"));
 }
 
 
+
+std::ostream & operator << (std::ostream & s, const LevelType & t)
+{
+	return s << t.name();
+}
+
+
+Level::Level() :
+	type_("", ""), from_(0), to_(0)
+{}
+
+Level::Level(const std::string & levelName, const std::string & unit, float from, float to) :
+	type_(levelName, unit), from_(from), to_(to)
+{
+}
+
 bool operator <(const Level & a, const Level & b)
 {
-	if (a.name() != b.name())
-		return a.name() < b.name();
+	if (a.type() != b.type())
+		return a.type() < b.type();
 	if (a.from() != b.from())
 		return a.from() < b.from();
 	return a.to() < b.to();
@@ -57,7 +87,7 @@ std::ostream & operator << (std::ostream & s, const Level & l)
 {
 	if (l.from() != l.to())
 		s << l.from() << " to ";
-	s << l.to() << " " << l.name();
+	s << l.to() << " " << l.type();
 
 	return s;
 }

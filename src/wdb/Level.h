@@ -29,14 +29,51 @@
 #ifndef LEVEL_H_
 #define LEVEL_H_
 
+#include "fimex/CDMDimension.h"
+#include "fimex/CDMAttribute.h"
 #include <string>
 #include <iosfwd>
 
 
 namespace MetNoFimex
 {
+class CDM;
+
 namespace wdb
 {
+class CdmNameTranslator;
+
+class LevelType
+{
+public:
+	LevelType(const std::string & name, const std::string & unit);
+
+	const std::string & name() const { return name_; }
+	const std::string & unit() const { return unit_; }
+
+	void addToCdm(CDM & cdm, long length, const CdmNameTranslator & translator) const;
+
+
+private:
+	std::string name_;
+	std::string unit_;
+};
+
+inline bool operator < (const LevelType & a, const LevelType & b)
+{
+	return a.name() < b.name();
+}
+inline bool operator == (const LevelType & a, const LevelType & b)
+{
+	return a.name() == b.name();
+}
+inline bool operator != (const LevelType & a, const LevelType & b)
+{
+	return not (a == b);
+}
+std::ostream & operator << (std::ostream & s, const LevelType & t);
+
+
 
 /**
  * A level in the wdb database.
@@ -47,15 +84,14 @@ public:
 	Level();
 	Level(const std::string & levelName, const std::string & unit, float from, float to);
 
-	const std::string & name() const { return name_; }
-	const std::string & unit() const { return unit_; }
+	const LevelType & type() const { return type_; }
 	float from() const { return from_; }
 	float to() const { return to_; }
 
 
+
 private:
-	std::string name_;
-	std::string unit_;
+	LevelType type_;
 	float from_;
 	float to_;
 };

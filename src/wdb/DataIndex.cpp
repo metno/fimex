@@ -87,7 +87,7 @@ void DataIndex::addDimensions_(CDM & cdm) const
 	time.setUnlimited(true);
 	cdm.addDimension(time);
 
-	typedef std::map<std::string, std::set<std::pair<float, float> > > LevelMap;
+	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelMap;
 	LevelMap dimensions;
 
 	std::size_t maxVersionCount = 0;
@@ -96,7 +96,7 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
 		{
 			const Level & lvl = le->first;
-			dimensions[lvl.name()].insert(std::make_pair(lvl.from(), lvl.to()));
+			dimensions[lvl.type()].insert(std::make_pair(lvl.from(), lvl.to()));
 
 			maxVersionCount = std::max(maxVersionCount, le->second.size());
 		}
@@ -104,19 +104,9 @@ void DataIndex::addDimensions_(CDM & cdm) const
 	for ( LevelMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
 		if ( it->second.size() > 1 )
 		{
-			const std::string & lvl = it->first;
-			std::string cdmName = translator_.toCdmName(lvl);
+			const LevelType & lvl = it->first;
+			lvl.addToCdm(cdm, it->second.size(), translator_);
 
-			cdm.addDimension(CDMDimension(cdmName, it->second.size()));
-
-			std::vector<std::string> shape;
-			shape.push_back(cdmName);
-			cdm.addVariable(CDMVariable(cdmName, CDM_FLOAT, shape));
-			cdm.addAttribute(cdmName, CDMAttribute("long_name", lvl));
-			cdm.addAttribute(cdmName, CDMAttribute("standard_name", cdmName));
-
-			cdm.addAttribute(cdmName, CDMAttribute("units", "m"));
-			cdm.addAttribute(cdmName, CDMAttribute("axis", "z"));
 		}
 
 	if ( maxVersionCount > 1 )
@@ -191,19 +181,19 @@ void DataIndex::getDimensions_(std::vector<std::string> & out, const LevelEntry 
 
 void DataIndex::getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
 {
-	typedef std::map<std::string, std::set<std::pair<float, float> > > LevelEntries;
+	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelEntries;
 	LevelEntries levels;
 	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
 	{
 		const Level & level = it->first;
-		levels[level.name()].insert(std::make_pair(level.from(), level.to()));
+		levels[level.type()].insert(std::make_pair(level.from(), level.to()));
 	}
 
 	for ( LevelEntries::const_iterator it = levels.begin(); it != levels.end(); ++ it )
 	{
 		if ( it->second.size() > 1 )
 		{
-			out.push_back(translator_.toCdmName(it->first));
+			out.push_back(translator_.toCdmName(it->first.name()));
 			break; // We only support a single type of level atm
 		}
 	}

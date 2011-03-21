@@ -288,6 +288,44 @@ BOOST_AUTO_TEST_CASE(zDimensionsAddThemselvesAsVariables)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(manyZDimensions)
+{
+
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
+	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
+	gridData.push_back(TestingGridData(wdb::Level("foo bar", "x", 0, 0)));
+	gridData.push_back(TestingGridData(wdb::Level("foo bar", "x", 1, 1)));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	const std::string variableA = "lvl";
+	const std::string variableB = "foo_bar";
+	try
+	{
+		cdm.getVariable(variableA); // will throw if variableA does no exist
+		BOOST_CHECK_EQUAL("m", cdm.getAttribute(variableA, "units").getStringValue());
+		BOOST_CHECK_EQUAL("lvl", cdm.getAttribute(variableA, "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("lvl", cdm.getAttribute(variableA, "standard_name").getStringValue());
+		BOOST_CHECK_EQUAL("z", cdm.getAttribute(variableA, "axis").getStringValue());
+
+		cdm.getVariable(variableB); // will throw if variableB does no exist
+		BOOST_CHECK_EQUAL("x", cdm.getAttribute(variableB, "units").getStringValue());
+		BOOST_CHECK_EQUAL("foo bar", cdm.getAttribute(variableB, "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("foo_bar", cdm.getAttribute(variableB, "standard_name").getStringValue());
+		BOOST_CHECK_EQUAL("z", cdm.getAttribute(variableB, "axis").getStringValue());
+
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
+
+
 
 
 BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
