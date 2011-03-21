@@ -47,14 +47,15 @@ using namespace MetNoFimex;
 /// Do not add any non-static fields to this class; they will disappear in tests
 class TestingGridData : public wdb::GridData
 {
-	static const wdb::Parameter defaultParameter;
-	static const wdb::Level defaultLevel;
-	static const std::string defaultTime;
 	static boost::posix_time::ptime t(const std::string & time)
 	{
 		return boost::posix_time::time_from_string(time);
 	}
 public:
+	static const wdb::Parameter defaultParameter;
+	static const wdb::Level defaultLevel;
+	static const std::string defaultTime;
+
 	TestingGridData(const wdb::Level & lvl, const std::string & time = defaultTime) :
 		wdb::GridData(defaultParameter, lvl, 0, t(time), 0)
 	{}
@@ -234,7 +235,32 @@ BOOST_AUTO_TEST_CASE(setsVersionDimensions)
 }
 
 
+BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(TestingGridData::defaultLevel, "2010-03-18 06:00:00"));
+	gridData.push_back(TestingGridData(TestingGridData::defaultLevel, "2010-03-18 07:00:00"));
+	gridData.push_back(TestingGridData(TestingGridData::defaultLevel, "2010-03-18 08:00:00"));
 
+	const wdb::DataIndex di(gridData);
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+		const std::vector<std::string> & shape = var.getShape();
+		BOOST_REQUIRE_LE(3, shape.size());
+		BOOST_CHECK_EQUAL("time", shape[0]);
+		BOOST_CHECK_EQUAL("longitude", shape[1]);
+		BOOST_CHECK_EQUAL("latitude", shape[2]);
+		BOOST_CHECK_EQUAL(3, shape.size());
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
 
 BOOST_AUTO_TEST_CASE(singleLevelInData)
 {

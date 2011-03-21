@@ -81,7 +81,8 @@ void DataIndex::populate(CDM & cdm) const
 {
 	addDimensions_(cdm);
 	addParameters_(cdm);
-	return;
+
+	//cdm.toXMLStream(std::cout);
 
 //	typedef std::map<std::string, std::set<std::pair<float, float> > > LevelMap;
 //	// Collection of all levels in use
@@ -238,6 +239,11 @@ void DataIndex::addParameters_(CDM & cdm) const
 
 void DataIndex::getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
 {
+	for ( LevelEntry::const_iterator le = levelEntry.begin(); le != levelEntry.end(); ++ le )
+		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
+			if ( ve->second.size() > 1 )
+				out.push_back("time");
+
 	getLevelDimensions_(out, levelEntry);
 
 	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
