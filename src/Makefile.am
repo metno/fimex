@@ -6,7 +6,7 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} 
 
 lib_LTLIBRARIES = libfimex.la
 libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @MIFI_UDUNITS2_LDFLAGS@ @MIFI_UDUNITS_LDFLAGS@ @MIFI_PROJ_LDFLAGS@ @MIFI_NETCDF_LDFLAGS@ @MIFI_GRIB_API_LDFLAGS@ ${XML_LDFLAGS} @BOOST_LDFLAGS@
-libfimex_la_LIBADD = felt/libfelt.la wdb/libwdb.a @MIFI_UDUNITS_LIBS@ @MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ @MIFI_NETCDF_CPP_LIBS@ @MIFI_GRIB_API_LIBS@ @XML_LIBS@ @BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
+libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ @MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ @MIFI_NETCDF_CPP_LIBS@ @MIFI_GRIB_API_LIBS@ @XML_LIBS@ @BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
 libfimex_la_SOURCES = interpolation.c \
                      c_fimex.cc \
                      C_CDMReader.cc \
@@ -94,4 +94,6 @@ if HAVE_LIBPQ
   libfimex_la_SOURCES += gridexer/GxWdbDataTypes.cc \
                          gridexer/GxWdbExplorer.cc \
                          WdbCDMReader.cc
+                         
+libfimex_la_LIBADD += wdb/libwdb.a
 endif
