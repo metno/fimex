@@ -60,7 +60,7 @@ std::ostream & DataIndex::summary(std::ostream & s) const
 			{
 				s << "  " << ve->first << '\n';
 				for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
-					s << "   " << te->first << ":\t" << std::showbase << std::hex << te->second << '\n';
+					s << "   " << te->first << ":\t" << te->second << '\n';
 			}
 		}
 	}
@@ -182,7 +182,10 @@ void DataIndex::getDimensions_(std::vector<std::string> & out, const LevelEntry 
 	for ( LevelEntry::const_iterator le = levelEntry.begin(); le != levelEntry.end(); ++ le )
 		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
 			if ( ve->second.size() > 1 )
+			{
 				out.push_back("time");
+				break;
+			}
 
 	getLevelDimensions_(out, levelEntry);
 

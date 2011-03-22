@@ -52,13 +52,12 @@ class Level;
 class DataIndex
 {
 public:
-	explicit DataIndex(const std::vector<GridData> & data, const CdmNameTranslator & translator);
+	DataIndex(const std::vector<GridData> & data, const CdmNameTranslator & translator);
 	~DataIndex();
 
 	std::ostream & summary(std::ostream & s) const;
 
 	void populate(CDM & cdm) const;
-
 
 private:
 
@@ -73,6 +72,7 @@ private:
 
 	void addDimensions_(CDM & cdm) const;
 	void addTimes_(CDM & cdm) const;
+
 	void addParameters_(CDM & cdm) const;
 	void getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
 	void getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
