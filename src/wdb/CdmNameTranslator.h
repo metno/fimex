@@ -29,7 +29,14 @@
 #ifndef CDMNAMETRANSLATOR_H_
 #define CDMNAMETRANSLATOR_H_
 
+#include <fimex/CDMException.h>
+
+// standard
+//
 #include <string>
+#include <map>
+
+class XMLDoc;
 
 namespace MetNoFimex
 {
@@ -43,7 +50,39 @@ public:
 	CdmNameTranslator();
 	~CdmNameTranslator();
 
-	std::string toCdmName(const std::string & wdbName) const;
+    void readXML(const std::string& xmlFileName);
+	void readXML(const XMLDoc& xmlDoc);
+	void addNamePair(const std::string& wdbName, const std::string& cdmName);
+
+    bool isEmpty() const;
+
+    bool hasWdbName(const std::string& wdbName) const;
+	bool hasCdmName(const std::string& cdmName) const;
+	std::string toCdmName(const std::string& wdbName) const;
+	std::string toWdbName(const std::string& cdmName) const;
+
+	void clear();
+
+	std::string toString() const;
+private:
+    /**
+	 * TODO:
+	 *     consider if mapping is
+	 *         a)    1:1
+	 *         b)    n:1
+	 *
+	 *     assumption that
+	 *     1:M and N:M
+	 *     are invalid
+	 */
+    std::map<std::string, std::string> mapWdbToCdm;
+};
+
+class CdmNameTranslatorException : public CDMException
+{
+public:
+    explicit CdmNameTranslatorException(std::string msg)
+	    : CDMException("CdmNameTranslatorException: " + msg) {}
 };
 
 }

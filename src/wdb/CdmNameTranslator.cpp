@@ -43,6 +43,40 @@ CdmNameTranslator::~CdmNameTranslator()
 {
 }
 
+bool CdmNameTranslator::isEmpty() const
+{
+    return mapWdbToCdm.empty();
+}
+
+void CdmNameTranslator::clear()
+{
+    mapWdbToCdm.clear();
+}
+
+bool CdmNameTranslator::hasCdmName(const std::string& cdmName) const
+{
+    /**
+	 * TODO:
+	 *     try boost bidirectional map
+	 *
+	 *     ATM we can assume that map
+	 *     will be relatively small to
+	 *     do linera search
+	 */
+    std::map<std::string, std::string>::const_iterator cit = mapWdbToCdm.begin();
+	for(; cit != mapWdbToCdm.end(); ++cit) {
+			if(cit->second == cdmName)
+                return true;
+	}
+
+	return false;
+}
+
+bool CdmNameTranslator::hasWdbName(const std::string& wdbName) const
+{
+    return mapWdbToCdm.find(wdbName) != mapWdbToCdm.end();
+}
+
 std::string CdmNameTranslator::toCdmName(const std::string & wdbName) const
 {
 	return boost::algorithm::replace_all_copy(wdbName, " ", "_");
