@@ -36,10 +36,22 @@ namespace wdb
 
 WdbConnection::WdbConnection(const std::string & connectString)
 {
+	/**
+	 * TODO:
+	 *     parse connection string down to its elements?
+	 */
 	connection_ = PQconnectdb(connectString.c_str());
 	if ( !isConnected() )
 		throw WdbException(connection_);
 
+    /**
+	 * TODO:
+	 *    wci and wdb user might be different
+	 *
+	 *    convey information about wci user
+	 *
+	 *    remove hard coded value from query below
+	 */
 	PQclear(call_("SELECT wci.begin('wdb')"));
 }
 
