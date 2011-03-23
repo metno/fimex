@@ -37,7 +37,7 @@ namespace wdb
 WdbConnection::WdbConnection(const std::string & connectString)
 {
 	connection_ = PQconnectdb(connectString.c_str());
-	if ( CONNECTION_OK != PQstatus(connection_) )
+	if ( !isConnected() )
 		throw WdbException(connection_);
 
 	PQclear(call_("SELECT wci.begin('wdb')"));
@@ -47,6 +47,11 @@ WdbConnection::~WdbConnection()
 {
 	if (connection_)
 		PQfinish(connection_);
+}
+
+bool WdbConnection::isConnected()
+{
+    return ( CONNECTION_OK == PQstatus(connection_) ) ;
 }
 
 namespace

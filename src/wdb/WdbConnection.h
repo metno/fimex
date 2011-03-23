@@ -56,6 +56,13 @@ public:
 	explicit WdbConnection(const std::string & connectString);
 	~WdbConnection();
 
+    /**
+	 * Checking if already connected
+	 *
+	 */
+	bool isConnected();
+
+
 	/**
 	 * Get a list of all available data that matches the given arguments.
 	 *
