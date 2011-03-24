@@ -72,9 +72,25 @@ bool CdmNameTranslator::hasCdmName(const std::string& cdmName) const
 	return false;
 }
 
+void CdmNameTranslator::removeCdmName(const std::string& cdmName)
+{
+    std::map<std::string, std::string>::iterator it = mapWdbToCdm.begin();
+	for(; it != mapWdbToCdm.end(); ++it) {
+	    if(it->second == cdmName){
+		    mapWdbToCdm.erase(it);
+		    return;
+		}
+	}
+}
+
 bool CdmNameTranslator::hasWdbName(const std::string& wdbName) const
 {
     return mapWdbToCdm.find(wdbName) != mapWdbToCdm.end();
+}
+
+void CdmNameTranslator::removeWdbName(const std::string& wdbName)
+{
+    mapWdbToCdm.erase(wdbName);
 }
 
 std::string CdmNameTranslator::toCdmName(const std::string & wdbName) const

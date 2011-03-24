@@ -52,12 +52,22 @@ public:
 
     void readXML(const std::string& xmlFileName);
 	void readXML(const XMLDoc& xmlDoc);
+
 	void addNamePair(const std::string& wdbName, const std::string& cdmName);
+
+    /**
+	 * both removeNNN will remove name pair
+	 * as we are operating on assumption that
+	 * we have bijection 1:1 mapping
+	 */
+	void removeWdbName(const std::string& wdbName);
+	void removeCdmName(const std::string& cdmName);
 
     bool isEmpty() const;
 
     bool hasWdbName(const std::string& wdbName) const;
 	bool hasCdmName(const std::string& cdmName) const;
+
 	std::string toCdmName(const std::string& wdbName) const;
 	std::string toWdbName(const std::string& cdmName) const;
 
