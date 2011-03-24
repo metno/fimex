@@ -86,7 +86,7 @@ void CdmNameTranslator::readXML(const XMLDoc& xmlDoc, const std::string& xpath)
 				(std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
 				    std::string name = getXmlProp(child, "name");
 					std::string value = getXmlProp(child, "value");
-					if(name == std::string("standard_cf_name")) {
+					if(name == std::string("standard_name")) {
 					    cdmName = value;
 						addNamePair(wdbName, cdmName);
 					}
