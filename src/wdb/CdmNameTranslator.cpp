@@ -27,6 +27,18 @@
  */
 
 #include "CdmNameTranslator.h"
+
+// fimex
+//
+#include <fimex/XMLDoc.h>
+
+
+// 3rd party
+#include <libxml/xinclude.h>
+#include <libxml/xpathInternals.h>
+
+// system
+//
 #include <boost/algorithm/string.hpp>
 
 
@@ -51,6 +63,50 @@ bool CdmNameTranslator::isEmpty() const
 void CdmNameTranslator::clear()
 {
     mapWdbToCdm.clear();
+}
+
+void CdmNameTranslator::readXML(const XMLDoc& xmlDoc, const std::string& xpath)
+{
+    std::string wdbName;
+	std::string cdmName;
+	xmlNodePtr theNode;
+	XPathObjPtr xpathObj = xmlDoc.getXPathObject(xpath);
+	xmlNodeSetPtr nodes = xpathObj->nodesetval;
+	int size = (nodes) ? nodes->nodeNr : 0;
+	for(int node_index = 0; node_index < size; ++node_index) {
+	    theNode = nodes->nodeTab[node_index];
+		assert(theNode->type == XML_ELEMENT_NODE);
+		wdbName = getXmlProp(theNode, "name");
+
+		// fetch attributes for this node
+		//
+		xmlNodePtr child = theNode->children;
+		while(child != 0) {
+			if ((child->type == XML_ELEMENT_NODE) &&
+				(std::string("attribute") == std::string(reinterpret_cast<const char *>(child->name)))) {
+				    std::string name = getXmlProp(child, "name");
+					std::string value = getXmlProp(child, "value");
+					if(name == std::string("standard_cf_name")) {
+					    cdmName = value;
+						addNamePair(wdbName, cdmName);
+					}
+			}
+
+			child = child->next;
+		}
+	}
+}
+
+void CdmNameTranslator::readXML(const XMLDoc& xmlDoc)
+{
+    readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/value_parameter");
+	readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/level_parameter");
+}
+
+void CdmNameTranslator::readXML(const std::string& xmlFileName)
+{
+    XMLDoc xmlDoc(xmlFileName);
+	readXML(xmlDoc);
 }
 
 void CdmNameTranslator::addNamePair(const std::string& wdbName, const std::string& cdmName)

@@ -36,10 +36,10 @@
 #include <string>
 #include <map>
 
-class XMLDoc;
-
 namespace MetNoFimex
 {
+
+class XMLDoc;
 
 namespace wdb
 {
@@ -75,6 +75,7 @@ public:
 
 	std::string toString() const;
 private:
+    void readXML(const XMLDoc& xmlDoc, const std::string& path);
     /**
 	 * TODO:
 	 *     consider if mapping is
