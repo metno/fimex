@@ -5,7 +5,7 @@ if HAVE_LIBPQ
 
 noinst_LIBRARIES = libwdb.a
 
-libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/
+libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/ ${XML_CPPFLAGS}
 
 libwdb_a_SOURCES = \
 	WdbConnection.h WdbConnection.cpp \

@@ -257,7 +257,7 @@ top_srcdir = @top_srcdir@
 # Convenience library for wdb access. Will not be installed
 # 
 @HAVE_LIBPQ_TRUE@noinst_LIBRARIES = libwdb.a
-@HAVE_LIBPQ_TRUE@libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/
+@HAVE_LIBPQ_TRUE@libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/ ${XML_CPPFLAGS}
 @HAVE_LIBPQ_TRUE@libwdb_a_SOURCES = \
 @HAVE_LIBPQ_TRUE@	WdbConnection.h WdbConnection.cpp \
 @HAVE_LIBPQ_TRUE@	CdmNameTranslator.h CdmNameTranslator.cpp \
