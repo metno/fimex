@@ -53,6 +53,17 @@ void CdmNameTranslator::clear()
     mapWdbToCdm.clear();
 }
 
+void CdmNameTranslator::addNamePair(const std::string& wdbName, const std::string& cdmName)
+{
+    if(hasWdbName(wdbName))
+	    throw CdmNameTranslatorException("wdbName: " + wdbName + " already exists!");
+
+    if(hasCdmName(cdmName))
+	    throw CdmNameTranslatorException("cdmName: " + cdmName + " already exists!");
+
+    mapWdbToCdm.insert(std::pair<std::string, std::string>(wdbName, cdmName));
+}
+
 bool CdmNameTranslator::hasCdmName(const std::string& cdmName) const
 {
     /**
