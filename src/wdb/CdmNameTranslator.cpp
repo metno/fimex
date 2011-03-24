@@ -75,7 +75,8 @@ void CdmNameTranslator::readXML(const XMLDoc& xmlDoc, const std::string& xpath)
 	int size = (nodes) ? nodes->nodeNr : 0;
 	for(int node_index = 0; node_index < size; ++node_index) {
 	    theNode = nodes->nodeTab[node_index];
-		assert(theNode->type == XML_ELEMENT_NODE);
+		if(theNode->type != XML_ELEMENT_NODE)
+		    throw CdmNameTranslatorException("not XML_ELEMENT_NODE!");
 		wdbName = getXmlProp(theNode, "name");
 
 		// fetch attributes for this node
