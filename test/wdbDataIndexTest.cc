@@ -480,8 +480,43 @@ BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 
+
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(CdmNameTranslator)
+
+BOOST_AUTO_TEST_CASE(testSize)
+{
+    wdb::CdmNameTranslator translator;
+    BOOST_CHECK_EQUAL(true, translator.isEmpty());
+    BOOST_CHECK_EQUAL(0, translator.size());
+
+    translator.addNamePair("air temperature", "temperature");
+    translator.addNamePair("air pressure", "pressure");
+    BOOST_CHECK_EQUAL(2, translator.size());
+
+    translator.addNamePair("geopotential height", "height");
+    BOOST_CHECK_EQUAL(3, translator.size());
+
+    translator.addNamePair("longitude", "longitutde");
+    translator.addNamePair("latitude", "latitude");
+    BOOST_CHECK_EQUAL(5, translator.size());
+    BOOST_CHECK_EQUAL(false, translator.isEmpty());
+
+    translator.removeWdbName("geopotential height");
+    translator.removeCdmName("temperature");
+    BOOST_CHECK_EQUAL(3, translator.size());
+
+    translator.addNamePair("x", "projection_x_coordinate");
+    translator.addNamePair("y", "projection_y_coordinate");
+    BOOST_CHECK_EQUAL(5, translator.size());
+
+    translator.clear();
+    BOOST_CHECK_EQUAL(true, translator.isEmpty());
+    BOOST_CHECK_EQUAL(0, translator.size());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 #else
 // no boost testframework
