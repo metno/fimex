@@ -166,10 +166,33 @@ void CdmNameTranslator::removeWdbName(const std::string& wdbName)
     mapWdbToCdm.erase(wdbName);
 }
 
-std::string CdmNameTranslator::toCdmName(const std::string & wdbName) const
+std::string CdmNameTranslator::toCdmName(const std::string& wdbName) const
 {
-	return boost::algorithm::replace_all_copy(wdbName, " ", "_");
+    if(hasWdbName(wdbName)) {
+	    std::map<std::string, std::string>::const_iterator cit = mapWdbToCdm.find(wdbName);
+	    return cit->second;
+	} else {
+	    /**
+		 * default case
+		 */
+        return boost::algorithm::replace_all_copy(wdbName, " ", "_");
+	}
 }
 
+std::string CdmNameTranslator::toWdbName(const std::string& cdmName) const
+{
+    if(hasCdmName(cdmName)) {
+	   std::map<std::string, std::string>::const_iterator cit;
+	   for(cit = mapWdbToCdm.begin(); cit != mapWdbToCdm.end(); ++cit) {
+	       if(cit->second == cdmName)
+	           return cit->first;
+	   }
+	} else {
+        /**
+		 * default
+		 */
+        return boost::algorithm::replace_all_copy(cdmName, "_", " ");
+	}
+}
 }
 }
