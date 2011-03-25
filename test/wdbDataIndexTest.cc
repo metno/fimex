@@ -516,6 +516,24 @@ BOOST_AUTO_TEST_CASE(testSize)
     BOOST_CHECK_EQUAL(0, translator.size());
 }
 
+BOOST_AUTO_TEST_CASE(testTranslation)
+{
+    wdb::CdmNameTranslator translator;
+    BOOST_CHECK_EQUAL(true, translator.isEmpty());
+
+    translator.addNamePair("air temperature", "temperature");
+    translator.addNamePair("air pressure", "pressure");
+    translator.addNamePair("geopotential height", "height");
+    translator.addNamePair("longitude", "longitutde");
+    translator.addNamePair("latitude", "latitude");
+    translator.removeWdbName("geopotential height");
+    translator.removeCdmName("temperature");
+    translator.addNamePair("x", "projection_x_coordinate");
+    translator.addNamePair("y", "projection_y_coordinate");
+
+    BOOST_CHECK_EQUAL(9, translator.size());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #else
