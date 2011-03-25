@@ -516,6 +516,38 @@ BOOST_AUTO_TEST_CASE(testSize)
     BOOST_CHECK_EQUAL(0, translator.size());
 }
 
+BOOST_AUTO_TEST_CASE(testHasNames)
+{
+    wdb::CdmNameTranslator translator;
+    BOOST_CHECK_EQUAL(true, translator.isEmpty());
+
+    translator.addNamePair("air temperature", "temperature");
+    translator.addNamePair("air pressure", "pressure");
+    translator.addNamePair("geopotential height", "height");
+    translator.addNamePair("longitude", "longitude");
+    translator.addNamePair("latitude", "latitude");
+    translator.addNamePair("x", "projection_x_coordinate");
+    translator.addNamePair("y", "projection_y_coordinate");
+
+    BOOST_CHECK_EQUAL(7, translator.size());
+
+    BOOST_CHECK_EQUAL(true, translator.hasCdmName("temperature"));
+    BOOST_CHECK_EQUAL(true, translator.hasWdbName("air temperature"));
+
+    BOOST_CHECK_EQUAL(true, translator.hasCdmName("projection_x_coordinate"));
+    BOOST_CHECK_EQUAL(true, translator.hasWdbName("x"));
+
+    translator.removeCdmName("temperature");
+    BOOST_CHECK_EQUAL(false, translator.hasCdmName("temperature"));
+    BOOST_CHECK_EQUAL(false, translator.hasWdbName("air temperature"));
+
+    translator.removeWdbName("x");
+    BOOST_CHECK_EQUAL(false, translator.hasCdmName("projection_x_coordinate"));
+    BOOST_CHECK_EQUAL(false, translator.hasWdbName("x"));
+
+    BOOST_CHECK_EQUAL(false, translator.isEmpty());
+}
+
 BOOST_AUTO_TEST_CASE(testTranslation)
 {
     wdb::CdmNameTranslator translator;
@@ -524,14 +556,26 @@ BOOST_AUTO_TEST_CASE(testTranslation)
     translator.addNamePair("air temperature", "temperature");
     translator.addNamePair("air pressure", "pressure");
     translator.addNamePair("geopotential height", "height");
-    translator.addNamePair("longitude", "longitutde");
+    translator.addNamePair("longitude", "longitude");
     translator.addNamePair("latitude", "latitude");
-    translator.removeWdbName("geopotential height");
-    translator.removeCdmName("temperature");
     translator.addNamePair("x", "projection_x_coordinate");
     translator.addNamePair("y", "projection_y_coordinate");
 
-    BOOST_CHECK_EQUAL(9, translator.size());
+    BOOST_CHECK_EQUAL(7, translator.size());
+
+    BOOST_CHECK_EQUAL("longitutde", translator.toCdmName("longitutde"));
+    BOOST_CHECK_EQUAL("longitutde", translator.toWdbName("longitutde"));
+
+    BOOST_CHECK_EQUAL("temperature", translator.toCdmName("air temperature"));
+    BOOST_CHECK_EQUAL("geopotential height", translator.toWdbName("height"));
+
+    BOOST_CHECK_EQUAL("not_in_translator", translator.toCdmName("not in translator"));
+    BOOST_CHECK_EQUAL("not in translator", translator.toWdbName("not_in_translator"));
+
+    BOOST_CHECK_EQUAL("notintranslator", translator.toCdmName("notintranslator"));
+    BOOST_CHECK_EQUAL("notintranslator", translator.toWdbName("notintranslator"));
+
+    BOOST_CHECK_EQUAL(false, translator.isEmpty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
