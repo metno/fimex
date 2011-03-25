@@ -64,6 +64,7 @@ public:
 	void removeCdmName(const std::string& cdmName);
 
     bool isEmpty() const;
+	size_t size() const;
 
     bool hasWdbName(const std::string& wdbName) const;
 	bool hasCdmName(const std::string& cdmName) const;

@@ -60,6 +60,11 @@ bool CdmNameTranslator::isEmpty() const
     return mapWdbToCdm.empty();
 }
 
+size_t CdmNameTranslator::size() const
+{
+    return mapWdbToCdm.size();
+}
+
 void CdmNameTranslator::clear()
 {
     mapWdbToCdm.clear();
