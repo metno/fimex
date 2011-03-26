@@ -578,6 +578,36 @@ BOOST_AUTO_TEST_CASE(testTranslation)
     BOOST_CHECK_EQUAL(false, translator.isEmpty());
 }
 
+BOOST_AUTO_TEST_CASE(testExceptions)
+{
+    wdb::CdmNameTranslator translator;
+    BOOST_CHECK_EQUAL(true, translator.isEmpty());
+
+    translator.addNamePair("air temperature", "temperature");
+    translator.addNamePair("air pressure", "pressure");
+    translator.addNamePair("geopotential height", "height");
+    translator.addNamePair("longitude", "longitude");
+    translator.addNamePair("latitude", "latitude");
+    translator.addNamePair("x", "projection_x_coordinate");
+    translator.addNamePair("y", "projection_y_coordinate");
+
+    BOOST_REQUIRE_EQUAL(7, translator.size());
+
+    BOOST_REQUIRE_THROW(translator.addNamePair("air pressure", "pressure"), wdb::CdmNameTranslatorException);
+    BOOST_REQUIRE_THROW(translator.addNamePair("x", "projection_x_coordinate"), wdb::CdmNameTranslatorException);
+
+    translator.removeWdbName("air pressure");
+    BOOST_REQUIRE_EQUAL(6, translator.size());
+
+    translator.removeCdmName("projection_x_coordinate");
+    BOOST_REQUIRE_EQUAL(5, translator.size());
+
+    BOOST_REQUIRE_NO_THROW(translator.addNamePair("air pressure", "pressure"));
+    BOOST_REQUIRE_NO_THROW(translator.addNamePair("x", "projection_x_coordinate"));
+
+    BOOST_REQUIRE_EQUAL(7, translator.size());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #else
