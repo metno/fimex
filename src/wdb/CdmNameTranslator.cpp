@@ -107,6 +107,7 @@ void CdmNameTranslator::readXML(const XMLDoc& xmlDoc)
 {
     readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/value_parameter");
 	readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/level_parameter");
+	readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/parameter");
 }
 
 void CdmNameTranslator::readXML(const std::string& xmlFileName)

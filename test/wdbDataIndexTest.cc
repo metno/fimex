@@ -616,7 +616,7 @@ BOOST_AUTO_TEST_CASE(testXmlRead)
     translator.readXML("wdbreadercfg.xml");
     BOOST_CHECK_EQUAL(false, translator.isEmpty());
 
-    BOOST_REQUIRE_EQUAL(5, translator.size());
+    BOOST_REQUIRE_EQUAL(6, translator.size());
 
     BOOST_CHECK_EQUAL(true, translator.hasWdbName("height above ground distance"));
     BOOST_CHECK_EQUAL(true, translator.hasWdbName("height above mean sea level distance"));
@@ -627,6 +627,7 @@ BOOST_AUTO_TEST_CASE(testXmlRead)
     BOOST_CHECK_EQUAL(false, translator.hasCdmName("precipitation"));
 
     BOOST_CHECK_EQUAL("temperature", translator.toCdmName("air_temperature"));
+    BOOST_CHECK_EQUAL("relative_humidity", translator.toCdmName("relative_humidity"));
     BOOST_CHECK_EQUAL("height above mean sea level distance", translator.toWdbName("GeoZ"));
 }
 
