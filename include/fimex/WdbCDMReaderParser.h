@@ -19,7 +19,7 @@
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
-
+e
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
@@ -41,13 +41,51 @@
 
 namespace MetNoFimex
 {
+    class WdbCDMReaderParserInfo
+    {
+    public:
+        explicit WdbCDMReaderParserInfo();
+        ~WdbCDMReaderParserInfo();
+
+        /**
+         * ATM we will expose only getters
+         *
+         * WdbCDMReaderParser will be able
+         * to sett values as friend class
+         */
+        std::string wdbHost() const;
+        std::string wdbName() const;
+        std::string wdbUser() const;
+        std::string wciUser() const;
+        std::string configFileName() const;
+        unsigned short wdbPort() const;
+    private:
+        std::string    wdbHost_;
+        std::string    wdbName_;
+        std::string    wdbUser_;
+        std::string    wciUser_;
+        std::string    configFileName_;
+        std::string    referenceTime_;
+        unsigned short wdbPort_;
+
+        friend class WdbCDMReaderParser;
+    };
 
     class WdbCDMReaderParser
     {
     public:
-        explicit WdbCDMReaderParser(const std::string& cmdLine);
+        explicit WdbCDMReaderParser();
         ~WdbCDMReaderParser();
+
+        /**
+         * if bParseConfigFile == false, parse() method
+         * will skip to parse the file (even if found
+         * within cmdLine options)
+         */
+        WdbCDMReaderParserInfo parse(const std::string& cmdLine, bool bParseConfigFile = true);
     private:
+        void parseCmdLine(const std::string& cmdLine, WdbCDMReaderParserInfo& info);
+        void parseCfgFile(const std::string& cfgFile, WdbCDMReaderParserInfo& info);
     };
 
 } // MetNoFimex
