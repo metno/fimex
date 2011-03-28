@@ -92,6 +92,10 @@ BOOST_AUTO_TEST_CASE(testHasNames)
 
     BOOST_CHECK_EQUAL(7, translator.size());
 
+#ifdef __DEBUG__
+	std::cerr << translator.toString() << std::endl;
+#endif
+
     BOOST_CHECK_EQUAL(true, translator.hasCdmName("temperature"));
     BOOST_CHECK_EQUAL(true, translator.hasWdbName("air temperature"));
 
