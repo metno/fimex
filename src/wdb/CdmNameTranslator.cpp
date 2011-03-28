@@ -39,6 +39,8 @@
 
 // system
 //
+#include <iostream>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
 
 
@@ -195,5 +197,21 @@ std::string CdmNameTranslator::toWdbName(const std::string& cdmName) const
         return boost::algorithm::replace_all_copy(cdmName, "_", " ");
 	}
 }
+
+std::string CdmNameTranslator::toString() const
+{
+    std::stringstream buffer;
+	buffer << "CdmNameTranslator output: " << std::endl;
+	buffer << "                  has size: " << size() << std::endl;
+	buffer << "                  contains values: " << std::endl;
+	buffer << "                  " << "WdbName" << " \t<->\t " << "CdmName"  << std::endl;
+	std::map<std::string, std::string>::const_iterator cit;
+	for(cit = mapWdbToCdm.begin(); cit != mapWdbToCdm.end(); ++cit) {
+        buffer << "                  " << cit->first << " <-> " << cit->second  << std::endl;
+	}
+
+	return buffer.str();
+}
+
 }
 }
