@@ -196,9 +196,11 @@ test_c_consumer_OBJECTS = $(am_test_c_consumer_OBJECTS)
 test_c_consumer_LDADD = $(LDADD)
 test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
-am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc
+am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc \
+	wdbCdmNameTranslatorTest.cc
 @HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
-@HAVE_LIBPQ_TRUE@	wdbTest-wdbDataIndexTest.$(OBJEXT)
+@HAVE_LIBPQ_TRUE@	wdbTest-wdbDataIndexTest.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	wdbTest-wdbCdmNameTranslatorTest.$(OBJEXT)
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
 wdbTest_LDADD = $(LDADD)
 wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
@@ -418,8 +420,8 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
-@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = wdbDataIndexTest.cc
-@HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/
+@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc
+@HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
@@ -580,6 +582,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbDataIndexTest.Po@am__quote@
 
 .c.o:
@@ -637,6 +640,20 @@ wdbTest-wdbDataIndexTest.obj: wdbDataIndexTest.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbDataIndexTest.cc' object='wdbTest-wdbDataIndexTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbDataIndexTest.obj `if test -f 'wdbDataIndexTest.cc'; then $(CYGPATH_W) 'wdbDataIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbDataIndexTest.cc'; fi`
+
+wdbTest-wdbCdmNameTranslatorTest.o: wdbCdmNameTranslatorTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbCdmNameTranslatorTest.o -MD -MP -MF $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Tpo -c -o wdbTest-wdbCdmNameTranslatorTest.o `test -f 'wdbCdmNameTranslatorTest.cc' || echo '$(srcdir)/'`wdbCdmNameTranslatorTest.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Tpo $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbCdmNameTranslatorTest.cc' object='wdbTest-wdbCdmNameTranslatorTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbCdmNameTranslatorTest.o `test -f 'wdbCdmNameTranslatorTest.cc' || echo '$(srcdir)/'`wdbCdmNameTranslatorTest.cc
+
+wdbTest-wdbCdmNameTranslatorTest.obj: wdbCdmNameTranslatorTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbCdmNameTranslatorTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Tpo -c -o wdbTest-wdbCdmNameTranslatorTest.obj `if test -f 'wdbCdmNameTranslatorTest.cc'; then $(CYGPATH_W) 'wdbCdmNameTranslatorTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbCdmNameTranslatorTest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Tpo $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbCdmNameTranslatorTest.cc' object='wdbTest-wdbCdmNameTranslatorTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbCdmNameTranslatorTest.obj `if test -f 'wdbCdmNameTranslatorTest.cc'; then $(CYGPATH_W) 'wdbCdmNameTranslatorTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbCdmNameTranslatorTest.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

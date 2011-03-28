@@ -39,8 +39,8 @@ if HAVE_GRIBAPI
 endif
 if HAVE_LIBPQ 
   CC_TESTS += wdbTest
-  wdbTest_SOURCES = wdbDataIndexTest.cc
-  wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/
+  wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc
+  wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
   
 test_wdb: wdbTest
 	@./wdbTest
