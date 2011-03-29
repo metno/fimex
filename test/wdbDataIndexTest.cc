@@ -536,8 +536,6 @@ BOOST_AUTO_TEST_CASE(createsProjectionVariable_2)
 
 	try
 	{
-		const CDM::VarVec & variables = cdm.getVariables();
-
 		std::string projectionName = "projection_rotated_latitude_longitude"; // change to projection_ob_tran?
 		const CDMVariable & var = cdm.getVariable(projectionName);
 		BOOST_CHECK(var.getShape().empty());
