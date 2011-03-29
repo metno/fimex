@@ -54,43 +54,20 @@ DataIndex::~DataIndex()
 {
 }
 
-std::ostream & DataIndex::summary(std::ostream & s) const
-{
-	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
-	{
-		s << pe->first.name() << " (" << pe->first.unit() << ")" << '\n';
-		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
-		{
-			s << " " << le->first << '\n';
-			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
-			{
-				s << "  " << ve->first << '\n';
-				for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
-					s << "   " << te->first << ":\t" << te->second << '\n';
-			}
-		}
-	}
-	std::flush(s);
+// projection after z-axis
+// x(x) and y(y)
+// longitude(x, y)
+// latitude(x, y)
+// forecast_reference_time
 
-	return s;
-}
-
+// global attributes
 
 void DataIndex::populate(CDM & cdm) const
 {
-	// projection after z-axis
-	// x(x) and y(y)
-	// longitude(x, y)
-	// latitude(x, y)
-	// forecast_reference_time
-
-	// global attributes
-
-
 	addDimensions_(cdm);
+	addProjectionInformation_(cdm);
 	addParameters_(cdm);
-
-	cdm.toXMLStream(std::cout);
+	//cdm.toXMLStream(std::cout);
 }
 
 namespace
@@ -105,18 +82,22 @@ CDMVariable getSelfReferencingVariable(const std::string & name, CDMDataType dat
 
 void DataIndex::addDimensions_(CDM & cdm) const
 {
+	addLevelDimensions_(cdm);
+	addVersionDimension_(cdm);
+	addTimeDimensions_(cdm);
+}
+
+void DataIndex::addLevelDimensions_(CDM & cdm) const
+{
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelMap;
 	LevelMap dimensions;
 
-	std::size_t maxVersionCount = 0;
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
 	{
 		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
 		{
 			const Level & lvl = le->first;
 			dimensions[lvl.type()].insert(std::make_pair(lvl.from(), lvl.to()));
-
-			maxVersionCount = std::max(maxVersionCount, le->second.size());
 		}
 	}
 	for ( LevelMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
@@ -127,6 +108,14 @@ void DataIndex::addDimensions_(CDM & cdm) const
 			lvl.addToCdm(cdm, it->second.size(), translator_);
 		}
 	}
+}
+
+void DataIndex::addVersionDimension_(CDM & cdm) const
+{
+	std::size_t maxVersionCount = 0;
+	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
+		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
+			maxVersionCount = std::max(maxVersionCount, le->second.size());
 
 	if ( maxVersionCount > 1 )
 	{
@@ -137,14 +126,9 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		cdm.addAttribute(dimesion, CDMAttribute("long_name", "data version"));
 		cdm.addAttribute(dimesion, CDMAttribute("standard_name", "version"));
 	}
-
-	cdm.addDimension(CDMDimension("latitude", 100));
-	cdm.addDimension(CDMDimension("longitude", 100));
-
-	addTimes_(cdm);
 }
 
-void DataIndex::addTimes_(CDM & cdm) const
+void DataIndex::addTimeDimensions_(CDM & cdm) const
 {
 	std::set<Time> times;
 
@@ -163,7 +147,7 @@ void DataIndex::addTimes_(CDM & cdm) const
 			times.insert(timesForParameter.begin(), timesForParameter.end());
 	}
 
-	CDMDimension time("time", times.size()); // get correct number
+	CDMDimension time("time", times.size());
 	time.setUnlimited(true);
 	cdm.addDimension(time);
 
@@ -174,7 +158,7 @@ void DataIndex::addTimes_(CDM & cdm) const
 }
 
 
-void DataIndex::addParameters_(CDM & cdm) const
+void DataIndex::addProjectionInformation_(CDM & cdm) const
 {
 	std::set<GridData::GridInformationPtr> grids;
 	for ( GridSpecMap::const_iterator it = grids_.begin(); it != grids_.end(); ++ it )
@@ -188,6 +172,14 @@ void DataIndex::addParameters_(CDM & cdm) const
 		BOOST_FOREACH(const CDMAttribute & a, projection->getParameters())
 			cdm.addAttribute(projectionName, a);
 	}
+
+	cdm.addDimension(CDMDimension("latitude", 100));
+	cdm.addDimension(CDMDimension("longitude", 100));
+}
+
+
+void DataIndex::addParameters_(CDM & cdm) const
+{
 
 	for ( ParameterEntry::const_iterator it = data_.begin(); it != data_.end(); ++ it )
 	{
