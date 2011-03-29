@@ -34,6 +34,7 @@
 #include "fimex/coordSys/Projection.h"
 #include <set>
 #include <boost/foreach.hpp>
+#include <boost/assign/list_of.hpp>
 
 namespace MetNoFimex
 {
@@ -67,6 +68,7 @@ void DataIndex::populate(CDM & cdm) const
 	addProjectionInformation_(cdm);
 	addDimensions_(cdm);
 	addParameterVariables_(cdm);
+
 	cdm.toXMLStream(std::cout);
 }
 
@@ -173,8 +175,32 @@ void DataIndex::addProjectionInformation_(CDM & cdm) const
 			cdm.addAttribute(projectionName, a);
 	}
 
-	cdm.addDimension(CDMDimension("latitude", 100));
-	cdm.addDimension(CDMDimension("longitude", 100));
+	if ( grids.size() > 1 )
+		throw CDMException("Several grid types in same wdb is not supported (yet)");
+
+	cdm.addDimension(CDMDimension("x", (*grids.begin())->numberX()));
+	cdm.addDimension(CDMDimension("y", (*grids.begin())->numberY()));
+
+	cdm.addVariable(CDMVariable("x", CDM_FLOAT, std::vector<std::string>(1, "x")));
+	cdm.addAttribute("x", CDMAttribute("long_name", "x-coordinate in Cartesian system"));
+	cdm.addAttribute("x", CDMAttribute("standard_name", "grid longitude"));
+	cdm.addAttribute("x", CDMAttribute("units", "degree_east"));
+
+	cdm.addVariable(CDMVariable("y", CDM_FLOAT, std::vector<std::string>(1, "y")));
+	cdm.addAttribute("y", CDMAttribute("long_name", "y-coordinate in Cartesian system"));
+	cdm.addAttribute("y", CDMAttribute("standard_name", "grid latitude"));
+	cdm.addAttribute("y", CDMAttribute("units", "degree_north"));
+
+	std::vector<std::string> dims = boost::assign::list_of("longitude")("latitude");
+	cdm.addVariable(CDMVariable("longitude", CDM_FLOAT, dims));
+	cdm.addAttribute("longitude", CDMAttribute("long_name", "longitude"));
+	cdm.addAttribute("longitude", CDMAttribute("standard_name", "longitude"));
+	cdm.addAttribute("longitude", CDMAttribute("units", "degree_east"));
+
+	cdm.addVariable(CDMVariable("latitude", CDM_FLOAT, dims));
+	cdm.addAttribute("latitude", CDMAttribute("long_name", "latitude"));
+	cdm.addAttribute("latitude", CDMAttribute("standard_name", "latitude"));
+	cdm.addAttribute("latitude", CDMAttribute("units", "degree_north"));
 }
 
 

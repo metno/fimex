@@ -125,8 +125,8 @@ BOOST_AUTO_TEST_CASE(setsBaseDimensions)
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("latitude")) != dims.end());
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("longitude")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("x")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("y")) != dims.end());
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("time")) != dims.end());
 	BOOST_CHECK_EQUAL(3, dims.size());
 }
@@ -143,8 +143,8 @@ BOOST_AUTO_TEST_CASE(setsDimensionSizes)
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("latitude")) != dims.end());
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("longitude")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("x")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("y")) != dims.end());
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("time")) != dims.end());
 
 	BOOST_CHECK_EQUAL(4, dims.size());
@@ -548,6 +548,42 @@ BOOST_AUTO_TEST_CASE(createsProjectionVariable_2)
 		BOOST_FAIL(e.what());
 	}
 }
+
+BOOST_AUTO_TEST_CASE(createsTranslatedLatLonVariables)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData());
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		const CDMVariable & var = cdm.getVariable("projection_latitude_longitude");
+		BOOST_CHECK(var.getShape().empty());
+
+		const CDMAttribute & attr = cdm.getAttribute("projection_latitude_longitude", "grid_mapping_name");
+		BOOST_CHECK_EQUAL("latitude_longitude", attr.getStringValue());
+
+		const CDMDimension & xDimension = cdm.getDimension("x");
+		BOOST_CHECK_EQUAL(30, xDimension.getLength());
+
+		const CDMDimension & yDimension = cdm.getDimension("y");
+		BOOST_CHECK_EQUAL(20, yDimension.getLength());
+
+		const CDMVariable & x = cdm.getVariable("x");
+		const CDMVariable & y = cdm.getVariable("y");
+		const CDMVariable & latitude = cdm.getVariable("latitude");
+		const CDMVariable & longitude = cdm.getVariable("longitude");
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
+
 
 BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes)
 {
