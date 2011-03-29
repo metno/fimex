@@ -75,10 +75,11 @@ private:
 
 	void addProjectionInformation_(CDM & cdm) const;
 
-	void addParameters_(CDM & cdm) const;
-	void getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
-	void getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
-	void getVersionDimensions_(std::vector<std::string> & out, const VersionEntry & versionEntry) const;
+	void addParameterVariables_(CDM & cdm) const;
+	void getDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
+	void getTimeDimensionForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
+	void getLevelDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
+	void getVersionDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
 
 	ParameterEntry data_;
 	const CdmNameTranslator & translator_;

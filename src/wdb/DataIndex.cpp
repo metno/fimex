@@ -64,10 +64,10 @@ DataIndex::~DataIndex()
 
 void DataIndex::populate(CDM & cdm) const
 {
-	addDimensions_(cdm);
 	addProjectionInformation_(cdm);
-	addParameters_(cdm);
-	//cdm.toXMLStream(std::cout);
+	addDimensions_(cdm);
+	addParameterVariables_(cdm);
+	cdm.toXMLStream(std::cout);
 }
 
 namespace
@@ -178,15 +178,14 @@ void DataIndex::addProjectionInformation_(CDM & cdm) const
 }
 
 
-void DataIndex::addParameters_(CDM & cdm) const
+void DataIndex::addParameterVariables_(CDM & cdm) const
 {
-
 	for ( ParameterEntry::const_iterator it = data_.begin(); it != data_.end(); ++ it )
 	{
 		const Parameter & parameter = it->first;
 
 		std::vector<std::string> dimensions;
-		getDimensions_(dimensions, it->second);
+		getDimensionsForParameter_(dimensions, it->second);
 
 		const std::string cdmName = translator_.toCdmName(parameter.name());
 
@@ -202,7 +201,18 @@ void DataIndex::addParameters_(CDM & cdm) const
 	}
 }
 
-void DataIndex::getDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+{
+	getTimeDimensionForParameter_(out, levelEntry);
+	getLevelDimensionsForParameter_(out, levelEntry);
+	getVersionDimensionsForParameter_(out, levelEntry);
+
+	// x/y dimensions
+	out.push_back("longitude");
+	out.push_back("latitude");
+}
+
+void DataIndex::getTimeDimensionForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
 {
 	for ( LevelEntry::const_iterator le = levelEntry.begin(); le != levelEntry.end(); ++ le )
 		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
@@ -211,17 +221,9 @@ void DataIndex::getDimensions_(std::vector<std::string> & out, const LevelEntry 
 				out.push_back("time");
 				break;
 			}
-
-	getLevelDimensions_(out, levelEntry);
-
-	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
-		getVersionDimensions_(out, it->second);
-
-	out.push_back("longitude");
-	out.push_back("latitude");
 }
 
-void DataIndex::getLevelDimensions_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+void DataIndex::getLevelDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
 {
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelEntries;
 	LevelEntries levels;
@@ -241,10 +243,11 @@ void DataIndex::getLevelDimensions_(std::vector<std::string> & out, const LevelE
 	}
 }
 
-void DataIndex::getVersionDimensions_(std::vector<std::string> & out, const VersionEntry & versionEntry) const
+void DataIndex::getVersionDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
 {
-	if ( versionEntry.size() > 1 )
-		out.push_back("version");
+	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
+		if ( it->second.size() > 1 )
+			out.push_back("version");
 }
 
 }
