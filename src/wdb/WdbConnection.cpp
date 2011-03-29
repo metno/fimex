@@ -27,6 +27,7 @@
  */
 
 #include "WdbConnection.h"
+#include "GridInformation.h"
 
 namespace MetNoFimex
 {
@@ -92,7 +93,37 @@ void WdbConnection::readGid(std::vector<GridData> & out, const std::string & dat
 
 	int tuples = PQntuples(result.get());
 	for ( int i = 0; i < tuples; ++ i )
-		out.push_back(GridData(result.get(), i));
+	{
+		GridData gridData(result.get(), i);
+		out.push_back(gridData);
+	}
+
+	// Add grid information to data
+	for ( int i = out.size() - tuples; i < out.size(); ++ i )
+	{
+		GridData & gridData = out[i];
+		GridInformationPtr gridInfo = readGridInformation(gridData.placeName());
+		gridData.setGridInformation(gridInfo);
+	}
+}
+
+WdbConnection::GridInformationPtr WdbConnection::readGridInformation(const std::string & gridName)
+{
+	GridList::const_iterator find = gridsInUse_.find(gridName);
+	if ( find == gridsInUse_.end() )
+	{
+		Scoped_PGresult result(call_(GridInformation::query(gridName)));
+
+		int tuples = PQntuples(result.get());
+		if ( tuples == 0 )
+			throw WdbException("Unknown grid name: " + gridName);
+		else if ( tuples > 1 )
+			throw WdbException("Ambiguous grid name: " + gridName);
+
+		GridInformationPtr ret(new GridInformation(result.get(), 0));
+		find = gridsInUse_.insert(std::make_pair(gridName, ret)).first;
+	}
+	return find->second;
 }
 
 PGresult * WdbConnection::call_(const std::string & query)
@@ -110,6 +141,10 @@ PGresult * WdbConnection::call_(const std::string & query)
 WdbException::WdbException(PGconn * connection) :
 		CDMException(PQerrorMessage(connection))
 {}
+WdbException::WdbException(const std::string & msg) :
+		CDMException(msg)
+{}
+
 
 }
 }

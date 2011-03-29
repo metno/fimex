@@ -32,12 +32,16 @@
 #include "Parameter.h"
 #include "Level.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/shared_ptr.hpp>
 #include <libpq-fe.h>
+
 
 namespace MetNoFimex
 {
 namespace wdb
 {
+class GridInformation;
+
 
 /**
  * Represents a single return row from wci.read(..., returngid)
@@ -50,12 +54,15 @@ public:
 	~GridData();
 
 	typedef boost::posix_time::ptime Time;
+	typedef boost::shared_ptr<GridInformation> GridInformationPtr;
 	typedef long long gid;
 
 	const Parameter & parameter() const { return parameter_; };
 	const Level & level() const { return level_; }
 	int version() const { return version_; };
 	const Time & validTo() const { return validTo_; };
+	const std::string & placeName() const { return placeName_; }
+	const GridInformationPtr & gridInformation() const { return gridInformation_; }
 	gid gridIdentifier() const { return gridIdentifier_; };
 
 protected:
@@ -64,11 +71,19 @@ protected:
 	 * - via subclasses
 	 */
 	GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, gid gridId);
+
+	void setGridInformation(GridInformationPtr gridInformation)
+	{
+		gridInformation_ = gridInformation;
+	}
+
 private:
 	Parameter parameter_;
 	Level level_;
 	int version_;
 	Time validTo_;
+	std::string placeName_;
+	GridInformationPtr gridInformation_;
 	gid gridIdentifier_;
 
 	friend class WdbConnection;

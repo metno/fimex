@@ -80,6 +80,9 @@ private:
 
 	ParameterEntry data_;
 	const CdmNameTranslator & translator_;
+
+	typedef std::set<GridData::GridInformationPtr> GridSpecMap;
+	GridSpecMap grids_;
 };
 
 }

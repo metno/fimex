@@ -27,10 +27,13 @@
  */
 
 #include "DataIndex.h"
+#include "GridInformation.h"
 #include "CdmNameTranslator.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/coordSys/Projection.h"
 #include <set>
+#include <boost/foreach.hpp>
 
 namespace MetNoFimex
 {
@@ -41,7 +44,10 @@ DataIndex::DataIndex(const std::vector<wdb::GridData> & data, const CdmNameTrans
 		translator_(translator)
 {
 	for ( std::vector<wdb::GridData>::const_iterator d = data.begin(); d != data.end(); ++ d )
+	{
 		data_[d->parameter()] [d->level()] [d->version()] [d->validTo()] = d->gridIdentifier();
+		grids_.insert(d->gridInformation());
+	}
 }
 
 DataIndex::~DataIndex()
@@ -72,6 +78,15 @@ std::ostream & DataIndex::summary(std::ostream & s) const
 
 void DataIndex::populate(CDM & cdm) const
 {
+	// projection after z-axis
+	// x(x) and y(y)
+	// longitude(x, y)
+	// latitude(x, y)
+	// forecast_reference_time
+
+	// global attributes
+
+
 	addDimensions_(cdm);
 	addParameters_(cdm);
 
@@ -90,8 +105,6 @@ CDMVariable getSelfReferencingVariable(const std::string & name, CDMDataType dat
 
 void DataIndex::addDimensions_(CDM & cdm) const
 {
-	addTimes_(cdm);
-
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelMap;
 	LevelMap dimensions;
 
@@ -107,12 +120,13 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		}
 	}
 	for ( LevelMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
+	{
 		if ( it->second.size() > 1 )
 		{
 			const LevelType & lvl = it->first;
 			lvl.addToCdm(cdm, it->second.size(), translator_);
-
 		}
+	}
 
 	if ( maxVersionCount > 1 )
 	{
@@ -124,8 +138,21 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		cdm.addAttribute(dimesion, CDMAttribute("standard_name", "version"));
 	}
 
+
+	for ( GridSpecMap::const_iterator it = grids_.begin(); it != grids_.end(); ++ it )
+	{
+		std::string projDefinition = (*it)->projDefinition();
+		boost::shared_ptr<Projection> projection = Projection::createByProj4(projDefinition);
+		std::string projectionName = "projection_" + projection->getName();
+		CDMVariable projectionSpec(projectionName, CDM_FLOAT, std::vector<std::string>());
+		cdm.addVariable(projectionSpec);
+		BOOST_FOREACH(const CDMAttribute & a, projection->getParameters())
+			cdm.addAttribute(projectionName, a);
+	}
 	cdm.addDimension(CDMDimension("latitude", 100));
 	cdm.addDimension(CDMDimension("longitude", 100));
+
+	addTimes_(cdm);
 }
 
 void DataIndex::addTimes_(CDM & cdm) const

@@ -28,6 +28,7 @@
 
 #include <wdb/DataIndex.h>
 #include <wdb/CdmNameTranslator.h>
+#include <wdb/GridInformation.h>
 #include <fimex/CDM.h>
 #include <iostream>
 #include <algorithm>
@@ -56,22 +57,37 @@ public:
 	static const wdb::Parameter defaultParameter;
 	static const wdb::Level defaultLevel;
 	static const std::string defaultTime;
+	static const GridInformationPtr defaultGrid;
 
 	TestingGridData(const wdb::Level & lvl, const std::string & time = defaultTime) :
 		wdb::GridData(defaultParameter, lvl, 0, t(time), 0)
-	{}
+	{
+		setGridInformation(defaultGrid);
+	}
 
 	TestingGridData(const wdb::Parameter & parameter, const std::string & time = defaultTime) :
 		wdb::GridData(parameter, defaultLevel, 0, t(time), 0)
-	{}
+	{
+		setGridInformation(defaultGrid);
+	}
 
 	explicit TestingGridData(const std::string & time) :
 		wdb::GridData(defaultParameter, defaultLevel, 0, t(time), 0)
-	{}
+	{
+		setGridInformation(defaultGrid);
+	}
 
-	explicit TestingGridData(int dataVersion, const std::string & time = defaultTime) :
+	TestingGridData(int dataVersion, const std::string & time = defaultTime) :
 		wdb::GridData(defaultParameter, defaultLevel, dataVersion, t(time), 0)
-	{}
+	{
+		setGridInformation(defaultGrid);
+	}
+
+	TestingGridData(GridInformationPtr gridInfo) :
+		wdb::GridData(defaultParameter, defaultLevel, 0, t(defaultTime), 0)
+	{
+		setGridInformation(gridInfo);
+	}
 
 	static std::string cdmId()
 	{
@@ -81,6 +97,7 @@ public:
 const wdb::Parameter TestingGridData::defaultParameter("air temperature", "C");
 const wdb::Level TestingGridData::defaultLevel("distance above ground", "m", 0, 0);
 const std::string TestingGridData::defaultTime = "2011-03-18 06:00:00";
+const TestingGridData::GridInformationPtr TestingGridData::defaultGrid(new wdb::GridInformation("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
 wdb::CdmNameTranslator tr;
 
@@ -480,6 +497,59 @@ BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 
+BOOST_AUTO_TEST_CASE(createsProjectionVariable)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(TestingGridData::defaultGrid));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		const CDMVariable & var = cdm.getVariable("projection_latitude_longitude");
+		BOOST_CHECK(var.getShape().empty());
+
+		const CDMAttribute & attr = cdm.getAttribute("projection_latitude_longitude", "grid_mapping_name");
+		BOOST_CHECK_EQUAL("latitude_longitude", attr.getStringValue());
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(createsProjectionVariable_2)
+{
+	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
+	TestingGridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(grid));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		const CDM::VarVec & variables = cdm.getVariables();
+
+		std::string projectionName = "projection_rotated_latitude_longitude"; // change to projection_ob_tran?
+		const CDMVariable & var = cdm.getVariable(projectionName);
+		BOOST_CHECK(var.getShape().empty());
+
+		const CDMAttribute & attr = cdm.getAttribute(projectionName, "proj4");
+		BOOST_CHECK_EQUAL(projDefinition, attr.getStringValue());
+}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

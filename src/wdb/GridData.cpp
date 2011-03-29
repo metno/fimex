@@ -39,6 +39,7 @@ GridData::GridData(const Parameter & param, const Level & lvl, int version, cons
 		level_(lvl),
 		version_(version),
 		validTo_(validTo),
+		placeName_("test grid"),
 		gridIdentifier_(gridId)
 {
 }
@@ -55,9 +56,10 @@ std::string GridData::query(const std::string & dataProvider)
 		"DataVersion, "
 		"extract(epoch from ValidTimeFrom), "
 		"extract(epoch from ValidTimeTo), "
+		"PlaceName, "
 		"value"
 		" FROM "
-		"wci.read('{" + dataProvider + "}',NULL, NULL,NULL, NULL,NULL, NULL,NULL::wci.returngid)";
+		"wci.read('{" + dataProvider + "}',NULL, NULL,NULL, '{air temperature}',NULL, '{0}',NULL::wci.returngid)";
 }
 
 namespace
@@ -74,6 +76,7 @@ enum ReadIdx
 	DataVersion,
 	ValidTimeFrom,
 	ValidTimeTo,
+	PlaceName,
 	Value
 };
 #define GET(idx) PQgetvalue(result, row, idx)
@@ -89,6 +92,7 @@ GridData::GridData(PGresult * result, int row)
 	level_ = Level(GET(LevelParameterName), GET(LevelUnitName), GETFLOAT(LevelFrom), GETFLOAT(LevelTo));
 	version_ = GETINT32(DataVersion);
 	validTo_ = GETTIME(ValidTimeTo);
+	placeName_ = GET(PlaceName);
 	gridIdentifier_ = GETINT64(Value);
 }
 

@@ -40,7 +40,7 @@ namespace MetNoFimex
 {
 namespace wdb
 {
-
+class GridInformation;
 
 /**
  * A connection to a wdb database, with useful queries created as methods on
@@ -70,6 +70,11 @@ public:
 	 */
 	void readGid(std::vector<GridData> & out, const std::string & dataProvider);
 
+
+	typedef boost::shared_ptr<GridInformation> GridInformationPtr;
+	GridInformationPtr readGridInformation(const std::string & gridName);
+
+
 private:
 	/**
 	 * Make a database call.
@@ -82,7 +87,8 @@ private:
 
 	PGconn * connection_;
 
-	friend class WdbException;
+	typedef std::map<std::string, GridInformationPtr> GridList;
+	GridList gridsInUse_;
 };
 
 
@@ -90,6 +96,7 @@ class WdbException : public CDMException
 {
 public:
 	explicit WdbException(PGconn * connection);
+	explicit WdbException(const std::string & msg);
 };
 
 }
