@@ -59,14 +59,14 @@ public:
 	static const std::string defaultTime;
 	static const GridInformationPtr defaultGrid;
 
-	TestingGridData(const wdb::Level & lvl, const std::string & time = defaultTime) :
-		wdb::GridData(defaultParameter, lvl, 0, t(time), 0)
+	TestingGridData(const wdb::Parameter & parameter = defaultParameter, const std::string & time = defaultTime) :
+		wdb::GridData(parameter, defaultLevel, 0, t(time), 0)
 	{
 		setGridInformation(defaultGrid);
 	}
 
-	TestingGridData(const wdb::Parameter & parameter, const std::string & time = defaultTime) :
-		wdb::GridData(parameter, defaultLevel, 0, t(time), 0)
+	TestingGridData(const wdb::Level & lvl, const std::string & time = defaultTime) :
+		wdb::GridData(defaultParameter, lvl, 0, t(time), 0)
 	{
 		setGridInformation(defaultGrid);
 	}
@@ -550,6 +550,55 @@ BOOST_AUTO_TEST_CASE(createsProjectionVariable_2)
 		BOOST_FAIL(e.what());
 	}
 }
+
+BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData());
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(TestingGridData::cdmId(), "grid_mapping").getStringValue());
+		BOOST_CHECK_EQUAL("C", cdm.getAttribute(TestingGridData::cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(TestingGridData::cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(TestingGridData::cdmId(), "coordinates").getStringValue());
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes_2)
+{
+	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
+	TestingGridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData(grid));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(TestingGridData::cdmId(), "grid_mapping").getStringValue());
+		BOOST_CHECK_EQUAL("C", cdm.getAttribute(TestingGridData::cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(TestingGridData::cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(TestingGridData::cdmId(), "coordinates").getStringValue());
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

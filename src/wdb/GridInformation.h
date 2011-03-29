@@ -31,10 +31,11 @@
 
 #include <string>
 #include <libpq-fe.h>
-
+#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
 {
+class Projection;
 
 namespace wdb
 {
@@ -44,15 +45,19 @@ class GridInformation
 public:
 	~GridInformation();
 
-	const std::string & projDefinition() const { return projDefinition_; };
+	//const std::string & projDefinition() const { return projDefinition_; };
+	const boost::shared_ptr<Projection> & getProjection() const { return projection_; }
 	unsigned numberX() const { return numberX_; };
 	unsigned numberY() const { return numberY_; };
+
+	std::string getProjectionName() const;
 
 
 	GridInformation(const std::string & projDefinition, unsigned numberX, unsigned numberY);
 
+
 private:
-	std::string projDefinition_;
+	boost::shared_ptr<Projection> projection_;
 	unsigned numberX_;
 	unsigned numberY_;
 

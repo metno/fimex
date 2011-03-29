@@ -46,7 +46,7 @@ DataIndex::DataIndex(const std::vector<wdb::GridData> & data, const CdmNameTrans
 	for ( std::vector<wdb::GridData>::const_iterator d = data.begin(); d != data.end(); ++ d )
 	{
 		data_[d->parameter()] [d->level()] [d->version()] [d->validTo()] = d->gridIdentifier();
-		grids_.insert(d->gridInformation());
+		grids_[d->parameter()] = d->gridInformation();
 	}
 }
 
@@ -90,7 +90,7 @@ void DataIndex::populate(CDM & cdm) const
 	addDimensions_(cdm);
 	addParameters_(cdm);
 
-	//cdm.toXMLStream(std::cout);
+	cdm.toXMLStream(std::cout);
 }
 
 namespace
@@ -138,17 +138,6 @@ void DataIndex::addDimensions_(CDM & cdm) const
 		cdm.addAttribute(dimesion, CDMAttribute("standard_name", "version"));
 	}
 
-
-	for ( GridSpecMap::const_iterator it = grids_.begin(); it != grids_.end(); ++ it )
-	{
-		std::string projDefinition = (*it)->projDefinition();
-		boost::shared_ptr<Projection> projection = Projection::createByProj4(projDefinition);
-		std::string projectionName = "projection_" + projection->getName();
-		CDMVariable projectionSpec(projectionName, CDM_FLOAT, std::vector<std::string>());
-		cdm.addVariable(projectionSpec);
-		BOOST_FOREACH(const CDMAttribute & a, projection->getParameters())
-			cdm.addAttribute(projectionName, a);
-	}
 	cdm.addDimension(CDMDimension("latitude", 100));
 	cdm.addDimension(CDMDimension("longitude", 100));
 
@@ -187,6 +176,19 @@ void DataIndex::addTimes_(CDM & cdm) const
 
 void DataIndex::addParameters_(CDM & cdm) const
 {
+	std::set<GridData::GridInformationPtr> grids;
+	for ( GridSpecMap::const_iterator it = grids_.begin(); it != grids_.end(); ++ it )
+		grids.insert(it->second);
+	BOOST_FOREACH(GridData::GridInformationPtr grid, grids)
+	{
+		const boost::shared_ptr<Projection> projection = grid->getProjection();
+		std::string projectionName = grid->getProjectionName();
+		CDMVariable projectionSpec(projectionName, CDM_FLOAT, std::vector<std::string>());
+		cdm.addVariable(projectionSpec);
+		BOOST_FOREACH(const CDMAttribute & a, projection->getParameters())
+			cdm.addAttribute(projectionName, a);
+	}
+
 	for ( ParameterEntry::const_iterator it = data_.begin(); it != data_.end(); ++ it )
 	{
 		const Parameter & parameter = it->first;
@@ -197,7 +199,11 @@ void DataIndex::addParameters_(CDM & cdm) const
 		const std::string cdmName = translator_.toCdmName(parameter.name());
 
 		cdm.addVariable(CDMVariable(cdmName, CDM_FLOAT, dimensions));
-		cdm.addAttribute(cdmName, CDMAttribute("grid_mapping", "unknown"));
+
+		GridSpecMap::const_iterator find = grids_.find(parameter);
+		if ( find == grids_.end() )
+			throw CDMException("Internal error - unable to find grid mapping"); // should never happen
+		cdm.addAttribute(cdmName, CDMAttribute("grid_mapping", find->second->getProjectionName()));
 		cdm.addAttribute(cdmName, CDMAttribute("units", parameter.unit()));
 		cdm.addAttribute(cdmName, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));
 		cdm.addAttribute(cdmName, CDMAttribute("coordinates", "longitude latitude"));

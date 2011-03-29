@@ -27,6 +27,7 @@
  */
 
 #include "GridInformation.h"
+#include <fimex/coordSys/Projection.h>
 #include <boost/lexical_cast.hpp>
 
 
@@ -37,8 +38,9 @@ namespace wdb
 {
 
 GridInformation::GridInformation(const std::string & projDefinition, unsigned numberX, unsigned numberY ) :
-	projDefinition_(projDefinition), numberX_(numberX), numberY_(numberY)
+	numberX_(numberX), numberY_(numberY)
 {
+	projection_ = Projection::createByProj4(projDefinition);
 }
 
 
@@ -46,10 +48,16 @@ GridInformation::~GridInformation()
 {
 }
 
+std::string GridInformation::getProjectionName() const
+{
+	return "projection_" + projection_->getName();
+}
+
 std::string GridInformation::query(const std::string & gridName)
 {
 	return "SELECT NumberX, NumberY, ProjDefinition FROM wci.getplaceregulargrid('" + gridName + "')";
 }
+
 
 namespace
 {
@@ -62,15 +70,9 @@ enum ReadIdx
 #define GETUINT(idx)boost::lexical_cast<unsigned>(PQgetvalue(result, row, idx))
 }
 
-//	parameter_ = Parameter(GET(ValueParameterName), GET(ValueParameterUnit));
-//	level_ = Level(GET(LevelParameterName), GET(LevelUnitName), GETFLOAT(LevelFrom), GETFLOAT(LevelTo));
-//	version_ = GETINT32(DataVersion);
-//	validTo_ = GETTIME(ValidTimeTo);
-//	gridIdentifier_ = GETINT64(Value);
-
 GridInformation::GridInformation(PGresult * result, int row)
 {
-	projDefinition_ = GET(ProjDefinition);
+	projection_ = Projection::createByProj4(GET(ProjDefinition));
 	numberX_ = GETUINT(NumberX);
 	numberY_ = GETUINT(NumberY);
 }

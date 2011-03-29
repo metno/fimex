@@ -28,6 +28,7 @@
 
 #include "fimex/WdbCDMReader.h"
 #include "fimex/CDM.h"
+#include "fimex/Data.h"
 #include "wdb/WdbConnection.h"
 #include "wdb/DataIndex.h"
 #include "wdb/CdmNameTranslator.h"
@@ -73,7 +74,8 @@ GxWdbCDMReader::~GxWdbCDMReader()
 boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 		const std::string& varName, size_t unLimDimPos) throw (CDMException)
 {
-	return boost::shared_ptr<Data>();
+	boost::shared_ptr<Data> ret = createData(CDM_FLOAT, 100 * 100, std::numeric_limits<float>::quiet_NaN());
+	return ret;
 }
 
 
