@@ -388,8 +388,8 @@ BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
 		BOOST_CHECK_EQUAL("time", shape[0]);
-		BOOST_CHECK_EQUAL("longitude", shape[1]);
-		BOOST_CHECK_EQUAL("latitude", shape[2]);
+		BOOST_CHECK_EQUAL("x", shape[1]);
+		BOOST_CHECK_EQUAL("y", shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
 	catch ( CDMException & e )
@@ -412,8 +412,8 @@ BOOST_AUTO_TEST_CASE(singleLevelInData)
 		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(2, shape.size());
-		BOOST_CHECK_EQUAL("longitude", shape[0]);
-		BOOST_CHECK_EQUAL("latitude", shape[1]);
+		BOOST_CHECK_EQUAL("x", shape[0]);
+		BOOST_CHECK_EQUAL("y", shape[1]);
 		BOOST_CHECK_EQUAL(2, shape.size());
 	}
 	catch ( CDMException & e )
@@ -439,8 +439,8 @@ BOOST_AUTO_TEST_CASE(severalLevelsInData)
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
 		BOOST_CHECK_EQUAL("lvl", shape[0]);
-		BOOST_CHECK_EQUAL("longitude", shape[1]);
-		BOOST_CHECK_EQUAL("latitude", shape[2]);
+		BOOST_CHECK_EQUAL("x", shape[1]);
+		BOOST_CHECK_EQUAL("y", shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
 	catch ( CDMException & e )
@@ -466,8 +466,8 @@ BOOST_AUTO_TEST_CASE(severalDataVersions)
 	const std::vector<std::string> & shape = var.getShape();
 	BOOST_REQUIRE_LE(3, shape.size());
 	BOOST_CHECK_EQUAL("version", shape[0]);
-	BOOST_CHECK_EQUAL("longitude", shape[1]);
-	BOOST_CHECK_EQUAL("latitude", shape[2]);
+	BOOST_CHECK_EQUAL("x", shape[1]);
+	BOOST_CHECK_EQUAL("y", shape[2]);
 	BOOST_CHECK_EQUAL(3, shape.size());
 }
 
@@ -492,8 +492,8 @@ BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
 	BOOST_REQUIRE_LE(4, shape.size());
 	BOOST_CHECK_EQUAL("time", shape[0]);
 	BOOST_CHECK_EQUAL("version", shape[1]);
-	BOOST_CHECK_EQUAL("longitude", shape[2]);
-	BOOST_CHECK_EQUAL("latitude", shape[3]);
+	BOOST_CHECK_EQUAL("x", shape[2]);
+	BOOST_CHECK_EQUAL("y", shape[3]);
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 

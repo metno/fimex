@@ -234,8 +234,8 @@ void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const
 	getVersionDimensionsForParameter_(out, levelEntry);
 
 	// x/y dimensions
-	out.push_back("longitude");
-	out.push_back("latitude");
+	out.push_back("x");
+	out.push_back("y");
 }
 
 void DataIndex::getTimeDimensionForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
