@@ -25,8 +25,14 @@ e
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  MA  02110-1301, USA
  */
+
 #ifndef WDBCDMREADERPARSER_H_
 #define WDBCDMREADERPARSER_H_
+
+// std
+//
+#include <utility>
+#include <vector>
 
 /**
  * This class will parse command line and extract
@@ -58,6 +64,8 @@ namespace MetNoFimex
         std::string wdbUser() const;
         std::string wciUser() const;
         std::string configFileName() const;
+        std::string provider() const;
+        std::string place() const;
         unsigned short wdbPort() const;
     private:
         std::string    wdbHost_;
@@ -65,6 +73,8 @@ namespace MetNoFimex
         std::string    wdbUser_;
         std::string    wciUser_;
         std::string    configFileName_;
+        std::string    provider_;
+        std::string    place_;
         std::string    referenceTime_;
         unsigned short wdbPort_;
 
@@ -80,11 +90,40 @@ namespace MetNoFimex
         /**
          * if bParseConfigFile == false, parse() method
          * will skip to parse the file (even if found
-         * within cmdLine options)
+         * within int argc, char* args[] options)
+         * this method will work for comman line
+         * taken verbatim from main.cpp
          */
-        WdbCDMReaderParserInfo parse(const std::string& cmdLine, bool bParseConfigFile = true);
+        WdbCDMReaderParserInfo parse(int argc, char* args[], bool bParseConfigFile = true);
+
+        /**
+         * As Fimex is already parsing cmd line we will use that result
+         * we are interested in following options:
+         *     1. --input.file (sent as 'source' argument)
+         *     2. --input.config (sent as 'configFileName' argument)
+         *
+         * the source that has format
+         * dbHost=<string>;dbName=<string>;dbPort=<string>;dbUser=<string>;wciUser=<string>;provider=<string>;place=<string>;refTime=<string>
+         * refTime is  given as iso string "20110210T000000"
+         */
+        WdbCDMReaderParserInfo parse(const std::string& source, const std::string& configFileName, bool bParseConfigFile = true);
     private:
-        void parseCmdLine(const std::string& cmdLine, WdbCDMReaderParserInfo& info);
+        /**
+          * ATM:
+          * to keep things simple
+          * take just firs occurence
+          * ignore retst
+          */
+        std::pair<std::string, std::string> getNameValuePairForXmlPath(const XMLDoc& doc, const std::string& path);
+
+        /**
+          * or get the vector
+          */
+        std::vector<std::pair<std::string, std::string> > getNameValuePairsForXmlPath(const XMLDoc& doc, const std::string& path);
+
+        std::vector<std::pair<std::string, std::string> > getAttributesForXmlPath(const XMLDoc& doc, const std::string& path);
+
+        void parseSource(const std::string& source, WdbCDMReaderParserInfo& info);
         void parseCfgFile(const std::string& cfgFile, WdbCDMReaderParserInfo& info);
     };
 
