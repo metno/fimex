@@ -219,10 +219,11 @@ test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
 am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc \
-	wdbCdmNameTranslatorTest.cc
+	wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
 @HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
 @HAVE_LIBPQ_TRUE@	wdbTest-wdbDataIndexTest.$(OBJEXT) \
-@HAVE_LIBPQ_TRUE@	wdbTest-wdbCdmNameTranslatorTest.$(OBJEXT)
+@HAVE_LIBPQ_TRUE@	wdbTest-wdbCdmNameTranslatorTest.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	wdbTest-wdbCDMReaderParserTest.$(OBJEXT)
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
 wdbTest_LDADD = $(LDADD)
 wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
@@ -444,7 +445,7 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
-@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc
+@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
@@ -606,6 +607,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbDataIndexTest.Po@am__quote@
 
@@ -678,6 +680,20 @@ wdbTest-wdbCdmNameTranslatorTest.obj: wdbCdmNameTranslatorTest.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbCdmNameTranslatorTest.cc' object='wdbTest-wdbCdmNameTranslatorTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbCdmNameTranslatorTest.obj `if test -f 'wdbCdmNameTranslatorTest.cc'; then $(CYGPATH_W) 'wdbCdmNameTranslatorTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbCdmNameTranslatorTest.cc'; fi`
+
+wdbTest-wdbCDMReaderParserTest.o: wdbCDMReaderParserTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbCDMReaderParserTest.o -MD -MP -MF $(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Tpo -c -o wdbTest-wdbCDMReaderParserTest.o `test -f 'wdbCDMReaderParserTest.cc' || echo '$(srcdir)/'`wdbCDMReaderParserTest.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Tpo $(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbCDMReaderParserTest.cc' object='wdbTest-wdbCDMReaderParserTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbCDMReaderParserTest.o `test -f 'wdbCDMReaderParserTest.cc' || echo '$(srcdir)/'`wdbCDMReaderParserTest.cc
+
+wdbTest-wdbCDMReaderParserTest.obj: wdbCDMReaderParserTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbCDMReaderParserTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Tpo -c -o wdbTest-wdbCDMReaderParserTest.obj `if test -f 'wdbCDMReaderParserTest.cc'; then $(CYGPATH_W) 'wdbCDMReaderParserTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbCDMReaderParserTest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Tpo $(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbCDMReaderParserTest.cc' object='wdbTest-wdbCDMReaderParserTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbCDMReaderParserTest.obj `if test -f 'wdbCDMReaderParserTest.cc'; then $(CYGPATH_W) 'wdbCDMReaderParserTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbCDMReaderParserTest.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
