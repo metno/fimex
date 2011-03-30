@@ -75,6 +75,8 @@ private:
 
 	void addProjectionInformation_(CDM & cdm) const;
 
+	void addReferenceTimeInformation_(CDM & cdm) const;
+
 	void addParameterVariables_(CDM & cdm) const;
 	void getDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
 	void getTimeDimensionForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;

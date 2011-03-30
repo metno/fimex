@@ -55,21 +55,17 @@ DataIndex::~DataIndex()
 {
 }
 
-// projection after z-axis
-// x(x) and y(y)
-// longitude(x, y)
-// latitude(x, y)
-// forecast_reference_time
-
-// global attributes
 
 void DataIndex::populate(CDM & cdm) const
 {
+	// TODO: global attributes
+
 	addProjectionInformation_(cdm);
+	addReferenceTimeInformation_(cdm);
 	addDimensions_(cdm);
 	addParameterVariables_(cdm);
 
-	cdm.toXMLStream(std::cout);
+	//cdm.toXMLStream(std::cout);
 }
 
 namespace
@@ -201,6 +197,16 @@ void DataIndex::addProjectionInformation_(CDM & cdm) const
 	cdm.addAttribute("latitude", CDMAttribute("long_name", "latitude"));
 	cdm.addAttribute("latitude", CDMAttribute("standard_name", "latitude"));
 	cdm.addAttribute("latitude", CDMAttribute("units", "degree_north"));
+}
+
+
+void DataIndex::addReferenceTimeInformation_(CDM & cdm) const
+{
+	const std::string reftime = "forecast_reference_time";
+	cdm.addVariable(CDMVariable(reftime, CDM_DOUBLE, std::vector<std::string>()));
+	cdm.addAttribute(reftime, CDMAttribute("long_name", reftime));
+	cdm.addAttribute(reftime, CDMAttribute("standard_name", reftime));
+	cdm.addAttribute(reftime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
 }
 
 

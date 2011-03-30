@@ -584,6 +584,30 @@ BOOST_AUTO_TEST_CASE(createsTranslatedLatLonVariables)
 	}
 }
 
+BOOST_AUTO_TEST_CASE(setsReferenceTimeVariable)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData());
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	try
+	{
+		const std::string reftime = "forecast_reference_time";
+		const CDMVariable & reftimeVariable = cdm.getVariable(reftime);
+		BOOST_CHECK_EQUAL(CDM_DOUBLE, reftimeVariable.getDataType());
+		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute(reftime, "units").getStringValue());
+		BOOST_CHECK_EQUAL("forecast_reference_time", cdm.getAttribute(reftime, "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("forecast_reference_time", cdm.getAttribute(reftime, "standard_name").getStringValue());
+	}
+	catch( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+}
 
 BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes)
 {
