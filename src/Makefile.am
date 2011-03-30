@@ -93,7 +93,8 @@ endif
 if HAVE_LIBPQ
   libfimex_la_SOURCES += gridexer/GxWdbDataTypes.cc \
                          gridexer/GxWdbExplorer.cc \
-                         WdbCDMReader.cc
+                         WdbCDMReader.cc \
+                         WdbCDMReaderParser.cc
                          
 libfimex_la_LIBADD += wdb/libwdb.a
 endif
