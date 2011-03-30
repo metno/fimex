@@ -18,8 +18,8 @@
         <attribute name="dbhost" value="proffdb-devel.met.no" type="string" />
         <attribute name="dbport" value="5432" type="short" />
         <attribute name="dbname" value="wdb" type="string" />
-        <attribute name="dbuser" value="proffread" type="string" />
-        <attribute name="wciuser" value="proffwrite" type="string" />
+        <attribute name="dbuser" value="wdb" type="string" />
+		<attribute name="wciuser" value="proffwrite" type="string"/>
     </wdb_connection>
 
     <reference_times>
@@ -27,11 +27,11 @@
     </reference_times>
 
     <data_providers>
-        <provider id="0" name="proff.h12h8um4"></provider>
+        <provider id="0" name="dnmi" value="met.no"></provider>
     </data_providers>
 
     <grid_places>
-        <place id="0" name="proff grid"></place>
+        <place id="0" name="test grid" value="norge grid"></place>
     </grid_places>
 
     <level_parameter id="0" name="isobaric surface pressure">
