@@ -70,6 +70,7 @@ namespace MetNoFimex
         std::string configFileName() const;
         std::string provider() const;
         std::string place() const;
+        std::string referenceTime() const;
         unsigned short wdbPort() const;
     private:
         std::string    wdbHost_;

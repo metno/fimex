@@ -52,6 +52,52 @@ WdbCDMReaderParserInfo::WdbCDMReaderParserInfo()
 {
 }
 
+std::string WdbCDMReaderParserInfo::wdbHost() const
+{
+    return wdbHost_;
+}
+
+std::string WdbCDMReaderParserInfo::wdbName() const
+{
+    return wdbName_;
+}
+
+std::string WdbCDMReaderParserInfo::wdbUser() const
+{
+    return wdbUser_;
+}
+
+std::string WdbCDMReaderParserInfo::wciUser() const
+{
+    return wciUser_;
+}
+
+std::string WdbCDMReaderParserInfo::configFileName() const
+{
+    return configFileName_;
+}
+
+std::string WdbCDMReaderParserInfo::provider() const
+{
+    return provider_;
+}
+
+std::string WdbCDMReaderParserInfo::place() const
+{
+    return place_;
+}
+
+std::string WdbCDMReaderParserInfo::referenceTime() const
+{
+    return referenceTime_;
+}
+
+unsigned short WdbCDMReaderParserInfo::wdbPort() const
+{
+    return wdbPort_;
+}
+
+
 WdbCDMReaderParser::WdbCDMReaderParser()
 {
 }
@@ -213,22 +259,31 @@ void WdbCDMReaderParser::parseSource(const std::string& source, WdbCDMReaderPars
         splitmap[subsplit.at(0)] = subsplit.at(1);
     }
 
-    info.wdbHost_ = splitmap["dbHost"];
-    info.wdbName_ = splitmap["dbName"];
-    info.wdbUser_ = splitmap["dbUser"];
-    info.wciUser_ = splitmap["wciUser"];
+    if(!splitmap["dbHost"].empty())
+        info.wdbHost_ = splitmap["dbHost"];
 
-    info.provider_ = splitmap["provider"];
-    info.place_ = splitmap["place"];
+    if(!splitmap["dbName"].empty())
+        info.wdbName_ = splitmap["dbName"];
+
+    if(!splitmap["dbUser"].empty())
+        info.wdbUser_ = splitmap["dbUser"];
+
+    if(!splitmap["wciUser"].empty())
+        info.wciUser_ = splitmap["wciUser"];
+
+    if(!splitmap["provider"].empty())
+        info.provider_ = splitmap["provider"];
+
+    if(!splitmap["place"].empty())
+        info.place_ = splitmap["place"];
 
     // as ISO formated string
     // convert to POSIX time ?
-    info.referenceTime_ = splitmap["refTime"];
+    if(!splitmap["refTime"].empty())
+        info.referenceTime_ = splitmap["refTime"];
 
     if(!splitmap["dbPort"].empty())
         info.wdbPort_ = boost::lexical_cast<unsigned int>(splitmap["dbPort"]);
-    else
-        info.wdbPort_ = 5432; // default
 }
 
 WdbCDMReaderParserInfo WdbCDMReaderParser::parse(const std::string& source, const std::string& configFileName, bool bParseConfigFile)
