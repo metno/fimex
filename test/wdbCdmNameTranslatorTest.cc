@@ -26,7 +26,6 @@
     MA  02110-1301, USA
 */
 
-#include <wdb/DataIndex.h>
 #include <wdb/CdmNameTranslator.h>
 #include <fimex/CDM.h>
 #include <iostream>
