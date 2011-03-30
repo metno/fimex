@@ -29,10 +29,15 @@ e
 #ifndef WDBCDMREADERPARSER_H_
 #define WDBCDMREADERPARSER_H_
 
+// fimex
+//
+#include "fimex/XMLDoc.h"
+
 // std
 //
-#include <utility>
+#include <string>
 #include <vector>
+#include <utility>
 
 /**
  * This class will parse command line and extract
@@ -51,7 +56,6 @@ namespace MetNoFimex
     {
     public:
         explicit WdbCDMReaderParserInfo();
-        ~WdbCDMReaderParserInfo();
 
         /**
          * ATM we will expose only getters

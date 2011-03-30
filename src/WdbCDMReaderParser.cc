@@ -26,12 +26,33 @@
  MA  02110-1301, USA
  */
 
-#include "fimex/WdbCDMReader.h"
+#include "fimex/WdbCDMReaderParser.h"
+
+// libxml2
+#include <libxml/xinclude.h>
+#include <libxml/xpathInternals.h>
+
+// boost
+//
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
+#include <boost/algorithm/string.hpp>
+
+// std
+//
+#include <limits>
+
+namespace po = boost::program_options;
 
 namespace MetNoFimex {
 
+WdbCDMReaderParserInfo::WdbCDMReaderParserInfo()
+    : wdbPort_(5432)
+{
+}
+
 WdbCDMReaderParser::WdbCDMReaderParser()
-    : wdbPort(5432)
 {
 }
 
@@ -157,14 +178,14 @@ void WdbCDMReaderParser::parseCfgFile(const std::string& cfgFileName, WdbCDMRead
             } else if(name == std::string("wciuser")) {
                 info.wciUser_ = value;
             } else if(name == std::string("dbport")) {
-                info.wciPort_ = value.empty() ? std::numeric_limits<unsigned int>::quiet_NaN() : boost::lexical_cast<unsigned int>(value);
+                info.wdbPort_ = value.empty() ? std::numeric_limits<unsigned int>::quiet_NaN() : boost::lexical_cast<unsigned int>(value);
             }
         }
     }
 
-    info.referenceTime_ = getValueForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/reference_times/time").second;
-    info.provider_ = getValueForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_providers/provider").second;
-    info.place_ = getValueForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/grid_places/place").second;
+    info.referenceTime_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/reference_times/time").second;
+    info.provider_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_providers/provider").second;
+    info.place_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/grid_places/place").second;
 
 }
 
@@ -179,7 +200,7 @@ void WdbCDMReaderParser::parseSource(const std::string& source, WdbCDMReaderPars
         return;
 
     std::vector<std::string> splitvector;
-    boost::algorithm::split(splitvector, source_, boost::algorithm::is_any_of(";"));
+    boost::algorithm::split(splitvector, source, boost::algorithm::is_any_of(";"));
     // todo: exception
     //
     assert(splitvector.size() != 0);
@@ -232,8 +253,8 @@ WdbCDMReaderParserInfo WdbCDMReaderParser::parse(int argc, char* args[], bool bP
     // reader
     po::options_description config("wdbcdmreader options");
     config.add_options()
-            ("input.file", po::value<string>(), "input file")
-            ("input.config", po::value<string>(), "non-standard input configuration")
+            ("input.file", po::value<std::string>(), "input file")
+            ("input.config", po::value<std::string>(), "non-standard input configuration")
             ;
 
     po::options_description cmdline_options;
@@ -246,12 +267,12 @@ WdbCDMReaderParserInfo WdbCDMReaderParser::parse(int argc, char* args[], bool bP
 
     std::string source;
     if (vm.count("input.file")) {
-        cfgFileName = vm["input.file"].as<string>();
+        source = vm["input.file"].as<std::string>();
     }
 
     std::string cfgFileName;
     if (vm.count("input.config")) {
-        cfgFileName = vm["input.config"].as<string>();
+        cfgFileName = vm["input.config"].as<std::string>();
     }
 
     return parse(source, cfgFileName);
