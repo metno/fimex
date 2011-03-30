@@ -41,7 +41,7 @@ if HAVE_LIBPQ
   CC_TESTS += wdbTest
   wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc
   wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
-  
+  LDADD += @BOOST_PROGRAM_OPTIONS_LIB@
 test_wdb: wdbTest
 	@./wdbTest
 endif

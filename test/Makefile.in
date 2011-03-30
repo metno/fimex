@@ -40,6 +40,7 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS}
 @HAVE_GRIBAPI_TRUE@am__append_6 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_LIBPQ_TRUE@am__append_7 = wdbTest
+@HAVE_LIBPQ_TRUE@am__append_8 = @BOOST_PROGRAM_OPTIONS_LIB@
 TESTS = $(am__EXEEXT_9) $(am__EXEEXT_11)
 check_PROGRAMS = $(am__EXEEXT_9)
 subdir = test
@@ -95,107 +96,128 @@ testBinaryConstants_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @HAVE_MILIB_TRUE@am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
 testBinaryConstants_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
 testCDM_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testCoordSys_OBJECTS = testCoordSys.$(OBJEXT)
 testCoordSys_OBJECTS = $(am_testCoordSys_OBJECTS)
 testCoordSys_LDADD = $(LDADD)
 testCoordSys_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testData_OBJECTS = testData.$(OBJEXT)
 testData_OBJECTS = $(am_testData_OBJECTS)
 testData_LDADD = $(LDADD)
 testData_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
 testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
 testExtractor_LDADD = $(LDADD)
 testExtractor_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
 testFeltReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testFileReaderFactory_OBJECTS = testFileReaderFactory.$(OBJEXT)
 testFileReaderFactory_OBJECTS = $(am_testFileReaderFactory_OBJECTS)
 testFileReaderFactory_LDADD = $(LDADD)
 testFileReaderFactory_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testGribReader_OBJECTS = testGribReader.$(OBJEXT)
 testGribReader_OBJECTS = $(am_testGribReader_OBJECTS)
 testGribReader_LDADD = $(LDADD)
 testGribReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testGribWriter_OBJECTS = testGribWriter.$(OBJEXT)
 testGribWriter_OBJECTS = $(am_testGribWriter_OBJECTS)
 testGribWriter_LDADD = $(LDADD)
 testGribWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
 testInterpolation_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
 testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
 testInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
 testNetcdfWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testProjections_OBJECTS = testProjections.$(OBJEXT)
 testProjections_OBJECTS = $(am_testProjections_OBJECTS)
 testProjections_LDADD = $(LDADD)
 testProjections_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testQualityExtractor_OBJECTS = testQualityExtractor.$(OBJEXT)
 testQualityExtractor_OBJECTS = $(am_testQualityExtractor_OBJECTS)
 testQualityExtractor_LDADD = $(LDADD)
 testQualityExtractor_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testSpatialAxisSpec_OBJECTS = testSpatialAxisSpec.$(OBJEXT)
 testSpatialAxisSpec_OBJECTS = $(am_testSpatialAxisSpec_OBJECTS)
 testSpatialAxisSpec_LDADD = $(LDADD)
 testSpatialAxisSpec_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testTimeInterpolator_OBJECTS = testTimeInterpolator.$(OBJEXT)
 testTimeInterpolator_OBJECTS = $(am_testTimeInterpolator_OBJECTS)
 testTimeInterpolator_LDADD = $(LDADD)
 testTimeInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testTimeSpec_OBJECTS = testTimeSpec.$(OBJEXT)
 testTimeSpec_OBJECTS = $(am_testTimeSpec_OBJECTS)
 testTimeSpec_LDADD = $(LDADD)
 testTimeSpec_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testUnits_OBJECTS = testUnits.$(OBJEXT)
 testUnits_OBJECTS = $(am_testUnits_OBJECTS)
 testUnits_LDADD = $(LDADD)
 testUnits_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testUtils_OBJECTS = testUtils.$(OBJEXT)
 testUtils_OBJECTS = $(am_testUtils_OBJECTS)
 testUtils_LDADD = $(LDADD)
 testUtils_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
 testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
 testXMLDoc_LDADD = $(LDADD)
 testXMLDoc_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_test_c_consumer_OBJECTS = test_c_consumer.$(OBJEXT)
 test_c_consumer_OBJECTS = $(am_test_c_consumer_OBJECTS)
 test_c_consumer_LDADD = $(LDADD)
 test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc \
 	wdbCdmNameTranslatorTest.cc
 @HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
@@ -204,7 +226,8 @@ am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc \
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
 wdbTest_LDADD = $(LDADD)
 wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -412,7 +435,8 @@ CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	$(am__append_6) $(am__append_7)
 SH_TESTS = $(am__append_5)
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_1)
+	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_1) \
+	$(am__append_8)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@
 AM_CXXFLAGS = -Wall
 AM_CFLAGS = -std=c99 -Wall
@@ -953,7 +977,6 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
-
 
 @HAVE_LIBPQ_TRUE@test_wdb: wdbTest
 @HAVE_LIBPQ_TRUE@	@./wdbTest
