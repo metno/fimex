@@ -575,8 +575,18 @@ BOOST_AUTO_TEST_CASE(createsTranslatedLatLonVariables)
 
 		const CDMVariable & x = cdm.getVariable("x");
 		const CDMVariable & y = cdm.getVariable("y");
+
 		const CDMVariable & latitude = cdm.getVariable("latitude");
+		std::vector<std::string> shape = latitude.getShape();
+		BOOST_CHECK_EQUAL(2, shape.size());
+		BOOST_CHECK(std::find(shape.begin(), shape.end(), "x") != shape.end());
+		BOOST_CHECK(std::find(shape.begin(), shape.end(), "y") != shape.end());
+
 		const CDMVariable & longitude = cdm.getVariable("longitude");
+		shape = longitude.getShape();
+		BOOST_CHECK_EQUAL(2, shape.size());
+		BOOST_CHECK(std::find(shape.begin(), shape.end(), "x") != shape.end());
+		BOOST_CHECK(std::find(shape.begin(), shape.end(), "y") != shape.end());
 	}
 	catch ( CDMException & e )
 	{

@@ -187,7 +187,7 @@ void DataIndex::addProjectionInformation_(CDM & cdm) const
 	cdm.addAttribute("y", CDMAttribute("standard_name", "grid latitude"));
 	cdm.addAttribute("y", CDMAttribute("units", "degree_north"));
 
-	std::vector<std::string> dims = boost::assign::list_of("longitude")("latitude");
+	std::vector<std::string> dims = boost::assign::list_of("x")("y");
 	cdm.addVariable(CDMVariable("longitude", CDM_FLOAT, dims));
 	cdm.addAttribute("longitude", CDMAttribute("long_name", "longitude"));
 	cdm.addAttribute("longitude", CDMAttribute("standard_name", "longitude"));
