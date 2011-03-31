@@ -115,7 +115,12 @@ std::pair<std::string, std::string> WdbCDMReaderParser::getNameValuePairForXmlPa
     std::string value;
     xmlNodePtr xmlNode;
     {
-        XPathObjPtr xpathObj = doc.getXPathObject(path);
+        XPathObjPtr xpathObj;
+        xpathObj = doc.getXPathObject(path);
+
+        if(xpathObj.get() == 0)
+            return std::make_pair(std::string(), std::string());
+
         xmlNodeSetPtr xmlNodes = xpathObj->nodesetval;
         /**
           * int nodessize = (xmlNodes) ? xmlNodes->nodeNr : 0;
@@ -150,6 +155,9 @@ std::vector<std::pair<std::string, std::string> > WdbCDMReaderParser::getNameVal
     xmlNodePtr xmlNode;
     {
         XPathObjPtr xpathObj = doc.getXPathObject(path);
+        if(xpathObj.get() == 0) {
+            return pairs;
+        }
         xmlNodeSetPtr xmlNodes = xpathObj->nodesetval;
         int nodessize = (xmlNodes) ? xmlNodes->nodeNr : 0;
         for(int index = 0; index < nodessize; ++index) {
@@ -175,6 +183,10 @@ std::vector<std::pair<std::string, std::string> > WdbCDMReaderParser::getAttribu
     xmlNodePtr xmlNode;
     {
         XPathObjPtr xpathObj = doc.getXPathObject(path);
+
+        if(xpathObj.get() == 0)
+            return pairs;
+
         xmlNodeSetPtr xmlNodes = xpathObj->nodesetval;
         int nodessize = (xmlNodes) ? xmlNodes->nodeNr : 0;
 
@@ -203,7 +215,7 @@ void WdbCDMReaderParser::parseCfgFile(const std::string& cfgFileName, WdbCDMRead
     if(cfgFileName.empty())
         return;
 
-    // use XML config file information
+    // use XML config file inforitmation
     //
     XMLDoc doc(cfgFileName);
 
@@ -232,7 +244,6 @@ void WdbCDMReaderParser::parseCfgFile(const std::string& cfgFileName, WdbCDMRead
     info.referenceTime_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/reference_times/time").second;
     info.provider_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_providers/provider").second;
     info.place_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/grid_places/place").second;
-
 }
 
 /**
@@ -259,30 +270,30 @@ void WdbCDMReaderParser::parseSource(const std::string& source, WdbCDMReaderPars
         splitmap[subsplit.at(0)] = subsplit.at(1);
     }
 
-    if(!splitmap["dbHost"].empty())
+    if(splitmap.find("dbHost") != splitmap.end())
         info.wdbHost_ = splitmap["dbHost"];
 
-    if(!splitmap["dbName"].empty())
+    if(splitmap.find("dbName") != splitmap.end())
         info.wdbName_ = splitmap["dbName"];
 
-    if(!splitmap["dbUser"].empty())
+    if(splitmap.find("dbUser") != splitmap.end())
         info.wdbUser_ = splitmap["dbUser"];
 
-    if(!splitmap["wciUser"].empty())
+    if(splitmap.find("wciUser") != splitmap.end())
         info.wciUser_ = splitmap["wciUser"];
 
-    if(!splitmap["provider"].empty())
+    if(splitmap.find("provider") != splitmap.end())
         info.provider_ = splitmap["provider"];
 
-    if(!splitmap["place"].empty())
+    if(splitmap.find("place") != splitmap.end())
         info.place_ = splitmap["place"];
 
     // as ISO formated string
     // convert to POSIX time ?
-    if(!splitmap["refTime"].empty())
+    if(splitmap.find("refTime") != splitmap.end())
         info.referenceTime_ = splitmap["refTime"];
 
-    if(!splitmap["dbPort"].empty())
+    if(splitmap.find("dbPort") != splitmap.end())
         info.wdbPort_ = boost::lexical_cast<unsigned int>(splitmap["dbPort"]);
 }
 
@@ -290,7 +301,7 @@ WdbCDMReaderParserInfo WdbCDMReaderParser::parse(const std::string& source, cons
 {
     WdbCDMReaderParserInfo wdbInfo;
 
-    if(bParseConfigFile) {
+    if(!configFileName.empty() && bParseConfigFile) {
         parseCfgFile(configFileName, wdbInfo);
     }
 
