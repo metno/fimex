@@ -50,12 +50,19 @@ BOOST_AUTO_TEST_SUITE(WdbCDMReaderParserTest)
 BOOST_AUTO_TEST_CASE(testParseOnlySource)
 {
     std::string cfgFileName; // empty
-    std::string source("dbHost=proffdb-devel.met.no;dbName=wdb;dbUser=wdb;wciUser=proffread;dbPort=5432;refTime=20110209T120000");
+    std::string source("dbHost=localhost;dbPort=5432;dbName=wdb;dbUser=wdb");
 
     WdbCDMReaderParser parser;
     WdbCDMReaderParserInfo wdbInfo;
 
     wdbInfo =  parser.parse(source, cfgFileName, false);
+
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "localhost");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "wdb");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
+    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "");
+    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "");
 
     // add provider and place
 
@@ -106,7 +113,7 @@ BOOST_AUTO_TEST_CASE(testConfigFileOnly)
     WdbCDMReaderParser parser;
     WdbCDMReaderParserInfo wdbInfo;
 
-    wdbInfo =  parser.parse(source, cfgFileName);
+    wdbInfo = parser.parse(source, cfgFileName);
 
     BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
     BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
@@ -116,6 +123,18 @@ BOOST_AUTO_TEST_CASE(testConfigFileOnly)
     BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "met.no");
     BOOST_REQUIRE_EQUAL(wdbInfo.place(), "norge grid");
     BOOST_REQUIRE_EQUAL(wdbInfo.referenceTime(), "20110210T000000");
+
+    // local cfg
+    std::string cfgFileNameLocal(TEST_DIR"/local_wdb_config.xml");
+    wdbInfo =  parser.parse(source, cfgFileNameLocal);
+
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "localhost");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "vegardb");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wciUser(), "vegardb");
+    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
+    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "met.no eceps modification");
+    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "norway 025");
 }
 
 
