@@ -46,7 +46,7 @@ DataIndex::DataIndex(const std::vector<wdb::GridData> & data, const CdmNameTrans
 {
 	for ( std::vector<wdb::GridData>::const_iterator d = data.begin(); d != data.end(); ++ d )
 	{
-		data_[d->parameter()] [d->level()] [d->version()] [d->validTo()] = d->gridIdentifier();
+		data_[d->parameter()] [d->validTo()] [d->level()] [d->version()] = d->gridIdentifier();
 		grids_[d->parameter()] = d->gridInformation();
 	}
 }
@@ -67,6 +67,14 @@ void DataIndex::populate(CDM & cdm) const
 
 	//cdm.toXMLStream(std::cout);
 }
+
+
+bool DataIndex::isDatabaseField(const std::string & variableName) const
+{
+	Parameter p(variableName, "");
+	return data_.find(p) != data_.end();
+}
+
 
 namespace
 {
@@ -92,11 +100,12 @@ void DataIndex::addLevelDimensions_(CDM & cdm) const
 
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
 	{
-		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
-		{
-			const Level & lvl = le->first;
-			dimensions[lvl.type()].insert(std::make_pair(lvl.from(), lvl.to()));
-		}
+		for ( TimeEntry::const_iterator te = pe->second.begin(); te != pe->second.end(); ++ te )
+			for ( LevelEntry::const_iterator le = te->second.begin(); le != te->second.end(); ++ le )
+			{
+				const Level & lvl = le->first;
+				dimensions[lvl.type()].insert(std::make_pair(lvl.from(), lvl.to()));
+			}
 	}
 	for ( LevelMap::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
 	{
@@ -112,8 +121,9 @@ void DataIndex::addVersionDimension_(CDM & cdm) const
 {
 	std::size_t maxVersionCount = 0;
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
-		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
-			maxVersionCount = std::max(maxVersionCount, le->second.size());
+		for ( TimeEntry::const_iterator te = pe->second.begin(); te != pe->second.end(); ++ te )
+			for ( LevelEntry::const_iterator le = te->second.begin(); le != te->second.end(); ++ le )
+				maxVersionCount = std::max(maxVersionCount, le->second.size());
 
 	if ( maxVersionCount > 1 )
 	{
@@ -132,17 +142,21 @@ void DataIndex::addTimeDimensions_(CDM & cdm) const
 
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
 	{
-		std::set<Time> timesForParameter;
-		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
-		{
-			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
-			{
-				for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
-					timesForParameter.insert(te->first);
-			}
-		}
-		if ( timesForParameter.size() > 1 )
-			times.insert(timesForParameter.begin(), timesForParameter.end());
+		if ( pe->second.size() > 1 )
+			for ( TimeEntry::const_iterator te = pe->second.begin(); te != pe->second.end(); ++ te )
+				times.insert(te->first);
+
+//		std::set<Time> timesForParameter;
+//		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
+//		{
+//			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
+//			{
+//				for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
+//					timesForParameter.insert(te->first);
+//			}
+//		}
+//		if ( timesForParameter.size() > 1 )
+//			times.insert(timesForParameter.begin(), timesForParameter.end());
 	}
 
 	CDMDimension time("time", times.size());
@@ -153,6 +167,7 @@ void DataIndex::addTimeDimensions_(CDM & cdm) const
 	cdm.addAttribute("time", CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
 	cdm.addAttribute("time", CDMAttribute("long_name", "time"));
 	cdm.addAttribute("time", CDMAttribute("standard_name", "time"));
+	cdm.addAttribute("time", CDMAttribute("axis", "T"));
 }
 
 
@@ -233,37 +248,41 @@ void DataIndex::addParameterVariables_(CDM & cdm) const
 	}
 }
 
-void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
-	getTimeDimensionForParameter_(out, levelEntry);
-	getLevelDimensionsForParameter_(out, levelEntry);
-	getVersionDimensionsForParameter_(out, levelEntry);
+	getLevelDimensionsForParameter_(out, timeEntry);
+	getVersionDimensionsForParameter_(out, timeEntry);
 
 	// x/y dimensions
 	out.push_back("x");
 	out.push_back("y");
+	getTimeDimensionForParameter_(out, timeEntry);
 }
 
-void DataIndex::getTimeDimensionForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+void DataIndex::getTimeDimensionForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
-	for ( LevelEntry::const_iterator le = levelEntry.begin(); le != levelEntry.end(); ++ le )
-		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
-			if ( ve->second.size() > 1 )
-			{
-				out.push_back("time");
-				break;
-			}
+	if ( timeEntry.size() > 1 )
+		out.push_back("time");
+
+//	for ( LevelEntry::const_iterator le = timeEntry.begin(); le != timeEntry.end(); ++ le )
+//		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
+//			if ( ve->second.size() > 1 )
+//			{
+//				out.push_back("time");
+//				break;
+//			}
 }
 
-void DataIndex::getLevelDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+void DataIndex::getLevelDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelEntries;
 	LevelEntries levels;
-	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
-	{
-		const Level & level = it->first;
-		levels[level.type()].insert(std::make_pair(level.from(), level.to()));
-	}
+	for ( TimeEntry::const_iterator te = timeEntry.begin(); te != timeEntry.end(); ++ te )
+		for ( LevelEntry::const_iterator it = te->second.begin(); it != te->second.end(); ++ it )
+		{
+			const Level & level = it->first;
+			levels[level.type()].insert(std::make_pair(level.from(), level.to()));
+		}
 
 	for ( LevelEntries::const_iterator it = levels.begin(); it != levels.end(); ++ it )
 	{
@@ -275,11 +294,15 @@ void DataIndex::getLevelDimensionsForParameter_(std::vector<std::string> & out, 
 	}
 }
 
-void DataIndex::getVersionDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const
+void DataIndex::getVersionDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
-	for ( LevelEntry::const_iterator it = levelEntry.begin(); it != levelEntry.end(); ++ it )
-		if ( it->second.size() > 1 )
-			out.push_back("version");
+	for ( TimeEntry::const_iterator te = timeEntry.begin(); te != timeEntry.end(); ++ te )
+		for ( LevelEntry::const_iterator it = te->second.begin(); it != te->second.end(); ++ it )
+			if ( it->second.size() > 1 )
+			{
+				out.push_back("version");
+				return;
+			}
 }
 
 }

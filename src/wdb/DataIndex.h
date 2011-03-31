@@ -57,15 +57,20 @@ public:
 
 	void populate(CDM & cdm) const;
 
-private:
 
-	// referencetime -> parameter -> level -> version -> validtime -> gid
 	typedef GridData::gid gid;
 	typedef GridData::Time Time;
-	typedef std::map<Time, gid> TimeEntry;
-	typedef std::map<int, TimeEntry> VersionEntry;
+
+	bool isDatabaseField(const std::string & variableName) const;
+	std::vector<gid> getGridIdentifiers(const std::string & variableName, const Time & time) const;
+
+private:
+
+	// parameter -> validtime -> level -> version -> gid
+	typedef std::map<int, gid> VersionEntry;
 	typedef std::map<Level, VersionEntry> LevelEntry;
-	typedef std::map<Parameter, LevelEntry> ParameterEntry;
+	typedef std::map<Time, LevelEntry> TimeEntry;
+	typedef std::map<Parameter, TimeEntry> ParameterEntry;
 
 
 	void addDimensions_(CDM & cdm) const;
@@ -78,10 +83,10 @@ private:
 	void addReferenceTimeInformation_(CDM & cdm) const;
 
 	void addParameterVariables_(CDM & cdm) const;
-	void getDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
-	void getTimeDimensionForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
-	void getLevelDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
-	void getVersionDimensionsForParameter_(std::vector<std::string> & out, const LevelEntry & levelEntry) const;
+	void getDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & levelEntry) const;
+	void getTimeDimensionForParameter_(std::vector<std::string> & out, const TimeEntry & levelEntry) const;
+	void getLevelDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & levelEntry) const;
+	void getVersionDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & levelEntry) const;
 
 	ParameterEntry data_;
 	const CdmNameTranslator & translator_;

@@ -387,9 +387,9 @@ BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
 		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
-		BOOST_CHECK_EQUAL("time", shape[0]);
-		BOOST_CHECK_EQUAL("x", shape[1]);
-		BOOST_CHECK_EQUAL("y", shape[2]);
+		BOOST_CHECK_EQUAL("x", shape[0]);
+		BOOST_CHECK_EQUAL("y", shape[1]);
+		BOOST_CHECK_EQUAL("time", shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
 	catch ( CDMException & e )
@@ -489,11 +489,12 @@ BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
 	const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
 
 	const std::vector<std::string> & shape = var.getShape();
+
 	BOOST_REQUIRE_LE(4, shape.size());
-	BOOST_CHECK_EQUAL("time", shape[0]);
-	BOOST_CHECK_EQUAL("version", shape[1]);
-	BOOST_CHECK_EQUAL("x", shape[2]);
-	BOOST_CHECK_EQUAL("y", shape[3]);
+	BOOST_CHECK_EQUAL("version", shape[0]);
+	BOOST_CHECK_EQUAL("x", shape[1]);
+	BOOST_CHECK_EQUAL("y", shape[2]);
+	BOOST_CHECK_EQUAL("time", shape[3]);
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 
