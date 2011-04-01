@@ -77,7 +77,7 @@ XMLDoc::~XMLDoc()
 	cleanup();
 }
 
-XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const throw(CDMException)
+XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const
 {
     if (node == 0) {
         xpathCtx->node = xmlDocGetRootElement(doc);
