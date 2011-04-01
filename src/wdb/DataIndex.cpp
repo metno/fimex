@@ -49,6 +49,14 @@ DataIndex::DataIndex(const std::vector<wdb::GridData> & data, const CdmNameTrans
 		data_[d->parameter()] [d->validTo()] [d->level()] [d->version()] = d->gridIdentifier();
 		grids_[d->parameter()] = d->gridInformation();
 	}
+
+	// Fill in times vector
+	std::set<Time> times;
+	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
+		if ( pe->second.size() > 1 )
+			for ( TimeEntry::const_iterator te = pe->second.begin(); te != pe->second.end(); ++ te )
+				times.insert(te->first);
+	times_.assign(times.begin(), times.end());
 }
 
 DataIndex::~DataIndex()
@@ -75,6 +83,35 @@ bool DataIndex::isDatabaseField(const std::string & variableName) const
 	return data_.find(p) != data_.end();
 }
 
+const DataIndex::Time & DataIndex::timeFromIndex(std::size_t timeIndex) const
+{
+	-- timeIndex; // range was from 1
+
+	if ( 0 <= timeIndex and timeIndex < times_.size() )
+		return times_[timeIndex];
+
+	throw CDMException("Time index out of range");
+}
+
+std::vector<DataIndex::gid> DataIndex::getGridIdentifiers(const std::string & variableName, const DataIndex::Time & time) const
+{
+	// TODO: Handle base data with missing entries
+
+
+	std::vector<DataIndex::gid> ret;
+	ParameterEntry::const_iterator parameter = data_.find(Parameter(variableName, ""));
+	if ( parameter == data_.end() )
+		throw CDMException(variableName + ": no suvh parameter in index");
+	TimeEntry::const_iterator te = parameter->second.find(time);
+	if ( te == parameter->second.end() )
+		throw CDMException(to_simple_string(time) + ": no such time for parameter " + variableName);
+
+	for ( LevelEntry::const_iterator le = te->second.begin(); le != te->second.end(); ++ le )
+		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
+			ret.push_back(ve->second);
+
+	return ret;
+}
 
 namespace
 {
@@ -138,28 +175,8 @@ void DataIndex::addVersionDimension_(CDM & cdm) const
 
 void DataIndex::addTimeDimensions_(CDM & cdm) const
 {
-	std::set<Time> times;
 
-	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
-	{
-		if ( pe->second.size() > 1 )
-			for ( TimeEntry::const_iterator te = pe->second.begin(); te != pe->second.end(); ++ te )
-				times.insert(te->first);
-
-//		std::set<Time> timesForParameter;
-//		for ( LevelEntry::const_iterator le = pe->second.begin(); le != pe->second.end(); ++ le )
-//		{
-//			for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
-//			{
-//				for ( TimeEntry::const_iterator te = ve->second.begin(); te != ve->second.end(); ++ te )
-//					timesForParameter.insert(te->first);
-//			}
-//		}
-//		if ( timesForParameter.size() > 1 )
-//			times.insert(timesForParameter.begin(), timesForParameter.end());
-	}
-
-	CDMDimension time("time", times.size());
+	CDMDimension time("time", times_.size());
 	time.setUnlimited(true);
 	cdm.addDimension(time);
 
@@ -250,12 +267,13 @@ void DataIndex::addParameterVariables_(CDM & cdm) const
 
 void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
-	getLevelDimensionsForParameter_(out, timeEntry);
-	getVersionDimensionsForParameter_(out, timeEntry);
-
 	// x/y dimensions
 	out.push_back("x");
 	out.push_back("y");
+
+	getVersionDimensionsForParameter_(out, timeEntry);
+	getLevelDimensionsForParameter_(out, timeEntry);
+
 	getTimeDimensionForParameter_(out, timeEntry);
 }
 

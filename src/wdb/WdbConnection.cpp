@@ -126,9 +126,37 @@ WdbConnection::GridInformationPtr WdbConnection::readGridInformation(const std::
 	return find->second;
 }
 
-PGresult * WdbConnection::call_(const std::string & query)
+
+float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 {
-	PGresult * result = PQexec(connection_, query.c_str());
+	std::ostringstream query;
+	query << "SELECT grid::bytea FROM wci.fetch(" << gridIdentifier << ", NULL::wci.grid)";
+
+	Scoped_PGresult result(call_(query.str(), BinaryResult));
+
+	int tuples = PQntuples(result.get());
+	if ( tuples == 0 )
+		throw WdbException("Unknown grid id");
+	if ( tuples > 1 )
+		throw WdbException("Internal error (got more than one grid from query");
+
+	float * data = (float *) PQgetvalue(result.get(), 0, 0);
+	int dataLength = PQgetlength(result.get(), 0, 0);
+
+	if ( dataLength % sizeof(float) )
+		throw WdbException("Invalid field size");
+
+	float * ret = std::copy(data, data + (dataLength / 4), buffer);
+
+	return ret;
+}
+
+
+PGresult * WdbConnection::call_(const std::string & query, QueryResultFormat resultFormat)
+{
+
+	PGresult * result = PQexecParams(connection_, query.c_str(), 0, NULL, NULL, NULL, NULL, resultFormat == BinaryResult ? 1 : 0);
+	//PGresult * result = PQexec(connection_, query.c_str());
 	if ( PQresultStatus(result) != PGRES_TUPLES_OK )
 	{
 		PQclear(result);

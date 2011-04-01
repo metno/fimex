@@ -438,9 +438,9 @@ BOOST_AUTO_TEST_CASE(severalLevelsInData)
 		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
-		BOOST_CHECK_EQUAL("lvl", shape[0]);
-		BOOST_CHECK_EQUAL("x", shape[1]);
-		BOOST_CHECK_EQUAL("y", shape[2]);
+		BOOST_CHECK_EQUAL("x", shape[0]);
+		BOOST_CHECK_EQUAL("y", shape[1]);
+		BOOST_CHECK_EQUAL("lvl", shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
 	catch ( CDMException & e )
@@ -465,9 +465,9 @@ BOOST_AUTO_TEST_CASE(severalDataVersions)
 
 	const std::vector<std::string> & shape = var.getShape();
 	BOOST_REQUIRE_LE(3, shape.size());
-	BOOST_CHECK_EQUAL("version", shape[0]);
-	BOOST_CHECK_EQUAL("x", shape[1]);
-	BOOST_CHECK_EQUAL("y", shape[2]);
+	BOOST_CHECK_EQUAL("x", shape[0]);
+	BOOST_CHECK_EQUAL("y", shape[1]);
+	BOOST_CHECK_EQUAL("version", shape[2]);
 	BOOST_CHECK_EQUAL(3, shape.size());
 }
 
@@ -491,9 +491,9 @@ BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
 	const std::vector<std::string> & shape = var.getShape();
 
 	BOOST_REQUIRE_LE(4, shape.size());
-	BOOST_CHECK_EQUAL("version", shape[0]);
-	BOOST_CHECK_EQUAL("x", shape[1]);
-	BOOST_CHECK_EQUAL("y", shape[2]);
+	BOOST_CHECK_EQUAL("x", shape[0]);
+	BOOST_CHECK_EQUAL("y", shape[1]);
+	BOOST_CHECK_EQUAL("version", shape[2]);
 	BOOST_CHECK_EQUAL("time", shape[3]);
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
@@ -666,6 +666,44 @@ BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes_2)
 	{
 		BOOST_FAIL(e.what());
 	}
+}
+
+BOOST_AUTO_TEST_CASE(timeIndexLoopkup)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData("2011-03-31 06:00:00"));
+	gridData.push_back(TestingGridData("2011-03-31 18:00:00"));
+	gridData.push_back(TestingGridData("2011-03-31 12:00:00"));
+	gridData.push_back(TestingGridData("2011-04-01 06:00:00"));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	wdb::DataIndex::Time t = boost::posix_time::time_from_string("2011-03-31 06:00:00");
+	boost::posix_time::time_duration offset(6, 0, 0);
+	BOOST_CHECK_EQUAL(t, di.timeFromIndex(1));
+	BOOST_CHECK_EQUAL(t + offset, di.timeFromIndex(2));
+	BOOST_CHECK_EQUAL(t + (offset * 2), di.timeFromIndex(3));
+	BOOST_CHECK_EQUAL(t + (offset * 4), di.timeFromIndex(4));
+}
+
+BOOST_AUTO_TEST_CASE(throwOnInvalidTimeIndexLoopkup)
+{
+	std::vector<wdb::GridData> gridData;
+	gridData.push_back(TestingGridData("2011-03-31 06:00:00"));
+	gridData.push_back(TestingGridData("2011-03-31 18:00:00"));
+
+	const wdb::DataIndex di(gridData, tr);
+
+	CDM cdm;
+	di.populate(cdm);
+
+	BOOST_CHECK_THROW(di.timeFromIndex(0), CDMException);
+	di.timeFromIndex(1);
+	di.timeFromIndex(2);
+	BOOST_CHECK_THROW(di.timeFromIndex(3), CDMException);
 }
 
 

@@ -74,8 +74,23 @@ public:
 	typedef boost::shared_ptr<GridInformation> GridInformationPtr;
 	GridInformationPtr readGridInformation(const std::string & gridName);
 
+	/**
+	 * Read a grid from database, placing it in the provided buffer.
+	 *
+	 * @param buffer Fetched data goes here.
+	 * @param gridIdentifier Id of the data to fetch
+	 *
+	 * @returns a pointer to one-past the stored data
+	 */
+	float * getGrid(float * buffer, GridData::gid gridIdentifier);
 
 private:
+
+	enum QueryResultFormat
+	{
+		TextResult, BinaryResult
+	};
+
 	/**
 	 * Make a database call.
 	 *
@@ -83,7 +98,7 @@ private:
 	 *
 	 * @throws WdbException on error
 	 */
-	PGresult * call_(const std::string & query);
+	PGresult * call_(const std::string & query, QueryResultFormat resultFormat = TextResult);
 
 	PGconn * connection_;
 

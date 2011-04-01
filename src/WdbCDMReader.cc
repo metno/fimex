@@ -27,6 +27,10 @@
  */
 
 #include "fimex/WdbCDMReader.h"
+
+#include <sstream>
+
+#include "fimex/WdbCDMReaderParser.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "wdb/WdbConnection.h"
@@ -37,15 +41,16 @@ namespace MetNoFimex
 {
 
 
-
 GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& configfilename) :
 		wdbConnection_(0), dataIndex_(0), translator_(0)
 {
 	try
 	{
+		std::string connectString = "dbname=wdb";
+
 		translator_ = new wdb::CdmNameTranslator;
 
-		wdbConnection_ = new wdb::WdbConnection("dbname=wdb");
+		wdbConnection_ = new wdb::WdbConnection(connectString);
 
 		std::vector<wdb::GridData> data;
 		wdbConnection_->readGid(data, "met.no eceps modification");
@@ -57,27 +62,51 @@ GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& con
 	}
 	catch (...)
 	{
-		delete translator_;
-		delete wdbConnection_;
 		delete dataIndex_;
+		delete wdbConnection_;
+		delete translator_;
 		throw;
 	}
 }
 
 GxWdbCDMReader::~GxWdbCDMReader()
 {
-	delete translator_;
-	delete wdbConnection_;
 	delete dataIndex_;
+	delete wdbConnection_;
+	delete translator_;
 }
 
 boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 		const std::string& varName, size_t unLimDimPos) throw (CDMException)
 {
-	boost::shared_ptr<Data> ret = createData(CDM_FLOAT, 100 * 100, std::numeric_limits<float>::quiet_NaN());
+	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");";
+
+	const CDMVariable& variable = cdm_->getVariable(varName);
+	const std::vector<std::string> & dimensions = variable.getShape();
+	unsigned size = 1;
+	for ( std::vector<std::string>::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
+	{
+		const CDMDimension & dimension = cdm_->getDimension(* it);
+		if ( not dimension.isUnlimited() )
+			size *= dimension.getLength();
+	}
+
+	boost::shared_ptr<Data> ret = createData(variable.getDataType(), size/*, std::numeric_limits<float>::quiet_NaN()*/);
+
+	const std::string & wdbName = translator_->toWdbName(varName);
+	if ( dataIndex_->isDatabaseField(wdbName) )
+	{
+		const wdb::DataIndex::Time & time = dataIndex_->timeFromIndex(unLimDimPos);
+		std::vector<wdb::DataIndex::gid> fieldIdentifiers = dataIndex_->getGridIdentifiers(wdbName, time);
+
+		float * dataIdx = (float *) ret->getDataPtr();
+		for ( std::vector<wdb::DataIndex::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
+			dataIdx = wdbConnection_->getGrid(dataIdx, * it);
+	}
+
+	std::cout << "\tdone" << std::endl;
 	return ret;
 }
-
 
 
 }

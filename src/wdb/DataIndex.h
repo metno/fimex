@@ -62,7 +62,9 @@ public:
 	typedef GridData::Time Time;
 
 	bool isDatabaseField(const std::string & variableName) const;
+	const Time & timeFromIndex(std::size_t timeIndex) const;
 	std::vector<gid> getGridIdentifiers(const std::string & variableName, const Time & time) const;
+
 
 private:
 
@@ -93,6 +95,8 @@ private:
 
 	typedef std::map<Parameter, GridData::GridInformationPtr> GridSpecMap;
 	GridSpecMap grids_;
+
+	std::vector<Time> times_;
 };
 
 }
