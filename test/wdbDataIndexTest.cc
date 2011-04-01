@@ -46,60 +46,81 @@
 
 using namespace MetNoFimex;
 
-/// Do not add any non-static fields to this class; they will disappear in tests
-class TestingGridData : public wdb::GridData
+class DataIndexFixture
 {
+	struct TestingGridData : public wdb::GridData
+	{
+		TestingGridData(const wdb::Parameter & param,
+				const wdb::Level & lvl,
+				int version,
+				const Time & validTo,
+				const wdb::GridData::GridInformationPtr & grid,
+				gid gridId) :
+			wdb::GridData(param, lvl, version, validTo, gridId)
+		{
+			setGridInformation(grid);
+		}
+	};
+
+	wdb::GridData::gid nextGid_;
+public:
+	DataIndexFixture() : nextGid_(0) {}
+
+	wdb::GridData::gid nextGid()
+	{
+		return nextGid_ ++;
+	}
+
 	static boost::posix_time::ptime t(const std::string & time)
 	{
 		return boost::posix_time::time_from_string(time);
-	}
-public:
-	static const wdb::Parameter defaultParameter;
-	static const wdb::Level defaultLevel;
-	static const std::string defaultTime;
-	static const GridInformationPtr defaultGrid;
-
-	TestingGridData(const wdb::Parameter & parameter = defaultParameter, const std::string & time = defaultTime) :
-		wdb::GridData(parameter, defaultLevel, 0, t(time), 0)
-	{
-		setGridInformation(defaultGrid);
-	}
-
-	TestingGridData(const wdb::Level & lvl, const std::string & time = defaultTime) :
-		wdb::GridData(defaultParameter, lvl, 0, t(time), 0)
-	{
-		setGridInformation(defaultGrid);
-	}
-
-	explicit TestingGridData(const std::string & time) :
-		wdb::GridData(defaultParameter, defaultLevel, 0, t(time), 0)
-	{
-		setGridInformation(defaultGrid);
-	}
-
-	TestingGridData(int dataVersion, const std::string & time = defaultTime) :
-		wdb::GridData(defaultParameter, defaultLevel, dataVersion, t(time), 0)
-	{
-		setGridInformation(defaultGrid);
-	}
-
-	TestingGridData(GridInformationPtr gridInfo) :
-		wdb::GridData(defaultParameter, defaultLevel, 0, t(defaultTime), 0)
-	{
-		setGridInformation(gridInfo);
 	}
 
 	static std::string cdmId()
 	{
 		return "air_temperature";
 	}
-};
-const wdb::Parameter TestingGridData::defaultParameter("air temperature", "C");
-const wdb::Level TestingGridData::defaultLevel("distance above ground", "m", 0, 0);
-const std::string TestingGridData::defaultTime = "2011-03-18 06:00:00";
-const TestingGridData::GridInformationPtr TestingGridData::defaultGrid(new wdb::GridInformation("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
-wdb::CdmNameTranslator tr;
+
+
+	std::vector<wdb::GridData> gridData;
+	CDM cdm;
+
+	static const wdb::Parameter defaultParameter;
+	static const wdb::Level defaultLevel;
+	static const std::string defaultTime;
+	static const wdb::GridData::GridInformationPtr defaultGrid;
+	wdb::CdmNameTranslator tr;
+
+	void addGridData(const wdb::Parameter & parameter = defaultParameter, const std::string & time = defaultTime)
+	{
+		gridData.push_back(TestingGridData(parameter, defaultLevel, 0, t(time), defaultGrid, nextGid()));
+	}
+
+	void addGridData(const wdb::Level & lvl, const std::string & time = defaultTime)
+	{
+		gridData.push_back(TestingGridData(defaultParameter, lvl, 0, t(time), defaultGrid, nextGid()));
+	}
+
+	void addGridData(const std::string & time)
+	{
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(time), defaultGrid, nextGid()));
+	}
+
+	void addGridData(int dataVersion, const std::string & time = defaultTime)
+	{
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, dataVersion, t(time), defaultGrid, nextGid()));
+	}
+
+	void addGridData(const wdb::GridData::GridInformationPtr & gridInfo)
+	{
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(defaultTime), gridInfo, nextGid()));
+	}
+};
+const wdb::Parameter DataIndexFixture::defaultParameter("air temperature", "C");
+const wdb::Level DataIndexFixture::defaultLevel("distance above ground", "m", 0, 0);
+const std::string DataIndexFixture::defaultTime = "2011-03-18 06:00:00";
+const wdb::GridData::GridInformationPtr DataIndexFixture::defaultGrid(new wdb::GridInformation("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
 struct same_entity
 {
@@ -115,13 +136,11 @@ struct same_entity
 
 BOOST_AUTO_TEST_SUITE(DataIndexTest)
 
-BOOST_AUTO_TEST_CASE(setsBaseDimensions)
+BOOST_FIXTURE_TEST_CASE(setsBaseDimensions, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
+	addGridData(wdb::Level("lvl", "m", 1, 1));
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -131,15 +150,13 @@ BOOST_AUTO_TEST_CASE(setsBaseDimensions)
 	BOOST_CHECK_EQUAL(3, dims.size());
 }
 
-BOOST_AUTO_TEST_CASE(setsDimensionSizes)
+BOOST_FIXTURE_TEST_CASE(setsDimensionSizes, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2)));
+	addGridData(wdb::Level("lvl", "m", 0, 0));
+	addGridData(wdb::Level("lvl", "m", 1, 1));
+	addGridData(wdb::Level("lvl", "m", 2, 2));
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -154,18 +171,16 @@ BOOST_AUTO_TEST_CASE(setsDimensionSizes)
 	BOOST_CHECK_EQUAL(3, lvlDimension->getLength());
 }
 
-BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep)
+BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep, DataIndexFixture)
 {
 	// since there is only one time here, we don't add time as a dimension.
 	// but we still add time as an unlimited dimension (of size 0).
 	//
 	// (todo: is there any problems with this?)
 
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2)));
+	addGridData(wdb::Level("lvl", "m", 2, 2));
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -175,15 +190,13 @@ BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep)
 	BOOST_CHECK_EQUAL(0, timeDimension->getLength());
 }
 
-BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSize)
+BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSize, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0), "2010-03-18 07:00:00"));
+	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
+	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
+	addGridData(wdb::Level("lvl", "m", 0, 0), "2010-03-18 07:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -193,17 +206,14 @@ BOOST_AUTO_TEST_CASE(setsCorrectTimeDimensionSize)
 	BOOST_CHECK_EQUAL(2, timeDimension->getLength());
 }
 
-BOOST_AUTO_TEST_CASE(picksUpAllTimesFromSameParameter)
+BOOST_FIXTURE_TEST_CASE(picksUpAllTimesFromSameParameter, DataIndexFixture)
 {
 	// All times for varying levels should be picked up
-
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0), "2000-01-01 00:00:00"));
+	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
+	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
+	addGridData(wdb::Level("lvl", "m", 0, 0), "2000-01-01 00:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -213,18 +223,15 @@ BOOST_AUTO_TEST_CASE(picksUpAllTimesFromSameParameter)
 	BOOST_CHECK_EQUAL(3, timeDimension->getLength());
 }
 
-BOOST_AUTO_TEST_CASE(ignoresIrrelevantTimeDimensions)
+BOOST_FIXTURE_TEST_CASE(ignoresIrrelevantTimeDimensions, DataIndexFixture)
 {
 	// Any parameters which only have one time step will not get a time dimension
 	// This makes sense for such fields as topography
-
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00"));
-	gridData.push_back(TestingGridData(wdb::Parameter("timeless", "stuff"), "2000-01-01 00:00:00"));
+	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
+	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
+	addGridData(wdb::Parameter("timeless", "stuff"), "2000-01-01 00:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -234,16 +241,13 @@ BOOST_AUTO_TEST_CASE(ignoresIrrelevantTimeDimensions)
 	BOOST_CHECK_EQUAL(2, timeDimension->getLength());
 }
 
-BOOST_AUTO_TEST_CASE(setsVersionDimensions)
+BOOST_FIXTURE_TEST_CASE(setsVersionDimensions, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(0));
-	gridData.push_back(TestingGridData(1));
-	gridData.push_back(TestingGridData(2));
+	addGridData(0);
+	addGridData(1);
+	addGridData(2);
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
@@ -257,15 +261,12 @@ BOOST_AUTO_TEST_CASE(setsVersionDimensions)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(versionsAddThemselvesAsVariables)
+BOOST_FIXTURE_TEST_CASE(versionsAddThemselvesAsVariables, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(0));
-	gridData.push_back(TestingGridData(1));
+	addGridData(0);
+	addGridData(1);
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	const std::string variable = "version";
@@ -281,16 +282,13 @@ BOOST_AUTO_TEST_CASE(versionsAddThemselvesAsVariables)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(zDimensionsAddThemselvesAsVariables)
+BOOST_FIXTURE_TEST_CASE(zDimensionsAddThemselvesAsVariables, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 2, 2)));
+	addGridData(wdb::Level("lvl", "m", 0, 0));
+	addGridData(wdb::Level("lvl", "m", 1, 1));
+	addGridData(wdb::Level("lvl", "m", 2, 2));
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	const std::string variable = "lvl";
@@ -309,17 +307,14 @@ BOOST_AUTO_TEST_CASE(zDimensionsAddThemselvesAsVariables)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(manyZDimensions)
+BOOST_FIXTURE_TEST_CASE(manyZDimensions, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
-	gridData.push_back(TestingGridData(wdb::Level("foo bar", "x", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("foo bar", "x", 1, 1)));
+	addGridData(wdb::Level("lvl", "m", 0, 0));
+	addGridData(wdb::Level("lvl", "m", 1, 1));
+	addGridData(wdb::Level("foo bar", "x", 0, 0));
+	addGridData(wdb::Level("foo bar", "x", 1, 1));
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	const std::string variableA = "lvl";
@@ -345,16 +340,13 @@ BOOST_AUTO_TEST_CASE(manyZDimensions)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(addsTimeVariable)
+BOOST_FIXTURE_TEST_CASE(addsTimeVariable, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData("2011-03-21 06:00:00"));
-	gridData.push_back(TestingGridData("2011-03-21 12:00:00"));
-	gridData.push_back(TestingGridData("2011-03-21 18:00:00"));
+	addGridData("2011-03-21 06:00:00");
+	addGridData("2011-03-21 12:00:00");
+	addGridData("2011-03-21 18:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
@@ -371,20 +363,18 @@ BOOST_AUTO_TEST_CASE(addsTimeVariable)
 }
 
 
-BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
+BOOST_FIXTURE_TEST_CASE(addsTimeToRelevantVariables, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(TestingGridData::defaultLevel, "2010-03-18 06:00:00"));
-	gridData.push_back(TestingGridData(TestingGridData::defaultLevel, "2010-03-18 07:00:00"));
-	gridData.push_back(TestingGridData(TestingGridData::defaultLevel, "2010-03-18 08:00:00"));
+	addGridData(defaultLevel, "2010-03-18 06:00:00");
+	addGridData(defaultLevel, "2010-03-18 07:00:00");
+	addGridData(defaultLevel, "2010-03-18 08:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	try
 	{
-		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+		const CDMVariable & var = cdm.getVariable(cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
 		BOOST_CHECK_EQUAL("x", shape[0]);
@@ -398,18 +388,16 @@ BOOST_AUTO_TEST_CASE(addsTimeToRelevantVariables)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(singleLevelInData)
+BOOST_FIXTURE_TEST_CASE(singleLevelInData, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
+	addGridData(wdb::Level("lvl", "m", 0, 0));
 
 	const wdb::DataIndex di(gridData, tr);
-	CDM cdm;
 	di.populate(cdm);
 
 	try
 	{
-		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+		const CDMVariable & var = cdm.getVariable(cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(2, shape.size());
 		BOOST_CHECK_EQUAL("x", shape[0]);
@@ -422,20 +410,17 @@ BOOST_AUTO_TEST_CASE(singleLevelInData)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(severalLevelsInData)
+BOOST_FIXTURE_TEST_CASE(severalLevelsInData, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 0, 0)));
-	gridData.push_back(TestingGridData(wdb::Level("lvl", "m", 1, 1)));
+	addGridData(wdb::Level("lvl", "m", 0, 0));
+	addGridData(wdb::Level("lvl", "m", 1, 1));
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
 	{
-		const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+		const CDMVariable & var = cdm.getVariable(cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
 		BOOST_CHECK_EQUAL("x", shape[0]);
@@ -449,19 +434,16 @@ BOOST_AUTO_TEST_CASE(severalLevelsInData)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(severalDataVersions)
+BOOST_FIXTURE_TEST_CASE(severalDataVersions, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(0));
-	gridData.push_back(TestingGridData(1));
-	gridData.push_back(TestingGridData(2));
+	addGridData(0);
+	addGridData(1);
+	addGridData(2);
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
-	const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+	const CDMVariable & var = cdm.getVariable(cdmId());
 
 	const std::vector<std::string> & shape = var.getShape();
 	BOOST_REQUIRE_LE(3, shape.size());
@@ -471,22 +453,19 @@ BOOST_AUTO_TEST_CASE(severalDataVersions)
 	BOOST_CHECK_EQUAL(3, shape.size());
 }
 
-BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
+BOOST_FIXTURE_TEST_CASE(onlyOneTimeDimensionInVaraiableShape, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(0, "2011-03-22 06:00:00"));
-	gridData.push_back(TestingGridData(1, "2011-03-22 06:00:00"));
-	gridData.push_back(TestingGridData(0, "2011-03-22 07:00:00"));
-	gridData.push_back(TestingGridData(1, "2011-03-22 07:00:00"));
-	gridData.push_back(TestingGridData(0, "2011-03-22 08:00:00"));
-	gridData.push_back(TestingGridData(1, "2011-03-22 08:00:00"));
+	addGridData(0, "2011-03-22 06:00:00");
+	addGridData(1, "2011-03-22 06:00:00");
+	addGridData(0, "2011-03-22 07:00:00");
+	addGridData(1, "2011-03-22 07:00:00");
+	addGridData(0, "2011-03-22 08:00:00");
+	addGridData(1, "2011-03-22 08:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
-	const CDMVariable & var = cdm.getVariable(TestingGridData::cdmId());
+	const CDMVariable & var = cdm.getVariable(cdmId());
 
 	const std::vector<std::string> & shape = var.getShape();
 
@@ -498,14 +477,11 @@ BOOST_AUTO_TEST_CASE(onlyOneTimeDimensionInVaraiableShape)
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 
-BOOST_AUTO_TEST_CASE(createsProjectionVariable)
+BOOST_FIXTURE_TEST_CASE(createsProjectionVariable, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(TestingGridData::defaultGrid));
+	addGridData(defaultGrid);
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
@@ -522,17 +498,13 @@ BOOST_AUTO_TEST_CASE(createsProjectionVariable)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(createsProjectionVariable_2)
+BOOST_FIXTURE_TEST_CASE(createsProjectionVariable_2, DataIndexFixture)
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
-	TestingGridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
-
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(grid));
+	wdb::GridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	addGridData(grid);
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
@@ -550,14 +522,11 @@ BOOST_AUTO_TEST_CASE(createsProjectionVariable_2)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(createsTranslatedLatLonVariables)
+BOOST_FIXTURE_TEST_CASE(createsTranslatedLatLonVariables, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData());
+	addGridData();
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
@@ -595,14 +564,11 @@ BOOST_AUTO_TEST_CASE(createsTranslatedLatLonVariables)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(setsReferenceTimeVariable)
+BOOST_FIXTURE_TEST_CASE(setsReferenceTimeVariable, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData());
+	addGridData();
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
@@ -620,22 +586,19 @@ BOOST_AUTO_TEST_CASE(setsReferenceTimeVariable)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes)
+BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData());
+	addGridData();
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
 	{
-		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(TestingGridData::cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("C", cdm.getAttribute(TestingGridData::cdmId(), "units").getStringValue());
-		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(TestingGridData::cdmId(), "_FillValue").getStringValue());
-		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(TestingGridData::cdmId(), "coordinates").getStringValue());
+		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
+		BOOST_CHECK_EQUAL("C", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )
 	{
@@ -643,24 +606,21 @@ BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes_2)
+BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, DataIndexFixture)
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
-	TestingGridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData(grid));
+	wdb::GridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	addGridData(grid);
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	try
 	{
-		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(TestingGridData::cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("C", cdm.getAttribute(TestingGridData::cdmId(), "units").getStringValue());
-		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(TestingGridData::cdmId(), "_FillValue").getStringValue());
-		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(TestingGridData::cdmId(), "coordinates").getStringValue());
+		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
+		BOOST_CHECK_EQUAL("C", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )
 	{
@@ -668,17 +628,14 @@ BOOST_AUTO_TEST_CASE(setsCorrectParameterAttributes_2)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(timeIndexLoopkup)
+BOOST_FIXTURE_TEST_CASE(timeIndexLoopkup, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData("2011-03-31 06:00:00"));
-	gridData.push_back(TestingGridData("2011-03-31 18:00:00"));
-	gridData.push_back(TestingGridData("2011-03-31 12:00:00"));
-	gridData.push_back(TestingGridData("2011-04-01 06:00:00"));
+	addGridData("2011-03-31 06:00:00");
+	addGridData("2011-03-31 18:00:00");
+	addGridData("2011-03-31 12:00:00");
+	addGridData("2011-04-01 06:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	wdb::DataIndex::Time t = boost::posix_time::time_from_string("2011-03-31 06:00:00");
@@ -689,15 +646,12 @@ BOOST_AUTO_TEST_CASE(timeIndexLoopkup)
 	BOOST_CHECK_EQUAL(t + (offset * 4), di.timeFromIndex(4));
 }
 
-BOOST_AUTO_TEST_CASE(throwOnInvalidTimeIndexLoopkup)
+BOOST_FIXTURE_TEST_CASE(throwOnInvalidTimeIndexLoopkup, DataIndexFixture)
 {
-	std::vector<wdb::GridData> gridData;
-	gridData.push_back(TestingGridData("2011-03-31 06:00:00"));
-	gridData.push_back(TestingGridData("2011-03-31 18:00:00"));
+	addGridData("2011-03-31 06:00:00");
+	addGridData("2011-03-31 18:00:00");
 
 	const wdb::DataIndex di(gridData, tr);
-
-	CDM cdm;
 	di.populate(cdm);
 
 	BOOST_CHECK_THROW(di.timeFromIndex(0), CDMException);
@@ -705,7 +659,6 @@ BOOST_AUTO_TEST_CASE(throwOnInvalidTimeIndexLoopkup)
 	di.timeFromIndex(2);
 	BOOST_CHECK_THROW(di.timeFromIndex(3), CDMException);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()
 
