@@ -193,7 +193,20 @@ void NcmlCDMReader::initVariableDataChange()
             std::transform(tokens.begin(), tokens.end(),
                     std::back_inserter(dvals), string2type<double>);
             CDMVariable& var = cdm_->getVariable(name);
-            // TODO: check that no. of values == shape-size
+            // check that no. of values == shape-size
+            vector<string> dims = var.getShape();
+            size_t dataSize = 0;
+            for (size_t i = 0; i < dims.size(); ++i) {
+                size_t dimLen = cdm_->getDimension(dims[i]).getLength();
+                if (dataSize == 0) {
+                    dataSize = 1;
+                }
+                dataSize *= dimLen;
+            }
+            if (dvals.size() != dataSize) {
+                LOG4FIMEX(logger, Logger::ERROR, "values from ncml: "<< dvals.size() <<" required for " << name << ": " << dataSize);
+                throw CDMException("values from ncml does not match shape for variable "+name);
+            }
             var.setData(createData(var.getDataType(), dvals.begin(), dvals.end()));
         }
     }
