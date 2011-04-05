@@ -660,6 +660,28 @@ BOOST_FIXTURE_TEST_CASE(throwOnInvalidTimeIndexLoopkup, DataIndexFixture)
 	BOOST_CHECK_THROW(di.timeFromIndex(3), CDMException);
 }
 
+BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingData, DataIndexFixture)
+{
+	addGridData(0, "2011-03-31 06:00:00");
+	addGridData(1, "2011-03-31 06:00:00");
+	addGridData(2, "2011-03-31 06:00:00");
+	addGridData(0, "2011-03-31 18:00:00");
+	// addGridData(1, "2011-03-31 06:00:00"); // missing, but a missing gid entry should be added
+	addGridData(2, "2011-03-31 18:00:00");
+
+	const wdb::DataIndex di(gridData, tr);
+	di.populate(cdm);
+
+	std::vector<wdb::DataIndex::gid> gids = di.getGridIdentifiers(defaultParameter.name(), t("2011-03-31 18:00:00"));
+
+	BOOST_CHECK_EQUAL(3, gids.size());
+	BOOST_REQUIRE(gids.size() >= 3);
+	BOOST_CHECK_EQUAL(4, gids[0]);
+	BOOST_CHECK_EQUAL(-1, gids[1]);
+	BOOST_CHECK_EQUAL(5, gids[2]);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
 #else

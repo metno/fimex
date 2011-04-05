@@ -101,7 +101,7 @@ std::vector<DataIndex::gid> DataIndex::getGridIdentifiers(const std::string & va
 	std::vector<DataIndex::gid> ret;
 	ParameterEntry::const_iterator parameter = data_.find(Parameter(variableName, ""));
 	if ( parameter == data_.end() )
-		throw CDMException(variableName + ": no suvh parameter in index");
+		throw CDMException(variableName + ": no such parameter in index");
 	TimeEntry::const_iterator te = parameter->second.find(time);
 	if ( te == parameter->second.end() )
 		throw CDMException(to_simple_string(time) + ": no such time for parameter " + variableName);
