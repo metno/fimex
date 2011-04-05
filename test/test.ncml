@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	    xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 ncml-2.2.xsd "
+		location="coordTest.nc">
+<dimension name="dummy" length="3" />
+<variable name="dummy" shape="dummy" type="float">
+  <attribute name="test" value="lon_rho"/>
+  <values>1 
+  15.3 17</values>
+</variable>
+
+</netcdf>
+

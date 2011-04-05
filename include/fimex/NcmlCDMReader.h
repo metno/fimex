@@ -83,6 +83,7 @@ private:
     void initWarnUnsupported();
     void initVariableNameChange();
     void initVariableTypeChange();
+    void initVariableDataChange();
     void initDimensionNameChange();
     void initDimensionUnlimited();
     void initAttributeNameChange();

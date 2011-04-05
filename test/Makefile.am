@@ -24,7 +24,7 @@ if HAVE_MILIB
 endif
 if HAVE_FELT_OR_MILIB 
   CC_TESTS += testQualityExtractor
-  NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh
+  NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh
   NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
   GRIBAPI_MI_TESTS = testGribWriter
 endif

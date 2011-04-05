@@ -35,6 +35,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include "fimex/DataImpl.h"
 #include "fimex/CDM.h"
 
 namespace MetNoFimex
@@ -95,6 +96,7 @@ void NcmlCDMReader::init() throw(CDMException)
     initDimensionUnlimited();
     initVariableNameChange();
     initVariableTypeChange();
+    initVariableDataChange();
     initAttributeNameChange();
     initAddReassignAttribute();
     initWarnUnsupported();
@@ -175,6 +177,28 @@ void NcmlCDMReader::initVariableTypeChange()
     }
 }
 
+void NcmlCDMReader::initVariableDataChange()
+{
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:values");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i]->parent, "name");
+        if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
+        if (cdm_->hasVariable(name)) {
+            std::string values = getXmlContent(nodes->nodeTab[i]);
+            std::vector<std::string> tokens = tokenize(values, " \t\r\n");
+            std::vector<double> dvals;
+            dvals.reserve(tokens.size());
+            std::transform(tokens.begin(), tokens.end(),
+                    std::back_inserter(dvals), string2type<double>);
+            CDMVariable& var = cdm_->getVariable(name);
+            // TODO: check that no. of values == shape-size
+            var.setData(createData(var.getDataType(), dvals.begin(), dvals.end()));
+        }
+    }
+}
+
 void NcmlCDMReader::initAddReassignAttribute()
 {
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:attribute[@value]");
@@ -227,6 +251,22 @@ void NcmlCDMReader::initVariableNameChange()
             variableNameChanges[name] = orgName;
         }
     }
+
+    // add variables not existing yet
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@shape and @type]");
+    nodes = xpathObj->nodesetval;
+    size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i], "name");
+        if (!cdm_->hasVariable(name)) {
+            std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
+            vector<string> vshape = tokenize(shape, " \t");
+            std::string type = getXmlProp(nodes->nodeTab[i], "type");
+            CDMVariable var(name, string2datatype(type), vshape);
+            cdm_->addVariable(var);
+        }
+    }
+
 }
 
 /* change the dimension names */
@@ -241,6 +281,18 @@ void NcmlCDMReader::initDimensionNameChange()
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for dimension with orgName: "+ orgName);
             cdm_->renameDimension(orgName, name);
+        }
+    }
+    // add dimensions not existing
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@length]");
+    nodes = xpathObj->nodesetval;
+    size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i], "name");
+        if (!cdm_->hasDimension(name)) {
+            int length = string2type<int>(getXmlProp(nodes->nodeTab[i], "length"));
+            CDMDimension dim(name,length);
+            cdm_->addDimension(dim);
         }
     }
 }
@@ -268,7 +320,9 @@ void NcmlCDMReader::initDimensionUnlimited()
                     // prefetch the data of that variable
                     if (cdm_->hasVariable(name)) {
                         CDMVariable& var = cdm_->getVariable(name);
-                        var.setData(dataReader->getData(orgName));
+                        if (!var.hasData()) {
+                            var.setData(dataReader->getData(orgName));
+                        }
                     }
                 }
             } else if (isUnlimited == "false") {

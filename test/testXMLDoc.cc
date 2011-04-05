@@ -57,6 +57,11 @@ BOOST_AUTO_TEST_CASE( test_xmlDoc )
         xmlNodeSetPtr flagNodes2 = xpathObj->nodesetval;
         int flagNodesSize2 = (flagNodes2) ? flagNodes2->nodeNr : 0;
         BOOST_CHECK(flagNodesSize == flagNodesSize2);
+
+        // check a subnode with full path
+        xpathObj = doc.getXPathObject("/cdmQualityConfig/variable/status_flag_variable/allowed_values");
+        std::string text = getXmlContent(xpathObj->nodesetval->nodeTab[0]);
+        BOOST_CHECK("1,2,...,6" == text);
     }
 
 }

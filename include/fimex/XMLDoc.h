@@ -56,7 +56,7 @@ public:
 	 * @param filename xml input-file
 	 * @throw CDMException if problems with libxml or problems with input-file
 	 */
-	XMLDoc(const std::string& filename) throw(CDMException);
+	XMLDoc(const std::string& filename);
 	virtual ~XMLDoc();
 	/**
 	 * get a ptr to the node defined by xpath
@@ -65,7 +65,7 @@ public:
 	 * @return an xpathobj, which is != 0, but might have 0 elements, i.e. nodesetval == 0 or nodesetval->nodeNr == 0
 	 * @throw CDMException if xpath is not parsable
 	 */
-	XPathObjPtr getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const throw(CDMException);
+	XPathObjPtr getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const;
 	/**
 	 * @brief register a namespace for later xpath
 	 *
@@ -73,7 +73,7 @@ public:
 	 * @param prefix short name for namespace
 	 * @param uri full namespace name
 	 */
-	void registerNamespace(const std::string& prefix, const std::string& uri) throw(CDMException);
+	void registerNamespace(const std::string& prefix, const std::string& uri);
 
 private:
 	xmlDoc* doc;
@@ -94,6 +94,14 @@ std::string getXmlProp(const xmlNodePtr node, const std::string& attrName);
  * @return a string of the attribute, "" if attribute doesn't exist
  */
 std::string getXmlName(const xmlNodePtr node);
+/**
+ * @brief get all text-contents of the node or underlying nodes
+ *
+ * @param node the xmlNodePtr or xmlNodePtr as list
+ * @return string with text-content, or ""
+ * @throws CDMException
+ */
+std::string getXmlContent(const xmlNodePtr node);
 
 
 }
