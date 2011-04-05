@@ -6,9 +6,14 @@
 <dimension name="dummy" length="3" />
 <variable name="dummy" shape="dummy" type="float">
   <attribute name="test" value="lon_rho"/>
-  <values>1 
+  <values>1
   15.3 17</values>
 </variable>
+
+<variable name="valueless" type="float">
+  <attribute name="test" value="lon_rho"/>
+</variable>
+
 
 </netcdf>
 

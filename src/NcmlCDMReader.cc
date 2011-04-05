@@ -170,9 +170,14 @@ void NcmlCDMReader::initVariableTypeChange()
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
         if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
         if (cdm_->hasVariable(name)) {
-            variableTypeChanges[name] = string2datatype(type);
-            LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
-            cdm_->getVariable(name).setDataType(string2datatype(type));
+            CDMVariable& var = cdm_->getVariable(name);
+            CDMDataType oldType = var.getDataType();
+            CDMDataType newType = string2datatype(type);
+            if (oldType != newType) {
+                variableTypeChanges[name] = newType;
+                LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
+                var.setDataType(string2datatype(type));
+            }
         }
     }
 }
@@ -266,7 +271,7 @@ void NcmlCDMReader::initVariableNameChange()
     }
 
     // add variables not existing yet
-    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@shape and @type]");
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[not(@orgName)]");
     nodes = xpathObj->nodesetval;
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
@@ -275,7 +280,9 @@ void NcmlCDMReader::initVariableNameChange()
             std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
             vector<string> vshape = tokenize(shape, " \t");
             std::string type = getXmlProp(nodes->nodeTab[i], "type");
-            CDMVariable var(name, string2datatype(type), vshape);
+            CDMDataType dataType = string2datatype(type);
+            CDMVariable var(name, dataType, vshape);
+            var.setData(createData(dataType, 0)); // this data cannot get fetched from the reader!
             cdm_->addVariable(var);
         }
     }
