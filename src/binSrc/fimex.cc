@@ -78,6 +78,22 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << config << endl;
 }
 
+static void printReaderStatements(const string& readerName, const po::variables_map& vm, const CDMReader* reader)
+{
+    if (vm.count(readerName+".printNcML")) {
+        cout << readerName << " as NcML:" << endl;
+        reader->getCDM().toXMLStream(cout);
+        cout << endl;
+    }
+    if (vm.count(readerName+".printCS")) {
+        cout << readerName + " CoordinateSystems: ";
+        vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(reader->getCDM());
+        cout << csVec.size() << ": ";
+        cout << joinPtr(csVec.begin(), csVec.end(), " | ");
+        cout << endl;
+    }
+}
+
 template<typename T>
 static void writeOption(ostream& out, const string& var, const po::variables_map& vm) {
     if (vm.count(var)) {
@@ -253,18 +269,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 		LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
 		exit(1);
 	} else {
-		if (vm.count("input.printNcML")) {
-			cout << "InputFile as NcML:" << endl;
-			returnPtr->getCDM().toXMLStream(cout);
-			cout << endl;
-		}
-        if (vm.count("input.printCS")) {
-            cout << "InputFile CoordinateSystems: ";
-            vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(returnPtr->getCDM());
-            cout << csVec.size() << ": ";
-            cout << joinPtr(csVec.begin(), csVec.end(), " | ");
-            cout << endl;
-        }
+	    printReaderStatements("input", vm, returnPtr.get());
 	}
 
 	return returnPtr;
@@ -353,11 +358,8 @@ static auto_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, auto_ptr<CDMRe
             extractor->removeVariable(*it);
         }
     }
-	if (vm.count("extract.printNcML")) {
-		cout << "Extractor as NcML:" << endl;
-		extractor->getCDM().toXMLStream(cout);
-		cout << endl;
-	}
+	printReaderStatements("extract", vm, extractor.get());
+
 	return auto_ptr<CDMReader>(extractor);
 }
 
@@ -369,11 +371,8 @@ static auto_ptr<CDMReader> getCDMQualityExtractor(po::variables_map& vm, auto_pt
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
         dataReader = auto_ptr<CDMReader>(new CDMQualityExtractor(boost::shared_ptr<CDMReader>(dataReader), autoConf, config));
     }
-    if (vm.count("qualityExtract.printNcML")) {
-        cout << "QualityExtractor as NcML:" << endl;
-        dataReader->getCDM().toXMLStream(cout);
-        cout << endl;
-    }
+    printReaderStatements("qualityExtract", vm, dataReader.get());
+
     return dataReader;
 }
 
@@ -385,11 +384,8 @@ static auto_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm, auto_pt
 	}
 	auto_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
 	timeInterpolator->changeTimeAxis(vm["timeInterpolate.timeSpec"].as<string>());
-	if (vm.count("timeInterpolate.printNcML")) {
-		cout << "TimeInterpolator as NcML:" << endl;
-		timeInterpolator->getCDM().toXMLStream(cout);
-		cout << endl;
-	}
+	printReaderStatements("timeInterpolate", vm, timeInterpolator.get());
+
 	return auto_ptr<CDMReader>(timeInterpolator);
 }
 
@@ -446,11 +442,8 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 	}
 
 	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(), vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
-	if (vm.count("interpolate.printNcML")) {
-		cout << "Interpolator as NcML:" << endl;
-		interpolator->getCDM().toXMLStream(cout);
-		cout << endl;
-	}
+	printReaderStatements("interpolate", vm, interpolator.get());
+
 	return auto_ptr<CDMReader>(interpolator);
 }
 
@@ -459,11 +452,8 @@ static auto_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, auto_ptr<CDMR
         return dataReader;
     }
     auto_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),vm["ncml.config"].as<string>()));
-    if (vm.count("ncml.printNcML")) {
-        cout << "NcmlCDMReader as NcML:" << endl;
-        ncmlReader->getCDM().toXMLStream(cout);
-        cout << endl;
-    }
+    printReaderStatements("ncml", vm, ncmlReader.get());
+
     return auto_ptr<CDMReader>(ncmlReader);
 }
 
@@ -569,7 +559,7 @@ int run(int argc, char* args[])
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
         ("timeInterpolate.printNcML", "print NcML description of timeInterpolator")
         ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
-        ("ncml.config", "modify/configure with ncml-file")
+        ("ncml.config", po::value<string>(), "modify/configure with ncml-file")
         ("ncml.printNcML", "print NcML description after ncml-configuration")
         ("ncml.printCS", "print CoordinateSystems after ncml-configuration")
 		;
