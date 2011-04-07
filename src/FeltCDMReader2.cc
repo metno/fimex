@@ -181,6 +181,12 @@ FeltCDMReader2::~FeltCDMReader2()
 void FeltCDMReader2::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
     // test lib vs compile version
     MetNoFimex::XMLDoc doc(configFilename);
+    XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    if (nodes->nodeNr != 1) {
+        throw CDMException("config-file "+configFilename+" is not a /cdm_felt_config configuration");
+    }
+
 	// open the feltFile with the desired parameters
 	std::vector<std::string> knownFeltIds = initGetKnownFeltIdsFromXML(doc);
 	std::map<std::string, std::string> options = initGetOptionsFromXML(doc);

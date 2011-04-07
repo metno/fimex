@@ -256,8 +256,15 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 
 #ifdef MIFI_HAVE_NETCDF
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
-		LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
-		returnPtr = auto_ptr<CDMReader>(new NetCDF_CDMReader(vm["input.file"].as<string>()));
+        if (vm.count("input.config")) {
+            std::string config = vm["input.config"].as<string>();
+            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config and applying ncml config");
+            boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(vm["input.file"].as<string>()));
+            returnPtr = auto_ptr<CDMReader>(new NcmlCDMReader(ncReader, config));
+        } else {
+            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
+            returnPtr = auto_ptr<CDMReader>(new NetCDF_CDMReader(vm["input.file"].as<string>()));
+        }
 	}
 #endif
 	if (type == "ncml") {
