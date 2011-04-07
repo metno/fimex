@@ -37,6 +37,7 @@
 #include "fimex/Data.h"
 #include "fimex/DataImpl.h"
 #include "fimex/CDM.h"
+#include <boost/regex.hpp>
 
 namespace MetNoFimex
 {
@@ -45,18 +46,22 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 
-NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
+NcmlCDMReader::NcmlCDMReader(std::string configFile)
     : configFile(configFile)
 {
 #ifdef MIFI_HAVE_NETCDF
-    doc = new XMLDoc(configFile);
-    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+    setConfigDoc();
+
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
         throw CDMException("config-file "+configFile+" does not contain location-attribute");
     }
     string ncFile = getXmlProp(nodes->nodeTab[0], "location");
+    // remove file: URL-prefix
+    ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
+    // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
+    ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
     dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     init();
 #else
@@ -66,11 +71,10 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
 #endif
 }
 
-NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile) throw(CDMException)
+NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile)
     : configFile(configFile), dataReader(dataReader)
 {
-    doc = new XMLDoc(configFile);
-    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+    setConfigDoc();
     init();
 }
 
@@ -80,7 +84,20 @@ NcmlCDMReader::~NcmlCDMReader()
     delete doc;
 }
 
-void NcmlCDMReader::init() throw(CDMException)
+void NcmlCDMReader::setConfigDoc()
+{
+    doc = new XMLDoc(configFile);
+    if (configFile != "") {
+        doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        if (nodes->nodeNr != 1) {
+            throw CDMException("config-file "+configFile+" is not a ncml document with root /nc:netcdf");
+        }
+    }
+}
+
+void NcmlCDMReader::init()
 {
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
     int size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
