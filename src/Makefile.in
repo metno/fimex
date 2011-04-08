@@ -140,7 +140,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
 	gridexer/GxWdbDataTypes.cc gridexer/GxWdbExplorer.cc \
-        WdbCDMReader.cc WdbCDMReaderParser.cc
+	WdbCDMReader.cc WdbCDMReaderParser.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 @HAVE_GRIBAPI_TRUE@am__objects_2 = GribApiCDMWriter.lo \
@@ -151,8 +151,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_MILIB_TRUE@am__objects_3 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
 @HAVE_LIBPQ_TRUE@am__objects_4 = GxWdbDataTypes.lo GxWdbExplorer.lo \
-@HAVE_LIBPQ_TRUE@	WdbCDMReader.lo \
-@HAVE_LIBPQ_TRUE@	WdbCDMReaderParser.lo
+@HAVE_LIBPQ_TRUE@	WdbCDMReader.lo WdbCDMReaderParser.lo
 am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \

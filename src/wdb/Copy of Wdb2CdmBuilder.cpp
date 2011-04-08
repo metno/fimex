@@ -26,7 +26,7 @@
  MA  02110-1301, USA
  */
 
-#include "DataIndex.h"
+#include "Wdb2CdmBuilder.h"
 #include "GridInformation.h"
 #include "CdmNameTranslator.h"
 #include "fimex/CDM.h"
@@ -41,30 +41,17 @@ namespace MetNoFimex
 namespace wdb
 {
 
-DataIndex::DataIndex(const std::vector<wdb::GridData> & data, const CdmNameTranslator & translator) :
-		translator_(translator)
+Wdb2CdmBuilder::Wdb2CdmBuilder(const std::vector<wdb::GridData> & data, const CdmNameTranslator & translator) :
+		index_(data), translator_(translator)
 {
-	for ( std::vector<wdb::GridData>::const_iterator d = data.begin(); d != data.end(); ++ d )
-	{
-		data_[d->parameter()] [d->validTo()] [d->level()] [d->version()] = d->gridIdentifier();
-		grids_[d->parameter()] = d->gridInformation();
-	}
-
-	// Fill in times vector
-	std::set<Time> times;
-	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
-		if ( pe->second.size() > 1 )
-			for ( TimeEntry::const_iterator te = pe->second.begin(); te != pe->second.end(); ++ te )
-				times.insert(te->first);
-	times_.assign(times.begin(), times.end());
 }
 
-DataIndex::~DataIndex()
+Wdb2CdmBuilder::~Wdb2CdmBuilder()
 {
 }
 
 
-void DataIndex::populate(CDM & cdm) const
+void Wdb2CdmBuilder::populate(CDM & cdm) const
 {
 	// TODO: global attributes
 
@@ -77,40 +64,14 @@ void DataIndex::populate(CDM & cdm) const
 }
 
 
-bool DataIndex::isDatabaseField(const std::string & variableName) const
+bool Wdb2CdmBuilder::isDatabaseField(const std::string & variableName) const
 {
-	Parameter p(variableName, "");
-	return data_.find(p) != data_.end();
+	return index_.hasParameter(variableName);
 }
 
-const DataIndex::Time & DataIndex::timeFromIndex(std::size_t timeIndex) const
+std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & variableName, int timeIndex) const
 {
-	-- timeIndex; // range was from 1
-
-	if ( 0 <= timeIndex and timeIndex < times_.size() )
-		return times_[timeIndex];
-
-	throw CDMException("Time index out of range");
-}
-
-std::vector<DataIndex::gid> DataIndex::getGridIdentifiers(const std::string & variableName, const DataIndex::Time & time) const
-{
-	// TODO: Handle base data with missing entries
-
-
-	std::vector<DataIndex::gid> ret;
-	ParameterEntry::const_iterator parameter = data_.find(Parameter(variableName, ""));
-	if ( parameter == data_.end() )
-		throw CDMException(variableName + ": no such parameter in index");
-	TimeEntry::const_iterator te = parameter->second.find(time);
-	if ( te == parameter->second.end() )
-		throw CDMException(to_simple_string(time) + ": no such time for parameter " + variableName);
-
-	for ( LevelEntry::const_iterator le = te->second.begin(); le != te->second.end(); ++ le )
-		for ( VersionEntry::const_iterator ve = le->second.begin(); ve != le->second.end(); ++ ve )
-			ret.push_back(ve->second);
-
-	return ret;
+	return index_.getData(variableName, timeIndex);
 }
 
 namespace
@@ -123,14 +84,14 @@ CDMVariable getSelfReferencingVariable(const std::string & name, CDMDataType dat
 }
 }
 
-void DataIndex::addDimensions_(CDM & cdm) const
+void Wdb2CdmBuilder::addDimensions_(CDM & cdm) const
 {
 	addLevelDimensions_(cdm);
 	addVersionDimension_(cdm);
 	addTimeDimensions_(cdm);
 }
 
-void DataIndex::addLevelDimensions_(CDM & cdm) const
+void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
 {
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelMap;
 	LevelMap dimensions;
@@ -154,7 +115,7 @@ void DataIndex::addLevelDimensions_(CDM & cdm) const
 	}
 }
 
-void DataIndex::addVersionDimension_(CDM & cdm) const
+void Wdb2CdmBuilder::addVersionDimension_(CDM & cdm) const
 {
 	std::size_t maxVersionCount = 0;
 	for ( ParameterEntry::const_iterator pe = data_.begin(); pe != data_.end(); ++ pe )
@@ -173,7 +134,7 @@ void DataIndex::addVersionDimension_(CDM & cdm) const
 	}
 }
 
-void DataIndex::addTimeDimensions_(CDM & cdm) const
+void Wdb2CdmBuilder::addTimeDimensions_(CDM & cdm) const
 {
 
 	CDMDimension time("time", times_.size());
@@ -188,7 +149,7 @@ void DataIndex::addTimeDimensions_(CDM & cdm) const
 }
 
 
-void DataIndex::addProjectionInformation_(CDM & cdm) const
+void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
 {
 	std::set<GridData::GridInformationPtr> grids;
 	for ( GridSpecMap::const_iterator it = grids_.begin(); it != grids_.end(); ++ it )
@@ -232,7 +193,7 @@ void DataIndex::addProjectionInformation_(CDM & cdm) const
 }
 
 
-void DataIndex::addReferenceTimeInformation_(CDM & cdm) const
+void Wdb2CdmBuilder::addReferenceTimeInformation_(CDM & cdm) const
 {
 	const std::string reftime = "forecast_reference_time";
 	cdm.addVariable(CDMVariable(reftime, CDM_DOUBLE, std::vector<std::string>()));
@@ -242,7 +203,7 @@ void DataIndex::addReferenceTimeInformation_(CDM & cdm) const
 }
 
 
-void DataIndex::addParameterVariables_(CDM & cdm) const
+void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 {
 	for ( ParameterEntry::const_iterator it = data_.begin(); it != data_.end(); ++ it )
 	{
@@ -265,7 +226,7 @@ void DataIndex::addParameterVariables_(CDM & cdm) const
 	}
 }
 
-void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
+void Wdb2CdmBuilder::getDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
 	// x/y dimensions
 	out.push_back("x");
@@ -277,7 +238,7 @@ void DataIndex::getDimensionsForParameter_(std::vector<std::string> & out, const
 	getTimeDimensionForParameter_(out, timeEntry);
 }
 
-void DataIndex::getTimeDimensionForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
+void Wdb2CdmBuilder::getTimeDimensionForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
 	if ( timeEntry.size() > 1 )
 		out.push_back("time");
@@ -291,7 +252,7 @@ void DataIndex::getTimeDimensionForParameter_(std::vector<std::string> & out, co
 //			}
 }
 
-void DataIndex::getLevelDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
+void Wdb2CdmBuilder::getLevelDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
 	typedef std::map<LevelType, std::set<std::pair<float, float> > > LevelEntries;
 	LevelEntries levels;
@@ -312,7 +273,7 @@ void DataIndex::getLevelDimensionsForParameter_(std::vector<std::string> & out, 
 	}
 }
 
-void DataIndex::getVersionDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
+void Wdb2CdmBuilder::getVersionDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & timeEntry) const
 {
 	for ( TimeEntry::const_iterator te = timeEntry.begin(); te != timeEntry.end(); ++ te )
 		for ( LevelEntry::const_iterator it = te->second.begin(); it != te->second.end(); ++ it )

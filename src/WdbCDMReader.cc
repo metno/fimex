@@ -34,7 +34,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "wdb/WdbConnection.h"
-#include "wdb/DataIndex.h"
+#include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/CdmNameTranslator.h"
 
 namespace MetNoFimex
@@ -55,7 +55,7 @@ GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& con
 		std::vector<wdb::GridData> data;
 		wdbConnection_->readGid(data, "met.no eceps modification");
 
-		dataIndex_ = new wdb::DataIndex(data, * translator_);
+		dataIndex_ = new wdb::Wdb2CdmBuilder(data, * translator_);
 		dataIndex_->populate(* cdm_);
 
 		cdm_->toXMLStream(std::cout);
@@ -96,11 +96,10 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 	const std::string & wdbName = translator_->toWdbName(varName);
 	if ( dataIndex_->isDatabaseField(wdbName) )
 	{
-		const wdb::DataIndex::Time & time = dataIndex_->timeFromIndex(unLimDimPos);
-		std::vector<wdb::DataIndex::gid> fieldIdentifiers = dataIndex_->getGridIdentifiers(wdbName, time);
+		std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = dataIndex_->getGridIdentifiers(wdbName, unLimDimPos);
 
 		float * dataIdx = (float *) ret->getDataPtr();
-		for ( std::vector<wdb::DataIndex::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
+		for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
 			dataIdx = wdbConnection_->getGrid(dataIdx, * it);
 	}
 

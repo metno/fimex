@@ -12,7 +12,8 @@ libwdb_a_SOURCES = \
 	CdmNameTranslator.h CdmNameTranslator.cpp \
 	GridData.h GridData.cpp \
 	GridInformation.h GridInformation.cpp \
-	DataIndex.h DataIndex.cpp \
+	WdbIndex.h WdbIndex.cpp \
+	Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp \
 	Parameter.h Parameter.cpp \
 	Level.h Level.cpp
 	

@@ -218,10 +218,11 @@ test_c_consumer_LDADD = $(LDADD)
 test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
-am__wdbTest_SOURCES_DIST = wdbDataIndexTest.cc \
+am__wdbTest_SOURCES_DIST = Wdb2CdmBuilderTest.cc WdbIndexTest.cc \
 	wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
 @HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
-@HAVE_LIBPQ_TRUE@	wdbTest-wdbDataIndexTest.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	wdbTest-Wdb2CdmBuilderTest.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	wdbTest-WdbIndexTest.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-wdbCdmNameTranslatorTest.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-wdbCDMReaderParserTest.$(OBJEXT)
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
@@ -229,6 +230,9 @@ wdbTest_LDADD = $(LDADD)
 wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
+wdbTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(wdbTest_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -445,8 +449,9 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_FELT_OR_MILIB_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
-@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
+@HAVE_LIBPQ_TRUE@wdbTest_SOURCES = Wdb2CdmBuilderTest.cc WdbIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
+@HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/wdb/libwdb.a
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
@@ -578,7 +583,7 @@ test_c_consumer$(EXEEXT): $(test_c_consumer_OBJECTS) $(test_c_consumer_DEPENDENC
 	$(LINK) $(test_c_consumer_OBJECTS) $(test_c_consumer_LDADD) $(LIBS)
 wdbTest$(EXEEXT): $(wdbTest_OBJECTS) $(wdbTest_DEPENDENCIES) 
 	@rm -f wdbTest$(EXEEXT)
-	$(CXXLINK) $(wdbTest_OBJECTS) $(wdbTest_LDADD) $(LIBS)
+	$(wdbTest_LINK) $(wdbTest_OBJECTS) $(wdbTest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -607,9 +612,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbIndexTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbCDMReaderParserTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-wdbDataIndexTest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -653,19 +659,33 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-wdbTest-wdbDataIndexTest.o: wdbDataIndexTest.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbDataIndexTest.o -MD -MP -MF $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo -c -o wdbTest-wdbDataIndexTest.o `test -f 'wdbDataIndexTest.cc' || echo '$(srcdir)/'`wdbDataIndexTest.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo $(DEPDIR)/wdbTest-wdbDataIndexTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbDataIndexTest.cc' object='wdbTest-wdbDataIndexTest.o' libtool=no @AMDEPBACKSLASH@
+wdbTest-Wdb2CdmBuilderTest.o: Wdb2CdmBuilderTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-Wdb2CdmBuilderTest.o -MD -MP -MF $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Tpo -c -o wdbTest-Wdb2CdmBuilderTest.o `test -f 'Wdb2CdmBuilderTest.cc' || echo '$(srcdir)/'`Wdb2CdmBuilderTest.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Tpo $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Wdb2CdmBuilderTest.cc' object='wdbTest-Wdb2CdmBuilderTest.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbDataIndexTest.o `test -f 'wdbDataIndexTest.cc' || echo '$(srcdir)/'`wdbDataIndexTest.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-Wdb2CdmBuilderTest.o `test -f 'Wdb2CdmBuilderTest.cc' || echo '$(srcdir)/'`Wdb2CdmBuilderTest.cc
 
-wdbTest-wdbDataIndexTest.obj: wdbDataIndexTest.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbDataIndexTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo -c -o wdbTest-wdbDataIndexTest.obj `if test -f 'wdbDataIndexTest.cc'; then $(CYGPATH_W) 'wdbDataIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbDataIndexTest.cc'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-wdbDataIndexTest.Tpo $(DEPDIR)/wdbTest-wdbDataIndexTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdbDataIndexTest.cc' object='wdbTest-wdbDataIndexTest.obj' libtool=no @AMDEPBACKSLASH@
+wdbTest-Wdb2CdmBuilderTest.obj: Wdb2CdmBuilderTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-Wdb2CdmBuilderTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Tpo -c -o wdbTest-Wdb2CdmBuilderTest.obj `if test -f 'Wdb2CdmBuilderTest.cc'; then $(CYGPATH_W) 'Wdb2CdmBuilderTest.cc'; else $(CYGPATH_W) '$(srcdir)/Wdb2CdmBuilderTest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Tpo $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Wdb2CdmBuilderTest.cc' object='wdbTest-Wdb2CdmBuilderTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-wdbDataIndexTest.obj `if test -f 'wdbDataIndexTest.cc'; then $(CYGPATH_W) 'wdbDataIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/wdbDataIndexTest.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-Wdb2CdmBuilderTest.obj `if test -f 'Wdb2CdmBuilderTest.cc'; then $(CYGPATH_W) 'Wdb2CdmBuilderTest.cc'; else $(CYGPATH_W) '$(srcdir)/Wdb2CdmBuilderTest.cc'; fi`
+
+wdbTest-WdbIndexTest.o: WdbIndexTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-WdbIndexTest.o -MD -MP -MF $(DEPDIR)/wdbTest-WdbIndexTest.Tpo -c -o wdbTest-WdbIndexTest.o `test -f 'WdbIndexTest.cc' || echo '$(srcdir)/'`WdbIndexTest.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-WdbIndexTest.Tpo $(DEPDIR)/wdbTest-WdbIndexTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbIndexTest.cc' object='wdbTest-WdbIndexTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-WdbIndexTest.o `test -f 'WdbIndexTest.cc' || echo '$(srcdir)/'`WdbIndexTest.cc
+
+wdbTest-WdbIndexTest.obj: WdbIndexTest.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-WdbIndexTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-WdbIndexTest.Tpo -c -o wdbTest-WdbIndexTest.obj `if test -f 'WdbIndexTest.cc'; then $(CYGPATH_W) 'WdbIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/WdbIndexTest.cc'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-WdbIndexTest.Tpo $(DEPDIR)/wdbTest-WdbIndexTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbIndexTest.cc' object='wdbTest-WdbIndexTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-WdbIndexTest.obj `if test -f 'WdbIndexTest.cc'; then $(CYGPATH_W) 'WdbIndexTest.cc'; else $(CYGPATH_W) '$(srcdir)/WdbIndexTest.cc'; fi`
 
 wdbTest-wdbCdmNameTranslatorTest.o: wdbCdmNameTranslatorTest.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-wdbCdmNameTranslatorTest.o -MD -MP -MF $(DEPDIR)/wdbTest-wdbCdmNameTranslatorTest.Tpo -c -o wdbTest-wdbCdmNameTranslatorTest.o `test -f 'wdbCdmNameTranslatorTest.cc' || echo '$(srcdir)/'`wdbCdmNameTranslatorTest.cc

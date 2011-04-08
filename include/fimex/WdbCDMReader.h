@@ -41,7 +41,7 @@ namespace MetNoFimex
 namespace wdb
 {
 class WdbConnection;
-class DataIndex;
+class Wdb2CdmBuilder;
 class CdmNameTranslator;
 }
 
@@ -56,7 +56,7 @@ public:
 
 private:
 	wdb::WdbConnection * wdbConnection_;
-	wdb::DataIndex * dataIndex_;
+	wdb::Wdb2CdmBuilder * dataIndex_;
 	wdb::CdmNameTranslator * translator_;
 };
 

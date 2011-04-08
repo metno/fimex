@@ -67,14 +67,16 @@ libwdb_a_AR = $(AR) $(ARFLAGS)
 libwdb_a_LIBADD =
 am__libwdb_a_SOURCES_DIST = WdbConnection.h WdbConnection.cpp \
 	CdmNameTranslator.h CdmNameTranslator.cpp GridData.h \
-	GridData.cpp GridInformation.h GridInformation.cpp DataIndex.h \
-	DataIndex.cpp Parameter.h Parameter.cpp Level.h Level.cpp
+	GridData.cpp GridInformation.h GridInformation.cpp WdbIndex.h \
+	WdbIndex.cpp Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp Parameter.h \
+	Parameter.cpp Level.h Level.cpp
 @HAVE_LIBPQ_TRUE@am_libwdb_a_OBJECTS =  \
 @HAVE_LIBPQ_TRUE@	libwdb_a-WdbConnection.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-CdmNameTranslator.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-GridData.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-GridInformation.$(OBJEXT) \
-@HAVE_LIBPQ_TRUE@	libwdb_a-DataIndex.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-WdbIndex.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-Wdb2CdmBuilder.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-Parameter.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-Level.$(OBJEXT)
 libwdb_a_OBJECTS = $(am_libwdb_a_OBJECTS)
@@ -264,7 +266,8 @@ top_srcdir = @top_srcdir@
 @HAVE_LIBPQ_TRUE@	CdmNameTranslator.h CdmNameTranslator.cpp \
 @HAVE_LIBPQ_TRUE@	GridData.h GridData.cpp \
 @HAVE_LIBPQ_TRUE@	GridInformation.h GridInformation.cpp \
-@HAVE_LIBPQ_TRUE@	DataIndex.h DataIndex.cpp \
+@HAVE_LIBPQ_TRUE@	WdbIndex.h WdbIndex.cpp \
+@HAVE_LIBPQ_TRUE@	Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp \
 @HAVE_LIBPQ_TRUE@	Parameter.h Parameter.cpp \
 @HAVE_LIBPQ_TRUE@	Level.h Level.cpp
 
@@ -317,12 +320,13 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-CdmNameTranslator.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-DataIndex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridInformation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Level.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Parameter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbConnection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbIndex.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -401,19 +405,33 @@ libwdb_a-GridInformation.obj: GridInformation.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridInformation.obj `if test -f 'GridInformation.cpp'; then $(CYGPATH_W) 'GridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/GridInformation.cpp'; fi`
 
-libwdb_a-DataIndex.o: DataIndex.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-DataIndex.o -MD -MP -MF $(DEPDIR)/libwdb_a-DataIndex.Tpo -c -o libwdb_a-DataIndex.o `test -f 'DataIndex.cpp' || echo '$(srcdir)/'`DataIndex.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-DataIndex.Tpo $(DEPDIR)/libwdb_a-DataIndex.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DataIndex.cpp' object='libwdb_a-DataIndex.o' libtool=no @AMDEPBACKSLASH@
+libwdb_a-WdbIndex.o: WdbIndex.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-WdbIndex.o -MD -MP -MF $(DEPDIR)/libwdb_a-WdbIndex.Tpo -c -o libwdb_a-WdbIndex.o `test -f 'WdbIndex.cpp' || echo '$(srcdir)/'`WdbIndex.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-WdbIndex.Tpo $(DEPDIR)/libwdb_a-WdbIndex.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbIndex.cpp' object='libwdb_a-WdbIndex.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-DataIndex.o `test -f 'DataIndex.cpp' || echo '$(srcdir)/'`DataIndex.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-WdbIndex.o `test -f 'WdbIndex.cpp' || echo '$(srcdir)/'`WdbIndex.cpp
 
-libwdb_a-DataIndex.obj: DataIndex.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-DataIndex.obj -MD -MP -MF $(DEPDIR)/libwdb_a-DataIndex.Tpo -c -o libwdb_a-DataIndex.obj `if test -f 'DataIndex.cpp'; then $(CYGPATH_W) 'DataIndex.cpp'; else $(CYGPATH_W) '$(srcdir)/DataIndex.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-DataIndex.Tpo $(DEPDIR)/libwdb_a-DataIndex.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DataIndex.cpp' object='libwdb_a-DataIndex.obj' libtool=no @AMDEPBACKSLASH@
+libwdb_a-WdbIndex.obj: WdbIndex.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-WdbIndex.obj -MD -MP -MF $(DEPDIR)/libwdb_a-WdbIndex.Tpo -c -o libwdb_a-WdbIndex.obj `if test -f 'WdbIndex.cpp'; then $(CYGPATH_W) 'WdbIndex.cpp'; else $(CYGPATH_W) '$(srcdir)/WdbIndex.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-WdbIndex.Tpo $(DEPDIR)/libwdb_a-WdbIndex.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbIndex.cpp' object='libwdb_a-WdbIndex.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-DataIndex.obj `if test -f 'DataIndex.cpp'; then $(CYGPATH_W) 'DataIndex.cpp'; else $(CYGPATH_W) '$(srcdir)/DataIndex.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-WdbIndex.obj `if test -f 'WdbIndex.cpp'; then $(CYGPATH_W) 'WdbIndex.cpp'; else $(CYGPATH_W) '$(srcdir)/WdbIndex.cpp'; fi`
+
+libwdb_a-Wdb2CdmBuilder.o: Wdb2CdmBuilder.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-Wdb2CdmBuilder.o -MD -MP -MF $(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Tpo -c -o libwdb_a-Wdb2CdmBuilder.o `test -f 'Wdb2CdmBuilder.cpp' || echo '$(srcdir)/'`Wdb2CdmBuilder.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Tpo $(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Wdb2CdmBuilder.cpp' object='libwdb_a-Wdb2CdmBuilder.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-Wdb2CdmBuilder.o `test -f 'Wdb2CdmBuilder.cpp' || echo '$(srcdir)/'`Wdb2CdmBuilder.cpp
+
+libwdb_a-Wdb2CdmBuilder.obj: Wdb2CdmBuilder.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-Wdb2CdmBuilder.obj -MD -MP -MF $(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Tpo -c -o libwdb_a-Wdb2CdmBuilder.obj `if test -f 'Wdb2CdmBuilder.cpp'; then $(CYGPATH_W) 'Wdb2CdmBuilder.cpp'; else $(CYGPATH_W) '$(srcdir)/Wdb2CdmBuilder.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Tpo $(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Wdb2CdmBuilder.cpp' object='libwdb_a-Wdb2CdmBuilder.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-Wdb2CdmBuilder.obj `if test -f 'Wdb2CdmBuilder.cpp'; then $(CYGPATH_W) 'Wdb2CdmBuilder.cpp'; else $(CYGPATH_W) '$(srcdir)/Wdb2CdmBuilder.cpp'; fi`
 
 libwdb_a-Parameter.o: Parameter.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-Parameter.o -MD -MP -MF $(DEPDIR)/libwdb_a-Parameter.Tpo -c -o libwdb_a-Parameter.o `test -f 'Parameter.cpp' || echo '$(srcdir)/'`Parameter.cpp

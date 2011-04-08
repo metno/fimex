@@ -96,7 +96,7 @@ boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, cons
                 boost::shared_ptr<Data> unLimDimData = getDataSlice(varName, i+unLimDimStart);
                 if (unLimDimData->size() != 0) {
                     unLimDimData = unLimDimData->slice(maxDimSize, dimStart, dimSize);
-                    assert(unLimDimData->size() == unLimSliceSize);
+                    //assert(unLimDimData->size() == unLimSliceSize);
                     retData->setValues(i*unLimSliceSize, *unLimDimData);
                 }
             }

@@ -29,6 +29,7 @@
 #ifndef DATAINDEX_H_
 #define DATAINDEX_H_
 
+#include "WdbIndex.h"
 #include "GridData.h"
 #include <vector>
 #include <map>
@@ -49,11 +50,11 @@ class Parameter;
 class Level;
 
 
-class DataIndex
+class Wdb2CdmBuilder
 {
 public:
-	DataIndex(const std::vector<GridData> & data, const CdmNameTranslator & translator);
-	~DataIndex();
+	Wdb2CdmBuilder(const std::vector<GridData> & data, const CdmNameTranslator & translator);
+	~Wdb2CdmBuilder();
 
 	void populate(CDM & cdm) const;
 
@@ -62,18 +63,10 @@ public:
 	typedef GridData::Time Time;
 
 	bool isDatabaseField(const std::string & variableName) const;
-	const Time & timeFromIndex(std::size_t timeIndex) const;
-	std::vector<gid> getGridIdentifiers(const std::string & variableName, const Time & time) const;
+	std::vector<gid> getGridIdentifiers(const std::string & variableName, int timeIndex) const;
 
 
 private:
-
-	// parameter -> validtime -> level -> version -> gid
-	typedef std::map<int, gid> VersionEntry;
-	typedef std::map<Level, VersionEntry> LevelEntry;
-	typedef std::map<Time, LevelEntry> TimeEntry;
-	typedef std::map<Parameter, TimeEntry> ParameterEntry;
-
 
 	void addDimensions_(CDM & cdm) const;
 	void addLevelDimensions_(CDM & cdm) const;
@@ -90,13 +83,11 @@ private:
 	void getLevelDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & levelEntry) const;
 	void getVersionDimensionsForParameter_(std::vector<std::string> & out, const TimeEntry & levelEntry) const;
 
-	ParameterEntry data_;
+	WdbIndex index_;
 	const CdmNameTranslator & translator_;
 
 	typedef std::map<Parameter, GridData::GridInformationPtr> GridSpecMap;
 	GridSpecMap grids_;
-
-	std::vector<Time> times_;
 };
 
 }

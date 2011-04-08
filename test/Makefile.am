@@ -39,8 +39,9 @@ if HAVE_GRIBAPI
 endif
 if HAVE_LIBPQ 
   CC_TESTS += wdbTest
-  wdbTest_SOURCES = wdbDataIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
+  wdbTest_SOURCES = Wdb2CdmBuilderTest.cc WdbIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
   wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
+  wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/wdb/libwdb.a
   LDADD += @BOOST_PROGRAM_OPTIONS_LIB@
 test_wdb: wdbTest
 	@./wdbTest
