@@ -46,6 +46,7 @@ namespace MetNoFimex
 {
 
 using namespace std;
+typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
 static LoggerPtr logger = getLogger("fimex.CDMInterpolator");
 const int DEBUG = 0;
@@ -189,6 +190,83 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	}
 }
 
+CoordSysPtr CDMInterpolator::findBestCoordinateSystemAndProjectionVars(bool withProjection)
+{
+    typedef vector<CoordSysPtr> CoordSysVec;
+    CoordSysVec coordSys;
+    CoordSysVec tempCoordSys = listCoordinateSystems(getCDM());
+    for (CoordSysVec::iterator cs = tempCoordSys.begin(); cs != tempCoordSys.end(); ++cs) {
+        if ((*cs)->isSimpleSpatialGridded() &&
+              ((!withProjection) || (*cs)->hasProjection()) &&
+              (withProjection || ((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {
+            coordSys.push_back(*cs);
+        }
+    }
+    if (coordSys.size() == 0) {
+        LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems" << (withProjection ? " with projection found, maybe you should try coordinate interpolation" : "found"));
+        throw CDMException("no coordinate-systems found");
+    }
+    // make sure we have only one projection with only one set of axes
+    for (CoordSysVec::iterator csx = coordSys.begin(); csx != coordSys.end(); ++csx) {
+        if ((*csx)->getGeoXAxis()->getName() != coordSys[0]->getGeoXAxis()->getName()) {
+            throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->getGeoXAxis()->getName() + " != " + (*csx)->getGeoXAxis()->getName());
+        }
+        if ((*csx)->getGeoYAxis()->getName() != coordSys[0]->getGeoYAxis()->getName()) {
+            throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->getGeoYAxis()->getName() + " != " + (*csx)->getGeoYAxis()->getName());
+        }
+        if (withProjection) {
+            if (!(*((*csx)->getProjection()) == *(coordSys[0]->getProjection()))) {
+                throw CDMException("CDMInterpolator cannot handle cdms with several projection : " + coordSys[0]->getProjection()->toString() + " != " + (*csx)->getProjection()->toString());
+            }
+        } else {
+            // require lat/lon
+            if ((*csx)->findAxisOfType(CoordinateAxis::Lat)->getName() != coordSys[0]->findAxisOfType(CoordinateAxis::Lat)->getName()) {
+                throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->findAxisOfType(CoordinateAxis::Lat)->getName() + " != " + (*csx)->findAxisOfType(CoordinateAxis::Lat)->getName());
+            }
+            if ((*csx)->findAxisOfType(CoordinateAxis::Lon)->getName() != coordSys[0]->findAxisOfType(CoordinateAxis::Lon)->getName()) {
+                throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->findAxisOfType(CoordinateAxis::Lon)->getName() + " != " + (*csx)->findAxisOfType(CoordinateAxis::Lon)->getName());
+            }
+        }
+    }
+
+    // mapping all variables with matching orgX/orgY dimensions
+    // find all variables belonging to a cs containing the projection
+    const CDM::VarVec& vars = getCDM().getVariables();
+    for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
+        if (coordSys.end() != find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(v->getName()))) {
+            projectionVariables.push_back(v->getName());
+        }
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "projection variables: " << join(projectionVariables.begin(), projectionVariables.end(), ","));
+
+    // create a minimal one
+    boost::shared_ptr<CoordinateSystem> cs(new CoordinateSystem());
+    cs->setConventionName(coordSys[0]->getConventionName());
+    cs->setAxis(coordSys[0]->getGeoXAxis());
+    cs->setAxis(coordSys[0]->getGeoYAxis());
+    // find lat and lon, eventually different from GeoX and GeoY
+    for (CoordSysVec::iterator csx = coordSys.begin(); csx != coordSys.end(); ++csx) {
+        if ((*csx)->hasProjection()) {
+            cs->setProjection(coordSys[0]->getProjection());
+        }
+        cs->setProjection(coordSys[0]->getProjection());
+        if ((*csx)->hasAxisType(CoordinateAxis::Lon)) {
+            cs->setAxis((*csx)->findAxisOfType(CoordinateAxis::Lon));
+        }
+        if ((*csx)->hasAxisType(CoordinateAxis::Lat)) {
+            cs->setAxis((*csx)->findAxisOfType(CoordinateAxis::Lat));
+        }
+    }
+
+    // add all variables to the coordinate system
+    for (vector<string>::const_iterator v = projectionVariables.begin(); v != projectionVariables.end(); ++v) {
+        cs->setCSFor(*v);
+    }
+
+    LOG4FIMEX(logger,Logger::DEBUG, "interpolator of cs " << *cs);
+    return cs;
+}
+
 /**
  * make changes in the CDM structure to reflect the new projection (attributes, coordinates, projection-variable, dimensions)
  *
@@ -198,28 +276,32 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
  * @param orgXAxis
  * @param orgYAxis
  */
-void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, const vector<string>& projectionVariables, const string& orgXAxis, const string& orgYAxis, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& longitudeName, const string& latitudeName)
+//void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, const vector<string>& projectionVariables, const string& orgXAxis, const string& orgYAxis, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& longitudeName, const string& latitudeName)
+static void changeCDM(CDM& cdm, const string& proj_input, const CoordSysPtr& cs, const vector<string>& projectionVariables, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& longitudeName, const string& latitudeName)
 {
 	string newProj = getProjectionName(proj_input);
+	string orgProjection;
+	if (cs->hasProjection()) {
+	    orgProjection = cs->getProjection()->getName();
+	    // remove all other projections, those might confuse other programs, i.e. IDV
+	    // this is not int the orgProjection name i.e. stereographic but in the variable name projection_stere
+	    std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
+	    for (size_t i = 0; i < gridMappings.size(); i++) {
+	        LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gridMappings[i]);
+	        cdm.removeVariable(gridMappings[i]);
+	    }
+	}
 
 	// remove projection and coordinates (lon lat)
-	if (orgProjection != "" && orgProjection != "latitude_longitude") {
-		cdm.removeVariable(orgProjection);
-		std::string var = projectionVariables[0];
-		if (var != "") {
-			std::string coordinates = cdm.getAttribute(var, "coordinates").getStringValue();
-			std::string coord1, coord2;
-			size_t sepPos = coordinates.find(" ");
-			if (sepPos != std::string::npos) {
-				coord1 = coordinates.substr(0, sepPos);
-				coord2 = coordinates.substr(sepPos+1);
-				cdm.removeVariable(coord1);
-				cdm.removeVariable(coord2);
-			} else {
-				throw CDMException("could not find two coordinates in " + coordinates);
-			}
-		}
+	if (cs->hasAxisType(CoordinateAxis::Lat) && cs->hasAxisType(CoordinateAxis::Lon)) {
+	    typedef CoordinateSystem::ConstAxisPtr ConstAxisPtr;
+	    ConstAxisPtr latAxis = cs->findAxisOfType(CoordinateAxis::Lat);
+        ConstAxisPtr lonAxis = cs->findAxisOfType(CoordinateAxis::Lon);
+        LOG4FIMEX(logger, Logger::DEBUG, "removing old coordinate axes " << latAxis->getName() << " and " << lonAxis->getName());
+        cdm.removeVariable(latAxis->getName());
+        cdm.removeVariable(lonAxis->getName());
 	}
+
 	// add new projection and parameters
 	std::string newProjection = "latlong";
 	if (newProj != "latlong") {
@@ -235,6 +317,8 @@ void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, 
 		}
 	}
 
+	string orgXAxis = cs->getGeoXAxis()->getName();
+	string orgYAxis = cs->getGeoYAxis()->getName();
 	if (DEBUG) {
 		std::cerr << "orgX, orgY: " << orgXAxis << ", "<< orgYAxis << std::endl;
 		std::cerr << "original projection: " << orgProjection << std::endl;
@@ -549,41 +633,25 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 
 void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
-    // detect a variable with coordinates axes, the interpolator does not allow for
-    // conversion of variable with different dimensions, converting only all variables
-    // with the same dimensions/coordinates as the first variable with coordinates
-    std::vector<std::string> variables = cdm_->findVariables("coordinates", ".*");
-    if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
-    std::string var = variables[0];
-    std::string coordinates = cdm_->getAttribute(var, "coordinates").getStringValue();
-    string longitude, latitude;
-    if (!cdm_->getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
-    const vector<string> dims = cdm_->getVariable(latitude).getShape();
-    // remove the old coordinates
-    cdm_->removeVariable(longitude);
-    cdm_->removeVariable(latitude);
+    CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(false);
 
-    std::vector<std::string> gridMappings = cdm_->findVariables("grid_mapping_name", ".*");
-    for (size_t i = 0; i < gridMappings.size(); i++) {
-        // remove all other projections, those might confuse other programs, i.e. IDV
-        cdm_->removeVariable(gridMappings[i]);
-    }
+    size_t orgXDimSize = cdm_->getDimension(cs->getGeoXAxis()->getName()).getLength();
+    size_t orgYDimSize = cdm_->getDimension(cs->getGeoYAxis()->getName()).getLength();
 
-    // mapping all variables with matching orgX/orgY dimensions
-    std::map<std::string, std::string> attrs;
-    attrs["coordinates"] = coordinates;
-    projectionVariables = cdm_->findVariables(attrs, dims);
+    changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
+              out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+              getLongitudeName(), getLatitudeName());
 
-    size_t orgXDimSize = cdm_->getDimension(dims[0]).getLength();
-    size_t orgYDimSize = cdm_->getDimension(dims[1]).getLength();
-
-    changeCDM(*cdm_.get(), proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
-
+    string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
+    string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
     boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
     size_t latSize = dataReader->getData(latitude)->size();
     boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
     for_each(&latVals[0], &latVals[latSize], degreeToRad);
     for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+
+    // and remove the old latitude/longitude variables
+
 
     // store projection changes to be used in data-section
     // translate temporary new axes from deg2rad if required
@@ -630,36 +698,17 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
 void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
-	// detect a variable with coordinates axes, the interpolator does not allow for
-	// conversion of variable with different dimensions, converting only all variables
-	// with the same dimensions/coordinates as the first variable with coordinates
-	std::vector<std::string> variables = cdm_->findVariables("coordinates", ".*");
-	if (variables.size() < 1) throw CDMException("could not find coordinates needed for projection");
-	std::string var = variables[0];
-	std::string coordinates = cdm_->getAttribute(var, "coordinates").getStringValue();
-	string longitude, latitude;
-	if (!cdm_->getLatitudeLongitude(var, latitude, longitude)) throw CDMException("could not find lat/long coordinates in " + coordinates + " of " + var);
-	const vector<string> dims = cdm_->getVariable(latitude).getShape();
-	// remove the old coordinates
-	cdm_->removeVariable(longitude);
-	cdm_->removeVariable(latitude);
+    CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(false);
 
-	std::vector<std::string> gridMappings = cdm_->findVariables("grid_mapping_name", ".*");
-	for (size_t i = 0; i < gridMappings.size(); i++) {
-	    // remove all other projections, those might confuse other programs, i.e. IDV
-	    cdm_->removeVariable(gridMappings[i]);
-	}
+	size_t orgXDimSize = cdm_->getDimension(cs->getGeoXAxis()->getName()).getLength();
+	size_t orgYDimSize = cdm_->getDimension(cs->getGeoYAxis()->getName()).getLength();
 
-	// mapping all variables with matching orgX/orgY dimensions
-	std::map<std::string, std::string> attrs;
-	attrs["coordinates"] = coordinates;
-	projectionVariables = cdm_->findVariables(attrs, dims);
+    changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
+              out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+              getLongitudeName(), getLatitudeName());
 
-	size_t orgXDimSize = cdm_->getDimension(dims[0]).getLength();
-	size_t orgYDimSize = cdm_->getDimension(dims[1]).getLength();
-
-	changeCDM(*cdm_.get(), proj_input, "", projectionVariables, dims[0], dims[1], out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
-
+    string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
+    string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
 	boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
 	size_t latSize = dataReader->getData(latitude)->size();
 	boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
@@ -730,51 +779,11 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 
 void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
-	// detect original projection and axes of the first variable with projection, only convert those
-	// projection and the according axes. No support for multiple axes yes.
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-    typedef vector<CoordSysPtr> CoordSysVec;
-    CoordSysVec coordSys;
-    {
-        CoordSysVec tempCoordSys = listCoordinateSystems(*cdm_);
-        for (CoordSysVec::iterator cs = tempCoordSys.begin(); cs != tempCoordSys.end(); ++cs) {
-            if ((*cs)->hasProjection()) {
-                coordSys.push_back(*cs);
-            }
-        }
-    }
-    if (coordSys.size() == 0) {
-        LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems with projection found, maybe you should try coordinate interpolation");
-        throw CDMException("no coordinate-systems with projection found, maybe you should try coordinate interpolation");
-    }
-    // make sure we have only one projection with only one set of axes
-    for (CoordSysVec::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
-        if (!(*((*cs)->getProjection()) == *(coordSys[0]->getProjection()))) {
-            throw CDMException("CDMInterpolator cannot handle cdms with several projection : " + coordSys[0]->getProjection()->toString() + " != " + (*cs)->getProjection()->toString());
-        }
-        if ((*cs)->getGeoXAxis()->getName() != coordSys[0]->getGeoXAxis()->getName()) {
-            throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->getGeoXAxis()->getName() + " != " + (*cs)->getGeoXAxis()->getName());
-        }
-        if ((*cs)->getGeoYAxis()->getName() != coordSys[0]->getGeoYAxis()->getName()) {
-            throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->getGeoYAxis()->getName() + " != " + (*cs)->getGeoYAxis()->getName());
-        }
-    }
-    CoordSysPtr& cs = coordSys[0];
-    LOG4FIMEX(logger,Logger::DEBUG, "projection-interpolator of cs " << *cs);
+    CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(true);
 
-
-	// mapping all variables with matching orgX/orgY dimensions
-	// find all variables belonging to a cs containing the projection
-	const CDM::VarVec& vars = cdm_->getVariables();
-	for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-	    if (coordSys.end() != find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(v->getName()))) {
-	        projectionVariables.push_back(v->getName());
-	    }
-    }
-	LOG4FIMEX(logger, Logger::DEBUG, "projection variables (grid_mapping + coordinates, or latlong): " << join(projectionVariables.begin(), projectionVariables.end(), ","));
-
-
-	changeCDM(*cdm_.get(), proj_input, cs->getProjection()->getName(), projectionVariables, cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, getLongitudeName(), getLatitudeName());
+	changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
+	          out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+	          getLongitudeName(), getLatitudeName());
 
 	// translate axes to 'm' if given in other metric units
 	std::string orgUnit = cs->getProjection()->isDegree() ? "degree" : "m";
