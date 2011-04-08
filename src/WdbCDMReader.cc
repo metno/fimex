@@ -1444,7 +1444,7 @@ namespace MetNoFimex {
         }
     }
 
-    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
     	const CDMVariable& variable = cdm_->getVariable(varName);
         if (variable.hasData()) {
@@ -1673,7 +1673,7 @@ namespace MetNoFimex {
         return data;
     }
 
-//    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+//    boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 //    {
 //        std::vector<std::string> dimensionNames = sb.getDimensionNames();
 //        std::vector<size_t> dimensionSizes = sb.getDimensionSizes();

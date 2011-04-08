@@ -46,10 +46,10 @@ class XMLDoc; // declaration without import
 class FeltCDMReader2 : public CDMReader
 {
 public:
-	FeltCDMReader2(std::string filename, std::string configFilename) throw(CDMException);
+	FeltCDMReader2(std::string filename, std::string configFilename);
 	virtual ~FeltCDMReader2();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
 	const std::string filename;

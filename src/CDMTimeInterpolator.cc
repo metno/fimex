@@ -61,7 +61,7 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 {
 }
 
-boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
 	std::string timeAxis = cdm_->getTimeAxis(varName);
 	LOG4FIMEX(logger, Logger::DEBUG, "getting time-interpolated data-slice for " << varName << " with time-axis: " << timeAxis);
@@ -128,7 +128,7 @@ size_t lower_bound_pos(const vector<FimexTime>& ft, size_t startPos, const Fimex
 	return ft.size();
 }
 
-void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec) throw(CDMException)
+void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
 {
 	// changing time-axes
 	const CDM& orgCDM = dataReader_->getCDM();

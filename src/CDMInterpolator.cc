@@ -72,7 +72,7 @@ static boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float
 	return boost::shared_ptr<Data>(new DataImpl<float>(iData, size));
 }
 
-boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
@@ -127,7 +127,7 @@ static string getProjectionName(const string& proj_input) {
 }
 
 
-void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
     SpatialAxisSpec xAxisSpec(out_x_axis);
     SpatialAxisSpec yAxisSpec(out_y_axis);
@@ -167,7 +167,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 	changeProjection(method, proj_input, xAxisSpec.getAxisSteps(), yAxisSpec.getAxisSteps(), out_x_axis_unit, out_y_axis_unit);
 }
 
-void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
 	*cdm_ = dataReader->getCDM(); // reset previous changes
 	projectionVariables.assign(0, ""); // reset variables
@@ -547,7 +547,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 #endif
 }
 
-void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
     // detect a variable with coordinates axes, the interpolator does not allow for
     // conversion of variable with different dimensions, converting only all variables
@@ -628,7 +628,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
 }
 
-void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
 	// detect a variable with coordinates axes, the interpolator does not allow for
 	// conversion of variable with different dimensions, converting only all variables
@@ -728,7 +728,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 
 }
 
-void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit) throw(CDMException)
+void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
 	// detect original projection and axes of the first variable with projection, only convert those
 	// projection and the according axes. No support for multiple axes yes.

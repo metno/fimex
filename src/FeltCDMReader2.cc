@@ -164,7 +164,7 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 }
 
 
-FeltCDMReader2::FeltCDMReader2(std::string filename, std::string configFilename) throw (CDMException)
+FeltCDMReader2::FeltCDMReader2(std::string filename, std::string configFilename)
 : filename(filename), configFilename(configFilename)
 {
 	try {
@@ -600,7 +600,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
 	}
 }
 
-boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
+boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName, size_t unLimDimPos) {
     LOG4FIMEX(logger, Logger::DEBUG, "reading var: "<< varName << " slice: " << unLimDimPos);
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {

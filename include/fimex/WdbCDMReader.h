@@ -50,8 +50,8 @@ namespace MetNoFimex {
 //        void addWdbNameToFillValueMap(const boost::bimap<std::string, double>& map);
         void addWdbNameToFillValue(const std::string& wdbname, const double value);
 
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
-//        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
+        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+//        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
     protected:
         boost::shared_ptr<GxWdbExplorer> wdbExplorer()  {

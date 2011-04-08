@@ -45,7 +45,7 @@ class C_CDMReader: public CDMReader
 public:
     C_CDMReader(boost::shared_ptr<CDMReader> dataReader);
     virtual ~C_CDMReader();
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual void setDoubleCallbackFunction(const std::string& varName, doubleDatasliceCallbackPtr callback);
 private:
     boost::shared_ptr<CDMReader> dataReader_;

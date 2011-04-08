@@ -415,7 +415,7 @@ void NcmlCDMReader::initAttributeNameChange()
 }
 
 
-boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);

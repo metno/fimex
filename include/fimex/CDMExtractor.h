@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -41,7 +41,7 @@ class CDMExtractor : public MetNoFimex::CDMReader
 {
 private:
 	boost::shared_ptr<CDMReader> dataReader;
-	typedef std::map<std::string, boost::array<size_t, 2> > DimChangeMap; 
+	typedef std::map<std::string, boost::array<size_t, 2> > DimChangeMap;
 	DimChangeMap dimChanges;
 	/**
 	 * all extractors need to have another Reader with input-data
@@ -51,12 +51,12 @@ private:
 public:
 	CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMExtractor();
-	
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 
 	/**
 	 * @brief Remove a variable from the CDM
-	 * 
+	 *
 	 * @param varName name of the variable
      * @warning ignores removal of non-existing variable
 	 */
@@ -74,22 +74,22 @@ public:
     virtual void selectVariables(std::set<std::string> variables);
 	/**
 	 * @brief Reduce a dimension of the file
-	 * 
+	 *
 	 * @param name  dimension to change
 	 * @param start start-position corresponding to the original dimension
 	 * @param size  size of the new dimension
 	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
 	 */
-	virtual void reduceDimension(std::string dimName, size_t start, size_t length) throw(CDMException);
+	virtual void reduceDimension(std::string dimName, size_t start, size_t length);
 	/**
 	 * @brief Reduce a dimension of the file
-	 * 
+	 *
 	 * @param name  dimension to change
 	 * @param start start-position corresponding to the original dimension, defaults to 0
 	 * @param end end-position of dimension, 0 means full size, negative values start from end
 	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
 	 */
-	virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0) throw(CDMException);
+	virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0);
     /**
      * @brief reduce the axes of a file with an explicit unit
      *
@@ -102,7 +102,7 @@ public:
      * @warning reduceAxes is not able to reduce multi-dimensional axes-dimensions, e.g. time(time, station), yet
      *
      */
-    virtual void reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal) throw(CDMException);
+    virtual void reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal);
 	/**
 	 * @brief reduce the time explicitly by a timestamp
 	 *
@@ -112,7 +112,7 @@ public:
      * This is implemented using reduceAxes() and the TimeAxis type.
      * @warning see warnings in reduceAxes()
 	 */
-	virtual void reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException);
+	virtual void reduceTime(const FimexTime& startTime, const FimexTime& endTime);
 
     /**
      * @brief reduce a vertical axis by value
@@ -128,7 +128,7 @@ public:
      * This is implemented using reduceAxes() and the axis types: pressure, height, geoZ.
      * @warning see warnings in reduceAxes()
      */
-    virtual void reduceVerticalAxis(const std::string& units, double startVal, double endVal) throw(CDMException);
+    virtual void reduceVerticalAxis(const std::string& units, double startVal, double endVal);
 
     /**
      * @brief reduce the horizontal layer to the latitude-longitude bounding box
@@ -142,19 +142,19 @@ public:
      * @param west westernmost border in dec. degree, -180 < west < east < 180
      * @param east easternmost border in dec. degree, -180 < west < east < 180
      */
-    virtual void reduceLatLonBoundingBox(double south, double north, double west, double east) throw(CDMException);
+    virtual void reduceLatLonBoundingBox(double south, double north, double west, double east);
 
     /**
 	 * @brief change the datatype of the variable
-	 * 
+	 *
 	 * a change of the variable will also change the datatype of the _FillValue attribute
-	 * 
+	 *
 	 * @param variable name of the variable
 	 * @param datatype new datatype
 	 * @throw CDMException if variable doesn't exist or conversion to datatype is not supported
 	 */
-	virtual void changeDataType(std::string variable, CDMDataType datatype) throw(CDMException);
-	
+	virtual void changeDataType(std::string variable, CDMDataType datatype);
+
 };
 
 }
