@@ -71,6 +71,18 @@ bool Wdb2CdmBuilder::isDatabaseField(const std::string & variableName) const
 	return index_.hasParameter(variableName);
 }
 
+const GridInformation & Wdb2CdmBuilder::gridInformation() const
+{
+	// Several grid types in same wdb is not supported (yet)
+
+	return * grids_.begin()->second;
+}
+
+const GridData::Time & Wdb2CdmBuilder::referenceTime() const
+{
+	return index_.referenceTime();
+}
+
 void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
 {
 	std::set<GridData::GridInformationPtr> grids;

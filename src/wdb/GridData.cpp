@@ -54,6 +54,7 @@ std::string GridData::query(const std::string & dataProvider)
 		"LevelUnitName, "
 		"LevelFrom, LevelTo, "
 		"DataVersion, "
+		"extract(epoch from ReferenceTime),"
 		"extract(epoch from ValidTimeFrom), "
 		"extract(epoch from ValidTimeTo), "
 		"PlaceName, "
@@ -74,6 +75,7 @@ enum ReadIdx
 	LevelFrom,
 	LevelTo,
 	DataVersion,
+	ReferenceTime,
 	ValidTimeFrom,
 	ValidTimeTo,
 	PlaceName,
@@ -91,6 +93,7 @@ GridData::GridData(PGresult * result, int row)
 	parameter_ = Parameter(GET(ValueParameterName), GET(ValueParameterUnit));
 	level_ = Level(GET(LevelParameterName), GET(LevelUnitName), GETFLOAT(LevelFrom), GETFLOAT(LevelTo));
 	version_ = GETINT32(DataVersion);
+	referenceTime_ = GETTIME(ReferenceTime);
 	validTo_ = GETTIME(ValidTimeTo);
 	placeName_ = GET(PlaceName);
 	gridIdentifier_ = GETINT64(Value);

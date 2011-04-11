@@ -67,6 +67,14 @@ public:
 		return index_.getData(variableName, timeIndex);
 	}
 
+	const GridInformation & gridInformation() const;
+	const std::set<GridData::Time> & allTimes() const
+	{
+		return index_.allTimes();
+	}
+
+	const GridData::Time & referenceTime() const;
+
 private:
 
 	void addProjectionInformation_(CDM & cdm) const;

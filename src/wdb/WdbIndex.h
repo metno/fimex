@@ -57,6 +57,7 @@ public:
 	std::set<std::string> allParameters() const;
 	const std::string & unitForParameter(const std::string & parameter) const;
 
+	const std::set<GridData::Time> & allTimes() const;
 	std::set<GridData::Time> timesForParameter(const std::string & parameter) const;
 
 	const std::string & levelNameForParameter(const std::string & parameter) const;
@@ -68,6 +69,11 @@ public:
 	bool hasParameter(const std::string & parameter) const
 	{
 		return data_.find(parameter) != data_.end();
+	}
+
+	const GridData::Time & referenceTime() const
+	{
+		return referenceTime_;
 	}
 
 private:
@@ -102,6 +108,8 @@ private:
 	bool hasMoreThanOneLevel_(const std::string & parameter) const;
 	std::set<std::string> parametersWithMoreThanOneLevel_;
 	std::set<int> allVersions_;
+
+	GridData::Time referenceTime_;
 };
 
 }

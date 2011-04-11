@@ -55,7 +55,7 @@ std::string GridInformation::getProjectionName() const
 
 std::string GridInformation::query(const std::string & gridName)
 {
-	return "SELECT NumberX, NumberY, ProjDefinition FROM wci.getplaceregulargrid('" + gridName + "')";
+	return "SELECT NumberX, NumberY, IncrementX, IncrementY, NumberX, NumberY, ProjDefinition FROM wci.getplaceregulargrid('" + gridName + "')";
 }
 
 
@@ -64,17 +64,22 @@ namespace
 /// Indices for extracting fields from a wci.read tuple. This must exactly match the query above.
 enum ReadIdx
 {
-	NumberX, NumberY, ProjDefinition
+	NumberX, NumberY, IncrementX, IncrementY, StartX, StartY, ProjDefinition
 };
 #define GET(idx) PQgetvalue(result, row, idx)
-#define GETUINT(idx)boost::lexical_cast<unsigned>(PQgetvalue(result, row, idx))
+#define GETUINT(idx) boost::lexical_cast<unsigned>(PQgetvalue(result, row, idx))
+#define GETFLOAT(idx) boost::lexical_cast<float>(PQgetvalue(result, row, idx))
 }
 
 GridInformation::GridInformation(PGresult * result, int row)
 {
 	projection_ = Projection::createByProj4(GET(ProjDefinition));
+	incrementX_ = GETFLOAT(IncrementX);
+	incrementY_ = GETFLOAT(IncrementY);
 	numberX_ = GETUINT(NumberX);
 	numberY_ = GETUINT(NumberY);
+	startX_ = GETFLOAT(StartX);
+	startY_ = GETFLOAT(StartY);
 }
 
 }

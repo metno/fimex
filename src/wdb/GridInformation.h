@@ -47,8 +47,13 @@ public:
 
 	//const std::string & projDefinition() const { return projDefinition_; };
 	const boost::shared_ptr<Projection> & getProjection() const { return projection_; }
+
 	unsigned numberX() const { return numberX_; };
 	unsigned numberY() const { return numberY_; };
+	float incrementX() const { return incrementX_; }
+	float incrementY() const { return incrementY_; }
+	float startX() const { return startX_; }
+	float startY() const { return startY_; }
 
 	std::string getProjectionName() const;
 
@@ -58,8 +63,14 @@ public:
 
 private:
 	boost::shared_ptr<Projection> projection_;
+
+
 	unsigned numberX_;
 	unsigned numberY_;
+	float incrementX_;
+	float incrementY_;
+	float startX_;
+	float startY_;
 
 	friend class WdbConnection;
 	static std::string query(const std::string & gridName);

@@ -43,6 +43,11 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 {
 	BOOST_FOREACH(const GridData & d, data)
 	{
+		if ( referenceTime_.is_not_a_date_time() )
+			referenceTime_ = d.referenceTime();
+		else if ( referenceTime_ != d.referenceTime() )
+			throw CDMException("multiple reference times in data from wdb");
+
 		parameterUnits_[d.parameter().name()] = d.parameter().unit();
 
 		LevelEntry & levelEntry = data_[d.parameter().name()] [d.validTo()];
@@ -118,6 +123,11 @@ const std::string & WdbIndex::unitForParameter(const std::string & parameter) co
 	if ( find == parameterUnits_.end() )
 		throw CDMException(parameter + ": no such parameter");
 	return find->second;
+}
+
+const std::set<GridData::Time> & WdbIndex::allTimes() const
+{
+	return allTimes_;
 }
 
 std::set<GridData::Time> WdbIndex::timesForParameter(const std::string & parameter) const
