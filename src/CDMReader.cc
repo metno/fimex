@@ -52,7 +52,7 @@ const CDM& CDMReader::getCDM() const
     return *(cdm_.get());
 }
 
-boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     using namespace std;
     boost::shared_ptr<Data> retData;
@@ -107,7 +107,7 @@ boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, cons
     return retData;
 }
 
-boost::shared_ptr<Data> CDMReader::getData(const std::string& varName) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getData(const std::string& varName)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
@@ -145,7 +145,7 @@ void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, d
 }
 
 // handle data scaling using add_offset, scale_factor and _FillValue from the varName variable
-boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale, double unitOffset) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale, double unitOffset)
 {
 	// retrieve scale and offset
 	double scale, offset;
@@ -161,7 +161,7 @@ boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost
 
 	return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
 }
-boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& newUnit) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& newUnit)
 {
     std::string myUnit = cdm_->getUnits(varName);
     double unitOffset = 0.;
@@ -175,37 +175,37 @@ boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName,
 
 
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos)
 {
 	return scaleDataOf(varName, getDataSlice(varName, unLimDimPos));
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos)
 {
     return scaleDataToUnitOf(varName, getDataSlice(varName, unLimDimPos), unit);
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     return scaleDataOf(varName, getDataSlice(varName, sb));
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb)
 {
     return scaleDataToUnitOf(varName, getDataSlice(varName, sb), unit);
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledData(const std::string& varName) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getScaledData(const std::string& varName)
 {
 	return scaleDataOf(varName, getData(varName));
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataInUnit(const std::string& varName, const std::string& unit) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getScaledDataInUnit(const std::string& varName, const std::string& unit)
 {
     return scaleDataToUnitOf(varName, getData(varName), unit);
 }
 
-boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos)
 {
 	if (variable.hasData()) {
 		if (cdm_->hasUnlimitedDim(variable)) {

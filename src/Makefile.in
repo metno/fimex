@@ -108,7 +108,7 @@ libfimex_la_DEPENDENCIES = felt/libfelt.la $(am__append_5)
 am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	C_CDMReader.cc CachedInterpolation.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
-	CDM.cc CDMAttribute.cc CDMconstants.c CDMDimension.cc \
+	CDM.cc CDMAttribute.cc CDMconstants.cc CDMDimension.cc \
 	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
 	CDMReader.cc CDMReaderUtils.cc CDMTimeInterpolator.cc \
@@ -408,7 +408,7 @@ libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ \
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
-	CDMconstants.c CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+	CDMconstants.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMTimeInterpolator.cc CDMVariable.cc CDM_XMLConfigHelper.cc \

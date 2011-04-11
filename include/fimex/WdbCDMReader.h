@@ -52,7 +52,7 @@ public:
 	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
 	virtual ~GxWdbCDMReader();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
 	wdb::WdbConnection * wdbConnection_;

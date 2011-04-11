@@ -136,13 +136,24 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
     }
 #endif
 #ifdef MIFI_HAVE_NETCDF
-    case MIFI_FILETYPE_NETCDF:
-        return boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
+    case MIFI_FILETYPE_NETCDF: {
+        boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+        if (configFile != "") {
+            reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, fileName));
+        }
+        return reader;
+    }
 #endif
     case MIFI_FILETYPE_NCML:
         return boost::shared_ptr<CDMReader>(new NcmlCDMReader(fileName));
     default: throw CDMException("Unknown fileType: " + type2string(fileType) + " for file: "+fileName);
     }
+}
+
+boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
+{
+    int fileType = mifi_get_filetype(fileTypeName.c_str());
+    return create(fileType, fileName, configFile, args);
 }
 
 }

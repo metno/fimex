@@ -164,7 +164,7 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 }
 
 
-FeltCDMReader2::FeltCDMReader2(std::string filename, std::string configFilename) throw (CDMException)
+FeltCDMReader2::FeltCDMReader2(std::string filename, std::string configFilename)
 : filename(filename), configFilename(configFilename)
 {
 	try {
@@ -181,6 +181,12 @@ FeltCDMReader2::~FeltCDMReader2()
 void FeltCDMReader2::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
     // test lib vs compile version
     MetNoFimex::XMLDoc doc(configFilename);
+    XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    if (nodes->nodeNr != 1) {
+        throw CDMException("config-file "+configFilename+" is not a /cdm_felt_config configuration");
+    }
+
 	// open the feltFile with the desired parameters
 	std::vector<std::string> knownFeltIds = initGetKnownFeltIdsFromXML(doc);
 	std::map<std::string, std::string> options = initGetOptionsFromXML(doc);
@@ -594,7 +600,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
 	}
 }
 
-boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) {
+boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName, size_t unLimDimPos) {
     LOG4FIMEX(logger, Logger::DEBUG, "reading var: "<< varName << " slice: " << unLimDimPos);
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {

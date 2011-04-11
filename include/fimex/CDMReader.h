@@ -67,18 +67,20 @@ public:
 	 *
 	 * @param varName name of the variable to read
 	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+	 * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
 	 */
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException) = 0;
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos) = 0;
 
     /**
      * @brief data-reading function to be called from the CDMWriter
      *
      * @param varName name of the variable to read
      * @param sb a SliceBuilder generated from this CDMReaders CDM
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      * @warn This method has a default implementation depending on #getDataSlice(varName, unLimDimPos),
      *       but should be implemented for performance reasons.
      */
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
 	/**
 	 * @brief data-reading function to be called from the CDMWriter
@@ -88,8 +90,9 @@ public:
 	 * variable might be bigger than available memory.
 	 *
 	 * @param varName name of the variable to read
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
 	 */
-	virtual boost::shared_ptr<Data> getData(const std::string& varName) throw(CDMException);
+	virtual boost::shared_ptr<Data> getData(const std::string& varName);
 
 	/**
 	 * @brief read and scale a dataslice
@@ -101,8 +104,9 @@ public:
 	 *
 	 * @param varName name of the variable to read
 	 * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+	 * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
 	 */
-	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException);
+	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, size_t unLimDimPos);
 	/**
      * @brief read and scale a dataslice to a known unit
      *
@@ -114,24 +118,27 @@ public:
      * @param varName name of the variable to read
      * @param unit unit-string
      * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
-	virtual boost::shared_ptr<Data> getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos) throw(CDMException);
+	virtual boost::shared_ptr<Data> getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos);
 
 	/**
 	 * @brief read and scale a dataslice
 	 * @param varName name of the variable to read
 	 * @param sb SliceBuilder to restrict the data
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
 	 * @see getScaledDataSlice(varName, unLimDimPos)
 	 */
-	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException);
+	virtual boost::shared_ptr<Data> getScaledDataSlice(const std::string& varName, const SliceBuilder& sb);
     /**
      * @brief read and scale a dataslice to a set unit
      * @param varName name of the variable to read
      * @param unit unit string to scale to
      * @param sb SliceBuilder to restrict the data
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      * @see getScaledDataSlice(varName, unLimDimPos)
      */
-    virtual boost::shared_ptr<Data> getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb) throw(CDMException);
+    virtual boost::shared_ptr<Data> getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb);
 
 	/**
 	 * @brief read and scale the complete data
@@ -142,8 +149,9 @@ public:
 	 * will be MIFI_UNDEFINED_D.
 	 *
 	 * @param varName name of the variable to read
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
 	 */
-	virtual boost::shared_ptr<Data> getScaledData(const std::string& varName) throw(CDMException);
+	virtual boost::shared_ptr<Data> getScaledData(const std::string& varName);
     /**
      * @brief read and scale the complete data to a set unit
      *
@@ -154,8 +162,9 @@ public:
      *
      * @param varName name of the variable to read
      * @param unit the unit-string to convert the data to
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
-    virtual boost::shared_ptr<Data> getScaledDataInUnit(const std::string& varName, const std::string& unit) throw(CDMException);
+    virtual boost::shared_ptr<Data> getScaledDataInUnit(const std::string& varName, const std::string& unit);
 
 protected:
 	boost::shared_ptr<CDM> cdm_;
@@ -165,10 +174,10 @@ protected:
 	 * @param variable the variable to read data from
 	 * @param unLimDimPos (optional) the unlimited position
 	 */
-	virtual boost::shared_ptr<Data> getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos = 0) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos = 0);
 private:
-	boost::shared_ptr<Data> scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale = 1., double unitOffset = 0.) throw(CDMException);
-	boost::shared_ptr<Data> scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& unit)throw(CDMException);
+	boost::shared_ptr<Data> scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale = 1., double unitOffset = 0.);
+	boost::shared_ptr<Data> scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& unit);
 	void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset);
 };
 

@@ -35,7 +35,9 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
+#include "fimex/DataImpl.h"
 #include "fimex/CDM.h"
+#include <boost/regex.hpp>
 
 namespace MetNoFimex
 {
@@ -44,18 +46,22 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 
-NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
+NcmlCDMReader::NcmlCDMReader(std::string configFile)
     : configFile(configFile)
 {
 #ifdef MIFI_HAVE_NETCDF
-    doc = new XMLDoc(configFile);
-    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+    setConfigDoc();
+
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
         throw CDMException("config-file "+configFile+" does not contain location-attribute");
     }
     string ncFile = getXmlProp(nodes->nodeTab[0], "location");
+    // remove file: URL-prefix
+    ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
+    // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
+    ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
     dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     init();
 #else
@@ -65,11 +71,10 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile) throw(CDMException)
 #endif
 }
 
-NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile) throw(CDMException)
+NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile)
     : configFile(configFile), dataReader(dataReader)
 {
-    doc = new XMLDoc(configFile);
-    doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+    setConfigDoc();
     init();
 }
 
@@ -79,7 +84,20 @@ NcmlCDMReader::~NcmlCDMReader()
     delete doc;
 }
 
-void NcmlCDMReader::init() throw(CDMException)
+void NcmlCDMReader::setConfigDoc()
+{
+    doc = new XMLDoc(configFile);
+    if (configFile != "") {
+        doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
+        XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        if (nodes->nodeNr != 1) {
+            throw CDMException("config-file "+configFile+" is not a ncml document with root /nc:netcdf");
+        }
+    }
+}
+
+void NcmlCDMReader::init()
 {
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
     int size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
@@ -95,6 +113,7 @@ void NcmlCDMReader::init() throw(CDMException)
     initDimensionUnlimited();
     initVariableNameChange();
     initVariableTypeChange();
+    initVariableDataChange();
     initAttributeNameChange();
     initAddReassignAttribute();
     initWarnUnsupported();
@@ -168,9 +187,49 @@ void NcmlCDMReader::initVariableTypeChange()
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
         if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
         if (cdm_->hasVariable(name)) {
-            variableTypeChanges[name] = string2datatype(type);
-            LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
-            cdm_->getVariable(name).setDataType(string2datatype(type));
+            CDMVariable& var = cdm_->getVariable(name);
+            CDMDataType oldType = var.getDataType();
+            CDMDataType newType = string2datatype(type);
+            if (oldType != newType) {
+                variableTypeChanges[name] = newType;
+                LOG4FIMEX(logger, Logger::DEBUG, "changing datatype of variable: " << name);
+                var.setDataType(string2datatype(type));
+            }
+        }
+    }
+}
+
+void NcmlCDMReader::initVariableDataChange()
+{
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:values");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i]->parent, "name");
+        if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
+        if (cdm_->hasVariable(name)) {
+            std::string values = getXmlContent(nodes->nodeTab[i]);
+            std::vector<std::string> tokens = tokenize(values, " \t\r\n");
+            std::vector<double> dvals;
+            dvals.reserve(tokens.size());
+            std::transform(tokens.begin(), tokens.end(),
+                    std::back_inserter(dvals), string2type<double>);
+            CDMVariable& var = cdm_->getVariable(name);
+            // check that no. of values == shape-size
+            vector<string> dims = var.getShape();
+            size_t dataSize = 0;
+            for (size_t i = 0; i < dims.size(); ++i) {
+                size_t dimLen = cdm_->getDimension(dims[i]).getLength();
+                if (dataSize == 0) {
+                    dataSize = 1;
+                }
+                dataSize *= dimLen;
+            }
+            if (dvals.size() != dataSize) {
+                LOG4FIMEX(logger, Logger::ERROR, "values from ncml: "<< dvals.size() <<" required for " << name << ": " << dataSize);
+                throw CDMException("values from ncml does not match shape for variable "+name);
+            }
+            var.setData(createData(var.getDataType(), dvals.begin(), dvals.end()));
         }
     }
 }
@@ -227,6 +286,24 @@ void NcmlCDMReader::initVariableNameChange()
             variableNameChanges[name] = orgName;
         }
     }
+
+    // add variables not existing yet
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[not(@orgName)]");
+    nodes = xpathObj->nodesetval;
+    size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i], "name");
+        if (!cdm_->hasVariable(name)) {
+            std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
+            vector<string> vshape = tokenize(shape, " \t");
+            std::string type = getXmlProp(nodes->nodeTab[i], "type");
+            CDMDataType dataType = string2datatype(type);
+            CDMVariable var(name, dataType, vshape);
+            var.setData(createData(dataType, 0)); // this data cannot get fetched from the reader!
+            cdm_->addVariable(var);
+        }
+    }
+
 }
 
 /* change the dimension names */
@@ -241,6 +318,18 @@ void NcmlCDMReader::initDimensionNameChange()
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for dimension with orgName: "+ orgName);
             cdm_->renameDimension(orgName, name);
+        }
+    }
+    // add dimensions not existing
+    xpathObj = doc->getXPathObject("/nc:netcdf/nc:dimension[@length]");
+    nodes = xpathObj->nodesetval;
+    size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i], "name");
+        if (!cdm_->hasDimension(name)) {
+            int length = string2type<int>(getXmlProp(nodes->nodeTab[i], "length"));
+            CDMDimension dim(name,length);
+            cdm_->addDimension(dim);
         }
     }
 }
@@ -268,7 +357,9 @@ void NcmlCDMReader::initDimensionUnlimited()
                     // prefetch the data of that variable
                     if (cdm_->hasVariable(name)) {
                         CDMVariable& var = cdm_->getVariable(name);
-                        var.setData(dataReader->getData(orgName));
+                        if (!var.hasData()) {
+                            var.setData(dataReader->getData(orgName));
+                        }
                     }
                 }
             } else if (isUnlimited == "false") {
@@ -324,7 +415,7 @@ void NcmlCDMReader::initAttributeNameChange()
 }
 
 
-boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);

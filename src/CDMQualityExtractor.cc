@@ -99,7 +99,7 @@ static vector<double> getValidValues(const CDM& cdm, const string& statusVarName
     return validVals;
 }
 
-CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString, std::string configFile) throw(CDMException)
+CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString, std::string configFile)
 : dataReader(dataReader)
 {
     *cdm_.get() = dataReader->getCDM();
@@ -198,7 +198,7 @@ static double findDefinedExtreme(double* begin, double* end, const double& (*min
     return extreme;
 }
 
-boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     // no change in cdm-data in CDMQualityExtractor, so no need to check for in-memory data
 

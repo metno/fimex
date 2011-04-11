@@ -58,31 +58,33 @@ public:
      * @param configFile ncml-file with location set
      * @throw CDMException
      */
-    NcmlCDMReader(std::string configFile) throw(CDMException);
+    NcmlCDMReader(std::string configFile);
     /**
      * @param cdmReader a file reader opened elsewhere
      * @param configFile ncml-file with location set
      * @throw CDMException
      */
-    NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile) throw(CDMException);
+    NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile);
     virtual ~NcmlCDMReader();
     /**
      * reading the data from the required source
      */
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 
 
 private:
     /**
      * main function for all constructors
      */
-    void init() throw(CDMException);
+    void init();
+    void setConfigDoc();
     /* log a info of msg if xpath in config file */
     void initRemove();
     void warnUnsupported(std::string xpath, std::string msg);
     void initWarnUnsupported();
     void initVariableNameChange();
     void initVariableTypeChange();
+    void initVariableDataChange();
     void initDimensionNameChange();
     void initDimensionUnlimited();
     void initAttributeNameChange();

@@ -62,7 +62,7 @@ void noDealloc(CDMReader* reader)
     // used within a shared_ptr<CDMReader>, where the auto-dealloc is not needed
 }
 
-boost::shared_ptr<Data> C_CDMReader::getDataSlice(const std::string & varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> C_CDMReader::getDataSlice(const std::string & varName, size_t unLimDimPos)
 {
     // check if there is a callback-function (currently only double)
     std::map<std::string, doubleDatasliceCallbackPtr>::iterator callbackIt = doubleCallbacks_.find(varName);

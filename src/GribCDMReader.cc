@@ -532,7 +532,7 @@ GribCDMReader::~GribCDMReader()
 {
 }
 
-boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {

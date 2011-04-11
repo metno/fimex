@@ -15,7 +15,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 CachedVectorReprojection.cc \
 					 CDM.cc \
 					 CDMAttribute.cc \
-					 CDMconstants.c \
+					 CDMconstants.cc \
 					 CDMDimension.cc \
 					 CDMDataType.cc \
 					 CDMExtractor.cc \

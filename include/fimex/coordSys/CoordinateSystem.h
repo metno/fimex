@@ -174,7 +174,7 @@ public:
      * Set any axis.
      * @throw CDMException if an axis with the same axistype (except undefined) exists
      */
-    virtual void setAxis(AxisPtr axis);
+    virtual void setAxis(ConstAxisPtr axis);
 private:
     boost::shared_ptr<CoordSysImpl> pimpl_;
 };

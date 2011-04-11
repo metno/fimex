@@ -47,7 +47,7 @@ CDMExtractor::~CDMExtractor()
 {
 }
 
-boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
@@ -121,7 +121,7 @@ void CDMExtractor::selectVariables(std::set<std::string> variables)
              bind1st(mem_fun(&CDMExtractor::removeVariable),this));
 }
 
-void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length) throw(CDMException)
+void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length)
 {
 	CDMDimension& dim = cdm_->getDimension(dimName);
 	if (start+length > dim.getLength()) {
@@ -143,7 +143,7 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
 	}
 }
 
-void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long end) throw(CDMException)
+void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long end)
 {
 	size_t length = 0;
 	if (end > 0) {
@@ -157,7 +157,7 @@ void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, lo
 	reduceDimension(dimName, start, length);
 }
 
-void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal) throw(CDMException)
+void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal)
 {
     using namespace std;
     LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of "<< aUnits << "(" << startVal << "," << endVal <<")");
@@ -241,7 +241,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
     }
 }
 
-void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTime) throw(CDMException)
+void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTime)
 {
     std::string unit = "seconds since 1970-01-01 00:00:00";
     TimeUnit tu(unit);
@@ -250,7 +250,7 @@ void CDMExtractor::reduceTime(const FimexTime& startTime, const FimexTime& endTi
     reduceAxes(types, unit, tu.fimexTime2unitTime(startTime), tu.fimexTime2unitTime(endTime));
 }
 
-void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal, double endVal) throw(CDMException)
+void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal, double endVal)
 {
     std::vector<CoordinateAxis::AxisType> types;
     types.push_back(CoordinateAxis::GeoZ);
@@ -259,7 +259,7 @@ void CDMExtractor::reduceVerticalAxis(const std::string& units, double startVal,
     reduceAxes(types, units, startVal, endVal);
 }
 
-void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double west, double east) throw(CDMException)
+void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double west, double east)
 {
     using namespace std;
     // check input
@@ -332,7 +332,7 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
 }
 
 
-void CDMExtractor::changeDataType(std::string variable, CDMDataType datatype) throw(CDMException)
+void CDMExtractor::changeDataType(std::string variable, CDMDataType datatype)
 {
 	// TODO
 	throw CDMException("not implemented yet");

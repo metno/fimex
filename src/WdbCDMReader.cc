@@ -82,7 +82,7 @@ GxWdbCDMReader::~GxWdbCDMReader()
 }
 
 boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
-		const std::string& varName, size_t unLimDimPos) throw (CDMException)
+		const std::string& varName, size_t unLimDimPos)
 {
 	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");";
 

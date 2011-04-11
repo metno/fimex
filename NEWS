@@ -1,3 +1,14 @@
+  * 2011-03-22 fimex-0.27
+    * new documentation target
+    * generic usage of udunits2 without udunits1-wrapper
+    * felt-reader to allow reading time-independant files
+    * NC_BYTE variables don't change to NC_CHAR
+    * support +R proj4 parameter
+    * grib-reader: use DxInMetres instead of xDirectionInMetres
+    * adding all CF1.4 projections: AlbersConical, AzimuthalEquidistant,
+                                    LambertAzimuthal, LambertCylindrical,
+                                    Orthograhpic, VerticalPerspective
+    * improve exception-handling
   * 2011-02-14 fimex-0.26.1
     * adding config.h to NcmlCDMReader to detect netcdf-support
   * 2011-02-11 fimex-0.26

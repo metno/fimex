@@ -91,7 +91,7 @@ std::string joinPtr(InputIterator start, InputIterator end, std::string delim = 
  *
  * This function has been derived from http://www.oopweb.com/CPP/Documents/CPPHOWTO/Volume/C++Programming-HOWTO-7.html
  * @param str the string to tokenize
- * @param delimiters the delimiters between the tokens
+ * @param delimiters the delimiters between the tokens. That can be multiple delimiters, i.e. whitespace is " \t\n\r"
  * @return vector of tokens
  */
 std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters = " ");

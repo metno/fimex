@@ -62,12 +62,12 @@ public:
      * might be overwritten by the config-file. If empty, no quality extraction on the basis of CF-1.4 will be used.
      * @param configFile filename of a cdmQualityConfig.xml file. If empty, no quality-file will be used.
      */
-    CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString="", std::string configFile="") throw(CDMException);
+    CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString="", std::string configFile="");
     virtual ~CDMQualityExtractor() {};
     /**
      * Read and manipulate the data
      */
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
      * Read the internals of statusVariable. This code is mainly thought for testing/debugging.
      */

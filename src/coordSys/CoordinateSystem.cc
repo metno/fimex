@@ -230,7 +230,7 @@ CoordinateSystem::ConstAxisList CoordinateSystem::getAxes() const
     return pimpl_->axes_;
 }
 
-void CoordinateSystem::setAxis(AxisPtr axis)
+void CoordinateSystem::setAxis(ConstAxisPtr axis)
 {
     assert(axis.get() != 0);
 

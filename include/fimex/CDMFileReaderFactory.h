@@ -29,6 +29,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <string>
 
 namespace MetNoFimex
 {
@@ -69,7 +70,11 @@ public:
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
      */
-    static boost::shared_ptr<CDMReader> create(int fileType, const std::string& fileName, const std::string& configFile, const std::vector<std::string>& args);
+    static boost::shared_ptr<CDMReader> create(int fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
+    /**
+     * @brief same as the other create(), but with a fileType string
+     */
+    static boost::shared_ptr<CDMReader> create(const std::string& fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
 };
 
 }

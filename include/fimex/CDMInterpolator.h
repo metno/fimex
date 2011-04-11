@@ -29,8 +29,11 @@
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
 
+
 namespace MetNoFimex
 {
+// forward decl
+class CoordinateSystem;
 
 class CDMInterpolator : public MetNoFimex::CDMReader
 {
@@ -43,9 +46,10 @@ private:
 	std::string longitudeName;
 	/** converter for axes-strings */
 	void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
-	void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
-	void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
-	void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+	void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+	void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+	void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+	boost::shared_ptr<const CoordinateSystem> findBestCoordinateSystemAndProjectionVars(bool withProjection);
 	bool hasSpatialVectors() const;
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
@@ -54,7 +58,7 @@ public:
 	 * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
 	 *
 	 */
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0) throw(CDMException);
+	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 	/**
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
 	 *
@@ -65,7 +69,7 @@ public:
 	 * @param out_x_axis_unit unit of the output x-axis
 	 * @param out_y_axis_unit unit of the output y-axis
 	 */
-	virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+	virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
 	/**
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
 	 *
@@ -76,7 +80,7 @@ public:
 	 * @param out_x_axis_unit unit of the output x-axis
 	 * @param out_y_axis_unit unit of the output y-axis
 	 */
-	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit) throw(CDMException);
+	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
 	/**
 	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for latitude

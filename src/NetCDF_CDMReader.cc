@@ -82,7 +82,7 @@ NetCDF_CDMReader::~NetCDF_CDMReader()
 {
 }
 
-boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
+boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
 	const CDMVariable& var = cdm_->getVariable(varName);
 	if (var.hasData()) {
@@ -106,7 +106,7 @@ boost::shared_ptr<Data> getData_(NcVar* ncVar, long* count)
     return boost::shared_ptr<Data>(new DataImpl<T>(vals, length));
 }
 
-boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
+boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     const CDMVariable& var = cdm_->getVariable(varName);
     if (var.hasData()) {

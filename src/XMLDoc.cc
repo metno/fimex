@@ -29,7 +29,7 @@
 namespace MetNoFimex
 {
 
-XMLDoc::XMLDoc(const std::string& filename) throw(CDMException)
+XMLDoc::XMLDoc(const std::string& filename)
 : xpathCtx(0)
 {
 	xmlInitParser();
@@ -51,7 +51,7 @@ XMLDoc::XMLDoc(const std::string& filename) throw(CDMException)
 	}
 }
 
-void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href) throw(CDMException)
+void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href)
 {
     /* do register namespace */
     if(xmlXPathRegisterNs(xpathCtx, reinterpret_cast<const xmlChar *>(prefix.c_str()), reinterpret_cast<const xmlChar *>(href.c_str())) != 0) {
@@ -107,6 +107,16 @@ std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
 
 std::string getXmlName(const xmlNodePtr node) {
 	return std::string (reinterpret_cast<const char *>(node->name));
+}
+std::string getXmlContent(const xmlNodePtr node)
+{
+    if (node == 0) return "";
+    boost::shared_ptr<xmlChar> xChar(xmlNodeGetContent(node), xmlFree);
+    std::string retVal;
+    if (xChar.get() != 0) {
+        retVal = std::string(reinterpret_cast<char *>(xChar.get()));
+    }
+    return retVal;
 }
 
 
