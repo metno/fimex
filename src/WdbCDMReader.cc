@@ -63,7 +63,7 @@ GxWdbCDMReader::GxWdbCDMReader(const std::string& source, const std::string& con
 		dataIndex_ = new wdb::Wdb2CdmBuilder(data, * translator_);
 		dataIndex_->populate(* cdm_);
 
-		cdm_->toXMLStream(std::cout);
+//		cdm_->toXMLStream(std::cout);
 	}
 	catch (...)
 	{
@@ -105,13 +105,13 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 
 		std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = dataIndex_->getGridIdentifiers(wdbName, unLimDimPos);
 
-		float * dataIdx = (float *) ret->getDataPtr();
+		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
 		for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
 			dataIdx = wdbConnection_->getGrid(dataIdx, * it);
 	}
 	else if ( varName.substr(0, 11) == "projection_" )
 	{
-		ret = createData(variable.getDataType(), 1);
+		ret = createData(variable.getDataType(), 0);
 	}
 	else if ( varName == "x" )
 	{
@@ -145,23 +145,16 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 	}
 	else if ( varName == "time" )
 	{
+		// fix time functions: TimeUnit.h
 		const std::set<wdb::GridData::Time> & allTimes = dataIndex_->allTimes();
-		ret = createData(variable.getDataType(), allTimes.size());
-
-//		std::set<wdb::GridData::Time>::const_iterator thisTime = allTimes.begin();
-//		std::advance(thisTime, unLimDimPos -1);
-
-		int idx = 0;
-		BOOST_FOREACH(const wdb::GridData::Time & time, allTimes)
-		{
-			std::tm t = to_tm(time);
-			ret->setValue(idx ++, std::mktime(& t));
-		}
+		std::set<wdb::GridData::Time>::const_iterator thisTime = allTimes.begin();
+		std::advance(thisTime, unLimDimPos -1);
+		std::tm t = to_tm(* thisTime);
+		ret = createData(variable.getDataType(), 1, std::mktime(& t));
 	}
 	else
 	{
-		std::cout << "??? ";
-		ret = createData(variable.getDataType(), 1);
+		throw CDMException("internal error: " + varName + ": unrecognized variable");
 	}
 	std::cout << "\tdone" << std::endl;
 	return ret;
