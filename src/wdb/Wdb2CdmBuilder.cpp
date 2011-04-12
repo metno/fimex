@@ -29,9 +29,9 @@
 #include "Wdb2CdmBuilder.h"
 #include "GridInformation.h"
 #include "CdmNameTranslator.h"
-#include "fimex/CDM.h"
-#include "fimex/CDMDimension.h"
-#include "fimex/coordSys/Projection.h"
+#include <fimex/CDM.h>
+#include <fimex/CDMDimension.h>
+#include <fimex/coordSys/Projection.h>
 #include <set>
 #include <boost/foreach.hpp>
 #include <boost/assign/list_of.hpp>
@@ -98,11 +98,16 @@ void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
 			cdm.addAttribute(projectionName, a);
 	}
 
+	if ( grids.empty() )
+		throw CDMException("No grids");
 	if ( grids.size() > 1 )
-		throw CDMException("Several grid types in same wdb is not supported (yet)");
+		throw CDMException("Several grid types in same wdb reader is not supported (yet)");
 
-	cdm.addDimension(CDMDimension("x", (*grids.begin())->numberX()));
-	cdm.addDimension(CDMDimension("y", (*grids.begin())->numberY()));
+	GridData::GridInformationPtr gridInfo = * grids.begin();
+
+
+	cdm.addDimension(CDMDimension("x", gridInfo->numberX()));
+	cdm.addDimension(CDMDimension("y", gridInfo->numberY()));
 
 	cdm.addVariable(CDMVariable("x", CDM_FLOAT, std::vector<std::string>(1, "x")));
 	cdm.addAttribute("x", CDMAttribute("long_name", "x-coordinate in Cartesian system"));

@@ -28,6 +28,7 @@
 
 #include "WdbConnection.h"
 #include "GridInformation.h"
+#include <fimex/WdbCDMReaderParser.h>
 
 namespace MetNoFimex
 {
@@ -35,25 +36,18 @@ namespace wdb
 {
 
 
-WdbConnection::WdbConnection(const std::string & connectString)
+WdbConnection::WdbConnection(const WdbCDMReaderParserInfo & connectionSpec)
 {
-	/**
-	 * TODO:
-	 *     parse connection string down to its elements?
-	 */
+	std::string connectString = connectionSpec.databaseConnectString();
 	connection_ = PQconnectdb(connectString.c_str());
 	if ( !isConnected() )
 		throw WdbException(connection_);
 
-    /**
-	 * TODO:
-	 *    wci and wdb user might be different
-	 *
-	 *    convey information about wci user
-	 *
-	 *    remove hard coded value from query below
-	 */
-	PQclear(call_("SELECT wci.begin('wdb')"));
+	std::ostringstream begin;
+#warning sanitize input
+	begin << "SELECT wci.begin('" << connectionSpec.wciUser() << "')";
+
+	PQclear(call_(begin.str()));
 }
 
 WdbConnection::~WdbConnection()
@@ -86,9 +80,10 @@ public:
 };
 }
 
-void WdbConnection::readGid(std::vector<GridData> & out, const std::string & dataProvider)
+void WdbConnection::readGid(std::vector<GridData> & out, const WdbCDMReaderParserInfo & connectionSpec)
 {
-	std::string query = GridData::query(dataProvider);
+	std::string query = GridData::query(connectionSpec);
+	std::cout << query << std::endl;
 	Scoped_PGresult result(call_(query));
 
 	int tuples = PQntuples(result.get());

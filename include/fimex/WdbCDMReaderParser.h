@@ -57,6 +57,8 @@ namespace MetNoFimex
     public:
         explicit WdbCDMReaderParserInfo();
 
+        std::string databaseConnectString() const;
+
         /**
          * ATM we will expose only getters
          *

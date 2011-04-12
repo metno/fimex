@@ -38,6 +38,7 @@
 
 namespace MetNoFimex
 {
+class WdbCDMReaderParserInfo;
 namespace wdb
 {
 class GridInformation;
@@ -89,7 +90,7 @@ private:
 	gid gridIdentifier_;
 
 	friend class WdbConnection;
-	static std::string query(const std::string & dataProvider);
+	static std::string query(const WdbCDMReaderParserInfo & querySpec);
 	GridData(PGresult * result, int row);
 };
 

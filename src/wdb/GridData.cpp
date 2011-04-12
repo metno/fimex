@@ -27,6 +27,7 @@
  */
 
 #include "GridData.h"
+#include <fimex/WdbCDMReaderParser.h>
 
 namespace MetNoFimex
 {
@@ -44,9 +45,32 @@ GridData::GridData(const Parameter & param, const Level & lvl, int version, cons
 {
 }
 
-
-std::string GridData::query(const std::string & dataProvider)
+namespace
 {
+std::string sqlString(const std::string & input)
+{
+	if ( input.empty() )
+		return "NULL";
+	return "'" + input + "'";
+}
+std::string array(const std::string & input)
+{
+	if ( input.empty() )
+		return "NULL";
+	return sqlString("{" + input + "}");
+}
+}
+
+
+std::string GridData::query(const WdbCDMReaderParserInfo & querySpec)
+{
+#warning sanitize input
+
+	const std::string dataProvider = array(querySpec.provider());
+	const std::string placeName = sqlString(querySpec.place());
+	const std::string referenceTime = sqlString(querySpec.referenceTime());
+
+
 	return "SELECT "
 		"ValueParameterName, "
 		"ValueParameterUnit, "
@@ -60,7 +84,7 @@ std::string GridData::query(const std::string & dataProvider)
 		"PlaceName, "
 		"value"
 		" FROM "
-		"wci.read('{" + dataProvider + "}',NULL, NULL,NULL, '{air temperature}',NULL, '{0}',NULL::wci.returngid)";
+		"wci.read(" + dataProvider + ", " + placeName + ", " + referenceTime + ",NULL, '{air temperature}',NULL, '{0}',NULL::wci.returngid)";
 }
 
 namespace

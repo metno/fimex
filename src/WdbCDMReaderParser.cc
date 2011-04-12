@@ -52,6 +52,20 @@ WdbCDMReaderParserInfo::WdbCDMReaderParserInfo()
 {
 }
 
+std::string WdbCDMReaderParserInfo::databaseConnectString() const
+{
+	std::ostringstream ret;
+
+	ret << "dbname=" << wdbName();
+	if ( not wdbHost().empty() )
+		ret << " host=" << wdbHost();
+	ret << " port=" << wdbPort();
+	if ( not wdbUser().empty() )
+		ret << " user=" << wdbUser();
+
+	return ret.str();
+}
+
 std::string WdbCDMReaderParserInfo::wdbHost() const
 {
     return wdbHost_;

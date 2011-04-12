@@ -38,6 +38,8 @@
 
 namespace MetNoFimex
 {
+class WdbCDMReaderParserInfo;
+
 namespace wdb
 {
 class GridInformation;
@@ -53,7 +55,7 @@ public:
 	/**
 	 * @throws WdbException on error
 	 */
-	explicit WdbConnection(const std::string & connectString);
+	explicit WdbConnection(const WdbCDMReaderParserInfo & connectionSpec);
 	~WdbConnection();
 
     /**
@@ -68,7 +70,7 @@ public:
 	 *
 	 * @throws WdbException on error
 	 */
-	void readGid(std::vector<GridData> & out, const std::string & dataProvider);
+	void readGid(std::vector<GridData> & out, const WdbCDMReaderParserInfo & connectionSpec);
 
 
 	typedef boost::shared_ptr<GridInformation> GridInformationPtr;

@@ -38,13 +38,6 @@
 
 namespace MetNoFimex
 {
-namespace wdb
-{
-class WdbConnection;
-class Wdb2CdmBuilder;
-class CdmNameTranslator;
-}
-
 
 class GxWdbCDMReader: public CDMReader, boost::noncopyable
 {
@@ -55,9 +48,8 @@ public:
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
-	wdb::WdbConnection * wdbConnection_;
-	wdb::Wdb2CdmBuilder * dataIndex_;
-	wdb::CdmNameTranslator * translator_;
+	class InternalData;
+	InternalData * d_;
 };
 
 
