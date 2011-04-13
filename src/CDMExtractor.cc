@@ -194,18 +194,21 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
             usedDimensions.insert(shape[0]);
             boost::shared_ptr<Data> vData = dataReader->getScaledData((*va)->getName());
             if (vData->size() > 0) {
+                const boost::shared_array<double> vArray = vData->asConstDouble();
                 // calculate everything in the original unit
                 string vaUnits = cdm.getUnits((*va)->getName());
                 double offset,slope;
                 units.convert(aUnits, vaUnits, slope, offset);
                 double roundingDelta = 1e-5;
+                if (vData->size() > 1 && vArray[0] != vArray[1]) {
+                    // make a relative rounding delta
+                    roundingDelta = .01 * fabs(vArray[0] - vArray[1]);
+                }
                 startVal = startVal*slope + offset - roundingDelta;
                 endVal = endVal*slope + offset + roundingDelta;
                 LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of " << (*va)->getName() << " after unit-conversion: ("<< startVal << ","<< endVal<<")");
 
                 // find start and end time in time-axis
-                boost::shared_ptr<Data> vData = dataReader->getScaledData((*va)->getName());
-                const boost::shared_array<double> vArray = vData->asConstDouble();
                 // make sure data is growing
                 bool isReverse = false;
                 if ((vData->size() > 1) && (vArray[0] > vArray[1])) {
@@ -214,10 +217,14 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
                 }
 
                 // vArray assumed to be monotonic growing
-                double* lower = lower_bound(&vArray[0], &vArray[0] + vData->size(), startVal);
-                double* upper = upper_bound(&vArray[0], &vArray[0] + vData->size(), endVal);
+                double* lower = lower_bound(&vArray[0], &vArray[0] + vData->size(), startVal); // val included
+                double* upper = upper_bound(&vArray[0], &vArray[0] + vData->size(), endVal);   // val excluded
 
-                LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes found lower,upper ("<< *lower << ","<< *upper<<")");
+                if (upper == (&vArray[0] + vData->size())) {
+                    LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes found lower,upper ("<< *lower << ",end)");
+                } else {
+                    LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes found lower,upper ("<< *lower << ","<< *upper <<")");
+                }
 
 
                 // reduce dimension according to these points (name, startPos, size)
