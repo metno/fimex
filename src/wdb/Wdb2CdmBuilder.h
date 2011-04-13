@@ -50,29 +50,57 @@ class Parameter;
 class Level;
 
 
+/**
+ * Structure data, using it to populate a MetNoFimes::CDM object.
+ */
 class Wdb2CdmBuilder
 {
 public:
 	Wdb2CdmBuilder(const std::vector<GridData> & data, const CdmNameTranslator & translator);
 	~Wdb2CdmBuilder();
 
+	/**
+	 * Add all data structured by this object to the given cdm object
+	 */
 	void populate(CDM & cdm) const;
 
 	typedef GridData::gid gid;
 	typedef GridData::Time Time;
 
+	/**
+	 * Does the given variable name refer to a wdb parameter?
+	 */
 	bool isDatabaseField(const std::string & variableName) const;
+
+	/**
+	 * get all grid idenitfiers for the given variable name and timestep
+	 */
 	std::vector<gid> getGridIdentifiers(const std::string & variableName, int timeIndex) const
 	{
 		return index_.getData(variableName, timeIndex);
 	}
 
+	/**
+	 * Get information about the grid in use.
+	 *
+	 * @note atm we only support a single grid in each Wdb2CdmBuilder
+	 */
 	const GridInformation & gridInformation() const;
+
+	/**
+	 * Get a list of all times in use
+	 */
 	const std::set<GridData::Time> & allTimes() const
 	{
 		return index_.allTimes();
 	}
 
+	/**
+	 * Get the reference time for the data in this object.
+	 *
+	 * @note Only one reference time may exist in the sate Wdb2CdmBuilder
+	 * object.
+	 */
 	const GridData::Time & referenceTime() const;
 
 private:

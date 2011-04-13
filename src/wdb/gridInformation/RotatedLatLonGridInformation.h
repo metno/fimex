@@ -37,6 +37,10 @@ namespace MetNoFimex
 namespace wdb
 {
 
+/**
+ * A Grid where x and y corresponds directly to longitude and altitude, except
+ * that the grid has been rotated in some manner.
+ */
 class RotatedLatLonGridInformation: public GridInformation
 {
 public:

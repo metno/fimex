@@ -37,6 +37,9 @@ namespace MetNoFimex
 namespace wdb
 {
 
+/**
+ * Any grid which does not use lat/lon as basis for x and y
+ */
 class MetricGridInformation: public GridInformation
 {
 public:

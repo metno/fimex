@@ -40,6 +40,9 @@ namespace MetNoFimex
 namespace wdb
 {
 
+/**
+ * Representation of a wdb parameter, with parameter unit information
+ */
 class Parameter
 {
 public:
@@ -47,10 +50,16 @@ public:
 	Parameter(const std::string & name, const std::string & unit);
 	~Parameter();
 
+	/**
+	 * Get wdb parameter name
+	 */
 	const std::string & name() const { return name_; }
+
+	/**
+	 * get wdb parameter unit
+	 */
 	const std::string & unit() const { return unit_; }
 
-//	void getVariable(const std::vector<std::string> & dimensions) const;
 
 private:
 	std::string name_;

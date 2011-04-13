@@ -39,11 +39,17 @@ namespace MetNoFimex
 namespace wdb
 {
 
+/**
+ * Performs string escaping, for inserting unsafe strings into database queries.
+ */
 class DataSanitizer
 {
 public:
 	explicit DataSanitizer(PGconn * connection);
 
+	/**
+	 * Clean an unsafe string for use in a query
+	 */
 	std::string operator () (const std::string & unsafeString) const;
 
 private:

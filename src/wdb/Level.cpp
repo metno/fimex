@@ -40,24 +40,6 @@ LevelType::LevelType(const std::string & name, const std::string & unit) :
 		name_(name), unit_(unit)
 {}
 
-void LevelType::addToCdm(CDM & cdm, long length, const CdmNameTranslator & translator) const
-{
-	const std::string & cdmName = translator.toCdmName(name_);
-
-	cdm.addDimension(CDMDimension(cdmName, length));
-
-	std::vector<std::string> shape;
-	shape.push_back(cdmName);
-
-	cdm.addVariable(CDMVariable(cdmName, CDM_FLOAT, shape));
-
-	cdm.addAttribute(cdmName, CDMAttribute("long_name", name_));
-	cdm.addAttribute(cdmName, CDMAttribute("standard_name", cdmName));
-	cdm.addAttribute(cdmName, CDMAttribute("units", unit_));
-	cdm.addAttribute(cdmName, CDMAttribute("axis", "z"));
-}
-
-
 
 std::ostream & operator << (std::ostream & s, const LevelType & t)
 {

@@ -43,15 +43,23 @@ namespace wdb
 {
 class CdmNameTranslator;
 
+/**
+ * Represent a wdb level type, including level parameter unit.
+ */
 class LevelType
 {
 public:
 	LevelType(const std::string & name, const std::string & unit);
 
+	/**
+	 * get level's name
+	 */
 	const std::string & name() const { return name_; }
-	const std::string & unit() const { return unit_; }
 
-	void addToCdm(CDM & cdm, long length, const CdmNameTranslator & translator) const;
+	/**
+	 * get level's unit
+	 */
+	const std::string & unit() const { return unit_; }
 
 
 private:
@@ -84,8 +92,19 @@ public:
 	Level();
 	Level(const std::string & levelName, const std::string & unit, float from, float to);
 
+	/**
+	 * Get level type
+	 */
 	const LevelType & type() const { return type_; }
+
+	/**
+	 * lowest level this is valid for
+	 */
 	float from() const { return from_; }
+
+	/**
+	 * highest level this is valid for
+	 */
 	float to() const { return to_; }
 
 

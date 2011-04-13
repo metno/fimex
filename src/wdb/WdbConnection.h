@@ -74,6 +74,9 @@ public:
 
 
 	typedef boost::shared_ptr<GridInformation> GridInformationPtr;
+	/**
+	 * Get grid information from database.
+	 */
 	GridInformationPtr readGridInformation(const std::string & gridName);
 
 	/**
@@ -108,7 +111,9 @@ private:
 	GridList gridsInUse_;
 };
 
-
+/**
+ * Exception caused by errors when contacting a wdb database.
+ */
 class WdbException : public CDMException
 {
 public:

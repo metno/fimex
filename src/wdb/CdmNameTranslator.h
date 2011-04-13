@@ -44,6 +44,9 @@ class XMLDoc;
 namespace wdb
 {
 
+/**
+ * Translates wdb names to cdm names, and vice-versa.
+ */
 class CdmNameTranslator
 {
 public:
