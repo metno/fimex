@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -46,25 +46,25 @@ namespace MetNoFimex
 
 	/**
 	 * @brief create a new shared array with a different type using static_cast
-	 * 
+	 *
 	 * @param inData original data
 	 * @param length length of original data array
-	 * 
+	 *
 	 */
 	template<typename T1, typename T2>
 	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length);
 	/**
 	 * @brief return a shared array of this data, possibly pointer to internal data
-	 * 
+	 *
 	 * @param inData original data
 	 * @param length length of original data array
-	 * 
+	 *
 	 */
 	template<typename T1, typename T2>
 	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length);
-		
 
-	
+
+
 	template<typename C>
 	class DataImpl : public Data
 	{
@@ -105,10 +105,11 @@ namespace MetNoFimex
 		virtual boost::shared_array<double> asDouble() {return as<double>();}
 		virtual std::string asString(std::string separator = "") const;
 
-		
+
 		virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException);
 		virtual void setAllValues(double val) {C v = static_cast<C>(val); for (C* pos = &theData[0]; pos != (&theData[0])+length; ++pos) *pos = v;}
+        virtual boost::shared_ptr<Data> clone() const {return boost::shared_ptr<Data>(new DataImpl<C>(*this));}
 		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException);
 		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException);
 		// specialized for each known type in Data.cc
@@ -119,26 +120,44 @@ namespace MetNoFimex
 		 */
 		template<class InputIterator>
 		void setValues(InputIterator begin, InputIterator end, size_t dataStartPos = 0) throw(CDMException);
-		
+
 	private:
 		size_t length;
 		boost::shared_array<C> theData;
+		DataImpl(const DataImpl<C>& rhs);
+		DataImpl<C>& operator=(const DataImpl<C> & rhs);
 		void copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd) throw(CDMException);
 	};
-	
+
 	/**
 	 * @brief create a Data-pointer of the datatype and fill with the data from the iterator
-	 * 
+	 *
 	 * @param datatype
 	 * @param first start of container containing the data to fill the array with
 	 * @param last end (excluded) of the container containing the data to fill the array with
-	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
+	 * @return Base-Class ptr of the DataImpl belonging to the datatype
 	 */
 	template<class InputIterator>
 	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) throw(CDMException);
-	
+
 	// below follow implementations of templates
 	// (template definitions should be in header files (depending on compiler))
+	template<typename C>
+	DataImpl<C>::DataImpl(const DataImpl<C>& rhs)
+    : length(rhs.length), theData(new C[rhs.length])
+	{
+	    std::copy(&rhs.theData[0], &rhs.theData[0] + rhs.length, &theData[0]);
+	}
+
+	template<typename C>
+	DataImpl<C>& DataImpl<C>::operator=(const DataImpl<C>& rhs)
+	{
+	    length = rhs.length;
+	    theData = boost::shared_array<C>(new C[rhs.length]);
+	    std::copy(&rhs.theData[0], &rhs.theData[0] + rhs.length, &theData[0]);
+	    return *this;
+	}
+
 	template<typename C>
 	void DataImpl<C>::toStream(std::ostream& os, std::string separator) const {
 	    if (length > 0) {
@@ -186,12 +205,12 @@ namespace MetNoFimex
 	void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
 	template<>
 	void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
-	
+
 	/**
 	 * recursively copy data by moving the newData and orgData pointers forward and copy the data at the current position
-	 * 
+	 *
 	 * it's assumed that the first dim in the vector is the fastest moving (fortran like)
-	 * 
+	 *
 	 * @param orgData pointer to the current postion of the original array
 	 * @param newData pointer to the current position of the new array
 	 * @orgDimSize the original dimensions of orgData
@@ -199,7 +218,7 @@ namespace MetNoFimex
 	 * @newStart the start positions in the new data
 	 * @newSize the dimensions of the newData
 	 * @currentDim the dimension currently under work, should be between (orgData.size()-1) and 0
-	 * 
+	 *
 	 */
 	template<typename C>
 	void recursiveCopyMultiDimData(C** orgData, C** newData, const std::vector<size_t>& orgDimSize, const std::vector<size_t>& orgSliceSize, const std::vector<size_t>& newStart, const std::vector<size_t>& newSize, size_t currentDim) {
@@ -214,12 +233,12 @@ namespace MetNoFimex
 		}
 		(*orgData) += (orgDimSize[currentDim] - (newStart[currentDim] + newSize[currentDim])) * orgSliceSize[currentDim];
 	}
-	
+
 	template<typename C>
 	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) {
-	    // handle empty data
-	    if (orgDimSize.size() == 0 || orgDimSize.size() == 0) {
-	        return boost::shared_ptr<DataImpl<C> >(new DataImpl<C>(0));
+	    // handle scalar data
+	    if (orgDimSize.size() == 0) {
+	        return clone();
 	    }
 		// get the sizes of the original data and the output data
 		size_t orgSize = 1;
@@ -230,7 +249,7 @@ namespace MetNoFimex
 			if (orgDimSize[i] < (startDims[i] + outputDimSize[i])) throw CDMException("dimension-size error, start+size > orgSize: " + type2string(startDims[i]+outputDimSize[i]) + ">" + type2string(orgDimSize[i]) );
 		}
 		if (orgSize != size()) throw CDMException("dimension-mismatch: " + type2string(size()) + "!=" + type2string(orgSize));
-		
+
 		// get the old and new datacontainer
 		boost::shared_ptr<DataImpl<C> > output(new DataImpl<C>(outputSize));
 		C* newData = output->theData.get();
@@ -244,7 +263,7 @@ namespace MetNoFimex
 		}
 		// slice the data
 		recursiveCopyMultiDimData(&oldData, &newData, orgDimSize, orgSliceSize, startDims, outputDimSize, orgDimSize.size() - 1);
-		
+
 		return output;
 	}
 
@@ -265,7 +284,7 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException) 
+	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException)
 	{
 		boost::shared_ptr<Data> data(new DataImpl<char>(0)); // dummy default
 		switch (newType) {
@@ -280,7 +299,7 @@ namespace MetNoFimex
 		return data;
 	}
 
-	
+
 	template<typename T1, typename T2>
 	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length) {
 		boost::shared_array<T1> outData(new T1[length]);
@@ -298,7 +317,7 @@ namespace MetNoFimex
 	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) throw(CDMException) {
 	    size_t length = std::distance(first, last);
 		switch (datatype) {
-			case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > data(new DataImpl<double>(length)); data->setValues(first, last); return data; }  
+			case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > data(new DataImpl<double>(length)); data->setValues(first, last); return data; }
 			case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > data(new DataImpl<float>(length));   data->setValues(first, last); return data; }
 			case CDM_INT:    { boost::shared_ptr<DataImpl<int> > data(new DataImpl<int>(length));       data->setValues(first, last); return data; }
 			case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > data(new DataImpl<short>(length));   data->setValues(first, last); return data; }

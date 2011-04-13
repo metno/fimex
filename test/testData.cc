@@ -55,6 +55,13 @@ BOOST_AUTO_TEST_CASE( test_slicing )
 
 	BOOST_CHECK(slice->size() == newSize);
 	BOOST_CHECK((slice->asInt())[0] == start);
+
+	// test_slicing of a scalar (size 0 or size 1)
+	DataImpl<double> scalar(1);
+	scalar.setValue(0, 3.);
+    boost::shared_ptr<Data> scalarSlice = scalar.slice(vector<size_t>(0), vector<size_t>(0), vector<size_t>(0));
+    BOOST_CHECK(scalar.size() == scalarSlice->size());
+    BOOST_CHECK(scalar.asConstDouble()[0] == scalarSlice->asConstDouble()[0]);
 }
 
 BOOST_AUTO_TEST_CASE( test_slicing2D )

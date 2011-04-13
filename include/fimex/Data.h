@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -86,7 +86,7 @@ namespace MetNoFimex
 		 * @param data the other data-source
 		 * @param first the first data-entry
 		 * @param end the last (excluded) data-entry, defaults to MAX size_t, automatically shrunken to fit size
-		 */		
+		 */
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t end = -1) throw(CDMException) = 0;
 		/**
 		 * set all values to the submitted value
@@ -94,17 +94,24 @@ namespace MetNoFimex
 		 */
 		virtual void setAllValues(double val) = 0;
 		/**
+		 * @brief duplicate the data
+		 *
+		 * The clone operation generates a real duplicate
+		 * of the data. The internal array-data will be copied.
+		 */
+		virtual boost::shared_ptr<Data> clone() const = 0;
+		/**
 		 * @brief get a multi-dimensional slice of the data
-		 * 
+		 *
 		 * This slices a multidimensional chunk out of the data.
 		 * All parameters must be vectors of the same size (dimension of array).
 		 * The first dimension is the fastest moving index (fortran arrays)
-		 * 
+		 *
 		 * @param orgDimSize the dimensions of this vector. The product of all orgDimSizes must equal to data.size.
 		 * @param startDims The start-position in the original data to fetch data from
 		 * @param outputDimSize the size of the output data
-		 * @return a Data of the size of outputDimSize with the same datatype as the original type  
-		 * 
+		 * @return a Data of the size of outputDimSize with the same datatype as the original type
+		 *
 		 * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
 		 */
 		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) = 0;
@@ -120,19 +127,19 @@ namespace MetNoFimex
 
 	/**
 	 * @brief create a Data-pointer of the datatype
-	 * 
+	 *
 	 * @param datatype
 	 * @param size_t length of the data array
 	 * @param val default value for data elements, 0 by default
-	 * @return Base-Class ptr of the DataImpl belonging to the datatype 
+	 * @return Base-Class ptr of the DataImpl belonging to the datatype
 	 */
 	boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val = 0) throw(CDMException);
 
 	/**
 	 * @brief create a one-dimensional dataslice from another Data object
-	 * 
+	 *
 	 * @param datatype of the return-data
-	 * @param data the data to read the values from, should be convertible data-format 
+	 * @param data the data to read the values from, should be convertible data-format
 	 * @param dataStartPos the first element of data to fetch
 	 * @param dataSize the size of the data
 	 */
