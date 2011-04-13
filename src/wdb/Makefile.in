@@ -66,9 +66,10 @@ ARFLAGS = cru
 libwdb_a_AR = $(AR) $(ARFLAGS)
 libwdb_a_LIBADD =
 am__libwdb_a_SOURCES_DIST = WdbConnection.h WdbConnection.cpp \
-	CdmNameTranslator.h CdmNameTranslator.cpp GridData.h \
-	GridData.cpp WdbIndex.h WdbIndex.cpp Wdb2CdmBuilder.h \
-	Wdb2CdmBuilder.cpp Parameter.h Parameter.cpp Level.h Level.cpp \
+	DataSanitizer.h DataSanitizer.cpp CdmNameTranslator.h \
+	CdmNameTranslator.cpp GridData.h GridData.cpp WdbIndex.h \
+	WdbIndex.cpp Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp Parameter.h \
+	Parameter.cpp Level.h Level.cpp \
 	gridInformation/GridInformation.h \
 	gridInformation/GridInformation.cpp \
 	gridInformation/LatLonGridInformation.h \
@@ -79,6 +80,7 @@ am__libwdb_a_SOURCES_DIST = WdbConnection.h WdbConnection.cpp \
 	gridInformation/MetricGridInformation.cpp
 @HAVE_LIBPQ_TRUE@am_libwdb_a_OBJECTS =  \
 @HAVE_LIBPQ_TRUE@	libwdb_a-WdbConnection.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-DataSanitizer.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-CdmNameTranslator.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-GridData.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-WdbIndex.$(OBJEXT) \
@@ -273,6 +275,7 @@ top_srcdir = @top_srcdir@
 @HAVE_LIBPQ_TRUE@libwdb_a_CPPFLAGS = -I$(top_srcdir)/include/ ${XML_CPPFLAGS}
 @HAVE_LIBPQ_TRUE@libwdb_a_SOURCES = \
 @HAVE_LIBPQ_TRUE@	WdbConnection.h WdbConnection.cpp \
+@HAVE_LIBPQ_TRUE@	DataSanitizer.h DataSanitizer.cpp \
 @HAVE_LIBPQ_TRUE@	CdmNameTranslator.h CdmNameTranslator.cpp \
 @HAVE_LIBPQ_TRUE@	GridData.h GridData.cpp \
 @HAVE_LIBPQ_TRUE@	WdbIndex.h WdbIndex.cpp \
@@ -333,6 +336,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-CdmNameTranslator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-DataSanitizer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridInformation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-LatLonGridInformation.Po@am__quote@
@@ -378,6 +382,20 @@ libwdb_a-WdbConnection.obj: WdbConnection.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbConnection.cpp' object='libwdb_a-WdbConnection.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-WdbConnection.obj `if test -f 'WdbConnection.cpp'; then $(CYGPATH_W) 'WdbConnection.cpp'; else $(CYGPATH_W) '$(srcdir)/WdbConnection.cpp'; fi`
+
+libwdb_a-DataSanitizer.o: DataSanitizer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-DataSanitizer.o -MD -MP -MF $(DEPDIR)/libwdb_a-DataSanitizer.Tpo -c -o libwdb_a-DataSanitizer.o `test -f 'DataSanitizer.cpp' || echo '$(srcdir)/'`DataSanitizer.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-DataSanitizer.Tpo $(DEPDIR)/libwdb_a-DataSanitizer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DataSanitizer.cpp' object='libwdb_a-DataSanitizer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-DataSanitizer.o `test -f 'DataSanitizer.cpp' || echo '$(srcdir)/'`DataSanitizer.cpp
+
+libwdb_a-DataSanitizer.obj: DataSanitizer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-DataSanitizer.obj -MD -MP -MF $(DEPDIR)/libwdb_a-DataSanitizer.Tpo -c -o libwdb_a-DataSanitizer.obj `if test -f 'DataSanitizer.cpp'; then $(CYGPATH_W) 'DataSanitizer.cpp'; else $(CYGPATH_W) '$(srcdir)/DataSanitizer.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-DataSanitizer.Tpo $(DEPDIR)/libwdb_a-DataSanitizer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DataSanitizer.cpp' object='libwdb_a-DataSanitizer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-DataSanitizer.obj `if test -f 'DataSanitizer.cpp'; then $(CYGPATH_W) 'DataSanitizer.cpp'; else $(CYGPATH_W) '$(srcdir)/DataSanitizer.cpp'; fi`
 
 libwdb_a-CdmNameTranslator.o: CdmNameTranslator.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-CdmNameTranslator.o -MD -MP -MF $(DEPDIR)/libwdb_a-CdmNameTranslator.Tpo -c -o libwdb_a-CdmNameTranslator.o `test -f 'CdmNameTranslator.cpp' || echo '$(srcdir)/'`CdmNameTranslator.cpp

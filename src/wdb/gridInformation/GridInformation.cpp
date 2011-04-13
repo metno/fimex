@@ -31,6 +31,7 @@
 #include "RotatedLatLonGridInformation.h"
 #include "MetricGridInformation.h"
 #include "GridInformation.h"
+#include "DataSanitizer.h"
 #include <fimex/coordSys/Projection.h>
 #include <fimex/Data.h>
 #include <fimex/CDM.h>
@@ -46,7 +47,7 @@ namespace MetNoFimex
 namespace wdb
 {
 
-std::string GridInformation::query(const std::string & gridName)
+std::string GridInformation::query(const std::string & gridName, const DataSanitizer & sanitizer)
 {
 	return "SELECT NumberX, NumberY, IncrementX, IncrementY, NumberX, NumberY, ProjDefinition FROM wci.getplaceregulargrid('" + gridName + "')";
 }

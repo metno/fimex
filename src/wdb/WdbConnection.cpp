@@ -27,14 +27,15 @@
  */
 
 #include "WdbConnection.h"
+#include "DataSanitizer.h"
 #include "gridInformation/GridInformation.h"
 #include <fimex/WdbCDMReaderParser.h>
+#include <boost/scoped_array.hpp>
 
 namespace MetNoFimex
 {
 namespace wdb
 {
-
 
 WdbConnection::WdbConnection(const WdbCDMReaderParserInfo & connectionSpec)
 {
@@ -44,8 +45,7 @@ WdbConnection::WdbConnection(const WdbCDMReaderParserInfo & connectionSpec)
 		throw WdbException(connection_);
 
 	std::ostringstream begin;
-#warning sanitize input
-	begin << "SELECT wci.begin('" << connectionSpec.wciUser() << "')";
+	begin << "SELECT wci.begin('" << DataSanitizer(connection_)(connectionSpec.wciUser()) << "')";
 
 	PQclear(call_(begin.str()));
 }
@@ -82,7 +82,7 @@ public:
 
 void WdbConnection::readGid(std::vector<GridData> & out, const WdbCDMReaderParserInfo & connectionSpec)
 {
-	std::string query = GridData::query(connectionSpec);
+	std::string query = GridData::query(connectionSpec, DataSanitizer(connection_));
 	std::cout << query << std::endl;
 	Scoped_PGresult result(call_(query));
 
@@ -107,7 +107,7 @@ WdbConnection::GridInformationPtr WdbConnection::readGridInformation(const std::
 	GridList::const_iterator find = gridsInUse_.find(gridName);
 	if ( find == gridsInUse_.end() )
 	{
-		Scoped_PGresult result(call_(GridInformation::query(gridName)));
+		Scoped_PGresult result(call_(GridInformation::query(gridName, DataSanitizer(connection_))));
 
 		int tuples = PQntuples(result.get());
 		if ( tuples == 0 )

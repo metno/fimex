@@ -42,7 +42,7 @@ class WdbCDMReaderParserInfo;
 namespace wdb
 {
 class GridInformation;
-
+class DataSanitizer;
 
 /**
  * Represents a single return row from wci.read(..., returngid)
@@ -90,7 +90,7 @@ private:
 	gid gridIdentifier_;
 
 	friend class WdbConnection;
-	static std::string query(const WdbCDMReaderParserInfo & querySpec);
+	static std::string query(const WdbCDMReaderParserInfo & querySpec, const DataSanitizer & sanitizer);
 	GridData(PGresult * result, int row);
 };
 

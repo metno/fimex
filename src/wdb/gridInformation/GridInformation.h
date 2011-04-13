@@ -44,6 +44,8 @@ class CDM;
 
 namespace wdb
 {
+class DataSanitizer;
+
 
 class GridInformation : boost::noncopyable
 {
@@ -73,7 +75,7 @@ public:
 
 	virtual void addSpatialDimensions(std::vector<std::string> & out) const =0;
 
-	static std::string query(const std::string & gridName);
+	static std::string query(const std::string & gridName, const DataSanitizer & sanitizer);
 
 
 protected:

@@ -27,6 +27,7 @@
  */
 
 #include "GridData.h"
+#include "DataSanitizer.h"
 #include <fimex/WdbCDMReaderParser.h>
 
 namespace MetNoFimex
@@ -62,13 +63,11 @@ std::string array(const std::string & input)
 }
 
 
-std::string GridData::query(const WdbCDMReaderParserInfo & querySpec)
+std::string GridData::query(const WdbCDMReaderParserInfo & querySpec, const DataSanitizer & sanitizer)
 {
-#warning sanitize input
-
-	const std::string dataProvider = array(querySpec.provider());
-	const std::string placeName = sqlString(querySpec.place());
-	const std::string referenceTime = sqlString(querySpec.referenceTime());
+	const std::string dataProvider = array(sanitizer(querySpec.provider()));
+	const std::string placeName = sqlString(sanitizer(querySpec.place()));
+	const std::string referenceTime = sqlString(sanitizer(querySpec.referenceTime()));
 
 
 	return "SELECT "
