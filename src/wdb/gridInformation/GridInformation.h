@@ -30,22 +30,33 @@
 #define GRIDINFORMATION_H_
 
 #include <string>
+#include <vector>
 #include <libpq-fe.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 namespace MetNoFimex
 {
 class Projection;
+class Data;
+class CDMVariable;
+class CDM;
 
 namespace wdb
 {
 
-class GridInformation
+class GridInformation : boost::noncopyable
 {
 public:
-	~GridInformation();
 
-	//const std::string & projDefinition() const { return projDefinition_; };
+	typedef boost::shared_ptr<GridInformation> Ptr;
+
+	static Ptr get(PGresult * result, int row);
+	static Ptr get(const std::string & projDefinition, unsigned numberX, unsigned numberY);
+
+	virtual ~GridInformation();
+
+
 	const boost::shared_ptr<Projection> & getProjection() const { return projection_; }
 
 	unsigned numberX() const { return numberX_; };
@@ -57,14 +68,21 @@ public:
 
 	std::string getProjectionName() const;
 
+	virtual void addToCdm(CDM & cdm) const =0;
+	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
 
-	GridInformation(const std::string & projDefinition, unsigned numberX, unsigned numberY);
+	virtual void addSpatialDimensions(std::vector<std::string> & out) const =0;
+
+	static std::string query(const std::string & gridName);
 
 
-private:
+protected:
+	GridInformation(PGresult * result, int row);
+	GridInformation(const boost::shared_ptr<Projection> & projection, unsigned numberX, unsigned numberY);
+
 	boost::shared_ptr<Projection> projection_;
 
-
+private:
 	unsigned numberX_;
 	unsigned numberY_;
 	float incrementX_;
@@ -72,9 +90,6 @@ private:
 	float startX_;
 	float startY_;
 
-	friend class WdbConnection;
-	static std::string query(const std::string & gridName);
-	GridInformation(PGresult * result, int row);
 };
 
 }

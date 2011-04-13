@@ -27,7 +27,7 @@
  */
 
 #include "WdbConnection.h"
-#include "GridInformation.h"
+#include "gridInformation/GridInformation.h"
 #include <fimex/WdbCDMReaderParser.h>
 
 namespace MetNoFimex
@@ -115,7 +115,7 @@ WdbConnection::GridInformationPtr WdbConnection::readGridInformation(const std::
 		else if ( tuples > 1 )
 			throw WdbException("Ambiguous grid name: " + gridName);
 
-		GridInformationPtr ret(new GridInformation(result.get(), 0));
+		GridInformationPtr ret = GridInformation::get(result.get(), 0);
 		find = gridsInUse_.insert(std::make_pair(gridName, ret)).first;
 	}
 	return find->second;

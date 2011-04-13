@@ -27,7 +27,7 @@
  */
 
 #include "Wdb2CdmBuilder.h"
-#include "GridInformation.h"
+#include "gridInformation/GridInformation.h"
 #include "CdmNameTranslator.h"
 #include <fimex/CDM.h>
 #include <fimex/CDMDimension.h>
@@ -74,7 +74,6 @@ bool Wdb2CdmBuilder::isDatabaseField(const std::string & variableName) const
 const GridInformation & Wdb2CdmBuilder::gridInformation() const
 {
 	// Several grid types in same wdb is not supported (yet)
-
 	return * grids_.begin()->second;
 }
 
@@ -104,31 +103,7 @@ void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
 		throw CDMException("Several grid types in same wdb reader is not supported (yet)");
 
 	GridData::GridInformationPtr gridInfo = * grids.begin();
-
-
-	cdm.addDimension(CDMDimension("x", gridInfo->numberX()));
-	cdm.addDimension(CDMDimension("y", gridInfo->numberY()));
-
-	cdm.addVariable(CDMVariable("x", CDM_FLOAT, std::vector<std::string>(1, "x")));
-	cdm.addAttribute("x", CDMAttribute("long_name", "x-coordinate in Cartesian system"));
-	cdm.addAttribute("x", CDMAttribute("standard_name", "grid longitude"));
-	cdm.addAttribute("x", CDMAttribute("units", "degree_east"));
-
-	cdm.addVariable(CDMVariable("y", CDM_FLOAT, std::vector<std::string>(1, "y")));
-	cdm.addAttribute("y", CDMAttribute("long_name", "y-coordinate in Cartesian system"));
-	cdm.addAttribute("y", CDMAttribute("standard_name", "grid latitude"));
-	cdm.addAttribute("y", CDMAttribute("units", "degree_north"));
-
-	std::vector<std::string> dims = boost::assign::list_of("x")("y");
-	cdm.addVariable(CDMVariable("longitude", CDM_FLOAT, dims));
-	cdm.addAttribute("longitude", CDMAttribute("long_name", "longitude"));
-	cdm.addAttribute("longitude", CDMAttribute("standard_name", "longitude"));
-	cdm.addAttribute("longitude", CDMAttribute("units", "degree_east"));
-
-	cdm.addVariable(CDMVariable("latitude", CDM_FLOAT, dims));
-	cdm.addAttribute("latitude", CDMAttribute("long_name", "latitude"));
-	cdm.addAttribute("latitude", CDMAttribute("standard_name", "latitude"));
-	cdm.addAttribute("latitude", CDMAttribute("units", "degree_north"));
+	gridInfo->addToCdm(cdm);
 }
 
 void Wdb2CdmBuilder::addReferenceTimeInformation_(CDM & cdm) const
@@ -224,11 +199,15 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 {
 	BOOST_FOREACH( const std::string & parameter, index_.allParameters() )
 	{
+		GridSpecMap::const_iterator find = grids_.find(parameter);
+		if ( find == grids_.end() )
+			throw CDMException("Internal error - unable to find grid mapping"); // should never happen
+		GridData::GridInformationPtr gridInfo = find->second;
+
 		std::string dimension = translator_.toCdmName(parameter);
 
 		std::vector<std::string> dimensions;
-		dimensions.push_back("x");
-		dimensions.push_back("y");
+		gridInformation().addSpatialDimensions(dimensions);
 		if ( index_.versionsForParameter(parameter).size() > 1 )
 			dimensions.push_back("version");
 		if ( index_.levelsForParameter(parameter).size() > 1 )
@@ -238,10 +217,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, dimensions));
 
-		GridSpecMap::const_iterator find = grids_.find(parameter);
-		if ( find == grids_.end() )
-			throw CDMException("Internal error - unable to find grid mapping"); // should never happen
-		cdm.addAttribute(dimension, CDMAttribute("grid_mapping", find->second->getProjectionName()));
+		cdm.addAttribute(dimension, CDMAttribute("grid_mapping", gridInfo->getProjectionName()));
 
 		cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForParameter(parameter)));
 		cdm.addAttribute(dimension, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));

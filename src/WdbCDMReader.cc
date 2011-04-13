@@ -40,7 +40,7 @@
 #include "wdb/WdbConnection.h"
 #include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/CdmNameTranslator.h"
-#include "wdb/GridInformation.h"
+#include "wdb/gridInformation/GridInformation.h"
 
 namespace MetNoFimex
 {
@@ -129,34 +129,6 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 		for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
 			dataIdx = d_->wdbConnection->getGrid(dataIdx, * it);
 	}
-	else if ( varName.substr(0, 11) == "projection_" )
-	{
-		ret = createData(variable.getDataType(), 0);
-	}
-	else if ( varName == "x" )
-	{
-		const wdb::GridInformation & grid = d_->dataIndex->gridInformation();
-		ret = createData(variable.getDataType(), grid.numberX());
-		for ( unsigned i = 0; i < grid.numberX(); ++ i )
-			ret->setValue(i, grid.startX() + (grid.incrementX() * i));
-	}
-	else if ( varName == "y" )
-	{
-		const wdb::GridInformation & grid = d_->dataIndex->gridInformation();
-		ret = createData(variable.getDataType(), grid.numberY());
-		for ( unsigned i = 0; i < grid.numberY(); ++ i )
-			ret->setValue(i, grid.startY() + (grid.incrementY() * i));
-	}
-	else if ( varName == "longitude" )
-	{
-		const wdb::GridInformation & grid = d_->dataIndex->gridInformation();
-		ret = createData(variable.getDataType(), grid.numberX() * grid.numberY());
-	}
-	else if ( varName == "latitude" )
-	{
-		const wdb::GridInformation & grid = d_->dataIndex->gridInformation();
-		ret = createData(variable.getDataType(), grid.numberX() * grid.numberY());
-	}
 	else if ( varName == "forecast_reference_time" )
 	{
 		ret = createData(variable.getDataType(), 1);
@@ -172,10 +144,15 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 		std::tm t = to_tm(* thisTime);
 		ret = createData(variable.getDataType(), 1, std::mktime(& t));
 	}
-	else
+	else // we assume this has to do with projection or grid
 	{
-		throw CDMException("internal error: " + varName + ": unrecognized variable");
+		const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
+		ret = gridInfo.getField(variable);
+
+		if ( ! ret )
+			throw CDMException("internal error: " + varName + ": unrecognized variable");
 	}
+
 	std::cout << "\tdone" << std::endl;
 	return ret;
 }

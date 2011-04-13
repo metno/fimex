@@ -32,7 +32,7 @@
 
 
 #include <wdb/WdbIndex.h>
-#include <wdb/GridInformation.h>
+#include <wdb/gridInformation/GridInformation.h>
 #include <fimex/CDMException.h>
 
 #include <boost/test/unit_test.hpp>
@@ -107,7 +107,7 @@ public:
 const Parameter WdbIndexTestFixture::defaultParameter("air temperature", "C");
 const Level WdbIndexTestFixture::defaultLevel("distance above ground", "m", 0, 0);
 const std::string WdbIndexTestFixture::defaultTime = "2011-03-18 06:00:00";
-const GridData::GridInformationPtr WdbIndexTestFixture::defaultGrid(new GridInformation("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
+const GridData::GridInformationPtr WdbIndexTestFixture::defaultGrid(GridInformation::get("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
 
 

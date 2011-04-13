@@ -28,7 +28,7 @@
 
 #include <wdb/Wdb2CdmBuilder.h>
 #include <wdb/CdmNameTranslator.h>
-#include <wdb/GridInformation.h>
+#include <wdb/gridInformation/GridInformation.h>
 #include <fimex/CDM.h>
 #include <iostream>
 #include <algorithm>
@@ -125,7 +125,7 @@ public:
 const wdb::Parameter Wdb2CdmBuilderFixture::defaultParameter("air temperature", "C");
 const wdb::Level Wdb2CdmBuilderFixture::defaultLevel("distance above ground", "m", 0, 0);
 const std::string Wdb2CdmBuilderFixture::defaultTime = "2011-03-18 06:00:00";
-const wdb::GridData::GridInformationPtr Wdb2CdmBuilderFixture::defaultGrid(new wdb::GridInformation("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
+const wdb::GridData::GridInformationPtr Wdb2CdmBuilderFixture::defaultGrid(wdb::GridInformation::get("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
 struct same_entity
 {
@@ -149,8 +149,8 @@ BOOST_FIXTURE_TEST_CASE(setsBaseDimensions, Wdb2CdmBuilderFixture)
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("x")) != dims.end());
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("y")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("latitude")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("longitude")) != dims.end());
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("time")) != dims.end());
 	BOOST_CHECK_EQUAL(3, dims.size());
 }
@@ -165,8 +165,8 @@ BOOST_FIXTURE_TEST_CASE(setsDimensionSizes, Wdb2CdmBuilderFixture)
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("x")) != dims.end());
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("y")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("latitude")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("longitude")) != dims.end());
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("time")) != dims.end());
 
 	BOOST_CHECK_EQUAL(4, dims.size());
@@ -383,8 +383,8 @@ BOOST_FIXTURE_TEST_CASE(addsTimeToRelevantVariables, Wdb2CdmBuilderFixture)
 		const CDMVariable & var = cdm.getVariable(cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
-		BOOST_CHECK_EQUAL("x", shape[0]);
-		BOOST_CHECK_EQUAL("y", shape[1]);
+		BOOST_CHECK_EQUAL("longitude", shape[0]);
+		BOOST_CHECK_EQUAL("latitude", shape[1]);
 		BOOST_CHECK_EQUAL("time", shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
@@ -406,8 +406,8 @@ BOOST_FIXTURE_TEST_CASE(singleLevelInData, Wdb2CdmBuilderFixture)
 		const CDMVariable & var = cdm.getVariable(cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(2, shape.size());
-		BOOST_CHECK_EQUAL("x", shape[0]);
-		BOOST_CHECK_EQUAL("y", shape[1]);
+		BOOST_CHECK_EQUAL("longitude", shape[0]);
+		BOOST_CHECK_EQUAL("latitude", shape[1]);
 		BOOST_CHECK_EQUAL(2, shape.size());
 	}
 	catch ( CDMException & e )
@@ -429,8 +429,8 @@ BOOST_FIXTURE_TEST_CASE(severalLevelsInData, Wdb2CdmBuilderFixture)
 		const CDMVariable & var = cdm.getVariable(cdmId());
 		const std::vector<std::string> & shape = var.getShape();
 		BOOST_REQUIRE_LE(3, shape.size());
-		BOOST_CHECK_EQUAL("x", shape[0]);
-		BOOST_CHECK_EQUAL("y", shape[1]);
+		BOOST_CHECK_EQUAL("longitude", shape[0]);
+		BOOST_CHECK_EQUAL("latitude", shape[1]);
 		BOOST_CHECK_EQUAL("lvl", shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
@@ -453,8 +453,8 @@ BOOST_FIXTURE_TEST_CASE(severalDataVersions, Wdb2CdmBuilderFixture)
 
 	const std::vector<std::string> & shape = var.getShape();
 	BOOST_REQUIRE_LE(3, shape.size());
-	BOOST_CHECK_EQUAL("x", shape[0]);
-	BOOST_CHECK_EQUAL("y", shape[1]);
+	BOOST_CHECK_EQUAL("longitude", shape[0]);
+	BOOST_CHECK_EQUAL("latitude", shape[1]);
 	BOOST_CHECK_EQUAL("version", shape[2]);
 	BOOST_CHECK_EQUAL(3, shape.size());
 }
@@ -476,14 +476,14 @@ BOOST_FIXTURE_TEST_CASE(onlyOneTimeDimensionInVaraiableShape, Wdb2CdmBuilderFixt
 	const std::vector<std::string> & shape = var.getShape();
 
 	BOOST_REQUIRE_LE(4, shape.size());
-	BOOST_CHECK_EQUAL("x", shape[0]);
-	BOOST_CHECK_EQUAL("y", shape[1]);
+	BOOST_CHECK_EQUAL("longitude", shape[0]);
+	BOOST_CHECK_EQUAL("latitude", shape[1]);
 	BOOST_CHECK_EQUAL("version", shape[2]);
 	BOOST_CHECK_EQUAL("time", shape[3]);
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 
-BOOST_FIXTURE_TEST_CASE(createsProjectionVariable, Wdb2CdmBuilderFixture)
+BOOST_FIXTURE_TEST_CASE(createsProjectionVariableLatLon, Wdb2CdmBuilderFixture)
 {
 	addGridData(defaultGrid); // +proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs
 
@@ -504,10 +504,10 @@ BOOST_FIXTURE_TEST_CASE(createsProjectionVariable, Wdb2CdmBuilderFixture)
 	}
 }
 
-BOOST_FIXTURE_TEST_CASE(createsProjectionVariable_2, Wdb2CdmBuilderFixture)
+BOOST_FIXTURE_TEST_CASE(createsProjectionVariableRotatedLatLon, Wdb2CdmBuilderFixture)
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
-	wdb::GridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
 	addGridData(grid);
 
 	const wdb::Wdb2CdmBuilder di(gridData, tr);
@@ -545,18 +545,18 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForLatLonProjection, Wdb2CdmBuilderFixtu
 		const CDMVariable & latitude = cdm.getVariable("latitude");
 		std::vector<std::string> shape = latitude.getShape();
 		if ( not shape.empty() )
-			BOOST_CHECK(shape[0] == "latitude");
+			BOOST_CHECK_EQUAL("latitude", shape[0]);
 		BOOST_CHECK_EQUAL(1, shape.size());
-		BOOST_CHECK_EQUAL("degree_east", cdm.getAttribute("latitude", "units").getStringValue());
+		BOOST_CHECK_EQUAL("degree_north", cdm.getAttribute("latitude", "units").getStringValue());
 		BOOST_CHECK_EQUAL("latitude", cdm.getAttribute("latitude", "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("latitude", cdm.getAttribute("latitude", "standard_name").getStringValue());
 
 		const CDMVariable & longitude = cdm.getVariable("longitude");
-		shape = latitude.getShape();
+		shape = longitude.getShape();
 		if ( not shape.empty() )
-			BOOST_CHECK(shape[0] == "longitude");
+			BOOST_CHECK_EQUAL("longitude", shape[0]);
 		BOOST_CHECK_EQUAL(1, shape.size());
-		BOOST_CHECK_EQUAL("degree_north", cdm.getAttribute("longitude", "units").getStringValue());
+		BOOST_CHECK_EQUAL("degree_east", cdm.getAttribute("longitude", "units").getStringValue());
 		BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("longitude", "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("longitude", "standard_name").getStringValue());
 	}
@@ -569,7 +569,7 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForLatLonProjection, Wdb2CdmBuilderFixtu
 BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuilderFixture)
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
-	wdb::GridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
 	addGridData(grid);
 
 	const wdb::Wdb2CdmBuilder di(gridData, tr);
@@ -583,12 +583,32 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuild
 	try
 	{
 		{
+			const CDMVariable & rlon = cdm.getVariable("rlon");
+			std::vector<std::string> shape = rlon.getShape();
+			if ( not shape.empty() )
+				BOOST_CHECK_EQUAL("rlon", shape[0]);
+			BOOST_CHECK_EQUAL(1, shape.size());
+			BOOST_CHECK_EQUAL("degrees", cdm.getAttribute("rlon", "units").getStringValue());
+			BOOST_CHECK_EQUAL("rotated longitude", cdm.getAttribute("rlon", "long_name").getStringValue());
+			BOOST_CHECK_EQUAL("grid_longitude", cdm.getAttribute("rlon", "standard_name").getStringValue());
+		}
+		{
+			const CDMVariable & rlat = cdm.getVariable("rlat");
+			std::vector<std::string> shape = rlat.getShape();
+			if ( not shape.empty() )
+				BOOST_CHECK_EQUAL("rlat", shape[0]);
+			BOOST_CHECK_EQUAL(1, shape.size());
+			BOOST_CHECK_EQUAL("degrees", cdm.getAttribute("rlat", "units").getStringValue());
+			BOOST_CHECK_EQUAL("rotated latitude", cdm.getAttribute("rlat", "long_name").getStringValue());
+			BOOST_CHECK_EQUAL("grid_latitude", cdm.getAttribute("rlat", "standard_name").getStringValue());
+		}
+		{
 			const CDMVariable & latitude = cdm.getVariable("latitude");
 			std::vector<std::string> shape = latitude.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "rlat");
+				BOOST_CHECK_EQUAL("rlat", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK(shape[1] == "rlon");
+				BOOST_CHECK_EQUAL("rlon", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_north", cdm.getAttribute("latitude", "units").getStringValue());
 			BOOST_CHECK_EQUAL("latitude", cdm.getAttribute("latitude", "long_name").getStringValue());
@@ -598,33 +618,13 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuild
 			const CDMVariable & longitude = cdm.getVariable("longitude");
 			std::vector<std::string> shape = longitude.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "rlat");
+				BOOST_CHECK_EQUAL("rlat", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK(shape[1] == "rlon");
+				BOOST_CHECK_EQUAL("rlon", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_east", cdm.getAttribute("longitude", "units").getStringValue());
 			BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("longitude", "long_name").getStringValue());
 			BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("longitude", "standard_name").getStringValue());
-		}
-		{
-			const CDMVariable & rlon = cdm.getVariable("rlon");
-			std::vector<std::string> shape = rlon.getShape();
-			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "rlon");
-			BOOST_CHECK_EQUAL(1, shape.size());
-			BOOST_CHECK_EQUAL("degrees", cdm.getAttribute("rlon", "units").getStringValue());
-			BOOST_CHECK_EQUAL("rotated latitude", cdm.getAttribute("rlon", "long_name").getStringValue());
-			BOOST_CHECK_EQUAL("grid_latitude", cdm.getAttribute("rlon", "standard_name").getStringValue());
-		}
-		{
-			const CDMVariable & rlat = cdm.getVariable("rlat");
-			std::vector<std::string> shape = rlat.getShape();
-			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "rlat");
-			BOOST_CHECK_EQUAL(1, shape.size());
-			BOOST_CHECK_EQUAL("degrees", cdm.getAttribute("rlat", "units").getStringValue());
-			BOOST_CHECK_EQUAL("rotated longitude", cdm.getAttribute("rlat", "long_name").getStringValue());
-			BOOST_CHECK_EQUAL("grid_longitude", cdm.getAttribute("rlat", "standard_name").getStringValue());
 		}
 	}
 	catch ( CDMException & e )
@@ -636,7 +636,7 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuild
 BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixture)
 {
 	const std::string projDefinition = "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +elips=sphere +a=6371000 +e=0";
-	wdb::GridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
 	addGridData(grid);
 
 	const wdb::Wdb2CdmBuilder di(gridData, tr);
@@ -650,12 +650,30 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixtu
 	try
 	{
 		{
+			const CDMVariable & xc = cdm.getVariable("xc");
+			std::vector<std::string> shape = xc.getShape();
+			if ( not shape.empty() )
+				BOOST_CHECK_EQUAL("xc", shape[0]);
+			BOOST_CHECK_EQUAL(1, shape.size());
+			BOOST_CHECK_EQUAL("m", cdm.getAttribute("xc", "units").getStringValue());
+			BOOST_CHECK_EQUAL("projection_x_coordinate", cdm.getAttribute("xc", "standard_name").getStringValue());
+		}
+		{
+			const CDMVariable & yc = cdm.getVariable("yc");
+			std::vector<std::string> shape = yc.getShape();
+			if ( not shape.empty() )
+				BOOST_CHECK_EQUAL("yc", shape[0]);
+			BOOST_CHECK_EQUAL(1, shape.size());
+			BOOST_CHECK_EQUAL("m", cdm.getAttribute("yc", "units").getStringValue());
+			BOOST_CHECK_EQUAL("projection_y_coordinate", cdm.getAttribute("yc", "standard_name").getStringValue());
+		}
+		{
 			const CDMVariable & lat1 = cdm.getVariable("lat1");
 			std::vector<std::string> shape = lat1.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "yc");
+				BOOST_CHECK_EQUAL("yc", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK(shape[1] == "xc");
+				BOOST_CHECK_EQUAL("xc", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_north", cdm.getAttribute("lat1", "units").getStringValue());
 			BOOST_CHECK_EQUAL("latitude", cdm.getAttribute("lat1", "long_name").getStringValue());
@@ -665,31 +683,13 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixtu
 			const CDMVariable & lon1 = cdm.getVariable("lon1");
 			std::vector<std::string> shape = lon1.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "rlat");
+				BOOST_CHECK_EQUAL("yc", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK(shape[1] == "rlon");
+				BOOST_CHECK_EQUAL("xc", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_east", cdm.getAttribute("lon1", "units").getStringValue());
 			BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("lon1", "long_name").getStringValue());
 			BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("lon1", "standard_name").getStringValue());
-		}
-		{
-			const CDMVariable & xc = cdm.getVariable("xc");
-			std::vector<std::string> shape = xc.getShape();
-			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "xc");
-			BOOST_CHECK_EQUAL(1, shape.size());
-			BOOST_CHECK_EQUAL("m", cdm.getAttribute("xc", "units").getStringValue());
-			BOOST_CHECK_EQUAL("projection_x_coordinate", cdm.getAttribute("xc", "standard_name").getStringValue());
-		}
-		{
-			const CDMVariable & yc = cdm.getVariable("yc");
-			std::vector<std::string> shape = yc.getShape();
-			if ( not shape.empty() )
-				BOOST_CHECK(shape[0] == "yc");
-			BOOST_CHECK_EQUAL(1, shape.size());
-			BOOST_CHECK_EQUAL("m", cdm.getAttribute("yc", "units").getStringValue());
-			BOOST_CHECK_EQUAL("projection_y_coordinate", cdm.getAttribute("yc", "standard_name").getStringValue());
 		}
 	}
 	catch ( CDMException & e )
@@ -744,7 +744,7 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes, Wdb2CdmBuilderFixture)
 BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
-	wdb::GridData::GridInformationPtr grid(new wdb::GridInformation(projDefinition, 30, 20));
+	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
 	addGridData(grid);
 
 	const wdb::Wdb2CdmBuilder di(gridData, tr);

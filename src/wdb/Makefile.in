@@ -67,18 +67,28 @@ libwdb_a_AR = $(AR) $(ARFLAGS)
 libwdb_a_LIBADD =
 am__libwdb_a_SOURCES_DIST = WdbConnection.h WdbConnection.cpp \
 	CdmNameTranslator.h CdmNameTranslator.cpp GridData.h \
-	GridData.cpp GridInformation.h GridInformation.cpp WdbIndex.h \
-	WdbIndex.cpp Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp Parameter.h \
-	Parameter.cpp Level.h Level.cpp
+	GridData.cpp WdbIndex.h WdbIndex.cpp Wdb2CdmBuilder.h \
+	Wdb2CdmBuilder.cpp Parameter.h Parameter.cpp Level.h Level.cpp \
+	gridInformation/GridInformation.h \
+	gridInformation/GridInformation.cpp \
+	gridInformation/LatLonGridInformation.h \
+	gridInformation/LatLonGridInformation.cpp \
+	gridInformation/RotatedLatLonGridInformation.h \
+	gridInformation/RotatedLatLonGridInformation.cpp \
+	gridInformation/MetricGridInformation.h \
+	gridInformation/MetricGridInformation.cpp
 @HAVE_LIBPQ_TRUE@am_libwdb_a_OBJECTS =  \
 @HAVE_LIBPQ_TRUE@	libwdb_a-WdbConnection.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-CdmNameTranslator.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-GridData.$(OBJEXT) \
-@HAVE_LIBPQ_TRUE@	libwdb_a-GridInformation.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-WdbIndex.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-Wdb2CdmBuilder.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-Parameter.$(OBJEXT) \
-@HAVE_LIBPQ_TRUE@	libwdb_a-Level.$(OBJEXT)
+@HAVE_LIBPQ_TRUE@	libwdb_a-Level.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-GridInformation.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-LatLonGridInformation.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-RotatedLatLonGridInformation.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-MetricGridInformation.$(OBJEXT)
 libwdb_a_OBJECTS = $(am_libwdb_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -265,11 +275,14 @@ top_srcdir = @top_srcdir@
 @HAVE_LIBPQ_TRUE@	WdbConnection.h WdbConnection.cpp \
 @HAVE_LIBPQ_TRUE@	CdmNameTranslator.h CdmNameTranslator.cpp \
 @HAVE_LIBPQ_TRUE@	GridData.h GridData.cpp \
-@HAVE_LIBPQ_TRUE@	GridInformation.h GridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	WdbIndex.h WdbIndex.cpp \
 @HAVE_LIBPQ_TRUE@	Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp \
 @HAVE_LIBPQ_TRUE@	Parameter.h Parameter.cpp \
-@HAVE_LIBPQ_TRUE@	Level.h Level.cpp
+@HAVE_LIBPQ_TRUE@	Level.h Level.cpp \
+@HAVE_LIBPQ_TRUE@	gridInformation/GridInformation.h gridInformation/GridInformation.cpp \
+@HAVE_LIBPQ_TRUE@	gridInformation/LatLonGridInformation.h gridInformation/LatLonGridInformation.cpp \
+@HAVE_LIBPQ_TRUE@	gridInformation/RotatedLatLonGridInformation.h gridInformation/RotatedLatLonGridInformation.cpp \
+@HAVE_LIBPQ_TRUE@	gridInformation/MetricGridInformation.h gridInformation/MetricGridInformation.cpp
 
 all: all-am
 
@@ -322,8 +335,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-CdmNameTranslator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-GridInformation.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-LatLonGridInformation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Level.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-MetricGridInformation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Parameter.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbConnection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbIndex.Po@am__quote@
@@ -391,20 +407,6 @@ libwdb_a-GridData.obj: GridData.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridData.obj `if test -f 'GridData.cpp'; then $(CYGPATH_W) 'GridData.cpp'; else $(CYGPATH_W) '$(srcdir)/GridData.cpp'; fi`
 
-libwdb_a-GridInformation.o: GridInformation.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-GridInformation.o -MD -MP -MF $(DEPDIR)/libwdb_a-GridInformation.Tpo -c -o libwdb_a-GridInformation.o `test -f 'GridInformation.cpp' || echo '$(srcdir)/'`GridInformation.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-GridInformation.Tpo $(DEPDIR)/libwdb_a-GridInformation.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GridInformation.cpp' object='libwdb_a-GridInformation.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridInformation.o `test -f 'GridInformation.cpp' || echo '$(srcdir)/'`GridInformation.cpp
-
-libwdb_a-GridInformation.obj: GridInformation.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-GridInformation.obj -MD -MP -MF $(DEPDIR)/libwdb_a-GridInformation.Tpo -c -o libwdb_a-GridInformation.obj `if test -f 'GridInformation.cpp'; then $(CYGPATH_W) 'GridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/GridInformation.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-GridInformation.Tpo $(DEPDIR)/libwdb_a-GridInformation.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GridInformation.cpp' object='libwdb_a-GridInformation.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridInformation.obj `if test -f 'GridInformation.cpp'; then $(CYGPATH_W) 'GridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/GridInformation.cpp'; fi`
-
 libwdb_a-WdbIndex.o: WdbIndex.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-WdbIndex.o -MD -MP -MF $(DEPDIR)/libwdb_a-WdbIndex.Tpo -c -o libwdb_a-WdbIndex.o `test -f 'WdbIndex.cpp' || echo '$(srcdir)/'`WdbIndex.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-WdbIndex.Tpo $(DEPDIR)/libwdb_a-WdbIndex.Po
@@ -460,6 +462,62 @@ libwdb_a-Level.obj: Level.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Level.cpp' object='libwdb_a-Level.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-Level.obj `if test -f 'Level.cpp'; then $(CYGPATH_W) 'Level.cpp'; else $(CYGPATH_W) '$(srcdir)/Level.cpp'; fi`
+
+libwdb_a-GridInformation.o: gridInformation/GridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-GridInformation.o -MD -MP -MF $(DEPDIR)/libwdb_a-GridInformation.Tpo -c -o libwdb_a-GridInformation.o `test -f 'gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`gridInformation/GridInformation.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-GridInformation.Tpo $(DEPDIR)/libwdb_a-GridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/GridInformation.cpp' object='libwdb_a-GridInformation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridInformation.o `test -f 'gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`gridInformation/GridInformation.cpp
+
+libwdb_a-GridInformation.obj: gridInformation/GridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-GridInformation.obj -MD -MP -MF $(DEPDIR)/libwdb_a-GridInformation.Tpo -c -o libwdb_a-GridInformation.obj `if test -f 'gridInformation/GridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/GridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/GridInformation.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-GridInformation.Tpo $(DEPDIR)/libwdb_a-GridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/GridInformation.cpp' object='libwdb_a-GridInformation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-GridInformation.obj `if test -f 'gridInformation/GridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/GridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/GridInformation.cpp'; fi`
+
+libwdb_a-LatLonGridInformation.o: gridInformation/LatLonGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-LatLonGridInformation.o -MD -MP -MF $(DEPDIR)/libwdb_a-LatLonGridInformation.Tpo -c -o libwdb_a-LatLonGridInformation.o `test -f 'gridInformation/LatLonGridInformation.cpp' || echo '$(srcdir)/'`gridInformation/LatLonGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-LatLonGridInformation.Tpo $(DEPDIR)/libwdb_a-LatLonGridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/LatLonGridInformation.cpp' object='libwdb_a-LatLonGridInformation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-LatLonGridInformation.o `test -f 'gridInformation/LatLonGridInformation.cpp' || echo '$(srcdir)/'`gridInformation/LatLonGridInformation.cpp
+
+libwdb_a-LatLonGridInformation.obj: gridInformation/LatLonGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-LatLonGridInformation.obj -MD -MP -MF $(DEPDIR)/libwdb_a-LatLonGridInformation.Tpo -c -o libwdb_a-LatLonGridInformation.obj `if test -f 'gridInformation/LatLonGridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/LatLonGridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/LatLonGridInformation.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-LatLonGridInformation.Tpo $(DEPDIR)/libwdb_a-LatLonGridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/LatLonGridInformation.cpp' object='libwdb_a-LatLonGridInformation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-LatLonGridInformation.obj `if test -f 'gridInformation/LatLonGridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/LatLonGridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/LatLonGridInformation.cpp'; fi`
+
+libwdb_a-RotatedLatLonGridInformation.o: gridInformation/RotatedLatLonGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-RotatedLatLonGridInformation.o -MD -MP -MF $(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Tpo -c -o libwdb_a-RotatedLatLonGridInformation.o `test -f 'gridInformation/RotatedLatLonGridInformation.cpp' || echo '$(srcdir)/'`gridInformation/RotatedLatLonGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Tpo $(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/RotatedLatLonGridInformation.cpp' object='libwdb_a-RotatedLatLonGridInformation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-RotatedLatLonGridInformation.o `test -f 'gridInformation/RotatedLatLonGridInformation.cpp' || echo '$(srcdir)/'`gridInformation/RotatedLatLonGridInformation.cpp
+
+libwdb_a-RotatedLatLonGridInformation.obj: gridInformation/RotatedLatLonGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-RotatedLatLonGridInformation.obj -MD -MP -MF $(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Tpo -c -o libwdb_a-RotatedLatLonGridInformation.obj `if test -f 'gridInformation/RotatedLatLonGridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/RotatedLatLonGridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/RotatedLatLonGridInformation.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Tpo $(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/RotatedLatLonGridInformation.cpp' object='libwdb_a-RotatedLatLonGridInformation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-RotatedLatLonGridInformation.obj `if test -f 'gridInformation/RotatedLatLonGridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/RotatedLatLonGridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/RotatedLatLonGridInformation.cpp'; fi`
+
+libwdb_a-MetricGridInformation.o: gridInformation/MetricGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-MetricGridInformation.o -MD -MP -MF $(DEPDIR)/libwdb_a-MetricGridInformation.Tpo -c -o libwdb_a-MetricGridInformation.o `test -f 'gridInformation/MetricGridInformation.cpp' || echo '$(srcdir)/'`gridInformation/MetricGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-MetricGridInformation.Tpo $(DEPDIR)/libwdb_a-MetricGridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/MetricGridInformation.cpp' object='libwdb_a-MetricGridInformation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-MetricGridInformation.o `test -f 'gridInformation/MetricGridInformation.cpp' || echo '$(srcdir)/'`gridInformation/MetricGridInformation.cpp
+
+libwdb_a-MetricGridInformation.obj: gridInformation/MetricGridInformation.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-MetricGridInformation.obj -MD -MP -MF $(DEPDIR)/libwdb_a-MetricGridInformation.Tpo -c -o libwdb_a-MetricGridInformation.obj `if test -f 'gridInformation/MetricGridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/MetricGridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/MetricGridInformation.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-MetricGridInformation.Tpo $(DEPDIR)/libwdb_a-MetricGridInformation.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridInformation/MetricGridInformation.cpp' object='libwdb_a-MetricGridInformation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-MetricGridInformation.obj `if test -f 'gridInformation/MetricGridInformation.cpp'; then $(CYGPATH_W) 'gridInformation/MetricGridInformation.cpp'; else $(CYGPATH_W) '$(srcdir)/gridInformation/MetricGridInformation.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
