@@ -29,7 +29,7 @@
 #include "WdbConnection.h"
 #include "DataSanitizer.h"
 #include "gridInformation/GridInformation.h"
-#include <fimex/WdbCDMReaderParser.h>
+#include "WdbCDMReaderParser.h"
 #include <boost/scoped_array.hpp>
 
 namespace MetNoFimex

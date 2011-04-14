@@ -26,7 +26,7 @@
  MA  02110-1301, USA
  */
 
-#include "fimex/WdbCDMReaderParser.h"
+#include "WdbCDMReaderParser.h"
 
 // libxml2
 #include <libxml/xinclude.h>

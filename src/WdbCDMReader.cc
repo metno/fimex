@@ -34,13 +34,13 @@
 
 #include <boost/foreach.hpp>
 
-#include "fimex/WdbCDMReaderParser.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "wdb/WdbConnection.h"
 #include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/CdmNameTranslator.h"
 #include "wdb/gridInformation/GridInformation.h"
+#include "wdb/WdbCDMReaderParser.h"
 
 namespace MetNoFimex
 {

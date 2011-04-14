@@ -27,7 +27,7 @@
 */
 
 #include <fimex/CDM.h>
-#include <fimex/WdbCDMReaderParser.h>
+#include <wdb/WdbCDMReaderParser.h>
 
 // std
 //
