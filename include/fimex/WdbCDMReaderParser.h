@@ -44,12 +44,11 @@ e
  * needed options.
  *
  * One of the options can be wdbcdmreader config
- * file. Parser will work throuhg it as well.
+ * file. Parser will work through it as well.
  *
  * Remember, values from command line will
  * override those from config file.
  */
-
 namespace MetNoFimex
 {
     class WdbCDMReaderParserInfo

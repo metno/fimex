@@ -23,11 +23,15 @@
     </wdb_connection>
 
     <data_providers>
-        <provider id="0" name="proff.h12h8um4"></provider>
+        <provider id="0" value="proff.h12h8um4"></provider>
     </data_providers>
 
+	<reference_times>
+		<time id="0" value="2011-04-13 00:00:00+00"/>
+	</reference_times>
+
     <grid_places>
-        <place id="0" name="proff grid"></place>
+        <place id="0" value="proff grid"></place>
     </grid_places>
 
     <level_parameter id="0" name="isobaric surface pressure">
