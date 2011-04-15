@@ -49,7 +49,7 @@ namespace wdb
 
 std::string GridInformation::query(const std::string & gridName, const DataSanitizer & sanitizer)
 {
-	return "SELECT NumberX, NumberY, IncrementX, IncrementY, NumberX, NumberY, ProjDefinition FROM wci.getplaceregulargrid('" + gridName + "')";
+	return "SELECT NumberX, NumberY, IncrementX, IncrementY, StartX, StartY, ProjDefinition FROM wci.getplaceregulargrid('" + gridName + "')";
 }
 
 
