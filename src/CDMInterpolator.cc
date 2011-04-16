@@ -645,6 +645,25 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 #endif
 }
 
+/**
+ * convert latVals and lonVals to matrices
+ * @return lonVals in size (lonSize*latSize)
+ */
+static void lonLatVals2Matrix(boost::shared_array<double>& lonVals, boost::shared_array<double>& latVals, size_t lonSize, size_t latSize)
+{
+    boost::shared_array<double> matrixLatVals(new double[lonSize * latSize]);
+    boost::shared_array<double> matrixLonVals(new double[lonSize * latSize]);
+    for (size_t ix = 0; ix < lonSize; ix++) {
+        for (size_t iy = 0; iy < latSize; iy++) {
+            size_t pos = ix+iy*lonSize;
+            matrixLonVals[pos] = lonVals[ix];
+            matrixLatVals[pos] = latVals[iy];
+        }
+    }
+    lonVals = matrixLonVals;
+    latVals = matrixLatVals;
+}
+
 void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
     CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(false);
@@ -664,19 +683,26 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
     size_t orgXDimSize;
     size_t orgYDimSize;
     bool latLonProj = (cs->hasProjection() && (cs->getProjection()->getName() == "latitude_longitude"));
-    // TODO: if latLonProj, make latVals/lonVals a matrix
-    if (!latLonProj && cs->getGeoYAxis()->getName() == latitude) {
-        // x and y axis not properly defined, guessing
-        vector<string> latShape = dataReader->getCDM().getVariable(latitude).getShape();
-        if (latShape.size() != 2) {
-            throw CDMException("latitude needs 2 dims for forward interpolation");
-        }
-        orgXDimSize = dataReader->getCDM().getDimension(latShape[0]).getLength();
-        orgYDimSize = dataReader->getCDM().getDimension(latShape[1]).getLength();
-        LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "(" << orgXDimSize << "), " << latShape[1] << "(" << orgYDimSize << ")");
-    } else {
+    if (latLonProj) {
         orgXDimSize = dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
         orgYDimSize = dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
+        // create new latVals and lonVals as a matrix
+        lonLatVals2Matrix(lonVals, latVals, orgXDimSize, orgYDimSize);
+        latSize = orgXDimSize * orgYDimSize;
+    } else {
+        if (cs->getGeoYAxis()->getName() == latitude) {
+            // x and y axis not properly defined, guessing
+            vector<string> latShape = dataReader->getCDM().getVariable(latitude).getShape();
+            if (latShape.size() != 2) {
+                throw CDMException("latitude needs 2 dims for forward interpolation");
+            }
+            orgXDimSize = dataReader->getCDM().getDimension(latShape[0]).getLength();
+            orgYDimSize = dataReader->getCDM().getDimension(latShape[1]).getLength();
+            LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "(" << orgXDimSize << "), " << latShape[1] << "(" << orgYDimSize << ")");
+        } else {
+            orgXDimSize = dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
+            orgYDimSize = dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
+        }
     }
 
 
@@ -742,19 +768,26 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
     size_t orgXDimSize;
     size_t orgYDimSize;
     bool latLonProj = (cs->hasProjection() && (cs->getProjection()->getName() == "latitude_longitude"));
-    // TODO: if latLonProj, make latVals/lonVals a matrix
-    if (!latLonProj && cs->getGeoYAxis()->getName() == latitude) {
-        // x and y axis not properly defined, guessing
-        vector<string> latShape = dataReader->getCDM().getVariable(latitude).getShape();
-        if (latShape.size() != 2) {
-            throw CDMException("latitude needs 2 dims for forward interpolation");
-        }
-        orgXDimSize = dataReader->getCDM().getDimension(latShape[0]).getLength();
-        orgYDimSize = dataReader->getCDM().getDimension(latShape[1]).getLength();
-        LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "(" << orgXDimSize << "), " << latShape[1] << "(" << orgYDimSize << ")");
-    } else {
+    if (latLonProj) {
         orgXDimSize = dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
         orgYDimSize = dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
+        // create new latVals and lonVals as a matrix
+        lonLatVals2Matrix(lonVals, latVals, orgXDimSize, orgYDimSize);
+        latSize = orgXDimSize * orgYDimSize;
+    } else {
+        if (cs->getGeoYAxis()->getName() == latitude) {
+            // x and y axis not properly defined, guessing
+            vector<string> latShape = dataReader->getCDM().getVariable(latitude).getShape();
+            if (latShape.size() != 2) {
+                throw CDMException("latitude needs 2 dims for forward interpolation");
+            }
+            orgXDimSize = dataReader->getCDM().getDimension(latShape[0]).getLength();
+            orgYDimSize = dataReader->getCDM().getDimension(latShape[1]).getLength();
+            LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "(" << orgXDimSize << "), " << latShape[1] << "(" << orgYDimSize << ")");
+        } else {
+            orgXDimSize = dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
+            orgYDimSize = dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
+        }
     }
 
     // store projection changes to be used in data-section
