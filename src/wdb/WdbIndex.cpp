@@ -60,7 +60,11 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 		else if ( levelEntry.levelName != d.level().type().name() )
 			throw CDMException("Only one level type is allowed for each parameter");
 
-		levelEntry [d.level().to()] [d.version()] = d.gridIdentifier();
+
+		VersionEntry & versionEntry = levelEntry [d.level().to()];
+		if ( ! versionEntry.insert(std::make_pair(d.version(), d.gridIdentifier())).second )
+			throw CDMException("Duplicate data in source");
+
 		if ( levelEntry.size() > 1 )
 			parametersWithMoreThanOneLevel_.insert(d.parameter().name());
 

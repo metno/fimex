@@ -148,6 +148,14 @@ BOOST_FIXTURE_TEST_CASE(requestSecondTimeEntry, WdbIndexTestFixture)
 	BOOST_CHECK_EQUAL(1, gids.front());
 }
 
+BOOST_FIXTURE_TEST_CASE(throwOnSameData, WdbIndexTestFixture)
+{
+	addGridData("2011-04-06 06:00:00");
+	addGridData("2011-04-06 06:00:00");
+	BOOST_CHECK_THROW(WdbIndex index(gridData), CDMException);
+}
+
+
 BOOST_FIXTURE_TEST_CASE(throwsOnInvalidTimeIndex, WdbIndexTestFixture)
 {
 	addGridData("2011-04-06 06:00:00");
@@ -220,6 +228,20 @@ BOOST_FIXTURE_TEST_CASE(getLevels, WdbIndexTestFixture)
 	BOOST_CHECK_EQUAL(1, gids[1]);
 	BOOST_CHECK_EQUAL(2, gids[2]);
 }
+
+BOOST_FIXTURE_TEST_CASE(twoLevelsComingInWrongOrder, WdbIndexTestFixture)
+{
+	addGridData(Level("height", "m", 1, 1));
+	addGridData(Level("height", "m", 0, 0));
+	WdbIndex index(gridData);
+
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+
+	BOOST_REQUIRE_EQUAL(2, gids.size());
+	BOOST_CHECK_EQUAL(1, gids[0]);
+	BOOST_CHECK_EQUAL(0, gids[1]);
+}
+
 
 BOOST_FIXTURE_TEST_CASE(getMissingLevels, WdbIndexTestFixture)
 {
