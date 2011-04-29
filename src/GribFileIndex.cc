@@ -27,6 +27,7 @@
 #include "fimex/GribFileIndex.h"
 #include "fimex/Utils.h"
 #include "fimex/GribUtils.h"
+#include "fimex/Logger.h"
 #include "grib_api.h"
 #include "proj_api.h"
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -56,6 +57,7 @@ std::string file_string(boost::filesystem::path p) { return p.file_string(); }
 namespace MetNoFimex
 {
 using namespace std;
+static LoggerPtr logger = getLogger("fimex.GribFileIndex");
 
 /**
  * converts a point on earth to a projection plane
@@ -159,6 +161,7 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startX), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
 
+    GridDefinition::Orientation orient = gribGetGridOrientation(gh);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
     if (ijDirectionIncrementGiven == 0) {
         double endX, endY;
@@ -169,11 +172,18 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
     } else {
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+        if (orient & GridDefinition::ScanStartRight) {
+            incrX *= -1;
+        }
+        if (!(orient & GridDefinition::ScanStartBottom)) {
+            incrY *= -1;
+        }
     }
 
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh);
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, gribGetGridOrientation(gh));
+    LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
 GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> gh)
 {
@@ -186,6 +196,7 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfSouthernPoleInDegrees", &lonRot), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfSouthernPoleInDegrees", &latRot), 0);
 
+    GridDefinition::Orientation orient = gribGetGridOrientation(gh);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
     if (ijDirectionIncrementGiven == 0) {
         double endX, endY;
@@ -196,6 +207,12 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
     } else {
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+        if (orient & GridDefinition::ScanStartRight) {
+            incrX *= -1;
+        }
+        if (!(orient & GridDefinition::ScanStartBottom)) {
+            incrY *= -1;
+        }
     }
 
     // TODO: test, might be rotation by lat/long = 180degree
@@ -204,7 +221,7 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
     oss << " " + getEarthsFigure(edition, gh);
     string proj =  oss.str();
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
 GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib_handle> gh)
 {

@@ -53,7 +53,7 @@ GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle
         mode |= GridDefinition::ScanStartRight;
     }
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "jScansPositively", &val), "jScansPositively");
-    if (!val) {
+    if (val) {
             mode |= GridDefinition::ScanStartBottom;
     }
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "jPointsAreConsecutive", &val), "jPointsAreConsecutive");

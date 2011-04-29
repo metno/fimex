@@ -244,6 +244,9 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         } else if (ellps == "iers03") {
             attrList.push_back(CDMAttribute("semi_major_axis", 6378136.6));
             attrList.push_back(CDMAttribute("semi_minor_axis", 6356751.9));
+        } else if (ellps == "intl") { // international 1924 / hayford 1909
+            attrList.push_back(CDMAttribute("semi_major_axis", 6378388.0));
+            attrList.push_back(CDMAttribute("semi_minor_axis", 6356909.0));
         }
 
     }
