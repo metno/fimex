@@ -26,33 +26,54 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
+#ifndef PARAMETER_H_
+#define PARAMETER_H_
 
-#include "fimex/CDMReader.h"
+#include "fimex/CDMVariable.h"
 #include <string>
-#include <boost/noncopyable.hpp>
-
+#include <vector>
 
 
 
 namespace MetNoFimex
 {
+namespace wdb
+{
 
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+/**
+ * Representation of a wdb parameter, with parameter unit information
+ */
+class Parameter
 {
 public:
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-	virtual ~GxWdbCDMReader();
+	Parameter() {}
+	Parameter(const std::string & name, const std::string & unit);
+	~Parameter();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+	/**
+	 * Get wdb parameter name
+	 */
+	const std::string & name() const { return name_; }
+
+	/**
+	 * get wdb parameter unit
+	 */
+	const std::string & unit() const { return unit_; }
+
 
 private:
-	class InternalData;
-	InternalData * d_;
+	std::string name_;
+	std::string unit_;
+
 };
 
+inline bool operator < (const Parameter & a, const Parameter & b)
+{
+	return a.name() < b.name();
+}
 
 }
 
-#endif /* GXWDBCDMREADER_H_ */
+}
+
+#endif /* PARAMETER_H_ */

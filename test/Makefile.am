@@ -11,6 +11,7 @@ CC_TESTS = testBinaryConstants \
            testCDM \
            testXMLDoc \
            testFeltReader
+
 SH_TESTS = 
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
@@ -36,6 +37,16 @@ endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
+if HAVE_LIBPQ 
+  CC_TESTS += wdbTest
+  wdbTest_SOURCES = Wdb2CdmBuilderTest.cc WdbIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
+  wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
+  wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/wdb/libwdb.a
+  LDADD += @BOOST_PROGRAM_OPTIONS_LIB@
+test_wdb: wdbTest
+	@./wdbTest
+endif
+
 
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)

@@ -18,44 +18,52 @@
         <attribute name="dbhost" value="proffdb-devel.met.no" type="string" />
         <attribute name="dbport" value="5432" type="short" />
         <attribute name="dbname" value="wdb" type="string" />
-        <attribute name="dbuser" value="proffread" type="string" />
-        <attribute name="wciuser" value="proffwrite" type="string" />
+        <attribute name="dbuser" value="wdb" type="string" />
+		<attribute name="wciuser" value="proffwrite" type="string"/>
     </wdb_connection>
 
+    <reference_times>
+        <time id="0" name="first_referencetime" value="20110210T000000" type="string"></time>
+    </reference_times>
+
     <data_providers>
-        <provider id="0" value="proff.h12h8um4"></provider>
+        <provider id="0" name="dnmi" value="met.no"></provider>
     </data_providers>
 
-	<reference_times>
-		<time id="0" value="2011-04-15 00:00:00+00"/>
-	</reference_times>
-
     <grid_places>
-        <place id="0" value="proff grid"></place>
+        <place id="0" name="test grid" value="norge grid"></place>
     </grid_places>
 
     <level_parameter id="0" name="isobaric surface pressure">
-        <attribute name="standard_cf_name" value="trykk" type="string" />
+        <attribute name="standard_name" value="pressure" type="string" />
     </level_parameter>
 
     <level_parameter id="1" name="height above ground distance">
-        <attribute name="standard_cf_name" value="height" type="string" />
+        <attribute name="standard_name" value="height" type="string" />
     </level_parameter>
 
     <level_parameter id="2" name="height above mean sea level distance">
-        <attribute name="standard_cf_name" value="GeoZ" type="string" />
+        <attribute name="standard_name" value="GeoZ" type="string" />
     </level_parameter>
 
-    <value_parameter id="air_temperature" name="air_temperature">
-        <attribute name="standard_cf_name" value="air_temperature" type="string" />
-        <attribute name="units" value="K" type="string" />
+    <value_parameter id="2" name="air_temperature">
+        <attribute name="standard_name" value="temperature" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>
 
-    <value_parameter id="high cloud cover" name="high cloud cover">
-        <attribute name="standard_cf_name" value="cloud_area_fraction" type="string" />
+    <value_parameter id="4" name="high cloud cover">
+        <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>
+
+    <parameter id="32,2,1000" name="relative_humidity">
+        <attribute name="_FillValue" value="-32767" type="short" />
+        <attribute name="scale_factor" value="0.01" type="float" />
+        <attribute name="cell_methods" value="time: point height: 2m" type="string" />
+        <attribute name="long_name" value="relative_humidity" type="string" />
+        <attribute name="standard_name" value="relative_humidity" type="string" />
+        <attribute name="units" value="1" type="string" />
+    </parameter>
 
 </wdb_parameters>
 </wdb_fimex_config>

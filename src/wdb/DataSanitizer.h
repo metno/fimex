@@ -26,33 +26,37 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
+#ifndef DATASANITIZER_H_
+#define DATASANITIZER_H_
 
-#include "fimex/CDMReader.h"
+
+#include <libpq-fe.h>
 #include <string>
-#include <boost/noncopyable.hpp>
-
-
 
 
 namespace MetNoFimex
 {
+namespace wdb
+{
 
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+/**
+ * Performs string escaping, for inserting unsafe strings into database queries.
+ */
+class DataSanitizer
 {
 public:
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-	virtual ~GxWdbCDMReader();
+	explicit DataSanitizer(PGconn * connection);
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+	/**
+	 * Clean an unsafe string for use in a query
+	 */
+	std::string operator () (const std::string & unsafeString) const;
 
 private:
-	class InternalData;
-	InternalData * d_;
+	PGconn * connection_;
 };
 
-
+}
 }
 
-#endif /* GXWDBCDMREADER_H_ */
+#endif /* DATASANITIZER_H_ */

@@ -26,33 +26,32 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
+#ifndef LATLONGRIDINFORMATION_H_
+#define LATLONGRIDINFORMATION_H_
 
-#include "fimex/CDMReader.h"
-#include <string>
-#include <boost/noncopyable.hpp>
-
-
-
+#include "GridInformation.h"
 
 namespace MetNoFimex
 {
+namespace wdb
+{
 
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+/**
+ * A Grid where x and y corresponds directly to longitude and altitude
+ */
+class LatLonGridInformation: public GridInformation
 {
 public:
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-	virtual ~GxWdbCDMReader();
+	LatLonGridInformation(PGresult * result, int row);
+	LatLonGridInformation(const boost::shared_ptr<Projection> & projection, unsigned numberX, unsigned numberY);
+	virtual ~LatLonGridInformation();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
-
-private:
-	class InternalData;
-	InternalData * d_;
+	virtual void addToCdm(CDM & cdm) const;
+	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
+	virtual void addSpatialDimensions(std::vector<std::string> & out) const;
 };
 
-
+}
 }
 
-#endif /* GXWDBCDMREADER_H_ */
+#endif /* LATLONGRIDINFORMATION_H_ */

@@ -26,33 +26,32 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
-
-#include "fimex/CDMReader.h"
-#include <string>
-#include <boost/noncopyable.hpp>
-
-
+#include "DataSanitizer.h"
+#include <fimex/CDMException.h>
+#include "boost/scoped_array.hpp"
 
 
 namespace MetNoFimex
 {
-
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+namespace wdb
 {
-public:
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-	virtual ~GxWdbCDMReader();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
-
-private:
-	class InternalData;
-	InternalData * d_;
-};
-
-
+DataSanitizer::DataSanitizer(PGconn * connection) :
+		connection_(connection)
+{
 }
 
-#endif /* GXWDBCDMREADER_H_ */
+std::string DataSanitizer::operator () (const std::string & unsafeString) const
+{
+	boost::scoped_array<char> buffer(new char[(unsafeString.size() * 2) +1]);
+	int error = 0;
+	PQescapeStringConn(connection_, buffer.get(), unsafeString.c_str(), unsafeString.size(), & error);
+
+	if ( error )
+		throw CDMException(std::string("Error when creating string for database query: ") + PQerrorMessage(connection_));
+
+	return std::string(buffer.get());
+}
+
+}
+}

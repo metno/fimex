@@ -48,10 +48,8 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
 
 @HAVE_MILIB_TRUE@am__append_3 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
-@HAVE_LIBPQ_TRUE@am__append_4 = gridexer/GxWdbDataTypes.cc \
-@HAVE_LIBPQ_TRUE@                         gridexer/GxWdbExplorer.cc \
-@HAVE_LIBPQ_TRUE@                         WdbCDMReader.cc
-
+@HAVE_LIBPQ_TRUE@am__append_4 = WdbCDMReader.cc
+@HAVE_LIBPQ_TRUE@am__append_5 = wdb/libwdb.a
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -102,7 +100,7 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libfimex_la_DEPENDENCIES = felt/libfelt.la
+libfimex_la_DEPENDENCIES = felt/libfelt.la $(am__append_5)
 am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	C_CDMReader.cc CachedInterpolation.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
@@ -137,7 +135,6 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
-	gridexer/GxWdbDataTypes.cc gridexer/GxWdbExplorer.cc \
 	WdbCDMReader.cc
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
@@ -148,8 +145,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
 @HAVE_MILIB_TRUE@am__objects_3 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
-@HAVE_LIBPQ_TRUE@am__objects_4 = GxWdbDataTypes.lo GxWdbExplorer.lo \
-@HAVE_LIBPQ_TRUE@	WdbCDMReader.lo
+@HAVE_LIBPQ_TRUE@am__objects_4 = WdbCDMReader.lo
 am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
@@ -392,13 +388,17 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = felt . binSrc
+SUBDIRS = felt wdb . binSrc
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @MIFI_GRIB_API_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@
 lib_LTLIBRARIES = libfimex.la
 libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @MIFI_UDUNITS2_LDFLAGS@ @MIFI_UDUNITS_LDFLAGS@ @MIFI_PROJ_LDFLAGS@ @MIFI_NETCDF_LDFLAGS@ @MIFI_GRIB_API_LDFLAGS@ ${XML_LDFLAGS} @BOOST_LDFLAGS@
-libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ @MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ @MIFI_NETCDF_CPP_LIBS@ @MIFI_GRIB_API_LIBS@ @XML_LIBS@ @BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
+libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ \
+	@MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ \
+	@MIFI_NETCDF_CPP_LIBS@ @MIFI_GRIB_API_LIBS@ @XML_LIBS@ \
+	@BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@ \
+	@BOOST_SYSTEM_LIB@ $(am__append_5)
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
@@ -543,8 +543,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GxWdbDataTypes.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GxWdbExplorer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo@am__quote@
@@ -738,20 +736,6 @@ VerticalPerspectiveProjection.lo: coordSys/VerticalPerspectiveProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/VerticalPerspectiveProjection.cc' object='VerticalPerspectiveProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
-
-GxWdbDataTypes.lo: gridexer/GxWdbDataTypes.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GxWdbDataTypes.lo -MD -MP -MF $(DEPDIR)/GxWdbDataTypes.Tpo -c -o GxWdbDataTypes.lo `test -f 'gridexer/GxWdbDataTypes.cc' || echo '$(srcdir)/'`gridexer/GxWdbDataTypes.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GxWdbDataTypes.Tpo $(DEPDIR)/GxWdbDataTypes.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridexer/GxWdbDataTypes.cc' object='GxWdbDataTypes.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GxWdbDataTypes.lo `test -f 'gridexer/GxWdbDataTypes.cc' || echo '$(srcdir)/'`gridexer/GxWdbDataTypes.cc
-
-GxWdbExplorer.lo: gridexer/GxWdbExplorer.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GxWdbExplorer.lo -MD -MP -MF $(DEPDIR)/GxWdbExplorer.Tpo -c -o GxWdbExplorer.lo `test -f 'gridexer/GxWdbExplorer.cc' || echo '$(srcdir)/'`gridexer/GxWdbExplorer.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GxWdbExplorer.Tpo $(DEPDIR)/GxWdbExplorer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='gridexer/GxWdbExplorer.cc' object='GxWdbExplorer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GxWdbExplorer.lo `test -f 'gridexer/GxWdbExplorer.cc' || echo '$(srcdir)/'`gridexer/GxWdbExplorer.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

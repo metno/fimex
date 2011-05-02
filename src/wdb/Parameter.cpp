@@ -26,33 +26,35 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
-
-#include "fimex/CDMReader.h"
-#include <string>
-#include <boost/noncopyable.hpp>
-
-
-
+#include "Parameter.h"
+#include "fimex/CDMAttribute.h"
 
 namespace MetNoFimex
 {
-
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+namespace wdb
 {
-public:
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-	virtual ~GxWdbCDMReader();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+Parameter::Parameter(const std::string & name, const std::string & unit) :
+		name_(name), unit_(unit)
+{
+}
 
-private:
-	class InternalData;
-	InternalData * d_;
-};
+Parameter::~Parameter()
+{
+}
+
+//CDMVariable Parameter::getVariable(const std::vector<std::string> & dimensions) const
+//{
+//	// lag frittstående oversetterfunksjoner eller noe...
+//	CDMVariable parameter(toCdmName(parameter), CDM_FLOAT, dimensions);
+//
+//	CDMAttribute unit("units", unit());
+//
+//
+//
+//	return parameter;
+//}
 
 
 }
-
-#endif /* GXWDBCDMREADER_H_ */
+}

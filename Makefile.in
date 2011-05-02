@@ -843,6 +843,9 @@ uninstall-am: uninstall-pkgconfigDATA
 
 
 $(pkgconfig_DATA): config.status
+
+@HAVE_LIBPQ_TRUE@test_wdb: 
+@HAVE_LIBPQ_TRUE@	cd test; $(MAKE) test_wdb
 prepare-debian: dist clean-debian
 	tar xvzf $(PKG_DIR).tar.gz
 	mkdir -p $(DEBIAN_DIR)

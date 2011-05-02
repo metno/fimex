@@ -26,33 +26,40 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
+#ifndef ROTATEDLATLONGRIDINFORMATION_H_
+#define ROTATEDLATLONGRIDINFORMATION_H_
 
-#include "fimex/CDMReader.h"
-#include <string>
-#include <boost/noncopyable.hpp>
-
-
-
+#include "GridInformation.h"
 
 namespace MetNoFimex
 {
 
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+namespace wdb
+{
+
+/**
+ * A Grid where x and y corresponds directly to longitude and altitude, except
+ * that the grid has been rotated in some manner.
+ */
+class RotatedLatLonGridInformation: public GridInformation
 {
 public:
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
-	virtual ~GxWdbCDMReader();
+	RotatedLatLonGridInformation(PGresult * result, int row);
+	RotatedLatLonGridInformation(const boost::shared_ptr<Projection> & projection, unsigned numberX, unsigned numberY);
+	virtual ~RotatedLatLonGridInformation();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+	virtual void addToCdm(CDM & cdm) const;
+	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
+	virtual void addSpatialDimensions(std::vector<std::string> & out) const;
 
 private:
-	class InternalData;
-	InternalData * d_;
+	void convertLatLon() const;
+	mutable std::vector<double> longitudes_;
+	mutable std::vector<double> latitudes_;
 };
-
 
 }
 
-#endif /* GXWDBCDMREADER_H_ */
+}
+
+#endif /* ROTATEDLATLONGRIDINFORMATION_H_ */

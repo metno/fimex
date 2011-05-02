@@ -1,4 +1,4 @@
-SUBDIRS = felt . binSrc
+SUBDIRS = felt wdb . binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
@@ -91,7 +91,7 @@ if HAVE_MILIB
 endif
 
 if HAVE_LIBPQ
-  libfimex_la_SOURCES += gridexer/GxWdbDataTypes.cc \
-                         gridexer/GxWdbExplorer.cc \
-                         WdbCDMReader.cc
+  libfimex_la_SOURCES += WdbCDMReader.cc
+                         
+libfimex_la_LIBADD += wdb/libwdb.a
 endif

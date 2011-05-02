@@ -14,46 +14,39 @@
 
 <wdb_parameters>
 
-    <wdb_connection id="0" name="proffdb" type="string">
-        <attribute name="dbhost" value="proffdb-devel.met.no" type="string" />
+    <wdb_connection id="0" name="local_wdb" type="string">
+        <attribute name="dbhost" value="localhost" type="string" />
         <attribute name="dbport" value="5432" type="short" />
         <attribute name="dbname" value="wdb" type="string" />
-        <attribute name="dbuser" value="proffread" type="string" />
-        <attribute name="wciuser" value="proffwrite" type="string" />
+        <attribute name="dbuser" value="vegardb" type="string" />
+        <attribute name="wciuser" value="vegardb" type="string" />
     </wdb_connection>
 
     <data_providers>
-        <provider id="0" value="proff.h12h8um4"></provider>
+		<provider id="0" name="logic_name1" value="met.no eceps modification"></provider>
     </data_providers>
 
-	<reference_times>
-		<time id="0" value="2011-04-15 00:00:00+00"/>
-	</reference_times>
-
     <grid_places>
-        <place id="0" value="proff grid"></place>
+        <place id="0" name="logic_name2" value="norway 025"></place>
     </grid_places>
 
-    <level_parameter id="0" name="isobaric surface pressure">
-        <attribute name="standard_cf_name" value="trykk" type="string" />
+    <level_parameter id="0" name="atmosphere sigma coordinate">
+        <attribute name="standard_name" value="sigma" type="string" />
     </level_parameter>
 
-    <level_parameter id="1" name="height above ground distance">
-        <attribute name="standard_cf_name" value="height" type="string" />
+    <level_parameter id="1" name="height above ground">
+        <attribute name="standard_name" value="height" type="string" />
     </level_parameter>
 
-    <level_parameter id="2" name="height above mean sea level distance">
-        <attribute name="standard_cf_name" value="GeoZ" type="string" />
-    </level_parameter>
 
-    <value_parameter id="air_temperature" name="air_temperature">
-        <attribute name="standard_cf_name" value="air_temperature" type="string" />
+    <value_parameter id="air temperature" name="air temperature">
+        <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>
 
-    <value_parameter id="high cloud cover" name="high cloud cover">
-        <attribute name="standard_cf_name" value="cloud_area_fraction" type="string" />
+    <value_parameter id="cloud area fraction" name="cloud area fraction">
+        <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>
 
