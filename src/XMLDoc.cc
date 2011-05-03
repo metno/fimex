@@ -24,7 +24,6 @@
 #include "fimex/XMLDoc.h"
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
-#include <iostream>
 
 namespace MetNoFimex
 {
@@ -84,11 +83,11 @@ XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) co
     } else {
         xpathCtx->node = node;
     }
-    xmlXPathObjectPtr result = xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx);
-	if (xmlXPathNodeSetIsEmpty(result->nodesetval)) {
-		return 	XPathObjPtr();
+	XPathObjPtr xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx), xmlXPathFreeObject);
+	if (xpathObj.get() == 0) {
+		throw CDMException("unable to parse xpath: " + xpath);
 	}
-	return XPathObjPtr(result, xmlXPathFreeObject);
+	return xpathObj;
 }
 
 /**
