@@ -198,7 +198,8 @@ FeltFile::Block FeltFile::getBlock_(size_type blockNo) const
 {
 	Block ret(new word[blockWords]);
 
-	feltFile_->seekg(blockNo * blockWords * sizeof(word), ios_base::beg);
+	long long pos = static_cast<long long>(blockNo) * blockWords * sizeof(word);
+	feltFile_->seekg(pos, ios_base::beg);
 	feltFile_->read((char*) ret.get(), blockWords * sizeof(word));
 	if ( changeEndianness_ )
 		for_each(ret.get(), ret.get() + blockWords, swapByteOrder);
@@ -210,8 +211,9 @@ FeltFile::Block FeltFile::getBlock_(size_type blockNo) const
 void FeltFile::get_(std::vector<word> & out, size_type fromWord, size_type noOfWords) const
 {
 	out.resize(noOfWords);
-
-	feltFile_->seekg(fromWord * sizeof(word), ios_base::beg);
+	// this will allow up to 8.4GB (size_t = 4.2G * word=2)
+    unsigned long long pos = static_cast<unsigned long long>(fromWord) * sizeof(word);
+	feltFile_->seekg(pos, ios_base::beg);
 	feltFile_->read((char*) & out[0], noOfWords * sizeof(word));
 	if ( changeEndianness_ )
 		for_each(out.begin(), out.end(), swapByteOrder);
