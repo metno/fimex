@@ -164,7 +164,8 @@ void void_ut_free(void* ptr) {
 #ifdef HAVE_UDUNITS2
     ut_free(reinterpret_cast<ut_unit*>(ptr));
 #else
-    utFree(reinterpret_cast<utUnit*>(ptr));
+    // only the udunits1 wrapper of udunits2 contains utFree
+    // utFree(reinterpret_cast<utUnit*>(ptr));
 #endif
 }
 
