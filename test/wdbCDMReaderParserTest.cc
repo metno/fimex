@@ -42,7 +42,7 @@
 #define BOOST_TEST_MODULE WDB Interface Test
 
 
-using namespace MetNoFimex;
+using namespace MetNoFimex::wdb;
 
 
 BOOST_AUTO_TEST_SUITE(WdbCDMReaderParserTest)

@@ -29,6 +29,8 @@ e
 #ifndef WDBCDMREADERPARSER_H_
 #define WDBCDMREADERPARSER_H_
 
+#include "WdbCDMReaderParserInfo.h"
+
 // fimex
 //
 #include "fimex/XMLDoc.h"
@@ -51,46 +53,14 @@ e
  */
 namespace MetNoFimex
 {
-    class WdbCDMReaderParserInfo
-    {
-    public:
-        explicit WdbCDMReaderParserInfo();
 
-        std::string databaseConnectString() const;
-
-        /**
-         * ATM we will expose only getters
-         *
-         * WdbCDMReaderParser will be able
-         * to sett values as friend class
-         */
-        std::string wdbHost() const;
-        std::string wdbName() const;
-        std::string wdbUser() const;
-        std::string wciUser() const;
-        std::string configFileName() const;
-        std::string provider() const;
-        std::string place() const;
-        std::string referenceTime() const;
-        unsigned short wdbPort() const;
-    private:
-        std::string    wdbHost_;
-        std::string    wdbName_;
-        std::string    wdbUser_;
-        std::string    wciUser_;
-        std::string    configFileName_;
-        std::string    provider_;
-        std::string    place_;
-        std::string    referenceTime_;
-        unsigned short wdbPort_;
-
-        friend class WdbCDMReaderParser;
-    };
+namespace wdb
+{
 
     class WdbCDMReaderParser
     {
     public:
-        explicit WdbCDMReaderParser();
+        WdbCDMReaderParser();
         ~WdbCDMReaderParser();
 
         /**
@@ -133,6 +103,7 @@ namespace MetNoFimex
         void parseCfgFile(const std::string& cfgFile, WdbCDMReaderParserInfo& info);
     };
 
+}
 } // MetNoFimex
 
 #endif // WDBCDMREADERPARSER_H_

@@ -17,6 +17,7 @@ libwdb_a_SOURCES = \
 	Parameter.h Parameter.cpp \
 	Level.h Level.cpp \
 	WdbCDMReaderParser.h WdbCDMReaderParser.cc \
+	WdbCDMReaderParserInfo.h WdbCDMReaderParserInfo.cpp \
 	gridInformation/GridInformation.h gridInformation/GridInformation.cpp \
 	gridInformation/LatLonGridInformation.h gridInformation/LatLonGridInformation.cpp \
 	gridInformation/RotatedLatLonGridInformation.h gridInformation/RotatedLatLonGridInformation.cpp \

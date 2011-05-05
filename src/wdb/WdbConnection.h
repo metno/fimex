@@ -38,11 +38,11 @@
 
 namespace MetNoFimex
 {
-class WdbCDMReaderParserInfo;
 
 namespace wdb
 {
 class GridInformation;
+class WdbCDMReaderParserInfo;
 
 /**
  * A connection to a wdb database, with useful queries created as methods on

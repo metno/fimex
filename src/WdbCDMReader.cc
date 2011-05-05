@@ -53,10 +53,11 @@ public:
 	{
 		try
 		{
-			WdbCDMReaderParser configParser;
+			wdb::WdbCDMReaderParser configParser;
 			config = configParser.parse(source, configfilename);
 
 			translator = new wdb::CdmNameTranslator;
+			translator->readXML(configfilename);
 
 			wdbConnection = new wdb::WdbConnection(config);
 
@@ -64,7 +65,7 @@ public:
 			wdbConnection->readGid(data, config);
 
 			dataIndex = new wdb::Wdb2CdmBuilder(data, * translator);
-			dataIndex->populate(cdm);
+			dataIndex->populate(cdm, config);
 		}
 		catch (...)
 		{
@@ -86,7 +87,7 @@ public:
 	wdb::Wdb2CdmBuilder * dataIndex;
 	wdb::CdmNameTranslator * translator;
 
-	WdbCDMReaderParserInfo config;
+	wdb::WdbCDMReaderParserInfo config;
 };
 
 

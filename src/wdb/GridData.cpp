@@ -83,7 +83,7 @@ std::string GridData::query(const WdbCDMReaderParserInfo & querySpec, const Data
 		"PlaceName, "
 		"value"
 		" FROM "
-		"wci.read(" + dataProvider + ", " + placeName + ", " + referenceTime + ",NULL, '{air temperature}',NULL, '{0}',NULL::wci.returngid)";
+		"wci.read(" + dataProvider + ", " + placeName + ", " + referenceTime + ",NULL, NULL,NULL, '{0}',NULL::wci.returngid)";
 }
 
 namespace

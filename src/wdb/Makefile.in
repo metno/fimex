@@ -70,7 +70,8 @@ am__libwdb_a_SOURCES_DIST = WdbConnection.h WdbConnection.cpp \
 	CdmNameTranslator.cpp GridData.h GridData.cpp WdbIndex.h \
 	WdbIndex.cpp Wdb2CdmBuilder.h Wdb2CdmBuilder.cpp Parameter.h \
 	Parameter.cpp Level.h Level.cpp WdbCDMReaderParser.h \
-	WdbCDMReaderParser.cc gridInformation/GridInformation.h \
+	WdbCDMReaderParser.cc WdbCDMReaderParserInfo.h \
+	WdbCDMReaderParserInfo.cpp gridInformation/GridInformation.h \
 	gridInformation/GridInformation.cpp \
 	gridInformation/LatLonGridInformation.h \
 	gridInformation/LatLonGridInformation.cpp \
@@ -88,6 +89,7 @@ am__libwdb_a_SOURCES_DIST = WdbConnection.h WdbConnection.cpp \
 @HAVE_LIBPQ_TRUE@	libwdb_a-Parameter.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-Level.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-WdbCDMReaderParser.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	libwdb_a-WdbCDMReaderParserInfo.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-GridInformation.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-LatLonGridInformation.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	libwdb_a-RotatedLatLonGridInformation.$(OBJEXT) \
@@ -284,6 +286,7 @@ top_srcdir = @top_srcdir@
 @HAVE_LIBPQ_TRUE@	Parameter.h Parameter.cpp \
 @HAVE_LIBPQ_TRUE@	Level.h Level.cpp \
 @HAVE_LIBPQ_TRUE@	WdbCDMReaderParser.h WdbCDMReaderParser.cc \
+@HAVE_LIBPQ_TRUE@	WdbCDMReaderParserInfo.h WdbCDMReaderParserInfo.cpp \
 @HAVE_LIBPQ_TRUE@	gridInformation/GridInformation.h gridInformation/GridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	gridInformation/LatLonGridInformation.h gridInformation/LatLonGridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	gridInformation/RotatedLatLonGridInformation.h gridInformation/RotatedLatLonGridInformation.cpp \
@@ -348,6 +351,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-RotatedLatLonGridInformation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-Wdb2CdmBuilder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbCDMReaderParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbConnection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libwdb_a-WdbIndex.Po@am__quote@
 
@@ -497,6 +501,20 @@ libwdb_a-WdbCDMReaderParser.obj: WdbCDMReaderParser.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbCDMReaderParser.cc' object='libwdb_a-WdbCDMReaderParser.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-WdbCDMReaderParser.obj `if test -f 'WdbCDMReaderParser.cc'; then $(CYGPATH_W) 'WdbCDMReaderParser.cc'; else $(CYGPATH_W) '$(srcdir)/WdbCDMReaderParser.cc'; fi`
+
+libwdb_a-WdbCDMReaderParserInfo.o: WdbCDMReaderParserInfo.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-WdbCDMReaderParserInfo.o -MD -MP -MF $(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Tpo -c -o libwdb_a-WdbCDMReaderParserInfo.o `test -f 'WdbCDMReaderParserInfo.cpp' || echo '$(srcdir)/'`WdbCDMReaderParserInfo.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Tpo $(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbCDMReaderParserInfo.cpp' object='libwdb_a-WdbCDMReaderParserInfo.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-WdbCDMReaderParserInfo.o `test -f 'WdbCDMReaderParserInfo.cpp' || echo '$(srcdir)/'`WdbCDMReaderParserInfo.cpp
+
+libwdb_a-WdbCDMReaderParserInfo.obj: WdbCDMReaderParserInfo.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-WdbCDMReaderParserInfo.obj -MD -MP -MF $(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Tpo -c -o libwdb_a-WdbCDMReaderParserInfo.obj `if test -f 'WdbCDMReaderParserInfo.cpp'; then $(CYGPATH_W) 'WdbCDMReaderParserInfo.cpp'; else $(CYGPATH_W) '$(srcdir)/WdbCDMReaderParserInfo.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Tpo $(DEPDIR)/libwdb_a-WdbCDMReaderParserInfo.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WdbCDMReaderParserInfo.cpp' object='libwdb_a-WdbCDMReaderParserInfo.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libwdb_a-WdbCDMReaderParserInfo.obj `if test -f 'WdbCDMReaderParserInfo.cpp'; then $(CYGPATH_W) 'WdbCDMReaderParserInfo.cpp'; else $(CYGPATH_W) '$(srcdir)/WdbCDMReaderParserInfo.cpp'; fi`
 
 libwdb_a-GridInformation.o: gridInformation/GridInformation.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libwdb_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libwdb_a-GridInformation.o -MD -MP -MF $(DEPDIR)/libwdb_a-GridInformation.Tpo -c -o libwdb_a-GridInformation.o `test -f 'gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`gridInformation/GridInformation.cpp

@@ -38,9 +38,9 @@
 
 namespace MetNoFimex
 {
-class WdbCDMReaderParserInfo;
 namespace wdb
 {
+class WdbCDMReaderParserInfo;
 class GridInformation;
 class DataSanitizer;
 

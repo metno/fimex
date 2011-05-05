@@ -47,70 +47,8 @@ namespace po = boost::program_options;
 
 namespace MetNoFimex {
 
-WdbCDMReaderParserInfo::WdbCDMReaderParserInfo()
-    : wdbPort_(5432)
+namespace wdb
 {
-}
-
-std::string WdbCDMReaderParserInfo::databaseConnectString() const
-{
-	std::ostringstream ret;
-
-	ret << "dbname=" << wdbName();
-	if ( not wdbHost().empty() )
-		ret << " host=" << wdbHost();
-	ret << " port=" << wdbPort();
-	if ( not wdbUser().empty() )
-		ret << " user=" << wdbUser();
-
-	return ret.str();
-}
-
-std::string WdbCDMReaderParserInfo::wdbHost() const
-{
-    return wdbHost_;
-}
-
-std::string WdbCDMReaderParserInfo::wdbName() const
-{
-    return wdbName_;
-}
-
-std::string WdbCDMReaderParserInfo::wdbUser() const
-{
-    return wdbUser_;
-}
-
-std::string WdbCDMReaderParserInfo::wciUser() const
-{
-    return wciUser_;
-}
-
-std::string WdbCDMReaderParserInfo::configFileName() const
-{
-    return configFileName_;
-}
-
-std::string WdbCDMReaderParserInfo::provider() const
-{
-    return provider_;
-}
-
-std::string WdbCDMReaderParserInfo::place() const
-{
-    return place_;
-}
-
-std::string WdbCDMReaderParserInfo::referenceTime() const
-{
-    return referenceTime_;
-}
-
-unsigned short WdbCDMReaderParserInfo::wdbPort() const
-{
-    return wdbPort_;
-}
-
 
 WdbCDMReaderParser::WdbCDMReaderParser()
 {
@@ -259,6 +197,11 @@ void WdbCDMReaderParser::parseCfgFile(const std::string& cfgFileName, WdbCDMRead
     info.referenceTime_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/reference_times/time").second;
     info.provider_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_providers/provider").second;
     info.place_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/grid_places/place").second;
+
+    std::vector<std::pair<std::string, std::string> > globals =
+    		getAttributesForXmlPath(doc, "/wdb_fimex_config/global_attributes");
+    for ( std::vector<std::pair<std::string, std::string> >::const_iterator it = globals.begin(); it != globals.end(); ++ it )
+    	info.globalAttributes_.push_back(CDMAttribute(it->first, it->second));
 }
 
 /**
@@ -357,5 +300,6 @@ WdbCDMReaderParserInfo WdbCDMReaderParser::parse(int argc, char* args[], bool bP
     }
 
     return parse(source, cfgFileName);
+}
 }
 }
