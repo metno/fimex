@@ -69,6 +69,8 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 		yAxis.push_back(i * 50000);
 	}
 	interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+	//interpolator->changeProjection(MIFI_INTERPOL_COORD_NN, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+    //NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	//interpolator->getCDM().toXMLStream(cerr);
 	BOOST_CHECK(true);
     boost::shared_ptr<Data> altitudeData = interpolator->getDataSlice("altitude");

@@ -162,13 +162,17 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     if (msg.getEdition() == 1) {
         xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"' and @gribTablesVersionNo='"+type2string(pars.at(1))+"' and @identificationOfOriginatingGeneratingCentre='"+type2string(pars.at(2))+"']");
     } else {
-        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"' and @paramterCategory='"+type2string(pars.at(1))+"' and @discipline='"+type2string(pars.at(2))+"']");
+        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"' and @parameterCategory='"+type2string(pars.at(1))+"' and @discipline='"+type2string(pars.at(2))+"']");
     }
     XPathObjPtr xpathObj = doc_->getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
-    if (size == 1) {
+    if (size >= 1) {
+        LOG4FIMEX(logger, Logger::DEBUG, "found parameter at " << xpathString);
+        if (size > 1)  LOG4FIMEX(logger, Logger::WARN, "using first of several parameters for " << xpathString);
         return nodes->nodeTab[0]->parent; // return the parent, since xpath looks for grib1/2 node
+    } else {
+        LOG4FIMEX(logger, Logger::DEBUG, "no parameter found in config for " << xpathString);
     }
     return 0;
 }

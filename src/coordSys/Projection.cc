@@ -185,20 +185,32 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
 boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projStr)
 {
     std::vector<CDMAttribute> attrs;
-    if (LatitudeLongitudeProjection::acceptsProj4(projStr)) {
-        attrs = LatitudeLongitudeProjection::parametersFromProj4(projStr);
-    } else if (RotatedLatitudeLongitudeProjection::acceptsProj4(projStr)) {
-        attrs = RotatedLatitudeLongitudeProjection::parametersFromProj4(projStr);
-    } else if (PolarStereographicProjection::acceptsProj4(projStr)) {
-        attrs = PolarStereographicProjection::parametersFromProj4(projStr);
-    } else if (StereographicProjection::acceptsProj4(projStr)) {
-        attrs = StereographicProjection::parametersFromProj4(projStr);
+    if (AlbersConicalEqualAreaProjection::acceptsProj4(projStr)) {
+        attrs = AlbersConicalEqualAreaProjection::parametersFromProj4(projStr);
+    } else if (AzimuthalEquidistantProjection::acceptsProj4(projStr)) {
+        attrs = AzimuthalEquidistantProjection::parametersFromProj4(projStr);
+    } else if (LambertAzimuthalEqualAreaProjection::acceptsProj4(projStr)) {
+        attrs = LambertAzimuthalEqualAreaProjection::parametersFromProj4(projStr);
     } else if (LambertConformalConicProjection::acceptsProj4(projStr)) {
         attrs = LambertConformalConicProjection::parametersFromProj4(projStr);
+    } else if (LambertCylindricalEqualAreaProjection::acceptsProj4(projStr)) {
+        attrs = LambertCylindricalEqualAreaProjection::parametersFromProj4(projStr);
+    } else if (LatitudeLongitudeProjection::acceptsProj4(projStr)) {
+        attrs = LatitudeLongitudeProjection::parametersFromProj4(projStr);
     } else if (MercatorProjection::acceptsProj4(projStr)) {
         attrs = MercatorProjection::parametersFromProj4(projStr);
+    } else if (OrthographicProjection::acceptsProj4(projStr)) {
+        attrs = OrthographicProjection::parametersFromProj4(projStr);
+    } else if (PolarStereographicProjection::acceptsProj4(projStr)) {
+        attrs = PolarStereographicProjection::parametersFromProj4(projStr);
+    } else if (RotatedLatitudeLongitudeProjection::acceptsProj4(projStr)) {
+        attrs = RotatedLatitudeLongitudeProjection::parametersFromProj4(projStr);
+    } else if (StereographicProjection::acceptsProj4(projStr)) {
+        attrs = StereographicProjection::parametersFromProj4(projStr);
     } else if (TransverseMercatorProjection::acceptsProj4(projStr)) {
         attrs = TransverseMercatorProjection::parametersFromProj4(projStr);
+    } else if (VerticalPerspectiveProjection::acceptsProj4(projStr)) {
+        attrs = VerticalPerspectiveProjection::parametersFromProj4(projStr);
     }
 
     if (attrs.size() == 0) {

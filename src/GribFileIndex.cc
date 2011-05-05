@@ -275,15 +275,15 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     size_t msgLength = 1024;
 
     if (edition_ == 1) {
-        gridParmeterIds_ = vector<long> (3, 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParmeterIds_[0]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParmeterIds_[1]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "centre", &gridParmeterIds_[2]), 0);
+        gridParameterIds_ = vector<long> (3, 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParameterIds_[0]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParameterIds_[1]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "centre", &gridParameterIds_[2]), 0);
     } else if (edition_ == 2) {
-        gridParmeterIds_ = vector<long> (3, 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParmeterIds_[0]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterCategory", &gridParmeterIds_[1]), 0);
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "discipline", &gridParmeterIds_[2]), 0);
+        gridParameterIds_ = vector<long> (3, 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParameterIds_[0]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterCategory", &gridParameterIds_[1]), 0);
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "discipline", &gridParameterIds_[2]), 0);
     } else {
         throw runtime_error("unknown grib version: " + type2string(edition_));
     }
@@ -293,14 +293,14 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
         MIFI_GRIB_CHECK(nameError, 0);
         parameterName_ = msg;
     } else {
-        parameterName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), ",");
+        parameterName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), ",");
     }
     int shortNameError = grib_get_string(gh.get(), "shortName", msg, &msgLength);
     if ((shortNameError != GRIB_NOT_FOUND) && (string("unknown") != string(msg))) {
         MIFI_GRIB_CHECK(shortNameError, 0);
         shortName_ = msg;
     } else {
-        shortName_ = join(gridParmeterIds_.begin(), gridParmeterIds_.end(), "_");
+        shortName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), "_");
     }
 
 
@@ -369,18 +369,18 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         if (gSize > 0) {
             edition_ = 1;
             xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
-            gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "indicatorOfParameter")));
-            gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "gribTablesVersionNo")));
-            gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "identificationOfOriginatingGeneratingCentre")));
+            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "indicatorOfParameter")));
+            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "gribTablesVersionNo")));
+            gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "identificationOfOriginatingGeneratingCentre")));
         } else {
             xpG = doc->getXPathObject(nsPrefix+":grib2", pNode);
             int gSize = xpG->nodesetval ? xpG->nodesetval->nodeNr : 0;
             if (gSize > 0) {
                 edition_ = 2;
                 xmlNodePtr gNode = xpG->nodesetval->nodeTab[0];
-                gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "parameterNumber")));
-                gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "parameterCategory")));
-                gridParmeterIds_.push_back(string2type<long>(getXmlProp(gNode, "discipline")));
+                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "parameterNumber")));
+                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "parameterCategory")));
+                gridParameterIds_.push_back(string2type<long>(getXmlProp(gNode, "discipline")));
             } else {
                 throw runtime_error("no grib parameters found");
             }
@@ -550,7 +550,7 @@ long GribFileMessage::getLevelType() const
 
 const vector<long>& GribFileMessage::getParameterIds() const
 {
-    return gridParmeterIds_;
+    return gridParameterIds_;
 }
 
 
@@ -593,25 +593,25 @@ string GribFileMessage::toString() const
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib1")));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
                     "indicatorOfParameter"), xmlCast(type2string(
-                    gridParmeterIds_.at(0)))));
+                    gridParameterIds_.at(0)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
                     "gribTablesVersionNo"), xmlCast(type2string(
-                    gridParmeterIds_.at(1)))));
+                    gridParameterIds_.at(1)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
                     "identificationOfOriginatingGeneratingCentre"), xmlCast(
-                    type2string(gridParmeterIds_.at(2)))));
+                    type2string(gridParameterIds_.at(2)))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         } else if (edition_ == 2) {
             checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("grib2")));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
                     "parameterNumber"), xmlCast(type2string(
-                    gridParmeterIds_.at(0)))));
+                    gridParameterIds_.at(0)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast(
                     "parameterCategory"), xmlCast(type2string(
-                    gridParmeterIds_.at(1)))));
+                    gridParameterIds_.at(1)))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(),
                     xmlCast("discipline"), xmlCast(type2string(
-                            gridParmeterIds_.at(2)))));
+                            gridParameterIds_.at(2)))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         } else {
             throw runtime_error("unknown gribEdition: " + type2string(edition_));

@@ -86,7 +86,7 @@ private:
     std::string shortName_;
     // ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
     // ed2: parameterNumber, paramterCategory, discipline
-    std::vector<long> gridParmeterIds_;
+    std::vector<long> gridParameterIds_;
     long edition_;
     long dataTime_;
     long dataDate_;
