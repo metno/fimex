@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(testParseOnlySource)
     BOOST_REQUIRE_EQUAL(wdbInfo.place(), "");
 }
 
-BOOST_AUTO_TEST_CASE(testConfigFileOnly)
+BOOST_AUTO_TEST_CASE(testConfigFileOnly1)
 {
     std::string cfgFileName(TEST_DIR"/wdbreadercfg.xml");
     std::string source; // empty
@@ -123,10 +123,15 @@ BOOST_AUTO_TEST_CASE(testConfigFileOnly)
     BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "met.no");
     BOOST_REQUIRE_EQUAL(wdbInfo.place(), "norge grid");
     BOOST_REQUIRE_EQUAL(wdbInfo.referenceTime(), "20110210T000000");
+}
 
-    // local cfg
+
+BOOST_AUTO_TEST_CASE(testConfigFileOnly2)
+{
+	WdbCDMReaderParser parser;
+
     std::string cfgFileNameLocal(TEST_DIR"/local_wdb_config.xml");
-    wdbInfo =  parser.parse(source, cfgFileNameLocal);
+    WdbCDMReaderParserInfo wdbInfo = parser.parse(std::string(), cfgFileNameLocal);
 
     BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "localhost");
     BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");

@@ -132,10 +132,11 @@ std::pair<std::string, std::string> WdbCDMReaderParser::getNameValuePairForXmlPa
         XPathObjPtr xpathObj;
         xpathObj = doc.getXPathObject(path);
 
-        if(xpathObj.get() == 0)
-            return std::make_pair(std::string(), std::string());
-
         xmlNodeSetPtr xmlNodes = xpathObj->nodesetval;
+
+        if ( ! xmlNodes->nodeTab )
+        	return std::make_pair(std::string(), std::string());
+
         /**
           * int nodessize = (xmlNodes) ? xmlNodes->nodeNr : 0;
           *
