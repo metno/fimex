@@ -1,4 +1,4 @@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testBinaryConstants \
            testUtils \
            testTimeSpec \
@@ -32,7 +32,7 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys
   GRIBAPI_NC_TESTS = testGribReader
-  SH_TESTS += ${NETCDF_MI_SH_TESTS}
+  SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}

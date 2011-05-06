@@ -398,6 +398,29 @@ int mifi_project_values(const char* proj_input, const char* proj_output, double*
  */
 extern int mifi_project_axes(const char* proj_input, const char* proj_output, const double* in_x_axis, const double* in_y_axis, const int ix, const int iy, double* out_xproj_axis, double* out_yproj_axis);
 
+
+/**
+ *
+ * @brief Method to fill undefined values in a 2d field
+ *
+ * Solves Laplace's equation with Neumann boundary conditions
+ * (dA/dn = 0) in rectangular coordinates by an iterative method to
+ * fill-in reasonable values at gridpoints containing values with MIFI_UNDEFINED_F or NaNs
+ *
+ * Translated to C from Fortran code by H.Engedahl and A.Foss (1990-93).
+ *
+ * @param nx size of field in x-direction
+ * @param ny size of field in x-direction
+ * @param field the data-field to be filled (input/output)
+ * @param relaxCrit relaxation criteria. Usually 4 orders of magnitude lower than data in field.
+ * @param corrEff Coef. of overrelaxation, between +1.2 and +2.0
+ * @param maxLoop Max. allowed no. of scans in relaxation procedure.
+ * @param nChanged number of changed values (output)
+ * @return error-code, usually MIFI_OK
+ */
+extern int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float corrEff, size_t maxLoop, size_t* nChanged);
+
+
 /**
  * Convert bad-values to nan. The mifi_ functions don't handle bad values generally, but
  * forward this work to the floating-point IEEE NaN's. This function converts a general bad value

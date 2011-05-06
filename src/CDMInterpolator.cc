@@ -72,6 +72,32 @@ static boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float
     mifi_nanf2bad(&iData[0], &iData[size], badValue);
     return boost::shared_ptr<Data>(new DataImpl<float>(iData, size));
 }
+/**
+ *
+ * run all processes 2d-slice by 2d-slice on the array of size
+ *
+ * @param processes list of processes
+ * @param array the data
+ * @param size size of the data (must be N * nx * ny)
+ * @param nx size in x-direction
+ * @param ny size in y-direction
+ */
+static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > processes, float* array, size_t size, size_t nx, size_t ny)
+{
+    if (processes.size() == 0) return; // nothing to do
+
+    size_t nz = size / (nx*ny);
+    assert((nz*nx*ny) == size);
+
+    for (size_t z = 0; z < nz; z++) {
+        // find the start of the slice
+        float* arrayPos = array + (z*nx*ny);
+        for (size_t i = 0; i < processes.size(); i++) {
+            processes[i]->operator()(arrayPos, nx, ny);
+        }
+    }
+    return;
+}
 
 boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
@@ -86,6 +112,7 @@ boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName
         boost::shared_ptr<Data> data = dataReader->getDataSlice(varName, unLimDimPos);
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
+        processArray_(preprocesses, array.get(), data->size(), cachedInterpolation->getInX(), cachedInterpolation->getInY());
         size_t newSize = 0;
         boost::shared_array<float> iArray = cachedInterpolation->interpolateValues(array, data->size(), newSize);
         if (variable.isSpatialVector()) {
@@ -925,6 +952,12 @@ bool CDMInterpolator::hasSpatialVectors() const
         }
     }
     return false;
+}
+
+void CDMInterpolator::addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation preprocess");
+    preprocesses.push_back(process);
 }
 
 }

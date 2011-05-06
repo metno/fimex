@@ -37,7 +37,7 @@ host_triplet = @host@
 @HAVE_MILIB_TRUE@am__append_2 = 
 @HAVE_FELT_OR_MILIB_TRUE@am__append_3 = testQualityExtractor
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_MI_TESTS} testCoordSys
-@HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS}
+@HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh
 @HAVE_GRIBAPI_TRUE@am__append_6 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_LIBPQ_TRUE@am__append_7 = wdbTest
 @HAVE_LIBPQ_TRUE@am__append_8 = @BOOST_PROGRAM_OPTIONS_LIB@
@@ -281,7 +281,8 @@ ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
-@HAVE_NETCDF_TRUE@am__EXEEXT_10 = $(NETCDF_MI_SH_TESTS)
+@HAVE_NETCDF_TRUE@am__EXEEXT_10 = $(NETCDF_MI_SH_TESTS) \
+@HAVE_NETCDF_TRUE@	testInterpolatorFill.sh
 am__EXEEXT_11 = $(am__EXEEXT_10)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -432,7 +433,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	testSpatialAxisSpec testData testProjections testInterpolation \
 	testUnits testFileReaderFactory testCDM testXMLDoc \

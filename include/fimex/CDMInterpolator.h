@@ -35,22 +35,42 @@ namespace MetNoFimex
 // forward decl
 class CoordinateSystem;
 
+/**
+ * operator interface to work on 2d arrays of size nx*ny
+ */
+class InterpolatorProcess2d {
+public:
+    virtual void operator()(float* array, size_t nx, size_t ny) = 0;
+};
+
+class InterpolatorFill2d : public InterpolatorProcess2d {
+private:
+    float relaxCrit_;
+    float corrEff_;
+    size_t maxLoop_;
+public:
+    InterpolatorFill2d(float relaxCrit, float corrEff, size_t maxLoop)
+        : relaxCrit_(relaxCrit), corrEff_(corrEff), maxLoop_(maxLoop) {}
+    virtual void operator()(float* array, size_t nx, size_t ny) {size_t nChanged; mifi_fill2d_f(nx, ny, array, relaxCrit_, corrEff_, maxLoop_, &nChanged);};
+};
+
 class CDMInterpolator : public MetNoFimex::CDMReader
 {
 private:
-	boost::shared_ptr<CDMReader> dataReader;
-	std::vector<std::string> projectionVariables;
-	boost::shared_ptr<CachedInterpolationInterface> cachedInterpolation;
-	boost::shared_ptr<CachedVectorReprojection> cachedVectorReprojection;
-	std::string latitudeName;
-	std::string longitudeName;
-	/** converter for axes-strings */
-	void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
-	void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
-	void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
-	void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
-	boost::shared_ptr<const CoordinateSystem> findBestCoordinateSystemAndProjectionVars(bool withProjection);
-	bool hasSpatialVectors() const;
+    boost::shared_ptr<CDMReader> dataReader;
+    std::vector<std::string> projectionVariables;
+    std::vector<boost::shared_ptr<InterpolatorProcess2d> > preprocesses;
+    boost::shared_ptr<CachedInterpolationInterface> cachedInterpolation;
+    boost::shared_ptr<CachedVectorReprojection> cachedVectorReprojection;
+    std::string latitudeName;
+    std::string longitudeName;
+    /** converter for axes-strings */
+    void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
+    void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+    void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+    void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+    boost::shared_ptr<const CoordinateSystem> findBestCoordinateSystemAndProjectionVars(bool withProjection);
+    bool hasSpatialVectors() const;
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMInterpolator();
@@ -99,6 +119,12 @@ public:
 	 * @return the name used for longitude in the automatic coordinate generation
 	 */
 	virtual const std::string& getLongitudeName() const {return longitudeName;}
+	/**
+	 * add a process to the internal list of preprocesses
+	 *
+	 * @warning this function is not completely thought through and might change
+	 */
+	virtual void addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process);
 };
 
 }

@@ -179,6 +179,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "interpolate.yAxisUnit", vm);
 	writeOption<string>(out, "interpolate.latitudeName", vm);
 	writeOption<string>(out, "interpolate.longitudeName", vm);
+    writeOption<string>(out, "interpolate.preprocess", vm);
 	writeOptionAny(out, "interpolate.printNcML", vm);
     writeOptionAny(out, "interpolate.printCS", vm);
 	writeOption<string>(out, "timeInterpolate.timeSpec", vm);
@@ -409,6 +410,17 @@ static auto_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, auto_ptr<CD
 		interpolator->setLongitudeName(vm["interpolate.longitudeName"].as<string>());
 	}
 
+	if (vm.count("interpolate.preprocess")) {
+	    boost::smatch what;
+	    if (boost::regex_match(vm["interpolate.preprocess"].as<string>(), what, boost::regex(".*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
+	        double critx = string2type<double>(what[1]);
+	        double cor = string2type<double>(what[2]);
+	        size_t maxLoop = string2type<size_t>(what[3]);
+	        LOG4FIMEX(logger, Logger::DEBUG, "running interpolate preprocess: fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
+	        interpolator->addPreprocess(boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorFill2d(critx,cor,maxLoop)));
+	    }
+
+	}
 
 	int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
 	if (vm.count("interpolate.method")) {
@@ -561,6 +573,7 @@ int run(int argc, char* args[])
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
+        ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, i.e. \"fill2d(critx,cor,maxLoop)\"")
         ("interpolate.printNcML", "print NcML description of interpolator")
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")

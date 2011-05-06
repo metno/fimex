@@ -38,6 +38,10 @@ namespace MetNoFimex
 class CachedInterpolationInterface {
 public:
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
+    /** return x-size of input array */
+    virtual size_t getInX() const = 0;
+    /** return y-size of input array */
+    virtual size_t getInY() const = 0;
 };
 
 /**
@@ -74,6 +78,8 @@ public:
 	 * @param newSize return the size of the output-array
 	 */
 	virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
+	virtual size_t getInX() const {return inX;}
+    virtual size_t getInY() const {return inY;}
 };
 
 

@@ -642,6 +642,126 @@ int mifi_project_axes(const char* proj_input, const char* proj_output, const dou
 	return MIFI_OK;
 }
 
+int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float corrEff, size_t maxLoop, size_t* nChanged) {
+    size_t totalSize = nx*ny;
+    if (totalSize == 0) return MIFI_OK;
+
+    double sum = 0;
+    *nChanged = 0;
+
+    float* fieldPos = field;
+    int i = 0;
+    // calculate sum and number of valid values
+    while (i < totalSize) {
+        if (isnan(*fieldPos)) {
+            (*nChanged)++;
+        } else {
+            sum += *fieldPos;
+        }
+        fieldPos++;
+        i++;
+    }
+    size_t nUnchanged = totalSize - *nChanged;
+    if (nUnchanged == 0 || *nChanged == 0) {
+        return MIFI_OK; // nothing to do
+    }
+
+    // working field
+    float* wField = malloc(totalSize*sizeof(float));
+    if (wField == NULL) {
+        fprintf(stderr, "error allocating memory of float(%d*%d)", nx, ny);
+        exit(1);
+    }
+
+    // The value of average ( i.e. the MEAN value of the array field ) is filled in
+    // the array field at all points with an undefined value.
+    // field(i,j) = average may be regarded as the "first guess" in the iterative
+    // method.
+    double average = sum / nUnchanged;
+    //fprintf(stderr, "sum: %f, average: %f, unchanged: %d\n", sum, average, nUnchanged);
+    // calculate stddev
+    double stddev = 0;
+    fieldPos = field;
+    float *wFieldPos = wField;
+    i = 0;
+    while (i < totalSize) {
+        if (isnan(*fieldPos)) {
+            *wFieldPos = 1.;
+            *fieldPos = average;
+        } else {
+            stddev += fabs(*fieldPos - average);
+            *wFieldPos = 0.;
+        }
+        wFieldPos++;
+        fieldPos++;
+        i++;
+    }
+    stddev /= nUnchanged;
+
+    double crit = relaxCrit * stddev;
+
+    //fprintf(stderr, "crit %f, stddev %f", crit, stddev);
+
+    // starting the iterative method, border-values are left at average, nx,ny >=1
+    size_t nxm1 = (size_t)(nx - 1);
+    size_t nym1 = (size_t)(ny - 1);
+
+    // initialize a variational field from the border
+    for (size_t y = 1; y < nym1; y++) {
+        for (size_t x = 1; x < nxm1; x++) {
+            wField[y*nx +x] *= corrEff;
+        }
+    }
+
+    // error field
+    float* eField = malloc(totalSize*sizeof(float));
+    if (eField == NULL) {
+        fprintf(stderr, "error allocating memory of float(%d*%d)", nx, ny);
+        exit(1);
+    }
+    // start the iteration loop
+    for (size_t n = 0; n < maxLoop; n++) {
+        for (size_t y = 1; y < nym1; y++) {
+            for (size_t x = 1; x < nxm1; x++) {
+                eField[y*nx+x] = (field[y*nx+(x+1)] + field[y*nx+(x-1)] + field[(y+1)*nx+x] + field[(y-1)*nx+x])*0.25 - field[y*nx+x];
+                field[y*nx+x] += eField[y*nx+x] * wField[y*nx+x];
+            }
+        }
+
+        // Test convergence now and then (slow test loop)
+        if ((n < (maxLoop-5)) &&
+            (n%10 == 0)) {
+            float crtest = crit*corrEff;
+            size_t nbad = 0;
+            for (size_t y = 1; y < nym1; y++) {
+                if (nbad != 0) break;
+                for (size_t x = 1; x < nxm1; x++) {
+                    if (fabs(eField[y*nx+x])*wField[y*nx+x] > crtest) {
+                        nbad = 1;
+                    }
+                }
+            }
+            if (nbad == 0) {
+                free(wField);
+                return MIFI_OK; // convergence
+            }
+        }
+
+        // some work on the borders
+        for (size_t y = 1; y < nym1; y++) {
+            field[y*nx+0] += (field[y*nx+1] - field[y*nx+0]) * wField[y*nx+0];
+            field[y*nx+(nx-1)] += (field[y*nx+(nx-2)] - field[y*nx+(nx-1)]) * wField[y*nx+(nx-1)];
+        }
+        for (size_t x = 0; x < nx; x++) {
+            field[0*nx +x] += (field[1*nx+x] - field[0*nx+x]) * wField[0*nx+x];
+            field[nym1*nx+x] += (field[(nym1-1)*nx+x] - field[nym1*nx+x]) * wField[nym1*nx+x];
+        }
+    }
+
+    free(wField);
+    return MIFI_OK;
+}
+
 size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal) {
 	size_t retVal = 0;
 	if (!isnan(badVal)) {
