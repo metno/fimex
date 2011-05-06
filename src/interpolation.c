@@ -237,8 +237,8 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 		exit(1);
 	}
 	double pointsZ[ox*oy]; // z currently of no interest, no height attached to values
-	for (int x = 0; x < ox; ++x) {
-		for (int y = 0; y < oy; ++y) {
+    for (int y = 0; y < oy; ++y) {
+        for (int x = 0; x < ox; ++x) {
 			in_xproj_axis[y*ox +x] = outXAxis[x];
 			in_yproj_axis[y*ox +x] = outYAxis[y];
 			pointsZ[y*ox +x] = 0;
@@ -265,8 +265,8 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	}
 	{// conversion along x axis
 		delta[0] = 1e-3; // will be overwritten if x > 1
-		for (int x = 0; x < ox; ++x) {
-			for (int y = 0; y < oy; ++y) {
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
 				// find a delta <<< than the diagonal to the next cell
 				if (x < (ox-1) && y < (oy-1)) {
 					delta[y*ox+x] = in_xproj_axis[(y+1)*ox +(x+1)] - in_xproj_axis[y*ox +x] * 1e-3;
@@ -295,8 +295,8 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			return MIFI_ERROR;
 		}
 
-		for (int x = 0; x < ox; ++x) {
-			for (int y = 0; y < oy; ++y) {
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
 				double deltaInv = 1/delta[y*ox+x];
 				matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
 						- outXAxis[x]) * deltaInv;
@@ -308,8 +308,8 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 
 	{	// conversion along y axis
 		delta[0] = 1e-3; // will be overwritten if x > 1
-		for (int x = 0; x < ox; ++x) {
-			for (int y = 0; y < oy; ++y) {
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
 				// find a delta <<< than the diagonal to the next cell
 				if (x < (ox-1) && y < (oy-1)) {
 					delta[y*ox+x] = in_yproj_axis[(y+1)*ox +(x+1)] - in_yproj_axis[y*ox +x] * 1e-3;
@@ -338,8 +338,8 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			return MIFI_ERROR;
 		}
 
-		for (int x = 0; x < ox; ++x) {
-			for (int y = 0; y < oy; ++y) {
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
 				double deltaInv = 1/delta[y*ox+x];
 				matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
 						- outXAxis[x]) * deltaInv;
@@ -621,8 +621,8 @@ int mifi_project_axes(const char* proj_input, const char* proj_output, const dou
         pj_free(outputPJ);
         return MIFI_ERROR;
     }
-	for (int x = 0; x < ix; ++x) {
-		for (int y = 0; y < iy; ++y) {
+    for (int y = 0; y < iy; ++y) {
+        for (int x = 0; x < ix; ++x) {
 			out_xproj_axis[y*ix +x] = in_x_axis[x];
 			out_yproj_axis[y*ix +x] = in_y_axis[y];
 		}
