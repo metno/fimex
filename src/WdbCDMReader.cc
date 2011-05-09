@@ -38,6 +38,7 @@
 #include "fimex/Data.h"
 #include "wdb/WdbConnection.h"
 #include "wdb/Wdb2CdmBuilder.h"
+#include "wdb/WdbIndex.h"
 #include "wdb/CdmNameTranslator.h"
 #include "wdb/gridInformation/GridInformation.h"
 #include "wdb/WdbCDMReaderParser.h"
@@ -128,7 +129,13 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 
 		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
 		for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
-			dataIdx = d_->wdbConnection->getGrid(dataIdx, * it);
+			if ( * it != wdb::WdbIndex::UNDEFINED_GID )
+				dataIdx = d_->wdbConnection->getGrid(dataIdx, * it);
+			else
+			{
+				const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
+				dataIdx += gridInfo.numberX() * gridInfo.numberY();
+			}
 	}
 	else if ( varName == "forecast_reference_time" )
 	{
