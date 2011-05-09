@@ -50,7 +50,9 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 
 		parameterUnits_[d.parameter().name()] = d.parameter().unit();
 
-		LevelEntry & levelEntry = data_[d.parameter().name()] [d.validTo()];
+		TimeEntry & timeEntry = data_[d.parameter().name()];
+
+		LevelEntry & levelEntry = timeEntry[d.validTo()];
 		if ( levelEntry.levelName.empty() )
 		{
 			levelEntry.levelName = d.level().type().name();
@@ -68,10 +70,27 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 		if ( levelEntry.size() > 1 )
 			parametersWithMoreThanOneLevel_.insert(d.parameter().name());
 
-
-		allTimes_.insert(d.validTo());
 		allLevels_[d.level().type().name()].insert(d.level().to());
 		allVersions_.insert(d.version());
+	}
+
+	BOOST_FOREACH( const Data::value_type & d, data_ )
+	{
+		const TimeEntry & timeEntry = d.second;
+		if ( timeEntry.size() > 1 )
+			for ( TimeEntry::const_iterator it = timeEntry.begin(); it != timeEntry.end(); ++ it )
+				allTimes_.insert(it->first);
+	}
+	if ( allTimes_.empty() )
+	{
+		GridData::Time minTime = boost::posix_time::max_date_time;
+		BOOST_FOREACH( const Data::value_type & d, data_ )
+		{
+			const TimeEntry & timeEntry = d.second;
+			if ( not timeEntry.empty() )
+				minTime = std::min(minTime, timeEntry.begin()->first);
+		}
+		allTimes_.insert(minTime);
 	}
 }
 
