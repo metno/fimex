@@ -86,16 +86,24 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
 {
     if (processes.size() == 0) return; // nothing to do
 
-    size_t nz = size / (nx*ny);
+    int nz = static_cast<int>(size / (nx*ny));
     assert((nz*nx*ny) == size);
 
-    for (size_t z = 0; z < nz; z++) {
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(shared)
+    {
+#pragma omp for
+#endif
+    for (int z = 0; z < nz; z++) { // using int instead of size_t because of openMP < 3.0
         // find the start of the slice
         float* arrayPos = array + (z*nx*ny);
         for (size_t i = 0; i < processes.size(); i++) {
             processes[i]->operator()(arrayPos, nx, ny);
         }
     }
+#ifdef HAVE_OPENMP
+    }
+#endif
     return;
 }
 
@@ -619,7 +627,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
     {
 #pragma omp for
 #endif
-    for (int i = 0; i < pointsOnXAxis.size(); i++) { // using int instead of size_t because of openMP < 3.0
+    for (int i = 0; i < static_cast<int>(pointsOnXAxis.size()); i++) { // using int instead of size_t because of openMP < 3.0
         //                   lat                   lon
         LL_POINT p(pointsOnYAxis[i], pointsOnXAxis[i], -1., -1.);
         size_t steps = 0;
