@@ -211,8 +211,10 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		std::string dimension = translator_.toCdmName(parameter);
 
-		std::vector<std::string> dimensions;
-		gridInformation().addSpatialDimensions(dimensions);
+		std::vector<std::string> spatialDimensions;
+		gridInformation().addSpatialDimensions(spatialDimensions);
+
+		std::vector<std::string> dimensions = spatialDimensions;
 		if ( index_.versionsForParameter(parameter).size() > 1 )
 			dimensions.push_back("version");
 		if ( index_.levelsForParameter(parameter).size() > 1 )
@@ -226,7 +228,10 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForParameter(parameter)));
 		cdm.addAttribute(dimension, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));
-		cdm.addAttribute(dimension, CDMAttribute("coordinates", "longitude latitude"));
+		//cdm.addAttribute(dimension, CDMAttribute("coordinates", "longitude latitude"));
+
+		std::string coordinates = spatialDimensions.front() + " " + spatialDimensions.back();
+		cdm.addAttribute(dimension, CDMAttribute("coordinates", coordinates));
 	}
 }
 
