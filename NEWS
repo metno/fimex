@@ -1,3 +1,12 @@
+  * 2011-05-09 fimex-0.28
+    * improving ncml-support: creation of dimensions and variables, adding values, allow filenames
+    * improving CDMFileReaderFactory to be better usable as library
+    * better handling of rounding-errors when reading data-ranges
+    * allow slices of scalar
+    * fix scan-mode for grib-reader, improve support for grib2
+    * refactoring CDMInterpolator to use CoordinateSystems
+    * adding fill2d preprocess method to CDMInterpolator
+    * improved/rewritten wdb-reader
   * 2011-03-22 fimex-0.27
     * new documentation target
     * generic usage of udunits2 without udunits1-wrapper
