@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           targetNamespace="http://www.met.no/schema/fimex/cdmGribWriterConfig"
+           xmlns:c="http://www.met.no/schema/fimex/cdmGribWriterConfig">
+  <xs:element name="cdm_gribwriter_config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:global_attributes" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="c:axes" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="c:variables" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="global_attributes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:attribute" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:g1attribute"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:g2attribute"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="attribute">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="g1attribute">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="g2attribute">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="axes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:vertical_axis"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="vertical_axis">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="grib1" type="c:gribAxis" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="grib2" type="c:gribAxis" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="standard_name"/>
+      <xs:attribute name="unitCompatibleTo" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="variables">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:parameter"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="parameter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="c:grib1"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="c:grib2"/>
+      </xs:sequence>
+      <xs:attribute name="level" type="xs:integer"/>
+      <xs:attribute name="standard_name" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="gribAxis">
+      <xs:attribute name="id" type="xs:integer"/>
+      <xs:attribute name="add_offset" type="xs:integer"/>
+      <xs:attribute name="scale_factor" type="xs:double"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:attribute name="value" type="xs:double"/>
+      <xs:attribute name="units"/>
+  </xs:complexType>
+  <xs:element name="grib1">
+    <xs:complexType>
+      <xs:attribute name="codeTable" type="xs:integer"/>
+      <xs:attribute name="parameterNumber" type="xs:integer"/>
+      <xs:attribute name="units"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="grib2">
+    <xs:complexType>
+      <xs:attribute name="discipline" type="xs:integer"/>
+      <xs:attribute name="parameterCategory" type="xs:integer"/>
+      <xs:attribute name="parameterNumber" type="xs:integer"/>
+      <xs:attribute name="units"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

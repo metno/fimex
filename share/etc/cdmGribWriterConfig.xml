@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cdm_gribwriter_config>
+<cdm_gribwriter_config xmlns="http://www.met.no/schema/fimex/cdmGribWriterConfig"
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--                        xsi:schemaLocation="http://www.met.no/schema/fimex/cdmGribWriterConfig cdmGribWriterConfig.xsd" -->
 <global_attributes>
 	<!-- type can be double, long, string -->
 	<attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
@@ -73,15 +75,15 @@
     <grib1 parameterNumber="248" codeTable="128" units="1/100"/>
 </parameter>
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="8500">
-<!-- low clouds  --> 
+<!-- low clouds  -->
     <grib1 parameterNumber="186" codeTable="128" units="1/100"/>
 </parameter>
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="5000">
-<!--  medium clouds  --> 
+<!--  medium clouds  -->
     <grib1 parameterNumber="187" codeTable="128" units="1/100"/>
 </parameter>
 <parameter standard_name="cloud_area_fraction_in_atmosphere_layer" level="3000">
-<!-- high clouds --> 
+<!-- high clouds -->
     <grib1 parameterNumber="188" codeTable="128" units="1/100"/>
 </parameter>
 </variables>

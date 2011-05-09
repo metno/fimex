@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cdmGribReaderConfig xmlns="http://www.met.no/schema/fimex/cdmGribReaderConfig">
+<cdmGribReaderConfig xmlns="http://www.met.no/schema/fimex/cdmGribReaderConfig"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--                     xsi:schemaLocation="http://www.met.no/schema/fimex/cdmGribReaderConfig cdmGribReaderConfig.xsd" -->
 <processOptions>
     <!-- allow up to 1% numerical errors in gridDefinition -->
     <option name="gridDefinitionDelta" value="0.01"/>
@@ -13,7 +15,7 @@
     <attribute name="title" value="unknown" type="string" />
     <attribute name="min_time" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
     <attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string" />
-    <attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string" /> 
+    <attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string" />
     <attribute name="references" value="unknown" type="string" />
     <!-- <attribute name="history" value="unknown" type="string" /> -->
     <attribute name="comment" value="none" type="string" />
@@ -92,7 +94,7 @@
     </grib1>
     <grib2>
         <attribute name="units" value="Pa" type="string" />
-    </grib2>    
+    </grib2>
 </vertical_axis>
 <vertical_axis id="height" name="height" grib2_id="103" grib1_id="105" type="float">
     <attribute name="description" value="height above ground" type="string" />
@@ -165,7 +167,7 @@
 <variables>
     <parameter name="geopotential_height" type="float">
         <!-- multi-id for grib1 and grib2 -->
-        <grib1 indicatorOfParameter="" gribTablesVersionNo="" identificationOfOriginatingGeneratingCentre=""/>
+        <!-- <grib1 indicatorOfParameter="" gribTablesVersionNo="" identificationOfOriginatingGeneratingCentre=""/> -->
         <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="long_name" value="geopotential_height" type="string" />
@@ -182,7 +184,7 @@
         <grib1 indicatorOfParameter="186" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
         <!-- fog -->
         <grib1 indicatorOfParameter="248" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <grib2 discipline="" parameterCategory="" parameterNumber=""/>
+        <!--  <grib2 discipline="" parameterCategory="" parameterNumber=""/> -->
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="long_name" value="cloud coverage" type="string" />
         <attribute name="units" value="%" type="string" />
@@ -193,7 +195,7 @@
         <attribute name="long_name" value="total_precipitation" type="string" />
         <attribute name="units" value="kg m^-2" type="string" />
     </parameter>
-    
+
 </variables>
 
 </cdmGribReaderConfig>
