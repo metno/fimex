@@ -109,6 +109,9 @@ Configurational options:
                                           coordinate latitude
   --interpolate.longitudeName arg         name for auto-generated projection
                                           coordinate longitude
+  --interpolate.preprocess arg            add a 2d preprocess to before the
+                                          interpolation, i.e.
+                                          "fill2d(critx,cor,maxLoop)"
   --interpolate.printNcML                 print NcML description of
                                           interpolator
   --interpolate.printCS                   print CoordinateSystems of
