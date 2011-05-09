@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -32,9 +32,11 @@ CDMDataType string2datatype(const std::string& s) {
 	if (str == "double") { return CDM_DOUBLE; }
 	else if (str == "float") { return CDM_FLOAT; }
 	else if (str == "int") { return CDM_INT; }
+    else if (str == "long") { return CDM_INT; }
 	else if (str == "short") { return CDM_SHORT; }
 	else if (str == "char") { return CDM_CHAR; }
 	else if (str == "string") { return CDM_STRING; }
+    else if (str == "String") { return CDM_STRING; }
 	else { return CDM_NAT; }
 }
 
