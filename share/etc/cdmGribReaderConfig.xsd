@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           elementFormDefault="qualified"
+           targetNamespace="http://www.met.no/schema/fimex/cdmGribReaderConfig"
+           xmlns:c="http://www.met.no/schema/fimex/cdmGribReaderConfig">
+  <xs:element name="cdmGribReaderConfig">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:processOptions" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="c:global_attributes" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="c:axes" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="c:variables" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="processOptions">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:option"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="option">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="global_attributes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:attribute"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="axes">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:time"/>
+        <xs:element maxOccurs="unbounded" ref="c:spatial_axis"/>
+        <xs:element maxOccurs="unbounded" ref="c:vertical_axis"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="time">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:attribute"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="spatial_axis">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:attribute"/>
+      </xs:sequence>
+      <xs:attribute name="id" use="required" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" type="xs:string"/>
+      <xs:attribute name="typeOfGrid" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="vertical_axis">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:attribute"/>
+        <xs:choice minOccurs="0">
+          <xs:sequence>
+            <xs:element ref="c:values"/>
+            <xs:element maxOccurs="unbounded" ref="c:additional_axis_variable"/>
+          </xs:sequence>
+          <xs:sequence>
+            <xs:element name="grib1" type="c:gribAttr" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="grib2" type="c:gribAttr" minOccurs="0" maxOccurs="1"/>
+          </xs:sequence>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="grib1_id" type="xs:integer"/>
+      <xs:attribute name="grib2_id" type="xs:integer"/>
+      <xs:attribute name="id" use="required" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="additional_axis_variable">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:attribute"/>
+        <xs:element ref="c:values"/>
+      </xs:sequence>
+      <xs:attribute name="axis" use="required" type="xs:string"/>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="variables">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="c:parameter"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="parameter">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:grib1"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:grib2"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:attribute"/>
+      </xs:sequence>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="attribute">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="type" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="values">
+    <xs:complexType>
+      <xs:attribute name="mode" use="required"/>
+      <xs:attribute name="scale_factor" type="xs:decimal"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="gribAttr">
+    <xs:sequence>
+      <xs:element ref="c:attribute"  minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="grib1">
+    <xs:complexType>
+      <xs:attribute name="gribTablesVersionNo" use="required" type="xs:integer"/>
+      <xs:attribute name="identificationOfOriginatingGeneratingCentre" use="required" type="xs:integer"/>
+      <xs:attribute name="indicatorOfParameter" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="grib2">
+    <xs:complexType>
+      <xs:attribute name="discipline" use="required" type="xs:integer"/>
+      <xs:attribute name="parameterCategory" use="required" type="xs:integer"/>
+      <xs:attribute name="parameterNumber" use="required" type="xs:integer"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
