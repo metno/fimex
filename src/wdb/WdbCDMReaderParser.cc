@@ -36,14 +36,11 @@
 //
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 #include <boost/algorithm/string.hpp>
 
 // std
 //
 #include <limits>
-
-namespace po = boost::program_options;
 
 namespace MetNoFimex {
 
@@ -270,36 +267,5 @@ WdbCDMReaderParserInfo WdbCDMReaderParser::parse(const std::string& source, cons
     return wdbInfo;
 }
 
-WdbCDMReaderParserInfo WdbCDMReaderParser::parse(int argc, char* args[], bool bParseConfigFile)
-{
-    // Declare a group of options
-    // relevant only for wdbcdmreader
-    // reader
-    po::options_description config("wdbcdmreader options");
-    config.add_options()
-            ("input.file", po::value<std::string>(), "input file")
-            ("input.config", po::value<std::string>(), "non-standard input configuration")
-            ;
-
-    po::options_description cmdline_options;
-    cmdline_options.add(config);
-
-    // read cmd-line
-    po::variables_map vm;
-    po::store(po::command_line_parser(argc, args).options(cmdline_options).run(), vm);
-    po::notify(vm);
-
-    std::string source;
-    if (vm.count("input.file")) {
-        source = vm["input.file"].as<std::string>();
-    }
-
-    std::string cfgFileName;
-    if (vm.count("input.config")) {
-        cfgFileName = vm["input.config"].as<std::string>();
-    }
-
-    return parse(source, cfgFileName);
-}
 }
 }

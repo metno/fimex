@@ -64,15 +64,6 @@ namespace wdb
         ~WdbCDMReaderParser();
 
         /**
-         * if bParseConfigFile == false, parse() method
-         * will skip to parse the file (even if found
-         * within int argc, char* args[] options)
-         * this method will work for comman line
-         * taken verbatim from main.cpp
-         */
-        WdbCDMReaderParserInfo parse(int argc, char* args[], bool bParseConfigFile = true);
-
-        /**
          * As Fimex is already parsing cmd line we will use that result
          * we are interested in following options:
          *     1. --input.file (sent as 'source' argument)

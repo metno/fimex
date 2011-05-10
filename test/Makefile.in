@@ -452,7 +452,7 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
 @HAVE_LIBPQ_TRUE@wdbTest_SOURCES = Wdb2CdmBuilderTest.cc WdbIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
-@HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.a
+@HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc wdbreadercfg.xml
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
