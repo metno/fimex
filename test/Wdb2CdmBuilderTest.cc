@@ -606,9 +606,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuild
 			const CDMVariable & latitude = cdm.getVariable("latitude");
 			std::vector<std::string> shape = latitude.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK_EQUAL("rlat", shape[0]);
+				BOOST_CHECK_EQUAL("rlon", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK_EQUAL("rlon", shape[1]);
+				BOOST_CHECK_EQUAL("rlat", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_north", cdm.getAttribute("latitude", "units").getStringValue());
 			BOOST_CHECK_EQUAL("latitude", cdm.getAttribute("latitude", "long_name").getStringValue());
@@ -618,9 +618,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuild
 			const CDMVariable & longitude = cdm.getVariable("longitude");
 			std::vector<std::string> shape = longitude.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK_EQUAL("rlat", shape[0]);
+				BOOST_CHECK_EQUAL("rlon", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK_EQUAL("rlon", shape[1]);
+				BOOST_CHECK_EQUAL("rlat", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_east", cdm.getAttribute("longitude", "units").getStringValue());
 			BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("longitude", "long_name").getStringValue());
