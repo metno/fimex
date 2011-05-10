@@ -1,4 +1,4 @@
-SUBDIRS = felt wdb . binSrc
+SUBDIRS = felt . binSrc
 
 AM_CFLAGS = -std=c99 -Wall -pedantic
 AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
@@ -92,6 +92,6 @@ endif
 
 if HAVE_LIBPQ
   libfimex_la_SOURCES += WdbCDMReader.cc
-                         
-libfimex_la_LIBADD += wdb/libwdb.a
 endif
+
+include wdb/make.mk

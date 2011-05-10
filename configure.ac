@@ -159,7 +159,6 @@ AC_CONFIG_FILES([fimex.pc
                           Makefile
                           src/Makefile
                           src/felt/Makefile
-                          src/wdb/Makefile
                           src/binSrc/Makefile
                           test/Makefile
                           share/etc/Makefile

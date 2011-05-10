@@ -41,14 +41,14 @@ if HAVE_LIBPQ
   CC_TESTS += wdbTest
   wdbTest_SOURCES = Wdb2CdmBuilderTest.cc WdbIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
   wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
-  wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/wdb/libwdb.a
+  wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.a
   LDADD += @BOOST_PROGRAM_OPTIONS_LIB@
 test_wdb: wdbTest
 	@./wdbTest
 endif
 
 
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc wdbreadercfg.xml
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 
