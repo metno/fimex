@@ -31,7 +31,7 @@
 #include "RotatedLatLonGridInformation.h"
 #include "MetricGridInformation.h"
 #include "GridInformation.h"
-#include "../DataSanitizer.h"
+#include "../database_access/DataSanitizer.h"
 #include <fimex/coordSys/Projection.h>
 #include <fimex/Data.h>
 #include <fimex/CDM.h>

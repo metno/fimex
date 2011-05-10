@@ -48,14 +48,11 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
 
 @HAVE_MILIB_TRUE@am__append_3 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
-@HAVE_LIBPQ_TRUE@am__append_4 = WdbCDMReader.cc wdb/WdbConnection.h \
-@HAVE_LIBPQ_TRUE@	wdb/WdbConnection.cpp wdb/DataSanitizer.h \
-@HAVE_LIBPQ_TRUE@	wdb/DataSanitizer.cpp wdb/CdmNameTranslator.h \
-@HAVE_LIBPQ_TRUE@	wdb/CdmNameTranslator.cpp wdb/GridData.h \
-@HAVE_LIBPQ_TRUE@	wdb/GridData.cpp wdb/WdbIndex.h \
+@HAVE_LIBPQ_TRUE@am__append_4 = WdbCDMReader.cc \
+@HAVE_LIBPQ_TRUE@	wdb/CdmNameTranslator.h \
+@HAVE_LIBPQ_TRUE@	wdb/CdmNameTranslator.cpp wdb/WdbIndex.h \
 @HAVE_LIBPQ_TRUE@	wdb/WdbIndex.cpp wdb/Wdb2CdmBuilder.h \
-@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.cpp wdb/Parameter.h \
-@HAVE_LIBPQ_TRUE@	wdb/Parameter.cpp wdb/Level.h wdb/Level.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/WdbCDMReaderParser.h \
 @HAVE_LIBPQ_TRUE@	wdb/WdbCDMReaderParser.cc \
 @HAVE_LIBPQ_TRUE@	wdb/WdbCDMReaderParserInfo.h \
@@ -67,9 +64,22 @@ host_triplet = @host@
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/RotatedLatLonGridInformation.h \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/RotatedLatLonGridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/MetricGridInformation.h \
-@HAVE_LIBPQ_TRUE@	wdb/gridInformation/MetricGridInformation.cpp
+@HAVE_LIBPQ_TRUE@	wdb/gridInformation/MetricGridInformation.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/Parameter.h \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/Parameter.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/Level.h \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/Level.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/WdbConnection.h \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/WdbConnection.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/WciReadQuerySpecification.h \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/WciReadQuerySpecification.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/DataSanitizer.h \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/DataSanitizer.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/GridData.h \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/GridData.cpp
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/wdb/make.mk
+	$(srcdir)/wdb/database_access/make.mk \
+	$(srcdir)/wdb/gridInformation/make.mk $(srcdir)/wdb/make.mk
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
@@ -154,12 +164,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
-	WdbCDMReader.cc wdb/WdbConnection.h wdb/WdbConnection.cpp \
-	wdb/DataSanitizer.h wdb/DataSanitizer.cpp \
-	wdb/CdmNameTranslator.h wdb/CdmNameTranslator.cpp \
-	wdb/GridData.h wdb/GridData.cpp wdb/WdbIndex.h \
-	wdb/WdbIndex.cpp wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp \
-	wdb/Parameter.h wdb/Parameter.cpp wdb/Level.h wdb/Level.cpp \
+	WdbCDMReader.cc wdb/CdmNameTranslator.h \
+	wdb/CdmNameTranslator.cpp wdb/WdbIndex.h wdb/WdbIndex.cpp \
+	wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp \
 	wdb/WdbCDMReaderParser.h wdb/WdbCDMReaderParser.cc \
 	wdb/WdbCDMReaderParserInfo.h wdb/WdbCDMReaderParserInfo.cpp \
 	wdb/gridInformation/GridInformation.h \
@@ -169,7 +176,18 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	wdb/gridInformation/RotatedLatLonGridInformation.h \
 	wdb/gridInformation/RotatedLatLonGridInformation.cpp \
 	wdb/gridInformation/MetricGridInformation.h \
-	wdb/gridInformation/MetricGridInformation.cpp
+	wdb/gridInformation/MetricGridInformation.cpp \
+	wdb/database_access/Parameter.h \
+	wdb/database_access/Parameter.cpp wdb/database_access/Level.h \
+	wdb/database_access/Level.cpp \
+	wdb/database_access/WdbConnection.h \
+	wdb/database_access/WdbConnection.cpp \
+	wdb/database_access/WciReadQuerySpecification.h \
+	wdb/database_access/WciReadQuerySpecification.cpp \
+	wdb/database_access/DataSanitizer.h \
+	wdb/database_access/DataSanitizer.cpp \
+	wdb/database_access/GridData.h \
+	wdb/database_access/GridData.cpp
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 @HAVE_GRIBAPI_TRUE@am__objects_2 = GribApiCDMWriter.lo \
@@ -179,14 +197,16 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
 @HAVE_MILIB_TRUE@am__objects_3 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
-@HAVE_LIBPQ_TRUE@am__objects_4 = WdbCDMReader.lo WdbConnection.lo \
-@HAVE_LIBPQ_TRUE@	DataSanitizer.lo CdmNameTranslator.lo \
-@HAVE_LIBPQ_TRUE@	GridData.lo WdbIndex.lo Wdb2CdmBuilder.lo \
-@HAVE_LIBPQ_TRUE@	Parameter.lo Level.lo WdbCDMReaderParser.lo \
+@HAVE_LIBPQ_TRUE@am__objects_4 = WdbCDMReader.lo CdmNameTranslator.lo \
+@HAVE_LIBPQ_TRUE@	WdbIndex.lo Wdb2CdmBuilder.lo \
+@HAVE_LIBPQ_TRUE@	WdbCDMReaderParser.lo \
 @HAVE_LIBPQ_TRUE@	WdbCDMReaderParserInfo.lo GridInformation.lo \
 @HAVE_LIBPQ_TRUE@	LatLonGridInformation.lo \
 @HAVE_LIBPQ_TRUE@	RotatedLatLonGridInformation.lo \
-@HAVE_LIBPQ_TRUE@	MetricGridInformation.lo
+@HAVE_LIBPQ_TRUE@	MetricGridInformation.lo Parameter.lo \
+@HAVE_LIBPQ_TRUE@	Level.lo WdbConnection.lo \
+@HAVE_LIBPQ_TRUE@	WciReadQuerySpecification.lo DataSanitizer.lo \
+@HAVE_LIBPQ_TRUE@	GridData.lo
 am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
@@ -470,7 +490,7 @@ all: all-recursive
 
 .SUFFIXES:
 .SUFFIXES: .c .cc .cpp .lo .o .obj
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/wdb/make.mk $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/wdb/make.mk $(srcdir)/wdb/gridInformation/make.mk $(srcdir)/wdb/database_access/make.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -617,6 +637,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WciReadQuerySpecification.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Wdb2CdmBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbCDMReaderParser.Plo@am__quote@
@@ -788,33 +809,12 @@ VerticalPerspectiveProjection.lo: coordSys/VerticalPerspectiveProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
 
-WdbConnection.lo: wdb/WdbConnection.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbConnection.lo -MD -MP -MF $(DEPDIR)/WdbConnection.Tpo -c -o WdbConnection.lo `test -f 'wdb/WdbConnection.cpp' || echo '$(srcdir)/'`wdb/WdbConnection.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WdbConnection.Tpo $(DEPDIR)/WdbConnection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/WdbConnection.cpp' object='WdbConnection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WdbConnection.lo `test -f 'wdb/WdbConnection.cpp' || echo '$(srcdir)/'`wdb/WdbConnection.cpp
-
-DataSanitizer.lo: wdb/DataSanitizer.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DataSanitizer.lo -MD -MP -MF $(DEPDIR)/DataSanitizer.Tpo -c -o DataSanitizer.lo `test -f 'wdb/DataSanitizer.cpp' || echo '$(srcdir)/'`wdb/DataSanitizer.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/DataSanitizer.Tpo $(DEPDIR)/DataSanitizer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/DataSanitizer.cpp' object='DataSanitizer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DataSanitizer.lo `test -f 'wdb/DataSanitizer.cpp' || echo '$(srcdir)/'`wdb/DataSanitizer.cpp
-
 CdmNameTranslator.lo: wdb/CdmNameTranslator.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CdmNameTranslator.lo -MD -MP -MF $(DEPDIR)/CdmNameTranslator.Tpo -c -o CdmNameTranslator.lo `test -f 'wdb/CdmNameTranslator.cpp' || echo '$(srcdir)/'`wdb/CdmNameTranslator.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/CdmNameTranslator.Tpo $(DEPDIR)/CdmNameTranslator.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/CdmNameTranslator.cpp' object='CdmNameTranslator.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CdmNameTranslator.lo `test -f 'wdb/CdmNameTranslator.cpp' || echo '$(srcdir)/'`wdb/CdmNameTranslator.cpp
-
-GridData.lo: wdb/GridData.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridData.lo -MD -MP -MF $(DEPDIR)/GridData.Tpo -c -o GridData.lo `test -f 'wdb/GridData.cpp' || echo '$(srcdir)/'`wdb/GridData.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GridData.Tpo $(DEPDIR)/GridData.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GridData.cpp' object='GridData.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridData.lo `test -f 'wdb/GridData.cpp' || echo '$(srcdir)/'`wdb/GridData.cpp
 
 WdbIndex.lo: wdb/WdbIndex.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbIndex.lo -MD -MP -MF $(DEPDIR)/WdbIndex.Tpo -c -o WdbIndex.lo `test -f 'wdb/WdbIndex.cpp' || echo '$(srcdir)/'`wdb/WdbIndex.cpp
@@ -829,20 +829,6 @@ Wdb2CdmBuilder.lo: wdb/Wdb2CdmBuilder.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/Wdb2CdmBuilder.cpp' object='Wdb2CdmBuilder.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Wdb2CdmBuilder.lo `test -f 'wdb/Wdb2CdmBuilder.cpp' || echo '$(srcdir)/'`wdb/Wdb2CdmBuilder.cpp
-
-Parameter.lo: wdb/Parameter.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Parameter.lo -MD -MP -MF $(DEPDIR)/Parameter.Tpo -c -o Parameter.lo `test -f 'wdb/Parameter.cpp' || echo '$(srcdir)/'`wdb/Parameter.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Parameter.Tpo $(DEPDIR)/Parameter.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/Parameter.cpp' object='Parameter.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Parameter.lo `test -f 'wdb/Parameter.cpp' || echo '$(srcdir)/'`wdb/Parameter.cpp
-
-Level.lo: wdb/Level.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Level.lo -MD -MP -MF $(DEPDIR)/Level.Tpo -c -o Level.lo `test -f 'wdb/Level.cpp' || echo '$(srcdir)/'`wdb/Level.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Level.Tpo $(DEPDIR)/Level.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/Level.cpp' object='Level.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Level.lo `test -f 'wdb/Level.cpp' || echo '$(srcdir)/'`wdb/Level.cpp
 
 WdbCDMReaderParser.lo: wdb/WdbCDMReaderParser.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbCDMReaderParser.lo -MD -MP -MF $(DEPDIR)/WdbCDMReaderParser.Tpo -c -o WdbCDMReaderParser.lo `test -f 'wdb/WdbCDMReaderParser.cc' || echo '$(srcdir)/'`wdb/WdbCDMReaderParser.cc
@@ -885,6 +871,48 @@ MetricGridInformation.lo: wdb/gridInformation/MetricGridInformation.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/gridInformation/MetricGridInformation.cpp' object='MetricGridInformation.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetricGridInformation.lo `test -f 'wdb/gridInformation/MetricGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/MetricGridInformation.cpp
+
+Parameter.lo: wdb/database_access/Parameter.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Parameter.lo -MD -MP -MF $(DEPDIR)/Parameter.Tpo -c -o Parameter.lo `test -f 'wdb/database_access/Parameter.cpp' || echo '$(srcdir)/'`wdb/database_access/Parameter.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Parameter.Tpo $(DEPDIR)/Parameter.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/Parameter.cpp' object='Parameter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Parameter.lo `test -f 'wdb/database_access/Parameter.cpp' || echo '$(srcdir)/'`wdb/database_access/Parameter.cpp
+
+Level.lo: wdb/database_access/Level.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Level.lo -MD -MP -MF $(DEPDIR)/Level.Tpo -c -o Level.lo `test -f 'wdb/database_access/Level.cpp' || echo '$(srcdir)/'`wdb/database_access/Level.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Level.Tpo $(DEPDIR)/Level.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/Level.cpp' object='Level.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Level.lo `test -f 'wdb/database_access/Level.cpp' || echo '$(srcdir)/'`wdb/database_access/Level.cpp
+
+WdbConnection.lo: wdb/database_access/WdbConnection.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbConnection.lo -MD -MP -MF $(DEPDIR)/WdbConnection.Tpo -c -o WdbConnection.lo `test -f 'wdb/database_access/WdbConnection.cpp' || echo '$(srcdir)/'`wdb/database_access/WdbConnection.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WdbConnection.Tpo $(DEPDIR)/WdbConnection.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/WdbConnection.cpp' object='WdbConnection.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WdbConnection.lo `test -f 'wdb/database_access/WdbConnection.cpp' || echo '$(srcdir)/'`wdb/database_access/WdbConnection.cpp
+
+WciReadQuerySpecification.lo: wdb/database_access/WciReadQuerySpecification.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WciReadQuerySpecification.lo -MD -MP -MF $(DEPDIR)/WciReadQuerySpecification.Tpo -c -o WciReadQuerySpecification.lo `test -f 'wdb/database_access/WciReadQuerySpecification.cpp' || echo '$(srcdir)/'`wdb/database_access/WciReadQuerySpecification.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WciReadQuerySpecification.Tpo $(DEPDIR)/WciReadQuerySpecification.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/WciReadQuerySpecification.cpp' object='WciReadQuerySpecification.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WciReadQuerySpecification.lo `test -f 'wdb/database_access/WciReadQuerySpecification.cpp' || echo '$(srcdir)/'`wdb/database_access/WciReadQuerySpecification.cpp
+
+DataSanitizer.lo: wdb/database_access/DataSanitizer.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DataSanitizer.lo -MD -MP -MF $(DEPDIR)/DataSanitizer.Tpo -c -o DataSanitizer.lo `test -f 'wdb/database_access/DataSanitizer.cpp' || echo '$(srcdir)/'`wdb/database_access/DataSanitizer.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/DataSanitizer.Tpo $(DEPDIR)/DataSanitizer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/DataSanitizer.cpp' object='DataSanitizer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DataSanitizer.lo `test -f 'wdb/database_access/DataSanitizer.cpp' || echo '$(srcdir)/'`wdb/database_access/DataSanitizer.cpp
+
+GridData.lo: wdb/database_access/GridData.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridData.lo -MD -MP -MF $(DEPDIR)/GridData.Tpo -c -o GridData.lo `test -f 'wdb/database_access/GridData.cpp' || echo '$(srcdir)/'`wdb/database_access/GridData.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GridData.Tpo $(DEPDIR)/GridData.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/GridData.cpp' object='GridData.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridData.lo `test -f 'wdb/database_access/GridData.cpp' || echo '$(srcdir)/'`wdb/database_access/GridData.cpp
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

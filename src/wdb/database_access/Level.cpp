@@ -27,7 +27,6 @@
  */
 
 #include "Level.h"
-#include "CdmNameTranslator.h"
 #include <fimex/CDM.h>
 #include <ostream>
 

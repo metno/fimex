@@ -30,7 +30,7 @@
 #define DATAINDEX_H_
 
 #include "WdbIndex.h"
-#include "GridData.h"
+#include "database_access/GridData.h"
 #include <vector>
 #include <map>
 #include <string>

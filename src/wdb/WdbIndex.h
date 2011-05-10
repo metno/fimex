@@ -29,7 +29,7 @@
 #ifndef WDBINDEX_H_
 #define WDBINDEX_H_
 
-#include "GridData.h"
+#include "database_access/GridData.h"
 #include <vector>
 #include <string>
 #include <map>

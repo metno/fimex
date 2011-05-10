@@ -28,7 +28,7 @@
 
 #include "GridData.h"
 #include "DataSanitizer.h"
-#include "WdbCDMReaderParser.h"
+#include "../WdbCDMReaderParserInfo.h"
 
 namespace MetNoFimex
 {
