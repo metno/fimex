@@ -107,7 +107,7 @@ boost::shared_ptr<Data> MetricGridInformation::getField(const CDMVariable & vari
 		ret = createData(variable.getDataType(), numberX() * numberY());
 		convertLatLon();
 		double * output = reinterpret_cast<double *>(ret->getDataPtr());
-		std::copy(longitudes_.begin(), longitudes_.end(), output);
+		std::copy(latitudes_.begin(), latitudes_.end(), output);
 	}
 	else
 		ret = GridInformation::getField(variable);
