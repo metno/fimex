@@ -755,7 +755,7 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)
 		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
 		BOOST_CHECK_EQUAL("C", cdm.getAttribute(cdmId(), "units").getStringValue());
 		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
-		BOOST_CHECK_EQUAL("rlon rlat", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
+		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )
 	{

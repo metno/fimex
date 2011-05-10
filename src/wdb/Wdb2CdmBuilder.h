@@ -75,6 +75,13 @@ public:
 	 */
 	bool isDatabaseField(const std::string & variableName) const;
 
+	bool isLevel(const std::string & levelName) const
+	{
+		return getLevelValues(levelName);
+	}
+
+	const std::set<float> * getLevelValues(const std::string & levelName) const;
+
 	/**
 	 * get all grid idenitfiers for the given variable name and timestep
 	 */

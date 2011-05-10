@@ -67,12 +67,12 @@ void MetricGridInformation::addToCdm(CDM & cdm) const
 
 	std::vector<std::string> dimensions = boost::assign::list_of("yc")("xc");
 
-	cdm.addVariable(CDMVariable("lon1", CDM_FLOAT, dimensions));
+	cdm.addVariable(CDMVariable("lon1", CDM_DOUBLE, dimensions));
 	cdm.addAttribute("lon1", CDMAttribute("units", "degree_east"));
 	cdm.addAttribute("lon1", CDMAttribute("long_name", "longitude"));
 	cdm.addAttribute("lon1", CDMAttribute("standard_name", "longitude"));
 
-	cdm.addVariable(CDMVariable("lat1", CDM_FLOAT, dimensions));
+	cdm.addVariable(CDMVariable("lat1", CDM_DOUBLE, dimensions));
 	cdm.addAttribute("lat1", CDMAttribute("units", "degree_north"));
 	cdm.addAttribute("lat1", CDMAttribute("long_name", "latitude"));
 	cdm.addAttribute("lat1", CDMAttribute("standard_name", "latitude"));
@@ -129,13 +129,12 @@ void MetricGridInformation::convertLatLon() const
 		latitudes_.reserve(numberX() * numberY() );
 
 
-		for ( unsigned i = 0; i < numberX(); ++ i )
-			for ( unsigned j = 0; j < numberY(); ++ j)
-				longitudes_.push_back(startX() + (incrementX() * i));
-
-		for ( unsigned i = 0; i < numberX(); ++ i )
-			for ( unsigned j = 0; j < numberY(); ++ j)
-				latitudes_.push_back(startY() + (incrementY() * j));
+		for ( unsigned y = 0; y < numberY(); ++ y)
+			for ( unsigned x = 0; x < numberX(); ++ x )
+			{
+				longitudes_.push_back(startX() + (incrementX() * x));
+				latitudes_.push_back(startY() + (incrementY() * y));
+			}
 
 		projection_->convertToLonLat(longitudes_, latitudes_);
 	}

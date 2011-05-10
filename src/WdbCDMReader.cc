@@ -106,7 +106,7 @@ GxWdbCDMReader::~GxWdbCDMReader()
 boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 		const std::string& varName, size_t unLimDimPos)
 {
-	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");";
+	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");" << std::flush;
 
 	boost::shared_ptr<Data> ret;
 	const CDMVariable& variable = cdm_->getVariable(varName);
@@ -136,6 +136,16 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 				const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
 				dataIdx += gridInfo.numberX() * gridInfo.numberY();
 			}
+	}
+	else if ( d_->dataIndex->isLevel(wdbName) )
+	{
+		const std::set<float> * levels = d_->dataIndex->getLevelValues(wdbName);
+		if ( ! levels )
+			throw CDMException("Internal error request for nonexisting level: " + wdbName);
+
+		ret = createData(variable.getDataType(), levels->size());
+		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
+		std::copy(levels->begin(), levels->end(), dataIdx);
 	}
 	else if ( varName == "forecast_reference_time" )
 	{

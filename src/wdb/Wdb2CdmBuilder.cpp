@@ -76,6 +76,11 @@ bool Wdb2CdmBuilder::isDatabaseField(const std::string & variableName) const
 	return index_.hasParameter(variableName);
 }
 
+const std::set<float> * Wdb2CdmBuilder::getLevelValues(const std::string & levelName) const
+{
+	return index_.getLevelValues(levelName);
+}
+
 const GridInformation & Wdb2CdmBuilder::gridInformation() const
 {
 	// Several grid types in same wdb is not supported (yet)
@@ -214,6 +219,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 		std::vector<std::string> spatialDimensions;
 		gridInformation().addSpatialDimensions(spatialDimensions);
 
+
 		std::vector<std::string> dimensions = spatialDimensions;
 		if ( index_.versionsForParameter(parameter).size() > 1 )
 			dimensions.push_back("version");
@@ -228,7 +234,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForParameter(parameter)));
 		cdm.addAttribute(dimension, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));
-		cdm.addAttribute(dimension, CDMAttribute("coordinates", spatialDimensions.front() + " " + spatialDimensions.back()));
+		cdm.addAttribute(dimension, CDMAttribute("coordinates", "longitude latitude"/*spatialDimensions.front() + " " + spatialDimensions.back()*/));
 	}
 }
 

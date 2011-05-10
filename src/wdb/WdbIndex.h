@@ -115,6 +115,19 @@ public:
 		return data_.find(parameter) != data_.end();
 	}
 
+	bool isLevel(const std::string & levelName) const
+	{
+		return allLevels_.find(levelName) != allLevels_.end();
+	}
+
+	const std::set<float> * getLevelValues(const std::string & levelName) const
+	{
+		std::map<std::string, std::set<float> >::const_iterator find = allLevels_.find(levelName);
+		if ( find == allLevels_.end() )
+			return 0;
+		return & find->second;
+	}
+
 	/**
 	 * Get data's reference time
 	 */

@@ -113,7 +113,7 @@ boost::shared_ptr<Data> RotatedLatLonGridInformation::getField(const CDMVariable
 		ret = createData(variable.getDataType(), numberX() * numberY());
 		convertLatLon();
 		double * output = reinterpret_cast<double *>(ret->getDataPtr());
-		std::copy(longitudes_.begin(), longitudes_.end(), output);
+		std::copy(latitudes_.begin(), latitudes_.end(), output);
 	}
 	else
 		ret = GridInformation::getField(variable);
@@ -135,13 +135,12 @@ void RotatedLatLonGridInformation::convertLatLon() const
 		latitudes_.reserve(numberX() * numberY() );
 
 
-		for ( unsigned i = 0; i < numberX(); ++ i )
-			for ( unsigned j = 0; j < numberY(); ++ j)
-				longitudes_.push_back(startX() + (incrementX() * i));
-
-		for ( unsigned i = 0; i < numberX(); ++ i )
-			for ( unsigned j = 0; j < numberY(); ++ j)
-				latitudes_.push_back(startY() + (incrementY() * j));
+		for ( unsigned y = 0; y < numberY(); ++ y)
+			for ( unsigned x = 0; x < numberX(); ++ x )
+			{
+				longitudes_.push_back(startX() + (incrementX() * x));
+				latitudes_.push_back(startY() + (incrementY() * y));
+			}
 
 		projection_->convertToLonLat(longitudes_, latitudes_);
 	}
