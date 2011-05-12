@@ -43,6 +43,7 @@ namespace wdb
 {
 class GridInformation;
 class WdbCDMReaderParserInfo;
+class WciReadQuerySpecification;
 
 /**
  * A connection to a wdb database, with useful queries created as methods on
@@ -70,7 +71,7 @@ public:
 	 *
 	 * @throws WdbException on error
 	 */
-	void readGid(std::vector<GridData> & out, const WdbCDMReaderParserInfo & connectionSpec);
+	void readGid(std::vector<GridData> & out, const WciReadQuerySpecification & readParameters);
 
 
 	typedef boost::shared_ptr<GridInformation> GridInformationPtr;

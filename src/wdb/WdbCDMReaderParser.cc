@@ -55,7 +55,7 @@ WdbCDMReaderParser::~WdbCDMReaderParser()
 {
 }
 
-std::pair<std::string, std::string> WdbCDMReaderParser::getNameValuePairForXmlPath(const XMLDoc& doc, const std::string& path)
+WdbCDMReaderParser::NameValuePair WdbCDMReaderParser::getNameValuePairForXmlPath(const XMLDoc& doc, const std::string& path)
 {
     if(path.empty()) // just return empty
         return std::make_pair(std::string(), std::string());
@@ -94,9 +94,9 @@ std::pair<std::string, std::string> WdbCDMReaderParser::getNameValuePairForXmlPa
     return std::make_pair(name, value);
 }
 
-std::vector<std::pair<std::string, std::string> > WdbCDMReaderParser::getNameValuePairsForXmlPath(const XMLDoc& doc, const std::string& path)
+std::vector<WdbCDMReaderParser::NameValuePair > WdbCDMReaderParser::getNameValuePairsForXmlPath(const XMLDoc& doc, const std::string& path)
 {
-    std::vector<std::pair<std::string, std::string> > pairs;
+    std::vector<NameValuePair > pairs;
     if(path.empty()) // just return empty
         return pairs;
 
@@ -124,9 +124,9 @@ std::vector<std::pair<std::string, std::string> > WdbCDMReaderParser::getNameVal
     return pairs;
 }
 
-std::vector<std::pair<std::string, std::string> > WdbCDMReaderParser::getAttributesForXmlPath(const XMLDoc& doc, const std::string& path)
+std::vector<WdbCDMReaderParser::NameValuePair > WdbCDMReaderParser::getAttributesForXmlPath(const XMLDoc& doc, const std::string& path)
 {
-    std::vector<std::pair<std::string, std::string> > pairs;
+    std::vector<NameValuePair > pairs;
     if(path.empty()) // just return empty
         return pairs;
 
@@ -169,11 +169,11 @@ void WdbCDMReaderParser::parseCfgFile(const std::string& cfgFileName, WdbCDMRead
     //
     XMLDoc doc(cfgFileName);
 
-    std::vector<std::pair<std::string, std::string> >
+    std::vector<NameValuePair >
             wdbConnectionAttributes =
                     getAttributesForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/wdb_connection");
     if(!wdbConnectionAttributes.empty()) {
-        std::vector<std::pair<std::string, std::string> >::const_iterator cit;
+        std::vector<NameValuePair >::const_iterator cit;
         for(cit = wdbConnectionAttributes.begin(); cit != wdbConnectionAttributes.end(); ++cit) {
             std::string name = cit->first;
             std::string value = cit->second;
@@ -191,13 +191,38 @@ void WdbCDMReaderParser::parseCfgFile(const std::string& cfgFileName, WdbCDMRead
         }
     }
 
-    info.referenceTime_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/reference_times/time").second;
-    info.provider_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_providers/provider").second;
-    info.place_ = getNameValuePairForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/grid_places/place").second;
+    WciReadQuerySpecification & readSpec = info.wciReadQuerySpecification_;
 
-    std::vector<std::pair<std::string, std::string> > globals =
+
+    std::vector<NameValuePair> dataProviders = getNameValuePairsForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_providers/provider");
+    for ( std::vector<NameValuePair>::const_iterator it = dataProviders.begin(); it != dataProviders.end(); ++ it )
+    	readSpec.addDataProvider(it->second);
+
+    std::vector<NameValuePair> parameters = getNameValuePairsForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/value_parameter/parameter");
+    for ( std::vector<NameValuePair>::const_iterator it = parameters.begin(); it != parameters.end(); ++ it )
+    	readSpec.addParameter(it->second);
+
+    std::vector<NameValuePair> dataVersions = getNameValuePairsForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/data_version/version");
+    for ( std::vector<NameValuePair>::const_iterator it = dataVersions.begin(); it != dataVersions.end(); ++ it )
+    	readSpec.addDataVersion(boost::lexical_cast<int>(it->second));
+
+
+    std::vector<NameValuePair> location = getNameValuePairsForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/grid_places/place");
+    if ( location.size() == 1 )
+    	readSpec.setLocation(location.front().second);
+    else if ( location.size() > 1 )
+    	throw CDMException("Only one place name is allowed in configuration");
+
+    std::vector<NameValuePair> referenceTime = getNameValuePairsForXmlPath(doc, "/wdb_fimex_config/wdb_parameters/reference_times/time");
+    if ( referenceTime.size() == 1 )
+    	readSpec.setReferenceTime(referenceTime.front().second);
+    else if ( referenceTime.size() > 1 )
+    	throw CDMException("Only one reference time is allowed in configuration");
+
+
+    std::vector<NameValuePair > globals =
     		getAttributesForXmlPath(doc, "/wdb_fimex_config/global_attributes");
-    for ( std::vector<std::pair<std::string, std::string> >::const_iterator it = globals.begin(); it != globals.end(); ++ it )
+    for ( std::vector<NameValuePair >::const_iterator it = globals.begin(); it != globals.end(); ++ it )
     	info.globalAttributes_.push_back(CDMAttribute(it->first, it->second));
 }
 
@@ -237,28 +262,37 @@ void WdbCDMReaderParser::parseSource(const std::string& source, WdbCDMReaderPars
     if(splitmap.find("wciUser") != splitmap.end())
         info.wciUser_ = splitmap["wciUser"];
 
+    WciReadQuerySpecification & querySpec = info.wciReadQuerySpecification_;
+
     if(splitmap.find("provider") != splitmap.end())
-        info.provider_ = splitmap["provider"];
+    {
+    	querySpec.clearDataProvider();
+        querySpec.addDataProvider(splitmap["provider"]);
+    }
 
     if(splitmap.find("place") != splitmap.end())
-        info.place_ = splitmap["place"];
+    {
+    	querySpec.clearLocation();
+    	querySpec.setLocation(splitmap["place"]);
+    }
 
     // as ISO formated string
     // convert to POSIX time ?
     if(splitmap.find("refTime") != splitmap.end())
-        info.referenceTime_ = splitmap["refTime"];
+    {
+    	querySpec.clearReferenceTime();
+    	querySpec.setReferenceTime(splitmap["refTime"]);
+    }
 
     if(splitmap.find("dbPort") != splitmap.end())
         info.wdbPort_ = boost::lexical_cast<unsigned int>(splitmap["dbPort"]);
 }
 
-WdbCDMReaderParserInfo WdbCDMReaderParser::parse(const std::string& source, const std::string& configFileName, bool bParseConfigFile)
+WdbCDMReaderParserInfo WdbCDMReaderParser::parse(const std::string& source, const std::string& configFileName)
 {
     WdbCDMReaderParserInfo wdbInfo;
 
-    if(!configFileName.empty() && bParseConfigFile) {
-        parseCfgFile(configFileName, wdbInfo);
-    }
+	parseCfgFile(configFileName, wdbInfo);
 
     // source - stuff from command line
     // will override config file

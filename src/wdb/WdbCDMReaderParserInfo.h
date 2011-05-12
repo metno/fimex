@@ -29,6 +29,7 @@
 #ifndef WDBCDMREADERPARSERINFO_H_
 #define WDBCDMREADERPARSERINFO_H_
 
+#include "database_access/WciReadQuerySpecification.h"
 #include <fimex/CDMAttribute.h>
 #include <string>
 
@@ -61,22 +62,27 @@ public:
 
     std::string configFileName() const;
 
-    std::string provider() const;
-    std::string place() const;
-    std::string referenceTime() const;
+
+    const WciReadQuerySpecification & getWciReadQuerySpecification() const
+    {
+    	return wciReadQuerySpecification_;
+    }
+
 
     const std::vector<CDMAttribute> & globalAttributes() const { return globalAttributes_; }
 
 private:
+
+    std::string    configFileName_;
+
     std::string    wdbHost_;
     std::string    wdbName_;
     std::string    wdbUser_;
-    std::string    wciUser_;
-    std::string    configFileName_;
-    std::string    provider_;
-    std::string    place_;
-    std::string    referenceTime_;
     unsigned short wdbPort_;
+
+    std::string    wciUser_;
+
+    WciReadQuerySpecification wciReadQuerySpecification_;
 
     std::vector<CDMAttribute> globalAttributes_;
 

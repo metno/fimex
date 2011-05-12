@@ -80,21 +80,6 @@ std::string WdbCDMReaderParserInfo::configFileName() const
     return configFileName_;
 }
 
-std::string WdbCDMReaderParserInfo::provider() const
-{
-    return provider_;
-}
-
-std::string WdbCDMReaderParserInfo::place() const
-{
-    return place_;
-}
-
-std::string WdbCDMReaderParserInfo::referenceTime() const
-{
-    return referenceTime_;
-}
-
 unsigned short WdbCDMReaderParserInfo::wdbPort() const
 {
     return wdbPort_;

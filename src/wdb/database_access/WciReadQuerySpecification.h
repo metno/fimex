@@ -35,37 +35,60 @@
 
 namespace MetNoFimex
 {
-
 namespace wdb
 {
+class DataSanitizer;
+
 
 class WciReadQuerySpecification
 {
 public:
 	WciReadQuerySpecification();
 
-	std::string query() const;
+	std::string query(const DataSanitizer & sanitizer) const;
 
 	typedef boost::posix_time::ptime Time;
 
 	void addDataProvider(const std::string & dataProvider);
 	void setLocation(const std::string & location);
-	void setReferenceTime(const Time & referenceTime);
 	void setReferenceTime(const std::string & referenceTime);
 	void addParameter(const std::string & parameter);
 	void addDataVersion(int version);
 
+	void clearDataProvider() { dataProvider_.clear(); }
+	void clearLocation() { location_ = std::string(); }
+	void clearReferenceTime() { referenceTime_ = std::string(); }
+	void clearParameter() { parameter_.clear(); }
+	void clearDataVersion() { dataVersion_.clear(); }
+
 	const std::set<std::string> * dataProvider() const { return dataProvider_.empty() ? 0 : & dataProvider_; };
 	const std::string * location() const { return location_.empty() ? 0 : & location_; };
-	const Time * referenceTime() const { return referenceTime_.is_not_a_date_time() ? 0 : & referenceTime_; };
+	const std::string * referenceTime() const { return referenceTime_.empty() ? 0 : & referenceTime_; };
 	const std::set<std::string> * parameter() const { return parameter_.empty() ? 0 : & parameter_; };
 	const std::set<int> * dataVersion() const { return dataVersion_.empty() ? 0 : & dataVersion_; };
 
 
+	// Data from wci.read comes in this order
+	enum ReadIdx
+	{
+		ValueParameterName,
+		ValueParameterUnit,
+		LevelParameterName,
+		LevelUnitName,
+		LevelFrom,
+		LevelTo,
+		DataVersion,
+		ReferenceTime,
+		ValidTimeFrom,
+		ValidTimeTo,
+		PlaceName,
+		Value
+	};
+
 private:
 	std::set<std::string> dataProvider_;
 	std::string location_;
-	Time referenceTime_;
+	std::string referenceTime_;
 	std::set<std::string> parameter_;
 	std::set<int> dataVersion_;
 };

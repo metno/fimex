@@ -40,6 +40,7 @@ namespace wdb
 WdbConnection::WdbConnection(const WdbCDMReaderParserInfo & connectionSpec)
 {
 	std::string connectString = connectionSpec.databaseConnectString();
+
 	connection_ = PQconnectdb(connectString.c_str());
 	if ( !isConnected() )
 		throw WdbException(connection_);
@@ -80,13 +81,15 @@ public:
 };
 }
 
-void WdbConnection::readGid(std::vector<GridData> & out, const WdbCDMReaderParserInfo & connectionSpec)
+void WdbConnection::readGid(std::vector<GridData> & out, const WciReadQuerySpecification & readParameters)
 {
-	std::string query = GridData::query(connectionSpec, DataSanitizer(connection_));
+	std::string query = readParameters.query(DataSanitizer(connection_));
 	std::cout << query << std::endl;
+
 	Scoped_PGresult result(call_(query));
 
 	int tuples = PQntuples(result.get());
+
 	for ( int i = 0; i < tuples; ++ i )
 	{
 		GridData gridData(result.get(), i);
@@ -94,7 +97,7 @@ void WdbConnection::readGid(std::vector<GridData> & out, const WdbCDMReaderParse
 	}
 
 	// Add grid information to data
-	for ( int i = out.size() - tuples; i < out.size(); ++ i )
+	for ( unsigned i = out.size() - tuples; i < out.size(); ++ i )
 	{
 		GridData & gridData = out[i];
 		GridInformationPtr gridInfo = readGridInformation(gridData.placeName());

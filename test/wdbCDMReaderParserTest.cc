@@ -27,7 +27,10 @@
 */
 
 #include <fimex/CDM.h>
+#include <fimex/CDMException.h>
 #include <wdb/WdbCDMReaderParser.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 // std
 //
@@ -47,123 +50,298 @@ using namespace MetNoFimex::wdb;
 
 BOOST_AUTO_TEST_SUITE(WdbCDMReaderParserTest)
 
-BOOST_AUTO_TEST_CASE(testParseOnlySource)
+class Fixture
 {
-    std::string cfgFileName; // empty
-    std::string source("dbHost=localhost;dbPort=5432;dbName=wdb;dbUser=wdb");
-
-    WdbCDMReaderParser parser;
+public:
     WdbCDMReaderParserInfo wdbInfo;
 
-    wdbInfo =  parser.parse(source, cfgFileName, false);
+    void parseSource(const std::string & source)
+    {
+		WdbCDMReaderParser parser;
+        wdbInfo = parser.parse(source, std::string());
+    }
 
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "localhost");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "");
+    void parseConfig(const std::string & relativeConfigFileName)
+    {
+    	WdbCDMReaderParser parser;
+        std::string cfgFileName = TEST_DIR "/" + relativeConfigFileName;
+        wdbInfo = parser.parse(std::string(), cfgFileName);
+    }
 
+    void parse(const std::string & source, const std::string & relativeConfigFileName)
+    {
+    	WdbCDMReaderParser parser;
+        std::string cfgFileName = TEST_DIR "/" + relativeConfigFileName;
+        wdbInfo = parser.parse(source, cfgFileName);
+
+    }
+};
+
+
+BOOST_FIXTURE_TEST_CASE(parseOnlySource, Fixture)
+{
+	parseSource("dbHost=localhost;dbPort=5432;dbName=wdb;dbUser=wdb");
+
+    BOOST_CHECK_EQUAL(wdbInfo.wdbHost(), "localhost");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbUser(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbPort(), 5432);
+
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    BOOST_CHECK(! qSpec.dataProvider());
+    BOOST_CHECK(! qSpec.location());
+    BOOST_CHECK(! qSpec.referenceTime());
+    BOOST_CHECK(! qSpec.parameter());
+    BOOST_CHECK(! qSpec.dataVersion());
+}
+
+BOOST_FIXTURE_TEST_CASE(testParseQuerySpec, Fixture)
+{
     // add provider and place
 
-    std::string newSource("dbHost=proffdb-devel.met.no;dbName=wdb;dbUser=wdb;wciUser=proffread;dbPort=5432;refTime=20110209T120000;provider=snoeskred;place=snoeskred grid");
+	std::string source =
+			"refTime=20110209T120000;"
+			"provider=snoeskred;"
+			"place=snoeskred grid";
 
-    wdbInfo =  parser.parse(newSource, cfgFileName, false);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "snoeskred");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "snoeskred grid");
+	parseSource(source);
 
-    wdbInfo =  parser.parse(newSource, cfgFileName);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "snoeskred");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "snoeskred grid");
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    const std::set<std::string> * dataProvider = qSpec.dataProvider();
+    BOOST_CHECK(dataProvider);
+    if ( dataProvider )
+    {
+		BOOST_CHECK_EQUAL(1, dataProvider->size());
+		BOOST_CHECK(dataProvider->find("snoeskred") != dataProvider->end());
+    }
 
+    const std::string * location = qSpec.location();
+    BOOST_CHECK(location);
+    if ( location )
+    	BOOST_CHECK_EQUAL("snoeskred grid", * location);
+
+    const std::string * referenceTime = qSpec.referenceTime();
+    BOOST_CHECK(referenceTime);
+    if ( referenceTime )
+    	BOOST_CHECK_EQUAL("20110209T120000", * referenceTime);
+}
+
+BOOST_FIXTURE_TEST_CASE(testParseOnlySourceDataShuffled, Fixture)
+{
     // shuffle data
-    std::string newerSource("dbHost=proffdb-devel.met.no;Name=wdb;dbName=wdb;dbUser=wdb;place=snoeskred grid;wciUser=proffread;dbPort=5432;refTime=20110209T120000;provider=snoeskred;");
+	parseSource("dbHost=proffdb-devel.met.no;"
+			"Name=wdb;"
+			"dbName=wdb;"
+			"dbUser=wdb;"
+			"place=snoeskred grid;"
+			"wciUser=proffread;"
+			"dbPort=5432;"
+			"refTime=20110209T120000;"
+			"provider=snoeskred;");
 
-    wdbInfo =  parser.parse(newerSource, cfgFileName);
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wciUser(), "proffread");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "snoeskred");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "snoeskred grid");
-    BOOST_REQUIRE_EQUAL(wdbInfo.referenceTime(), "20110209T120000");
+	BOOST_CHECK_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbUser(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wciUser(), "proffread");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbPort(), 5432);
 
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    const std::set<std::string> * dataProvider = qSpec.dataProvider();
+    BOOST_CHECK(dataProvider);
+    if ( dataProvider )
+    {
+		BOOST_CHECK_EQUAL(1, dataProvider->size());
+		BOOST_CHECK(dataProvider->find("snoeskred") != dataProvider->end());
+    }
+
+    const std::string * location = qSpec.location();
+    BOOST_CHECK(location);
+    if ( location )
+    	BOOST_CHECK_EQUAL("snoeskred grid", * location);
+
+    const std::string * referenceTime = qSpec.referenceTime();
+    BOOST_CHECK(referenceTime);
+	if ( referenceTime )
+    	BOOST_CHECK_EQUAL("20110209T120000", * referenceTime);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(emptySource, Fixture)
+{
     // empty source
-    std::string emptySource("");
+	parseSource("");
 
-    wdbInfo =  parser.parse(emptySource, cfgFileName);
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wciUser(), "");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbHost(), "");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbName(), "");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbUser(), "");
+    BOOST_CHECK_EQUAL(wdbInfo.wciUser(), "");
 
     // by default
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
+    BOOST_CHECK_EQUAL(wdbInfo.wdbPort(), 5432);
 
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "");
-}
-
-BOOST_AUTO_TEST_CASE(testConfigFileOnly1)
-{
-    std::string cfgFileName(TEST_DIR"/wdbreadercfg.xml");
-    std::string source; // empty
-
-    WdbCDMReaderParser parser;
-    WdbCDMReaderParserInfo wdbInfo;
-
-    wdbInfo = parser.parse(source, cfgFileName);
-
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wciUser(), "proffwrite");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "met.no");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "norge grid");
-    BOOST_REQUIRE_EQUAL(wdbInfo.referenceTime(), "20110210T000000");
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    BOOST_CHECK(! qSpec.dataProvider());
+    BOOST_CHECK(! qSpec.location());
+    BOOST_CHECK(! qSpec.referenceTime());
+    BOOST_CHECK(! qSpec.parameter());
+    BOOST_CHECK(! qSpec.dataVersion());
 }
 
 
-BOOST_AUTO_TEST_CASE(testConfigFileOnly2)
+
+BOOST_FIXTURE_TEST_CASE(testConfigFileOnly1, Fixture)
 {
-	WdbCDMReaderParser parser;
+    parseConfig("wdbreadercfg.xml");
 
-    std::string cfgFileNameLocal(TEST_DIR"/local_wdb_config.xml");
-    WdbCDMReaderParserInfo wdbInfo = parser.parse(std::string(), cfgFileNameLocal);
+    BOOST_CHECK_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbUser(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wciUser(), "proffwrite");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbPort(), 5432);
 
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "localhost");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "vegardb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wciUser(), "vegardb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "met.no eceps modification");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "norway 025");
+
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    const std::set<std::string> * dataProvider = qSpec.dataProvider();
+    BOOST_CHECK(dataProvider);
+    if ( dataProvider )
+    {
+		BOOST_CHECK_EQUAL(1, dataProvider->size());
+		BOOST_CHECK(dataProvider->find("met.no") != dataProvider->end());
+    }
+
+    const std::string * location = qSpec.location();
+    BOOST_CHECK(location);
+    if ( location )
+    	BOOST_CHECK_EQUAL("norge grid", * location);
+
+    const std::string * referenceTime = qSpec.referenceTime();
+    BOOST_CHECK(referenceTime);
+    if ( referenceTime )
+    	BOOST_CHECK_EQUAL("20110210T000000", * referenceTime);
 }
 
 
-BOOST_AUTO_TEST_CASE(testSourceAndConfigFile)
+BOOST_FIXTURE_TEST_CASE(testConfigFileOnly2, Fixture)
 {
-    std::string cfgFileName(TEST_DIR"/wdbreadercfg.xml");
-    std::string source("dbHost=proffdb-devel.met.no;wciUser=proffread;refTime=20110209T120000;provider=snoeskred");
+	parseConfig("local_wdb_config.xml");
 
-    /**
-      * source will override config file
-      */
-    WdbCDMReaderParser parser;
-    WdbCDMReaderParserInfo wdbInfo;
+    BOOST_CHECK_EQUAL(wdbInfo.wdbHost(), "localhost");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbUser(), "vegardb");
+    BOOST_CHECK_EQUAL(wdbInfo.wciUser(), "vegardb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbPort(), 5432);
 
-    wdbInfo =  parser.parse(source, cfgFileName);
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    const std::set<std::string> * dataProvider = qSpec.dataProvider();
+    BOOST_CHECK(dataProvider);
+	if ( dataProvider )
+    {
+		BOOST_CHECK_EQUAL(1, dataProvider->size());
+		BOOST_CHECK(dataProvider->find("met.no eceps modification") != dataProvider->end());
+    }
 
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbName(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbUser(), "wdb");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wciUser(), "proffread");
-    BOOST_REQUIRE_EQUAL(wdbInfo.wdbPort(), 5432);
-    BOOST_REQUIRE_EQUAL(wdbInfo.provider(), "snoeskred");
-    BOOST_REQUIRE_EQUAL(wdbInfo.place(), "norge grid");
-    BOOST_REQUIRE_EQUAL(wdbInfo.referenceTime(), "20110209T120000");
+    const std::string * location = qSpec.location();
+    BOOST_CHECK(location);
+    if ( location )
+    	BOOST_CHECK_EQUAL("norway 025", * location);
+
+    BOOST_CHECK(! qSpec.referenceTime());
+}
+
+BOOST_FIXTURE_TEST_CASE(manyDataProviders, Fixture)
+{
+	parseConfig("wdbreadercfg2.xml");
+
+	const std::set<std::string> * dataProviders = wdbInfo.getWciReadQuerySpecification().dataProvider();
+
+	BOOST_REQUIRE(dataProviders);
+
+	BOOST_CHECK_EQUAL(2, dataProviders->size());
+	BOOST_CHECK(dataProviders->find("provider 1") != dataProviders->end());
+	BOOST_CHECK(dataProviders->find("provider 2") != dataProviders->end());
+}
+
+BOOST_FIXTURE_TEST_CASE(configFileWithoutContents, Fixture)
+{
+	// An exception here may mean that many other tests are invalid. If an
+	// exception is thrown bacause a specific key is not found, many
+	// specialized tests will pass - maybe falsely, because they expect their
+	// parsing to fail.
+	parseConfig("wdb_no_content.xml");
+}
+
+BOOST_FIXTURE_TEST_CASE(manyLocationsThrows, Fixture)
+{
+	BOOST_CHECK_THROW(parseConfig("wdb_many_locations.xml"), MetNoFimex::CDMException);
+}
+
+BOOST_FIXTURE_TEST_CASE(manyReferenceTimesThrows, Fixture)
+{
+	BOOST_CHECK_THROW(parseConfig("wdb_many_reference_times.xml"), MetNoFimex::CDMException);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(manyParameters, Fixture)
+{
+	parseConfig("wdbreadercfg2.xml");
+
+	const std::set<std::string> * parameters = wdbInfo.getWciReadQuerySpecification().parameter();
+
+	BOOST_REQUIRE(parameters);
+
+	BOOST_CHECK_EQUAL(3, parameters->size());
+	BOOST_CHECK(parameters->find("air temperature") != parameters->end());
+	BOOST_CHECK(parameters->find("air pressure") != parameters->end());
+	BOOST_CHECK(parameters->find("cloud cover") != parameters->end());
+}
+
+BOOST_FIXTURE_TEST_CASE(manyDataVersions, Fixture)
+{
+	parseConfig("wdbreadercfg2.xml");
+
+	const std::set<int> * versions = wdbInfo.getWciReadQuerySpecification().dataVersion();
+
+	BOOST_REQUIRE(versions);
+
+	BOOST_CHECK_EQUAL(4, versions->size());
+	BOOST_CHECK(versions->find(0) != versions->end());
+	BOOST_CHECK(versions->find(-1) != versions->end());
+	BOOST_CHECK(versions->find(1) != versions->end());
+	BOOST_CHECK(versions->find(2) != versions->end());
+}
+
+
+
+
+BOOST_FIXTURE_TEST_CASE(testSourceAndConfigFile, Fixture)
+{
+	// source should override config file
+	parse("dbHost=proffdb-devel.met.no;wciUser=proffread;refTime=20110209T120000;provider=snoeskred", "wdbreadercfg.xml");
+
+    BOOST_CHECK_EQUAL(wdbInfo.wdbHost(), "proffdb-devel.met.no");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbName(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbUser(), "wdb");
+    BOOST_CHECK_EQUAL(wdbInfo.wciUser(), "proffread");
+    BOOST_CHECK_EQUAL(wdbInfo.wdbPort(), 5432);
+
+    const WciReadQuerySpecification & qSpec = wdbInfo.getWciReadQuerySpecification();
+    const std::set<std::string> * dataProvider = qSpec.dataProvider();
+    BOOST_CHECK(dataProvider);
+    if ( dataProvider )
+    {
+		BOOST_CHECK_EQUAL(1, dataProvider->size());
+		BOOST_CHECK(dataProvider->find("snoeskred") != dataProvider->end());
+    }
+
+    const std::string * location = qSpec.location();
+    BOOST_CHECK(location);
+    if ( location )
+    	BOOST_CHECK_EQUAL("norge grid", * location);
+
+    const std::string * referenceTime = qSpec.referenceTime();
+    BOOST_CHECK(referenceTime);
+    if ( referenceTime )
+    	BOOST_CHECK_EQUAL("20110209T120000", * referenceTime);
 }
 
 

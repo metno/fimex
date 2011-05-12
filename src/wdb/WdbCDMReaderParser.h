@@ -73,22 +73,25 @@ namespace wdb
          * dbHost=<string>;dbName=<string>;dbPort=<string>;dbUser=<string>;wciUser=<string>;provider=<string>;place=<string>;refTime=<string>
          * refTime is  given as iso string "20110210T000000"
          */
-        WdbCDMReaderParserInfo parse(const std::string& source, const std::string& configFileName, bool bParseConfigFile = true);
+        WdbCDMReaderParserInfo parse(const std::string& source, const std::string& configFileName);
     private:
+        typedef std::pair<std::string, std::string> NameValuePair;
+
+
         /**
           * ATM:
           * to keep things simple
           * take just firs occurence
           * ignore retst
           */
-        std::pair<std::string, std::string> getNameValuePairForXmlPath(const XMLDoc& doc, const std::string& path);
+        NameValuePair getNameValuePairForXmlPath(const XMLDoc& doc, const std::string& path);
 
         /**
           * or get the vector
           */
-        std::vector<std::pair<std::string, std::string> > getNameValuePairsForXmlPath(const XMLDoc& doc, const std::string& path);
+        std::vector<NameValuePair> getNameValuePairsForXmlPath(const XMLDoc& doc, const std::string& path);
 
-        std::vector<std::pair<std::string, std::string> > getAttributesForXmlPath(const XMLDoc& doc, const std::string& path);
+        std::vector<NameValuePair> getAttributesForXmlPath(const XMLDoc& doc, const std::string& path);
 
         void parseSource(const std::string& source, WdbCDMReaderParserInfo& info);
         void parseCfgFile(const std::string& cfgFile, WdbCDMReaderParserInfo& info);

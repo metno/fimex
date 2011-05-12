@@ -63,7 +63,7 @@ public:
 			wdbConnection = new wdb::WdbConnection(config);
 
 			std::vector<wdb::GridData> data;
-			wdbConnection->readGid(data, config);
+			wdbConnection->readGid(data, config.getWciReadQuerySpecification());
 
 			dataIndex = new wdb::Wdb2CdmBuilder(data, * translator);
 			dataIndex->populate(cdm, config);

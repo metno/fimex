@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wdb_fimex_config>
+<wdb_fimex_config xmlns:xi="http://www.w3.org/2001/XInclude">
+
+
+<wdb_parameters>
+
+<reference_times>
+	<time value="20110511T060000"/>
+	<time value="20110512T060000"/>
+</reference_times>/time
+
+</wdb_parameters>
+</wdb_fimex_config>
