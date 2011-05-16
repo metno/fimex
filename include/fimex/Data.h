@@ -166,7 +166,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array);
+    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<short> array);
     /**
      * @brief create a Data-pointer of type CDM_BYTE
      *
@@ -177,6 +177,17 @@ namespace MetNoFimex
     boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array);
 
     /**
+     * @brief create a Data-pointer of the datatype and fill with the data from the iterator
+     *
+     * @param datatype
+     * @param first start of container containing the data to fill the array with
+     * @param last end (excluded) of the container containing the data to fill the array with
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    template<class InputIterator>
+    boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last);
+
+    /**
 	 * @brief create a one-dimensional dataslice from another Data object
 	 *
 	 * @param datatype of the return-data
@@ -185,6 +196,23 @@ namespace MetNoFimex
 	 * @param dataSize the size of the data
 	 */
 	boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t dataSize);
+
+	/* BELOW follow template implementations */
+    template<class InputIterator>
+	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last)
+	{
+        size_t length = std::distance(first, last);
+	    switch (datatype) {
+            case CDM_DOUBLE: { boost::shared_array<double> ary(new double[length]); copy(first, last, ary.get()); return createData(length, ary); }
+	        case CDM_FLOAT:  { boost::shared_array<float> ary(new float[length]);   copy(first, last, ary.get()); return createData(length, ary); }
+	        case CDM_INT:    { boost::shared_array<int> ary(new int[length]);       copy(first, last, ary.get()); return createData(length, ary); }
+	        case CDM_SHORT:  { boost::shared_array<short> ary(new short[length]);   copy(first, last, ary.get()); return createData(length, ary); }
+	        case CDM_CHAR:   { boost::shared_array<char> ary(new char[length]);     copy(first, last, ary.get()); return createData(length, ary); }
+	        case CDM_NAT: ;
+	        default: ;
+	     }
+	     return createData(0, boost::shared_array<char>(new char[0])); // a dummy dataset
+	}
 
 }
 

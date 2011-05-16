@@ -24,7 +24,7 @@
 #include "fimex/Felt_File.h"
 #include <milib/milib.h>
 #include "fimex/CDMDataType.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
 #include "fimex/interpolation.h"
@@ -291,7 +291,7 @@ template<typename T>
 boost::shared_ptr<MetNoFimex::Data> createScaledData(const boost::shared_array<short>& header_data, size_t dataSize, double newFillValue, double scalingFactor) {
 	boost::shared_array<T> data(new T[dataSize]);
 	transform(&header_data[20], &header_data[20+dataSize], &data[0], Scale<T>(newFillValue, scalingFactor));
-	return boost::shared_ptr<MetNoFimex::Data>(new DataImpl<T>(data, dataSize));
+	return MetNoFimex::createData(dataSize, data);
 }
 
 boost::shared_ptr<MetNoFimex::Data> Felt_File::getScaledDataSlice(const std::string& compName, const epoch_seconds time, const short level, double fillValue) throw(Felt_File_Error) {

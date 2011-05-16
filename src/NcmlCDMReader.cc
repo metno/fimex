@@ -35,7 +35,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/CDM.h"
 #include <boost/regex.hpp>
 

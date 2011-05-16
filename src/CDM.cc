@@ -24,7 +24,7 @@
 #include "fimex/CDM.h"
 #include "fimex/interpolation.h"
 #include "proj_api.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/Units.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -638,9 +638,9 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
 	xyDims.push_back(xDim);
 	xyDims.push_back(yDim);
 	CDMVariable lonVar(lonDim, CDM_DOUBLE, xyDims);
-	lonVar.setData(createData(CDM_DOUBLE, &longVal[0], &longVal[fieldSize]));
+	lonVar.setData(createData(fieldSize, longVal));
 	CDMVariable latVar(latDim, CDM_DOUBLE, xyDims);
-	latVar.setData(createData(CDM_DOUBLE, &latVal[0], &latVal[fieldSize]));
+	latVar.setData(createData(fieldSize, latVal));
 	addVariable(lonVar);
 	addVariable(latVar);
 	// add the coordinate attributes

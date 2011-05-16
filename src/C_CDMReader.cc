@@ -26,7 +26,7 @@
 
 #include "fimex/mifi_cdm_reader.h"
 #include "fimex/C_CDMReader.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDM.h"
 
@@ -88,7 +88,7 @@ boost::shared_ptr<Data> C_CDMReader::getDataSlice(const std::string & varName, s
     if (retVal != 0) {
         throw CDMException("c-callback-function for variable "+varName+" gives error-code: "+type2string(retVal));
     }
-    return boost::shared_ptr<Data>(new DataImpl<double>(doubleArray, data->size()));
+    return createData(data->size(), doubleArray);
 }
 
 }

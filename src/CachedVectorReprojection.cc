@@ -23,7 +23,7 @@
 
 #include "fimex/CachedVectorReprojection.h"
 #include "fimex/CDMException.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include <iostream>
 

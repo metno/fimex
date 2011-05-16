@@ -31,7 +31,7 @@
 #include <utility>
 #include <fimex/CDM.h>
 #include "fimex/TimeSpec.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
 
@@ -98,7 +98,7 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
 		} else {
 	        boost::shared_array<float> out(new float[d1->size()]);
 		    mifi_get_values_linear_f(d1->asConstFloat().get(), d2->asConstFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
-		    data = boost::shared_ptr<Data>(new DataImpl<float>(out, d1->size()));
+		    data = createData(d1->size(), out);
 		}
 	} else {
 		// TODO
@@ -186,7 +186,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
 			TimeUnit newTU(ts.getUnitString());
 			transform(newTimes.begin(), newTimes.end(), timeData.get(),
 					  bind1st(mem_fun_ref(&TimeUnit::fimexTime2unitTimeX),newTU));
-			cdm_->getVariable(timeDimName).setData(boost::shared_ptr<Data>(new DataImpl<double>(timeData, newTimes.size())));
+			cdm_->getVariable(timeDimName).setData(createData(newTimes.size(), timeData));
 			cdm_->getDimension(timeDimName).setLength(newTimes.size());
 
 			// store old times with new unit as oldTimesNewUnits-vector

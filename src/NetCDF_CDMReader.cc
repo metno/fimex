@@ -22,7 +22,7 @@
  */
 
 #include "fimex/NetCDF_CDMReader.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
 #include "netcdfcpp.h"
@@ -103,7 +103,7 @@ boost::shared_ptr<Data> getData_(NcVar* ncVar, long* count)
     size_t length = accumulate(count, count + ncVar->num_dims(), 1, multiplies<size_t>());
     boost::shared_array<T> vals(new T[length]);
     if (!ncVar->get(&vals[0], &count[0])) throw CDMException("cannot get netcdf dataslice values");
-    return boost::shared_ptr<Data>(new DataImpl<T>(vals, length));
+    return createData(length, vals);
 }
 
 boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)

@@ -22,7 +22,7 @@
  */
 
 #include "fimex/CachedInterpolation.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 namespace MetNoFimex
 {
 

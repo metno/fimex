@@ -37,7 +37,6 @@
 #include <functional>
 #include <algorithm>
 #include <limits>
-#include "fimex/DataImpl.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
 #include "kdtree++/kdtree.hpp"
@@ -70,7 +69,7 @@ static boost::shared_array<float> data2InterpolationArray(const boost::shared_pt
 // for performance reasons, the iData-reference will be modified and used within the return data
 static boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
     mifi_nanf2bad(&iData[0], &iData[size], badValue);
-    return boost::shared_ptr<Data>(new DataImpl<float>(iData, size));
+    return createData(size, iData);
 }
 /**
  *

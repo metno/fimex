@@ -23,7 +23,7 @@
 
 #include "NetCDF_Utils.h"
 #include <boost/shared_array.hpp>
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {
@@ -57,15 +57,15 @@ CDMDataType ncType2cdmDataType(NcType dt) {
 
 boost::shared_ptr<Data> ncValues2Data(NcValues* values, NcType dt, size_t length) {
 	switch (dt) {
-	case ncByte: return boost::shared_ptr<Data>(new DataImpl<char>(boost::shared_array<char>(reinterpret_cast<char*>(values->base())), length));
-	case ncChar: return boost::shared_ptr<Data>(new DataImpl<char>(boost::shared_array<char>(reinterpret_cast<char*>(values->base())), length));
-	case ncShort: return boost::shared_ptr<Data>(new DataImpl<short>(boost::shared_array<short>(reinterpret_cast<short*>(values->base())), length));
-	case ncInt: return boost::shared_ptr<Data>(new DataImpl<int>(boost::shared_array<int>(reinterpret_cast<int*>(values->base())), length));
+	case ncByte: return createData(length, boost::shared_array<char>(reinterpret_cast<char*>(values->base())));
+	case ncChar: return createData(length, boost::shared_array<char>(reinterpret_cast<char*>(values->base())));
+	case ncShort: return createData(length, boost::shared_array<short>(reinterpret_cast<short*>(values->base())));
+	case ncInt: return createData(length, boost::shared_array<int>(reinterpret_cast<int*>(values->base())));
 //	case ncLong: return CDM_INT; // ncLong is deprecated, and identical to ncInt
-	case ncFloat: return boost::shared_ptr<Data>(new DataImpl<float>(boost::shared_array<float>(reinterpret_cast<float*>(values->base())), length));
-	case ncDouble: return boost::shared_ptr<Data>(new DataImpl<double>(boost::shared_array<double>(reinterpret_cast<double*>(values->base())), length));
+	case ncFloat: return createData(length, boost::shared_array<float>(reinterpret_cast<float*>(values->base())));
+	case ncDouble: return createData(length, boost::shared_array<double>(reinterpret_cast<double*>(values->base())));
 	case ncNoType:
-	default: delete values; return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(boost::shared_array<int>(new int[0]), 0));
+	default: delete values; return createData(0, boost::shared_array<int>(new int[0]));
 	}
 }
 

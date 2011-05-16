@@ -129,17 +129,6 @@ namespace MetNoFimex
 		void copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd);
 	};
 
-	/**
-	 * @brief create a Data-pointer of the datatype and fill with the data from the iterator
-	 *
-	 * @param datatype
-	 * @param first start of container containing the data to fill the array with
-	 * @param last end (excluded) of the container containing the data to fill the array with
-	 * @return Base-Class ptr of the DataImpl belonging to the datatype
-	 */
-	template<class InputIterator>
-	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last);
-
 	// below follow implementations of templates
 	// (template definitions should be in header files (depending on compiler))
 	template<typename C>
@@ -311,22 +300,6 @@ namespace MetNoFimex
 	template<typename T1, typename T2>
 	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length) {
 		return duplicateArrayType<T1,T2>(inData, length);
-	}
-
-	template<class InputIterator>
-	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) {
-	    size_t length = std::distance(first, last);
-		switch (datatype) {
-			case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > data(new DataImpl<double>(length)); data->setValues(first, last); return data; }
-			case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > data(new DataImpl<float>(length));   data->setValues(first, last); return data; }
-			case CDM_INT:    { boost::shared_ptr<DataImpl<int> > data(new DataImpl<int>(length));       data->setValues(first, last); return data; }
-			case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > data(new DataImpl<short>(length));   data->setValues(first, last); return data; }
-			case CDM_CHAR:   { boost::shared_ptr<DataImpl<char> > data(new DataImpl<char>(length));     data->setValues(first, last); return data; }
-			case CDM_NAT: ;
-			default: ;
-		}
-		return boost::shared_ptr<Data>(new DataImpl<char>(0)); // a dummy dataset
-
 	}
 
 }

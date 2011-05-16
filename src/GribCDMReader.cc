@@ -34,7 +34,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/coordSys/Projection.h"
 #include <algorithm>
@@ -600,7 +600,7 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const std::string& varName, 
     // prefill with missing values
     double missingValue = cdm_->getFillValue(varName);
     fill(&doubleArray[0], &doubleArray[xy_size], missingValue);
-    data = boost::shared_ptr<Data>(new DataImpl<double>(doubleArray, xy_size));
+    data = createData(xy_size, doubleArray);
     // storage for one layer
     vector<double> gridData(xy_size/slices.size());
     size_t dataCurrentPos = 0;

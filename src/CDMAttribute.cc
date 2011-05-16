@@ -26,7 +26,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 #include <cmath>
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/Utils.h"
 #include "fimex/CDMException.h"
 #include "fimex/CDMNamedEntity.h"
@@ -53,7 +53,7 @@ CDMAttribute::CDMAttribute(std::string name, std::string value)
 	for (size_t i = 0; i < value.size(); i++) {
 		cstr[i] = value.at(i);
 	}
-	data = boost::shared_ptr<Data>(new DataImpl<char>(cstr, value.size()));
+	data = createData(value.size(), cstr);
 }
 
 
@@ -62,7 +62,7 @@ CDMAttribute::CDMAttribute(std::string name, double value)
 {
 	boost::shared_array<double> xvalue(new double[1]);
 	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<double>(xvalue, 1));
+	data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, int value)
@@ -70,7 +70,7 @@ CDMAttribute::CDMAttribute(std::string name, int value)
 {
 	boost::shared_array<int> xvalue(new int[1]);
 	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<int>(xvalue, 1));
+    data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, short value)
@@ -78,7 +78,7 @@ CDMAttribute::CDMAttribute(std::string name, short value)
 {
 	boost::shared_array<short> xvalue(new short[1]);
 	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<short>(xvalue, 1));
+    data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, char value)
@@ -86,7 +86,7 @@ CDMAttribute::CDMAttribute(std::string name, char value)
 {
 	boost::shared_array<char> xvalue(new char[1]);
 	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<char>(xvalue, 1));
+    data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, float value)
@@ -94,7 +94,7 @@ CDMAttribute::CDMAttribute(std::string name, float value)
 {
 	boost::shared_array<float> xvalue(new float[1]);
 	xvalue[0] = value;
-	data = boost::shared_ptr<Data>(new DataImpl<float>(xvalue, 1));
+    data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data)
@@ -171,9 +171,9 @@ void CDMAttribute::toXMLStream(std::ostream& out) const
 /* init data arrays for all types */
 template<typename T>
 void CDMAttribute::initDataArray(const std::vector<std::string>& values) {
-    std::vector<T> vec;
-    std::transform(values.begin(), values.end(), std::back_inserter(vec), &string2type<T>);
-    data = createData(datatype, vec.begin(), vec.end());
+    boost::shared_array<T> array(new T[values.size()]);
+    std::transform(values.begin(), values.end(), &array[0], &string2type<T>);
+    data = createData(values.size(), array);
 }
 
 

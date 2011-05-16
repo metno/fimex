@@ -3,7 +3,7 @@
 
 // fimex
 //
-#include "fimex/DataImpl.h"
+#include "fimex/Data.h"
 #include "fimex/CDMDataType.h"
 
 // standard
