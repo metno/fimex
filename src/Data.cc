@@ -22,7 +22,7 @@
  */
 
 #include "fimex/Data.h"
-#include "fimex/DataImpl.h"
+#include "DataImpl.h"
 
 namespace MetNoFimex
 {

@@ -32,7 +32,7 @@ using boost::unit_test_framework::test_suite;
 
 
 #include "fimex/Data.h"
-#include "fimex/DataImpl.h"
+#include "../src/DataImpl.h"
 
 using namespace std;
 using namespace MetNoFimex;

@@ -48,6 +48,7 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/TransverseMercatorProjection.cc \
                      coordSys/VerticalPerspectiveProjection.cc \
 					 Data.cc \
+					 DataImpl.h \
 					 DataTypeChanger.cc \
 					 Felt_Array2.cc \
                      FeltCDMReader2.cc \

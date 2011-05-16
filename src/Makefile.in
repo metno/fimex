@@ -158,7 +158,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/TransverseMercatorProjection.cc \
-	coordSys/VerticalPerspectiveProjection.cc Data.cc \
+	coordSys/VerticalPerspectiveProjection.cc Data.cc DataImpl.h \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
@@ -486,7 +486,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/RotatedLatitudeLongitudeProjection.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/TransverseMercatorProjection.cc \
-	coordSys/VerticalPerspectiveProjection.cc Data.cc \
+	coordSys/VerticalPerspectiveProjection.cc Data.cc DataImpl.h \
 	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \

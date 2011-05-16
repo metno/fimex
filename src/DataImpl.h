@@ -41,7 +41,11 @@ namespace MetNoFimex
 {
 
     /**
-     * @headerfile "fimex/DataImpl.h"
+     * @headerfile "DataImpl.h"
+     */
+
+    /**
+     * This is a private header file, to be used only within Data.h
      */
 
 	/**
