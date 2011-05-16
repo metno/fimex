@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -30,16 +30,37 @@ namespace MetNoFimex
 // pure abstract class, impl. required for linker
 Data::~Data() {}
 
-boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val) throw(CDMException) {
+boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val) {
 	std::vector<char> v(length);
 	boost::shared_ptr<Data> data = createData(datatype, v.begin(), v.end());
 	data->setAllValues(val);
 	return data;
 }
 
-boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length) throw(CDMException)  {
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<double> array)
+{
+    return boost::shared_ptr<Data>(new DataImpl<double>(array, length));
+}
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<float> array)
+{
+    return boost::shared_ptr<Data>(new DataImpl<float>(array, length));
+}
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<int> array)
+{
+    return boost::shared_ptr<Data>(new DataImpl<int>(array, length));
+}
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<short> array)
+{
+    return boost::shared_ptr<Data>(new DataImpl<short>(array, length));
+}
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array)
+{
+    return boost::shared_ptr<Data>(new DataImpl<char>(array, length));
+}
+
+boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)  {
 	switch (datatype) {
-		case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > mydata(new DataImpl<double>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }  
+		case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > mydata(new DataImpl<double>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > mydata(new DataImpl<float>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_INT:    { boost::shared_ptr<DataImpl<int> > mydata(new DataImpl<int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > mydata(new DataImpl<short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
@@ -50,23 +71,23 @@ boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, 
 	throw(CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype)));
 }
 template<>
-void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
 	copyData(startPos, data.asConstChar(), data.size(), first, last);
 }
 template<>
-void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
 	copyData(startPos, data.asConstShort(), data.size(), first, last);
 }
 template<>
-void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
 	copyData(startPos, data.asConstInt(), data.size(), first, last);
 }
 template<>
-void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
 	copyData(startPos, data.asConstFloat(), data.size(), first, last);
 }
 template<>
-void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
 	copyData(startPos, data.asConstDouble(), data.size(), first, last);
 }
 

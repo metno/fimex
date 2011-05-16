@@ -107,11 +107,11 @@ namespace MetNoFimex
 
 
 		virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
-		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1) throw(CDMException);
+		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
 		virtual void setAllValues(double val) {C v = static_cast<C>(val); for (C* pos = &theData[0]; pos != (&theData[0])+length; ++pos) *pos = v;}
         virtual boost::shared_ptr<Data> clone() const {return boost::shared_ptr<Data>(new DataImpl<C>(*this));}
-		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException);
-		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException);
+		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
+		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
 		// specialized for each known type in Data.cc
 		virtual CDMDataType getDataType() const {return CDM_NAT;}
 
@@ -119,14 +119,14 @@ namespace MetNoFimex
 		 * set the values of the data by the input-iterator
 		 */
 		template<class InputIterator>
-		void setValues(InputIterator begin, InputIterator end, size_t dataStartPos = 0) throw(CDMException);
+		void setValues(InputIterator begin, InputIterator end, size_t dataStartPos = 0);
 
 	private:
 		size_t length;
 		boost::shared_array<C> theData;
 		DataImpl(const DataImpl<C>& rhs);
 		DataImpl<C>& operator=(const DataImpl<C> & rhs);
-		void copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd) throw(CDMException);
+		void copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd);
 	};
 
 	/**
@@ -138,7 +138,7 @@ namespace MetNoFimex
 	 * @return Base-Class ptr of the DataImpl belonging to the datatype
 	 */
 	template<class InputIterator>
-	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) throw(CDMException);
+	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last);
 
 	// below follow implementations of templates
 	// (template definitions should be in header files (depending on compiler))
@@ -177,7 +177,7 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	void DataImpl<C>::copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherFirst, size_t otherLast) throw(CDMException) {
+	void DataImpl<C>::copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherFirst, size_t otherLast) {
 		if (otherFirst > otherSize) {
 			throw(CDMException("data-region-start "+ type2string(otherFirst) + " outside range: "+ type2string(otherSize)));
 		}
@@ -190,21 +190,21 @@ namespace MetNoFimex
 	}
 // don't implement all possible setValues functions, link-time error
 //	template<typename C>
-//	void DataImpl<C>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException){
+//	void DataImpl<C>::setValues(size_t startPos, const Data& data, size_t first, size_t last){
 //		throw(CDMException("setValues not implemented for this datatype"));
 //	}
 
 	// declaration of implemented function (in Data.cc)
 	template<>
-	void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
+	void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>
-	void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
+	void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>
-	void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
+	void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>
-	void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
+	void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>
-	void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) throw(CDMException);
+	void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 
 	/**
 	 * recursively copy data by moving the newData and orgData pointers forward and copy the data at the current position
@@ -235,7 +235,7 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) throw(CDMException) {
+	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) {
 	    // handle scalar data
 	    if (orgDimSize.size() == 0) {
 	        return clone();
@@ -269,7 +269,7 @@ namespace MetNoFimex
 
 	template<typename C>
 	template<class InputIterator>
-	void DataImpl<C>::setValues(InputIterator begin, InputIterator end, size_t dataStartPos) throw(CDMException) {
+	void DataImpl<C>::setValues(InputIterator begin, InputIterator end, size_t dataStartPos) {
 	    size_t dist = std::distance(begin, end);
 	    if ((dist + dataStartPos) > length)
 	        throw CDMException("dataPos " + type2string(dist+dataStartPos) + " >= dataLength " + type2string(length));
@@ -284,7 +284,7 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) throw(CDMException)
+	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
 	{
 		boost::shared_ptr<Data> data(new DataImpl<char>(0)); // dummy default
 		switch (newType) {
@@ -314,7 +314,7 @@ namespace MetNoFimex
 	}
 
 	template<class InputIterator>
-	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) throw(CDMException) {
+	boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last) {
 	    size_t length = std::distance(first, last);
 		switch (datatype) {
 			case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > data(new DataImpl<double>(length)); data->setValues(first, last); return data; }
