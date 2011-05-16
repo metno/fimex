@@ -39,7 +39,6 @@
 #include "fimex/Utils.h"
 #include "fimex/GribUtils.h"
 #include "fimex/Data.h"
-#include "fimex/DataImpl.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -166,7 +165,7 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             if (debug) cerr << "reading " << nv << " values" << endl;
             MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "values", &array[0], &nv), 0);
             if (debug) cerr << "got " << nv << " values" << endl;
-            DataImpl<double> data(array, nv);
+            boost::shared_ptr<Data> data = createData(nv, array);
 
             // slice the data
             vector<size_t> orgDim(2,0);
@@ -179,7 +178,7 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             startPos[0] = lonFirstLast.first;
             startPos[1] = latFirstLast.first;
             if (debug) cerr << "slicing values" << endl;
-            boost::shared_ptr<Data> outData = data.slice(orgDim, startPos, newDim);
+            boost::shared_ptr<Data> outData = data->slice(orgDim, startPos, newDim);
             assert(outData->size() == (newDim[0]*newDim[1]));
 
             // write the new data
