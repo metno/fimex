@@ -9,5 +9,6 @@ libfimex_la_SOURCES += \
 
 include wdb/gridInformation/make.mk
 include wdb/database_access/make.mk
+include wdb/config/make.mk
 	
 endif

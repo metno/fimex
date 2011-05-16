@@ -45,6 +45,7 @@ class GridInformation;
 class WdbCDMReaderParserInfo;
 class WciReadQuerySpecification;
 
+
 /**
  * A connection to a wdb database, with useful queries created as methods on
  * this object
@@ -56,14 +57,9 @@ public:
 	/**
 	 * @throws WdbException on error
 	 */
-	explicit WdbConnection(const WdbCDMReaderParserInfo & connectionSpec);
-	~WdbConnection();
+	WdbConnection(const std::string & connectString, const std::string & wciUser);
 
-    /**
-	 * Checking if already connected
-	 *
-	 */
-	bool isConnected();
+	~WdbConnection();
 
 
 	/**

@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(testXmlRead)
     wdb::CdmNameTranslator translator;
     BOOST_CHECK_EQUAL(true, translator.isEmpty());
 
-    translator.readXML(TEST_DIR"/wdbreadercfg.xml");
+    translator = wdb::CdmNameTranslator(TEST_DIR"/wdbreadercfg.xml");
     BOOST_CHECK_EQUAL(false, translator.isEmpty());
 
     BOOST_REQUIRE_EQUAL(6, translator.size());

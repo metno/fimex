@@ -53,6 +53,18 @@ CdmNameTranslator::CdmNameTranslator()
 {
 }
 
+CdmNameTranslator::CdmNameTranslator(const std::string& xmlFileName)
+{
+    XMLDoc xmlDoc(xmlFileName);
+	readXML(xmlDoc);
+}
+
+CdmNameTranslator::CdmNameTranslator(const XMLDoc& xmlDoc)
+{
+	readXML(xmlDoc);
+}
+
+
 CdmNameTranslator::~CdmNameTranslator()
 {
 }
@@ -110,12 +122,6 @@ void CdmNameTranslator::readXML(const XMLDoc& xmlDoc)
     readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/value_parameter");
 	readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/level_parameter");
 	readXML(xmlDoc, "/wdb_fimex_config/wdb_parameters/parameter");
-}
-
-void CdmNameTranslator::readXML(const std::string& xmlFileName)
-{
-    XMLDoc xmlDoc(xmlFileName);
-	readXML(xmlDoc);
 }
 
 void CdmNameTranslator::addNamePair(const std::string& wdbName, const std::string& cdmName)

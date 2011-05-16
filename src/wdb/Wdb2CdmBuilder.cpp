@@ -170,8 +170,10 @@ void Wdb2CdmBuilder::addVersionDimension_(CDM & cdm) const
 			cdm.addDimension(CDMDimension(dimension, versions.size()));
 
 			cdm.addVariable(CDMVariable(dimension, CDM_INT, std::vector<std::string>(1, dimension)));
+
 			cdm.addAttribute(dimension, CDMAttribute("long_name", "data version"));
 			cdm.addAttribute(dimension, CDMAttribute("standard_name", "version"));
+			cdm.addAttribute(dimension, CDMAttribute("axis", "Ensemble"));
 
 			return;
 		}

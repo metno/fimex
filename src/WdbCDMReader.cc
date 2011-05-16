@@ -42,6 +42,8 @@
 #include "wdb/database_access/WdbConnection.h"
 #include "wdb/gridInformation/GridInformation.h"
 #include "wdb/WdbCDMReaderParser.h"
+#include "wdb/config/WdbConfiguration.h"
+
 
 namespace MetNoFimex
 {
@@ -54,19 +56,25 @@ public:
 	{
 		try
 		{
-			wdb::WdbCDMReaderParser configParser;
-			config = configParser.parse(source, configfilename);
+			wdb::WdbConfiguration configuration(source);
 
-			translator = new wdb::CdmNameTranslator;
-			translator->readXML(configfilename);
 
-			wdbConnection = new wdb::WdbConnection(config);
+//			wdb::WdbCDMReaderParser configParser;
+//			config = configParser.parse(source, configfilename);
+
+			translator = new wdb::CdmNameTranslator(configfilename);
+
+			std::cout << translator->toString() << std::endl;
+
+			//wdbConnection = new wdb::WdbConnection(config.databaseConnectString(), config.wciUser());
+			wdbConnection = new wdb::WdbConnection(configuration.pqDatabaseConnectString(), configuration.wciUser());
 
 			std::vector<wdb::GridData> data;
-			wdbConnection->readGid(data, config.getWciReadQuerySpecification());
+//			wdbConnection->readGid(data, config.getWciReadQuerySpecification());
+			wdbConnection->readGid(data, configuration.query());
 
 			dataIndex = new wdb::Wdb2CdmBuilder(data, * translator);
-			dataIndex->populate(cdm, config);
+			dataIndex->populate(cdm/*, config*/);
 		}
 		catch (...)
 		{

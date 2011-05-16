@@ -39,7 +39,12 @@ if HAVE_GRIBAPI
 endif
 if HAVE_LIBPQ 
   CC_TESTS += wdbTest
-  wdbTest_SOURCES = Wdb2CdmBuilderTest.cc WdbIndexTest.cc wdbCdmNameTranslatorTest.cc wdbCDMReaderParserTest.cc
+  wdbTest_SOURCES = \
+  	Wdb2CdmBuilderTest.cc \
+  	WdbIndexTest.cc \
+  	wdbCdmNameTranslatorTest.cc \
+  	wdbCDMReaderParserTest.cc \
+  	WdbConfigurationTest.cpp
   wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@\"
   wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
   LDADD += @BOOST_PROGRAM_OPTIONS_LIB@

@@ -51,10 +51,10 @@ class CdmNameTranslator
 {
 public:
 	CdmNameTranslator();
-	~CdmNameTranslator();
+	explicit CdmNameTranslator(const std::string& xmlFileName);
+	explicit CdmNameTranslator(const XMLDoc& xmlDoc);
 
-    void readXML(const std::string& xmlFileName);
-	void readXML(const XMLDoc& xmlDoc);
+	~CdmNameTranslator();
 
 	void addNamePair(const std::string& wdbName, const std::string& cdmName);
 
@@ -68,6 +68,7 @@ public:
 
     bool isEmpty() const;
 	size_t size() const;
+	void clear();
 
     bool hasWdbName(const std::string& wdbName) const;
 	bool hasCdmName(const std::string& cdmName) const;
@@ -75,11 +76,12 @@ public:
 	std::string toCdmName(const std::string& wdbName) const;
 	std::string toWdbName(const std::string& cdmName) const;
 
-	void clear();
 
 	std::string toString() const;
 private:
-    void readXML(const XMLDoc& xmlDoc, const std::string& path);
+	void readXML(const XMLDoc& xmlDoc);
+
+	void readXML(const XMLDoc& xmlDoc, const std::string& path);
     /**
 	 * TODO:
 	 *     consider if mapping is

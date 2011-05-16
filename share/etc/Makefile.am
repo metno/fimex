@@ -36,6 +36,7 @@ config_DATA = \
 	felt_variables_hirlam20.xml\
 	fimex_example.cfg\
 	ncml-2.2.xsd\
-	ncmlCDMConfig.ncml
+	ncmlCDMConfig.ncml\
+	wdb_config.xml
 				
 EXTRA_DIST = $(config_DATA)

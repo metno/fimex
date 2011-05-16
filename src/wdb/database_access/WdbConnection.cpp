@@ -37,16 +37,14 @@ namespace MetNoFimex
 namespace wdb
 {
 
-WdbConnection::WdbConnection(const WdbCDMReaderParserInfo & connectionSpec)
+WdbConnection::WdbConnection(const std::string & connectString, const std::string & wciUser)
 {
-	std::string connectString = connectionSpec.databaseConnectString();
-
 	connection_ = PQconnectdb(connectString.c_str());
-	if ( !isConnected() )
+	if ( CONNECTION_OK != PQstatus(connection_) )
 		throw WdbException(connection_);
 
 	std::ostringstream begin;
-	begin << "SELECT wci.begin('" << DataSanitizer(connection_)(connectionSpec.wciUser()) << "')";
+	begin << "SELECT wci.begin('" << DataSanitizer(connection_)(wciUser) << "')";
 
 	PQclear(call_(begin.str()));
 }
@@ -57,10 +55,6 @@ WdbConnection::~WdbConnection()
 		PQfinish(connection_);
 }
 
-bool WdbConnection::isConnected()
-{
-    return ( CONNECTION_OK == PQstatus(connection_) ) ;
-}
 
 namespace
 {
