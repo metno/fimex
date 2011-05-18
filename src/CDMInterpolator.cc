@@ -91,7 +91,7 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(shared)
     {
-#pragma omp for
+#pragma omp for nowait
 #endif
     for (int z = 0; z < nz; z++) { // using int instead of size_t because of openMP < 3.0
         // find the start of the slice
@@ -541,7 +541,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
     {
         omp_lock_t my_lock;
         omp_init_lock(&my_lock);
-#pragma omp for
+#pragma omp for nowait
 #endif
     for (int ik = 0; ik < static_cast<int>(pointsOnXAxis.size()/sampler); ik++) { // using int instead of size_t because of openMP < 3.0
         size_t samplePos = sampler * ik;
@@ -624,7 +624,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(shared)
     {
-#pragma omp for
+#pragma omp for nowait
 #endif
     for (int i = 0; i < static_cast<int>(pointsOnXAxis.size()); i++) { // using int instead of size_t because of openMP < 3.0
         //                   lat                   lon
