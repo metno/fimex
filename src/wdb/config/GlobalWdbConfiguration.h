@@ -38,6 +38,7 @@
 
 namespace MetNoFimex
 {
+class XMLDoc;
 
 namespace wdb
 {
@@ -56,7 +57,13 @@ public:
 	typedef std::vector<CDMAttribute> AttributeList;
 	AttributeList getAttributes(const std::string & wdbParameter, const std::string & defaultUnit = std::string()) const;
 
+	const AttributeList & getGlobalAttributes() const { return globalAttributes_; }
+
 private:
+	void initParseGlobalAttributes_(XMLDoc & config);
+	void initParseValueParameter_(XMLDoc & config);
+
+
 	typedef std::map<std::string, std::string> NameTranslation;
 	NameTranslation wdb2cf_;
 	NameTranslation cf2wdb_;
@@ -64,6 +71,8 @@ private:
 
 	typedef std::map<std::string, AttributeList> NameToAttributeMap;
 	NameToAttributeMap attributes_;
+
+	AttributeList globalAttributes_;
 };
 
 }

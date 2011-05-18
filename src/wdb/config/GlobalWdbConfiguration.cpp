@@ -51,39 +51,8 @@ GlobalWdbConfiguration::GlobalWdbConfiguration(const boost::filesystem::path & c
 		throw CDMException(configFile.string() + " is a directory");
 
 	XMLDoc config(configFile.string());
-	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
-	if ( parameters->nodesetval )
-	{
-		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
-		{
-			xmlNodePtr node = parameters->nodesetval->nodeTab[i];
-			if(node->type != XML_ELEMENT_NODE)
-			    throw CDMException("not XML_ELEMENT_NODE!");
-			std::string wdbName = getXmlProp(node, "wdbname");
-			std::string cfName  = getXmlProp(node, "cfname");
-
-			if ( not cfName.empty() )
-			{
-				wdb2cf_[wdbName] = cfName;
-				cf2wdb_[cfName] = wdbName;
-			}
-
-			for ( xmlNodePtr child = node->children; child; child = child->next )
-			{
-				std::string name = std::string(reinterpret_cast<const char *>(child->name));
-				if ((child->type == XML_ELEMENT_NODE) and "attribute" == name )
-				{
-					std::string name = getXmlProp(child, "name");
-					std::string value = getXmlProp(child, "value");
-					std::string dataType = getXmlProp(child, "type");
-					if ( dataType.empty() )
-						dataType = "string";
-
-					attributes_[wdbName].push_back(CDMAttribute(name, dataType, value));
-				}
-			}
-		}
-	}
+	initParseGlobalAttributes_(config);
+	initParseValueParameter_(config);
 }
 
 GlobalWdbConfiguration::~GlobalWdbConfiguration()
@@ -135,6 +104,64 @@ GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(cons
 	setAttribute(ret, "_FillValue", std::numeric_limits<float>::quiet_NaN());
 
 	return ret;
+}
+
+void GlobalWdbConfiguration::initParseGlobalAttributes_(XMLDoc & config)
+{
+	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/global_attributes/attribute");
+	if ( parameters->nodesetval )
+	{
+		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
+		{
+			xmlNodePtr node = parameters->nodesetval->nodeTab[i];
+			if(node->type != XML_ELEMENT_NODE)
+				throw CDMException("not XML_ELEMENT_NODE!");
+			std::string name = getXmlProp(node, "name");
+			std::string value = getXmlProp(node, "value");
+			std::string type = getXmlProp(node, "type");
+			if ( type.empty() )
+				type = "string";
+
+			globalAttributes_.push_back(CDMAttribute(name, type, value));
+		}
+	}
+}
+
+void GlobalWdbConfiguration::initParseValueParameter_(XMLDoc & config)
+{
+	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
+	if ( parameters->nodesetval )
+	{
+		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
+		{
+			xmlNodePtr node = parameters->nodesetval->nodeTab[i];
+			if(node->type != XML_ELEMENT_NODE)
+			    throw CDMException("not XML_ELEMENT_NODE!");
+			std::string wdbName = getXmlProp(node, "wdbname");
+			std::string cfName  = getXmlProp(node, "cfname");
+
+			if ( not cfName.empty() )
+			{
+				wdb2cf_[wdbName] = cfName;
+				cf2wdb_[cfName] = wdbName;
+			}
+
+			for ( xmlNodePtr child = node->children; child; child = child->next )
+			{
+				std::string name = std::string(reinterpret_cast<const char *>(child->name));
+				if ((child->type == XML_ELEMENT_NODE) and "attribute" == name )
+				{
+					std::string name = getXmlProp(child, "name");
+					std::string value = getXmlProp(child, "value");
+					std::string dataType = getXmlProp(child, "type");
+					if ( dataType.empty() )
+						dataType = "string";
+
+					attributes_[wdbName].push_back(CDMAttribute(name, dataType, value));
+				}
+			}
+		}
+	}
 }
 
 }
