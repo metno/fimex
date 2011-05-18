@@ -5,8 +5,6 @@ if HAVE_LIBPQ
   wdbTest_SOURCES = \
   	wdb/Wdb2CdmBuilderTest.cc \
   	wdb/WdbIndexTest.cc \
-  	wdb/wdbCdmNameTranslatorTest.cc \
-  	wdb/wdbCDMReaderParserTest.cc \
   	wdb/WdbConfigurationTest.cpp \
   	wdb/WdbTranslationsTest.cpp 
   	

@@ -45,7 +45,6 @@ class CDM;
 
 namespace wdb
 {
-class WdbCDMReaderParserInfo;
 class GlobalWdbConfiguration;
 class Parameter;
 class Level;
@@ -63,8 +62,6 @@ public:
 	/**
 	 * Add all data structured by this object to the given cdm object
 	 */
-	void populate(CDM & cdm, const WdbCDMReaderParserInfo & config) const;
-
 	void populate(CDM & cdm) const;
 
 	typedef GridData::gid gid;

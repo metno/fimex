@@ -41,7 +41,6 @@
 #include "wdb/config/GlobalWdbConfiguration.h"
 #include "wdb/database_access/WdbConnection.h"
 #include "wdb/gridInformation/GridInformation.h"
-#include "wdb/WdbCDMReaderParser.h"
 #include "wdb/config/WdbConfiguration.h"
 
 
@@ -60,14 +59,13 @@ public:
 
 			translator = new wdb::GlobalWdbConfiguration(configfilename);
 
-			//wdbConnection = new wdb::WdbConnection(config.databaseConnectString(), config.wciUser());
 			wdbConnection = new wdb::WdbConnection(configuration.pqDatabaseConnectString(), configuration.wciUser());
 
 			std::vector<wdb::GridData> data;
 			wdbConnection->readGid(data, configuration.query());
 
 			dataIndex = new wdb::Wdb2CdmBuilder(data, * translator);
-			dataIndex->populate(cdm/*, config*/);
+			dataIndex->populate(cdm);
 		}
 		catch (...)
 		{
@@ -88,8 +86,6 @@ public:
 	wdb::WdbConnection * wdbConnection;
 	wdb::Wdb2CdmBuilder * dataIndex;
 	wdb::GlobalWdbConfiguration * translator;
-
-	wdb::WdbCDMReaderParserInfo config;
 };
 
 

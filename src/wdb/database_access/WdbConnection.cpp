@@ -28,8 +28,8 @@
 
 #include "WdbConnection.h"
 #include "DataSanitizer.h"
+#include "WciReadQuerySpecification.h"
 #include "../gridInformation/GridInformation.h"
-#include "../WdbCDMReaderParserInfo.h"
 #include <boost/scoped_array.hpp>
 
 namespace MetNoFimex

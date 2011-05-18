@@ -27,7 +27,6 @@
  */
 
 #include "Wdb2CdmBuilder.h"
-#include "WdbCDMReaderParserInfo.h"
 #include "config/GlobalWdbConfiguration.h"
 #include "gridInformation/GridInformation.h"
 #include <fimex/CDM.h>
@@ -54,20 +53,12 @@ Wdb2CdmBuilder::~Wdb2CdmBuilder()
 }
 
 
-void Wdb2CdmBuilder::populate(CDM & cdm, const WdbCDMReaderParserInfo & config) const
+void Wdb2CdmBuilder::populate(CDM & cdm) const
 {
-	BOOST_FOREACH( const CDMAttribute & attr, config.globalAttributes() )
-		cdm.addAttribute(cdm.globalAttributeNS(), attr);
-
 	addProjectionInformation_(cdm);
 	addReferenceTimeInformation_(cdm);
 	addDimensions_(cdm);
 	addParameterVariables_(cdm);
-}
-
-void Wdb2CdmBuilder::populate(CDM & cdm) const
-{
-	populate(cdm, WdbCDMReaderParserInfo());
 }
 
 
