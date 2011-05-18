@@ -28,7 +28,7 @@
 
 #include "Wdb2CdmBuilder.h"
 #include "WdbCDMReaderParserInfo.h"
-#include "CdmNameTranslator.h"
+#include "config/GlobalWdbConfiguration.h"
 #include "gridInformation/GridInformation.h"
 #include <fimex/CDM.h>
 #include <fimex/CDMDimension.h>
@@ -42,8 +42,8 @@ namespace MetNoFimex
 namespace wdb
 {
 
-Wdb2CdmBuilder::Wdb2CdmBuilder(const std::vector<wdb::GridData> & data, const CdmNameTranslator & translator) :
-		index_(data), translator_(translator)
+Wdb2CdmBuilder::Wdb2CdmBuilder(const std::vector<wdb::GridData> & data, const GlobalWdbConfiguration & config) :
+		index_(data), config_(config)
 {
 	BOOST_FOREACH(const wdb::GridData & d, data)
 		grids_[d.parameter().name()] = d.gridInformation();
@@ -143,7 +143,7 @@ void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
 			std::set<float> levels = index_.levelsForParameter(parameter);
 			if ( levels.size() > 1 )
 			{
-				const std::string & dimension = translator_.toCdmName(levelName);
+				const std::string & dimension = config_.cfName(levelName);
 
 				cdm.addDimension(CDMDimension(dimension, levels.size()));
 
@@ -216,7 +216,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 			throw CDMException("Internal error - unable to find grid mapping"); // should never happen
 		GridData::GridInformationPtr gridInfo = find->second;
 
-		std::string dimension = translator_.toCdmName(parameter);
+		std::string dimension = config_.cfName(parameter);
 
 		std::vector<std::string> spatialDimensions;
 		gridInformation().addSpatialDimensions(spatialDimensions);
@@ -226,7 +226,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 		if ( index_.versionsForParameter(parameter).size() > 1 )
 			dimensions.push_back("version");
 		if ( index_.levelsForParameter(parameter).size() > 1 )
-			dimensions.push_back(translator_.toCdmName(index_.levelNameForParameter(parameter)));
+			dimensions.push_back(config_.cfName(index_.levelNameForParameter(parameter)));
 		if ( index_.timesForParameter(parameter).size() > 1 )
 			dimensions.push_back("time");
 
@@ -234,8 +234,11 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		cdm.addAttribute(dimension, CDMAttribute("grid_mapping", gridInfo->getProjectionName()));
 
-		cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForParameter(parameter)));
-		cdm.addAttribute(dimension, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));
+		BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(parameter, index_.unitForParameter(parameter)) )
+			cdm.addAttribute(dimension, attribute);
+
+//		cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForParameter(parameter)));
+//		cdm.addAttribute(dimension, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));
 		cdm.addAttribute(dimension, CDMAttribute("coordinates", "longitude latitude"/*spatialDimensions.front() + " " + spatialDimensions.back()*/));
 	}
 }

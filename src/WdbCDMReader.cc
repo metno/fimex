@@ -38,7 +38,7 @@
 #include "fimex/Data.h"
 #include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/WdbIndex.h"
-#include "wdb/CdmNameTranslator.h"
+#include "wdb/config/GlobalWdbConfiguration.h"
 #include "wdb/database_access/WdbConnection.h"
 #include "wdb/gridInformation/GridInformation.h"
 #include "wdb/WdbCDMReaderParser.h"
@@ -58,19 +58,12 @@ public:
 		{
 			wdb::WdbConfiguration configuration(source);
 
-
-//			wdb::WdbCDMReaderParser configParser;
-//			config = configParser.parse(source, configfilename);
-
-			translator = new wdb::CdmNameTranslator(configfilename);
-
-			std::cout << translator->toString() << std::endl;
+			translator = new wdb::GlobalWdbConfiguration(configfilename);
 
 			//wdbConnection = new wdb::WdbConnection(config.databaseConnectString(), config.wciUser());
 			wdbConnection = new wdb::WdbConnection(configuration.pqDatabaseConnectString(), configuration.wciUser());
 
 			std::vector<wdb::GridData> data;
-//			wdbConnection->readGid(data, config.getWciReadQuerySpecification());
 			wdbConnection->readGid(data, configuration.query());
 
 			dataIndex = new wdb::Wdb2CdmBuilder(data, * translator);
@@ -94,7 +87,7 @@ public:
 
 	wdb::WdbConnection * wdbConnection;
 	wdb::Wdb2CdmBuilder * dataIndex;
-	wdb::CdmNameTranslator * translator;
+	wdb::GlobalWdbConfiguration * translator;
 
 	wdb::WdbCDMReaderParserInfo config;
 };
@@ -118,7 +111,7 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 
 	boost::shared_ptr<Data> ret;
 	const CDMVariable& variable = cdm_->getVariable(varName);
-	const std::string & wdbName = d_->translator->toWdbName(varName);
+	const std::string & wdbName = d_->translator->wdbName(varName);
 
 	if ( d_->dataIndex->isDatabaseField(wdbName) )
 	{

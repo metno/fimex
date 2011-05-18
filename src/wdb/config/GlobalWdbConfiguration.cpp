@@ -1,0 +1,141 @@
+/*
+ fimex
+
+ Copyright (C) 2011 met.no
+
+ Contact information:
+ Norwegian Meteorological Institute
+ Box 43 Blindern
+ 0313 OSLO
+ NORWAY
+ E-mail: post@met.no
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ MA  02110-1301, USA
+ */
+
+#include "GlobalWdbConfiguration.h"
+#include <fimex/CDMException.h>
+#include <fimex/XMLDoc.h>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
+#include <libxml/xinclude.h>
+#include <libxml/xpathInternals.h>
+
+#include <iostream>
+
+
+namespace MetNoFimex
+{
+namespace wdb
+{
+
+GlobalWdbConfiguration::GlobalWdbConfiguration(const boost::filesystem::path & configFile)
+{
+	if ( ! exists(configFile) )
+		throw CDMException(configFile.string() + ": no such file");
+
+	if ( is_directory(configFile) )
+		throw CDMException(configFile.string() + " is a directory");
+
+	XMLDoc config(configFile.string());
+	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
+	if ( parameters->nodesetval )
+	{
+		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
+		{
+			xmlNodePtr node = parameters->nodesetval->nodeTab[i];
+			if(node->type != XML_ELEMENT_NODE)
+			    throw CDMException("not XML_ELEMENT_NODE!");
+			std::string wdbName = getXmlProp(node, "wdbname");
+			std::string cfName  = getXmlProp(node, "cfname");
+
+			if ( not cfName.empty() )
+			{
+				wdb2cf_[wdbName] = cfName;
+				cf2wdb_[cfName] = wdbName;
+			}
+
+			for ( xmlNodePtr child = node->children; child; child = child->next )
+			{
+				std::string name = std::string(reinterpret_cast<const char *>(child->name));
+				if ((child->type == XML_ELEMENT_NODE) and "attribute" == name )
+				{
+					std::string name = getXmlProp(child, "name");
+					std::string value = getXmlProp(child, "value");
+					std::string dataType = getXmlProp(child, "type");
+					if ( dataType.empty() )
+						dataType = "string";
+
+					attributes_[wdbName].push_back(CDMAttribute(name, dataType, value));
+				}
+			}
+		}
+	}
+}
+
+GlobalWdbConfiguration::~GlobalWdbConfiguration()
+{
+}
+
+std::string GlobalWdbConfiguration::cfName(const std::string & wdbName) const
+{
+	NameTranslation::const_iterator find = wdb2cf_.find(wdbName);
+	if ( find != wdb2cf_.end() )
+		return find->second;
+
+	return boost::algorithm::replace_all_copy(wdbName, " ", "_");
+}
+
+std::string GlobalWdbConfiguration::wdbName(const std::string & cfName) const
+{
+	NameTranslation::const_iterator find = cf2wdb_.find(cfName);
+	if ( find != cf2wdb_.end() )
+		return find->second;
+
+	return boost::algorithm::replace_all_copy(cfName, "_", " ");
+}
+
+namespace
+{
+	template <typename T>
+	void setAttribute(GlobalWdbConfiguration::AttributeList & out, const std::string & name, T value)
+	{
+		for ( GlobalWdbConfiguration::AttributeList::const_iterator find = out.begin(); find != out.end(); ++ find )
+			if ( find->getName() == name )
+				return;
+		out.push_back(CDMAttribute(name, value));
+	}
+}
+
+GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(const std::string & wdbParameter, const std::string & defaultUnit) const
+{
+	AttributeList ret;
+
+	NameToAttributeMap::const_iterator find = attributes_.find(wdbParameter);
+	if ( find != attributes_.end() )
+		ret = find->second;
+
+	// all these may be overridden by config file:
+	setAttribute(ret, "units", defaultUnit);
+	setAttribute(ret, "standard_name", cfName(wdbParameter));
+	setAttribute(ret, "long_name", wdbParameter);
+	setAttribute(ret, "_FillValue", std::numeric_limits<float>::quiet_NaN());
+
+	return ret;
+}
+
+}
+}

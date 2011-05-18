@@ -39,13 +39,13 @@
     </level_parameter>
 
 
-    <value_parameter id="air temperature" name="air temperature">
+    <value_parameter wdbname="air temperature">
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>
 
-    <value_parameter id="cloud area fraction" name="cloud area fraction">
+    <value_parameter wdbname="cloud area fraction">
         <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="_FillValue" value="0.0" type="float" />
     </value_parameter>

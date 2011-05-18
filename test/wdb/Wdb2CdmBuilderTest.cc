@@ -27,7 +27,7 @@
 */
 
 #include <wdb/Wdb2CdmBuilder.h>
-#include <wdb/CdmNameTranslator.h>
+#include <wdb/config/GlobalWdbConfiguration.h>
 #include <wdb/gridInformation/GridInformation.h>
 #include <fimex/CDM.h>
 #include <iostream>
@@ -64,7 +64,7 @@ class Wdb2CdmBuilderFixture
 
 	wdb::GridData::gid nextGid_;
 public:
-	Wdb2CdmBuilderFixture() : nextGid_(0) {}
+	Wdb2CdmBuilderFixture() : nextGid_(0), tr(TEST_DIR"/local_wdb_config.xml") {}
 
 	wdb::GridData::gid nextGid()
 	{
@@ -90,7 +90,7 @@ public:
 	static const wdb::Level defaultLevel;
 	static const std::string defaultTime;
 	static const wdb::GridData::GridInformationPtr defaultGrid;
-	wdb::CdmNameTranslator tr;
+	wdb::GlobalWdbConfiguration tr;
 
 	void addGridData(const wdb::Parameter & parameter = defaultParameter, const std::string & time = defaultTime, int version = 0)
 	{
@@ -731,8 +731,8 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes, Wdb2CdmBuilderFixture)
 	try
 	{
 		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("C", cdm.getAttribute(cdmId(), "units").getStringValue());
-		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("K", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
 		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )
@@ -753,8 +753,8 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)
 	try
 	{
 		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("C", cdm.getAttribute(cdmId(), "units").getStringValue());
-		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("K", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
 		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )

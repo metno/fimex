@@ -31,8 +31,8 @@
 #if defined(HAVE_BOOST_UNIT_TEST_FRAMEWORK) && (BOOST_VERSION >= 103400)
 
 #include <boost/test/unit_test.hpp>
-#include <fimex/CDMException.h>
 #include <wdb/config/WdbConfiguration.h>
+#include <fimex/CDMException.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <string>

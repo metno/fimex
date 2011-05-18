@@ -46,7 +46,7 @@ class CDM;
 namespace wdb
 {
 class WdbCDMReaderParserInfo;
-class CdmNameTranslator;
+class GlobalWdbConfiguration;
 class Parameter;
 class Level;
 
@@ -57,7 +57,7 @@ class Level;
 class Wdb2CdmBuilder
 {
 public:
-	Wdb2CdmBuilder(const std::vector<GridData> & data, const CdmNameTranslator & translator);
+	Wdb2CdmBuilder(const std::vector<GridData> & data, const GlobalWdbConfiguration & config);
 	~Wdb2CdmBuilder();
 
 	/**
@@ -127,7 +127,7 @@ private:
 
 
 	WdbIndex index_;
-	const CdmNameTranslator & translator_;
+	const GlobalWdbConfiguration & config_;
 
 	typedef std::map<std::string, GridData::GridInformationPtr> GridSpecMap;
 	GridSpecMap grids_;

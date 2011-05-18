@@ -26,7 +26,15 @@
  MA  02110-1301, USA
  */
 
-#include "WdbTranslations.h"
+#ifndef WDBTRANSLATIONS_H_
+#define WDBTRANSLATIONS_H_
+
+#include <fimex/CDMAttribute.h>
+#include <boost/filesystem/path.hpp>
+#include <string>
+#include <map>
+#include <vector>
+
 
 namespace MetNoFimex
 {
@@ -34,14 +42,32 @@ namespace MetNoFimex
 namespace wdb
 {
 
-WdbTranslations::WdbTranslations()
+class GlobalWdbConfiguration
 {
+public:
+	//GlobalWdbConfiguration() {}
+	explicit GlobalWdbConfiguration(const boost::filesystem::path & configFile);
+	~GlobalWdbConfiguration();
+
+	std::string cfName(const std::string & wdbName) const;
+
+	std::string wdbName(const std::string & cfName) const;
+
+	typedef std::vector<CDMAttribute> AttributeList;
+	AttributeList getAttributes(const std::string & wdbParameter, const std::string & defaultUnit = std::string()) const;
+
+private:
+	typedef std::map<std::string, std::string> NameTranslation;
+	NameTranslation wdb2cf_;
+	NameTranslation cf2wdb_;
+
+
+	typedef std::map<std::string, AttributeList> NameToAttributeMap;
+	NameToAttributeMap attributes_;
+};
+
 }
 
-WdbTranslations::~WdbTranslations()
-{
 }
 
-}
-
-}
+#endif /* WDBTRANSLATIONS_H_ */
