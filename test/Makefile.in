@@ -221,12 +221,12 @@ test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
 	$(am__DEPENDENCIES_1)
 am__wdbTest_SOURCES_DIST = wdb/Wdb2CdmBuilderTest.cc \
 	wdb/WdbIndexTest.cc wdb/WdbConfigurationTest.cpp \
-	wdb/WdbTranslationsTest.cpp
+	wdb/GlobalWdbConfigurationTest.cpp
 @HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
 @HAVE_LIBPQ_TRUE@	wdbTest-Wdb2CdmBuilderTest.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-WdbIndexTest.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-WdbConfigurationTest.$(OBJEXT) \
-@HAVE_LIBPQ_TRUE@	wdbTest-WdbTranslationsTest.$(OBJEXT)
+@HAVE_LIBPQ_TRUE@	wdbTest-GlobalWdbConfigurationTest.$(OBJEXT)
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
 wdbTest_LDADD = $(LDADD)
 wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
@@ -456,7 +456,7 @@ AM_CFLAGS = -std=c99 -Wall
 @HAVE_LIBPQ_TRUE@  	wdb/Wdb2CdmBuilderTest.cc \
 @HAVE_LIBPQ_TRUE@  	wdb/WdbIndexTest.cc \
 @HAVE_LIBPQ_TRUE@  	wdb/WdbConfigurationTest.cpp \
-@HAVE_LIBPQ_TRUE@  	wdb/WdbTranslationsTest.cpp 
+@HAVE_LIBPQ_TRUE@  	wdb/GlobalWdbConfigurationTest.cpp 
 
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\"
 @HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
@@ -620,10 +620,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbConfigurationTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbIndexTest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbTranslationsTest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -709,19 +709,19 @@ wdbTest-WdbConfigurationTest.obj: wdb/WdbConfigurationTest.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-WdbConfigurationTest.obj `if test -f 'wdb/WdbConfigurationTest.cpp'; then $(CYGPATH_W) 'wdb/WdbConfigurationTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/WdbConfigurationTest.cpp'; fi`
 
-wdbTest-WdbTranslationsTest.o: wdb/WdbTranslationsTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-WdbTranslationsTest.o -MD -MP -MF $(DEPDIR)/wdbTest-WdbTranslationsTest.Tpo -c -o wdbTest-WdbTranslationsTest.o `test -f 'wdb/WdbTranslationsTest.cpp' || echo '$(srcdir)/'`wdb/WdbTranslationsTest.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-WdbTranslationsTest.Tpo $(DEPDIR)/wdbTest-WdbTranslationsTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/WdbTranslationsTest.cpp' object='wdbTest-WdbTranslationsTest.o' libtool=no @AMDEPBACKSLASH@
+wdbTest-GlobalWdbConfigurationTest.o: wdb/GlobalWdbConfigurationTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-GlobalWdbConfigurationTest.o -MD -MP -MF $(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Tpo -c -o wdbTest-GlobalWdbConfigurationTest.o `test -f 'wdb/GlobalWdbConfigurationTest.cpp' || echo '$(srcdir)/'`wdb/GlobalWdbConfigurationTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Tpo $(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GlobalWdbConfigurationTest.cpp' object='wdbTest-GlobalWdbConfigurationTest.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-WdbTranslationsTest.o `test -f 'wdb/WdbTranslationsTest.cpp' || echo '$(srcdir)/'`wdb/WdbTranslationsTest.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-GlobalWdbConfigurationTest.o `test -f 'wdb/GlobalWdbConfigurationTest.cpp' || echo '$(srcdir)/'`wdb/GlobalWdbConfigurationTest.cpp
 
-wdbTest-WdbTranslationsTest.obj: wdb/WdbTranslationsTest.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-WdbTranslationsTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-WdbTranslationsTest.Tpo -c -o wdbTest-WdbTranslationsTest.obj `if test -f 'wdb/WdbTranslationsTest.cpp'; then $(CYGPATH_W) 'wdb/WdbTranslationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/WdbTranslationsTest.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-WdbTranslationsTest.Tpo $(DEPDIR)/wdbTest-WdbTranslationsTest.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/WdbTranslationsTest.cpp' object='wdbTest-WdbTranslationsTest.obj' libtool=no @AMDEPBACKSLASH@
+wdbTest-GlobalWdbConfigurationTest.obj: wdb/GlobalWdbConfigurationTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-GlobalWdbConfigurationTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Tpo -c -o wdbTest-GlobalWdbConfigurationTest.obj `if test -f 'wdb/GlobalWdbConfigurationTest.cpp'; then $(CYGPATH_W) 'wdb/GlobalWdbConfigurationTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/GlobalWdbConfigurationTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Tpo $(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GlobalWdbConfigurationTest.cpp' object='wdbTest-GlobalWdbConfigurationTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-WdbTranslationsTest.obj `if test -f 'wdb/WdbTranslationsTest.cpp'; then $(CYGPATH_W) 'wdb/WdbTranslationsTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/WdbTranslationsTest.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-GlobalWdbConfigurationTest.obj `if test -f 'wdb/GlobalWdbConfigurationTest.cpp'; then $(CYGPATH_W) 'wdb/GlobalWdbConfigurationTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/GlobalWdbConfigurationTest.cpp'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

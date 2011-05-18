@@ -42,7 +42,7 @@ using namespace MetNoFimex;
 using namespace MetNoFimex::wdb;
 
 
-BOOST_AUTO_TEST_SUITE(WdbTranslationsTest)
+BOOST_AUTO_TEST_SUITE(GlobalWdbConfigurationTest)
 
 BOOST_AUTO_TEST_CASE(nonExistingFile)
 {

@@ -6,7 +6,7 @@ if HAVE_LIBPQ
   	wdb/Wdb2CdmBuilderTest.cc \
   	wdb/WdbIndexTest.cc \
   	wdb/WdbConfigurationTest.cpp \
-  	wdb/WdbTranslationsTest.cpp 
+  	wdb/GlobalWdbConfigurationTest.cpp 
   	
   wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\"
   
