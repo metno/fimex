@@ -42,7 +42,8 @@ const size_t blockWords = 1024;
 const size_t blockSize = blockWords * sizeof(word);
 const size_t offsetToContentDefinition = 2;
 
-/* M_PI not in <cmath> for C++98 */
+/* M_PI not in <cmath> for C++98, but some compilers put it nonetheless */
+#include <cmath>
 #ifndef M_PI
 #define M_PI  3.14159265358979323846  /* pi */
 #endif
