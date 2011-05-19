@@ -47,6 +47,7 @@ public:
 	virtual ~LatLonGridInformation();
 
 	virtual void addToCdm(CDM & cdm) const;
+	virtual std::string getCoordinatesAttribute() const { return ""; }
 	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
 	virtual void addSpatialDimensions(std::vector<std::string> & out) const;
 };

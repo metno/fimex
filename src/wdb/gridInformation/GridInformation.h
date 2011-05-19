@@ -117,6 +117,12 @@ public:
 	virtual void addToCdm(CDM & cdm) const =0;
 
 	/**
+	 * Get string to use in coordinates attribute for data, or an empty string
+	 * if this is not required.
+	 */
+	virtual std::string getCoordinatesAttribute() const =0;
+
+	/**
 	 * Get data for the given variable, if available. If the object cannot
 	 * give any such data, an empty pointer will be returned.
 	 */
@@ -134,7 +140,7 @@ public:
 
 	/**
 	 * Get a query string for requesting the all data contained in this object
-	 * form a wdb database.
+	 * from a wdb database.
 	 *
 	 * If you use libpq, the result of calling this query can be used as an
 	 * argument to the get function of this class.

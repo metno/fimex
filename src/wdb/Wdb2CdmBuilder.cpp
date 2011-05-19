@@ -52,7 +52,6 @@ Wdb2CdmBuilder::~Wdb2CdmBuilder()
 {
 }
 
-
 void Wdb2CdmBuilder::populate(CDM & cdm) const
 {
 	addProjectionInformation_(cdm);
@@ -238,8 +237,14 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		GlobalWdbConfiguration::AttributeList attributes = config_.getAttributes(parameter, index_.unitForParameter(parameter));
 		setAttribute(attributes, "_FillValue", std::numeric_limits<float>::quiet_NaN());
-		setAttribute(attributes, "grid_mapping", gridInfo->getProjectionName());
-		setAttribute(attributes, "coordinates", "longitude latitude"/*spatialDimensions.front() + " " + spatialDimensions.back()*/);
+
+//		grids_[d.parameter().name()]
+
+	   std::string coordinates = gridInfo->getCoordinatesAttribute();
+	   if ( not coordinates.empty() )
+		   setAttribute(attributes, "coordinates", coordinates);
+	   setAttribute(attributes, "grid_mapping", gridInfo->getProjectionName());
+
 
 		BOOST_FOREACH( const CDMAttribute & attribute, attributes )
 			cdm.addAttribute(dimension, attribute);

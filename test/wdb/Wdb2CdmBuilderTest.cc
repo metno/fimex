@@ -733,12 +733,13 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes, Wdb2CdmBuilderFixture)
 		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
 		BOOST_CHECK_EQUAL("1", cdm.getAttribute(cdmId(), "units").getStringValue());
 		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
-		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )
 	{
 		BOOST_FAIL(e.what());
 	}
+	// unrotated lat/lon grids should not have coordinates attributes on their variables
+	BOOST_CHECK_THROW(cdm.getAttribute(cdmId(), "coordinates"), CDMException);
 }
 
 BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)

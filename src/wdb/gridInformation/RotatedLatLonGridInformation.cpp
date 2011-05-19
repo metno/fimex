@@ -84,6 +84,11 @@ void RotatedLatLonGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("latitude", CDMAttribute("standard_name", "latitude"));
 }
 
+std::string RotatedLatLonGridInformation::getCoordinatesAttribute() const
+{
+	return "longitude latitude";
+}
+
 boost::shared_ptr<Data> RotatedLatLonGridInformation::getField(const CDMVariable & variable) const
 {
 	boost::shared_ptr<Data> ret;

@@ -78,6 +78,11 @@ void MetricGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("lat1", CDMAttribute("standard_name", "latitude"));
 }
 
+std::string MetricGridInformation::getCoordinatesAttribute() const
+{
+	return "lon1 lat1";
+}
+
 boost::shared_ptr<Data> MetricGridInformation::getField(const CDMVariable & variable) const
 {
 	boost::shared_ptr<Data> ret;
