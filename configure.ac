@@ -1,6 +1,6 @@
 AC_INIT([fimex],[0.28],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
-AM_INIT_AUTOMAKE([1.9 tar-pax -Wall -Werror foreign])
+AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC_STDC
@@ -8,11 +8,27 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_PROG_CC_C99
 
+# on gcc, enable -Wall
+AC_MSG_CHECKING(whether compiler understands -Wall -pedantic)
+old_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Wall"
+AC_TRY_COMPILE([],[],AC_MSG_RESULT(yes),
+                     AC_MSG_RESULT(no)
+	                 CFLAGS="$old_CFLAGS")
+
+
 # Checks for libraries.
 AC_CXX_HAVE_STD
 AC_CXX_HAVE_STL
 
 AC_LANG_PUSH(C++)
+# on g++, enable -Wall
+AC_MSG_CHECKING(whether c++ compiler understands -Wall -pedantic)
+old_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall"
+AC_TRY_COMPILE([],[],AC_MSG_RESULT(yes),
+                     AC_MSG_RESULT(no)
+	                 CXXFLAGS="$old_CXXFLAGS")
 
 # Checks for header files.
 AC_HEADER_STDC

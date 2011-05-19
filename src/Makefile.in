@@ -389,8 +389,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = felt wdb . binSrc
-AM_CFLAGS = -std=c99 -Wall -pedantic
-AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
+AM_CFLAGS = 
+AM_CXXFLAGS = $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @MIFI_GRIB_API_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@
 lib_LTLIBRARIES = libfimex.la
 libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @MIFI_UDUNITS2_LDFLAGS@ @MIFI_UDUNITS_LDFLAGS@ @MIFI_PROJ_LDFLAGS@ @MIFI_NETCDF_LDFLAGS@ @MIFI_GRIB_API_LDFLAGS@ ${XML_LDFLAGS} @BOOST_LDFLAGS@

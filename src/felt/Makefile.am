@@ -1,5 +1,5 @@
-AM_CFLAGS = -std=c99 -Wall -pedantic
-AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
+AM_CFLAGS = 
+AM_CXXFLAGS = $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include @MIFI_PROJ_CPPFLAGS@
 
 
