@@ -139,9 +139,9 @@ void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
 				cdm.addDimension(CDMDimension(dimension, levels.size()));
 
 				cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, std::vector<std::string>(1, dimension)));
-				cdm.addAttribute(dimension, CDMAttribute("long_name", levelName));
-				cdm.addAttribute(dimension, CDMAttribute("standard_name", dimension));
-				cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForLevel(levelName)));
+
+				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(levelName, index_.unitForLevel(levelName)) )
+					cdm.addAttribute(dimension, attribute);
 				cdm.addAttribute(dimension, CDMAttribute("axis", "z"));
 
 				addedLevels.insert(levelName);
@@ -198,6 +198,19 @@ void Wdb2CdmBuilder::addTimeDimensions_(CDM & cdm) const
 	cdm.addDimension(time);
 }
 
+namespace
+{
+	template <typename T>
+	void setAttribute(GlobalWdbConfiguration::AttributeList & out, const std::string & name, T value)
+	{
+		for ( GlobalWdbConfiguration::AttributeList::const_iterator find = out.begin(); find != out.end(); ++ find )
+			if ( find->getName() == name )
+				return;
+		out.push_back(CDMAttribute(name, value));
+	}
+}
+
+
 void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 {
 	BOOST_FOREACH( const std::string & parameter, index_.allParameters() )
@@ -223,14 +236,13 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, dimensions));
 
-		cdm.addAttribute(dimension, CDMAttribute("grid_mapping", gridInfo->getProjectionName()));
+		GlobalWdbConfiguration::AttributeList attributes = config_.getAttributes(parameter, index_.unitForParameter(parameter));
+		setAttribute(attributes, "_FillValue", std::numeric_limits<float>::quiet_NaN());
+		setAttribute(attributes, "grid_mapping", gridInfo->getProjectionName());
+		setAttribute(attributes, "coordinates", "longitude latitude"/*spatialDimensions.front() + " " + spatialDimensions.back()*/);
 
-		BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(parameter, index_.unitForParameter(parameter)) )
+		BOOST_FOREACH( const CDMAttribute & attribute, attributes )
 			cdm.addAttribute(dimension, attribute);
-
-//		cdm.addAttribute(dimension, CDMAttribute("units", index_.unitForParameter(parameter)));
-//		cdm.addAttribute(dimension, CDMAttribute("_FillValue", std::numeric_limits<float>::quiet_NaN()));
-		cdm.addAttribute(dimension, CDMAttribute("coordinates", "longitude latitude"/*spatialDimensions.front() + " " + spatialDimensions.back()*/));
 	}
 }
 

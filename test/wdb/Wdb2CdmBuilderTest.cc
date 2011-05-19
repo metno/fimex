@@ -64,7 +64,7 @@ class Wdb2CdmBuilderFixture
 
 	wdb::GridData::gid nextGid_;
 public:
-	Wdb2CdmBuilderFixture() : nextGid_(0), tr(TEST_DIR"/local_wdb_config.xml") {}
+	Wdb2CdmBuilderFixture() : nextGid_(0), tr(TEST_DIR"/wdb_config.xml") {}
 
 	wdb::GridData::gid nextGid()
 	{
@@ -78,7 +78,7 @@ public:
 
 	static std::string cdmId()
 	{
-		return "air_temperature";
+		return "high_cloud_cover";
 	}
 
 
@@ -122,7 +122,7 @@ public:
 		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(defaultTime), gridInfo, nextGid()));
 	}
 };
-const wdb::Parameter Wdb2CdmBuilderFixture::defaultParameter("air temperature", "C");
+const wdb::Parameter Wdb2CdmBuilderFixture::defaultParameter("high cloud cover", "C");
 const wdb::Level Wdb2CdmBuilderFixture::defaultLevel("distance above ground", "m", 0, 0);
 const std::string Wdb2CdmBuilderFixture::defaultTime = "2011-03-18 06:00:00";
 const wdb::GridData::GridInformationPtr Wdb2CdmBuilderFixture::defaultGrid(wdb::GridInformation::get("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
@@ -731,7 +731,7 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes, Wdb2CdmBuilderFixture)
 	try
 	{
 		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("K", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("1", cdm.getAttribute(cdmId(), "units").getStringValue());
 		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
 		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
@@ -753,7 +753,7 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)
 	try
 	{
 		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("K", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("1", cdm.getAttribute(cdmId(), "units").getStringValue());
 		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
 		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}

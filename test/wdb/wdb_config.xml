@@ -12,34 +12,60 @@
     <attribute name="distribution_statement" value="Free" type="string" />
 </global_attributes>
 
-<wdb_parameters>
+<parameters>
 
-    <value_parameter wdbname="air temperature">
+	<!-- Level parameters -->
+
+	<variable wdbname="height above ground">
+    	<attribute name="units" value="m" type="string" />
+        <attribute name="standard_name" value="height" type="string" />
+	</variable>
+ 
+	<variable wdbname="depth">
+    	<attribute name="units" value="m" type="string" />
+        <attribute name="standard_name" value="depth" type="string" />
+	</variable>
+	
+	<variable wdbname="atmosphere sigma coordinate">
+    	<attribute name="units" value="1" type="string" />
+        <attribute name="standard_name" value="atmosphere_sigma_coordinate" type="string" />
+	</variable>
+	
+	<variable wdbname="height above reference ellipsoid">
+    	<attribute name="units" value="m" type="string" />
+        <attribute name="standard_name" value="height_above_reference_ellipsoid" type="string" />
+	</variable>
+
+
+	<!-- Value parameters -->
+
+
+    <variable wdbname="air temperature">
     	<attribute name="units" value="K" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
-    </value_parameter>
+    </variable>
 
-	<value_parameter wdbname="mean sea level pressure" cfname="mslp">
+	<variable wdbname="mean sea level pressure" cfname="mslp">
 		<attribute name="units" value="Pa" type="string" />
 		<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
-	</value_parameter>
+	</variable>
 
-    <value_parameter wdbname="x wind">
+    <variable wdbname="x wind">
 		<attribute name="units" value="m s-1" type="string" />    
         <attribute name="standard_name" value="eastward_wind" type="string" />
-    </value_parameter>
+    </variable>
 
-    <value_parameter wdbname="y wind">
+    <variable wdbname="y wind">
     	<attribute name="units" value="m s-1" type="string" />
         <attribute name="standard_name" value="northward_wind" type="string" />
-    </value_parameter>
+    </variable>
 
-    <value_parameter wdbname="high cloud cover">
+    <variable wdbname="high cloud cover">
     	<attribute name="units" value="1" type="string" />
         <attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
         <attribute name="long_name" value="stuff" type="string" />
-        <attribute name="DefaultValue_" value="0" type="float" />
-    </value_parameter>
+        <attribute name="_FillValue" value="0" type="float" />
+    </variable>
 
-</wdb_parameters>
+</parameters>
 </wdb_fimex_config>

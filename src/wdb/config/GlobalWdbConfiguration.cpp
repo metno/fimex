@@ -101,7 +101,8 @@ GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(cons
 	setAttribute(ret, "units", defaultUnit);
 	setAttribute(ret, "standard_name", cfName(wdbParameter));
 	setAttribute(ret, "long_name", wdbParameter);
-	setAttribute(ret, "_FillValue", std::numeric_limits<float>::quiet_NaN());
+
+	//setAttribute(ret, "_FillValue", std::numeric_limits<float>::quiet_NaN());
 
 	return ret;
 }
@@ -129,7 +130,7 @@ void GlobalWdbConfiguration::initParseGlobalAttributes_(XMLDoc & config)
 
 void GlobalWdbConfiguration::initParseValueParameter_(XMLDoc & config)
 {
-	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
+	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/parameters/variable");
 	if ( parameters->nodesetval )
 	{
 		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )

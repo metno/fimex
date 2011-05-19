@@ -36,7 +36,6 @@
 #include <fimex/CDMAttribute.h>
 #include <fimex/Data.h>
 #include <boost/foreach.hpp>
-#include <cmath>
 
 using namespace MetNoFimex;
 using namespace MetNoFimex::wdb;
@@ -146,23 +145,6 @@ BOOST_AUTO_TEST_CASE(getsAttributes2)
 		BOOST_CHECK_EQUAL("northward_wind", standardName->getStringValue());
 }
 
-
-BOOST_AUTO_TEST_CASE(defaultAttributes)
-{
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
-	std::vector<CDMAttribute> attributes = globalConfig.getAttributes("y wind");
-
-	const CDMAttribute * defaultValue = getAttribute("_FillValue", attributes);
-	BOOST_CHECK(defaultValue != 0);
-	if ( defaultValue )
-	{
-		boost::shared_ptr<Data> data = defaultValue->getData();
-		BOOST_CHECK_EQUAL(1, data->size());
-		if ( data->size() )
-			BOOST_CHECK(std::isnan(data->asFloat()[0]));
-	}
-}
-
 BOOST_AUTO_TEST_CASE(implicitLongName)
 {
 	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
@@ -183,16 +165,6 @@ BOOST_AUTO_TEST_CASE(overrideDefaultValues)
 	BOOST_CHECK(longName != 0);
 	if ( longName )
 		BOOST_CHECK_EQUAL("stuff", longName->getStringValue());
-
-	const CDMAttribute * defaultValue = getAttribute("DefaultValue_", attributes);
-	BOOST_CHECK(defaultValue != 0);
-	if ( defaultValue )
-	{
-		boost::shared_ptr<Data> data = defaultValue->getData();
-		BOOST_CHECK_EQUAL(1, data->size());
-		if ( data->size() )
-			BOOST_CHECK_EQUAL(0, data->asFloat()[0]);
-	}
 }
 
 

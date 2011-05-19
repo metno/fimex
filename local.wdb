@@ -1,0 +1,20 @@
+# wdb database configuration for fimex 
+
+database = wdb
+host = localhost 
+port = 5432
+user = vegardb
+
+
+[wci]
+
+# user = vegardb
+
+
+[wci.read]
+
+dataprovider = met.no eceps modification
+# location = 188,113 res 4000 start -2.452e+06,-1.952e+06
+# referencetime = 2011-05-05T06:00:00
+# valueparameter =
+dataversion = 0  
