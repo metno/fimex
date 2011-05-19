@@ -18855,8 +18855,6 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
-return main ();
-  ;
   return 0;
 }
 _ACEOF
