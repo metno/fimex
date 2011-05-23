@@ -72,7 +72,7 @@ protected:
 	 * This constructor is meant for artificially generating objects for tests
 	 * - via subclasses
 	 */
-	GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, gid gridId);
+	GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, const Time & referenceTime, gid gridId);
 
 	void setGridInformation(GridInformationPtr gridInformation)
 	{

@@ -136,13 +136,11 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 	}
 	else if ( d_->dataIndex->isLevel(wdbName) )
 	{
-		const std::set<float> * levels = d_->dataIndex->getLevelValues(wdbName);
-		if ( ! levels )
-			throw CDMException("Internal error request for nonexisting level: " + wdbName);
+		const std::set<float> & levels = d_->dataIndex->getLevelValues(wdbName);
 
-		ret = createData(variable.getDataType(), levels->size());
+		ret = createData(variable.getDataType(), levels.size());
 		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
-		std::copy(levels->begin(), levels->end(), dataIdx);
+		std::copy(levels.begin(), levels.end(), dataIdx);
 	}
 	else if ( varName == "forecast_reference_time" )
 	{

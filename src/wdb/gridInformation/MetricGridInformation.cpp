@@ -65,7 +65,7 @@ void MetricGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("yc", CDMAttribute("standard_name", "projection_y_coordinate"));
 	cdm.addAttribute("yc", CDMAttribute("units", "m"));
 
-	std::vector<std::string> dimensions = boost::assign::list_of("yc")("xc");
+	std::vector<std::string> dimensions = boost::assign::list_of("xc")("yc");
 
 	cdm.addVariable(CDMVariable("lon1", CDM_DOUBLE, dimensions));
 	cdm.addAttribute("lon1", CDMAttribute("units", "degree_east"));

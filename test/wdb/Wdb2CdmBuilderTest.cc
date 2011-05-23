@@ -54,9 +54,10 @@ class Wdb2CdmBuilderFixture
 				const wdb::Level & lvl,
 				int version,
 				const Time & validTo,
+				const Time & referenceTime,
 				const wdb::GridData::GridInformationPtr & grid,
 				gid gridId) :
-			wdb::GridData(param, lvl, version, validTo, gridId)
+			wdb::GridData(param, lvl, version, validTo, referenceTime, gridId)
 		{
 			setGridInformation(grid);
 		}
@@ -89,42 +90,44 @@ public:
 	static const wdb::Parameter defaultParameter;
 	static const wdb::Level defaultLevel;
 	static const std::string defaultTime;
+	static const std::string defaultReferenceTime;
 	static const wdb::GridData::GridInformationPtr defaultGrid;
 	wdb::GlobalWdbConfiguration tr;
 
 	void addGridData(const wdb::Parameter & parameter = defaultParameter, const std::string & time = defaultTime, int version = 0)
 	{
-		gridData.push_back(TestingGridData(parameter, defaultLevel, version, t(time), defaultGrid, nextGid()));
+		gridData.push_back(TestingGridData(parameter, defaultLevel, version, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
 	}
 
 	void addGridData(const wdb::Parameter & parameter, const wdb::Level & lvl)
 	{
-		gridData.push_back(TestingGridData(parameter, lvl, 0, t(defaultTime), defaultGrid, nextGid()));
+		gridData.push_back(TestingGridData(parameter, lvl, 0, t(defaultTime), t(defaultReferenceTime), defaultGrid, nextGid()));
 	}
 
 	void addGridData(const wdb::Level & lvl, const std::string & time = defaultTime)
 	{
-		gridData.push_back(TestingGridData(defaultParameter, lvl, 0, t(time), defaultGrid, nextGid()));
+		gridData.push_back(TestingGridData(defaultParameter, lvl, 0, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
 	}
 
 	void addGridData(const std::string & time)
 	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(time), defaultGrid, nextGid()));
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
 	}
 
 	void addGridData(int dataVersion, const std::string & time = defaultTime)
 	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, dataVersion, t(time), defaultGrid, nextGid()));
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, dataVersion, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
 	}
 
 	void addGridData(const wdb::GridData::GridInformationPtr & gridInfo)
 	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(defaultTime), gridInfo, nextGid()));
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(defaultTime), t(defaultReferenceTime), gridInfo, nextGid()));
 	}
 };
 const wdb::Parameter Wdb2CdmBuilderFixture::defaultParameter("high cloud cover", "C");
 const wdb::Level Wdb2CdmBuilderFixture::defaultLevel("distance above ground", "m", 0, 0);
 const std::string Wdb2CdmBuilderFixture::defaultTime = "2011-03-18 06:00:00";
+const std::string Wdb2CdmBuilderFixture::defaultReferenceTime = "2011-03-18 00:00:00";
 const wdb::GridData::GridInformationPtr Wdb2CdmBuilderFixture::defaultGrid(wdb::GridInformation::get("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
 struct same_entity
@@ -671,9 +674,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixtu
 			const CDMVariable & lat1 = cdm.getVariable("lat1");
 			std::vector<std::string> shape = lat1.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK_EQUAL("yc", shape[0]);
+				BOOST_CHECK_EQUAL("xc", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK_EQUAL("xc", shape[1]);
+				BOOST_CHECK_EQUAL("yc", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_north", cdm.getAttribute("lat1", "units").getStringValue());
 			BOOST_CHECK_EQUAL("latitude", cdm.getAttribute("lat1", "long_name").getStringValue());
@@ -683,9 +686,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixtu
 			const CDMVariable & lon1 = cdm.getVariable("lon1");
 			std::vector<std::string> shape = lon1.getShape();
 			if ( not shape.empty() )
-				BOOST_CHECK_EQUAL("yc", shape[0]);
+				BOOST_CHECK_EQUAL("xc", shape[0]);
 			if ( shape.size() > 1 )
-				BOOST_CHECK_EQUAL("xc", shape[1]);
+				BOOST_CHECK_EQUAL("yc", shape[1]);
 			BOOST_CHECK_EQUAL(2, shape.size());
 			BOOST_CHECK_EQUAL("degree_east", cdm.getAttribute("lon1", "units").getStringValue());
 			BOOST_CHECK_EQUAL("longitude", cdm.getAttribute("lon1", "long_name").getStringValue());

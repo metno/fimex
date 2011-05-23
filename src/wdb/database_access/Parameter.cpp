@@ -39,6 +39,11 @@ Parameter::Parameter(const std::string & name, const std::string & unit) :
 {
 }
 
+Parameter::Parameter(const std::string & name) :
+		name_(name), unit_("unknown")
+{
+}
+
 Parameter::~Parameter()
 {
 }

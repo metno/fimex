@@ -36,11 +36,12 @@ namespace MetNoFimex
 namespace wdb
 {
 
-GridData::GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, gid gridId) :
+GridData::GridData(const Parameter & param, const Level & lvl, int version, const Time & validTo, const Time & referenceTime, gid gridId) :
 		parameter_(param),
 		level_(lvl),
 		version_(version),
 		validTo_(validTo),
+		referenceTime_(referenceTime),
 		placeName_("test grid"),
 		gridIdentifier_(gridId)
 {

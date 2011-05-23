@@ -47,6 +47,7 @@ class Parameter
 {
 public:
 	Parameter() {}
+	Parameter(const std::string & name);
 	Parameter(const std::string & name, const std::string & unit);
 	~Parameter();
 

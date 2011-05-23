@@ -80,7 +80,7 @@ public:
 	/**
 	 * Get a list of all times that are in use.
 	 */
-	const std::set<GridData::Time> & allTimes() const;
+	std::set<GridData::Time> allTimes() const;
 
 	/**
 	 * Get all available times for the given parameter
@@ -90,12 +90,7 @@ public:
 	/**
 	 * Find a parameter's level type
 	 */
-	const std::string & levelNameForParameter(const std::string & parameter) const;
-
-	/**
-	 * Find a parameter's level unit
-	 */
-	const std::string & unitForLevel(const std::string & level) const;
+	const LevelType & levelTypeForParameter(const std::string & parameter) const;
 
 	/**
 	 * Get a list of all available levels for the given parameter
@@ -110,66 +105,32 @@ public:
 	/**
 	 * does the given parameter name exist in this object?
 	 */
-	bool hasParameter(const std::string & parameter) const
-	{
-		return data_.find(parameter) != data_.end();
-	}
+	bool hasParameter(const std::string & parameter) const;
 
-	bool isLevel(const std::string & levelName) const
-	{
-		return allLevels_.find(levelName) != allLevels_.end();
-	}
-
-	const std::set<float> * getLevelValues(const std::string & levelName) const
-	{
-		std::map<std::string, std::set<float> >::const_iterator find = allLevels_.find(levelName);
-		if ( find == allLevels_.end() )
-			return 0;
-		return & find->second;
-	}
+	std::set<float> getLevelValues(const std::string & levelName) const;
 
 	/**
 	 * Get data's reference time
 	 */
-	const GridData::Time & referenceTime() const
-	{
-		return referenceTime_;
-	}
+	const GridData::Time & referenceTime() const;
 
 private:
 
+//	typedef std::map<GridData::Time, GidList> Entries;
+//	typedef std::map<Parameter, Entries> Data;
+//
+//	Data data_;
+
+
 	typedef std::map<int, gid> VersionEntry;
-	struct LevelEntry : public std::map<float, VersionEntry>
-	{
-		std::string levelName;
-	};
-	typedef std::map<GridData::Time, LevelEntry> TimeEntry;
-	typedef std::map<std::string, TimeEntry> Data;
+	typedef std::map<Level, VersionEntry> LevelEntry;
+	typedef std::map<GridData::Time, LevelEntry> ReferenceTimeEntry;
+	typedef std::map<GridData::Time, ReferenceTimeEntry> ValidTimeEntry;
+	typedef std::map<Parameter, ValidTimeEntry> Data;
 
+	Data entries;
 
-    void extractGids_(WdbIndex::GidList & out, const LevelEntry & levelEntry, const std::string & parameter) const;
-    void extractMissingGidsForLevel_(WdbIndex::GidList & out, const std::string & parameter) const;
-
-
-	Data data_;
-
-	std::map<std::string, std::string> parameterUnits_;
-
-	// all times in use
-	std::set<GridData::Time> allTimes_;
-
-	// level names to level values
-	std::map<std::string, std::set<float> > allLevels_;
-	std::map<std::string, std::string> levelUnits_;
-
-	// parameter name to level name
-	std::map<std::string, std::string> levelsForParameters_;
-
-	bool hasMoreThanOneLevel_(const std::string & parameter) const;
-	std::set<std::string> parametersWithMoreThanOneLevel_;
-	std::set<int> allVersions_;
-
-	GridData::Time referenceTime_;
+	std::map<std::string, std::set<float> > levels_;
 };
 
 }

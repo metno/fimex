@@ -74,10 +74,18 @@ public:
 
 	bool isLevel(const std::string & levelName) const
 	{
-		return getLevelValues(levelName);
+		try
+		{
+			getLevelValues(levelName);
+			return true;
+		}
+		catch (...)
+		{
+			return false;
+		}
 	}
 
-	const std::set<float> * getLevelValues(const std::string & levelName) const;
+	std::set<float> getLevelValues(const std::string & levelName) const;
 
 	/**
 	 * get all grid idenitfiers for the given variable name and timestep
@@ -97,7 +105,7 @@ public:
 	/**
 	 * Get a list of all times in use
 	 */
-	const std::set<GridData::Time> & allTimes() const
+	std::set<GridData::Time> allTimes() const
 	{
 		return index_.allTimes();
 	}

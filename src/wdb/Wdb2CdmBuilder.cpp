@@ -66,7 +66,7 @@ bool Wdb2CdmBuilder::isDatabaseField(const std::string & variableName) const
 	return index_.hasParameter(variableName);
 }
 
-const std::set<float> * Wdb2CdmBuilder::getLevelValues(const std::string & levelName) const
+std::set<float> Wdb2CdmBuilder::getLevelValues(const std::string & levelName) const
 {
 	return index_.getLevelValues(levelName);
 }
@@ -127,7 +127,8 @@ void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
 	std::set<std::string> addedLevels;
 	BOOST_FOREACH(const std::string & parameter, index_.allParameters())
 	{
-		const std::string & levelName = index_.levelNameForParameter(parameter);
+		const LevelType & levelType = index_.levelTypeForParameter(parameter);
+		std::string levelName = levelType.name();
 		if ( addedLevels.find(levelName) == addedLevels.end() )
 		{
 			std::set<float> levels = index_.levelsForParameter(parameter);
@@ -139,7 +140,7 @@ void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
 
 				cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, std::vector<std::string>(1, dimension)));
 
-				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(levelName, index_.unitForLevel(levelName)) )
+				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(levelName, levelType.unit()) )
 					cdm.addAttribute(dimension, attribute);
 				cdm.addAttribute(dimension, CDMAttribute("axis", "z"));
 
@@ -229,7 +230,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 		if ( index_.versionsForParameter(parameter).size() > 1 )
 			dimensions.push_back("version");
 		if ( index_.levelsForParameter(parameter).size() > 1 )
-			dimensions.push_back(config_.cfName(index_.levelNameForParameter(parameter)));
+			dimensions.push_back(config_.cfName(index_.levelTypeForParameter(parameter).name()));
 		if ( index_.timesForParameter(parameter).size() > 1 )
 			dimensions.push_back("time");
 
