@@ -110,7 +110,9 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
 {
     const CDMVariable& var = cdm_->getVariable(varName);
     if (var.hasData()) {
-        return var.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionStartPositions());
+        return var.getData()->slice(sb.getMaxDimensionSizes(),
+                                    sb.getDimensionStartPositions(),
+                                    sb.getDimensionSizes());
     }
 
     NcVar* ncVar = ncFile->get_var(var.getName().c_str());
