@@ -100,17 +100,19 @@ if test [ "x$with_netcdf" == "xyes" ]; then
     save_LIBS="$LIBS"
     save_LDFLAGS="$LDFLAGS"
     save_CPPFLAGS="$CPPFLAGS"
-    LIBS="$LIBS $MIFI_NETCDF_LIBS"
+    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
+    LIBS="$LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_NETCDF_LIBS"
     LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
     CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
-    AC_CHECK_LIB([netcdf_c++], [main],[], [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <netcdfcpp.h>], [NcError::set_err(5)])],
+                   [],                                           
+                   [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
     AC_CHECK_TYPE([NcFile::FileFormat],[  AC_DEFINE([HAVE_NCFILE_FILEFORMAT],[1],
                                                      [netcdf knows NcFile::FileFormat enum])
                                                     ],[],[#include "netcdfcpp.h"])
     LIBS="$save_LIBS"
     LDFLAGS="$save_LDFLAGS"
     CPPFLAGS="$save_CPPFLAGS"
-    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
     AC_SUBST(MIFI_NETCDF_CPP_LIBS)
     AC_LANG_POP(C++)
     AC_DEFINE([MIFI_HAVE_NETCDF], 1, 'Define to 1 if you have the <netcdf.h> header file.')

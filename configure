@@ -18838,48 +18838,28 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
     save_LIBS="$LIBS"
     save_LDFLAGS="$LDFLAGS"
     save_CPPFLAGS="$CPPFLAGS"
-    LIBS="$LIBS $MIFI_NETCDF_LIBS"
+    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
+    LIBS="$LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_NETCDF_LIBS"
     LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
     CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lnetcdf_c++" >&5
-$as_echo_n "checking for main in -lnetcdf_c++... " >&6; }
-if test "${ac_cv_lib_netcdf_cpp_main+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lnetcdf_c++  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-
+#include <netcdfcpp.h>
 int
 main ()
 {
+NcError::set_err(5)
+  ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_netcdf_cpp_main=yes
-else
-  ac_cv_lib_netcdf_cpp_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_netcdf_cpp_main" >&5
-$as_echo "$ac_cv_lib_netcdf_cpp_main" >&6; }
-if test "x$ac_cv_lib_netcdf_cpp_main" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBNETCDF_C__ 1
-_ACEOF
-
-  LIBS="-lnetcdf_c++ $LIBS"
 
 else
   as_fn_error "Did not find libnetcdf_c++, this is required to continue" "$LINENO" 5
 fi
-
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
     ac_fn_cxx_check_type "$LINENO" "NcFile::FileFormat" "ac_cv_type_NcFile__FileFormat" "#include \"netcdfcpp.h\"
 "
 if test "x$ac_cv_type_NcFile__FileFormat" = x""yes; then :
@@ -18892,7 +18872,6 @@ fi
     LIBS="$save_LIBS"
     LDFLAGS="$save_LDFLAGS"
     CPPFLAGS="$save_CPPFLAGS"
-    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
 
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
