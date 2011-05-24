@@ -1,6 +1,6 @@
 AC_INIT([fimex],[0.29beta],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
-AM_INIT_AUTOMAKE([1.9 tar-pax -Wall -Werror foreign])
+AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC_STDC
@@ -8,11 +8,27 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_PROG_CC_C99
 
+# on gcc, enable -Wall
+AC_MSG_CHECKING(whether compiler understands -Wall -pedantic)
+old_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -Wall"
+AC_TRY_COMPILE([],[],AC_MSG_RESULT(yes),
+                     AC_MSG_RESULT(no)
+	                 CFLAGS="$old_CFLAGS")
+
+
 # Checks for libraries.
 AC_CXX_HAVE_STD
 AC_CXX_HAVE_STL
 
 AC_LANG_PUSH(C++)
+# on g++, enable -Wall
+AC_MSG_CHECKING(whether c++ compiler understands -Wall -pedantic)
+old_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -Wall"
+AC_TRY_COMPILE([],[],AC_MSG_RESULT(yes),
+                     AC_MSG_RESULT(no)
+	                 CXXFLAGS="$old_CXXFLAGS")
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -84,17 +100,19 @@ if test [ "x$with_netcdf" == "xyes" ]; then
     save_LIBS="$LIBS"
     save_LDFLAGS="$LDFLAGS"
     save_CPPFLAGS="$CPPFLAGS"
-    LIBS="$LIBS $MIFI_NETCDF_LIBS"
+    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
+    LIBS="$LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_NETCDF_LIBS"
     LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
     CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
-    AC_CHECK_LIB([netcdf_c++], [main],[], [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <netcdfcpp.h>], [NcError::set_err(5)])],
+                   [],
+                   [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
     AC_CHECK_TYPE([NcFile::FileFormat],[  AC_DEFINE([HAVE_NCFILE_FILEFORMAT],[1],
                                                      [netcdf knows NcFile::FileFormat enum])
                                                     ],[],[#include "netcdfcpp.h"])
     LIBS="$save_LIBS"
     LDFLAGS="$save_LDFLAGS"
     CPPFLAGS="$save_CPPFLAGS"
-    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
     AC_SUBST(MIFI_NETCDF_CPP_LIBS)
     AC_LANG_POP(C++)
     AC_DEFINE([MIFI_HAVE_NETCDF], 1, 'Define to 1 if you have the <netcdf.h> header file.')

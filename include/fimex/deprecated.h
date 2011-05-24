@@ -31,6 +31,9 @@
 #define DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
 #define DEPRECATED(func) __declspec(deprecated) func
+#elif defined(__IBMC__) || defined(__IBMCPP__)
+#pragma info("DEPRECATED not implemented for IBM compilers")
+#define DEPRECATED(func) func
 #else
 #pragma message("WARNING: You need to implement DEPRECATED for this compiler")
 #define DEPRECATED(func) func

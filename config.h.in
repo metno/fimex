@@ -42,9 +42,6 @@
 /* Define to 1 if you have the `mic' library (-lmic). */
 #undef HAVE_LIBMIC
 
-/* Define to 1 if you have the `netcdf_c++' library (-lnetcdf_c++). */
-#undef HAVE_LIBNETCDF_C__
-
 /* Define if you have libpq */
 #undef HAVE_LIBPQ
 

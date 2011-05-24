@@ -257,8 +257,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CFLAGS = -std=c99 -Wall -pedantic
-AM_CXXFLAGS = -Wall $(BOOST_CPPFLAGS)
+AM_CFLAGS = 
+AM_CXXFLAGS = $(BOOST_CPPFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include @MIFI_PROJ_CPPFLAGS@
 lib_LTLIBRARIES = libfelt.la
 libfelt_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @BOOST_LDFLAGS@ @MIFI_PROJ_LDFLAGS@
