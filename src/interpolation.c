@@ -790,3 +790,12 @@ size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal) {
 	return retVal;
 }
 
+int mifi_isnanf(float val)
+{
+    return isnan(val);
+}
+
+int mifi_isnand(double val)
+{
+    return isnan(val);
+}

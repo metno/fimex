@@ -107,17 +107,17 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bilinear_f )
 
 	// check for border values / nan
 	mifi_get_values_bilinear_f(infield, outvalues, 0, 0, 2, 2, 1);
-	BOOST_CHECK(!isnanf(outvalues[0]));
+	BOOST_CHECK(!mifi_isnanf(outvalues[0]));
 	mifi_get_values_bilinear_f(infield, outvalues, 1, 1, 2, 2, 1);
-	BOOST_CHECK(!isnanf(outvalues[0]));
+	BOOST_CHECK(!mifi_isnanf(outvalues[0]));
 	mifi_get_values_bilinear_f(infield, outvalues, 1.5, 0.5, 2, 2, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 	mifi_get_values_bilinear_f(infield, outvalues, 0.5, 1.5, 2, 2, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 	mifi_get_values_bilinear_f(infield, outvalues, 0.5, -0.5, 2, 2, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 	mifi_get_values_bilinear_f(infield, outvalues, -0.5, 0.5, 2, 2, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 
 }
 
@@ -154,13 +154,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_bicubic_f )
 
 	// check for border values / nan
 	mifi_get_values_bicubic_f(infield, outvalues, .5, 1, 4, 4, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 	mifi_get_values_bicubic_f(infield, outvalues, 1, .5, 4, 4, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 	mifi_get_values_bicubic_f(infield, outvalues, 2.5, 1, 4, 4, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 	mifi_get_values_bicubic_f(infield, outvalues, 1, 2.5, 4, 4, 1);
-	BOOST_CHECK(isnanf(outvalues[0]));
+	BOOST_CHECK(mifi_isnanf(outvalues[0]));
 
 }
 

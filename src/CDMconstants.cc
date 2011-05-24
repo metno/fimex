@@ -35,7 +35,7 @@
 std::vector<std::string> names_;
 static void addName_(int pos, const std::string& name)
 {
-    if (pos >= names_.size()) {
+    if (pos >= static_cast<int>(names_.size())) {
         names_.resize(pos+1);
     }
     names_.at(pos) = name;
@@ -55,7 +55,7 @@ static std::vector<std::string> getFiletypeNames_()
 const char* mifi_get_filetype_name(int filetype)
 {
     std::vector<std::string> names = getFiletypeNames_();
-    if (filetype >= 0 && filetype < names.size()) {
+    if (filetype >= 0 && filetype < static_cast<int>(names.size())) {
         return names.at(filetype).c_str();
     }
     return "";

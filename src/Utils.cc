@@ -34,7 +34,7 @@ namespace MetNoFimex
 {
 
 int round(double num) {
-  return static_cast<int>(std::floor(num+0.5));
+    return static_cast<int>(num < 0.0 ? std::ceil(num - 0.5) : std::floor(num + 0.5));
 }
 
 std::string trim(const std::string& str) {

@@ -26,6 +26,7 @@
 
 #include "fimex/CachedForwardInterpolation.h"
 #include "fimex/interpolation.h"
+#include "fimex/Utils.h"
 #include <numeric>
 #include <algorithm>
 
@@ -85,11 +86,11 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
         for (size_t y = 0; y < inY; ++y) {
             for (size_t x = 0; x < inX; ++x) {
                 float val = *inDataIt++;
-                if (!isnanf(val)) {
-                    int xOutPos = round(pointsOnXAxis[y*inX+x]);
-                    if (xOutPos >= 0 && xOutPos < outX) {
-                        int yOutPos = round(pointsOnYAxis[y*inX+x]);
-                        if (yOutPos >= 0 && yOutPos < outY) {
+                if (!mifi_isnanf(val)) {
+                    int xOutPos = MetNoFimex::round(pointsOnXAxis[y*inX+x]);
+                    if (xOutPos >= 0 && xOutPos < static_cast<int>(outX)) {
+                        int yOutPos = MetNoFimex::round(pointsOnYAxis[y*inX+x]);
+                        if (yOutPos >= 0 && yOutPos < static_cast<int>(outY)) {
                             tempOut[yOutPos*outX + xOutPos].push_back(val);
                         }
                     }

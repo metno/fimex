@@ -434,13 +434,33 @@ extern int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, fl
 extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
 /**
  * Convert nan back to bad-values. See #mifi_bad2nanf
-
+ *
  * @param posPtr start pointer of the float array
  * @param endPtr end-pointer of the float array (excluded from conversion)
  * @param badVal value NaNs will be  converted to
  * @return number of conversions
  */
 extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
+
+/**
+ * check if the value is a nan
+ *
+ * @param the value to test
+ * @return 0 on false, otherwise true
+ * @warning this function should only be used in C++, which doesn't define
+ *          the isnan macro defined in C99
+ */
+extern int mifi_isnanf(float val);
+/**
+ * check if the value is a nan
+ *
+ * @param the value to test
+ * @return 0 on false, otherwise true
+ * @warning this function should only be used in C++, which doesn't define
+ *          the isnan macro defined in C99
+ */
+extern int mifi_isnand(double val);
+
 
 #ifdef __cplusplus
 }
