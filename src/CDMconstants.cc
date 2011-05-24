@@ -29,6 +29,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <string>
 
 // remember to upgrade this function together with
 // with the MIFI_FILETYPE_*
@@ -64,7 +65,7 @@ const char* mifi_get_filetype_name(int filetype)
 int mifi_get_filetype(const char* name)
 {
     std::vector<std::string> names = getFiletypeNames_();
-    std::vector<std::string>::iterator namePos = std::find(names.begin(), names.end(), name);
+    std::vector<std::string>::iterator namePos = std::find(names.begin(), names.end(), std::string(name));
     if (namePos == names.end()) {
         return MIFI_FILETYPE_UNKNOWN;
     } else {
