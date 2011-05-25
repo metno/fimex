@@ -61,11 +61,11 @@ public:
 	void clearParameter() { parameter_.clear(); }
 	void clearDataVersion() { dataVersion_.clear(); }
 
-	const std::set<std::string> * dataProvider() const { return dataProvider_.empty() ? 0 : & dataProvider_; };
-	const std::string * location() const { return location_.empty() ? 0 : & location_; };
-	const std::string * referenceTime() const { return referenceTime_.empty() ? 0 : & referenceTime_; };
-	const std::set<std::string> * parameter() const { return parameter_.empty() ? 0 : & parameter_; };
-	const std::set<int> * dataVersion() const { return dataVersion_.empty() ? 0 : & dataVersion_; };
+	const std::set<std::string> * dataProvider() const { return dataProvider_.empty() ? 0 : & dataProvider_; }
+	const std::string * location() const { return location_.empty() ? 0 : & location_; }
+	const std::string * referenceTime() const { return referenceTime_.empty() ? 0 : & referenceTime_; }
+	const std::set<std::string> * parameter() const { return parameter_.empty() ? 0 : & parameter_; }
+	const std::set<int> * dataVersion() const { return dataVersion_.empty() ? 0 : & dataVersion_; }
 
 
 	// Data from wci.read comes in this order
@@ -86,6 +86,9 @@ public:
 	};
 
 private:
+
+	std::ostream & referenceTimeQuery_(std::ostream & s, const DataSanitizer & sanitizer) const;
+
 	std::set<std::string> dataProvider_;
 	std::string location_;
 	std::string referenceTime_;

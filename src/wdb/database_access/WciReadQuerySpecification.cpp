@@ -127,7 +127,7 @@ std::string WciReadQuerySpecification::query(const DataSanitizer & sanitizer) co
 
 	toString.add(q, dataProvider()) << ", ";
 	toString.add(q, location()) << ", ";
-	toString.add(q, referenceTime()) << ", ";
+	referenceTimeQuery_(q, sanitizer) << ", ";
 	q << "NULL, ";
 	toString.add(q, parameter()) << ", ";
 	q << "NULL, ";
@@ -162,6 +162,31 @@ void WciReadQuerySpecification::addDataVersion(int version)
 	dataVersion_.insert(version);
 }
 
+std::ostream & WciReadQuerySpecification::referenceTimeQuery_(std::ostream & s, const DataSanitizer & sanitizer) const
+{
+	StringBuilder toString(sanitizer);
+	if ( referenceTime_ == "latest" )
+	{
+		s << "("
+			"SELECT "
+			"referencetime"
+			" FROM "
+			"wci.browse(";
+		toString.add(s, dataProvider()) << ", ";
+		toString.add(s, location()) << ", ";
+		s << "NULL, ";
+		s << "NULL, ";
+		toString.add(s, parameter()) << ", ";
+		s << "NULL, ";
+		toString.add(s, dataVersion());
+		s << ", NULL::wci.browsereferencetime) "
+			"ORDER BY referencetime DESC LIMIT 1)::text";
+	}
+	else
+		toString.add(s, referenceTime());
+
+	return s;
+}
 
 }
 }
