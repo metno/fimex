@@ -54,6 +54,10 @@ Wdb2CdmBuilder::~Wdb2CdmBuilder()
 
 void Wdb2CdmBuilder::populate(CDM & cdm) const
 {
+	std::string globalns = cdm.globalAttributeNS();
+	BOOST_FOREACH( const CDMAttribute & attr, config_.getGlobalAttributes() )
+		cdm.addAttribute(globalns, attr);
+
 	addProjectionInformation_(cdm);
 	addDimensions_(cdm);
 	addParameterVariables_(cdm);
