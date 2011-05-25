@@ -142,21 +142,25 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
 		std::copy(levels.begin(), levels.end(), dataIdx);
 	}
-	else if ( varName == "forecast_reference_time" )
+	else if ( d_->dataIndex->timeHandler().canHandle(varName) )
 	{
-		ret = createData(variable.getDataType(), 1);
-		std::tm t = to_tm(d_->dataIndex->referenceTime());
-		ret->setValue(0, std::mktime(& t));
+		ret = d_->dataIndex->timeHandler().getData(varName, unLimDimPos);
 	}
-	else if ( varName == "time" )
-	{
-		// fix time functions: TimeUnit.h
-		const std::set<wdb::GridData::Time> & allTimes = d_->dataIndex->allTimes();
-		std::set<wdb::GridData::Time>::const_iterator thisTime = allTimes.begin();
-		std::advance(thisTime, unLimDimPos -1);
-		std::tm t = to_tm(* thisTime);
-		ret = createData(variable.getDataType(), 1, std::mktime(& t));
-	}
+//	else if ( varName == "forecast_reference_time" )
+//	{
+//		ret = createData(variable.getDataType(), 1);
+//		std::tm t = to_tm(* d_->dataIndex->referenceTimes().rbegin());
+//		ret->setValue(0, std::mktime(& t));
+//	}
+//	else if ( varName == "time" )
+//	{
+//		// fix time functions: TimeUnit.h
+//		const std::set<wdb::GridData::Time> & allTimes = d_->dataIndex->allTimes();
+//		std::set<wdb::GridData::Time>::const_iterator thisTime = allTimes.begin();
+//		std::advance(thisTime, unLimDimPos -1);
+//		std::tm t = to_tm(* thisTime);
+//		ret = createData(variable.getDataType(), 1, std::mktime(& t));
+//	}
 	else // we assume this has to do with projection or grid
 	{
 		const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();

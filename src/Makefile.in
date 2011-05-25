@@ -50,7 +50,8 @@ host_triplet = @host@
 @HAVE_MILIB_TRUE@am__append_3 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_LIBPQ_TRUE@am__append_4 = WdbCDMReader.cc wdb/WdbIndex.h \
 @HAVE_LIBPQ_TRUE@	wdb/WdbIndex.cpp wdb/Wdb2CdmBuilder.h \
-@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.cpp wdb/TimeHandler.h \
+@HAVE_LIBPQ_TRUE@	wdb/TimeHandler.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.h \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/LatLonGridInformation.h \
@@ -164,8 +165,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
 	WdbCDMReader.cc wdb/WdbIndex.h wdb/WdbIndex.cpp \
-	wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp \
-	wdb/gridInformation/GridInformation.h \
+	wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp wdb/TimeHandler.h \
+	wdb/TimeHandler.cpp wdb/gridInformation/GridInformation.h \
 	wdb/gridInformation/GridInformation.cpp \
 	wdb/gridInformation/LatLonGridInformation.h \
 	wdb/gridInformation/LatLonGridInformation.cpp \
@@ -197,8 +198,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_MILIB_TRUE@am__objects_3 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
 @HAVE_LIBPQ_TRUE@am__objects_4 = WdbCDMReader.lo WdbIndex.lo \
-@HAVE_LIBPQ_TRUE@	Wdb2CdmBuilder.lo GridInformation.lo \
-@HAVE_LIBPQ_TRUE@	LatLonGridInformation.lo \
+@HAVE_LIBPQ_TRUE@	Wdb2CdmBuilder.lo TimeHandler.lo \
+@HAVE_LIBPQ_TRUE@	GridInformation.lo LatLonGridInformation.lo \
 @HAVE_LIBPQ_TRUE@	RotatedLatLonGridInformation.lo \
 @HAVE_LIBPQ_TRUE@	MetricGridInformation.lo Parameter.lo \
 @HAVE_LIBPQ_TRUE@	Level.lo WdbConnection.lo \
@@ -628,6 +629,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpatialAxisSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StereographicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@
@@ -819,6 +821,13 @@ Wdb2CdmBuilder.lo: wdb/Wdb2CdmBuilder.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/Wdb2CdmBuilder.cpp' object='Wdb2CdmBuilder.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Wdb2CdmBuilder.lo `test -f 'wdb/Wdb2CdmBuilder.cpp' || echo '$(srcdir)/'`wdb/Wdb2CdmBuilder.cpp
+
+TimeHandler.lo: wdb/TimeHandler.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TimeHandler.lo -MD -MP -MF $(DEPDIR)/TimeHandler.Tpo -c -o TimeHandler.lo `test -f 'wdb/TimeHandler.cpp' || echo '$(srcdir)/'`wdb/TimeHandler.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/TimeHandler.Tpo $(DEPDIR)/TimeHandler.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/TimeHandler.cpp' object='TimeHandler.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TimeHandler.lo `test -f 'wdb/TimeHandler.cpp' || echo '$(srcdir)/'`wdb/TimeHandler.cpp
 
 GridInformation.lo: wdb/gridInformation/GridInformation.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridInformation.lo -MD -MP -MF $(DEPDIR)/GridInformation.Tpo -c -o GridInformation.lo `test -f 'wdb/gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/GridInformation.cpp

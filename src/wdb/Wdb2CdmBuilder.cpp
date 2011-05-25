@@ -42,7 +42,7 @@ namespace wdb
 {
 
 Wdb2CdmBuilder::Wdb2CdmBuilder(const std::vector<wdb::GridData> & data, const GlobalWdbConfiguration & config) :
-		index_(data), config_(config)
+		index_(data), config_(config), timeHandler_(index_)
 {
 	BOOST_FOREACH(const wdb::GridData & d, data)
 		grids_[d.parameter().name()] = d.gridInformation();
@@ -55,7 +55,6 @@ Wdb2CdmBuilder::~Wdb2CdmBuilder()
 void Wdb2CdmBuilder::populate(CDM & cdm) const
 {
 	addProjectionInformation_(cdm);
-	addReferenceTimeInformation_(cdm);
 	addDimensions_(cdm);
 	addParameterVariables_(cdm);
 }
@@ -77,9 +76,9 @@ const GridInformation & Wdb2CdmBuilder::gridInformation() const
 	return * grids_.begin()->second;
 }
 
-const GridData::Time & Wdb2CdmBuilder::referenceTime() const
+std::set<GridData::Time> Wdb2CdmBuilder::referenceTimes() const
 {
-	return index_.referenceTime();
+	return index_.referenceTimes();
 }
 
 void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
@@ -106,20 +105,11 @@ void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
 	gridInfo->addToCdm(cdm);
 }
 
-void Wdb2CdmBuilder::addReferenceTimeInformation_(CDM & cdm) const
-{
-	const std::string reftime = "forecast_reference_time";
-	cdm.addVariable(CDMVariable(reftime, CDM_DOUBLE, std::vector<std::string>()));
-	cdm.addAttribute(reftime, CDMAttribute("long_name", reftime));
-	cdm.addAttribute(reftime, CDMAttribute("standard_name", reftime));
-	cdm.addAttribute(reftime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
-}
-
 void Wdb2CdmBuilder::addDimensions_(CDM & cdm) const
 {
 	addLevelDimensions_(cdm);
 	addVersionDimension_(cdm);
-	addTimeDimensions_(cdm);
+	timeHandler_.addToCdm(cdm);
 }
 
 void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
@@ -169,33 +159,6 @@ void Wdb2CdmBuilder::addVersionDimension_(CDM & cdm) const
 			return;
 		}
 	}
-}
-
-void Wdb2CdmBuilder::addTimeDimensions_(CDM & cdm) const
-{
-	std::string dimension = "time";
-
-	cdm.addVariable(CDMVariable(dimension, CDM_DOUBLE, std::vector<std::string>(1, dimension)));
-	cdm.addAttribute(dimension, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
-	cdm.addAttribute(dimension, CDMAttribute("long_name", dimension));
-	cdm.addAttribute(dimension, CDMAttribute("standard_name", dimension));
-	cdm.addAttribute(dimension, CDMAttribute("axis", "T"));
-
-	BOOST_FOREACH(const std::string & parameter, index_.allParameters())
-	{
-		const std::set<GridData::Time> & times = index_.timesForParameter(parameter);
-		if ( times.size() > 1 )
-		{
-			CDMDimension time(dimension, times.size());
-			time.setUnlimited(true);
-			cdm.addDimension(time);
-			return;
-		}
-	}
-
-	CDMDimension time(dimension, 1);
-	time.setUnlimited(true);
-	cdm.addDimension(time);
 }
 
 namespace

@@ -112,7 +112,7 @@ public:
 	/**
 	 * Get data's reference time
 	 */
-	const GridData::Time & referenceTime() const;
+	std::set<GridData::Time> referenceTimes() const;
 
 private:
 

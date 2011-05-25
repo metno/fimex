@@ -30,6 +30,7 @@
 #define DATAINDEX_H_
 
 #include "WdbIndex.h"
+#include "TimeHandler.h"
 #include "database_access/GridData.h"
 #include <vector>
 #include <map>
@@ -116,17 +117,17 @@ public:
 	 * @note Only one reference time may exist in the sate Wdb2CdmBuilder
 	 * object.
 	 */
-	const GridData::Time & referenceTime() const;
+	std::set<GridData::Time> referenceTimes() const;
+
+	const TimeHandler & timeHandler() const { return timeHandler_; }
 
 private:
 
 	void addProjectionInformation_(CDM & cdm) const;
-	void addReferenceTimeInformation_(CDM & cdm) const;
 
 	void addDimensions_(CDM & cdm) const;
 	void addLevelDimensions_(CDM & cdm) const;
 	void addVersionDimension_(CDM & cdm) const;
-	void addTimeDimensions_(CDM & cdm) const;
 
 	void addParameterVariables_(CDM & cdm) const;
 
@@ -136,6 +137,8 @@ private:
 
 	typedef std::map<std::string, GridData::GridInformationPtr> GridSpecMap;
 	GridSpecMap grids_;
+
+	TimeHandler timeHandler_;
 };
 
 }

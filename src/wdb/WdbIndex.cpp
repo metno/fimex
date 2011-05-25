@@ -301,13 +301,16 @@ std::set<float> WdbIndex::getLevelValues(const std::string & levelName) const
 	return find->second;
 }
 
-const GridData::Time & WdbIndex::referenceTime() const
+std::set<GridData::Time> WdbIndex::referenceTimes() const
 {
+	std::set<GridData::Time> ret;
+
 	Data::const_iterator p = entries.begin();
 	ValidTimeEntry::const_iterator v = p->second.begin();
-	ReferenceTimeEntry::const_reverse_iterator r = v->second.rbegin();
+	for ( ReferenceTimeEntry::const_iterator r = v->second.begin(); r != v->second.end(); ++ r )
+		ret.insert(r->first);
 
-	return r->first;
+	return ret;
 }
 
 }

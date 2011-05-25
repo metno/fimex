@@ -109,9 +109,9 @@ public:
 		gridData.push_back(TestingGridData(defaultParameter, lvl, 0, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
 	}
 
-	void addGridData(const std::string & time)
+	void addGridData(const std::string & time, const std::string & referenceTime = defaultReferenceTime)
 	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
+		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(time), t(referenceTime), defaultGrid, nextGid()));
 	}
 
 	void addGridData(int dataVersion, const std::string & time = defaultTime)
@@ -228,6 +228,16 @@ BOOST_FIXTURE_TEST_CASE(picksUpAllTimesFromSameParameter, Wdb2CdmBuilderFixture)
 	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity("time"));
 	BOOST_REQUIRE(timeDimension != dims.end());
 	BOOST_CHECK_EQUAL(3, timeDimension->getLength());
+}
+
+BOOST_FIXTURE_TEST_CASE(manyReferenceTimes, Wdb2CdmBuilderFixture)
+{
+	addGridData("2010-05-23 06:00:00", "2010-05-22 00:00:00");
+	addGridData("2010-05-23 06:00:00", "2010-05-23 00:00:00");
+
+	const wdb::Wdb2CdmBuilder di(gridData, tr);
+
+	BOOST_CHECK_THROW(di.populate(cdm), CDMException);
 }
 
 BOOST_FIXTURE_TEST_CASE(ignoresIrrelevantTimeDimensions, Wdb2CdmBuilderFixture)
@@ -362,7 +372,7 @@ BOOST_FIXTURE_TEST_CASE(addsTimeVariable, Wdb2CdmBuilderFixture)
 	{
 		cdm.getVariable("time");
 		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute("time", "units").getStringValue());
-		BOOST_CHECK_EQUAL("time", cdm.getAttribute("time", "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("forecast (valid) time", cdm.getAttribute("time", "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("time", cdm.getAttribute("time", "standard_name").getStringValue());
 	}
 	catch ( CDMException & e )
@@ -715,7 +725,7 @@ BOOST_FIXTURE_TEST_CASE(setsReferenceTimeVariable, Wdb2CdmBuilderFixture)
 		const CDMVariable & reftimeVariable = cdm.getVariable(reftime);
 		BOOST_CHECK_EQUAL(CDM_DOUBLE, reftimeVariable.getDataType());
 		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute(reftime, "units").getStringValue());
-		BOOST_CHECK_EQUAL("forecast_reference_time", cdm.getAttribute(reftime, "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("Run time for model", cdm.getAttribute(reftime, "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("forecast_reference_time", cdm.getAttribute(reftime, "standard_name").getStringValue());
 	}
 	catch( CDMException & e )
