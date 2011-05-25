@@ -26,6 +26,26 @@
     <attribute name="standard_name" value="time" type="string" />
     <attribute name="units" value="seconds since 1970-01-01 00:00:00 +00:00" type="string" />
 </time>
+<spatial_axis typeOfGrid="lambert" id="x" name="x" type="float">
+    <attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+    <attribute name="standard_name" value="projection_x_coordinate" type="string" />
+    <attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis typeOfGrid="lambert" id="y" name="y" type="float">
+    <attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+    <attribute name="standard_name" value="projection_y_coordinate" type="string" />
+    <attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis typeOfGrid="mercator" id="x" name="x" type="float">
+    <attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
+    <attribute name="standard_name" value="projection_x_coordinate" type="string" />
+    <attribute name="units" value="m" type="string" />
+</spatial_axis>
+<spatial_axis typeOfGrid="mercator" id="y" name="y" type="float">
+    <attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
+    <attribute name="standard_name" value="projection_y_coordinate" type="string" />
+    <attribute name="units" value="m" type="string" />
+</spatial_axis>
 <spatial_axis typeOfGrid="polar_stereographic" id="x" name="x" type="float">
     <attribute name="long_name" value="x-coordinate in Cartesian system" type="string" />
     <attribute name="standard_name" value="projection_x_coordinate" type="string" />
@@ -95,6 +115,12 @@
     <grib2>
         <attribute name="units" value="Pa" type="string" />
     </grib2>
+</vertical_axis>
+<vertical_axis id="altitude" name="altitude" grib2_id="102" grib1_id="103" type="float">
+    <attribute name="description" value="height above MSL" type="string" />
+    <attribute name="long_name" value="height" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <attribute name="units" value="m" type="string" />
 </vertical_axis>
 <vertical_axis id="height" name="height" grib2_id="103" grib1_id="105" type="float">
     <attribute name="description" value="height above ground" type="string" />

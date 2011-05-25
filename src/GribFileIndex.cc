@@ -223,16 +223,81 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
 
     return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
+
+struct GribMetricDef {
+    long sizeX;
+    long sizeY;
+    double incrX;
+    double incrY;
+    double startLon;
+    double startLat;
+};
+
+GribMetricDef getGridDefMetric(long edition, boost::shared_ptr<grib_handle> gh)
+{
+    GribMetricDef gmd;
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &gmd.sizeX), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &gmd.sizeY), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &gmd.startLon), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &gmd.startLat), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DxInMetres", &gmd.incrX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DyInMetres", &gmd.incrY), 0);
+
+    return gmd;
+}
+
+GridDefinition getGridDefMercator(long edition, boost::shared_ptr<grib_handle> gh)
+{
+    double startX, startY;
+    GribMetricDef gmd = getGridDefMetric(edition, gh);
+
+
+    double orientationOfGrid, lat_ts;
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "LaDInDegrees", &lat_ts), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "orientationOfTheGridInDegrees", &orientationOfGrid), 0);
+
+    ostringstream oss;
+    oss << "+proj=merc +lon_0="<<orientationOfGrid  << " +lat_ts=" << lat_ts << " ";
+    oss << getEarthsFigure(edition, gh);
+    string proj = oss.str();
+
+    // calculate startX and startY from lat/lon
+    projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
+
+    return GridDefinition(proj, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+}
+
+GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh)
+{
+    double startX, startY;
+    GribMetricDef gmd = getGridDefMetric(edition, gh);
+
+
+    double lonV, lat1, lat2;
+    // TODO: southPole position not used yet
+    // MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfSouthernPoleInDegrees", &southPLat), 0);
+    // MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfSouthernPoleInDegrees", &southPLon), 0);
+// ignore LaD, does not make sense for lambert and grib_api returns 60, which is wrong
+// MIFI_GRIB_CHECK(grib_get_double(gh.get(), "LaDInDegrees", &latD), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "LoVInDegrees", &lonV), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "Latin1InDegrees", &lat1), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "Latin2InDegrees", &lat2), 0);
+
+    ostringstream oss;
+    oss << "+proj=lcc +lat_0="<<lat1 << " +lon_0="<< lonV << " +lat_1=" << lat1 << " " << " +lat_2=" << lat2 << " ";
+    oss << getEarthsFigure(edition, gh);
+    string proj = oss.str();
+
+    // calculate startX and startY from lat/lon
+    projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
+
+    return GridDefinition(proj, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+}
+
 GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib_handle> gh)
 {
-    long sizeX, sizeY;
-    double startX, startY, incrX, incrY, startLon, startLat;
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Ni", &sizeX), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &sizeY), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &startLon), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startLat), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DxInMetres", &incrX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DyInMetres", &incrY), 0);
+    double startX, startY;
+    GribMetricDef gmd = getGridDefMetric(edition, gh);
 
 
     long projectionCentreFlag;
@@ -258,9 +323,9 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
-    projConvert(proj, startLon, startLat, startX, startY);
+    projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos)
@@ -330,6 +395,10 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     //        reduced_gg | sh | rotated_sh | stretched_sh | stretched_rotated_sh | space_view
     if (typeOfGrid_ == "regular_ll") {
         gridDefinition_ = getGridDefRegularLL(edition_, gh);
+    } else if (typeOfGrid_ == "lambert") {
+        gridDefinition_ = getGridDefLambert(edition_, gh);
+    } else if (typeOfGrid_ == "mercator") {
+        gridDefinition_ = getGridDefMercator(edition_, gh);
     } else if (typeOfGrid_ == "polar_stereographic") {
         gridDefinition_ = getGridDefPolarStereographic(edition_, gh);
     } else if (typeOfGrid_ == "rotated_ll") {
