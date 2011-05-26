@@ -39,13 +39,37 @@
 namespace MetNoFimex
 {
 
+/**
+ * CDM reader for wdb databases.
+ *
+ * Since wdb is a database system, a configuration file is used in place of a
+ * "real" data file. This configuration file tells how to connect to a wdb
+ * database, and what query to perform on it.
+ *
+ * Information about database specification files are given in the example
+ * configuration file example.wdb.conf
+ *
+ * Syntax for global configuration is given in wdb_conf.xsd.
+ *
+ * Since there is much freedom in wdb, the generated CDMs from different wdb
+ * instances can be very different from each other. In general all dimensions
+ * of size one will be skipped in the resulting dimensions and variables.
+ */
 class GxWdbCDMReader: public CDMReader, boost::noncopyable
 {
 public:
+
+	/**
+	 * Specifications of where to find the database, and what query to run on
+	 * it is given in the file with name source. Generic specifications are
+	 * given in the file with name configfilename.
+	 */
 	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
+
 	virtual ~GxWdbCDMReader();
 
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+
 
 private:
 	class InternalData;

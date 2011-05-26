@@ -47,6 +47,11 @@
 namespace MetNoFimex
 {
 
+/**
+ * All data members of GxWdbCDMReader are kept "hidden" in this class, in
+ * order to avoid header file dependencies on anything other than
+ * GxWdbCDMReader
+ */
 class GxWdbCDMReader::InternalData
 {
 public:

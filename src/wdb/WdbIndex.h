@@ -41,6 +41,7 @@ namespace MetNoFimex
 namespace wdb
 {
 
+
 /**
  * Storing data from wdb in a structured way, so that they can later be
  * retrieved for easy insertion into a CDM object.
@@ -53,13 +54,26 @@ namespace wdb
 class WdbIndex
 {
 public:
+	/**
+	 * Create an index, based on the given data.
+	 */
 	explicit WdbIndex(const std::vector<GridData> & data);
 	~WdbIndex();
 
+	/**
+	 * Grid identifier - this is what the database needs in order to retrieve
+	 * the grid.
+	 */
 	typedef long long gid;
+
+	/**
+	 * A list of grid identifiers.
+	 */
 	typedef std::vector<gid> GidList;
 
-
+	/**
+	 * Dummy value, for use when there is no grid available for a request.
+	 */
 	static const gid UNDEFINED_GID;
 
 	/**
@@ -116,12 +130,6 @@ public:
 
 private:
 
-//	typedef std::map<GridData::Time, GidList> Entries;
-//	typedef std::map<Parameter, Entries> Data;
-//
-//	Data data_;
-
-
 	typedef std::map<int, gid> VersionEntry;
 	typedef std::map<Level, VersionEntry> LevelEntry;
 	typedef std::map<GridData::Time, LevelEntry> ReferenceTimeEntry;
@@ -134,7 +142,6 @@ private:
 };
 
 }
-
 }
 
 #endif /* WDBINDEX_H_ */

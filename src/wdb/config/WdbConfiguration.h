@@ -38,16 +38,24 @@ namespace MetNoFimex
 namespace wdb
 {
 
-
+/**
+ * Represents a wdb "file". Information about how to connect to a wdb
+ * database, and what query to perform on it is given here. See the example
+ * file example.wdb.conf for information about the file's syntax.
+ */
 class WdbConfiguration
 {
 public:
 	/**
+	 * Initialize with data read from the given file.
+	 *
 	 * @throws CDMException on error
 	 */
 	explicit WdbConfiguration(const boost::filesystem::path & configFile);
 
 	/**
+	 * Initialize with data read from the given stream
+	 *
 	 * @throws CDMException on error
 	 */
 	explicit WdbConfiguration(std::istream & configStream);
@@ -64,6 +72,9 @@ public:
 	 */
 	const std::string & wciUser() const { return wciUser_; }
 
+	/**
+	 * Get a specification for what wci.read query to perform on the database.
+	 */
 	const WciReadQuerySpecification & query() const { return querySpec_; }
 
 private:

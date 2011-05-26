@@ -45,6 +45,11 @@ namespace wdb
 class DataSanitizer
 {
 public:
+	/**
+	 * Construct sanitizer, giving the connection the resulting queries are
+	 * meant to be used on. Giving connection is required since the underlying
+	 * libpq uses the connection for sanitizing data.
+	 */
 	explicit DataSanitizer(PGconn * connection);
 
 	/**

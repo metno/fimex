@@ -55,6 +55,9 @@ class WdbConnection
 public:
 
 	/**
+	 * Connect to a wdb database with the given libpq-style connection
+	 * string, and calling wci.begin with the given wci user name
+	 *
 	 * @throws WdbException on error
 	 */
 	WdbConnection(const std::string & connectString, const std::string & wciUser);

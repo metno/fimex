@@ -53,10 +53,18 @@ class Level;
 
 /**
  * Structure data, using it to populate a MetNoFimes::CDM object.
+ *
+ * The most important method here is populate, which adds data to a given cdm
+ * object.
  */
 class Wdb2CdmBuilder
 {
 public:
+
+	/**
+	 * Create builder, with the provided data. Configuration in
+	 * GlobalWdbConfiguration will be added to any built CDM.
+	 */
 	Wdb2CdmBuilder(const std::vector<GridData> & data, const GlobalWdbConfiguration & config);
 	~Wdb2CdmBuilder();
 
@@ -73,6 +81,9 @@ public:
 	 */
 	bool isDatabaseField(const std::string & variableName) const;
 
+	/**
+	 * Does the given name refer to a level?
+	 */
 	bool isLevel(const std::string & levelName) const
 	{
 		try
@@ -86,6 +97,9 @@ public:
 		}
 	}
 
+	/**
+	 * Get all values for the given level type
+	 */
 	std::set<float> getLevelValues(const std::string & levelName) const;
 
 	/**
@@ -119,6 +133,9 @@ public:
 	 */
 	std::set<GridData::Time> referenceTimes() const;
 
+	/**
+	 * Get handler object for time
+	 */
 	const TimeHandler & timeHandler() const { return timeHandler_; }
 
 private:

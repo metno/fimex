@@ -41,16 +41,34 @@ namespace wdb
 {
 class WdbIndex;
 
+/**
+ * Handling time for wdb/fimex. Objects of this class may be used to add time
+ * dimensions and -variables to CDM objects, and to get time values for the
+ * same variables.
+ */
 class TimeHandler
 {
 public:
+	/**
+	 * Times will be extracted and calculated from the given index object
+	 */
 	explicit TimeHandler(const WdbIndex & index);
 	~TimeHandler();
 
+	/**
+	 * Add relevant time dimensions and -variables to the given CDM object.
+	 */
 	void addToCdm(CDM & cdm) const;
 
+	/**
+	 * Get data for the given variable name and unlimited dimension
+	 */
 	boost::shared_ptr<Data> getData(const std::string & varName, size_t unLimDimPos) const;
 
+	/**
+	 * Does the given cdm variable name refer to anything that this object can
+	 * handle via the getData method?
+	 */
 	bool canHandle(const std::string & parameter) const;
 
 private:

@@ -47,7 +47,15 @@ class Parameter
 {
 public:
 	Parameter() {}
+
+	/**
+	 * Construct with an empty unit.
+	 */
 	Parameter(const std::string & name);
+
+	/**
+	 * Create a parameter with the given name and unit
+	 */
 	Parameter(const std::string & name, const std::string & unit);
 	~Parameter();
 
@@ -68,6 +76,9 @@ private:
 
 };
 
+/**
+ * Sorting parameters, based on parameter name.
+ */
 inline bool operator < (const Parameter & a, const Parameter & b)
 {
 	return a.name() < b.name();

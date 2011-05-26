@@ -88,13 +88,6 @@ public:
 			return s << "NULL";
 		return s << '\'' << sanitizer_(* text) << '\'';
 	}
-
-	std::ostream & add(std::ostream & s, const WciReadQuerySpecification::Time * time) const
-	{
-		if ( ! time )
-			return s << "NULL";
-		return s << '\'' << * time << "+00" << '\'';
-	}
 };
 
 }

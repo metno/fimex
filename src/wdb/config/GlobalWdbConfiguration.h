@@ -43,20 +43,51 @@ class XMLDoc;
 namespace wdb
 {
 
+/**
+ * Holds global configuration which should be valid for all users of
+ * wdb/fimex, such as name translations and global attributes.
+ *
+ * The configuration is read from an xml file, with syntax described in the
+ * wdb_config.xsd file, which is distributed with fimex.
+ */
 class GlobalWdbConfiguration
 {
 public:
-	//GlobalWdbConfiguration() {}
+
+	/**
+	 * Initialize object with content from the given configuration file
+	 */
 	explicit GlobalWdbConfiguration(const boost::filesystem::path & configFile);
 	~GlobalWdbConfiguration();
 
+	/**
+	 * Translate a wdb parameter name (value- or level-) into a cf standard
+	 * name. If no explicit translations are given in configuration - make
+	 * a guess.
+	 */
 	std::string cfName(const std::string & wdbName) const;
 
+	/**
+	 * Translate a cf standard name (value- or level-) into a wdb parameter
+	 * name. If no explicit translations are given in configuration - make
+	 * a guess.
+	 */
 	std::string wdbName(const std::string & cfName) const;
 
+	/// A collection of attributes
 	typedef std::vector<CDMAttribute> AttributeList;
+
+	/**
+	 * Get all attributes that config says the given parameter should
+	 * have. The returned list is not meant to be exhaustive - other
+	 * attributes may be added by other means.
+	 */
 	AttributeList getAttributes(const std::string & wdbParameter, const std::string & defaultUnit = std::string()) const;
 
+	/**
+	 * Get all globla attributes mentioned in config. The returned list is not
+	 * meant to be exhaustive - other attributes may be added by other means.
+	 */
 	const AttributeList & getGlobalAttributes() const { return globalAttributes_; }
 
 private:

@@ -47,7 +47,9 @@ class DataSanitizer;
 /**
  * Represents a single return row from wci.read(..., returngid)
  *
- * This class should only be instantiated by a WdbConnection object
+ * This class should only be instantiated by a WdbConnection object. The
+ * protected methods in this class is solely intended used for testing
+ * purposes.
  */
 class GridData
 {
@@ -58,13 +60,44 @@ public:
 	typedef boost::shared_ptr<GridInformation> GridInformationPtr;
 	typedef long long gid;
 
+	/**
+	 * Get the data's value parameter type
+	 */
 	const Parameter & parameter() const { return parameter_; };
+
+	/**
+	 * Get level information for the data
+	 */
 	const Level & level() const { return level_; }
+
+	/**
+	 * Get data version (most often ensemble member number).
+	 */
 	int version() const { return version_; };
+
+	/**
+	 * Latest validity point for data
+	 */
 	const Time & validTo() const { return validTo_; };
+
+	/**
+	 * Get reference time, also called run time for model.
+	 */
 	const Time & referenceTime() const { return referenceTime_; }
+
+	/**
+	 * Get a name for the grid the data is valid for
+	 */
 	const std::string & placeName() const { return placeName_; }
+
+	/**
+	 * Get detailed information about the data's grid
+	 */
 	const GridInformationPtr & gridInformation() const { return gridInformation_; }
+
+	/**
+	 * Get grid identifier, for retrieving of the actual data.
+	 */
 	gid gridIdentifier() const { return gridIdentifier_; };
 
 protected:
