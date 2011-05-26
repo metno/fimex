@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+	<xs:complexType name="attribute_type">
+		<xs:attribute name="name" type="xs:string" />
+		<xs:attribute name="value" type="xs:string" />
+		<xs:attribute name="type" type="xs:string" />
+	</xs:complexType>
+	
+	<xs:complexType name="parameter_type">
+		<xs:sequence>
+			<xs:element name="attribute" type="attribute_type" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="wdbname" type="xs:string" />
+		<xs:attribute name="cfname" type="xs:string" />
+	</xs:complexType>
+
+
+	<xs:element name="wdb_fimex_config">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="global_attributes">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="attribute" type="attribute_type" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="wdb_parameters">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="level_parameter" type="parameter_type" minOccurs="0" maxOccurs="unbounded" />
+							<xs:element name="value_parameter" type="parameter_type" minOccurs="0" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>
