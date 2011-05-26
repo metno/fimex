@@ -37,6 +37,7 @@ config_DATA = \
 	fimex_example.cfg\
 	ncml-2.2.xsd\
 	ncmlCDMConfig.ncml\
-	wdb_config.xml
+	wdb_config.xml \
+	wdb_config.xsd
 				
 EXTRA_DIST = $(config_DATA)
