@@ -29,25 +29,65 @@ namespace MetNoFimex
 {
 
 XMLDoc::XMLDoc(const std::string& filename)
-: xpathCtx(0)
+    :doc(0), xpathCtx(0)
 {
-	xmlInitParser();
+    init();
+    xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, 0);
+    setDoc(pdoc);
+    setXPathCtx(pdoc);
+}
+
+XMLDoc::XMLDoc()
+    : doc(0), xpathCtx(0)
+{
+    init();
+}
+
+void XMLDoc::init()
+{
+    xmlInitParser();
     LIBXML_TEST_VERSION
-    doc = xmlReadFile(filename.c_str(), NULL, 0);
+}
+
+void XMLDoc::setDoc(xmlDoc* pdoc)
+{
+    doc = pdoc;
     if (doc == 0) {
-    	cleanup();
-    	throw CDMException("unable to parse config file: " + filename);
+        cleanup();
+        throw CDMException("unable to parse content");
     }
     // apply the XInclude process
     if (xmlXIncludeProcess(doc) < 0) {
-    	cleanup();
-    	throw CDMException("XInclude processing failed: " + filename);
+        cleanup();
+        throw CDMException("XInclude processing failed");
     }
-	xpathCtx = xmlXPathNewContext(doc);
-	if (xpathCtx == 0) {
-		cleanup();
-		throw CDMException("unable to generate xpath context for " + filename);
-	}
+}
+
+void XMLDoc::setXPathCtx(xmlDoc* pdoc)
+{
+    xpathCtx = xmlXPathNewContext(pdoc);
+    if (xpathCtx == 0) {
+        cleanup();
+        throw CDMException("unable to generate xpath context");
+    }
+}
+
+boost::shared_ptr<XMLDoc> XMLDoc::fromFile(const std::string& filename)
+{
+    boost::shared_ptr<XMLDoc> pdoc(new XMLDoc());
+    xmlDoc* pxmldoc = xmlReadFile(filename.c_str(), NULL, 0);
+    pdoc->setDoc(pxmldoc);
+    pdoc->setXPathCtx(pxmldoc);
+    return pdoc;
+}
+
+boost::shared_ptr<XMLDoc> XMLDoc::fromString(const std::string& buffer)
+{
+    boost::shared_ptr<XMLDoc> pdoc(new XMLDoc());
+    xmlDoc* pxmldoc = xmlReadMemory(buffer.c_str(), buffer.length(), 0, NULL, 0);
+    pdoc->setDoc(pxmldoc);
+    pdoc->setXPathCtx(pxmldoc);
+    return pdoc;
 }
 
 void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href)
@@ -57,7 +97,6 @@ void XMLDoc::registerNamespace(const std::string& prefix, const std::string& hre
         throw CDMException("unable to register NS with prefix "+prefix + " and href " + href);
     }
 }
-
 
 void XMLDoc::cleanup()
 {

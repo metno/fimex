@@ -75,7 +75,20 @@ public:
 	 */
 	void registerNamespace(const std::string& prefix, const std::string& uri);
 
+        static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
+        static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer);
+
 private:
+        /**
+          * helper functions
+          */
+        explicit XMLDoc();
+        void init();
+        void setDoc(xmlDoc* pdoc);
+        void setXPathCtx(xmlDoc* pdoc);
+        /**
+          * some helper functions
+          */
 	xmlDoc* doc;
 	xmlXPathContext* xpathCtx;
 	void cleanup();
