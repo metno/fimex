@@ -203,11 +203,11 @@ namespace MetNoFimex
 	{
         size_t length = std::distance(first, last);
 	    switch (datatype) {
-            case CDM_DOUBLE: { boost::shared_array<double> ary(new double[length]); copy(first, last, ary.get()); return createData(length, ary); }
-	        case CDM_FLOAT:  { boost::shared_array<float> ary(new float[length]);   copy(first, last, ary.get()); return createData(length, ary); }
-	        case CDM_INT:    { boost::shared_array<int> ary(new int[length]);       copy(first, last, ary.get()); return createData(length, ary); }
-	        case CDM_SHORT:  { boost::shared_array<short> ary(new short[length]);   copy(first, last, ary.get()); return createData(length, ary); }
-	        case CDM_CHAR:   { boost::shared_array<char> ary(new char[length]);     copy(first, last, ary.get()); return createData(length, ary); }
+            case CDM_DOUBLE: { boost::shared_array<double> ary(new double[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_FLOAT:  { boost::shared_array<float> ary(new float[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_INT:    { boost::shared_array<int> ary(new int[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_SHORT:  { boost::shared_array<short> ary(new short[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_CHAR:   { boost::shared_array<char> ary(new char[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
 	        case CDM_NAT: ;
 	        default: ;
 	     }
