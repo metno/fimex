@@ -38,6 +38,9 @@ config_DATA = \
 	ncml-2.2.xsd\
 	ncmlCDMConfig.ncml\
 	wdb_config.xml \
-	wdb_config.xsd
+	wdb_config.xsd \
+	example.wdb.conf
+
+
 				
 EXTRA_DIST = $(config_DATA)

@@ -274,7 +274,9 @@ config_DATA = \
 	fimex_example.cfg\
 	ncml-2.2.xsd\
 	ncmlCDMConfig.ncml\
-	wdb_config.xml
+	wdb_config.xml \
+	wdb_config.xsd \
+	example.wdb.conf
 
 EXTRA_DIST = $(config_DATA)
 all: all-am
