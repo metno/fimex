@@ -24,6 +24,7 @@
 #include "fimex/Units.h"
 #include "fimex/Logger.h"
 #include "config.h"
+#include "boost/shared_ptr.hpp"
 #ifdef HAVE_UDUNITS2
 #include "udunits2.h"
 #include "converter.h"
@@ -138,18 +139,14 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 		return;
 	}
 #ifdef HAVE_UDUNITS2
-	ut_unit *fromUnit, *toUnit;
-	fromUnit = ut_parse(utSystem, from.c_str(), UT_UTF8);
+	boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
 	handleUdUnitError(ut_get_status(), from);
-	toUnit = ut_parse(utSystem, to.c_str(), UT_UTF8);
+	boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
 	handleUdUnitError(ut_get_status(), to);
-	cv_converter *conv = ut_get_converter(fromUnit, toUnit);
+	boost::shared_ptr<cv_converter> conv(ut_get_converter(fromUnit.get(), toUnit.get()), cv_free);
     handleUdUnitError(ut_get_status(), from + " -> " + to);
-    offset = cv_convert_double(conv, 0.0);
-    slope = cv_convert_double(conv, 1.0) - offset;
-    ut_free(fromUnit);
-    ut_free(toUnit);
-    cv_free(conv);
+    offset = cv_convert_double(conv.get(), 0.0);
+    slope = cv_convert_double(conv.get(), 1.0) - offset;
 #else
 	utUnit fromUnit, toUnit;
 	handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
@@ -158,18 +155,20 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 #endif
 }
 
-bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException)
+bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const
 {
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
 #ifdef HAVE_UDUNITS2
-    ut_unit *fromUnit, *toUnit;
-    fromUnit = ut_parse(utSystem, unit1.c_str(), UT_UTF8);
-    handleUdUnitError(ut_get_status(), unit1);
-    toUnit = ut_parse(utSystem, unit2.c_str(), UT_UTF8);
-    handleUdUnitError(ut_get_status(), unit2);
-    int areConv = ut_are_convertible(fromUnit, toUnit);
-    ut_free(fromUnit);
-    ut_free(toUnit);
+    int areConv = 0;
+    try {
+        boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
+        handleUdUnitError(ut_get_status(), unit1);
+        boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, unit2.c_str(), UT_UTF8), ut_free);
+        handleUdUnitError(ut_get_status(), unit2);
+        areConv = ut_are_convertible(fromUnit.get(), toUnit.get());
+    } catch (UnitException& ue) {
+        LOG4FIMEX(logger, Logger::WARN, ue.what());
+    }
     return areConv;
 #else
 	utUnit fromUnit, toUnit;
@@ -185,7 +184,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 #endif
 	return false;
 }
-bool Units::isTime(const std::string& timeUnit) const throw(UnitException)
+bool Units::isTime(const std::string& timeUnit) const
 {
 #ifdef HAVE_UDUNITS2
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");

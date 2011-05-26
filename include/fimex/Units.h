@@ -66,8 +66,12 @@ public:
 	 * @param unit1 first unit
 	 * @param unit2 second unit
 	 */
-	bool areConvertible(const std::string& unit1, const std::string& unit2) const throw(UnitException);
-	bool isTime(const std::string& timeUnit) const throw(UnitException);
+	bool areConvertible(const std::string& unit1, const std::string& unit2) const;
+	/**
+	 * @brief test if unit is a time
+	 * @param timeUnit
+	 */
+	bool isTime(const std::string& timeUnit) const;
 	/**
 	 * Units initialize themselve on first using the default unix-file path
 	 * and keep the internal datastructure until the end of the program, or
