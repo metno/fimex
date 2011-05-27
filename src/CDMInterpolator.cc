@@ -37,6 +37,9 @@
 #include <functional>
 #include <algorithm>
 #include <limits>
+#include <set>
+#include <string>
+#include <ctime>
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
 #include "kdtree++/kdtree.hpp"
@@ -240,7 +243,7 @@ CoordSysPtr CDMInterpolator::findBestCoordinateSystemAndProjectionVars(bool with
         LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems" << (withProjection ? " with projection found, maybe you should try coordinate interpolation" : " found"));
         throw CDMException("no coordinate-systems found");
     }
-    // make sure we have only one projection with only one set of axes
+    // make sure we have only one projection with only one set of geo-axes
     for (CoordSysVec::iterator csx = coordSys.begin(); csx != coordSys.end(); ++csx) {
         if ((*csx)->getGeoXAxis()->getName() != coordSys[0]->getGeoXAxis()->getName()) {
             throw CDMException("CDMInterpolator cannot handle cdms with different axes: " + coordSys[0]->getGeoXAxis()->getName() + " != " + (*csx)->getGeoXAxis()->getName());
@@ -273,6 +276,36 @@ CoordSysPtr CDMInterpolator::findBestCoordinateSystemAndProjectionVars(bool with
         }
     }
     LOG4FIMEX(logger, Logger::DEBUG, "projection variables: " << join(projectionVariables.begin(), projectionVariables.end(), ","));
+
+    // remove all variables which are not part of any coordinate-system
+    // but which share geographical-dimensions (x,y,lon,lat) whith the system
+    {
+        set<std::string> geoDimensions;
+        vector<string>  xShape = getCDM().getVariable(coordSys[0]->getGeoXAxis()->getName()).getShape();
+        vector<string>  yShape = getCDM().getVariable(coordSys[0]->getGeoYAxis()->getName()).getShape();
+        geoDimensions.insert(xShape.begin(), xShape.end());
+        geoDimensions.insert(yShape.begin(), yShape.end());
+        CDM::VarVec vars = getCDM().getVariables();
+        CoordinateSystem::ConstAxisList axes = coordSys[0]->getAxes();
+        for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
+            if ((axes.end() == find_if(axes.begin(), axes.end(), CDMNameEqualPtr(v->getName()))) &&
+                (projectionVariables.end() == find(projectionVariables.begin(), projectionVariables.end(), v->getName()))) {
+                // v is not an axis
+                // v is not a projectionVariable
+                vector<string> vShape = getCDM().getVariable(v->getName()).getShape();
+                sort(vShape.begin(), vShape.end());
+                vector<string> intersect;
+                set_intersection(geoDimensions.begin(), geoDimensions.end(),
+                                 vShape.begin(), vShape.end(),
+                                 back_inserter(intersect));
+                if (intersect.size() > 0) {
+                    cdm_->removeVariable(v->getName());
+                    LOG4FIMEX(logger, Logger::WARN, "removing variable " << v->getName() << " since it is not compatible with the reprojected coordinates");
+                }
+            }
+        }
+    }
+
 
     // create a minimal one
     boost::shared_ptr<CoordinateSystem> cs(new CoordinateSystem());
@@ -480,28 +513,23 @@ public:
 };
 
 
-void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, size_t xAxisSize, size_t yAxisSize, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
 {
     // find the max distance of two neighboring points in the output
-    double maxDist = 0;
+    // this is the region of influence for a cell
+    double maxDist;
     {
-        vector<point2d> xyPoints;
-        xyPoints.reserve(pointsOnXAxis.size());
-        for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
-            xyPoints.push_back(point2d(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1));
+        double maxX = 0;
+        for (size_t i = 0; i < xAxisSize-1; ++i) {
+            maxX = max(abs(pointsOnXAxis[i+1]-pointsOnXAxis[i]), maxX);
         }
-        tree_type xyTree(xyPoints.begin(), xyPoints.end(), std::ptr_fun(pac));
-        xyPoints.clear(); // release memory
-        for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
-            point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
-            std::pair<tree_type::const_iterator,double> found = xyTree.find_nearest_if(target, std::numeric_limits<double>::max(), DoesNotEqual(target));
-            assert(found.first != xyTree.end());
-            if (found.second> maxDist) {
-                maxDist = found.second;
-            }
+        double maxY = 0;
+        for (size_t j = 0; j < yAxisSize-1; ++j) {
+            maxY = max(abs(pointsOnXAxis[(j+1)*xAxisSize] - pointsOnXAxis[j*xAxisSize]), maxY);
         }
+        maxDist = max(maxX, maxY);
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "maxDist: " << maxDist);
+    LOG4FIMEX(logger, Logger::DEBUG, "maximum allowed distance from cell-center: " << maxDist);
     assert(maxDist != 0);
 
     // pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in m on projectionSpace
@@ -515,14 +543,16 @@ void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vect
             }
         }
     }
+    time_t start = time(0);
     tree_type lonLatTree(llPoints.begin(), llPoints.end(), std::ptr_fun(pac));
+    LOG4FIMEX(logger, Logger::DEBUG, "finished loading kdTree after " << (time(0) - start) << "s");
     llPoints.clear(); // release memory
 
     for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
         point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
         std::pair<tree_type::const_iterator,double> found = lonLatTree.find_nearest(target, maxDist);
         if (found.first != lonLatTree.end()) {
-            LOG4FIMEX(logger, Logger::DEBUG, "found (" << pointsOnXAxis[i] << "," << pointsOnYAxis[i] << ") at (" << found.first->getI() << "," << found.first->getJ() << ")");
+            //LOG4FIMEX(logger, Logger::DEBUG, "found (" << pointsOnXAxis[i] << "," << pointsOnYAxis[i] << ") at (" << found.first->getI() << "," << found.first->getJ() << ")");
             pointsOnXAxis[i] = found.first->getI();
             pointsOnYAxis[i] = found.first->getJ();
         }
@@ -535,16 +565,24 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
     // multiply that with a number slightly bigger than 1 (i use 1.414
     // and define that as grid distance
     vector<double> samples;
-    size_t sampler = 13; // unusual grid-dimension
+    int steps;
+    size_t stepSize;
+    if (orgXDimSize * orgYDimSize > 1000) {
+        steps = 53; // unusual grid-dimension
+        stepSize = orgXDimSize * orgYDimSize / steps;
+    } else {
+        stepSize = 1;
+        steps = orgXDimSize * orgYDimSize;
+    }
 #ifdef HAVE_OPENMP
+    omp_lock_t my_lock;
+    omp_init_lock(&my_lock);
 #pragma omp parallel default(shared)
     {
-        omp_lock_t my_lock;
-        omp_init_lock(&my_lock);
 #pragma omp for nowait
 #endif
-    for (int ik = 0; ik < static_cast<int>(pointsOnXAxis.size()/sampler); ik++) { // using int instead of size_t because of openMP < 3.0
-        size_t samplePos = sampler * ik;
+    for (int ik = 0; ik < steps; ik++) { // using int instead of size_t because of openMP < 3.0
+        size_t samplePos = ik * stepSize;
         double lon0 = lonVals[samplePos];
         double lat0 = latVals[samplePos];
         if (!(isnan(lon0) || isnan(lat0))) {
@@ -581,7 +619,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
     omp_destroy_lock(&my_lock);
     }
 #endif
-    double max_grid_d = acos(*(max_element(samples.begin(), samples.end())));
+    double max_grid_d = acos(*(min_element(samples.begin(), samples.end())));
     max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
     if (max_grid_d > PI) max_grid_d = PI;
     return max_grid_d;
@@ -603,7 +641,10 @@ public:
 // in lonVals/latVals using a binary search in latitude-direction, otherwise brute-force
 void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "estimation of ROI of input-data");
+    time_t start = time(0);
     double max_grid_d = getGridDistance(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+    LOG4FIMEX(logger, Logger::DEBUG, "assuming a ROI of input-data as: "<< (max_grid_d*180/PI) << "deg after " << (time(0) - start) << "s");
     double min_grid_cos_d = cos(max_grid_d);
 
     // 1. order lat/lon after latitude
@@ -815,10 +856,11 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
             if (latShape.size() != 2) {
                 throw CDMException("latitude needs 2 dims for forward interpolation");
             }
+            LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "," << latShape[1]);
             orgXDimSize = dataReader->getCDM().getDimension(latShape[0]).getLength();
             orgYDimSize = dataReader->getCDM().getDimension(latShape[1]).getLength();
-            LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "(" << orgXDimSize << "), " << latShape[1] << "(" << orgYDimSize << ")");
         } else {
+            LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << cs->getGeoXAxis()->getName() << "," << cs->getGeoYAxis()->getName());
             orgXDimSize = dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
             orgYDimSize = dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
         }
@@ -872,7 +914,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
                 }
             }
         }
-        kdTreeTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+        kdTreeTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, outXAxis.size(), outYAxis.size(), &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
     } else {
         throw CDMException("unkown interpolation method for coordinates: " + type2string(method));
     }

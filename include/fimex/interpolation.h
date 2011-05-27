@@ -38,19 +38,25 @@ extern "C" {
 /**
  * @brief interpolation method
  *
- * flag for nearest neighbor interpolation
+ * Flag for nearest neighbor interpolation. This requires,
+ * that the original data comes with a properly defined projection,
+ * i.e. implicit as latlon or explicit with projection-string
  */
 #define MIFI_INTERPOL_NEAREST_NEIGHBOR 0
 /**
  * @brief interpolation method
  *
- * flag for bilinear interpolation
+ * Flag for bilinear interpolation. This requires,
+ * that the original data comes with a properly defined projection,
+ * i.e. implicit as latlon or explicit with projection-string
  */
 #define MIFI_INTERPOL_BILINEAR         1
 /**
  * @brief interpolation method
  *
- * flag for bicubic interpolation
+ * Flag for bicubic interpolation. This requires,
+ * that the original data comes with a properly defined projection,
+ * i.e. implicit as latlon or explicit with projection-string
  */
 #define MIFI_INTERPOL_BICUBIC          2
 /**
@@ -76,7 +82,7 @@ extern "C" {
  * i.e. near southpole when using northpole-polarstereographic.
  *
  * It doesn't work with output projections in degree, i.e.
- * rotated latitude longitude.
+ * rotated latitude longitude, since distances are calculated as outX^2*outY^2
  *
  * Vector projection is not implemented (not defined?)
  *

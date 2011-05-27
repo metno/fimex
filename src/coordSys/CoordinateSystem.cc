@@ -556,7 +556,9 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystemsCF1
                         }
                     } else {
                         // LON/LAT systems don't need  grid_mapping, detect by lat/lon axes
-                        if (cs.hasAxisType(CoordinateAxis::Lon) && cs.hasAxisType(CoordinateAxis::Lat)) {
+                        // lat/lon must be axes (i.e. 'simple') otherwise not a projection
+                        if (cs.isSimpleSpatialGridded() &&
+                            cs.hasAxisType(CoordinateAxis::Lon) && cs.hasAxisType(CoordinateAxis::Lat)) {
                             if ( cs.getGeoXAxis()->getName() == cs.findAxisOfType(CoordinateAxis::Lon)->getName() &&
                                  cs.getGeoYAxis()->getName() == cs.findAxisOfType(CoordinateAxis::Lat)->getName() ) {
                                 CDMAttribute grid_mapping("grid_mapping_name", "latitude_longitude");
