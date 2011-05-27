@@ -130,7 +130,7 @@ void GlobalWdbConfiguration::initParseGlobalAttributes_(XMLDoc & config)
 
 void GlobalWdbConfiguration::initParseValueParameter_(XMLDoc & config)
 {
-	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/parameters/variable");
+	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
 	if ( parameters->nodesetval )
 	{
 		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
