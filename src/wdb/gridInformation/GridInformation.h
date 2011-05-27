@@ -128,6 +128,8 @@ public:
 	 */
 	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
 
+	virtual bool canHandle(const std::string & name) const;
+
 	/**
 	 * Fill the given vector with strings with names for x- and y-dimensions
 	 * for this.

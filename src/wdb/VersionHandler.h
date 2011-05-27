@@ -26,62 +26,37 @@
  MA  02110-1301, USA
  */
 
-#ifndef TIMEHANDLER_H_
-#define TIMEHANDLER_H_
+#ifndef VERSIONHANDLER_H_
+#define VERSIONHANDLER_H_
 
 #include "DataHandler.h"
+#include <set>
+
 
 namespace MetNoFimex
 {
-class CDM;
-class Data;
-
 namespace wdb
 {
-class WdbIndex;
-class GlobalWdbConfiguration;
 
-
-/**
- * Handling time for wdb/fimex. Objects of this class may be used to add time
- * dimensions and -variables to CDM objects, and to get time values for the
- * same variables.
- */
-class TimeHandler : public DataHandler
+class VersionHandler : public DataHandler
 {
 public:
-	/**
-	 * Times will be extracted and calculated from the given index object
-	 */
-	TimeHandler(const WdbIndex & index, const GlobalWdbConfiguration & config);
-	~TimeHandler();
+	explicit VersionHandler(const WdbIndex & index);
+	virtual ~VersionHandler();
 
-	/**
-	 * Add relevant time dimensions and -variables to the given CDM object.
-	 */
 	void addToCdm(CDM & cdm) const;
 
-	/**
-	 * Get data for the given variable name and unlimited dimension
-	 */
 	boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
-	/**
-	 * Does the given cdm variable name refer to anything that this object can
-	 * handle via the getData method?
-	 */
 	bool canHandle(const std::string & wdbName) const;
 
 private:
-	static const std::string referenceTimeName;
-	static const std::string validTimeName;
-
 	const WdbIndex & index_;
-	const GlobalWdbConfiguration & config_;
+	mutable std::set<int> versions_;
 };
 
 }
 
 }
 
-#endif /* TIMEHANDLER_H_ */
+#endif /* VERSIONHANDLER_H_ */

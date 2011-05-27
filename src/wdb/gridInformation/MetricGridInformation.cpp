@@ -33,6 +33,7 @@
 #include <fimex/CDMAttribute.h>
 #include <fimex/Data.h>
 #include <boost/assign/list_of.hpp>
+#include <set>
 
 namespace MetNoFimex
 {
@@ -119,6 +120,14 @@ boost::shared_ptr<Data> MetricGridInformation::getField(const CDMVariable & vari
 
 	return ret;
 }
+
+bool MetricGridInformation::canHandle(const std::string & name) const
+{
+	std::set<std::string> names = boost::assign::list_of("xc")("yc")("lon1")("lat1");
+
+	return names.find(name) != names.end() or GridInformation::canHandle(name);
+}
+
 
 void MetricGridInformation::addSpatialDimensions(std::vector<std::string> & out) const
 {

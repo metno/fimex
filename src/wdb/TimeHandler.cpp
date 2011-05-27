@@ -28,6 +28,7 @@
 
 #include "TimeHandler.h"
 #include "WdbIndex.h"
+#include "config/GlobalWdbConfiguration.h"
 #include <fimex/CDM.h>
 #include <fimex/Data.h>
 
@@ -41,8 +42,8 @@ const std::string TimeHandler::referenceTimeName = "forecast_reference_time";
 const std::string TimeHandler::validTimeName = "time";
 
 
-TimeHandler::TimeHandler(const WdbIndex & index) :
-		index_(index)
+TimeHandler::TimeHandler(const WdbIndex & index, const GlobalWdbConfiguration & config) :
+		index_(index), config_(config)
 {
 }
 
@@ -87,9 +88,11 @@ void TimeHandler::addToCdm(CDM & cdm) const
 	cdm.addDimension(time);
 }
 
-boost::shared_ptr<Data> TimeHandler::getData(const std::string & varName, size_t unLimDimPos) const
+boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
 	boost::shared_ptr<Data> ret;
+
+	std::string varName = variable.getName();
 
 	if ( varName == referenceTimeName )
 	{
@@ -103,8 +106,7 @@ boost::shared_ptr<Data> TimeHandler::getData(const std::string & varName, size_t
 			ret->setValue(idx ++, std::mktime(& t));
 		}
 	}
-
-	if ( varName == validTimeName )
+	else if ( varName == validTimeName )
 	{
 		// fix time functions: TimeUnit.h
 		const std::set<wdb::GridData::Time> & allTimes = index_.allTimes();
@@ -113,13 +115,15 @@ boost::shared_ptr<Data> TimeHandler::getData(const std::string & varName, size_t
 		std::tm t = to_tm(* thisTime);
 		ret = createData(CDM_DOUBLE, 1, std::mktime(& t));
 	}
+	else
+		throw CDMException("Unrecognized variable name for time: " + varName);
 
 	return ret;
 }
 
-bool TimeHandler::canHandle(const std::string & parameter) const
+bool TimeHandler::canHandle(const std::string & wdbName) const
 {
-	return parameter == validTimeName or parameter == referenceTimeName;
+	return wdbName == validTimeName or wdbName == referenceTimeName;
 }
 
 }

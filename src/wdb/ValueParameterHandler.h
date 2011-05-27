@@ -26,42 +26,38 @@
  MA  02110-1301, USA
  */
 
-#ifndef ROTATEDLATLONGRIDINFORMATION_H_
-#define ROTATEDLATLONGRIDINFORMATION_H_
+#ifndef VALUEPARAMETERHANDLER_H_
+#define VALUEPARAMETERHANDLER_H_
 
-#include "GridInformation.h"
+#include "DataHandler.h"
 
 namespace MetNoFimex
 {
-
 namespace wdb
 {
+class GlobalWdbConfiguration;
 
-/**
- * A Grid where x and y corresponds directly to longitude and altitude, except
- * that the grid has been rotated in some manner.
- */
-class RotatedLatLonGridInformation: public GridInformation
+
+class ValueParameterHandler : public DataHandler
 {
 public:
-	RotatedLatLonGridInformation(PGresult * result, int row);
-	RotatedLatLonGridInformation(const boost::shared_ptr<Projection> & projection, unsigned numberX, unsigned numberY);
-	virtual ~RotatedLatLonGridInformation();
+	ValueParameterHandler(const WdbIndex & index, const GlobalWdbConfiguration & config);
+	virtual ~ValueParameterHandler();
 
 	virtual void addToCdm(CDM & cdm) const;
-	virtual std::string getCoordinatesAttribute() const;
-	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
-	bool canHandle(const std::string & name) const;
-	virtual void addSpatialDimensions(std::vector<std::string> & out) const;
+
+	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
+
+	virtual bool canHandle(const std::string & wdbName) const;
+
 
 private:
-	void convertLatLon() const;
-	mutable std::vector<double> longitudes_;
-	mutable std::vector<double> latitudes_;
+	const WdbIndex & index_;
+	const GlobalWdbConfiguration & config_;
 };
 
 }
 
 }
 
-#endif /* ROTATEDLATLONGRIDINFORMATION_H_ */
+#endif /* VALUEPARAMETERHANDLER_H_ */

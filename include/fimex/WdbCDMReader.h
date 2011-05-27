@@ -70,6 +70,7 @@ public:
 
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
+	//virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
 private:
 	class InternalData;

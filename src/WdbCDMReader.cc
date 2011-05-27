@@ -114,64 +114,42 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	const std::string & wdbName = d_->translator->wdbName(varName);
 
-	if ( d_->dataIndex->isDatabaseField(wdbName) )
-	{
-		const std::vector<std::string> & dimensions = variable.getShape();
-		unsigned size = 1;
-		for ( std::vector<std::string>::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
+	bool handled = false;
+	BOOST_FOREACH(const wdb::DataHandler::Ptr & handler, d_->dataIndex->dataHandlers())
+		if ( handler->canHandle(varName) )
 		{
-			const CDMDimension & dimension = cdm_->getDimension(* it);
-			if ( not dimension.isUnlimited() )
-				size *= dimension.getLength();
+			ret = handler->getData(variable, unLimDimPos);
+			handled = true;
 		}
 
-		ret = createData(variable.getDataType(), size/*, std::numeric_limits<float>::quiet_NaN()*/);
-
-		std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, unLimDimPos);
-
-		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
-		for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
-			if ( * it != wdb::WdbIndex::UNDEFINED_GID )
-				dataIdx = d_->wdbConnection->getGrid(dataIdx, * it);
-			else
+	if ( not handled )
+	{
+		if ( d_->dataIndex->isDatabaseField(wdbName) )
+		{
+			const std::vector<std::string> & dimensions = variable.getShape();
+			unsigned size = 1;
+			for ( std::vector<std::string>::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
 			{
-				const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
-				dataIdx += gridInfo.numberX() * gridInfo.numberY();
+				const CDMDimension & dimension = cdm_->getDimension(* it);
+				if ( not dimension.isUnlimited() )
+					size *= dimension.getLength();
 			}
-	}
-	else if ( d_->dataIndex->isLevel(wdbName) )
-	{
-		const std::set<float> & levels = d_->dataIndex->getLevelValues(wdbName);
 
-		ret = createData(variable.getDataType(), levels.size());
-		float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
-		std::copy(levels.begin(), levels.end(), dataIdx);
-	}
-	else if ( d_->dataIndex->timeHandler().canHandle(varName) )
-	{
-		ret = d_->dataIndex->timeHandler().getData(varName, unLimDimPos);
-	}
-//	else if ( varName == "forecast_reference_time" )
-//	{
-//		ret = createData(variable.getDataType(), 1);
-//		std::tm t = to_tm(* d_->dataIndex->referenceTimes().rbegin());
-//		ret->setValue(0, std::mktime(& t));
-//	}
-//	else if ( varName == "time" )
-//	{
-//		// fix time functions: TimeUnit.h
-//		const std::set<wdb::GridData::Time> & allTimes = d_->dataIndex->allTimes();
-//		std::set<wdb::GridData::Time>::const_iterator thisTime = allTimes.begin();
-//		std::advance(thisTime, unLimDimPos -1);
-//		std::tm t = to_tm(* thisTime);
-//		ret = createData(variable.getDataType(), 1, std::mktime(& t));
-//	}
-	else // we assume this has to do with projection or grid
-	{
-		const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
-		ret = gridInfo.getField(variable);
+			ret = createData(variable.getDataType(), size/*, std::numeric_limits<float>::quiet_NaN()*/);
 
-		if ( ! ret )
+			std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, unLimDimPos);
+
+			float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
+			for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
+				if ( * it != wdb::WdbIndex::UNDEFINED_GID )
+					dataIdx = d_->wdbConnection->getGrid(dataIdx, * it);
+				else
+				{
+					const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
+					dataIdx += gridInfo.numberX() * gridInfo.numberY();
+				}
+		}
+		else
 			throw CDMException("internal error: " + varName + ": unrecognized variable");
 	}
 
@@ -179,5 +157,23 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 	return ret;
 }
 
+//boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
+//		const std::string& varName, size_t unLimDimPos)
+//{
+//	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");" << std::flush;
+//
+//	SliceBuilder slicer(* cdm_, varName);
+//	const CDMDimension * unlimitedDimension = cdm_->getUnlimitedDim();
+//	if ( unlimitedDimension )
+//		slicer.setStartAndSize(unlimitedDimension->getName(), unLimDimPos, 1);
+//
+//	boost::shared_ptr<Data> ret = getDataSlice(varName, slicer);
+//
+//	std::cout << "\tdone" << std::endl;
+//
+//	return ret;
+//}
+
 
 }
+

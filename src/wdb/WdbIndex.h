@@ -101,6 +101,11 @@ public:
 	 */
 	std::set<GridData::Time> timesForParameter(const std::string & parameter) const;
 
+	bool hasLevel(const std::string & wdbName) const
+	{
+		return levels_.find(wdbName) != levels_.end();
+	}
+
 	/**
 	 * Find a parameter's level type
 	 */

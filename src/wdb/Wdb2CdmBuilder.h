@@ -30,7 +30,7 @@
 #define DATAINDEX_H_
 
 #include "WdbIndex.h"
-#include "TimeHandler.h"
+#include "DataHandler.h"
 #include "database_access/GridData.h"
 #include <vector>
 #include <map>
@@ -133,17 +133,11 @@ public:
 	 */
 	std::set<GridData::Time> referenceTimes() const;
 
-	/**
-	 * Get handler object for time
-	 */
-	const TimeHandler & timeHandler() const { return timeHandler_; }
+	const std::vector<DataHandler::Ptr> & dataHandlers() const { return dataHandlers_; }
 
 private:
 
-	void addProjectionInformation_(CDM & cdm) const;
-
 	void addDimensions_(CDM & cdm) const;
-	void addLevelDimensions_(CDM & cdm) const;
 	void addVersionDimension_(CDM & cdm) const;
 
 	void addParameterVariables_(CDM & cdm) const;
@@ -155,7 +149,7 @@ private:
 	typedef std::map<std::string, GridData::GridInformationPtr> GridSpecMap;
 	GridSpecMap grids_;
 
-	TimeHandler timeHandler_;
+	std::vector<DataHandler::Ptr> dataHandlers_;
 };
 
 }

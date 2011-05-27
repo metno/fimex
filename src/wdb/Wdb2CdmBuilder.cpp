@@ -27,6 +27,10 @@
  */
 
 #include "Wdb2CdmBuilder.h"
+#include "TimeHandler.h"
+#include "LevelHandler.h"
+#include "VersionHandler.h"
+#include "GridHandler.h"
 #include "config/GlobalWdbConfiguration.h"
 #include "gridInformation/GridInformation.h"
 #include <fimex/CDM.h>
@@ -42,10 +46,15 @@ namespace wdb
 {
 
 Wdb2CdmBuilder::Wdb2CdmBuilder(const std::vector<wdb::GridData> & data, const GlobalWdbConfiguration & config) :
-		index_(data), config_(config), timeHandler_(index_)
+		index_(data), config_(config)
 {
 	BOOST_FOREACH(const wdb::GridData & d, data)
 		grids_[d.parameter().name()] = d.gridInformation();
+
+	dataHandlers_.push_back(DataHandler::Ptr(new TimeHandler(index_, config_)));
+	dataHandlers_.push_back(DataHandler::Ptr(new LevelHandler(index_, config_)));
+	dataHandlers_.push_back(DataHandler::Ptr(new VersionHandler(index_)));
+	dataHandlers_.push_back(DataHandler::Ptr(new GridHandler(grids_)));
 }
 
 Wdb2CdmBuilder::~Wdb2CdmBuilder()
@@ -58,7 +67,6 @@ void Wdb2CdmBuilder::populate(CDM & cdm) const
 	BOOST_FOREACH( const CDMAttribute & attr, config_.getGlobalAttributes() )
 		cdm.addAttribute(globalns, attr);
 
-	addProjectionInformation_(cdm);
 	addDimensions_(cdm);
 	addParameterVariables_(cdm);
 }
@@ -85,84 +93,10 @@ std::set<GridData::Time> Wdb2CdmBuilder::referenceTimes() const
 	return index_.referenceTimes();
 }
 
-void Wdb2CdmBuilder::addProjectionInformation_(CDM & cdm) const
-{
-	std::set<GridData::GridInformationPtr> grids;
-	for ( GridSpecMap::const_iterator it = grids_.begin(); it != grids_.end(); ++ it )
-		grids.insert(it->second);
-	BOOST_FOREACH(GridData::GridInformationPtr grid, grids)
-	{
-		const boost::shared_ptr<Projection> projection = grid->getProjection();
-		std::string projectionName = grid->getProjectionName();
-		CDMVariable projectionSpec(projectionName, CDM_FLOAT, std::vector<std::string>());
-		cdm.addVariable(projectionSpec);
-		BOOST_FOREACH(const CDMAttribute & a, projection->getParameters())
-			cdm.addAttribute(projectionName, a);
-	}
-
-	if ( grids.empty() )
-		throw CDMException("No grids");
-	if ( grids.size() > 1 )
-		throw CDMException("Several grid types in same wdb reader is not supported (yet)");
-
-	GridData::GridInformationPtr gridInfo = * grids.begin();
-	gridInfo->addToCdm(cdm);
-}
-
 void Wdb2CdmBuilder::addDimensions_(CDM & cdm) const
 {
-	addLevelDimensions_(cdm);
-	addVersionDimension_(cdm);
-	timeHandler_.addToCdm(cdm);
-}
-
-void Wdb2CdmBuilder::addLevelDimensions_(CDM & cdm) const
-{
-	std::set<std::string> addedLevels;
-	BOOST_FOREACH(const std::string & parameter, index_.allParameters())
-	{
-		const LevelType & levelType = index_.levelTypeForParameter(parameter);
-		std::string levelName = levelType.name();
-		if ( addedLevels.find(levelName) == addedLevels.end() )
-		{
-			std::set<float> levels = index_.levelsForParameter(parameter);
-			if ( levels.size() > 1 )
-			{
-				const std::string & dimension = config_.cfName(levelName);
-
-				cdm.addDimension(CDMDimension(dimension, levels.size()));
-
-				cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, std::vector<std::string>(1, dimension)));
-
-				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(levelName, levelType.unit()) )
-					cdm.addAttribute(dimension, attribute);
-				cdm.addAttribute(dimension, CDMAttribute("axis", "z"));
-
-				addedLevels.insert(levelName);
-			}
-		}
-	}
-}
-
-void Wdb2CdmBuilder::addVersionDimension_(CDM & cdm) const
-{
-	BOOST_FOREACH(const std::string & parameter, index_.allParameters())
-	{
-		const std::set<int> & versions = index_.versionsForParameter(parameter);
-		if ( versions.size() > 1 )
-		{
-			std::string dimension = "version";
-			cdm.addDimension(CDMDimension(dimension, versions.size()));
-
-			cdm.addVariable(CDMVariable(dimension, CDM_INT, std::vector<std::string>(1, dimension)));
-
-			cdm.addAttribute(dimension, CDMAttribute("long_name", "data version"));
-			cdm.addAttribute(dimension, CDMAttribute("standard_name", "version"));
-			cdm.addAttribute(dimension, CDMAttribute("axis", "Ensemble"));
-
-			return;
-		}
-	}
+	BOOST_FOREACH( DataHandler::Ptr handler, dataHandlers_ )
+		handler->addToCdm(cdm);
 }
 
 namespace

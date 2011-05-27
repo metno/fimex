@@ -33,6 +33,7 @@
 #include <fimex/CDMAttribute.h>
 #include <fimex/Data.h>
 #include <boost/assign/list_of.hpp>
+#include <set>
 
 
 namespace MetNoFimex
@@ -124,6 +125,13 @@ boost::shared_ptr<Data> RotatedLatLonGridInformation::getField(const CDMVariable
 		ret = GridInformation::getField(variable);
 
 	return ret;
+}
+
+bool RotatedLatLonGridInformation::canHandle(const std::string & name) const
+{
+	std::set<std::string> names = boost::assign::list_of("rlon")("rlat")("longitude")("latitude");
+
+	return names.find(name) != names.end() or GridInformation::canHandle(name);
 }
 
 void RotatedLatLonGridInformation::addSpatialDimensions(std::vector<std::string> & out) const

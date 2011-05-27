@@ -26,10 +26,13 @@
  MA  02110-1301, USA
  */
 
-#ifndef ROTATEDLATLONGRIDINFORMATION_H_
-#define ROTATEDLATLONGRIDINFORMATION_H_
+#ifndef GRIDHANDLER_H_
+#define GRIDHANDLER_H_
 
-#include "GridInformation.h"
+#include "DataHandler.h"
+#include "database_access/GridData.h"
+#include <map>
+
 
 namespace MetNoFimex
 {
@@ -37,31 +40,29 @@ namespace MetNoFimex
 namespace wdb
 {
 
-/**
- * A Grid where x and y corresponds directly to longitude and altitude, except
- * that the grid has been rotated in some manner.
- */
-class RotatedLatLonGridInformation: public GridInformation
+class GridHandler : public DataHandler
 {
 public:
-	RotatedLatLonGridInformation(PGresult * result, int row);
-	RotatedLatLonGridInformation(const boost::shared_ptr<Projection> & projection, unsigned numberX, unsigned numberY);
-	virtual ~RotatedLatLonGridInformation();
+	typedef std::map<std::string, GridData::GridInformationPtr> GridSpecMap;
+
+	explicit GridHandler(const GridSpecMap & grids);
+
+	virtual ~GridHandler();
 
 	virtual void addToCdm(CDM & cdm) const;
-	virtual std::string getCoordinatesAttribute() const;
-	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
-	bool canHandle(const std::string & name) const;
-	virtual void addSpatialDimensions(std::vector<std::string> & out) const;
+
+	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
+
+	virtual bool canHandle(const std::string & wdbName) const;
 
 private:
-	void convertLatLon() const;
-	mutable std::vector<double> longitudes_;
-	mutable std::vector<double> latitudes_;
+	const wdb::GridInformation & gridInfo_() const;
+
+	GridSpecMap grids_;
 };
 
 }
 
 }
 
-#endif /* ROTATEDLATLONGRIDINFORMATION_H_ */
+#endif /* GRIDHANDLER_H_ */

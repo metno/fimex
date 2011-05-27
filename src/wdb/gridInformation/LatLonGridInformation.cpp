@@ -88,6 +88,11 @@ boost::shared_ptr<Data> LatLonGridInformation::getField(const CDMVariable & vari
 	return ret;
 }
 
+bool LatLonGridInformation::canHandle(const std::string & name) const
+{
+	return name == "longitude" or name == "latitude" or GridInformation::canHandle(name);
+}
+
 void LatLonGridInformation::addSpatialDimensions(std::vector<std::string> & out) const
 {
 	out.push_back("longitude");

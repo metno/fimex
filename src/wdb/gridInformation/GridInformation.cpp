@@ -141,6 +141,10 @@ boost::shared_ptr<Data> GridInformation::getField(const CDMVariable & variable) 
 	return ret;
 }
 
+bool GridInformation::canHandle(const std::string & name) const
+{
+	return name.substr(0, 11) == "projection_";
 }
 
+}
 }
