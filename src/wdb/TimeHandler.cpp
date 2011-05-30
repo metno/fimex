@@ -28,7 +28,6 @@
 
 #include "TimeHandler.h"
 #include "WdbIndex.h"
-#include "config/GlobalWdbConfiguration.h"
 #include <fimex/CDM.h>
 #include <fimex/Data.h>
 
@@ -42,8 +41,8 @@ const std::string TimeHandler::referenceTimeName = "forecast_reference_time";
 const std::string TimeHandler::validTimeName = "time";
 
 
-TimeHandler::TimeHandler(const WdbIndex & index, const GlobalWdbConfiguration & config) :
-		index_(index), config_(config)
+TimeHandler::TimeHandler(const WdbIndex & index) :
+		index_(index)
 {
 }
 

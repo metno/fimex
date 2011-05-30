@@ -143,7 +143,7 @@ private:
 	void addParameterVariables_(CDM & cdm) const;
 
 
-	WdbIndex index_;
+	const WdbIndex index_;
 	const GlobalWdbConfiguration & config_;
 
 	typedef std::map<std::string, GridData::GridInformationPtr> GridSpecMap;

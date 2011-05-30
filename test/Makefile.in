@@ -219,14 +219,19 @@ test_c_consumer_LDADD = $(LDADD)
 test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
-am__wdbTest_SOURCES_DIST = wdb/Wdb2CdmBuilderTest.cc \
+am__wdbTest_SOURCES_DIST = wdb/TestingGridData.h \
+	wdb/TestingGridData.cpp wdb/GridDataFactory.h \
+	wdb/GridDataFactory.cpp wdb/Wdb2CdmBuilderTest.cc \
 	wdb/WdbIndexTest.cc wdb/WdbConfigurationTest.cpp \
-	wdb/GlobalWdbConfigurationTest.cpp
+	wdb/GlobalWdbConfigurationTest.cpp wdb/TimeHandlerTest.cpp
 @HAVE_LIBPQ_TRUE@am_wdbTest_OBJECTS =  \
+@HAVE_LIBPQ_TRUE@	wdbTest-TestingGridData.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	wdbTest-GridDataFactory.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-Wdb2CdmBuilderTest.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-WdbIndexTest.$(OBJEXT) \
 @HAVE_LIBPQ_TRUE@	wdbTest-WdbConfigurationTest.$(OBJEXT) \
-@HAVE_LIBPQ_TRUE@	wdbTest-GlobalWdbConfigurationTest.$(OBJEXT)
+@HAVE_LIBPQ_TRUE@	wdbTest-GlobalWdbConfigurationTest.$(OBJEXT) \
+@HAVE_LIBPQ_TRUE@	wdbTest-TimeHandlerTest.$(OBJEXT)
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
 wdbTest_LDADD = $(LDADD)
 wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
@@ -453,10 +458,13 @@ AM_CFLAGS =
 @HAVE_FELT_OR_MILIB_TRUE@GRIBAPI_MI_TESTS = testGribWriter
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
 @HAVE_LIBPQ_TRUE@wdbTest_SOURCES = \
+@HAVE_LIBPQ_TRUE@  	wdb/TestingGridData.h wdb/TestingGridData.cpp \
+@HAVE_LIBPQ_TRUE@  	wdb/GridDataFactory.h wdb/GridDataFactory.cpp \
 @HAVE_LIBPQ_TRUE@  	wdb/Wdb2CdmBuilderTest.cc \
 @HAVE_LIBPQ_TRUE@  	wdb/WdbIndexTest.cc \
 @HAVE_LIBPQ_TRUE@  	wdb/WdbConfigurationTest.cpp \
-@HAVE_LIBPQ_TRUE@  	wdb/GlobalWdbConfigurationTest.cpp 
+@HAVE_LIBPQ_TRUE@  	wdb/GlobalWdbConfigurationTest.cpp \
+@HAVE_LIBPQ_TRUE@  	wdb/TimeHandlerTest.cpp
 
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\"
 @HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
@@ -621,6 +629,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-GlobalWdbConfigurationTest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-GridDataFactory.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-TestingGridData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-TimeHandlerTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbConfigurationTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbIndexTest.Po@am__quote@
@@ -666,6 +677,34 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+wdbTest-TestingGridData.o: wdb/TestingGridData.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-TestingGridData.o -MD -MP -MF $(DEPDIR)/wdbTest-TestingGridData.Tpo -c -o wdbTest-TestingGridData.o `test -f 'wdb/TestingGridData.cpp' || echo '$(srcdir)/'`wdb/TestingGridData.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-TestingGridData.Tpo $(DEPDIR)/wdbTest-TestingGridData.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/TestingGridData.cpp' object='wdbTest-TestingGridData.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-TestingGridData.o `test -f 'wdb/TestingGridData.cpp' || echo '$(srcdir)/'`wdb/TestingGridData.cpp
+
+wdbTest-TestingGridData.obj: wdb/TestingGridData.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-TestingGridData.obj -MD -MP -MF $(DEPDIR)/wdbTest-TestingGridData.Tpo -c -o wdbTest-TestingGridData.obj `if test -f 'wdb/TestingGridData.cpp'; then $(CYGPATH_W) 'wdb/TestingGridData.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/TestingGridData.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-TestingGridData.Tpo $(DEPDIR)/wdbTest-TestingGridData.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/TestingGridData.cpp' object='wdbTest-TestingGridData.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-TestingGridData.obj `if test -f 'wdb/TestingGridData.cpp'; then $(CYGPATH_W) 'wdb/TestingGridData.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/TestingGridData.cpp'; fi`
+
+wdbTest-GridDataFactory.o: wdb/GridDataFactory.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-GridDataFactory.o -MD -MP -MF $(DEPDIR)/wdbTest-GridDataFactory.Tpo -c -o wdbTest-GridDataFactory.o `test -f 'wdb/GridDataFactory.cpp' || echo '$(srcdir)/'`wdb/GridDataFactory.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-GridDataFactory.Tpo $(DEPDIR)/wdbTest-GridDataFactory.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GridDataFactory.cpp' object='wdbTest-GridDataFactory.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-GridDataFactory.o `test -f 'wdb/GridDataFactory.cpp' || echo '$(srcdir)/'`wdb/GridDataFactory.cpp
+
+wdbTest-GridDataFactory.obj: wdb/GridDataFactory.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-GridDataFactory.obj -MD -MP -MF $(DEPDIR)/wdbTest-GridDataFactory.Tpo -c -o wdbTest-GridDataFactory.obj `if test -f 'wdb/GridDataFactory.cpp'; then $(CYGPATH_W) 'wdb/GridDataFactory.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/GridDataFactory.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-GridDataFactory.Tpo $(DEPDIR)/wdbTest-GridDataFactory.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GridDataFactory.cpp' object='wdbTest-GridDataFactory.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-GridDataFactory.obj `if test -f 'wdb/GridDataFactory.cpp'; then $(CYGPATH_W) 'wdb/GridDataFactory.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/GridDataFactory.cpp'; fi`
 
 wdbTest-Wdb2CdmBuilderTest.o: wdb/Wdb2CdmBuilderTest.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-Wdb2CdmBuilderTest.o -MD -MP -MF $(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Tpo -c -o wdbTest-Wdb2CdmBuilderTest.o `test -f 'wdb/Wdb2CdmBuilderTest.cc' || echo '$(srcdir)/'`wdb/Wdb2CdmBuilderTest.cc
@@ -722,6 +761,20 @@ wdbTest-GlobalWdbConfigurationTest.obj: wdb/GlobalWdbConfigurationTest.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GlobalWdbConfigurationTest.cpp' object='wdbTest-GlobalWdbConfigurationTest.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-GlobalWdbConfigurationTest.obj `if test -f 'wdb/GlobalWdbConfigurationTest.cpp'; then $(CYGPATH_W) 'wdb/GlobalWdbConfigurationTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/GlobalWdbConfigurationTest.cpp'; fi`
+
+wdbTest-TimeHandlerTest.o: wdb/TimeHandlerTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-TimeHandlerTest.o -MD -MP -MF $(DEPDIR)/wdbTest-TimeHandlerTest.Tpo -c -o wdbTest-TimeHandlerTest.o `test -f 'wdb/TimeHandlerTest.cpp' || echo '$(srcdir)/'`wdb/TimeHandlerTest.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-TimeHandlerTest.Tpo $(DEPDIR)/wdbTest-TimeHandlerTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/TimeHandlerTest.cpp' object='wdbTest-TimeHandlerTest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-TimeHandlerTest.o `test -f 'wdb/TimeHandlerTest.cpp' || echo '$(srcdir)/'`wdb/TimeHandlerTest.cpp
+
+wdbTest-TimeHandlerTest.obj: wdb/TimeHandlerTest.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wdbTest-TimeHandlerTest.obj -MD -MP -MF $(DEPDIR)/wdbTest-TimeHandlerTest.Tpo -c -o wdbTest-TimeHandlerTest.obj `if test -f 'wdb/TimeHandlerTest.cpp'; then $(CYGPATH_W) 'wdb/TimeHandlerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/TimeHandlerTest.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wdbTest-TimeHandlerTest.Tpo $(DEPDIR)/wdbTest-TimeHandlerTest.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/TimeHandlerTest.cpp' object='wdbTest-TimeHandlerTest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(wdbTest_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wdbTest-TimeHandlerTest.obj `if test -f 'wdb/TimeHandlerTest.cpp'; then $(CYGPATH_W) 'wdb/TimeHandlerTest.cpp'; else $(CYGPATH_W) '$(srcdir)/wdb/TimeHandlerTest.cpp'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

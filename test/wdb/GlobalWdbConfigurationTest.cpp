@@ -40,7 +40,6 @@
 using namespace MetNoFimex;
 using namespace MetNoFimex::wdb;
 
-
 BOOST_AUTO_TEST_SUITE(GlobalWdbConfigurationTest)
 
 namespace

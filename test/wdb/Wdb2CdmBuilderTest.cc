@@ -26,6 +26,7 @@
     MA  02110-1301, USA
 */
 
+#include "GridDataFactory.h"
 #include <wdb/Wdb2CdmBuilder.h>
 #include <wdb/config/GlobalWdbConfiguration.h>
 #include <wdb/gridInformation/GridInformation.h>
@@ -46,89 +47,19 @@
 
 using namespace MetNoFimex;
 
-class Wdb2CdmBuilderFixture
+class Wdb2CdmBuilderFixture : public wdb::GridDataFactory
 {
-	struct TestingGridData : public wdb::GridData
-	{
-		TestingGridData(const wdb::Parameter & param,
-				const wdb::Level & lvl,
-				int version,
-				const Time & validTo,
-				const Time & referenceTime,
-				const wdb::GridData::GridInformationPtr & grid,
-				gid gridId) :
-			wdb::GridData(param, lvl, version, validTo, referenceTime, gridId)
-		{
-			setGridInformation(grid);
-		}
-	};
-
-	wdb::GridData::gid nextGid_;
 public:
-	Wdb2CdmBuilderFixture() : nextGid_(0), tr(TEST_DIR"/wdb_config.xml") {}
+	Wdb2CdmBuilderFixture() : tr(TEST_DIR"/wdb_config.xml") {}
 
-	wdb::GridData::gid nextGid()
+	std::string cdmId() const
 	{
-		return nextGid_ ++;
+		return tr.cfName(defaultParameter.name());
 	}
 
-	static boost::posix_time::ptime t(const std::string & time)
-	{
-		return boost::posix_time::time_from_string(time);
-	}
-
-	static std::string cdmId()
-	{
-		return "high_cloud_cover";
-	}
-
-
-
-	std::vector<wdb::GridData> gridData;
 	CDM cdm;
-
-	static const wdb::Parameter defaultParameter;
-	static const wdb::Level defaultLevel;
-	static const std::string defaultTime;
-	static const std::string defaultReferenceTime;
-	static const wdb::GridData::GridInformationPtr defaultGrid;
 	wdb::GlobalWdbConfiguration tr;
-
-	void addGridData(const wdb::Parameter & parameter = defaultParameter, const std::string & time = defaultTime, int version = 0)
-	{
-		gridData.push_back(TestingGridData(parameter, defaultLevel, version, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
-	}
-
-	void addGridData(const wdb::Parameter & parameter, const wdb::Level & lvl)
-	{
-		gridData.push_back(TestingGridData(parameter, lvl, 0, t(defaultTime), t(defaultReferenceTime), defaultGrid, nextGid()));
-	}
-
-	void addGridData(const wdb::Level & lvl, const std::string & time = defaultTime)
-	{
-		gridData.push_back(TestingGridData(defaultParameter, lvl, 0, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
-	}
-
-	void addGridData(const std::string & time, const std::string & referenceTime = defaultReferenceTime)
-	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(time), t(referenceTime), defaultGrid, nextGid()));
-	}
-
-	void addGridData(int dataVersion, const std::string & time = defaultTime)
-	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, dataVersion, t(time), t(defaultReferenceTime), defaultGrid, nextGid()));
-	}
-
-	void addGridData(const wdb::GridData::GridInformationPtr & gridInfo)
-	{
-		gridData.push_back(TestingGridData(defaultParameter, defaultLevel, 0, t(defaultTime), t(defaultReferenceTime), gridInfo, nextGid()));
-	}
 };
-const wdb::Parameter Wdb2CdmBuilderFixture::defaultParameter("high cloud cover", "C");
-const wdb::Level Wdb2CdmBuilderFixture::defaultLevel("distance above ground", "m", 0, 0);
-const std::string Wdb2CdmBuilderFixture::defaultTime = "2011-03-18 06:00:00";
-const std::string Wdb2CdmBuilderFixture::defaultReferenceTime = "2011-03-18 00:00:00";
-const wdb::GridData::GridInformationPtr Wdb2CdmBuilderFixture::defaultGrid(wdb::GridInformation::get("+proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs", 30, 20));
 
 struct same_entity
 {
@@ -146,9 +77,9 @@ BOOST_AUTO_TEST_SUITE(Wdb2CdmBuilderTest)
 
 BOOST_FIXTURE_TEST_CASE(setsBaseDimensions, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Level("lvl", "m", 1, 1));
+	add(wdb::Level("lvl", "m", 1, 1));
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -160,11 +91,11 @@ BOOST_FIXTURE_TEST_CASE(setsBaseDimensions, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(setsDimensionSizes, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Level("lvl", "m", 0, 0));
-	addGridData(wdb::Level("lvl", "m", 1, 1));
-	addGridData(wdb::Level("lvl", "m", 2, 2));
+	add(wdb::Level("lvl", "m", 0, 0));
+	add(wdb::Level("lvl", "m", 1, 1));
+	add(wdb::Level("lvl", "m", 2, 2));
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -185,9 +116,9 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep, Wdb2CdmBuil
 	// we still add it, in order to give information that _all_ data has the
 	// specified valid time.
 
-	addGridData(wdb::Level("lvl", "m", 2, 2));
+	add(wdb::Level("lvl", "m", 2, 2));
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -199,11 +130,11 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep, Wdb2CdmBuil
 
 BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSize, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
-	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
-	addGridData(wdb::Level("lvl", "m", 0, 0), "2010-03-18 07:00:00");
+	add(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
+	add(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
+	add(wdb::Level("lvl", "m", 0, 0), "2010-03-18 07:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -216,11 +147,11 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSize, Wdb2CdmBuilderFixture)
 BOOST_FIXTURE_TEST_CASE(picksUpAllTimesFromSameParameter, Wdb2CdmBuilderFixture)
 {
 	// All times for varying levels should be picked up
-	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
-	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
-	addGridData(wdb::Level("lvl", "m", 0, 0), "2000-01-01 00:00:00");
+	add(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
+	add(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
+	add(wdb::Level("lvl", "m", 0, 0), "2000-01-01 00:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDM::DimVec & dims = cdm.getDimensions();
@@ -232,25 +163,23 @@ BOOST_FIXTURE_TEST_CASE(picksUpAllTimesFromSameParameter, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(manyReferenceTimes, Wdb2CdmBuilderFixture)
 {
-	addGridData("2010-05-23 06:00:00", "2010-05-22 00:00:00");
-	addGridData("2010-05-23 06:00:00", "2010-05-23 00:00:00");
+	add("2010-05-23 06:00:00", "2010-05-22 00:00:00");
+	add("2010-05-23 06:00:00", "2010-05-23 00:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 
 	BOOST_CHECK_THROW(di.populate(cdm), CDMException);
 }
 
 BOOST_FIXTURE_TEST_CASE(ignoresIrrelevantTimeDimensions, Wdb2CdmBuilderFixture)
 {
-	// maybe implement this later..
-
-//	// Any parameters which only have one time step will not get a time dimension
-//	// This makes sense for such fields as topography
-//	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
-//	addGridData(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
-//	addGridData(wdb::Parameter("timeless", "stuff"), "2000-01-01 00:00:00");
+	// Any parameters which only have one time step will not get a time dimension
+	// This makes sense for such fields as topography
+//	add(wdb::Level("lvl", "m", 2, 2), "2010-03-18 06:00:00");
+//	add(wdb::Level("lvl", "m", 2, 2), "2010-03-18 07:00:00");
+//	add(wdb::Parameter("timeless", "stuff"), "2000-01-01 00:00:00");
 //
-//	const wdb::Wdb2CdmBuilder di(gridData, tr);
+//	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 //	di.populate(cdm);
 //
 //	const CDM::DimVec & dims = cdm.getDimensions();
@@ -262,11 +191,11 @@ BOOST_FIXTURE_TEST_CASE(ignoresIrrelevantTimeDimensions, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(setsVersionDimensions, Wdb2CdmBuilderFixture)
 {
-	addGridData(0);
-	addGridData(1);
-	addGridData(2);
+	add(0);
+	add(1);
+	add(2);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -282,10 +211,10 @@ BOOST_FIXTURE_TEST_CASE(setsVersionDimensions, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(versionsAddThemselvesAsVariables, Wdb2CdmBuilderFixture)
 {
-	addGridData(0);
-	addGridData(1);
+	add(0);
+	add(1);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const std::string variable = "version";
@@ -303,11 +232,11 @@ BOOST_FIXTURE_TEST_CASE(versionsAddThemselvesAsVariables, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(zDimensionsAddThemselvesAsVariables, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Level("lvl", "m", 0, 0));
-	addGridData(wdb::Level("lvl", "m", 1, 1));
-	addGridData(wdb::Level("lvl", "m", 2, 2));
+	add(wdb::Level("lvl", "m", 0, 0));
+	add(wdb::Level("lvl", "m", 1, 1));
+	add(wdb::Level("lvl", "m", 2, 2));
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const std::string variable = "lvl";
@@ -328,14 +257,14 @@ BOOST_FIXTURE_TEST_CASE(zDimensionsAddThemselvesAsVariables, Wdb2CdmBuilderFixtu
 
 BOOST_FIXTURE_TEST_CASE(manyZDimensions, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Parameter("temperature", "c"), wdb::Level("lvl", "m", 0, 0));
-	addGridData(wdb::Parameter("temperature", "c"), wdb::Level("lvl", "m", 1, 1));
-	addGridData(wdb::Parameter("pressure", "pa"), wdb::Level("foo bar", "x", 0, 0));
-	addGridData(wdb::Parameter("pressure", "pa"), wdb::Level("foo bar", "x", 1, 1));
+	add(wdb::Parameter("temperature", "c"), wdb::Level("lvl", "m", 0, 0));
+	add(wdb::Parameter("temperature", "c"), wdb::Level("lvl", "m", 1, 1));
+	add(wdb::Parameter("pressure", "pa"), wdb::Level("foo bar", "x", 0, 0));
+	add(wdb::Parameter("pressure", "pa"), wdb::Level("foo bar", "x", 1, 1));
 
 	try
 	{
-		const wdb::Wdb2CdmBuilder di(gridData, tr);
+		const wdb::Wdb2CdmBuilder di(gridData(), tr);
 		di.populate(cdm);
 
 		const std::string variableA = "lvl";
@@ -361,11 +290,11 @@ BOOST_FIXTURE_TEST_CASE(manyZDimensions, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(addsTimeVariable, Wdb2CdmBuilderFixture)
 {
-	addGridData("2011-03-21 06:00:00");
-	addGridData("2011-03-21 12:00:00");
-	addGridData("2011-03-21 18:00:00");
+	add("2011-03-21 06:00:00");
+	add("2011-03-21 12:00:00");
+	add("2011-03-21 18:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -384,11 +313,11 @@ BOOST_FIXTURE_TEST_CASE(addsTimeVariable, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(addsTimeToRelevantVariables, Wdb2CdmBuilderFixture)
 {
-	addGridData(defaultLevel, "2010-03-18 06:00:00");
-	addGridData(defaultLevel, "2010-03-18 07:00:00");
-	addGridData(defaultLevel, "2010-03-18 08:00:00");
+	add(defaultLevel, "2010-03-18 06:00:00");
+	add(defaultLevel, "2010-03-18 07:00:00");
+	add(defaultLevel, "2010-03-18 08:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -409,9 +338,9 @@ BOOST_FIXTURE_TEST_CASE(addsTimeToRelevantVariables, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(singleLevelInData, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Level("lvl", "m", 0, 0));
+	add(wdb::Level("lvl", "m", 0, 0));
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -431,10 +360,10 @@ BOOST_FIXTURE_TEST_CASE(singleLevelInData, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(severalLevelsInData, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Level("lvl", "m", 0, 0));
-	addGridData(wdb::Level("lvl", "m", 1, 1));
+	add(wdb::Level("lvl", "m", 0, 0));
+	add(wdb::Level("lvl", "m", 1, 1));
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -455,11 +384,11 @@ BOOST_FIXTURE_TEST_CASE(severalLevelsInData, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(severalDataVersions, Wdb2CdmBuilderFixture)
 {
-	addGridData(0);
-	addGridData(1);
-	addGridData(2);
+	add(0);
+	add(1);
+	add(2);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDMVariable & var = cdm.getVariable(cdmId());
@@ -474,14 +403,14 @@ BOOST_FIXTURE_TEST_CASE(severalDataVersions, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(onlyOneTimeDimensionInVaraiableShape, Wdb2CdmBuilderFixture)
 {
-	addGridData(0, "2011-03-22 06:00:00");
-	addGridData(1, "2011-03-22 06:00:00");
-	addGridData(0, "2011-03-22 07:00:00");
-	addGridData(1, "2011-03-22 07:00:00");
-	addGridData(0, "2011-03-22 08:00:00");
-	addGridData(1, "2011-03-22 08:00:00");
+	add(0, "2011-03-22 06:00:00");
+	add(1, "2011-03-22 06:00:00");
+	add(0, "2011-03-22 07:00:00");
+	add(1, "2011-03-22 07:00:00");
+	add(0, "2011-03-22 08:00:00");
+	add(1, "2011-03-22 08:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDMVariable & var = cdm.getVariable(cdmId());
@@ -498,9 +427,9 @@ BOOST_FIXTURE_TEST_CASE(onlyOneTimeDimensionInVaraiableShape, Wdb2CdmBuilderFixt
 
 BOOST_FIXTURE_TEST_CASE(createsProjectionVariableLatLon, Wdb2CdmBuilderFixture)
 {
-	addGridData(defaultGrid); // +proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs
+	add(defaultGrid); // +proj=longlat +a=6367470.0 +towgs84=0,0,0 +no_defs
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -521,9 +450,9 @@ BOOST_FIXTURE_TEST_CASE(createsProjectionVariableRotatedLatLon, Wdb2CdmBuilderFi
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
 	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
-	addGridData(grid);
+	add(grid);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -543,9 +472,9 @@ BOOST_FIXTURE_TEST_CASE(createsProjectionVariableRotatedLatLon, Wdb2CdmBuilderFi
 
 BOOST_FIXTURE_TEST_CASE(createsVariablesForLatLonProjection, Wdb2CdmBuilderFixture)
 {
-	addGridData();
+	add();
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	BOOST_CHECK_THROW(cdm.getDimension("x"), CDMException);
@@ -583,9 +512,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForRotatedLatLonProjection, Wdb2CdmBuild
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
 	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
-	addGridData(grid);
+	add(grid);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	BOOST_CHECK_THROW(cdm.getDimension("x"), CDMException);
@@ -650,9 +579,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixtu
 {
 	const std::string projDefinition = "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +elips=sphere +a=6371000 +e=0";
 	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
-	addGridData(grid);
+	add(grid);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	BOOST_CHECK_THROW(cdm.getDimension("rlat"), CDMException);
@@ -714,9 +643,9 @@ BOOST_FIXTURE_TEST_CASE(createsVariablesForMetricProjection, Wdb2CdmBuilderFixtu
 
 BOOST_FIXTURE_TEST_CASE(setsReferenceTimeVariable, Wdb2CdmBuilderFixture)
 {
-	addGridData();
+	add();
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
@@ -736,16 +665,16 @@ BOOST_FIXTURE_TEST_CASE(setsReferenceTimeVariable, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes, Wdb2CdmBuilderFixture)
 {
-	addGridData();
+	add();
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
 	{
 		BOOST_CHECK_EQUAL("projection_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("1", cdm.getAttribute(cdmId(), "units").getStringValue());
-		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("K", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
 	}
 	catch ( CDMException & e )
 	{
@@ -759,16 +688,16 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)
 {
 	const std::string projDefinition = "+proj=ob_tran +o_proj=longlat +lon_0=-24 +o_lat_p=23.5 +a=6367470.0 +no_defs";
 	wdb::GridData::GridInformationPtr grid(wdb::GridInformation::get(projDefinition, 30, 20));
-	addGridData(grid);
+	add(grid);
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	try
 	{
 		BOOST_CHECK_EQUAL("projection_rotated_latitude_longitude", cdm.getAttribute(cdmId(), "grid_mapping").getStringValue());
-		BOOST_CHECK_EQUAL("1", cdm.getAttribute(cdmId(), "units").getStringValue());
-		BOOST_CHECK_EQUAL("0", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
+		BOOST_CHECK_EQUAL("K", cdm.getAttribute(cdmId(), "units").getStringValue());
+		BOOST_CHECK_EQUAL("nan", cdm.getAttribute(cdmId(), "_FillValue").getStringValue());
 		BOOST_CHECK_EQUAL("longitude latitude", cdm.getAttribute(cdmId(), "coordinates").getStringValue());
 	}
 	catch ( CDMException & e )
@@ -777,56 +706,24 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectParameterAttributes_2, Wdb2CdmBuilderFixture)
 	}
 }
 
-//BOOST_FIXTURE_TEST_CASE(timeIndexLoopkup, Wdb2CdmBuilderFixture)
-//{
-//	addGridData("2011-03-31 06:00:00");
-//	addGridData("2011-03-31 18:00:00");
-//	addGridData("2011-03-31 12:00:00");
-//	addGridData("2011-04-01 06:00:00");
-//
-//	const wdb::Wdb2CdmBuilder di(gridData, tr);
-//	di.populate(cdm);
-//
-//	wdb::Wdb2CdmBuilder::Time t = boost::posix_time::time_from_string("2011-03-31 06:00:00");
-//	boost::posix_time::time_duration offset(6, 0, 0);
-//	BOOST_CHECK_EQUAL(t, di.timeFromIndex(1));
-//	BOOST_CHECK_EQUAL(t + offset, di.timeFromIndex(2));
-//	BOOST_CHECK_EQUAL(t + (offset * 2), di.timeFromIndex(3));
-//	BOOST_CHECK_EQUAL(t + (offset * 4), di.timeFromIndex(4));
-//}
-//
-//BOOST_FIXTURE_TEST_CASE(throwOnInvalidTimeIndexLoopkup, Wdb2CdmBuilderFixture)
-//{
-//	addGridData("2011-03-31 06:00:00");
-//	addGridData("2011-03-31 18:00:00");
-//
-//	const wdb::Wdb2CdmBuilder di(gridData, tr);
-//	di.populate(cdm);
-//
-//	BOOST_CHECK_THROW(di.timeFromIndex(0), CDMException);
-//	di.timeFromIndex(1);
-//	di.timeFromIndex(2);
-//	BOOST_CHECK_THROW(di.timeFromIndex(3), CDMException);
-//}
-
 BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingTime, Wdb2CdmBuilderFixture)
 {
-	addGridData(wdb::Parameter("temperature", "C"), "2011-03-31 06:00:00", 0);
-	addGridData(wdb::Parameter("temperature", "C"), "2011-03-31 06:00:00", 1);
-	addGridData(wdb::Parameter("temperature", "C"), "2011-03-31 07:00:00", 0);
-	addGridData(wdb::Parameter("temperature", "C"), "2011-03-31 07:00:00", 1);
-	addGridData(wdb::Parameter("temperature", "C"), "2011-03-31 08:00:00", 0);
-	addGridData(wdb::Parameter("temperature", "C"), "2011-03-31 08:00:00", 1);
-	addGridData(wdb::Parameter("pressure", "pa"), "2011-03-31 06:00:00", 0);
-	addGridData(wdb::Parameter("pressure", "pa"), "2011-03-31 06:00:00", 1);
-	// addGridData(wdb::Parameter("pressure", "pa"), "2011-03-31 07:00:00", 0); // missing, but a missing gid entry should be added
-	addGridData(wdb::Parameter("pressure", "pa"), "2011-03-31 07:00:00", 1);
-	addGridData(wdb::Parameter("pressure", "pa"), "2011-03-31 08:00:00", 0);
-	addGridData(wdb::Parameter("pressure", "pa"), "2011-03-31 08:00:00", 1);
+	add(wdb::Parameter("temperature", "C"), "2011-03-31 06:00:00", 0);
+	add(wdb::Parameter("temperature", "C"), "2011-03-31 06:00:00", 1);
+	add(wdb::Parameter("temperature", "C"), "2011-03-31 07:00:00", 0);
+	add(wdb::Parameter("temperature", "C"), "2011-03-31 07:00:00", 1);
+	add(wdb::Parameter("temperature", "C"), "2011-03-31 08:00:00", 0);
+	add(wdb::Parameter("temperature", "C"), "2011-03-31 08:00:00", 1);
+	add(wdb::Parameter("pressure", "pa"), "2011-03-31 06:00:00", 0);
+	add(wdb::Parameter("pressure", "pa"), "2011-03-31 06:00:00", 1);
+	// add(wdb::Parameter("pressure", "pa"), "2011-03-31 07:00:00", 0); // missing, but a missing gid entry should be added
+	add(wdb::Parameter("pressure", "pa"), "2011-03-31 07:00:00", 1);
+	add(wdb::Parameter("pressure", "pa"), "2011-03-31 08:00:00", 0);
+	add(wdb::Parameter("pressure", "pa"), "2011-03-31 08:00:00", 1);
 
 	try
 	{
-		const wdb::Wdb2CdmBuilder di(gridData, tr);
+		const wdb::Wdb2CdmBuilder di(gridData(), tr);
 		di.populate(cdm);
 
 		const CDMDimension & timeDimension = cdm.getDimension("time");
@@ -848,14 +745,14 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingTime, Wdb2CdmBuilderFixture)
 
 BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingVersion, Wdb2CdmBuilderFixture)
 {
-	addGridData(0, "2011-03-31 06:00:00");
-	addGridData(1, "2011-03-31 06:00:00");
-	addGridData(2, "2011-03-31 06:00:00");
-	addGridData(0, "2011-03-31 18:00:00");
-	// addGridData(1, "2011-03-31 06:00:00"); // missing, but a missing gid entry should be added
-	addGridData(2, "2011-03-31 18:00:00");
+	add(0, "2011-03-31 06:00:00");
+	add(1, "2011-03-31 06:00:00");
+	add(2, "2011-03-31 06:00:00");
+	add(0, "2011-03-31 18:00:00");
+	// add(1, "2011-03-31 06:00:00"); // missing, but a missing gid entry should be added
+	add(2, "2011-03-31 18:00:00");
 
-	const wdb::Wdb2CdmBuilder di(gridData, tr);
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
 	const CDMDimension & timeDimension = cdm.getDimension("time");

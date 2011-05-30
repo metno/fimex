@@ -51,7 +51,7 @@ Wdb2CdmBuilder::Wdb2CdmBuilder(const std::vector<wdb::GridData> & data, const Gl
 	BOOST_FOREACH(const wdb::GridData & d, data)
 		grids_[d.parameter().name()] = d.gridInformation();
 
-	dataHandlers_.push_back(DataHandler::Ptr(new TimeHandler(index_, config_)));
+	dataHandlers_.push_back(DataHandler::Ptr(new TimeHandler(index_)));
 	dataHandlers_.push_back(DataHandler::Ptr(new LevelHandler(index_, config_)));
 	dataHandlers_.push_back(DataHandler::Ptr(new VersionHandler(index_)));
 	dataHandlers_.push_back(DataHandler::Ptr(new GridHandler(grids_)));

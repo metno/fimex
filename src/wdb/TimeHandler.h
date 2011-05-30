@@ -39,7 +39,6 @@ class Data;
 namespace wdb
 {
 class WdbIndex;
-class GlobalWdbConfiguration;
 
 
 /**
@@ -53,7 +52,7 @@ public:
 	/**
 	 * Times will be extracted and calculated from the given index object
 	 */
-	TimeHandler(const WdbIndex & index, const GlobalWdbConfiguration & config);
+	explicit TimeHandler(const WdbIndex & index);
 	~TimeHandler();
 
 	/**
@@ -77,7 +76,6 @@ private:
 	static const std::string validTimeName;
 
 	const WdbIndex & index_;
-	const GlobalWdbConfiguration & config_;
 };
 
 }
