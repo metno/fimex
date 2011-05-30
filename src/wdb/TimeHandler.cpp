@@ -87,6 +87,20 @@ void TimeHandler::addToCdm(CDM & cdm) const
 	cdm.addDimension(time);
 }
 
+namespace
+{
+std::time_t secondsSinceEpoch(const GridData::Time & time)
+{
+	using namespace boost::posix_time;
+
+	static const ptime epoch(boost::gregorian::date(1970,1,1));
+
+	time_duration duration = time - epoch;
+
+	return duration.total_seconds();
+}
+}
+
 boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
 	boost::shared_ptr<Data> ret;
@@ -100,19 +114,21 @@ boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_
 
 		int idx = 0;
 		for ( std::set<GridData::Time>::const_iterator it = referenceTimes.begin(); it != referenceTimes.end(); ++ it )
-		{
-			std::tm t = to_tm(* it);
-			ret->setValue(idx ++, std::mktime(& t));
-		}
+			ret->setValue(idx ++, secondsSinceEpoch(* it));
 	}
 	else if ( varName == validTimeName )
 	{
 		// fix time functions: TimeUnit.h
 		const std::set<wdb::GridData::Time> & allTimes = index_.allTimes();
 		std::set<wdb::GridData::Time>::const_iterator thisTime = allTimes.begin();
-		std::advance(thisTime, unLimDimPos -1);
-		std::tm t = to_tm(* thisTime);
-		ret = createData(CDM_DOUBLE, 1, std::mktime(& t));
+
+		if ( unLimDimPos > allTimes.size() )
+			throw CDMException("Invalid time index");
+
+		if ( unLimDimPos )
+			std::advance(thisTime, unLimDimPos -1);
+
+		ret = createData(CDM_DOUBLE, 1, secondsSinceEpoch(* thisTime));
 	}
 	else
 		throw CDMException("Unrecognized variable name for time: " + varName);

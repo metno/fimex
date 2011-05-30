@@ -35,9 +35,13 @@
 #include "GridDataFactory.h"
 #include <wdb/TimeHandler.h>
 #include <wdb/config/GlobalWdbConfiguration.h>
-#include <wdb/Wdb2CdmBuilder.h>
+//#include <wdb/Wdb2CdmBuilder.h>
 #include <wdb/WdbIndex.h>
 #include <fimex/CDM.h>
+#include <fimex/CDMException.h>
+#include <fimex/Data.h>
+
+#include <iostream>
 
 BOOST_AUTO_TEST_SUITE(TimeHandlerTest)
 
@@ -52,6 +56,15 @@ public:
 	MetNoFimex::CDM cdm;
 };
 
+namespace
+{
+GridData::Time timeFromData(const boost::shared_ptr<MetNoFimex::Data> & data)
+{
+	double time = data->asConstDouble()[0];
+	return boost::posix_time::from_time_t(time);
+}
+}
+
 BOOST_FIXTURE_TEST_CASE(timeIndexLoopkup, TimeHandlerFixture)
 {
 	add("2011-03-31 06:00:00");
@@ -59,15 +72,19 @@ BOOST_FIXTURE_TEST_CASE(timeIndexLoopkup, TimeHandlerFixture)
 	add("2011-03-31 12:00:00");
 	add("2011-04-01 06:00:00");
 
-	const Wdb2CdmBuilder di(gridData(), tr);
-	di.populate(cdm);
+	WdbIndex index(gridData());
+	TimeHandler timeHandler(index);
+	timeHandler.addToCdm(cdm);
 
-	Wdb2CdmBuilder::Time t = boost::posix_time::time_from_string("2011-03-31 06:00:00");
+	GridData::Time t = boost::posix_time::time_from_string("2011-03-31 06:00:00");
 	boost::posix_time::time_duration offset(6, 0, 0);
-//	BOOST_CHECK_EQUAL(t, di.timeFromIndex(1));
-//	BOOST_CHECK_EQUAL(t + offset, di.timeFromIndex(2));
-//	BOOST_CHECK_EQUAL(t + (offset * 2), di.timeFromIndex(3));
-//	BOOST_CHECK_EQUAL(t + (offset * 4), di.timeFromIndex(4));
+
+	const MetNoFimex::CDMVariable & timeVar = cdm.getVariable("time");
+
+	BOOST_CHECK_EQUAL(t,                timeFromData(timeHandler.getData(timeVar, 1)));
+	BOOST_CHECK_EQUAL(t + offset,       timeFromData(timeHandler.getData(timeVar, 2)));
+	BOOST_CHECK_EQUAL(t + (offset * 2), timeFromData(timeHandler.getData(timeVar, 3)));
+	BOOST_CHECK_EQUAL(t + (offset * 4), timeFromData(timeHandler.getData(timeVar, 4)));
 }
 
 BOOST_FIXTURE_TEST_CASE(throwOnInvalidTimeIndexLoopkup, TimeHandlerFixture)
@@ -75,13 +92,15 @@ BOOST_FIXTURE_TEST_CASE(throwOnInvalidTimeIndexLoopkup, TimeHandlerFixture)
 	add("2011-03-31 06:00:00");
 	add("2011-03-31 18:00:00");
 
-	const Wdb2CdmBuilder di(gridData(), tr);
-	di.populate(cdm);
+	WdbIndex index(gridData());
+	TimeHandler timeHandler(index);
+	timeHandler.addToCdm(cdm);
 
-	//BOOST_CHECK_THROW(di.timeFromIndex(0), CDMException);
-//	di.timeFromIndex(1);
-//	di.timeFromIndex(2);
-//	BOOST_CHECK_THROW(di.timeFromIndex(3), CDMException);
+	const MetNoFimex::CDMVariable & timeVar = cdm.getVariable("time");
+	//BOOST_CHECK_THROW(timeHandler.getData(timeVar, 0), MetNoFimex::CDMException);
+	timeHandler.getData(timeVar, 1);
+	timeHandler.getData(timeVar, 2);
+	BOOST_CHECK_THROW(timeHandler.getData(timeVar, 3), MetNoFimex::CDMException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
