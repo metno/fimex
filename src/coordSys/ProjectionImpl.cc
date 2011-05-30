@@ -173,7 +173,7 @@ std::string ProjectionImpl::toString() const
     std::ostringstream buffer;
     buffer << getName() << ":";
     vector<CDMAttribute> pars = getParameters();
-    sort(pars.begin(), pars.end(), CDMNameCompare());
+    stable_sort(pars.begin(), pars.end(), CDMNameCompare());
     for (vector<CDMAttribute>::const_iterator par = pars.begin(); par != pars.end(); ++par) {
         buffer << par->getName() << "=" << par->getStringValue() << ";";
     }
