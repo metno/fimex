@@ -323,6 +323,8 @@ CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& varName)
             return CoordinateAxis::Lon;
         if ( lcSName == "latitude" )
             return CoordinateAxis::Lat;
+        if ( lcSName == "forecast_reference_time" )
+            return CoordinateAxis::ReferenceTime;
         if ( lcSName == "projection_x_coordinate" ||
              lcSName == "grid_longitude" )
             return CoordinateAxis::GeoX;
