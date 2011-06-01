@@ -54,7 +54,14 @@ public:
      * @throw CDMException f varName doesn't exists
      */
     SliceBuilder(const CDM& cdm, const std::string& varName);
-    ~SliceBuilder();
+    /**
+     * Simple interface to create a slicebuilder. No checks are made if
+     * the created object is useful with any reader.
+     * @param dimNames names of dimensions
+     * @param dimSize maximum size of the dimensions
+     */
+    SliceBuilder(const std::vector<std::string>& dimNames, const std::vector<size_t>& dimSize);
+    virtual ~SliceBuilder();
     /**
      * set the start position and the size of the slice of that dimension
      * @param dimName name of the dimension to restrict
@@ -110,9 +117,10 @@ public:
      * in the order and size of the variables dimensions
      */
     const std::vector<size_t>& getMaxDimensionSizes() const {return maxSize_;}
-
-private:
+protected:
     size_t getDimPos(const std::string& dimName) const;
+private:
+    void init(const std::vector<std::string>& dimNames, const std::vector<std::size_t>& dimSize);
     // position of the dimension
     std::map<std::string, size_t> dimPos_;
     std::set<std::string> setDims_;

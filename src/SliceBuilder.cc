@@ -35,20 +35,37 @@ namespace MetNoFimex
 
 using namespace std;
 
+SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>& dimSize)
+{
+    init(dimNames, dimSize);
+}
+
 SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName)
 {
     const CDMVariable& var = cdm.getVariable(varName);
-    const vector<string>& shape = var.getShape();
-    start_.resize(shape.size());
-    size_.resize(shape.size());
-    maxSize_.resize(shape.size());
-    size_t pos = 0;
-    for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt, ++pos) {
+    vector<string> shape = var.getShape();
+    vector<size_t> dimSizes;
+    dimSizes.reserve(shape.size());
+    for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
         const CDMDimension& dim = cdm.getDimension(*dimIt);
-        dimPos_[dim.getName()] = pos;
+        dimSizes.push_back(dim.getLength());
+    }
+    init(shape, dimSizes);
+}
+
+void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& dimSize)
+{
+    if (dimNames.size() != dimSize.size()) {
+        throw CDMException("dimension mismatch in SliceBuilder::init");
+    }
+    start_.resize(dimNames.size());
+    size_.resize(dimNames.size());
+    maxSize_.resize(dimNames.size());
+    for (size_t pos = 0; pos < dimNames.size(); ++pos) {
+        dimPos_[dimNames.at(pos)] = pos;
         start_.at(pos) = 0;
-        size_.at(pos) = dim.getLength();
-        maxSize_.at(pos) = dim.getLength();
+        size_.at(pos) = dimSize[pos];
+        maxSize_.at(pos) = dimSize[pos];
     }
 }
 

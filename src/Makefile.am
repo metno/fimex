@@ -63,6 +63,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 ReplaceStringTimeObject.cc \
 					 SpatialAxisSpec.cc \
                      SliceBuilder.cc \
+                     ReferenceTimeSliceBuilder.cc \
 					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
 					 TimeSpec.cc \
