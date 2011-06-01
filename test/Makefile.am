@@ -9,6 +9,7 @@ CC_TESTS = testBinaryConstants \
            testUnits \
            testFileReaderFactory \
            testCDM \
+           testSliceBuilder \
            testXMLDoc \
            testFeltReader
 
@@ -53,6 +54,7 @@ testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc
+testSliceBuilder_SOURCES = testSliceBuilder.cc
 testProjections_SOURCES = testProjections.cc
 testCoordSys_SOURCES = testCoordSys.cc 
 testFeltReader_SOURCES = testFeltReader.cc

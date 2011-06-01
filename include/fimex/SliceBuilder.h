@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
@@ -73,6 +74,20 @@ public:
      */
     void setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size);
     /**
+     * Set the start to 0 and the size to the maximum size. Though this is the default
+     * this function will reset prevous reduced dimensions and it will mark the dimension as 'set'
+     * and not return it in getUnsetDimensionNames.
+     * @param axis name of the dimension to restrict
+     */
+    void setAll(const std::string& dimName);
+    /**
+     * Set the start to 0 and the size to the maximum size. Though this is the default
+     * this function will reset prevous reduced dimensions and it will mark the dimension as 'set'
+     * and not return it in getUnsetDimensionNames.
+     * @param axis name of the dimension to restrict, ignored if NULL
+     */
+    void setAll(const boost::shared_ptr<const CoordinateAxis>& axis);
+    /**
      * @return vector with start-positions of shape-size and order of the variable
      */
     const std::vector<size_t>& getDimensionStartPositions() const {return start_;}
@@ -86,6 +101,11 @@ public:
      */
     std::vector<std::string> getDimensionNames() const;
     /**
+     * @return vector with names of dimensions which have not been
+     *         set yet, (i.e. through setAll() or setStartAndSize()
+     */
+    std::vector<std::string> getUnsetDimensionNames() const;
+    /**
      * @return vector with maximum sizes of the dimenions of the variable
      * in the order and size of the variables dimensions
      */
@@ -95,6 +115,7 @@ private:
     size_t getDimPos(const std::string& dimName) const;
     // position of the dimension
     std::map<std::string, size_t> dimPos_;
+    std::set<std::string> setDims_;
     std::vector<size_t> maxSize_;
     std::vector<size_t> start_;
     std::vector<size_t> size_;

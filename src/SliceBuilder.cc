@@ -72,23 +72,54 @@ void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, si
     }
     start_.at(pos) = start;
     size_.at(pos) = size;
+    setDims_.insert(dimName);
 }
 
 void SliceBuilder::setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size)
 {
     if (axis.get() == 0) return;
-    setStartAndSize(axis->getName(), start, size);
+    if (axis->isExplicit()) {
+        setStartAndSize(axis->getName(), start, size);
+    } else {
+        throw CDMException("Cannot set implicit axis " + axis->getName() + " in SliceBuilder");
+    }
 }
 
+void SliceBuilder::setAll(const std::string & dimName)
+{
+    size_t pos = getDimPos(dimName);
+    setStartAndSize(dimName, 0, maxSize_.at(pos));
+}
+void SliceBuilder::setAll(const boost::shared_ptr<const CoordinateAxis>& axis)
+{
+    if (axis.get() == 0) return;
+    if (axis->isExplicit()) {
+        setAll(axis->getName());
+    } else {
+        throw CDMException("Cannot set implicit axis " + axis->getName() + " in SliceBuilder");
+    }
+}
 vector<string> SliceBuilder::getDimensionNames() const
 {
     vector<string> names;
     names.resize(dimPos_.size());
     for (map<string, size_t>::const_iterator posIt = dimPos_.begin(); posIt != dimPos_.end(); ++posIt) {
-       names.at(posIt->second) = posIt->first;
+        names.at(posIt->second) = posIt->first;
     }
     return names;
 }
 
+vector<string> SliceBuilder::getUnsetDimensionNames() const
+{
+    vector<string> names;
+    names.reserve(dimPos_.size());
+    for (map<string, size_t>::const_iterator posIt = dimPos_.begin(); posIt != dimPos_.end(); ++posIt) {
+        if (setDims_.find(posIt->first) == setDims_.end()) { // not set
+            names.push_back(posIt->first);
+        }
+    }
+    return names;
+
+}
 
 }

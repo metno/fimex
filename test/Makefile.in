@@ -88,9 +88,9 @@ am__EXEEXT_9 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testData$(EXEEXT) testProjections$(EXEEXT) \
 	testInterpolation$(EXEEXT) testUnits$(EXEEXT) \
 	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
-	testXMLDoc$(EXEEXT) testFeltReader$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) $(am__EXEEXT_4) $(am__EXEEXT_7) \
-	$(am__EXEEXT_8)
+	testSliceBuilder$(EXEEXT) testXMLDoc$(EXEEXT) \
+	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_4) $(am__EXEEXT_7) $(am__EXEEXT_8)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
@@ -175,6 +175,12 @@ am_testQualityExtractor_OBJECTS = testQualityExtractor.$(OBJEXT)
 testQualityExtractor_OBJECTS = $(am_testQualityExtractor_OBJECTS)
 testQualityExtractor_LDADD = $(LDADD)
 testQualityExtractor_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
+am_testSliceBuilder_OBJECTS = testSliceBuilder.$(OBJEXT)
+testSliceBuilder_OBJECTS = $(am_testSliceBuilder_OBJECTS)
+testSliceBuilder_LDADD = $(LDADD)
+testSliceBuilder_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
 am_testSpatialAxisSpec_OBJECTS = testSpatialAxisSpec.$(OBJEXT)
@@ -269,10 +275,11 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
 	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
-	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
-	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
+	$(testSliceBuilder_SOURCES) $(testSpatialAxisSpec_SOURCES) \
+	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
+	$(testUnits_SOURCES) $(testUtils_SOURCES) \
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
+	$(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) $(testData_SOURCES) \
 	$(testExtractor_SOURCES) $(testFeltReader_SOURCES) \
@@ -280,10 +287,11 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testNetcdfWriter_SOURCES) \
 	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
-	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
-	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
+	$(testSliceBuilder_SOURCES) $(testSpatialAxisSpec_SOURCES) \
+	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
+	$(testUnits_SOURCES) $(testUtils_SOURCES) \
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
+	$(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -443,9 +451,9 @@ top_srcdir = @top_srcdir@
 CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt
 CC_TESTS = testBinaryConstants testUtils testTimeSpec \
 	testSpatialAxisSpec testData testProjections testInterpolation \
-	testUnits testFileReaderFactory testCDM testXMLDoc \
-	testFeltReader $(am__append_2) $(am__append_3) $(am__append_4) \
-	$(am__append_6) $(am__append_7)
+	testUnits testFileReaderFactory testCDM testSliceBuilder \
+	testXMLDoc testFeltReader $(am__append_2) $(am__append_3) \
+	$(am__append_4) $(am__append_6) $(am__append_7)
 SH_TESTS = $(am__append_5)
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_1) \
@@ -477,6 +485,7 @@ testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
 testCDM_SOURCES = testCDM.cc
+testSliceBuilder_SOURCES = testSliceBuilder.cc
 testProjections_SOURCES = testProjections.cc
 testCoordSys_SOURCES = testCoordSys.cc 
 testFeltReader_SOURCES = testFeltReader.cc
@@ -576,6 +585,9 @@ testProjections$(EXEEXT): $(testProjections_OBJECTS) $(testProjections_DEPENDENC
 testQualityExtractor$(EXEEXT): $(testQualityExtractor_OBJECTS) $(testQualityExtractor_DEPENDENCIES) 
 	@rm -f testQualityExtractor$(EXEEXT)
 	$(CXXLINK) $(testQualityExtractor_OBJECTS) $(testQualityExtractor_LDADD) $(LIBS)
+testSliceBuilder$(EXEEXT): $(testSliceBuilder_OBJECTS) $(testSliceBuilder_DEPENDENCIES) 
+	@rm -f testSliceBuilder$(EXEEXT)
+	$(CXXLINK) $(testSliceBuilder_OBJECTS) $(testSliceBuilder_LDADD) $(LIBS)
 testSpatialAxisSpec$(EXEEXT): $(testSpatialAxisSpec_OBJECTS) $(testSpatialAxisSpec_DEPENDENCIES) 
 	@rm -f testSpatialAxisSpec$(EXEEXT)
 	$(CXXLINK) $(testSpatialAxisSpec_OBJECTS) $(testSpatialAxisSpec_LDADD) $(LIBS)
@@ -621,6 +633,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetcdfWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testProjections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testQualityExtractor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testSliceBuilder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testSpatialAxisSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeInterpolator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSpec.Po@am__quote@
