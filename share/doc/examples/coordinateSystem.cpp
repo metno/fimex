@@ -1,14 +1,19 @@
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/ReferenceTimeSliceBuilder.h"
 #include "fimex/NetCDF_CDMReader.h"
+
+using namespace MetNoFimex;
+using namespace std;
 
 int main(int argc, char* args[]) {
     boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader("coordTest.nc"));
+    //boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader("coordRefTimeTest.nc"));
     const CDM& cdm = reader->getCDM();
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
     // find an appropriate coordinate system for a variable
-    string varName = "altitude";
+    string varName = "air_temperature";
     vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
             find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt != coordSys.end()) {
@@ -16,16 +21,39 @@ int main(int argc, char* args[]) {
             CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
             CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
             CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
-            // create a slice-builder for the variable
-            // the slicebuilder starts with the maximum variable size
-            SliceBuilder sb(cdm, altitude);
+
+            ReferenceTimeSliceBuilder sb(cdm, varName, *varSysIt);
+            // handling of time
+            if (tAxis.get() != 0) {
+                // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
+                if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
+                    CoordinateSystem::ConstAxisPtr rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
+                    boost::shared_ptr<Data> refTimes = reader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
+                    /* do something with the refTimes and select the wanted Position */
+                    size_t refTimePos = 3; /* or whatever you select between 0 (default) and refTimes->size()-1 */
+                    sb.setReferenceTimePos(refTimePos);
+                }
+                boost::shared_ptr<Data> times = reader->getDataSlice(tAxis->getName(), sb.getTimeVariableSliceBuilder());
+                /* select the desired startTime and the sice for the time-slices */
+                // fetch the 2nd and 3rd time-step of the 4th run
+                sb.setTimeStartAndSize(1, 2); // default is all of ReferenceTimePos
+            }
+
+
+            // further selection of data
             // select 3-7 y-points
             sb.setStartAndSize(yAxis, 3, 5);
-            // select the 2nd time slice
-            sb.setStartAndSize(tAxis, 2, 2);
+            sb.setAll(xAxis);
+
+            // by default, all other dimensions are fetched at maximum size
+            // here, I reduce them to the first slice
+            vector<string> dims = sb.getUnsetDimensionNames();
+            for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
+                sb.setStartAndSize(*dim, 0, 1);
+            }
 
             // fetch the data
-            boost::shared_ptr<Data> data = reader->getDataSlice(altitude, sb);
+            boost::shared_ptr<Data> data = reader->getDataSlice(varName, sb);
             /* do something with the data */
         }
     }
