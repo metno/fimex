@@ -554,7 +554,6 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystemsCF1
                         std::string varName = mappingAttr.getStringValue();
                         if (cdm.hasVariable(varName)) {
                             boost::shared_ptr<Projection> proj = Projection::create(cdm.getAttributes(varName));
-                            cerr << "Proj:" << *proj << endl;
                             cs.setProjection(proj);
                         }
                     } else {
