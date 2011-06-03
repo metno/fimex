@@ -30,6 +30,7 @@
 #define TIMEHANDLER_H_
 
 #include "DataHandler.h"
+#include "database_access/GridData.h"
 
 namespace MetNoFimex
 {
@@ -71,7 +72,16 @@ public:
 	 */
 	bool canHandle(const std::string & wdbName) const;
 
+	enum Dimension
+	{
+		ReferenceTime, ValidTime, Other
+	};
+	Dimension unlimitedDimension() const;
+
+
 private:
+	GridData::Time getReferenceTime(size_t unLimDimPos) const;
+
 	static const std::string referenceTimeName;
 	static const std::string validTimeName;
 
@@ -79,7 +89,6 @@ private:
 };
 
 }
-
 }
 
 #endif /* TIMEHANDLER_H_ */

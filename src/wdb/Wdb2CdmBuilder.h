@@ -120,7 +120,7 @@ public:
 	/**
 	 * Get a list of all times in use
 	 */
-	std::set<GridData::Time> allTimes() const
+	std::set<GridData::Duration> allTimes() const
 	{
 		return index_.allTimes();
 	}

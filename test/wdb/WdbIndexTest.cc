@@ -62,7 +62,7 @@ BOOST_FIXTURE_TEST_CASE(requestFirstTimeEntry, WdbIndexTestFixture)
 	add("2011-04-06 07:00:00");
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
 
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(0, gids.front());
@@ -74,7 +74,7 @@ BOOST_FIXTURE_TEST_CASE(requestSecondTimeEntry, WdbIndexTestFixture)
 	add("2011-04-06 07:00:00");
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 2);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
 
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(1, gids.front());
@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_CASE(throwsOnInvalidTimeIndex, WdbIndexTestFixture)
 {
 	add("2011-04-06 06:00:00");
 	WdbIndex index(gridData());
-	BOOST_CHECK_THROW(index.getData(defaultParameter.name(), 2), CDMException);
+	BOOST_CHECK_THROW(index.getData(defaultParameter.name(), 1), CDMException);
 }
 
 BOOST_FIXTURE_TEST_CASE(throwOnRequestForNonexistingParameter, WdbIndexTestFixture)
@@ -100,7 +100,7 @@ BOOST_FIXTURE_TEST_CASE(throwOnRequestForNonexistingParameter, WdbIndexTestFixtu
 	add(Parameter("pressure", "hp"));
 	WdbIndex index(gridData());
 
-	BOOST_CHECK_THROW(index.getData("no such parameter", 1), CDMException);
+	BOOST_CHECK_THROW(index.getData("no such parameter", 0), CDMException);
 }
 
 BOOST_FIXTURE_TEST_CASE(selectSingleParameter, WdbIndexTestFixture)
@@ -109,11 +109,11 @@ BOOST_FIXTURE_TEST_CASE(selectSingleParameter, WdbIndexTestFixture)
 	add(Parameter("pressure", "hp"));
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData("temperature", 1);
+	WdbIndex::GidList gids = index.getData("temperature", 0);
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(0, gids.front());
 
-	gids = index.getData("pressure", 1);
+	gids = index.getData("pressure", 0);
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(1, gids.front());
 }
@@ -128,7 +128,7 @@ BOOST_FIXTURE_TEST_CASE(selectParameterWithMissingTimeEntry, WdbIndexTestFixture
 	add(Parameter("pressure", "hp"), "2011-04-06 08:00:00");
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData("pressure", 2);
+	WdbIndex::GidList gids = index.getData("pressure", 1);
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids.front());
 }
@@ -156,7 +156,7 @@ BOOST_FIXTURE_TEST_CASE(parameterWithUniqueTime, WdbIndexTestFixture)
 //	add(Parameter("terrain height", "m"), "1900-01-01 00:00:00");
 //	WdbIndex index(gridData());
 //
-//	WdbIndex::GidList gids = index.getData("temperature", 1);
+//	WdbIndex::GidList gids = index.getData("temperature", 0);
 //	BOOST_REQUIRE_EQUAL(1, gids.size());
 //	BOOST_CHECK_EQUAL(0, gids.front());
 }
@@ -169,7 +169,7 @@ BOOST_FIXTURE_TEST_CASE(getLevels, WdbIndexTestFixture)
 	add(Level("height", "m", 2, 2));
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
 
 	BOOST_REQUIRE_EQUAL(3, gids.size());
 	BOOST_CHECK_EQUAL(0, gids[0]);
@@ -183,7 +183,7 @@ BOOST_FIXTURE_TEST_CASE(twoLevelsComingInWrongOrder, WdbIndexTestFixture)
 	add(Level("height", "m", 0, 0));
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
 
 	BOOST_REQUIRE_EQUAL(2, gids.size());
 	BOOST_CHECK_EQUAL(1, gids[0]);
@@ -201,7 +201,7 @@ BOOST_FIXTURE_TEST_CASE(getMissingLevels, WdbIndexTestFixture)
 	add(Level("height", "m", 2, 2), "2011-04-06 07:00:00");
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
 
 	BOOST_REQUIRE_EQUAL(3, gids.size());
 	BOOST_CHECK_EQUAL(0, gids[0]);
@@ -226,7 +226,7 @@ BOOST_FIXTURE_TEST_CASE(getMissingLevelsForMissingTimes, WdbIndexTestFixture)
 
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
 
 	BOOST_REQUIRE_EQUAL(3, gids.size());
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids[0]);
@@ -241,7 +241,7 @@ BOOST_FIXTURE_TEST_CASE(separatesSeveralTypesOfLevels, WdbIndexTestFixture)
 	add(Parameter("temperature", "C"), Level("whatever", "m", 0, 0));
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData("pressure", 1);
+	WdbIndex::GidList gids = index.getData("pressure", 0);
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(0, gids.front());
 }
@@ -263,7 +263,7 @@ BOOST_FIXTURE_TEST_CASE(onlyOneLevelWhenAllEntriesHaveOneLevel, WdbIndexTestFixt
 	add(Parameter("wind speed", "m/s"), Level("height", "m", 10, 10));
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData("wind speed", 1);
+	WdbIndex::GidList gids = index.getData("wind speed", 0);
 
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(3, gids.front());
@@ -281,7 +281,7 @@ BOOST_FIXTURE_TEST_CASE(onlyOneMissingLevelWhenAllEntriesHaveOneLevel, WdbIndexT
 	add(Parameter("wind speed", "m/s"), Level("height", "m", 10, 10), "2011-04-03 06:00:00");
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData("wind speed", 1);
+	WdbIndex::GidList gids = index.getData("wind speed", 0);
 
 	BOOST_REQUIRE_EQUAL(1, gids.size());
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids.front());
@@ -306,7 +306,7 @@ BOOST_FIXTURE_TEST_CASE(missingVersions, WdbIndexTestFixture)
 	add(0, "2011-04-07 07:00:00");
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 2);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
 	BOOST_REQUIRE_EQUAL(2, gids.size());
 	BOOST_CHECK_EQUAL(2, gids[0]);
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids[1]);
@@ -323,7 +323,7 @@ BOOST_FIXTURE_TEST_CASE(missingTimeStepWithManyVersions, WdbIndexTestFixture)
 
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData("pressure", 3);
+	WdbIndex::GidList gids = index.getData("pressure", 2);
 	BOOST_REQUIRE_EQUAL(2, gids.size());
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids[0]);
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids[1]);
@@ -332,16 +332,38 @@ BOOST_FIXTURE_TEST_CASE(missingTimeStepWithManyVersions, WdbIndexTestFixture)
 
 BOOST_FIXTURE_TEST_CASE(manyReferenceTimes, WdbIndexTestFixture)
 {
-	add("2011-04-07 06:00:00", "2011-04-06 06:00:00");
+	add("2011-04-06 06:00:00", "2011-04-06 06:00:00");
 	add("2011-04-07 06:00:00", "2011-04-07 06:00:00");
 
-	//BOOST_CHECK_THROW(WdbIndex index(gridData()), CDMException);
 	WdbIndex index(gridData());
 
-	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
+	BOOST_REQUIRE_EQUAL(1, gids.size());
+	BOOST_CHECK_EQUAL(0, gids[0]);
+
+	gids = index.getData(defaultParameter.name(), 1);
+	BOOST_REQUIRE_EQUAL(1, gids.size());
+	BOOST_CHECK_EQUAL(1, gids[0]);
+}
+
+BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, WdbIndexTestFixture)
+{
+	add("2011-04-06 06:00:00", "2011-04-06 06:00:00");
+	add("2011-04-07 06:00:00", "2011-04-06 06:00:00");
+	add("2011-04-07 06:00:00", "2011-04-07 06:00:00");
+	add("2011-04-08 06:00:00", "2011-04-07 06:00:00");
+
+	WdbIndex index(gridData());
+
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 0);
 	BOOST_REQUIRE_EQUAL(2, gids.size());
 	BOOST_CHECK_EQUAL(0, gids[0]);
 	BOOST_CHECK_EQUAL(1, gids[1]);
+
+	gids = index.getData(defaultParameter.name(), 1);
+	BOOST_REQUIRE_EQUAL(2, gids.size());
+	BOOST_CHECK_EQUAL(2, gids[0]);
+	BOOST_CHECK_EQUAL(3, gids[1]);
 }
 
 

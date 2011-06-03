@@ -57,6 +57,7 @@ public:
 	~GridData();
 
 	typedef boost::posix_time::ptime Time;
+	typedef boost::posix_time::time_duration Duration;
 	typedef boost::shared_ptr<GridInformation> GridInformationPtr;
 	typedef long long gid;
 
@@ -80,10 +81,17 @@ public:
 	 */
 	const Time & validTo() const { return validTo_; };
 
+	Duration validTimeRelativeToReferenceTime() const
+	{
+		return validTo() - referenceTime();
+	}
+
 	/**
 	 * Get reference time, also called run time for model.
 	 */
 	const Time & referenceTime() const { return referenceTime_; }
+
+
 
 	/**
 	 * Get a name for the grid the data is valid for

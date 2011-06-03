@@ -79,7 +79,7 @@ public:
 	/**
 	 * Get all data for the given parameter and timestep
 	 */
-	GidList getData(const std::string & parameter, unsigned timeIndex) const;
+	GidList getData(const std::string & parameter, unsigned ) const;
 
 	/**
 	 * Get a list of all parameters that are stored here
@@ -94,12 +94,12 @@ public:
 	/**
 	 * Get a list of all times that are in use.
 	 */
-	std::set<GridData::Time> allTimes() const;
+	std::set<GridData::Duration> allTimes() const;
 
 	/**
 	 * Get all available times for the given parameter
 	 */
-	std::set<GridData::Time> timesForParameter(const std::string & parameter) const;
+	std::set<GridData::Duration> timesForParameter(const std::string & parameter) const;
 
 	bool hasLevel(const std::string & wdbName) const
 	{
@@ -133,17 +133,22 @@ public:
 	 */
 	std::set<GridData::Time> referenceTimes() const;
 
+	std::set<GridData::Time> referenceTimesForParameter(const std::string & parameter) const;
+
 private:
 
 	typedef std::map<int, gid> VersionEntry;
 	typedef std::map<Level, VersionEntry> LevelEntry;
-	typedef std::map<GridData::Time, LevelEntry> ReferenceTimeEntry;
-	typedef std::map<GridData::Time, ReferenceTimeEntry> ValidTimeEntry;
-	typedef std::map<Parameter, ValidTimeEntry> Data;
+	typedef std::map<GridData::Duration, LevelEntry> ValidTimeEntry;
+	typedef std::map<GridData::Time, ValidTimeEntry> ReferenceTimeEntry;
+	typedef std::map<Parameter, ReferenceTimeEntry> Data;
 
 	Data entries;
 
 	std::map<std::string, std::set<float> > levels_;
+	std::set<GridData::Duration> allValidtimes_;
+	std::set<GridData::Time> allReferenceTimes_;
+
 };
 
 }

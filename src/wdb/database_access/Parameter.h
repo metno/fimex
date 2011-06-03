@@ -32,6 +32,7 @@
 #include "fimex/CDMVariable.h"
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 
 
@@ -83,6 +84,8 @@ inline bool operator < (const Parameter & a, const Parameter & b)
 {
 	return a.name() < b.name();
 }
+
+std::ostream & operator << (std::ostream & s, const Parameter & p);
 
 }
 

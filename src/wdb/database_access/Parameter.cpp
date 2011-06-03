@@ -28,6 +28,7 @@
 
 #include "Parameter.h"
 #include "fimex/CDMAttribute.h"
+#include <istream>
 
 namespace MetNoFimex
 {
@@ -48,18 +49,10 @@ Parameter::~Parameter()
 {
 }
 
-//CDMVariable Parameter::getVariable(const std::vector<std::string> & dimensions) const
-//{
-//	// lag frittstående oversetterfunksjoner eller noe...
-//	CDMVariable parameter(toCdmName(parameter), CDM_FLOAT, dimensions);
-//
-//	CDMAttribute unit("units", unit());
-//
-//
-//
-//	return parameter;
-//}
-
+std::ostream & operator << (std::ostream & s, const Parameter & p)
+{
+	return s << p.name() << " (" << p.unit() << ")";
+}
 
 }
 }

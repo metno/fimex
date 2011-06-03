@@ -43,44 +43,30 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 {
 	std::set<int> allVersions;
 	std::set<Level> allLevels;
-	std::set<GridData::Time> allReferenceTimes;
-	std::set<GridData::Time> allValidTimes;
 	std::map<Parameter, LevelType> levelsForParameter;
 
 	// First, pass through all data, and store it in structure
 	BOOST_FOREACH(const GridData & d, data)
 	{
-#if 1
 		VersionEntry & ve = entries
 				[d.parameter()]
-				 [d.validTo()]
-				  [d.referenceTime()]
+				 [d.referenceTime()]
+				  [d.validTo() - d.referenceTime()]
 				   [d.level()];
 
 		if ( ve.find(d.version()) != ve.end() )
 			throw CDMException("Duplicate data in data set!");
 
 		ve[d.version()] = d.gridIdentifier();
-#else
-		gid & gridId = entries
-		[d.parameter()]
-		 [d.validTo()]
-		  [d.referenceTime()]
-		   [d.level()]
-		    [d.version()];
 
-		if ( gridId > 0 ) // This may fail if a real gid is 0
-			throw CDMException("Duplicate data in data set");
-		gridId = d.gridIdentifier();
-#endif
 		// temp variables
 		allVersions.insert(d.version());
 		allLevels.insert(d.level());
-		allReferenceTimes.insert(d.referenceTime());
-		allValidTimes.insert(d.validTo());
 
-		// Levels overview
+		allValidtimes_.insert(d.validTo() - d.referenceTime());
+		allReferenceTimes_.insert(d.referenceTime());
 		levels_[d.level().type().name()].insert(d.level().to());
+
 
 		// Veryfy that each parameter has only one level
 		std::map<Parameter, LevelType>::const_iterator find = levelsForParameter.find(d.parameter());
@@ -93,21 +79,21 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 	// then; fill in missing entries
 	for ( Data::iterator it = entries.begin(); it != entries.end(); ++ it )
 	{
-		ValidTimeEntry & validTimeEntry = it->second;
+		ReferenceTimeEntry & referenceTimeEntry = it->second;
 
 		// Locate all existing entries of each type for each dimension
-		std::set<GridData::Time> validTimes;
 		std::set<GridData::Time> referenceTimes;
+		std::set<GridData::Duration> validTimes;
 		std::set<Level> levels;
 		std::set<int> versions;
-		for ( ValidTimeEntry::const_iterator validTime = validTimeEntry.begin(); validTime != validTimeEntry.end(); ++ validTime )
+		for ( ReferenceTimeEntry::const_iterator referenceTime = referenceTimeEntry.begin(); referenceTime != referenceTimeEntry.end(); ++ referenceTime )
 		{
-			validTimes.insert(validTime->first);
-			const ReferenceTimeEntry & referenceTimeEntry = validTime->second;
-			for ( ReferenceTimeEntry::const_iterator referenceTime = referenceTimeEntry.begin(); referenceTime != referenceTimeEntry.end(); ++ referenceTime )
+			referenceTimes.insert(referenceTime->first);
+			const ValidTimeEntry & validTimeEntry = referenceTime->second;
+			for ( ValidTimeEntry::const_iterator validTime = validTimeEntry.begin(); validTime != validTimeEntry.end(); ++ validTime )
 			{
-				referenceTimes.insert(referenceTime->first);
-				const LevelEntry & levelEntry = referenceTime->second;
+				validTimes.insert(validTime->first);
+				const LevelEntry & levelEntry = validTime->second;
 				for ( LevelEntry::const_iterator level = levelEntry.begin(); level != levelEntry.end(); ++ level )
 				{
 					levels.insert(level->first);
@@ -118,33 +104,33 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 			}
 		}
 
-		// Entries with more than one valid time should hav all valid times available, no matter what
-		if ( validTimes.size() > 1 )
+		// Entries with more than one reference time should have all reference times available
+		if ( referenceTimes.size() > 1 )
 		{
-			BOOST_FOREACH( const GridData::Time & t, allValidTimes )
-				validTimeEntry[t];
+			BOOST_FOREACH( const GridData::Time & t, allReferenceTimes_ )
+				referenceTimeEntry[t];
 		}
 
-		for ( ValidTimeEntry::iterator validTime = validTimeEntry.begin(); validTime != validTimeEntry.end(); ++ validTime )
+		for ( ReferenceTimeEntry::iterator referenceTime = referenceTimeEntry.begin(); referenceTime != referenceTimeEntry.end(); ++ referenceTime )
 		{
-			ReferenceTimeEntry & referenceTimeEntry = validTime->second;
-			if (referenceTimes.size() > 1 )
-			{
-				BOOST_FOREACH( const GridData::Time & t, allReferenceTimes )
-					referenceTimeEntry[t];
-			}
+			ValidTimeEntry & validTimeEntry = referenceTime->second;
+			if (validTimes.size() > 1 )
+				BOOST_FOREACH( const GridData::Duration & d, allValidtimes_ )
+					validTimeEntry[d];
 			else
-				referenceTimeEntry[* referenceTimes.begin()];
+				validTimeEntry[* validTimes.begin()];
 
-			for ( ReferenceTimeEntry::iterator referenceTime = referenceTimeEntry.begin(); referenceTime != referenceTimeEntry.end(); ++ referenceTime )
+			for ( ValidTimeEntry::iterator validTime = validTimeEntry.begin(); validTime != validTimeEntry.end(); ++ validTime )
 			{
-				LevelEntry & levelEntry = referenceTime->second;
+				LevelEntry & levelEntry = validTime->second;
 				if ( levels.size() > 1 )
 				{
 					const LevelType & lvlType = levels.begin()->type();
 					BOOST_FOREACH( const Level & l, allLevels )
+					{
 						if ( l.type() == lvlType )
 							levelEntry[l];
+					}
 				}
 				else
 					levelEntry[* levels.begin()];
@@ -170,7 +156,7 @@ WdbIndex::~WdbIndex()
 {
 }
 
-WdbIndex::GidList WdbIndex::getData(const std::string & parameter, unsigned timeIndex) const
+WdbIndex::GidList WdbIndex::getData(const std::string & parameter, unsigned unLimDimPos) const
 {
 	GidList ret;
 
@@ -179,18 +165,29 @@ WdbIndex::GidList WdbIndex::getData(const std::string & parameter, unsigned time
 	if ( p == entries.end() )
 		throw CDMException(parameter + ": no such parameter");
 
-	if ( p->second.size() < timeIndex )
-		throw CDMException("Invalid time index");
+	ReferenceTimeEntry::const_iterator rt = p->second.begin();
+	if ( allReferenceTimes_.size() > 1 )
+	{
+		if ( p->second.size() <= unLimDimPos )
+			throw CDMException("Invalid time index");
+		std::advance(rt, unLimDimPos);
+		for ( ValidTimeEntry::const_iterator v = rt->second.begin(); v != rt->second.end(); ++ v )
+			for ( LevelEntry::const_iterator l = v->second.begin(); l != v->second.end(); ++ l )
+				for ( VersionEntry::const_iterator ver = l->second.begin(); ver != l->second.end(); ++ ver)
+					ret.push_back(ver->second);
+	}
+	else
+	{
+		if ( rt->second.size() <= unLimDimPos )
+			throw CDMException("Invalid time index");
 
-	ValidTimeEntry::const_iterator v = p->second.begin();
 
-	if ( timeIndex > 1)
-		std::advance(v, timeIndex -1);
-
-	for ( ReferenceTimeEntry::const_iterator r = v->second.begin(); r != v->second.end(); ++ r )
-		for ( LevelEntry::const_iterator l = r->second.begin(); l != r->second.end(); ++ l )
+		ValidTimeEntry::const_iterator v = rt->second.begin();
+		std::advance(v, unLimDimPos);
+		for ( LevelEntry::const_iterator l = v->second.begin(); l != v->second.end(); ++ l )
 			for ( VersionEntry::const_iterator ver = l->second.begin(); ver != l->second.end(); ++ ver)
 				ret.push_back(ver->second);
+	}
 
 	return ret;
 }
@@ -214,25 +211,22 @@ const std::string & WdbIndex::unitForParameter(const std::string & parameter) co
 	return find->first.unit();
 }
 
-std::set<GridData::Time> WdbIndex::allTimes() const
+std::set<GridData::Duration> WdbIndex::allTimes() const
 {
-	std::set<GridData::Time> t;
-	for ( Data::const_iterator it = entries.begin(); it != entries.end(); ++ it )
-		for ( ValidTimeEntry::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++ it2 )
-			t.insert(it2->first);
-	return t;
+	return allValidtimes_;
 }
 
-std::set<GridData::Time> WdbIndex::timesForParameter(const std::string & parameter) const
+std::set<GridData::Duration> WdbIndex::timesForParameter(const std::string & parameter) const
 {
-	std::set<GridData::Time> t;
+	std::set<GridData::Duration> t;
 
 	Data::const_iterator find = entries.find(parameter);
 	if ( find == entries.end() )
 		throw CDMException(parameter + ": no such parameter");
 
-	for ( ValidTimeEntry::const_iterator it2 = find->second.begin(); it2 != find->second.end(); ++ it2 )
-		t.insert(it2->first);
+	for ( ReferenceTimeEntry::const_iterator it2 = find->second.begin(); it2 != find->second.end(); ++ it2 )
+		for ( ValidTimeEntry::const_iterator it3 = it2->second.begin(); it3 != it2->second.end(); ++ it3 )
+			t.insert(it3->first);
 	return t;
 }
 
@@ -242,8 +236,8 @@ const LevelType & WdbIndex::levelTypeForParameter(const std::string & parameter)
 	if ( p == entries.end() )
 		throw CDMException(parameter + ": no such parameter");
 
-	ValidTimeEntry::const_iterator v = p->second.begin();
-	ReferenceTimeEntry::const_iterator r = v->second.begin();
+	ReferenceTimeEntry::const_iterator v = p->second.begin();
+	ValidTimeEntry::const_iterator r = v->second.begin();
 	LevelEntry::const_iterator l = r->second.begin();
 	const Level & lvl = l->first;
 	return lvl.type();
@@ -258,8 +252,8 @@ std::set<float> WdbIndex::levelsForParameter(const std::string & parameter) cons
 	if ( p == entries.end() )
 		throw CDMException(parameter + ": no such parameter");
 
-	ValidTimeEntry::const_iterator v = p->second.begin();
-	ReferenceTimeEntry::const_iterator r = v->second.begin();
+	ReferenceTimeEntry::const_iterator v = p->second.begin();
+	ValidTimeEntry::const_iterator r = v->second.begin();
 
 	// All level entries are equal in structure, so we only have to find one for the given parameter
 
@@ -277,8 +271,8 @@ std::set<int> WdbIndex::versionsForParameter(const std::string & parameter) cons
 	if ( p == entries.end() )
 		throw CDMException(parameter + ": no such parameter");
 
-	ValidTimeEntry::const_iterator v = p->second.begin();
-	ReferenceTimeEntry::const_iterator r = v->second.begin();
+	ReferenceTimeEntry::const_iterator v = p->second.begin();
+	ValidTimeEntry::const_iterator r = v->second.begin();
 	LevelEntry::const_iterator l = r->second.begin();
 
 	for ( VersionEntry::const_iterator ver = l->second.begin(); ver != l->second.end(); ++ ver )
@@ -303,14 +297,21 @@ std::set<float> WdbIndex::getLevelValues(const std::string & levelName) const
 
 std::set<GridData::Time> WdbIndex::referenceTimes() const
 {
-	std::set<GridData::Time> ret;
+	return allReferenceTimes_;
+}
 
-	Data::const_iterator p = entries.begin();
-	ValidTimeEntry::const_iterator v = p->second.begin();
-	for ( ReferenceTimeEntry::const_iterator r = v->second.begin(); r != v->second.end(); ++ r )
-		ret.insert(r->first);
+std::set<GridData::Time> WdbIndex::referenceTimesForParameter(const std::string & parameter) const
+{
+	std::set<GridData::Time> t;
 
-	return ret;
+	Data::const_iterator find = entries.find(parameter);
+	if ( find == entries.end() )
+		throw CDMException(parameter + ": no such parameter");
+
+	for ( ReferenceTimeEntry::const_iterator it2 = find->second.begin(); it2 != find->second.end(); ++ it2 )
+		t.insert(it2->first);
+
+	return t;
 }
 
 }
