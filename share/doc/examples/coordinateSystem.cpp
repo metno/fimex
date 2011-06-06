@@ -1,5 +1,5 @@
 #include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/ReferenceTimeSliceBuilder.h"
+#include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/NetCDF_CDMReader.h"
 
 using namespace MetNoFimex;
@@ -22,7 +22,7 @@ int main(int argc, char* args[]) {
             CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
             CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
 
-            ReferenceTimeSliceBuilder sb(cdm, varName, *varSysIt);
+            CoordinateSystemSliceBuilder sb(cdm, *varSysIt);
             // handling of time
             if (tAxis.get() != 0) {
                 // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time

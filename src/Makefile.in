@@ -143,9 +143,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
 	CDMReader.cc CDMReaderUtils.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
-	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
-	coordSys/CoordSysImpl.h coordSys/Projection.cc \
-	coordSys/ProjectionImpl.cc \
+	CoordinateSystemSliceBuilder.cc coordSys/CoordinateSystem.cc \
+	coordSys/CoordinateAxis.cc coordSys/CoordSysImpl.h \
+	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \
@@ -163,10 +163,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ReferenceTimeSliceBuilder.cc TimeLevelDataSliceFetcher.cc \
-	TimeUnit.cc TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
-	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
-	NetCDF_Utils.h GribApiCDMWriter.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
+	Utils.cc XMLDoc.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
+	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
@@ -225,8 +224,9 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMFileReaderFactory.lo CDMInterpolator.lo CDMNamedEntity.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
 	CDMTimeInterpolator.lo CDMVariable.lo CDM_XMLConfigHelper.lo \
-	CoordinateSystem.lo CoordinateAxis.lo Projection.lo \
-	ProjectionImpl.lo AlbersConicalEqualAreaProjection.lo \
+	CoordinateSystemSliceBuilder.lo CoordinateSystem.lo \
+	CoordinateAxis.lo Projection.lo ProjectionImpl.lo \
+	AlbersConicalEqualAreaProjection.lo \
 	AzimuthalEquidistantProjection.lo \
 	LambertAzimuthalEqualAreaProjection.lo \
 	LambertConformalConicProjection.lo \
@@ -240,10 +240,9 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	FeltParameters.lo GridDefinition.lo Logger.lo NcmlCDMReader.lo \
 	Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	ReferenceTimeSliceBuilder.lo TimeLevelDataSliceFetcher.lo \
-	TimeUnit.lo TimeSpec.lo Units.lo Utils.lo XMLDoc.lo \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
+	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
+	Utils.lo XMLDoc.lo $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) $(am__objects_4)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -475,9 +474,10 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMTimeInterpolator.cc CDMVariable.cc CDM_XMLConfigHelper.cc \
-	CDM_XMLConfigHelper.h coordSys/CoordinateSystem.cc \
-	coordSys/CoordinateAxis.cc coordSys/CoordSysImpl.h \
-	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
+	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
+	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
+	coordSys/CoordSysImpl.h coordSys/Projection.cc \
+	coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \
@@ -495,10 +495,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ReferenceTimeSliceBuilder.cc TimeLevelDataSliceFetcher.cc \
-	TimeUnit.cc TimeSpec.cc Units.cc Utils.cc XMLDoc.cc \
-	$(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4)
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
+	Utils.cc XMLDoc.cc $(am__append_1) $(am__append_2) \
+	$(am__append_3) $(am__append_4)
 all: all-recursive
 
 .SUFFIXES:
@@ -596,6 +595,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateAxis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystemSliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataSanitizer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Plo@am__quote@
@@ -638,7 +638,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PolarStereographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Projection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProjectionImpl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReferenceTimeSliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RotatedLatLonGridInformation.Plo@am__quote@

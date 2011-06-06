@@ -30,6 +30,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 CDMVariable.cc \
                      CDM_XMLConfigHelper.cc \
                      CDM_XMLConfigHelper.h \
+                     CoordinateSystemSliceBuilder.cc \
                      coordSys/CoordinateSystem.cc \
                      coordSys/CoordinateAxis.cc \
                      coordSys/CoordSysImpl.h \
@@ -63,7 +64,6 @@ libfimex_la_SOURCES = interpolation.c \
 					 ReplaceStringTimeObject.cc \
 					 SpatialAxisSpec.cc \
                      SliceBuilder.cc \
-                     ReferenceTimeSliceBuilder.cc \
 					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
 					 TimeSpec.cc \

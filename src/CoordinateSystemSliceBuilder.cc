@@ -1,5 +1,5 @@
 /*
- * Fimex, ReferenceTimeSliceBuilder.cc
+ * Fimex, CoordinateSystemSliceBuilder.cc
  *
  * (C) Copyright 2011, met.no
  *
@@ -24,31 +24,40 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/ReferenceTimeSliceBuilder.h"
+#include "fimex/CoordinateSystemSliceBuilder.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/CDM.h"
 
 namespace MetNoFimex
 {
 
-static LoggerPtr logger = getLogger("fimex.ReferenceTimeSliceBuilder");
+static LoggerPtr logger = getLogger("fimex.CoordinateSystemSliceBuilder");
 
 using namespace std;
 
-ReferenceTimeSliceBuilder::ReferenceTimeSliceBuilder(const CDM& cdm, const std::string& varName, boost::shared_ptr<const CoordinateSystem> cs)
-: SliceBuilder(cdm, varName), cs_(cs)
+const std::string& getCSVarFromCDM_(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs)
 {
-    if (! (cs->isComplete(varName) && cs->isCSFor(varName))) {
-        throw CDMException("coordinate system not complete and for variable "+ varName + " as required for ReferenceTimeSliceBuilder");
+    const CDM::VarVec& vars = cdm.getVariables();
+    for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
+        if (cs->isCSFor(v->getName()) && cs->isComplete(v->getName())) {
+            // return first variable
+            return v->getName();
+        }
     }
-    setReferenceTimePos(0); // referenceTime is allways set
+    throw CDMException("no variable belonging to CoordinateSystem found in CoordinateSystem for CoordinateSystemSliceBuilder");
+}
+CoordinateSystemSliceBuilder::CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs)
+: SliceBuilder(cdm, getCSVarFromCDM_(cdm, cs)), cs_(cs)
+{
+    setCoordinateSystemPos(0); // referenceTime is allways set
     if (cs_->hasAxisType(CoordinateAxis::Time)) {
         tShape_ = cs_->getTimeAxis()->getShape();
     }
 }
 
-void ReferenceTimeSliceBuilder::setReferenceTimePos(size_t refTimePos)
+void CoordinateSystemSliceBuilder::setCoordinateSystemPos(size_t refTimePos)
 {
     if (cs_->hasAxisType(CoordinateAxis::ReferenceTime)) {
         CoordinateSystem::ConstAxisPtr refAxis = cs_->findAxisOfType(CoordinateAxis::ReferenceTime);
@@ -59,7 +68,7 @@ void ReferenceTimeSliceBuilder::setReferenceTimePos(size_t refTimePos)
         }
     }
 }
-void ReferenceTimeSliceBuilder::setTimeStartAndSize(size_t start, size_t size)
+void CoordinateSystemSliceBuilder::setTimeStartAndSize(size_t start, size_t size)
 {
     if (cs_->hasAxisType(CoordinateAxis::Time)) {
         CoordinateSystem::ConstAxisPtr tAxis = cs_->getTimeAxis();
@@ -79,10 +88,10 @@ void ReferenceTimeSliceBuilder::setTimeStartAndSize(size_t start, size_t size)
             }
         }
     } else {
-        LOG4FIMEX(logger, Logger::DEBUG, "ReferenceTimeSliceBuilder without time, ignoring setTimeStartAndSize()");
+        LOG4FIMEX(logger, Logger::DEBUG, "CoordinateSystemSliceBuilder without time, ignoring setTimeStartAndSize()");
     }
 }
-SliceBuilder ReferenceTimeSliceBuilder::getTimeVariableSliceBuilder()
+SliceBuilder CoordinateSystemSliceBuilder::getTimeVariableSliceBuilder()
 {
     vector<string> names = tShape_;
     vector<size_t> dimSize(tShape_.size());

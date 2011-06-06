@@ -1,5 +1,5 @@
 /*
- * Fimex, ReferenceTimeSliceBuilder.h
+ * Fimex, CoordinateSystemSliceBuilder.h
  *
  * (C) Copyright 2011, met.no
  *
@@ -24,8 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#ifndef REFERENCETIMESLICEBUILDER_H_
-#define REFERENCETIMESLICEBUILDER_H_
+#ifndef COORDINATESYSTEMSLICEBUILDER_H_
+#define COORDINATESYSTEMSLICEBUILDER_H_
 
 
 #include "SliceBuilder.h"
@@ -36,12 +36,12 @@ namespace MetNoFimex
 // forward decl;
 class CoordinateSystem;
 
-class ReferenceTimeSliceBuilder: public MetNoFimex::SliceBuilder
+class CoordinateSystemSliceBuilder: public MetNoFimex::SliceBuilder
 {
 public:
-    ReferenceTimeSliceBuilder(const CDM& cdm, const std::string& varName, boost::shared_ptr<const CoordinateSystem> cs);
-    virtual ~ReferenceTimeSliceBuilder() {};
-    void setReferenceTimePos(size_t refTimePos);
+    CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs);
+    virtual ~CoordinateSystemSliceBuilder() {};
+    void setCoordinateSystemPos(size_t refTimePos);
     void setTimeStartAndSize(size_t start, size_t size);
     SliceBuilder getTimeVariableSliceBuilder();
 private:
@@ -53,4 +53,4 @@ private:
 
 }
 
-#endif /* REFERENCETIMESLICEBUILDER_H_ */
+#endif /* COORDINATESYSTEMSLICEBUILDER_H_ */
