@@ -46,10 +46,23 @@ public:
     CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs);
     virtual ~CoordinateSystemSliceBuilder() {};
     /**
-     *
+     * Set a single reference-time. The CoordinateSystemSliceBuilder
+     * will only fetch a single reference-time, by default the first one.
      */
     void setReferenceTimePos(size_t refTimePos);
+    /**
+     * Set the start and the size of the time-dimension. This might
+     * even be a 2-dimensional time-dimension, i.e. (refTime,offset)
+     */
     void setTimeStartAndSize(size_t start, size_t size);
+    /**
+     * Get a slice-builder to fetch data for the time-variable
+     * with the same reference-time as set for the current slice. It should be
+     * used as:
+     * @code
+     * reader->getDataSlice(cs->getTimeAxis()->getName(), cssb->getTimeVariableSliceBuilder)
+     * @endcode
+     */
     SliceBuilder getTimeVariableSliceBuilder();
 private:
     boost::shared_ptr<const CoordinateSystem> cs_;
