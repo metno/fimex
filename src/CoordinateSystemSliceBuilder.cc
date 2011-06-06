@@ -51,13 +51,13 @@ const std::string& getCSVarFromCDM_(const CDM& cdm, boost::shared_ptr<const Coor
 CoordinateSystemSliceBuilder::CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs)
 : SliceBuilder(cdm, getCSVarFromCDM_(cdm, cs)), cs_(cs)
 {
-    setCoordinateSystemPos(0); // referenceTime is allways set
+    setReferenceTimePos(0); // referenceTime is allways set
     if (cs_->hasAxisType(CoordinateAxis::Time)) {
         tShape_ = cs_->getTimeAxis()->getShape();
     }
 }
 
-void CoordinateSystemSliceBuilder::setCoordinateSystemPos(size_t refTimePos)
+void CoordinateSystemSliceBuilder::setReferenceTimePos(size_t refTimePos)
 {
     if (cs_->hasAxisType(CoordinateAxis::ReferenceTime)) {
         CoordinateSystem::ConstAxisPtr refAxis = cs_->findAxisOfType(CoordinateAxis::ReferenceTime);

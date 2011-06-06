@@ -36,12 +36,19 @@ namespace MetNoFimex
 // forward decl;
 class CoordinateSystem;
 
+/**
+ * SliceBuilder with knowledge about the coordinate-system. It is therefore
+ * possible to set some variable on the basis that they are i.e. time-axes.
+ */
 class CoordinateSystemSliceBuilder: public MetNoFimex::SliceBuilder
 {
 public:
     CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs);
     virtual ~CoordinateSystemSliceBuilder() {};
-    void setCoordinateSystemPos(size_t refTimePos);
+    /**
+     *
+     */
+    void setReferenceTimePos(size_t refTimePos);
     void setTimeStartAndSize(size_t start, size_t size);
     SliceBuilder getTimeVariableSliceBuilder();
 private:
