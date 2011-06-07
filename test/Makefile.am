@@ -31,7 +31,7 @@ if HAVE_FELT_OR_MILIB
   GRIBAPI_MI_TESTS = testGribWriter
 endif
 if HAVE_NETCDF
-  CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys
+  CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
   GRIBAPI_NC_TESTS = testGribReader
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh
 endif
@@ -57,6 +57,7 @@ testCDM_SOURCES = testCDM.cc
 testSliceBuilder_SOURCES = testSliceBuilder.cc
 testProjections_SOURCES = testProjections.cc
 testCoordSys_SOURCES = testCoordSys.cc 
+testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testGribReader_SOURCES = testGribReader.cc

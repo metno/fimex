@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
-    BOOST_CHECK(coordSys.size() == 2);
+    BOOST_CHECK(coordSys.size() == 3);
 
     // find an appropriate coordinate system for a variable
     string altitude = "altitude";
