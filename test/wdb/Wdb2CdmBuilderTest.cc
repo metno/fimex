@@ -31,6 +31,7 @@
 #include <wdb/config/GlobalWdbConfiguration.h>
 #include <wdb/gridInformation/GridInformation.h>
 #include <fimex/CDM.h>
+#include <fimex/SliceBuilder.h>
 #include <iostream>
 #include <algorithm>
 #include <boost/assign.hpp>
@@ -770,6 +771,23 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingVersion, Wdb2CdmBuilderFixture)
 	BOOST_CHECK_EQUAL(4, gids[2]);
 }
 
+//BOOST_FIXTURE_TEST_CASE(getDataWithSliceBuilder, Wdb2CdmBuilderFixture)
+//{
+//	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 0);
+//	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 1);
+//	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 0);
+//	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 1);
+//
+//	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+//	di.populate(cdm);
+//
+//	SliceBuilder slicer(cdm, "temperature");
+//	slicer.setStartAndSize("version", 1, 1);
+//
+//	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer);
+//
+//	BOOST_CHECK_EQUAL(2, gids.size());
+//}
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -33,6 +33,7 @@
 #include "GridDataFactory.h"
 #include <wdb/WdbIndex.h>
 #include <wdb/gridInformation/GridInformation.h>
+#include <fimex/SliceBuilder.h>
 #include <fimex/CDMException.h>
 
 #include <boost/test/unit_test.hpp>
@@ -365,6 +366,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, WdbIndexTestFixture)
 	BOOST_CHECK_EQUAL(2, gids[0]);
 	BOOST_CHECK_EQUAL(3, gids[1]);
 }
+
 
 
 BOOST_AUTO_TEST_SUITE_END()

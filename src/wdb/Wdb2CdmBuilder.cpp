@@ -82,6 +82,17 @@ std::set<float> Wdb2CdmBuilder::getLevelValues(const std::string & levelName) co
 	return index_.getLevelValues(levelName);
 }
 
+std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & variableName, const SliceBuilder & slicer) const
+{
+	std::vector<Wdb2CdmBuilder::gid> ret = index_.getData(variableName);
+
+	// multidimensjonal array hadde vært fint her
+
+
+	return ret;
+}
+
+
 const GridInformation & Wdb2CdmBuilder::gridInformation() const
 {
 	// Several grid types in same wdb is not supported (yet)

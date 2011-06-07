@@ -51,7 +51,7 @@ void VersionHandler::addToCdm(CDM & cdm) const
 {
 	BOOST_FOREACH(const std::string & parameter, index_.allParameters())
 	{
-		const std::set<int> & versions = index_.versionsForParameter(parameter);
+		const std::vector<int> & versions = index_.versionsForParameter(parameter);
 		if ( versions.size() > 1 )
 		{
 			std::string dimension = "version";

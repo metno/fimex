@@ -85,6 +85,11 @@ inline bool operator < (const Parameter & a, const Parameter & b)
 	return a.name() < b.name();
 }
 
+inline bool operator == (const Parameter & a, const Parameter & b)
+{
+	return a.name() == b.name();
+}
+
 std::ostream & operator << (std::ostream & s, const Parameter & p);
 
 }

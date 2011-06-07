@@ -30,7 +30,7 @@
 #define VERSIONHANDLER_H_
 
 #include "DataHandler.h"
-#include <set>
+#include <vector>
 
 
 namespace MetNoFimex
@@ -52,7 +52,7 @@ public:
 
 private:
 	const WdbIndex & index_;
-	mutable std::set<int> versions_;
+	mutable std::vector<int> versions_;
 };
 
 }

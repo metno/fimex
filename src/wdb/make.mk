@@ -2,6 +2,8 @@ if HAVE_LIBPQ
 
 libfimex_la_SOURCES += \
 	wdb/WdbIndex.h wdb/WdbIndex.cpp \
+	wdb/DataSummary.h wdb/DataSummary.cpp \
+	wdb/ParameterData.h wdb/ParameterData.cpp \
 	wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp \
 	wdb/DataHandler.h \
 	wdb/TimeHandler.h wdb/TimeHandler.cpp \

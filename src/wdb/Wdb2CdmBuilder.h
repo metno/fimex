@@ -42,7 +42,7 @@
 namespace MetNoFimex
 {
 class CDM;
-
+class SliceBuilder;
 
 namespace wdb
 {
@@ -105,10 +105,12 @@ public:
 	/**
 	 * get all grid idenitfiers for the given variable name and timestep
 	 */
-	std::vector<gid> getGridIdentifiers(const std::string & variableName, int timeIndex) const
+	std::vector<gid> getGridIdentifiers(const std::string & variableName, unsigned unLimDimPos) const
 	{
-		return index_.getData(variableName, timeIndex);
+		return index_.getData(variableName, unLimDimPos);
 	}
+
+	std::vector<gid> getGridIdentifiers(const std::string & variableName, const SliceBuilder & slicer) const;
 
 	/**
 	 * Get information about the grid in use.

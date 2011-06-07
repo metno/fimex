@@ -29,7 +29,9 @@
 #ifndef WDBINDEX_H_
 #define WDBINDEX_H_
 
+#include "ParameterData.h"
 #include "database_access/GridData.h"
+#include <boost/multi_array.hpp>
 #include <vector>
 #include <string>
 #include <map>
@@ -79,7 +81,9 @@ public:
 	/**
 	 * Get all data for the given parameter and timestep
 	 */
-	GidList getData(const std::string & parameter, unsigned ) const;
+	GidList getData(const std::string & parameter, unsigned unLimDimPos) const;
+
+	GidList getData(const std::string & parameter) const;
 
 	/**
 	 * Get a list of all parameters that are stored here
@@ -99,7 +103,7 @@ public:
 	/**
 	 * Get all available times for the given parameter
 	 */
-	std::set<GridData::Duration> timesForParameter(const std::string & parameter) const;
+	const std::vector<GridData::Duration> & timesForParameter(const std::string & parameter) const;
 
 	bool hasLevel(const std::string & wdbName) const
 	{
@@ -114,12 +118,12 @@ public:
 	/**
 	 * Get a list of all available levels for the given parameter
 	 */
-	std::set<float> levelsForParameter(const std::string & parameter) const;
+	const std::vector<float> & levelsForParameter(const std::string & parameter) const;
 
 	/**
 	 * Get a list of all dataversions for a given parameter
 	 */
-	std::set<int> versionsForParameter(const std::string & parameter) const;
+	const std::vector<int> & versionsForParameter(const std::string & parameter) const;
 
 	/**
 	 * does the given parameter name exist in this object?
@@ -133,22 +137,21 @@ public:
 	 */
 	std::set<GridData::Time> referenceTimes() const;
 
-	std::set<GridData::Time> referenceTimesForParameter(const std::string & parameter) const;
+	const std::vector<GridData::Time> & referenceTimesForParameter(const std::string & parameter) const;
 
 private:
-
-	typedef std::map<int, gid> VersionEntry;
-	typedef std::map<Level, VersionEntry> LevelEntry;
-	typedef std::map<GridData::Duration, LevelEntry> ValidTimeEntry;
-	typedef std::map<GridData::Time, ValidTimeEntry> ReferenceTimeEntry;
-	typedef std::map<Parameter, ReferenceTimeEntry> Data;
-
-	Data entries;
 
 	std::map<std::string, std::set<float> > levels_;
 	std::set<GridData::Duration> allValidtimes_;
 	std::set<GridData::Time> allReferenceTimes_;
 
+	const ParameterData & parameterData_(const Parameter & p) const;
+
+	typedef	std::map<Parameter, ParameterData> Data;
+	Data data_;
+
+
+	void init_(const std::vector<GridData> & data);
 };
 
 }

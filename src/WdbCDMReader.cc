@@ -157,23 +157,10 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
 	return ret;
 }
 
-//boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(
-//		const std::string& varName, size_t unLimDimPos)
+//boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 //{
-//	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");" << std::flush;
-//
-//	SliceBuilder slicer(* cdm_, varName);
-//	const CDMDimension * unlimitedDimension = cdm_->getUnlimitedDim();
-//	if ( unlimitedDimension )
-//		slicer.setStartAndSize(unlimitedDimension->getName(), unLimDimPos, 1);
-//
-//	boost::shared_ptr<Data> ret = getDataSlice(varName, slicer);
-//
-//	std::cout << "\tdone" << std::endl;
-//
-//	return ret;
+//	return CDMReader::getDataSlice(varName, sb);
 //}
-
 
 }
 

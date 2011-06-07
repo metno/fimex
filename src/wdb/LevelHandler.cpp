@@ -59,7 +59,7 @@ void LevelHandler::addToCdm(CDM & cdm) const
 		std::string levelName = levelType.name();
 		if ( addedLevels.find(levelName) == addedLevels.end() )
 		{
-			std::set<float> levels = index_.levelsForParameter(parameter);
+			const std::vector<float> & levels = index_.levelsForParameter(parameter);
 			if ( levels.size() > 1 )
 			{
 				const std::string & dimension = config_.cfName(levelName);
