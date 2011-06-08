@@ -488,7 +488,7 @@ AM_CFLAGS =
 
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\"
 @HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg testXMLDoc.xml coordTest.nc
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
