@@ -151,6 +151,25 @@ WdbIndex::GidList WdbIndex::getData(const std::string & parameter) const
 	return GidList (data, data + elements);
 }
 
+WdbIndex::GidList WdbIndex::getData(const std::string & parameter,
+		const WdbIndex::Slice & referenceTime,
+		const WdbIndex::Slice & validTime,
+		const WdbIndex::Slice & level,
+		const WdbIndex::Slice & version) const
+{
+	WdbIndex::GidList ret;
+
+	const ParameterData::DataArray & data = parameterData_(parameter).data();
+
+	for ( std::size_t r = referenceTime.start; r < referenceTime.start + referenceTime.length; ++ r )
+		for ( std::size_t t = validTime.start; t < validTime.start + validTime.length; ++ t )
+			for ( std::size_t l = level.start; l < level.start + level.length; ++ l )
+				for ( std::size_t v = version.start; v < version.start + version.length; ++ v )
+					ret.push_back(data[r][t][l][v]);
+
+	return ret;
+}
+
 std::set<std::string> WdbIndex::allParameters() const
 {
 	std::set<std::string> ret;

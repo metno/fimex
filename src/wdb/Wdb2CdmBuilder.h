@@ -105,12 +105,12 @@ public:
 	/**
 	 * get all grid idenitfiers for the given variable name and timestep
 	 */
-	std::vector<gid> getGridIdentifiers(const std::string & variableName, unsigned unLimDimPos) const
+	std::vector<gid> getGridIdentifiers(const std::string & wdbName, unsigned unLimDimPos) const
 	{
-		return index_.getData(variableName, unLimDimPos);
+		return index_.getData(wdbName, unLimDimPos);
 	}
 
-	std::vector<gid> getGridIdentifiers(const std::string & variableName, const SliceBuilder & slicer) const;
+	std::vector<gid> getGridIdentifiers(const std::string & wdbName, const SliceBuilder & slicer, const CDM & cdm) const;
 
 	/**
 	 * Get information about the grid in use.

@@ -64,6 +64,7 @@ void RotatedLatLonGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("rlon", CDMAttribute("long_name", "rotated longitude"));
 	cdm.addAttribute("rlon", CDMAttribute("standard_name", "grid_longitude"));
 	cdm.addAttribute("rlon", CDMAttribute("units", "degrees"));
+	cdm.addAttribute("rlon", CDMAttribute("axis", "X"));
 
 
 	CDMVariable rlat("rlat", CDM_FLOAT, std::vector<std::string>(1, "rlat"));
@@ -71,6 +72,7 @@ void RotatedLatLonGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("rlat", CDMAttribute("long_name", "rotated latitude"));
 	cdm.addAttribute("rlat", CDMAttribute("standard_name", "grid_latitude"));
 	cdm.addAttribute("rlat", CDMAttribute("units", "degrees"));
+	cdm.addAttribute("rlat", CDMAttribute("axis", "Y"));
 
 	std::vector<std::string> dimensions = boost::assign::list_of("rlon")("rlat");
 

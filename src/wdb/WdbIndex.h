@@ -85,6 +85,15 @@ public:
 
 	GidList getData(const std::string & parameter) const;
 
+
+	struct Slice
+	{
+		std::size_t start;
+		std::size_t length;
+		Slice(std::size_t start, std::size_t length) : start(start), length(length) {}
+	};
+	GidList getData(const std::string & parameter, const Slice & referenceTime, const Slice & validTime, const Slice & level, const Slice & version) const;
+
 	/**
 	 * Get a list of all parameters that are stored here
 	 */

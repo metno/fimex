@@ -61,11 +61,13 @@ void LatLonGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("longitude", CDMAttribute("long_name", "longitude"));
 	cdm.addAttribute("longitude", CDMAttribute("standard_name", "longitude"));
 	cdm.addAttribute("longitude", CDMAttribute("units", "degree_east"));
+	cdm.addAttribute("longitude", CDMAttribute("axis", "X"));
 
 	cdm.addVariable(CDMVariable("latitude", CDM_FLOAT, std::vector<std::string>(1, "latitude")));
 	cdm.addAttribute("latitude", CDMAttribute("long_name", "latitude"));
 	cdm.addAttribute("latitude", CDMAttribute("standard_name", "latitude"));
 	cdm.addAttribute("latitude", CDMAttribute("units", "degree_north"));
+	cdm.addAttribute("latitude", CDMAttribute("axis", "Y"));
 }
 
 boost::shared_ptr<Data> LatLonGridInformation::getField(const CDMVariable & variable) const

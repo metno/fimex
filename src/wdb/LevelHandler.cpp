@@ -70,7 +70,7 @@ void LevelHandler::addToCdm(CDM & cdm) const
 
 				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(levelName, levelType.unit()) )
 					cdm.addAttribute(dimension, attribute);
-				cdm.addAttribute(dimension, CDMAttribute("axis", "z"));
+				cdm.addAttribute(dimension, CDMAttribute("axis", "Z"));
 
 				addedLevels.insert(levelName);
 			}

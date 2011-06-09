@@ -35,6 +35,7 @@
 #include "gridInformation/GridInformation.h"
 #include <fimex/CDM.h>
 #include <fimex/CDMDimension.h>
+#include <fimex/SliceBuilder.h>
 #include <fimex/coordSys/Projection.h>
 #include <set>
 #include <boost/foreach.hpp>
@@ -82,14 +83,44 @@ std::set<float> Wdb2CdmBuilder::getLevelValues(const std::string & levelName) co
 	return index_.getLevelValues(levelName);
 }
 
-std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & variableName, const SliceBuilder & slicer) const
+std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & wdbName, const SliceBuilder & slicer, const CDM & cdm) const
 {
-	std::vector<Wdb2CdmBuilder::gid> ret = index_.getData(variableName);
+	std::vector<std::string> axis;
+	std::vector<std::string> stdName;
+	BOOST_FOREACH( const std::string & dim, slicer.getDimensionNames() )
+	{
+		CDMAttribute a;
+		if ( cdm.getAttribute(dim, "axis", a) )
+				axis.push_back(a.getStringValue());
+		else
+			axis.push_back("");
+		stdName.push_back(cdm.getAttribute(dim, "standard_name").getStringValue());
+	}
 
-	// multidimensjonal array hadde vært fint her
+	const std::vector<size_t> & start = slicer.getDimensionStartPositions();
+	const std::vector<size_t> & size = slicer.getDimensionSizes();
 
+	std::vector<WdbIndex::Slice> slices(6, WdbIndex::Slice(0, 1));
 
-	return ret;
+	for ( unsigned i = 0; i < axis.size(); ++ i )
+	{
+		WdbIndex::Slice slice(start[i], size[i]);
+
+		if ( stdName[i] == "forecast_reference_time" )
+			slices[0] = slice;
+		else if ( axis[i] == "T" )
+			slices[1] = slice;
+		else if ( axis[i] == "Z" )
+			slices[2] = slice;
+		else if ( stdName[i] == "version" )
+			slices[3] = slice;
+		else if ( axis[i] == "Y" )
+			slices[4] = slice;
+		else if ( axis[i] == "X" )
+			slices[5] = slice;
+	}
+
+	return index_.getData(wdbName, slices[0], slices[1], slices[2], slices[3]);
 }
 
 

@@ -247,7 +247,7 @@ BOOST_FIXTURE_TEST_CASE(zDimensionsAddThemselvesAsVariables, Wdb2CdmBuilderFixtu
 		BOOST_CHECK_EQUAL("m", cdm.getAttribute(variable, "units").getStringValue());
 		BOOST_CHECK_EQUAL("lvl", cdm.getAttribute(variable, "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("lvl", cdm.getAttribute(variable, "standard_name").getStringValue());
-		BOOST_CHECK_EQUAL("z", cdm.getAttribute(variable, "axis").getStringValue());
+		BOOST_CHECK_EQUAL("Z", cdm.getAttribute(variable, "axis").getStringValue());
 
 	}
 	catch ( CDMException & e )
@@ -274,13 +274,13 @@ BOOST_FIXTURE_TEST_CASE(manyZDimensions, Wdb2CdmBuilderFixture)
 		BOOST_CHECK_EQUAL("m", cdm.getAttribute(variableA, "units").getStringValue());
 		BOOST_CHECK_EQUAL("lvl", cdm.getAttribute(variableA, "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("lvl", cdm.getAttribute(variableA, "standard_name").getStringValue());
-		BOOST_CHECK_EQUAL("z", cdm.getAttribute(variableA, "axis").getStringValue());
+		BOOST_CHECK_EQUAL("Z", cdm.getAttribute(variableA, "axis").getStringValue());
 
 		cdm.getVariable(variableB); // will throw if variableB does not exist
 		BOOST_CHECK_EQUAL("x", cdm.getAttribute(variableB, "units").getStringValue());
 		BOOST_CHECK_EQUAL("foo bar", cdm.getAttribute(variableB, "long_name").getStringValue());
 		BOOST_CHECK_EQUAL("foo_bar", cdm.getAttribute(variableB, "standard_name").getStringValue());
-		BOOST_CHECK_EQUAL("z", cdm.getAttribute(variableB, "axis").getStringValue());
+		BOOST_CHECK_EQUAL("Z", cdm.getAttribute(variableB, "axis").getStringValue());
 
 	}
 	catch ( CDMException & e )
@@ -771,23 +771,110 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingVersion, Wdb2CdmBuilderFixture)
 	BOOST_CHECK_EQUAL(4, gids[2]);
 }
 
-//BOOST_FIXTURE_TEST_CASE(getDataWithSliceBuilder, Wdb2CdmBuilderFixture)
-//{
-//	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 0);
-//	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 1);
-//	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 0);
-//	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 1);
-//
-//	const wdb::Wdb2CdmBuilder di(gridData(), tr);
-//	di.populate(cdm);
-//
-//	SliceBuilder slicer(cdm, "temperature");
-//	slicer.setStartAndSize("version", 1, 1);
-//
-//	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer);
-//
-//	BOOST_CHECK_EQUAL(2, gids.size());
-//}
+BOOST_FIXTURE_TEST_CASE(getDataWithEmptySliceBuilder, Wdb2CdmBuilderFixture)
+{
+	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 0);
+	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 1);
+	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 0);
+	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 1);
+
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+	di.populate(cdm);
+
+	SliceBuilder slicer(cdm, "temperature");
+
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer, cdm);
+
+	BOOST_CHECK_EQUAL(4, gids.size());
+}
+
+BOOST_FIXTURE_TEST_CASE(sliceReferenceTime, Wdb2CdmBuilderFixture)
+{
+	add("2011-06-01 00:00:00", "2011-06-01 00:00:00");
+	add("2011-06-01 06:00:00", "2011-06-01 00:00:00");
+	add("2011-06-02 00:00:00", "2011-06-02 00:00:00");
+	add("2011-06-02 06:00:00", "2011-06-02 00:00:00");
+	add("2011-06-03 00:00:00", "2011-06-03 00:00:00");
+	add("2011-06-03 06:00:00", "2011-06-03 00:00:00");
+
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+	di.populate(cdm);
+
+	SliceBuilder slicer(cdm, tr.cfName(defaultParameter.name()));
+	slicer.setStartAndSize("forecast_reference_time", 2, 1);
+
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), slicer, cdm);
+
+	BOOST_REQUIRE_LE(2, gids.size());
+	BOOST_CHECK_EQUAL(4, gids[0]);
+	BOOST_CHECK_EQUAL(5, gids[1]);
+	BOOST_CHECK_EQUAL(2, gids.size());
+}
+
+
+BOOST_FIXTURE_TEST_CASE(sliceValidTime, Wdb2CdmBuilderFixture)
+{
+	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 0);
+	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 1);
+	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 0);
+	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 1);
+
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+	di.populate(cdm);
+
+	SliceBuilder slicer(cdm, "temperature");
+	slicer.setStartAndSize("time", 1, 1);
+
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer, cdm);
+
+	BOOST_REQUIRE_LE(2, gids.size());
+	BOOST_CHECK_EQUAL(2, gids[0]);
+	BOOST_CHECK_EQUAL(3, gids[1]);
+	BOOST_CHECK_EQUAL(2, gids.size());
+}
+
+BOOST_FIXTURE_TEST_CASE(sliceLevel, Wdb2CdmBuilderFixture)
+{
+	add(wdb::Level("height", "m", 0, 0));
+	add(wdb::Level("height", "m", 2, 2));
+	add(wdb::Level("height", "m", 10, 10));
+	add(wdb::Parameter("rain", "mm"), wdb::Level("something else", "x", 1, 1));
+
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+	di.populate(cdm);
+
+	SliceBuilder slicer(cdm, tr.cfName(defaultParameter.name()));
+	slicer.setStartAndSize("height", 1, 2);
+
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), slicer, cdm);
+
+	BOOST_REQUIRE_LE(2, gids.size());
+	BOOST_CHECK_EQUAL(1, gids[0]);
+	BOOST_CHECK_EQUAL(2, gids[1]);
+	BOOST_CHECK_EQUAL(2, gids.size());
+}
+
+
+BOOST_FIXTURE_TEST_CASE(sliceVersion, Wdb2CdmBuilderFixture)
+{
+	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 0);
+	add(wdb::Parameter("temperature"), "2011-03-31 06:00:00", 1);
+	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 0);
+	add(wdb::Parameter("temperature"), "2011-03-31 07:00:00", 1);
+
+	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+	di.populate(cdm);
+
+	SliceBuilder slicer(cdm, "temperature");
+	slicer.setStartAndSize("version", 1, 1);
+
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer, cdm);
+
+	BOOST_REQUIRE_LE(2, gids.size());
+	BOOST_CHECK_EQUAL(1, gids[0]);
+	BOOST_CHECK_EQUAL(3, gids[1]);
+	BOOST_CHECK_EQUAL(2, gids.size());
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
