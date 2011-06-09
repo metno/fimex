@@ -73,11 +73,15 @@ public:
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
 private:
+	std::size_t getXSize(const CDMVariable& variable) const;
+	std::size_t getYSize(const CDMVariable& variable) const;
 	std::size_t getGridSize(const CDMVariable& variable) const;
 	boost::shared_ptr<Data> extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const;
 
+	boost::shared_ptr<Data> cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const;
+
 	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos, const std::string & wdbName) const;
-	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb, const std::string & wdbName);
+	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb, const std::string & wdbName) const;
 
 	class InternalData;
 	InternalData * d_;

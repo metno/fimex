@@ -33,6 +33,7 @@
 #include <iterator>
 
 #include <boost/foreach.hpp>
+#include <boost/assign/list_of.hpp>
 
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
@@ -137,24 +138,35 @@ boost::shared_ptr<Data> GxWdbCDMReader::getDataSlice(const std::string& varName,
 		return CDMReader::getDataSlice(varName, sb);
 }
 
-std::size_t GxWdbCDMReader::getGridSize(const CDMVariable& variable) const
+std::size_t GxWdbCDMReader::getXSize(const CDMVariable& variable) const
 {
 	const std::vector<std::string> & dimensions = variable.getShape();
-	std::size_t size = 1;
-	for ( std::vector<std::string>::const_iterator it = dimensions.begin(); it != dimensions.end(); ++ it )
-	{
-		CDMAttribute axis;
-		if ( cdm_->getAttribute(* it, "axis", axis) )
-		{
-			std::string dim = axis.getStringValue();
-			if ( dim == "X" or dim == "Y" )
-			{
-				const CDMDimension & dimension = cdm_->getDimension(* it);
-				size *= dimension.getLength();
-			}
-		}
-	}
-	return size;
+	const std::string & xName = dimensions[0];
+	CDMAttribute axis;
+	if ( cdm_->getAttribute(xName, "axis", axis) )
+		if ( axis.getStringValue() != "X" )
+			throw CDMException("Unable to find x dimension for parameter");
+	const CDMDimension & dimension = cdm_->getDimension(xName);
+	return dimension.getLength();
+}
+
+std::size_t GxWdbCDMReader::getYSize(const CDMVariable& variable) const
+{
+	const std::vector<std::string> & dimensions = variable.getShape();
+	const std::string & yName = dimensions[1];
+	CDMAttribute axis;
+	if ( cdm_->getAttribute(yName, "axis", axis) )
+		if ( axis.getStringValue() != "Y" )
+			throw CDMException("Unable to find y dimension for parameter");
+	const CDMDimension & dimension = cdm_->getDimension(yName);
+	return dimension.getLength();
+}
+
+
+
+std::size_t GxWdbCDMReader::getGridSize(const CDMVariable& variable) const
+{
+	return getXSize(variable) * getYSize(variable);
 }
 
 boost::shared_ptr<Data> GxWdbCDMReader::extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const
@@ -173,21 +185,48 @@ boost::shared_ptr<Data> GxWdbCDMReader::extractDataFromField(const CDMVariable& 
 	return ret;
 }
 
+boost::shared_ptr<Data> GxWdbCDMReader::cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const
+{
+	// We assume that the two last dimensions are x and y in the grid.
+
+    const std::vector<size_t> & starts = sb.getDimensionStartPositions();
+    const std::vector<size_t> & sizes = sb.getDimensionSizes();
+
+    const std::size_t x_start = starts[0];
+    const std::size_t x_size = sizes[0];
+    const std::size_t y_start = starts[1];
+    const std::size_t y_size = sizes[1];
+
+    const std::size_t grid_x_size = getXSize(variable);
+    const std::size_t grid_y_size = getYSize(variable);
+
+    if ( x_start == 0 and x_size == grid_x_size and y_start == 0 and y_size == grid_y_size )
+    	return d; // no cutting requested
+
+    const std::size_t grid_size = grid_x_size * grid_y_size;
+    const std::size_t grid_count = d->size() / grid_size;
+    if ( d->size() % grid_size )
+    	throw CDMException("Internal error: grid size/spec mismatch");
+
+	using boost::assign::list_of;
+	std::vector<size_t> orgDimSize = list_of(getXSize(variable))(getYSize(variable))(grid_count);
+	std::vector<size_t> startDims = list_of(x_start)(y_start)(0);
+	std::vector<size_t> outputDimSize = list_of(x_size)(y_size)(grid_count);
+
+	return d->slice(orgDimSize, startDims, outputDimSize);
+}
+
 boost::shared_ptr<Data> GxWdbCDMReader::getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos, const std::string & wdbName) const
 {
 	std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, unLimDimPos);
 	return extractDataFromField(variable, fieldIdentifiers);
 }
 
-boost::shared_ptr<Data> GxWdbCDMReader::getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb, const std::string & wdbName)
+boost::shared_ptr<Data> GxWdbCDMReader::getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb, const std::string & wdbName) const
 {
-	if ( true )
-	{
-		std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, sb, * cdm_);
-		return extractDataFromField(variable, fieldIdentifiers);
-	}
-	else
-		return CDMReader::getDataSlice(variable.getName(), sb);
+	std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, sb, * cdm_);
+	boost::shared_ptr<Data> ret = extractDataFromField(variable, fieldIdentifiers);
+	return cutGrid(ret, variable, sb);
 }
 
 }
