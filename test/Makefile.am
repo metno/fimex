@@ -42,7 +42,7 @@ endif
 include wdb/make.mk
 
 
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc coordRefTimeTest.nc
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 
