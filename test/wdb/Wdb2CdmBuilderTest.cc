@@ -30,6 +30,7 @@
 #include <wdb/Wdb2CdmBuilder.h>
 #include <wdb/config/GlobalWdbConfiguration.h>
 #include <wdb/gridInformation/GridInformation.h>
+#include <wdb/TimeHandler.h>
 #include <fimex/CDM.h>
 #include <fimex/SliceBuilder.h>
 #include <iostream>
@@ -86,7 +87,7 @@ BOOST_FIXTURE_TEST_CASE(setsBaseDimensions, Wdb2CdmBuilderFixture)
 	const CDM::DimVec & dims = cdm.getDimensions();
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("latitude")) != dims.end());
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("longitude")) != dims.end());
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("time")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName)) != dims.end());
 	BOOST_CHECK_EQUAL(3, dims.size());
 }
 
@@ -102,7 +103,7 @@ BOOST_FIXTURE_TEST_CASE(setsDimensionSizes, Wdb2CdmBuilderFixture)
 	const CDM::DimVec & dims = cdm.getDimensions();
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("latitude")) != dims.end());
 	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("longitude")) != dims.end());
-	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity("time")) != dims.end());
+	BOOST_CHECK(std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName)) != dims.end());
 
 	BOOST_CHECK_EQUAL(4, dims.size());
 
@@ -124,7 +125,7 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep, Wdb2CdmBuil
 
 	const CDM::DimVec & dims = cdm.getDimensions();
 
-	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity("time"));
+	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName));
 	BOOST_REQUIRE(timeDimension != dims.end());
 	BOOST_CHECK_EQUAL(1, timeDimension->getLength());
 }
@@ -140,7 +141,7 @@ BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSize, Wdb2CdmBuilderFixture)
 
 	const CDM::DimVec & dims = cdm.getDimensions();
 
-	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity("time"));
+	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName));
 	BOOST_REQUIRE(timeDimension != dims.end());
 	BOOST_CHECK_EQUAL(2, timeDimension->getLength());
 }
@@ -157,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(picksUpAllTimesFromSameParameter, Wdb2CdmBuilderFixture)
 
 	const CDM::DimVec & dims = cdm.getDimensions();
 
-	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity("time"));
+	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName));
 	BOOST_REQUIRE(timeDimension != dims.end());
 	BOOST_CHECK_EQUAL(3, timeDimension->getLength());
 }
@@ -185,7 +186,7 @@ BOOST_FIXTURE_TEST_CASE(ignoresIrrelevantTimeDimensions, Wdb2CdmBuilderFixture)
 //
 //	const CDM::DimVec & dims = cdm.getDimensions();
 //
-//	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity("time"));
+//	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName));
 //	BOOST_REQUIRE(timeDimension != dims.end());
 //	BOOST_CHECK_EQUAL(2, timeDimension->getLength());
 }
@@ -300,10 +301,10 @@ BOOST_FIXTURE_TEST_CASE(addsTimeVariable, Wdb2CdmBuilderFixture)
 
 	try
 	{
-		cdm.getVariable("time");
-		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute("time", "units").getStringValue());
-		BOOST_CHECK_EQUAL("forecast (valid) time", cdm.getAttribute("time", "long_name").getStringValue());
-		BOOST_CHECK_EQUAL("time", cdm.getAttribute("time", "standard_name").getStringValue());
+		cdm.getVariable(wdb::TimeHandler::validTimeName);
+		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute(wdb::TimeHandler::validTimeName, "units").getStringValue());
+		BOOST_CHECK_EQUAL("forecast (valid) time", cdm.getAttribute(wdb::TimeHandler::validTimeName, "long_name").getStringValue());
+		BOOST_CHECK_EQUAL("time", cdm.getAttribute(wdb::TimeHandler::validTimeName, "standard_name").getStringValue());
 	}
 	catch ( CDMException & e )
 	{
@@ -328,7 +329,7 @@ BOOST_FIXTURE_TEST_CASE(addsTimeToRelevantVariables, Wdb2CdmBuilderFixture)
 		BOOST_REQUIRE_GE(3, shape.size());
 		BOOST_CHECK_EQUAL("longitude", shape[0]);
 		BOOST_CHECK_EQUAL("latitude", shape[1]);
-		BOOST_CHECK_EQUAL("time", shape[2]);
+		BOOST_CHECK_EQUAL(wdb::TimeHandler::validTimeName, shape[2]);
 		BOOST_CHECK_EQUAL(3, shape.size());
 	}
 	catch ( CDMException & e )
@@ -422,7 +423,7 @@ BOOST_FIXTURE_TEST_CASE(onlyOneTimeDimensionInVaraiableShape, Wdb2CdmBuilderFixt
 	BOOST_CHECK_EQUAL("longitude", shape[0]);
 	BOOST_CHECK_EQUAL("latitude", shape[1]);
 	BOOST_CHECK_EQUAL("version", shape[2]);
-	BOOST_CHECK_EQUAL("time", shape[3]);
+	BOOST_CHECK_EQUAL(wdb::TimeHandler::validTimeName, shape[3]);
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
 
@@ -651,7 +652,7 @@ BOOST_FIXTURE_TEST_CASE(setsReferenceTimeVariable, Wdb2CdmBuilderFixture)
 
 	try
 	{
-		const std::string reftime = "forecast_reference_time";
+		const std::string reftime = wdb::TimeHandler::referenceTimeName;
 		const CDMVariable & reftimeVariable = cdm.getVariable(reftime);
 		BOOST_CHECK_EQUAL(CDM_DOUBLE, reftimeVariable.getDataType());
 		BOOST_CHECK_EQUAL("seconds since 1970-01-01 00:00:00 +00:00", cdm.getAttribute(reftime, "units").getStringValue());
@@ -727,7 +728,7 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingTime, Wdb2CdmBuilderFixture)
 		const wdb::Wdb2CdmBuilder di(gridData(), tr);
 		di.populate(cdm);
 
-		const CDMDimension & timeDimension = cdm.getDimension("time");
+		const CDMDimension & timeDimension = cdm.getDimension(wdb::TimeHandler::validTimeName);
 		BOOST_CHECK_EQUAL(3, timeDimension.getLength());
 
 		std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("pressure", 1 /*t("2011-03-31 07:00:00")*/);
@@ -756,7 +757,7 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingVersion, Wdb2CdmBuilderFixture)
 	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
-	const CDMDimension & timeDimension = cdm.getDimension("time");
+	const CDMDimension & timeDimension = cdm.getDimension(wdb::TimeHandler::validTimeName);
 	BOOST_CHECK_EQUAL(2, timeDimension.getLength());
 
 	const CDMDimension & versionDimension = cdm.getDimension("version");
@@ -801,7 +802,7 @@ BOOST_FIXTURE_TEST_CASE(sliceReferenceTime, Wdb2CdmBuilderFixture)
 	di.populate(cdm);
 
 	SliceBuilder slicer(cdm, tr.cfName(defaultParameter.name()));
-	slicer.setStartAndSize("forecast_reference_time", 2, 1);
+	slicer.setStartAndSize(wdb::TimeHandler::referenceTimeName, 2, 1);
 
 	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), slicer, cdm);
 
@@ -823,7 +824,7 @@ BOOST_FIXTURE_TEST_CASE(sliceValidTime, Wdb2CdmBuilderFixture)
 	di.populate(cdm);
 
 	SliceBuilder slicer(cdm, "temperature");
-	slicer.setStartAndSize("time", 1, 1);
+	slicer.setStartAndSize(wdb::TimeHandler::validTimeName, 1, 1);
 
 	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer, cdm);
 

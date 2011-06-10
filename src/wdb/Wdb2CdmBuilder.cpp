@@ -175,9 +175,9 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 		if ( index_.levelsForParameter(parameter).size() > 1 )
 			dimensions.push_back(config_.cfName(index_.levelTypeForParameter(parameter).name()));
 		if ( index_.timesForParameter(parameter).size() > 1 )
-			dimensions.push_back("time");
+			dimensions.push_back(TimeHandler::validTimeName);
 		if ( index_.referenceTimesForParameter(parameter).size() > 1 )
-			dimensions.push_back("forecast_reference_time");
+			dimensions.push_back(TimeHandler::referenceTimeName);
 
 
 

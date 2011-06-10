@@ -78,12 +78,16 @@ public:
 	};
 	Dimension unlimitedDimension() const;
 
+	static const std::string referenceTimeName;
+	static const std::string validTimeName;
+	static const std::string timeOffsetName;
 
 private:
 	GridData::Time getReferenceTime(size_t unLimDimPos) const;
 
-	static const std::string referenceTimeName;
-	static const std::string validTimeName;
+	void addReferenceTimeToCdm(CDM & cdm) const;
+	void addTimeOffsetToCdm(CDM & cdm) const;
+	void addValidTimeToCdm(CDM & cdm) const;
 
 	const WdbIndex & index_;
 };

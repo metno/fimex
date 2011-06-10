@@ -61,6 +61,43 @@ GridData::Time timeFromData(const boost::shared_ptr<Data> & data, int index = 0)
 }
 }
 
+#define CHECK_ATTRIBUTE(variable, attribute, expected_value) { \
+		CDMAttribute a; \
+		if ( cdm.getAttribute(variable, attribute, a) ) \
+			BOOST_CHECK_EQUAL(expected_value, a.getStringValue()); \
+		else \
+			BOOST_FAIL("Missing " attribute " attribute"); \
+		} \
+
+
+BOOST_FIXTURE_TEST_CASE(timeIndex, TimeHandlerFixture)
+{
+	add("2011-03-31 06:00:00");
+	add("2011-03-31 18:00:00");
+	add("2011-03-31 12:00:00");
+	add("2011-04-01 06:00:00");
+
+	WdbIndex index(gridData());
+	TimeHandler timeHandler(index);
+	timeHandler.addToCdm(cdm);
+
+	try
+	{
+		const CDMDimension & dim = cdm.getDimension(TimeHandler::validTimeName);
+		BOOST_CHECK_EQUAL(4, dim.getLength());
+	}
+	catch ( CDMException & e )
+	{
+		BOOST_FAIL(e.what());
+	}
+
+	CHECK_ATTRIBUTE(TimeHandler::validTimeName, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+	CHECK_ATTRIBUTE(TimeHandler::validTimeName, "long_name", "forecast (valid) time");
+	CHECK_ATTRIBUTE(TimeHandler::validTimeName, "standard_name", "time");
+	CHECK_ATTRIBUTE(TimeHandler::validTimeName, "axis", "T");
+}
+
+
 BOOST_FIXTURE_TEST_CASE(timeIndexLoopkup, TimeHandlerFixture)
 {
 	add("2011-03-31 06:00:00");
@@ -75,7 +112,7 @@ BOOST_FIXTURE_TEST_CASE(timeIndexLoopkup, TimeHandlerFixture)
 	GridData::Time t = boost::posix_time::time_from_string("2011-03-31 06:00:00");
 	boost::posix_time::time_duration offset(6, 0, 0);
 
-	const CDMVariable & timeVar = cdm.getVariable("time");
+	const CDMVariable & timeVar = cdm.getVariable(TimeHandler::validTimeName);
 
 	BOOST_CHECK_EQUAL(t,                timeFromData(timeHandler.getData(timeVar, 0)));
 	BOOST_CHECK_EQUAL(t + offset,       timeFromData(timeHandler.getData(timeVar, 1)));
@@ -92,7 +129,7 @@ BOOST_FIXTURE_TEST_CASE(throwOnInvalidTimeIndexLoopkup, TimeHandlerFixture)
 	TimeHandler timeHandler(index);
 	timeHandler.addToCdm(cdm);
 
-	const CDMVariable & timeVar = cdm.getVariable("time");
+	const CDMVariable & timeVar = cdm.getVariable(TimeHandler::validTimeName);
 	timeHandler.getData(timeVar, 0);
 	timeHandler.getData(timeVar, 1);
 	BOOST_CHECK_THROW(timeHandler.getData(timeVar, 3), CDMException);
@@ -110,7 +147,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimes, TimeHandlerFixture)
 	GridData::Time t1 = boost::posix_time::time_from_string("2011-05-29 00:00:00");
 	GridData::Time t2 = boost::posix_time::time_from_string("2011-05-30 00:00:00");
 
-	const CDMVariable & timeVar = cdm.getVariable("forecast_reference_time");
+	const CDMVariable & timeVar = cdm.getVariable(TimeHandler::referenceTimeName);
 	BOOST_CHECK_EQUAL(t1, timeFromData(timeHandler.getData(timeVar, 0)));
 	BOOST_CHECK_EQUAL(t2, timeFromData(timeHandler.getData(timeVar, 1)));
 	BOOST_CHECK_THROW(timeHandler.getData(timeVar, 2), CDMException);
@@ -127,7 +164,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesCreatesReferenceTimeDimension, TimeHan
 
 	try
 	{
-		const CDMDimension & dim = cdm.getDimension("forecast_reference_time");
+		const CDMDimension & dim = cdm.getDimension(TimeHandler::referenceTimeName);
 		BOOST_CHECK_EQUAL(2, dim.getLength());
 	}
 	catch ( CDMException & e )
@@ -135,6 +172,10 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesCreatesReferenceTimeDimension, TimeHan
 		BOOST_FAIL(e.what());
 	}
 
+	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "long_name", "Run time for model");
+	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "standard_name", "forecast_reference_time");
+	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "units", "seconds since 1970-01-01 00:00:00 +00:00");
+	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "_CoordinateAxisType", "RunTime");
 }
 
 BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, TimeHandlerFixture)
@@ -150,10 +191,10 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, TimeHandlerFixture)
 
 	GridData::Time referenceTime1 = boost::posix_time::time_from_string("2011-05-29 00:00:00");
 
-	const CDMVariable & refTimeVar = cdm.getVariable("forecast_reference_time");
+	const CDMVariable & refTimeVar = cdm.getVariable(TimeHandler::referenceTimeName);
 	BOOST_CHECK_EQUAL(referenceTime1, timeFromData(timeHandler.getData(refTimeVar, 0)));
 
-	const CDMVariable & timeVar = cdm.getVariable("time");
+	const CDMVariable & timeVar = cdm.getVariable(TimeHandler::validTimeName);
 	boost::shared_ptr<Data> times = timeHandler.getData(timeVar, 0);
 
 
@@ -163,6 +204,35 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, TimeHandlerFixture)
 	BOOST_REQUIRE_EQUAL(2, times->size());
 	BOOST_CHECK_EQUAL(validTime1, timeFromData(times, 0));
 	BOOST_CHECK_EQUAL(validTime2, timeFromData(times, 1));
+}
+
+BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimesCreatesTimeOffsetVariable, TimeHandlerFixture)
+{
+	add("2011-05-29 00:00:00", "2011-05-29 00:00:00");
+	add("2011-05-30 00:00:00", "2011-05-29 00:00:00");
+	add("2011-05-30 00:00:00", "2011-05-30 00:00:00");
+	add("2011-05-31 00:00:00", "2011-05-30 00:00:00");
+
+	WdbIndex index(gridData());
+	TimeHandler timeHandler(index);
+	timeHandler.addToCdm(cdm);
+
+	const CDMVariable & offsetVar = cdm.getVariable(TimeHandler::timeOffsetName);
+	boost::shared_ptr<Data> d = timeHandler.getData(offsetVar, 0);
+	BOOST_REQUIRE_EQUAL(2, d->size());
+	const boost::shared_array<double> array = d->asConstDouble();
+	BOOST_CHECK_EQUAL(0, array[0]);
+	BOOST_CHECK_EQUAL(24*60*60, array[1]);
+
+	const std::vector<std::string> & shape = offsetVar.getShape();
+	BOOST_REQUIRE_EQUAL(1, shape.size());
+	BOOST_CHECK_EQUAL(TimeHandler::timeOffsetName, shape[0]);
+
+	CHECK_ATTRIBUTE(TimeHandler::timeOffsetName, "long_name", "offset since referenceTime");
+	CHECK_ATTRIBUTE(TimeHandler::timeOffsetName, "units", "seconds");
+
+	const CDMDimension & dim = cdm.getDimension(TimeHandler::timeOffsetName);
+	BOOST_CHECK_EQUAL(2, dim.getLength());
 }
 
 

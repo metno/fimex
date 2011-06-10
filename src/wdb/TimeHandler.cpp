@@ -38,8 +38,9 @@ namespace MetNoFimex
 namespace wdb
 {
 
-const std::string TimeHandler::referenceTimeName = "forecast_reference_time";
+const std::string TimeHandler::referenceTimeName = "runtime";
 const std::string TimeHandler::validTimeName = "time";
+const std::string TimeHandler::timeOffsetName = "offsetTime";
 
 
 TimeHandler::TimeHandler(const WdbIndex & index) :
@@ -53,46 +54,9 @@ TimeHandler::~TimeHandler()
 
 void TimeHandler::addToCdm(CDM & cdm) const
 {
-	const std::set<GridData::Time> & referenceTimes = index_.referenceTimes();
-	const std::set<GridData::Duration> & validTimes = index_.allTimes();
-
-	Dimension unlimited = unlimitedDimension();
-
-	std::vector<std::string> runShape;
-	const std::string reftime = referenceTimeName;
-	if ( referenceTimes.size() > 1 )
-	{
-		//throw CDMException("Only one reference time is allowed");
-		CDMDimension referenceTimeDimension(reftime, referenceTimes.size());
-		if ( unlimited == ReferenceTime )
-			referenceTimeDimension.setUnlimited(true);
-
-		cdm.addDimension(referenceTimeDimension);
-		runShape.push_back(reftime);
-	}
-	cdm.addVariable(CDMVariable(reftime, CDM_DOUBLE, runShape));
-	cdm.addAttribute(reftime, CDMAttribute("long_name", "Run time for model"));
-	cdm.addAttribute(reftime, CDMAttribute("standard_name", "forecast_reference_time"));
-	cdm.addAttribute(reftime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
-	cdm.addAttribute(reftime, CDMAttribute("_CoordinateAxisType", "RunTime"));
-
-
-	std::string validTime = validTimeName;
-	std::vector<std::string> timeShape;
-	timeShape.push_back(validTime);
-	if ( referenceTimes.size() > 1)
-		timeShape.push_back(reftime);
-
-	cdm.addVariable(CDMVariable(validTime, CDM_DOUBLE, timeShape));
-	cdm.addAttribute(validTime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
-	cdm.addAttribute(validTime, CDMAttribute("long_name", "forecast (valid) time"));
-	cdm.addAttribute(validTime, CDMAttribute("standard_name", "time"));
-	cdm.addAttribute(validTime, CDMAttribute("axis", "T"));
-
-	CDMDimension time(validTime, validTimes.size());
-	if ( unlimited == ValidTime )
-		time.setUnlimited(true);
-	cdm.addDimension(time);
+	addReferenceTimeToCdm(cdm);
+	addTimeOffsetToCdm(cdm);
+	addValidTimeToCdm(cdm);
 }
 
 namespace
@@ -143,6 +107,14 @@ boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_
 			ret = createData(CDM_DOUBLE, 1, secondsSinceEpoch(refTime + * thisTime));
 		}
 	}
+	else if ( varName == timeOffsetName )
+	{
+		const std::set<GridData::Duration> & allTimes = index_.allTimes();
+		ret = createData(CDM_DOUBLE, allTimes.size());
+		unsigned i = 0;
+		BOOST_FOREACH(const GridData::Duration & t, allTimes)
+			ret->setValue(i ++, t.total_seconds());
+	}
 	else
 		throw CDMException("Unrecognized variable name for time: " + varName);
 
@@ -151,7 +123,9 @@ boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_
 
 bool TimeHandler::canHandle(const std::string & wdbName) const
 {
-	return wdbName == validTimeName or wdbName == referenceTimeName;
+	return wdbName == validTimeName
+			or wdbName == referenceTimeName
+			or wdbName == timeOffsetName;
 }
 
 TimeHandler::Dimension TimeHandler::unlimitedDimension() const
@@ -181,6 +155,74 @@ GridData::Time TimeHandler::getReferenceTime(size_t unLimDimPos) const
 	else
 		return * index_.referenceTimes().begin();
 }
+
+void TimeHandler::addReferenceTimeToCdm(CDM & cdm) const
+{
+	const std::set<GridData::Time> & referenceTimes = index_.referenceTimes();
+
+	Dimension unlimited = unlimitedDimension();
+
+	std::vector<std::string> runShape;
+	const std::string reftime = referenceTimeName;
+	if ( referenceTimes.size() > 1 )
+	{
+		CDMDimension referenceTimeDimension(referenceTimeName, referenceTimes.size());
+		if ( unlimited == ReferenceTime )
+			referenceTimeDimension.setUnlimited(true);
+
+		cdm.addDimension(referenceTimeDimension);
+		runShape.push_back(referenceTimeName);
+	}
+	cdm.addVariable(CDMVariable(referenceTimeName, CDM_DOUBLE, runShape));
+	cdm.addAttribute(referenceTimeName, CDMAttribute("long_name", "Run time for model"));
+	cdm.addAttribute(referenceTimeName, CDMAttribute("standard_name", "forecast_reference_time"));
+	cdm.addAttribute(referenceTimeName, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
+	cdm.addAttribute(referenceTimeName, CDMAttribute("_CoordinateAxisType", "RunTime"));
+}
+
+void TimeHandler::addTimeOffsetToCdm(CDM & cdm) const
+{
+	const std::set<GridData::Time> & referenceTimes = index_.referenceTimes();
+	const std::set<GridData::Duration> & validTimes = index_.allTimes();
+
+	if ( referenceTimes.size() > 1 and validTimes.size() > 1 )
+	{
+		cdm.addDimension(CDMDimension(timeOffsetName, validTimes.size()));
+
+		cdm.addVariable(CDMVariable(timeOffsetName, CDM_DOUBLE, std::vector<std::string>(1, timeOffsetName)));
+		cdm.addAttribute(timeOffsetName, CDMAttribute("long_name", "offset since referenceTime"));
+		cdm.addAttribute(timeOffsetName, CDMAttribute("units", "seconds"));
+	}
+}
+
+void TimeHandler::addValidTimeToCdm(CDM & cdm) const
+{
+	const std::set<GridData::Time> & referenceTimes = index_.referenceTimes();
+	const std::set<GridData::Duration> & validTimes = index_.allTimes();
+
+	Dimension unlimited = unlimitedDimension();
+
+	std::string validTime = validTimeName;
+	std::vector<std::string> timeShape;
+	timeShape.push_back(validTimeName);
+	if ( referenceTimes.size() > 1)
+		timeShape.push_back(referenceTimeName);
+
+	cdm.addVariable(CDMVariable(validTimeName, CDM_DOUBLE, timeShape));
+	cdm.addAttribute(validTimeName, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
+	cdm.addAttribute(validTimeName, CDMAttribute("long_name", "forecast (valid) time"));
+	cdm.addAttribute(validTimeName, CDMAttribute("standard_name", "time"));
+	cdm.addAttribute(validTimeName, CDMAttribute("axis", "T"));
+
+//	if ( referenceTimes.size() == 1 )
+//	{
+		CDMDimension time(validTimeName, validTimes.size());
+		if ( unlimited == ValidTime )
+			time.setUnlimited(true);
+		cdm.addDimension(time);
+//	}
+}
+
 
 }
 }
