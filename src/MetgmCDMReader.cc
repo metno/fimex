@@ -1,4 +1,4 @@
-#include "metgm_cdmreader.hpp"
+#include "MetgmCDMReader.h"
 
 // METGM C lib
 //
