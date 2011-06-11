@@ -1,4 +1,4 @@
-#include "metgm_cdmwriter.hpp"
+#include "MetgmCDMWriter.h"
 
 // fimex
 #include "fimex/CDM.h"
