@@ -165,6 +165,12 @@ if test "x$with_grib_api" = "xyes"; then
     AC_DEFINE([HAVE_GRIBAPI_H], 1, 'Define to 1 if you have the <grib_api.h> header file.')
 fi
 
+MIFI_USELIB([metgm_api], [mgm_new_handle], [])
+AM_CONDITIONAL([HAVE_METGMAPI], [test "x$with_metgm_api" = "xyes"])
+if test "x$with_metgm_api" = "xyes"; then
+    AC_DEFINE([HAVE_METGMAPI_H], 1, 'Define to 1 if you have the <metgm.h> header file.')
+fi
+
 AC_LANG_POP(C++)
 
 
