@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metgm>
+
+<!-- rename a dimension, make sure to rename the variable-dimension, too -->
+<!-- <dimension name="x_c" orgName="x" /> -->
+
+<!-- map variable to metgm p_id value -->
+<variable name="model_topography_distance" p_id="0" >
+    <attribute name="standard_name" value="topography" type="string" />
+    <attribute name="metgm_p_id"   value="0"    type="short" />
+</variable>
+
+<!--<variable name="altitude" p_id="0" >
+    <attribute name="standard_name" value="topography" type="string" />
+    <attribute name="metgm_p_id"   value="0"    type="short" />
+</variable>-->
+
+<variable name="horizontal_wind_speed_from_north_to_south" p_id="3" >
+    <attribute name="standard_name" value="northward_wind" type="string" />
+    <attribute name="metgm_p_id"    value="3"              type="short" />
+    <attribute name="_FillValue"    value="9999"           type="float" />
+    <attribute name="scale_factor"  value="-1"             type="float" />
+</variable>
+
+<variable name="vertical_wind_speed" p_id="4" >
+    <attribute name="standard_name" value="upward_air_velocity" type="string" />
+    <attribute name="metgm_p_id"    value="4"                   type="short" />
+</variable>
+
+<variable name="air_temperature" p_id="5">
+    <attribute name="standard_name" value="air_temperature" type="string" />
+    <attribute name="metgm_p_id"    value="5"               type="short" />
+</variable>
+
+<!--variable name="air_temperature_MSL" p_id="5">
+    <attribute name="standard_name" value="air_temperature" type="string" />
+    <attribute name="metgm_p_id"    value="5"               type="short" />
+</variable>
+
+<variable name="air_temperature_GND" p_id="5">
+    <attribute name="standard_name" value="air_temperature" type="string" />
+    <attribute name="metgm_p_id"    value="5"               type="short" />
+</variable-->
+
+<!--variable name="relative_humidity" p_id="6">
+    <attribute name="standard_name" value="relative_humidity" type="string" />
+    <attribute name="metgm_p_id" type="short" value="6"/>
+</variable-->
+
+<variable name="relative_humidity_GND" p_id="6">
+    <attribute name="standard_name" value="relative_humidity" type="string" />
+    <attribute name="metgm_p_id" type="short" value="6"/>
+</variable>
+
+<variable name="sea_level_pressure" p_id="7">
+    <attribute name="standard_name" value="air_pressure" type="string" />
+    <attribute name="metgm_p_id" type="short" value="7"/>
+</variable>
+
+<variable name="pressure_GND" p_id="7">
+    <attribute name="standard_name" value="air_pressure" type="string" />
+    <attribute name="metgm_p_id" type="short" value="7"/>
+</variable>
+
+<variable name="pressure_MSL" p_id="7">
+    <attribute name="standard_name" value="air_pressure" type="string" />
+    <attribute name="metgm_p_id" type="short" value="7"/>
+</variable>
+
+<variable name="horizontal_wind_speed_from_west_to_east" p_id="2" type="float">
+    <attribute name="standard_name" value="eastward_wind" type="string" />
+    <attribute name="metgm_p_id" type="short" value="2"/>
+</variable>
+
+<variable name="x_wind_10m" p_id="2" type="float">
+    <attribute name="standard_name" value="eastward_wind" type="string" />
+    <attribute name="metgm_p_id" type="short" value="2"/>
+</variable>
+
+<metgm_p_id name="humidity" p_id="6">
+    <attribute name="standard_name" value="relative_humidity" type="string" />
+</metgm_p_id>
+
+<!-- add/reassign a new variable attribute -->
+<!--
+<variable name="air_temperature">
+   <attribute name="standard_name" value="temperature" type="string" />
+</variable> -->
+
+<!-- change the type of a variable -->
+<!--
+<variable name="precipitation_amount" type="short">
+   <attribute name="_FillValue" value="-32767" type="short" />
+   <attribute name="scale_factor" value="0.001" type="float" />
+   <attribute name="add_offset" value="0" type="double" />
+</variable>
+-->
+
+<!-- rename a variable -->
+<!--
+<variable orgName="sea_level_pressure" name="sea_pressure" />
+<variable orgName="x" name="x_c" />
+-->
+
+<!-- <variable name="surface_snow_sickness"> -->
+   <!--remove a variable-attribute -->
+   <!-- <remove name="long_name" type="attribute"/> -->
+<!-- </variable> -->
+
+<!-- add/reassign a new global attribute -->
+<!--<attribute name="max_time" value="2008-05-28" type="string" / -->
+<!-- rename a attribute -->
+<!-- <attribute orgName="min_time" name="minimum_time" /> -->
+
+<!-- remove a global attribute -->
+<!--<remove name="comment" type="attribute" /> -->
+<!-- remove a variable -->
+<!--<remove name="land_ice_area_fraction" type="variable" /> -->
+
+<metgm_meta_data>
+        <attribute name="metgm_analysis_date_time" value="2005-02-04T00:00:00" type="string" />
+        <attribute name="metgm_start_date_time" value="2005-02-04T06:00:00" type="string" />
+        <attribute name="metgm_version" value="STANAG_6022_Edition_2" type="string" />
+        <attribute name="metgm_data_type" value="2 - Numerical weather prediction" type="string" />
+        <attribute name="metgm_production_nation" value="FRA" type="string" />
+        <attribute name="metgm_model_type" value="modelType-------" type="string" />
+</metgm_meta_data>
+
+</metgm>
