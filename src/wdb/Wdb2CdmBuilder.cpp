@@ -201,6 +201,8 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 		setAttribute(attributes, "_FillValue", std::numeric_limits<float>::quiet_NaN());
 
 	   std::string coordinates = gridInfo->getCoordinatesAttribute();
+	   BOOST_FOREACH(const DataHandler::Ptr & handler, dataHandlers_)
+	   	   handler->addToCoordinatesAttribute(coordinates, parameter);
 	   if ( not coordinates.empty() )
 		   setAttribute(attributes, "coordinates", coordinates);
 	   setAttribute(attributes, "grid_mapping", gridInfo->getProjectionName());

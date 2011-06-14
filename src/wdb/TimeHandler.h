@@ -54,23 +54,25 @@ public:
 	 * Times will be extracted and calculated from the given index object
 	 */
 	explicit TimeHandler(const WdbIndex & index);
-	~TimeHandler();
+	virtual ~TimeHandler();
 
 	/**
 	 * Add relevant time dimensions and -variables to the given CDM object.
 	 */
-	void addToCdm(CDM & cdm) const;
+	virtual void addToCdm(CDM & cdm) const;
 
 	/**
 	 * Get data for the given variable name and unlimited dimension
 	 */
-	boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
+	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
 	/**
 	 * Does the given cdm variable name refer to anything that this object can
 	 * handle via the getData method?
 	 */
-	bool canHandle(const std::string & wdbName) const;
+	virtual bool canHandle(const std::string & wdbName) const;
+
+	virtual void addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const;
 
 	enum Dimension
 	{

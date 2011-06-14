@@ -128,6 +128,19 @@ bool TimeHandler::canHandle(const std::string & wdbName) const
 			or wdbName == timeOffsetName;
 }
 
+void TimeHandler::addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const
+{
+	std::cout << "OK: " << wdbName;
+	if ( index_.hasManyReferenceTimes(wdbName) and index_.hasManyValidTimeOffsets(wdbName) )
+	{
+		if ( not coordinates.empty() )
+			coordinates += ' ';
+		coordinates += validTimeName;
+		std::cout << " = " << coordinates;
+	}
+	std::cout << std::endl;
+}
+
 TimeHandler::Dimension TimeHandler::unlimitedDimension() const
 {
 	if ( index_.referenceTimes().size() > 1 )

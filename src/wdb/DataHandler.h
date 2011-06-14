@@ -69,6 +69,11 @@ public:
 	 */
 	virtual bool canHandle(const std::string & wdbName) const =0;
 
+	/**
+	 * Override this if subclass creates variables that needs entries in the coordinates attribute
+	 */
+	virtual void addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const {}
+
 	typedef boost::shared_ptr<DataHandler> Ptr;
 };
 
