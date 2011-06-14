@@ -50,6 +50,9 @@
 #ifdef HAVE_LIBPQ
 #include "fimex/WdbCDMReader.h"
 #endif
+#ifdef HAVE_METGMAPI_H
+#include "fimex/MetgmCDMReader.h"
+#endif
 
 
 namespace MetNoFimex {
@@ -113,7 +116,8 @@ int CDMFileReaderFactory::detectFileType(const std::string & fileName)
                 type == "grb1" || type == "grib1" ||
                     type == "grb2" || type == "grib2")
             return MIFI_FILETYPE_GRIB;
-
+        if (type == "metgm")
+            return MIFI_FILETYPE_METGM;
     }
     return MIFI_FILETYPE_UNKNOWN;
 }
@@ -146,6 +150,13 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
             reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, fileName));
         }
         return reader;
+    }
+#endif
+#ifdef HAVE_METGMAPI_H
+    case MIFI_FILETYPE_METGM: {
+        std::vector<std::string> files(args.begin(), args.end());
+        files.insert(files.begin(), fileName);
+        return boost::shared_ptr<CDMReader>(new METGM_CDMReader(fileName, configFile));
     }
 #endif
 #ifdef HAVE_LIBPQ
