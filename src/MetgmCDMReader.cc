@@ -1111,35 +1111,24 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> METGM_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos) throw(CDMException)
     {
-//        if(varName == "time") {
-//            std::cerr << __FUNCTION__ << ":"
-//                      << __LINE__     << ":"
-//                      << "reading time"
-//                << std::endl;
-//        }
-//        if(varName.find("air_temperature") != std::string::npos) {
-//            std::cerr << __FUNCTION__ << ":"
-//                      << __LINE__     << ":"
-//                      << "reading " << varName
-//                << std::endl;
-//        }
+        short callResult = MGM_OK;
+
+//        std::cerr << __FUNCTION__ << ":"
+//                  << __LINE__     << ":"
+//                  << "for varName " << varName
+//                  << std::endl;
+
         /**
           * dont't use conts & as we will insert data when we get it
           */
-        CDMVariable& variable = cdm_->getVariable(varName);
-//        if(varName.find("_MSL") != std::string::npos) {
-//            std::cerr << "MSL found" << std::endl;
-//        }
-
-        CDMAttribute metgmPid;
         short p_id = -1;
-        if(cdm_->getAttribute(variable.getName(), "metgm_p_id", metgmPid)) {
-            boost::shared_ptr<Data> ptrPid = metgmPid.getData();
-            p_id = ptrPid->asConstShort()[0];
-        }
-
-        if(p_id >= 0 && cdmvariable2mgm_group3map_.find(varName) == cdmvariable2mgm_group3map_.end()) {
-            throw CDMException("for metgm param can't find group 3");
+        CDMAttribute metgmPid;
+        CDMVariable& variable = cdm_->getVariable(varName);
+        if(cdmvariable2mgm_group3map_.find(varName) != cdmvariable2mgm_group3map_.end()) {
+            if(cdm_->getAttribute(varName, "metgm_p_id", metgmPid)) {
+                boost::shared_ptr<Data> ptrPid = metgmPid.getData();
+                p_id = ptrPid->asConstShort()[0];
+            }
         }
 
         /**
@@ -1148,6 +1137,9 @@ namespace MetNoFimex {
         if(variable.hasData()) {
 //            std::cerr << "variable.hasData() == true" << std::endl;
             return getDataSliceFromMemory(variable, unLimDimPos);
+        } else {
+            if(p_id == -1)
+                return MetNoFimex::createData(CDM_FLOAT, 0);
         }
         // only time can be unLimDim
         if (unLimDimPos > timeVec_.size()) {
@@ -1162,42 +1154,25 @@ namespace MetNoFimex {
         // read group3 data until you match with initialPg3
         // in order to honor data reading sequence
         mgm_group3* fwdPg3 = mgm_new_group3();
-//        do {
-//            if(p_id < 0)
-//                break;
-//            short callResult = mgm_read_group3(metgmFileHandle_, metgmHandle_, fwdPg3);
-//            if(callResult != MGM_OK) {
-//                mgm_free_group3(fwdPg3);
-//                fwdPg3 = 0;
-//                break;
-//            }
-//            if(p_id == fwdPg3->p) {
-//                std::cerr << "checking fwdPg3 " << std::endl;
-//                if(initialPg3 != 0) {
-//                    if(initialPg3->p == fwdPg3->p
-//                       && initialPg3->pz == fwdPg3->pz
-//                       && initialPg3->pr == fwdPg3->pr) {
-//                        break;
-//                    }
-//                }
-//            }
-//            assert(mgm_skip_group4(metgmFileHandle_, metgmHandle_) == MGM_OK);
-//            assert(mgm_skip_group5(metgmFileHandle_, metgmHandle_) == MGM_OK);
-//        } while(true);
 
-//        assert(fwdPg3);
+        callResult = mgm_read_this_group3(metgmFileHandle_, metgmHandle_, p_id, fwdPg3);
+        if(callResult != MGM_OK) {
+            throw CDMException(metgmSource_ + std::string("---") + std::string(mgm_string_error(callResult)));
+        }
 
-
-        mgm_read_this_group3(metgmFileHandle_, metgmHandle_, p_id, fwdPg3);
         if(initialPg3 != 0) {
             while(mgm_group3_eq(metgmHandle_, fwdPg3, initialPg3) != MGM_OK) {
-                assert(mgm_read_next_group3(metgmFileHandle_, metgmHandle_, fwdPg3) == MGM_OK);
+                callResult = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, fwdPg3);
+                if(callResult != MGM_OK) {
+                    throw CDMException(metgmSource_ + std::string("---") + std::string(mgm_string_error(callResult)));
+                }
             }
         }
 
-        assert(fwdPg3);
+        if(fwdPg3 == 0 && p_id >=0)
+            throw CDMException("fwdPg3 is null");
 
-        short callResult = MGM_OK;
+        callResult = MGM_OK;
 
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         const CDMDimension* tDimension = 0;
