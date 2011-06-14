@@ -28,6 +28,7 @@
 #define MIFI_FILETYPE_NCML   2
 #define MIFI_FILETYPE_GRIB   3
 #define MIFI_FILETYPE_WDB    4
+#define MIFI_FILETYPE_METGM  5
 
 #ifdef __cplusplus
 extern "C" {

@@ -49,6 +49,7 @@ static std::vector<std::string> getFiletypeNames_()
         addName_(MIFI_FILETYPE_NCML,   "ncml");
         addName_(MIFI_FILETYPE_GRIB,   "grib");
         addName_(MIFI_FILETYPE_WDB,    "wdb");
+        addName_(MIFI_FILETYPE_METGM,  "metgm");
     }
     return names_;
 }
@@ -105,6 +106,13 @@ int fimexHas(int fileType)
 #else
     return 0;
 #endif
+    case MIFI_FILETYPE_METGM:
+#ifdef HAVE_METGMAPI_H
+    return 1;
+#else
+    return 0;
+#endif
+
     default: return 0;
     }
 }
