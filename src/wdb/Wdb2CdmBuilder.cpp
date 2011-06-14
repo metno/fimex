@@ -34,7 +34,6 @@
 #include "config/GlobalWdbConfiguration.h"
 #include "gridInformation/GridInformation.h"
 #include <fimex/CDM.h>
-#include <fimex/CDMDimension.h>
 #include <fimex/SliceBuilder.h>
 #include <fimex/coordSys/Projection.h>
 #include <set>
@@ -85,42 +84,53 @@ std::set<float> Wdb2CdmBuilder::getLevelValues(const std::string & levelName) co
 
 std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & wdbName, const SliceBuilder & slicer, const CDM & cdm) const
 {
-	std::vector<std::string> axis;
-	std::vector<std::string> stdName;
-	BOOST_FOREACH( const std::string & dim, slicer.getDimensionNames() )
+	std::vector<std::string> dimensions;
+	getDimensionList(dimensions, wdbName);
+
+	std::vector<size_t> start = slicer.getDimensionStartPositions();
+	std::vector<size_t> size = slicer.getDimensionSizes();
+
+
+	std::vector<size_t>::iterator st = start.begin();
+	std::advance(st, 2); // skip x/y dimension
+	std::vector<size_t>::iterator sz = size.begin();
+	std::advance(sz, 2); // skip x/y dimension
+	if ( not index_.hasManyVersions(wdbName) )
 	{
-		CDMAttribute a;
-		if ( cdm.getAttribute(dim, "axis", a) )
-				axis.push_back(a.getStringValue());
-		else
-			axis.push_back("");
-		stdName.push_back(cdm.getAttribute(dim, "standard_name").getStringValue());
+		st = start.insert(st, 0);
+		sz = size.insert(sz, 1);
 	}
-
-	const std::vector<size_t> & start = slicer.getDimensionStartPositions();
-	const std::vector<size_t> & size = slicer.getDimensionSizes();
-
-	std::vector<WdbIndex::Slice> slices(6, WdbIndex::Slice(0, 1));
-
-	for ( unsigned i = 0; i < axis.size(); ++ i )
+	++ st;
+	++ sz;
+	if ( not index_.hasManyLevels(wdbName) )
 	{
-		WdbIndex::Slice slice(start[i], size[i]);
-
-		if ( stdName[i] == "forecast_reference_time" )
-			slices[0] = slice;
-		else if ( axis[i] == "T" )
-			slices[1] = slice;
-		else if ( axis[i] == "Z" )
-			slices[2] = slice;
-		else if ( stdName[i] == "version" )
-			slices[3] = slice;
-		else if ( axis[i] == "Y" )
-			slices[4] = slice;
-		else if ( axis[i] == "X" )
-			slices[5] = slice;
+		st = start.insert(st, 0);
+		sz = size.insert(sz, 1);
 	}
+	++ st;
+	++ sz;
+	if ( not index_.hasManyValidTimeOffsets(wdbName) )
+	{
+		st = start.insert(st, 0);
+		sz = size.insert(sz, 1);
+	}
+	++ st;
+	++ sz;
+	if ( not index_.hasManyReferenceTimes(wdbName) )
+	{
+		st = start.insert(st, 0);
+		sz = size.insert(sz, 1);
+	}
+	++ st;
+	++ sz;
 
-	return index_.getData(wdbName, slices[0], slices[1], slices[2], slices[3]);
+	if ( start.size() != 6 or size.size() != 6 )
+		throw CDMException("Internal error: Generating indices failed");
+
+	std::reverse(start.begin(), start.end());
+	std::reverse(size.begin(), size.end());
+
+	return index_.getData(wdbName, start, size);
 }
 
 
@@ -153,6 +163,24 @@ namespace
 	}
 }
 
+void Wdb2CdmBuilder::getDimensionList(std::vector<std::string> & out, const std::string & parameter) const
+{
+	gridInformation().addSpatialDimensions(out);
+
+	if ( index_.versionsForParameter(parameter).size() > 1 )
+		out.push_back("version");
+	if ( index_.levelsForParameter(parameter).size() > 1 )
+		out.push_back(config_.cfName(index_.levelTypeForParameter(parameter).name()));
+	if ( index_.timesForParameter(parameter).size() > 1 )
+	{
+		if ( index_.referenceTimesForParameter(parameter).size() > 1 )
+			out.push_back(TimeHandler::timeOffsetName);
+		else
+			out.push_back(TimeHandler::validTimeName);
+	}
+	if ( index_.referenceTimesForParameter(parameter).size() > 1 )
+		out.push_back(TimeHandler::referenceTimeName);
+}
 
 void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 {
@@ -165,28 +193,12 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 
 		std::string dimension = config_.cfName(parameter);
 
-		std::vector<std::string> spatialDimensions;
-		gridInformation().addSpatialDimensions(spatialDimensions);
-
-
-		std::vector<std::string> dimensions = spatialDimensions;
-		if ( index_.versionsForParameter(parameter).size() > 1 )
-			dimensions.push_back("version");
-		if ( index_.levelsForParameter(parameter).size() > 1 )
-			dimensions.push_back(config_.cfName(index_.levelTypeForParameter(parameter).name()));
-		if ( index_.timesForParameter(parameter).size() > 1 )
-			dimensions.push_back(TimeHandler::validTimeName);
-		if ( index_.referenceTimesForParameter(parameter).size() > 1 )
-			dimensions.push_back(TimeHandler::referenceTimeName);
-
-
-
+		std::vector<std::string> dimensions;
+		getDimensionList(dimensions, parameter);
 		cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, dimensions));
 
 		GlobalWdbConfiguration::AttributeList attributes = config_.getAttributes(parameter, index_.unitForParameter(parameter));
 		setAttribute(attributes, "_FillValue", std::numeric_limits<float>::quiet_NaN());
-
-//		grids_[d.parameter().name()]
 
 	   std::string coordinates = gridInfo->getCoordinatesAttribute();
 	   if ( not coordinates.empty() )

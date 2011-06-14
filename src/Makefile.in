@@ -47,8 +47,11 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@                         GribFileIndex.cc \
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
 
-@HAVE_MILIB_TRUE@am__append_3 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
-@HAVE_LIBPQ_TRUE@am__append_4 = WdbCDMReader.cc wdb/WdbIndex.h \
+@HAVE_METGMAPI_TRUE@am__append_3 = MetgmCDMReader.cc \
+@HAVE_METGMAPI_TRUE@                         MetgmCDMWriter.cc
+
+@HAVE_MILIB_TRUE@am__append_4 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
+@HAVE_LIBPQ_TRUE@am__append_5 = WdbCDMReader.cc wdb/WdbIndex.h \
 @HAVE_LIBPQ_TRUE@	wdb/WdbIndex.cpp wdb/DataSummary.h \
 @HAVE_LIBPQ_TRUE@	wdb/DataSummary.cpp wdb/ParameterData.h \
 @HAVE_LIBPQ_TRUE@	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
@@ -57,8 +60,6 @@ host_triplet = @host@
 @HAVE_LIBPQ_TRUE@	wdb/LevelHandler.h wdb/LevelHandler.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/VersionHandler.h wdb/VersionHandler.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/GridHandler.h wdb/GridHandler.cpp \
-@HAVE_LIBPQ_TRUE@	wdb/ValueParameterHandler.h \
-@HAVE_LIBPQ_TRUE@	wdb/ValueParameterHandler.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.h \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/LatLonGridInformation.h \
@@ -87,11 +88,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/wdb/config/make.mk \
 	$(srcdir)/wdb/database_access/make.mk \
 	$(srcdir)/wdb/gridInformation/make.mk $(srcdir)/wdb/make.mk
-@HAVE_LIBPQ_TRUE@am__append_5 = @BOOST_PROGRAM_OPTIONS_LIB@
-
-@HAVE_METGMAPI_TRUE@am__append_6 = MetgmCDMWriter.cc \
-@HAVE_METGMAPI_TRUE@                   MetgmCDMReader.cc
-
+@HAVE_LIBPQ_TRUE@am__append_6 = @BOOST_PROGRAM_OPTIONS_LIB@
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
@@ -176,16 +173,14 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GribUtils.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
-        MetgmCDMReader.cc MetgmCDMWriter.cc \
-	WdbCDMReader.cc wdb/WdbIndex.h wdb/WdbIndex.cpp \
-	wdb/DataSummary.h wdb/DataSummary.cpp wdb/ParameterData.h \
-	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
-	wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h wdb/TimeHandler.h \
-	wdb/TimeHandler.cpp wdb/LevelHandler.h wdb/LevelHandler.cpp \
-	wdb/VersionHandler.h wdb/VersionHandler.cpp wdb/GridHandler.h \
-	wdb/GridHandler.cpp wdb/ValueParameterHandler.h \
-	wdb/ValueParameterHandler.cpp \
+	GribUtils.cc MetgmCDMReader.cc MetgmCDMWriter.cc \
+	FeltCDMReader.cc Felt_Array.cc Felt_File.cc WdbCDMReader.cc \
+	wdb/WdbIndex.h wdb/WdbIndex.cpp wdb/DataSummary.h \
+	wdb/DataSummary.cpp wdb/ParameterData.h wdb/ParameterData.cpp \
+	wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h \
+	wdb/TimeHandler.h wdb/TimeHandler.cpp wdb/LevelHandler.h \
+	wdb/LevelHandler.cpp wdb/VersionHandler.h \
+	wdb/VersionHandler.cpp wdb/GridHandler.h wdb/GridHandler.cpp \
 	wdb/gridInformation/GridInformation.h \
 	wdb/gridInformation/GridInformation.cpp \
 	wdb/gridInformation/LatLonGridInformation.h \
@@ -215,22 +210,22 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl1.lo \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl2.lo GribCDMReader.lo \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
-@HAVE_MILIB_TRUE@am__objects_3 = FeltCDMReader.lo Felt_Array.lo \
+@HAVE_METGMAPI_TRUE@am__objects_3 = MetgmCDMReader.lo \
+@HAVE_METGMAPI_TRUE@	MetgmCDMWriter.lo
+@HAVE_MILIB_TRUE@am__objects_4 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
-@HAVE_LIBPQ_TRUE@am__objects_4 = WdbCDMReader.lo WdbIndex.lo \
+@HAVE_LIBPQ_TRUE@am__objects_5 = WdbCDMReader.lo WdbIndex.lo \
 @HAVE_LIBPQ_TRUE@	DataSummary.lo ParameterData.lo \
 @HAVE_LIBPQ_TRUE@	Wdb2CdmBuilder.lo TimeHandler.lo \
 @HAVE_LIBPQ_TRUE@	LevelHandler.lo VersionHandler.lo \
-@HAVE_LIBPQ_TRUE@	GridHandler.lo ValueParameterHandler.lo \
-@HAVE_LIBPQ_TRUE@	GridInformation.lo LatLonGridInformation.lo \
+@HAVE_LIBPQ_TRUE@	GridHandler.lo GridInformation.lo \
+@HAVE_LIBPQ_TRUE@	LatLonGridInformation.lo \
 @HAVE_LIBPQ_TRUE@	RotatedLatLonGridInformation.lo \
 @HAVE_LIBPQ_TRUE@	MetricGridInformation.lo Parameter.lo \
 @HAVE_LIBPQ_TRUE@	Level.lo WdbConnection.lo \
 @HAVE_LIBPQ_TRUE@	WciReadQuerySpecification.lo DataSanitizer.lo \
 @HAVE_LIBPQ_TRUE@	GridData.lo WdbConfiguration.lo \
 @HAVE_LIBPQ_TRUE@	GlobalWdbConfiguration.lo
-@HAVE_METGMAPI_TRUE@am__objects_6 = MetgmCDMWriter.lo \
-@HAVE_METGMAPI_TRUE@	MetgmCDMReader.lo
 am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
@@ -256,7 +251,7 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
 	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
 	Utils.lo XMLDoc.lo $(am__objects_1) $(am__objects_2) \
-        $(am__objects_3) $(am__objects_4) $(am__objects_6)
+	$(am__objects_3) $(am__objects_4) $(am__objects_5)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -485,9 +480,10 @@ lib_LTLIBRARIES = libfimex.la
 libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @MIFI_UDUNITS2_LDFLAGS@ @MIFI_UDUNITS_LDFLAGS@ @MIFI_PROJ_LDFLAGS@ @MIFI_NETCDF_LDFLAGS@ @MIFI_GRIB_API_LDFLAGS@ @MIFI_METGM_API_LDFLAGS@ ${XML_LDFLAGS} @BOOST_LDFLAGS@
 libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ \
 	@MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ \
-        @MIFI_NETCDF_CPP_LIBS@ @MIFI_GRIB_API_LIBS@ @MIFI_METGM_API_LIBS@ @XML_LIBS@ \
-	@BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@ \
-	@BOOST_SYSTEM_LIB@ $(am__append_5)
+	@MIFI_NETCDF_CPP_LIBS@ @MIFI_GRIB_API_LIBS@ \
+	@MIFI_METGM_API_LIBS@ @XML_LIBS@ @BOOST_REGEX_LIB@ \
+	@BOOST_DATE_TIME_LIB@ @BOOST_FILESYSTEM_LIB@ \
+	@BOOST_SYSTEM_LIB@ $(am__append_6)
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
@@ -518,7 +514,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
 	Utils.cc XMLDoc.cc $(am__append_1) $(am__append_2) \
-        $(am__append_3) $(am__append_4) $(am__append_6)
+	$(am__append_3) $(am__append_4) $(am__append_5)
 all: all-recursive
 
 .SUFFIXES:
@@ -636,8 +632,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribUtils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMReader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridData.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridHandler.Plo@am__quote@
@@ -651,6 +645,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LevelHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMReader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetricGridInformation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMReader.Plo@am__quote@
@@ -677,7 +673,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransverseMercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ValueParameterHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VersionHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WciReadQuerySpecification.Plo@am__quote@
@@ -906,13 +901,6 @@ GridHandler.lo: wdb/GridHandler.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GridHandler.cpp' object='GridHandler.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridHandler.lo `test -f 'wdb/GridHandler.cpp' || echo '$(srcdir)/'`wdb/GridHandler.cpp
-
-ValueParameterHandler.lo: wdb/ValueParameterHandler.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ValueParameterHandler.lo -MD -MP -MF $(DEPDIR)/ValueParameterHandler.Tpo -c -o ValueParameterHandler.lo `test -f 'wdb/ValueParameterHandler.cpp' || echo '$(srcdir)/'`wdb/ValueParameterHandler.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ValueParameterHandler.Tpo $(DEPDIR)/ValueParameterHandler.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/ValueParameterHandler.cpp' object='ValueParameterHandler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ValueParameterHandler.lo `test -f 'wdb/ValueParameterHandler.cpp' || echo '$(srcdir)/'`wdb/ValueParameterHandler.cpp
 
 GridInformation.lo: wdb/gridInformation/GridInformation.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridInformation.lo -MD -MP -MF $(DEPDIR)/GridInformation.Tpo -c -o GridInformation.lo `test -f 'wdb/gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/GridInformation.cpp

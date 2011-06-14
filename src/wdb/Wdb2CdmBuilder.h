@@ -139,6 +139,8 @@ public:
 
 private:
 
+	void getDimensionList(std::vector<std::string> & out, const std::string & parameter) const;
+
 	void addDimensions_(CDM & cdm) const;
 	void addVersionDimension_(CDM & cdm) const;
 

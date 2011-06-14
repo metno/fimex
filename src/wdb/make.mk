@@ -11,9 +11,7 @@ libfimex_la_SOURCES += \
 	wdb/TimeHandler.h wdb/TimeHandler.cpp \
 	wdb/LevelHandler.h wdb/LevelHandler.cpp \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp \
-	wdb/GridHandler.h wdb/GridHandler.cpp \
-	wdb/ValueParameterHandler.h wdb/ValueParameterHandler.cpp
-	
+	wdb/GridHandler.h wdb/GridHandler.cpp	
 
 include wdb/gridInformation/make.mk
 include wdb/database_access/make.mk

@@ -141,30 +141,19 @@ WdbIndex::GidList WdbIndex::getData(const std::string & parameter, unsigned unLi
 	return ret;
 }
 
-WdbIndex::GidList WdbIndex::getData(const std::string & parameter) const
+WdbIndex::GidList WdbIndex::getData(const std::string & parameter, const std::vector<size_t> & startPositions, const std::vector<size_t> & sizes) const
 {
-	const ParameterData::DataArray & gids = parameterData_(parameter).data();
+	if ( startPositions.size() != 6 or sizes.size() != 6 )
+		throw CDMException("Invalid index size");
 
-	const gid * data = gids.data();
-	unsigned elements = gids.num_elements();
-
-	return GidList (data, data + elements);
-}
-
-WdbIndex::GidList WdbIndex::getData(const std::string & parameter,
-		const WdbIndex::Slice & referenceTime,
-		const WdbIndex::Slice & validTime,
-		const WdbIndex::Slice & level,
-		const WdbIndex::Slice & version) const
-{
 	WdbIndex::GidList ret;
 
 	const ParameterData::DataArray & data = parameterData_(parameter).data();
 
-	for ( std::size_t r = referenceTime.start; r < referenceTime.start + referenceTime.length; ++ r )
-		for ( std::size_t t = validTime.start; t < validTime.start + validTime.length; ++ t )
-			for ( std::size_t l = level.start; l < level.start + level.length; ++ l )
-				for ( std::size_t v = version.start; v < version.start + version.length; ++ v )
+	for ( std::size_t r = startPositions[0]; r < startPositions[0] + sizes[0]; ++ r )
+		for ( std::size_t t = startPositions[1]; t < startPositions[1] + sizes[1]; ++ t )
+			for ( std::size_t l = startPositions[2]; l < startPositions[2] + sizes[2]; ++ l )
+				for ( std::size_t v = startPositions[3]; v < startPositions[3] + sizes[3]; ++ v )
 					ret.push_back(data[r][t][l][v]);
 
 	return ret;
@@ -237,6 +226,26 @@ std::set<GridData::Time> WdbIndex::referenceTimes() const
 const std::vector<GridData::Time> & WdbIndex::referenceTimesForParameter(const std::string & parameter) const
 {
 	return parameterData_(parameter).referenceTimes();
+}
+
+bool WdbIndex::hasManyReferenceTimes(const std::string & parameter) const
+{
+	return parameterData_(parameter).referenceTimes().size() > 1;
+}
+
+bool WdbIndex::hasManyValidTimeOffsets(const std::string & parameter) const
+{
+	return parameterData_(parameter).validTimes().size() > 1;
+}
+
+bool WdbIndex::hasManyLevels(const std::string & parameter) const
+{
+	return parameterData_(parameter).levels().size() > 1;
+}
+
+bool WdbIndex::hasManyVersions(const std::string & parameter) const
+{
+	return parameterData_(parameter).versions().size() > 1;
 }
 
 const ParameterData & WdbIndex::parameterData_(const Parameter & p) const

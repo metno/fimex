@@ -202,11 +202,14 @@ void TimeHandler::addValidTimeToCdm(CDM & cdm) const
 
 	Dimension unlimited = unlimitedDimension();
 
-	std::string validTime = validTimeName;
 	std::vector<std::string> timeShape;
-	timeShape.push_back(validTimeName);
 	if ( referenceTimes.size() > 1)
+	{
+		timeShape.push_back(timeOffsetName);
 		timeShape.push_back(referenceTimeName);
+	}
+	else
+		timeShape.push_back(validTimeName);
 
 	cdm.addVariable(CDMVariable(validTimeName, CDM_DOUBLE, timeShape));
 	cdm.addAttribute(validTimeName, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
@@ -214,13 +217,13 @@ void TimeHandler::addValidTimeToCdm(CDM & cdm) const
 	cdm.addAttribute(validTimeName, CDMAttribute("standard_name", "time"));
 	cdm.addAttribute(validTimeName, CDMAttribute("axis", "T"));
 
-//	if ( referenceTimes.size() == 1 )
-//	{
+	if ( referenceTimes.size() == 1 )
+	{
 		CDMDimension time(validTimeName, validTimes.size());
 		if ( unlimited == ValidTime )
 			time.setUnlimited(true);
 		cdm.addDimension(time);
-//	}
+	}
 }
 
 

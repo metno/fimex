@@ -83,16 +83,7 @@ public:
 	 */
 	GidList getData(const std::string & parameter, unsigned unLimDimPos) const;
 
-	GidList getData(const std::string & parameter) const;
-
-
-	struct Slice
-	{
-		std::size_t start;
-		std::size_t length;
-		Slice(std::size_t start, std::size_t length) : start(start), length(length) {}
-	};
-	GidList getData(const std::string & parameter, const Slice & referenceTime, const Slice & validTime, const Slice & level, const Slice & version) const;
+	GidList getData(const std::string & parameter, const std::vector<size_t> & startPositions, const std::vector<size_t> & sizes) const;
 
 	/**
 	 * Get a list of all parameters that are stored here
@@ -147,6 +138,13 @@ public:
 	std::set<GridData::Time> referenceTimes() const;
 
 	const std::vector<GridData::Time> & referenceTimesForParameter(const std::string & parameter) const;
+
+
+	bool hasManyReferenceTimes(const std::string & parameter) const;
+	bool hasManyValidTimeOffsets(const std::string & parameter) const;
+	bool hasManyLevels(const std::string & parameter) const;
+	bool hasManyVersions(const std::string & parameter) const;
+
 
 private:
 
