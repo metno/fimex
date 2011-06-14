@@ -1,0 +1,29 @@
+Implementation of vertical interpolation in fimex
+
+Literature:
+  * vcdata.f and sondat.f from mi-bin : preparing sonde comparison plots
+    * nearly unreadable code - mostly converting to height? Using very simple
+      formulars for translation of levels, and unexplained interpolations
+  * ncl/NCAR: http://www.ncl.ucar.edu/Applications/vert_interp.shtml
+    * good explanation of function-interface and explanation of what they do
+    * lin, log, log-log interpolation
+    * no source-code (legal restrictions)
+    * nice reference, but most interesting for extrapolation:
+       Vertical Interpolation and Truncation of Model-Coordinate Data
+       Trenberth, Berry, Buja
+       [NCAR/TN-396, 1993].
+  * CF-Convention, App. D: http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.4/cf-conventions.html#dimensionless-v-coord
+    * exact formulars to convert between dim-less pressure (sigma/hybrid) coordinates to pressure
+
+ Implementation Plan:
+  * concentrate on pressure-conversions (urgent task), no pressure-height conversion
+    * C-impl. CF-formular for sigma->pressure, sigma-hybrid->pressure
+  * C-impl. of pressure->pressure interpolation using lin,log,log-log
+  * CDM/CoordSys:
+    * detect dim-less coordinate and map to correct pressure formular
+    * detect formular-terms: auxiliary variables (p, p_top, sigma, ...)
+    * configurable interpolation methods for different variables, i.e.
+      * log(p) default for most quantitities according to Trenberth et. al.
+      * other schemes for geopotential (height/temperature) or mean sea level pressure,
+        eventually best starting directly from hybrid-levels?
+        * this will be very complicated, so ignoring in first version

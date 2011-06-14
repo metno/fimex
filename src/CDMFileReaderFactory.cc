@@ -47,6 +47,10 @@
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribCDMReader.h"
 #endif
+#ifdef HAVE_LIBPQ
+#include "fimex/WdbCDMReader.h"
+#endif
+
 
 namespace MetNoFimex {
 
@@ -142,6 +146,11 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
             reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, fileName));
         }
         return reader;
+    }
+#endif
+#ifdef HAVE_LIBPQ
+    case MIFI_FILETYPE_WDB: {
+        return boost::shared_ptr<CDMReader>(new WdbCDMReader(fileName, config));
     }
 #endif
     case MIFI_FILETYPE_NCML:
