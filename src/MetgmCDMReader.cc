@@ -3,8 +3,6 @@
 // METGM C lib
 //
 #include "metgm.h"
-#include "metgm_debug.h"
-#include "metgm_internal.h"
 
 // fimex
 //
@@ -466,7 +464,8 @@ namespace MetNoFimex {
 
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
             int error = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, pg3);
-            if(pg3->p == 0) {
+            short p_id = mgm_get_p_id(pg3);
+            if(p_id == 0) {
                 // special case on non-temporal values
                 continue;
             }
