@@ -154,8 +154,6 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #endif
 #ifdef HAVE_METGMAPI_H
     case MIFI_FILETYPE_METGM: {
-        std::vector<std::string> files(args.begin(), args.end());
-        files.insert(files.begin(), fileName);
         return boost::shared_ptr<CDMReader>(new METGM_CDMReader(fileName, configFile));
     }
 #endif
