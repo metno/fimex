@@ -251,7 +251,7 @@ static auto_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
             config = vm["input.config"].as<string>();
         }
         LOG4FIMEX(logger, Logger::DEBUG, "connectiong to WDB " << vm["input.file"].as<string>() << " with config " << config);
-        returnPtr = auto_ptr<CDMReader>(new GxWdbCDMReader(vm["input.file"].as<string>(), config));
+        returnPtr = auto_ptr<CDMReader>(new WdbCDMReader(vm["input.file"].as<string>(), config));
     }
 #endif
 

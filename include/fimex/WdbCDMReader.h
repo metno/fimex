@@ -26,8 +26,8 @@
  MA  02110-1301, USA
  */
 
-#ifndef GXWDBCDMREADER_H_
-#define GXWDBCDMREADER_H_
+#ifndef WDBCDMREADER_H_
+#define WDBCDMREADER_H_
 
 #include "fimex/CDMReader.h"
 #include <string>
@@ -55,7 +55,7 @@ namespace MetNoFimex
  * instances can be very different from each other. In general all dimensions
  * of size one will be skipped in the resulting dimensions and variables.
  */
-class GxWdbCDMReader: public CDMReader, boost::noncopyable
+class WdbCDMReader: public CDMReader, boost::noncopyable
 {
 public:
 
@@ -64,9 +64,9 @@ public:
 	 * it is given in the file with name source. Generic specifications are
 	 * given in the file with name configfilename.
 	 */
-	GxWdbCDMReader(const std::string& source, const std::string& configfilename);
+	WdbCDMReader(const std::string& source, const std::string& configfilename);
 
-	virtual ~GxWdbCDMReader();
+	virtual ~WdbCDMReader();
 
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
@@ -90,4 +90,4 @@ private:
 
 }
 
-#endif /* GXWDBCDMREADER_H_ */
+#endif /* WDBCDMREADER_H_ */

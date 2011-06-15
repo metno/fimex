@@ -159,7 +159,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #endif
 #ifdef HAVE_LIBPQ
     case MIFI_FILETYPE_WDB: {
-        return boost::shared_ptr<CDMReader>(new GxWdbCDMReader(fileName, configFile));
+        return boost::shared_ptr<CDMReader>(new WdbCDMReader(fileName, configFile));
     }
 #endif
     case MIFI_FILETYPE_NCML:
