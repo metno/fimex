@@ -31,7 +31,6 @@
 
 #include "fimex/CDMReader.h"
 #include <string>
-#include <boost/noncopyable.hpp>
 
 
 
@@ -55,7 +54,7 @@ namespace MetNoFimex
  * instances can be very different from each other. In general all dimensions
  * of size one will be skipped in the resulting dimensions and variables.
  */
-class WdbCDMReader: public CDMReader, boost::noncopyable
+class WdbCDMReader: public CDMReader
 {
 public:
 

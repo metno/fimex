@@ -25,6 +25,7 @@
 #define CDMREADER_H_
 
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 #include "fimex/CDMException.h"
 #include "fimex/SliceBuilder.h"
 
@@ -45,7 +46,7 @@ class CDMVariable;
  *
  * @see FeltCDMReader
  */
-class CDMReader
+class CDMReader : boost::noncopyable
 {
 public:
 	CDMReader();

@@ -29,7 +29,6 @@
 
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
-#include "boost/noncopyable.hpp"
 #include <map>
 
 namespace MetNoFimex
@@ -50,7 +49,7 @@ class XMLDoc;
  * @warning The current version does not support aggregation.
  *
  */
-class NcmlCDMReader: public MetNoFimex::CDMReader,boost::noncopyable
+class NcmlCDMReader: public MetNoFimex::CDMReader
 {
 
 public:

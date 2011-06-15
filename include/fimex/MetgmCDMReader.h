@@ -16,7 +16,6 @@
 
 // boost
 //
-#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
