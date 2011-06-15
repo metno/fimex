@@ -223,8 +223,8 @@ BOOST_FIXTURE_TEST_CASE(versionsAddThemselvesAsVariables, Wdb2CdmBuilderFixture)
 	try
 	{
 		cdm.getVariable(variable); // will throw if variable does no exist
-		BOOST_CHECK_EQUAL("data version", cdm.getAttribute(variable, "long_name").getStringValue());
-		BOOST_CHECK_EQUAL("version", cdm.getAttribute(variable, "standard_name").getStringValue());
+		BOOST_CHECK_EQUAL("ensemble data version", cdm.getAttribute(variable, "long_name").getStringValue());
+		//BOOST_CHECK_EQUAL("version", cdm.getAttribute(variable, "standard_name").getStringValue());
 	}
 	catch ( CDMException & e )
 	{

@@ -175,7 +175,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesCreatesReferenceTimeDimension, TimeHan
 	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "long_name", "Run time for model");
 	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "standard_name", "forecast_reference_time");
 	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "units", "seconds since 1970-01-01 00:00:00 +00:00");
-	CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "_CoordinateAxisType", "RunTime");
+	//CHECK_ATTRIBUTE(TimeHandler::referenceTimeName, "_CoordinateAxisType", "RunTime");
 }
 
 BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, TimeHandlerFixture)

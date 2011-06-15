@@ -130,15 +130,12 @@ bool TimeHandler::canHandle(const std::string & wdbName) const
 
 void TimeHandler::addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const
 {
-	std::cout << "OK: " << wdbName;
 	if ( index_.hasManyReferenceTimes(wdbName) and index_.hasManyValidTimeOffsets(wdbName) )
 	{
 		if ( not coordinates.empty() )
 			coordinates += ' ';
 		coordinates += validTimeName;
-		std::cout << " = " << coordinates;
 	}
-	std::cout << std::endl;
 }
 
 TimeHandler::Dimension TimeHandler::unlimitedDimension() const
@@ -190,7 +187,7 @@ void TimeHandler::addReferenceTimeToCdm(CDM & cdm) const
 	cdm.addAttribute(referenceTimeName, CDMAttribute("long_name", "Run time for model"));
 	cdm.addAttribute(referenceTimeName, CDMAttribute("standard_name", "forecast_reference_time"));
 	cdm.addAttribute(referenceTimeName, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
-	cdm.addAttribute(referenceTimeName, CDMAttribute("_CoordinateAxisType", "RunTime"));
+	//cdm.addAttribute(referenceTimeName, CDMAttribute("_CoordinateAxisType", "RunTime"));
 }
 
 void TimeHandler::addTimeOffsetToCdm(CDM & cdm) const
