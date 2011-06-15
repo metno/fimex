@@ -202,12 +202,12 @@ BOOST_FIXTURE_TEST_CASE(setsVersionDimensions, Wdb2CdmBuilderFixture)
 
 	try
 	{
-		const CDMDimension & dim = cdm.getDimension("version");
+		const CDMDimension & dim = cdm.getDimension("ensemble_member");
 		BOOST_CHECK_EQUAL(3, dim.getLength());
 	}
 	catch ( CDMException & )
 	{
-		BOOST_FAIL("Unable to find dimension 'version'");
+		BOOST_FAIL("Unable to find dimension 'ensemble_member'");
 	}
 }
 
@@ -219,12 +219,12 @@ BOOST_FIXTURE_TEST_CASE(versionsAddThemselvesAsVariables, Wdb2CdmBuilderFixture)
 	const wdb::Wdb2CdmBuilder di(gridData(), tr);
 	di.populate(cdm);
 
-	const std::string variable = "version";
+	const std::string variable = "ensemble_member";
 	try
 	{
 		cdm.getVariable(variable); // will throw if variable does no exist
 		BOOST_CHECK_EQUAL("ensemble run number", cdm.getAttribute(variable, "long_name").getStringValue());
-		//BOOST_CHECK_EQUAL("version", cdm.getAttribute(variable, "standard_name").getStringValue());
+		//BOOST_CHECK_EQUAL("ensemble_member", cdm.getAttribute(variable, "standard_name").getStringValue());
 	}
 	catch ( CDMException & e )
 	{
@@ -399,7 +399,7 @@ BOOST_FIXTURE_TEST_CASE(severalDataVersions, Wdb2CdmBuilderFixture)
 	BOOST_REQUIRE_LE(3, shape.size());
 	BOOST_CHECK_EQUAL("longitude", shape[0]);
 	BOOST_CHECK_EQUAL("latitude", shape[1]);
-	BOOST_CHECK_EQUAL("version", shape[2]);
+	BOOST_CHECK_EQUAL("ensemble_member", shape[2]);
 	BOOST_CHECK_EQUAL(3, shape.size());
 }
 
@@ -422,7 +422,7 @@ BOOST_FIXTURE_TEST_CASE(onlyOneTimeDimensionInVaraiableShape, Wdb2CdmBuilderFixt
 	BOOST_REQUIRE_LE(4, shape.size());
 	BOOST_CHECK_EQUAL("longitude", shape[0]);
 	BOOST_CHECK_EQUAL("latitude", shape[1]);
-	BOOST_CHECK_EQUAL("version", shape[2]);
+	BOOST_CHECK_EQUAL("ensemble_member", shape[2]);
 	BOOST_CHECK_EQUAL(wdb::TimeHandler::validTimeName, shape[3]);
 	BOOST_CHECK_EQUAL(4, shape.size());
 }
@@ -760,7 +760,7 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingVersion, Wdb2CdmBuilderFixture)
 	const CDMDimension & timeDimension = cdm.getDimension(wdb::TimeHandler::validTimeName);
 	BOOST_CHECK_EQUAL(2, timeDimension.getLength());
 
-	const CDMDimension & versionDimension = cdm.getDimension("version");
+	const CDMDimension & versionDimension = cdm.getDimension("ensemble_member");
 	BOOST_CHECK_EQUAL(3, versionDimension.getLength());
 
 	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), 1/*t("2011-03-31 18:00:00")*/);
@@ -867,7 +867,7 @@ BOOST_FIXTURE_TEST_CASE(sliceVersion, Wdb2CdmBuilderFixture)
 	di.populate(cdm);
 
 	SliceBuilder slicer(cdm, "temperature");
-	slicer.setStartAndSize("version", 1, 1);
+	slicer.setStartAndSize("ensemble_member", 1, 1);
 
 	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers("temperature", slicer, cdm);
 

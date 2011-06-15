@@ -168,7 +168,7 @@ void Wdb2CdmBuilder::getDimensionList(std::vector<std::string> & out, const std:
 	gridInformation().addSpatialDimensions(out);
 
 	if ( index_.versionsForParameter(parameter).size() > 1 )
-		out.push_back("version");
+		out.push_back("ensemble_member");
 	if ( index_.levelsForParameter(parameter).size() > 1 )
 		out.push_back(config_.cfName(index_.levelTypeForParameter(parameter).name()));
 	if ( index_.timesForParameter(parameter).size() > 1 )
