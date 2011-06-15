@@ -59,7 +59,7 @@ void VersionHandler::addToCdm(CDM & cdm) const
 
 			cdm.addVariable(CDMVariable(dimension, CDM_INT, std::vector<std::string>(1, dimension)));
 
-			cdm.addAttribute(dimension, CDMAttribute("long_name", "ensemble data version"));
+			cdm.addAttribute(dimension, CDMAttribute("long_name", "ensemble run number"));
 			//cdm.addAttribute(dimension, CDMAttribute("standard_name", "version"));
 			//cdm.addAttribute(dimension, CDMAttribute("axis", "Ensemble"));
 
