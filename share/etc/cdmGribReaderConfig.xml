@@ -168,11 +168,18 @@
     <attribute name="long_name" value="depth" type="string" />
     <attribute name="positive" value="down" type="string" />
     <attribute name="standard_name" value="depth" type="string" />
-    <attribute name="units" value="m" type="string" />
+    <grib1>
+        <attribute name="units" value="cm" type="string" />
+    </grib1>
+    <grib2>
+        <attribute name="units" value="m" type="string" />
+    </grib2>
 </vertical_axis>
-<vertical_axis id="depth" name="depth" grib1_id="111" type="short">
-    <attribute name="description" value="depth below land surface" type="string" />
-    <attribute name="long_name" value="depth" type="string" />
+<vertical_axis id="depth_between_layers" name="depth_between_layers" grib1_id="112" type="short">
+<!-- TODO, the 2 layers are not read correctly yet. I need a special function to extract the 2 levels from one grib-field
+           like in  hybridSigma -->
+    <attribute name="description" value="depth between layers below land surface" type="string" />
+    <attribute name="long_name" value="depth between layes" type="string" />
     <attribute name="positive" value="down" type="string" />
     <attribute name="standard_name" value="depth" type="string" />
     <attribute name="units" value="cm" type="string" />
