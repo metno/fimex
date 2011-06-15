@@ -9,11 +9,7 @@
 <global_attributes>
     <attribute name="Conventions" value="CF-1.0" type="string" />
     <attribute name="institution" value="Norwegian Meteorological Institute" type="string" />
-    <attribute name="product_name" value="WdbCDMReader" type="string" />
-    <attribute name="project_name" value="WdbCDMReader" type="string" />
-    <attribute name="title" value="Wdb data extraction via Fimex" type="string" />
     <attribute name="topiccategory" value="ClimatologyMeteorologyAtmosphere" type="string" />
-    <attribute name="contact" value="fimex@lists.met.no" type="string" />
     <attribute name="distribution_statement" value="Free" type="string" />
 </global_attributes>
 
