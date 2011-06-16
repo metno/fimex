@@ -17,6 +17,7 @@
 // boost
 //
 #include <boost/regex.hpp>
+#include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
@@ -1242,8 +1243,7 @@ namespace MetNoFimex {
 
                 int p_id = ptrPid->asConstShort()[0];
 
-                float* pg5 =       new float[totalDataDimension];
-//                float* finalData = new float[totalDataDimension];
+                boost::scoped_array<float> pg5(new float[totalDataDimension]);
 
                 short pz = mgm_get_pz(fwdPg3);
                 if(pz != 0) {
@@ -1253,34 +1253,16 @@ namespace MetNoFimex {
                         throw CDMException(mgm_string_error(callResult));
                 }
 
-                callResult = mgm_read_group5(metgmFileHandle_, metgmHandle_, pg5);
+                callResult = mgm_read_group5(metgmFileHandle_, metgmHandle_, pg5.get());
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
 
-                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5, totalDataDimension);
+                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
                 assert(callResult == MGM_ERROR_GROUP5_NOT_CONVERTIBLE || callResult == MGM_OK);
 
-//            for(int i = 0; i < totalDataDimension; ++i )
-//                std::cerr << *(pg5 + i) << std::endl;
-
-//                size_t maxZindex = 1;
-//                size_t maxYindex = yDim_.getLength();
-//                size_t maxXindex = xDim_.getLength();
-//                for(size_t z_index = 0; z_index < maxZindex; ++z_index) {
-//                    for(size_t y_index = 0; y_index < maxYindex; ++y_index) {
-//                        for(size_t x_index = 0; x_index < maxXindex; ++x_index) {
-//                            finalData[z_index * (maxYindex * maxXindex) + y_index * maxXindex + x_index] =
-//                                    pg5[z_index + x_index * maxZindex + y_index * (maxZindex * maxXindex)];
-//                        } // x_index
-//                    } // y_index
-//                } // z_index == const 1
-
-//                assert(memcmp(pg5, finalData, totalDataDimension * sizeof(float)) == 0);
-
-                data = MetNoFimex::createData(CDM_FLOAT, pg5, pg5 + totalDataDimension);
+                data = MetNoFimex::createData(CDM_FLOAT, pg5.get(), pg5.get() + totalDataDimension);
                 variable.setData(data);
-                delete [] pg5;
-//                delete [] finalData;
+
                 assert(mgm_free_group3(fwdPg3) == MGM_OK);
                 break;
             }
@@ -1293,8 +1275,8 @@ namespace MetNoFimex {
 
                 int p_id = ptrPid->asConstShort()[0];
 
-                float* pg5 = new float[totalDataDimension];
-                float* pg5T = new float[totalDataDimension];
+                boost::scoped_array<float> pg5(new float[totalDataDimension]);
+                boost::scoped_array<float> pg5T(new float[totalDataDimension]);
 
                 short pz = mgm_get_pz(fwdPg3);
                 short pr = mgm_get_pr(fwdPg3);
@@ -1306,7 +1288,7 @@ namespace MetNoFimex {
                         throw CDMException(mgm_string_error(callResult));
                 }
 
-                callResult = mgm_read_group5(metgmFileHandle_, metgmHandle_, pg5);
+                callResult = mgm_read_group5(metgmFileHandle_, metgmHandle_, pg5.get());
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
 
@@ -1315,11 +1297,11 @@ namespace MetNoFimex {
                   * lets extract one we actually need
                 */
 
-                short callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5, totalDataDimension);
+                short callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
                 assert(callResult == MGM_ERROR_GROUP5_NOT_CONVERTIBLE || callResult == MGM_OK);
 
-                float* slice = pg5;
-                float* sliceT = pg5T;
+                float* slice = pg5.get();
+                float* sliceT = pg5T.get();
                 const size_t maxXindex = xDim_.getLength();
                 const size_t maxYindex = yDim_.getLength();
                 const size_t maxZindex = zDimension->getLength();
@@ -1327,8 +1309,8 @@ namespace MetNoFimex {
 
                 for(size_t sIndex = 0; sIndex < numOfSlices; ++sIndex) {
 
-                    slice = pg5 + sIndex * sliceDataDimension;
-                    sliceT = pg5T + sIndex * sliceDataDimension;
+                    slice = pg5.get() + sIndex * sliceDataDimension;
+                    sliceT = pg5T.get() + sIndex * sliceDataDimension;
 
                     for(size_t z_index = 0; z_index < maxZindex; ++z_index) {
 
@@ -1342,57 +1324,11 @@ namespace MetNoFimex {
 
                 } // sliceIndex
 
-//                float* sliceData = new float[sliceDataDimension];
-//                float* finalData = new float[sliceDataDimension];
-
-//                memcpy(sliceData, static_cast<void*>(pg5 + (unLimDimPos * sliceDataDimension)), sliceDataDimension * sizeof(float));
-
-                /**
-              * we are not yet there as:
-                The data are specified in the array such that the vertical profile (iz-direction)
-                is stored contiguously for each grid point in the row (ix-direction) followed by the
-                vertical profiles for the next row in the iy-direction. The next time-block follows in the
-                same order as specified above: iz, ix, iy.
-
-                nz = 2, nx = 3, ny = 4
-
-                (z0,(x0,y0))[0]  -> [0]     (z1,(x0,y0))[1]  -> [12]
-                (z0,(x1,y0))[2]  -> [1]     (z1,(x1,y0))[3]  -> [13]
-                (z0,(x2,y0))[4]  -> [2]     (z1,(x2,y0))[5]  -> [14]
-
-                (z0,(x0,y1))[6]  -> [3]     (z1,(x0,y1))[7]  -> [15]
-                (z0,(x1,y1))[8]  -> [4]     (z1,(x1,y1))[9]  -> [16]
-                (z0,(x2,y1))[10] -> [5]     (z1,(x2,y1))[11] -> [17]
-
-                (z0,(x0,y2))[12] -> [6]     (z1,(x0,y2))[13] -> [11]
-                (z0,(x1,y2))[14] -> [7]     (z1,(x1,y2))[15]
-                (z0,(x2,y2))[16] -> [8]     (z1,(x2,y2))[17]
-
-                (z0,(x0,y3))[18] -> [9]     (z1,(x0,y3))[19]
-                (z0,(x1,y3))[20] -> [10]    (z1,(x1,y3))[21]
-                (z0,(x2,y3))[22] -> [11]    (z1,(x2,y3))[23]
-
-              */
-
-//                for(size_t z_index = 0; z_index < maxZindex; ++z_index) {
-//                    for(size_t y_index = 0; y_index < maxYindex; ++y_index) {
-//                        for(size_t x_index = 0; x_index < maxXindex; ++x_index) {
-//                            finalData[z_index * (maxYindex * maxXindex) + y_index * maxXindex + x_index] =
-//                                    sliceData[z_index + x_index * maxZindex + y_index * (maxZindex * maxXindex)];
-//                        } // x_index
-//                    } // y_index
-//                } // z_index
-
                 /**
                   * we will load all data
                   */
-                data = MetNoFimex::createData(CDM_FLOAT, pg5T, pg5T + totalDataDimension);
+                data = MetNoFimex::createData(CDM_FLOAT, pg5T.get(), pg5T.get() + totalDataDimension);
                 variable.setData(data);
-
-//                delete[] sliceData;
-//                delete[] finalData;
-                delete[] pg5;
-                delete[] pg5T;
 
                 assert(variable.hasData());
                 assert(mgm_free_group3(fwdPg3) == MGM_OK);
