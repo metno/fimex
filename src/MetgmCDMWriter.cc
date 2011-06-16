@@ -543,27 +543,95 @@ namespace MetNoFimex {
 
 
         boost::shared_ptr<Projection> proj;
+        std::string proj4String("[EMPTY]");
+        std::string isDegree("[EMPTY]");
         CDMAttribute gridMapping;
         if(cdmRef.getAttribute(pVar->getName(), "grid_mapping", gridMapping)) {
             std::string projName = gridMapping.getStringValue();
             CDMVariable projVar = cdmRef.getVariable(projName);
             CDMAttribute proj4Attribute;
             if(cdmRef.getAttribute(projVar.getName(), "proj4", proj4Attribute)) {
-                proj = Projection::createByProj4(proj4Attribute.getStringValue());
+                proj4String = proj4Attribute.getStringValue();
+                proj = Projection::createByProj4(proj4String);
+                isDegree = proj->isDegree() ? "true" : "false";
             }
         }
 
-        std::string lonName; // x
-        std::string latName; // y
-        cdmRef.getLatitudeLongitude(kildeVariableName, latName, lonName);
+        CDMAttribute coordinatesAttr;
+        std::string coordinatesString("[EMPTY]");
+        if(cdmRef.getAttribute(pVar->getName(), "coordinates", coordinatesAttr)) {
+            coordinatesString = coordinatesAttr.getStringValue();
+        }
+
         std::string xName = cdmRef.getHorizontalXAxis(kildeVariableName); // x
         std::string yName = cdmRef.getHorizontalYAxis(kildeVariableName); // y
 
+        const CDMVariable *xAxisVar = 0;
+        std::string xAxisVarToXml("[EMPTY]");
+        if(cdmRef.hasVariable(xName)) {
+            std::stringstream sstream;
+            xAxisVar = &cdmRef.getVariable(xName);
+            xAxisVar->toXMLStream(sstream);
+            CDMAttribute standardName;
+            if(cdmRef.getAttribute(xName, "standard_name", standardName)) {
+                standardName.toXMLStream(sstream);
+            }
+            xAxisVarToXml = sstream.str();
+
+        }
+        const CDMVariable *yAxisVar = 0;
+        std::string yAxisVarToXml("[EMPTY]");
+        if(cdmRef.hasVariable(yName)) {
+            std::stringstream sstream;
+            yAxisVar = &cdmRef.getVariable(yName);
+            yAxisVar->toXMLStream(sstream);
+            CDMAttribute standardName;
+            if(cdmRef.getAttribute(yName, "standard_name", standardName)) {
+                standardName.toXMLStream(sstream);
+            }
+            yAxisVarToXml = sstream.str();
+        }
+
+//        std::cerr << __FILE__         << "|"
+//                  << __FUNCTION__     << "|"
+//                  << __LINE__         << ":"
+//                  << " p_id = "       << boost::lexical_cast<std::string>(p_id)
+//                  << " varName = "    << pVar->getName()
+//                  << " xAxisVar = "   << xAxisVarToXml
+//                  << " yAxisVar = "   << yAxisVarToXml
+//                  << " xName = "      << xName
+//                  << " yName = "      << yName
+//                  << " lonName = "    << lonName
+//                  << " latName = "    << latName
+//                  << " proj4 = "      << proj4String
+//                  << " coordinates =" << coordinatesString
+//                  << " isDegree = "   << isDegree
+//              << std::endl;
+
         if(!xName.empty() && !yName.empty()) {
+            /**
+              * we have horizontal axis
+              * let's determine nature
+              */
+            assert(xAxisVar);
+            assert(yAxisVar);
 
-            if(cdmRef.hasDimension(xName) && cdmRef.hasDimension(yName)) {
+            std::string xAxisStandardName;
+            std::string yAxisStandardName;
 
-                // TAKE DATA
+            CDMAttribute standardName;
+            if(cdmRef.getAttribute(xName, "standard_name", standardName)) {
+                xAxisStandardName = standardName.getStringValue();
+            }
+            if(cdmRef.getAttribute(yName, "standard_name", standardName)) {
+                yAxisStandardName = standardName.getStringValue();
+            }
+
+            if(xAxisStandardName == std::string("longitude")
+                      && yAxisStandardName == std::string("latitude")) {
+                /**
+                  * usual lon/lat
+                  */
 
                 boost::shared_ptr<Data> xData = cdmReader->getData(xName);
                 const boost::shared_array<double> xArray = xData->asConstDouble();
@@ -576,17 +644,6 @@ namespace MetNoFimex {
                 std::vector<double> yVector;
                 for(size_t index = 0; index < yData->size(); ++index)
                     yVector.push_back(yArray[index]);
-
-                // convert by proj4
-                if(proj.get()) {
-                    if(proj->isDegree()) {
-//                        boost::shared_ptr<Projection> projWgs84 = Projection::createByProj4("+proj=latlong +datum=WGS84");
-//                        proj->convertFromLonLat(xVector, yVector);
-//                        projWgs84->convertToLonLat(xVector, yVector);
-                    } else {
-                        proj->convertToLonLat(xVector, yVector);
-                    }
-                }
 
                 float dx = 0;
                 if(xData->size() > 1) {
@@ -610,160 +667,100 @@ namespace MetNoFimex {
                 float cy = yVector[yVector.size()/2];
                 assert(mgm_set_cy(gp3, cy) == MGM_OK);
 
+            } else if(xAxisStandardName == std::string("grid_longitude")
+                      && yAxisStandardName == std::string("grid_latitude")) {
+                /**
+                  * rotated lon/lat
+                  */
 
-            } else {
-                assert(0);
-            }
-        } else if(!lonName.empty() && !latName.empty()) {
-            if(!cdmRef.hasDimension(latName)) {
-                xDimension = &cdmRef.getDimension(cdmRef.getHorizontalXAxis(pVar->getName()));
-            }
-
-            if(cdmRef.hasVariable(lonName)) {
-                xDimension = 0;
-            } else {
-                if(!cdmRef.getHorizontalXAxis(pVar->getName()).empty()) {
-                    zDimension = &cdmRef.getDimension(cdmRef.getHorizontalXAxis(pVar->getName()));
-                } else {
-                    assert(0);
-                }
-            }
-
-            if(cdmRef.hasVariable(latName)) {
-                yDimension = 0;
-            } else {
-                if(!cdmRef.getHorizontalYAxis(pVar->getName()).empty()) {
-                    yDimension = &cdmRef.getDimension(cdmRef.getHorizontalYAxis(pVar->getName()));
-                } else {
-                    assert(0);
-                }
-            }
-
-
-            // TAKE DATA
-            const CDMVariable& xVarRef = xDimension ? cdmRef.getVariable(xDimension->getName()) : cdmRef.getVariable(lonName);
-            boost::shared_ptr<Data> xData;
-            if(xVarRef.hasData()) {
-                xData = xVarRef.getData();
-            } else {
-                xData = cdmReader->getData(xVarRef.getName());
-            }
-
-            const CDMVariable& yVarRef = yDimension ? cdmRef.getVariable(yDimension->getName()) : cdmRef.getVariable(latName);
-            boost::shared_ptr<Data> yData;
-            if(yVarRef.hasData()) {
-                yData = yVarRef.getData();
-            } else {
-                yData = cdmReader->getData(yVarRef.getName());
-            }
-
-            const boost::shared_array<double> xArray = xData->asConstDouble();
-            std::vector<double> xVector;
-            for(size_t index = 0; index < xData->size(); ++index)
-                xVector.push_back(xArray[index]);
-
-            const boost::shared_array<double> yArray = yData->asConstDouble();
-            std::vector<double> yVector;
-            for(size_t index = 0; index < yData->size(); ++index)
-                yVector.push_back(yArray[index]);
-
-            // convert by proj4
-            if(xDimension != 0 && yDimension != 0)
-                proj->convertToLonLat(xVector, yVector);
-
-            float dx = 0;
-            if(xData->size() > 1) {
-                dx = xVector[1] - xVector[0];
-            }
-
-            float dy = 0;
-            if(yData->size() > 1) {
-                dy = yVector[1] - yVector[0];
-            }
-
-            short nx = xVector.size();
-            assert(mgm_set_nx(gp3, nx) == MGM_OK);
-            assert(mgm_set_dx(gp3, dx) == MGM_OK);
-            float cx = xVector[xVector.size()/2];
-            assert(mgm_set_cx(gp3, cx) == MGM_OK);
-
-            short ny = yVector.size();
-            assert(mgm_set_ny(gp3, ny) == MGM_OK);
-            assert(mgm_set_dy(gp3, dy) == MGM_OK);
-            float cy = yVector[yVector.size()/2];
-            assert(mgm_set_cy(gp3, cy) == MGM_OK);
-
-            //            assert(mgm_set_pm(gp3, 9999) == MGM_OK);
-        }
-
-            std::string zName = cdmRef.getVerticalAxis(kildeVariableName);
-            if(!zName.empty()) {
-
-                assert(p_id != 0);
-
-                zDimension = &cdmRef.getDimension(zName);
-
-                size_t nz = zDimension->getLength();
-                assert(mgm_set_nz(gp3, nz) == MGM_OK);
+                throw CDMException("rotated longitude latitide not supported by metgm writer, consider first using Interpolator");
 
                 /**
+                  * fimex --input.file=proff.nc --interpolate.method=bilinear --interpolate.projString="+proj=latlong +ellps=WGS84"
+                  * --interpolate.xAxisValues=-90,-89,...,90 --interpolate.yAxisValues=90,89,...,50 --interpolate.xAxisUnit="degree"
+                  * --interpolate.yAxisUnit="degree" --output.file=interpolated.nc
+                  */
+
+            } else if(xAxisStandardName == "projection_x_coordinate"
+                      && yAxisStandardName == "projection_y_coordinate") {
+
+                throw CDMException("projection_[x|y]_coordinate not supported by metgm writer, consider first using Interpolator");
+
+            } else {
+
+                throw CDMException("given projection not supported by metgm writer, consider first using Interpolator");
+            }
+
+        }
+
+        std::string zName = cdmRef.getVerticalAxis(kildeVariableName);
+        if(!zName.empty()) {
+
+            assert(p_id != 0);
+
+            zDimension = &cdmRef.getDimension(zName);
+
+            size_t nz = zDimension->getLength();
+            assert(mgm_set_nz(gp3, nz) == MGM_OK);
+
+            /**
                   * sending by default all Z coordinates
                   * this is why we are hard coding to 1
                   */
-                assert(mgm_set_pz(gp3, 1) == MGM_OK);
+            assert(mgm_set_pz(gp3, 1) == MGM_OK);
 
-                /**
+            /**
                   * 1. try to find metgm_pr CDMAttribute
                   * 2. else try parsing the name for _GND or _MSL
                   * 3. if MSL sent exists from before, then check for units to distinguish _GND or _MSL
                   */
-                CDMAttribute metgmPrAttribute;
-                if(cdmRef.getAttribute(kildeVariableName, "metgm_pr", metgmPrAttribute)) {
-                    short pr = boost::lexical_cast<short>(metgmPrAttribute.getStringValue());
-                    assert(mgm_set_pr(gp3, pr) == MGM_OK);
-                } else if(kildeVariableName.find("_MSL") != std::string::npos) {
-                    assert(mgm_set_pr(gp3, 0) == MGM_OK);
-                } else if(kildeVariableName.find("_GND") != std::string::npos) {
-                    assert(mgm_set_pr(gp3, 1) == MGM_OK);
-                } else {
-                    CDMAttribute metgmUnitsAttribute;
-                    if(cdmRef.getAttribute(kildeVariableName, "units", metgmUnitsAttribute)) {
-                        std::string unitsName = metgmUnitsAttribute.getStringValue();
-                        if(unitsName.find("Pa") != std::string::npos) {
-                            assert(mgm_set_pr(gp3, 2) == MGM_OK);
-                        } else if(unitsName.find("m") != std::string::npos) {
-                            if(pid2CdmVariablesMMap_.find(0) != pid2CdmVariablesMMap_.end()) {
-                                // we have MSL pr = 1 (we are dealing with GND type)
-                                assert(mgm_set_pr(gp3, 1) == MGM_OK);
-                            } else {
-                                // no MSL in CDM model (pr = 0 if units not Pa)
-                                assert(mgm_set_pr(gp3, 0) == MGM_OK);
-                            }
+            CDMAttribute metgmPrAttribute;
+            if(cdmRef.getAttribute(kildeVariableName, "metgm_pr", metgmPrAttribute)) {
+                short pr = boost::lexical_cast<short>(metgmPrAttribute.getStringValue());
+                assert(mgm_set_pr(gp3, pr) == MGM_OK);
+            } else if(kildeVariableName.find("_MSL") != std::string::npos) {
+                assert(mgm_set_pr(gp3, 0) == MGM_OK);
+            } else if(kildeVariableName.find("_GND") != std::string::npos) {
+                assert(mgm_set_pr(gp3, 1) == MGM_OK);
+            } else {
+                CDMAttribute metgmUnitsAttribute;
+                if(cdmRef.getAttribute(kildeVariableName, "units", metgmUnitsAttribute)) {
+                    std::string unitsName = metgmUnitsAttribute.getStringValue();
+                    if(unitsName.find("Pa") != std::string::npos) {
+                        assert(mgm_set_pr(gp3, 2) == MGM_OK);
+                    } else if(unitsName.find("m") != std::string::npos) {
+                        if(pid2CdmVariablesMMap_.find(0) != pid2CdmVariablesMMap_.end()) {
+                            // we have MSL pr = 1 (we are dealing with GND type)
+                            assert(mgm_set_pr(gp3, 1) == MGM_OK);
                         } else {
-                            assert(0); // some todo here
+                            // no MSL in CDM model (pr = 0 if units not Pa)
+                            assert(mgm_set_pr(gp3, 0) == MGM_OK);
                         }
-                    } else  {
+                    } else {
                         assert(0); // some todo here
                     }
-                }
-            } else {
-                /**
-                  * NO vertical axis (allowed case)
-                  */
-                if(p_id == 0) {
-                    assert(mgm_set_nz(gp3, 1) == MGM_OK);
-                    assert(mgm_set_pr(gp3, 0) == MGM_OK);
-                    assert(mgm_set_pz(gp3, 1) == MGM_OK);
-                } else {
-                    assert(mgm_set_nz(gp3, 1) == MGM_OK);
-                    assert(mgm_set_pr(gp3, 0) == MGM_OK);
-                    assert(mgm_set_pz(gp3, 1) == MGM_OK);
+                } else  {
+                    assert(0); // some todo here
                 }
             }
+        } else {
+            /**
+                  * NO vertical axis (allowed case)
+                  */
+            if(p_id == 0) {
+                assert(mgm_set_nz(gp3, 1) == MGM_OK);
+                assert(mgm_set_pr(gp3, 0) == MGM_OK);
+                assert(mgm_set_pz(gp3, 1) == MGM_OK);
+            } else {
+                assert(mgm_set_nz(gp3, 1) == MGM_OK);
+                assert(mgm_set_pr(gp3, 0) == MGM_OK);
+                assert(mgm_set_pz(gp3, 1) == MGM_OK);
+            }
+        }
 
-            short callResult = mgm_write_group3(metgmFileHandle_, metgmHandle_, gp3);
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
+        short callResult = mgm_write_group3(metgmFileHandle_, metgmHandle_, gp3);
+        if(callResult != MGM_OK)
+            throw CDMException(mgm_string_error(callResult));
 
     }
 
