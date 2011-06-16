@@ -742,6 +742,7 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
                 }
             }
             if (nbad == 0) {
+                free(eField);
                 free(wField);
                 return MIFI_OK; // convergence
             }
@@ -758,6 +759,7 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
         }
     }
 
+    free(eField);
     free(wField);
     return MIFI_OK;
 }
