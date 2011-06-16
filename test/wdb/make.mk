@@ -11,7 +11,7 @@ if HAVE_LIBPQ
   	wdb/GlobalWdbConfigurationTest.cpp \
   	wdb/TimeHandlerTest.cpp
   	
-  wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\"
+  wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\" @MIFI_PQ_CPPFLAGS@
   
   wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
   
