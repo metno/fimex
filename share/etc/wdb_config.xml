@@ -15,43 +15,343 @@
 
 <wdb_parameters>
 
-    <level_parameter wdbname="isobaric surface pressure">
-        <attribute name="standard_name" value="trykk" type="string" />
-    </level_parameter>
+	<level_parameter wdbname="atmosphere sigma coordinate">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="atmosphere_sigma_coordinate" type="string" />
+	</level_parameter>
+	
+	<level_parameter wdbname="depth">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="depth" type="string" />
+	</level_parameter>
+	
+	<level_parameter wdbname="height above ground">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="height" type="string" />
+	</level_parameter>
+	
+	<level_parameter wdbname="height above ground distance">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="height" type="string" />
+	</level_parameter>
+	
+	<!-- 
+	<level_parameter wdbname="height above mean sea level distance">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</level_parameter>
+	 -->
+	
+	<level_parameter wdbname="height above reference ellipsoid">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="height_above_reference_ellipsoid" type="string" />
+	</level_parameter>
+	
+	<!-- 
+	<level_parameter wdbname="isobaric surface pressure">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</level_parameter>
+	 -->
 
-    <level_parameter wdbname="height above ground distance">
-        <attribute name="standard_name" value="height" type="string" />
-    </level_parameter>
-
-    <level_parameter wdbname="height above mean sea level distance">
-        <attribute name="standard_name" value="GeoZ" type="string" />
-    </level_parameter>
 
 
-    <value_parameter wdbname="air temperature">
-    	<attribute name="units" value="K" type="string" />
-        <attribute name="standard_name" value="air_temperature" type="string" />
-    </value_parameter>
-
-	<value_parameter wdbname="mean sea level pressure" cfname="mslp">
-		<attribute name="units" value="Pa" type="string" />
-		<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+	<!-- 
+	<value_parameter wdbname="accumulated precipitation surface density">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
 	</value_parameter>
-
-    <value_parameter wdbname="x wind">
-		<attribute name="units" value="m s-1" type="string" />    
-        <attribute name="standard_name" value="eastward_wind" type="string" />
-    </value_parameter>
-
-    <value_parameter wdbname="y wind">
-    	<attribute name="units" value="m s-1" type="string" />
-        <attribute name="standard_name" value="northward_wind" type="string" />
-    </value_parameter>
-
-    <value_parameter wdbname="high cloud cover">
-    	<attribute name="units" value="1" type="string" />
-        <attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
-    </value_parameter>
+	 -->
+	
+	<value_parameter wdbname="air pressure at sea level">
+	    <attribute name="units" value="Pa" type="string" />
+	    <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="air temperature">
+	    <attribute name="units" value="K" type="string" />
+	    <attribute name="standard_name" value="air_temperature" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="cloud area fraction">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="cloud_area_fraction" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="cloud area fraction in atmosphere layer">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="dew point temperature">
+	    <attribute name="units" value="K" type="string" />
+	    <attribute name="standard_name" value="dew_point_temperature" type="string" />
+	</value_parameter>
+	
+	<!-- 
+	<value_parameter wdbname="fog cover">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<value_parameter wdbname="geopotential">
+	    <attribute name="units" value="m2 s-2" type="string" />
+	    <attribute name="standard_name" value="geopotential" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="geopotential height">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="geopotential_height" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="geopotential height specific energy">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="geopotential_height" type="string" />
+	</value_parameter>
+	
+	<!-- 
+	<value_parameter wdbname="high cloud cover">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="kalman air temperature">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<value_parameter wdbname="land area fraction">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="land_binary_mask" type="string" />
+	</value_parameter>
+	
+	<!-- 
+	<value_parameter wdbname="land cover">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="local 20th percentile accumulated precipitation surface density">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="local 50th percentile accumulated precipitation surface density">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="local 80th percentile accumulated precipitation surface density">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="low cloud cover">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<value_parameter wdbname="lwe precipitation rate">
+	    <attribute name="units" value="m s-1" type="string" />
+	    <attribute name="standard_name" value="lwe_precipitation_rate" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="lwe thickness of precipitation amount">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="lwe_thickness_of_precipitation_amount" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="lwe thickness of snowfall amount">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="lwe thickness of surface snow amount">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="lwe_thickness_of_surface_snow_amount" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="mean sea level pressure">
+	    <attribute name="units" value="Pa" type="string" />
+	    <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+	</value_parameter>
+	
+	<!-- 
+	<value_parameter wdbname="medium cloud cover">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="model topography distance">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<value_parameter wdbname="precipitation amount">
+	    <attribute name="units" value="kg m-2" type="string" />
+	    <attribute name="standard_name" value="precipitation_amount" type="string" />
+	</value_parameter>
+	
+	<!-- 
+	<value_parameter wdbname="probability of precipitation">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="proportion of land (model)">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<value_parameter wdbname="relative humidity">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="relative_humidity" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea floor depth below geoid">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="sea_floor_depth_below_geoid" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea surface height above geoid">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="sea_surface_height_above_geoid" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea surface wave significant height">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea temperature">
+	    <attribute name="units" value="K" type="string" />
+	    <attribute name="standard_name" value="sea_water_temperature" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea water temperature">
+	    <attribute name="units" value="K" type="string" />
+	    <attribute name="standard_name" value="sea_water_temperature" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea water x velocity">
+	    <attribute name="units" value="m s-1" type="string" />
+	    <attribute name="standard_name" value="sea_water_x_velocity" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sea water y velocity">
+	    <attribute name="units" value="m s.1" type="string" />
+	    <attribute name="standard_name" value="sea_water_y_velocity" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="significant combined wind waves and swell height distance">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="soil temperature">
+	    <attribute name="units" value="K" type="string" />
+	    <attribute name="standard_name" value="surface_temperature" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="sunshine duration">
+	    <attribute name="units" value="s" type="string" />
+	    <attribute name="standard_name" value="duration_of_sunshine" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="surface upward latent heat flux">
+	    <attribute name="units" value="W m-2" type="string" />
+	    <attribute name="standard_name" value="surface_upward_latent_heat_flux" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="surface upward sensible heat flux">
+	    <attribute name="units" value="W m-2" type="string" />
+	    <attribute name="standard_name" value="surface_upward_sensible_heat_flux" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="thunderstorm probability">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="thunderstorm_probability" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="total cloud cover">
+	    <attribute name="units" value="1" type="string" />
+	    <attribute name="standard_name" value="cloud_area_fraction" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="total precipitation distance">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="lwe_thickness_of_precipitation_amount" type="string" />
+	</value_parameter>
+	
+	<!-- 
+	<value_parameter wdbname="unsmoothed altitude">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="unsmoothed land area fraction">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<!-- 
+	<value_parameter wdbname="vessel icing index">
+	    <attribute name="units" value= type="string" />
+	    <attribute name="standard_name" value= type="string" />
+	</value_parameter>
+	 -->
+	
+	<value_parameter wdbname="visibility distance">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="visibility_in_air" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="visibility in air">
+	    <attribute name="units" value="m" type="string" />
+	    <attribute name="standard_name" value="visibility_in_air" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="wind velocity (u vector)">
+	    <attribute name="units" value="m s-1" type="string" />
+	    <attribute name="standard_name" value="eastward_wind" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="wind velocity (v vector)">
+	    <attribute name="units" value="m s-1" type="string" />
+	    <attribute name="standard_name" value="northward_wind" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="x wind">
+	    <attribute name="units" value="m s-1" type="string" />
+	    <attribute name="standard_name" value="eastward_wind" type="string" />
+	</value_parameter>
+	
+	<value_parameter wdbname="y wind">
+	    <attribute name="units" value="m s-1" type="string" />
+	    <attribute name="standard_name" value="northward_wind" type="string" />
+	</value_parameter>
 
 </wdb_parameters>
 </wdb_fimex_config>
