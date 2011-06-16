@@ -568,8 +568,8 @@ namespace MetNoFimex {
 
         if(!xName.empty() && !yName.empty()) {
             /**
-              * we have horizontal axis
-              * let's determine nature
+              * we have horizontal (X|Y) axes
+              * let's determine their nature
               */
 
             std::string xAxisStandardName;
@@ -585,9 +585,6 @@ namespace MetNoFimex {
 
             if(xAxisStandardName == std::string("longitude")
                       && yAxisStandardName == std::string("latitude")) {
-                /**
-                  * usual lon/lat
-                  */
 
                 boost::shared_ptr<Data> xData = cdmReader->getData(xName);
                 const boost::shared_array<double> xArray = xData->asConstDouble();
@@ -625,18 +622,7 @@ namespace MetNoFimex {
 
             } else if(xAxisStandardName == std::string("grid_longitude")
                       && yAxisStandardName == std::string("grid_latitude")) {
-                /**
-                  * rotated lon/lat
-                  */
-
                 throw CDMException("rotated longitude latitide not supported by metgm writer, consider first using Interpolator");
-
-                /**
-                  * fimex --input.file=proff.nc --interpolate.method=bilinear --interpolate.projString="+proj=latlong +ellps=WGS84"
-                  * --interpolate.xAxisValues=-90,-89,...,90 --interpolate.yAxisValues=90,89,...,50
-                  * --interpolate.xAxisUnit="degree" --interpolate.yAxisUnit="degree"
-                  * --output.file=interpolated.nc
-                  */
 
             } else if(xAxisStandardName == "projection_x_coordinate"
                       && yAxisStandardName == "projection_y_coordinate") {
