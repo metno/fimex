@@ -566,55 +566,11 @@ namespace MetNoFimex {
         std::string xName = cdmRef.getHorizontalXAxis(kildeVariableName); // x
         std::string yName = cdmRef.getHorizontalYAxis(kildeVariableName); // y
 
-        const CDMVariable *xAxisVar = 0;
-        std::string xAxisVarToXml("[EMPTY]");
-        if(cdmRef.hasVariable(xName)) {
-            std::stringstream sstream;
-            xAxisVar = &cdmRef.getVariable(xName);
-            xAxisVar->toXMLStream(sstream);
-            CDMAttribute standardName;
-            if(cdmRef.getAttribute(xName, "standard_name", standardName)) {
-                standardName.toXMLStream(sstream);
-            }
-            xAxisVarToXml = sstream.str();
-
-        }
-        const CDMVariable *yAxisVar = 0;
-        std::string yAxisVarToXml("[EMPTY]");
-        if(cdmRef.hasVariable(yName)) {
-            std::stringstream sstream;
-            yAxisVar = &cdmRef.getVariable(yName);
-            yAxisVar->toXMLStream(sstream);
-            CDMAttribute standardName;
-            if(cdmRef.getAttribute(yName, "standard_name", standardName)) {
-                standardName.toXMLStream(sstream);
-            }
-            yAxisVarToXml = sstream.str();
-        }
-
-//        std::cerr << __FILE__         << "|"
-//                  << __FUNCTION__     << "|"
-//                  << __LINE__         << ":"
-//                  << " p_id = "       << boost::lexical_cast<std::string>(p_id)
-//                  << " varName = "    << pVar->getName()
-//                  << " xAxisVar = "   << xAxisVarToXml
-//                  << " yAxisVar = "   << yAxisVarToXml
-//                  << " xName = "      << xName
-//                  << " yName = "      << yName
-//                  << " lonName = "    << lonName
-//                  << " latName = "    << latName
-//                  << " proj4 = "      << proj4String
-//                  << " coordinates =" << coordinatesString
-//                  << " isDegree = "   << isDegree
-//              << std::endl;
-
         if(!xName.empty() && !yName.empty()) {
             /**
               * we have horizontal axis
               * let's determine nature
               */
-            assert(xAxisVar);
-            assert(yAxisVar);
 
             std::string xAxisStandardName;
             std::string yAxisStandardName;
@@ -677,8 +633,9 @@ namespace MetNoFimex {
 
                 /**
                   * fimex --input.file=proff.nc --interpolate.method=bilinear --interpolate.projString="+proj=latlong +ellps=WGS84"
-                  * --interpolate.xAxisValues=-90,-89,...,90 --interpolate.yAxisValues=90,89,...,50 --interpolate.xAxisUnit="degree"
-                  * --interpolate.yAxisUnit="degree" --output.file=interpolated.nc
+                  * --interpolate.xAxisValues=-90,-89,...,90 --interpolate.yAxisValues=90,89,...,50
+                  * --interpolate.xAxisUnit="degree" --interpolate.yAxisUnit="degree"
+                  * --output.file=interpolated.nc
                   */
 
             } else if(xAxisStandardName == "projection_x_coordinate"
