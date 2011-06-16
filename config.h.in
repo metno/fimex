@@ -52,7 +52,7 @@
 #undef HAVE_MEMSET
 
 /* 'Define to 1 if you have the <metgm.h> header file.' */
-#undef HAVE_METGMAPI_H
+#undef HAVE_METGM_H
 
 /* Define to 1 if you have the <milib/milib.h> header file. */
 #undef HAVE_MILIB_MILIB_H

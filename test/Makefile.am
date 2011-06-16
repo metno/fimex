@@ -38,7 +38,7 @@ endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
-if HAVE_METGMAPI
+if HAVE_METGM
   CC_TESTS += testMetgmReader
 endif
 include wdb/make.mk

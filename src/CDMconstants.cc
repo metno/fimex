@@ -107,7 +107,7 @@ int fimexHas(int fileType)
     return 0;
 #endif
     case MIFI_FILETYPE_METGM:
-#ifdef HAVE_METGMAPI_H
+#ifdef HAVE_METGM_H
     return 1;
 #else
     return 0;

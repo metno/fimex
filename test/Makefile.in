@@ -39,7 +39,7 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
 @HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh
 @HAVE_GRIBAPI_TRUE@am__append_6 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
-@HAVE_METGMAPI_TRUE@am__append_7 = testMetgmReader
+@HAVE_METGM_TRUE@am__append_7 = testMetgmReader
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/wdb/make.mk
 @HAVE_LIBPQ_TRUE@am__append_8 = wdbTest
@@ -59,12 +59,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ax_boost_regex.m4 \
 	$(top_srcdir)/m4/ax_boost_system.m4 \
 	$(top_srcdir)/m4/ax_boost_unit_test_framework.m4 \
-	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/ax_postgres.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/ax_openmp.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/metno_check.m4 \
-	$(top_srcdir)/m4/mifi_checklib.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 \
+	$(top_srcdir)/m4/mifi_postgres.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -84,7 +84,7 @@ am__EXEEXT_1 =
 @HAVE_FELT_OR_MILIB_TRUE@am__EXEEXT_5 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_6 = testGribReader$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_7 = $(am__EXEEXT_5) $(am__EXEEXT_6)
-@HAVE_METGMAPI_TRUE@am__EXEEXT_8 = testMetgmReader$(EXEEXT)
+@HAVE_METGM_TRUE@am__EXEEXT_8 = testMetgmReader$(EXEEXT)
 @HAVE_LIBPQ_TRUE@am__EXEEXT_9 = wdbTest$(EXEEXT)
 am__EXEEXT_10 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
 	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
@@ -377,13 +377,16 @@ MAKEINFO = @MAKEINFO@
 MIFI_GRIB_API_CPPFLAGS = @MIFI_GRIB_API_CPPFLAGS@
 MIFI_GRIB_API_LDFLAGS = @MIFI_GRIB_API_LDFLAGS@
 MIFI_GRIB_API_LIBS = @MIFI_GRIB_API_LIBS@
-MIFI_METGM_API_CPPFLAGS = @MIFI_METGM_API_CPPFLAGS@
-MIFI_METGM_API_LDFLAGS = @MIFI_METGM_API_LDFLAGS@
-MIFI_METGM_API_LIBS = @MIFI_METGM_API_LIBS@
+MIFI_METGM_CPPFLAGS = @MIFI_METGM_CPPFLAGS@
+MIFI_METGM_LDFLAGS = @MIFI_METGM_LDFLAGS@
+MIFI_METGM_LIBS = @MIFI_METGM_LIBS@
 MIFI_NETCDF_CPPFLAGS = @MIFI_NETCDF_CPPFLAGS@
 MIFI_NETCDF_CPP_LIBS = @MIFI_NETCDF_CPP_LIBS@
 MIFI_NETCDF_LDFLAGS = @MIFI_NETCDF_LDFLAGS@
 MIFI_NETCDF_LIBS = @MIFI_NETCDF_LIBS@
+MIFI_PQ_CPPFLAGS = @MIFI_PQ_CPPFLAGS@
+MIFI_PQ_LDFLAGS = @MIFI_PQ_LDFLAGS@
+MIFI_PQ_LIBS = @MIFI_PQ_LIBS@
 MIFI_PROJ_CPPFLAGS = @MIFI_PROJ_CPPFLAGS@
 MIFI_PROJ_LDFLAGS = @MIFI_PROJ_LDFLAGS@
 MIFI_PROJ_LIBS = @MIFI_PROJ_LIBS@

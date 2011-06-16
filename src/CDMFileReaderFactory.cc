@@ -50,7 +50,7 @@
 #ifdef HAVE_LIBPQ
 #include "fimex/WdbCDMReader.h"
 #endif
-#ifdef HAVE_METGMAPI_H
+#ifdef HAVE_METGM_H
 #include "fimex/MetgmCDMReader.h"
 #endif
 
@@ -152,7 +152,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         return reader;
     }
 #endif
-#ifdef HAVE_METGMAPI_H
+#ifdef HAVE_METGM_H
     case MIFI_FILETYPE_METGM: {
         return boost::shared_ptr<CDMReader>(new METGM_CDMReader(fileName, configFile));
     }
