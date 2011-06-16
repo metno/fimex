@@ -21,7 +21,8 @@
 /**
  * The MIFI_FILETYPE_* define the available input and output file-formats
  */
-/* when changing, remember to update CDMconstants.cc#getFileTypeNames */
+/* when changing, remember to update CDMconstants.cc#getFileTypeNames,
+ * make sure that the maximum number is <= size of filetypes */
 #define MIFI_FILETYPE_UNKNOWN -1
 #define MIFI_FILETYPE_FELT   0
 #define MIFI_FILETYPE_NETCDF 1
@@ -50,6 +51,12 @@ int mifi_get_filetype(const char* filetypeName);
  * @param one of MIFI_FILETYPE_*
  */
 const char* mifi_get_filetype_name(int filetype);
+
+/**
+ * get the maximum number of filetypes, that is , the largest number
+ * of valid filetype you can get.
+ */
+int mifi_get_max_filetype_number();
 
 /**
  * check if fimex is configured with the filetype

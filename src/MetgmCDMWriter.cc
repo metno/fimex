@@ -40,8 +40,8 @@ namespace MetNoFimex {
         short int callResult = mgm_write_group3(fh, mh, gp3);
         if(callResult != MGM_OK)
             throw CDMException(mgm_string_error(callResult));
-        else
-            callResult; // that is MGM_OK
+
+        return callResult; // that is MGM_OK
     }
 
 

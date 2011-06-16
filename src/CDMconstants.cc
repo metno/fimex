@@ -73,6 +73,12 @@ int mifi_get_filetype(const char* name)
         return std::distance(names.begin(), namePos);
     }
 }
+
+int mifi_get_max_filetype_number()
+{
+    return static_cast<int>(getFiletypeNames_().size());
+}
+
 const char* fimexVersion()
 {
     return VERSION;
