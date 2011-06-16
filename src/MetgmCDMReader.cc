@@ -161,17 +161,6 @@ namespace MetNoFimex {
         }
     }
 
-    // P Id, P Id Edition1, P Id Edition2, Name, Type, Abbreviation, Unit, Max dim, Convertible
-//            {    0,    0,    0, "terrain elevation above MSL",               "value",        " ",     "m",          2, 0 },
-//            {    1,    1,    1, "land use",                                  "value",        " ",     "1",          2, 0 },
-//            {    2,    2,    2, "horizontal wind speed from west to east",   "value",        "U",     "m/s",        3, 0 },
-//            {    3,    3,    3, "horizontal wind speed from north to south", "value",        "V",     "m/s",        3, 0 },
-//            {    4,    4,    4, "vertical wind speed",                       "value",        "W",     "m/s",        3, 0 },
-//            {    5,    5,    5, "air temperature",                           "value",        "T",     "K",          3, 0 },
-//            {    6,    6,    6, "relative humidity",                         "value",        "RH",    "1",          3, 0 },
-//            {    7,    7,    7, "pressure",                                  "value",        "P",     "hPa",        3, 0 },
-//            {    7,    7,    7, "geopotential height",                       "value",        "Phi",   "m",          3, 0 },
-
     void METGM_CDMReader::fillPidToMetNoNameMap(const std::auto_ptr<XMLDoc> &doc)
     {
         if(doc.get() != 0) {
@@ -254,11 +243,6 @@ namespace MetNoFimex {
               * check units to differentiate between pressure and geopotential height
               */
             pid2cdmnamesmap_.insert(std::pair<int, std::string>(7, std::string("air_pressure")));
-
-//            if(pid2unitsmap_.at(7) == "hPa")
-//                pid2cdmnamesmap_.insert(std::pair<int, std::string>(7, std::string("air_pressure")));
-//            else // if(pid2unitsmap_.at(7) == "m")
-//                pid2cdmnamesmap_.insert(std::pair<int, std::string>(7, std::string("geopotential_height")));
         }
     }
 
@@ -300,12 +284,6 @@ namespace MetNoFimex {
         std::string projectionCoordinates = projectionTuple.get<1>();
 
         addVariables(projectionName, projectionCoordinates, timeDimension);
-
-//        std::map<std::string, mgm_group3*>::const_iterator cit = cdmvariable2mgm_group3map_.begin();
-//        for(; cit != cdmvariable2mgm_group3map_.end(); ++cit) {
-//            std::cerr << cit->first << std::endl;
-//            mgm_group3_dump(cit->second);
-//        }
     }
 
     void METGM_CDMReader::addGlobalCDMAttributes()
@@ -478,8 +456,6 @@ namespace MetNoFimex {
                 assert(error);
             } else if(error == MGM_OK) {
 
-//                mgm_group3_dump(pg3);
-
                 int numOfSteps = mgm_get_nt(pg3);
                 double timeStep = mgm_get_dt(pg3);
 
@@ -593,9 +569,6 @@ namespace MetNoFimex {
         if(mgm_free_group3(pg3) != 0)
            throw CDMException("mgm_free_group3() failed");
 
-//        projStr.append(" ").append("lon_0=").append(boost::lexical_cast<std::string>(cx));
-//        projStr.append(" ").append("lat_0=").append(boost::lexical_cast<std::string>(cy));
-
         boost::regex projexpr( "[+]proj=([[:alnum:]_]+)[[:space:]]+" );
         boost::smatch projmatch;
         if (boost::regex_search(projStr, projmatch, projexpr)) {
@@ -628,8 +601,6 @@ namespace MetNoFimex {
         if (boost::regex_search(projStr, unitsmatch, unitsexpr)) {
             if(unitsmatch.size() > 1)
                 projUnits = unitsmatch[1];
-        } else {
-//            throw CDMException("projection units not found");
         }
 
         if(projection->isDegree()) { // check if projection is lot-lat
@@ -719,7 +690,8 @@ namespace MetNoFimex {
         return metgmFileHandle_;
     }
 
-    mgm_handle* METGM_CDMReader::openMetgmHandle() {
+    mgm_handle* METGM_CDMReader::openMetgmHandle()
+    {
         if(metgmHandle_) {
             return metgmHandle_;
         }
@@ -727,7 +699,8 @@ namespace MetNoFimex {
         return metgmHandle_ = mgm_new_handle();
     }
 
-    mgm_handle* METGM_CDMReader::resetMetgmHandle() {
+    mgm_handle* METGM_CDMReader::resetMetgmHandle()
+    {
         if(openMetgmHandle() == 0) {
             std::cerr
                       << __FUNCTION__ << ":"
@@ -749,7 +722,8 @@ namespace MetNoFimex {
         return metgmHandle_;
     }
 
-    int METGM_CDMReader::readMetgmHeader() {
+    int METGM_CDMReader::readMetgmHeader()
+    {
         assert(resetMetgmHandle());
         return mgm_read_header(metgmFileHandle_, metgmHandle_);
     }
@@ -760,7 +734,6 @@ namespace MetNoFimex {
           * in artilery METGM we have basicaly 3 levels:
           * pressure or geopotential height - with MSL or GND reference
           */
-//        CDMDimension levelDim;
 
         std::string hcLevelType = "float";
 
@@ -780,14 +753,11 @@ namespace MetNoFimex {
             int error = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
-//                std::cerr << __FUNCTION__ << __LINE__ << " for gp3Index " << gp3Index << " MGM_ERROR_GROUP3_NOT_FOUND " << std::endl;
                 continue;
             } else if(error != MGM_OK) {
                 assert(error);
                 return;
             }
-
-//            mgm_group3_debug(pg3);
 
             int p_id = mgm_get_p_id(pg3);
 
@@ -796,8 +766,6 @@ namespace MetNoFimex {
                   * when skipping read its groups 3,4,5
                   * to move the pointer properly forward
                   */
-//                std::cerr << __FUNCTION__ << __LINE__ << " p_id:" << p_id << "skip4 : " << mgm_skip_group4 (metgmFileHandle_, metgmHandle_) << std::endl;
-//                std::cerr << __FUNCTION__ << __LINE__ << " p_id:" << p_id << "skip5 : " << mgm_skip_group5 (metgmFileHandle_, metgmHandle_) << std::endl;
 
                 continue;
             }
@@ -807,7 +775,6 @@ namespace MetNoFimex {
             int pz = mgm_get_pz(pg3);
             int pr = mgm_get_pr(pg3);
 
-//            std::cerr << __FUNCTION__ << __LINE__ << " p_id:" << p_id << " pz " << pz << std::endl;
             if(pz == 0) {
                 if(!prevZProfile.isValid()) {
                     throw CDMException("addLevelDimension : pz==0 : prevZProfile not valid");
@@ -861,17 +828,17 @@ namespace MetNoFimex {
                         exisitng_z_profile_name = existing_dim.getName();
                         if(boost::algorithm::contains(exisitng_z_profile_name, longName)) {
                             CDMVariable z_exisitng_variable  = cdm_->getVariable(exisitng_z_profile_name);
-                            // take and compare data
+                            /**
+                              * take and compare data
+                              */
                             int cmpResult = memcmp(pg4Data, z_exisitng_variable.getData()->getDataPtr(), nz * sizeof(float));
                             if( cmpResult == 0) {
                                 break;
                             } else if(cmpResult > 0) {
                                 exisitng_z_profile_name.clear();
-//                                std::cerr <<__FUNCTION__ << __LINE__ << " p_id = " << p_id << " buff1 > buff2 "<< std::endl;
                                 continue;
                             } else {
                                 exisitng_z_profile_name.clear();
-//                                std::cerr <<__FUNCTION__ << __LINE__ << " p_id = " << p_id << " buff1 < buff2 " << std::endl;
                                 continue;
                             }
                         } else {
@@ -879,7 +846,6 @@ namespace MetNoFimex {
                             continue;
                         }
                     }
-
 
                     if(exisitng_z_profile_name.empty()) {
                         data = createData(levelDataType, pg4Data, pg4Data + nz);
@@ -890,8 +856,8 @@ namespace MetNoFimex {
 
                         std::vector<std::string> levelShape;
                         /**
-                              * shape might be dependable of x,y (if pr=1)
-                              */
+                          * shape might be dependable of x,y (if pr=1)
+                          */
                         levelShape.push_back(levelDim.getName());
                         CDMVariable levelVar(levelDim.getName(), levelDataType, levelShape);
                         cdm_->addVariable(levelVar);
@@ -918,68 +884,25 @@ namespace MetNoFimex {
                         prXpidXname_.insert(zProfile);
 
                         prevZProfile = zProfile;
-//                        pid2levelprofilemap_.insert(std::make_pair(p_id, longName));
+
                     } else {
                         METGM_ZProfile zProfile(exisitng_z_profile_name, pr, p_id);
 
                         prXpidXname_.insert(zProfile);
 
                         prevZProfile = zProfile;
-
-//                        pid2levelprofilemap_.insert(std::make_pair(p_id, ));
                     }
 
                     delete [] pg4Data;
 
                 } else if(pz == 2) {
                     assert(0);
-//                    std::string levelProfileName = pid2levelprofilemap_.at(p_id - 1);
-//                    pid2levelprofilemap_.insert(std::make_pair(p_id, levelProfileName));
                 } else {
                     assert(0);
                 }
 
         }
 
-        /**
-          * lets do some printing
-          */
-//        typedef metgm_profile_set::index<metgm_pr>::type profiles_by_pr;
-//        profiles_by_pr& pr_index = prXpidXname_.get<metgm_pr>();
-
-//        profiles_by_pr::iterator prIt = pr_index.find(0);
-
-//        // obtain an iterator of index #0 from it1
-//        metgm_profile_set::const_iterator cit = prXpidXname_.project<name>(prIt);
-
-//        for(;cit != prXpidXname_.get<name>().end(); ++cit) {
-//            METGM_ZProfile profile = *cit;
-//            std::cerr
-//                    << " name=" << profile.name_
-//                    << " pr="   << profile.pr_
-//                    << " pid="  << profile.pid_
-//                    << std::endl;
-//        }
-
-//        size_t size = prXpidXname_.size();
-//        metgm_profile_set::index<metgm_pr>::type::const_iterator cit = prXpidXname_.get<metgm_pr>().find(1);
-//        for(;cit != prXpidXname_.get<metgm_pr>().end(); ++cit) {
-//            METGM_ZProfile profile = *cit;
-//            std::cerr
-//                    << " name=" << profile.name_
-//                    << " pr="   << profile.pr_
-//                    << " pid="  << profile.pid_
-//                    << std::endl;
-//        }
-//        metgm_profile_set::index<metgm_pid>::type::const_iterator it = prXpidXname_.get<metgm_pid>().begin();
-//        for(; it !=  prXpidXname_.get<metgm_pid>().end(); ++it) {
-//            METGM_ZProfile profile = *it;
-//            std::cerr
-//                    << " name=" << profile.name_
-//                    << " pr="   << profile.pr_
-//                    << " pid="  << profile.pid_
-//                    << std::endl;
-//        }
         return;
     }
 
@@ -1113,11 +1036,6 @@ namespace MetNoFimex {
     {
         short callResult = MGM_OK;
 
-//        std::cerr << __FUNCTION__ << ":"
-//                  << __LINE__     << ":"
-//                  << "for varName " << varName
-//                  << std::endl;
-
         /**
           * dont't use conts & as we will insert data when we get it
           */
@@ -1135,7 +1053,6 @@ namespace MetNoFimex {
           * TODO: Fimex needs elaborate caching
           */
         if(variable.hasData()) {
-//            std::cerr << "variable.hasData() == true" << std::endl;
             return getDataSliceFromMemory(variable, unLimDimPos);
         } else {
             if(p_id == -1)
@@ -1357,27 +1274,6 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> METGM_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb) throw(CDMException)
     {
-//        if(varName == "time") {
-//            std::cerr << __FUNCTION__ << ":"
-//                      << __LINE__     << ":"
-//                      << "reading time"
-//                << std::endl;
-//        }
-//        std::vector<std::string> dimensionNames = sb.getDimensionNames();
-//        std::vector<size_t> dimensionSizes = sb.getDimensionSizes();
-//        std::vector<size_t> dimensionMaxSizes = sb.getMaxDimensionSizes();
-//        std::vector<size_t> dimensionStartPositions = sb.getDimensionStartPositions();
-
-//        for(size_t index = 0; index < dimensionNames.size(); ++index) {
-//            std::cout
-//                    << __FUNCTION__ << "@" << __LINE__ << " : " << std::endl
-//                    << "   dimension name            "  << dimensionNames.at(index) << std::endl
-//                    << " \tdimension sizes           "  << dimensionSizes.at(index) << std::endl
-//                    << " \tdimension max sizes       "  << dimensionMaxSizes.at(index) << std::endl
-//                    << " \tdimension start positions "  << dimensionStartPositions.at(index)
-//                    << std::endl;
-//        }
-
         if(!cdm_->hasVariable(varName))
             return boost::shared_ptr<Data>();
 
@@ -1386,14 +1282,6 @@ namespace MetNoFimex {
         /**
           * TODO: check if data exists in some cache
           */
-
-//        // find time axis -- validtime in our case
-
-//        std::cerr
-//                << __FUNCTION__ << ":"
-//                << __LINE__ << ":"
-//                << "\t VARIABLE: " << varName
-//        << std::endl;
 
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         const std::vector<std::string>& dims = variable.getShape();
@@ -1426,21 +1314,6 @@ namespace MetNoFimex {
         }
 
         if ((!dims.empty()) && (layerDim != 0) && (timeDimension != 0)) { // 3D + T
-//            std::string t_axis_name = cdm_->getTimeAxis(varName);
-//            const CDMDimension& tRef = cdm_->getDimension(t_axis_name);
-
-//            std::string z_axis_name = cdm_->getVerticalAxis(varName);
-//            const CDMDimension& zRef = cdm_->getDimension(z_axis_name);
-
-//            std::string x_axis_name = cdm_->getHorizontalXAxis(varName);
-//            const CDMDimension& xRef = cdm_->getDimension(x_axis_name);
-
-//            std::string y_axis_name = cdm_->getHorizontalYAxis(varName);
-//            const CDMDimension& yRef = cdm_->getDimension(y_axis_name);
-
-//            size_t totalDataSize = tRef.getLength() * zRef.getLength() * xRef.getLength() * yRef.getLength();
-//            boost::shared_ptr<Data> totalData = createData(variable.getDataType(), totalDataSize);
-//            size_t totalDataCurrentPos = 0;
             /**
               * implementing shortcut (can be done even easier  --- bulk read)
               * read directly whole data from file
@@ -1457,14 +1330,6 @@ namespace MetNoFimex {
                     variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
 
             return sliceData;
-
-//            std::vector<std::string>::const_iterator x_cit = std::find(sb.getDimensionNames().begin(), sb.getDimensionNames().end(), x_axis_name);
-//            std::vector<std::string>::const_iterator y_cit = std::find(sb.getDimensionNames().begin(), sb.getDimensionNames().end(), y_axis_name);
-//            if( x_cit == sb.getDimensionNames().end() || y_cit == sb.getDimensionNames().end())
-//                return createData(variable.getDataType(), 0);
-
-//            size_t x_axis_index = x_cit - sb.getDimensionNames().end();
-//            size_t y_axis_index = y_cit - sb.getDimensionNames().end();
 
         } if ((!dims.empty()) && (layerDim != 0) && (timeDimension == 0)) { // 3D and const in time
 
@@ -1485,37 +1350,12 @@ namespace MetNoFimex {
             throw CDMException("METGM_CDMReader getDatalSlice for 2D + T case not implemented");
 
         } else if(!dims.empty() && layerDim == 0 && timeDimension == 0) { // 2D - x , y
-//            std::string x_axis_name = cdm_->getHorizontalXAxis(varName);
-//            const CDMDimension& xRef = cdm_->getDimension(x_axis_name);
-
-//            std::string y_axis_name = cdm_->getHorizontalYAxis(varName);
-//            const CDMDimension& yRef = cdm_->getDimension(y_axis_name);
-
-//            std::vector<std::string>::const_iterator x_cit = std::find(sb.getDimensionNames().begin(), sb.getDimensionNames().end(), x_axis_name);
-//            std::vector<std::string>::const_iterator y_cit = std::find(sb.getDimensionNames().begin(), sb.getDimensionNames().end(), y_axis_name);
-//            if( x_cit == sb.getDimensionNames().end() || y_cit == sb.getDimensionNames().end())
-//                return createData(variable.getDataType(), 0);
-
-//            size_t x_axis_index = x_cit - sb.getDimensionNames().end();
-//            size_t y_axis_index = y_cit - sb.getDimensionNames().end();
-
-//            size_t x_axis_start_position = sb.getDimensionStartPositions().at(x_axis_index);
-//            size_t y_axis_start_position = sb.getDimensionStartPositions().at(y_axis_index);
-
-//            size_t x_axis_end_position = x_axis_start_position + sb.getDimensionSizes().at(x_axis_index);
-//            size_t y_axis_end_position = y_axis_start_position + sb.getDimensionSizes().at(y_axis_index);
-
-//            assert(x_axis_end_position <= sb.getMaxDimensionSizes().at(x_axis_index) && x_axis_end_position <= xRef.getLength());
-//            assert(y_axis_end_position <= sb.getMaxDimensionSizes().at(y_axis_index) && y_axis_end_position <= yRef.getLength());
-
-//            size_t sliceSize = (x_axis_end_position - x_axis_start_position) * (y_axis_end_position - y_axis_start_position);
 
             if(!variable.hasData()) {
                 boost::shared_ptr<Data> data = getDataSlice(varName, 0);
             }
 
             assert(variable.hasData());
-
 
             boost::shared_ptr<Data> sliceData =
                     variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
