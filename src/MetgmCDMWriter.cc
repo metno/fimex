@@ -524,8 +524,6 @@ namespace MetNoFimex {
             assert(0);
 
         const CDMDimension* tDimension = 0;
-        const CDMDimension* xDimension = 0;
-        const CDMDimension* yDimension = 0;
         const CDMDimension* zDimension = 0;
 
         std::string tName = cdmRef.getTimeAxis(kildeVariableName);
