@@ -100,8 +100,6 @@ private:
         void mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
         void mapMetgmPidToMetgmHDs(const std::auto_ptr<XMLDoc>& doc);
         void mapStandardNamesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
-        /** test if the variable exists in the cdmReader or throw an CDMException */
-        void testVariableExists(const std::string& varName) throw(CDMException);
 
         void allocateMgmHandle();
         void freeMgmHandle();
@@ -119,6 +117,10 @@ private:
         void writeHeader();
 
         void writeGroup3Data(mgm_group3* gp3, const CDMVariable* pVar);
+        void writeGroup3VerticalAxis(mgm_group3* gp3, const CDMVariable* pVar);
+        void writeGroup3TimeAxis(mgm_group3* gp3, const CDMVariable* pVar);
+        void writeGroup3HorizontalAxis(mgm_group3* gp3, const CDMVariable* pVar);
+
         void writeGroup4Data(const mgm_group3* gp3, const CDMVariable* pVar);
         void writeGroup5Data(const mgm_group3* gp3, const CDMVariable* pVar);
 

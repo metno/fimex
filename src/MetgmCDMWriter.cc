@@ -32,6 +32,19 @@ namespace MetNoFimex {
 #define MODEL_TYPE "metgm_model_type"
 #define PRODUCTION_NATION "metgm_production_nation"
 
+    /**
+      * static mgm_ wrapper functions
+      */
+    static int fimex_mgm_write_group3(FILE* fh, mgm_handle* mh, const mgm_group3* gp3)
+    {
+        short int callResult = mgm_write_group3(fh, mh, gp3);
+        if(callResult != MGM_OK)
+            throw CDMException(mgm_string_error(callResult));
+        else
+            callResult; // that is MGM_OK
+    }
+
+
     mgm_version METGM_CDMWriter::getMetgmVersion()
     {
         return this->metgmVersion_;
@@ -502,69 +515,45 @@ namespace MetNoFimex {
             throw CDMException("mgm_write_header fails");
     }
 
-    void METGM_CDMWriter::writeGroup3Data(mgm_group3* gp3, const CDMVariable* pVar)
+    void METGM_CDMWriter::writeGroup3TimeAxis(mgm_group3* gp3, const CDMVariable* pVar)
     {
-        assert(gp3);
-        assert(pVar);
-
-        const short p_id = mgm_get_p_id(gp3);
-
-        /**
-          * there can be more than one variable for same pid
-          * depending on the reference of vertical coordinate
-          * in metgm it is defined by (pr) parameter
-          */
+        short int callResult = MGM_OK;
 
         const CDM& cdmRef(cdmReader->getCDM());
 
-        const std::string kildeVariableName = pVar->getName();
-
-        // quick check
-        if(!cdmReader->getCDM().hasVariable(kildeVariableName))
-            assert(0);
-
-        const CDMDimension* tDimension = 0;
-        const CDMDimension* zDimension = 0;
-
-        std::string tName = cdmRef.getTimeAxis(kildeVariableName);
+        std::string tName = cdmRef.getTimeAxis(pVar->getName());
         if(!tName.empty()) {
-            tDimension = &cdmRef.getDimension(tName);
 
-            if(mgm_set_nt(gp3, tDimension->getLength()) != MGM_OK)
-                throw CDMException("mgm_set_nt fails");
+            const CDMDimension* tDimension = &cdmRef.getDimension(tName);
 
-            assert(mgm_set_dt(gp3, dTimeStep_) == MGM_OK);
+            assert(tDimension);
+
+            callResult = mgm_set_nt(gp3, tDimension->getLength());
+            if(callResult != MGM_OK)
+                throw CDMException(mgm_string_error(callResult));
+
+            callResult = mgm_set_dt(gp3, dTimeStep_);
+            if(callResult != MGM_OK)
+                throw CDMException(mgm_string_error(callResult));
 
         } else {
-            if(mgm_set_nt(gp3, 1) != MGM_OK)
-                throw CDMException("mgm_set_nt fails");
-            assert(mgm_set_dt(gp3, dTimeStep_) == MGM_OK);
+            // default values
+            callResult = mgm_set_nt(gp3, 1);
+            if(callResult != MGM_OK)
+                throw CDMException(mgm_string_error(callResult));
+
+            callResult = mgm_set_dt(gp3, dTimeStep_);
+            if(callResult != MGM_OK)
+                throw CDMException(mgm_string_error(callResult));
         }
+    }
 
+    void METGM_CDMWriter::writeGroup3HorizontalAxis(mgm_group3* gp3, const CDMVariable* pVar)
+    {
+        const CDM& cdmRef(cdmReader->getCDM());
 
-        boost::shared_ptr<Projection> proj;
-        std::string proj4String("[EMPTY]");
-        std::string isDegree("[EMPTY]");
-        CDMAttribute gridMapping;
-        if(cdmRef.getAttribute(pVar->getName(), "grid_mapping", gridMapping)) {
-            std::string projName = gridMapping.getStringValue();
-            CDMVariable projVar = cdmRef.getVariable(projName);
-            CDMAttribute proj4Attribute;
-            if(cdmRef.getAttribute(projVar.getName(), "proj4", proj4Attribute)) {
-                proj4String = proj4Attribute.getStringValue();
-                proj = Projection::createByProj4(proj4String);
-                isDegree = proj->isDegree() ? "true" : "false";
-            }
-        }
-
-        CDMAttribute coordinatesAttr;
-        std::string coordinatesString("[EMPTY]");
-        if(cdmRef.getAttribute(pVar->getName(), "coordinates", coordinatesAttr)) {
-            coordinatesString = coordinatesAttr.getStringValue();
-        }
-
-        std::string xName = cdmRef.getHorizontalXAxis(kildeVariableName); // x
-        std::string yName = cdmRef.getHorizontalYAxis(kildeVariableName); // y
+        std::string xName = cdmRef.getHorizontalXAxis(pVar->getName());
+        std::string yName = cdmRef.getHorizontalYAxis(pVar->getName());
 
         if(!xName.empty() && !yName.empty()) {
             /**
@@ -622,6 +611,7 @@ namespace MetNoFimex {
 
             } else if(xAxisStandardName == std::string("grid_longitude")
                       && yAxisStandardName == std::string("grid_latitude")) {
+
                 throw CDMException("rotated longitude latitide not supported by metgm writer, consider first using Interpolator");
 
             } else if(xAxisStandardName == "projection_x_coordinate"
@@ -635,49 +625,68 @@ namespace MetNoFimex {
             }
 
         }
+    }
 
-        std::string zName = cdmRef.getVerticalAxis(kildeVariableName);
-        if(!zName.empty()) {
+    void METGM_CDMWriter::writeGroup3VerticalAxis(mgm_group3* gp3, const CDMVariable* pVar)
+    {
+        short int callResult = MGM_OK;
 
-            assert(p_id != 0);
+        const CDM& cdmRef(cdmReader->getCDM());
 
-            zDimension = &cdmRef.getDimension(zName);
+        const CDMDimension* zDimension = &cdmRef.getDimension(cdmRef.getVerticalAxis(pVar->getName()));
 
+        if(zDimension) {
             size_t nz = zDimension->getLength();
-            assert(mgm_set_nz(gp3, nz) == MGM_OK);
+            callResult = mgm_set_nz(gp3, nz);
+            if(callResult != MGM_OK)
+                throw CDMException(mgm_string_error(callResult));
 
             /**
-                  * sending by default all Z coordinates
-                  * this is why we are hard coding to 1
-                  */
-            assert(mgm_set_pz(gp3, 1) == MGM_OK);
+              * sending by default all Z coordinates
+              * this is why we are hard coding to 1
+              */
+            callResult = mgm_set_pz(gp3, 1);
+            if(callResult != MGM_OK)
+                throw CDMException(mgm_string_error(callResult));
 
             /**
-                  * 1. try to find metgm_pr CDMAttribute
-                  * 2. else try parsing the name for _GND or _MSL
-                  * 3. if MSL sent exists from before, then check for units to distinguish _GND or _MSL
-                  */
+              * 1. try to find metgm_pr CDMAttribute
+              * 2. else try parsing the name for _GND or _MSL
+              * 3. if MSL sent exists from before, then check for units to distinguish _GND or _MSL
+              */
             CDMAttribute metgmPrAttribute;
-            if(cdmRef.getAttribute(kildeVariableName, "metgm_pr", metgmPrAttribute)) {
+            if(cdmRef.getAttribute(pVar->getName(), "metgm_pr", metgmPrAttribute)) {
                 short pr = boost::lexical_cast<short>(metgmPrAttribute.getStringValue());
-                assert(mgm_set_pr(gp3, pr) == MGM_OK);
-            } else if(kildeVariableName.find("_MSL") != std::string::npos) {
-                assert(mgm_set_pr(gp3, 0) == MGM_OK);
-            } else if(kildeVariableName.find("_GND") != std::string::npos) {
-                assert(mgm_set_pr(gp3, 1) == MGM_OK);
+                callResult = mgm_set_pr(gp3, pr);
+                if(callResult != MGM_OK)
+                    throw CDMException(mgm_string_error(callResult));
+            } else if(pVar->getName().find("_MSL") != std::string::npos) {
+                callResult = mgm_set_pr(gp3, 0);
+                if(callResult != MGM_OK)
+                    throw CDMException(mgm_string_error(callResult));
+            } else if(pVar->getName().find("_GND") != std::string::npos) {
+                callResult = mgm_set_pr(gp3, 1);
+                if(callResult != MGM_OK)
+                    throw CDMException(mgm_string_error(callResult));
             } else {
                 CDMAttribute metgmUnitsAttribute;
-                if(cdmRef.getAttribute(kildeVariableName, "units", metgmUnitsAttribute)) {
+                if(cdmRef.getAttribute(pVar->getName(), "units", metgmUnitsAttribute)) {
                     std::string unitsName = metgmUnitsAttribute.getStringValue();
                     if(unitsName.find("Pa") != std::string::npos) {
-                        assert(mgm_set_pr(gp3, 2) == MGM_OK);
+                        callResult = mgm_set_pr(gp3, 2);
+                        if(callResult != MGM_OK)
+                            throw CDMException(mgm_string_error(callResult));
                     } else if(unitsName.find("m") != std::string::npos) {
                         if(pid2CdmVariablesMMap_.find(0) != pid2CdmVariablesMMap_.end()) {
                             // we have MSL pr = 1 (we are dealing with GND type)
-                            assert(mgm_set_pr(gp3, 1) == MGM_OK);
+                            callResult = mgm_set_pr(gp3, 1);
+                            if(callResult != MGM_OK)
+                                throw CDMException(mgm_string_error(callResult));
                         } else {
                             // no MSL in CDM model (pr = 0 if units not Pa)
-                            assert(mgm_set_pr(gp3, 0) == MGM_OK);
+                            callResult = mgm_set_pr(gp3, 0);
+                            if(callResult != MGM_OK)
+                                throw CDMException(mgm_string_error(callResult));
                         }
                     } else {
                         assert(0); // some todo here
@@ -688,9 +697,11 @@ namespace MetNoFimex {
             }
         } else {
             /**
-                  * NO vertical axis (allowed case)
-                  */
-            if(p_id == 0) {
+              * NO vertical axis (allowed case)
+              */
+            const short p_id = mgm_get_p_id(gp3);
+
+            if(p_id == 0) { // special case -- topography
                 assert(mgm_set_nz(gp3, 1) == MGM_OK);
                 assert(mgm_set_pr(gp3, 0) == MGM_OK);
                 assert(mgm_set_pz(gp3, 1) == MGM_OK);
@@ -701,10 +712,21 @@ namespace MetNoFimex {
             }
         }
 
-        short callResult = mgm_write_group3(metgmFileHandle_, metgmHandle_, gp3);
-        if(callResult != MGM_OK)
-            throw CDMException(mgm_string_error(callResult));
 
+    }
+
+    void METGM_CDMWriter::writeGroup3Data(mgm_group3* gp3, const CDMVariable* pVar)
+    {
+        assert(gp3);
+        assert(pVar);
+
+        writeGroup3TimeAxis(gp3, pVar);
+
+        writeGroup3VerticalAxis(gp3, pVar);
+
+        writeGroup3VerticalAxis(gp3, pVar);
+
+        fimex_mgm_write_group3(metgmFileHandle_, metgmHandle_, gp3);
     }
 
     void METGM_CDMWriter::writeGroup4Data(const mgm_group3* gp3, const CDMVariable* pVar)
@@ -896,30 +918,6 @@ namespace MetNoFimex {
 
     }
 
-    //  Sequence when writing:
-    //     open output file in binary mode      - user program responsibility
-    //     mgm_new_handle                       - allocate handle memory
-    //     mgm_set_xxx                          - set group 0, 1 and 2 data
-    //     mgm_write_header                     - get handle, write group 0, 1 and 2 data
-    //     mgm_new_group3                       - allocate group 3 memory
-    //     mgm_set_xxx **                       - set group 3 data
-    //     mgm_write_group3                     - write group3 data
-    //     mgm_write_group4                     - write group 4 data
-    //     mgm_write_group5                     - write group 5 data
-    //     ... go back to ** and continue
-    //     mgm_free_group3                      - deallocate group 3 memory
-    //     mgm_free_handle                      - deallocate handle memory
-    //     close output file                    - user program responsibility
-    //
-    //  Call to function mgm_read_next_group3 and mgm_read_this_group3 can be repeated without
-    //  completing the given sequence when reading.
-    //
-    //  The METGM API only supports lat/long based METGMs.
-    //  There is no support for UTM grid, i.e. group 3 pz other than 9999.
-    //  All parameters must have the same horizontal grid and number of time steps, i.e all group 3s
-    //  must have equal nx, ny, nt, dx, dy, dt, cx and cy. The only exceptions are terrain elevation
-    //  (p_id = 0) and land use (p_id = 1) which only has one time step (nt = 1, dt = 0).
-
     void METGM_CDMWriter::init()
     {
         detectCDMVariables();
@@ -928,8 +926,8 @@ namespace MetNoFimex {
 
         allocateMgmHandle();
 
-        const CDM::DimVec& dims = cdmReader->getCDM().getDimensions();
-        CDM::DimVec::const_iterator dimIt;
+//        const CDM::DimVec& dims = cdmReader->getCDM().getDimensions();
+//        CDM::DimVec::const_iterator dimIt;
 
 //        for(dimIt = dims.begin(); dimIt != dims.end(); ++dimIt){
 //            CDM& cdmRef = const_cast<CDM&>(cdmReader->getCDM());
