@@ -624,11 +624,8 @@ namespace MetNoFimex {
                     dx = xVector[1] - xVector[0];
                     cx = xVector[0] + (xVector[xVector.size() - 1] - xVector[0]) / 2.0;
                     if(dx <= 0)
-                        throw CDMException("dx <= 0");
+                        throw CDMException("MetgmCDMWriter doesn't support dx <= 0 [use Interpolator to adjust axis]");
                 }
-
-//                std::cerr << "cx index is = " << (size_t)(xVector.size()/2) << " and the value is = " << xVector[xVector.size()/2] << std::endl;
-//                std::cerr << "real cx should be = " << (xVector[xVector.size()-1] - xVector[0]) / 2.0 << std::endl;
                 assert(mgm_set_dx(gp3, dx) == MGM_OK);
                 assert(mgm_set_nx(gp3, xVector.size()) == MGM_OK);
                 assert(mgm_set_cx(gp3, cx) == MGM_OK);
@@ -640,10 +637,8 @@ namespace MetNoFimex {
                     dy = yVector[1] - yVector[0];
                     cy = yVector[0] + (yVector[yVector.size() - 1] - yVector[0]) / 2.0;
                     if(dy <= 0)
-                        throw CDMException("dy <= 0");
+                        throw CDMException("MetgmCDMWriter doesn't support dy <= 0 [use Interpolator to adjust axis]");
                 }
-//                std::cerr << "cy index is = " << (size_t)(yVector.size()/2) << " and the value is = " << yVector[yVector.size()/2] << std::endl;
-//                std::cerr << "real cy should be = " << (yVector[yVector.size()-1] - yVector[0]) / 2.0 << std::endl;
                 assert(mgm_set_dy(gp3, dy) == MGM_OK);
                 assert(mgm_set_ny(gp3, yVector.size()) == MGM_OK);
                 assert(mgm_set_cy(gp3, cy) == MGM_OK);
