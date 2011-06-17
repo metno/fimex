@@ -680,7 +680,9 @@ namespace MetNoFimex {
 
         const CDM& cdmRef(cdmReader->getCDM());
 
-        const CDMDimension* zDimension = &cdmRef.getDimension(cdmRef.getVerticalAxis(pVar->getName()));
+        const CDMDimension* zDimension = 0;
+        if(!cdmRef.getVerticalAxis( pVar->getName() ).empty())
+                zDimension = &cdmRef.getDimension(cdmRef.getVerticalAxis( pVar->getName() ));
 
         if(zDimension) {
             size_t nz = zDimension->getLength();
@@ -746,20 +748,10 @@ namespace MetNoFimex {
             /**
               * NO vertical axis (allowed case)
               */
-            const short p_id = mgm_get_p_id(gp3);
-
-            if(p_id == 0) { // special case -- topography
-                assert(mgm_set_nz(gp3, 1) == MGM_OK);
-                assert(mgm_set_pr(gp3, 0) == MGM_OK);
-                assert(mgm_set_pz(gp3, 1) == MGM_OK);
-            } else {
-                assert(mgm_set_nz(gp3, 1) == MGM_OK);
-                assert(mgm_set_pr(gp3, 0) == MGM_OK);
-                assert(mgm_set_pz(gp3, 1) == MGM_OK);
-            }
+            assert(mgm_set_nz(gp3, 1) == MGM_OK);
+            assert(mgm_set_pr(gp3, 0) == MGM_OK);
+            assert(mgm_set_pz(gp3, 1) == MGM_OK);
         }
-
-
     }
 
     void METGM_CDMWriter::writeGroup3Data(mgm_group3* gp3, const CDMVariable* pVar)
