@@ -1,3 +1,15 @@
+fimex (0.29-2) lucid; urgency=low
+
+  * removing dependency on dpkg-dev for installation (required by preinst script)
+
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 17 Jun 2011 14:38:00 +0100
+
+fimex (0.29-1) lucid; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 16 Jun 2011 15:38:00 +0100
+
 fimex (0.27-1) lucid; urgency=low
 
   * initial upload
