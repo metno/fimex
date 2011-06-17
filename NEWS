@@ -1,6 +1,6 @@
   * 2011-06-16 {{:fimex:fimex-0.29.tar.gz|fimex-0.29}}
     * much improved and production ready [[http://sourceforge.net/projects/wdb/|wdb]]-reader
-    * beta version of MetGM / STANAG6022 reader and writer
+    * beta version of MetGM / STANAG6022 reader and writer (MetgmCDMReader.[h|cc] and MetgmCDMWriter.[h|cc] files)
     * support for [[http://www.unidata.ucar.edu/software/netcdf/ncml/v2.2/FmrcAggregation.html|FMRC]] / reference time axis
     * faster build-process / better portability (ported to AIX)
     * mercator and lambert projection support in grib-reader
