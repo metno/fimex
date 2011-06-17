@@ -611,19 +611,11 @@ namespace MetNoFimex {
 
                 boost::shared_ptr<Data> xData = cdmReader->getData(xName);
                 const boost::shared_array<float> xArray = xData->asConstFloat();
-                std::vector<float> xVector;
-                for(size_t index = 0; index < xData->size(); ++index) {
-                    xVector.push_back(xArray[index]);
-                    std::cerr << "index = " << index << "  xVector = " << xVector[index] << std::endl;
-                }
+                std::vector<float> xVector(&xArray[0], &xArray[xData->size()]);
 
                 boost::shared_ptr<Data> yData = cdmReader->getData(yName);;
                 const boost::shared_array<float> yArray = yData->asConstFloat();
-                std::vector<float> yVector;
-                for(size_t index = 0; index < yData->size(); ++index) {
-                    yVector.push_back(yArray[index]);
-                    std::cerr << "index = " << index << "  yVector = " << yVector[index] << std::endl;
-                }
+                std::vector<float> yVector(&yArray[0], &yArray[yData->size()]);
 
                 float dx = 0;
                 float cx = 0;
