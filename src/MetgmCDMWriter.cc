@@ -15,6 +15,7 @@
 
 // boost
 #include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 
 // standard
 #include <cstdio>
@@ -827,13 +828,13 @@ namespace MetNoFimex {
           * TODO: see if unit conversion is needed !
           */
         size_t totalDataSize;
-        float* gp5 = 0;
+        boost::scoped_array<float> gp5(0);
         if (!cdmRef.hasUnlimitedDim(*pVar)) {
             const boost::shared_ptr<Data> data = cdmReader->getData(variableName);
             const boost::shared_array<float> group5Data = data->asConstFloat();
 
             totalDataSize = data->size();
-            gp5 = new float[totalDataSize];
+            gp5.reset(new float[totalDataSize]);
 
             for(size_t index = 0; index < totalDataSize; ++index) {
 //                std::cerr << " index " << index << " has value " << group5Data[index] << std::endl;
@@ -859,8 +860,8 @@ namespace MetNoFimex {
 
             totalDataSize = sliceSize * unLimDim->getLength();
 
-            gp5 = new float[totalDataSize];
-            float* currPos = gp5;
+            gp5.reset(new float[totalDataSize]);
+            float* currPos = gp5.get();
 
             for (size_t i = 0; i < unLimDim->getLength(); ++i) {
                 boost::shared_ptr<Data> data = cdmReader->getDataSlice(variableName, i);
@@ -906,11 +907,9 @@ namespace MetNoFimex {
         }
 
         short callResult = MGM_OK;
-        callResult = mgm_write_group5 (metgmFileHandle_, metgmHandle_, gp5);
-
-        assert(callResult == MGM_OK);
-
-        delete [] gp5;
+        callResult = mgm_write_group5 (metgmFileHandle_, metgmHandle_, gp5.get());
+        if(callResult != MGM_OK)
+            throw CDMException(mgm_string_error(callResult));
     }
 
     void METGM_CDMWriter::loadInternalCDMObject()
