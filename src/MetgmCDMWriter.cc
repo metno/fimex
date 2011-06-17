@@ -41,10 +41,27 @@ namespace MetNoFimex {
         short int callResult = mgm_write_group3(fh, mh, gp3);
         if(callResult != MGM_OK)
             throw CDMException(mgm_string_error(callResult));
-
-        return callResult; // that is MGM_OK
+        else
+            return callResult; // that is MGM_OK
     }
 
+    static void fimex_dump_group3(const mgm_group3* gp3)
+    {
+        std::cerr << "dumping group3 [START]" << std::endl
+                  << "p_id = " << mgm_get_p_id (gp3) << std::endl
+                  << "nz = "   << mgm_get_nz (gp3)  << std::endl
+                  << "nx = "   << mgm_get_nx (gp3)  << std::endl
+                  << "ny = "   << mgm_get_ny (gp3)  << std::endl
+                  << "nt = "   << mgm_get_nt (gp3)  << std::endl
+                  << "dx = "   << mgm_get_dx (gp3)  << std::endl
+                  << "dy = "   << mgm_get_dy (gp3)  << std::endl
+                  << "dt = "   << mgm_get_dt (gp3)  << std::endl
+                  << "cx = "   << mgm_get_cx (gp3)  << std::endl
+                  << "cy = "   << mgm_get_cy (gp3)  << std::endl
+                  << "pr = "   << mgm_get_pr (gp3)  << std::endl
+                  << "pz = "   << mgm_get_pz (gp3)  << std::endl
+                  << "dumping group3 [END]" << std::endl;
+    }
 
     mgm_version METGM_CDMWriter::getMetgmVersion()
     {
