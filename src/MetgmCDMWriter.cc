@@ -556,6 +556,22 @@ namespace MetNoFimex {
 
         } else {
             // default values
+            const CDMDimension* tDimension = cdmRef.getUnlimitedDim();
+
+            assert(tDimension);
+
+            boost::shared_ptr<Data> tData = cdmReader->getData(tDimension->getName());
+            const boost::shared_array<double> tArray = tData->asConstDouble();
+
+            size_t nt = tData->size();
+
+            dTimeStep_ = tArray[tData->size() - 1] - tArray[0];
+
+            if(dTimeStep_ <= 0)
+                throw CDMException("dTimeStep_ <= 0");
+//            else
+//                std::cerr << "dTimeStep_ = " << dTimeStep_ << std::endl;
+
             callResult = mgm_set_nt(gp3, 1);
             if(callResult != MGM_OK)
                 throw CDMException(mgm_string_error(callResult));
@@ -594,37 +610,50 @@ namespace MetNoFimex {
                       && yAxisStandardName == std::string("latitude")) {
 
                 boost::shared_ptr<Data> xData = cdmReader->getData(xName);
-                const boost::shared_array<double> xArray = xData->asConstDouble();
-                std::vector<double> xVector(&xArray[0], &xArray[xData->size() - 1]);
-//                for(size_t index = 0; index < xData->size(); ++index)
-//                    xVector.push_back(xArray[index]);
+                const boost::shared_array<float> xArray = xData->asConstFloat();
+                std::vector<float> xVector;
+                for(size_t index = 0; index < xData->size(); ++index) {
+                    xVector.push_back(xArray[index]);
+                    std::cerr << "index = " << index << "  xVector = " << xVector[index] << std::endl;
+                }
 
                 boost::shared_ptr<Data> yData = cdmReader->getData(yName);;
-                const boost::shared_array<double> yArray = yData->asConstDouble();
-                std::vector<double> yVector(&yArray[0], &yArray[xData->size() - 1]);
-//                for(size_t index = 0; index < yData->size(); ++index)
-//                    yVector.push_back(yArray[index]);
+                const boost::shared_array<float> yArray = yData->asConstFloat();
+                std::vector<float> yVector;
+                for(size_t index = 0; index < yData->size(); ++index) {
+                    yVector.push_back(yArray[index]);
+                    std::cerr << "index = " << index << "  yVector = " << yVector[index] << std::endl;
+                }
 
                 float dx = 0;
-                if(xData->size() > 1) {
+                float cx = 0;
+                if(xVector.size() > 1) {
+                    std::cerr << "xVector.size() = " << xVector.size() << std::endl;
                     dx = xVector[1] - xVector[0];
+                    cx = xVector[0] + (xVector[xVector.size() - 1] - xVector[0]) / 2.0;
+                    if(dx <= 0)
+                        throw CDMException("dx <= 0");
                 }
 
-                float dy = 0;
-                if(yData->size() > 1) {
-                    dy = yVector[1] - yVector[0];
-                }
-
-                short nx = xVector.size();
-                assert(mgm_set_nx(gp3, nx) == MGM_OK);
+//                std::cerr << "cx index is = " << (size_t)(xVector.size()/2) << " and the value is = " << xVector[xVector.size()/2] << std::endl;
+//                std::cerr << "real cx should be = " << (xVector[xVector.size()-1] - xVector[0]) / 2.0 << std::endl;
                 assert(mgm_set_dx(gp3, dx) == MGM_OK);
-                float cx = xVector[xVector.size()/2];
+                assert(mgm_set_nx(gp3, xVector.size()) == MGM_OK);
                 assert(mgm_set_cx(gp3, cx) == MGM_OK);
 
-                short ny = yVector.size();
-                assert(mgm_set_ny(gp3, ny) == MGM_OK);
+                float dy = 0;
+                float cy = 0;
+                if(yVector.size() > 1) {
+                    std::cerr << "yVector.size() = " << yVector.size() << std::endl;
+                    dy = yVector[1] - yVector[0];
+                    cy = yVector[0] + (yVector[yVector.size() - 1] - yVector[0]) / 2.0;
+                    if(dy <= 0)
+                        throw CDMException("dy <= 0");
+                }
+//                std::cerr << "cy index is = " << (size_t)(yVector.size()/2) << " and the value is = " << yVector[yVector.size()/2] << std::endl;
+//                std::cerr << "real cy should be = " << (yVector[yVector.size()-1] - yVector[0]) / 2.0 << std::endl;
                 assert(mgm_set_dy(gp3, dy) == MGM_OK);
-                float cy = yVector[yVector.size()/2];
+                assert(mgm_set_ny(gp3, yVector.size()) == MGM_OK);
                 assert(mgm_set_cy(gp3, cy) == MGM_OK);
 
             } else if(xAxisStandardName == std::string("grid_longitude")
@@ -740,9 +769,11 @@ namespace MetNoFimex {
 
         writeGroup3TimeAxis(gp3, pVar);
 
-        writeGroup3VerticalAxis(gp3, pVar);
+        writeGroup3HorizontalAxis(gp3, pVar);
 
         writeGroup3VerticalAxis(gp3, pVar);
+
+        fimex_dump_group3(gp3);
 
         fimex_mgm_write_group3(metgmFileHandle_, metgmHandle_, gp3);
     }
