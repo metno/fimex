@@ -14,6 +14,9 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/CDMException.h"
 
+// implementation details
+#include "../include/metgm/MetGmVersion.h"
+
 // boost
 //
 #include <boost/regex.hpp>
@@ -65,21 +68,6 @@ namespace MetNoFimex {
         metgmHandle_ = 0;
     }
 
-    mgm_version METGM_CDMReader::getMetgmVersion()
-    {
-        return metgmVersion_;
-    }
-
-    std::string METGM_CDMReader::getMetgmVersionAsString()
-    {
-        if(getMetgmVersion() == MGM_Edition1)
-            return std::string("STANAG 6022 Edition 1");
-        else if(getMetgmVersion() == MGM_Edition2)
-            return std::string("STANAG 6022 Edition 2");
-        else
-            return std::string("Unknown STANAG 6022 Edition");
-    }
-
     std::string METGM_CDMReader::dataTypeToString(short data_type)
     {
         switch(data_type) {
@@ -109,10 +97,10 @@ namespace MetNoFimex {
 
         short callResult = readMetgmHeader();
         if(callResult != MGM_OK) {
-            std::cerr << mgm_string_error(callResult) << std::endl;
+            throw CDMException(mgm_string_error(callResult));
         }
 
-        metgmVersion_ = mgm_get_version(metgmHandle_);
+        metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(mgm_get_version(metgmHandle_)));
   }
 
     std::string METGM_CDMReader::spaceToUnderscore(const std::string& name)
@@ -256,7 +244,7 @@ namespace MetNoFimex {
 
         readMetgmVersion();
 
-        if(getMetgmVersion() == MGM_EditionNONE)
+        if(*metgmVersion_ == MGM_EditionNONE)
             throw CDMException(std::string("can't use MGM_EditionNONE as version"));
 
         std::auto_ptr<XMLDoc> xmlDoc;
@@ -316,15 +304,15 @@ namespace MetNoFimex {
                                          strHistory);
 
         CDMAttribute cdmSourceAttribute("source", "string", "unknown");
-        if(getMetgmVersion() == MGM_Edition2) {
+        if(*metgmVersion_ == MGM_Edition2) {
             cdmSourceAttribute = CDMAttribute("source", "string", std::string(mgm_get_production_nation(metgmHandle_)).append(" ").append(mgm_get_model_type(metgmHandle_)));
         }
-        CDMAttribute cdmTitleAttribute("title", "string", metgmSource_ + std::string(" ") + getMetgmVersionAsString());
+        CDMAttribute cdmTitleAttribute("title", "string", metgmSource_ + std::string(" ") + metgmVersion_->getAsString());
         CDMAttribute cdmReferencesAttribute("references", "string", "unknown");
 
         CDMAttribute cdmMetgmAnalysisDateTimeAttribute("metgm_analysis_date_time", "string", boost::posix_time::to_iso_extended_string(analysisTime));
         CDMAttribute cdmMetgmStartDateTimeAttribute("metgm_start_date_time", "string", boost::posix_time::to_iso_extended_string(startTime));
-        CDMAttribute cdmMetgmVersionAttribute("metgm_version", "string", spaceToUnderscore(getMetgmVersionAsString()));
+        CDMAttribute cdmMetgmVersionAttribute("metgm_version", "string", spaceToUnderscore(metgmVersion_->getAsString()));
         CDMAttribute cdmMetgmDataTypeAttribute("metgm_data_type", "string", dataTypeToString(mgm_get_data_type(metgmHandle_)));
         CDMAttribute cdmMetgmFreeTextAttribute("metgm_free_text", "string", mgm_get_free_text(metgmHandle_));
 
@@ -379,7 +367,7 @@ namespace MetNoFimex {
                 << " type=\"string\" />"
                 << std::endl;
 
-        if(getMetgmVersion() == MGM_Edition2) {
+        if(*metgmVersion_ == MGM_Edition2) {
             CDMAttribute cdmMetgmProductionNationAttribute = CDMAttribute("metgm_production_nation", "string", std::string(mgm_get_production_nation(metgmHandle_)));
             cdm_->addAttribute(cdm_->globalAttributeNS(), cdmMetgmProductionNationAttribute);
             CDMAttribute cdmMetgmModelTypeAttribute = CDMAttribute("metgm_model_type", "string", std::string(mgm_get_model_type(metgmHandle_)));
@@ -1023,7 +1011,6 @@ namespace MetNoFimex {
             CDMDataType type = string2datatype(hcDataType);
             CDMVariable var(variableMetNoName, type, shape);
             cdm_->addVariable(var);
-            const CDMVariable* pVar = &cdm_->getVariable(variableMetNoName);
             cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, mgm_group3*>(variableMetNoName, pg3));
 
             for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
@@ -1174,7 +1161,14 @@ namespace MetNoFimex {
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
 
-//                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
+                /**
+                  * check if param with given p_id is convertible
+                  */
+                callResult = mgm_param_is_convertible(p_id, *metgmVersion_);
+                if(callResult != MGM_OK) {
+                    throw CDMException(mgm_string_error(callResult));
+                }
+//                callResult = mgm_convert_group5_to_met(p_id, *metgmVersion_, pg5.get(), totalDataDimension);
 //                if(callResult != MGM_OK || callResult != MGM_ERROR_GROUP5_NOT_CONVERTIBLE)
 //                    throw CDMException(mgm_string_error(callResult));
 
@@ -1197,7 +1191,7 @@ namespace MetNoFimex {
                 boost::scoped_array<float> pg5T(new float[totalDataDimension]);
 
                 short pz = mgm_get_pz(fwdPg3);
-                short pr = mgm_get_pr(fwdPg3);
+//                short pr = mgm_get_pr(fwdPg3);
 
                 if(pz > 0) {
                     // read group4 data
@@ -1215,7 +1209,14 @@ namespace MetNoFimex {
                   * lets extract one we actually need
                 */
 
-//                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
+                /**
+                  * check if param with given p_id is convertible
+                  */
+                callResult = mgm_param_is_convertible(p_id, *metgmVersion_);
+                if(callResult != MGM_OK) {
+                    throw CDMException(mgm_string_error(callResult));
+                }
+//                callResult = mgm_convert_group5_to_met(p_id, *metgmVersion_, pg5.get(), totalDataDimension);
 //                if(callResult != MGM_ERROR_GROUP5_NOT_CONVERTIBLE && callResult != MGM_OK) {
 //                    throw CDMException(mgm_string_error(callResult));
 //                }

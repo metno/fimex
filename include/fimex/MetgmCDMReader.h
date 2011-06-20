@@ -1,18 +1,10 @@
 #ifndef METGM_CDM_READER_H
 #define METGM_CDM_READER_H
 
-#include "metgm.h"
-
-
 // fimex
 //
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDimension.h"
-
-// standard
-//
-#include <string>
-#include <vector>
 
 // boost
 //
@@ -25,49 +17,31 @@
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/composite_key.hpp>
 
+// standard
+//
+#include <cstdio>
+#include <string>
+#include <vector>
+
 
 /**
   * TODO:
-       1. DONE ----- see if we are dealing with time axis properly
-          should we calculate
-                startTime+1*td; startTime+2*td;
-                or
-                startTime+0*td; startTime+1*td;
 
-Clarification for dt. If the METGM has only one time slice, dt is the
-number of seconds the data are valid for from the YS,MS,DS,hS,mS
-DTG provided. Where a number of time slice volumes are provided,
-all slices are separated by dt seconds.
+       1. parameters can have different vertical profile -- make it properly
 
-          Have in mind that dataslice is 0 indexed
-          so
-          startTime+0*td; startTime+1*td; shoul be used
-
-       2. DONE ----- am I using properly long_0 and lat_0 (centers of grid)
-
-       3. parameters can have different vertical profile -- make it properly
-
-       4. DONE ----- when we have MSL .. should we add it to the vertical profiles
-          Nope, no adding
-
-       5. DONE ----- how to handle unitless parameters (what is the unit -- now is "1")
-          valueunitname should be "ratio"
-
-       6. one of the winds parameters has to be multiplied by -1
+       2. one of the winds parameters has to be multiplied by -1
           maybe to have slope as -1?
 
-       7. DONE ----- introduce confoguration file parsing (pids, cfnames, fillvalues ...)
-
-       8. cacheing of data as data is read at once for all points in time
-
-       9. DONE ----- SliceBuilder
-
-       10. use comment to set all metadata as well (start, analysis time, country)
   */
+
+/* external forward declarations */
+struct mgm_handle;
+struct mgm_group3;
 
 namespace MetNoFimex {
     /* forward declarations */
     class XMLDoc;
+    class MetGmVersion;
 
     struct METGM_ZProfile
     {
@@ -113,9 +87,6 @@ namespace MetNoFimex {
         void init() throw(CDMException);
         bool deinit();
 
-        mgm_version getMetgmVersion();
-        std::string getMetgmVersionAsString();
-
         int getPidForMetgmName(const std::string& metgm_name);
         int getPidForCdmName(const std::string& cdm_name);
 
@@ -159,15 +130,7 @@ namespace MetNoFimex {
         // returning projName and coordinates for given place name
         boost::tuple<std::string, std::string> addProjection();
 
-        void addVariables
-                (
-                        const std::string& projName,
-                        const std::string& coordinates,
-                        const CDMDimension& timeDim //,
-                        /*const CDMDimension& referenceTimDim,*/
-//                        const std::map<short, CDMDimension>& levelDim
-//                        const CDMDimension& levelDim
-                );
+        void addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim);
 
     private:
         std::string                         metgmSource_;
@@ -175,8 +138,8 @@ namespace MetNoFimex {
         fpos_t                              metgmFileHandleStartPos_;
         mgm_handle*                         metgmHandle_;
         std::string                         configFileName_;
-        mgm_version                         metgmVersion_;
-//
+        boost::shared_ptr<MetGmVersion>     metgmVersion_;
+
         // data to build the reader on
         // todo: use smart pointers
 
