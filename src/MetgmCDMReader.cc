@@ -1174,8 +1174,9 @@ namespace MetNoFimex {
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
 
-                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
-                assert(callResult == MGM_ERROR_GROUP5_NOT_CONVERTIBLE || callResult == MGM_OK);
+//                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
+//                if(callResult != MGM_OK || callResult != MGM_ERROR_GROUP5_NOT_CONVERTIBLE)
+//                    throw CDMException(mgm_string_error(callResult));
 
                 data = MetNoFimex::createData(CDM_FLOAT, pg5.get(), pg5.get() + totalDataDimension);
                 variable.setData(data);
@@ -1214,8 +1215,10 @@ namespace MetNoFimex {
                   * lets extract one we actually need
                 */
 
-                short callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
-                assert(callResult == MGM_ERROR_GROUP5_NOT_CONVERTIBLE || callResult == MGM_OK);
+//                callResult = mgm_convert_group5_to_met(p_id, metgmVersion_, pg5.get(), totalDataDimension);
+//                if(callResult != MGM_ERROR_GROUP5_NOT_CONVERTIBLE && callResult != MGM_OK) {
+//                    throw CDMException(mgm_string_error(callResult));
+//                }
 
                 float* slice = pg5.get();
                 float* sliceT = pg5T.get();
