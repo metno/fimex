@@ -16,6 +16,7 @@
 // boost
 #include <boost/shared_array.hpp>
 #include <boost/scoped_array.hpp>
+#include <boost/bind.hpp>
 
 // standard
 #include <cstdio>
@@ -546,6 +547,16 @@ namespace MetNoFimex {
 
             assert(tDimension);
 
+            if(tDimension->getLength() <= 0)
+                throw CDMException("given time axis lenght is <= 0, check data manually");
+
+            const boost::shared_ptr<Data> tData = cdmReader->getData(tDimension->getName());
+            const boost::shared_array<float> tArray = tData->asConstFloat();
+
+            std::less_equal<float> leq;
+            if( std::find_if( &tArray[0], &tArray[tData->size()], boost::bind( leq, _1, 0 ) ) != &tArray[tData->size()])
+                throw CDMException("MetgmCDMWriter is not supporting negative values on the time axis");
+
             callResult = mgm_set_nt(gp3, tDimension->getLength());
             if(callResult != MGM_OK)
                 throw CDMException(mgm_string_error(callResult));
@@ -563,20 +574,20 @@ namespace MetNoFimex {
             boost::shared_ptr<Data> tData = cdmReader->getData(tDimension->getName());
             const boost::shared_array<double> tArray = tData->asConstDouble();
 
-            size_t nt = tData->size();
+            std::less_equal<float> leq;
+            if( std::find_if( &tArray[0], &tArray[tData->size()], boost::bind( leq, _1, 0 ) ) != &tArray[tData->size()])
+                throw CDMException("MetgmCDMWriter is not supporting negative values on the time axis");
 
-            dTimeStep_ = tArray[tData->size() - 1] - tArray[0];
+            time_t dT = tArray[tData->size() - 1] - tArray[0];
 
-            if(dTimeStep_ <= 0)
-                throw CDMException("dTimeStep_ <= 0");
-//            else
-//                std::cerr << "dTimeStep_ = " << dTimeStep_ << std::endl;
+            if(dT <= 0)
+                throw CDMException("MetgmCDMReader is not supporting dt <= 0");
 
             callResult = mgm_set_nt(gp3, 1);
             if(callResult != MGM_OK)
                 throw CDMException(mgm_string_error(callResult));
 
-            callResult = mgm_set_dt(gp3, dTimeStep_);
+            callResult = mgm_set_dt(gp3, dT);
             if(callResult != MGM_OK)
                 throw CDMException(mgm_string_error(callResult));
         }
