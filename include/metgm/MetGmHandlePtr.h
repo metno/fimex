@@ -25,49 +25,27 @@
   * Used as private/implementation class
   */
 
-#ifndef METGM_VERSION_H
-#define METGM_VERSION_H
+#ifndef METGM_HANDLEPTR_H
+#define METGM_HANDLEPTR_H
 
 #include "metgm.h"
 
-#include <string>
-
 namespace MetNoFimex {
 
-    class MetGmVersion {
+    class MetGmHandlePtr {
     public:
 
-        explicit MetGmVersion(mgm_version version) : version_(version) { }
+        explicit MetGmHandlePtr() { handle_ = mgm_new_handle(); }
 
-        inline std::string getAsString()
-        {
-            if(version_ == MGM_Edition1)
-                return std::string("STANAG 6022 Edition 1");
-            else if(version_ == MGM_Edition2)
-                return std::string("STANAG 6022 Edition 2");
-            else
-                return std::string("Unknown STANAG 6022 Edition");
-        }
+        ~MetGmHandlePtr() { mgm_free_handle(handle_); }
 
-        inline bool operator == (const MetGmVersion &rh) const
-        {
-            return version_ == rh.version_;
-        }
+        inline int reset() { return mgm_reset_handle(handle_); }
 
-        inline bool operator == (const mgm_version rh_version) const
-        {
-            return version_ == rh_version;
-        }
-
-        inline operator mgm_version ()
-        {
-            return version_;
-        }
-
+        inline operator mgm_handle* () { return handle_; }
 
     private:
-        mgm_version version_;
+        mgm_handle* handle_;
     };
 }
 
-#endif // METGM_VERSION_H
+#endif // METGM_HANDLE_H

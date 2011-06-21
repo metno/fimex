@@ -25,49 +25,53 @@
   * Used as private/implementation class
   */
 
-#ifndef METGM_VERSION_H
-#define METGM_VERSION_H
+#ifndef METGM_FILEHANDLEPTR_H
+#define METGM_FILEHANDLEPTR_H
 
 #include "metgm.h"
 
+#include <cstdio>
 #include <string>
 
 namespace MetNoFimex {
 
-    class MetGmVersion {
+    class MetGmFileHandlePtr {
     public:
 
-        explicit MetGmVersion(mgm_version version) : version_(version) { }
-
-        inline std::string getAsString()
+        explicit MetGmFileHandlePtr(const std::string name) : handle_(0), fileName_(name)
         {
-            if(version_ == MGM_Edition1)
-                return std::string("STANAG 6022 Edition 1");
-            else if(version_ == MGM_Edition2)
-                return std::string("STANAG 6022 Edition 2");
-            else
-                return std::string("Unknown STANAG 6022 Edition");
+            if(!fileName_.empty()) {
+                handle_ = fopen(fileName_.c_str() , "rb");
+                fgetpos(handle_, &startPos_);
+            }
         }
 
-        inline bool operator == (const MetGmVersion &rh) const
+        ~MetGmFileHandlePtr()
         {
-            return version_ == rh.version_;
+            if(handle_)
+                fclose(handle_);
         }
 
-        inline bool operator == (const mgm_version rh_version) const
+        inline void reset()
         {
-            return version_ == rh_version;
+            assert(handle_);
+            if(ftell(handle_) == -1L) {
+                throw CDMException("ftell failed!");
+            } else {
+                if(fsetpos(handle_, &startPos_) != 0) {
+                    throw CDMException("fsetpos failed!");
+                }
+            }
         }
 
-        inline operator mgm_version ()
-        {
-            return version_;
-        }
-
+        inline operator FILE* () { return handle_; }
+        inline std::string fileName() { return fileName_; }
 
     private:
-        mgm_version version_;
+        FILE* handle_;
+        fpos_t startPos_;
+        std::string fileName_;
     };
 }
 
-#endif // METGM_VERSION_H
+#endif // METGM_FILEHANDLE_H

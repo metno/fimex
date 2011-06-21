@@ -39,9 +39,12 @@ struct mgm_handle;
 struct mgm_group3;
 
 namespace MetNoFimex {
+
     /* forward declarations */
     class XMLDoc;
     class MetGmVersion;
+    class MetGmHandlePtr;
+    class MetGmFileHandlePtr;
 
     struct METGM_ZProfile
     {
@@ -95,13 +98,8 @@ namespace MetNoFimex {
 
     protected:
 
-        FILE* openMetgmFileHandle();
-        FILE* resetMetgmFileHandle();
-
-        std::string dataTypeToString(short data_type);
-        mgm_handle* openMetgmHandle();
-        mgm_handle* resetMetgmHandle();
-        int         readMetgmHeader();
+        std::string dataTypeToString(short data_type);        
+        int readMetgmHeader();
 
         /**
           * read metgm version as part of init process
@@ -133,12 +131,10 @@ namespace MetNoFimex {
         void addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim);
 
     private:
-        std::string                         metgmSource_;
-        FILE*                               metgmFileHandle_;
-        fpos_t                              metgmFileHandleStartPos_;
-        mgm_handle*                         metgmHandle_;
-        std::string                         configFileName_;
-        boost::shared_ptr<MetGmVersion>     metgmVersion_;
+        std::string                            configFileName_;
+        boost::shared_ptr<MetGmVersion>        metgmVersion_;
+        boost::shared_ptr<MetGmHandlePtr>      metgmHandle_;
+        boost::shared_ptr<MetGmFileHandlePtr>  metgmFileHandle_;
 
         // data to build the reader on
         // todo: use smart pointers

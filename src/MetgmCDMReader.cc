@@ -14,8 +14,10 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/CDMException.h"
 
-// implementation details
+// private implementation details
 #include "../include/metgm/MetGmVersion.h"
+#include "../include/metgm/MetGmHandlePtr.h"
+#include "../include/metgm/MetGmFileHandlePtr.h"
 
 // boost
 //
@@ -46,27 +48,18 @@ namespace MetNoFimex {
     };
 
     METGM_CDMReader::METGM_CDMReader(const std::string& metgmsource, const std::string& configfilename)
-         : metgmSource_(metgmsource), metgmFileHandle_(0), metgmHandle_(0), configFileName_(configfilename)
+         : configFileName_(configfilename)
     {
         try {
+            metgmFileHandle_ = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(metgmsource));
+            metgmHandle_ = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr());
             init();
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("METGM_CDMReader error: ") + exp.what());
         }
     }
 
-    METGM_CDMReader::~METGM_CDMReader()
-    {
-        if(metgmFileHandle_)
-            fclose(metgmFileHandle_);
-
-        metgmFileHandle_ = 0;
-
-        if(metgmHandle_)
-            mgm_free_handle(metgmHandle_);
-
-        metgmHandle_ = 0;
-    }
+    METGM_CDMReader::~METGM_CDMReader() { }
 
     std::string METGM_CDMReader::dataTypeToString(short data_type)
     {
@@ -91,16 +84,14 @@ namespace MetNoFimex {
 
     void METGM_CDMReader::readMetgmVersion()
     {
-        if(resetMetgmFileHandle() == 0) {
-            std::cerr << "can't reset file handle for filename = " << metgmSource_ << std::endl;
-        }
+        metgmFileHandle_->reset();
 
         short callResult = readMetgmHeader();
         if(callResult != MGM_OK) {
             throw CDMException(mgm_string_error(callResult));
         }
 
-        metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(mgm_get_version(metgmHandle_)));
+        metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(mgm_get_version(*metgmHandle_)));
   }
 
     std::string METGM_CDMReader::spaceToUnderscore(const std::string& name)
@@ -236,10 +227,10 @@ namespace MetNoFimex {
 
     void METGM_CDMReader::init() throw(CDMException)
     {
-        if(!openMetgmFileHandle())
+        if(!(*metgmFileHandle_))
             throw CDMException(std::string("error opening metgm file handle"));
 
-        if(!openMetgmHandle())
+        if(!(*metgmHandle_))
             throw CDMException(std::string("error opening metgm handle"));
 
         readMetgmVersion();
@@ -280,7 +271,7 @@ namespace MetNoFimex {
         std::string hcConventions("CF-1.0");
         std::string hcInstitution("Forsvarets forskningsinstitutt, ffi.no");
 
-        assert(resetMetgmFileHandle() != 0);
+        metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         CDMAttribute cdmConventionsAttribute("Conventions", "string", hcConventions);
@@ -288,10 +279,10 @@ namespace MetNoFimex {
 
         boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
 
-        time_t analysisT = mgm_get_analysis_date_time(metgmHandle_);
+        time_t analysisT = mgm_get_analysis_date_time(*metgmHandle_);
         boost::posix_time::ptime analysisTime = boost::posix_time::from_time_t(analysisT);
 
-        time_t startT = mgm_get_start_date_time(metgmHandle_);
+        time_t startT = mgm_get_start_date_time(*metgmHandle_);
         boost::posix_time::ptime startTime = boost::posix_time::from_time_t(startT);
 
         std::string strHistory("");
@@ -305,16 +296,16 @@ namespace MetNoFimex {
 
         CDMAttribute cdmSourceAttribute("source", "string", "unknown");
         if(*metgmVersion_ == MGM_Edition2) {
-            cdmSourceAttribute = CDMAttribute("source", "string", std::string(mgm_get_production_nation(metgmHandle_)).append(" ").append(mgm_get_model_type(metgmHandle_)));
+            cdmSourceAttribute = CDMAttribute("source", "string", std::string(mgm_get_production_nation(*metgmHandle_)).append(" ").append(mgm_get_model_type(*metgmHandle_)));
         }
-        CDMAttribute cdmTitleAttribute("title", "string", metgmSource_ + std::string(" ") + metgmVersion_->getAsString());
+        CDMAttribute cdmTitleAttribute("title", "string", metgmFileHandle_->fileName() + std::string(" ") + metgmVersion_->getAsString());
         CDMAttribute cdmReferencesAttribute("references", "string", "unknown");
 
         CDMAttribute cdmMetgmAnalysisDateTimeAttribute("metgm_analysis_date_time", "string", boost::posix_time::to_iso_extended_string(analysisTime));
         CDMAttribute cdmMetgmStartDateTimeAttribute("metgm_start_date_time", "string", boost::posix_time::to_iso_extended_string(startTime));
         CDMAttribute cdmMetgmVersionAttribute("metgm_version", "string", spaceToUnderscore(metgmVersion_->getAsString()));
-        CDMAttribute cdmMetgmDataTypeAttribute("metgm_data_type", "string", dataTypeToString(mgm_get_data_type(metgmHandle_)));
-        CDMAttribute cdmMetgmFreeTextAttribute("metgm_free_text", "string", mgm_get_free_text(metgmHandle_));
+        CDMAttribute cdmMetgmDataTypeAttribute("metgm_data_type", "string", dataTypeToString(mgm_get_data_type(*metgmHandle_)));
+        CDMAttribute cdmMetgmFreeTextAttribute("metgm_free_text", "string", mgm_get_free_text(*metgmHandle_));
 
         cdm_->addAttribute(cdm_->globalAttributeNS(), cdmConventionsAttribute);
         cdm_->addAttribute(cdm_->globalAttributeNS(), cdmInstitutionAttribute);
@@ -368,9 +359,9 @@ namespace MetNoFimex {
                 << std::endl;
 
         if(*metgmVersion_ == MGM_Edition2) {
-            CDMAttribute cdmMetgmProductionNationAttribute = CDMAttribute("metgm_production_nation", "string", std::string(mgm_get_production_nation(metgmHandle_)));
+            CDMAttribute cdmMetgmProductionNationAttribute = CDMAttribute("metgm_production_nation", "string", std::string(mgm_get_production_nation(*metgmHandle_)));
             cdm_->addAttribute(cdm_->globalAttributeNS(), cdmMetgmProductionNationAttribute);
-            CDMAttribute cdmMetgmModelTypeAttribute = CDMAttribute("metgm_model_type", "string", std::string(mgm_get_model_type(metgmHandle_)));
+            CDMAttribute cdmMetgmModelTypeAttribute = CDMAttribute("metgm_model_type", "string", std::string(mgm_get_model_type(*metgmHandle_)));
             cdm_->addAttribute(cdm_->globalAttributeNS(), cdmMetgmModelTypeAttribute);
 
             metgm_comment
@@ -408,7 +399,7 @@ namespace MetNoFimex {
         std::string hcSymbolForTimeDimension = "T";
         std::string hcTimeDimensionUnits = "seconds since 1970-01-01 00:00:00 +00:00";
 
-        assert(resetMetgmFileHandle() != 0);
+        metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         mgm_group3* pg3 = mgm_new_group3();
@@ -418,7 +409,7 @@ namespace MetNoFimex {
         /**
           * in seconds since epoch
           */
-        time_t startT = mgm_get_start_date_time(metgmHandle_);
+        time_t startT = mgm_get_start_date_time(*metgmHandle_);
 
         boost::posix_time::ptime startDateTime = boost::posix_time::from_time_t(startT);
         boost::posix_time::ptime epochDateTime(boost::gregorian::date(1970,1,1));
@@ -427,10 +418,10 @@ namespace MetNoFimex {
         double  deltaTime = 0;
         double  maxTimeSpan = 0;
 
-        size_t np = mgm_get_number_of_params(metgmHandle_);
+        size_t np = mgm_get_number_of_params(*metgmHandle_);
 
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
-            int error = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, pg3);
+            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
             short p_id = mgm_get_p_id(pg3);
             if(p_id == 0) {
                 // special case on non-temporal values
@@ -453,8 +444,8 @@ namespace MetNoFimex {
                     deltaTime = timeStep;
                 }
             }
-            mgm_skip_group4(metgmFileHandle_, metgmHandle_);
-            mgm_skip_group5(metgmFileHandle_, metgmHandle_);
+            mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
+            mgm_skip_group5(*metgmFileHandle_, *metgmHandle_);
         }
 
         if(mgm_free_group3(pg3) != 0)
@@ -497,7 +488,7 @@ namespace MetNoFimex {
         cdm_->addAttribute(timeVariable.getName(), timeAxisAttribute);
 
         // analysis time is unique forecast reference time
-        time_t analysis_time_t = mgm_get_analysis_date_time(metgmHandle_);
+        time_t analysis_time_t = mgm_get_analysis_date_time(*metgmHandle_);
         std::string analysisTimeName = "analysis_time";
         std::string analysisTimeStandardName = "forecast_reference_time";
         std::vector<std::string> nullShape;
@@ -519,7 +510,7 @@ namespace MetNoFimex {
         std::string projStr = "+proj=latlong +datum=WGS84"; // "lon_0=cx lat_0=cy";
         std::string gridMappingType;
 
-        assert(resetMetgmFileHandle() != 0);
+        metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         /**
@@ -537,7 +528,7 @@ namespace MetNoFimex {
         float cy = 0; // center lat
         size_t pid = 1;
         for(; pid < 8; ++pid) {
-            if(mgm_read_next_group3(metgmFileHandle_, metgmHandle_, pg3) == 0) {
+            if(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3) == 0) {
                 nx = mgm_get_nx(pg3);
                 ny = mgm_get_ny(pg3);
                 dx = mgm_get_dx(pg3);
@@ -651,69 +642,10 @@ namespace MetNoFimex {
 
     }
 
-    FILE* METGM_CDMReader::openMetgmFileHandle()
-    {
-        if(metgmSource_.empty()) {
-            return 0;
-        } else {
-            metgmFileHandle_ = fopen(metgmSource_.c_str() , "rb");
-            assert(fgetpos(metgmFileHandle_, &metgmFileHandleStartPos_) == 0);
-        }
-
-        return metgmFileHandle_;
-    }
-
-    FILE* METGM_CDMReader::resetMetgmFileHandle()
-    {
-        if(metgmFileHandle_ != 0) {
-            if(ftell(metgmFileHandle_) != 0) {
-                if(fsetpos(metgmFileHandle_, &metgmFileHandleStartPos_) != 0) {
-                   throw CDMException("fsetpos failed!");
-                }
-            }
-        } else {
-            return 0;
-        }
-
-        return metgmFileHandle_;
-    }
-
-    mgm_handle* METGM_CDMReader::openMetgmHandle()
-    {
-        if(metgmHandle_) {
-            return metgmHandle_;
-        }
-
-        return metgmHandle_ = mgm_new_handle();
-    }
-
-    mgm_handle* METGM_CDMReader::resetMetgmHandle()
-    {
-        if(openMetgmHandle() == 0) {
-            std::cerr
-                      << __FUNCTION__ << ":"
-                      << __LINE__     << ":"
-                      << "openMetgmHandle"
-                 << std::endl;
-            return metgmHandle_ = 0;
-        }
-
-        if(mgm_reset_handle(metgmHandle_) != MGM_OK) {
-            std::cerr
-                      << __FUNCTION__ << ":"
-                      << __LINE__     << ":"
-                      << "mgm_reset_handle"
-                 << std::endl;
-            return metgmHandle_ = 0;
-        }
-
-        return metgmHandle_;
-    }
-
     int METGM_CDMReader::readMetgmHeader()
     {
-        assert(resetMetgmHandle());
-        return mgm_read_header(metgmFileHandle_, metgmHandle_);
+        metgmHandle_->reset();
+        return mgm_read_header(*metgmFileHandle_, *metgmHandle_);
     }
 
     void METGM_CDMReader::addLevelDimensions()
@@ -725,7 +657,7 @@ namespace MetNoFimex {
 
         std::string hcLevelType = "float";
 
-        assert(resetMetgmFileHandle() != 0);
+        metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         mgm_group3* pg3 = mgm_new_group3();
@@ -734,11 +666,11 @@ namespace MetNoFimex {
         /**
           * number of parameters
           */
-        size_t np = mgm_get_number_of_params(metgmHandle_);
+        size_t np = mgm_get_number_of_params(*metgmHandle_);
         METGM_ZProfile prevZProfile;
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
 
-            int error = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, pg3);
+            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
                 continue;
@@ -773,7 +705,7 @@ namespace MetNoFimex {
             } else if(pz == 1 || pz == 0) {
 
                float *pg4Data = new float[nz];
-               error = mgm_read_group4(metgmFileHandle_, metgmHandle_, pg4Data);
+               error = mgm_read_group4(*metgmFileHandle_, *metgmHandle_, pg4Data);
                if(error != MGM_OK) {
                    std::cerr << "p_id:" << p_id << " error " << error << std::endl;
                    return;
@@ -900,12 +832,12 @@ namespace MetNoFimex {
         // from wdb, so we have to hard code some
         std::string hcDataType = "float";
 
-        assert(resetMetgmFileHandle() != 0);
+        metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
         /**
           * number of parameters
           */
-        size_t np = mgm_get_number_of_params(metgmHandle_);
+        size_t np = mgm_get_number_of_params(*metgmHandle_);
 
         for(size_t gp3Index  = 0; gp3Index < np; ++gp3Index)
         {
@@ -914,7 +846,7 @@ namespace MetNoFimex {
             if(pg3 == 0)
                 throw CDMException("mgm_new_group3() failed");
 
-            int error = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, pg3);
+            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
                 std::cerr << __FUNCTION__ << __LINE__ << " for gp3Index " << gp3Index << " MGM_ERROR_GROUP3_NOT_FOUND " << std::endl;
@@ -930,7 +862,7 @@ namespace MetNoFimex {
 
             std::string variableStandardName = pid2cdmnamesmap_.at(p_id);
 
-            std::string variableMetNoName = spaceToUnderscore(std::string(mgm_get_param_name(p_id, metgmHandle_)));
+            std::string variableMetNoName = spaceToUnderscore(std::string(mgm_get_param_name(p_id, *metgmHandle_)));
             if(pid2metnonamesmap_.find(p_id) != pid2metnonamesmap_.end())
                     variableMetNoName = pid2metnonamesmap_[p_id];
 
@@ -952,7 +884,7 @@ namespace MetNoFimex {
                 break;
             }
 
-            std::string variableUnitName(mgm_get_param_unit(p_id, metgmHandle_));
+            std::string variableUnitName(mgm_get_param_unit(p_id, *metgmHandle_));
             float variableFillValue = pid2fillvaluemap_.at(p_id);
 
             std::vector<CDMAttribute> attributes;
@@ -1052,23 +984,23 @@ namespace MetNoFimex {
 
         mgm_group3* initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
 
-        assert(resetMetgmFileHandle() != 0);
+        metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         // read group3 data until you match with initialPg3
         // in order to honor data reading sequence
         mgm_group3* fwdPg3 = mgm_new_group3();
 
-        callResult = mgm_read_this_group3(metgmFileHandle_, metgmHandle_, p_id, fwdPg3);
+        callResult = mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, fwdPg3);
         if(callResult != MGM_OK) {
-            throw CDMException(metgmSource_ + std::string("---") + std::string(mgm_string_error(callResult)));
+            throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
         }
 
         if(initialPg3 != 0) {
-            while(mgm_group3_eq(metgmHandle_, fwdPg3, initialPg3) != MGM_OK) {
-                callResult = mgm_read_next_group3(metgmFileHandle_, metgmHandle_, fwdPg3);
+            while(mgm_group3_eq(*metgmHandle_, fwdPg3, initialPg3) != MGM_OK) {
+                callResult = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, fwdPg3);
                 if(callResult != MGM_OK) {
-                    throw CDMException(metgmSource_ + std::string("---") + std::string(mgm_string_error(callResult)));
+                    throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
                 }
             }
         }
@@ -1152,12 +1084,12 @@ namespace MetNoFimex {
                 short pz = mgm_get_pz(fwdPg3);
                 if(pz != 0) {
                     // read group4 data
-                    callResult = mgm_skip_group4(metgmFileHandle_, metgmHandle_);
+                    callResult = mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
                     if(callResult != MGM_OK)
                         throw CDMException(mgm_string_error(callResult));
                 }
 
-                callResult = mgm_read_group5(metgmFileHandle_, metgmHandle_, pg5.get());
+                callResult = mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get());
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
 
@@ -1195,12 +1127,12 @@ namespace MetNoFimex {
 
                 if(pz > 0) {
                     // read group4 data
-                    callResult  = mgm_skip_group4(metgmFileHandle_, metgmHandle_);
+                    callResult  = mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
                     if(callResult != MGM_OK)
                         throw CDMException(mgm_string_error(callResult));
                 }
 
-                callResult = mgm_read_group5(metgmFileHandle_, metgmHandle_, pg5.get());
+                callResult = mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get());
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
 
