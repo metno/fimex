@@ -17,6 +17,7 @@
 // private implementation details
 #include "../include/metgm/MetGmVersion.h"
 #include "../include/metgm/MetGmHandlePtr.h"
+#include "../include/metgm/MetGmGroup3Ptr.h"
 #include "../include/metgm/MetGmFileHandlePtr.h"
 
 // boost
@@ -402,9 +403,7 @@ namespace MetNoFimex {
         metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
-        mgm_group3* pg3 = mgm_new_group3();
-        if(pg3 == 0)
-            throw CDMException("mgm_new_group3() fails");
+        MetGmGroup3Ptr pg3;
 
         /**
           * in seconds since epoch
@@ -422,7 +421,7 @@ namespace MetNoFimex {
 
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
             int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
-            short p_id = mgm_get_p_id(pg3);
+            short p_id = pg3.p_id();
             if(p_id == 0) {
                 // special case on non-temporal values
                 continue;
@@ -435,8 +434,8 @@ namespace MetNoFimex {
                 assert(error);
             } else if(error == MGM_OK) {
 
-                int numOfSteps = mgm_get_nt(pg3);
-                double timeStep = mgm_get_dt(pg3);
+                int numOfSteps = pg3.nt();
+                double timeStep = pg3.dt();
 
                 if(timeStep * numOfSteps > maxTimeSpan) {
                     maxTimeSpan = timeStep * numOfSteps;
@@ -447,9 +446,6 @@ namespace MetNoFimex {
             mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
             mgm_skip_group5(*metgmFileHandle_, *metgmHandle_);
         }
-
-        if(mgm_free_group3(pg3) != 0)
-           throw CDMException("mgm_free_group3() failed");
 
         std::vector<double> timeInUnitsVector;
 
@@ -517,9 +513,8 @@ namespace MetNoFimex {
           * As x and y will be same for all except pid = 0
           * grab the group 3 values for first pid > 1
           */
-        mgm_group3* pg3 = mgm_new_group3();
-        if(pg3 == 0)
-            throw CDMException("mgm_new_group3() failed");
+        MetGmGroup3Ptr pg3;
+
         int nx = 0; // long
         int ny = 0; // lat
         float dx = 0;
@@ -529,12 +524,12 @@ namespace MetNoFimex {
         size_t pid = 1;
         for(; pid < 8; ++pid) {
             if(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3) == 0) {
-                nx = mgm_get_nx(pg3);
-                ny = mgm_get_ny(pg3);
-                dx = mgm_get_dx(pg3);
-                dy = mgm_get_dy(pg3);
-                cx = mgm_get_cx(pg3);
-                cy = mgm_get_cy(pg3);
+                nx = pg3.nx();
+                ny = pg3.ny();
+                dx = pg3.dx();
+                dy = pg3.dy();
+                cx = pg3.cx();
+                cy = pg3.cy();
             } else {
                 /**
                   * handle errors
@@ -544,9 +539,6 @@ namespace MetNoFimex {
 
         float longitudeSpanDegrees = dx * (nx - 1);
         float latitudeSpanDegrees = dy * (ny - 1);
-
-        if(mgm_free_group3(pg3) != 0)
-           throw CDMException("mgm_free_group3() failed");
 
         boost::regex projexpr( "[+]proj=([[:alnum:]_]+)[[:space:]]+" );
         boost::smatch projmatch;
@@ -660,7 +652,7 @@ namespace MetNoFimex {
         metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
-        mgm_group3* pg3 = mgm_new_group3();
+        MetGmGroup3Ptr pg3;
         if(pg3 == 0)
             throw CDMException("mgm_new_group3() failed");
         /**
@@ -679,7 +671,7 @@ namespace MetNoFimex {
                 return;
             }
 
-            int p_id = mgm_get_p_id(pg3);
+            int p_id = pg3.p_id();
 
             if(p_id == 0 || p_id == 1) {
                 /**
@@ -691,9 +683,9 @@ namespace MetNoFimex {
             }
 
 
-            int nz = mgm_get_nz(pg3);
-            int pz = mgm_get_pz(pg3);
-            int pr = mgm_get_pr(pg3);
+            int nz = pg3.nz();
+            int pz = pg3.pz();
+            int pr = pg3.pr();
 
             if(pz == 0) {
                 if(!prevZProfile.isValid()) {
@@ -841,10 +833,7 @@ namespace MetNoFimex {
 
         for(size_t gp3Index  = 0; gp3Index < np; ++gp3Index)
         {
-            mgm_group3* pg3 = mgm_new_group3();
-
-            if(pg3 == 0)
-                throw CDMException("mgm_new_group3() failed");
+            MetGmGroup3Ptr pg3;
 
             int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
 
@@ -855,7 +844,7 @@ namespace MetNoFimex {
                 assert(error);
             }
 
-            int p_id = mgm_get_p_id(pg3);
+            int p_id = pg3.p_id();
 
             if(pid2cdmnamesmap_.find(p_id) == pid2cdmnamesmap_.end())
                 continue;
@@ -871,7 +860,7 @@ namespace MetNoFimex {
               * but with different reference level
               * we will include this in variable name
               */
-            short pr = mgm_get_pr(pg3);
+            short pr = pg3.pr();
             switch(pr) {
             case 0:
                 variableMetNoName.append("_MSL");
@@ -943,7 +932,7 @@ namespace MetNoFimex {
             CDMDataType type = string2datatype(hcDataType);
             CDMVariable var(variableMetNoName, type, shape);
             cdm_->addVariable(var);
-            cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, mgm_group3*>(variableMetNoName, pg3));
+            cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, MetGmGroup3Ptr>(variableMetNoName, pg3));
 
             for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
                 cdm_->addAttribute(variableMetNoName, *attrIt);
@@ -982,14 +971,14 @@ namespace MetNoFimex {
             throw CDMException("requested time outside data-region");
         }
 
-        mgm_group3* initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
+        MetGmGroup3Ptr initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
 
         metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         // read group3 data until you match with initialPg3
         // in order to honor data reading sequence
-        mgm_group3* fwdPg3 = mgm_new_group3();
+        MetGmGroup3Ptr fwdPg3;
 
         callResult = mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, fwdPg3);
         if(callResult != MGM_OK) {
@@ -997,7 +986,7 @@ namespace MetNoFimex {
         }
 
         if(initialPg3 != 0) {
-            while(mgm_group3_eq(*metgmHandle_, fwdPg3, initialPg3) != MGM_OK) {
+            while(fwdPg3 != initialPg3) {
                 callResult = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, fwdPg3);
                 if(callResult != MGM_OK) {
                     throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
@@ -1081,7 +1070,7 @@ namespace MetNoFimex {
 
                 boost::scoped_array<float> pg5(new float[totalDataDimension]);
 
-                short pz = mgm_get_pz(fwdPg3);
+                short pz = fwdPg3.pz();
                 if(pz != 0) {
                     // read group4 data
                     callResult = mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
@@ -1107,7 +1096,6 @@ namespace MetNoFimex {
                 data = MetNoFimex::createData(CDM_FLOAT, pg5.get(), pg5.get() + totalDataDimension);
                 variable.setData(data);
 
-                assert(mgm_free_group3(fwdPg3) == MGM_OK);
                 break;
             }
 
@@ -1122,7 +1110,7 @@ namespace MetNoFimex {
                 boost::scoped_array<float> pg5(new float[totalDataDimension]);
                 boost::scoped_array<float> pg5T(new float[totalDataDimension]);
 
-                short pz = mgm_get_pz(fwdPg3);
+                short pz = fwdPg3.pz();
 //                short pr = mgm_get_pr(fwdPg3);
 
                 if(pz > 0) {
@@ -1184,7 +1172,6 @@ namespace MetNoFimex {
                 variable.setData(data);
 
                 assert(variable.hasData());
-                assert(mgm_free_group3(fwdPg3) == MGM_OK);
 
                 return getDataSliceFromMemory(variable, unLimDimPos);
 
