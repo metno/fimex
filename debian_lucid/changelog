@@ -1,3 +1,15 @@
+fimex (0.29-2) lucid; urgency=low
+
+  * fixing rules, removing dependencies to met.no libs
+
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 21 Jun 2011 09:00:00 +0100
+
+fimex (0.29-1) lucid; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 20 Jun 2011 09:00:00 +0100
+
 fimex (0.28-1) lucid; urgency=low
 
   * initial upload

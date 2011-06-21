@@ -21,7 +21,7 @@ DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_BUILD_OPTIONS ?= parallel=2
 
 CFLAGS = -Wall
-LD_LIBRARY_PATH += :/opt/udunits2.1.20/lib:/opt/grib-api1.9.9
+LD_LIBRARY_PATH += :/opt/udunits2.1.20/lib:/opt/grib-api1.9.9/lib
 LDFLAGS = -lexpat
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
     CFLAGS += -O0
@@ -67,7 +67,7 @@ ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
 ifeq ($(DEB_HOST_ARCH),i386)
-	cp -f $(DEBIAN_DIR)/libfimex.preinst.i386 $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst 
+	cp -f $(DEBIAN_DIR)/libfimex.preinst.i386 $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst
 	cp -f $(DEBIAN_DIR)/libfelt.preinst.i386 $(DEBIAN_DIR)/libfelt-$(VERSION)-0.preinst
 endif
 	./configure --with-netcdf=/opt/netcdf4.1.1 --with-pq --with-metgm --with-udunits2=/opt/udunits2.1.20 --with-grib_api=/opt/grib-api1.9.9 --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CXXFLAGS)"
