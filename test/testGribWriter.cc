@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem/operations.hpp>
 #ifdef HAVE_LIBMIC
 #include "fimex/FeltCDMReader.h"
 #else
@@ -46,7 +47,7 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFelt;
 using namespace MetNoFimex;
-
+namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 {
@@ -64,7 +65,9 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 
 	string outputFile("test.grb1");
 	GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
-	BOOST_CHECK((ifstream(outputFile.c_str()) != 0));
+    fs::path out( outputFile );
+    BOOST_CHECK(fs::exists(out));
+    BOOST_CHECK(fs::file_size(out) > 5000000);
 }
 BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
 {
@@ -81,7 +84,9 @@ BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
 #endif
 	string outputFile("test.grb2");
 	GribApiCDMWriter(feltReader, outputFile, 2, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
-	BOOST_CHECK((ifstream(outputFile.c_str()) != 0));
+	fs::path out( outputFile );
+	BOOST_CHECK(fs::exists(out));
+    BOOST_CHECK(fs::file_size(out) > 5000000);
 }
 
 #else
