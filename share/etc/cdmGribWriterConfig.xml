@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cdm_gribwriter_config xmlns="http://www.met.no/schema/fimex/cdmGribWriterConfig"
+<cdm_gribwriter_config
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<!--                        xsi:schemaLocation="http://www.met.no/schema/fimex/cdmGribWriterConfig cdmGribWriterConfig.xsd" -->
+<!--                        xsi:schemaLocation="cdmGribWriterConfig.xsd" -->
 <global_attributes>
 	<!-- type can be double, long, string -->
 	<attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
