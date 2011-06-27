@@ -91,6 +91,7 @@ endif
 
 if HAVE_METGM
   libfimex_la_SOURCES += MetgmCDMReader.cc \
+                         metgm/MetGmCDMReaderImpl.cc \
                          MetgmCDMWriter.cc
 endif
 
