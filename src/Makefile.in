@@ -47,9 +47,8 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@                         GribFileIndex.cc \
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
 
-@HAVE_METGM_TRUE@am__append_3 = MetgmCDMReader.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmCDMReaderImpl.cc \
-@HAVE_METGM_TRUE@                         MetgmCDMWriter.cc
+@HAVE_METGM_TRUE@am__append_3 = MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
+@HAVE_METGM_TRUE@                         MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc
 
 @HAVE_MILIB_TRUE@am__append_4 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_LIBPQ_TRUE@am__append_5 = WdbCDMReader.cc wdb/WdbIndex.h \
@@ -175,10 +174,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
-	MetgmCDMWriter.cc FeltCDMReader.cc Felt_Array.cc Felt_File.cc \
-	WdbCDMReader.cc wdb/WdbIndex.h wdb/WdbIndex.cpp \
-	wdb/DataSummary.h wdb/DataSummary.cpp wdb/ParameterData.h \
-	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
+	MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc FeltCDMReader.cc \
+	Felt_Array.cc Felt_File.cc WdbCDMReader.cc wdb/WdbIndex.h \
+	wdb/WdbIndex.cpp wdb/DataSummary.h wdb/DataSummary.cpp \
+	wdb/ParameterData.h wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
 	wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h wdb/TimeHandler.h \
 	wdb/TimeHandler.cpp wdb/LevelHandler.h wdb/LevelHandler.cpp \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp wdb/GridHandler.h \
@@ -212,7 +211,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl2.lo GribCDMReader.lo \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
 @HAVE_METGM_TRUE@am__objects_3 = MetgmCDMReader.lo \
-@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo MetgmCDMWriter.lo
+@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo MetgmCDMWriter.lo \
+@HAVE_METGM_TRUE@	MetGmCDMWriterImpl.lo
 @HAVE_MILIB_TRUE@am__objects_4 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
 @HAVE_LIBPQ_TRUE@am__objects_5 = WdbCDMReader.lo WdbIndex.lo \
@@ -650,6 +650,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReaderImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMWriterImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetricGridInformation.Plo@am__quote@
@@ -857,6 +858,13 @@ MetGmCDMReaderImpl.lo: metgm/MetGmCDMReaderImpl.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMReaderImpl.cc' object='MetGmCDMReaderImpl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMReaderImpl.lo `test -f 'metgm/MetGmCDMReaderImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderImpl.cc
+
+MetGmCDMWriterImpl.lo: metgm/MetGmCDMWriterImpl.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMWriterImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMWriterImpl.Tpo -c -o MetGmCDMWriterImpl.lo `test -f 'metgm/MetGmCDMWriterImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterImpl.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCDMWriterImpl.Tpo $(DEPDIR)/MetGmCDMWriterImpl.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMWriterImpl.cc' object='MetGmCDMWriterImpl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMWriterImpl.lo `test -f 'metgm/MetGmCDMWriterImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterImpl.cc
 
 WdbIndex.lo: wdb/WdbIndex.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbIndex.lo -MD -MP -MF $(DEPDIR)/WdbIndex.Tpo -c -o WdbIndex.lo `test -f 'wdb/WdbIndex.cpp' || echo '$(srcdir)/'`wdb/WdbIndex.cpp

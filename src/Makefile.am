@@ -90,9 +90,8 @@ if HAVE_GRIBAPI
 endif
 
 if HAVE_METGM
-  libfimex_la_SOURCES += MetgmCDMReader.cc \
-                         metgm/MetGmCDMReaderImpl.cc \
-                         MetgmCDMWriter.cc
+  libfimex_la_SOURCES += MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
+                         MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc
 endif
 
 if HAVE_MILIB
