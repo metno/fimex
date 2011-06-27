@@ -38,10 +38,27 @@ namespace MetNoFimex {
     class MetGmFileHandlePtr {
     public:
 
-        explicit MetGmFileHandlePtr(const std::string name) : handle_(0), fileName_(name)
+        enum IODirection {
+            WRITE,
+            READ
+        };
+
+        explicit MetGmFileHandlePtr(const std::string name, IODirection direction = READ) : handle_(0), fileName_(name)
         {
             if(!fileName_.empty()) {
-                handle_ = fopen(fileName_.c_str() , "rb");
+                switch(direction) {
+                    case READ:
+                        handle_ = fopen(fileName_.c_str() , "rb");
+                        break;
+                    case WRITE:
+                        handle_ = fopen(fileName_.c_str() , "wb");
+                        break;
+                }
+
+                if(handle_ == 0) {
+                    throw CDMException("can't open output file");
+                }
+
                 fgetpos(handle_, &startPos_);
             }
         }
