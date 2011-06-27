@@ -24,9 +24,6 @@
 #ifndef METGM_CDMWRITER_HPP
 #define METGM_CDMWRITER_HPP
 
-// metgm C Library
-#include "metgm.h"
-
 // fimex
 #include "fimex/CDMWriter.h"
 #include "fimex/CDM.h"
@@ -47,15 +44,14 @@
 #include <vector>
 #include <map>
 
-/**
-  * TODO:
-  *     1. make this to work for Edition2
-  */
+struct mgm_handle;
+struct mgm_group3;
 
 namespace MetNoFimex {
 
 /* forward declarations */
 class XMLDoc;
+class MetGmVersion;
 
 class METGM_CDMWriter : public CDMWriter
 {
@@ -70,14 +66,12 @@ public:
                 (
                         const boost::shared_ptr<CDMReader> cdmReader,
                         const std::string& outputFile,
-                        const std::string& configFile = std::string(),
-                        const mgm_version& version = MGM_Edition1
+                        const std::string& configFile = std::string()
                 );
 
         virtual ~METGM_CDMWriter();
 
-        mgm_version getMetgmVersion();
-        /**
+       /**
          * @warning only public for testing
          * @return the new name of a variable, eventually changed by the writers config
          */
@@ -100,6 +94,7 @@ private:
         void mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
         void mapMetgmPidToMetgmHDs(const std::auto_ptr<XMLDoc>& doc);
         void mapStandardNamesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
+        void mapKildeNamesToFillValues(const std::auto_ptr<XMLDoc>& doc);
 
         void allocateMgmHandle();
         void freeMgmHandle();
@@ -135,19 +130,19 @@ private:
         typedef std::map<const MetgmPr, const CDMVariable*> MetgmPrToCDMVariableMap;
 
 
-        std::multimap<short, const CDMVariable*> pid2CdmVariablesMMap_;
-        std::multimap<short, std::string>              pid2kildemap_;
-        std::multimap<short, std::string>              pid2StandardNamesMMap_;
-        std::map<short, short>                         pid2hdmap_;
-        mgm_version                                    metgmVersion_;
-        std::string                                    configFileName_;
-        FILE*                                          metgmFileHandle_;
-        mgm_handle*                                    metgmHandle_;
+        std::multimap<short, const CDMVariable*>    pid2CdmVariablesMMap_;
+        std::map<std::string, float>                kildeName2FillValueMap_;
+        std::multimap<short, std::string>           pid2kildemap_;
+        std::multimap<short, std::string>           pid2StandardNamesMMap_;
+        std::map<short, short>                      pid2hdmap_;
+        boost::shared_ptr<MetGmVersion>             metgmVersion_;
+        std::string                                 configFileName_;
+        FILE*                                       metgmFileHandle_;
+        mgm_handle*                                 metgmHandle_;
 
-        boost::posix_time::ptime                       analysisTime_;
-        boost::posix_time::ptime                       startTime_;
-        time_t                                         dTimeStep_;
-
+        boost::posix_time::ptime                    analysisTime_;
+        boost::posix_time::ptime                    startTime_;
+        time_t                                      dTimeStep_;
         CDM cdmInternal;
 };
 

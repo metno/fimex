@@ -1,10 +1,16 @@
 #include "fimex/MetgmCDMWriter.h"
 
+#include "metgm.h"
+
 // fimex
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/CDMReaderUtils.h"
+
+// private/implementation code
+#include "../include/metgm/MetGmVersion.h"
+#include "../include/metgm/MetGmDimensionalTag.h"
 
 // udunits
 #include <udunits2.h>
@@ -19,10 +25,15 @@
 #include <boost/bind.hpp>
 
 // standard
+#include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <auto_ptr.h>
 #include <map>
 #include <set>
+#include <deque>
+#include <numeric>
+#include <limits>
 
 namespace MetNoFimex {
 
@@ -48,25 +59,20 @@ namespace MetNoFimex {
 
     static void fimex_dump_group3(const mgm_group3* gp3)
     {
-        std::cerr << "dumping group3 [START]" << std::endl
-                  << "p_id = " << mgm_get_p_id (gp3) << std::endl
-                  << "nz = "   << mgm_get_nz (gp3)  << std::endl
-                  << "nx = "   << mgm_get_nx (gp3)  << std::endl
-                  << "ny = "   << mgm_get_ny (gp3)  << std::endl
-                  << "nt = "   << mgm_get_nt (gp3)  << std::endl
-                  << "dx = "   << mgm_get_dx (gp3)  << std::endl
-                  << "dy = "   << mgm_get_dy (gp3)  << std::endl
-                  << "dt = "   << mgm_get_dt (gp3)  << std::endl
-                  << "cx = "   << mgm_get_cx (gp3)  << std::endl
-                  << "cy = "   << mgm_get_cy (gp3)  << std::endl
-                  << "pr = "   << mgm_get_pr (gp3)  << std::endl
-                  << "pz = "   << mgm_get_pz (gp3)  << std::endl
-                  << "dumping group3 [END]" << std::endl;
-    }
-
-    mgm_version METGM_CDMWriter::getMetgmVersion()
-    {
-        return this->metgmVersion_;
+//        std::cerr << "dumping group3 [START]" << std::endl
+//                  << "p_id = " << mgm_get_p_id (gp3) << std::endl
+//                  << "nz = "   << mgm_get_nz (gp3)  << std::endl
+//                  << "nx = "   << mgm_get_nx (gp3)  << std::endl
+//                  << "ny = "   << mgm_get_ny (gp3)  << std::endl
+//                  << "nt = "   << mgm_get_nt (gp3)  << std::endl
+//                  << "dx = "   << mgm_get_dx (gp3)  << std::endl
+//                  << "dy = "   << mgm_get_dy (gp3)  << std::endl
+//                  << "dt = "   << mgm_get_dt (gp3)  << std::endl
+//                  << "cx = "   << mgm_get_cx (gp3)  << std::endl
+//                  << "cy = "   << mgm_get_cy (gp3)  << std::endl
+//                  << "pr = "   << mgm_get_pr (gp3)  << std::endl
+//                  << "pz = "   << mgm_get_pz (gp3)  << std::endl
+//                  << "dumping group3 [END]" << std::endl;
     }
 
     void METGM_CDMWriter::mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc)
@@ -132,20 +138,48 @@ namespace MetNoFimex {
         }
     }
 
+    void METGM_CDMWriter::mapKildeNamesToFillValues(const std::auto_ptr<XMLDoc>& doc)
+    {
+        /**
+          * it is really expected that config will be used
+          */
+        if(doc.get() != 0) {
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
+            xmlNodeSetPtr nodes = xpathObj->nodesetval;
+            size_t size = (nodes) ? nodes->nodeNr : 0;
+            for (size_t i = 0; i < size; ++i) {
+                xmlNodePtr node = nodes->nodeTab[i];
+                std::string metnoName = getXmlProp(node, "name");
+                // get the metgm p_id value
+                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"_FillValue\"]");
+                std::string str_FillValue;
+                if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                    str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                    if( str_FillValue.empty()) {
+                        continue;
+                    } else {
+                        float fillValue = 0;
+                        fillValue = boost::lexical_cast<float>(str_FillValue);
+                        kildeName2FillValueMap_.insert(std::make_pair<std::string, float>(metnoName, fillValue));
+                    }
+                }
+            }
+        }
+    }
+
     void METGM_CDMWriter::mapMetgmPidToMetgmHDs(const std::auto_ptr<XMLDoc>& doc)
     {
         /**
           * hard coded defaults
           * config.xml will override defaults
           */
-        pid2hdmap_.insert(std::make_pair<short, short>(0, 4));
 
-        pid2hdmap_.insert(std::make_pair<short, short>(2, 1));
-        pid2hdmap_.insert(std::make_pair<short, short>(3, 1));
-        pid2hdmap_.insert(std::make_pair<short, short>(4, 1));
-        pid2hdmap_.insert(std::make_pair<short, short>(5, 1));
-        pid2hdmap_.insert(std::make_pair<short, short>(6, 1));
-        pid2hdmap_.insert(std::make_pair<short, short>(7, 1));
+        for(size_t index = 0; index < 28; ++index) {
+            pid2hdmap_.insert(std::make_pair<short, short>(index, 1));
+        }
+
+        // default override for p_id = 0
+        pid2hdmap_.insert(std::make_pair<short, short>(0, 4));
 
         if(doc.get() != 0) {
             /**
@@ -214,10 +248,10 @@ namespace MetNoFimex {
 
 
 #ifdef METGM_CDM_WRITER_DEBUG
-            std::cerr
-                    << "checking p_id "
-                    << p_id
-                    << std::endl;
+//            std::cerr
+//                    << "checking p_id "
+//                    << p_id
+//                    << std::endl;
 #endif
             /**
               * for same p_id we could have more CDM variables
@@ -229,10 +263,10 @@ namespace MetNoFimex {
                     && findIt.second == pid2kildemap_.begin())
             {
 #ifdef METGM_CDM_WRITER_DEBUG
-                std::cerr
-                    << "no prenamed variables found for p_id "
-                    << p_id
-                << std::endl;
+//                std::cerr
+//                    << "no prenamed variables found for p_id "
+//                    << p_id
+//                << std::endl;
 #endif
                 continue;
             }
@@ -241,35 +275,35 @@ namespace MetNoFimex {
             for(cit = findIt.first; cit != findIt.second; ++cit) {
                 std::string variableName = (*cit).second;
 #ifdef METGM_CDM_WRITER_DEBUG
-                std::cerr
-                    << "for p_id "
-                    << p_id
-                    << " searching CDMVariable with name "
-                    << variableName
-                << std::endl;
+//                std::cerr
+//                    << "for p_id "
+//                    << p_id
+//                    << " searching CDMVariable with name "
+//                    << variableName
+//                << std::endl;
 #endif
 
                 if(!cdmRef_.hasVariable(variableName)) {
 
 #ifdef METGM_CDM_WRITER_DEBUG
-                    std::cerr
-                        << "for p_id "
-                        << p_id
-                        << " and name "
-                        << variableName
-                        << " CDM model doesn't have CDMVariable"
-                    << std::endl;
+//                    std::cerr
+//                        << "for p_id "
+//                        << p_id
+//                        << " and name "
+//                        << variableName
+//                        << " CDM model doesn't have CDMVariable"
+//                    << std::endl;
 #endif
                     continue;
                 }
 #ifdef METGM_CDM_WRITER_DEBUG
-                std::cerr
-                    << "for p_id "
-                    << p_id
-                    << " and name "
-                    << variableName
-                    << " CDMVariable found!"
-                << std::endl;
+//                std::cerr
+//                    << "for p_id "
+//                    << p_id
+//                    << " and name "
+//                    << variableName
+//                    << " CDMVariable found!"
+//                << std::endl;
 #endif
                 const CDMVariable* cdmVariable = &(cdmRef_.getVariable(variableName));
 
@@ -305,7 +339,7 @@ namespace MetNoFimex {
 
     void METGM_CDMWriter::writeGroup0Data()
     {
-        if(mgm_set_version(metgmHandle_, metgmVersion_) != MGM_OK)
+        if(mgm_set_version(metgmHandle_, *metgmVersion_) != MGM_OK)
             throw CDMException("mgm_set_version fails");
     }
 
@@ -381,7 +415,7 @@ namespace MetNoFimex {
         // set start date time
         const CDMDimension* tDimension = 0;
         if(cdmRef.getTimeAxis("time").empty()) {
-            throw CDMException("something sucks with unlimited dimension");
+            throw CDMException("something sucks time dimension");
         } else {
             tDimension = &cdmRef.getDimension(cdmRef.getTimeAxis("time"));
         }
@@ -404,19 +438,23 @@ namespace MetNoFimex {
         double kildeTime0 = kildeTimeVector[0];
 
         time_t start_t_0 = kilde_tu.unitTime2epochSeconds(kildeTime0);
+
         startTime_ = kilde_tu.unitTime2posixTime(start_t_0);
 
         if(kildeTimeData->size() > 1) {
             double kildeTime1 = kildeTimeVector[1];
             time_t start_t_1 = kilde_tu.unitTime2epochSeconds(kildeTime1);
             dTimeStep_ = start_t_1 - start_t_0;
+            std::cerr << "start_t_1 == " << start_t_1 << " and  start_t_0 == " << start_t_0 << " and dTimeStep == " << dTimeStep_ << std::endl;
         } else {
-            dTimeStep_ = 3600.0;
+            /**
+              * lets use some heuristics
+              */
+            dTimeStep_ = std::abs(start_t_0 - analysis_t);
         }
 
         if(mgm_set_start_date_time(metgmHandle_, start_t_0) != MGM_OK)
             throw CDMException("mgm_set_start_date_time fails");
-
 
         CDMAttribute metgmFreeTextAttribute;
         if(!metgmFreeText.empty()) { // value from xml
@@ -481,10 +519,10 @@ namespace MetNoFimex {
         // Set group 2 data, applicable to Edition 1 only
         //  np     : total number of parameters
         //  return : 0 if OK, error code on error
-        if(metgmVersion_ == MGM_Edition1) {
+        if(*metgmVersion_ == MGM_Edition1) {
             if(mgm_set_number_of_params(metgmHandle_, pid2CdmVariablesMMap_.size()) != 0)
                 throw CDMException("mgm_set_number_of_params fails");
-        } else if(metgmVersion_ == MGM_Edition2) {
+        } else if(*metgmVersion_ == MGM_Edition2) {
             if(mgm_set_number_of_params(metgmHandle_, pid2CdmVariablesMMap_.size()) != 0)
                 throw CDMException("mgm_set_number_of_params fails");
 
@@ -551,17 +589,41 @@ namespace MetNoFimex {
                 throw CDMException("given time axis lenght is <= 0, check data manually");
 
             const boost::shared_ptr<Data> tData = cdmReader->getData(tDimension->getName());
-            const boost::shared_array<float> tArray = tData->asConstFloat();
+            const boost::shared_array<double> tArray = tData->asConstDouble();
 
             std::less_equal<float> leq;
             if( std::find_if( &tArray[0], &tArray[tData->size()], boost::bind( leq, _1, 0 ) ) != &tArray[tData->size()])
                 throw CDMException("MetgmCDMWriter is not supporting negative values on the time axis");
 
+            time_t dT = tData->size() > 1 ? tArray[1] - tArray[0] : dTimeStep_;
+
+            if(dT <= 0) {
+                throw CDMException("MetgmCDMReader is not supporting dt <= 0");
+            }
+
+            /**
+              * calculate and check if points on time axis are equidistant
+              */
+            std::deque<double> adjDiff(tData->size());
+            std::adjacent_difference(&tArray[0], &tArray[tData->size()], adjDiff.begin());
+            adjDiff.pop_front(); // remove first element
+
+            std::deque<double>::iterator it = std::unique_copy(adjDiff.begin(), adjDiff.end(), adjDiff.begin());
+            std::sort(adjDiff.begin(), it);
+
+            adjDiff.resize(it - adjDiff.begin());
+
+            if(adjDiff.size() != 1) {
+                throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
+            }
+
+            dT = adjDiff.at(0);
+
             callResult = mgm_set_nt(gp3, tDimension->getLength());
             if(callResult != MGM_OK)
                 throw CDMException(mgm_string_error(callResult));
 
-            callResult = mgm_set_dt(gp3, dTimeStep_);
+            callResult = mgm_set_dt(gp3, dT);
             if(callResult != MGM_OK)
                 throw CDMException(mgm_string_error(callResult));
 
@@ -578,7 +640,7 @@ namespace MetNoFimex {
             if( std::find_if( &tArray[0], &tArray[tData->size()], boost::bind( leq, _1, 0 ) ) != &tArray[tData->size()])
                 throw CDMException("MetgmCDMWriter is not supporting negative values on the time axis");
 
-            time_t dT = tArray[tData->size() - 1] - tArray[0];
+            time_t dT = tData->size() > 1 ? tArray[tData->size() - 1] - tArray[0] : dTimeStep_;
 
             if(dT <= 0)
                 throw CDMException("MetgmCDMReader is not supporting dt <= 0");
@@ -621,17 +683,17 @@ namespace MetNoFimex {
                       && yAxisStandardName == std::string("latitude")) {
 
                 boost::shared_ptr<Data> xData = cdmReader->getData(xName);
-                const boost::shared_array<float> xArray = xData->asConstFloat();
-                std::vector<float> xVector(&xArray[0], &xArray[xData->size()]);
+                const boost::shared_array<double> xArray = xData->asConstDouble();
+                std::vector<double> xVector(&xArray[0], &xArray[xData->size()]);
 
                 boost::shared_ptr<Data> yData = cdmReader->getData(yName);;
-                const boost::shared_array<float> yArray = yData->asConstFloat();
-                std::vector<float> yVector(&yArray[0], &yArray[yData->size()]);
+                const boost::shared_array<double> yArray = yData->asConstDouble();
+                std::vector<double> yVector(&yArray[0], &yArray[yData->size()]);
 
-                float dx = 0;
-                float cx = 0;
+                double dx = 0;
+                double cx = 0;
                 if(xVector.size() > 1) {
-                    std::cerr << "xVector.size() = " << xVector.size() << std::endl;
+//                    std::cerr << "xVector.size() = " << xVector.size() << std::endl;
                     dx = xVector[1] - xVector[0];
                     cx = xVector[0] + (xVector[xVector.size() - 1] - xVector[0]) / 2.0;
                     if(dx <= 0)
@@ -641,10 +703,10 @@ namespace MetNoFimex {
                 assert(mgm_set_nx(gp3, xVector.size()) == MGM_OK);
                 assert(mgm_set_cx(gp3, cx) == MGM_OK);
 
-                float dy = 0;
-                float cy = 0;
+                double dy = 0;
+                double cy = 0;
                 if(yVector.size() > 1) {
-                    std::cerr << "yVector.size() = " << yVector.size() << std::endl;
+//                    std::cerr << "yVector.size() = " << yVector.size() << std::endl;
                     dy = yVector[1] - yVector[0];
                     cy = yVector[0] + (yVector[yVector.size() - 1] - yVector[0]) / 2.0;
                     if(dy <= 0)
@@ -716,8 +778,9 @@ namespace MetNoFimex {
                 if(callResult != MGM_OK)
                     throw CDMException(mgm_string_error(callResult));
             } else {
+                // check unit for the dimension
                 CDMAttribute metgmUnitsAttribute;
-                if(cdmRef.getAttribute(pVar->getName(), "units", metgmUnitsAttribute)) {
+                if(cdmRef.getAttribute(zDimension->getName(), "units", metgmUnitsAttribute)) {
                     std::string unitsName = metgmUnitsAttribute.getStringValue();
                     if(unitsName.find("Pa") != std::string::npos) {
                         callResult = mgm_set_pr(gp3, 2);
@@ -858,59 +921,137 @@ namespace MetNoFimex {
         std::string variableName = pVar->getName();
 
         const CDM& cdmRef = cdmReader->getCDM();
-//        assert(cdmRef.hasVariable(variableName));
 
-//        const CDMVariable& varRef = cdmRef.getVariable(va);
+        CDMAttribute fillValueAttribute;
+        std::string strFillValue;
+        if(cdmRef.getAttribute(pVar->getName(), "_FillValue", fillValueAttribute))
+            strFillValue = fillValueAttribute.getStringValue();
 
         /**
           * TODO: see if unit conversion is needed !
           */
-        size_t totalDataSize;
+//        size_t totalDataSize;
         boost::scoped_array<float> gp5(0);
-        if (!cdmRef.hasUnlimitedDim(*pVar)) {
-            const boost::shared_ptr<Data> data = cdmReader->getData(variableName);
-            const boost::shared_array<float> group5Data = data->asConstFloat();
+        boost::scoped_array<float> gp5T(0);
+        boost::shared_ptr<Data> data;
+        boost::shared_array<float> group5Data;
 
-            totalDataSize = data->size();
-            gp5.reset(new float[totalDataSize]);
 
-            for(size_t index = 0; index < totalDataSize; ++index) {
-//                std::cerr << " index " << index << " has value " << group5Data[index] << std::endl;
-                gp5[index] = group5Data[index];
-            }
-        } else {
-            // iterate over each unlimited dim (usually time)
-            size_t sliceSize = 1;
-            if(!cdmRef.getHorizontalXAxis(variableName).empty()) {
-                CDMDimension xDimension = cdmRef.getDimension(cdmRef.getHorizontalXAxis(variableName));
-                sliceSize *= xDimension.getLength();
-            }
-            if(!cdmRef.getHorizontalYAxis(variableName).empty()) {
-                CDMDimension yDimension = cdmRef.getDimension(cdmRef.getHorizontalYAxis(variableName));
-                sliceSize *= yDimension.getLength();
-            }
-            if(!cdmRef.getVerticalAxis(variableName).empty()) {
-                CDMDimension zDimension = cdmRef.getDimension(cdmRef.getVerticalAxis(variableName));
-                sliceSize *= zDimension.getLength();
-            }
+//        size_t sliceSize = 1;
 
-            const CDMDimension* unLimDim = cdmRef.getUnlimitedDim();
+        float* currPos = 0;
+        const CDMDimension* unLimDim = 0;
 
-            totalDataSize = sliceSize * unLimDim->getLength();
+        MetGmHDTag hdTag = MetGmHDTag::createMetGmHDTag(&cdmRef, pVar);
 
-            gp5.reset(new float[totalDataSize]);
-            float* currPos = gp5.get();
+        switch(hdTag.asShort()) {
+            case MetGmHDTag::HD_2D:
+                data = cdmReader->getData(variableName);
+                group5Data = data->asConstFloat();
 
-            for (size_t i = 0; i < unLimDim->getLength(); ++i) {
-                boost::shared_ptr<Data> data = cdmReader->getDataSlice(variableName, i);
-                const boost::shared_array<float> group5Data = data->asConstFloat();
-                assert(sliceSize == data->size());
-                for(size_t index = 0; index < data->size(); ++index) {
+                assert(hdTag.totalSize() == data->size());
+                gp5.reset(new float[hdTag.totalSize()]);
+
+                for(size_t index = 0; index < hdTag.totalSize(); ++index) {
 //                    std::cerr << " index " << index << " has value " << group5Data[index] << std::endl;
-                    *currPos = group5Data[index];
-                    ++currPos;
+                    if(!strFillValue.empty() &&
+                            strFillValue == boost::lexical_cast<std::string>(group5Data[index])) {
+                        gp5[index] = 9999.0;
+                    } else if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end()
+                              && kildeName2FillValueMap_[pVar->getName()] == group5Data[index]) {
+                        gp5[index] = 9999.0;
+                    } else if(isnan(group5Data[index])) {
+//                        std::cerr << "isNaN triggered" << std::cerr;
+                        gp5[index] = 9999.0;
+                    } else {
+                        gp5[index] = group5Data[index];
+                    }
                 }
-            }
+                break;
+
+            case MetGmHDTag::HD_3D_T:
+                 // iterate over each unlimited dim (should be time)
+                unLimDim = cdmRef.getUnlimitedDim();
+
+                assert( hdTag.totalSize() == hdTag.sliceSize() * unLimDim->getLength() );
+
+                gp5.reset(new float[hdTag.totalSize()]);
+
+                currPos = gp5.get();
+
+                for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+                    boost::shared_ptr<Data> data = cdmReader->getDataSlice(variableName, i);
+                    const boost::shared_array<float> group5Data = data->asConstFloat();
+                    assert(hdTag.sliceSize() == data->size());
+                    for(size_t index = 0; index < data->size(); ++index) {
+//                        std::cerr << " index " << index << " has value " << group5Data[index] << std::endl;
+                        if(!strFillValue.empty() &&
+                                strFillValue == boost::lexical_cast<std::string>(group5Data[index])) {
+                            *currPos = 9999.0;
+//                            std::cerr << "_FillValue triggered" << " and index " << index << " has value " << (*currPos) << std::endl;
+                        } else if (!strFillValue.empty() &&
+                                   boost::lexical_cast<float>(strFillValue) == group5Data[index]) {
+                            *currPos = 9999.0;
+//                            std::cerr << "_FillValue triggered" << " and index " << index << " has value " << (*currPos) << std::endl;
+                        } else if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end()
+                                  && kildeName2FillValueMap_[pVar->getName()] == group5Data[index]) {
+                            *currPos = 9999.0;
+//                            std::cerr << "_FillValue triggered" << " and index " << index << " has value " << (*currPos) << std::endl;
+                        } else if(isnan(group5Data[index])) {
+//                            std::cerr << "isNaN triggered" << std::endl;
+                            *currPos = 9999.0;
+                        } else {
+                            *currPos = group5Data[index];
+                        }
+
+//                        std::cerr << __FUNCTION__ << "|"
+//                                  << __LINE__     << "|"
+//                                  << " index " << index << " has value " << (*currPos)
+//                                  << std::endl;
+
+                        ++currPos;
+                    }
+                }
+
+                {
+                    // data re-layout Fimex -> MetGM
+
+                    gp5T.reset(new float[hdTag.totalSize()]);
+
+                    float* slice = gp5.get();
+                    float* sliceT = gp5T.get();
+
+                    for(size_t sIndex = 0; sIndex < hdTag.tSize(); ++sIndex) {
+
+                        slice = gp5.get() + sIndex * hdTag.sliceSize();
+                        sliceT = gp5T.get() + sIndex * hdTag.sliceSize();
+
+                        for(size_t z_index = 0; z_index < hdTag.zSize(); ++z_index) {
+
+                            for(size_t y_index = 0; y_index < hdTag.ySize(); ++y_index) {
+                                for(size_t x_index = 0; x_index < hdTag.xSize(); ++x_index) {
+                                    sliceT[z_index + x_index * hdTag.zSize() + y_index * (hdTag.zSize() * hdTag.xSize())] =
+                                            slice[z_index * (hdTag.ySize() * hdTag.xSize()) + y_index * hdTag.xSize() + x_index];
+
+                                } // x_index
+                            } // y_index
+                        } // z_index
+
+                    } // sliceIndex
+
+                    gp5.swap(gp5T);
+                }
+
+
+                break;
+            case MetGmHDTag::HD_0D:
+            case MetGmHDTag::HD_0D_T:
+            case MetGmHDTag::HD_1D:
+            case MetGmHDTag::HD_1D_T:
+            case MetGmHDTag::HD_2D_T:
+            case MetGmHDTag::HD_3D:
+            default:
+                throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdTag.asString());
         }
 
         /**
@@ -924,8 +1065,10 @@ namespace MetNoFimex {
 
         double offset = 0.0f;
 
-        for(size_t index = 0; index < totalDataSize; ++index)
-            gp5[index] = gp5[index] * slope + offset;
+        for(size_t index = 0; index < hdTag.totalSize(); ++index) {
+            if(gp5[index] != 9999.0)
+                gp5[index] = gp5[index] * slope + offset;
+        }
 
         /**
           * convert data from kilde units to the metgm
@@ -939,8 +1082,9 @@ namespace MetNoFimex {
         if(kildeUnits != std::string("ratio") && metgmUnits != std::string("1")) {
             if(un.areConvertible(kildeUnits, metgmUnits)) {
                 un.convert(kildeUnits, metgmUnits, newSlope, newOffset);
-                for(size_t index = 0; index < totalDataSize; ++index)
-                    gp5[index] = gp5[index] * newSlope + newOffset;
+                for(size_t index = 0; index < hdTag.totalSize(); ++index)
+                    if(gp5[index] != 9999.)
+                        gp5[index] = gp5[index] * newSlope + newOffset;
             }
         }
 
@@ -948,11 +1092,6 @@ namespace MetNoFimex {
         callResult = mgm_write_group5 (metgmFileHandle_, metgmHandle_, gp5.get());
         if(callResult != MGM_OK)
             throw CDMException(mgm_string_error(callResult));
-    }
-
-    void METGM_CDMWriter::loadInternalCDMObject()
-    {
-
     }
 
     void METGM_CDMWriter::init()
@@ -1035,10 +1174,9 @@ namespace MetNoFimex {
             (
                     const boost::shared_ptr<CDMReader> cdmReader,
                     const std::string& outputFile,
-                    const std::string& configFile,
-                    const mgm_version& version
+                    const std::string& configFile
                     )
-                        : CDMWriter(cdmReader, outputFile), metgmVersion_(version), configFileName_(configFile),
+                        : CDMWriter(cdmReader, outputFile), configFileName_(configFile),
                           metgmFileHandle_(0), metgmHandle_(0)
     {
         std::auto_ptr<XMLDoc> xmlDoc;
@@ -1048,11 +1186,14 @@ namespace MetNoFimex {
             xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
         }
 
+        if(metgmVersion_ == 0)
+            metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(MGM_Edition1));
+
         assert(xmlDoc.get() != 0);
 
-        mapKildeVariablesToMetgmPids(xmlDoc);
         mapMetgmPidToMetgmHDs(xmlDoc);
-
+        mapKildeNamesToFillValues(xmlDoc);
+        mapKildeVariablesToMetgmPids(xmlDoc);
         init();
     }
 
