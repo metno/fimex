@@ -53,7 +53,7 @@ namespace MetNoFimex {
     {
         cdm_ = cdm; // as not accesible via initialzation list
 
-        try {   
+        try {
             metgmFileHandle_ = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(metgmsource));
             metgmHandle_ = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr());
             init();

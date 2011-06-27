@@ -24,10 +24,6 @@
 #ifndef METGM_CDMWRITERIMPL_HPP
 #define METGM_CDMWRITERIMPL_HPP
 
-// metlib
-// TODO: remove even this dependancy in future
-#include "metgm.h"
-
 // fimex
 #include "fimex/CDMWriter.h"
 #include "fimex/CDM.h"
@@ -52,6 +48,9 @@ namespace MetNoFimex {
 
     /* forwrd decelarations */
     class MetGmVersion;
+    class MetGmHandlePtr;
+    class MetGmGroup3Ptr;
+    class MetGmFileHandlePtr;
 
 class MetGmCDMWriterImpl : public CDMWriter
 {
@@ -90,34 +89,28 @@ public:
         const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException);
 
 private:
-
         void mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
         void mapMetgmPidToMetgmHDs(const std::auto_ptr<XMLDoc>& doc);
         void mapStandardNamesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
         void mapKildeNamesToFillValues(const std::auto_ptr<XMLDoc>& doc);
 
-        void allocateMgmHandle();
-        void freeMgmHandle();
-
-        void openMgmFileHandle();
-        void closeMgmFileHandle();
-        void loadInternalCDMObject();
         void detectCDMVariables();
         void detectCDMVariablesByPid();
         void detectCDMVariablesByName();
         void detectCDMVariablesByStandardName();
+
         void writeGroup0Data();
         void writeGroup1Data();
         void writeGroup2Data();
         void writeHeader();
 
-        void writeGroup3Data(mgm_group3* gp3, const CDMVariable* pVar);
-        void writeGroup3VerticalAxis(mgm_group3* gp3, const CDMVariable* pVar);
-        void writeGroup3TimeAxis(mgm_group3* gp3, const CDMVariable* pVar);
-        void writeGroup3HorizontalAxis(mgm_group3* gp3, const CDMVariable* pVar);
+        void writeGroup3Data(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
+        void writeGroup3VerticalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
+        void writeGroup3TimeAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
+        void writeGroup3HorizontalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
 
-        void writeGroup4Data(const mgm_group3* gp3, const CDMVariable* pVar);
-        void writeGroup5Data(const mgm_group3* gp3, const CDMVariable* pVar);
+        void writeGroup4Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
+        void writeGroup5Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
 
         void init();
 
@@ -135,10 +128,12 @@ private:
         std::multimap<short, std::string>           pid2kildemap_;
         std::multimap<short, std::string>           pid2StandardNamesMMap_;
         std::map<short, short>                      pid2hdmap_;
-        boost::shared_ptr<MetGmVersion>             metgmVersion_;
         std::string                                 configFileName_;
-        FILE*                                       metgmFileHandle_;
-        mgm_handle*                                 metgmHandle_;
+
+        boost::shared_ptr<MetGmVersion>             metgmVersion_;
+        boost::shared_ptr<MetGmHandlePtr>           metgmHandle_;
+        boost::shared_ptr<MetGmFileHandlePtr>       metgmFileHandle_;
+
 
         boost::posix_time::ptime                    analysisTime_;
         boost::posix_time::ptime                    startTime_;
