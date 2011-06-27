@@ -31,6 +31,8 @@
 #include "metgm.h"
 
 #include <cstdio>
+#include <string>
+#include <ostream>
 
 namespace MetNoFimex {
 
@@ -100,6 +102,7 @@ namespace MetNoFimex {
         inline int reset() { return mgm_reset_group3(group3_); }
 
         inline operator mgm_group3* () { return group3_; }
+        inline operator const mgm_group3* () const { return group3_; }
 
         inline int   p_id() const { return mgm_get_p_id(group3_); }
         inline int   nz()   const { return mgm_get_nz(group3_); }
@@ -126,6 +129,23 @@ namespace MetNoFimex {
         inline int set_cy(float cy)   { return mgm_set_cy(group3_, cy); }
         inline int set_pr(short pr)   { return mgm_set_pr(group3_, pr); }
         inline int set_pz(short pz)   { return mgm_set_pz(group3_, pz); }
+
+        inline void dump() {
+            std::cerr << "dumping group3 [START]" << std::endl
+                      << "p_id = " << p_id()      << std::endl
+                      << "nz = "   << nz()        << std::endl
+                      << "nx = "   << nx()        << std::endl
+                      << "ny = "   << ny()        << std::endl
+                      << "nt = "   << nt()        << std::endl
+                      << "dx = "   << dx()        << std::endl
+                      << "dy = "   << dy()        << std::endl
+                      << "dt = "   << dt()        << std::endl
+                      << "cx = "   << cx()        << std::endl
+                      << "cy = "   << cy()        << std::endl
+                      << "pr = "   << pr()        << std::endl
+                      << "pz = "   << pz()        << std::endl
+                      << "dumping group3 [END]"   << std::endl;
+        }
 
     private:
         inline void deep_copy(const MetGmGroup3Ptr &rhs)
