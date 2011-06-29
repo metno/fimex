@@ -45,6 +45,8 @@
 #include "fimex/coordSys/StereographicProjection.h"
 #include "fimex/coordSys/TransverseMercatorProjection.h"
 #include "fimex/coordSys/VerticalPerspectiveProjection.h"
+#include "fimex/coordSys/UnknownToFgdcProjection.h"
+#include "fimex/Logger.h"
 
 #include <proj_api.h>
 
@@ -174,6 +176,8 @@ boost::shared_ptr<Projection> Projection::create(std::vector<CDMAttribute> attrs
             proj =  boost::shared_ptr<Projection>(new TransverseMercatorProjection());
         } else if (projName == "vertical_perspective") {
             proj =  boost::shared_ptr<Projection>(new VerticalPerspectiveProjection());
+        } else if (projName == "unknown_to_fgdc") {
+            proj =  boost::shared_ptr<Projection>(new UnknownToFgdcProjection());
         } else {
             throw CDMException("unsupported projection: " + projName);
         }
@@ -211,10 +215,13 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
         attrs = TransverseMercatorProjection::parametersFromProj4(projStr);
     } else if (VerticalPerspectiveProjection::acceptsProj4(projStr)) {
         attrs = VerticalPerspectiveProjection::parametersFromProj4(projStr);
+    } else if (UnknownToFgdcProjection::acceptsProj4(projStr)) {
+        LOG4FIMEX(getLogger("fimex.Projection"), Logger::WARN, "projStr not supported by FGDC, trying UnknownToFgdcProjection for '" << projStr << "'");
+        attrs = UnknownToFgdcProjection::parametersFromProj4(projStr);
     }
 
     if (attrs.size() == 0) {
-        std::cerr << "translation of proj4 '" << projStr << "' to FGDC/CF not supported" << std::endl;
+        LOG4FIMEX(getLogger("fimex.Projection"), Logger::ERROR, "translation of proj4 '" << projStr << "' to FGDC/CF not supported");
         throw CDMException("proj-string "+projStr+" to FGDC/CF not supported");
     }
     return Projection::create(attrs);
