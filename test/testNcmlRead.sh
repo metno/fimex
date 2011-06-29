@@ -12,5 +12,10 @@ if [ $? != 0 ]; then
   echo "failed reading ncml"
   exit 1
 fi
+../src/binSrc/fimex --input.file=coordTest.nc --input.config=test.ncml --output.file=x --output.type=null
+if [ $? != 0 ]; then
+  echo "failed reading nc with ncml-config"
+  exit 1
+fi
 echo "success"
 exit 0
