@@ -64,8 +64,8 @@ namespace MetNoFimex {
     class MetGmHorizontalTag {
     public:
 
-        static boost::shared_ptr<MetGmXTag> createMetGmXTag(const boost::shared_ptr<CDMReader> pCdmReader);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTag(const boost::shared_ptr<CDMReader> pCdmReader);
+        static boost::shared_ptr<MetGmXTag> createMetGmXTag(boost::shared_ptr<CDMReader>& pCdmReader);
+        static boost::shared_ptr<MetGmYTag> createMetGmYTag(boost::shared_ptr<CDMReader>& pCdmReader);
 
         inline unsigned int        numberOfPoints()     { return numberOfPoints_; }
         inline double              distance()           { return distance_; }
@@ -144,7 +144,7 @@ namespace MetNoFimex {
 
     };
 
-    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTag(const boost::shared_ptr<CDMReader> pCdmReader)
+    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTag(boost::shared_ptr<CDMReader>& pCdmReader)
     {
         if(!pCdmReader.get())
             throw CDMException("createMetGmXTag: pCdmReader is null");
@@ -181,7 +181,7 @@ namespace MetNoFimex {
         return XTag;
     }
 
-    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTag(const boost::shared_ptr<CDMReader> pCdmReader)
+    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTag(boost::shared_ptr<CDMReader>& pCdmReader)
     {
         if(!pCdmReader.get())
             throw CDMException("createMetGmXTag: pCdmReader is null");

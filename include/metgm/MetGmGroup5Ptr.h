@@ -51,7 +51,7 @@ namespace MetNoFimex {
 
     class MetGmGroup5Ptr {
     public:
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5Ptr(const boost::shared_ptr<CDMReader> pCdmReader,
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5Ptr(boost::shared_ptr<CDMReader>& pCdmReader,
                                                                       const CDMVariable* pVariable,
                                                                       const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                                                       const float* pFillValue = 0);
@@ -117,7 +117,7 @@ namespace MetNoFimex {
         data_.swap(dataT);
     }
 
-    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(const boost::shared_ptr<CDMReader> pCdmReader,
+    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::shared_ptr<CDMReader>& pCdmReader,
                                                                            const CDMVariable* pVariable,
                                                                            const boost::shared_ptr<MetGmGroup3Ptr> pg3,
                                                                            const float* pFillValue)
