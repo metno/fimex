@@ -62,23 +62,8 @@ namespace MetNoFimex {
     class MetGmTimeTag {
     public:
 
-        inline static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader)
-        {
-            if(!pCdmReader.get())
-                throw CDMException("createMetGmTimeTag: pCdmReader is null");
-
-            const CDM& cdmRef = pCdmReader->getCDM();
-
-            if( !(cdmRef.hasDimension("time") && cdmRef.hasVariable("time")) )
-                throw CDMException("createMetGmTimeTag: cdm model doesn't have the 'time'");
-
-            boost::shared_ptr<MetGmTimeTag> TTag =
-                    boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag());
-
-            TTag->init(pCdmReader);
-
-            return TTag;
-        }
+        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader);
+        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
 
         inline unsigned int        nT()           { return nT_; }
         inline time_t              dT()           { return dT_; }
