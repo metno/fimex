@@ -112,9 +112,6 @@ namespace MetNoFimex {
 //                throw CDMException("time points at horizontal axis are not equidistant [use extractor to split file on boundaries]");
         }
 
-
-        const boost::shared_ptr<CDMReader>    pCdmReader_;
-
         unsigned int        numberOfPoints_;
         double              center_;
         double              distance_;
