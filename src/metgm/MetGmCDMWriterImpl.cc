@@ -1,3 +1,26 @@
+/*
+ * Fimex
+ *
+ * (C) Copyright 2011, met.no
+ *
+ * Project Info:  https://wiki.met.no/fimex/start
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ */
+
 #include "../../include/metgm/MetGmCDMWriterImpl.h"
 
 #include "metgm.h"
@@ -778,265 +801,39 @@ namespace MetNoFimex {
 
         gp3->dump();
 
-        fimex_mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *gp3);
+        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *gp3));
     }
 
     void MetGmCDMWriterImpl::writeGroup4Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        assert(gp3->p_id() >= 0);
+        MetGmTagsPtr tags;
 
-        if(gp3->pz() == 0) {
-            /**
-              * for now shouldn't get here at all
-              */
-            assert(0);
-            return;
+        if(variable2TagsMap_.find(pVar) != variable2TagsMap_.end()) {
+            tags = variable2TagsMap_[pVar];
+            if(!tags->vTag.get())
+                tags->vTag = MetGmVerticalTag::createMetGmVerticalTag(cdmReader, pVar);
         } else {
-            std::string variableName = pVar->getName();
-            assert(!variableName.empty());
-
-            const CDM& cdmRef = cdmReader->getCDM();
-            assert(cdmRef.hasVariable(variableName));
-
-            std::string zAxisName = cdmRef.getVerticalAxis(variableName);
-            if(zAxisName.empty()) {
-                float f = 0;
-                assert(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, &f) == MGM_OK);
-                return;
-            }
-            if(!cdmRef.hasDimension(zAxisName))
-                return;
-
-            const CDMDimension& zDimRef = cdmRef.getDimension(zAxisName);
-
-            const CDMVariable& zVarRef = cdmRef.getVariable(zDimRef.getName());
-            boost::shared_ptr<Data> zData;
-            if(zVarRef.hasData()) {
-                zData = zVarRef.getData();
-            } else {
-                zData = cdmReader->getData(zVarRef.getName());
-            }
-
-            float* gp4 = new float[zDimRef.getLength()];
-            const boost::shared_array<float> group4Data = zData->asConstFloat();
-            for(size_t index = 0; index < zData->size(); ++index) {
-//                std::cerr << "p_id " <<  p_id << " index " << index << " has value " << group4Data[index] << std::endl;
-                gp4[index] = group4Data[index];
-            }
-
-            /**
-              * convert data from kilde units to the metgm
-              */
-            Units un;
-            const std::string kildeUnits = cdmRef.getAttribute(zVarRef.getName(), std::string("units")).getStringValue();
-            const std::string metgmUnits = mgm_get_param_unit(gp3->p_id(), *metgmHandle_);
-
-            double slope = 1.0;
-            CDMAttribute slopeAttribute;
-            if(cdmRef.getAttribute(zVarRef.getName(), std::string("scale_factor"), slopeAttribute)) {
-                slope = slopeAttribute.getData()->asFloat()[0];
-            }
-
-            double offset = 0.0;
-//            CDMAttribute offsetttribute;
-//            if(cdmRef.getAttribute(zVarRef.getName(), std::string("scale_factor"), slopeAttribute)) {
-//                slope = slopeAttribute.getData()->asFloat()[0];
-//            }
-
-            if(un.areConvertible(kildeUnits, metgmUnits)) {
-                un.convert(kildeUnits, metgmUnits, slope, offset);
-                for(size_t index = 0; index < zDimRef.getLength(); ++index)
-                    gp4[index] = gp4[index] * slope + offset;
-            }
-
-            assert(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, gp4) == MGM_OK);
-
-            delete [] gp4;
-
+            tags = MetGmTagsPtr(new MetGmTags());
+            variable2TagsMap_.insert(std::make_pair<const CDMVariable*, MetGmTagsPtr>(pVar, tags));
+            tags->vTag = MetGmVerticalTag::createMetGmVerticalTag(cdmReader, pVar);
         }
+
+        MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, tags->vTag->points().get()));
     }
 
     void MetGmCDMWriterImpl::writeGroup5Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        assert(gp3.get());
-        assert(pVar);
+        boost::shared_ptr<MetGmGroup5Ptr> pGp5;
 
-        assert(gp3->p_id() >= 0);
-
-        std::string variableName = pVar->getName();
-
-        const CDM& cdmRef = cdmReader->getCDM();
-
-        CDMAttribute fillValueAttribute;
-        std::string strFillValue;
-        if(cdmRef.getAttribute(pVar->getName(), "_FillValue", fillValueAttribute))
-            strFillValue = fillValueAttribute.getStringValue();
-
-        /**
-          * TODO: see if unit conversion is needed !
-          */
-//        size_t totalDataSize;
-        boost::scoped_array<float> gp5(0);
-        boost::scoped_array<float> gp5T(0);
-        boost::shared_ptr<Data> data;
-        boost::shared_array<float> group5Data;
-
-
-//        size_t sliceSize = 1;
-
-        float* currPos = 0;
-        const CDMDimension* unLimDim = 0;
-
-        MetGmHDTag hdTag = MetGmHDTag::createMetGmHDTag(&cdmRef, pVar);
-
-        switch(hdTag.asShort()) {
-            case MetGmHDTag::HD_2D:
-                data = cdmReader->getData(variableName);
-                group5Data = data->asConstFloat();
-
-                assert(hdTag.totalSize() == data->size());
-                gp5.reset(new float[hdTag.totalSize()]);
-
-                for(size_t index = 0; index < hdTag.totalSize(); ++index) {
-//                    std::cerr << " index " << index << " has value " << group5Data[index] << std::endl;
-                    if(!strFillValue.empty() &&
-                            strFillValue == boost::lexical_cast<std::string>(group5Data[index])) {
-                        gp5[index] = 9999.0;
-                    } else if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end()
-                              && kildeName2FillValueMap_[pVar->getName()] == group5Data[index]) {
-                        gp5[index] = 9999.0;
-                    } else if(isnan(group5Data[index])) {
-//                        std::cerr << "isNaN triggered" << std::cerr;
-                        gp5[index] = 9999.0;
-                    } else {
-                        gp5[index] = group5Data[index];
-                    }
-                }
-                break;
-
-            case MetGmHDTag::HD_3D_T:
-                 // iterate over each unlimited dim (should be time)
-                unLimDim = cdmRef.getUnlimitedDim();
-
-                assert( hdTag.totalSize() == hdTag.sliceSize() * unLimDim->getLength() );
-
-                gp5.reset(new float[hdTag.totalSize()]);
-
-                currPos = gp5.get();
-
-                for (size_t i = 0; i < unLimDim->getLength(); ++i) {
-                    boost::shared_ptr<Data> data = cdmReader->getDataSlice(variableName, i);
-                    const boost::shared_array<float> group5Data = data->asConstFloat();
-                    assert(hdTag.sliceSize() == data->size());
-                    for(size_t index = 0; index < data->size(); ++index) {
-//                        std::cerr << " index " << index << " has value " << group5Data[index] << std::endl;
-                        if(!strFillValue.empty() &&
-                                strFillValue == boost::lexical_cast<std::string>(group5Data[index])) {
-                            *currPos = 9999.0;
-//                            std::cerr << "_FillValue triggered" << " and index " << index << " has value " << (*currPos) << std::endl;
-                        } else if (!strFillValue.empty() &&
-                                   boost::lexical_cast<float>(strFillValue) == group5Data[index]) {
-                            *currPos = 9999.0;
-//                            std::cerr << "_FillValue triggered" << " and index " << index << " has value " << (*currPos) << std::endl;
-                        } else if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end()
-                                  && kildeName2FillValueMap_[pVar->getName()] == group5Data[index]) {
-                            *currPos = 9999.0;
-//                            std::cerr << "_FillValue triggered" << " and index " << index << " has value " << (*currPos) << std::endl;
-                        } else if(isnan(group5Data[index])) {
-//                            std::cerr << "isNaN triggered" << std::endl;
-                            *currPos = 9999.0;
-                        } else {
-                            *currPos = group5Data[index];
-                        }
-
-//                        std::cerr << __FUNCTION__ << "|"
-//                                  << __LINE__     << "|"
-//                                  << " index " << index << " has value " << (*currPos)
-//                                  << std::endl;
-
-                        ++currPos;
-                    }
-                }
-
-                {
-                    // data re-layout Fimex -> MetGM
-
-                    gp5T.reset(new float[hdTag.totalSize()]);
-
-                    float* slice = gp5.get();
-                    float* sliceT = gp5T.get();
-
-                    for(size_t sIndex = 0; sIndex < hdTag.tSize(); ++sIndex) {
-
-                        slice = gp5.get() + sIndex * hdTag.sliceSize();
-                        sliceT = gp5T.get() + sIndex * hdTag.sliceSize();
-
-                        for(size_t z_index = 0; z_index < hdTag.zSize(); ++z_index) {
-
-                            for(size_t y_index = 0; y_index < hdTag.ySize(); ++y_index) {
-                                for(size_t x_index = 0; x_index < hdTag.xSize(); ++x_index) {
-                                    sliceT[z_index + x_index * hdTag.zSize() + y_index * (hdTag.zSize() * hdTag.xSize())] =
-                                            slice[z_index * (hdTag.ySize() * hdTag.xSize()) + y_index * hdTag.xSize() + x_index];
-
-                                } // x_index
-                            } // y_index
-                        } // z_index
-
-                    } // sliceIndex
-
-                    gp5.swap(gp5T);
-                }
-
-
-                break;
-            case MetGmHDTag::HD_0D:
-            case MetGmHDTag::HD_0D_T:
-            case MetGmHDTag::HD_1D:
-            case MetGmHDTag::HD_1D_T:
-            case MetGmHDTag::HD_2D_T:
-            case MetGmHDTag::HD_3D:
-            default:
-                throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdTag.asString());
+        if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end())
+        {
+            const float externalFillValue = kildeName2FillValueMap_[pVar->getName()];
+            pGp5 = MetGmGroup5Ptr::createMetGmGroup5Ptr(cdmReader, pVar, gp3, &externalFillValue);
+        } else {
+            pGp5 = MetGmGroup5Ptr::createMetGmGroup5Ptr(cdmReader, pVar, gp3);
         }
 
-        /**
-          * apply scale and offset
-          */
-        double slope = 1.0;
-        CDMAttribute slopeAttribute;
-        if(cdmRef.getAttribute(pVar->getName(), std::string("scale_factor"), slopeAttribute)) {
-            slope = slopeAttribute.getData()->asDouble()[0];
-        }
-
-        double offset = 0.0f;
-
-        for(size_t index = 0; index < hdTag.totalSize(); ++index) {
-            if(gp5[index] != 9999.0)
-                gp5[index] = gp5[index] * slope + offset;
-        }
-
-        /**
-          * convert data from kilde units to the metgm
-          */
-        Units un;
-        const std::string kildeUnits = cdmRef.getAttribute(variableName, std::string("units")).getStringValue();
-        const std::string metgmUnits = mgm_get_param_unit(gp3->p_id(), *metgmHandle_);
-
-        double newSlope = 1.0;
-        double newOffset = 0.0;
-        if(kildeUnits != std::string("ratio") && metgmUnits != std::string("1")) {
-            if(un.areConvertible(kildeUnits, metgmUnits)) {
-                un.convert(kildeUnits, metgmUnits, newSlope, newOffset);
-                for(size_t index = 0; index < hdTag.totalSize(); ++index)
-                    if(gp5[index] != 9999.)
-                        gp5[index] = gp5[index] * newSlope + newOffset;
-            }
-        }
-
-        short callResult = MGM_OK;
-        callResult = mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, gp5.get());
-        if(callResult != MGM_OK)
-            throw CDMException(mgm_string_error(callResult));
+        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *pGp5));
     }
 
     void MetGmCDMWriterImpl::init()
