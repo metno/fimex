@@ -54,14 +54,12 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVar) {
+        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable) {
 
             boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
-            tag->pCdmReader_ = pCdmReader;
-            tag->pVar_ = pVar;
 
             const CDM& cdmRef = pCdmReader->getCDM();
-            std::string varName = tag->pVar_->getName();
+            std::string varName = pVariable->getName();
 
             bool hasTAxis = !( cdmRef.getTimeAxis(varName).empty() );
             tag->pTDim_ = hasTAxis ? &cdmRef.getDimension(cdmRef.getTimeAxis(varName)): 0;
@@ -120,12 +118,11 @@ namespace MetNoFimex {
 
     private:
 
-        inline MetGmHDTag() : pVar_(0), pTDim_(0), pXDim_(0), pYDim_(0), pZDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
+        inline MetGmHDTag() : pTDim_(0), pXDim_(0), pYDim_(0), pZDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
 
         /**
           * not owner, just holding reference
           */
-        const CDMVariable*  pVar_;
         const CDMDimension* pTDim_;
         const CDMDimension* pXDim_;
         const CDMDimension* pYDim_;
