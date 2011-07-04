@@ -125,7 +125,7 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmGroup5Ptr> gp5 =
                 boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3));
 
-        gp5->hdTag_ = MetGmHDTag::createMetGmHDTag(&pCdmReader->getCDM(), pVariable);
+        gp5->hdTag_ = MetGmHDTag::createMetGmHDTag(pCdmReader, pVariable);
 
         switch(gp5->hdTag_->asShort()) {
             case MetGmHDTag::HD_2D:

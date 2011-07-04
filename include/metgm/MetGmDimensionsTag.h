@@ -30,9 +30,10 @@
 
 #include "metgm.h"
 
-#include"fimex/CDM.h"
-#include"fimex/CDMVariable.h"
-#include"fimex/CDMDimension.h"
+#include "fimex/CDM.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDMVariable.h"
+#include "fimex/CDMDimension.h"
 
 #include <cstdio>
 #include <string>
@@ -53,28 +54,26 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(const CDM* pCdm, const CDMVariable* pVar) {
-
-            assert(pCdm);
-            assert(pVar);
+        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVar) {
 
             boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
-            tag->pCdm_ = pCdm;
+            tag->pCdmReader_ = pCdmReader;
             tag->pVar_ = pVar;
 
+            const CDM& cdmRef = pCdmReader->getCDM();
             std::string varName = tag->pVar_->getName();
 
-            bool hasTAxis = !( tag->pCdm_->getTimeAxis(varName).empty() );
-            tag->pTDim_ = hasTAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getTimeAxis(varName)): 0;
+            bool hasTAxis = !( cdmRef.getTimeAxis(varName).empty() );
+            tag->pTDim_ = hasTAxis ? &cdmRef.getDimension(cdmRef.getTimeAxis(varName)): 0;
 
-            bool hasXAxis = !( tag->pCdm_->getHorizontalXAxis(varName).empty() );
-            tag->pXDim_ = hasXAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getHorizontalXAxis(varName)) : 0;
+            bool hasXAxis = !( cdmRef.getHorizontalXAxis(varName).empty() );
+            tag->pXDim_ = hasXAxis ? &cdmRef.getDimension(cdmRef.getHorizontalXAxis(varName)) : 0;
 
-            bool hasYAxis = !( tag->pCdm_->getHorizontalYAxis(varName).empty() );
-            tag->pYDim_ = hasYAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getHorizontalYAxis(varName)) : 0;
+            bool hasYAxis = !( cdmRef.getHorizontalYAxis(varName).empty() );
+            tag->pYDim_ = hasYAxis ? &cdmRef.getDimension(cdmRef.getHorizontalYAxis(varName)) : 0;
 
-            bool hasZAxis = !( tag->pCdm_->getVerticalAxis(varName).empty() );
-            tag->pZDim_ = hasZAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getVerticalAxis(varName)) : 0;
+            bool hasZAxis = !( cdmRef.getVerticalAxis(varName).empty() );
+            tag->pZDim_ = hasZAxis ? &cdmRef.getDimension(cdmRef.getVerticalAxis(varName)) : 0;
 
             if(hasZAxis && hasXAxis && hasYAxis) {
                 tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
@@ -87,8 +86,8 @@ namespace MetNoFimex {
             }
 
             tag->sliceSize_ = (tag->pXDim_ ? tag->pXDim_->getLength() : 1)
-                           * (tag->pYDim_ ? tag->pYDim_->getLength() : 1)
-                           * (tag->pZDim_ ? tag->pZDim_->getLength() : 1);
+                            * (tag->pYDim_ ? tag->pYDim_->getLength() : 1)
+                            * (tag->pZDim_ ? tag->pZDim_->getLength() : 1);
 
             tag->totalSize_ = tag->sliceSize() * ( (hasTAxis) ? tag->pTDim_->getLength() : 1 );
 
@@ -121,12 +120,11 @@ namespace MetNoFimex {
 
     private:
 
-        inline MetGmHDTag() : pCdm_(0), pVar_(0), pTDim_(0), pXDim_(0), pYDim_(0), pZDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
+        inline MetGmHDTag() : pVar_(0), pTDim_(0), pXDim_(0), pYDim_(0), pZDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
 
         /**
           * not owner, just holding reference
           */
-        const CDM*          pCdm_;
         const CDMVariable*  pVar_;
         const CDMDimension* pTDim_;
         const CDMDimension* pXDim_;
