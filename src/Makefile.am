@@ -92,7 +92,8 @@ endif
 
 if HAVE_METGM
   libfimex_la_SOURCES += MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
-                         MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc
+                         MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
+                         metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc
 endif
 
 if HAVE_MILIB
