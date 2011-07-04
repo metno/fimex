@@ -405,7 +405,7 @@ namespace MetNoFimex {
         metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
-        MetGmGroup3Ptr pg3;
+        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
         /**
           * in seconds since epoch
@@ -422,8 +422,8 @@ namespace MetNoFimex {
         size_t np = mgm_get_number_of_params(*metgmHandle_);
 
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
-            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
-            short p_id = pg3.p_id();
+            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3);
+            short p_id = pg3->p_id();
             if(p_id == 0) {
                 // special case on non-temporal values
                 continue;
@@ -436,8 +436,8 @@ namespace MetNoFimex {
                 assert(error);
             } else if(error == MGM_OK) {
 
-                int numOfSteps = pg3.nt();
-                double timeStep = pg3.dt();
+                int numOfSteps = pg3->nt();
+                double timeStep = pg3->dt();
 
                 if(timeStep * numOfSteps > maxTimeSpan) {
                     maxTimeSpan = timeStep * numOfSteps;
@@ -515,7 +515,7 @@ namespace MetNoFimex {
           * As x and y will be same for all except pid = 0
           * grab the group 3 values for first pid > 1
           */
-        MetGmGroup3Ptr pg3;
+        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
         int nx = 0; // long
         int ny = 0; // lat
@@ -525,13 +525,13 @@ namespace MetNoFimex {
         double cy = 0; // center lat
         size_t pid = 1;
         for(; pid < 8; ++pid) {
-            if(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3) == 0) {
-                nx = pg3.nx();
-                ny = pg3.ny();
-                dx = pg3.dx();
-                dy = pg3.dy();
-                cx = pg3.cx();
-                cy = pg3.cy();
+            if(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3) == 0) {
+                nx = pg3->nx();
+                ny = pg3->ny();
+                dx = pg3->dx();
+                dy = pg3->dy();
+                cx = pg3->cx();
+                cy = pg3->cy();
             } else {
                 /**
                   * handle errors
@@ -654,7 +654,7 @@ namespace MetNoFimex {
         metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
-        MetGmGroup3Ptr pg3;
+        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
         if(pg3 == 0)
             throw CDMException("mgm_new_group3() failed");
         /**
@@ -664,7 +664,7 @@ namespace MetNoFimex {
         METGM_ZProfile prevZProfile;
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
 
-            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
+            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
                 continue;
@@ -673,7 +673,7 @@ namespace MetNoFimex {
                 return;
             }
 
-            int p_id = pg3.p_id();
+            int p_id = pg3->p_id();
 
             if(p_id == 0 || p_id == 1) {
                 /**
@@ -685,9 +685,9 @@ namespace MetNoFimex {
             }
 
 
-            int nz = pg3.nz();
-            int pz = pg3.pz();
-            int pr = pg3.pr();
+            int nz = pg3->nz();
+            int pz = pg3->pz();
+            int pr = pg3->pr();
 
             if(pz == 0) {
                 if(!prevZProfile.isValid()) {
@@ -835,9 +835,9 @@ namespace MetNoFimex {
 
         for(size_t gp3Index  = 0; gp3Index < np; ++gp3Index)
         {
-            MetGmGroup3Ptr pg3;
+            boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
-            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, pg3);
+            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
                 std::cerr << __FUNCTION__ << __LINE__ << " for gp3Index " << gp3Index << " MGM_ERROR_GROUP3_NOT_FOUND " << std::endl;
@@ -846,7 +846,7 @@ namespace MetNoFimex {
                 assert(error);
             }
 
-            int p_id = pg3.p_id();
+            int p_id = pg3->p_id();
 
             if(pid2cdmnamesmap_.find(p_id) == pid2cdmnamesmap_.end())
                 continue;
@@ -862,7 +862,7 @@ namespace MetNoFimex {
               * but with different reference level
               * we will include this in variable name
               */
-            short pr = pg3.pr();
+            short pr = pg3->pr();
             switch(pr) {
             case 0:
                 variableMetNoName.append("_MSL");
@@ -934,7 +934,7 @@ namespace MetNoFimex {
             CDMDataType type = string2datatype(hcDataType);
             CDMVariable var(variableMetNoName, type, shape);
             cdm_->addVariable(var);
-            cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, MetGmGroup3Ptr>(variableMetNoName, pg3));
+            cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, boost::shared_ptr<MetGmGroup3Ptr> >(variableMetNoName, pg3));
 
             for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
                 cdm_->addAttribute(variableMetNoName, *attrIt);
@@ -973,23 +973,25 @@ namespace MetNoFimex {
             throw CDMException("requested time outside data-region");
         }
 
-        MetGmGroup3Ptr initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
+        boost::shared_ptr<MetGmGroup3Ptr> initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
 
         metgmFileHandle_->reset();
         assert(readMetgmHeader() == MGM_OK);
 
         // read group3 data until you match with initialPg3
         // in order to honor data reading sequence
-        MetGmGroup3Ptr fwdPg3;
+        boost::shared_ptr<MetGmGroup3Ptr> fwdPg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
-        callResult = mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, fwdPg3);
+        callResult = mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, *fwdPg3);
         if(callResult != MGM_OK) {
             throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
         }
 
-        if(initialPg3 != 0) {
-            while(fwdPg3 != initialPg3) {
-                callResult = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, fwdPg3);
+        fwdPg3->dump();
+
+        if(*initialPg3 != 0) {
+            while(fwdPg3->neq(initialPg3)) {
+                callResult = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *fwdPg3);
                 if(callResult != MGM_OK) {
                     throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
                 }
@@ -1072,7 +1074,7 @@ namespace MetNoFimex {
 
                 boost::scoped_array<float> pg5(new float[totalDataDimension]);
 
-                short pz = fwdPg3.pz();
+                short pz = fwdPg3->pz();
                 if(pz != 0) {
                     // read group4 data
                     callResult = mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
@@ -1112,7 +1114,7 @@ namespace MetNoFimex {
                 boost::scoped_array<float> pg5(new float[totalDataDimension]);
                 boost::scoped_array<float> pg5T(new float[totalDataDimension]);
 
-                short pz = fwdPg3.pz();
+                short pz = fwdPg3->pz();
 //                short pr = mgm_get_pr(fwdPg3);
 
                 if(pz > 0) {

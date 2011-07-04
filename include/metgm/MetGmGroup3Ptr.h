@@ -28,8 +28,20 @@
 #ifndef METGM_GROUP3PTR_H
 #define METGM_GROUP3PTR_H
 
+// METGM C Lib
+//
 #include "metgm.h"
 
+// internals
+//
+#include "MetGmHandlePtr.h"
+
+// boost
+//
+#include <boost/shared_ptr.hpp>
+
+// standard
+//
 #include <cstdio>
 #include <string>
 #include <ostream>
@@ -39,64 +51,37 @@ namespace MetNoFimex {
     class MetGmGroup3Ptr {
     public:
 
-        inline MetGmGroup3Ptr() { group3_ = mgm_new_group3(); }
-
-        inline MetGmGroup3Ptr(const MetGmGroup3Ptr &rhs)
-        {
-            group3_ = mgm_new_group3();
-            deep_copy(rhs);
-        }
-
-        inline MetGmGroup3Ptr(MetGmGroup3Ptr &rhs)
-        {
-            group3_ = mgm_new_group3();
-            deep_copy(rhs);
-        }
-
-        inline MetGmGroup3Ptr& operator=(const MetGmGroup3Ptr &rhs)
-        {
-            if (this == &rhs) return *this;
-
-            deep_copy(rhs);
-
-            return *this;
-        }
-
-        inline MetGmGroup3Ptr& operator=(MetGmGroup3Ptr &rhs)
-        {
-            if (this == &rhs) return *this;
-
-            deep_copy(rhs);
-
-            return *this;
+        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle) {
+            boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
+            return gp3;
         }
 
         inline ~MetGmGroup3Ptr() { mgm_free_group3(group3_); }
 
-        inline bool operator==(MetGmGroup3Ptr &rhs) const {
+        inline bool eq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const {
 
-            if(this == &rhs) return true;
+            if(this == rhs.get()) return true;
 
             if(
-                   nz() == rhs.nz()
-                && nx() == rhs.nx()
-                && ny() == rhs.ny()
-                && nt() == rhs.nt()
-                && dx() == rhs.dx()
-                && dy() == rhs.dy()
-                && dt() == rhs.dt()
-                && cx() == rhs.cx()
-                && cy() == rhs.cy()
-                && pr() == rhs.pr()
-                && pz() == rhs.pz()
+                   nz() == rhs->nz()
+                && nx() == rhs->nx()
+                && ny() == rhs->ny()
+                && nt() == rhs->nt()
+                && dx() == rhs->dx()
+                && dy() == rhs->dy()
+                && dt() == rhs->dt()
+                && cx() == rhs->cx()
+                && cy() == rhs->cy()
+                && pr() == rhs->pr()
+                && pz() == rhs->pz()
               )
                 return true;
             else
                 return false;
         }
 
-        inline bool operator!=(MetGmGroup3Ptr &rhs) const {
-            return !(operator ==(rhs));
+        inline bool neq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const {
+            return !(eq(rhs));
         }
 
         inline int reset() { return mgm_reset_group3(group3_); }
@@ -104,7 +89,10 @@ namespace MetNoFimex {
         inline operator mgm_group3* () { return group3_; }
         inline operator const mgm_group3* () const { return group3_; }
 
-        inline int   p_id() const { return mgm_get_p_id(group3_); }
+        inline boost::shared_ptr<MetGmHandlePtr> mgmHandle() const { return pHandle_;}
+
+        inline int   p_id() { return mgm_get_p_id(group3_); }
+        inline const int   p_id() const { return mgm_get_p_id(group3_); }
         inline int   nz()   const { return mgm_get_nz(group3_); }
         inline int   nx()   const { return mgm_get_nx(group3_); }
         inline int   ny()   const { return mgm_get_ny(group3_); }
@@ -148,24 +136,17 @@ namespace MetNoFimex {
         }
 
     private:
-        inline void deep_copy(const MetGmGroup3Ptr &rhs)
-        {
-            set_p_id(rhs.p_id());
-            set_nz(rhs.nz());
-            set_nx(rhs.nx());
-            set_ny(rhs.ny());
-            set_nt(rhs.nt());
-            set_dx(rhs.dx());
-            set_dy(rhs.dy());
-            set_dt(rhs.dt());
-            set_cx(rhs.cx());
-            set_cy(rhs.cy());
-            set_pr(rhs.pr());
-            set_pz(rhs.pz());
-        }
+        inline MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle)
+            : pHandle_(pHandle) { group3_ = mgm_new_group3(); }
 
+        // not owning
+        const boost::shared_ptr<MetGmHandlePtr> pHandle_;
+
+        // owning
         mgm_group3* group3_;
     };
+
+
 }
 
 #endif // METGM_GROUP3PTR_H

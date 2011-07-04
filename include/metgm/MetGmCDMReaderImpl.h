@@ -125,7 +125,7 @@ namespace MetNoFimex {
         std::map<int, std::string>            pid2metnonamesmap_;
         std::map<int, std::string>            pid2cdmnamesmap_;
         std::map<int, double>                 pid2fillvaluemap_;
-        std::map<std::string, MetGmGroup3Ptr> cdmvariable2mgm_group3map_;
+        std::map<std::string, boost::shared_ptr<MetGmGroup3Ptr> > cdmvariable2mgm_group3map_;
         typedef boost::multi_index::multi_index_container<
           METGM_ZProfile,
           boost::multi_index::indexed_by<
