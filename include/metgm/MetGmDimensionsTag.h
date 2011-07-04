@@ -117,6 +117,10 @@ namespace MetNoFimex {
         size_t zSize() const { return pZTag_.get() ? pZTag_->nz() : 0; }
         size_t tSize() const { return pTTag_.get() ? pTTag_->nT() : 0; }
 
+        boost::shared_ptr<MetGmXTag>        xTag() { return pXTag_; }
+        boost::shared_ptr<MetGmYTag>        yTag() { return pYTag_; }
+        boost::shared_ptr<MetGmVerticalTag> zTag() { return pZTag_; }
+        boost::shared_ptr<MetGmTimeTag>     tTag() { return pTTag_; }
     private:
 
         inline MetGmHDTag() : hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
