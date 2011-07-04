@@ -100,7 +100,7 @@ namespace MetNoFimex {
             throw CDMException("createMetGmXTag: pCdmReader is null");
 
         boost::shared_ptr<MetGmVerticalTag> VTag =
-                boost::shared_ptr<MetGmVerticalTag>();
+                boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
 
         const CDM& cdmRef = pCdmReader->getCDM();
 
