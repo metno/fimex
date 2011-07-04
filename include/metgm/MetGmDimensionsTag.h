@@ -29,6 +29,7 @@
 #define METGM_DIMENSIONALTAG_H
 
 #include "MetGmVerticalTag.h"
+#include "MetGmHorizontalTag.h"
 
 #include "metgm.h"
 
@@ -66,11 +67,17 @@ namespace MetNoFimex {
             bool hasTAxis = !( cdmRef.getTimeAxis(varName).empty() );
             tag->pTDim_ = hasTAxis ? &cdmRef.getDimension(cdmRef.getTimeAxis(varName)): 0;
 
-            bool hasXAxis = !( cdmRef.getHorizontalXAxis(varName).empty() );
-            tag->pXDim_ = hasXAxis ? &cdmRef.getDimension(cdmRef.getHorizontalXAxis(varName)) : 0;
+//            bool hasXAxis = !( cdmRef.getHorizontalXAxis(varName).empty() );
+//            tag->pXDim_ = hasXAxis ? &cdmRef.getDimension(cdmRef.getHorizontalXAxis(varName)) : 0;
 
-            bool hasYAxis = !( cdmRef.getHorizontalYAxis(varName).empty() );
-            tag->pYDim_ = hasYAxis ? &cdmRef.getDimension(cdmRef.getHorizontalYAxis(varName)) : 0;
+//            bool hasYAxis = !( cdmRef.getHorizontalYAxis(varName).empty() );
+//            tag->pYDim_ = hasYAxis ? &cdmRef.getDimension(cdmRef.getHorizontalYAxis(varName)) : 0;
+
+            tag->pXTag_ = MetGmHorizontalTag::createMetGmXTag(pCdmReader);
+            bool hasXAxis = tag->pXTag_.get() ? true : false;
+
+            tag->pYTag_ = MetGmHorizontalTag::createMetGmYTag(pCdmReader);
+            bool hasYAxis = tag->pYTag_.get() ? true : false;
 
             tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTag(pCdmReader, pVariable);
             bool hasZAxis = tag->pZTag_.get() ? true : false;
@@ -85,8 +92,8 @@ namespace MetNoFimex {
                 tag->hd_= hasTAxis ?  HD_0D_T : HD_0D;
             }
 
-            tag->sliceSize_ = (tag->pXDim_ ? tag->pXDim_->getLength() : 1)
-                            * (tag->pYDim_ ? tag->pYDim_->getLength() : 1)
+            tag->sliceSize_ = (hasXAxis ? tag->pXTag_->nx() : 1)
+                            * (hasYAxis ? tag->pYTag_->ny() : 1)
                             * (hasZAxis ? tag->pZTag_->nz() : 1);
 
             tag->totalSize_ = tag->sliceSize() * ( (hasTAxis) ? tag->pTDim_->getLength() : 1 );
@@ -113,21 +120,23 @@ namespace MetNoFimex {
         size_t sliceSize() const {return sliceSize_; }
         size_t totalSize() const {return totalSize_; }
 
-        size_t xSize() const { return pXDim_ ? pXDim_->getLength() : 0; }
-        size_t ySize() const { return pYDim_ ? pYDim_->getLength() : 0; }
+        size_t xSize() const { return pXTag_.get() ? pXTag_->nx() : 0; }
+        size_t ySize() const { return pYTag_.get() ? pYTag_->ny() : 0; }
         size_t zSize() const { return pZTag_.get() ? pZTag_->nz() : 0; }
         size_t tSize() const { return pTDim_ ? pTDim_->getLength() : 0; }
 
     private:
 
-        inline MetGmHDTag() : pTDim_(0), pXDim_(0), pYDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
+        inline MetGmHDTag() : pTDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
 
         /**
           * not owner, just holding reference
           */
         const CDMDimension* pTDim_;
-        const CDMDimension* pXDim_;
-        const CDMDimension* pYDim_;
+//        const CDMDimension* pXDim_;
+//        const CDMDimension* pYDim_;
+        boost::shared_ptr<MetGmXTag> pXTag_;
+        boost::shared_ptr<MetGmYTag> pYTag_;
         boost::shared_ptr<MetGmVerticalTag> pZTag_;
 
         MetGmHD hd_;
