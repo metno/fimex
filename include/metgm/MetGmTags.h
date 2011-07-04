@@ -34,19 +34,38 @@
 
 // implementation classes
 //
-#include "MetGmVerticalTag.h"
-#include "MetGmHorizontalTag.h"
+#include "MetGmGroup3Ptr.h"
+#include "MetGmGroup5Ptr.h"
+#include "MetGmDimensionsTag.h"
 
 // boost
 #include <boost/shared_ptr.hpp>
-
 
 namespace MetNoFimex {
 
     class MetGmTags {
     public:
-        boost::shared_ptr<MetGmVerticalTag>   vTag;
-        boost::shared_ptr<MetGmHorizontalTag> hTag;
+        static boost::shared_ptr<MetGmTags> createMetGmTags(boost::shared_ptr<CDMReader>& pCdmReader,
+                                                            const CDMVariable* pVariable,
+                                                            boost::shared_ptr<MetGmGroup3Ptr>& pg3,
+                                                            const float* pFillValue)
+        {
+            boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
+            tags->dimTag_ = MetGmHDTag::createMetGmHDTag(pCdmReader, pVariable);
+            tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5Ptr(pCdmReader, pVariable, pg3, pFillValue);
+            tags->pGp3_   = pg3;
+            return tags;
+        }
+
+        boost::shared_ptr<MetGmHDTag>       dimTag() { return dimTag_;}
+        boost::shared_ptr<MetGmGroup3Ptr>   gp3()    { return pGp3_; }
+        boost::shared_ptr<MetGmGroup5Ptr>   gp5()    { return pGp5_; }
+
+    private:
+        MetGmTags() {}
+        boost::shared_ptr<MetGmHDTag>       dimTag_;
+        boost::shared_ptr<MetGmGroup3Ptr>   pGp3_;
+        boost::shared_ptr<MetGmGroup5Ptr>   pGp5_;
     };
 }
 
