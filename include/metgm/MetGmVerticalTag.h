@@ -99,8 +99,7 @@ namespace MetNoFimex {
         if(!pCdmReader.get())
             throw CDMException("createMetGmXTag: pCdmReader is null");
 
-        boost::shared_ptr<MetGmVerticalTag> VTag =
-                boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
+        boost::shared_ptr<MetGmVerticalTag> VTag;
 
         const CDM& cdmRef = pCdmReader->getCDM();
 
@@ -110,6 +109,9 @@ namespace MetNoFimex {
                 find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVar->getName()));
         if (varSysIt != coordSys.end()) {
             if((*varSysIt)->isSimpleSpatialGridded()) {
+
+                VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
+
                 CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis();
 
                 boost::shared_ptr<Data> data;
@@ -132,11 +134,11 @@ namespace MetNoFimex {
             }
         } else {
             /* vertical coordinate not found */
-            VTag->nz_ = 1;
-            VTag->pr_ = 0;
-            VTag->pz_ = 1;
-            VTag->points_ = boost::shared_array<float>(new float[1]);
-            VTag->points_[0] = 0;
+//            VTag->nz_ = 1;
+//            VTag->pr_ = 0;
+//            VTag->pz_ = 1;
+//            VTag->points_ = boost::shared_array<float>(new float[1]);
+//            VTag->points_[0] = 0;
         }
 
         return VTag;

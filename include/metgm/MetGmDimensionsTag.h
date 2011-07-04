@@ -28,6 +28,8 @@
 #ifndef METGM_DIMENSIONALTAG_H
 #define METGM_DIMENSIONALTAG_H
 
+#include "MetGmVerticalTag.h"
+
 #include "metgm.h"
 
 #include "fimex/CDM.h"
@@ -70,8 +72,8 @@ namespace MetNoFimex {
             bool hasYAxis = !( cdmRef.getHorizontalYAxis(varName).empty() );
             tag->pYDim_ = hasYAxis ? &cdmRef.getDimension(cdmRef.getHorizontalYAxis(varName)) : 0;
 
-            bool hasZAxis = !( cdmRef.getVerticalAxis(varName).empty() );
-            tag->pZDim_ = hasZAxis ? &cdmRef.getDimension(cdmRef.getVerticalAxis(varName)) : 0;
+            tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTag(pCdmReader, pVariable);
+            bool hasZAxis = tag->pZTag_.get() ? true : false;
 
             if(hasZAxis && hasXAxis && hasYAxis) {
                 tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
@@ -85,7 +87,7 @@ namespace MetNoFimex {
 
             tag->sliceSize_ = (tag->pXDim_ ? tag->pXDim_->getLength() : 1)
                             * (tag->pYDim_ ? tag->pYDim_->getLength() : 1)
-                            * (tag->pZDim_ ? tag->pZDim_->getLength() : 1);
+                            * (hasZAxis ? tag->pZTag_->nz() : 1);
 
             tag->totalSize_ = tag->sliceSize() * ( (hasTAxis) ? tag->pTDim_->getLength() : 1 );
 
@@ -113,12 +115,12 @@ namespace MetNoFimex {
 
         size_t xSize() const { return pXDim_ ? pXDim_->getLength() : 0; }
         size_t ySize() const { return pYDim_ ? pYDim_->getLength() : 0; }
-        size_t zSize() const { return pZDim_ ? pZDim_->getLength() : 0; }
+        size_t zSize() const { return pZTag_.get() ? pZTag_->nz() : 0; }
         size_t tSize() const { return pTDim_ ? pTDim_->getLength() : 0; }
 
     private:
 
-        inline MetGmHDTag() : pTDim_(0), pXDim_(0), pYDim_(0), pZDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
+        inline MetGmHDTag() : pTDim_(0), pXDim_(0), pYDim_(0), hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
 
         /**
           * not owner, just holding reference
@@ -126,7 +128,7 @@ namespace MetNoFimex {
         const CDMDimension* pTDim_;
         const CDMDimension* pXDim_;
         const CDMDimension* pYDim_;
-        const CDMDimension* pZDim_;
+        boost::shared_ptr<MetGmVerticalTag> pZTag_;
 
         MetGmHD hd_;
 
