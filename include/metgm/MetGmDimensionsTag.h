@@ -53,44 +53,44 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        inline static MetGmHDTag createMetGmHDTag(const CDM* pCdm, const CDMVariable* pVar) {
+        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(const CDM* pCdm, const CDMVariable* pVar) {
 
             assert(pCdm);
             assert(pVar);
 
-            MetGmHDTag tag;
-            tag.pCdm_ = pCdm;
-            tag.pVar_ = pVar;
+            boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
+            tag->pCdm_ = pCdm;
+            tag->pVar_ = pVar;
 
-            std::string varName = tag.pVar_->getName();
+            std::string varName = tag->pVar_->getName();
 
-            bool hasTAxis = !( tag.pCdm_->getTimeAxis(varName).empty() );
-            tag.pTDim_ = hasTAxis ? &tag.pCdm_->getDimension(tag.pCdm_->getTimeAxis(varName)): 0;
+            bool hasTAxis = !( tag->pCdm_->getTimeAxis(varName).empty() );
+            tag->pTDim_ = hasTAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getTimeAxis(varName)): 0;
 
-            bool hasXAxis = !( tag.pCdm_->getHorizontalXAxis(varName).empty() );
-            tag.pXDim_ = hasXAxis ? &tag.pCdm_->getDimension(tag.pCdm_->getHorizontalXAxis(varName)) : 0;
+            bool hasXAxis = !( tag->pCdm_->getHorizontalXAxis(varName).empty() );
+            tag->pXDim_ = hasXAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getHorizontalXAxis(varName)) : 0;
 
-            bool hasYAxis = !( tag.pCdm_->getHorizontalYAxis(varName).empty() );
-            tag.pYDim_ = hasYAxis ? &tag.pCdm_->getDimension(tag.pCdm_->getHorizontalYAxis(varName)) : 0;
+            bool hasYAxis = !( tag->pCdm_->getHorizontalYAxis(varName).empty() );
+            tag->pYDim_ = hasYAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getHorizontalYAxis(varName)) : 0;
 
-            bool hasZAxis = !( tag.pCdm_->getVerticalAxis(varName).empty() );
-            tag.pZDim_ = hasZAxis ? &tag.pCdm_->getDimension(tag.pCdm_->getVerticalAxis(varName)) : 0;
+            bool hasZAxis = !( tag->pCdm_->getVerticalAxis(varName).empty() );
+            tag->pZDim_ = hasZAxis ? &tag->pCdm_->getDimension(tag->pCdm_->getVerticalAxis(varName)) : 0;
 
             if(hasZAxis && hasXAxis && hasYAxis) {
-                tag.hd_= hasTAxis ? HD_3D_T : HD_3D;
+                tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
             } else if((hasZAxis && hasXAxis && hasYAxis) || (hasZAxis && !hasXAxis && hasYAxis) || (hasZAxis && hasXAxis && !hasYAxis)) {
-                tag.hd_= hasTAxis ? HD_2D_T : HD_2D;
+                tag->hd_= hasTAxis ? HD_2D_T : HD_2D;
             } else if((!hasZAxis && !hasXAxis && hasYAxis) || (!hasZAxis && hasXAxis && !hasYAxis) || (hasZAxis && !hasXAxis && !hasYAxis)) {
-                tag.hd_= hasTAxis ? HD_1D_T : HD_1D;
+                tag->hd_= hasTAxis ? HD_1D_T : HD_1D;
             } else {
-                tag.hd_= hasTAxis ?  HD_0D_T : HD_0D;
+                tag->hd_= hasTAxis ?  HD_0D_T : HD_0D;
             }
 
-            tag.sliceSize_ = (tag.pXDim_ ? tag.pXDim_->getLength() : 1)
-                           * (tag.pYDim_ ? tag.pYDim_->getLength() : 1)
-                           * (tag.pZDim_ ? tag.pZDim_->getLength() : 1);
+            tag->sliceSize_ = (tag->pXDim_ ? tag->pXDim_->getLength() : 1)
+                           * (tag->pYDim_ ? tag->pYDim_->getLength() : 1)
+                           * (tag->pZDim_ ? tag->pZDim_->getLength() : 1);
 
-            tag.totalSize_ = tag.sliceSize() * ( (hasTAxis) ? tag.pTDim_->getLength() : 1 );
+            tag->totalSize_ = tag->sliceSize() * ( (hasTAxis) ? tag->pTDim_->getLength() : 1 );
 
             return tag;
         }

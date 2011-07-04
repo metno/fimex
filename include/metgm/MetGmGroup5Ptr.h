@@ -35,7 +35,7 @@
 // internals
 //
 #include "MetGmGroup3Ptr.h"
-#include "MetGmDimensionalTag.h"
+#include "MetGmDimensionsTag.h"
 
 // fimex
 //
