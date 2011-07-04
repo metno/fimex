@@ -56,7 +56,7 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable) {
+        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable) {
 
             boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
 

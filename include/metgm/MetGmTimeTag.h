@@ -62,7 +62,7 @@ namespace MetNoFimex {
     class MetGmTimeTag {
     public:
 
-        inline static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(const boost::shared_ptr<CDMReader> pCdmReader)
+        inline static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader)
         {
             if(!pCdmReader.get())
                 throw CDMException("createMetGmTimeTag: pCdmReader is null");
@@ -90,7 +90,7 @@ namespace MetNoFimex {
 
         inline MetGmTimeTag() : analysis_t(0), start_t(0), dT_(0), nT_(0) { }
 
-        inline void extractAnalysisDateTime(const boost::shared_ptr<CDMReader>& pCdmReader)
+        inline void extractAnalysisDateTime(boost::shared_ptr<CDMReader>& pCdmReader)
         {
             const CDM cdmRef = pCdmReader->getCDM();
             CDMAttribute metgmAnalysisDateTimeAttribute;
@@ -127,7 +127,7 @@ namespace MetNoFimex {
             return adjDiff.size() != 1;
         }
 
-        inline void extractTimePoints(const boost::shared_ptr<CDMReader>& pCdmReader)
+        inline void extractTimePoints(boost::shared_ptr<CDMReader>& pCdmReader)
         {
             const CDM& cdmRef = pCdmReader->getCDM();
             const CDMVariable& tVar = cdmRef.getVariable("time");
@@ -160,7 +160,7 @@ namespace MetNoFimex {
             start_t = timePoints_.at(0);
         }
 
-        inline void init(const boost::shared_ptr<CDMReader>& pCdmReader)
+        inline void init(boost::shared_ptr<CDMReader>& pCdmReader)
         {
             const CDM& cdmRef = pCdmReader->getCDM();
             const CDMDimension& tDim = cdmRef.getDimension("time");

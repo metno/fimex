@@ -61,7 +61,7 @@ namespace MetNoFimex {
     class MetGmVerticalTag {
     public:
 
-        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTag(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVar);
+        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVar);
 
         inline unsigned int               nz()       { return nz_; }
         inline unsigned int               pr()       { return pr_;}
@@ -91,7 +91,7 @@ namespace MetNoFimex {
         boost::shared_array<float>  points_;
     };
 
-    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVar)
+    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVar)
     {
         if(!pVar)
             throw CDMException("pVar is null createMetGmVerticalTag");
