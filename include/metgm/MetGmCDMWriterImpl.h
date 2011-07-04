@@ -1,7 +1,7 @@
 /*
  * Fimex
  *
- * (C) Copyright 2008, met.no
+ * (C) Copyright 2011, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -23,6 +23,10 @@
 
 #ifndef METGM_CDMWRITERIMPL_HPP
 #define METGM_CDMWRITERIMPL_HPP
+
+// implementation stuff
+//
+#include "MetGmTimeTag.h"
 
 // fimex
 #include "fimex/CDMWriter.h"
@@ -51,6 +55,10 @@ namespace MetNoFimex {
     class MetGmHandlePtr;
     class MetGmGroup3Ptr;
     class MetGmFileHandlePtr;
+    class MetGmTimeTag;
+    class MetGmXTag;
+    class MetGmYTag;
+    class MetGmTags;
 
 class MetGmCDMWriterImpl : public CDMWriter
 {
@@ -63,7 +71,7 @@ public:
          */
         explicit MetGmCDMWriterImpl
                 (
-                        const boost::shared_ptr<CDMReader> cdmReader,
+                        boost::shared_ptr<CDMReader> cdmReader,
                         const std::string& outputFile,
                         const std::string& configFile = std::string()
                 );
@@ -121,8 +129,9 @@ private:
         };
 
         typedef std::map<const MetgmPr, const CDMVariable*> MetgmPrToCDMVariableMap;
+        typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
 
-
+        std::map<const CDMVariable*, MetGmTagsPtr>     variable2TagsMap_;
         std::multimap<short, const CDMVariable*>    pid2CdmVariablesMMap_;
         std::map<std::string, float>                kildeName2FillValueMap_;
         std::multimap<short, std::string>           pid2kildemap_;
@@ -133,12 +142,9 @@ private:
         boost::shared_ptr<MetGmVersion>             metgmVersion_;
         boost::shared_ptr<MetGmHandlePtr>           metgmHandle_;
         boost::shared_ptr<MetGmFileHandlePtr>       metgmFileHandle_;
-
+        boost::shared_ptr<MetGmTimeTag>             metgmTimeTag_;
 
         boost::posix_time::ptime                    analysisTime_;
-        boost::posix_time::ptime                    startTime_;
-        time_t                                      dTimeStep_;
-        CDM cdmInternal;
 };
 
 }
