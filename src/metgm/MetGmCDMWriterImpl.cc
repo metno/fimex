@@ -28,15 +28,15 @@
 // fimex
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
-#include "fimex/TimeUnit.h"
-#include "fimex/CDMReaderUtils.h"
+#include "fimex/interpolation.h"
 
 // private/implementation code
+#include "../../include/metgm/MetGmTags.h"
+#include "../../include/metgm/MetGmUtils.h"
 #include "../../include/metgm/MetGmVersion.h"
 #include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "../../include/metgm/MetGmGroup1Ptr.h"
 #include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmDimensionalTag.h"
 
 // udunits
 #include <udunits2.h>
