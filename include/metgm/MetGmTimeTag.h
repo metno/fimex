@@ -73,9 +73,9 @@ namespace MetNoFimex {
                 throw CDMException("createMetGmTimeTag: cdm model doesn't have the 'time'");
 
             boost::shared_ptr<MetGmTimeTag> TTag =
-                    boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag(pCdmReader));
+                    boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag());
 
-            TTag->init();
+            TTag->init(pCdmReader);
 
             return TTag;
         }
@@ -88,21 +88,16 @@ namespace MetNoFimex {
 
     private:
 
-        inline MetGmTimeTag(const boost::shared_ptr<CDMReader> pCdmReader)
-            : pCdmReader_(pCdmReader), analysis_t(0), start_t(0), dT_(0), nT_(0)
+        inline MetGmTimeTag() : analysis_t(0), start_t(0), dT_(0), nT_(0) { }
+
+        inline void extractAnalysisDateTime(const boost::shared_ptr<CDMReader>& pCdmReader)
         {
-
-        }
-
-        inline void extractAnalysisDateTime()
-        {
-            const CDM& cdmRef = pCdmReader_->getCDM();
-
+            const CDM cdmRef = pCdmReader->getCDM();
             CDMAttribute metgmAnalysisDateTimeAttribute;
             boost::posix_time::ptime analysisTime;
             std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
             if(!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
-                analysisTime = getUniqueForecastReferenceTime(pCdmReader_);
+                analysisTime = getUniqueForecastReferenceTime(pCdmReader);
             } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
                 analysisTime = boost::posix_time::from_iso_string(metgmAnalysisDateTimeAttribute.getStringValue());
             } else {
@@ -132,17 +127,12 @@ namespace MetNoFimex {
             return adjDiff.size() != 1;
         }
 
-        inline void extractTimePoints()
+        inline void extractTimePoints(const boost::shared_ptr<CDMReader>& pCdmReader)
         {
-            const CDM& cdmRef = pCdmReader_->getCDM();
+            const CDM& cdmRef = pCdmReader->getCDM();
             const CDMVariable& tVar = cdmRef.getVariable("time");
 
-            boost::shared_ptr<Data> tData;
-            if(tVar.hasData()) {
-                tData = tVar.getData();
-            } else {
-                tData = pCdmReader_->getData(tVar.getName());
-            }
+            boost::shared_ptr<Data> tData = pCdmReader->getData(tVar.getName());
 
             const CDMAttribute& tUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
             const std::string t_unit = tUnitAttribute.getStringValue();
@@ -170,9 +160,9 @@ namespace MetNoFimex {
             start_t = timePoints_.at(0);
         }
 
-        inline void init()
+        inline void init(const boost::shared_ptr<CDMReader>& pCdmReader)
         {
-            const CDM& cdmRef = pCdmReader_->getCDM();
+            const CDM& cdmRef = pCdmReader->getCDM();
             const CDMDimension& tDim = cdmRef.getDimension("time");
 
             if(!tDim.isUnlimited())
@@ -180,19 +170,14 @@ namespace MetNoFimex {
 
             nT_ = tDim.getLength();
 
-            extractTimePoints();
+            extractTimePoints(pCdmReader);
 
             dT_ = timePoints_.at(1) - timePoints_.at(0);
 
             extractStartDateTime();
 
-            extractAnalysisDateTime();
+            extractAnalysisDateTime(pCdmReader);
         }
-
-        /**
-          * not owner, just holding reference
-          */
-        const boost::shared_ptr<CDMReader>    pCdmReader_;
 
         time_t              analysis_t;
         time_t              start_t;
