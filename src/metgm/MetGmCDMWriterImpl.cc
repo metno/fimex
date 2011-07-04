@@ -71,18 +71,6 @@ namespace MetNoFimex {
 #define MODEL_TYPE "metgm_model_type"
 #define PRODUCTION_NATION "metgm_production_nation"
 
-    /**
-      * static mgm_ wrapper functions
-      */
-    static int fimex_mgm_write_group3(FILE* fh, mgm_handle* mh, const mgm_group3* gp3)
-    {
-        short int callResult = mgm_write_group3(fh, mh, gp3);
-        if(callResult != MGM_OK)
-            throw CDMException(mgm_string_error(callResult));
-        else
-            return callResult; // that is MGM_OK
-    }
-
     void MetGmCDMWriterImpl::mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc)
     {
         const CDM& cdmRef = cdmReader->getCDM();
@@ -312,192 +300,33 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup0Data()
     {
-        if(mgm_set_version(*metgmHandle_, *metgmVersion_) != MGM_OK)
-            throw CDMException("mgm_set_version fails");
+        MGM_THROW_ON_ERROR(mgm_set_version(*metgmHandle_, *metgmVersion_));
     }
 
     void MetGmCDMWriterImpl::writeGroup1Data()
     {
-        const CDM& cdmRef = cdmReader->getCDM();
+        boost::shared_ptr<MetGmGroup1Ptr> pg1 = MetGmGroup1Ptr::createMetGmGroup1Ptr(cdmReader);
 
-        std::string metgmFreeText;
-        std::string metgmVersion;
-        std::string metgmDataType;
-        std::string metgmModelType;
-        std::string metgmProductNation;
-        std::string metgmAnalysisDateTime;
-        std::string metgmStartDateTime;
+        MGM_THROW_ON_ERROR(mgm_set_analysis_date_time(*metgmHandle_, pg1->analysisTime()))
 
-        CDMAttribute metgmMetaData; // encoded within comment
-        if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), "comment", metgmMetaData)) {
-            try {
-                boost::shared_ptr<XMLDoc> doc = XMLDoc::fromString(metgmMetaData.getStringValue());//std::auto_ptr<XMLDoc>(new XMLDoc(metgmMetaData.getStringValue().c_str(), metgmMetaData.getStringValue().size()));
+        MGM_THROW_ON_ERROR(mgm_set_start_date_time(*metgmHandle_, pg1->startTime()))
 
-                if(doc.get() != 0) {
-                    XPathObjPtr xpathObj = doc->getXPathObject("/metgm_meta_data/attribute");
-                    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-                    size_t size = (nodes) ? nodes->nodeNr : 0;
-                    for (size_t i = 0; i < size; ++i) {
-                        xmlNodePtr node = nodes->nodeTab[i];
-                        std::string attributeName = getXmlProp(node, "name");
-                        if(attributeName == std::string(FREE_TEXT)) {
-                            metgmFreeText = getXmlProp(node, "value");
-                        } else if(attributeName == std::string(VERSION)) {
-                            metgmVersion = getXmlProp(node, "value");
-                        } else if(attributeName == std::string(DATA_TYPE)) {
-                            metgmDataType = getXmlProp(node, "value");
-                        }  else if(attributeName == std::string(MODEL_TYPE)) {
-                            metgmModelType = getXmlProp(node, "value");
-                        } else if(attributeName == std::string(PRODUCTION_NATION)) {
-                            metgmProductNation = getXmlProp(node, "value");
-                        } else if(attributeName == std::string(ANALYSIS_DATE_TIME)) {
-                            metgmAnalysisDateTime = getXmlProp(node, "value");
-                        } else if(attributeName == std::string(START_DATE_TIME)) {
-                            metgmStartDateTime = getXmlProp(node, "value");
-                        }
-                    }
-                }
-            } catch (CDMException exception) {
-                // just ignore
-            }
-        }
+        MGM_THROW_ON_ERROR(mgm_set_free_text(*metgmHandle_, pg1->freeText().c_str()))
 
-        // set analysis date time
-        CDMAttribute metgmAnalysisDateTimeAttribute;
-        std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
-        if(!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
-            analysisTime_ = getUniqueForecastReferenceTime(cdmReader);
-        } else if(!metgmAnalysisDateTime.empty()) {
-            analysisTime_ = boost::posix_time::from_iso_string(metgmAnalysisDateTime);
-        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
-            analysisTime_ = boost::posix_time::from_iso_string(metgmAnalysisDateTimeAttribute.getStringValue());
-        } else {
-            analysisTime_ = boost::posix_time::second_clock::universal_time();
-        }
+        MGM_THROW_ON_ERROR(mgm_set_data_type(*metgmHandle_, pg1->dataType()))
 
-        TimeUnit tu("seconds since 1970-01-01 00:00:00");
-        double unit_time = tu.posixTime2unitTime(analysisTime_);
-        time_t analysis_t = tu.unitTime2epochSeconds(unit_time);
+        MGM_THROW_ON_ERROR(mgm_set_model_type(*metgmHandle_, pg1->modelType().c_str()))
 
-        if(mgm_set_analysis_date_time(*metgmHandle_, analysis_t) != MGM_OK)
-            throw CDMException("mgm_set_analysis_date_time fails");
-
-        assert(cdmRef.hasVariable("time"));
-        assert(cdmRef.hasDimension("time"));
-
-        // set start date time
-        const CDMDimension* tDimension = 0;
-        if(cdmRef.getTimeAxis("time").empty()) {
-            throw CDMException("something sucks time dimension");
-        } else {
-            tDimension = &cdmRef.getDimension(cdmRef.getTimeAxis("time"));
-        }
-
-        assert(tDimension);
-        assert(tDimension->isUnlimited());
-
-        const CDMVariable& timeVariable = cdmRef.getVariable("time");
-        boost::shared_ptr<Data> kildeTimeData;
-        if(timeVariable.hasData()) {
-            kildeTimeData = timeVariable.getData();
-        } else {
-            kildeTimeData = cdmReader->getData(timeVariable.getName());
-        }
-        const CDMAttribute& timeUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
-        const std::string kilde_time_unit = timeUnitAttribute.getStringValue();
-        const TimeUnit kilde_tu(kilde_time_unit);
-
-        const boost::shared_array<double> kildeTimeVector = kildeTimeData->asConstDouble();
-        double kildeTime0 = kildeTimeVector[0];
-
-        time_t start_t_0 = kilde_tu.unitTime2epochSeconds(kildeTime0);
-
-        startTime_ = kilde_tu.unitTime2posixTime(start_t_0);
-
-        if(kildeTimeData->size() > 1) {
-            double kildeTime1 = kildeTimeVector[1];
-            time_t start_t_1 = kilde_tu.unitTime2epochSeconds(kildeTime1);
-            dTimeStep_ = start_t_1 - start_t_0;
-            std::cerr << "start_t_1 == " << start_t_1 << " and  start_t_0 == " << start_t_0 << " and dTimeStep == " << dTimeStep_ << std::endl;
-        } else {
-            /**
-              * lets use some heuristics
-              */
-            dTimeStep_ = std::abs(start_t_0 - analysis_t);
-        }
-
-        if(mgm_set_start_date_time(*metgmHandle_, start_t_0) != MGM_OK)
-            throw CDMException("mgm_set_start_date_time fails");
-
-        CDMAttribute metgmFreeTextAttribute;
-        if(!metgmFreeText.empty()) { // value from xml
-            if(mgm_set_free_text(*metgmHandle_, metgmFreeText.c_str()) != MGM_OK)
-                throw CDMException("mgm_set_free_text fails");
-        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), FREE_TEXT, metgmFreeTextAttribute)) { // value from cdm model
-            if(mgm_set_free_text(*metgmHandle_, metgmFreeTextAttribute.getStringValue().c_str()) != MGM_OK)
-                throw CDMException("mgm_set_free_text fails");
-        } else { // default
-            metgmFreeText = ("comment---------------------------------");
-            if(mgm_set_free_text(*metgmHandle_, metgmFreeTextAttribute.getStringValue().c_str()) != MGM_OK)
-                throw CDMException("mgm_set_free_text fails");
-        }
-
-        CDMAttribute metgmDataTypeAttribute;
-        if(!metgmDataType.empty()) { // value from xml
-            short data_type = boost::lexical_cast<short>(metgmDataType.c_str());
-            if(mgm_set_data_type(*metgmHandle_, data_type) != MGM_OK)
-                throw CDMException("mgm_set_data_type fails");
-        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), DATA_TYPE, metgmDataTypeAttribute)) { // value from cdm model
-            short data_type = boost::lexical_cast<short>(metgmDataTypeAttribute.getStringValue().c_str());
-            if(mgm_set_data_type(*metgmHandle_, data_type) != MGM_OK)
-                throw CDMException("mgm_set_data_type fails");
-        } else { // default
-            short data_type = 4; // MGM_COMPOUND_DATA = 4;
-            if(mgm_set_data_type(*metgmHandle_, data_type) != MGM_OK)
-                throw CDMException("mgm_set_data_type fails");
-        }
-
-        CDMAttribute metgmModelTypeAttribute;
-        if(!metgmModelType.empty()) { // value from xml
-            if(mgm_set_model_type(*metgmHandle_, metgmModelType.c_str()) != MGM_OK)
-                throw CDMException("mgm_set_model_type fails");
-        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), MODEL_TYPE, metgmModelTypeAttribute)) { // value from cdm model
-            if(mgm_set_model_type(*metgmHandle_, metgmModelTypeAttribute.getStringValue().c_str()) != MGM_OK)
-                throw CDMException("mgm_set_model_type fails");
-        } else { // default
-            metgmModelType = "----------------";
-            if(mgm_set_model_type(*metgmHandle_, metgmModelType.c_str()) != MGM_OK)
-                throw CDMException("mgm_set_model_type fails");
-        }
-
-        CDMAttribute metgmProductNationAttribute;
-        if(!metgmProductNation.empty()) { // value from xml
-            if(mgm_set_production_nation(*metgmHandle_, metgmProductNation.c_str()) != MGM_OK)
-                throw CDMException("mgm_set_production_nation fails");
-        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), PRODUCTION_NATION, metgmProductNationAttribute)) { // value from cdm model
-            if(mgm_set_production_nation(*metgmHandle_, metgmProductNationAttribute.getStringValue().c_str()) != MGM_OK)
-                throw CDMException("mgm_set_production_nation fails");
-        } else { // default
-            metgmProductNation = "NOR";
-            if(mgm_set_production_nation(*metgmHandle_, metgmProductNation.c_str()) != MGM_OK)
-                throw CDMException("mgm_set_production_nation fails");
-        }
-
-        //        std::string metgmStartDateTime;
+        MGM_THROW_ON_ERROR(mgm_set_production_nation(*metgmHandle_, pg1->productNation().c_str()))
 
     }
 
     void MetGmCDMWriterImpl::writeGroup2Data()
     {
-        // Set group 2 data, applicable to Edition 1 only
-        //  np     : total number of parameters
-        //  return : 0 if OK, error code on error
         if(*metgmVersion_ == MGM_Edition1) {
-            if(mgm_set_number_of_params(*metgmHandle_, pid2CdmVariablesMMap_.size()) != 0)
-                throw CDMException("mgm_set_number_of_params fails");
+            MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, pid2CdmVariablesMMap_.size()))
         } else if(*metgmVersion_ == MGM_Edition2) {
-            if(mgm_set_number_of_params(*metgmHandle_, pid2CdmVariablesMMap_.size()) != 0)
-                throw CDMException("mgm_set_number_of_params fails");
+            MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, pid2CdmVariablesMMap_.size()))
 
             std::set<short> p_id_set;
 
@@ -508,8 +337,7 @@ namespace MetNoFimex {
 
             const short ndp = p_id_set.size();
 
-            if(mgm_set_number_of_dist_params(*metgmHandle_, ndp) != 0)
-                throw CDMException("mgm_set_number_of_dist_params fails");
+            MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
 
             std::set<short>::const_iterator cit;
             size_t index = 0;
@@ -521,14 +349,16 @@ namespace MetNoFimex {
 
                 size_t ndpr = pid2CdmVariablesMMap_.count(p_id);
 
-                assert(mgm_set_param_id(*metgmHandle_, index, p_id) == MGM_OK);
-                assert(mgm_set_ndpr(*metgmHandle_, index, ndpr) == MGM_OK);
+                MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, p_id))
+                MGM_THROW_ON_ERROR(mgm_set_ndpr(*metgmHandle_, index, ndpr))
 
                 /**
                   * TODO: should HD be treated as CDMAttribute?
+                  *
+                  * the HD value should be highest for given parameter
                   */
                 if(pid2hdmap_.find(p_id) != pid2hdmap_.end()) {
-                    assert(mgm_set_hd(*metgmHandle_, index, pid2hdmap_[p_id]) == MGM_OK);
+                    MGM_THROW_ON_ERROR(mgm_set_hd(*metgmHandle_, index, pid2hdmap_[p_id]))
                 } else {
                     throw CDMException("can't find hd value for p_id = " + boost::lexical_cast<std::string>(p_id));
                 }
@@ -541,258 +371,68 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeHeader()
     {
-        if(mgm_write_header(*metgmFileHandle_, *metgmHandle_) != MGM_OK)
-            throw CDMException("mgm_write_header fails");
+        MGM_THROW_ON_ERROR(mgm_write_header(*metgmFileHandle_, *metgmHandle_))
     }
 
     void MetGmCDMWriterImpl::writeGroup3TimeAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        short int callResult = MGM_OK;
+        MetGmTagsPtr tags;
 
-        const CDM& cdmRef(cdmReader->getCDM());
-
-        std::string tName = cdmRef.getTimeAxis(pVar->getName());
-        if(!tName.empty()) {
-
-            const CDMDimension* tDimension = &cdmRef.getDimension(tName);
-
-            assert(tDimension);
-
-            if(tDimension->getLength() <= 0)
-                throw CDMException("given time axis lenght is <= 0, check data manually");
-
-            const boost::shared_ptr<Data> tData = cdmReader->getData(tDimension->getName());
-            const boost::shared_array<double> tArray = tData->asConstDouble();
-
-            std::less_equal<float> leq;
-            if( std::find_if( &tArray[0], &tArray[tData->size()], boost::bind( leq, _1, 0 ) ) != &tArray[tData->size()])
-                throw CDMException("MetgmCDMWriter is not supporting negative values on the time axis");
-
-            time_t dT = tData->size() > 1 ? tArray[1] - tArray[0] : dTimeStep_;
-
-            if(dT <= 0) {
-                throw CDMException("MetgmCDMReader is not supporting dt <= 0");
-            }
-
-            /**
-              * calculate and check if points on time axis are equidistant
-              */
-            std::deque<double> adjDiff(tData->size());
-            std::adjacent_difference(&tArray[0], &tArray[tData->size()], adjDiff.begin());
-            adjDiff.pop_front(); // remove first element
-
-            std::deque<double>::iterator it = std::unique_copy(adjDiff.begin(), adjDiff.end(), adjDiff.begin());
-            std::sort(adjDiff.begin(), it);
-
-            adjDiff.resize(it - adjDiff.begin());
-
-            if(adjDiff.size() != 1) {
-                throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
-            }
-
-            dT = adjDiff.at(0);
-
-            callResult = gp3->set_nt(tDimension->getLength());
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
-
-            callResult = gp3->set_dt(dT);
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
-
+        if(variable2TagsMap_.find(pVar) != variable2TagsMap_.end()) {
+            tags = variable2TagsMap_[pVar];
         } else {
-            // default values
-            const CDMDimension* tDimension = cdmRef.getUnlimitedDim();
+            if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end())
+            {
+                const float externalFillValue = kildeName2FillValueMap_[pVar->getName()];
+                tags = MetGmTags::createMetGmTags(cdmReader, pVar, gp3, &externalFillValue);
+            } else {
+                tags = MetGmTags::createMetGmTags(cdmReader, pVar, gp3, 0);
+            }
 
-            assert(tDimension);
+            variable2TagsMap_.insert(std::make_pair<const CDMVariable*, MetGmTagsPtr>(pVar, tags));
+        }
 
-            boost::shared_ptr<Data> tData = cdmReader->getData(tDimension->getName());
-            const boost::shared_array<double> tArray = tData->asConstDouble();
-
-            std::less_equal<float> leq;
-            if( std::find_if( &tArray[0], &tArray[tData->size()], boost::bind( leq, _1, 0 ) ) != &tArray[tData->size()])
-                throw CDMException("MetgmCDMWriter is not supporting negative values on the time axis");
-
-            time_t dT = tData->size() > 1 ? tArray[tData->size() - 1] - tArray[0] : dTimeStep_;
-
-            if(dT <= 0)
-                throw CDMException("MetgmCDMReader is not supporting dt <= 0");
-
-            callResult = gp3->set_nt(1);
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
-
-            callResult = gp3->set_dt(dT);
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
+        if(tags->dimTag()->tTag().get()) {
+            MGM_THROW_ON_ERROR(gp3->set_nt(tags->dimTag()->tTag()->nT()))
+            MGM_THROW_ON_ERROR(gp3->set_dt(tags->dimTag()->tTag()->dT()))
+        } else {
+            MGM_THROW_ON_ERROR(gp3->set_nt(1))
+            MGM_THROW_ON_ERROR(gp3->set_dt(metgmTimeTag_->dT() * metgmTimeTag_->nT()))
         }
     }
 
     void MetGmCDMWriterImpl::writeGroup3HorizontalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        const CDM& cdmRef(cdmReader->getCDM());
+        MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
-        std::string xName = cdmRef.getHorizontalXAxis(pVar->getName());
-        std::string yName = cdmRef.getHorizontalYAxis(pVar->getName());
-
-        if(!xName.empty() && !yName.empty()) {
-            /**
-              * we have horizontal (X|Y) axes
-              * let's determine their nature
-              */
-
-            std::string xAxisStandardName;
-            std::string yAxisStandardName;
-
-            CDMAttribute standardName;
-            if(cdmRef.getAttribute(xName, "standard_name", standardName)) {
-                xAxisStandardName = standardName.getStringValue();
-            }
-            if(cdmRef.getAttribute(yName, "standard_name", standardName)) {
-                yAxisStandardName = standardName.getStringValue();
-            }
-
-            if(xAxisStandardName == std::string("longitude")
-                      && yAxisStandardName == std::string("latitude")) {
-
-                boost::shared_ptr<Data> xData = cdmReader->getData(xName);
-                const boost::shared_array<double> xArray = xData->asConstDouble();
-                std::vector<double> xVector(&xArray[0], &xArray[xData->size()]);
-
-                boost::shared_ptr<Data> yData = cdmReader->getData(yName);;
-                const boost::shared_array<double> yArray = yData->asConstDouble();
-                std::vector<double> yVector(&yArray[0], &yArray[yData->size()]);
-
-                double dx = 0;
-                double cx = 0;
-                if(xVector.size() > 1) {
-//                    std::cerr << "xVector.size() = " << xVector.size() << std::endl;
-                    dx = xVector[1] - xVector[0];
-                    cx = xVector[0] + (xVector[xVector.size() - 1] - xVector[0]) / 2.0;
-                    if(dx <= 0)
-                        throw CDMException("MetgmCDMWriter doesn't support dx <= 0 [use Interpolator to adjust axis]");
-                }
-                assert(gp3->set_dx(dx) == MGM_OK);
-                assert(gp3->set_nx(xVector.size()) == MGM_OK);
-                assert(gp3->set_cx(cx) == MGM_OK);
-
-                double dy = 0;
-                double cy = 0;
-                if(yVector.size() > 1) {
-//                    std::cerr << "yVector.size() = " << yVector.size() << std::endl;
-                    dy = yVector[1] - yVector[0];
-                    cy = yVector[0] + (yVector[yVector.size() - 1] - yVector[0]) / 2.0;
-                    if(dy <= 0)
-                        throw CDMException("MetgmCDMWriter doesn't support dy <= 0 [use Interpolator to adjust axis]");
-                }
-                assert(gp3->set_dy(dy) == MGM_OK);
-                assert(gp3->set_ny(yVector.size()) == MGM_OK);
-                assert(gp3->set_cy(cy) == MGM_OK);
-
-            } else if(xAxisStandardName == std::string("grid_longitude")
-                      && yAxisStandardName == std::string("grid_latitude")) {
-
-                throw CDMException("rotated longitude latitide not supported by metgm writer, consider first using Interpolator");
-
-            } else if(xAxisStandardName == "projection_x_coordinate"
-                      && yAxisStandardName == "projection_y_coordinate") {
-
-                throw CDMException("projection_[x|y]_coordinate not supported by metgm writer, consider first using Interpolator");
-
-            } else {
-
-                throw CDMException("given projection not supported by metgm writer, consider first using Interpolator");
-            }
-
-        }
+        // x
+        MGM_THROW_ON_ERROR(gp3->set_dx(tags->dimTag()->xTag()->dx()));
+        MGM_THROW_ON_ERROR(gp3->set_nx(tags->dimTag()->xTag()->nx()));
+        MGM_THROW_ON_ERROR(gp3->set_cx(tags->dimTag()->xTag()->cx()));
+        // y
+        MGM_THROW_ON_ERROR(gp3->set_dy(tags->dimTag()->yTag()->dy()));
+        MGM_THROW_ON_ERROR(gp3->set_ny(tags->dimTag()->yTag()->ny()));
+        MGM_THROW_ON_ERROR(gp3->set_cy(tags->dimTag()->yTag()->cy()));
     }
 
     void MetGmCDMWriterImpl::writeGroup3VerticalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        short int callResult = MGM_OK;
+        MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
-        const CDM& cdmRef(cdmReader->getCDM());
-
-        const CDMDimension* zDimension = 0;
-        if(!cdmRef.getVerticalAxis( pVar->getName() ).empty())
-                zDimension = &cdmRef.getDimension(cdmRef.getVerticalAxis( pVar->getName() ));
-
-        if(zDimension) {
-            size_t nz = zDimension->getLength();
-            callResult = gp3->set_nz(nz);
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
-
-            /**
-              * sending by default all Z coordinates
-              * this is why we are hard coding to 1
-              */
-            callResult = gp3->set_pz(1);
-            if(callResult != MGM_OK)
-                throw CDMException(mgm_string_error(callResult));
-
-            /**
-              * 1. try to find metgm_pr CDMAttribute
-              * 2. else try parsing the name for _GND or _MSL
-              * 3. if MSL sent exists from before, then check for units to distinguish _GND or _MSL
-              */
-            CDMAttribute metgmPrAttribute;
-            if(cdmRef.getAttribute(pVar->getName(), "metgm_pr", metgmPrAttribute)) {
-                short pr = boost::lexical_cast<short>(metgmPrAttribute.getStringValue());
-                callResult = gp3->set_pr(pr);
-                if(callResult != MGM_OK)
-                    throw CDMException(mgm_string_error(callResult));
-            } else if(pVar->getName().find("_MSL") != std::string::npos) {
-                callResult = gp3->set_pr(0);
-                if(callResult != MGM_OK)
-                    throw CDMException(mgm_string_error(callResult));
-            } else if(pVar->getName().find("_GND") != std::string::npos) {
-                callResult = gp3->set_pr(1);
-                if(callResult != MGM_OK)
-                    throw CDMException(mgm_string_error(callResult));
-            } else {
-                // check unit for the dimension
-                CDMAttribute metgmUnitsAttribute;
-                if(cdmRef.getAttribute(zDimension->getName(), "units", metgmUnitsAttribute)) {
-                    std::string unitsName = metgmUnitsAttribute.getStringValue();
-                    if(unitsName.find("Pa") != std::string::npos) {
-                        callResult = gp3->set_pr(2);
-                        if(callResult != MGM_OK)
-                            throw CDMException(mgm_string_error(callResult));
-                    } else if(unitsName.find("m") != std::string::npos) {
-                        if(pid2CdmVariablesMMap_.find(0) != pid2CdmVariablesMMap_.end()) {
-                            // we have MSL pr = 1 (we are dealing with GND type)
-                            callResult = gp3->set_pr(1);
-                            if(callResult != MGM_OK)
-                                throw CDMException(mgm_string_error(callResult));
-                        } else {
-                            // no MSL in CDM model (pr = 0 if units not Pa)
-                            callResult = gp3->set_pr(0);
-                            if(callResult != MGM_OK)
-                                throw CDMException(mgm_string_error(callResult));
-                        }
-                    } else {
-                        assert(0); // some todo here
-                    }
-                } else  {
-                    assert(0); // some todo here
-                }
-            }
+        if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
+            MGM_THROW_ON_ERROR(gp3->set_nz(tags->dimTag()->zTag()->nz()));
+            MGM_THROW_ON_ERROR(gp3->set_pr(tags->dimTag()->zTag()->pr()));
+            MGM_THROW_ON_ERROR(gp3->set_pz(tags->dimTag()->zTag()->pz()));
         } else {
-            /**
-              * NO vertical axis (allowed case)
-              */
-            assert(gp3->set_nz(1) == MGM_OK);
-            assert(gp3->set_pr(0) == MGM_OK);
-            assert(gp3->set_pz(1) == MGM_OK);
+            /* no z profile for variable*/
+            MGM_THROW_ON_ERROR(gp3->set_nz(1));
+            MGM_THROW_ON_ERROR(gp3->set_pr(0));
+            MGM_THROW_ON_ERROR(gp3->set_pz(1));
         }
     }
 
     void MetGmCDMWriterImpl::writeGroup3Data(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        assert(gp3.get());
-        assert(pVar);
-
         writeGroup3TimeAxis(gp3, pVar);
 
         writeGroup3HorizontalAxis(gp3, pVar);
@@ -806,34 +446,22 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup4Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        MetGmTagsPtr tags;
+        MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
-        if(variable2TagsMap_.find(pVar) != variable2TagsMap_.end()) {
-            tags = variable2TagsMap_[pVar];
-            if(!tags->vTag.get())
-                tags->vTag = MetGmVerticalTag::createMetGmVerticalTag(cdmReader, pVar);
+        if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
+            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, tags->dimTag()->zTag()->points().get()));
         } else {
-            tags = MetGmTagsPtr(new MetGmTags());
-            variable2TagsMap_.insert(std::make_pair<const CDMVariable*, MetGmTagsPtr>(pVar, tags));
-            tags->vTag = MetGmVerticalTag::createMetGmVerticalTag(cdmReader, pVar);
+            /* no z profile for variable */
+            float f = 0;
+            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, &f));
         }
 
-        MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, tags->vTag->points().get()));
     }
 
     void MetGmCDMWriterImpl::writeGroup5Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
     {
-        boost::shared_ptr<MetGmGroup5Ptr> pGp5;
-
-        if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end())
-        {
-            const float externalFillValue = kildeName2FillValueMap_[pVar->getName()];
-            pGp5 = MetGmGroup5Ptr::createMetGmGroup5Ptr(cdmReader, pVar, gp3, &externalFillValue);
-        } else {
-            pGp5 = MetGmGroup5Ptr::createMetGmGroup5Ptr(cdmReader, pVar, gp3);
-        }
-
-        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *pGp5));
+        MetGmTagsPtr tags = variable2TagsMap_[pVar];
+        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(tags->gp5())));
     }
 
     void MetGmCDMWriterImpl::init()
@@ -890,7 +518,7 @@ namespace MetNoFimex {
 //                    << variableName
 //                    << std::endl;
 
-            boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr());
+            boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
             assert(gp3.get());
 
@@ -904,14 +532,15 @@ namespace MetNoFimex {
 
     MetGmCDMWriterImpl::MetGmCDMWriterImpl
             (
-                    const boost::shared_ptr<CDMReader> cdmReader,
+                    boost::shared_ptr<CDMReader> cdmReader,
                     const std::string& outputFile,
                     const std::string& configFile
                     )
                         : CDMWriter(cdmReader, outputFile), configFileName_(configFile),
                           metgmVersion_(boost::shared_ptr<MetGmVersion>()),
                           metgmHandle_(boost::shared_ptr<MetGmHandlePtr>()),
-                          metgmFileHandle_(boost::shared_ptr<MetGmFileHandlePtr>())
+                          metgmFileHandle_(boost::shared_ptr<MetGmFileHandlePtr>()),
+                          metgmTimeTag_(boost::shared_ptr<MetGmTimeTag>())
     {
         std::auto_ptr<XMLDoc> xmlDoc;
         if (configFileName_ == std::string()) {
@@ -920,6 +549,8 @@ namespace MetNoFimex {
             xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
         }
 
+
+        metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTag(cdmReader);
         metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(MGM_Edition1));
         metgmFileHandle_ = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(outputFile, MetGmFileHandlePtr::WRITE));
         metgmHandle_ = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr());
