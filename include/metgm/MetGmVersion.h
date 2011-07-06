@@ -28,16 +28,55 @@
 #ifndef METGM_VERSION_H
 #define METGM_VERSION_H
 
+// METGM C library
+//
 #include "metgm.h"
 
+// libxml2
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
+
+// boost
+//
+#include <boost/shared_ptr.hpp>
+
+// standard
+//
 #include <string>
 
 namespace MetNoFimex {
 
+    #define VERSION   "metgm_version"
+
     class MetGmVersion {
     public:
 
-        explicit MetGmVersion(mgm_version version) : version_(version) { }
+        static boost::shared_ptr<MetGmVersion> createMetGmVersion(mgm_version version) {
+            boost::shared_ptr<MetGmVersion> pVersion = boost::shared_ptr<MetGmVersion>(new MetGmVersion(version));
+            return pVersion;
+        }
+
+        static boost::shared_ptr<MetGmVersion> createMetGmVersion(const std::auto_ptr<XMLDoc>& doc) {
+
+            mgm_version version = MGM_Edition1;
+
+            if(doc.get()) {
+                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/metgm_meta_data/attribute");
+                xmlNodeSetPtr nodes = xpathObj->nodesetval;
+                size_t size = (nodes) ? nodes->nodeNr : 0;
+                for (size_t i = 0; i < size; ++i) {
+                    xmlNodePtr node = nodes->nodeTab[i];
+                    std::string attributeName = getXmlProp(node, "name");
+                    if(attributeName == std::string(VERSION)) {
+                        std::string strVersion = getXmlProp(node, "value");
+                        if(strVersion.find("Edition_2") != std::string::npos) {
+                            version = MGM_Edition2;
+                        }
+                    }
+                }
+            }
+            return boost::shared_ptr<MetGmVersion>(new MetGmVersion(version));
+        }
 
         inline std::string getAsString()
         {
@@ -67,6 +106,8 @@ namespace MetNoFimex {
 
     private:
         mgm_version version_;
+
+        explicit MetGmVersion(mgm_version version) : version_(version) { }
     };
 }
 
