@@ -28,14 +28,22 @@
 #ifndef METGM_HANDLEPTR_H
 #define METGM_HANDLEPTR_H
 
+// METGM C library
+//
 #include "metgm.h"
+
+// boost
+//
+#include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex {
 
     class MetGmHandlePtr {
     public:
 
-        explicit MetGmHandlePtr() { handle_ = mgm_new_handle(); }
+        static boost::shared_ptr<MetGmHandlePtr> createMetGmHandle() {
+            return boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
+        }
 
         ~MetGmHandlePtr() { mgm_free_handle(handle_); }
 
@@ -44,6 +52,9 @@ namespace MetNoFimex {
         inline operator mgm_handle* () { return handle_; }
 
     private:
+
+        explicit MetGmHandlePtr() { handle_ = mgm_new_handle(); }
+
         mgm_handle* handle_;
     };
 }
