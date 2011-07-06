@@ -40,12 +40,6 @@
 //
 #include <boost/shared_ptr.hpp>
 
-// standard
-//
-#include <cstdio>
-#include <string>
-#include <ostream>
-
 namespace MetNoFimex {
 
     class MetGmGroup3Ptr {
@@ -118,22 +112,7 @@ namespace MetNoFimex {
         inline int set_pr(short pr)   { return mgm_set_pr(group3_, pr); }
         inline int set_pz(short pz)   { return mgm_set_pz(group3_, pz); }
 
-        inline void dump() {
-            std::cerr << "dumping group3 [START]" << std::endl
-                      << "p_id = " << p_id()      << std::endl
-                      << "nz = "   << nz()        << std::endl
-                      << "nx = "   << nx()        << std::endl
-                      << "ny = "   << ny()        << std::endl
-                      << "nt = "   << nt()        << std::endl
-                      << "dx = "   << dx()        << std::endl
-                      << "dy = "   << dy()        << std::endl
-                      << "dt = "   << dt()        << std::endl
-                      << "cx = "   << cx()        << std::endl
-                      << "cy = "   << cy()        << std::endl
-                      << "pr = "   << pr()        << std::endl
-                      << "pz = "   << pz()        << std::endl
-                      << "dumping group3 [END]"   << std::endl;
-        }
+        void dump();
 
     private:
         inline MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle)
