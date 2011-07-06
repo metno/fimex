@@ -15,6 +15,7 @@
 #include "fimex/CDMException.h"
 
 // private implementation details
+#include "../../include/metgm/MetGmUtils.h"
 #include "../../include/metgm/MetGmVersion.h"
 #include "../../include/metgm/MetGmHandlePtr.h"
 #include "../../include/metgm/MetGmGroup3Ptr.h"
@@ -89,10 +90,7 @@ namespace MetNoFimex {
     {
         metgmFileHandle_->reset();
 
-        short callResult = readMetgmHeader();
-        if(callResult != MGM_OK) {
-            throw CDMException(mgm_string_error(callResult));
-        }
+        readMetgmHeader();
 
         metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(mgm_get_version(*metgmHandle_)));
   }
@@ -275,7 +273,7 @@ namespace MetNoFimex {
         std::string hcInstitution("Forsvarets forskningsinstitutt, ffi.no");
 
         metgmFileHandle_->reset();
-        assert(readMetgmHeader() == MGM_OK);
+        readMetgmHeader();
 
         CDMAttribute cdmConventionsAttribute("Conventions", "string", hcConventions);
         CDMAttribute cdmInstitutionAttribute("institution", "string", hcInstitution);
@@ -403,7 +401,7 @@ namespace MetNoFimex {
         std::string hcTimeDimensionUnits = "seconds since 1970-01-01 00:00:00 +00:00";
 
         metgmFileHandle_->reset();
-        assert(readMetgmHeader() == MGM_OK);
+        readMetgmHeader();
 
         boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
@@ -505,11 +503,11 @@ namespace MetNoFimex {
     {
         std::string projectionName;
         std::string projectionCoordinates;
-        std::string projStr = "+proj=latlong +datum=WGS84"; // "lon_0=cx lat_0=cy";
+        std::string projStr = "+proj=latlong +datum=WGS84";
         std::string gridMappingType;
 
         metgmFileHandle_->reset();
-        assert(readMetgmHeader() == MGM_OK);
+        readMetgmHeader();
 
         /**
           * As x and y will be same for all except pid = 0
@@ -636,10 +634,10 @@ namespace MetNoFimex {
 
     }
 
-    int MetGmCDMReaderImpl::readMetgmHeader()
+    void MetGmCDMReaderImpl::readMetgmHeader()
     {
         metgmHandle_->reset();
-        return mgm_read_header(*metgmFileHandle_, *metgmHandle_);
+        MGM_THROW_ON_ERROR(mgm_read_header(*metgmFileHandle_, *metgmHandle_));
     }
 
     void MetGmCDMReaderImpl::addLevelDimensions()
@@ -652,7 +650,7 @@ namespace MetNoFimex {
         std::string hcLevelType = "float";
 
         metgmFileHandle_->reset();
-        assert(readMetgmHeader() == MGM_OK);
+        readMetgmHeader();
 
         boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
         if(pg3 == 0)
@@ -822,12 +820,10 @@ namespace MetNoFimex {
 
     void MetGmCDMReaderImpl::addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDimension)
     {
-        // ATM there is not way of determining _FillValue
-        // from wdb, so we have to hard code some
         std::string hcDataType = "float";
 
         metgmFileHandle_->reset();
-        assert(readMetgmHeader() == MGM_OK);
+        readMetgmHeader();
         /**
           * number of parameters
           */
@@ -944,11 +940,6 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> MetGmCDMReaderImpl::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
-        short callResult = MGM_OK;
-
-        /**
-          * dont't use conts & as we will insert data when we get it
-          */
         short p_id = -1;
         CDMAttribute metgmPid;
         CDMVariable& variable = cdm_->getVariable(varName);
@@ -976,32 +967,24 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmGroup3Ptr> initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
 
         metgmFileHandle_->reset();
-        assert(readMetgmHeader() == MGM_OK);
+        readMetgmHeader();
 
         // read group3 data until you match with initialPg3
         // in order to honor data reading sequence
         boost::shared_ptr<MetGmGroup3Ptr> fwdPg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
 
-        callResult = mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, *fwdPg3);
-        if(callResult != MGM_OK) {
-            throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
-        }
+        MGM_THROW_ON_ERROR(mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, *fwdPg3))
 
         fwdPg3->dump();
 
         if(*initialPg3 != 0) {
             while(fwdPg3->neq(initialPg3)) {
-                callResult = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *fwdPg3);
-                if(callResult != MGM_OK) {
-                    throw CDMException(metgmFileHandle_->fileName() + std::string("---") + std::string(mgm_string_error(callResult)));
-                }
+                MGM_THROW_ON_ERROR(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *fwdPg3))
             }
         }
 
         if(fwdPg3 == 0 && p_id >=0)
             throw CDMException("fwdPg3 is null");
-
-        callResult = MGM_OK;
 
         // field data can be x,y,level,time; x,y,level; x,y,time; x,y;
         const CDMDimension* tDimension = 0;
@@ -1075,27 +1058,12 @@ namespace MetNoFimex {
                 boost::scoped_array<float> pg5(new float[totalDataDimension]);
 
                 short pz = fwdPg3->pz();
-                if(pz != 0) {
-                    // read group4 data
-                    callResult = mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
-                    if(callResult != MGM_OK)
-                        throw CDMException(mgm_string_error(callResult));
+                if(pz > 0) {
+                    MGM_THROW_ON_ERROR(mgm_skip_group4(*metgmFileHandle_, *metgmHandle_))
                 }
 
-                callResult = mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get());
-                if(callResult != MGM_OK)
-                    throw CDMException(mgm_string_error(callResult));
-
-                /**
-                  * check if param with given p_id is convertible
-                  */
-                callResult = mgm_param_is_convertible(p_id, *metgmVersion_);
-                if(callResult != MGM_OK) {
-                    throw CDMException(mgm_string_error(callResult));
-                }
-//                callResult = mgm_convert_group5_to_met(p_id, *metgmVersion_, pg5.get(), totalDataDimension);
-//                if(callResult != MGM_OK || callResult != MGM_ERROR_GROUP5_NOT_CONVERTIBLE)
-//                    throw CDMException(mgm_string_error(callResult));
+                MGM_THROW_ON_ERROR(mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get()))
+                MGM_THROW_ON_ERROR(mgm_param_is_convertible(p_id, *metgmVersion_))
 
                 data = MetNoFimex::createData(CDM_FLOAT, pg5.get(), pg5.get() + totalDataDimension);
                 variable.setData(data);
@@ -1115,35 +1083,17 @@ namespace MetNoFimex {
                 boost::scoped_array<float> pg5T(new float[totalDataDimension]);
 
                 short pz = fwdPg3->pz();
-//                short pr = mgm_get_pr(fwdPg3);
 
                 if(pz > 0) {
-                    // read group4 data
-                    callResult  = mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
-                    if(callResult != MGM_OK)
-                        throw CDMException(mgm_string_error(callResult));
+                    MGM_THROW_ON_ERROR(mgm_skip_group4(*metgmFileHandle_, *metgmHandle_))
                 }
 
-                callResult = mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get());
-                if(callResult != MGM_OK)
-                    throw CDMException(mgm_string_error(callResult));
-
                 /**
-                  * OK - we have data for all time slices
-                  * lets extract one we actually need
-                */
-
-                /**
-                  * check if param with given p_id is convertible
+                  * get the data for all time slices at once
+                  * and then extract one we actually need
                   */
-                callResult = mgm_param_is_convertible(p_id, *metgmVersion_);
-                if(callResult != MGM_OK) {
-                    throw CDMException(mgm_string_error(callResult));
-                }
-//                callResult = mgm_convert_group5_to_met(p_id, *metgmVersion_, pg5.get(), totalDataDimension);
-//                if(callResult != MGM_ERROR_GROUP5_NOT_CONVERTIBLE && callResult != MGM_OK) {
-//                    throw CDMException(mgm_string_error(callResult));
-//                }
+                MGM_THROW_ON_ERROR(mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get()))
+                MGM_THROW_ON_ERROR(mgm_param_is_convertible(p_id, *metgmVersion_))
 
                 float* slice = pg5.get();
                 float* sliceT = pg5T.get();

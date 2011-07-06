@@ -82,12 +82,7 @@ namespace MetNoFimex {
     protected:
 
         std::string dataTypeToString(short data_type);
-        int readMetgmHeader();
-
-        /**
-          * read metgm version as part of init process
-          * not public as we will read from file
-          */
+        void readMetgmHeader();
         void readMetgmVersion();
 
         /**
