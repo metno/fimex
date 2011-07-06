@@ -163,27 +163,6 @@ namespace MetNoFimex {
         }
     }
 
-    void MetGmCDMWriterImpl::mapMetgmPidToMetgmHDs(const std::auto_ptr<XMLDoc>& doc)
-    {
-        /**
-          * hard coded defaults
-          * config.xml will override defaults
-          */
-
-        for(size_t index = 0; index < 28; ++index) {
-            pid2hdmap_.insert(std::make_pair<short, short>(index, 1));
-        }
-
-        // default override for p_id = 0
-        pid2hdmap_.insert(std::make_pair<short, short>(0, 4));
-
-        if(doc.get() != 0) {
-            /**
-              * TODO: support for config file
-              */
-        }
-    }
-
     void MetGmCDMWriterImpl::detectCDMVariables() {
         detectCDMVariablesByName();
 //        detectCDMVariablesToExportByStandardName();
@@ -323,33 +302,26 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup2Data()
     {
-        if(*metgmVersion_ == MGM_Edition1) {
-            MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, pid2CdmVariablesMMap_.size()))
-        } else if(*metgmVersion_ == MGM_Edition2) {
-            MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, pid2CdmVariablesMMap_.size()))
+        short total_number_of_parameters = cdmVariableProfileMap_.size();
+        std::cerr << __FUNCTION__ << "@" << __LINE__ << " total_number_of_parameters :" << total_number_of_parameters << std::endl;
+        MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, cdmVariableProfileMap_.size()))
 
-            std::set<short> p_id_set;
+        if(*metgmVersion_ == MGM_Edition2) {
 
-            std::multimap<short, const CDMVariable*>::const_iterator cmmapIt;
-            for(cmmapIt = pid2CdmVariablesMMap_.begin(); cmmapIt != pid2CdmVariablesMMap_.end(); ++cmmapIt) {
-                p_id_set.insert(cmmapIt->first);
-            }
-
-            const short ndp = p_id_set.size();
+            pidIndex &pid_index = cdmVariableProfileMap_.get<p_id_index>();
+            const short ndp = pid_index.size();
 
             MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
 
-            std::set<short>::const_iterator cit;
             size_t index = 0;
-            for(cit = p_id_set.begin(); cit != p_id_set.end(); ++cit) {
+            for(pidIndex::const_iterator cit = pid_index.begin(); cit != pid_index.end(); ++cit) {
 
                 ++index;
 
-                const short p_id = *cit;
+                const MetGmCDMVariableProfile& profile = *cit;
+                size_t ndpr = pid_index.count(profile.p_id_);
 
-                size_t ndpr = pid2CdmVariablesMMap_.count(p_id);
-
-                MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, p_id))
+                MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, profile.p_id_))
                 MGM_THROW_ON_ERROR(mgm_set_ndpr(*metgmHandle_, index, ndpr))
 
                 /**
@@ -357,15 +329,12 @@ namespace MetNoFimex {
                   *
                   * the HD value should be highest for given parameter
                   */
-                if(pid2hdmap_.find(p_id) != pid2hdmap_.end()) {
-                    MGM_THROW_ON_ERROR(mgm_set_hd(*metgmHandle_, index, pid2hdmap_[p_id]))
-                } else {
-                    throw CDMException("can't find hd value for p_id = " + boost::lexical_cast<std::string>(p_id));
-                }
+
+
+                MGM_THROW_ON_ERROR(mgm_set_hd(*metgmHandle_, index, profile.hd()))
+
             }
 
-        } else {
-            throw CDMException("unknown metgm version");
         }
     }
 
@@ -374,77 +343,65 @@ namespace MetNoFimex {
         MGM_THROW_ON_ERROR(mgm_write_header(*metgmFileHandle_, *metgmHandle_))
     }
 
-    void MetGmCDMWriterImpl::writeGroup3TimeAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
+    void MetGmCDMWriterImpl::writeGroup3TimeAxis(const CDMVariable* pVar)
     {
-        MetGmTagsPtr tags;
-
-        if(variable2TagsMap_.find(pVar) != variable2TagsMap_.end()) {
-            tags = variable2TagsMap_[pVar];
-        } else {
-            if(kildeName2FillValueMap_.find(pVar->getName()) != kildeName2FillValueMap_.end())
-            {
-                const float externalFillValue = kildeName2FillValueMap_[pVar->getName()];
-                tags = MetGmTags::createMetGmTags(cdmReader, pVar, gp3, &externalFillValue);
-            } else {
-                tags = MetGmTags::createMetGmTags(cdmReader, pVar, gp3, 0);
-            }
-
-            variable2TagsMap_.insert(std::make_pair<const CDMVariable*, MetGmTagsPtr>(pVar, tags));
-        }
+        MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
         if(tags->dimTag()->tTag().get()) {
-            MGM_THROW_ON_ERROR(gp3->set_nt(tags->dimTag()->tTag()->nT()))
-            MGM_THROW_ON_ERROR(gp3->set_dt(tags->dimTag()->tTag()->dT()))
+            MGM_THROW_ON_ERROR(tags->gp3()->set_nt(tags->dimTag()->tTag()->nT()))
+            MGM_THROW_ON_ERROR(tags->gp3()->set_dt(tags->dimTag()->tTag()->dT()))
         } else {
-            MGM_THROW_ON_ERROR(gp3->set_nt(1))
-            MGM_THROW_ON_ERROR(gp3->set_dt(metgmTimeTag_->dT() * metgmTimeTag_->nT()))
+            MGM_THROW_ON_ERROR(tags->gp3()->set_nt(1))
+            MGM_THROW_ON_ERROR(tags->gp3()->set_dt(metgmTimeTag_->dT() * metgmTimeTag_->nT()))
         }
     }
 
-    void MetGmCDMWriterImpl::writeGroup3HorizontalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
+    void MetGmCDMWriterImpl::writeGroup3HorizontalAxis(const CDMVariable* pVar)
     {
         MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
         // x
-        MGM_THROW_ON_ERROR(gp3->set_dx(tags->dimTag()->xTag()->dx()));
-        MGM_THROW_ON_ERROR(gp3->set_nx(tags->dimTag()->xTag()->nx()));
-        MGM_THROW_ON_ERROR(gp3->set_cx(tags->dimTag()->xTag()->cx()));
+        MGM_THROW_ON_ERROR(tags->gp3()->set_dx(tags->dimTag()->xTag()->dx()));
+        MGM_THROW_ON_ERROR(tags->gp3()->set_nx(tags->dimTag()->xTag()->nx()));
+        MGM_THROW_ON_ERROR(tags->gp3()->set_cx(tags->dimTag()->xTag()->cx()));
         // y
-        MGM_THROW_ON_ERROR(gp3->set_dy(tags->dimTag()->yTag()->dy()));
-        MGM_THROW_ON_ERROR(gp3->set_ny(tags->dimTag()->yTag()->ny()));
-        MGM_THROW_ON_ERROR(gp3->set_cy(tags->dimTag()->yTag()->cy()));
+        MGM_THROW_ON_ERROR(tags->gp3()->set_dy(tags->dimTag()->yTag()->dy()));
+        MGM_THROW_ON_ERROR(tags->gp3()->set_ny(tags->dimTag()->yTag()->ny()));
+        MGM_THROW_ON_ERROR(tags->gp3()->set_cy(tags->dimTag()->yTag()->cy()));
     }
 
-    void MetGmCDMWriterImpl::writeGroup3VerticalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
+    void MetGmCDMWriterImpl::writeGroup3VerticalAxis(const CDMVariable* pVar)
     {
         MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
         if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
-            MGM_THROW_ON_ERROR(gp3->set_nz(tags->dimTag()->zTag()->nz()));
-            MGM_THROW_ON_ERROR(gp3->set_pr(tags->dimTag()->zTag()->pr()));
-            MGM_THROW_ON_ERROR(gp3->set_pz(tags->dimTag()->zTag()->pz()));
+            MGM_THROW_ON_ERROR(tags->gp3()->set_nz(tags->dimTag()->zTag()->nz()));
+            MGM_THROW_ON_ERROR(tags->gp3()->set_pr(tags->dimTag()->zTag()->pr()));
+            MGM_THROW_ON_ERROR(tags->gp3()->set_pz(tags->dimTag()->zTag()->pz()));
         } else {
             /* no z profile for variable*/
-            MGM_THROW_ON_ERROR(gp3->set_nz(1));
-            MGM_THROW_ON_ERROR(gp3->set_pr(0));
-            MGM_THROW_ON_ERROR(gp3->set_pz(1));
+            MGM_THROW_ON_ERROR(tags->gp3()->set_nz(1));
+            MGM_THROW_ON_ERROR(tags->gp3()->set_pr(0));
+            MGM_THROW_ON_ERROR(tags->gp3()->set_pz(1));
         }
     }
 
-    void MetGmCDMWriterImpl::writeGroup3Data(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
+    void MetGmCDMWriterImpl::writeGroup3Data(const CDMVariable* pVar)
     {
-        writeGroup3TimeAxis(gp3, pVar);
+        MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
-        writeGroup3HorizontalAxis(gp3, pVar);
+        writeGroup3TimeAxis(pVar);
 
-        writeGroup3VerticalAxis(gp3, pVar);
+        writeGroup3HorizontalAxis(pVar);
 
-        gp3->dump();
+        writeGroup3VerticalAxis(pVar);
 
-        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *gp3));
+        tags->gp3()->dump();
+
+        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(tags->gp3())));
     }
 
-    void MetGmCDMWriterImpl::writeGroup4Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
+    void MetGmCDMWriterImpl::writeGroup4Data(const CDMVariable* pVar)
     {
         MetGmTagsPtr tags = variable2TagsMap_[pVar];
 
@@ -458,7 +415,7 @@ namespace MetNoFimex {
 
     }
 
-    void MetGmCDMWriterImpl::writeGroup5Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar)
+    void MetGmCDMWriterImpl::writeGroup5Data(const CDMVariable* pVar)
     {
         MetGmTagsPtr tags = variable2TagsMap_[pVar];
         MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(tags->gp5())));
@@ -468,34 +425,50 @@ namespace MetNoFimex {
     {
         detectCDMVariables();
 
-//        const CDM::DimVec& dims = cdmReader->getCDM().getDimensions();
-//        CDM::DimVec::const_iterator dimIt;
-
-//        for(dimIt = dims.begin(); dimIt != dims.end(); ++dimIt){
-//            CDM& cdmRef = const_cast<CDM&>(cdmReader->getCDM());
-
-//            CDMVariable& dimVarRef = cdmRef.getVariable(dimIt->getName());
-//            if(dimVarRef.hasData())
-//                continue;
-//            boost::shared_ptr<Data> data = cdmReader->getData(dimVarRef.getName());
-//            size_t size = data->size();
-//            std::cerr << "refilling data for dimension = " << dimVarRef.getName() << std::endl;
-////            dimVarRef.setData(data);
-
-//            size = size;
-
-//        }
-
         std::map<short, const CDMVariable* >::const_iterator cit;
 
-//        for(cit = pid2CdmVariablesMMap_.begin(); cit != this->pid2CdmVariablesMMap_.end(); ++cit) {
-//            CDMVariable* pVar = const_cast<CDMVariable*> (cit->second);
-//            const std::string varName = pVar->getName();
+        for(cit = pid2CdmVariablesMMap_.begin(); cit != this->pid2CdmVariablesMMap_.end(); ++cit) {
 
-//            boost::shared_ptr<Data> data = cdmReader->getData(varName);
+            const short p_id = cit->first;
+            const CDMVariable* varPtr = cit->second;
+            std::string variableName = varPtr->getName();
 
-//            pVar->setData(data);
-//        }
+            std::cerr
+                    << __FUNCTION__ << ":"
+                    << __LINE__     << ":"
+                    << "p_id = "
+                    << p_id
+                    << " CDMVariable with name = "
+                    << variableName
+                    << std::endl;
+
+            MetGmTagsPtr tags;
+            boost::shared_ptr<MetGmGroup3Ptr> gp3 =
+                    MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+
+            assert(gp3.get());
+
+            gp3->set_p_id(p_id);
+
+            if(variable2TagsMap_.find(varPtr) != variable2TagsMap_.end()) {
+                throw CDMException("shouldn't encounter again the variable " + varPtr->getName());
+            } else {
+                if(kildeName2FillValueMap_.find(varPtr->getName()) != kildeName2FillValueMap_.end())
+                {
+                    const float externalFillValue = kildeName2FillValueMap_[varPtr->getName()];
+                    tags = MetGmTags::createMetGmTags(cdmReader, varPtr, gp3, &externalFillValue);
+                } else {
+                    tags = MetGmTags::createMetGmTags(cdmReader, varPtr, gp3, 0);
+                }
+
+                variable2TagsMap_.insert(std::make_pair<const CDMVariable*, MetGmTagsPtr>(varPtr, tags));
+            }
+
+            assert(tags.get());
+
+            MetGmCDMVariableProfile profile(p_id, varPtr, tags);
+            cdmVariableProfileMap_.insert(profile);
+        }
 
         writeGroup0Data();
         writeGroup1Data();
@@ -503,30 +476,13 @@ namespace MetNoFimex {
 
         writeHeader();
 
-        for(cit = pid2CdmVariablesMMap_.begin(); cit != this->pid2CdmVariablesMMap_.end(); ++cit) {
+        profile_multi::const_iterator varIt;
+        for(varIt = cdmVariableProfileMap_.begin(); varIt != cdmVariableProfileMap_.end(); ++varIt) {
 
-            const short p_id = cit->first;
-            const CDMVariable* varPtr = cit->second;
-//            std::string variableName = varPtr->getName();
-
-//            std::cerr
-//                    << __FUNCTION__ << ":"
-//                    << __LINE__     << ":"
-//                    << "p_id = "
-//                    << p_id
-//                    << " CDMVariable with name = "
-//                    << variableName
-//                    << std::endl;
-
-            boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
-
-            assert(gp3.get());
-
-            gp3->set_p_id(p_id);
-
-            writeGroup3Data(gp3, varPtr);
-            writeGroup4Data(gp3, varPtr);
-            writeGroup5Data(gp3, varPtr);
+            MetGmCDMVariableProfile profile = *varIt;
+            writeGroup3Data(profile.variable());
+            writeGroup4Data(profile.variable());
+            writeGroup5Data(profile.variable());
         }
     }
 
@@ -551,13 +507,13 @@ namespace MetNoFimex {
 
 
         metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTag(cdmReader);
-        metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(MGM_Edition1));
-        metgmFileHandle_ = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(outputFile, MetGmFileHandlePtr::WRITE));
-        metgmHandle_ = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr());
+        metgmVersion_ = MetGmVersion::createMetGmVersion(xmlDoc);
+        metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForWriting(outputFile);
+        metgmHandle_ = MetGmHandlePtr::createMetGmHandle();
 
         assert(xmlDoc.get() != 0);
 
-        mapMetgmPidToMetgmHDs(xmlDoc);
+//        mapMetgmPidToMetgmHDs(xmlDoc);
         mapKildeNamesToFillValues(xmlDoc);
         mapKildeVariablesToMetgmPids(xmlDoc);
 

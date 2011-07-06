@@ -27,6 +27,7 @@
 // implementation stuff
 //
 #include "MetGmTimeTag.h"
+#include "MetGmCDMVariableProfile.h"
 
 // fimex
 #include "fimex/CDMWriter.h"
@@ -98,7 +99,6 @@ public:
 
 private:
         void mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
-        void mapMetgmPidToMetgmHDs(const std::auto_ptr<XMLDoc>& doc);
         void mapStandardNamesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
         void mapKildeNamesToFillValues(const std::auto_ptr<XMLDoc>& doc);
 
@@ -112,13 +112,13 @@ private:
         void writeGroup2Data();
         void writeHeader();
 
-        void writeGroup3Data(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
-        void writeGroup3VerticalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
-        void writeGroup3TimeAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
-        void writeGroup3HorizontalAxis(boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
+        void writeGroup3Data(const CDMVariable* pVar);
+        void writeGroup3VerticalAxis(const CDMVariable* pVar);
+        void writeGroup3TimeAxis(const CDMVariable* pVar);
+        void writeGroup3HorizontalAxis(const CDMVariable* pVar);
 
-        void writeGroup4Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
-        void writeGroup5Data(const boost::shared_ptr<MetGmGroup3Ptr> gp3, const CDMVariable* pVar);
+        void writeGroup4Data(const CDMVariable* pVar);
+        void writeGroup5Data(const CDMVariable* pVar);
 
         void init();
 
@@ -136,7 +136,6 @@ private:
         std::map<std::string, float>                kildeName2FillValueMap_;
         std::multimap<short, std::string>           pid2kildemap_;
         std::multimap<short, std::string>           pid2StandardNamesMMap_;
-        std::map<short, short>                      pid2hdmap_;
         std::string                                 configFileName_;
 
         boost::shared_ptr<MetGmVersion>             metgmVersion_;
@@ -145,6 +144,8 @@ private:
         boost::shared_ptr<MetGmTimeTag>             metgmTimeTag_;
 
         boost::posix_time::ptime                    analysisTime_;
+
+        profile_multi                               cdmVariableProfileMap_;
 };
 
 }
