@@ -38,26 +38,14 @@
 
 namespace MetNoFimex {
 
-//    enum MetgmHDValues {
-//        METGM_3D_T,
-//        METGM_2D_T,
-//        METGM_1D_T,
-//        METGM_T,
-//        METGM_3D,
-//        METGM_2D,
-//        METGM_1D,
-//        METGM_NO_DIMENSIONALITY,
-//        METGM_UNKNOWN_DIMENSIONALITY
-//    };
-
     MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& metgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm)
         : CDMReader(), configFileName_(configfilename)
     {
         cdm_ = cdm; // as not accesible via initialzation list
 
         try {
-            metgmFileHandle_ = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(metgmsource));
-            metgmHandle_ = boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr());
+            metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForReading((metgmsource));
+            metgmHandle_ = MetGmHandlePtr::createMetGmHandle();
             init();
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("MetGmCDMReaderImpl error: ") + exp.what());
@@ -93,7 +81,7 @@ namespace MetNoFimex {
 
         readMetgmHeader();
 
-        metgmVersion_ = boost::shared_ptr<MetGmVersion>(new MetGmVersion(mgm_get_version(*metgmHandle_)));
+        metgmVersion_ = MetGmVersion::createMetGmVersion(mgm_get_version(*metgmHandle_));
   }
 
     std::string MetGmCDMReaderImpl::spaceToUnderscore(const std::string& name)
