@@ -28,8 +28,16 @@
 #ifndef METGM_FILEHANDLEPTR_H
 #define METGM_FILEHANDLEPTR_H
 
+// METGM C lib
+//
 #include "metgm.h"
 
+// boost
+//
+#include <boost/shared_ptr.hpp>
+
+// standard
+//
 #include <cstdio>
 #include <string>
 
@@ -43,24 +51,14 @@ namespace MetNoFimex {
             READ
         };
 
-        explicit MetGmFileHandlePtr(const std::string name, IODirection direction = READ) : handle_(0), fileName_(name)
-        {
-            if(!fileName_.empty()) {
-                switch(direction) {
-                    case READ:
-                        handle_ = fopen(fileName_.c_str() , "rb");
-                        break;
-                    case WRITE:
-                        handle_ = fopen(fileName_.c_str() , "wb");
-                        break;
-                }
+        static boost::shared_ptr<MetGmFileHandlePtr> createMetGmFileHandlePtrForReading(const std::string& name) {
+            boost::shared_ptr<MetGmFileHandlePtr> handle = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(name, READ));
+            return handle;
+        }
 
-                if(handle_ == 0) {
-                    throw CDMException("can't open output file");
-                }
-
-                fgetpos(handle_, &startPos_);
-            }
+        static boost::shared_ptr<MetGmFileHandlePtr> createMetGmFileHandlePtrForWriting(const std::string& name) {
+            boost::shared_ptr<MetGmFileHandlePtr> handle = boost::shared_ptr<MetGmFileHandlePtr>(new MetGmFileHandlePtr(name, WRITE));
+            return handle;
         }
 
         ~MetGmFileHandlePtr()
@@ -88,6 +86,26 @@ namespace MetNoFimex {
         FILE* handle_;
         fpos_t startPos_;
         std::string fileName_;
+
+        explicit MetGmFileHandlePtr(const std::string name, IODirection direction = READ) : handle_(0), fileName_(name)
+        {
+            if(!fileName_.empty()) {
+                switch(direction) {
+                    case READ:
+                        handle_ = fopen(fileName_.c_str() , "rb");
+                        break;
+                    case WRITE:
+                        handle_ = fopen(fileName_.c_str() , "wb");
+                        break;
+                }
+
+                if(handle_ == 0) {
+                    throw CDMException("can't open output file");
+                }
+
+                fgetpos(handle_, &startPos_);
+            }
+        }
     };
 }
 
