@@ -19,6 +19,7 @@
 #include "../../include/metgm/MetGmVersion.h"
 #include "../../include/metgm/MetGmHandlePtr.h"
 #include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "../../include/metgm/MetGmDimensionsTag.h"
 #include "../../include/metgm/MetGmFileHandlePtr.h"
 
 // boost
@@ -37,17 +38,17 @@
 
 namespace MetNoFimex {
 
-    enum MetgmHDValues {
-        METGM_3D_T,
-        METGM_2D_T,
-        METGM_1D_T,
-        METGM_T,
-        METGM_3D,
-        METGM_2D,
-        METGM_1D,
-        METGM_NO_DIMENSIONALITY,
-        METGM_UNKNOWN_DIMENSIONALITY
-    };
+//    enum MetgmHDValues {
+//        METGM_3D_T,
+//        METGM_2D_T,
+//        METGM_1D_T,
+//        METGM_T,
+//        METGM_3D,
+//        METGM_2D,
+//        METGM_1D,
+//        METGM_NO_DIMENSIONALITY,
+//        METGM_UNKNOWN_DIMENSIONALITY
+//    };
 
     MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& metgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm)
         : CDMReader(), configFileName_(configfilename)
@@ -1023,31 +1024,29 @@ namespace MetNoFimex {
 
         boost::shared_ptr<Data> data = createData(CDM_FLOAT, 0);
 
-        MetgmHDValues dimensionality = METGM_UNKNOWN_DIMENSIONALITY; // default
+        MetGmHDTag::MetGmHD dimensionality = MetGmHDTag::HD_0D;
         if(xDimension != 0 && yDimension != 0 && zDimension != 0 && tDimension != 0) {
-            dimensionality = METGM_3D_T;
+            dimensionality = MetGmHDTag::HD_3D_T;
         } else if(xDimension != 0 && yDimension != 0 && zDimension == 0 && tDimension != 0) {
-            dimensionality = METGM_2D_T;
+            dimensionality = MetGmHDTag::HD_2D_T;
         } else if(xDimension == 0 && yDimension == 0 && zDimension == 0 && tDimension != 0) {
-            dimensionality = METGM_T;
+            dimensionality = MetGmHDTag::HD_0D_T;
         } else if(xDimension != 0 && yDimension != 0 && zDimension != 0 && tDimension == 0) {
-            dimensionality = METGM_3D;
+            dimensionality = MetGmHDTag::HD_3D;
         } else if(xDimension != 0 && yDimension != 0 && zDimension == 0 && tDimension == 0) {
-            dimensionality = METGM_2D;
-        } else if(xDimension == 0 && yDimension == 0 && zDimension == 0 && tDimension == 0) {
-            dimensionality = METGM_NO_DIMENSIONALITY;
+            dimensionality = MetGmHDTag::HD_2D;
         }
 
         switch(dimensionality) {
 
-        case METGM_T:
+        case MetGmHDTag::HD_0D_T:
             {
                 throw CDMException("time data should already be set");
                 break;
             }
 
 
-        case METGM_2D:
+        case MetGmHDTag::HD_2D:
             {
                 CDMAttribute metgmPid = cdm_->getAttribute(variable.getName(), "metgm_p_id");
 
@@ -1071,7 +1070,7 @@ namespace MetNoFimex {
                 break;
             }
 
-        case METGM_3D_T:
+        case MetGmHDTag::HD_3D_T:
             {
                 CDMAttribute metgmPid = cdm_->getAttribute(variable.getName(), "metgm_p_id");
 
@@ -1131,14 +1130,9 @@ namespace MetNoFimex {
 
                 break;
             }
-        case METGM_NO_DIMENSIONALITY:
-            {
-                std::cerr << "METGM_NO_DIMENSIONALITY for " << variable.getName() << std::endl;
-                break;
-            }
-        case METGM_UNKNOWN_DIMENSIONALITY:
-        case METGM_3D:
-        case METGM_2D_T:
+        case MetGmHDTag::HD_0D:
+        case MetGmHDTag::HD_3D:
+        case MetGmHDTag::HD_2D_T:
         default:
             {
                 throw CDMException("MetGmCDMReaderImpl getDatalSlice for given dimensionality not implemented");
