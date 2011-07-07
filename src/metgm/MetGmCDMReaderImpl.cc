@@ -291,8 +291,8 @@ namespace MetNoFimex {
         CDMAttribute cdmTitleAttribute("title", "string", metgmFileHandle_->fileName() + std::string(" ") + metgmVersion_->getAsString());
         CDMAttribute cdmReferencesAttribute("references", "string", "unknown");
 
-        CDMAttribute cdmMetgmAnalysisDateTimeAttribute("metgm_analysis_date_time", "string", boost::posix_time::to_iso_extended_string(analysisTime));
-        CDMAttribute cdmMetgmStartDateTimeAttribute("metgm_start_date_time", "string", boost::posix_time::to_iso_extended_string(startTime));
+        CDMAttribute cdmMetgmAnalysisDateTimeAttribute("metgm_analysis_date_time", "string", boost::posix_time::to_iso_string(analysisTime));
+        CDMAttribute cdmMetgmStartDateTimeAttribute("metgm_start_date_time", "string", boost::posix_time::to_iso_string(startTime));
         CDMAttribute cdmMetgmVersionAttribute("metgm_version", "string", spaceToUnderscore(metgmVersion_->getAsString()));
         CDMAttribute cdmMetgmDataTypeAttribute("metgm_data_type", "string", dataTypeToString(mgm_get_data_type(*metgmHandle_)));
         CDMAttribute cdmMetgmFreeTextAttribute("metgm_free_text", "string", mgm_get_free_text(*metgmHandle_));
