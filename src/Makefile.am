@@ -94,8 +94,10 @@ if HAVE_METGM
   libfimex_la_SOURCES += MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
                          MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
                          metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
-                         metgm/MetGmVerticalTag.cc metgm/MetGmGroup5Ptr.cc \
-                         metgm/MetGmGroup3Ptr.cc
+                         metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
+                         metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
+                         metgm/MetGmCommentAttributeParser.cc
+
 endif
 
 if HAVE_MILIB
