@@ -49,46 +49,7 @@ namespace MetNoFimex {
 
     class MetGmCommentAttributeParser {
     public:
-        static boost::shared_ptr<MetGmCommentAttributeParser> createMetGmCommentAttributeParser(const boost::shared_ptr<CDMReader>& pCdmReader) {
-            boost::shared_ptr<MetGmCommentAttributeParser> parser =
-                    boost::shared_ptr<MetGmCommentAttributeParser>(new MetGmCommentAttributeParser);
-
-            CDMAttribute metgmMetaData; // encoded within comment
-            if(pCdmReader->getCDM().getAttribute(pCdmReader->getCDM().globalAttributeNS(), "comment", metgmMetaData)) {
-                try {
-                    boost::shared_ptr<XMLDoc> doc = XMLDoc::fromString(metgmMetaData.getStringValue());
-
-                    if(doc.get() != 0) {
-                        XPathObjPtr xpathObj = doc->getXPathObject("/metgm_meta_data/attribute");
-                        xmlNodeSetPtr nodes = xpathObj->nodesetval;
-                        size_t size = (nodes) ? nodes->nodeNr : 0;
-                        for (size_t i = 0; i < size; ++i) {
-                            xmlNodePtr node = nodes->nodeTab[i];
-                            std::string attributeName = getXmlProp(node, "name");
-                            if(attributeName == std::string(FREE_TEXT)) {
-                                parser->freeText_ = getXmlProp(node, "value");
-                            } else if(attributeName == std::string(VERSION)) {
-                                parser->version_ = getXmlProp(node, "value");
-                            } else if(attributeName == std::string(DATA_TYPE)) {
-                                parser->dataType_ = getXmlProp(node, "value");
-                            }  else if(attributeName == std::string(MODEL_TYPE)) {
-                                parser->modelType_ = getXmlProp(node, "value");
-                            } else if(attributeName == std::string(PRODUCTION_NATION)) {
-                                parser->productNation_ = getXmlProp(node, "value");
-                            } else if(attributeName == std::string(ANALYSIS_DATE_TIME)) {
-                                parser->analysisDateTime_ = getXmlProp(node, "value");
-                            } else if(attributeName == std::string(START_DATE_TIME)) {
-                                parser->startDateTime_ = getXmlProp(node, "value");
-                            }
-                        }
-                    }
-                } catch (CDMException exception) {
-                    // just ignore
-                }
-            }
-
-            return parser;
-        }
+        static boost::shared_ptr<MetGmCommentAttributeParser> createMetGmCommentAttributeParser(const boost::shared_ptr<CDMReader>& pCdmReader);
 
         std::string freeText()         {return freeText_; }
         std::string version()          {return version_; }
