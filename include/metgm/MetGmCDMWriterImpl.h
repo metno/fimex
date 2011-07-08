@@ -122,16 +122,8 @@ private:
 
         void init();
 
-        enum MetgmPr {
-            REF_MSL,
-            REF_GND,
-            REF_hPa // reference in Pa
-        };
-
-        typedef std::map<const MetgmPr, const CDMVariable*> MetgmPrToCDMVariableMap;
         typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
 
-        std::map<const CDMVariable*, MetGmTagsPtr>     variable2TagsMap_;
         std::multimap<short, const CDMVariable*>    pid2CdmVariablesMMap_;
         std::map<std::string, float>                kildeName2FillValueMap_;
         std::multimap<short, std::string>           pid2kildemap_;
