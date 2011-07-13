@@ -44,9 +44,9 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVar)
+boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable)
 {
-    if(!pVar)
+    if(!pVariable)
         throw CDMException("pVar is null createMetGmVerticalTag");
 
     if(!pCdmReader.get())
@@ -59,13 +59,22 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
     std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdmRef);
 
     std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVar->getName()));
+            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVariable->getName()));
     if (varSysIt != coordSys.end()) {
         if((*varSysIt)->isSimpleSpatialGridded()) {
 
-            VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
-
             CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis();
+
+            if(!zAxis.get()) {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " z axis NOT existing for " << pVariable->getName() << std::endl;
+                return boost::shared_ptr<MetGmVerticalTag>();
+            } else {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " z axis IS existing for " << pVariable->getName() << std::endl;
+            }
+
+            VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
 
             boost::shared_ptr<Data> data;
 
