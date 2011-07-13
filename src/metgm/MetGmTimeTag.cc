@@ -82,14 +82,25 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
 
     std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
             find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVariable->getName()));
+
     if (varSysIt != coordSys.end()) {
         if((*varSysIt)->isSimpleSpatialGridded()) {
 
-            TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
-
             CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis();
 
-            assert(tAxis->getAxisType() == CoordinateAxis::Time);
+            if(!tAxis.get()) {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " time axis NOT existing for " << pVariable->getName() << std::endl;
+                return boost::shared_ptr<MetGmTimeTag>();
+            } else {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " time axis IS existing for " << pVariable->getName() << std::endl;
+            }
+
+            TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
+
+            if(tAxis->getAxisType() != CoordinateAxis::Time)
+                throw CDMException("time axis not found");
 
             boost::shared_ptr<Data> data = pCdmReader->getData(tAxis->getName());
 
