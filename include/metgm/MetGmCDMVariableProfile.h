@@ -72,9 +72,9 @@ namespace MetNoFimex {
 
     };
 
-    struct pid_index        {};
-    struct cdmvariable_index {};
-    struct hd_index          {};
+    struct cdm_pid_index       {};
+    struct cdm_variable_index  {};
+    struct cdm_hd_index        {};
 
 //    typedef boost::multi_index::multi_index_container<
 //      MetGmCDMVariableProfile,
@@ -97,34 +97,29 @@ namespace MetNoFimex {
           >
         >,
         boost::multi_index::hashed_non_unique<
-          boost::multi_index::tag<pid_index>,
+          boost::multi_index::tag<cdm_pid_index>,
           boost::multi_index::member<
             MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::p_id_
           >
         >,
-        boost::multi_index::hashed_non_unique<
-          boost::multi_index::member<
-            MetGmCDMVariableProfile, const CDMVariable*, &MetGmCDMVariableProfile::pVariable_
-          >
-        >,
         boost::multi_index::ordered_non_unique<
-          boost::multi_index::tag<hd_index>,
+          boost::multi_index::tag<cdm_hd_index>,
           boost::multi_index::const_mem_fun<
            MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::hd
           >,
           std::greater<short>
         >,
         boost::multi_index::hashed_unique<
-        boost::multi_index::tag<cdmvariable_index>,
+        boost::multi_index::tag<cdm_variable_index>,
         boost::multi_index::member<
           MetGmCDMVariableProfile, const CDMVariable*, &MetGmCDMVariableProfile::pVariable_
           >
         >
       >
-    > profile_multi;
+    > cdm_configuration;
 
-    typedef profile_multi::index<pid_index>::type pidIndex;
-    typedef profile_multi::index<cdmvariable_index>::type cdmVariableIndex;
+    typedef cdm_configuration::index<cdm_pid_index>::type       cdmPidView;
+    typedef cdm_configuration::index<cdm_variable_index>::type  cdmVariableView;
 
 }
 
