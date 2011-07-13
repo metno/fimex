@@ -25,8 +25,10 @@
 // boost
 //
 #include <boost/regex.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 // libxml2
@@ -89,129 +91,77 @@ namespace MetNoFimex {
         return boost::algorithm::replace_all_copy(name, " ", "_");
     }
 
-    void MetGmCDMReaderImpl::fillPidToFillValueMap(const std::auto_ptr<XMLDoc>& doc)
+    void MetGmCDMReaderImpl::configure(const std::auto_ptr<XMLDoc>& doc)
     {
-        if(doc.get() != 0) {
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
-            xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            size_t size = (nodes) ? nodes->nodeNr : 0;
-            for (size_t i = 0; i < size; ++i) {
-                xmlNodePtr node = nodes->nodeTab[i];
-                std::string metnoName = getXmlProp(node, "name");
-                // get the metgm p_id value
-                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"metgm_p_id\"]");
-                std::string str_metgm_p_id;
-                if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                    str_metgm_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                    if(str_metgm_p_id == std::string("")) {
-                        continue;
-                    } else {
-                        size_t metgm_p_id = boost::lexical_cast<size_t>(str_metgm_p_id);
-                        // get _FillValue
-                        xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"_FillValue\"]");
-                        std::string str_fillValue;
-                        if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                            str_fillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                            if(str_fillValue == std::string("")) {
-                                str_fillValue = "9999.0";
-                            }
-                            float _FillValue = boost::lexical_cast<float>(str_fillValue);
-                            pid2fillvaluemap_.insert(std::pair<int, float>(metgm_p_id, _FillValue));
-                        } else {
-                            pid2fillvaluemap_.insert(std::pair<int, float>(metgm_p_id, 9999.0f));
-                        }
-                    }
+        if(!doc.get())
+            throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
+
+        XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        size_t size = (nodes) ? nodes->nodeNr : 0;
+        for (size_t i = 0; i < size; ++i) {
+
+            xmlNodePtr node = nodes->nodeTab[i];
+
+            std::string kildeName = getXmlProp(node, "name");
+            if(kildeName.empty()) {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
+                continue;
+            }
+
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            std::string str_p_id;
+            short p_id = 0;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                if(str_p_id == std::string("")) {
+                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+                    continue;
+                }
+                p_id = boost::lexical_cast<size_t>(str_p_id);
+            } else {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+                continue;
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"standard_name\"]");
+            std::string str_standard_name;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            if(str_standard_name.empty()) {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard name not found -> " << kildeName << std::endl;
+                continue;
+            } else {
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard name for -> " << kildeName  << " is " << str_standard_name << std::endl;
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
+            std::string str_units;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            CDMVariable* pDummyVar = new CDMVariable(kildeName, CDM_FLOAT, std::vector<std::string>());
+            MetGmConfigurationMappings cfgEntry(p_id, pDummyVar);
+            cfgEntry.kildeName_ = spaceToUnderscore(kildeName);
+            cfgEntry.standardName_ = spaceToUnderscore(str_standard_name);
+            cfgEntry.units_ = str_units;
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
+            std::string str_FillValue;
+            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                if(str_FillValue.empty()) {
+                    cfgEntry.setFillValue(9999.0f);
+                } else {
+                    float fillValue = boost::lexical_cast<float>(str_FillValue);
+                    cfgEntry.setFillValue(fillValue);
                 }
             }
-        } else {
-            for(size_t metgm_p_id = 0; metgm_p_id < 8; ++metgm_p_id) {
-                pid2fillvaluemap_.insert(std::pair<int, float>(metgm_p_id, 9999.0f));
-            }
-        }
-    }
 
-    void MetGmCDMReaderImpl::fillPidToMetNoNameMap(const std::auto_ptr<XMLDoc> &doc)
-    {
-        if(doc.get() != 0) {
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
-            xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            size_t size = (nodes) ? nodes->nodeNr : 0;
-            for (size_t i = 0; i < size; ++i) {
-                xmlNodePtr node = nodes->nodeTab[i];
-                std::string metnoName = getXmlProp(node, "name");
-                // get the metgm p_id value
-                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"metgm_p_id\"]");
-                std::string str_metgm_p_id;
-                if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                    str_metgm_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                    if(str_metgm_p_id == std::string("")) {
-                        continue;
-                    } else {
-                        size_t metgm_p_id = boost::lexical_cast<size_t>(str_metgm_p_id);
-                        pid2metnonamesmap_.insert(std::make_pair<int, std::string>(metgm_p_id, spaceToUnderscore(metnoName)));
-                    }
-                }
-            }
-        }
-    }
-
-    void MetGmCDMReaderImpl::fillPidToCdmNameMap(const std::auto_ptr<XMLDoc>& doc)
-    {
-        if(doc.get() != 0) {
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
-            xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            size_t size = (nodes) ? nodes->nodeNr : 0;
-            for (size_t i = 0; i < size; ++i) {
-                xmlNodePtr node = nodes->nodeTab[i];
-                std::string metnoName = getXmlProp(node, "name");
-                // get the metgm p_id value
-                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"metgm_p_id\"]");
-                std::string str_metgm_p_id;
-                if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                    str_metgm_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                    if(str_metgm_p_id == std::string("")) {
-                        continue;
-                    } else {
-                        size_t metgm_p_id = boost::lexical_cast<size_t>(str_metgm_p_id);
-                        // get _FillValue
-                        xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"standard_name\"]");
-                        std::string standard_name;
-                        if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                            standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                            if(standard_name == std::string("")) {
-                                standard_name = metnoName;
-                            }
-                            pid2cdmnamesmap_.insert(std::pair<int, std::string>(metgm_p_id, spaceToUnderscore(standard_name)));
-                        } else {
-                            pid2cdmnamesmap_.insert(std::pair<int, std::string>(metgm_p_id, spaceToUnderscore(metnoName)));
-                        }
-                    }
-                }
-            }
-        } else {
-            /**
-              * We have some default values
-              * but config file should be used
-            */
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(0, "altitude"));
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(1, std::string("land_area_fraction")));
-
-            /**
-              * this component is given as north to south so the values will be multiplied -1
-              * to reflect standard name
-              */
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(2, std::string("eastward_wind")));
-
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(3, std::string("northward_wind")));
-
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(4, std::string("upward_air_velocity")));
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(5, std::string("air_temperature")));
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(6, std::string("relative_humidity")));
-
-            /**
-              * check units to differentiate between pressure and geopotential height
-              */
-            pid2cdmnamesmap_.insert(std::pair<int, std::string>(7, std::string("air_pressure")));
+            xmlConfiguration_.insert(cfgEntry);
         }
     }
 
@@ -237,9 +187,11 @@ namespace MetNoFimex {
 
         assert(xmlDoc.get() != 0);
 
-        fillPidToMetNoNameMap(xmlDoc);
-        fillPidToCdmNameMap(xmlDoc);
-        fillPidToFillValueMap(xmlDoc);
+        configure(xmlDoc);
+
+//        fillPidToMetNoNameMap(xmlDoc);
+//        fillPidToCdmNameMap(xmlDoc);
+//        fillPidToFillValueMap(xmlDoc);
 
         addLevelDimensions();
 
@@ -450,7 +402,7 @@ namespace MetNoFimex {
         timeDimension.setName(hcTimeDimensionName);
         timeDimension.setLength(timeDimensionSize);
 
-//        // ATM we always consider that the time is UNLIMITED dimension
+        // ATM we always consider that the time is UNLIMITED dimension
         timeDimension.setUnlimited(true);
         cdm_->addDimension(timeDimension);
         std::vector<std::string> timeDimensionShape;
@@ -543,17 +495,17 @@ namespace MetNoFimex {
 
         projectionName = std::string("projection_" + gridMappingType);
         // projection-variable without datatype and dimension
-        CDMVariable projVar(projectionName, CDM_FLOAT, std::vector<std::string>());
-        cdm_->addVariable(projVar);
+//        CDMVariable projVar(projectionName, CDM_FLOAT, std::vector<std::string>());
+//        cdm_->addVariable(projVar);
 
         boost::shared_ptr<Projection> projection = Projection::createByProj4(projStr);
         if(projection.get() == 0)
             throw CDMException("create by proj4 failed");
 
-        std::vector<CDMAttribute> projAttr = projection->getParameters();
-        for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
-            cdm_->addAttribute(projectionName, *attrIt);
-        }
+//        std::vector<CDMAttribute> projAttr = projection->getParameters();
+//        for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
+//            cdm_->addAttribute(projectionName, *attrIt);
+//        }
 
         std::string projUnits = "degree";
         boost::smatch unitsmatch;
@@ -818,6 +770,20 @@ namespace MetNoFimex {
           */
         size_t np = mgm_get_number_of_params(*metgmHandle_);
 
+        std::cerr << __FUNCTION__ << __LINE__ << " np in mgm file " << np << std::endl;
+
+        xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
+        xmlPidView::iterator cit = pidView.begin();
+        for(; cit != pidView.end(); ++cit) {
+            std::cerr << __FUNCTION__ << " @ " << __LINE__
+                      << " pid: " << cit->p_id_
+                      << " name: " << cit->kildeName_
+                      << " standard name: " << (cit->standardName_.empty() ? "NULL" : cit->standardName_)
+                      << " units: " << (cit->units_.empty() ? "NULL" : cit->units_)
+                      << std::endl;
+        }
+
+
         for(size_t gp3Index  = 0; gp3Index < np; ++gp3Index)
         {
             boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
@@ -833,14 +799,50 @@ namespace MetNoFimex {
 
             int p_id = pg3->p_id();
 
-            if(pid2cdmnamesmap_.find(p_id) == pid2cdmnamesmap_.end())
+            std::cerr << __FUNCTION__ << __LINE__ << " adding variable for pid " << p_id << std::endl;
+
+            xmlPidView::iterator ic0, ic1;
+            xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
+            boost::tuples::tie(ic0,ic1) = pidView.equal_range(p_id);
+
+            if(ic0 == pidView.end()) {
+                std::cerr << __FUNCTION__ << __LINE__ << " pid NOT found in xmlConfiguration " << std::endl;
                 continue;
+            }
 
-            std::string variableStandardName = pid2cdmnamesmap_.at(p_id);
+            std::string cfgName         = ic0->kildeName_;
+            std::string cfgStandardName = ic0->standardName_;
+            std::string cfgUnits        = ic0->units_;
+            float       cfgFillValue    = ic0->fillValue_.get() ? *(ic0->fillValue_) : 9999.0f;
 
-            std::string variableMetNoName = spaceToUnderscore(std::string(mgm_get_param_name(p_id, *metgmHandle_)));
-            if(pid2metnonamesmap_.find(p_id) != pid2metnonamesmap_.end())
-                    variableMetNoName = pid2metnonamesmap_[p_id];
+            std::string mgmUnits(mgm_get_param_unit(p_id, *metgmHandle_));
+
+            if(p_id == 7) {
+                bool bExactMatch = false;
+                do {
+                    std::cerr << __FUNCTION__ << __LINE__ << " checking units cfgName  " << ic0->kildeName_ << std::endl;
+                    if(!ic0->units_.empty()) {
+                        Units checker;
+                        if(checker.areConvertible(mgmUnits, ic0->units_)) {
+                            cfgName         = ic0->kildeName_;
+                            cfgStandardName = ic0->standardName_;
+                            cfgUnits        = ic0->units_;
+                            cfgFillValue    = ic0->fillValue_.get() ? *(ic0->fillValue_) : 9999.0f;
+                            bExactMatch = true;
+                            break;
+                        }
+                    }
+                    ++ic0;
+                } while (ic0 != ic1);
+
+                if(!bExactMatch)
+                    continue;
+            }
+
+            if(cfgUnits.empty()) cfgUnits = mgmUnits;
+
+            std::cerr << __FUNCTION__ << __LINE__ << " units from metgm  " << cfgUnits << std::endl;
+            std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " metno variable name found -> " << cfgName << std::endl;
 
             /**
               * we might have more pressure/geopotential
@@ -850,18 +852,18 @@ namespace MetNoFimex {
             short pr = pg3->pr();
             switch(pr) {
             case 0:
-                variableMetNoName.append("_MSL");
+                if(!boost::algorithm::ends_with(cfgName, "MSL"))
+                    cfgName.append("_MSL");
                 break;
             case 1:
-                variableMetNoName.append("_GND");
+                if(!boost::algorithm::ends_with(cfgName, "GND"))
+                    cfgName.append("_GND");
                 break;
             case 2:
-                variableMetNoName.append("_Pa");
+                if(!boost::algorithm::ends_with(cfgName, "Pa"))
+                    cfgName.append("_Pa");
                 break;
             }
-
-            std::string variableUnitName(mgm_get_param_unit(p_id, *metgmHandle_));
-            float variableFillValue = pid2fillvaluemap_.at(p_id);
 
             std::vector<CDMAttribute> attributes;
 
@@ -872,16 +874,16 @@ namespace MetNoFimex {
             CDMAttribute metgmPidAttribute("metgm_p_id", "short", boost::lexical_cast<std::string>(p_id));
             attributes.push_back(metgmPidAttribute);
 
-            CDMAttribute cfNameAttribute("standard_name", "string", variableStandardName);
+            CDMAttribute cfNameAttribute("standard_name", "string", cfgStandardName);
             attributes.push_back(cfNameAttribute);
 
-            CDMAttribute gridMappingAttribute("grid_mapping", "string", projName);
-            attributes.push_back(gridMappingAttribute);
+//            CDMAttribute gridMappingAttribute("grid_mapping", "string", projName);
+//            attributes.push_back(gridMappingAttribute);
 
-            CDMAttribute varUnitsAttribute("units", "string", variableUnitName);
+            CDMAttribute varUnitsAttribute("units", "string", cfgUnits);
             attributes.push_back(varUnitsAttribute);
 
-            CDMAttribute varFillValueAttribute("_FillValue", "float", boost::lexical_cast<std::string>(variableFillValue));
+            CDMAttribute varFillValueAttribute("_FillValue", "float", boost::lexical_cast<std::string>(cfgFillValue));
             attributes.push_back(varFillValueAttribute);
 
             // map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
@@ -917,12 +919,12 @@ namespace MetNoFimex {
             }
 
             CDMDataType type = string2datatype(hcDataType);
-            CDMVariable var(variableMetNoName, type, shape);
+            CDMVariable var(cfgName, type, shape);
             cdm_->addVariable(var);
-            cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, boost::shared_ptr<MetGmGroup3Ptr> >(variableMetNoName, pg3));
+            cdmvariable2mgm_group3map_.insert(std::make_pair<std::string, boost::shared_ptr<MetGmGroup3Ptr> >(cfgName, pg3));
 
             for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
-                cdm_->addAttribute(variableMetNoName, *attrIt);
+                cdm_->addAttribute(cfgName, *attrIt);
             }
         }
     }
@@ -964,6 +966,9 @@ namespace MetNoFimex {
 
         MGM_THROW_ON_ERROR(mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, *fwdPg3))
 
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                  << " pVar->Name " << variable.getName() << " dumping gp3"
+                  << std::endl;
         fwdPg3->dump();
 
         if(*initialPg3 != 0) {
@@ -1235,4 +1240,3 @@ namespace MetNoFimex {
     }
 
 }
-

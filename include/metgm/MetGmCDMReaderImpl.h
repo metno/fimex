@@ -1,6 +1,10 @@
 #ifndef METGM_CDM_READERIMPL_H
 #define METGM_CDM_READERIMPL_H
 
+// implementation
+//
+#include "MetGmConfigurationMappings.h"
+
 // fimex
 //
 #include "fimex/CDMReader.h"
@@ -109,17 +113,14 @@ namespace MetNoFimex {
         void addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim);
 
     private:
+
+        void configure(const std::auto_ptr<XMLDoc>& doc);
+
         std::string                            configFileName_;
         boost::shared_ptr<MetGmVersion>        metgmVersion_;
         boost::shared_ptr<MetGmHandlePtr>      metgmHandle_;
         boost::shared_ptr<MetGmFileHandlePtr>  metgmFileHandle_;
 
-        // data to build the reader on
-        // todo: use smart pointers
-
-        std::map<int, std::string>            pid2metnonamesmap_;
-        std::map<int, std::string>            pid2cdmnamesmap_;
-        std::map<int, double>                 pid2fillvaluemap_;
         std::map<std::string, boost::shared_ptr<MetGmGroup3Ptr> > cdmvariable2mgm_group3map_;
         typedef boost::multi_index::multi_index_container<
           METGM_ZProfile,
@@ -136,6 +137,8 @@ namespace MetNoFimex {
 
 
         metgm_profile_set prXpidXname_;
+        xml_configuration xmlConfiguration_;
+
         /**
           * cache some dimensions
           */
