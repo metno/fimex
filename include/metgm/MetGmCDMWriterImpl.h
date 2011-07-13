@@ -28,6 +28,7 @@
 //
 #include "MetGmTimeTag.h"
 #include "MetGmCDMVariableProfile.h"
+#include "MetGmConfigurationMappings.h"
 
 // fimex
 #include "fimex/CDMWriter.h"
@@ -98,14 +99,8 @@ public:
         const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException);
 
 private:
-        void mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
-        void mapStandardNamesToMetgmPids(const std::auto_ptr<XMLDoc>& doc);
-        void mapKildeNamesToFillValues(const std::auto_ptr<XMLDoc>& doc);
 
-        void detectCDMVariables();
-        void detectCDMVariablesByPid();
-        void detectCDMVariablesByName();
-        void detectCDMVariablesByStandardName();
+        void configure(const std::auto_ptr<XMLDoc>& doc);
 
         void writeGroup0Data();
         void writeGroup1Data();
@@ -124,10 +119,6 @@ private:
 
         typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
 
-        std::multimap<short, const CDMVariable*>    pid2CdmVariablesMMap_;
-        std::map<std::string, float>                kildeName2FillValueMap_;
-        std::multimap<short, std::string>           pid2kildemap_;
-        std::multimap<short, std::string>           pid2StandardNamesMMap_;
         std::string                                 configFileName_;
 
         boost::shared_ptr<MetGmVersion>             metgmVersion_;
@@ -137,7 +128,8 @@ private:
 
         boost::posix_time::ptime                    analysisTime_;
 
-        profile_multi                               cdmVariableProfileMap_;
+        xml_configuration                           xmlConfiguration_;
+        cdm_configuration                           cdmConfiguration_;
 };
 
 }

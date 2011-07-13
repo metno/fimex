@@ -28,6 +28,7 @@
 // fimex
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/Units.h"
 #include "fimex/interpolation.h"
 
 // private/implementation code
@@ -37,6 +38,7 @@
 #include "../../include/metgm/MetGmHandlePtr.h"
 #include "../../include/metgm/MetGmGroup1Ptr.h"
 #include "../../include/metgm/MetGmFileHandlePtr.h"
+#include "../../include/metgm/MetGmConfigurationMappings.h"
 
 // udunits
 #include <udunits2.h>
@@ -63,219 +65,184 @@
 
 namespace MetNoFimex {
 
-#define FREE_TEXT "metgm_free_text"
-#define VERSION   "metgm_version"
-#define ANALYSIS_DATE_TIME "metgm_analysis_date_time"
-#define START_DATE_TIME "metgm_start_date_time"
-#define DATA_TYPE "metgm_data_type"
-#define MODEL_TYPE "metgm_model_type"
-#define PRODUCTION_NATION "metgm_production_nation"
+    #define FREE_TEXT "metgm_free_text"
+    #define VERSION   "metgm_version"
+    #define ANALYSIS_DATE_TIME "metgm_analysis_date_time"
+    #define START_DATE_TIME "metgm_start_date_time"
+    #define DATA_TYPE "metgm_data_type"
+    #define MODEL_TYPE "metgm_model_type"
+    #define PRODUCTION_NATION "metgm_production_nation"
 
-    void MetGmCDMWriterImpl::mapKildeVariablesToMetgmPids(const std::auto_ptr<XMLDoc>& doc)
+    typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
+
+    void MetGmCDMWriterImpl::configure(const std::auto_ptr<XMLDoc>& doc)
     {
+        if(!doc.get())
+            throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
+
         const CDM& cdmRef = cdmReader->getCDM();
 
-        /**
-          * it is really expected that config will be used
-          */
-        if(doc.get() != 0) {
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
-            xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            size_t size = (nodes) ? nodes->nodeNr : 0;
-            for (size_t i = 0; i < size; ++i) {
-                    xmlNodePtr node = nodes->nodeTab[i];
-                    std::string metnoName = getXmlProp(node, "name");
-                    // get the metgm p_id value
-                    XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"metgm_p_id\"]");
-                    std::string str_metgm_p_id;
-                    if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                            str_metgm_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                            if(str_metgm_p_id == std::string("")) {
-                                continue;
-                            } else {
-                                size_t metgm_p_id = boost::lexical_cast<size_t>(str_metgm_p_id);
-                                pid2kildemap_.insert(std::make_pair<short, std::string>(metgm_p_id, metnoName));
-//                                pidToExportVector_.push_back(metgm_p_id);
-                            }
-                    }
-            }
-        } else {
-            /**
-              * some arbitrary default values
-              */
-            pid2kildemap_.insert(std::pair<int, std::string>(0, "topography"));
-            /**
-              * this component is given as north to south so the values will be multiplied -1
-              * to reflect standard name
-              */
-            pid2kildemap_.insert(std::pair<int, std::string>(2, std::string("horizontal_wind_speed_from_west_to_east")));
+        // start metgm_parameter
+        XPathObjPtr xpathObj = doc->getXPathObject("/metgm/metgm_parameter");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        size_t size = (nodes) ? nodes->nodeNr : 0;
+        for (size_t i = 0; i < size; ++i) {
 
-            pid2kildemap_.insert(std::pair<int, std::string>(3, std::string("horizontal_wind_speed_from_north_to_south")));
+            xmlNodePtr node = nodes->nodeTab[i];
 
-            pid2kildemap_.insert(std::pair<int, std::string>(4, std::string("vertical_wind_speed")));
-            pid2kildemap_.insert(std::pair<int, std::string>(5, std::string("air_temperature")));
-            pid2kildemap_.insert(std::pair<int, std::string>(6, std::string("relative_humidity")));
-
-            /**
-              * check units to differentiate between pressure and geopotential height
-              */
-            if(cdmRef.hasVariable("pressure"))
-                pid2kildemap_.insert(std::pair<int, std::string>(7, std::string("pressure")));
-            else if(cdmRef.hasVariable("geopotential_height"))
-                pid2kildemap_.insert(std::pair<int, std::string>(7, std::string("geopotential_height")));
-
-            for(int p_id = 0; p_id < 8; ++p_id) {
-                /**
-                  * this should also reflect the order
-                  * in which we want to have parameters
-                  */
-//                pidToExportVector_.push_back(p_id);
-            }
-        }
-    }
-
-    void MetGmCDMWriterImpl::mapKildeNamesToFillValues(const std::auto_ptr<XMLDoc>& doc)
-    {
-        /**
-          * it is really expected that config will be used
-          */
-        if(doc.get() != 0) {
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
-            xmlNodeSetPtr nodes = xpathObj->nodesetval;
-            size_t size = (nodes) ? nodes->nodeNr : 0;
-            for (size_t i = 0; i < size; ++i) {
-                xmlNodePtr node = nodes->nodeTab[i];
-                std::string metnoName = getXmlProp(node, "name");
-                // get the metgm p_id value
-                XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+metnoName+"\"]/attribute[@name=\"_FillValue\"]");
-                std::string str_FillValue;
-                if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                    str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                    if( str_FillValue.empty()) {
-                        continue;
-                    } else {
-                        float fillValue = 0;
-                        fillValue = boost::lexical_cast<float>(str_FillValue);
-                        kildeName2FillValueMap_.insert(std::make_pair<std::string, float>(metnoName, fillValue));
-                    }
-                }
-            }
-        }
-    }
-
-    void MetGmCDMWriterImpl::detectCDMVariables() {
-        detectCDMVariablesByName();
-//        detectCDMVariablesToExportByStandardName();
-    }
-
-    void MetGmCDMWriterImpl::detectCDMVariablesByName() {
-        const CDM& cdmRef_ = cdmReader->getCDM();
-
-        std::set<short> p_id_set;
-
-        std::multimap<short, std::string>::const_iterator cmmapIt;
-        for(cmmapIt = pid2kildemap_.begin(); cmmapIt != pid2kildemap_.end(); ++cmmapIt) {
-            p_id_set.insert(cmmapIt->first);
-        }
-
-        std::set<short>::const_iterator cit;
-
-        for(cit = p_id_set.begin(); cit != p_id_set.end(); ++cit) {
-
-            const short p_id = *cit;
-
-            assert(p_id >= 0);
-
-
-#ifdef METGM_CDM_WRITER_DEBUG
-//            std::cerr
-//                    << "checking p_id "
-//                    << p_id
-//                    << std::endl;
-#endif
-            /**
-              * for same p_id we could have more CDM variables
-              */
-            std::pair<std::multimap<short, std::string>::const_iterator,
-                          std::multimap<short, std::string>::const_iterator > findIt = pid2kildemap_.equal_range(p_id);
-
-            if(findIt.first == pid2kildemap_.end()
-                    && findIt.second == pid2kildemap_.begin())
-            {
-#ifdef METGM_CDM_WRITER_DEBUG
-//                std::cerr
-//                    << "no prenamed variables found for p_id "
-//                    << p_id
-//                << std::endl;
-#endif
+            std::string metgmName = getXmlProp(node, "name");
+            if(metgmName.empty()) {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " parameter metgmName empty " << std::endl;
                 continue;
             }
 
-            std::multimap<short, std::string>::const_iterator cit;
-            for(cit = findIt.first; cit != findIt.second; ++cit) {
-                std::string variableName = (*cit).second;
-#ifdef METGM_CDM_WRITER_DEBUG
-//                std::cerr
-//                    << "for p_id "
-//                    << p_id
-//                    << " searching CDMVariable with name "
-//                    << variableName
-//                << std::endl;
-#endif
-
-                if(!cdmRef_.hasVariable(variableName)) {
-
-#ifdef METGM_CDM_WRITER_DEBUG
-//                    std::cerr
-//                        << "for p_id "
-//                        << p_id
-//                        << " and name "
-//                        << variableName
-//                        << " CDM model doesn't have CDMVariable"
-//                    << std::endl;
-#endif
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            std::string str_p_id;
+            short p_id = 0;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                if(str_p_id == std::string("")) {
+                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
                     continue;
                 }
-#ifdef METGM_CDM_WRITER_DEBUG
-//                std::cerr
-//                    << "for p_id "
-//                    << p_id
-//                    << " and name "
-//                    << variableName
-//                    << " CDMVariable found!"
-//                << std::endl;
-#endif
-                const CDMVariable* cdmVariable = &(cdmRef_.getVariable(variableName));
+                p_id = boost::lexical_cast<size_t>(str_p_id);
+            } else {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
+                continue;
+            }
 
-                /**
-                  * check if CDMVariable* is in the final list
-                  */
+            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"_FillValue\"]");
+            std::string str_FillValue;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
 
-                std::pair<std::multimap<short, const CDMVariable*>::iterator,
-                              std::multimap<short, const CDMVariable*>::iterator > varRangeIt = pid2CdmVariablesMMap_.equal_range(p_id);
-                if(varRangeIt.first == pid2CdmVariablesMMap_.end()
-                        && varRangeIt.second == pid2CdmVariablesMMap_.end())
-                {
-                    // not even one entry
-                    pid2CdmVariablesMMap_.insert(std::make_pair<short, const CDMVariable*>(p_id,cdmVariable));
-                } else {
-                    // some entries -> check them
-                    bool bFound = false;
-                    std::multimap<short, const CDMVariable*>::const_iterator varIt;
-                    for(varIt = varRangeIt.first; varIt != varRangeIt.second; ++varIt) {
-                        if(cdmVariable == varIt->second)
-                            bFound = true;
+            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"units\"]");
+            std::string str_units;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"standard_name\"]");
+            std::string str_standard_name;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                if(str_standard_name.empty()) {
+                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
+                    continue;
+                }
+                // find all variables with given standard_name value
+                std::vector<std::string> varNames = cdmRef.findVariables("standard_name", str_standard_name);
+                for(size_t index = 0; index < varNames.size(); ++index) {
+                    std::string varName = varNames[index];
+                    if(cdmRef.hasDimension(varName)) {
+                        /* not interested in variables that are dimensions */
+                        std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] there is dimension with name -> " << metgmName << std::endl;
+                        continue;
                     }
-                    if(!bFound)
-                        pid2CdmVariablesMMap_.insert(std::make_pair<short, const CDMVariable*>(p_id,cdmVariable));
+
+                    const CDMVariable* pVar = &cdmRef.getVariable(varName);
+
+                    if(!str_units.empty() && !cdmRef.getUnits(varName).empty()) {
+                        /* check if dimensions convertible */
+                        Units checker;
+                        if(!checker.areConvertible(str_units, cdmRef.getUnits(varName))) {
+                            std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << metgmName << std::endl;
+                            continue;
+                        }
+                    }
+
+                    MetGmConfigurationMappings cfgEntry(p_id, pVar);
+                    cfgEntry.kildeName_ = pVar->getName();
+                    cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
+
+                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " found -> " << pVar->getName() << std::endl;
+
+                    if(!str_FillValue.empty())
+                        cfgEntry.setFillValue(boost::lexical_cast<float>(str_FillValue));
+
+                    xmlConfiguration_.insert(cfgEntry);
+                }
+
+            } else {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
+                continue;
+            }
+        }
+        // end metgm_parameter
+
+//        XPathObjPtr
+                xpathObj = doc->getXPathObject("/metgm/variable");
+//        xmlNodeSetPtr
+                nodes = xpathObj->nodesetval;
+//        size_t
+                size = (nodes) ? nodes->nodeNr : 0;
+        for (size_t i = 0; i < size; ++i) {
+
+            xmlNodePtr node = nodes->nodeTab[i];
+
+            std::string kildeName = getXmlProp(node, "name");
+            if(kildeName.empty()) {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
+                continue;
+            }
+
+            if(!cdmRef.hasVariable(kildeName)) {
+                std::cerr << __FILE__ " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " not found in CDM model -> " << kildeName << std::endl;
+                continue;
+            }
+
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            std::string str_p_id;
+            short p_id = 0;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                if(str_p_id == std::string("")) {
+                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+                    continue;
+                }
+                p_id = boost::lexical_cast<size_t>(str_p_id);
+            } else {
+                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+                continue;
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
+            std::string str_units;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            const CDMVariable* pVar = &cdmRef.getVariable(kildeName);
+
+            if(!str_units.empty() && !cdmRef.getUnits(kildeName).empty()) {
+                /* check if dimensions convertible */
+                Units checker;
+                if(!checker.areConvertible(str_units, cdmRef.getUnits(kildeName))) {
+                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << kildeName << std::endl;
+                    continue;
                 }
             }
+
+            MetGmConfigurationMappings cfgEntry(p_id, pVar);
+            cfgEntry.kildeName_ = kildeName;
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
+            std::string str_FillValue;
+            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+                if(str_FillValue.empty()) {
+                    /*do nothing*/;
+                } else {
+                    float fillValue = boost::lexical_cast<float>(str_FillValue);
+                    cfgEntry.setFillValue(fillValue);
+                }
+            }
+
+            xmlConfiguration_.insert(cfgEntry);
         }
     }
 
-    void MetGmCDMWriterImpl::detectCDMVariablesByStandardName() {
-
-    }
 
     void MetGmCDMWriterImpl::writeGroup0Data()
     {
@@ -302,24 +269,24 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup2Data()
     {
-        short total_number_of_parameters = cdmVariableProfileMap_.size();
+        short total_number_of_parameters = cdmConfiguration_.size();
         std::cerr << __FUNCTION__ << "@" << __LINE__ << " total_number_of_parameters :" << total_number_of_parameters << std::endl;
-        MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, cdmVariableProfileMap_.size()))
+        MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, cdmConfiguration_.size()))
 
         if(*metgmVersion_ == MGM_Edition2) {
 
-            pidIndex &pidindex = cdmVariableProfileMap_.get<pid_index>();
-            const short ndp = pidindex.size();
+            cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
+            const short ndp = pidView.size();
 
             MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
 
             size_t index = 0;
-            for(pidIndex::const_iterator cit = pidindex.begin(); cit != pidindex.end(); ++cit) {
+            for(cdmPidView::const_iterator cit = pidView.begin(); cit != pidView.end(); ++cit) {
 
                 ++index;
 
                 const MetGmCDMVariableProfile& profile = *cit;
-                size_t ndpr = pidindex.count(profile.p_id_);
+                size_t ndpr = pidView.count(profile.p_id_);
 
                 MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, profile.p_id_))
                 MGM_THROW_ON_ERROR(mgm_set_ndpr(*metgmHandle_, index, ndpr))
@@ -329,12 +296,8 @@ namespace MetNoFimex {
                   *
                   * the HD value should be highest for given parameter
                   */
-
-
                 MGM_THROW_ON_ERROR(mgm_set_hd(*metgmHandle_, index, profile.hd()))
-
             }
-
         }
     }
 
@@ -345,8 +308,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3TimeAxis(const CDMVariable* pVar)
     {
-        cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
-        MetGmTagsPtr tags = cdmVariableView.find(pVar)->pTags_;
+        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+        MetGmTagsPtr tags = variableView.find(pVar)->pTags_;
 
         if(tags->dimTag()->tTag().get()) {
             MGM_THROW_ON_ERROR(tags->gp3()->set_nt(tags->dimTag()->tTag()->nT()))
@@ -359,8 +322,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3HorizontalAxis(const CDMVariable* pVar)
     {
-        cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
-        MetGmTagsPtr tags = cdmVariableView.find(pVar)->pTags_;
+        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+        MetGmTagsPtr tags = variableView.find(pVar)->pTags_;
 
         // x
         MGM_THROW_ON_ERROR(tags->gp3()->set_dx(tags->dimTag()->xTag()->dx()));
@@ -374,15 +337,21 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3VerticalAxis(const CDMVariable* pVar)
     {
-        cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
-        MetGmTagsPtr tags = cdmVariableView.find(pVar)->pTags_;
+        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+        MetGmTagsPtr tags = variableView.find(pVar)->pTags_;
 
         if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " pVar->Name " << pVar->getName()
+                      << std::endl;
             MGM_THROW_ON_ERROR(tags->gp3()->set_nz(tags->dimTag()->zTag()->nz()));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pr(tags->dimTag()->zTag()->pr()));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pz(tags->dimTag()->zTag()->pz()));
         } else {
             /* no z profile for variable*/
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " pVar->Name " << pVar->getName()
+                      << std::endl;
             MGM_THROW_ON_ERROR(tags->gp3()->set_nz(1));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pr(0));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pz(1));
@@ -391,7 +360,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3Data(const CDMVariable* pVar)
     {
-        cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
+
+        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
 
         writeGroup3TimeAxis(pVar);
 
@@ -399,18 +369,21 @@ namespace MetNoFimex {
 
         writeGroup3VerticalAxis(pVar);
 
-        cdmVariableView.find(pVar)->pTags_->gp3()->dump();
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                  << " pVar->Name " << pVar->getName() << " dumping gp3"
+                  << std::endl;
+        variableView.find(pVar)->pTags_->gp3()->dump();
 
-        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(cdmVariableView.find(pVar)->pTags_->gp3())));
+        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(variableView.find(pVar)->pTags_->gp3())));
     }
 
     void MetGmCDMWriterImpl::writeGroup4Data(const CDMVariable* pVar)
     {
-        cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
+        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
 
-        if(cdmVariableView.find(pVar)->pTags_->dimTag().get()
-                && cdmVariableView.find(pVar)->pTags_->dimTag()->zTag().get()) {
-            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, cdmVariableView.find(pVar)->pTags_->dimTag()->zTag()->points().get()));
+        if(variableView.find(pVar)->pTags_->dimTag().get()
+                && variableView.find(pVar)->pTags_->dimTag()->zTag().get()) {
+            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, variableView.find(pVar)->pTags_->dimTag()->zTag()->points().get()));
         } else {
             /* no z profile for variable */
             float f = 0;
@@ -421,30 +394,24 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup5Data(const CDMVariable* pVar)
     {
-        cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
+        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
 
-        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(cdmVariableView.find(pVar)->pTags_->gp5())));
+        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(variableView.find(pVar)->pTags_->gp5())));
     }
 
     void MetGmCDMWriterImpl::init()
     {
-        detectCDMVariables();
-
-        std::map<short, const CDMVariable* >::const_iterator cit;
-
-        for(cit = pid2CdmVariablesMMap_.begin(); cit != this->pid2CdmVariablesMMap_.end(); ++cit) {
-
-            const short p_id = cit->first;
-            const CDMVariable* varPtr = cit->second;
-            std::string variableName = varPtr->getName();
+        xmlVariableView &variableView = xmlConfiguration_.get<xml_variable_index>();
+        for(xmlVariableView::const_iterator vit = variableView.begin(); vit != variableView.end(); ++vit) {
+            MetGmConfigurationMappings entry = *vit;
 
             std::cerr
                     << __FUNCTION__ << ":"
                     << __LINE__     << ":"
                     << "p_id = "
-                    << p_id
+                    << entry.p_id_
                     << " CDMVariable with name = "
-                    << variableName
+                    << entry.kildeName_
                     << std::endl;
 
             MetGmTagsPtr tags;
@@ -453,24 +420,23 @@ namespace MetNoFimex {
 
             assert(gp3.get());
 
-            gp3->set_p_id(p_id);
+            gp3->set_p_id(entry.p_id_);
 
-            cdmVariableIndex &cdmVariableView = cdmVariableProfileMap_.get<cdmvariable_index>();
-            if(cdmVariableView.find(varPtr) != cdmVariableView.end())
+            cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+            if(variableView.find(entry.variable_) != variableView.end())
                 throw CDMException("hmmm... the variable should not be fount in variable profile map");
 
-            if(kildeName2FillValueMap_.find(varPtr->getName()) != kildeName2FillValueMap_.end())
+            if(entry.fillValue_.get())
             {
-                const float externalFillValue = kildeName2FillValueMap_[varPtr->getName()];
-                tags = MetGmTags::createMetGmTags(cdmReader, varPtr, gp3, &externalFillValue);
+                tags = MetGmTags::createMetGmTags(cdmReader, entry.variable_, gp3, entry.fillValue_.get());
             } else {
-                tags = MetGmTags::createMetGmTags(cdmReader, varPtr, gp3, 0);
+                tags = MetGmTags::createMetGmTags(cdmReader, entry.variable_, gp3, 0);
             }
 
             assert(tags.get());
 
-            MetGmCDMVariableProfile profile(p_id, varPtr, tags);
-            cdmVariableProfileMap_.insert(profile);
+            MetGmCDMVariableProfile profile(entry.p_id_, entry.variable_, tags);
+            cdmConfiguration_.insert(profile);
         }
 
         writeGroup0Data();
@@ -479,8 +445,8 @@ namespace MetNoFimex {
 
         writeHeader();
 
-        profile_multi::const_iterator varIt;
-        for(varIt = cdmVariableProfileMap_.begin(); varIt != cdmVariableProfileMap_.end(); ++varIt) {
+        cdm_configuration::const_iterator varIt;
+        for(varIt = cdmConfiguration_.begin(); varIt != cdmConfiguration_.end(); ++varIt) {
 
             MetGmCDMVariableProfile profile = *varIt;
             writeGroup3Data(profile.variable());
@@ -514,11 +480,7 @@ namespace MetNoFimex {
         metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForWriting(outputFile);
         metgmHandle_ = MetGmHandlePtr::createMetGmHandle();
 
-        assert(xmlDoc.get() != 0);
-
-//        mapMetgmPidToMetgmHDs(xmlDoc);
-        mapKildeNamesToFillValues(xmlDoc);
-        mapKildeVariablesToMetgmPids(xmlDoc);
+        configure(xmlDoc);
 
         init();
     }
@@ -526,5 +488,3 @@ namespace MetNoFimex {
     MetGmCDMWriterImpl::~MetGmCDMWriterImpl() { }
 
 } // end namespace
-
-
