@@ -110,7 +110,7 @@ namespace MetNoFimex {
         // returning projName and coordinates for given place name
         boost::tuple<std::string, std::string> addProjection();
 
-        void addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim);
+        void addVariables(const CDMDimension& timeDim);
 
     private:
 

@@ -185,13 +185,7 @@ namespace MetNoFimex {
             xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
         }
 
-        assert(xmlDoc.get() != 0);
-
         configure(xmlDoc);
-
-//        fillPidToMetNoNameMap(xmlDoc);
-//        fillPidToCdmNameMap(xmlDoc);
-//        fillPidToFillValueMap(xmlDoc);
 
         addLevelDimensions();
 
@@ -199,12 +193,9 @@ namespace MetNoFimex {
 
         addGlobalCDMAttributes();
 
-        // get projection and coordinates
-        boost::tuple<std::string, std::string> projectionTuple = addProjection();
-        std::string projectionName = projectionTuple.get<0>();
-        std::string projectionCoordinates = projectionTuple.get<1>();
+        addProjection();
 
-        addVariables(projectionName, projectionCoordinates, timeDimension);
+        addVariables(timeDimension);
     }
 
     void MetGmCDMReaderImpl::addGlobalCDMAttributes()
@@ -759,7 +750,7 @@ namespace MetNoFimex {
         return;
     }
 
-    void MetGmCDMReaderImpl::addVariables(const std::string& projName, const std::string& coordinates, const CDMDimension& timeDimension)
+    void MetGmCDMReaderImpl::addVariables(const CDMDimension& timeDimension)
     {
         std::string hcDataType = "float";
 
@@ -912,10 +903,10 @@ namespace MetNoFimex {
 
                 shape.push_back(timeDimension.getName());
 
-                if (!coordinates.empty()) {
-                    CDMAttribute coordinatesAttributes("coordinates", coordinates);
-                    attributes.push_back(coordinatesAttributes);
-                }
+//                if (!coordinates.empty()) {
+//                    CDMAttribute coordinatesAttributes("coordinates", coordinates);
+//                    attributes.push_back(coordinatesAttributes);
+//                }
             }
 
             CDMDataType type = string2datatype(hcDataType);

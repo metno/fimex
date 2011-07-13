@@ -423,8 +423,9 @@ namespace MetNoFimex {
             gp3->set_p_id(entry.p_id_);
 
             cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
-            if(variableView.find(entry.variable_) != variableView.end())
+            if(variableView.find(entry.variable_) != variableView.end()) {
                 throw CDMException("hmmm... the variable should not be fount in variable profile map");
+            }
 
             if(entry.fillValue_.get())
             {
