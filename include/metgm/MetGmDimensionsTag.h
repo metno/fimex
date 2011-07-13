@@ -62,9 +62,6 @@ namespace MetNoFimex {
 
             boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
 
-            tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pCdmReader, pVariable);
-            bool hasTAxis = tag->pTTag_.get() ? true : false;
-
             tag->pXTag_ = MetGmHorizontalTag::createMetGmXTag(pCdmReader, pVariable);
             bool hasXAxis = tag->pXTag_.get() ? true : false;
 
@@ -74,11 +71,18 @@ namespace MetNoFimex {
             tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTag(pCdmReader, pVariable);
             bool hasZAxis = tag->pZTag_.get() ? true : false;
 
+            tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pCdmReader, pVariable);
+            bool hasTAxis = tag->pTTag_.get() ? true : false;
+
+            std::cerr << " hasXAxis=" << hasXAxis << " hasYAxis=" << hasYAxis
+                      << " hasZAxis=" << hasZAxis << " hasTAxis=" << hasTAxis
+                      << std::endl;
+
             if(hasZAxis && hasXAxis && hasYAxis) {
                 tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
-            } else if((hasZAxis && hasXAxis && hasYAxis) || (hasZAxis && !hasXAxis && hasYAxis) || (hasZAxis && hasXAxis && !hasYAxis)) {
+            } else if((hasXAxis && hasYAxis) || (hasZAxis && hasYAxis) || (hasZAxis && hasXAxis)) {
                 tag->hd_= hasTAxis ? HD_2D_T : HD_2D;
-            } else if((!hasZAxis && !hasXAxis && hasYAxis) || (!hasZAxis && hasXAxis && !hasYAxis) || (hasZAxis && !hasXAxis && !hasYAxis)) {
+            } else if((hasYAxis) || (hasXAxis) || (hasZAxis)) {
                 tag->hd_= hasTAxis ? HD_1D_T : HD_1D;
             } else {
                 tag->hd_= hasTAxis ?  HD_0D_T : HD_0D;
