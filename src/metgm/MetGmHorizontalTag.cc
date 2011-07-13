@@ -128,11 +128,18 @@ boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTag(boost::shared_p
     if (varSysIt != coordSys.end()) {
         if((*varSysIt)->isSimpleSpatialGridded()) {
 
-            XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
-
             CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis();
 
-            assert(xAxis->getAxisType() == CoordinateAxis::Lon);
+            if(!xAxis.get()) {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " x axis NOT existing for " << pVariable->getName() << std::endl;
+                return boost::shared_ptr<MetGmXTag>();
+            } else {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " x axis IS existing for " << pVariable->getName() << std::endl;
+            }
+
+            XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
 
             boost::shared_ptr<Data> data = pCdmReader->getScaledDataInUnit(xAxis->getName(), "degree");
 
@@ -172,11 +179,18 @@ boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTag(boost::shared_p
     if (varSysIt != coordSys.end()) {
         if((*varSysIt)->isSimpleSpatialGridded()) {
 
-            YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);
-
             CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis();
 
-            assert(yAxis->getAxisType() == CoordinateAxis::Lat);
+            if(!yAxis.get()) {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " y axis NOT existing for " << pVariable->getName() << std::endl;
+                return boost::shared_ptr<MetGmYTag>();
+            } else {
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " y axis IS existing for " << pVariable->getName() << std::endl;
+            }
+
+            YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);
 
             boost::shared_ptr<Data> data = pCdmReader->getScaledDataInUnit(yAxis->getName(), "degree");
 
