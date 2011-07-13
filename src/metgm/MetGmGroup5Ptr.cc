@@ -85,6 +85,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::sh
             {
                 std::string mgmUnits;
 
+                std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
                 if(gp5->pGp3_->p_id() == 7) {
                     /**
                       * METGM is tricky here as it can accomodate both m and hPa units
@@ -93,11 +94,17 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::sh
                       *
                       * it should honor the pr settings
                       */
-                    if(gp5->pGp3_->pr() == 2) {
-                        /* pressure */
-                        mgmUnits = "hPa";
-                    } else {
+                    if(gp5->hdTag_->zTag()->pr() == 2) {
+                        /**
+                          * If the value specified for pr is 2,
+                          * and the values for pid=7 (if reported)
+                          * are heights given in meters above MSL
+                          */
                         mgmUnits = "m";
+                        std::cerr << __FUNCTION__ << " @ " << __LINE__ << " m " << pVariable->getName() << std::endl;
+                    } else {
+                        mgmUnits = "hPa";
+                        std::cerr << __FUNCTION__ << " @ " << __LINE__ << " hPa " << pVariable->getName() << std::endl;
                     }
                 } else {
                     mgmUnits = std::string(mgm_get_param_unit(gp5->pGp3_->p_id(), *(gp5->pGp3_->mgmHandle())));
@@ -110,6 +117,8 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::sh
                 gp5->changeFillValue();
 
                 gp5->transpozeData();
+
+                std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
             }
             break;
         case MetGmHDTag::HD_0D:
@@ -119,7 +128,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::sh
         case MetGmHDTag::HD_2D_T:
         case MetGmHDTag::HD_3D:
         default:
-            throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + gp5->hdTag_->asString());
+        throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + gp5->hdTag_->asString() + " for " + pVariable->getName());
     }
 
     return gp5;
