@@ -56,12 +56,9 @@ boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1Ptr(boost::sh
 
     // set analysis date time
     if(!gp1->parser_->analysisDateTime().empty()) {
-//        gp1->analysis_t = gp1->tTag_->analysisTime();
 
         std::string a_date(gp1->parser_->analysisDateTime());
-        std::cerr << __FUNCTION__ << "@" << __LINE__ << "   a_date [" << a_date << "]" << std::endl;
         boost::posix_time::ptime analysis_posix = boost::posix_time::from_iso_string(a_date);
-        std::cerr << __FUNCTION__ << "@" << __LINE__ << "   a_date " << a_date << std::endl;
 
         TimeUnit tu("seconds since 1970-01-01 00:00:00");
         double unit_time = tu.posixTime2unitTime(analysis_posix);
