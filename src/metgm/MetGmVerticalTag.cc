@@ -102,13 +102,10 @@ bool MetGmVerticalTag::hasNegativePoints() {
     return std::find_if(&points_[0], &points_[nz_], boost::bind( leq, _1, 0 ) ) != &points_[nz_];
 }
 
-void MetGmVerticalTag::extractVerticalPoints(const boost::shared_ptr<Data>& data)
-{
-    points_ = data->asConstFloat();
-
-    if(hasNegativePoints())
-        throw CDMException("negative values on the vertical axis not supported");
-}
+    void MetGmVerticalTag::extractVerticalPoints(const boost::shared_ptr<Data>& data)
+    {
+        points_ = data->asConstFloat();
+    }
 
 }
 
