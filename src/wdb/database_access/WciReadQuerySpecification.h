@@ -59,6 +59,13 @@ public:
 	 */
 	WciReadQuerySpecification();
 
+	WciReadQuerySpecification(
+			const std::set<std::string> * dataProvider,
+			const std::string * location,
+			const std::string * referenceTime,
+			const std::set<std::string> * parameter,
+			const std::set<int> * dataVersion);
+
 	/**
 	 * Create a query string for this object.
 	 */
@@ -142,10 +149,22 @@ private:
 	std::string referenceTime_;
 	std::set<std::string> parameter_;
 	std::set<int> dataVersion_;
+
+	friend bool operator == (const WciReadQuerySpecification & a, const WciReadQuerySpecification & b);
 };
 
+inline bool operator == (const WciReadQuerySpecification & a, const WciReadQuerySpecification & b)
+{
+	return a.dataProvider_ == b.dataProvider_ and
+			a.location_ == b.location_ and
+			a.referenceTime_ == b.referenceTime_ and
+			a.parameter_ == b.parameter_ and
+			a.dataVersion_ == b.dataVersion_;
 }
 
+std::ostream & operator << (std::ostream & s, const WciReadQuerySpecification & spec);
+
+}
 }
 
 #endif /* WCIREADQUERYSPECIFICATION_H_ */

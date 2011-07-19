@@ -78,7 +78,8 @@ public:
 	const WciReadQuerySpecification & query() const { return querySpec_; }
 
 private:
-	void init_(std::istream & configStream);
+	void initPlain_(std::istream & configStream);
+	void initXml_(const boost::filesystem::path & configFile);
 
 	std::string database_;
 	std::string host_;

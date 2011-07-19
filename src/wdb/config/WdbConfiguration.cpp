@@ -28,11 +28,16 @@
 
 #include "WdbConfiguration.h"
 #include <fimex/CDMException.h>
+#include <fimex/XMLDoc.h>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 #include <boost/foreach.hpp>
 #include <fstream>
+#include <iostream>
+#include <libxml/xinclude.h>
+#include <libxml/xpathInternals.h>
+
 
 namespace MetNoFimex
 {
@@ -48,13 +53,18 @@ WdbConfiguration::WdbConfiguration(const boost::filesystem::path & configFile)
 	if ( is_directory(configFile) )
 		throw CDMException(configFile.string() + " is a directory");
 
-	boost::filesystem::ifstream configStream(configFile);
-	init_(configStream);
+	if ( configFile.extension() == ".xml" )
+		initXml_(configFile);
+	else
+	{
+		boost::filesystem::ifstream configStream(configFile);
+		initPlain_(configStream);
+	}
 }
 
 WdbConfiguration::WdbConfiguration(std::istream & configStream)
 {
-	init_(configStream);
+	initPlain_(configStream);
 }
 
 WdbConfiguration::~WdbConfiguration()
@@ -135,7 +145,7 @@ int getDefaultPort()
 
 }
 
-void WdbConfiguration::init_(std::istream & configStream)
+void WdbConfiguration::initPlain_(std::istream & configStream)
 {
 	using namespace boost::program_options;
 
@@ -213,8 +223,72 @@ void WdbConfiguration::init_(std::istream & configStream)
     		throw std::runtime_error(configFile.string() + " is a directory");
 
     	boost::filesystem::ifstream config(configFile);
-    	init_(config);
+    	initPlain_(config);
     }
+}
+
+namespace
+{
+std::string singleValue(const XMLDoc & document, const std::string & path, const std::string & defaultValue = std::string())
+{
+	XPathObjPtr obj = document.getXPathObject(path);
+
+	xmlNodeSetPtr nodeset = obj->nodesetval;
+
+	if ( nodeset->nodeNr == 0 )
+		return defaultValue;
+
+	if ( nodeset->nodeNr > 1 )
+		throw std::runtime_error(path + ": many such elements in xml (only one allowed)");
+
+	return getXmlContent(nodeset->nodeTab[0]);
+}
+
+template<typename T>
+std::vector<T> values(const XMLDoc & document, const std::string & path)
+{
+	std::vector<T> ret;
+
+	XPathObjPtr obj = document.getXPathObject(path);
+	xmlNodeSetPtr nodeset = obj->nodesetval;
+	for ( int i = 0; i < nodeset->nodeNr; ++ i )
+		ret.push_back(boost::lexical_cast<T>(getXmlContent(nodeset->nodeTab[i])));
+
+	return ret;
+}
+
+}
+
+void WdbConfiguration::initXml_(const boost::filesystem::path & configFile)
+{
+	XMLDoc document(configFile.file_string());
+
+	std::string connection = "//wdb_query/connection/";
+
+	database_ = singleValue(document, connection + "database", getDefaultTarget());
+	host_ = singleValue(document, connection + "host", getDefaultHost());
+	port_ = boost::lexical_cast<int>(singleValue(document, connection + "port", "5432"));
+	user_ = singleValue(document, connection + "user", getDefaultUser());
+
+	wciUser_ = singleValue(document, "//wci/begin/user", user_);
+
+	std::string read = "//wci/read/";
+	BOOST_FOREACH(const std::string & dataProvider, values<std::string>(document, read + "dataprovider"))
+		querySpec_.addDataProvider(dataProvider);
+	std::string location = singleValue(document, read + "location");
+	if ( not location.empty() )
+		querySpec_.setLocation(location);
+	std::string referenceTime = singleValue(document, read+"referencetime");
+	if ( not referenceTime.empty() )
+		querySpec_.setReferenceTime(referenceTime);
+//	std::string validTime = singleValue(document, read+"validtime");
+//	if ( not validTime.empty() )
+//		querySpec_.setValidTime(validTime);
+	BOOST_FOREACH(const std::string & parameter, values<std::string>(document, read + "valueparameter"))
+		querySpec_.addParameter(parameter);
+	// Level is not supported yet
+	BOOST_FOREACH(int dataVersion, values<int>(document, read + "dataversion"))
+		querySpec_.addDataVersion(dataVersion);
 }
 
 

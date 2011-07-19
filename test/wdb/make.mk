@@ -8,6 +8,7 @@ if HAVE_LIBPQ
   	wdb/Wdb2CdmBuilderTest.cc \
   	wdb/WdbIndexTest.cc \
   	wdb/WdbConfigurationTest.cpp \
+  	wdb/ConfigurationTest.cpp \
   	wdb/GlobalWdbConfigurationTest.cpp \
   	wdb/TimeHandlerTest.cpp
   	

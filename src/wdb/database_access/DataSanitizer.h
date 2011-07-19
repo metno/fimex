@@ -52,10 +52,12 @@ public:
 	 */
 	explicit DataSanitizer(PGconn * connection);
 
+	virtual ~DataSanitizer() {}
+
 	/**
 	 * Clean an unsafe string for use in a query
 	 */
-	std::string operator () (const std::string & unsafeString) const;
+	virtual std::string operator () (const std::string & unsafeString) const;
 
 private:
 	PGconn * connection_;

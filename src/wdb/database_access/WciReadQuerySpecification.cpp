@@ -41,6 +41,26 @@ WciReadQuerySpecification::WciReadQuerySpecification()
 {
 }
 
+WciReadQuerySpecification::WciReadQuerySpecification(
+		const std::set<std::string> * dataProvider,
+		const std::string * location,
+		const std::string * referenceTime,
+		const std::set<std::string> * parameter,
+		const std::set<int> * dataVersion)
+{
+	if ( dataProvider )
+		dataProvider_ = * dataProvider;
+	if ( location )
+		location_ = * location;
+	if ( referenceTime )
+		referenceTime_ = * referenceTime;
+	if ( parameter )
+		parameter_ = * parameter;
+	if ( dataVersion )
+		dataVersion_ = * dataVersion;
+}
+
+
 namespace
 {
 class StringBuilder
@@ -179,6 +199,26 @@ std::ostream & WciReadQuerySpecification::referenceTimeQuery_(std::ostream & s, 
 		toString.add(s, referenceTime());
 
 	return s;
+}
+
+namespace
+{
+class FakeSanitizer : public DataSanitizer
+{
+public:
+	FakeSanitizer() :
+		DataSanitizer(0)
+	{}
+	virtual std::string operator () (const std::string & unsafeString) const
+	{
+		return unsafeString;
+	}
+};
+}
+
+std::ostream & operator << (std::ostream & s, const WciReadQuerySpecification & spec)
+{
+	return s << spec.query(FakeSanitizer());
 }
 
 }
