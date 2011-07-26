@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="wdb_query">
+		<xs:complexType>
+			<xs:sequence>
+
+				<xs:element name="connection">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="database" type="xs:string" />
+							<xs:element name="host" type="xs:string" minOccurs="0" />
+							<xs:element name="port" type="xs:integer" minOccurs="0" />
+							<xs:element name="user" type="xs:string" minOccurs="0" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+
+				<xs:element name="wci">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="begin">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="user" type="xs:string" minOccurs="0" />
+										<!-- todo: add namespace definitions -->
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							
+							<xs:element name="read">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="dataprovider" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+										<xs:element name="location" type="xs:string" minOccurs="0" />
+										<xs:element name="referencetime" type="xs:string" minOccurs="0" />
+										<xs:element name="validtime" type="xs:string" minOccurs="0" />
+										<xs:element name="valueparameter" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+										<xs:element name="levelparameter" type="xs:string" minOccurs="0" />
+										<xs:element name="dataversion" type="xs:integer" minOccurs="0" maxOccurs="unbounded" />
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+
+</xs:schema>
