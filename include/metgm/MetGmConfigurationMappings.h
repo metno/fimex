@@ -53,31 +53,23 @@ namespace MetNoFimex {
     struct MetGmConfigurationMappings {
 
         short                          p_id_;
-        std::string                    kildeName_;
+        std::string                    cdmName_;
         std::string                    standardName_;
         std::string                    units_;
         boost::shared_ptr<float>       fillValue_;
 
-        bool operator<(const MetGmConfigurationMappings& entry)const{return kildeName_ < entry.kildeName_;}
+        bool operator<(const MetGmConfigurationMappings& entry)const{return cdmName_ < entry.cdmName_;}
 
         void setFillValue(const float fillValue)
         {
             fillValue_ = boost::shared_ptr<float>(new float(fillValue));
         }
 
-        const CDMVariable* variable_;
-
-        MetGmConfigurationMappings(short p_id, const CDMVariable* variable) : p_id_(p_id), variable_(variable)
-        {
-            assert(variable_);
-            kildeName_ == variable_->getName();
-        }
+        MetGmConfigurationMappings(short p_id, const std::string name) : p_id_(p_id), cdmName_(name) { }
     };
 
     struct xml_pid_index {};
-    struct xml_kildename_index {};
-    struct xml_standardname_index {};
-    struct xml_variable_index {};
+    struct xml_name_index {};
 
     typedef boost::multi_index::multi_index_container<
       MetGmConfigurationMappings,
@@ -85,28 +77,22 @@ namespace MetNoFimex {
         boost::multi_index::ordered_unique<
           boost::multi_index::identity<MetGmConfigurationMappings>
         >,
-        boost::multi_index::hashed_non_unique<
+        boost::multi_index::ordered_non_unique<
           boost::multi_index::tag<xml_pid_index>,
           boost::multi_index::member<
             MetGmConfigurationMappings, short, &MetGmConfigurationMappings::p_id_
           >
         >,
         boost::multi_index::hashed_non_unique<
-          boost::multi_index::tag<xml_kildename_index>,
+          boost::multi_index::tag<xml_name_index>,
             boost::multi_index::member<
-              MetGmConfigurationMappings, std::string, &MetGmConfigurationMappings::kildeName_ >
-        >,
-        boost::multi_index::hashed_unique<
-        boost::multi_index::tag<xml_variable_index>,
-        boost::multi_index::member<
-          MetGmConfigurationMappings, const CDMVariable*, &MetGmConfigurationMappings::variable_ >
+              MetGmConfigurationMappings, std::string, &MetGmConfigurationMappings::cdmName_ >
         >
       >
     > xml_configuration;
 
-    typedef xml_configuration::index<xml_pid_index>::type         xmlPidView;
-    typedef xml_configuration::index<xml_kildename_index>::type   xmlKildeNameView;
-    typedef xml_configuration::index<xml_variable_index>::type    xmlVariableView;
+    typedef xml_configuration::index<xml_pid_index>::type    xmlPidView;
+    typedef xml_configuration::index<xml_name_index>::type   xmlNameView;
 }
 
 #endif
