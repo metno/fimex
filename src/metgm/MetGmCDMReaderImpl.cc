@@ -102,10 +102,10 @@ namespace MetNoFimex {
             }
 
             if(str_standard_name.empty()) {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard name not found -> " << kildeName << std::endl;
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name not found -> " << kildeName << std::endl;
                 continue;
             } else {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard name for -> " << kildeName  << " is " << str_standard_name << std::endl;
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name for -> " << kildeName  << " is " << str_standard_name << std::endl;
             }
 
             xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
@@ -279,9 +279,13 @@ namespace MetNoFimex {
         cdmPidView::iterator pIt = pidView.begin();
         for(; pIt != pidView.end(); ++pIt) if(pIt->p_id_ > 0) break;
 
+        if(pIt == pidView.end())
+            pIt = pidView.begin();
+
         std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
                   << " time axis data based on variable = " << pIt->cdmName_
                   << std::endl;
+
         long timeDimensionSize = pIt->pTags_->dimTag()->tTag()->nT();
 
         tDim_.setName(hcTimeDimensionName);
@@ -386,15 +390,53 @@ namespace MetNoFimex {
           * 3. geopotential height - GND reference
           */
 
-        if(cdmConfiguration_.size() == 0)
+        if(cdmConfiguration_.size() == 0) {
             return;
+        }
+
+//        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
+
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                  << " nameView.size_() => " << nameView.size()
+//                  << std::endl;
+
+//        for(cdmNameView::iterator nIt = nameView.begin(); nIt != nameView.end(); ++nIt) {
+//            MetGmCDMVariableProfile profile = *nIt;
+
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " CDM_NAME_VIEW TESTING FOR p_id [" << profile.p_id_ << "]"
+//                      << " with name " << profile.cdmName_
+//                      << std::endl;
+//        }
+
 
         cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
+
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                  << " pidView.size_() => " << pidView.size()
+                  << std::endl;
+
         for(cdmPidView::iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
             MetGmCDMVariableProfile profile = *pIt;
-            if(profile.pTags_->dimTag()->zTag().get() == 0
-                    || (profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D
-                        && profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D_T))
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " CDM_PID_VIEW TESTING FOR p_id [" << profile.p_id_ << "]"
+                      << " with name " << profile.cdmName_
+                      << std::endl;
+        }
+
+        for(cdmPidView::iterator pidIt = pidView.begin(); pidIt != pidView.end(); ++pidIt) {
+            MetGmCDMVariableProfile profile = *pidIt;
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " adding data for p_id [" << profile.p_id_ << "]"
+                      << " with name " << profile.cdmName_
+                      << std::endl;
+
+            if(profile.p_id_ == 0
+               || profile.pTags_->dimTag()->zTag().get() == 0
+               || (profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D
+                   && profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D_T))
             {
                 std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
                           << " no vertical data for p_id [" << profile.p_id_ << "]"
@@ -409,13 +451,13 @@ namespace MetNoFimex {
                     unitName = "m";
                     longName = spaceToUnderscore("height in meters above mean sea level");
                     standardName = spaceToUnderscore("height_above_reference_ellipsoid");
-                } else if(profile.pTags_->gp3()->pr()) {
+                } else if(profile.pTags_->gp3()->pr() == 1) {
                     unitName = "m";
                     longName = spaceToUnderscore("height in meters above ground level");
                     standardName = spaceToUnderscore("height");
-                } else if(profile.pTags_->gp3()->pr()) {
+                } else if(profile.pTags_->gp3()->pr() == 2) {
                     unitName = "hPa";
-                    longName = spaceToUnderscore("pressure in hPa");
+                    longName = spaceToUnderscore("heigt as pressure in hPa");
                     standardName = spaceToUnderscore("height");
                 }
 
@@ -434,10 +476,15 @@ namespace MetNoFimex {
                                       << " based on existing dimension " << var.getName()
                                       << std::endl;
                             profile.zDimensionName_ = dim.getName();
-                            pidView.replace(pIt, profile);
-                            return;
+                            pidView.replace(pidIt, profile);
+                            continue;
                         }
                     }
+                }
+
+                if(!profile.zDimensionName_.empty()) {
+                    // z profile already existing
+                    continue;
                 }
 
                 std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
@@ -446,7 +493,7 @@ namespace MetNoFimex {
                           << std::endl;
 
                 // to create unique fimex name for CDM modell
-                longName.append("_").append(boost::lexical_cast<std::string>(profile.p_id_));
+                longName.append("_pid_").append(boost::lexical_cast<std::string>(profile.p_id_));
 
                 boost::shared_ptr<Data> data =
                         createData(CDM_FLOAT,
@@ -477,7 +524,7 @@ namespace MetNoFimex {
                 cdm_->getVariable(levelDim.getName()).setData(data);
 
                 profile.zDimensionName_ = levelDim.getName();
-                pidView.replace(pIt, profile);
+                pidView.replace(pidIt, profile);
             }
         }
 
@@ -486,11 +533,10 @@ namespace MetNoFimex {
 
     void MetGmCDMReaderImpl::addVariables()
     {
-        cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
-        for(cdmPidView::iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt)
+        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
+        for(cdmNameView::iterator nIt = nameView.begin(); nIt != nameView.end(); ++nIt)
         {
-            MetGmCDMVariableProfile profile = *pIt;
-            boost::shared_ptr<MetGmGroup3Ptr> pg3 = profile.pTags_->gp3(); // MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(pHandle_);
+            MetGmCDMVariableProfile profile = *nIt;
 
             int p_id = profile.p_id_;
 
@@ -525,8 +571,9 @@ namespace MetNoFimex {
 
             CDMVariable var(profile.cdmName_, CDM_FLOAT, shape);
 
-            const float* rawData = *(profile.pTags_->gp5());
-            boost::shared_ptr<Data> data = createData(CDM_FLOAT, rawData, rawData + profile.pTags_->dimTag()->totalSize());
+            boost::shared_ptr<Data> data = createData(CDM_FLOAT,
+                                                      profile.pTags_->gp5()->data().begin(),
+                                                      profile.pTags_->gp5()->data().end());
             var.setData(data);
 
             cdm_->addVariable(var);
@@ -670,26 +717,29 @@ namespace MetNoFimex {
             boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
             std::cerr << std::endl
                       << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "--------------- START ---------------------------" << std::endl;
+                      << "--------------- START ---------------------------"
+                      << "[parsing index=" << index << "] : "
+                      << "[pid=" << gp3->p_id() << "]"
+                      << "{ pr = " <<  gp3->pr() << " , "
+                      << "  pz = " <<  gp3->pz() << " } "
+                      << std::endl;
 
-            boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, gp3);
+//            if(gp3->pz() == 0) {
+//                std::cerr << std::endl
+//                          << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << "--------------- START ---------------------------"
+//                          << "  pz = 0  -- will skip it"
+//                          << std::endl;
 
-            std::cerr << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-            if(gp3->pz() == 0) {
-                /* use prev z profile*/
-                if(!prevZTag.get())
-                    throw CDMException(std::string("shouldn't happen that previous Z tag == null and pz == 0 at the same time for p_id = ")
-                                       + boost::lexical_cast<std::string>(gp3->p_id()));
-                if(tags->dimTag()->zTag().get())
-                    throw CDMException(std::string("shouldn't happen that Z tag != null and pz == 0 at the same time for p_id = ")
-                                       + boost::lexical_cast<std::string>(gp3->p_id()));
-                tags->dimTag()->setZTag(prevZTag);
-            } else {
-                if(!tags->dimTag()->zTag().get())
-                    throw CDMException(std::string("shouldn't happen that Z tag == null and pz != 0 at the same time for p_id = ")
-                                       + boost::lexical_cast<std::string>(gp3->p_id()));
-                prevZTag = tags->dimTag()->zTag();
-            }
+//                mgm_skip_group5(*pHandle_->fileHandle(), *pHandle_);
+//                continue;
+//            }
+
+            boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, gp3, prevZTag);
+
+            prevZTag = tags->dimTag()->zTag();
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
 
             xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
 
@@ -739,19 +789,28 @@ namespace MetNoFimex {
                     break;
                 }
 
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
+
                 MetGmCDMVariableProfile profile(gp3->p_id(), fixedKildeName, tags);
                 profile.standardName_ = standardName;
                 profile.units_ = strUnit;
                 profile.pfillValue_ = fillValue;
+
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
+
                 cdmConfiguration_.insert(profile);
 
                 std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " fixed kildeName  === " <<  fixedKildeName
+                          << " after insertion fixed kildeName  => " <<  fixedKildeName
+                          << " cdmConfiguration_.size()  =  " <<  cdmConfiguration_.size()
                           << std::endl;
             }
 
             std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "--------------- END ---------------------------" << std::endl;
+                      << "--------------- END ---------------------------"
+                      << "[parsing index=" << index << "] : "
+                      << "[pid=" << gp3->p_id() << "]"
+                      << std::endl;
         }
     }
 }
