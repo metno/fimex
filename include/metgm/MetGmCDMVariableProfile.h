@@ -56,8 +56,8 @@ namespace MetNoFimex {
 
     struct MetGmCDMVariableProfile {
 
-        MetGmCDMVariableProfile(short pid, const CDMVariable* pVar, boost::shared_ptr<MetGmTags> tags)
-            : p_id_(pid), pVariable_(pVar), pTags_(tags) {}
+        MetGmCDMVariableProfile(short pid, const std::string& cdmName, const CDMVariable* pVar, boost::shared_ptr<MetGmTags> tags)
+            : p_id_(pid), cdmName_(cdmName), pVariable_(pVar), pTags_(tags) {}
 
         const CDMVariable* variable() { return pVariable_; }
 
@@ -65,15 +65,24 @@ namespace MetNoFimex {
             return p_id_ < profile.p_id_;
         }
 
+        void setZDimensionName(const std::string& name) {
+            zDimensionName_ = name;
+        }
+
         short hd() const { return pTags_->dimTag()->asShort(); }
 
         short                         p_id_;
+        std::string                   cdmName_;
         const CDMVariable*            pVariable_;
         boost::shared_ptr<MetGmTags>  pTags_;
-
+        std::string                   standardName_;
+        std::string                   units_;
+        std::string                   zDimensionName_;
+        boost::shared_ptr<float>      pfillValue_;
     };
 
     struct cdm_pid_index       {};
+    struct cdm_name_index      {};
     struct cdm_variable_index  {};
     struct cdm_hd_index        {};
 
@@ -103,6 +112,12 @@ namespace MetNoFimex {
             MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::p_id_
           >
         >,
+    boost::multi_index::hashed_unique<
+      boost::multi_index::tag<cdm_name_index>,
+      boost::multi_index::member<
+        MetGmCDMVariableProfile, std::string, &MetGmCDMVariableProfile::cdmName_
+      >
+    >,
         boost::multi_index::ordered_non_unique<
           boost::multi_index::tag<cdm_hd_index>,
           boost::multi_index::const_mem_fun<
@@ -120,6 +135,7 @@ namespace MetNoFimex {
     > cdm_configuration;
 
     typedef cdm_configuration::index<cdm_pid_index>::type       cdmPidView;
+    typedef cdm_configuration::index<cdm_name_index>::type      cdmNameView;
     typedef cdm_configuration::index<cdm_variable_index>::type  cdmVariableView;
 
 }
