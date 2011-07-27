@@ -82,6 +82,9 @@ namespace MetNoFimex {
     typedef boost::multi_index::multi_index_container<
       MetGmCDMVariableProfile,
       boost::multi_index::indexed_by<
+        boost::multi_index::ordered_unique<
+         boost::multi_index::identity<MetGmCDMVariableProfile>
+        >,
         boost::multi_index::ordered_non_unique<
           boost::multi_index::tag<cdm_pid_index>,
           boost::multi_index::member<
