@@ -31,6 +31,7 @@
 // boost
 //
 #include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 // standard
 //
@@ -42,6 +43,8 @@ namespace MetNoFimex {
 
     class CDMReader;
     class CDMVariable;
+    class MetGmGroup1Ptr;
+    class MetGmGroup3Ptr;
 
     class MetGmTimeTag {
     public:
@@ -49,11 +52,15 @@ namespace MetNoFimex {
         static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader);
         static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
 
+        static boost::shared_ptr<MetGmTimeTag> createMetGmTimeTag(boost::shared_ptr<MetGmGroup1Ptr>& pGroup1, boost::shared_ptr<MetGmGroup3Ptr>& pGroup3);
+
         inline unsigned int        nT()           { return nT_; }
         inline time_t              dT()           { return dT_; }
         inline time_t              analysisTime() { return analysis_t; }
         inline time_t              startTime()    { return start_t; }
-        inline std::vector<time_t> timePoints()   { return timePoints_; }
+        inline std::vector<time_t>&                   pointsAsSystemTime() { return points_; }
+        inline std::vector<double>&                   pointsAsDouble()     { return pointsAsDouble_; }
+        inline std::vector<boost::posix_time::ptime>& pointsAsBoostPosix() { return pointsAsBoostPosix_; }
 
     private:
 
@@ -75,7 +82,9 @@ namespace MetNoFimex {
         time_t              start_t;
         time_t              dT_;
         unsigned int        nT_;
-        std::vector<time_t> timePoints_;
+        std::vector<time_t> points_;
+        std::vector<double> pointsAsDouble_;
+        std::vector<boost::posix_time::ptime> pointsAsBoostPosix_;
     };
 }
 

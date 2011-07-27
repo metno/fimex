@@ -24,6 +24,8 @@
 // internals
 //
 #include "../../include/metgm/MetGmTimeTag.h"
+#include "../../include/metgm/MetGmGroup1Ptr.h"
+#include "../../include/metgm/MetGmGroup3Ptr.h"
 
 // fimex
 //
@@ -114,10 +116,10 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
 
             for(size_t index = 0; index < data->size(); ++index) {
                 time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
-                TTag->timePoints_.push_back(t);
+                TTag->points_.push_back(t);
             }
 
-            if(TTag->timePoints_.size() <= 1)
+            if(TTag->points_.size() <= 1)
                 throw CDMException("time axis has one point can't determine dt needed for MetGm");
 
             if(TTag->hasNegativeTimePoints())
@@ -127,7 +129,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
                 throw CDMException("time points at time axis are not equidistant [use extractor to split file on boundaries]");
 
 
-            TTag->dT_ = TTag->timePoints_.at(1) - TTag->timePoints_.at(0);
+            TTag->dT_ = TTag->points_.at(1) - TTag->points_.at(0);
 
             TTag->extractStartDateTime();
 
@@ -136,6 +138,21 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
     } else {
     }
 
+    return TTag;
+}
+
+boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_ptr<MetGmGroup1Ptr>& pGroup1, boost::shared_ptr<MetGmGroup3Ptr>& pGroup3)
+{
+    boost::shared_ptr<MetGmTimeTag> TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
+    TTag->dT_ = pGroup3->dt();
+    TTag->nT_ = pGroup3->nt();
+    TTag->analysis_t = pGroup1->analysisTime();
+    TTag->start_t = pGroup1->startTime();
+    for(size_t step = 0; step < TTag->nT_; ++step) {
+        TTag->points_.push_back(TTag->start_t + step * TTag->dT_);
+        TTag->pointsAsBoostPosix_.push_back(boost::posix_time::from_time_t(TTag->points_.at(step)));
+        TTag->pointsAsDouble_.push_back(TTag->points_.at(step));
+    }
     return TTag;
 }
 
@@ -160,12 +177,12 @@ void MetGmTimeTag::extractAnalysisDateTime(boost::shared_ptr<CDMReader>& pCdmRea
 
 bool MetGmTimeTag::hasNegativeTimePoints() {
     std::less_equal<float> leq;
-    return std::find_if(timePoints_.begin(), timePoints_.end(), boost::bind( leq, _1, 0 ) ) != timePoints_.end();
+    return std::find_if(points_.begin(), points_.end(), boost::bind( leq, _1, 0 ) ) != points_.end();
 }
 
 bool MetGmTimeTag::hasNonEquidistantTimePoints() {
-    std::deque<double> adjDiff(timePoints_.size());
-    std::adjacent_difference(timePoints_.begin(), timePoints_.end(), adjDiff.begin());
+    std::deque<double> adjDiff(points_.size());
+    std::adjacent_difference(points_.begin(), points_.end(), adjDiff.begin());
     adjDiff.pop_front(); // remove first element
 
     std::deque<double>::iterator it = std::unique_copy(adjDiff.begin(), adjDiff.end(), adjDiff.begin());
@@ -191,10 +208,10 @@ void MetGmTimeTag::extractTimePoints(boost::shared_ptr<CDMReader>& pCdmReader)
 
     for(size_t index = 0; index < tData->size(); ++index) {
         time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
-        timePoints_.push_back(t);
+        points_.push_back(t);
     }
 
-    if(timePoints_.size() <= 1)
+    if(points_.size() <= 1)
         throw CDMException("time axis has one point can't determine dt needed for MetGm");
 
     if(hasNegativeTimePoints())
@@ -206,7 +223,7 @@ void MetGmTimeTag::extractTimePoints(boost::shared_ptr<CDMReader>& pCdmReader)
 
 void MetGmTimeTag::extractStartDateTime()
 {
-    start_t = timePoints_.at(0);
+    start_t = points_.at(0);
 }
 
 void MetGmTimeTag::init(boost::shared_ptr<CDMReader>& pCdmReader)
@@ -221,7 +238,7 @@ void MetGmTimeTag::init(boost::shared_ptr<CDMReader>& pCdmReader)
 
     extractTimePoints(pCdmReader);
 
-    dT_ = timePoints_.at(1) - timePoints_.at(0);
+    dT_ = points_.at(1) - points_.at(0);
 
     extractStartDateTime();
 
