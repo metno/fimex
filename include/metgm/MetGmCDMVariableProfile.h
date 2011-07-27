@@ -31,6 +31,7 @@
 // internals
 //
 #include "MetGmTags.h"
+#include "MetGmDimensionsTag.h"
 
 //fimex
 //
