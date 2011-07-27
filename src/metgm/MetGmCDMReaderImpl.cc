@@ -152,21 +152,11 @@ namespace MetNoFimex {
         if(*pHandle_->version() == MGM_EditionNONE)
             throw CDMException(std::string("can't use MGM_EditionNONE as version"));
 
-        addLevelDimensions();
-
-        CDMDimension timeDimension = addTimeDimension();
-
+        addTimeDimension();
         addGlobalCDMAttributes();
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
-        addProjection();
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
-        addVariables(timeDimension);
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
+        addHorizontalDimensions();
+        addVerticalDimensions();
+        addVariables();
     }
 
     void MetGmCDMReaderImpl::addGlobalCDMAttributes()
@@ -277,12 +267,10 @@ namespace MetNoFimex {
         cdm_->addAttribute(cdm_->globalAttributeNS(), cdmCommentAttribute);
     }
 
-    CDMDimension MetGmCDMReaderImpl::addTimeDimension()
+    void MetGmCDMReaderImpl::addTimeDimension()
     {
         if(cdmConfiguration_.size() == 0)
             throw CDMException("can't add time dimension as there are no cdm profiles");
-
-        CDMDimension timeDimension;
 
         std::string hcTimeDimensionName = "time";
         std::string hcSymbolForTimeDimension = "T";
@@ -293,15 +281,14 @@ namespace MetNoFimex {
         cdmPidView::iterator pIt = pidView.begin();
         for(; pIt != pidView.end(); ++pIt) if(pIt->p_id_ > 0) break;
 
-        timeVec_ = pIt->pTags_->dimTag()->tTag()->pointsAsBoostPosix();
-        long timeDimensionSize = timeVec_.size();
-        timeDimension.setName(hcTimeDimensionName);
-        timeDimension.setLength(timeDimensionSize);
+        long timeDimensionSize = pIt->pTags_->dimTag()->tTag()->nT();
+        tDim_.setName(hcTimeDimensionName);
+        tDim_.setLength(timeDimensionSize);
+        tDim_.setUnlimited(true);
 
-        timeDimension.setUnlimited(true);
-        cdm_->addDimension(timeDimension);
+        cdm_->addDimension(tDim_);
         std::vector<std::string> timeDimensionShape;
-        timeDimensionShape.push_back(timeDimension.getName());
+        timeDimensionShape.push_back(tDim_.getName());
         CDMDataType timeDimensionDataType = CDM_DOUBLE;
         CDMVariable timeVariable(hcTimeDimensionName, timeDimensionDataType, timeDimensionShape);
 
@@ -328,11 +315,9 @@ namespace MetNoFimex {
         cdm_->addVariable(analysisTimeVar);
         cdm_->addAttribute("analysis_time", CDMAttribute("units", hcTimeDimensionUnits));
         cdm_->addAttribute("analysis_time", CDMAttribute("standard_name", "forecast_reference_time"));
-
-        return timeDimension;
     }
 
-    void MetGmCDMReaderImpl::addProjection()
+    void MetGmCDMReaderImpl::addHorizontalDimensions()
     {
         if(cdmConfiguration_.size() == 0)
             throw CDMException("can't add x - y dimension as there are no cdm profiles");
@@ -414,7 +399,7 @@ namespace MetNoFimex {
         MGM_THROW_ON_ERROR(mgm_read_header(*pHandle_->fileHandle(), *pHandle_));
     }
 
-    void MetGmCDMReaderImpl::addLevelDimensions()
+    void MetGmCDMReaderImpl::addVerticalDimensions()
     {
         /**
           * in artilery METGM we have basicaly 3 levels:
@@ -589,7 +574,7 @@ namespace MetNoFimex {
         return;
     }
 
-    void MetGmCDMReaderImpl::addVariables(const CDMDimension& timeDimension)
+    void MetGmCDMReaderImpl::addVariables()
     {
         std::string hcDataType = "float";
 
@@ -732,7 +717,7 @@ namespace MetNoFimex {
                     }
                 }
 
-                shape.push_back(timeDimension.getName());
+                shape.push_back(tDim_.getName());
             }
 
             CDMDataType type = string2datatype(hcDataType);
@@ -768,7 +753,7 @@ namespace MetNoFimex {
                 return MetNoFimex::createData(CDM_FLOAT, 0);
         }
         // only time can be unLimDim
-        if (unLimDimPos > timeVec_.size()) {
+        if (unLimDimPos > tDim_.getLength()) {
             throw CDMException("requested time outside data-region");
         }
 

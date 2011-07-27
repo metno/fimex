@@ -94,12 +94,11 @@ namespace MetNoFimex {
         void fillPidToCdmNameMap(const std::auto_ptr<XMLDoc>& doc);
         void fillPidToFillValueMap(const std::auto_ptr<XMLDoc>& doc);
 
-        CDMDimension addTimeDimension();
-
         void addGlobalCDMAttributes();
-        void addLevelDimensions();
-        void addProjection();
-        void addVariables(const CDMDimension& timeDim);
+        void addTimeDimension();
+        void addHorizontalDimensions();
+        void addVerticalDimensions();
+        void addVariables();
 
     private:
 
@@ -132,11 +131,11 @@ namespace MetNoFimex {
         cdm_configuration cdmConfiguration_;
 
         /**
-          * cache some dimensions
+          * cache widely dimensions
           */
         CDMDimension xDim_;
         CDMDimension yDim_;
-        std::vector<boost::posix_time::ptime> timeVec_;
+        CDMDimension tDim_;
     };
 
 } // end namespace
