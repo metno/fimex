@@ -23,6 +23,8 @@
 
 // internals
 //
+#include "../../include/metgm/MetGmHandlePtr.h"
+#include "../../include/metgm/MetGmFileHandlePtr.h"
 #include "../../include/metgm/MetGmGroup3Ptr.h"
 
 // standard
@@ -30,6 +32,45 @@
 #include <iostream>
 
 namespace MetNoFimex {
+
+    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(boost::shared_ptr<MetGmHandlePtr>& pHandle)
+    {
+        boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
+        return gp3;
+    }
+
+    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pHandle)
+    {
+        boost::shared_ptr<MetGmGroup3Ptr> pg3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
+        mgm_read_group3(*pg3->pHandle_->fileHandle(), *pg3->mgmHandle(), *pg3);
+        return pg3;
+    }
+
+    bool MetGmGroup3Ptr::eq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const
+    {
+        if(this == rhs.get()) return true;
+
+        if(        nz() == rhs->nz()
+                && nx() == rhs->nx()
+                && ny() == rhs->ny()
+                && nt() == rhs->nt()
+                && dx() == rhs->dx()
+                && dy() == rhs->dy()
+                && dt() == rhs->dt()
+                && cx() == rhs->cx()
+                && cy() == rhs->cy()
+                && pr() == rhs->pr()
+                && pz() == rhs->pz()
+                )
+            return true;
+        else
+            return false;
+    }
+
+    bool MetGmGroup3Ptr::neq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const
+    {
+        return !(eq(rhs));
+    }
 
     void MetGmGroup3Ptr::dump() {
         std::cerr << "dumping group3 [START]" << std::endl
