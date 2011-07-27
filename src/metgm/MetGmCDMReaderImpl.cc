@@ -379,13 +379,6 @@ namespace MetNoFimex {
         cdm_->addAttribute(yName, yDimUnitsAttribute);
     }
 
-    void MetGmCDMReaderImpl::readMgMHeader()
-    {
-        pHandle_->reset();
-        pHandle_->fileHandle()->reset();
-        MGM_THROW_ON_ERROR(mgm_read_header(*pHandle_->fileHandle(), *pHandle_));
-    }
-
     void MetGmCDMReaderImpl::addVerticalDimensions()
     {
         /**

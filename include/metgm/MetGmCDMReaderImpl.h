@@ -86,8 +86,6 @@ namespace MetNoFimex {
 
     protected:
 
-        void readMgMHeader();
-
         std::string spaceToUnderscore(const std::string& text);
 
         void fillPidToMetNoNameMap(const std::auto_ptr<XMLDoc>& doc);
