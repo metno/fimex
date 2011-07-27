@@ -79,6 +79,7 @@ namespace MetNoFimex {
             }
         }
 
+        MetGmHD hd()    { return hd_; }
         short asShort() { return static_cast<short>(hd_); }
 
         size_t sliceSize() const {return sliceSize_; }
