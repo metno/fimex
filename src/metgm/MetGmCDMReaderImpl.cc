@@ -18,7 +18,10 @@
 #include "../../include/metgm/MetGmUtils.h"
 #include "../../include/metgm/MetGmVersion.h"
 #include "../../include/metgm/MetGmHandlePtr.h"
+#include "../../include/metgm/MetGmGroup1Ptr.h"
+#include "../../include/metgm/MetGmGroup2Ptr.h"
 #include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "../../include/metgm/MetGmGroup5Ptr.h"
 #include "../../include/metgm/MetGmDimensionsTag.h"
 #include "../../include/metgm/MetGmFileHandlePtr.h"
 
@@ -40,14 +43,12 @@
 
 namespace MetNoFimex {
 
-    MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& metgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm)
-        : CDMReader(), configFileName_(configfilename)
+    MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm)
+        : CDMReader(), sourceFileName_(mgmsource) ,configFileName_(configfilename)
     {
         cdm_ = cdm; // as not accesible via initialzation list
 
         try {
-            metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForReading((metgmsource));
-            metgmHandle_ = MetGmHandlePtr::createMetGmHandle();
             init();
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("MetGmCDMReaderImpl error: ") + exp.what());
@@ -55,36 +56,6 @@ namespace MetNoFimex {
     }
 
     MetGmCDMReaderImpl::~MetGmCDMReaderImpl() { }
-
-    std::string MetGmCDMReaderImpl::dataTypeToString(short data_type)
-    {
-        switch(data_type) {
-        case 0:
-            return std::string("0"); //("0 - Climatological Data");
-        case 1:
-            return std::string("1"); //("1 - Numerical weather analysis");
-        case 2:
-            return std::string("2"); //("2 - Numerical weather prediction");
-        case 3:
-            return std::string("3"); //("3 - Observations");
-        case 4:
-            return std::string("4");  //("4 - Compound data");
-        case 5:
-            return std::string("5");  //("5 - REQGM");
-        default:
-            return std::string();
-        };
-        return std::string();
-    }
-
-    void MetGmCDMReaderImpl::readMetgmVersion()
-    {
-        metgmFileHandle_->reset();
-
-        readMetgmHeader();
-
-        metgmVersion_ = MetGmVersion::createMetGmVersion(mgm_get_version(*metgmHandle_));
-  }
 
     std::string MetGmCDMReaderImpl::spaceToUnderscore(const std::string& name)
     {
@@ -167,17 +138,6 @@ namespace MetNoFimex {
 
     void MetGmCDMReaderImpl::init() throw(CDMException)
     {
-        if(!(*metgmFileHandle_))
-            throw CDMException(std::string("error opening metgm file handle"));
-
-        if(!(*metgmHandle_))
-            throw CDMException(std::string("error opening metgm handle"));
-
-        readMetgmVersion();
-
-        if(*metgmVersion_ == MGM_EditionNONE)
-            throw CDMException(std::string("can't use MGM_EditionNONE as version"));
-
         std::auto_ptr<XMLDoc> xmlDoc;
         if (configFileName_ == std::string()) {
             xmlDoc = std::auto_ptr<XMLDoc>(0);
@@ -187,15 +147,26 @@ namespace MetNoFimex {
 
         configure(xmlDoc);
 
+        parseMgmFile(sourceFileName_);
+
+        if(*pHandle_->version() == MGM_EditionNONE)
+            throw CDMException(std::string("can't use MGM_EditionNONE as version"));
+
         addLevelDimensions();
 
         CDMDimension timeDimension = addTimeDimension();
 
         addGlobalCDMAttributes();
 
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
+
         addProjection();
 
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
+
         addVariables(timeDimension);
+
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
     }
 
     void MetGmCDMReaderImpl::addGlobalCDMAttributes()
@@ -204,41 +175,30 @@ namespace MetNoFimex {
         std::string hcConventions("CF-1.0");
         std::string hcInstitution("Forsvarets forskningsinstitutt, ffi.no");
 
-        metgmFileHandle_->reset();
-        readMetgmHeader();
-
         CDMAttribute cdmConventionsAttribute("Conventions", "string", hcConventions);
         CDMAttribute cdmInstitutionAttribute("institution", "string", hcInstitution);
 
         boost::posix_time::ptime now(boost::posix_time::second_clock::universal_time());
 
-        time_t analysisT = mgm_get_analysis_date_time(*metgmHandle_);
-        boost::posix_time::ptime analysisTime = boost::posix_time::from_time_t(analysisT);
-
-        time_t startT = mgm_get_start_date_time(*metgmHandle_);
-        boost::posix_time::ptime startTime = boost::posix_time::from_time_t(startT);
-
         std::string strHistory("");
-        strHistory.append("analysis time: ").append(boost::posix_time::to_iso_extended_string(analysisTime));
-        strHistory.append(" start time: ").append(boost::posix_time::to_iso_extended_string(startTime));
+        strHistory.append("analysis time: ").append(pGroup1_->analysisTimeAsIsoExtendedString());
+        strHistory.append(" start time: ").append(pGroup1_->startTimeAsIsoExtendedString());
         strHistory.append(" created by Fimex on ");
         strHistory.append(boost::gregorian::to_iso_extended_string(now.date()));
-        CDMAttribute cdmHistoryAttribute("history",
-                                         "string",
-                                         strHistory);
+        CDMAttribute cdmHistoryAttribute("history", "string", strHistory);
 
         CDMAttribute cdmSourceAttribute("source", "string", "unknown");
-        if(*metgmVersion_ == MGM_Edition2) {
-            cdmSourceAttribute = CDMAttribute("source", "string", std::string(mgm_get_production_nation(*metgmHandle_)).append(" ").append(mgm_get_model_type(*metgmHandle_)));
+        if(*pHandle_->version() == MGM_Edition2) {
+            cdmSourceAttribute = CDMAttribute("source", "string", std::string(pGroup1_->productNation()).append(" ").append(pGroup1_->modelType()));
         }
-        CDMAttribute cdmTitleAttribute("title", "string", metgmFileHandle_->fileName() + std::string(" ") + metgmVersion_->getAsString());
+        CDMAttribute cdmTitleAttribute("title", "string", pHandle_->fileHandle()->fileName() + std::string(" ") + pHandle_->version()->getAsString());
         CDMAttribute cdmReferencesAttribute("references", "string", "unknown");
 
-        CDMAttribute cdmMetgmAnalysisDateTimeAttribute("metgm_analysis_date_time", "string", boost::posix_time::to_iso_string(analysisTime));
-        CDMAttribute cdmMetgmStartDateTimeAttribute("metgm_start_date_time", "string", boost::posix_time::to_iso_string(startTime));
-        CDMAttribute cdmMetgmVersionAttribute("metgm_version", "string", spaceToUnderscore(metgmVersion_->getAsString()));
-        CDMAttribute cdmMetgmDataTypeAttribute("metgm_data_type", "string", dataTypeToString(mgm_get_data_type(*metgmHandle_)));
-        CDMAttribute cdmMetgmFreeTextAttribute("metgm_free_text", "string", mgm_get_free_text(*metgmHandle_));
+        CDMAttribute cdmMetgmAnalysisDateTimeAttribute("metgm_analysis_date_time", "string", pGroup1_->analysisTimeAsIsoString());
+        CDMAttribute cdmMetgmStartDateTimeAttribute("metgm_start_date_time", "string", pGroup1_->startTimeAsIsoString());
+        CDMAttribute cdmMetgmVersionAttribute("metgm_version", "string", spaceToUnderscore(pHandle_->version()->getAsString()));
+        CDMAttribute cdmMetgmDataTypeAttribute("metgm_data_type", "string", pGroup1_->dataTypeAsString());
+        CDMAttribute cdmMetgmFreeTextAttribute("metgm_free_text", "string", pGroup1_->freeText());
 
         cdm_->addAttribute(cdm_->globalAttributeNS(), cdmConventionsAttribute);
         cdm_->addAttribute(cdm_->globalAttributeNS(), cdmInstitutionAttribute);
@@ -291,10 +251,10 @@ namespace MetNoFimex {
                 << " type=\"string\" />"
                 << std::endl;
 
-        if(*metgmVersion_ == MGM_Edition2) {
-            CDMAttribute cdmMetgmProductionNationAttribute = CDMAttribute("metgm_production_nation", "string", std::string(mgm_get_production_nation(*metgmHandle_)));
+        if(*pHandle_->version() == MGM_Edition2) {
+            CDMAttribute cdmMetgmProductionNationAttribute = CDMAttribute("metgm_production_nation", "string", pGroup1_->productNation());
             cdm_->addAttribute(cdm_->globalAttributeNS(), cdmMetgmProductionNationAttribute);
-            CDMAttribute cdmMetgmModelTypeAttribute = CDMAttribute("metgm_model_type", "string", std::string(mgm_get_model_type(*metgmHandle_)));
+            CDMAttribute cdmMetgmModelTypeAttribute = CDMAttribute("metgm_model_type", "string", pGroup1_->modelType());
             cdm_->addAttribute(cdm_->globalAttributeNS(), cdmMetgmModelTypeAttribute);
 
             metgm_comment
@@ -319,81 +279,25 @@ namespace MetNoFimex {
 
     CDMDimension MetGmCDMReaderImpl::addTimeDimension()
     {
-        CDMDimension timeDimension;
+        if(cdmConfiguration_.size() == 0)
+            throw CDMException("can't add time dimension as there are no cdm profiles");
 
-        /**
-          * we can have only one time axis
-          * loop all 7 important params
-          * find max time distance from start date
-          * and minimal time step
-          */
+        CDMDimension timeDimension;
 
         std::string hcTimeDimensionName = "time";
         std::string hcSymbolForTimeDimension = "T";
         std::string hcTimeDimensionUnits = "seconds since 1970-01-01 00:00:00 +00:00";
 
-        metgmFileHandle_->reset();
-        readMetgmHeader();
+        cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
 
-        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+        cdmPidView::iterator pIt = pidView.begin();
+        for(; pIt != pidView.end(); ++pIt) if(pIt->p_id_ > 0) break;
 
-        /**
-          * in seconds since epoch
-          */
-        time_t startT = mgm_get_start_date_time(*metgmHandle_);
-
-        boost::posix_time::ptime startDateTime = boost::posix_time::from_time_t(startT);
-        boost::posix_time::ptime epochDateTime(boost::gregorian::date(1970,1,1));
-
-        size_t  timePointNumber = 0;
-        double  deltaTime = 0;
-        double  maxTimeSpan = 0;
-
-        size_t np = mgm_get_number_of_params(*metgmHandle_);
-
-        for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
-            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3);
-            short p_id = pg3->p_id();
-            if(p_id == 0) {
-                // special case on non-temporal values
-                continue;
-            }
-
-            if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
-                std::cerr << __FUNCTION__ << __LINE__ << " for gp3Index " << gp3Index << " MGM_ERROR_GROUP3_NOT_FOUND " << std::endl;
-                continue;
-            } else if(error != MGM_OK) {
-                assert(error);
-            } else if(error == MGM_OK) {
-
-                int numOfSteps = pg3->nt();
-                double timeStep = pg3->dt();
-
-                if(timeStep * numOfSteps > maxTimeSpan) {
-                    maxTimeSpan = timeStep * numOfSteps;
-                    timePointNumber = numOfSteps;
-                    deltaTime = timeStep;
-                }
-            }
-            mgm_skip_group4(*metgmFileHandle_, *metgmHandle_);
-            mgm_skip_group5(*metgmFileHandle_, *metgmHandle_);
-        }
-
-        std::vector<double> timeInUnitsVector;
-
-        boost::posix_time::time_duration diff = startDateTime - epochDateTime;
-        double startSinceEpochInSeconds = diff.total_seconds();
-        for(size_t index = 0; index < timePointNumber; ++index) {
-            timeInUnitsVector.push_back(startSinceEpochInSeconds + index * deltaTime);
-            timeVec_.push_back(boost::posix_time::from_time_t(timeInUnitsVector[index]));
-        }
-
-
+        timeVec_ = pIt->pTags_->dimTag()->tTag()->pointsAsBoostPosix();
         long timeDimensionSize = timeVec_.size();
         timeDimension.setName(hcTimeDimensionName);
         timeDimension.setLength(timeDimensionSize);
 
-        // ATM we always consider that the time is UNLIMITED dimension
         timeDimension.setUnlimited(true);
         cdm_->addDimension(timeDimension);
         std::vector<std::string> timeDimensionShape;
@@ -401,6 +305,7 @@ namespace MetNoFimex {
         CDMDataType timeDimensionDataType = CDM_DOUBLE;
         CDMVariable timeVariable(hcTimeDimensionName, timeDimensionDataType, timeDimensionShape);
 
+        std::vector<double> timeInUnitsVector = pIt->pTags_->dimTag()->tTag()->pointsAsDouble();
         boost::shared_ptr<Data> timeDimensionData = createData(timeDimensionDataType, timeInUnitsVector.begin(), timeInUnitsVector.end());
         timeVariable.setData(timeDimensionData);
         cdm_->addVariable(timeVariable);
@@ -415,161 +320,98 @@ namespace MetNoFimex {
         cdm_->addAttribute(timeVariable.getName(), timeStandardNameAttribute);
         cdm_->addAttribute(timeVariable.getName(), timeAxisAttribute);
 
-        // analysis time is unique forecast reference time
-        time_t analysis_time_t = mgm_get_analysis_date_time(*metgmHandle_);
-        std::string analysisTimeName = "analysis_time";
-        std::string analysisTimeStandardName = "forecast_reference_time";
-        std::vector<std::string> nullShape;
-        CDMVariable analysisTimeVar(analysisTimeName, timeDimensionDataType, nullShape);
+        // analysis time -> unique forecast reference time
+        CDMVariable analysisTimeVar("analysis_time", timeDimensionDataType, std::vector<std::string>());
         boost::shared_ptr<Data> analysisTimeData = createData(timeDimensionDataType, 1);
-        analysisTimeData->setValue(0, analysis_time_t);
+        analysisTimeData->setValue(0, pGroup1_->analysisTime());
         analysisTimeVar.setData(analysisTimeData);
         cdm_->addVariable(analysisTimeVar);
-        cdm_->addAttribute(analysisTimeName, CDMAttribute("units", hcTimeDimensionUnits));
-        cdm_->addAttribute(analysisTimeName, CDMAttribute("standard_name", analysisTimeStandardName));
+        cdm_->addAttribute("analysis_time", CDMAttribute("units", hcTimeDimensionUnits));
+        cdm_->addAttribute("analysis_time", CDMAttribute("standard_name", "forecast_reference_time"));
 
         return timeDimension;
     }
 
-    boost::tuple<std::string, std::string> MetGmCDMReaderImpl::addProjection()
+    void MetGmCDMReaderImpl::addProjection()
     {
-        std::string projectionName;
-        std::string projectionCoordinates;
-        std::string projStr = "+proj=latlong +datum=WGS84";
-        std::string gridMappingType;
+        if(cdmConfiguration_.size() == 0)
+            throw CDMException("can't add x - y dimension as there are no cdm profiles");
 
-        metgmFileHandle_->reset();
-        readMetgmHeader();
+        cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
 
-        /**
-          * As x and y will be same for all except pid = 0
-          * grab the group 3 values for first pid > 1
-          */
-        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+        cdmPidView::iterator pIt = pidView.begin();
+        for(; pIt != pidView.end(); ++pIt) if(pIt->pTags_->dimTag()->xTag().get() && pIt->pTags_->dimTag()->yTag().get()) break;
 
-        int nx = 0; // long
-        int ny = 0; // lat
-        double dx = 0;
-        double dy = 0;
-        double cx = 0; // center long
-        double cy = 0; // center lat
-        size_t pid = 1;
-        for(; pid < 8; ++pid) {
-            if(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3) == 0) {
-                nx = pg3->nx();
-                ny = pg3->ny();
-                dx = pg3->dx();
-                dy = pg3->dy();
-                cx = pg3->cx();
-                cy = pg3->cy();
-            } else {
-                /**
-                  * handle errors
-                  */
-            }
-        }
+        if(pIt == pidView.end())
+            throw CDMException("can't find X / Y axis");
 
-        double longitudeSpanDegrees = dx * (nx - 1);
-        double latitudeSpanDegrees = dy * (ny - 1);
+        MetGmCDMVariableProfile profile = *pIt;
 
-        boost::regex projexpr( "[+]proj=([[:alnum:]_]+)[[:space:]]+" );
-        boost::smatch projmatch;
-        if (boost::regex_search(projStr, projmatch, projexpr)) {
-            if(projmatch.size() > 1)
-                gridMappingType = projmatch[1];
-        } else {
-            throw CDMException("creating grid mapping type failed");
-        }
+        // long and lat as dimensions on its own
+        std::string xName = "longitude";
+        CDMAttribute xDimLongNameAttribute = CDMAttribute("long_name", "string", "longitude");
+        CDMAttribute xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "longitude");
+        CDMAttribute xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
 
-        if(gridMappingType.empty())
-            throw CDMException("creating grid mapping type failed");
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
-        projectionName = std::string("projection_" + gridMappingType);
-        // projection-variable without datatype and dimension
-//        CDMVariable projVar(projectionName, CDM_FLOAT, std::vector<std::string>());
-//        cdm_->addVariable(projVar);
+        xDim_ = CDMDimension(xName, profile.pTags_->dimTag()->xTag()->nx());
+        std::vector<std::string> xDimShape;
+        xDimShape.push_back(xDim_.getName());
+        CDMVariable xVar(xName, CDM_DOUBLE, xDimShape);
+        boost::shared_ptr<Data> xData = createData(CDM_DOUBLE,
+                                                   profile.pTags_->dimTag()->xTag()->xPoints().begin(),
+                                                   profile.pTags_->dimTag()->xTag()->xPoints().end());
+        xVar.setData(xData);
 
-        boost::shared_ptr<Projection> projection = Projection::createByProj4(projStr);
-        if(projection.get() == 0)
-            throw CDMException("create by proj4 failed");
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
-//        std::vector<CDMAttribute> projAttr = projection->getParameters();
-//        for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
-//            cdm_->addAttribute(projectionName, *attrIt);
-//        }
+        cdm_->addDimension(xDim_);
+        cdm_->addVariable(xVar);
+        cdm_->addAttribute(xName, xDimLongNameAttribute);
+        cdm_->addAttribute(xName, xDimStandardNameAttribute);
+        cdm_->addAttribute(xName, xDimUnitsAttribute);
 
-        std::string projUnits = "degree";
-        boost::smatch unitsmatch;
-        boost::regex unitsexpr( "[+]units=([[:alnum:]]+)[[:space:]]+" );
-        if (boost::regex_search(projStr, unitsmatch, unitsexpr)) {
-            if(unitsmatch.size() > 1)
-                projUnits = unitsmatch[1];
-        }
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
-        if(projection->isDegree()) { // check if projection is lot-lat
-            // long and lat as dimensions on its own
-            std::string xName = "longitude";
-            CDMAttribute xDimLongNameAttribute = CDMAttribute("long_name", "string", "longitude");
-            CDMAttribute xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "longitude");
-            CDMAttribute xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
+        std::string yName = "latitude";
+        CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
+        CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
+        CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
 
-            xDim_ = CDMDimension(xName, nx);
-            CDMDataType xDataType = string2datatype("float");
-            std::vector<std::string> xDimShape;
-            xDimShape.push_back(xDim_.getName());
-            CDMVariable xVar(xName, xDataType, xDimShape);
-            boost::shared_ptr<Data> xData = createData(CDM_FLOAT, nx);
+        yDim_ = CDMDimension(yName, profile.pTags_->dimTag()->yTag()->ny());
+        std::vector<std::string> yDimShape;
+        yDimShape.push_back(yDim_.getName());
+        CDMVariable yVar(yName, CDM_DOUBLE, yDimShape);
 
-            double startX = cx - longitudeSpanDegrees / 2.0;
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
-            for (int i = 0; i < nx; i++) {
-                double value = startX + i * dx;
-                xData->setValue(i, value);
-            }
-            xVar.setData(xData);
-            cdm_->addDimension(xDim_);
-            cdm_->addVariable(xVar);
-            cdm_->addAttribute(xName, xDimLongNameAttribute);
-            cdm_->addAttribute(xName, xDimStandardNameAttribute);
-            cdm_->addAttribute(xName, xDimUnitsAttribute);
+        boost::shared_ptr<Data> yData = createData(CDM_DOUBLE,
+                                                   profile.pTags_->dimTag()->yTag()->yPoints().begin(),
+                                                   profile.pTags_->dimTag()->yTag()->yPoints().end());
 
-            std::string yName = "latitude";
-            CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
-            CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
-            CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
-            yDim_ = CDMDimension(yName, ny);
-            CDMDataType yDataType = string2datatype("float");
-            std::vector<std::string> yDimShape;
-            yDimShape.push_back(yDim_.getName());
-            CDMVariable yVar(yName, yDataType, yDimShape);
-            boost::shared_ptr<Data> yData = createData(CDM_FLOAT, ny);
+        yVar.setData(yData);
 
-            double startY = cy - latitudeSpanDegrees / 2.0;
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
-            for (int i = 0; i < ny; i++) {
-                double value = startY + i * dy;
-                yData->setValue(i, value);
-            }
-            yVar.setData(yData);
-            cdm_->addDimension(yDim_);
-            cdm_->addVariable(yVar);
+        cdm_->addDimension(yDim_);
+        cdm_->addVariable(yVar);
 
-            cdm_->addAttribute(yName, yDimLongNameAttribute);
-            cdm_->addAttribute(yName, yDimStandardNameAttribute);
-            cdm_->addAttribute(yName, yDimUnitsAttribute);
-        } else {
-            throw CDMException("projection units not degrees");
-        }
+        cdm_->addAttribute(yName, yDimLongNameAttribute);
+        cdm_->addAttribute(yName, yDimStandardNameAttribute);
+        cdm_->addAttribute(yName, yDimUnitsAttribute);
 
-        return boost::make_tuple(projectionName, projectionCoordinates);
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
 
     }
 
-    void MetGmCDMReaderImpl::readMetgmHeader()
+    void MetGmCDMReaderImpl::readMgMHeader()
     {
-        metgmHandle_->reset();
-        MGM_THROW_ON_ERROR(mgm_read_header(*metgmFileHandle_, *metgmHandle_));
+        pHandle_->reset();
+        pHandle_->fileHandle()->reset();
+        MGM_THROW_ON_ERROR(mgm_read_header(*pHandle_->fileHandle(), *pHandle_));
     }
 
     void MetGmCDMReaderImpl::addLevelDimensions()
@@ -581,20 +423,19 @@ namespace MetNoFimex {
 
         std::string hcLevelType = "float";
 
-        metgmFileHandle_->reset();
-        readMetgmHeader();
+        readMgMHeader();
 
-        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(pHandle_);
         if(pg3 == 0)
             throw CDMException("mgm_new_group3() failed");
         /**
           * number of parameters
           */
-        size_t np = mgm_get_number_of_params(*metgmHandle_);
+        size_t np = mgm_get_number_of_params(*pHandle_);
         METGM_ZProfile prevZProfile;
         for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
 
-            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3);
+            int error = mgm_read_next_group3(*pHandle_->fileHandle(), *pHandle_, *pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
                 continue;
@@ -614,7 +455,6 @@ namespace MetNoFimex {
                 continue;
             }
 
-
             int nz = pg3->nz();
             int pz = pg3->pz();
             int pr = pg3->pr();
@@ -629,7 +469,7 @@ namespace MetNoFimex {
             } else if(pz == 1 || pz == 0) {
 
                float *pg4Data = new float[nz];
-               error = mgm_read_group4(*metgmFileHandle_, *metgmHandle_, pg4Data);
+               error = mgm_read_group4(*pHandle_->fileHandle(), *pHandle_, pg4Data);
                if(error != MGM_OK) {
                    std::cerr << "p_id:" << p_id << " error " << error << std::endl;
                    return;
@@ -663,7 +503,6 @@ namespace MetNoFimex {
                       * try finding if there already exists
                       * some pid with same vertical profile
                       */
-
                     std::string exisitng_z_profile_name;
                     const std::vector<CDMDimension>& refDimVec = cdm_->getDimensions();
 
@@ -754,12 +593,11 @@ namespace MetNoFimex {
     {
         std::string hcDataType = "float";
 
-        metgmFileHandle_->reset();
-        readMetgmHeader();
+        readMgMHeader();
         /**
           * number of parameters
           */
-        size_t np = mgm_get_number_of_params(*metgmHandle_);
+        size_t np = mgm_get_number_of_params(*pHandle_);
 
         std::cerr << __FUNCTION__ << __LINE__ << " np in mgm file " << np << std::endl;
 
@@ -777,9 +615,9 @@ namespace MetNoFimex {
 
         for(size_t gp3Index  = 0; gp3Index < np; ++gp3Index)
         {
-            boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+            boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(pHandle_);
 
-            int error = mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *pg3);
+            int error = mgm_read_next_group3(*pHandle_->fileHandle(), *pHandle_, *pg3);
 
             if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
                 std::cerr << __FUNCTION__ << __LINE__ << " for gp3Index " << gp3Index << " MGM_ERROR_GROUP3_NOT_FOUND " << std::endl;
@@ -806,7 +644,7 @@ namespace MetNoFimex {
             std::string cfgUnits        = ic0->units_;
             float       cfgFillValue    = ic0->fillValue_.get() ? *(ic0->fillValue_) : 9999.0f;
 
-            std::string mgmUnits(mgm_get_param_unit(p_id, *metgmHandle_));
+            std::string mgmUnits(mgm_get_param_unit(p_id, *pHandle_));
 
             if(p_id == 7) {
                 bool bExactMatch = false;
@@ -858,18 +696,11 @@ namespace MetNoFimex {
 
             std::vector<CDMAttribute> attributes;
 
-            /**
-              * we will add metgm p_id as variable's attribute
-              * even though it is not supported by CF standard
-              */
             CDMAttribute metgmPidAttribute("metgm_p_id", "short", boost::lexical_cast<std::string>(p_id));
             attributes.push_back(metgmPidAttribute);
 
             CDMAttribute cfNameAttribute("standard_name", "string", cfgStandardName);
             attributes.push_back(cfNameAttribute);
-
-//            CDMAttribute gridMappingAttribute("grid_mapping", "string", projName);
-//            attributes.push_back(gridMappingAttribute);
 
             CDMAttribute varUnitsAttribute("units", "string", cfgUnits);
             attributes.push_back(varUnitsAttribute);
@@ -877,7 +708,6 @@ namespace MetNoFimex {
             CDMAttribute varFillValueAttribute("_FillValue", "float", boost::lexical_cast<std::string>(cfgFillValue));
             attributes.push_back(varFillValueAttribute);
 
-            // map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
             std::vector<std::string> shape;
 
             /**
@@ -890,6 +720,7 @@ namespace MetNoFimex {
               * p_id = 0 is only (x, y) that is (lon, lat) dependent
               */
             if(p_id != 0) {
+
                 metgm_profile_set::iterator it = prXpidXname_.find(boost::make_tuple(pr, p_id));
                 if(it != prXpidXname_.end()) {
                     METGM_ZProfile zProfile = *it;
@@ -902,11 +733,6 @@ namespace MetNoFimex {
                 }
 
                 shape.push_back(timeDimension.getName());
-
-//                if (!coordinates.empty()) {
-//                    CDMAttribute coordinatesAttributes("coordinates", coordinates);
-//                    attributes.push_back(coordinatesAttributes);
-//                }
             }
 
             CDMDataType type = string2datatype(hcDataType);
@@ -948,14 +774,13 @@ namespace MetNoFimex {
 
         boost::shared_ptr<MetGmGroup3Ptr> initialPg3 = cdmvariable2mgm_group3map_.find(varName)->second;
 
-        metgmFileHandle_->reset();
-        readMetgmHeader();
+        readMgMHeader();
 
         // read group3 data until you match with initialPg3
         // in order to honor data reading sequence
-        boost::shared_ptr<MetGmGroup3Ptr> fwdPg3 = MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+        boost::shared_ptr<MetGmGroup3Ptr> fwdPg3 = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(pHandle_);
 
-        MGM_THROW_ON_ERROR(mgm_read_this_group3(*metgmFileHandle_, *metgmHandle_, p_id, *fwdPg3))
+        MGM_THROW_ON_ERROR(mgm_read_this_group3(*pHandle_->fileHandle(), *pHandle_, p_id, *fwdPg3))
 
         std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
                   << " pVar->Name " << variable.getName() << " dumping gp3"
@@ -964,7 +789,7 @@ namespace MetNoFimex {
 
         if(*initialPg3 != 0) {
             while(fwdPg3->neq(initialPg3)) {
-                MGM_THROW_ON_ERROR(mgm_read_next_group3(*metgmFileHandle_, *metgmHandle_, *fwdPg3))
+                MGM_THROW_ON_ERROR(mgm_read_next_group3(*pHandle_->fileHandle(), *pHandle_, *fwdPg3))
             }
         }
 
@@ -1042,11 +867,11 @@ namespace MetNoFimex {
 
                 short pz = fwdPg3->pz();
                 if(pz > 0) {
-                    MGM_THROW_ON_ERROR(mgm_skip_group4(*metgmFileHandle_, *metgmHandle_))
+                    MGM_THROW_ON_ERROR(mgm_skip_group4(*pHandle_->fileHandle(), *pHandle_))
                 }
 
-                MGM_THROW_ON_ERROR(mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get()))
-                MGM_THROW_ON_ERROR(mgm_param_is_convertible(p_id, *metgmVersion_))
+                MGM_THROW_ON_ERROR(mgm_read_group5(*pHandle_->fileHandle(), *pHandle_, pg5.get()))
+                MGM_THROW_ON_ERROR(mgm_param_is_convertible(p_id, *pHandle_->version()))
 
                 data = MetNoFimex::createData(CDM_FLOAT, pg5.get(), pg5.get() + totalDataDimension);
                 variable.setData(data);
@@ -1068,15 +893,15 @@ namespace MetNoFimex {
                 short pz = fwdPg3->pz();
 
                 if(pz > 0) {
-                    MGM_THROW_ON_ERROR(mgm_skip_group4(*metgmFileHandle_, *metgmHandle_))
+                    MGM_THROW_ON_ERROR(mgm_skip_group4(*pHandle_->fileHandle(), *pHandle_))
                 }
 
                 /**
                   * get the data for all time slices at once
                   * and then extract one we actually need
                   */
-                MGM_THROW_ON_ERROR(mgm_read_group5(*metgmFileHandle_, *metgmHandle_, pg5.get()))
-                MGM_THROW_ON_ERROR(mgm_param_is_convertible(p_id, *metgmVersion_))
+                MGM_THROW_ON_ERROR(mgm_read_group5(*pHandle_->fileHandle(), *pHandle_, pg5.get()))
+                MGM_THROW_ON_ERROR(mgm_param_is_convertible(p_id, *pHandle_->version()))
 
                 float* slice = pg5.get();
                 float* sliceT = pg5T.get();
@@ -1230,4 +1055,88 @@ namespace MetNoFimex {
         }
     }
 
+    void MetGmCDMReaderImpl::parseMgmFile(const std::string& mgmFileName)
+    {
+        pHandle_ = MetGmHandlePtr::createMetGmHandleForReading(mgmFileName);
+        if(!(*pHandle_))
+            throw CDMException(std::string("error opening metgm handle"));
+
+        pGroup1_ = MetGmGroup1Ptr::createMetGmGroup1PtrForReading(pHandle_);
+
+        pGroup2_ = MetGmGroup2Ptr::createMetGmGroup2PtrForReading(pHandle_);
+
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__
+                  << " total np " << pGroup2_->totalnp()
+                  << std::endl;
+
+        boost::shared_ptr<MetGmVerticalTag> prevZTag;
+
+        for(int index = 0; index < pGroup2_->totalnp(); ++index) {
+            boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
+            std::cerr << "--------------- START ---------------------------" << std::endl;
+
+//            gp3->dump();
+
+            boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, gp3);
+//            boost::shared_ptr<MetGmHDTag> HDTag = MetGmHDTag::createMetGmDimensionsTag(pFileHandle, pHandle, gp1, gp3, pVersion);
+
+            if(gp3->pz() == 0) {
+                /* use prev z profile*/
+                if(!prevZTag.get())
+                    throw CDMException(std::string("shouldn't happen that previous Z tag == null and pz == 0 at the same time for p_id")
+                                       + boost::lexical_cast<std::string>(gp3->p_id()));
+                if(tags->dimTag()->zTag().get())
+                    throw CDMException(std::string("shouldn't happen that Z tag != null and pz == 0 at the same time for p_id")
+                                       + boost::lexical_cast<std::string>(gp3->p_id()));
+                tags->dimTag()->setZTag(prevZTag);
+            } else {
+                if(!tags->dimTag()->zTag().get())
+                    throw CDMException(std::string("shouldn't happen that Z tag == null and pz != 0 at the same time for p_id")
+                                       + boost::lexical_cast<std::string>(gp3->p_id()));
+                prevZTag = tags->dimTag()->zTag();
+            }
+
+            tags->dimTag()->zTag()->dump();
+
+//            boost::shared_ptr<MetGmGroup5Ptr> gp5 = MetGmGroup5Ptr::createMetGmGroup5Ptr(pFileHandle, pHandle, gp3, HDTag, pVersion);
+
+//            gp5->dumpFimexLayout();
+
+
+            xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
+
+            std::string kildeName;
+            if(pidView.count(gp3->p_id()) == 0) {
+                continue;
+            } else if(pidView.count(gp3->p_id()) == 1) {
+                MetGmConfigurationMappings entry = *(pidView.find(gp3->p_id()));
+                kildeName = entry.kildeName_;
+            } else {
+                std::string strUnit(mgm_get_param_unit(gp3->p_id(), *pHandle_));
+                xmlPidView::iterator ic0, ic1;
+                boost::tuples::tie(ic0,ic1) = pidView.equal_range(gp3->p_id());
+                for(; ic0 != ic1; ++ic0) {
+                    if(!ic0->units_.empty() && ic0->units_ == strUnit) {
+                        kildeName = ic0->kildeName_;
+                        break;
+                    }
+                }
+                if(kildeName.empty())
+                    continue;
+            }
+
+            CDMVariable* pDummyVar = new CDMVariable(kildeName, CDM_FLOAT, std::vector<std::string>());
+            MetGmCDMVariableProfile profile(gp3->p_id(), pDummyVar, tags);
+            cdmConfiguration_.insert(profile);
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " kilde name " <<  kildeName
+                      << std::endl;
+
+            profile.pTags_->gp3()->dump();
+            profile.pTags_->dimTag()->zTag()->dump();
+
+            std::cerr << "--------------- END ---------------------------" << std::endl;
+        }
+    }
 }

@@ -3,6 +3,7 @@
 
 // implementation
 //
+#include "MetGmCDMVariableProfile.h"
 #include "MetGmConfigurationMappings.h"
 
 // fimex
@@ -85,41 +86,31 @@ namespace MetNoFimex {
 
     protected:
 
-        std::string dataTypeToString(short data_type);
-        void readMetgmHeader();
-        void readMetgmVersion();
+        void readMgMHeader();
 
-        /**
-          * Fimex is having issues with names that have space
-          */
         std::string spaceToUnderscore(const std::string& text);
 
-        /**
-          * only pid 0, 2, ... 7 are important for artilery
-          */
         void fillPidToMetNoNameMap(const std::auto_ptr<XMLDoc>& doc);
         void fillPidToCdmNameMap(const std::auto_ptr<XMLDoc>& doc);
         void fillPidToFillValueMap(const std::auto_ptr<XMLDoc>& doc);
 
-        void addGlobalCDMAttributes();
-
         CDMDimension addTimeDimension();
-        CDMDimension addUniqueForecastReferenceTime();
+
+        void addGlobalCDMAttributes();
         void addLevelDimensions();
-
-        // returning projName and coordinates for given place name
-        boost::tuple<std::string, std::string> addProjection();
-
+        void addProjection();
         void addVariables(const CDMDimension& timeDim);
 
     private:
 
         void configure(const std::auto_ptr<XMLDoc>& doc);
+        void parseMgmFile(const std::string& mgmFileName);
 
+        std::string                            sourceFileName_;
         std::string                            configFileName_;
-        boost::shared_ptr<MetGmVersion>        metgmVersion_;
-        boost::shared_ptr<MetGmHandlePtr>      metgmHandle_;
-        boost::shared_ptr<MetGmFileHandlePtr>  metgmFileHandle_;
+        boost::shared_ptr<MetGmHandlePtr>      pHandle_;
+        boost::shared_ptr<MetGmGroup1Ptr>      pGroup1_;
+        boost::shared_ptr<MetGmGroup2Ptr>      pGroup2_;
 
         std::map<std::string, boost::shared_ptr<MetGmGroup3Ptr> > cdmvariable2mgm_group3map_;
         typedef boost::multi_index::multi_index_container<
@@ -138,6 +129,7 @@ namespace MetNoFimex {
 
         metgm_profile_set prXpidXname_;
         xml_configuration xmlConfiguration_;
+        cdm_configuration cdmConfiguration_;
 
         /**
           * cache some dimensions
