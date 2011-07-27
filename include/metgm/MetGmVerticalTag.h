@@ -38,16 +38,24 @@ namespace MetNoFimex {
     class Data;
     class CDMReader;
     class CDMVariable;
+    class MetGmFileHandlePtr;
+    class MetGmHandlePtr;
+    class MetGmGroup3Ptr;
+    class MetGmVersion;
 
     class MetGmVerticalTag {
     public:
 
         static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVar);
 
+        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTag(boost::shared_ptr<MetGmGroup3Ptr>& pGp3);
+
         inline unsigned int               nz()       { return nz_; }
         inline unsigned int               pr()       { return pr_;}
         inline unsigned int               pz()       { return pz_; }
         inline boost::shared_array<float> points()   { return points_; }
+
+        void dump();
 
     protected:
 
