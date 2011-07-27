@@ -32,6 +32,10 @@
 //
 #include "metgm.h"
 
+// Fimex
+//
+#include "fimex/XMLDoc.h"
+
 // libxml2
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
