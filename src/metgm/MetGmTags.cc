@@ -50,7 +50,7 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
         tags->pGp3_   = pg3;
         tags->dimTag_ = MetGmHDTag::createMetGmHDTag(pCdmReader, pVariable);
-        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5Ptr(pCdmReader, pVariable, tags->gp3(), pFillValue);
+        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->gp3(), pFillValue);
 
         return tags;
     }

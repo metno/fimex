@@ -37,6 +37,9 @@
 #include "../../include/metgm/MetGmVersion.h"
 #include "../../include/metgm/MetGmHandlePtr.h"
 #include "../../include/metgm/MetGmGroup1Ptr.h"
+#include "../../include/metgm/MetGmGroup2Ptr.h"
+#include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "../../include/metgm/MetGmGroup5Ptr.h"
 #include "../../include/metgm/MetGmFileHandlePtr.h"
 #include "../../include/metgm/MetGmConfigurationMappings.h"
 
@@ -416,7 +419,7 @@ namespace MetNoFimex {
 
             MetGmTagsPtr tags;
             boost::shared_ptr<MetGmGroup3Ptr> gp3 =
-                    MetGmGroup3Ptr::createMetGmGroup3Ptr(metgmHandle_);
+                    MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(metgmHandle_);
 
             assert(gp3.get());
 
@@ -462,11 +465,7 @@ namespace MetNoFimex {
                     const std::string& outputFile,
                     const std::string& configFile
                     )
-                        : CDMWriter(cdmReader, outputFile), configFileName_(configFile),
-                          metgmVersion_(boost::shared_ptr<MetGmVersion>()),
-                          metgmHandle_(boost::shared_ptr<MetGmHandlePtr>()),
-                          metgmFileHandle_(boost::shared_ptr<MetGmFileHandlePtr>()),
-                          metgmTimeTag_(boost::shared_ptr<MetGmTimeTag>())
+                        : CDMWriter(cdmReader, outputFile), configFileName_(configFile)
     {
         std::auto_ptr<XMLDoc> xmlDoc;
         if (configFileName_ == std::string()) {
@@ -475,11 +474,10 @@ namespace MetNoFimex {
             xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
         }
 
-
         metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTag(cdmReader);
         metgmVersion_ = MetGmVersion::createMetGmVersion(xmlDoc);
         metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForWriting(outputFile);
-        metgmHandle_ = MetGmHandlePtr::createMetGmHandle();
+        metgmHandle_ = MetGmHandlePtr::createMetGmHandleForWriting(metgmFileHandle_, metgmVersion_);
 
         configure(xmlDoc);
 

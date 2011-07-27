@@ -52,18 +52,24 @@ namespace MetNoFimex {
 
     class MetGmGroup5Ptr {
     public:
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5Ptr(boost::shared_ptr<CDMReader>& pCdmReader,
-                                                                      const CDMVariable* pVariable,
-                                                                      const boost::shared_ptr<MetGmGroup3Ptr> gp3,
-                                                                      const float* pFillValue = 0);
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
+                                                                                const CDMVariable* pVariable,
+                                                                                const boost::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                                const float* pFillValue = 0);
+
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(boost::shared_ptr<MetGmGroup3Ptr>& gp3,
+                                                                                boost::shared_ptr<MetGmHDTag>&     hdTag);
 
         inline operator float* () { return data_.get(); }
         inline operator const float* () const { return data_.get(); }
 
+        void dumpFimexLayout();
+        void dumpMetGmLayout();
     private:
 
         void changeFillValue();
-        void transpozeData();
+        void toFimexLayout();
+        void toMetGmLayout();
 
         MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3, float fillValue = 9999.0f) : pGp3_(gp3), fillValue_(fillValue) { }
 
@@ -72,7 +78,7 @@ namespace MetNoFimex {
 
         // owning
         boost::shared_ptr<MetGmHDTag> hdTag_;
-        boost::shared_array<float> data_;
+        boost::shared_array<float>    data_;
         float fillValue_;
     };
 

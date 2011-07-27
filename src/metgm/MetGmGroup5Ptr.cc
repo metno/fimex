@@ -23,7 +23,11 @@
 
 // internals
 //
+#include "../../include/metgm/MetGmUtils.h"
 #include "../../include/metgm/MetGmGroup5Ptr.h"
+#include "../../include/metgm/MetGmFileHandlePtr.h"
+#include "../../include/metgm/MetGmHandlePtr.h"
+#include "../../include/metgm/MetGmVersion.h"
 
 namespace MetNoFimex {
 
@@ -37,7 +41,7 @@ void MetGmGroup5Ptr::changeFillValue() {
     }
 }
 
-void MetGmGroup5Ptr::transpozeData()
+void MetGmGroup5Ptr::toMetGmLayout()
 {
     if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
         return;
@@ -69,10 +73,44 @@ void MetGmGroup5Ptr::transpozeData()
     data_.swap(dataT);
 }
 
-boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::shared_ptr<CDMReader>& pCdmReader,
-                                                                       const CDMVariable* pVariable,
-                                                                       const boost::shared_ptr<MetGmGroup3Ptr> pg3,
-                                                                       const float* pFillValue)
+void MetGmGroup5Ptr::toFimexLayout()
+{
+    if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
+        return;
+
+    boost::shared_array<float> dataT(new float[hdTag_->totalSize()]);
+
+    float* slice = data_.get();
+    float* sliceT = dataT.get();
+
+    for(size_t sIndex = 0; sIndex < hdTag_->tSize(); ++sIndex) {
+
+        slice = data_.get() + sIndex * hdTag_->sliceSize();
+        sliceT = dataT.get() + sIndex * hdTag_->sliceSize();
+
+        for(size_t z_index = 0; z_index < hdTag_->zSize(); ++z_index) {
+
+            for(size_t y_index = 0; y_index < hdTag_->ySize(); ++y_index) {
+
+                for(size_t x_index = 0; x_index < hdTag_->xSize(); ++x_index) {
+
+                    sliceT[z_index * (hdTag_->ySize() * hdTag_->xSize()) + y_index * hdTag_->xSize() + x_index] =
+                            slice[z_index + x_index * hdTag_->zSize() + y_index * (hdTag_->zSize() * hdTag_->xSize())];
+                } // x_index
+
+            } // y_index
+
+        } // z_index
+
+    } // sliceIndex
+
+    data_.swap(dataT);
+}
+
+boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
+                                                                                 const CDMVariable* pVariable,
+                                                                                 const boost::shared_ptr<MetGmGroup3Ptr> pg3,
+                                                                                 const float* pFillValue)
 {
     boost::shared_ptr<MetGmGroup5Ptr> gp5 =
             boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3));
@@ -116,7 +154,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::sh
 
                 gp5->changeFillValue();
 
-                gp5->transpozeData();
+                gp5->toMetGmLayout();
 
                 std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
             }
@@ -133,4 +171,75 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5Ptr(boost::sh
 
     return gp5;
 }
+
+    boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(boost::shared_ptr<MetGmGroup3Ptr>& gp3,
+                                                                                     boost::shared_ptr<MetGmHDTag>&     hdTag)
+    {
+        boost::shared_ptr<MetGmGroup5Ptr> gp5 =
+                boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(gp3));
+
+        gp5->hdTag_ = hdTag;
+
+        switch(gp5->hdTag_->asShort()) {
+            case MetGmHDTag::HD_2D:
+            case MetGmHDTag::HD_3D_T:
+                {
+                    gp5->data_.reset(new float[gp5->hdTag_->totalSize()]);
+
+                    MGM_THROW_ON_ERROR(mgm_read_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle(), gp5->data_.get()))
+                    MGM_THROW_ON_ERROR(mgm_param_is_convertible(gp5->pGp3_->p_id(), *gp3->mgmHandle()->version()))
+
+                    // from METGM to Fimex layout
+                    gp5->toFimexLayout();
+                }
+                break;
+            case MetGmHDTag::HD_0D:
+            case MetGmHDTag::HD_0D_T:
+            case MetGmHDTag::HD_1D:
+            case MetGmHDTag::HD_1D_T:
+            case MetGmHDTag::HD_2D_T:
+            case MetGmHDTag::HD_3D:
+            default:
+                throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
+                                   + gp5->hdTag_->asString()
+                                   + " for p_id="
+                                   + boost::lexical_cast<std::string>(gp5->pGp3_->p_id()));
+        }
+        return gp5;
+    }
+
+    void MetGmGroup5Ptr::dumpFimexLayout() {
+        std::cerr << "dumping group5 in Fimex layout [START]" << std::endl;
+        for(size_t sIndex = 0; sIndex < hdTag_->tSize(); ++sIndex) {
+
+            float* slice = data_.get() + sIndex * hdTag_->sliceSize();
+
+            for(size_t z_index = 0; z_index < hdTag_->zSize(); ++z_index) {
+
+                for(size_t y_index = 0; y_index < hdTag_->ySize(); ++y_index) {
+
+                    for(size_t x_index = 0; x_index < hdTag_->xSize(); ++x_index) {
+
+                        std::cerr << "[pid=" << pGp3_->p_id()  << "]"
+                                  << "[T=" << sIndex  << "]"
+                                  << "[X=" << x_index << "]"
+                                  << "[Y=" << y_index << "]"
+                                  << "[Z=" << z_index << "]"
+                                  << "{" << slice[x_index + y_index * hdTag_->xSize() + z_index * hdTag_->xSize() * hdTag_->ySize()] << "}"
+                                  << "    ";
+                    } // x_index
+
+                    std::cerr << std::endl << "end of Y" << std::endl;
+
+                } // y_index
+
+                std::cerr << std::endl << "end of Z" << std::endl;
+
+            } // z_index
+
+            std::cerr << std::endl << "end of T" << std::endl;
+
+        } // sliceIndex
+        std::cerr << "dumping group5 in Fimex layout"   << std::endl;
+    }
 }
