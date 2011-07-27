@@ -144,14 +144,24 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
 boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_ptr<MetGmGroup1Ptr>& pGroup1, boost::shared_ptr<MetGmGroup3Ptr>& pGroup3)
 {
     boost::shared_ptr<MetGmTimeTag> TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
-    TTag->dT_ = pGroup3->dt();
-    TTag->nT_ = pGroup3->nt();
-    TTag->analysis_t = pGroup1->analysisTime();
-    TTag->start_t = pGroup1->startTime();
-    for(size_t step = 0; step < TTag->nT_; ++step) {
-        TTag->points_.push_back(TTag->start_t + step * TTag->dT_);
-        TTag->pointsAsBoostPosix_.push_back(boost::posix_time::from_time_t(TTag->points_.at(step)));
-        TTag->pointsAsDouble_.push_back(TTag->points_.at(step));
+    if(pGroup3->p_id() == 0) {
+        TTag->dT_ = pGroup3->nt() * pGroup3->dt(); // valid for total duration
+        TTag->nT_ = 1;
+        TTag->analysis_t = pGroup1->analysisTime();
+        TTag->start_t = pGroup1->startTime();
+        TTag->points_.push_back(TTag->start_t + TTag->nT_ * TTag->dT_);
+        TTag->pointsAsBoostPosix_.push_back(boost::posix_time::from_time_t(TTag->points_.at(0)));
+        TTag->pointsAsDouble_.push_back(TTag->points_.at(0));
+    } else {
+        TTag->dT_ = pGroup3->dt();
+        TTag->nT_ = pGroup3->nt();
+        TTag->analysis_t = pGroup1->analysisTime();
+        TTag->start_t = pGroup1->startTime();
+        for(size_t step = 0; step < TTag->nT_; ++step) {
+            TTag->points_.push_back(TTag->start_t + step * TTag->dT_);
+            TTag->pointsAsBoostPosix_.push_back(boost::posix_time::from_time_t(TTag->points_.at(step)));
+            TTag->pointsAsDouble_.push_back(TTag->points_.at(step));
+        }
     }
     return TTag;
 }
