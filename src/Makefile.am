@@ -95,8 +95,9 @@ if HAVE_METGM
                          MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
                          metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
                          metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
-                         metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
-                         metgm/MetGmCommentAttributeParser.cc
+                         metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
+                         metgm/MetGmCommentAttributeParser.cc metgm/MetGmDimensionsTag.cc \
+                         metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc
 
 endif
 

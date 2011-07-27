@@ -2,7 +2,7 @@
 # @configure_input@
 
 # Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-# 2003, 2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation,
+# 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
 # Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
@@ -51,8 +51,9 @@ host_triplet = @host@
 @HAVE_METGM_TRUE@                         MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
 @HAVE_METGM_TRUE@                         metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
 @HAVE_METGM_TRUE@                         metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmCommentAttributeParser.cc
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmCommentAttributeParser.cc metgm/MetGmDimensionsTag.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc
 
 @HAVE_MILIB_TRUE@am__append_4 = FeltCDMReader.cc Felt_Array.cc Felt_File.cc
 @HAVE_LIBPQ_TRUE@am__append_5 = WdbCDMReader.cc wdb/WdbIndex.h \
@@ -182,11 +183,12 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
 	metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
 	metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
-	metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
-	metgm/MetGmCommentAttributeParser.cc FeltCDMReader.cc \
-	Felt_Array.cc Felt_File.cc WdbCDMReader.cc wdb/WdbIndex.h \
-	wdb/WdbIndex.cpp wdb/DataSummary.h wdb/DataSummary.cpp \
-	wdb/ParameterData.h wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
+        metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
+        metgm/MetGmCommentAttributeParser.cc metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc \
+	metgm/MetGmDimensionsTag.cc FeltCDMReader.cc Felt_Array.cc \
+	Felt_File.cc WdbCDMReader.cc wdb/WdbIndex.h wdb/WdbIndex.cpp \
+	wdb/DataSummary.h wdb/DataSummary.cpp wdb/ParameterData.h \
+	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
 	wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h wdb/TimeHandler.h \
 	wdb/TimeHandler.cpp wdb/LevelHandler.h wdb/LevelHandler.cpp \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp wdb/GridHandler.h \
@@ -223,9 +225,11 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo MetgmCDMWriter.lo \
 @HAVE_METGM_TRUE@	MetGmCDMWriterImpl.lo MetGmHorizontalTag.lo \
 @HAVE_METGM_TRUE@	MetGmTimeTag.lo MetGmVerticalTag.lo \
-@HAVE_METGM_TRUE@	MetGmGroup1Ptr.lo MetGmGroup3Ptr.lo \
+@HAVE_METGM_TRUE@	MetGmGroup1Ptr.lo MetGmGroup2Ptr.lo MetGmGroup3Ptr.lo \
 @HAVE_METGM_TRUE@	MetGmGroup5Ptr.lo \
-@HAVE_METGM_TRUE@	MetGmCommentAttributeParser.lo
+@HAVE_METGM_TRUE@	MetGmCommentAttributeParser.lo \
+@HAVE_METGM_TRUE@	MetGmDimensionsTag.lo MetGmTags.lo \
+@HAVE_METGM_TRUE@	MetGmHandlePtr.lo
 @HAVE_MILIB_TRUE@am__objects_4 = FeltCDMReader.lo Felt_Array.lo \
 @HAVE_MILIB_TRUE@	Felt_File.lo
 @HAVE_LIBPQ_TRUE@am__objects_5 = WdbCDMReader.lo WdbIndex.lo \
@@ -666,7 +670,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReaderImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMWriterImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCommentAttributeParser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmDimensionsTag.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmTags.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmHandlePtr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup1Ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup2Ptr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup3Ptr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup5Ptr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmHorizontalTag.Plo@am__quote@
@@ -923,6 +931,13 @@ MetGmGroup1Ptr.lo: metgm/MetGmGroup1Ptr.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmGroup1Ptr.lo `test -f 'metgm/MetGmGroup1Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup1Ptr.cc
 
+MetGmGroup2Ptr.lo: metgm/MetGmGroup2Ptr.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmGroup2Ptr.lo -MD -MP -MF $(DEPDIR)/MetGmGroup2Ptr.Tpo -c -o MetGmGroup2Ptr.lo `test -f 'metgm/MetGmGroup2Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup2Ptr.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmGroup2Ptr.Tpo $(DEPDIR)/MetGmGroup2Ptr.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmGroup2Ptr.cc' object='MetGmGroup2Ptr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmGroup2Ptr.lo `test -f 'metgm/MetGmGroup2Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup2Ptr.cc
+
 MetGmGroup3Ptr.lo: metgm/MetGmGroup3Ptr.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmGroup3Ptr.lo -MD -MP -MF $(DEPDIR)/MetGmGroup3Ptr.Tpo -c -o MetGmGroup3Ptr.lo `test -f 'metgm/MetGmGroup3Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup3Ptr.cc
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmGroup3Ptr.Tpo $(DEPDIR)/MetGmGroup3Ptr.Plo
@@ -943,6 +958,27 @@ MetGmCommentAttributeParser.lo: metgm/MetGmCommentAttributeParser.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCommentAttributeParser.cc' object='MetGmCommentAttributeParser.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCommentAttributeParser.lo `test -f 'metgm/MetGmCommentAttributeParser.cc' || echo '$(srcdir)/'`metgm/MetGmCommentAttributeParser.cc
+
+MetGmDimensionsTag.lo: metgm/MetGmDimensionsTag.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmDimensionsTag.lo -MD -MP -MF $(DEPDIR)/MetGmDimensionsTag.Tpo -c -o MetGmDimensionsTag.lo `test -f 'metgm/MetGmDimensionsTag.cc' || echo '$(srcdir)/'`metgm/MetGmDimensionsTag.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmDimensionsTag.Tpo $(DEPDIR)/MetGmDimensionsTag.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmDimensionsTag.cc' object='MetGmDimensionsTag.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmDimensionsTag.lo `test -f 'metgm/MetGmDimensionsTag.cc' || echo '$(srcdir)/'`metgm/MetGmDimensionsTag.cc
+
+MetGmTags.lo: metgm/MetGmTags.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmTags.lo -MD -MP -MF $(DEPDIR)/MetGmTags.Tpo -c -o MetGmTags.lo `test -f 'metgm/MetGmTags.cc' || echo '$(srcdir)/'`metgm/MetGmTags.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmTags.Tpo $(DEPDIR)/MetGmTags.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmTags.cc' object='MetGmTags.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmTags.lo `test -f 'metgm/MetGmTags.cc' || echo '$(srcdir)/'`metgm/MetGmTags.cc
+
+MetGmHandlePtr.lo: metgm/MetGmHandlePtr.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmHandlePtr.lo -MD -MP -MF $(DEPDIR)/MetGmHandlePtr.Tpo -c -o MetGmHandlePtr.lo `test -f 'metgm/MetGmHandlePtr.cc' || echo '$(srcdir)/'`metgm/MetGmHandlePtr.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmHandlePtr.Tpo $(DEPDIR)/MetGmHandlePtr.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmHandlePtr.cc' object='MetGmHandlePtr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmHandlePtr.lo `test -f 'metgm/MetGmHandlePtr.cc' || echo '$(srcdir)/'`metgm/MetGmHandlePtr.cc
 
 WdbIndex.lo: wdb/WdbIndex.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbIndex.lo -MD -MP -MF $(DEPDIR)/WdbIndex.Tpo -c -o WdbIndex.lo `test -f 'wdb/WdbIndex.cpp' || echo '$(srcdir)/'`wdb/WdbIndex.cpp
