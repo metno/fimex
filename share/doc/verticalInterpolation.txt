@@ -24,6 +24,12 @@ Literature:
     * detect formular-terms: auxiliary variables (p, p_top, sigma, ...)
     * configurable interpolation methods for different variables, i.e.
       * log(p) default for most quantitities according to Trenberth et. al.
+        => f(p) = m*log(p) + c
+      * linear(p)
+        => f(p) = m*p + c
+      * log-log
+        => f(p) = log(log(p)) + c
       * other schemes for geopotential (height/temperature) or mean sea level pressure,
         eventually best starting directly from hybrid-levels?
         * this will be very complicated, so ignoring in first version
+        * see NCL vintp2p_ecmwf

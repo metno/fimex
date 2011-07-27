@@ -541,6 +541,8 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
 	return MIFI_OK;
 }
 
+//o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
+//b = o(a)
 void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
 {
 	const double f = (a == b) ? 0 :  ((x - a) / (b - a));
@@ -548,10 +550,52 @@ void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, floa
 	while (n > i++) {
 		float iA = *infieldA++;
 		float iB = *infieldB++;
-		float* o = outfield++;
+		float* o = outfield++; // position!
 		*o = iA + f * (iB - iA);
 	}
 	return;
+}
+
+void mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x)
+{
+    const double f = (a == b) ? 0 :  ((x - a) / (b - a));
+    int i = 0;
+    while (n > i++) {
+        double iA = *infieldA++;
+        double iB = *infieldB++;
+        double* o = outfield++; // position!
+        *o = iA + f * (iB - iA);
+    }
+    return;
+}
+
+// o(x) = m*log(x) + c
+// exp(o(x)) = exp(m*log(x) + c) = exp(m*log(x)) * exp(c)
+// exp(o(xO)) = x^m * exp(c)
+int mifi_get_values_log_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+{
+    // see mifi_get_values_log_f + log of infields and outfield
+    if (a <= 0 || b <= 0 || x <= 0) {
+        return MIFI_ERROR;
+    }
+    double log_a = log(a);
+    double log_b = log(b);
+    double log_x = log(x);
+    mifi_get_values_linear_f(infieldA, infieldB, outfield, n, log_a, log_b, log_x);
+    return MIFI_OK;
+}
+
+int mifi_get_values_log_log_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+{
+    if (a <= 0 || b <= 0 || x <= 0) {
+        return MIFI_ERROR;
+    }
+    double log_a = log(a);
+    double log_b = log(b);
+    double log_x = log(x);
+    mifi_get_values_log_f(infieldA, infieldB, outfield, n, log_a, log_b, log_x);
+    return MIFI_OK;
+
 }
 
 int mifi_project_values(const char* proj_input, const char* proj_output, double* in_out_x_vals, double* in_out_y_vals, const int num)

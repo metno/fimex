@@ -1,6 +1,6 @@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc test_0time.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
              coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc \
-             hirlam12.mgm hirlam12.mgm.nc
+             hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
 
 CC_TESTS = testBinaryConstants \
            testUtils \

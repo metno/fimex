@@ -335,6 +335,7 @@ extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, con
 /**
  * Linear interpolation/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x
  * with o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
+ * (that describes a linear function o(x) = m*x + c )
  *
  * This interpolation can be used for linear time-interpolation.
  *
@@ -347,7 +348,47 @@ extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, con
  * @param x position of outfield
  */
 extern void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+/**
+ * This is the same as mifi_get_values_linear_f() for double input/output values.
+ */
+extern void mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x);
 
+/**
+ * Logarithmic interpolation/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x
+ * with o(x) = m*log(x) + c
+ *
+ * This interpolation can be used for i.e. log(p)-interpolation. It is tested against
+ * results from ncl int2p and vintp2p_ecmwf log(p) interpolation.
+ *
+ * @param infieldA array of size n with values of input at position a
+ * @param infieldB array of size n with values of input at position b
+ * @param outfield array of size n with values of input at position x, output
+ * @param n size of arrays
+ * @param a position of infieldA
+ * @param b position of infieldB
+ * @param x position of outfield
+ * @return MIFI_OK on success, MIFI_ERROR if log of a, b or x undefined
+ */
+extern int mifi_get_values_log_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+/**
+ * Log-log interpolation/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x
+ * that describes a function: o(x) = m*log(log(x)+c
+ *
+ * This interpolation can be used for i.e. log(log(p))-interpolation.
+ * @warning It is tested against results from ncl vintp2p_ecmwf log(log(p)) interpolation, but results vary slightly (~1%) for
+ * unknown reason.
+ *
+ *
+ * @param infieldA array of size n with values of input at position a
+ * @param infieldB array of size n with values of input at position b
+ * @param outfield array of size n with values of input at position x, output
+ * @param n size of arrays
+ * @param a position of infieldA
+ * @param b position of infieldB
+ * @param x position of outfield
+ * @return MIFI_OK on success, MIFI_ERROR if log of a, b or x undefined
+ */
+extern int mifi_get_values_log_log_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
 
 /**
  *  @brief find position in array of position in projection
