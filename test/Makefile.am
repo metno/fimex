@@ -1,4 +1,7 @@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc
+CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
+             coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc \
+             hirlam12.mgm hirlam12.mgm.nc
+
 CC_TESTS = testBinaryConstants \
            testUtils \
            testTimeSpec \
@@ -39,7 +42,7 @@ if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
 if HAVE_METGM
-  CC_TESTS += testMetgmReader
+  CC_TESTS += testMetgmReader testMetGmWriter
 endif
 include wdb/make.mk
 
@@ -63,6 +66,7 @@ testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testMetgmReader_SOURCES = testMetgmReader.cc
+testMetGmWriter_SOURCES = testMetGmWriter.cc
 testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testFileReaderFactory_SOURCES = testFileReaderFactory.cc
