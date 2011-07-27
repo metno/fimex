@@ -24,6 +24,7 @@
 // internals
 //
 #include "../../include/metgm/MetGmHorizontalTag.h"
+#include "../../include/metgm/MetGmGroup3Ptr.h"
 
 // fimex
 //
@@ -210,5 +211,39 @@ boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTag(boost::shared_p
 
     return YTag;
 }
+
+    boost::shared_ptr<MetGmXTag> MetGmHorizontalTag::createMetGmXTag(boost::shared_ptr<MetGmGroup3Ptr>& pg3)
+    {
+        boost::shared_ptr<MetGmXTag> XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
+
+        XTag->center_         = pg3->cx();
+        XTag->distance_       = pg3->dx();
+        XTag->numberOfPoints_ = pg3->nx();
+
+        double x0 = XTag->cx() - (XTag->nx() - 1) * XTag->dx() / 2.0;
+
+        for (int index = 0; index < XTag->nx(); ++index) {
+            XTag->horizontalPoints_.push_back(x0 + index * XTag->dx());
+        }
+
+        return XTag;
+    }
+
+    boost::shared_ptr<MetGmYTag> MetGmHorizontalTag::createMetGmYTag(boost::shared_ptr<MetGmGroup3Ptr>& pg3)
+    {
+        boost::shared_ptr<MetGmYTag> YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);
+
+        YTag->center_         = pg3->cy();
+        YTag->distance_       = pg3->dy();
+        YTag->numberOfPoints_ = pg3->ny();
+
+        double y0 = YTag->cy() - (YTag->ny() - 1) * YTag->dy() / 2.0;
+
+        for(size_t index = 0; index < YTag->ny(); ++index) {
+            YTag->horizontalPoints_.push_back(y0 + index * YTag->dy());
+        }
+
+        return YTag;
+    }
 }
 
