@@ -60,6 +60,7 @@ namespace MetNoFimex {
 
     class MetGmXTag;
     class MetGmYTag;
+    class MetGmGroup3Ptr;
 
     class MetGmHorizontalTag {
     public:
@@ -70,10 +71,13 @@ namespace MetNoFimex {
         static boost::shared_ptr<MetGmXTag> createMetGmXTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
         static boost::shared_ptr<MetGmYTag> createMetGmYTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
 
-        inline unsigned int        numberOfPoints()     { return numberOfPoints_; }
-        inline double              distance()           { return distance_; }
-        inline double              center()             { return center_; }
-        inline std::vector<double> horizontalPoints()   { return horizontalPoints_; }
+        static boost::shared_ptr<MetGmXTag> createMetGmXTag(boost::shared_ptr<MetGmGroup3Ptr>& pg3);
+        static boost::shared_ptr<MetGmYTag> createMetGmYTag(boost::shared_ptr<MetGmGroup3Ptr>& pg3);
+
+        inline unsigned int         numberOfPoints()     { return numberOfPoints_; }
+        inline double               distance()           { return distance_; }
+        inline double               center()             { return center_; }
+        inline std::vector<double>& horizontalPoints()   { return horizontalPoints_; }
 
     protected:
 
@@ -125,10 +129,10 @@ namespace MetNoFimex {
     public:
         friend class MetGmHorizontalTag;
 
-        inline unsigned int        nx()        { return numberOfPoints(); }
-        inline double              dx()        { return distance(); }
-        inline double              cx()        { return center(); }
-        inline std::vector<double> xPoints()   { return horizontalPoints(); }
+        inline unsigned int         nx()        { return numberOfPoints(); }
+        inline double               dx()        { return distance(); }
+        inline double               cx()        { return center(); }
+        inline std::vector<double>& xPoints()   { return horizontalPoints(); }
     private:
         inline MetGmXTag() : MetGmHorizontalTag() { }
 
@@ -138,10 +142,10 @@ namespace MetNoFimex {
     public:
         friend class MetGmHorizontalTag;
 
-        inline unsigned int        ny()        { return numberOfPoints(); }
-        inline double              dy()        { return distance(); }
-        inline double              cy()        { return center(); }
-        inline std::vector<double> yPoints()   { return horizontalPoints(); }
+        inline unsigned int         ny()        { return numberOfPoints(); }
+        inline double               dy()        { return distance(); }
+        inline double               cy()        { return center(); }
+        inline std::vector<double>& yPoints()   { return horizontalPoints(); }
     private:
         inline MetGmYTag() : MetGmHorizontalTag() { }
 

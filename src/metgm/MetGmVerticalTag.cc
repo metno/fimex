@@ -24,6 +24,11 @@
 // internals
 //
 #include "../../include/metgm/MetGmVerticalTag.h"
+#include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "../../include/metgm/MetGmFileHandlePtr.h"
+#include "../../include/metgm/MetGmHandlePtr.h"
+#include "../../include/metgm/MetGmUtils.h"
+
 
 // fimex
 //
@@ -106,16 +111,51 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
     return VTag;
 }
 
-bool MetGmVerticalTag::hasNegativePoints() {
-    std::less_equal<float> leq;
-    return std::find_if(&points_[0], &points_[nz_], boost::bind( leq, _1, 0 ) ) != &points_[nz_];
-}
+    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<MetGmGroup3Ptr>& pGp3)
+    {
+        boost::shared_ptr<MetGmVerticalTag> VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
+
+        VTag->nz_ = pGp3->nz();
+        VTag->pz_ = pGp3->pz();
+        VTag->pr_ = pGp3->pr();
+
+        if(VTag->pz() == 0) {
+            /**
+              * same Z data as in
+              * previous parameter
+              *
+              * skip must be called
+              * to keep handle state
+              * in sync
+              */
+            MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
+            return VTag;
+        }
+
+        VTag->points_.reset(new float[VTag->nz()]);
+
+        MGM_THROW_ON_ERROR(mgm_read_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle(), VTag->points_.get()))
+
+        return VTag;
+    }
+
+    bool MetGmVerticalTag::hasNegativePoints() {
+        std::less_equal<float> leq;
+        return std::find_if(&points_[0], &points_[nz_], boost::bind( leq, _1, 0 ) ) != &points_[nz_];
+    }
 
     void MetGmVerticalTag::extractVerticalPoints(const boost::shared_ptr<Data>& data)
     {
         points_ = data->asConstFloat();
     }
 
+    void MetGmVerticalTag::dump() {
+        std::cerr << "dumping Z profile [START]" << std::endl;
+        for(size_t index; index < nz_; ++index) {
+            std::cerr << "[" << index << "] = " << points_[index] << std::endl;
+        }
+        std::cerr << "dumping Z profile [END]"   << std::endl;
+    }
 }
 
 //            /**
