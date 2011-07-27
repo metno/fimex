@@ -155,8 +155,7 @@ namespace MetNoFimex {
                         }
                     }
 
-                    MetGmConfigurationMappings cfgEntry(p_id, pVar);
-                    cfgEntry.kildeName_ = pVar->getName();
+                    MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
                     cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
 
                     std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " found -> " << pVar->getName() << std::endl;
@@ -227,8 +226,7 @@ namespace MetNoFimex {
                 }
             }
 
-            MetGmConfigurationMappings cfgEntry(p_id, pVar);
-            cfgEntry.kildeName_ = kildeName;
+            MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
 
             xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
             std::string str_FillValue;
@@ -311,8 +309,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3TimeAxis(const CDMVariable* pVar)
     {
-        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
-        MetGmTagsPtr tags = variableView.find(pVar)->pTags_;
+        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
+        MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
         if(tags->dimTag()->tTag().get()) {
             MGM_THROW_ON_ERROR(tags->gp3()->set_nt(tags->dimTag()->tTag()->nT()))
@@ -325,8 +323,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3HorizontalAxis(const CDMVariable* pVar)
     {
-        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
-        MetGmTagsPtr tags = variableView.find(pVar)->pTags_;
+        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
+        MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
         // x
         MGM_THROW_ON_ERROR(tags->gp3()->set_dx(tags->dimTag()->xTag()->dx()));
@@ -340,8 +338,8 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3VerticalAxis(const CDMVariable* pVar)
     {
-        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
-        MetGmTagsPtr tags = variableView.find(pVar)->pTags_;
+        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
+        MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
         if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
             std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
@@ -363,8 +361,7 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup3Data(const CDMVariable* pVar)
     {
-
-        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
         writeGroup3TimeAxis(pVar);
 
@@ -375,18 +372,18 @@ namespace MetNoFimex {
         std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
                   << " pVar->Name " << pVar->getName() << " dumping gp3"
                   << std::endl;
-        variableView.find(pVar)->pTags_->gp3()->dump();
+        nameView.find(pVar->getName())->pTags_->gp3()->dump();
 
-        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(variableView.find(pVar)->pTags_->gp3())));
+        MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(nameView.find(pVar->getName())->pTags_->gp3())));
     }
 
     void MetGmCDMWriterImpl::writeGroup4Data(const CDMVariable* pVar)
     {
-        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
-        if(variableView.find(pVar)->pTags_->dimTag().get()
-                && variableView.find(pVar)->pTags_->dimTag()->zTag().get()) {
-            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, variableView.find(pVar)->pTags_->dimTag()->zTag()->points().get()));
+        if(nameView.find(pVar->getName())->pTags_->dimTag().get()
+                && nameView.find(pVar->getName())->pTags_->dimTag()->zTag().get()) {
+            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, nameView.find(pVar->getName())->pTags_->dimTag()->zTag()->points().get()));
         } else {
             /* no z profile for variable */
             float f = 0;
@@ -397,16 +394,17 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup5Data(const CDMVariable* pVar)
     {
-        cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
+        cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
-        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(variableView.find(pVar)->pTags_->gp5())));
+        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(nameView.find(pVar->getName())->pTags_->gp5())));
     }
 
     void MetGmCDMWriterImpl::init()
     {
-        xmlVariableView &variableView = xmlConfiguration_.get<xml_variable_index>();
-        for(xmlVariableView::const_iterator vit = variableView.begin(); vit != variableView.end(); ++vit) {
-            MetGmConfigurationMappings entry = *vit;
+        xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
+        for(xmlPidView::const_iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
+
+            MetGmConfigurationMappings entry = *pIt;
 
             std::cerr
                     << __FUNCTION__ << ":"
@@ -414,7 +412,7 @@ namespace MetNoFimex {
                     << "p_id = "
                     << entry.p_id_
                     << " CDMVariable with name = "
-                    << entry.kildeName_
+                    << entry.cdmName_
                     << std::endl;
 
             MetGmTagsPtr tags;
@@ -425,21 +423,23 @@ namespace MetNoFimex {
 
             gp3->set_p_id(entry.p_id_);
 
-            cdmVariableView &variableView = cdmConfiguration_.get<cdm_variable_index>();
-            if(variableView.find(entry.variable_) != variableView.end()) {
-                throw CDMException("hmmm... the variable should not be fount in variable profile map");
+            cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
+            if(nameView.find(entry.cdmName_) != nameView.end()) {
+                throw CDMException("hmmm... the variable should not be fount in cdm profile map");
             }
+
+            const CDMVariable* pVariable = &cdmReader->getCDM().getVariable(entry.cdmName_);
 
             if(entry.fillValue_.get())
             {
-                tags = MetGmTags::createMetGmTags(cdmReader, entry.variable_, gp3, entry.fillValue_.get());
+                tags = MetGmTags::createMetGmTags(cdmReader, pVariable, gp3, entry.fillValue_.get());
             } else {
-                tags = MetGmTags::createMetGmTags(cdmReader, entry.variable_, gp3, 0);
+                tags = MetGmTags::createMetGmTags(cdmReader, pVariable, gp3, 0);
             }
 
             assert(tags.get());
 
-            MetGmCDMVariableProfile profile(entry.p_id_, entry.kildeName_, entry.variable_, tags);
+            MetGmCDMVariableProfile profile(entry.p_id_, entry.cdmName_, tags);
             cdmConfiguration_.insert(profile);
         }
 
@@ -449,13 +449,13 @@ namespace MetNoFimex {
 
         writeHeader();
 
+        const CDM& cdmRef = cdmReader->getCDM();
         cdm_configuration::const_iterator varIt;
         for(varIt = cdmConfiguration_.begin(); varIt != cdmConfiguration_.end(); ++varIt) {
-
-            MetGmCDMVariableProfile profile = *varIt;
-            writeGroup3Data(profile.variable());
-            writeGroup4Data(profile.variable());
-            writeGroup5Data(profile.variable());
+            const CDMVariable* pVariable = &cdmRef.getVariable(varIt->cdmName_);
+            writeGroup3Data(pVariable);
+            writeGroup4Data(pVariable);
+            writeGroup5Data(pVariable);
         }
     }
 
