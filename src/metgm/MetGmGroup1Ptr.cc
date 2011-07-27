@@ -23,6 +23,8 @@
 
 // internals
 //
+#include "../../include/metgm/MetGmFileHandlePtr.h"
+#include "../../include/metgm/MetGmHandlePtr.h"
 #include "../../include/metgm/MetGmTimeTag.h"
 #include "../../include/metgm/MetGmCommentAttributeParser.h"
 #include "../../include/metgm/MetGmGroup1Ptr.h"
@@ -43,6 +45,22 @@
 
 namespace MetNoFimex {
 
+boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pMgmHandle)
+{
+    boost::shared_ptr<MetGmGroup1Ptr> gp1 =
+            boost::shared_ptr<MetGmGroup1Ptr>(new MetGmGroup1Ptr);
+
+    gp1->analysis_t     = mgm_get_analysis_date_time(*pMgmHandle);
+    gp1->start_t        = mgm_get_start_date_time(*pMgmHandle);
+    gp1->freeText_      = mgm_get_free_text(*pMgmHandle);
+    gp1->modelType_     = mgm_get_model_type(*pMgmHandle);
+    gp1->productNation_ = mgm_get_production_nation(*pMgmHandle);
+    gp1->dataType_      = mgm_get_data_type(*pMgmHandle);
+    gp1->pHandle_       = pMgmHandle;
+
+    return gp1;
+}
+
 boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1Ptr(boost::shared_ptr<CDMReader>& pCdmReader)
 {
     boost::shared_ptr<MetGmGroup1Ptr> gp1 =
@@ -51,6 +69,8 @@ boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1Ptr(boost::sh
     const CDM& cdmRef = pCdmReader->getCDM();
 
     gp1->tTag_ = MetGmTimeTag::createMetGmTimeTag(pCdmReader);
+
+    gp1->start_t = gp1->tTag_->startTime();
 
     gp1->parser_ = MetGmCommentAttributeParser::createMetGmCommentAttributeParser(pCdmReader);
 
@@ -109,5 +129,26 @@ boost::shared_ptr<MetGmGroup1Ptr> MetGmGroup1Ptr::createMetGmGroup1Ptr(boost::sh
 
     return gp1;
 }
+
+    std::string MetGmGroup1Ptr::dataTypeAsString()
+    {
+        switch(dataType()) {
+        case 0:
+            return std::string("0"); //("0 - Climatological Data");
+        case 1:
+            return std::string("1"); //("1 - Numerical weather analysis");
+        case 2:
+            return std::string("2"); //("2 - Numerical weather prediction");
+        case 3:
+            return std::string("3"); //("3 - Observations");
+        case 4:
+            return std::string("4");  //("4 - Compound data");
+        case 5:
+            return std::string("5");  //("5 - REQGM");
+        default:
+            return std::string();
+        };
+        return std::string();
+    }
 
 }

@@ -21,48 +21,63 @@
  * USA.
  */
 
-/**
-  * Used as private/implementation class
-  */
-
 #ifndef METGM_GROUP1PTR_H
 #define METGM_GROUP1PTR_H
 
 // boost
 //
 #include <boost/shared_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
-namespace MetNoFimex {
+// standard
+//
+#include <string>
 
-    class CDMReader;
-    class CDMVariable;
-    class MetGmTimeTag;
-    class MetGmCommentAttributeParser;
+    namespace MetNoFimex {
 
-    class MetGmGroup1Ptr {
-    public:
-        static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1Ptr(boost::shared_ptr<CDMReader>& pCdmReader);
+        class CDMReader;
+        class CDMVariable;
+        class MetGmTimeTag;
+        class MetGmCommentAttributeParser;
+        class MetGmFileHandlePtr;
+        class MetGmHandlePtr;
+        class MetGmVersion;
 
-        std::string freeText()      { return freeText_; }
-        time_t      startTime()     { return tTag_->startTime(); }
-        time_t      analysisTime()  { return analysis_t; }
-        std::string modelType()     { return modelType_; }
-        std::string productNation() { return productNation_; }
-        unsigned int dataType()     { return dataType_; }
-    private:
+        class MetGmGroup1Ptr {
+        public:
 
-        MetGmGroup1Ptr() { }
+            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pMgmHandle);
+            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1Ptr(boost::shared_ptr<CDMReader>& pCdmReader);
 
-        boost::shared_ptr<MetGmCommentAttributeParser> parser_;
-        boost::shared_ptr<MetGmTimeTag>                tTag_;
+            std::string dataTypeAsString();
+            unsigned int dataType()     { return dataType_; }
+            std::string freeText()      { return freeText_; }
+            std::string modelType()     { return modelType_; }
+            std::string productNation() { return productNation_; }
+            time_t      startTime()     { return start_t; }
+            time_t      analysisTime()  { return analysis_t; }
+            boost::posix_time::ptime    startTimeAsBoostPosix()     { return boost::posix_time::from_time_t(start_t); }
+            boost::posix_time::ptime    analysisTimeAsBoostPosix()  { return boost::posix_time::from_time_t(analysis_t); }
+            std::string    startTimeAsIsoString()                   { return boost::posix_time::to_iso_string(startTimeAsBoostPosix()); }
+            std::string    analysisTimeAsIsoString()                { return boost::posix_time::to_iso_string(analysisTimeAsBoostPosix()); }
+            std::string    startTimeAsIsoExtendedString()           { return boost::posix_time::to_iso_extended_string(startTimeAsBoostPosix()); }
+            std::string    analysisTimeAsIsoExtendedString()        { return boost::posix_time::to_iso_extended_string(analysisTimeAsBoostPosix()); }
+        private:
 
-        std::string  freeText_;
-        std::string  modelType_;
-        std::string  productNation_;
-        unsigned int dataType_;
-        time_t       analysis_t;
-    };
+            MetGmGroup1Ptr() { }
 
-}
+            boost::shared_ptr<MetGmCommentAttributeParser> parser_;
+            boost::shared_ptr<MetGmTimeTag>                tTag_;
+            boost::shared_ptr<MetGmHandlePtr>              pHandle_;
 
-#endif // METGM_GROUP1PTR_H
+            std::string  freeText_;
+            std::string  modelType_;
+            std::string  productNation_;
+            unsigned int dataType_;
+            time_t       analysis_t;
+            time_t       start_t;
+        };
+
+    }
+
+    #endif // METGM_GROUP1PTR_H
