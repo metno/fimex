@@ -44,6 +44,8 @@
 
 namespace MetNoFimex {
 
+    class MetGmGroup1Ptr;
+
     class MetGmHDTag {
     public:
 
@@ -58,44 +60,10 @@ namespace MetNoFimex {
             HD_0D   = 8      // single grid point (single time step) (lowest dimensionality)
         };
 
-        inline static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable) {
+        static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
 
-            boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
-
-            tag->pXTag_ = MetGmHorizontalTag::createMetGmXTag(pCdmReader, pVariable);
-            bool hasXAxis = tag->pXTag_.get() ? true : false;
-
-            tag->pYTag_ = MetGmHorizontalTag::createMetGmYTag(pCdmReader, pVariable);
-            bool hasYAxis = tag->pYTag_.get() ? true : false;
-
-            tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTag(pCdmReader, pVariable);
-            bool hasZAxis = tag->pZTag_.get() ? true : false;
-
-            tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pCdmReader, pVariable);
-            bool hasTAxis = tag->pTTag_.get() ? true : false;
-
-            std::cerr << " hasXAxis=" << hasXAxis << " hasYAxis=" << hasYAxis
-                      << " hasZAxis=" << hasZAxis << " hasTAxis=" << hasTAxis
-                      << std::endl;
-
-            if(hasZAxis && hasXAxis && hasYAxis) {
-                tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
-            } else if((hasXAxis && hasYAxis) || (hasZAxis && hasYAxis) || (hasZAxis && hasXAxis)) {
-                tag->hd_= hasTAxis ? HD_2D_T : HD_2D;
-            } else if((hasYAxis) || (hasXAxis) || (hasZAxis)) {
-                tag->hd_= hasTAxis ? HD_1D_T : HD_1D;
-            } else {
-                tag->hd_= hasTAxis ?  HD_0D_T : HD_0D;
-            }
-
-            tag->sliceSize_ = (hasXAxis ? tag->pXTag_->nx() : 1)
-                            * (hasYAxis ? tag->pYTag_->ny() : 1)
-                            * (hasZAxis ? tag->pZTag_->nz() : 1);
-
-            tag->totalSize_ = tag->sliceSize() * ( (hasTAxis) ? tag->pTTag_->nT() : 1 );
-
-            return tag;
-        }
+        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTag(boost::shared_ptr<MetGmGroup1Ptr>&     pGp1,
+                                                                      boost::shared_ptr<MetGmGroup3Ptr>&     pGp3);
 
         std::string asString() {
             switch (hd_)
@@ -121,10 +89,12 @@ namespace MetNoFimex {
         size_t zSize() const { return pZTag_.get() ? pZTag_->nz() : 0; }
         size_t tSize() const { return pTTag_.get() ? pTTag_->nT() : 0; }
 
-        boost::shared_ptr<MetGmXTag>        xTag() { return pXTag_; }
-        boost::shared_ptr<MetGmYTag>        yTag() { return pYTag_; }
-        boost::shared_ptr<MetGmVerticalTag> zTag() { return pZTag_; }
-        boost::shared_ptr<MetGmTimeTag>     tTag() { return pTTag_; }
+        boost::shared_ptr<MetGmXTag>&        xTag() { return pXTag_; }
+        boost::shared_ptr<MetGmYTag>&        yTag() { return pYTag_; }
+        boost::shared_ptr<MetGmVerticalTag>& zTag() { return pZTag_; }
+        boost::shared_ptr<MetGmTimeTag>&     tTag() { return pTTag_; }
+
+        void setZTag(boost::shared_ptr<MetGmVerticalTag>& zTag) { pZTag_ = zTag; }
     private:
 
         inline MetGmHDTag() : hd_(MetGmHDTag::HD_0D), sliceSize_(1), totalSize_() { }
