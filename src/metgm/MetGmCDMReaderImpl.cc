@@ -281,6 +281,9 @@ namespace MetNoFimex {
         cdmPidView::iterator pIt = pidView.begin();
         for(; pIt != pidView.end(); ++pIt) if(pIt->p_id_ > 0) break;
 
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                  << " time axis data based on variable = " << pIt->pVariable_->getName()
+                  << std::endl;
         long timeDimensionSize = pIt->pTags_->dimTag()->tTag()->nT();
 
         tDim_.setName(hcTimeDimensionName);
@@ -331,6 +334,10 @@ namespace MetNoFimex {
 
         if(pIt == pidView.end())
             throw CDMException("can't find X / Y axis");
+        else
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " horizontal axes based on variable " << pIt->pVariable_->getName()
+                      << std::endl;
 
         MetGmCDMVariableProfile profile = *pIt;
 
