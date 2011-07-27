@@ -158,7 +158,9 @@ namespace MetNoFimex {
                     MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
                     cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
 
-                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " found -> " << pVar->getName() << std::endl;
+                    std::cerr << __FILE__ << " @ "<< __FUNCTION__ << "@" << __LINE__ << " : "
+                              << " found -> " << pVar->getName()
+                              << std::endl;
 
                     if(!str_FillValue.empty())
                         cfgEntry.setFillValue(boost::lexical_cast<float>(str_FillValue));
@@ -270,24 +272,46 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup2Data()
     {
-        short total_number_of_parameters = cdmConfiguration_.size();
-        std::cerr << __FUNCTION__ << "@" << __LINE__ << " total_number_of_parameters :" << total_number_of_parameters << std::endl;
-        MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, cdmConfiguration_.size()))
+        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
+        short np = nameView.size();
+
+        MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, np))
+
+        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                  << " mgm_set_number_of_params [np]:" << np
+                  << std::endl;
 
         if(*metgmVersion_ == MGM_Edition2) {
 
             cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
-            const short ndp = pidView.size();
+
+            std::set<short> uniquePid;
+
+            for(cdmPidView::const_iterator cit = pidView.begin(); cit != pidView.end(); ++cit) {
+                uniquePid.insert(cit->p_id_);
+            }
+
+            std::unique_copy(uniquePid.begin(), uniquePid.end(), std::inserter(uniquePid, uniquePid.begin()));
+
+            const short ndp = uniquePid.size();
 
             MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
 
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << " mgm_set_number_of_dist_params [ndp]:" << ndp
+                      << std::endl;
+
             size_t index = 0;
-            for(cdmPidView::const_iterator cit = pidView.begin(); cit != pidView.end(); ++cit) {
+            for(std::set<short>::const_iterator cit = uniquePid.begin(); cit != uniquePid.end(); ++cit) {
 
                 ++index;
 
-                const MetGmCDMVariableProfile& profile = *cit;
-                size_t ndpr = pidView.count(profile.p_id_);
+                cdmPidView::const_iterator pIt = pidView.find(*cit);
+                if(pIt == pidView.end())
+                    continue;
+
+                const MetGmCDMVariableProfile& profile = *pIt;
+                const size_t ndpr = pidView.count(profile.p_id_);
 
                 MGM_THROW_ON_ERROR(mgm_set_param_id(*metgmHandle_, index, profile.p_id_))
                 MGM_THROW_ON_ERROR(mgm_set_ndpr(*metgmHandle_, index, ndpr))
@@ -407,8 +431,9 @@ namespace MetNoFimex {
             MetGmConfigurationMappings entry = *pIt;
 
             std::cerr
-                    << __FUNCTION__ << ":"
-                    << __LINE__     << ":"
+                    << __FILE__     << " @ "
+                    << __FUNCTION__ << " @ "
+                    << __LINE__     << " : "
                     << "p_id = "
                     << entry.p_id_
                     << " CDMVariable with name = "
