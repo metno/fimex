@@ -439,7 +439,7 @@ namespace MetNoFimex {
 
             assert(tags.get());
 
-            MetGmCDMVariableProfile profile(entry.p_id_, entry.variable_, tags);
+            MetGmCDMVariableProfile profile(entry.p_id_, entry.kildeName_, entry.variable_, tags);
             cdmConfiguration_.insert(profile);
         }
 
