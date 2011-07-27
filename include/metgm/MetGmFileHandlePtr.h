@@ -32,6 +32,10 @@
 //
 #include "metgm.h"
 
+// fimex
+//
+#include "fimex/CDMException.h"
+
 // boost
 //
 #include <boost/shared_ptr.hpp>
@@ -80,6 +84,7 @@ namespace MetNoFimex {
         }
 
         inline operator FILE* () { return handle_; }
+        inline FILE* handle() { return handle_; }
         inline std::string fileName() { return fileName_; }
 
     private:
