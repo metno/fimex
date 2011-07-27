@@ -282,11 +282,11 @@ namespace MetNoFimex {
         for(; pIt != pidView.end(); ++pIt) if(pIt->p_id_ > 0) break;
 
         long timeDimensionSize = pIt->pTags_->dimTag()->tTag()->nT();
+
         tDim_.setName(hcTimeDimensionName);
         tDim_.setLength(timeDimensionSize);
         tDim_.setUnlimited(true);
 
-        cdm_->addDimension(tDim_);
         std::vector<std::string> timeDimensionShape;
         timeDimensionShape.push_back(tDim_.getName());
         CDMDataType timeDimensionDataType = CDM_DOUBLE;
@@ -295,6 +295,8 @@ namespace MetNoFimex {
         std::vector<double> timeInUnitsVector = pIt->pTags_->dimTag()->tTag()->pointsAsDouble();
         boost::shared_ptr<Data> timeDimensionData = createData(timeDimensionDataType, timeInUnitsVector.begin(), timeInUnitsVector.end());
         timeVariable.setData(timeDimensionData);
+
+        cdm_->addDimension(tDim_);
         cdm_->addVariable(timeVariable);
 
         // add attributes
@@ -337,9 +339,6 @@ namespace MetNoFimex {
         CDMAttribute xDimLongNameAttribute = CDMAttribute("long_name", "string", "longitude");
         CDMAttribute xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "longitude");
         CDMAttribute xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
         xDim_ = CDMDimension(xName, profile.pTags_->dimTag()->xTag()->nx());
         std::vector<std::string> xDimShape;
         xDimShape.push_back(xDim_.getName());
@@ -348,48 +347,29 @@ namespace MetNoFimex {
                                                    profile.pTags_->dimTag()->xTag()->xPoints().begin(),
                                                    profile.pTags_->dimTag()->xTag()->xPoints().end());
         xVar.setData(xData);
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
         cdm_->addDimension(xDim_);
         cdm_->addVariable(xVar);
         cdm_->addAttribute(xName, xDimLongNameAttribute);
         cdm_->addAttribute(xName, xDimStandardNameAttribute);
         cdm_->addAttribute(xName, xDimUnitsAttribute);
 
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
         std::string yName = "latitude";
         CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
         CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
         CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
-
         yDim_ = CDMDimension(yName, profile.pTags_->dimTag()->yTag()->ny());
         std::vector<std::string> yDimShape;
         yDimShape.push_back(yDim_.getName());
         CDMVariable yVar(yName, CDM_DOUBLE, yDimShape);
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
         boost::shared_ptr<Data> yData = createData(CDM_DOUBLE,
                                                    profile.pTags_->dimTag()->yTag()->yPoints().begin(),
                                                    profile.pTags_->dimTag()->yTag()->yPoints().end());
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
         yVar.setData(yData);
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
         cdm_->addDimension(yDim_);
         cdm_->addVariable(yVar);
-
         cdm_->addAttribute(yName, yDimLongNameAttribute);
         cdm_->addAttribute(yName, yDimStandardNameAttribute);
         cdm_->addAttribute(yName, yDimUnitsAttribute);
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << std::endl;
-
     }
 
     void MetGmCDMReaderImpl::readMgMHeader()
