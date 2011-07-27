@@ -41,32 +41,11 @@
 
 namespace MetNoFimex {
 
-    /* forward declarations */
     class XMLDoc;
     class MetGmVersion;
     class MetGmHandlePtr;
     class MetGmGroup3Ptr;
     class MetGmFileHandlePtr;
-
-    struct METGM_ZProfile
-    {
-      std::string name_;
-      short       pr_;
-      int         pid_;
-
-      explicit METGM_ZProfile()
-          :name_(std::string()), pr_(0), pid_(0) {}
-
-      explicit METGM_ZProfile(const std::string& name , const short pr, const short pid)
-          :name_(name), pr_(pr), pid_(pid) {}
-
-      bool isValid() {
-          return !name_.empty();
-      }
-
-      bool operator<(const METGM_ZProfile& profile)const{return name_ < profile.name_;}
-
-    };
 
     class MetGmCDMReaderImpl : public CDMReader
     {
@@ -109,22 +88,6 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmGroup1Ptr>      pGroup1_;
         boost::shared_ptr<MetGmGroup2Ptr>      pGroup2_;
 
-        std::map<std::string, boost::shared_ptr<MetGmGroup3Ptr> > cdmvariable2mgm_group3map_;
-        typedef boost::multi_index::multi_index_container<
-          METGM_ZProfile,
-          boost::multi_index::indexed_by<
-              boost::multi_index::ordered_non_unique <
-                  boost::multi_index::composite_key <
-                      METGM_ZProfile,
-                      boost::multi_index::member<METGM_ZProfile,short,&METGM_ZProfile::pr_>,
-                      boost::multi_index::member<METGM_ZProfile,int,&METGM_ZProfile::pid_>
-                  >
-              >
-              >
-          > metgm_profile_set;
-
-
-        metgm_profile_set prXpidXname_;
         xml_configuration xmlConfiguration_;
         cdm_configuration cdmConfiguration_;
 
