@@ -268,7 +268,7 @@ namespace MetNoFimex {
     void MetGmCDMReaderImpl::addTimeDimension()
     {
         if(cdmConfiguration_.size() == 0)
-            throw CDMException("can't add time dimension as there are no cdm profiles");
+            return;
 
         std::string hcTimeDimensionName = "time";
         std::string hcSymbolForTimeDimension = "T";
@@ -323,7 +323,7 @@ namespace MetNoFimex {
     void MetGmCDMReaderImpl::addHorizontalDimensions()
     {
         if(cdmConfiguration_.size() == 0)
-            throw CDMException("can't add x - y dimension as there are no cdm profiles");
+            return;
 
         cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
 
@@ -387,7 +387,7 @@ namespace MetNoFimex {
           */
 
         if(cdmConfiguration_.size() == 0)
-            throw CDMException("can't add vertical levels as there are no cdm profiles");
+            return;
 
         cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
         for(cdmPidView::iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
