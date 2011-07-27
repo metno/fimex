@@ -113,13 +113,28 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
 
     boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<MetGmGroup3Ptr>& pGp3)
     {
-        boost::shared_ptr<MetGmVerticalTag> VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
+        boost::shared_ptr<MetGmVerticalTag> VTag;
+
+        VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
+
+        if(pGp3->p_id() == 0) {
+
+            VTag->nz_ = 1;
+            VTag->pr_ = 0;
+            VTag->pz_ = 1;
+
+            VTag->points_.reset(new float[VTag->nz()]);
+            VTag->points_[0] = 0.0;
+
+            MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
+            return VTag; // returning null
+        }
 
         VTag->nz_ = pGp3->nz();
         VTag->pz_ = pGp3->pz();
         VTag->pr_ = pGp3->pr();
 
-        if(VTag->pz() == 0) {
+        if(pGp3->pz() == 0) {
             /**
               * same Z data as in
               * previous parameter
