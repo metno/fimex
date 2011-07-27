@@ -28,6 +28,12 @@
 #ifndef METGM_HANDLEPTR_H
 #define METGM_HANDLEPTR_H
 
+// internals
+//
+#include "MetGmUtils.h"
+#include "MetGmVersion.h"
+#include "MetGmFileHandlePtr.h"
+
 // METGM C library
 //
 #include "metgm.h"
@@ -41,20 +47,27 @@ namespace MetNoFimex {
     class MetGmHandlePtr {
     public:
 
-        static boost::shared_ptr<MetGmHandlePtr> createMetGmHandle() {
-            return boost::shared_ptr<MetGmHandlePtr>(new MetGmHandlePtr);
-        }
+        static boost::shared_ptr<MetGmHandlePtr> createMetGmHandleForReading(const std::string& source);
 
-        ~MetGmHandlePtr() { mgm_free_handle(handle_); }
+        static boost::shared_ptr<MetGmHandlePtr> createMetGmHandleForWriting(boost::shared_ptr<MetGmFileHandlePtr>& pFileHandle,
+                                                                             boost::shared_ptr<MetGmVersion>& pVersion);
+
+
+        ~MetGmHandlePtr();
 
         inline int reset() { return mgm_reset_handle(handle_); }
 
         inline operator mgm_handle* () { return handle_; }
 
+        inline boost::shared_ptr<MetGmFileHandlePtr>& fileHandle() { return pFileHandle_; }
+        inline boost::shared_ptr<MetGmVersion>&       version()    { return pVersion_; }
+
     private:
 
         explicit MetGmHandlePtr() { handle_ = mgm_new_handle(); }
 
+        boost::shared_ptr<MetGmFileHandlePtr> pFileHandle_;
+        boost::shared_ptr<MetGmVersion>       pVersion_;
         mgm_handle* handle_;
     };
 }
