@@ -95,7 +95,7 @@ namespace MetNoFimex {
 
             std::string metgmName = getXmlProp(node, "name");
             if(metgmName.empty()) {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " parameter metgmName empty " << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " parameter metgmName empty " << std::endl;
                 continue;
             }
 
@@ -105,12 +105,12 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_p_id == std::string("")) {
-                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
+//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
                     continue;
                 }
                 p_id = boost::lexical_cast<size_t>(str_p_id);
             } else {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
                 continue;
             }
 
@@ -131,7 +131,7 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_standard_name.empty()) {
-                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
+//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
                     continue;
                 }
                 // find all variables with given standard_name value
@@ -140,7 +140,7 @@ namespace MetNoFimex {
                     std::string varName = varNames[index];
                     if(cdmRef.hasDimension(varName)) {
                         /* not interested in variables that are dimensions */
-                        std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] there is dimension with name -> " << metgmName << std::endl;
+//                        std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] there is dimension with name -> " << metgmName << std::endl;
                         continue;
                     }
 
@@ -150,7 +150,7 @@ namespace MetNoFimex {
                         /* check if dimensions convertible */
                         Units checker;
                         if(!checker.areConvertible(str_units, cdmRef.getUnits(varName))) {
-                            std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << metgmName << std::endl;
+//                            std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << metgmName << std::endl;
                             continue;
                         }
                     }
@@ -158,9 +158,9 @@ namespace MetNoFimex {
                     MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
                     cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
 
-                    std::cerr << __FILE__ << " @ "<< __FUNCTION__ << "@" << __LINE__ << " : "
-                              << " found -> " << pVar->getName()
-                              << std::endl;
+//                    std::cerr << __FILE__ << " @ "<< __FUNCTION__ << "@" << __LINE__ << " : "
+//                              << " found -> " << pVar->getName()
+//                              << std::endl;
 
                     if(!str_FillValue.empty())
                         cfgEntry.setFillValue(boost::lexical_cast<float>(str_FillValue));
@@ -169,7 +169,7 @@ namespace MetNoFimex {
                 }
 
             } else {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
                 continue;
             }
         }
@@ -187,12 +187,12 @@ namespace MetNoFimex {
 
             std::string kildeName = getXmlProp(node, "name");
             if(kildeName.empty()) {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
                 continue;
             }
 
             if(!cdmRef.hasVariable(kildeName)) {
-                std::cerr << __FILE__ " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " not found in CDM model -> " << kildeName << std::endl;
+//                std::cerr << __FILE__ " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " not found in CDM model -> " << kildeName << std::endl;
                 continue;
             }
 
@@ -202,12 +202,12 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_p_id == std::string("")) {
-                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                     continue;
                 }
                 p_id = boost::lexical_cast<size_t>(str_p_id);
             } else {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                 continue;
             }
 
@@ -223,7 +223,7 @@ namespace MetNoFimex {
                 /* check if dimensions convertible */
                 Units checker;
                 if(!checker.areConvertible(str_units, cdmRef.getUnits(kildeName))) {
-                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << kildeName << std::endl;
+//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << kildeName << std::endl;
                     continue;
                 }
             }
@@ -277,9 +277,9 @@ namespace MetNoFimex {
 
         MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, np))
 
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                  << " mgm_set_number_of_params [np]:" << np
-                  << std::endl;
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                  << " mgm_set_number_of_params [np]:" << np
+//                  << std::endl;
 
         if(*metgmVersion_ == MGM_Edition2) {
 
@@ -297,9 +297,9 @@ namespace MetNoFimex {
 
             MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " mgm_set_number_of_dist_params [ndp]:" << ndp
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " mgm_set_number_of_dist_params [ndp]:" << ndp
+//                      << std::endl;
 
             size_t index = 0;
             for(std::set<short>::const_iterator cit = uniquePid.begin(); cit != uniquePid.end(); ++cit) {
@@ -366,17 +366,17 @@ namespace MetNoFimex {
         MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
         if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " pVar->Name " << pVar->getName()
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " pVar->Name " << pVar->getName()
+//                      << std::endl;
             MGM_THROW_ON_ERROR(tags->gp3()->set_nz(tags->dimTag()->zTag()->nz()));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pr(tags->dimTag()->zTag()->pr()));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pz(tags->dimTag()->zTag()->pz()));
         } else {
             /* no z profile for variable*/
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " pVar->Name " << pVar->getName()
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " pVar->Name " << pVar->getName()
+//                      << std::endl;
             MGM_THROW_ON_ERROR(tags->gp3()->set_nz(1));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pr(0));
             MGM_THROW_ON_ERROR(tags->gp3()->set_pz(1));
@@ -393,10 +393,10 @@ namespace MetNoFimex {
 
         writeGroup3VerticalAxis(pVar);
 
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                  << " pVar->Name " << pVar->getName() << " dumping gp3"
-                  << std::endl;
-        nameView.find(pVar->getName())->pTags_->gp3()->dump();
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                  << " pVar->Name " << pVar->getName() << " dumping gp3"
+//                  << std::endl;
+//        nameView.find(pVar->getName())->pTags_->gp3()->dump();
 
         MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(nameView.find(pVar->getName())->pTags_->gp3())));
     }
@@ -432,15 +432,15 @@ namespace MetNoFimex {
 
             MetGmConfigurationMappings entry = *pIt;
 
-            std::cerr
-                    << __FILE__     << " @ "
-                    << __FUNCTION__ << " @ "
-                    << __LINE__     << " : "
-                    << "p_id = "
-                    << entry.p_id_
-                    << " CDMVariable with name = "
-                    << entry.cdmName_
-                    << std::endl;
+//            std::cerr
+//                    << __FILE__     << " @ "
+//                    << __FUNCTION__ << " @ "
+//                    << __LINE__     << " : "
+//                    << "p_id = "
+//                    << entry.p_id_
+//                    << " CDMVariable with name = "
+//                    << entry.cdmName_
+//                    << std::endl;
 
             MetGmTagsPtr tags;
             boost::shared_ptr<MetGmGroup3Ptr> gp3 =

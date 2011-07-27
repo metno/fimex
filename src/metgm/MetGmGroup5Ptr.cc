@@ -143,7 +143,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             {
                 std::string mgmUnits;
 
-                std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
+//                std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
                 if(pg3->p_id() == 7) {
                     /**
                       * METGM is tricky here as it can accomodate both m and hPa units
@@ -159,10 +159,10 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                           * are heights given in meters above MSL
                           */
                         mgmUnits = "m";
-                        std::cerr << __FUNCTION__ << " @ " << __LINE__ << " m " << pVariable->getName() << std::endl;
+//                        std::cerr << __FUNCTION__ << " @ " << __LINE__ << " m " << pVariable->getName() << std::endl;
                     } else {
                         mgmUnits = "hPa";
-                        std::cerr << __FUNCTION__ << " @ " << __LINE__ << " hPa " << pVariable->getName()  << std::endl;
+//                        std::cerr << __FUNCTION__ << " @ " << __LINE__ << " hPa " << pVariable->getName()  << std::endl;
                     }
                 } else {
                     mgmUnits = std::string(mgm_get_param_unit(pg3->p_id(), *(pg3->mgmHandle())));
@@ -183,7 +183,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
 
                 gp5->toMetGmLayout();
 
-                std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
+//                std::cerr << __FUNCTION__ << " @ " << __LINE__ << " for " << pVariable->getName() << std::endl;
 
                 return gp5;
             }
@@ -205,14 +205,10 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
     boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(boost::shared_ptr<MetGmGroup3Ptr>& gp3,
                                                                                      boost::shared_ptr<MetGmHDTag>&     hdTag)
     {
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                  << "[pid=" << gp3->p_id() << "]"
-                  << std::endl;
-
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                  << "[pid=" << gp3->p_id() << "]"
-                  << " dimensionality " << hdTag->asString()
-                  << std::endl;
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                  << "[pid=" << gp3->p_id() << "]"
+//                  << " dimensionality " << hdTag->asString()
+//                  << std::endl;
 
         switch(hdTag->asShort()) {
             case MetGmHDTag::HD_2D:
@@ -221,44 +217,28 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                 {
                    int sizeToAlloc = hdTag->totalSize();
 
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                              << "[pid=" << gp3->p_id() << "]"
-                              << " before allocation of size " << hdTag->totalSize()
-                              << std::endl;
-
-                    if(gp3->pz() == 0) {
-                        gp3->dump();
-                    }
+//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                              << "[pid=" << gp3->p_id() << "]"
+//                              << " before allocation of size " << hdTag->totalSize()
+//                              << std::endl;
 
                     boost::shared_array<float> data(new float[sizeToAlloc]);
 
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                              << "[pid=" << gp3->p_id() << "]"
-                              << " after allocation of size " << hdTag->totalSize()
-                              << std::endl;
-
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
+//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                              << "[pid=" << gp3->p_id() << "]"
+//                              << " after allocation of size " << hdTag->totalSize()
+//                              << std::endl;
 
                     MGM_THROW_ON_ERROR(mgm_read_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle(), data.get()))
-
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
-
                     MGM_THROW_ON_ERROR(mgm_param_is_convertible(gp3->p_id(), *gp3->mgmHandle()->version()))
 
                     std::vector<float> vdata;
-
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
-
                     for(size_t index = 0; index < sizeToAlloc; ++index)
                         vdata.push_back(data[index]);
-
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
-
                     boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, vdata));
+
                     // from METGM to Fimex layout
                     gp5->toFimexLayout();
-
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
 
                     return gp5;
                 }

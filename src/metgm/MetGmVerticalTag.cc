@@ -70,12 +70,12 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
             CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis();
 
             if(!zAxis.get()) {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " z axis NOT existing for " << pVariable->getName() << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " z axis NOT existing for " << pVariable->getName() << std::endl;
                 return boost::shared_ptr<MetGmVerticalTag>();
             } else {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " z axis IS existing for " << pVariable->getName() << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " z axis IS existing for " << pVariable->getName() << std::endl;
             }
 
             VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
@@ -130,21 +130,21 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
             // but take the data from prev
             VTag->points_.reset(new float[VTag->nz()]);
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "[pid=" << pGp3->p_id() << "]"
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << "[pid=" << pGp3->p_id() << "]"
+//                      << std::endl;
 
             memcpy(VTag.get(), prevTag.get(), VTag->nz() * sizeof(float));
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "[pid=" << pGp3->p_id() << "]"
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << "[pid=" << pGp3->p_id() << "]"
+//                      << std::endl;
 
-            VTag->dump();
+//            VTag->dump();
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "[pid=" << pGp3->p_id() << "]"
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << "[pid=" << pGp3->p_id() << "]"
+//                      << std::endl;
 
 
             return VTag; // return copy

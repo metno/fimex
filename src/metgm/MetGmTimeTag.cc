@@ -91,12 +91,12 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
             CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis();
 
             if(!tAxis.get()) {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " time axis NOT existing for " << pVariable->getName() << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " time axis NOT existing for " << pVariable->getName() << std::endl;
                 return boost::shared_ptr<MetGmTimeTag>();
             } else {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " time axis IS existing for " << pVariable->getName() << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " time axis IS existing for " << pVariable->getName() << std::endl;
             }
 
             TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
@@ -131,9 +131,9 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
 
             if(TTag->points_.size() <= 1) {
                 TTag->dT_ = 3600;
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " just one point on time axis -- dt will ne set to 3600"
-                          << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " just one point on time axis -- dt will ne set to 3600"
+//                          << std::endl;
             } else {
                 TTag->dT_ = TTag->points_.at(1) - TTag->points_.at(0);
             }

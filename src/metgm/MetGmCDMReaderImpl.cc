@@ -76,7 +76,7 @@ namespace MetNoFimex {
 
             std::string kildeName = getXmlProp(node, "name");
             if(kildeName.empty()) {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
                 continue;
             }
 
@@ -86,12 +86,12 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_p_id == std::string("")) {
-                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                     continue;
                 }
                 p_id = boost::lexical_cast<size_t>(str_p_id);
             } else {
-                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
+//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                 continue;
             }
 
@@ -102,10 +102,10 @@ namespace MetNoFimex {
             }
 
             if(str_standard_name.empty()) {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name not found -> " << kildeName << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name not found -> " << kildeName << std::endl;
                 continue;
             } else {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name for -> " << kildeName  << " is " << str_standard_name << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name for -> " << kildeName  << " is " << str_standard_name << std::endl;
             }
 
             xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
@@ -282,9 +282,9 @@ namespace MetNoFimex {
         if(pIt == pidView.end())
             pIt = pidView.begin();
 
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                  << " time axis data based on variable = " << pIt->cdmName_
-                  << std::endl;
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                  << " time axis data based on variable = " << pIt->cdmName_
+//                  << std::endl;
 
         long timeDimensionSize = pIt->pTags_->dimTag()->tTag()->nT();
 
@@ -336,10 +336,10 @@ namespace MetNoFimex {
 
         if(pIt == pidView.end())
             throw CDMException("can't find X / Y axis");
-        else
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " horizontal axes based on variable " << pIt->cdmName_
-                      << std::endl;
+//        else
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " horizontal axes based on variable " << pIt->cdmName_
+//                      << std::endl;
 
         MetGmCDMVariableProfile profile = *pIt;
 
@@ -412,36 +412,36 @@ namespace MetNoFimex {
 
         cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
 
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                  << " pidView.size_() => " << pidView.size()
-                  << std::endl;
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                  << " pidView.size_() => " << pidView.size()
+//                  << std::endl;
 
         for(cdmPidView::iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
             MetGmCDMVariableProfile profile = *pIt;
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " CDM_PID_VIEW TESTING FOR p_id [" << profile.p_id_ << "]"
-                      << " with name " << profile.cdmName_
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " CDM_PID_VIEW TESTING FOR p_id [" << profile.p_id_ << "]"
+//                      << " with name " << profile.cdmName_
+//                      << std::endl;
         }
 
         for(cdmPidView::iterator pidIt = pidView.begin(); pidIt != pidView.end(); ++pidIt) {
             MetGmCDMVariableProfile profile = *pidIt;
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " adding data for p_id [" << profile.p_id_ << "]"
-                      << " with name " << profile.cdmName_
-                      << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << " adding data for p_id [" << profile.p_id_ << "]"
+//                      << " with name " << profile.cdmName_
+//                      << std::endl;
 
             if(profile.p_id_ == 0
                || profile.pTags_->dimTag()->zTag().get() == 0
                || (profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D
                    && profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D_T))
             {
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " no vertical data for p_id [" << profile.p_id_ << "]"
-                          << " with name " << profile.cdmName_
-                          << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " no vertical data for p_id [" << profile.p_id_ << "]"
+//                          << " with name " << profile.cdmName_
+//                          << std::endl;
                 continue;
             } else {
                 std::string unitName;
@@ -471,10 +471,10 @@ namespace MetNoFimex {
                         const CDMVariable& var = cdm_->getVariable(dim.getName());
                         boost::shared_array<float> vertical_data = var.getData()->asFloat();
                         if(memcmp(vertical_data.get(), profile.pTags_->dimTag()->zTag()->points().get(), profile.pTags_->dimTag()->zTag()->nz() * sizeof(float)) == 0) {
-                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                                      << " vertical data for p_id [" << profile.p_id_ << "]"
-                                      << " based on existing dimension " << var.getName()
-                                      << std::endl;
+//                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                                      << " vertical data for p_id [" << profile.p_id_ << "]"
+//                                      << " based on existing dimension " << var.getName()
+//                                      << std::endl;
                             profile.zDimensionName_ = dim.getName();
                             pidView.replace(pidIt, profile);
                             continue;
@@ -487,10 +487,10 @@ namespace MetNoFimex {
                     continue;
                 }
 
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " vertical data for p_id [" << profile.p_id_ << "]"
-                          << " based on variable " << profile.cdmName_
-                          << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " vertical data for p_id [" << profile.p_id_ << "]"
+//                          << " based on variable " << profile.cdmName_
+//                          << std::endl;
 
                 // to create unique fimex name for CDM modell
                 longName.append("_pid_").append(boost::lexical_cast<std::string>(profile.p_id_));
@@ -707,22 +707,22 @@ namespace MetNoFimex {
 
         pGroup2_ = MetGmGroup2Ptr::createMetGmGroup2PtrForReading(pHandle_);
 
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__
-                  << " total np " << pGroup2_->totalnp()
-                  << std::endl;
+//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__
+//                  << " total np " << pGroup2_->totalnp()
+//                  << std::endl;
 
         boost::shared_ptr<MetGmVerticalTag> prevZTag;
 
         for(int index = 0; index < pGroup2_->totalnp(); ++index) {
             boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
-            std::cerr << std::endl
-                      << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "--------------- START ---------------------------"
-                      << "[parsing index=" << index << "] : "
-                      << "[pid=" << gp3->p_id() << "]"
-                      << "{ pr = " <<  gp3->pr() << " , "
-                      << "  pz = " <<  gp3->pz() << " } "
-                      << std::endl;
+//            std::cerr << std::endl
+//                      << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << "--------------- START ---------------------------"
+//                      << "[parsing index=" << index << "] : "
+//                      << "[pid=" << gp3->p_id() << "]"
+//                      << "{ pr = " <<  gp3->pr() << " , "
+//                      << "  pz = " <<  gp3->pz() << " } "
+//                      << std::endl;
 
 //            if(gp3->pz() == 0) {
 //                std::cerr << std::endl
@@ -739,7 +739,7 @@ namespace MetNoFimex {
 
             prevZTag = tags->dimTag()->zTag();
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
+//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
 
             xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
 
@@ -789,28 +789,23 @@ namespace MetNoFimex {
                     break;
                 }
 
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
-
                 MetGmCDMVariableProfile profile(gp3->p_id(), fixedKildeName, tags);
                 profile.standardName_ = standardName;
                 profile.units_ = strUnit;
                 profile.pfillValue_ = fillValue;
-
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
-
                 cdmConfiguration_.insert(profile);
 
-                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                          << " after insertion fixed kildeName  => " <<  fixedKildeName
-                          << " cdmConfiguration_.size()  =  " <<  cdmConfiguration_.size()
-                          << std::endl;
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " after insertion fixed kildeName  => " <<  fixedKildeName
+//                          << " cdmConfiguration_.size()  =  " <<  cdmConfiguration_.size()
+//                          << std::endl;
             }
 
-            std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << "--------------- END ---------------------------"
-                      << "[parsing index=" << index << "] : "
-                      << "[pid=" << gp3->p_id() << "]"
-                      << std::endl;
+//            std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                      << "--------------- END ---------------------------"
+//                      << "[parsing index=" << index << "] : "
+//                      << "[pid=" << gp3->p_id() << "]"
+//                      << std::endl;
         }
     }
 }

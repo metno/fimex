@@ -132,12 +132,12 @@ namespace MetNoFimex {
                 CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis();
 
                 if(!xAxis.get()) {
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                              << " x axis NOT existing for " << pVariable->getName() << std::endl;
+//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                              << " x axis NOT existing for " << pVariable->getName() << std::endl;
                     return boost::shared_ptr<MetGmXTag>();
                 } else {
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                              << " x axis IS existing for " << pVariable->getName() << std::endl;
+//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                              << " x axis IS existing for " << pVariable->getName() << std::endl;
                 }
 
                 XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
@@ -183,12 +183,12 @@ namespace MetNoFimex {
                 CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis();
 
                 if(!yAxis.get()) {
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                              << " y axis NOT existing for " << pVariable->getName() << std::endl;
+//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                              << " y axis NOT existing for " << pVariable->getName() << std::endl;
                     return boost::shared_ptr<MetGmYTag>();
                 } else {
-                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                              << " y axis IS existing for " << pVariable->getName() << std::endl;
+//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                              << " y axis IS existing for " << pVariable->getName() << std::endl;
                 }
 
                 YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);

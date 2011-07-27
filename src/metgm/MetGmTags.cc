@@ -61,18 +61,12 @@ namespace MetNoFimex {
                                                                       boost::shared_ptr<MetGmGroup3Ptr>& pGp3,
                                                                       boost::shared_ptr<MetGmVerticalTag>& vTag)
     {
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
         boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
         tags->pGp1_   = pGp1;
         tags->pGp2_   = pGp2;
         tags->pGp3_   = pGp3;
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTag(pGp1, pGp3, vTag);
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForReading(pGp3, tags->dimTag_);
-        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
-
         return tags;
     }
 }
