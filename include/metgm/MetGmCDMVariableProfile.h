@@ -59,10 +59,7 @@ namespace MetNoFimex {
         MetGmCDMVariableProfile(short pid, const std::string& cdmName, boost::shared_ptr<MetGmTags> tags)
             : p_id_(pid), cdmName_(cdmName), pTags_(tags) {}
 
-        bool operator<(const MetGmCDMVariableProfile& profile) const
-        {
-            return p_id_ < profile.p_id_;
-        }
+        bool operator<(const MetGmCDMVariableProfile& profile) const {return cdmName_ < profile.cdmName_;}
 
         short hd() const { return pTags_->dimTag()->asShort(); }
 
