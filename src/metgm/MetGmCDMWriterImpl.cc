@@ -420,7 +420,9 @@ namespace MetNoFimex {
     {
         cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
-        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, *(nameView.find(pVar->getName())->pTags_->gp5())));
+        MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
+        boost::shared_array<float> rawData(profile.pTags_->gp5()->dataAsFloat());
+        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, rawData.get()));
     }
 
     void MetGmCDMWriterImpl::init()
