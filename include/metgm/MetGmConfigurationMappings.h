@@ -83,7 +83,7 @@ namespace MetNoFimex {
             MetGmConfigurationMappings, short, &MetGmConfigurationMappings::p_id_
           >
         >,
-        boost::multi_index::hashed_non_unique<
+        boost::multi_index::hashed_unique<
           boost::multi_index::tag<xml_name_index>,
             boost::multi_index::member<
               MetGmConfigurationMappings, std::string, &MetGmConfigurationMappings::cdmName_ >
