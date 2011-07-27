@@ -382,173 +382,102 @@ namespace MetNoFimex {
     void MetGmCDMReaderImpl::addVerticalDimensions()
     {
         /**
-          * in artilery METGM we have basicaly 3 levels:
-          * pressure or geopotential height - with MSL or GND reference
+          * in artilery METGM we have 3 level types:
+          * 1. pressure
+          * 2. geopotential height - MSL reference
+          * 3. geopotential height - GND reference
           */
 
-        std::string hcLevelType = "float";
+        if(cdmConfiguration_.size() == 0)
+            throw CDMException("can't add vertical levels as there are no cdm profiles");
 
-        readMgMHeader();
-
-        boost::shared_ptr<MetGmGroup3Ptr> pg3 = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(pHandle_);
-        if(pg3 == 0)
-            throw CDMException("mgm_new_group3() failed");
-        /**
-          * number of parameters
-          */
-        size_t np = mgm_get_number_of_params(*pHandle_);
-        METGM_ZProfile prevZProfile;
-        for(size_t gp3Index = 0; gp3Index < np; ++gp3Index) {
-
-            int error = mgm_read_next_group3(*pHandle_->fileHandle(), *pHandle_, *pg3);
-
-            if(error == MGM_ERROR_GROUP3_NOT_FOUND) {
-                continue;
-            } else if(error != MGM_OK) {
-                assert(error);
-                return;
-            }
-
-            int p_id = pg3->p_id();
-
-            if(p_id == 0 || p_id == 1) {
-                /**
-                  * when skipping read its groups 3,4,5
-                  * to move the pointer properly forward
-                  */
+        cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
+        for(cdmPidView::iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
+            MetGmCDMVariableProfile profile = *pIt;
+            if(profile.pTags_->dimTag()->zTag().get() == 0
+                    || (profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D
+                        && profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D_T))
+            {
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " no vertical data for p_id [" << profile.p_id_ << "]"
+//                          << " with name " << profile.pVariable_->getName()
+//                          << std::endl;
 
                 continue;
-            }
+            } else {
+//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+//                          << " adding vertical data for p_id [" << profile.p_id_ << "]"
+//                          << " with name " << profile.pVariable_->getName()
+//                          << std::endl;
 
-            int nz = pg3->nz();
-            int pz = pg3->pz();
-            int pr = pg3->pr();
-
-            if(pz == 0) {
-                if(!prevZProfile.isValid()) {
-                    throw CDMException("addLevelDimension : pz==0 : prevZProfile not valid");
-                } else {
-                    prevZProfile.pid_ = p_id;
-                    prXpidXname_.insert(prevZProfile);
+                std::string unitName;
+                std::string longName;
+                std::string standardName;
+                if(profile.pTags_->gp3()->pr() == 0) {
+                    unitName = "m";
+                    longName = spaceToUnderscore("height in meters above mean sea level");
+                    standardName = spaceToUnderscore("height_above_reference_ellipsoid");
+                } else if(profile.pTags_->gp3()->pr()) {
+                    unitName = "m";
+                    longName = spaceToUnderscore("height in meters above ground level");
+                    standardName = spaceToUnderscore("height");
+                } else if(profile.pTags_->gp3()->pr()) {
+                    unitName = "hPa";
+                    longName = spaceToUnderscore("pressure in hPa");
+                    standardName = spaceToUnderscore("height");
                 }
-            } else if(pz == 1 || pz == 0) {
 
-               float *pg4Data = new float[nz];
-               error = mgm_read_group4(*pHandle_->fileHandle(), *pHandle_, pg4Data);
-               if(error != MGM_OK) {
-                   std::cerr << "p_id:" << p_id << " error " << error << std::endl;
-                   return;
-               }
-
-                    boost::shared_ptr<Data> data;
-                    CDMDataType levelDataType = string2datatype(hcLevelType);
-
-                    std::string unitName;
-                    std::string longName;
-                    std::string standardName;
-                    if(pr == 0) {
-                        unitName = "m";
-                        longName = spaceToUnderscore("height in meters above mean sea level");
-                        standardName = spaceToUnderscore("height_above_reference_ellipsoid");
-                    } else if(pr == 1) {
-                        unitName = "m";
-                        longName = spaceToUnderscore("height in meters above ground level");
-                        standardName = spaceToUnderscore("height");
-                        /**
-                          * maybe we have add values MSL (pid=0)
-                          */
-                    } else if(pr == 2) {
-                        unitName = "hPa";
-                        longName = spaceToUnderscore("pressure in hPa");
-                        standardName = spaceToUnderscore("height");
-                    }
-
-
-                    /**
-                      * try finding if there already exists
-                      * some pid with same vertical profile
-                      */
-                    std::string exisitng_z_profile_name;
-                    const std::vector<CDMDimension>& refDimVec = cdm_->getDimensions();
-
-                    for(size_t dimIndex = 0; dimIndex < refDimVec.size(); ++dimIndex) {
-                        CDMDimension existing_dim = refDimVec.at(dimIndex);
-                        exisitng_z_profile_name = existing_dim.getName();
-                        if(boost::algorithm::contains(exisitng_z_profile_name, longName)) {
-                            CDMVariable z_exisitng_variable  = cdm_->getVariable(exisitng_z_profile_name);
-                            /**
-                              * take and compare data
-                              */
-                            int cmpResult = memcmp(pg4Data, z_exisitng_variable.getData()->getDataPtr(), nz * sizeof(float));
-                            if( cmpResult == 0) {
-                                break;
-                            } else if(cmpResult > 0) {
-                                exisitng_z_profile_name.clear();
-                                continue;
-                            } else {
-                                exisitng_z_profile_name.clear();
-                                continue;
-                            }
-                        } else {
-                            exisitng_z_profile_name.clear();
-                            continue;
+                // try finding if same dimension already exists
+                const std::vector<CDMDimension>& dimensions = cdm_->getDimensions();
+                for(size_t index = 0; index < dimensions.size(); ++index) {
+                    CDMDimension dim = dimensions.at(index);
+                    if(dim.getName().find(longName) == std::string::npos) {
+                        continue;
+                    } else {
+                        const CDMVariable& var = cdm_->getVariable(dim.getName());
+                        boost::shared_array<float> vertical_data = var.getData()->asFloat();
+                        if(memcmp(vertical_data.get(), profile.pTags_->dimTag()->zTag()->points().get(), profile.pTags_->dimTag()->zTag()->nz() * sizeof(float)) == 0) {
+                            METGM_ZProfile zProfile(dim.getName(), profile.pTags_->gp3()->pr(), profile.p_id_);
+                            prXpidXname_.insert(zProfile);
+                            return;
                         }
                     }
-
-                    if(exisitng_z_profile_name.empty()) {
-                        data = createData(levelDataType, pg4Data, pg4Data + nz);
-
-                        longName.append("_").append(boost::lexical_cast<std::string>(p_id));
-                        CDMDimension levelDim = CDMDimension(longName, nz);
-                        cdm_->addDimension(levelDim);
-
-                        std::vector<std::string> levelShape;
-                        /**
-                          * shape might be dependable of x,y (if pr=1)
-                          */
-                        levelShape.push_back(levelDim.getName());
-                        CDMVariable levelVar(levelDim.getName(), levelDataType, levelShape);
-                        cdm_->addVariable(levelVar);
-
-                        CDMAttribute levelStandardNameAttribute("standard_name", "string", standardName);
-                        cdm_->addAttribute(levelVar.getName(), levelStandardNameAttribute);
-
-                        CDMAttribute levelUnitsAttribute("units", "string", unitName);
-                        cdm_->addAttribute(levelVar.getName(), levelUnitsAttribute);
-
-                        CDMAttribute levelLongNameAttribute("long_name", "string", longName);
-                        cdm_->addAttribute(levelVar.getName(), levelLongNameAttribute);
-
-                        CDMAttribute levelAxisAttribute("axis", "string", "z");
-                        cdm_->addAttribute(levelVar.getName(), levelAxisAttribute);
-
-                        CDMAttribute levelPositiveAttribute("positive", "string", "up");
-                        cdm_->addAttribute(levelVar.getName(), levelPositiveAttribute);
-
-                        cdm_->getVariable(levelDim.getName()).setData(data);
-
-                        METGM_ZProfile zProfile(levelDim.getName(), pr, p_id);
-
-                        prXpidXname_.insert(zProfile);
-
-                        prevZProfile = zProfile;
-
-                    } else {
-                        METGM_ZProfile zProfile(exisitng_z_profile_name, pr, p_id);
-
-                        prXpidXname_.insert(zProfile);
-
-                        prevZProfile = zProfile;
-                    }
-
-                    delete [] pg4Data;
-
-                } else if(pz == 2) {
-                    assert(0);
-                } else {
-                    assert(0);
                 }
 
+                // to create unique fimex name for CDM modell
+                longName.append("_").append(boost::lexical_cast<std::string>(profile.p_id_));
+
+                boost::shared_ptr<Data> data =
+                        createData(CDM_FLOAT,
+                                   profile.pTags_->dimTag()->zTag()->points().get(),
+                                   profile.pTags_->dimTag()->zTag()->points().get() + profile.pTags_->dimTag()->zTag()->nz());
+
+                CDMDimension levelDim = CDMDimension(longName, profile.pTags_->dimTag()->zTag()->nz());
+                cdm_->addDimension(levelDim);
+
+                std::vector<std::string> levelShape;
+                levelShape.push_back(levelDim.getName());
+
+                CDMVariable levelVar(levelDim.getName(), CDM_FLOAT, levelShape);
+                cdm_->addVariable(levelVar);
+
+                CDMAttribute levelStandardNameAttribute("standard_name", "string", standardName);
+                cdm_->addAttribute(levelVar.getName(), levelStandardNameAttribute);
+
+                CDMAttribute levelUnitsAttribute("units", "string", unitName);
+                cdm_->addAttribute(levelVar.getName(), levelUnitsAttribute);
+
+                CDMAttribute levelLongNameAttribute("long_name", "string", longName);
+                cdm_->addAttribute(levelVar.getName(), levelLongNameAttribute);
+
+                CDMAttribute levelAxisAttribute("axis", "string", "z");
+                cdm_->addAttribute(levelVar.getName(), levelAxisAttribute);
+
+                cdm_->getVariable(levelDim.getName()).setData(data);
+
+                METGM_ZProfile zProfile(levelDim.getName(), profile.pTags_->gp3()->pr(), profile.p_id_);
+                prXpidXname_.insert(zProfile);
+            }
         }
 
         return;
