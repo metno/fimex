@@ -967,7 +967,9 @@ namespace MetNoFimex {
 
         for(int index = 0; index < pGroup2_->totalnp(); ++index) {
             boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
-            std::cerr << "--------------- START ---------------------------" << std::endl;
+            std::cerr << std::endl
+                      << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << "--------------- START ---------------------------" << std::endl;
 
 //            gp3->dump();
 
@@ -990,7 +992,7 @@ namespace MetNoFimex {
                 prevZTag = tags->dimTag()->zTag();
             }
 
-            tags->dimTag()->zTag()->dump();
+//            tags->dimTag()->zTag()->dump();
 
 //            boost::shared_ptr<MetGmGroup5Ptr> gp5 = MetGmGroup5Ptr::createMetGmGroup5Ptr(pFileHandle, pHandle, gp3, HDTag, pVersion);
 
@@ -1001,7 +1003,7 @@ namespace MetNoFimex {
 
             std::string kildeName;
             if(pidView.count(gp3->p_id()) == 0) {
-                continue;
+
             } else if(pidView.count(gp3->p_id()) == 1) {
                 MetGmConfigurationMappings entry = *(pidView.find(gp3->p_id()));
                 kildeName = entry.kildeName_;
@@ -1015,22 +1017,34 @@ namespace MetNoFimex {
                         break;
                     }
                 }
-                if(kildeName.empty())
-                    continue;
             }
 
-            CDMVariable* pDummyVar = new CDMVariable(kildeName, CDM_FLOAT, std::vector<std::string>());
-            MetGmCDMVariableProfile profile(gp3->p_id(), pDummyVar, tags);
-            cdmConfiguration_.insert(profile);
+            if(!kildeName.empty()) {
 
-            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-                      << " kilde name " <<  kildeName
-                      << std::endl;
+                CDMVariable* pDummyVar = new CDMVariable(kildeName, CDM_FLOAT, std::vector<std::string>());
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " for VARIABLE = " << kildeName
+                          << " cdmConfiguration_.size() = " << cdmConfiguration_.size()
+                          << std::endl;
 
-            profile.pTags_->gp3()->dump();
-            profile.pTags_->dimTag()->zTag()->dump();
+                MetGmCDMVariableProfile profile(gp3->p_id(), pDummyVar, tags);
+                cdmConfiguration_.insert(profile);
 
-            std::cerr << "--------------- END ---------------------------" << std::endl;
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " for VARIABLE = " << kildeName
+                          << " cdmConfiguration_.size() = " << cdmConfiguration_.size()
+                          << std::endl;
+
+                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                          << " kilde name " <<  kildeName
+                          << std::endl;
+
+    //            profile.pTags_->gp3()->dump();
+    //            profile.pTags_->dimTag()->zTag()->dump();
+            }
+
+            std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << "--------------- END ---------------------------" << std::endl;
         }
     }
 }
