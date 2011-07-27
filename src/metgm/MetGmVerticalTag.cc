@@ -33,9 +33,6 @@
 // fimex
 //
 #include "fimex/coordSys/CoordinateSystem.h"
-
-// fimex
-//
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/CDMReader.h"
@@ -46,10 +43,12 @@
 // boost
 //
 #include <boost/bind.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable)
+boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
+                                                                                       const CDMVariable* pVariable)
 {
     if(!pVariable)
         throw CDMException("pVar is null createMetGmVerticalTag");
@@ -90,10 +89,11 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
                 VTag->pr_ = 2;
                 data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "hPa");
             } else if (zAxis->getAxisType() == CoordinateAxis::Height) {
-                VTag->pr_ = 1;
+                VTag->pr_ = 1; // as default
+                if(boost::algorithm::ends_with(pVariable->getName(), "_MSL")) {
+                    VTag->pr_ = 0;
+                }
                 data = pCdmReader->getScaledDataInUnit(zAxis->getName(), "m");
-            } else {
-                throw CDMException("pr  = 0 not supported yet");
             }
             VTag->pz_ = 1;
             VTag->nz_= data->size();
@@ -111,11 +111,44 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
     return VTag;
 }
 
-    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boost::shared_ptr<MetGmGroup3Ptr>& pGp3)
+    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>&   pGp3,
+                                                                                           boost::shared_ptr<MetGmVerticalTag>& prevTag)
     {
-        boost::shared_ptr<MetGmVerticalTag> VTag;
+        boost::shared_ptr<MetGmVerticalTag> VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
 
-        VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
+        if(pGp3->pz() == 0) {
+            /**
+              * same Z data as in previous parameter do deep copy
+              */
+            if(!prevTag.get())
+                throw CDMException("we have pz = 0 and previous vTag = 0");
+
+            VTag->nz_ = pGp3->nz();
+            VTag->pz_ = pGp3->pz();
+            VTag->pr_ = pGp3->pr();
+
+            // but take the data from prev
+            VTag->points_.reset(new float[VTag->nz()]);
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << "[pid=" << pGp3->p_id() << "]"
+                      << std::endl;
+
+            memcpy(VTag.get(), prevTag.get(), VTag->nz() * sizeof(float));
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << "[pid=" << pGp3->p_id() << "]"
+                      << std::endl;
+
+            VTag->dump();
+
+            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+                      << "[pid=" << pGp3->p_id() << "]"
+                      << std::endl;
+
+
+            return VTag; // return copy
+        }
 
         if(pGp3->p_id() == 0) {
 
@@ -127,25 +160,12 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
             VTag->points_[0] = 0.0;
 
             MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
-            return VTag; // returning null
+            return VTag;
         }
 
         VTag->nz_ = pGp3->nz();
         VTag->pz_ = pGp3->pz();
         VTag->pr_ = pGp3->pr();
-
-        if(pGp3->pz() == 0) {
-            /**
-              * same Z data as in
-              * previous parameter
-              *
-              * skip must be called
-              * to keep handle state
-              * in sync
-              */
-            MGM_THROW_ON_ERROR(mgm_skip_group4(*pGp3->mgmHandle()->fileHandle(), *pGp3->mgmHandle()))
-            return VTag;
-        }
 
         VTag->points_.reset(new float[VTag->nz()]);
 
@@ -166,7 +186,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTag(boo
 
     void MetGmVerticalTag::dump() {
         std::cerr << "dumping Z profile [START]" << std::endl;
-        for(size_t index; index < nz_; ++index) {
+        for(size_t index = 0; index < nz_; ++index) {
             std::cerr << "[" << index << "] = " << points_[index] << std::endl;
         }
         std::cerr << "dumping Z profile [END]"   << std::endl;
