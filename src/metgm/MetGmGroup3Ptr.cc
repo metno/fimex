@@ -27,23 +27,173 @@
 #include "../../include/metgm/MetGmFileHandlePtr.h"
 #include "../../include/metgm/MetGmGroup3Ptr.h"
 
+// METGM C Lib
+//
+#include "metgm.h"
+
 // standard
 //
 #include <iostream>
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(boost::shared_ptr<MetGmHandlePtr>& pHandle)
+    MetGmGroup3Ptr::MetGmGroup3Ptr(boost::shared_ptr<MetGmHandlePtr> pHandle)
+        : pHandle_(pHandle), group3_(0)
     {
+        assert(pHandle_.get());
+        group3_ = mgm_new_group3();
+        assert(group3_);
+    }
+
+    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(boost::shared_ptr<MetGmHandlePtr> pHandle)
+    {
+        assert(pHandle.get());
         boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
         return gp3;
     }
 
-    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pHandle)
+    MetGmGroup3Ptr::~MetGmGroup3Ptr()
     {
+        if(group3_)
+            mgm_free_group3(group3_);
+    }
+
+    boost::shared_ptr<MetGmHandlePtr> MetGmGroup3Ptr::mgmHandle()
+    {
+        return pHandle_;
+    }
+
+    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(boost::shared_ptr<MetGmHandlePtr> pHandle)
+    {
+        assert(pHandle.get());
         boost::shared_ptr<MetGmGroup3Ptr> pg3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
         mgm_read_group3(*pg3->pHandle_->fileHandle(), *pg3->mgmHandle(), *pg3);
         return pg3;
+    }
+
+    int MetGmGroup3Ptr::reset()
+    {
+        return mgm_reset_group3(group3_);
+    }
+
+    int MetGmGroup3Ptr::p_id() const
+    {
+        return mgm_get_p_id(group3_);
+    }
+
+    int MetGmGroup3Ptr::nz() const
+    {
+        return mgm_get_nz(group3_);
+    }
+
+    int MetGmGroup3Ptr::nx() const
+    {
+        return mgm_get_nx(group3_);
+    }
+
+    int MetGmGroup3Ptr::ny() const
+    {
+        return mgm_get_ny(group3_);
+    }
+
+    int MetGmGroup3Ptr::nt() const
+    {
+        return mgm_get_nt(group3_);
+    }
+
+    float MetGmGroup3Ptr::dx() const
+    {
+        return mgm_get_dx(group3_);
+    }
+
+    float MetGmGroup3Ptr::dy() const
+    {
+        return mgm_get_dy(group3_);
+    }
+
+    float MetGmGroup3Ptr::dt() const
+    {
+        return mgm_get_dt(group3_);
+    }
+
+    float MetGmGroup3Ptr::cx() const
+    {
+        return mgm_get_cx(group3_);
+    }
+
+    float MetGmGroup3Ptr::cy() const
+    {
+        return mgm_get_cy(group3_);
+    }
+
+    short MetGmGroup3Ptr::pr() const
+    {
+        return mgm_get_pr(group3_);
+    }
+
+    short MetGmGroup3Ptr::pz() const
+    {
+        return mgm_get_pz(group3_);
+    }
+
+    int MetGmGroup3Ptr::set_p_id(int p_id)
+    {
+        return mgm_set_p_id(group3_, p_id);
+    }
+
+    int MetGmGroup3Ptr::set_nz(int nz)
+    {
+        return mgm_set_nz(group3_, nz);
+    }
+
+    int MetGmGroup3Ptr::set_nx(int nx)
+    {
+        return mgm_set_nx(group3_, nx);
+    }
+
+    int MetGmGroup3Ptr::set_ny(int ny)
+    {
+        return mgm_set_ny(group3_, ny);
+    }
+
+    int MetGmGroup3Ptr::set_nt(int nt)
+    {
+        return mgm_set_nt(group3_, nt);
+    }
+
+    int MetGmGroup3Ptr::set_dx(float dx)
+    {
+        return mgm_set_dx(group3_, dx);
+    }
+
+    int MetGmGroup3Ptr::set_dy(float dy)
+    {
+        return mgm_set_dy(group3_, dy);
+    }
+
+    int MetGmGroup3Ptr::set_dt(float dt)
+    {
+        return mgm_set_dt(group3_, dt);
+    }
+
+    int MetGmGroup3Ptr::set_cx(float cx)
+    {
+        return mgm_set_cx(group3_, cx);
+    }
+
+    int MetGmGroup3Ptr::set_cy(float cy)
+    {
+        return mgm_set_cy(group3_, cy);
+    }
+
+    int MetGmGroup3Ptr::set_pr(short pr)
+    {
+        return mgm_set_pr(group3_, pr);
+    }
+
+    int MetGmGroup3Ptr::set_pz(short pz)
+    {
+        return mgm_set_pz(group3_, pz);
     }
 
     bool MetGmGroup3Ptr::eq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const
