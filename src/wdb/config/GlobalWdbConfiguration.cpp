@@ -42,13 +42,23 @@ namespace MetNoFimex
 namespace wdb
 {
 
+const boost::filesystem::path GlobalWdbConfiguration::defaultConfigFile_ = PKGDATADIR"/wdb_config.xml";
+
 GlobalWdbConfiguration::GlobalWdbConfiguration(const boost::filesystem::path & configFile)
 {
+	if ( configFile.empty() )
+		init_(defaultConfigFile_);
+	else
+		init_(configFile);
+}
+
+void GlobalWdbConfiguration::init_(const boost::filesystem::path & configFile)
+{
 	if ( ! exists(configFile) )
-		throw CDMException(configFile.string() + ": no such file");
+		throw CDMException(configFile.string() + ": Unable to find configuration file");
 
 	if ( is_directory(configFile) )
-		throw CDMException(configFile.string() + " is a directory");
+		throw CDMException(configFile.string() + ": Configuration file is a directory");
 
 	XMLDoc config(configFile.string());
 	initParseGlobalAttributes_(config);

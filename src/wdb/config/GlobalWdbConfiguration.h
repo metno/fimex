@@ -91,9 +91,12 @@ public:
 	const AttributeList & getGlobalAttributes() const { return globalAttributes_; }
 
 private:
+	void init_(const boost::filesystem::path & configFile);
+
 	void initParseGlobalAttributes_(XMLDoc & config);
 	void initParseValueParameter_(XMLDoc & config);
 
+	static const boost::filesystem::path defaultConfigFile_;
 
 	typedef std::map<std::string, std::string> NameTranslation;
 	NameTranslation wdb2cf_;

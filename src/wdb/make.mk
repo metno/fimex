@@ -12,6 +12,8 @@ libfimex_la_SOURCES += \
 	wdb/LevelHandler.h wdb/LevelHandler.cpp \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp \
 	wdb/GridHandler.h wdb/GridHandler.cpp	
+	
+libfimex_la_CPPFLAGS = -DPKGDATADIR=\"$(pkgdatadir)\" $(AM_CPPFLAGS)
 
 include wdb/gridInformation/make.mk
 include wdb/database_access/make.mk
