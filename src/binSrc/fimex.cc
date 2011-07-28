@@ -619,36 +619,38 @@ int run(int argc, char* args[])
     if (!(vm.count("input.file") && vm.count("output.file"))) {
     	writeUsage(cerr, generic, config);
     	LOG4FIMEX(logger, Logger::FATAL, "input.file and output.file required");
-    	exit(1);
+    	return 1;
     }
 
-//    try {
-    	boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
-    	dataReader = getCDMQualityExtractor(vm, dataReader);
-    	dataReader = getCDMExtractor(vm, dataReader);
-    	dataReader = getCDMTimeInterpolator(vm, dataReader);
-    	dataReader = getCDMInterpolator(vm, dataReader);
-    	dataReader = getNcmlCDMReader(vm, dataReader);
-    	writeCDM(dataReader, vm);
-//    } catch (CDMException& cdmex) {
-//    	cout << "CDMException occured: " << cdmex.what() << endl;
-//    	exit(1);
-//    } catch (std::exception& ex) {
-//    	cout << "exception occured: " << ex.what() << endl;
-//    	exit(1);
-//    }
+	boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
+	dataReader = getCDMQualityExtractor(vm, dataReader);
+	dataReader = getCDMExtractor(vm, dataReader);
+	dataReader = getCDMTimeInterpolator(vm, dataReader);
+	dataReader = getCDMInterpolator(vm, dataReader);
+	dataReader = getNcmlCDMReader(vm, dataReader);
+	writeCDM(dataReader, vm);
+
 	return 0;
 }
 
 int main(int argc, char* args[])
 {
     // wrapping main-functions in run to catch all exceptions
-//    try {
-        return run(argc, args);
-//    } catch (exception& ex) {
-//        cout << "exception occured: " << ex.what() << endl;
-//        exit(1);
-//    }
-    return 0;
+
+#ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
+	try {
+#else
+#warning Not catching exceptions in main method
+#endif
+
+
+		return run(argc, args);
+
+#ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
+    } catch (exception& ex) {
+        clog << "exception occured: " << ex.what() << endl;
+        return 1;
+    }
+#endif
 }
 

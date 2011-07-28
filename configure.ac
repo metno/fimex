@@ -171,7 +171,7 @@ fi
 
 AC_LANG_POP(C++)
 
-
+DEBUG_MODE
 
 #DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 

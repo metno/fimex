@@ -1,5 +1,9 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* If defined, this should remove the try-catch block from the main function,
+   causing any exceptions to crash the program. */
+#undef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
+
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 
