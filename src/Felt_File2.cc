@@ -30,7 +30,6 @@
 #include "fimex/Data.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
-#include "fimex/interpolation.h"
 #include "fimex/Logger.h"
 #include <cstring>
 #include <sys/types.h>

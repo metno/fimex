@@ -23,7 +23,7 @@
 
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
-#include "fimex/interpolation.h"
+#include "fimex/mifi_constants.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
 

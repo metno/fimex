@@ -86,12 +86,12 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
 		if (axis[0] < 0 || axis[num-1] < 0) {
 			// change points > 180
 			for (int i = 0; i < n; i++) {
-				if (points[i] > PI) points[i] -= 2*PI;
+				if (points[i] > MIFI_PI) points[i] -= 2*MIFI_PI;
 			}
 		} else {
 			// change negative points
 			for (int i = 0; i < n; i++) {
-				if (points[i] < 0) points[i] += 2*PI;
+				if (points[i] < 0) points[i] += 2*MIFI_PI;
 			}
 		}
 	}

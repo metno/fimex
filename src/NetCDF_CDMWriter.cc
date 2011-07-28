@@ -30,7 +30,7 @@ extern "C" {
 
 #include <iostream>
 #include <boost/shared_array.hpp>
-#include "fimex/interpolation.h"
+#include "fimex/mifi_constants.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataTypeChanger.h"
 #include "NetCDF_Utils.h"

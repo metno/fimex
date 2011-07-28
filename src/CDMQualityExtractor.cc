@@ -32,7 +32,7 @@
 #include "fimex/XMLDoc.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-#include "fimex/interpolation.h" // for constants
+#include "fimex/mifi_constants.h"
 #include <boost/regex.hpp>
 #include <algorithm>
 #include <set>

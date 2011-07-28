@@ -24,142 +24,17 @@
 #ifndef INTERPOLATION_H_
 #define INTERPOLATION_H_
 
-#include <math.h>
-#include <string.h>
+/**
+ * @headerfile "fimex/interpolation.h"
+ */
 
-// M_PI no longer in c99
-#define PI 3.1415926535897932384626433832795
+
+#include "fimex/mifi_constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-/**
- * @brief interpolation method
- *
- * Flag for nearest neighbor interpolation. This requires,
- * that the original data comes with a properly defined projection,
- * i.e. implicit as latlon or explicit with projection-string
- */
-#define MIFI_INTERPOL_NEAREST_NEIGHBOR 0
-/**
- * @brief interpolation method
- *
- * Flag for bilinear interpolation. This requires,
- * that the original data comes with a properly defined projection,
- * i.e. implicit as latlon or explicit with projection-string
- */
-#define MIFI_INTERPOL_BILINEAR         1
-/**
- * @brief interpolation method
- *
- * Flag for bicubic interpolation. This requires,
- * that the original data comes with a properly defined projection,
- * i.e. implicit as latlon or explicit with projection-string
- */
-#define MIFI_INTERPOL_BICUBIC          2
-/**
- * @brief interpolation method
- *
- * Flag for nearest neighbor interpolation
- * using lon/lat coordinates rather than the input
- * projection. This is largely a brute force method
- * which may take long time.
- *
- * Vector projection is not implemented (not defined?)
- *
- * @warning this works only from CDMInterpolator
- */
-#define MIFI_INTERPOL_COORD_NN         3
-/**
- * @brief interpolation method
- *
- * Flag for nearest neighbor interpolation
- * using coordinates with KD-tree. This works
- * as nearest neighbor in the output-projection
- * and has therefore numerical problems in some points,
- * i.e. near southpole when using northpole-polarstereographic.
- *
- * It doesn't work with output projections in degree, i.e.
- * rotated latitude longitude, since distances are calculated as outX^2*outY^2
- *
- * Vector projection is not implemented (not defined?)
- *
- * @warning this works only from CDMInterpolator
- *
- */
-#define MIFI_INTERPOL_COORD_NN_KD      4
-
-/**
- * @brief interpolation method
- *
- * forward interpolation, summing over all matching input-cells
- */
-#define MIFI_INTERPOL_FORWARD_SUM      5
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, averaging (mean) over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MEAN      6
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, median over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MEDIAN      7
-
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, maximum over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MAX      8
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, minimum over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MIN      9
-
-/**
- * @brief vector projection flag
- *
- * new size will be like old size
- */
-#define MIFI_VECTOR_KEEP_SIZE 0
-/**
- * @brief vector projection flag
- *
- * vector might change size with projection
- */
-#define MIFI_VECTOR_RESIZE    1
-
-
-/** @brief undefined value for floats */
-#define MIFI_UNDEFINED_F (nanf(""))
-/** @brief undefined value for doubles */
-#define MIFI_UNDEFINED_D (nan(""))
-
-/** @brief return code, error */
-#define MIFI_ERROR -1
-/** @brief return code, ok */
-#define MIFI_OK 1
-
-/** @brief projection axis in m-equivalent */
-#define MIFI_PROJ_AXIS 0
-/** @brief longitude projection axis in degrees */
-#define MIFI_LONGITUDE 1
-/** @brief latitude projection axis in degrees */
-#define MIFI_LATITUDE 2
-
-/** @brief debug flag */
-#define MIFI_DEBUG 0
 
 /**
  * Interpolation between two projections. Missing values are set to MIFI_UNDEFINED_F

@@ -621,7 +621,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
 #endif
     double max_grid_d = acos(*(min_element(samples.begin(), samples.end())));
     max_grid_d *= 1.414; // allow a bit larger extrapolation (diagonal = sqrt(2))
-    if (max_grid_d > PI) max_grid_d = PI;
+    if (max_grid_d > MIFI_PI) max_grid_d = MIFI_PI;
     return max_grid_d;
 }
 
@@ -644,7 +644,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
     LOG4FIMEX(logger, Logger::DEBUG, "estimation of ROI of input-data");
     time_t start = time(0);
     double max_grid_d = getGridDistance(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
-    LOG4FIMEX(logger, Logger::DEBUG, "assuming a ROI of input-data as: "<< (max_grid_d*180/PI) << "deg after " << (time(0) - start) << "s");
+    LOG4FIMEX(logger, Logger::DEBUG, "assuming a ROI of input-data as: "<< (max_grid_d*180/MIFI_PI) << "deg after " << (time(0) - start) << "s");
     double min_grid_cos_d = cos(max_grid_d);
 
     // 1. order lat/lon after latitude
