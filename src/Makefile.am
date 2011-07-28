@@ -70,6 +70,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 TimeSpec.cc \
 					 Units.cc \
 					 Utils.cc \
+					 vertical_coordinate_transformations.c \
 					 XMLDoc.cc
 
 
