@@ -111,8 +111,8 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
     return VTag;
 }
 
-    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>&   pGp3,
-                                                                                           boost::shared_ptr<MetGmVerticalTag>& prevTag)
+    boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                                           boost::shared_ptr<MetGmVerticalTag> prevTag)
     {
         boost::shared_ptr<MetGmVerticalTag> VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag);
 
@@ -120,7 +120,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
             /**
               * same Z data as in previous parameter do deep copy
               */
-            if(!prevTag.get())
+            if(prevTag.get() == 0 || prevTag->nz() == 0 || prevTag->points().get() == 0)
                 throw CDMException("we have pz = 0 and previous vTag = 0");
 
             VTag->nz_ = pGp3->nz();
@@ -128,24 +128,9 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
             VTag->pr_ = pGp3->pr();
 
             // but take the data from prev
-            VTag->points_.reset(new float[VTag->nz()]);
+            VTag->points().reset(new float[VTag->nz()]);
 
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << "[pid=" << pGp3->p_id() << "]"
-//                      << std::endl;
-
-            memcpy(VTag.get(), prevTag.get(), VTag->nz() * sizeof(float));
-
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << "[pid=" << pGp3->p_id() << "]"
-//                      << std::endl;
-
-//            VTag->dump();
-
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << "[pid=" << pGp3->p_id() << "]"
-//                      << std::endl;
-
+            memcpy(VTag->points().get(), prevTag->points().get(), prevTag->nz() * sizeof(float));
 
             return VTag; // return copy
         }
@@ -192,39 +177,3 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
         std::cerr << "dumping Z profile [END]"   << std::endl;
     }
 }
-
-//            /**
-//              * 1. try to find metgm_pr CDMAttribute
-//              * 2. else try parsing the name for _GND or _MSL
-//              * 3. if MSL sent exists from before, then check for units to distinguish _GND or _MSL
-//              */
-//            CDMAttribute metgmPrAttribute;
-//            if(cdmRef.getAttribute(pVar->getName(), "metgm_pr", metgmPrAttribute)) {
-//                short pr = boost::lexical_cast<short>(metgmPrAttribute.getStringValue());
-//                MGM_THROW_ON_ERROR(gp3->set_pr(pr))
-//            } else if(pVar->getName().find("_MSL") != std::string::npos) {
-//                MGM_THROW_ON_ERROR(gp3->set_pr(0))
-//            } else if(pVar->getName().find("_GND") != std::string::npos) {
-//                MGM_THROW_ON_ERROR(gp3->set_pr(1))
-//            } else {
-//                // check unit for the dimension
-//                CDMAttribute metgmUnitsAttribute;
-//                if(cdmRef.getAttribute(zDimension->getName(), "units", metgmUnitsAttribute)) {
-//                    std::string unitsName = metgmUnitsAttribute.getStringValue();
-//                    if(unitsName.find("Pa") != std::string::npos) {
-//                        MGM_THROW_ON_ERROR(gp3->set_pr(2))
-//                    } else if(unitsName.find("m") != std::string::npos) {
-//                        if(pid2CdmVariablesMMap_.find(0) != pid2CdmVariablesMMap_.end()) {
-//                            // we have MSL pr = 1 (we are dealing with GND type)
-//                            MGM_THROW_ON_ERROR(gp3->set_pr(1))
-//                        } else {
-//                            // no MSL in CDM model (pr = 0 if units not Pa)
-//                            MGM_THROW_ON_ERROR(gp3->set_pr(0))
-//                        }
-//                    } else {
-//                        assert(0); // some todo here
-//                    }
-//                } else  {
-//                    assert(0); // some todo here
-//                }
-//            }

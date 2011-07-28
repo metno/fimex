@@ -49,13 +49,13 @@ namespace MetNoFimex {
         static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
                                                                                     const CDMVariable* pVar);
 
-        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>&   pGp3,
-                                                                                    boost::shared_ptr<MetGmVerticalTag>& vTag);
+        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                                    boost::shared_ptr<MetGmVerticalTag> vTag);
 
-        inline unsigned int               nz()       { return nz_; }
-        inline unsigned int               pr()       { return pr_;}
-        inline unsigned int               pz()       { return pz_; }
-        inline boost::shared_array<float> points()   { return points_; }
+        inline unsigned int                nz()       { return nz_; }
+        inline unsigned int                pr()       { return pr_;}
+        inline unsigned int                pz()       { return pz_; }
+        inline boost::shared_array<float>& points()   { return points_; }
 
         void dump();
 
