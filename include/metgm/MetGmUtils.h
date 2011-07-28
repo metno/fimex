@@ -25,7 +25,13 @@
 //
 #include "metgm.h"
 
+// fimex
+//
 #include "fimex/CDMException.h"
+
+// standard
+//
+#include <iostream>
 
 #ifndef METGM_UTILS_H
 #define METGM_UTILS_H
@@ -37,4 +43,21 @@
                 throw CDMException(mgm_string_error(callResult)); \
         };                                                        \
 
-#endif
+#define MGM_RETURN_RESULT_OR_THROW_ON_ERROR(expression)                            \
+        {                                                         \
+            short callResult = expression;                        \
+            if(callResult != MGM_OK)                              \
+                throw CDMException(mgm_string_error(callResult)); \
+            return callResult;                                    \
+        };                                                        \
+
+#define MGM_CHECK_POINT()                                 \
+        {                                                 \
+            std::cerr << __FILE__     << " @ "            \
+                      << __FUNCTION__ << " @ "            \
+                      << __LINE__     << " : "            \
+                      << " CHECK POINT"                   \
+                      << std::endl;                       \
+        };                                                \
+
+#endif // METGM_UTILS_H
