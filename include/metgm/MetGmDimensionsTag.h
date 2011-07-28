@@ -62,9 +62,9 @@ namespace MetNoFimex {
 
         static boost::shared_ptr<MetGmHDTag> createMetGmHDTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
 
-        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTag(boost::shared_ptr<MetGmGroup1Ptr>&   pGp1,
-                                                                      boost::shared_ptr<MetGmGroup3Ptr>&   pGp3,
-                                                                      boost::shared_ptr<MetGmVerticalTag>& vTag);
+        static boost::shared_ptr<MetGmHDTag> createMetGmDimensionsTag(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                      boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                      boost::shared_ptr<MetGmVerticalTag> vTag);
 
         std::string asString() {
             switch (hd_)
@@ -91,10 +91,10 @@ namespace MetNoFimex {
         size_t zSize() const { return pZTag_.get() ? pZTag_->nz() : 0; }
         size_t tSize() const { return pTTag_.get() ? pTTag_->nT() : 0; }
 
-        boost::shared_ptr<MetGmXTag>&        xTag() { return pXTag_; }
-        boost::shared_ptr<MetGmYTag>&        yTag() { return pYTag_; }
-        boost::shared_ptr<MetGmVerticalTag>& zTag() { return pZTag_; }
-        boost::shared_ptr<MetGmTimeTag>&     tTag() { return pTTag_; }
+        boost::shared_ptr<MetGmXTag>        xTag() { return pXTag_; }
+        boost::shared_ptr<MetGmYTag>        yTag() { return pYTag_; }
+        boost::shared_ptr<MetGmVerticalTag> zTag() { return pZTag_; }
+        boost::shared_ptr<MetGmTimeTag>     tTag() { return pTTag_; }
 
         void setZTag(boost::shared_ptr<MetGmVerticalTag>& zTag) { pZTag_ = zTag; }
     private:

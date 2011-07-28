@@ -51,10 +51,6 @@ namespace MetNoFimex {
         tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pCdmReader, pVariable);
         bool hasTAxis = tag->pTTag_.get() ? true : false;
 
-//        std::cerr << " hasXAxis=" << hasXAxis << " hasYAxis=" << hasYAxis
-//                  << " hasZAxis=" << hasZAxis << " hasTAxis=" << hasTAxis
-//                  << std::endl;
-
         if(hasZAxis && hasXAxis && hasYAxis) {
             tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
         } else if((hasXAxis && hasYAxis) || (hasZAxis && hasYAxis) || (hasZAxis && hasXAxis)) {
@@ -74,35 +70,21 @@ namespace MetNoFimex {
         return tag;
     }
 
-    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTag(boost::shared_ptr<MetGmGroup1Ptr>&   pGp1,
-                                                                       boost::shared_ptr<MetGmGroup3Ptr>&   pGp3,
-                                                                       boost::shared_ptr<MetGmVerticalTag>& vTag)
+    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTag(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                       boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                       boost::shared_ptr<MetGmVerticalTag> vTag)
     {
         boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
-
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << "[pid=" << pGp3->p_id() << "]"
-//                  << std::endl;
 
         tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pGp1, pGp3);
         tag->pXTag_ = MetGmHorizontalTag::createMetGmXTag(pGp3);
         tag->pYTag_ = MetGmHorizontalTag::createMetGmYTag(pGp3);
         tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTagForReading(pGp3, vTag);
 
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << "[pid=" << pGp3->p_id() << "]"
-//                  << std::endl;
-
         bool hasXAxis = tag->pXTag_.get() ? true : false;
         bool hasYAxis = tag->pYTag_.get() ? true : false;
         bool hasZAxis = tag->pZTag_.get() ? true : false;
         bool hasTAxis = tag->pTTag_.get() ? true : false;
-
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << "[pid=" << pGp3->p_id() << "]"
-//                  << " hasXAxis=" << hasXAxis << " hasYAxis=" << hasYAxis
-//                  << " hasZAxis=" << hasZAxis << " hasTAxis=" << hasTAxis
-//                  << std::endl;
 
         if(hasZAxis && hasXAxis && hasYAxis) {
             tag->hd_= hasTAxis ? HD_3D_T : HD_3D;
