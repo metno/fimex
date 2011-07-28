@@ -180,7 +180,9 @@ boost::shared_ptr<Data> WdbCDMReader::extractDataFromField(const CDMVariable& va
 		else
 		{
 			const wdb::GridInformation & gridInfo = d_->dataIndex->gridInformation();
-			dataIdx += gridInfo.numberX() * gridInfo.numberY();
+			unsigned size = gridInfo.numberX() * gridInfo.numberY();
+			std::fill(dataIdx, dataIdx + size, std::numeric_limits<float>::quiet_NaN());
+			dataIdx += size;
 		}
 	return ret;
 }
