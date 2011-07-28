@@ -56,10 +56,10 @@ namespace MetNoFimex {
         return tags;
     }
 
-    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForReading(boost::shared_ptr<MetGmGroup1Ptr>& pGp1,
-                                                                      boost::shared_ptr<MetGmGroup2Ptr>& pGp2,
-                                                                      boost::shared_ptr<MetGmGroup3Ptr>& pGp3,
-                                                                      boost::shared_ptr<MetGmVerticalTag>& vTag)
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForReading(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                      boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
+                                                                      boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                      boost::shared_ptr<MetGmVerticalTag> vTag)
     {
         boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
         tags->pGp1_   = pGp1;

@@ -45,10 +45,10 @@ namespace MetNoFimex {
                                                             boost::shared_ptr<MetGmGroup3Ptr>& pg3,
                                                             const float* pFillValue);
 
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForReading(boost::shared_ptr<MetGmGroup1Ptr>&   pGp1,
-                                                                      boost::shared_ptr<MetGmGroup2Ptr>&   pGp2,
-                                                                      boost::shared_ptr<MetGmGroup3Ptr>&   pGp3,
-                                                                      boost::shared_ptr<MetGmVerticalTag>& vTag);
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForReading(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                      boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
+                                                                      boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                      boost::shared_ptr<MetGmVerticalTag> vTag);
 
         boost::shared_ptr<MetGmHDTag>&       dimTag() { return dimTag_;}
         boost::shared_ptr<MetGmGroup3Ptr>&   gp3()    { return pGp3_; }
