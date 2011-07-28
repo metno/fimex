@@ -715,6 +715,7 @@ namespace MetNoFimex {
 
         for(int index = 0; index < pGroup2_->totalnp(); ++index) {
             boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
+
 //            std::cerr << std::endl
 //                      << __FUNCTION__ << " @ " << __LINE__ << " : "
 //                      << "--------------- START ---------------------------"
@@ -724,22 +725,9 @@ namespace MetNoFimex {
 //                      << "  pz = " <<  gp3->pz() << " } "
 //                      << std::endl;
 
-//            if(gp3->pz() == 0) {
-//                std::cerr << std::endl
-//                          << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << "--------------- START ---------------------------"
-//                          << "  pz = 0  -- will skip it"
-//                          << std::endl;
-
-//                mgm_skip_group5(*pHandle_->fileHandle(), *pHandle_);
-//                continue;
-//            }
-
             boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, gp3, prevZTag);
 
             prevZTag = tags->dimTag()->zTag();
-
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << std::endl;
 
             xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
 
@@ -796,16 +784,16 @@ namespace MetNoFimex {
                 cdmConfiguration_.insert(profile);
 
 //                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " after insertion fixed kildeName  => " <<  fixedKildeName
+//                          << " fixed kildeName  => " <<  fixedKildeName
 //                          << " cdmConfiguration_.size()  =  " <<  cdmConfiguration_.size()
 //                          << std::endl;
             }
 
 //            std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "
 //                      << "--------------- END ---------------------------"
-//                      << "[parsing index=" << index << "] : "
-//                      << "[pid=" << gp3->p_id() << "]"
-//                      << std::endl;
+//                      << " [parsing index =" << index << "] : "
+//                      << " [pid = " << gp3->p_id() << "]"
+//                      << std::endl << std::endl;
         }
     }
 }
