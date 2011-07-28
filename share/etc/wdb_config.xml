@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE wdb_fimex_config>
 
-<wdb_fimex_config 
+<wdb_netcdf_config 
 	xmlns:xi="http://www.w3.org/2001/XInclude"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="wdb_config.xsd">
@@ -354,4 +354,4 @@
 	</value_parameter>
 
 </wdb_parameters>
-</wdb_fimex_config>
+</wdb_netcdf_config>
