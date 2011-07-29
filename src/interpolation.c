@@ -835,10 +835,14 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
     // working field, 5: valid value, 0: invalid value, 1 number of valid neighbours
     char* wField = (char*) malloc(totalSize*sizeof(char));
     if (wField == NULL) {
-        fprintf(stderr, "error allocating memory of float(%d*%d)", nx, ny);
+        fprintf(stderr, "error allocating memory of char(%d*%d)", nx, ny);
         exit(1);
     }
     unsigned short* rField = (unsigned short*) malloc(totalSize*sizeof(unsigned short));
+    if (rField == NULL) {
+        fprintf(stderr, "error allocating memory of short(%d*%d)", nx, ny);
+        exit(1);
+    }
 
     // The value of average ( i.e. the MEAN value of the array field ) is filled in
     // the array field at all points with an undefined value.
@@ -855,11 +859,12 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
             *wFieldPos = 0;
             *rFieldPos = 0;
             *fieldPos = average;
-        } else {
+        } else { // defined
             *wFieldPos = setWeight;
             *rFieldPos = repeat;
         }
         wFieldPos++;
+        rFieldPos++;
         fieldPos++;
         i++;
     }
@@ -871,49 +876,53 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
     // and the loop, with a maximum of nUnchanged rounds
     int l = 0;
     size_t changedInLoop = 1;
-    while ((l < nUnchanged) && (changedInLoop > 0)) {
+    while ((changedInLoop > 0) && (l < nUnchanged)) {
         //fprintf(stderr, "loop %d, change %d\n", l, changedInLoop);
         changedInLoop = 0; // stopps when a loop didn't manage to seriously change more values
         l++;
         // loop over inner array
         for (size_t y = 1; y < nym1; y++) {
             for (size_t x = 1; x < nxm1; x++) {
-                if (rField[y*nx+x] >= repeat) continue; // defined value or changed enough
-                //if (wField[y*nx+x] == setWeight) continue; // original value
-                size_t wFieldSum = wField[y*nx+(x+1)] + wField[y*nx+(x-1)] + wField[(y+1)*nx+x] + wField[(y-1)*nx+x];
-                if (wFieldSum == 0) continue; // all neighbours are average
-                // weight average of neigbouring cells, with double weight on original values
-                // + 1 average "center"
-                field[y*nx+x] += (wField[y*nx+(x+1)]*field[y*nx+(x+1)] + wField[y*nx+(x-1)]*field[y*nx+(x-1)] + wField[(y+1)*nx+x]*field[(y+1)*nx+x] + wField[(y-1)*nx+x]*field[(y-1)*nx+x]);
-                field[y*nx+x] /= (1+wFieldSum);
-                // field has been changed
-                rField[y*nx+x]++;
-                changedInLoop++;
-                wField[y*nx+x] = 1; // this is a normal field
+                if (rField[y*nx+x] < repeat) {
+                    // undefined value or changed enough
+                    size_t wFieldSum = wField[y*nx+(x+1)] + wField[y*nx+(x-1)] + wField[(y+1)*nx+x] + wField[(y-1)*nx+x];
+                    if (wFieldSum != 0) {
+                        // some neighbours defined
+
+                        // weight average of neigbouring cells, with double weight on original values
+                        // + 1 average "center"
+                        field[y*nx+x] += (wField[y*nx+(x+1)]*field[y*nx+(x+1)] + wField[y*nx+(x-1)]*field[y*nx+(x-1)] + wField[(y+1)*nx+x]*field[(y+1)*nx+x] + wField[(y-1)*nx+x]*field[(y-1)*nx+x]);
+                        field[y*nx+x] /= (1+wFieldSum);
+                        // field has been changed
+                        wField[y*nx+x] = 1; // this is a implicit defined field
+                        rField[y*nx+x]++; // it has been changed
+                        changedInLoop++;
+                    }
+                }
             }
         }
     }
     // simple calculations at the borders
     for (size_t l = 0; l < repeat; l++) {
         for (size_t y = 1; y < nym1; y++) {
-            if (rField[y*nx+0] <= repeat) { // unset
+            if (rField[y*nx+0] < repeat) { // unset
                 field[y*nx+0] += field[y*nx+1]*wField[y*nx+1];
                 field[y*nx+0] /= (1+wField[y*nx+1]);
                 wField[y*nx+0] = 1;
             }
-            if (rField[y*nx+(nx-1)] <= repeat) { // unset
+            if (rField[y*nx+(nx-1)] < repeat) { // unset
                 field[y*nx+(nx-1)] += field[y*nx+(nx-2)]*wField[y*nx+(nx-2)];
                 field[y*nx+(nx-1)] /= (1+wField[y*nx+(nx-2)]);
                 wField[y*nx+(nx-1)] = 1;
             }
         }
         for (size_t x = 0; x < nx; x++) {
-            if (rField[0*nx +x] <= repeat) { // unset
+            if (rField[0*nx +x] < repeat) { // unset
                 field[0*nx +x] += field[1*nx+x]*wField[1*nx+x];
                 field[0*nx +x] /= (1+wField[1*nx+x]);
                 wField[0*nx +x] = 1;
             }
-            if (rField[nym1*nx+x] <= repeat) { // unset
+            if (rField[nym1*nx+x] < repeat) { // unset
                 field[nym1*nx+x] += field[(nym1-1)*nx+x]*wField[(nym1-1)*nx+x];
                 field[nym1*nx+x] /= (1+wField[(nym1-1)*nx+x]);
                 wField[nym1*nx+x] = 1;
