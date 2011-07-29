@@ -176,8 +176,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
-	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
+	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
+	NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
@@ -306,6 +307,7 @@ am_libfimex_la_OBJECTS = libfimex_la-interpolation.lo \
 	libfimex_la-TimeLevelDataSliceFetcher.lo \
 	libfimex_la-TimeUnit.lo libfimex_la-TimeSpec.lo \
 	libfimex_la-Units.lo libfimex_la-Utils.lo \
+	libfimex_la-vertical_coordinate_transformations.lo \
 	libfimex_la-XMLDoc.lo $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
@@ -573,8 +575,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc XMLDoc.cc $(am__append_1) $(am__append_2) \
-	$(am__append_3) $(am__append_4) $(am__append_5)
+	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	$(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_4) $(am__append_5)
 @HAVE_LIBPQ_TRUE@libfimex_la_CPPFLAGS = -DPKGDATADIR=\"$(pkgdatadir)\" $(AM_CPPFLAGS)
 all: all-recursive
 
@@ -759,6 +762,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfimex_la-XMLDoc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfimex_la-c_fimex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfimex_la-interpolation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfimex_la-vertical_coordinate_transformations.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -787,6 +791,13 @@ libfimex_la-interpolation.lo: interpolation.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='interpolation.c' object='libfimex_la-interpolation.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfimex_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfimex_la-interpolation.lo `test -f 'interpolation.c' || echo '$(srcdir)/'`interpolation.c
+
+libfimex_la-vertical_coordinate_transformations.lo: vertical_coordinate_transformations.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfimex_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libfimex_la-vertical_coordinate_transformations.lo -MD -MP -MF $(DEPDIR)/libfimex_la-vertical_coordinate_transformations.Tpo -c -o libfimex_la-vertical_coordinate_transformations.lo `test -f 'vertical_coordinate_transformations.c' || echo '$(srcdir)/'`vertical_coordinate_transformations.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libfimex_la-vertical_coordinate_transformations.Tpo $(DEPDIR)/libfimex_la-vertical_coordinate_transformations.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='vertical_coordinate_transformations.c' object='libfimex_la-vertical_coordinate_transformations.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfimex_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libfimex_la-vertical_coordinate_transformations.lo `test -f 'vertical_coordinate_transformations.c' || echo '$(srcdir)/'`vertical_coordinate_transformations.c
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

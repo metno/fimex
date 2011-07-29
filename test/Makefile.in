@@ -88,10 +88,11 @@ am__EXEEXT_1 =
 @HAVE_METGM_TRUE@am__EXEEXT_8 = testMetgmReader$(EXEEXT) \
 @HAVE_METGM_TRUE@	testMetGmWriter$(EXEEXT)
 @HAVE_LIBPQ_TRUE@am__EXEEXT_9 = wdbTest$(EXEEXT)
-am__EXEEXT_10 = testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
-	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
-	testData$(EXEEXT) testProjections$(EXEEXT) \
-	testInterpolation$(EXEEXT) testUnits$(EXEEXT) \
+am__EXEEXT_10 = testInterpolation$(EXEEXT) \
+	testVerticalCoordinates$(EXEEXT) testBinaryConstants$(EXEEXT) \
+	testUtils$(EXEEXT) testTimeSpec$(EXEEXT) \
+	testSpatialAxisSpec$(EXEEXT) testData$(EXEEXT) \
+	testProjections$(EXEEXT) testUnits$(EXEEXT) \
 	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
 	testSliceBuilder$(EXEEXT) testXMLDoc$(EXEEXT) \
 	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
@@ -240,6 +241,14 @@ testUtils_LDADD = $(LDADD)
 testUtils_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
+am_testVerticalCoordinates_OBJECTS =  \
+	testVerticalCoordinates.$(OBJEXT)
+testVerticalCoordinates_OBJECTS =  \
+	$(am_testVerticalCoordinates_OBJECTS)
+testVerticalCoordinates_LDADD = $(LDADD)
+testVerticalCoordinates_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
 testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
 testXMLDoc_LDADD = $(LDADD)
@@ -309,8 +318,9 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
+	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
+	$(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
@@ -323,8 +333,9 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
+	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
+	$(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -491,12 +502,12 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc test_0ti
              coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
 
-CC_TESTS = testBinaryConstants testUtils testTimeSpec \
-	testSpatialAxisSpec testData testProjections testInterpolation \
-	testUnits testFileReaderFactory testCDM testSliceBuilder \
-	testXMLDoc testFeltReader $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_6) $(am__append_7) \
-	$(am__append_8)
+CC_TESTS = testInterpolation testVerticalCoordinates \
+	testBinaryConstants testUtils testTimeSpec testSpatialAxisSpec \
+	testData testProjections testUnits testFileReaderFactory \
+	testCDM testSliceBuilder testXMLDoc testFeltReader \
+	$(am__append_2) $(am__append_3) $(am__append_4) \
+	$(am__append_6) $(am__append_7) $(am__append_8)
 SH_TESTS = $(am__append_5)
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_1) \
@@ -525,6 +536,7 @@ check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
 testInterpolation_SOURCES = testInterpolation.cc
+testVerticalCoordinates_SOURCES = testVerticalCoordinates.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
@@ -659,6 +671,9 @@ testUnits$(EXEEXT): $(testUnits_OBJECTS) $(testUnits_DEPENDENCIES)
 testUtils$(EXEEXT): $(testUtils_OBJECTS) $(testUtils_DEPENDENCIES) 
 	@rm -f testUtils$(EXEEXT)
 	$(CXXLINK) $(testUtils_OBJECTS) $(testUtils_LDADD) $(LIBS)
+testVerticalCoordinates$(EXEEXT): $(testVerticalCoordinates_OBJECTS) $(testVerticalCoordinates_DEPENDENCIES) 
+	@rm -f testVerticalCoordinates$(EXEEXT)
+	$(CXXLINK) $(testVerticalCoordinates_OBJECTS) $(testVerticalCoordinates_LDADD) $(LIBS)
 testXMLDoc$(EXEEXT): $(testXMLDoc_OBJECTS) $(testXMLDoc_DEPENDENCIES) 
 	@rm -f testXMLDoc$(EXEEXT)
 	$(CXXLINK) $(testXMLDoc_OBJECTS) $(testXMLDoc_LDADD) $(LIBS)
@@ -698,6 +713,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testVerticalCoordinates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-ConfigurationTest.Po@am__quote@

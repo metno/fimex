@@ -27,7 +27,7 @@ Literature:
         => f(p) = m*log(p) + c
       * linear(p)
         => f(p) = m*p + c
-      * log-log
+      * log-log ?
         => f(p) = log(log(p)) + c
       * other schemes for geopotential (height/temperature) or mean sea level pressure,
         eventually best starting directly from hybrid-levels?

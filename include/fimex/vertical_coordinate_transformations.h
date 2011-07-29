@@ -110,6 +110,8 @@ extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const d
  * @param h height in m above base-layer
  * @param T_b temperature at base layer in K - usually varying in time,x,y
  * @param pressure output values in the same unit as p_b and at the same place as ps
+ *
+ * @warning This function has not been tested against possibly existing implementations
  */
 extern int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, double* pressure);
 
@@ -129,6 +131,9 @@ extern int mifi_barometric_pressure(size_t n, double P_b, const double* h, doubl
  * @param p pressure at level
  * @param T_b temperature at base layer in K - usually varying in time,x,y
  * @param height output values, height above base_layer in m
+ *
+ * @warning This function has not been tested against possibly existing implementations
+ *
  */
 extern int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, double* height);
 

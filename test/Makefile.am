@@ -2,13 +2,14 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc test_0ti
              coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
 
-CC_TESTS = testBinaryConstants \
+CC_TESTS = testInterpolation \
+           testVerticalCoordinates \
+           testBinaryConstants \
            testUtils \
            testTimeSpec \
            testSpatialAxisSpec \
            testData \
            testProjections \
-           testInterpolation \
            testUnits \
            testFileReaderFactory \
            testCDM \
@@ -55,6 +56,7 @@ check_PROGRAMS = $(CC_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
 testInterpolation_SOURCES = testInterpolation.cc
+testVerticalCoordinates_SOURCES = testVerticalCoordinates.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
