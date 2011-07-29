@@ -342,6 +342,27 @@ extern int mifi_project_axes(const char* proj_input, const char* proj_output, co
  */
 extern int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float corrEff, size_t maxLoop, size_t* nChanged);
 
+/**
+ * @brief Method to fill undefined values in a 2d field in stable time.
+ *
+ * This method will fill undefined values by interpolation of neighboring
+ * defined values + the average. A value is assumed to be defined if it is defined in the input field,
+ * or if it has been defined through the interpolation method (the defined fields will 'creep'
+ * into the undefined area).
+ *
+ * The results are very similar to mifi_fill2d_f, but the time will vary only with
+ * the size of the undefined area, not with the smoothness of the defined values.
+ *
+ * @param nx size of field in x-direction
+ * @param ny size of field in x-direction
+ * @param field the data-field to be filled (input/output)
+ * @param repeat number of times values should be re-smoothed (depending on grid-size, 20-100 (linear with time used)).
+ * @param setWeight default weight of original values (versus derived values with weight = 1). Must be >= 1, e.g. 2
+ *        the higher the value, the smoother the approxamation from the undefined border to average.
+ * @param nChanged number of changed values (output)
+ * @return error-code, usually MIFI_OK
+ */
+extern int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat, char setWeight, size_t* nChanged);
 
 /**
  * Convert bad-values to nan. The mifi_ functions don't handle bad values generally, but

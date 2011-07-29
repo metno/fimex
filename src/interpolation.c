@@ -808,6 +808,123 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
     return MIFI_OK;
 }
 
+int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat, char setWeight, size_t* nChanged) {
+    size_t totalSize = nx*ny;
+    if (totalSize == 0) return MIFI_OK;
+
+    double sum = 0;
+    *nChanged = 0;
+
+    float* fieldPos = field;
+    int i = 0;
+    // calculate sum and number of valid values
+    while (i < totalSize) {
+        if (isnan(*fieldPos)) {
+            (*nChanged)++;
+        } else {
+            sum += *fieldPos;
+        }
+        fieldPos++;
+        i++;
+    }
+    size_t nUnchanged = totalSize - *nChanged;
+    if (nUnchanged == 0 || *nChanged == 0) {
+        return MIFI_OK; // nothing to do
+    }
+
+    // working field, 5: valid value, 0: invalid value, 1 number of valid neighbours
+    char* wField = (char*) malloc(totalSize*sizeof(char));
+    if (wField == NULL) {
+        fprintf(stderr, "error allocating memory of float(%d*%d)", nx, ny);
+        exit(1);
+    }
+    unsigned short* rField = (unsigned short*) malloc(totalSize*sizeof(unsigned short));
+
+    // The value of average ( i.e. the MEAN value of the array field ) is filled in
+    // the array field at all points with an undefined value.
+    // field(i,j) = average may be regarded as the "first guess" in the iterative
+    // method.
+    double average = sum / nUnchanged;
+    //fprintf(stderr, "sum: %f, average: %f, unchanged: %d\n", sum, average, nUnchanged);
+    fieldPos = field;
+    char *wFieldPos = wField;
+    unsigned short *rFieldPos = rField;
+    i = 0;
+    while (i < totalSize) {
+        if (isnan(*fieldPos)) {
+            *wFieldPos = 0;
+            *rFieldPos = 0;
+            *fieldPos = average;
+        } else {
+            *wFieldPos = setWeight;
+            *rFieldPos = repeat;
+        }
+        wFieldPos++;
+        fieldPos++;
+        i++;
+    }
+
+    // starting the iterative method, border-values are left at average, nx,ny >=1
+    size_t nxm1 = (size_t)(nx - 1);
+    size_t nym1 = (size_t)(ny - 1);
+
+    // and the loop, with a maximum of nUnchanged rounds
+    int l = 0;
+    size_t changedInLoop = 1;
+    while ((l < nUnchanged) && (changedInLoop > 0)) {
+        //fprintf(stderr, "loop %d, change %d\n", l, changedInLoop);
+        changedInLoop = 0; // stopps when a loop didn't manage to seriously change more values
+        l++;
+        // loop over inner array
+        for (size_t y = 1; y < nym1; y++) {
+            for (size_t x = 1; x < nxm1; x++) {
+                if (rField[y*nx+x] >= repeat) continue; // defined value or changed enough
+                //if (wField[y*nx+x] == setWeight) continue; // original value
+                size_t wFieldSum = wField[y*nx+(x+1)] + wField[y*nx+(x-1)] + wField[(y+1)*nx+x] + wField[(y-1)*nx+x];
+                if (wFieldSum == 0) continue; // all neighbours are average
+                // weight average of neigbouring cells, with double weight on original values
+                // + 1 average "center"
+                field[y*nx+x] += (wField[y*nx+(x+1)]*field[y*nx+(x+1)] + wField[y*nx+(x-1)]*field[y*nx+(x-1)] + wField[(y+1)*nx+x]*field[(y+1)*nx+x] + wField[(y-1)*nx+x]*field[(y-1)*nx+x]);
+                field[y*nx+x] /= (1+wFieldSum);
+                // field has been changed
+                rField[y*nx+x]++;
+                changedInLoop++;
+                wField[y*nx+x] = 1; // this is a normal field
+            }
+        }
+    }
+    // simple calculations at the borders
+    for (size_t l = 0; l < repeat; l++) {
+        for (size_t y = 1; y < nym1; y++) {
+            if (rField[y*nx+0] <= repeat) { // unset
+                field[y*nx+0] += field[y*nx+1]*wField[y*nx+1];
+                field[y*nx+0] /= (1+wField[y*nx+1]);
+                wField[y*nx+0] = 1;
+            }
+            if (rField[y*nx+(nx-1)] <= repeat) { // unset
+                field[y*nx+(nx-1)] += field[y*nx+(nx-2)]*wField[y*nx+(nx-2)];
+                field[y*nx+(nx-1)] /= (1+wField[y*nx+(nx-2)]);
+                wField[y*nx+(nx-1)] = 1;
+            }
+        }
+        for (size_t x = 0; x < nx; x++) {
+            if (rField[0*nx +x] <= repeat) { // unset
+                field[0*nx +x] += field[1*nx+x]*wField[1*nx+x];
+                field[0*nx +x] /= (1+wField[1*nx+x]);
+                wField[0*nx +x] = 1;
+            }
+            if (rField[nym1*nx+x] <= repeat) { // unset
+                field[nym1*nx+x] += field[(nym1-1)*nx+x]*wField[(nym1-1)*nx+x];
+                field[nym1*nx+x] /= (1+wField[(nym1-1)*nx+x]);
+                wField[nym1*nx+x] = 1;
+            }
+        }
+    }
+    free(rField);
+    free(wField);
+    return MIFI_OK;
+}
+
 size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal) {
 	size_t retVal = 0;
 	if (!isnan(badVal)) {

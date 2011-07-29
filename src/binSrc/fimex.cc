@@ -409,8 +409,14 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
 	        size_t maxLoop = string2type<size_t>(what[3]);
 	        LOG4FIMEX(logger, Logger::DEBUG, "running interpolate preprocess: fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
 	        interpolator->addPreprocess(boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorFill2d(critx,cor,maxLoop)));
+	    } else if (boost::regex_match(vm["interpolate.preprocess"].as<string>(), what, boost::regex(".*creepfill2d\\(([^,]+),([^,]+)\\).*"))) {
+            unsigned short repeat = string2type<unsigned short>(what[1]);
+            char setWeight = string2type<char>(what[2]);
+            LOG4FIMEX(logger, Logger::DEBUG, "running interpolate preprocess: creepfill2d("<<repeat<<","<<setWeight<<")");
+            interpolator->addPreprocess(boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFill2d(repeat, setWeight)));
+	    } else {
+	        throw CDMException("undefined interpolate.preprocess: " + vm["interpolate.preprocess"].as<string>());
 	    }
-
 	}
 
 	int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
@@ -564,7 +570,7 @@ int run(int argc, char* args[])
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
-        ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, i.e. \"fill2d(critx,cor,maxLoop)\"")
+        ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2)\"")
         ("interpolate.printNcML", "print NcML description of interpolator")
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
