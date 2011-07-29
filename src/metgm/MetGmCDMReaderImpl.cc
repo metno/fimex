@@ -571,9 +571,7 @@ namespace MetNoFimex {
 
             CDMVariable var(profile.cdmName_, CDM_FLOAT, shape);
 
-            boost::shared_ptr<Data> data = createData(CDM_FLOAT,
-                                                      profile.pTags_->gp5()->data().begin(),
-                                                      profile.pTags_->gp5()->data().end());
+            boost::shared_ptr<Data> data = createData(profile.pTags_->dimTag()->totalSize(), profile.pTags_->gp5()->data());
             var.setData(data);
 
             cdm_->addVariable(var);

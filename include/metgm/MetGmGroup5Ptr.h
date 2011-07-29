@@ -52,37 +52,35 @@ namespace MetNoFimex {
 
     class MetGmGroup5Ptr {
     public:
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
                                                                                 const CDMVariable* pVariable,
-                                                                                const boost::shared_ptr<MetGmGroup3Ptr>& gp3,
+                                                                                const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                                                                 const float* pFillValue = 0);
 
-        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(boost::shared_ptr<MetGmGroup3Ptr>& gp3,
-                                                                                boost::shared_ptr<MetGmHDTag>&     hdTag);
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                                const boost::shared_ptr<MetGmHDTag>     hdTag);
 
         void dumpFimexLayout();
         void dumpMetGmLayout();
 
-        std::vector<float>& data() { return vData_; }
+        boost::shared_array<float>& data() { return data_; }
 
-        boost::shared_array<float> dataAsFloat();
     private:
 
         void changeFillValue();
         void toFimexLayout();
         void toMetGmLayout();
 
-        explicit MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr>& gp3,
-                                const boost::shared_ptr<MetGmHDTag>&     hdTag,
-                                const std::vector<float>&                vData,
-                                const float&                             fillValue = 9999.0f);
+        explicit MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
+                                const boost::shared_ptr<MetGmHDTag>     hdTag,
+                                const boost::shared_array<float>        data,
+                                const float                             fillValue = 9999.0f);
 
-        // not owning
-        const boost::shared_ptr<MetGmGroup3Ptr>& pGp3_;
-        const boost::shared_ptr<MetGmHDTag> hdTag_;
 
-        // owning
-        std::vector<float>            vData_;
+        const boost::shared_ptr<MetGmGroup3Ptr> pGp3_;
+        const boost::shared_ptr<MetGmHDTag>     hdTag_;
+
+        boost::shared_array<float>    data_;
         float                         fillValue_;
     };
 
