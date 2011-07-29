@@ -3,6 +3,7 @@ if HAVE_LIBPQ
 libfimex_la_LIBADD += @BOOST_PROGRAM_OPTIONS_LIB@
 
 libfimex_la_SOURCES += \
+	WdbCDMReader.h WdbCDMReader.cc \
 	wdb/WdbIndex.h wdb/WdbIndex.cpp \
 	wdb/DataSummary.h wdb/DataSummary.cpp \
 	wdb/ParameterData.h wdb/ParameterData.cpp \
@@ -13,7 +14,7 @@ libfimex_la_SOURCES += \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp \
 	wdb/GridHandler.h wdb/GridHandler.cpp	
 	
-libfimex_la_CPPFLAGS = -DPKGDATADIR=\"$(pkgdatadir)\" $(AM_CPPFLAGS)
+AM_CPPFLAGS += -DPKGDATADIR=\"$(pkgdatadir)\"
 
 include wdb/gridInformation/make.mk
 include wdb/database_access/make.mk

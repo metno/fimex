@@ -281,14 +281,17 @@ void WdbConfiguration::initXml_(const boost::filesystem::path & configFile)
 	std::string referenceTime = singleValue(document, read+"referencetime");
 	if ( not referenceTime.empty() )
 		querySpec_.setReferenceTime(referenceTime);
-//	std::string validTime = singleValue(document, read+"validtime");
-//	if ( not validTime.empty() )
-//		querySpec_.setValidTime(validTime);
+	std::string validTime = singleValue(document, read+"validtime");
+	if ( not validTime.empty() )
+		querySpec_.setValidTime(validTime);
 	BOOST_FOREACH(const std::string & parameter, values<std::string>(document, read + "valueparameter"))
 		querySpec_.addParameter(parameter);
 	// Level is not supported yet
 	BOOST_FOREACH(int dataVersion, values<int>(document, read + "dataversion"))
 		querySpec_.addDataVersion(dataVersion);
+
+
+	std::clog << "---  " << validTime << std::endl;
 }
 
 

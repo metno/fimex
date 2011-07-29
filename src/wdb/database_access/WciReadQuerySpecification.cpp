@@ -45,6 +45,7 @@ WciReadQuerySpecification::WciReadQuerySpecification(
 		const std::set<std::string> * dataProvider,
 		const std::string * location,
 		const std::string * referenceTime,
+		const std::string * validTime,
 		const std::set<std::string> * parameter,
 		const std::set<int> * dataVersion)
 {
@@ -54,6 +55,8 @@ WciReadQuerySpecification::WciReadQuerySpecification(
 		location_ = * location;
 	if ( referenceTime )
 		referenceTime_ = * referenceTime;
+	if ( validTime )
+		validTime_ = * validTime;
 	if ( parameter )
 		parameter_ = * parameter;
 	if ( dataVersion )
@@ -141,7 +144,7 @@ std::string WciReadQuerySpecification::query(const DataSanitizer & sanitizer) co
 	toString.add(q, dataProvider()) << ", ";
 	toString.add(q, location()) << ", ";
 	referenceTimeQuery_(q, sanitizer) << ", ";
-	q << "NULL, ";
+	toString.add(q, validTime()) << ", ";
 	toString.add(q, parameter()) << ", ";
 	q << "NULL, ";
 	toString.add(q, dataVersion());
@@ -163,6 +166,11 @@ void WciReadQuerySpecification::setLocation(const std::string & location)
 void WciReadQuerySpecification::setReferenceTime(const std::string & referenceTime)
 {
 	referenceTime_ = referenceTime;
+}
+
+void WciReadQuerySpecification::setValidTime(const std::string & validTime)
+{
+	validTime_ = validTime;
 }
 
 void WciReadQuerySpecification::addParameter(const std::string & parameter)

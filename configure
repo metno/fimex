@@ -19414,10 +19414,10 @@ if test "${enable_debug_mode+set}" = set; then :
        				*) as_fn_error "bad value ${enableval} for --enable-debug-mode" "$LINENO" 5 ;;
      			 esac
 else
-  --enable-debug-mode=false
+  debug_mode=false
 fi
 
-    if test $debug_mode = true; then
+    if test x$debug_mode = xtrue; then
 
 $as_echo "#define DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN /**/" >>confdefs.h
 

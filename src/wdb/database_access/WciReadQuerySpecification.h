@@ -63,6 +63,7 @@ public:
 			const std::set<std::string> * dataProvider,
 			const std::string * location,
 			const std::string * referenceTime,
+			const std::string * validTime,
 			const std::set<std::string> * parameter,
 			const std::set<int> * dataVersion);
 
@@ -97,6 +98,13 @@ public:
 	void setReferenceTime(const std::string & referenceTime);
 
 	/**
+	 * Request data with valid time matching the given string. The format
+	 * for the string is equal to that used in wdb. Refer to wdb documentation
+	 * for details. Only one value for valid time may exist.
+	 */
+	void setValidTime(const std::string & validTime);
+
+	/**
 	 * Add a value parameter to the request list. You may add any number of
 	 * parameters, but adding none means requesting any.
 	 */
@@ -115,6 +123,7 @@ public:
 	const std::set<std::string> * dataProvider() const { return dataProvider_.empty() ? 0 : & dataProvider_; }
 	const std::string * location() const { return location_.empty() ? 0 : & location_; }
 	const std::string * referenceTime() const { return referenceTime_.empty() ? 0 : & referenceTime_; }
+	const std::string * validTime() const { return validTime_.empty() ? 0 : & validTime_; }
 	const std::set<std::string> * parameter() const { return parameter_.empty() ? 0 : & parameter_; }
 	const std::set<int> * dataVersion() const { return dataVersion_.empty() ? 0 : & dataVersion_; }
 
@@ -147,6 +156,7 @@ private:
 	std::set<std::string> dataProvider_;
 	std::string location_;
 	std::string referenceTime_;
+	std::string validTime_;
 	std::set<std::string> parameter_;
 	std::set<int> dataVersion_;
 

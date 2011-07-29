@@ -69,7 +69,7 @@ BOOST_FIXTURE_TEST_CASE(testReadQuery, ConfigurationTest)
 	std::string referenceTime = "2011-05-12 02:00:00+02";
 	std::set<int> dataVersion = boost::assign::list_of(0);
 
-	WciReadQuerySpecification expected(& dataProvider, 0, & referenceTime, 0, & dataVersion);
+	WciReadQuerySpecification expected(& dataProvider, 0, & referenceTime, 0, 0, & dataVersion);
 
 	BOOST_CHECK_EQUAL(expected, config().query());
 }

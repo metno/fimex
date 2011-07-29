@@ -7,8 +7,8 @@ AC_DEFUN([DEBUG_MODE],
        				no)  debug_mode=false ;;
        				*) AC_MSG_ERROR(bad value ${enableval} for --enable-debug-mode) ;;
      			 esac],
-     			 [--enable-debug-mode=false])
-    if test $debug_mode = true; then
+     			 [debug_mode=false])
+    if test x$debug_mode = xtrue; then
     	AC_DEFINE(DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN, [], [If defined, this should remove the try-catch block from the main function, causing any exceptions to crash the program.])
     	CXXFLAGS="-g -O0 -Wall"
     fi
