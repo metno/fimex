@@ -765,11 +765,17 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
     }
     // start the iteration loop
     for (size_t n = 0; n < maxLoop; n++) {
+        // field-positions, start of inner loop, forwarded one row
+        float *f = &field[nx];
+        float *e = &eField[nx];
+        float *w = &wField[nx];
         for (size_t y = 1; y < nym1; y++) {
             for (size_t x = 1; x < nxm1; x++) {
-                eField[y*nx+x] = (field[y*nx+(x+1)] + field[y*nx+(x-1)] + field[(y+1)*nx+x] + field[(y-1)*nx+x])*0.25 - field[y*nx+x];
-                field[y*nx+x] += eField[y*nx+x] * wField[y*nx+x];
+                f++; e++; w++;
+                *e = (*(f+1) + *(f-1) + *(f+nx) + *(f-nx))*0.25 - *f;
+                (*f) += *e * *w;
             }
+            f+=2; e+=2; w+=2; // skip first and last element in row
         }
 
         // Test convergence now and then (slow test loop)
@@ -777,13 +783,17 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
             (n%10 == 0)) {
             float crtest = crit*corrEff;
             size_t nbad = 0;
+            float *e = &eField[nx];
+            float *w = &wField[nx];
             for (size_t y = 1; y < nym1; y++) {
                 if (nbad != 0) break;
                 for (size_t x = 1; x < nxm1; x++) {
-                    if (fabs(eField[y*nx+x])*wField[y*nx+x] > crtest) {
+                    e++; w++;
+                    if (fabs(*e * *w) > crtest) {
                         nbad = 1;
                     }
                 }
+                e+=2; w+=2;  // skip first and last element in row
             }
             if (nbad == 0) {
                 free(eField);
@@ -880,26 +890,33 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
         //fprintf(stderr, "loop %d, change %d\n", l, changedInLoop);
         changedInLoop = 0; // stopps when a loop didn't manage to seriously change more values
         l++;
+
+        // field-positions, start of inner loop, forwarded one row
+        float *f = &field[nx];
+        unsigned short *r = &rField[nx];
+        char *w = &wField[nx];
         // loop over inner array
         for (size_t y = 1; y < nym1; y++) {
             for (size_t x = 1; x < nxm1; x++) {
-                if (rField[y*nx+x] < repeat) {
+                f++; r++; w++; // propagate positions
+                if (*r < repeat) {
                     // undefined value or changed enough
-                    size_t wFieldSum = wField[y*nx+(x+1)] + wField[y*nx+(x-1)] + wField[(y+1)*nx+x] + wField[(y-1)*nx+x];
+                    size_t wFieldSum = *(w+1)+ *(w-1) + *(w+nx) + *(w-nx);
                     if (wFieldSum != 0) {
                         // some neighbours defined
 
                         // weight average of neigbouring cells, with double weight on original values
                         // + 1 average "center"
-                        field[y*nx+x] += (wField[y*nx+(x+1)]*field[y*nx+(x+1)] + wField[y*nx+(x-1)]*field[y*nx+(x-1)] + wField[(y+1)*nx+x]*field[(y+1)*nx+x] + wField[(y-1)*nx+x]*field[(y-1)*nx+x]);
-                        field[y*nx+x] /= (1+wFieldSum);
+                        (*f) += *(w+1) * *(f+1) + *(w-1) * *(f-1) + *(w+nx) * *(f+nx) + *(w-nx) * *(f-nx);
+                        (*f) /= (1+wFieldSum);
                         // field has been changed
-                        wField[y*nx+x] = 1; // this is a implicit defined field
-                        rField[y*nx+x]++; // it has been changed
+                        (*w) = 1; // this is a implicit defined field
+                        (*r)++; // it has been changed
                         changedInLoop++;
                     }
                 }
             }
+            f+=2; r+=2; w+=2; // skip last and first element in row
         }
     }
     // simple calculations at the borders
