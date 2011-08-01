@@ -95,7 +95,6 @@ namespace MetNoFimex {
 
             std::string metgmName = getXmlProp(node, "name");
             if(metgmName.empty()) {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " parameter metgmName empty " << std::endl;
                 continue;
             }
 
@@ -105,12 +104,10 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_p_id == std::string("")) {
-//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
                     continue;
                 }
                 p_id = boost::lexical_cast<size_t>(str_p_id);
             } else {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << metgmName << std::endl;
                 continue;
             }
 
@@ -131,7 +128,6 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_standard_name.empty()) {
-//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
                     continue;
                 }
                 // find all variables with given standard_name value
@@ -139,8 +135,6 @@ namespace MetNoFimex {
                 for(size_t index = 0; index < varNames.size(); ++index) {
                     std::string varName = varNames[index];
                     if(cdmRef.hasDimension(varName)) {
-                        /* not interested in variables that are dimensions */
-//                        std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] there is dimension with name -> " << metgmName << std::endl;
                         continue;
                     }
 
@@ -150,7 +144,6 @@ namespace MetNoFimex {
                         /* check if dimensions convertible */
                         Units checker;
                         if(!checker.areConvertible(str_units, cdmRef.getUnits(varName))) {
-//                            std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << metgmName << std::endl;
                             continue;
                         }
                     }
@@ -158,41 +151,31 @@ namespace MetNoFimex {
                     MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
                     cfgEntry.units_ = str_units.empty() ? std::string() : str_units;
 
-//                    std::cerr << __FILE__ << " @ "<< __FUNCTION__ << "@" << __LINE__ << " : "
-//                              << " found -> " << pVar->getName()
-//                              << std::endl;
-
                     if(!str_FillValue.empty())
-                        cfgEntry.setFillValue(boost::lexical_cast<float>(str_FillValue));
+                        cfgEntry.fillValue_ = str_FillValue;
 
                     xmlConfiguration_.insert(cfgEntry);
                 }
 
             } else {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " standard_name not found -> " << metgmName << std::endl;
                 continue;
             }
         }
         // end metgm_parameter
 
-//        XPathObjPtr
-                xpathObj = doc->getXPathObject("/metgm/variable");
-//        xmlNodeSetPtr
-                nodes = xpathObj->nodesetval;
-//        size_t
-                size = (nodes) ? nodes->nodeNr : 0;
+        xpathObj = doc->getXPathObject("/metgm/variable");
+        nodes = xpathObj->nodesetval;
+        size = (nodes) ? nodes->nodeNr : 0;
         for (size_t i = 0; i < size; ++i) {
 
             xmlNodePtr node = nodes->nodeTab[i];
 
             std::string kildeName = getXmlProp(node, "name");
             if(kildeName.empty()) {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
                 continue;
             }
 
             if(!cdmRef.hasVariable(kildeName)) {
-//                std::cerr << __FILE__ " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " not found in CDM model -> " << kildeName << std::endl;
                 continue;
             }
 
@@ -202,12 +185,10 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_p_id == std::string("")) {
-//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                     continue;
                 }
                 p_id = boost::lexical_cast<size_t>(str_p_id);
             } else {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                 continue;
             }
 
@@ -223,7 +204,6 @@ namespace MetNoFimex {
                 /* check if dimensions convertible */
                 Units checker;
                 if(!checker.areConvertible(str_units, cdmRef.getUnits(kildeName))) {
-//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " [SKIPPING] dimensions not convertible for -> " << kildeName << std::endl;
                     continue;
                 }
             }
@@ -231,15 +211,18 @@ namespace MetNoFimex {
             MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
 
             xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
-            std::string str_FillValue;
             if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
-                str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
-                if(str_FillValue.empty()) {
-                    /*do nothing*/;
-                } else {
-                    float fillValue = boost::lexical_cast<float>(str_FillValue);
-                    cfgEntry.setFillValue(fillValue);
-                }
+                cfgEntry.fillValue_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
+            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                cfgEntry.addOffset_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
+            if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                cfgEntry.scaleFactor_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
             xmlConfiguration_.insert(cfgEntry);
@@ -277,10 +260,6 @@ namespace MetNoFimex {
 
         MGM_THROW_ON_ERROR(mgm_set_number_of_params(*metgmHandle_, np))
 
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << " mgm_set_number_of_params [np]:" << np
-//                  << std::endl;
-
         if(*metgmVersion_ == MGM_Edition2) {
 
             cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
@@ -296,10 +275,6 @@ namespace MetNoFimex {
             const short ndp = uniquePid.size();
 
             MGM_THROW_ON_ERROR(mgm_set_number_of_dist_params(*metgmHandle_, ndp))
-
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " mgm_set_number_of_dist_params [ndp]:" << ndp
-//                      << std::endl;
 
             size_t index = 0;
             for(std::set<short>::const_iterator cit = uniquePid.begin(); cit != uniquePid.end(); ++cit) {
@@ -418,23 +393,7 @@ namespace MetNoFimex {
 
             MetGmConfigurationMappings entry = *pIt;
 
-//            std::cerr
-//                    << __FILE__     << " @ "
-//                    << __FUNCTION__ << " @ "
-//                    << __LINE__     << " : "
-//                    << "p_id = "
-//                    << entry.p_id_
-//                    << " CDMVariable with name = "
-//                    << entry.cdmName_
-//                    << std::endl;
-
             MetGmTagsPtr tags;
-//            boost::shared_ptr<MetGmGroup3Ptr> gp3 =
-//                    MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(metgmHandle_);
-
-//            assert(gp3.get());
-
-//            gp3->set_p_id(entry.p_id_);
 
             cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
             if(nameView.find(entry.cdmName_) != nameView.end()) {
@@ -443,12 +402,8 @@ namespace MetNoFimex {
 
             const CDMVariable* pVariable = &cdmReader->getCDM().getVariable(entry.cdmName_);
 
-            if(entry.fillValue_.get())
-            {
-                tags = MetGmTags::createMetGmTagsForWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_, entry.fillValue_.get());
-            } else {
-                tags = MetGmTags::createMetGmTagsForWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_, 0);
-            }
+            tags = MetGmTags::createMetGmTagsForWriting(cdmReader, pVariable, metgmHandle_,
+                                                        entry.p_id_, entry.fillValue_, entry.addOffset_, entry.scaleFactor_);
 
             assert(tags.get());
 

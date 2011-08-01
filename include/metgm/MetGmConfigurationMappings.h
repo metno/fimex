@@ -56,14 +56,11 @@ namespace MetNoFimex {
         std::string                    cdmName_;
         std::string                    standardName_;
         std::string                    units_;
-        boost::shared_ptr<float>       fillValue_;
+        std::string                    scaleFactor_;
+        std::string                    addOffset_;
+        std::string                    fillValue_;
 
         bool operator<(const MetGmConfigurationMappings& entry)const{return cdmName_ < entry.cdmName_;}
-
-        void setFillValue(const float fillValue)
-        {
-            fillValue_ = boost::shared_ptr<float>(new float(fillValue));
-        }
 
         MetGmConfigurationMappings(short p_id, const std::string name) : p_id_(p_id), cdmName_(name) { }
     };

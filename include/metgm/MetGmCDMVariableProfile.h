@@ -68,7 +68,9 @@ namespace MetNoFimex {
         std::string                   standardName_;
         std::string                   units_;
         std::string                   zDimensionName_;
-        boost::shared_ptr<float>      pfillValue_;
+        std::string                   addOffset_;
+        std::string                   scaleFactor_;
+        std::string                   fillValue_;
         boost::shared_ptr<MetGmTags>  pTags_;
     };
 

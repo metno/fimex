@@ -48,12 +48,14 @@ namespace MetNoFimex {
                                                                       const CDMVariable* pVariable,
                                                                       const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
                                                                       const unsigned short p_id,
-                                                                      const float* pFillValue)
+                                                                      const std::string fillValue,
+                                                                      const std::string addOffset,
+                                                                      const std::string scaleFactor)
     {
         boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
         tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(mgmHandle, p_id);
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
-        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->pGp3_, pFillValue);
+        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->pGp3_, fillValue, addOffset, scaleFactor);
 
         return tags;
     }

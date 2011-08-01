@@ -86,12 +86,10 @@ namespace MetNoFimex {
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_p_id = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_p_id == std::string("")) {
-//                    std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                     continue;
                 }
                 p_id = boost::lexical_cast<size_t>(str_p_id);
             } else {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " p_id not found -> " << kildeName << std::endl;
                 continue;
             }
 
@@ -102,10 +100,7 @@ namespace MetNoFimex {
             }
 
             if(str_standard_name.empty()) {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name not found -> " << kildeName << std::endl;
                 continue;
-            } else {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : " << " standard name for -> " << kildeName  << " is " << str_standard_name << std::endl;
             }
 
             xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
@@ -114,19 +109,32 @@ namespace MetNoFimex {
                 str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
+            std::string str_offset;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_offset = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
+            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
+            std::string str_scale;
+            if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
+                str_scale = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
+            }
+
             MetGmConfigurationMappings cfgEntry(p_id, spaceToUnderscore(kildeName));
             cfgEntry.standardName_ = spaceToUnderscore(str_standard_name);
-            cfgEntry.units_ = str_units;
+            cfgEntry.units_        = str_units;
+            cfgEntry.addOffset_    = str_offset;
+            cfgEntry.scaleFactor_  = str_scale;
 
             xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
             std::string str_FillValue;
             if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
                 if(str_FillValue.empty()) {
-                    cfgEntry.setFillValue(9999.0f);
+                    cfgEntry.fillValue_ = std::string("9999.0");
                 } else {
-                    float fillValue = boost::lexical_cast<float>(str_FillValue);
-                    cfgEntry.setFillValue(fillValue);
+                    cfgEntry.fillValue_ = str_FillValue;
                 }
             }
 
@@ -485,7 +493,7 @@ namespace MetNoFimex {
 
             int p_id = profile.p_id_;
 
-            float fillValue = profile.pfillValue_.get() ? *(profile.pfillValue_) : 9999.0f;
+            std::string fillValue = profile.fillValue_.empty() ? std::string("9999.0") : profile.fillValue_;
 
             std::vector<CDMAttribute> attributes;
 
@@ -498,8 +506,18 @@ namespace MetNoFimex {
             CDMAttribute varUnitsAttribute("units", "string", profile.units_);
             attributes.push_back(varUnitsAttribute);
 
-            CDMAttribute varFillValueAttribute("_FillValue", "float", boost::lexical_cast<std::string>(fillValue));
+            CDMAttribute varFillValueAttribute("_FillValue", "float", fillValue);
             attributes.push_back(varFillValueAttribute);
+
+            if(!profile.addOffset_.empty()) {
+                CDMAttribute varAddOffsetAttribute("add_offset", "float", profile.addOffset_);
+                attributes.push_back(varAddOffsetAttribute);
+            }
+
+            if(!profile.scaleFactor_.empty()) {
+                CDMAttribute varScaleFactorAttribute("scale_factor", "float", profile.scaleFactor_);
+                attributes.push_back(varScaleFactorAttribute);
+            }
 
             std::vector<std::string> shape;
 
@@ -676,8 +694,10 @@ namespace MetNoFimex {
 
             std::string kildeName;
             std::string standardName;
+            std::string addOffset;
+            std::string scaleFactor;
             std::string strUnit(mgm_get_param_unit(tags->p_id(), *pHandle_));
-            boost::shared_ptr<float> fillValue;
+            std::string fillValue;
             if(pidView.count(tags->p_id()) == 0) {
 
             } else if(pidView.count(tags->p_id()) == 1) {
@@ -685,6 +705,8 @@ namespace MetNoFimex {
                 kildeName = entry.cdmName_;
                 standardName = entry.standardName_;
                 fillValue = entry.fillValue_;
+                addOffset = entry.addOffset_;
+                scaleFactor = entry.scaleFactor_;
                 if(!entry.units_.empty())
                     strUnit = entry.units_;
             } else {
@@ -696,6 +718,8 @@ namespace MetNoFimex {
                         strUnit = ic0->units_;
                         standardName = ic0->standardName_;
                         fillValue = ic0->fillValue_;
+                        addOffset = ic0->addOffset_;
+                        scaleFactor = ic0->scaleFactor_;
                         break;
                     }
                 }
@@ -723,7 +747,9 @@ namespace MetNoFimex {
                 MetGmCDMVariableProfile profile(tags->p_id(), fixedKildeName, tags);
                 profile.standardName_ = standardName;
                 profile.units_ = strUnit;
-                profile.pfillValue_ = fillValue;
+                profile.fillValue_ = fillValue;
+                profile.addOffset_ = addOffset;
+                profile.scaleFactor_ = scaleFactor;
                 cdmConfiguration_.insert(profile);
 
             }

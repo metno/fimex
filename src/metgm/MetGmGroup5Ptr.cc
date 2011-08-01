@@ -30,12 +30,16 @@
 #include "../../include/metgm/MetGmDimensionsTag.h"
 #include "../../include/metgm/MetGmVersion.h"
 
+// fimex
+//
+#include "fimex/DataTypeChanger.h"
+
 namespace MetNoFimex {
 
 MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                const boost::shared_ptr<MetGmHDTag>     hdTag,
                                const boost::shared_array<float>        data,
-                               const float                             fillValue)
+                               const std::string                       fillValue)
         : pGp3_(gp3),
           hdTag_(hdTag),
           data_(data),
@@ -46,7 +50,7 @@ MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
 
 void MetGmGroup5Ptr::changeFillValue() {
     for(size_t index = 0; index < hdTag_->totalSize(); ++index) {
-        if(fillValue_ != MIFI_UNDEFINED_F && fillValue_ == data_[index]) {
+        if(!fillValue_.empty() && data_[index] == boost::lexical_cast<float>(fillValue_)) {
             data_[index] = 9999.0;
         } else if(isnan(data_[index])) {
             data_[index] = 9999.0;
@@ -120,15 +124,15 @@ void MetGmGroup5Ptr::toFimexLayout()
     data_.swap(dataT);
 }
 
-boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(boost::shared_ptr<CDMReader> pCdmReader,
+boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
                                                                                  const CDMVariable* pVariable,
                                                                                  const boost::shared_ptr<MetGmGroup3Ptr> pg3,
-                                                                                 const float* pFillValue)
+                                                                                 const std::string& fillValue,
+                                                                                 const std::string& addOffset,
+                                                                                 const std::string& scaleFactor)
 {
     boost::shared_ptr<MetGmHDTag> hdtag =
             MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
-
-    float fillValue = 9999.0f;
 
     switch(hdtag->asShort()) {
         case MetGmHDTag::HD_2D:
@@ -158,13 +162,31 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     mgmUnits = std::string(mgm_get_param_unit(pg3->p_id(), *(pg3->mgmHandle())));
                 }
 
-                boost::shared_array<float> data  = (pCdmReader->getScaledDataInUnit(pVariable->getName(), mgmUnits.c_str()))->asFloat();
+                double oldFill = pCdmReader->getCDM().getFillValue(pVariable->getName());
+                double oldScale = 1.0;  // as already applied to from getScaledDataInUnit
+                double oldOffset = 0.0; // as already applied to from getScaledDataInUnit
 
-                fillValue = pFillValue ? *pFillValue : pCdmReader->getCDM().getFillValue(pVariable->getName());
+                double newFill = fillValue.empty() ?
+                                     pCdmReader->getCDM().getFillValue(pVariable->getName())
+                                     :
+                                     boost::lexical_cast<double>(fillValue);
 
-                boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, data, fillValue));
+                double newScale = scaleFactor.empty() ? 1.0 : boost::lexical_cast<double>(scaleFactor);
+                double newOffset = addOffset.empty() ? 0.0 : boost::lexical_cast<double>(addOffset);
 
-                gp5->changeFillValue();
+                boost::shared_ptr<Data> raw_data  = pCdmReader->getScaledDataInUnit(pVariable->getName(), mgmUnits.c_str());
+
+                DataTypeChanger dtc(CDM_FLOAT, oldFill, oldScale, oldOffset, CDM_FLOAT, newFill, newScale, newOffset);
+
+                raw_data = dtc.convertData(raw_data);
+
+//                std::string fill = !fillValue.empty() ? fillValue : boost::lexical_cast<std::string>(pCdmReader->getCDM().getFillValue(pVariable->getName()));
+
+//                boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asConstFloat(), fill));
+
+                boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asConstFloat()));
+
+//                gp5->changeFillValue();
 
                 gp5->toMetGmLayout();
 
@@ -213,7 +235,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             default:
                 throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
                                    + hdTag->asString()
-                                   + " for p_id="
+                                   + " for p_id ="
                                    + boost::lexical_cast<std::string>(gp3->p_id()));
         }
 

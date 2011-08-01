@@ -28,6 +28,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+// standard
+#include <string>
+
 namespace MetNoFimex {
 
     class CDMReader;
@@ -49,7 +52,9 @@ namespace MetNoFimex {
                                                                       const CDMVariable* pVariable,
                                                                       const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
                                                                       const unsigned short p_id,
-                                                                      const float* pFillValue);
+                                                                      const std::string fillValue = std::string(),
+                                                                      const std::string addOffset = std::string(),
+                                                                      const std::string scaleFactor = std::string());
 
         static boost::shared_ptr<MetGmTags> createMetGmTagsForReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
                                                                       const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
