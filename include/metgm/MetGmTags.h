@@ -26,6 +26,7 @@
 
 // boost
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 
 namespace MetNoFimex {
 
@@ -37,6 +38,9 @@ namespace MetNoFimex {
     class MetGmGroup2Ptr;
     class MetGmGroup3Ptr;
     class MetGmGroup5Ptr;
+    class MetGmXTag;
+    class MetGmYTag;
+    class MetGmTimeTag;
     class MetGmVerticalTag;
 
     class MetGmTags {
@@ -52,8 +56,35 @@ namespace MetNoFimex {
                                                                       const boost::shared_ptr<MetGmVerticalTag> vTag);
 
         const boost::shared_ptr<MetGmGroup3Ptr>& gp3()    { return pGp3_; }
-        const boost::shared_ptr<MetGmGroup5Ptr>& gp5()    { return pGp5_; }
-        const boost::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
+//        const boost::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
+
+        const unsigned short p_id() const;
+        const int            pr()   const;
+        const int            pz()   const;
+        const unsigned short hd()   const;
+
+        int set_nt(int nt);
+        int set_dt(float dt);
+
+        int set_nz(int nz);
+        int set_pz(int pz);
+        int set_pr(int pr);
+
+        int set_nx(int nx);
+        int set_dx(float dx);
+        int set_cx(float cx);
+
+        int set_ny(int ny);
+        int set_dy(float dy);
+        int set_cy(float cy);
+
+        const unsigned long totalDataSize();
+        const boost::shared_array<float>& data();
+
+        boost::shared_ptr<MetGmXTag>&        xTag();
+        boost::shared_ptr<MetGmYTag>&        yTag();
+        boost::shared_ptr<MetGmVerticalTag>& zTag();
+        boost::shared_ptr<MetGmTimeTag>&     tTag();
 
     private:
         MetGmTags() { }

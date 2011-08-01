@@ -53,7 +53,7 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
         tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(mgmHandle, p_id);
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
-        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->gp3(), pFillValue);
+        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->pGp3_, pFillValue);
 
         return tags;
     }
@@ -68,6 +68,34 @@ namespace MetNoFimex {
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForReading(tags->pGp3_, tags->dimTag_);
         return tags;
     }
+
+    const unsigned short MetGmTags::p_id() const { return pGp3_->p_id(); }
+    const int MetGmTags::pr() const { return pGp3_->pr(); }
+    const int MetGmTags::pz() const { return pGp3_->pz(); }
+    const unsigned short MetGmTags::hd() const { return dimTag_->asShort(); }
+
+    int MetGmTags::set_nt(int nt)   { return pGp3_->set_nt(nt); }
+    int MetGmTags::set_dt(float dt) { return pGp3_->set_dt(dt); }
+
+    int MetGmTags::set_nz(int nz)   { return pGp3_->set_nz(nz); }
+    int MetGmTags::set_pz(int pz)   { return pGp3_->set_pz(pz); }
+    int MetGmTags::set_pr(int pr)   { return pGp3_->set_pr(pr); }
+
+    int MetGmTags::set_nx(int nx)   { return pGp3_->set_nx(nx); }
+    int MetGmTags::set_dx(float dx) { return pGp3_->set_dx(dx); }
+    int MetGmTags::set_cx(float cx) { return pGp3_->set_cx(cx); }
+
+    int MetGmTags::set_ny(int ny)   { return pGp3_->set_ny(ny); }
+    int MetGmTags::set_dy(float dy) { return pGp3_->set_dy(dy); }
+    int MetGmTags::set_cy(float cy) { return pGp3_->set_cy(cy); }
+
+    boost::shared_ptr<MetGmXTag>&        MetGmTags::xTag() { return dimTag_->xTag(); }
+    boost::shared_ptr<MetGmYTag>&        MetGmTags::yTag() { return dimTag_->yTag(); }
+    boost::shared_ptr<MetGmVerticalTag>& MetGmTags::zTag() { return dimTag_->zTag(); }
+    boost::shared_ptr<MetGmTimeTag>&     MetGmTags::tTag() { return dimTag_->tTag(); }
+
+    const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
+    const boost::shared_array<float>& MetGmTags::data() { return pGp5_->data(); }
 }
 
 

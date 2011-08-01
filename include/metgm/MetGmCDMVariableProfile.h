@@ -61,7 +61,7 @@ namespace MetNoFimex {
 
         bool operator<(const MetGmCDMVariableProfile& profile) const {return cdmName_ < profile.cdmName_;}
 
-        short hd() const { return pTags_->dimTag()->asShort(); }
+        const short hd() const { return pTags_->hd(); }
 
         short                         p_id_;
         std::string                   cdmName_;
@@ -97,7 +97,7 @@ namespace MetNoFimex {
         boost::multi_index::ordered_non_unique<
           boost::multi_index::tag<cdm_hd_index>,
           boost::multi_index::const_mem_fun<
-           MetGmCDMVariableProfile, short, &MetGmCDMVariableProfile::hd
+           MetGmCDMVariableProfile, const short, &MetGmCDMVariableProfile::hd
           >,
           std::greater<short>
         >

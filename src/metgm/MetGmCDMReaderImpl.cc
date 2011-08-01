@@ -282,11 +282,7 @@ namespace MetNoFimex {
         if(pIt == pidView.end())
             pIt = pidView.begin();
 
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << " time axis data based on variable = " << pIt->cdmName_
-//                  << std::endl;
-
-        long timeDimensionSize = pIt->pTags_->dimTag()->tTag()->nT();
+        long timeDimensionSize = pIt->pTags_->tTag()->nT();
 
         tDim_.setName(hcTimeDimensionName);
         tDim_.setLength(timeDimensionSize);
@@ -297,7 +293,7 @@ namespace MetNoFimex {
         CDMDataType timeDimensionDataType = CDM_DOUBLE;
         CDMVariable timeVariable(hcTimeDimensionName, timeDimensionDataType, timeDimensionShape);
 
-        std::vector<double> timeInUnitsVector = pIt->pTags_->dimTag()->tTag()->pointsAsDouble();
+        std::vector<double> timeInUnitsVector = pIt->pTags_->tTag()->pointsAsDouble();
         boost::shared_ptr<Data> timeDimensionData = createData(timeDimensionDataType, timeInUnitsVector.begin(), timeInUnitsVector.end());
         timeVariable.setData(timeDimensionData);
 
@@ -332,14 +328,10 @@ namespace MetNoFimex {
         cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
 
         cdmPidView::iterator pIt = pidView.begin();
-        for(; pIt != pidView.end(); ++pIt) if(pIt->pTags_->dimTag()->xTag().get() && pIt->pTags_->dimTag()->yTag().get()) break;
+        for(; pIt != pidView.end(); ++pIt) if(pIt->pTags_->xTag().get() && pIt->pTags_->yTag().get()) break;
 
         if(pIt == pidView.end())
             throw CDMException("can't find X / Y axis");
-//        else
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " horizontal axes based on variable " << pIt->cdmName_
-//                      << std::endl;
 
         MetGmCDMVariableProfile profile = *pIt;
 
@@ -348,13 +340,13 @@ namespace MetNoFimex {
         CDMAttribute xDimLongNameAttribute = CDMAttribute("long_name", "string", "longitude");
         CDMAttribute xDimStandardNameAttribute = CDMAttribute("standard_name", "string", "longitude");
         CDMAttribute xDimUnitsAttribute = CDMAttribute("units", "string", "degree_east");
-        xDim_ = CDMDimension(xName, profile.pTags_->dimTag()->xTag()->nx());
+        xDim_ = CDMDimension(xName, profile.pTags_->xTag()->nx());
         std::vector<std::string> xDimShape;
         xDimShape.push_back(xDim_.getName());
         CDMVariable xVar(xName, CDM_DOUBLE, xDimShape);
         boost::shared_ptr<Data> xData = createData(CDM_DOUBLE,
-                                                   profile.pTags_->dimTag()->xTag()->xPoints().begin(),
-                                                   profile.pTags_->dimTag()->xTag()->xPoints().end());
+                                                   profile.pTags_->xTag()->xPoints().begin(),
+                                                   profile.pTags_->xTag()->xPoints().end());
         xVar.setData(xData);
         cdm_->addDimension(xDim_);
         cdm_->addVariable(xVar);
@@ -366,13 +358,13 @@ namespace MetNoFimex {
         CDMAttribute yDimLongNameAttribute("long_name", "string", "latitude");
         CDMAttribute yDimStandardNameAttribute("standard_name", "string", "latitude");
         CDMAttribute yDimUnitsAttribute("units", "string", "degree_north");
-        yDim_ = CDMDimension(yName, profile.pTags_->dimTag()->yTag()->ny());
+        yDim_ = CDMDimension(yName, profile.pTags_->yTag()->ny());
         std::vector<std::string> yDimShape;
         yDimShape.push_back(yDim_.getName());
         CDMVariable yVar(yName, CDM_DOUBLE, yDimShape);
         boost::shared_ptr<Data> yData = createData(CDM_DOUBLE,
-                                                   profile.pTags_->dimTag()->yTag()->yPoints().begin(),
-                                                   profile.pTags_->dimTag()->yTag()->yPoints().end());
+                                                   profile.pTags_->yTag()->yPoints().begin(),
+                                                   profile.pTags_->yTag()->yPoints().end());
         yVar.setData(yData);
         cdm_->addDimension(yDim_);
         cdm_->addVariable(yVar);
@@ -394,68 +386,30 @@ namespace MetNoFimex {
             return;
         }
 
-//        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
-
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << " nameView.size_() => " << nameView.size()
-//                  << std::endl;
-
-//        for(cdmNameView::iterator nIt = nameView.begin(); nIt != nameView.end(); ++nIt) {
-//            MetGmCDMVariableProfile profile = *nIt;
-
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " CDM_NAME_VIEW TESTING FOR p_id [" << profile.p_id_ << "]"
-//                      << " with name " << profile.cdmName_
-//                      << std::endl;
-//        }
-
-
         cdmPidView& pidView = cdmConfiguration_.get<cdm_pid_index>();
-
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << " pidView.size_() => " << pidView.size()
-//                  << std::endl;
-
-        for(cdmPidView::iterator pIt = pidView.begin(); pIt != pidView.end(); ++pIt) {
-            MetGmCDMVariableProfile profile = *pIt;
-
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " CDM_PID_VIEW TESTING FOR p_id [" << profile.p_id_ << "]"
-//                      << " with name " << profile.cdmName_
-//                      << std::endl;
-        }
 
         for(cdmPidView::iterator pidIt = pidView.begin(); pidIt != pidView.end(); ++pidIt) {
             MetGmCDMVariableProfile profile = *pidIt;
 
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " adding data for p_id [" << profile.p_id_ << "]"
-//                      << " with name " << profile.cdmName_
-//                      << std::endl;
-
             if(profile.p_id_ == 0
-               || profile.pTags_->dimTag()->zTag().get() == 0
-               || (profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D
-                   && profile.pTags_->dimTag()->hd() != MetGmHDTag::HD_3D_T))
+               || profile.pTags_->zTag().get() == 0
+               || (profile.pTags_->hd() != MetGmHDTag::HD_3D
+                   && profile.pTags_->hd() != MetGmHDTag::HD_3D_T))
             {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " no vertical data for p_id [" << profile.p_id_ << "]"
-//                          << " with name " << profile.cdmName_
-//                          << std::endl;
                 continue;
             } else {
                 std::string unitName;
                 std::string longName;
                 std::string standardName;
-                if(profile.pTags_->gp3()->pr() == 0) {
+                if(profile.pTags_->pr() == 0) {
                     unitName = "m";
                     longName = spaceToUnderscore("height in meters above mean sea level");
                     standardName = spaceToUnderscore("height_above_reference_ellipsoid");
-                } else if(profile.pTags_->gp3()->pr() == 1) {
+                } else if(profile.pTags_->pr() == 1) {
                     unitName = "m";
                     longName = spaceToUnderscore("height in meters above ground level");
                     standardName = spaceToUnderscore("height");
-                } else if(profile.pTags_->gp3()->pr() == 2) {
+                } else if(profile.pTags_->pr() == 2) {
                     unitName = "hPa";
                     longName = spaceToUnderscore("heigt as pressure in hPa");
                     standardName = spaceToUnderscore("height");
@@ -470,11 +424,7 @@ namespace MetNoFimex {
                     } else {
                         const CDMVariable& var = cdm_->getVariable(dim.getName());
                         boost::shared_array<float> vertical_data = var.getData()->asFloat();
-                        if(memcmp(vertical_data.get(), profile.pTags_->dimTag()->zTag()->points().get(), profile.pTags_->dimTag()->zTag()->nz() * sizeof(float)) == 0) {
-//                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                                      << " vertical data for p_id [" << profile.p_id_ << "]"
-//                                      << " based on existing dimension " << var.getName()
-//                                      << std::endl;
+                        if(memcmp(vertical_data.get(), profile.pTags_->zTag()->points().get(), profile.pTags_->zTag()->nz() * sizeof(float)) == 0) {
                             profile.zDimensionName_ = dim.getName();
                             pidView.replace(pidIt, profile);
                             continue;
@@ -487,20 +437,15 @@ namespace MetNoFimex {
                     continue;
                 }
 
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " vertical data for p_id [" << profile.p_id_ << "]"
-//                          << " based on variable " << profile.cdmName_
-//                          << std::endl;
-
                 // to create unique fimex name for CDM modell
                 longName.append("_pid_").append(boost::lexical_cast<std::string>(profile.p_id_));
 
                 boost::shared_ptr<Data> data =
                         createData(CDM_FLOAT,
-                                   profile.pTags_->dimTag()->zTag()->points().get(),
-                                   profile.pTags_->dimTag()->zTag()->points().get() + profile.pTags_->dimTag()->zTag()->nz());
+                                   profile.pTags_->zTag()->points().get(),
+                                   profile.pTags_->zTag()->points().get() + profile.pTags_->zTag()->nz());
 
-                CDMDimension levelDim = CDMDimension(longName, profile.pTags_->dimTag()->zTag()->nz());
+                CDMDimension levelDim = CDMDimension(longName, profile.pTags_->zTag()->nz());
                 cdm_->addDimension(levelDim);
 
                 std::vector<std::string> levelShape;
@@ -571,7 +516,7 @@ namespace MetNoFimex {
 
             CDMVariable var(profile.cdmName_, CDM_FLOAT, shape);
 
-            boost::shared_ptr<Data> data = createData(profile.pTags_->dimTag()->totalSize(), profile.pTags_->gp5()->data());
+            boost::shared_ptr<Data> data = createData(profile.pTags_->totalDataSize(), profile.pTags_->data());
             var.setData(data);
 
             cdm_->addVariable(var);
@@ -725,18 +670,18 @@ namespace MetNoFimex {
 
             boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, prevZTag);
 
-            prevZTag = tags->dimTag()->zTag();
+            prevZTag = tags->zTag();
 
             xmlPidView &pidView = xmlConfiguration_.get<xml_pid_index>();
 
             std::string kildeName;
             std::string standardName;
-            std::string strUnit(mgm_get_param_unit(tags->gp3()->p_id(), *pHandle_));
+            std::string strUnit(mgm_get_param_unit(tags->p_id(), *pHandle_));
             boost::shared_ptr<float> fillValue;
-            if(pidView.count(tags->gp3()->p_id()) == 0) {
+            if(pidView.count(tags->p_id()) == 0) {
 
-            } else if(pidView.count(tags->gp3()->p_id()) == 1) {
-                MetGmConfigurationMappings entry = *(pidView.find(tags->gp3()->p_id()));
+            } else if(pidView.count(tags->p_id()) == 1) {
+                MetGmConfigurationMappings entry = *(pidView.find(tags->p_id()));
                 kildeName = entry.cdmName_;
                 standardName = entry.standardName_;
                 fillValue = entry.fillValue_;
@@ -744,7 +689,7 @@ namespace MetNoFimex {
                     strUnit = entry.units_;
             } else {
                 xmlPidView::iterator ic0, ic1;
-                boost::tuples::tie(ic0,ic1) = pidView.equal_range(tags->gp3()->p_id());
+                boost::tuples::tie(ic0,ic1) = pidView.equal_range(tags->p_id());
                 for(; ic0 != ic1; ++ic0) {
                     if(!ic0->units_.empty() && ic0->units_ == strUnit) {
                         kildeName = ic0->cdmName_;
@@ -760,7 +705,7 @@ namespace MetNoFimex {
 
                 std::string fixedKildeName(kildeName);
 
-                switch(tags->gp3()->pr()) {
+                switch(tags->pr()) {
                 case 0:
                     if(!boost::algorithm::ends_with(kildeName, "MSL"))
                         fixedKildeName.append("_MSL");
@@ -775,16 +720,12 @@ namespace MetNoFimex {
                     break;
                 }
 
-                MetGmCDMVariableProfile profile(tags->gp3()->p_id(), fixedKildeName, tags);
+                MetGmCDMVariableProfile profile(tags->p_id(), fixedKildeName, tags);
                 profile.standardName_ = standardName;
                 profile.units_ = strUnit;
                 profile.pfillValue_ = fillValue;
                 cdmConfiguration_.insert(profile);
 
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " fixed kildeName  => " <<  fixedKildeName
-//                          << " cdmConfiguration_.size()  =  " <<  cdmConfiguration_.size()
-//                          << std::endl;
             }
 
 //            std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "

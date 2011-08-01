@@ -336,12 +336,12 @@ namespace MetNoFimex {
         cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
         MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
-        if(tags->dimTag()->tTag().get()) {
-            MGM_THROW_ON_ERROR(tags->gp3()->set_nt(tags->dimTag()->tTag()->nT()))
-            MGM_THROW_ON_ERROR(tags->gp3()->set_dt(tags->dimTag()->tTag()->dT()))
+        if(tags->tTag().get()) {
+            MGM_THROW_ON_ERROR(tags->set_nt(tags->tTag()->nT()))
+            MGM_THROW_ON_ERROR(tags->set_dt(tags->tTag()->dT()))
         } else {
-            MGM_THROW_ON_ERROR(tags->gp3()->set_nt(1))
-            MGM_THROW_ON_ERROR(tags->gp3()->set_dt(metgmTimeTag_->dT() * metgmTimeTag_->nT()))
+            MGM_THROW_ON_ERROR(tags->set_nt(1))
+            MGM_THROW_ON_ERROR(tags->set_dt(metgmTimeTag_->dT() * metgmTimeTag_->nT()))
         }
     }
 
@@ -351,13 +351,13 @@ namespace MetNoFimex {
         MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
         // x
-        MGM_THROW_ON_ERROR(tags->gp3()->set_dx(tags->dimTag()->xTag()->dx()));
-        MGM_THROW_ON_ERROR(tags->gp3()->set_nx(tags->dimTag()->xTag()->nx()));
-        MGM_THROW_ON_ERROR(tags->gp3()->set_cx(tags->dimTag()->xTag()->cx()));
+        MGM_THROW_ON_ERROR(tags->set_dx(tags->xTag()->dx()));
+        MGM_THROW_ON_ERROR(tags->set_nx(tags->xTag()->nx()));
+        MGM_THROW_ON_ERROR(tags->set_cx(tags->xTag()->cx()));
         // y
-        MGM_THROW_ON_ERROR(tags->gp3()->set_dy(tags->dimTag()->yTag()->dy()));
-        MGM_THROW_ON_ERROR(tags->gp3()->set_ny(tags->dimTag()->yTag()->ny()));
-        MGM_THROW_ON_ERROR(tags->gp3()->set_cy(tags->dimTag()->yTag()->cy()));
+        MGM_THROW_ON_ERROR(tags->set_dy(tags->yTag()->dy()));
+        MGM_THROW_ON_ERROR(tags->set_ny(tags->yTag()->ny()));
+        MGM_THROW_ON_ERROR(tags->set_cy(tags->yTag()->cy()));
     }
 
     void MetGmCDMWriterImpl::writeGroup3VerticalAxis(const CDMVariable* pVar)
@@ -365,21 +365,14 @@ namespace MetNoFimex {
         cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
         MetGmTagsPtr tags = nameView.find(pVar->getName())->pTags_;
 
-        if(tags->dimTag().get() && tags->dimTag()->zTag().get()) {
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " pVar->Name " << pVar->getName()
-//                      << std::endl;
-            MGM_THROW_ON_ERROR(tags->gp3()->set_nz(tags->dimTag()->zTag()->nz()));
-            MGM_THROW_ON_ERROR(tags->gp3()->set_pr(tags->dimTag()->zTag()->pr()));
-            MGM_THROW_ON_ERROR(tags->gp3()->set_pz(tags->dimTag()->zTag()->pz()));
+        if(tags->zTag().get()) {
+            MGM_THROW_ON_ERROR(tags->set_nz(tags->zTag()->nz()));
+            MGM_THROW_ON_ERROR(tags->set_pr(tags->zTag()->pr()));
+            MGM_THROW_ON_ERROR(tags->set_pz(tags->zTag()->pz()));
         } else {
-            /* no z profile for variable*/
-//            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << " pVar->Name " << pVar->getName()
-//                      << std::endl;
-            MGM_THROW_ON_ERROR(tags->gp3()->set_nz(1));
-            MGM_THROW_ON_ERROR(tags->gp3()->set_pr(0));
-            MGM_THROW_ON_ERROR(tags->gp3()->set_pz(1));
+            MGM_THROW_ON_ERROR(tags->set_nz(1));
+            MGM_THROW_ON_ERROR(tags->set_pr(0));
+            MGM_THROW_ON_ERROR(tags->set_pz(1));
         }
     }
 
@@ -393,11 +386,6 @@ namespace MetNoFimex {
 
         writeGroup3VerticalAxis(pVar);
 
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                  << " pVar->Name " << pVar->getName() << " dumping gp3"
-//                  << std::endl;
-//        nameView.find(pVar->getName())->pTags_->gp3()->dump();
-
         MGM_THROW_ON_ERROR(mgm_write_group3(*metgmFileHandle_, *metgmHandle_, *(nameView.find(pVar->getName())->pTags_->gp3())));
     }
 
@@ -405,9 +393,8 @@ namespace MetNoFimex {
     {
         cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
-        if(nameView.find(pVar->getName())->pTags_->dimTag().get()
-                && nameView.find(pVar->getName())->pTags_->dimTag()->zTag().get()) {
-            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, nameView.find(pVar->getName())->pTags_->dimTag()->zTag()->points().get()));
+        if(nameView.find(pVar->getName())->pTags_->zTag().get()) {
+            MGM_THROW_ON_ERROR(mgm_write_group4 (*metgmFileHandle_, *metgmHandle_, nameView.find(pVar->getName())->pTags_->zTag()->points().get()));
         } else {
             /* no z profile for variable */
             float f = 0;
@@ -421,7 +408,7 @@ namespace MetNoFimex {
         cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
         MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
-        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, profile.pTags_->gp5()->data().get()));
+        MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, profile.pTags_->data().get()));
     }
 
     void MetGmCDMWriterImpl::init()
