@@ -46,8 +46,8 @@
         class MetGmGroup1Ptr {
         public:
 
-            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForReading(boost::shared_ptr<MetGmHandlePtr>& pMgmHandle);
-            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1Ptr(boost::shared_ptr<CDMReader>& pCdmReader);
+            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pMgmHandle);
+            static boost::shared_ptr<MetGmGroup1Ptr> createMetGmGroup1PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader);
 
             std::string dataTypeAsString();
             unsigned int dataType()     { return dataType_; }
@@ -62,13 +62,15 @@
             std::string    analysisTimeAsIsoString()                { return boost::posix_time::to_iso_string(analysisTimeAsBoostPosix()); }
             std::string    startTimeAsIsoExtendedString()           { return boost::posix_time::to_iso_extended_string(startTimeAsBoostPosix()); }
             std::string    analysisTimeAsIsoExtendedString()        { return boost::posix_time::to_iso_extended_string(analysisTimeAsBoostPosix()); }
+            const boost::shared_ptr<MetGmHandlePtr>& mgmHandle()    { return this->pHandle_; }
         private:
 
             MetGmGroup1Ptr() { }
+            MetGmGroup1Ptr(const boost::shared_ptr<MetGmHandlePtr> pMgmHandle) : pHandle_(pMgmHandle) { }
 
             boost::shared_ptr<MetGmCommentAttributeParser> parser_;
             boost::shared_ptr<MetGmTimeTag>                tTag_;
-            boost::shared_ptr<MetGmHandlePtr>              pHandle_;
+            const boost::shared_ptr<MetGmHandlePtr>        pHandle_;
 
             std::string  freeText_;
             std::string  modelType_;

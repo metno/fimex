@@ -32,6 +32,7 @@ namespace MetNoFimex {
     class CDMReader;
     class CDMVariable;
     class MetGmHDTag;
+    class MetGmHandlePtr;
     class MetGmGroup1Ptr;
     class MetGmGroup2Ptr;
     class MetGmGroup3Ptr;
@@ -40,27 +41,35 @@ namespace MetNoFimex {
 
     class MetGmTags {
     public:
-        static boost::shared_ptr<MetGmTags> createMetGmTags(boost::shared_ptr<CDMReader>& pCdmReader,
-                                                            const CDMVariable* pVariable,
-                                                            boost::shared_ptr<MetGmGroup3Ptr>& pg3,
-                                                            const float* pFillValue);
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+                                                                      const CDMVariable* pVariable,
+                                                                      const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
+                                                                      const unsigned short p_id,
+                                                                      const float* pFillValue);
 
-        static boost::shared_ptr<MetGmTags> createMetGmTagsForReading(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
-                                                                      boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
-                                                                      boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
-                                                                      boost::shared_ptr<MetGmVerticalTag> vTag);
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                      const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
+                                                                      const boost::shared_ptr<MetGmVerticalTag> vTag);
 
-        boost::shared_ptr<MetGmHDTag>&       dimTag() { return dimTag_;}
-        boost::shared_ptr<MetGmGroup3Ptr>&   gp3()    { return pGp3_; }
-        boost::shared_ptr<MetGmGroup5Ptr>&   gp5()    { return pGp5_; }
+        const boost::shared_ptr<MetGmGroup3Ptr>& gp3()    { return pGp3_; }
+        const boost::shared_ptr<MetGmGroup5Ptr>& gp5()    { return pGp5_; }
+        const boost::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
 
     private:
-        MetGmTags() {}
-        boost::shared_ptr<MetGmHDTag>       dimTag_;
-        boost::shared_ptr<MetGmGroup1Ptr>   pGp1_;
-        boost::shared_ptr<MetGmGroup2Ptr>   pGp2_;
+        MetGmTags() { }
+
+        MetGmTags(const boost::shared_ptr<MetGmGroup1Ptr> pg1,
+                  const boost::shared_ptr<MetGmGroup2Ptr> pg2)
+            : pGp1_(pg1), pGp2_(pg2)
+        {
+        }
+
+        const boost::shared_ptr<MetGmGroup1Ptr>   pGp1_;
+        const boost::shared_ptr<MetGmGroup2Ptr>   pGp2_;
+
         boost::shared_ptr<MetGmGroup3Ptr>   pGp3_;
         boost::shared_ptr<MetGmGroup5Ptr>   pGp5_;
+        boost::shared_ptr<MetGmHDTag>       dimTag_;
     };
 }
 

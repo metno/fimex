@@ -35,20 +35,21 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmHDTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable) {
+    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+                                                                                 const CDMVariable* pVariable) {
 
         boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
 
-        tag->pXTag_ = MetGmHorizontalTag::createMetGmXTag(pCdmReader, pVariable);
+        tag->pXTag_ = MetGmHorizontalTag::createMetGmXTagForWriting(pCdmReader, pVariable);
         bool hasXAxis = tag->pXTag_.get() ? true : false;
 
-        tag->pYTag_ = MetGmHorizontalTag::createMetGmYTag(pCdmReader, pVariable);
+        tag->pYTag_ = MetGmHorizontalTag::createMetGmYTagForWriting(pCdmReader, pVariable);
         bool hasYAxis = tag->pYTag_.get() ? true : false;
 
         tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTagForWriting(pCdmReader, pVariable);
         bool hasZAxis = tag->pZTag_.get() ? true : false;
 
-        tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pCdmReader, pVariable);
+        tag->pTTag_ = MetGmTimeTag::createMetGmTimeTagForWriting(pCdmReader, pVariable);
         bool hasTAxis = tag->pTTag_.get() ? true : false;
 
         if(hasZAxis && hasXAxis && hasYAxis) {
@@ -70,15 +71,15 @@ namespace MetNoFimex {
         return tag;
     }
 
-    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTag(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
-                                                                       boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
-                                                                       boost::shared_ptr<MetGmVerticalTag> vTag)
+    boost::shared_ptr<MetGmHDTag> MetGmHDTag::createMetGmDimensionsTag(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                       const boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
+                                                                       const boost::shared_ptr<MetGmVerticalTag> vTag)
     {
         boost::shared_ptr<MetGmHDTag> tag = boost::shared_ptr<MetGmHDTag>(new MetGmHDTag);
 
-        tag->pTTag_ = MetGmTimeTag::createMetGmTimeTag(pGp1, pGp3);
-        tag->pXTag_ = MetGmHorizontalTag::createMetGmXTag(pGp3);
-        tag->pYTag_ = MetGmHorizontalTag::createMetGmYTag(pGp3);
+        tag->pTTag_ = MetGmTimeTag::createMetGmTimeTagForReading(pGp1, pGp3);
+        tag->pXTag_ = MetGmHorizontalTag::createMetGmXTagForReading(pGp3);
+        tag->pYTag_ = MetGmHorizontalTag::createMetGmYTagForReading(pGp3);
         tag->pZTag_ = MetGmVerticalTag::createMetGmVerticalTagForReading(pGp3, vTag);
 
         bool hasXAxis = tag->pXTag_.get() ? true : false;

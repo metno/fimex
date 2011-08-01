@@ -47,15 +47,9 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
+boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
                                                                                        const CDMVariable* pVariable)
 {
-    if(!pVariable)
-        throw CDMException("pVar is null createMetGmVerticalTag");
-
-    if(!pCdmReader.get())
-        throw CDMException("createMetGmXTag: pCdmReader is null");
-
     boost::shared_ptr<MetGmVerticalTag> VTag;
 
     const CDM& cdmRef = pCdmReader->getCDM();
@@ -70,12 +64,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
             CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis();
 
             if(!zAxis.get()) {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " z axis NOT existing for " << pVariable->getName() << std::endl;
                 return boost::shared_ptr<MetGmVerticalTag>();
-            } else {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " z axis IS existing for " << pVariable->getName() << std::endl;
             }
 
             VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());

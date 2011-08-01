@@ -50,7 +50,7 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader)
+boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagGlobal(const boost::shared_ptr<CDMReader> pCdmReader)
 {
     if(!pCdmReader.get())
         throw CDMException("createMetGmTimeTag: pCdmReader is null");
@@ -68,14 +68,8 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
     return TTag;
 }
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable)
+boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable)
 {
-    if(!pVariable)
-        throw CDMException("pVar is null");
-
-    if(!pCdmReader.get())
-        throw CDMException("pCdmReader is null");
-
     boost::shared_ptr<MetGmTimeTag> TTag;
 
     const CDM& cdmRef = pCdmReader->getCDM();
@@ -91,12 +85,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
             CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis();
 
             if(!tAxis.get()) {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " time axis NOT existing for " << pVariable->getName() << std::endl;
                 return boost::shared_ptr<MetGmTimeTag>();
-            } else {
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " time axis IS existing for " << pVariable->getName() << std::endl;
             }
 
             TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
@@ -131,9 +120,6 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
 
             if(TTag->points_.size() <= 1) {
                 TTag->dT_ = 3600;
-//                std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                          << " just one point on time axis -- dt will ne set to 3600"
-//                          << std::endl;
             } else {
                 TTag->dT_ = TTag->points_.at(1) - TTag->points_.at(0);
             }
@@ -144,7 +130,8 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
     return TTag;
 }
 
-boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_ptr<MetGmGroup1Ptr>& pGroup1, boost::shared_ptr<MetGmGroup3Ptr>& pGroup3)
+boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const boost::shared_ptr<MetGmGroup1Ptr> pGroup1,
+                                                                           const boost::shared_ptr<MetGmGroup3Ptr> pGroup3)
 {
     boost::shared_ptr<MetGmTimeTag> TTag = boost::shared_ptr<MetGmTimeTag>(new MetGmTimeTag);
     if(pGroup3->p_id() == 0) {
@@ -169,24 +156,24 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTag(boost::shared_p
     return TTag;
 }
 
-void MetGmTimeTag::extractAnalysisDateTime(boost::shared_ptr<CDMReader>& pCdmReader)
-{
-    const CDM cdmRef = pCdmReader->getCDM();
-    CDMAttribute metgmAnalysisDateTimeAttribute;
-    boost::posix_time::ptime analysisTime;
-    std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
-    if(!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
-        analysisTime = getUniqueForecastReferenceTime(pCdmReader);
-    } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
-        analysisTime = boost::posix_time::from_iso_string(metgmAnalysisDateTimeAttribute.getStringValue());
-    } else {
-        analysisTime = boost::posix_time::second_clock::universal_time();
-    }
+    void MetGmTimeTag::extractAnalysisDateTime(const boost::shared_ptr<CDMReader> pCdmReader)
+    {
+        const CDM& cdmRef = pCdmReader->getCDM();
+        CDMAttribute metgmAnalysisDateTimeAttribute;
+        boost::posix_time::ptime analysisTime;
+        std::vector<std::string> refVarNames = cdmRef.findVariables("standard_name", "forecast_reference_time");
+        if(!refVarNames.empty()) { // we have to honour if there is forecast time in CDM model we get
+            analysisTime = getUniqueForecastReferenceTime(pCdmReader);
+        } else if(cdmRef.getAttribute(cdmRef.globalAttributeNS(), ANALYSIS_DATE_TIME, metgmAnalysisDateTimeAttribute)) {
+            analysisTime = boost::posix_time::from_iso_string(metgmAnalysisDateTimeAttribute.getStringValue());
+        } else {
+            analysisTime = boost::posix_time::second_clock::universal_time();
+        }
 
-    const TimeUnit tu("seconds since 1970-01-01 00:00:00");
-    double unit_time = tu.posixTime2unitTime(analysisTime);
-    analysis_t = tu.unitTime2epochSeconds(unit_time);
-}
+        const TimeUnit tu("seconds since 1970-01-01 00:00:00");
+        double unit_time = tu.posixTime2unitTime(analysisTime);
+        analysis_t = tu.unitTime2epochSeconds(unit_time);
+    }
 
     bool MetGmTimeTag::hasNegativeTimePoints()
     {
@@ -210,7 +197,7 @@ void MetGmTimeTag::extractAnalysisDateTime(boost::shared_ptr<CDMReader>& pCdmRea
         return adjDiff.size() != 1;
     }
 
-    void MetGmTimeTag::extractTimePoints(boost::shared_ptr<CDMReader>& pCdmReader)
+    void MetGmTimeTag::extractTimePoints(const boost::shared_ptr<CDMReader> pCdmReader)
     {
         const CDM& cdmRef = pCdmReader->getCDM();
         const CDMVariable& tVar = cdmRef.getVariable("time");
@@ -240,27 +227,27 @@ void MetGmTimeTag::extractAnalysisDateTime(boost::shared_ptr<CDMReader>& pCdmRea
         start_t = points_.at(0);
     }
 
-void MetGmTimeTag::init(boost::shared_ptr<CDMReader>& pCdmReader)
-{
-    const CDM& cdmRef = pCdmReader->getCDM();
-    const CDMDimension& tDim = cdmRef.getDimension("time");
+    void MetGmTimeTag::init(const boost::shared_ptr<CDMReader> pCdmReader)
+    {
+        const CDM& cdmRef = pCdmReader->getCDM();
+        const CDMDimension& tDim = cdmRef.getDimension("time");
 
-    if(!tDim.isUnlimited())
-        throw CDMException("in given cdm model 'time'' is not unlimited dimension");
+        if(!tDim.isUnlimited())
+            throw CDMException("in given cdm model 'time'' is not unlimited dimension");
 
-    nT_ = tDim.getLength();
+        nT_ = tDim.getLength();
 
-    extractTimePoints(pCdmReader);
+        extractTimePoints(pCdmReader);
 
-    if(points_.size() <= 1)
-        dT_ = 3600;
-    else
-        dT_ = points_.at(1) - points_.at(0);
+        if(points_.size() <= 1)
+            dT_ = 3600;
+        else
+            dT_ = points_.at(1) - points_.at(0);
 
-    extractStartDateTime();
+        extractStartDateTime();
 
-    extractAnalysisDateTime(pCdmReader);
-}
+        extractAnalysisDateTime(pCdmReader);
+    }
 
 }
 

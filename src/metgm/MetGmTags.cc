@@ -25,6 +25,7 @@
 // internals
 //
 #include "../../include/metgm/MetGmTags.h"
+#include "../../include/metgm/MetGmHandlePtr.h"
 #include "../../include/metgm/MetGmGroup1Ptr.h"
 #include "../../include/metgm/MetGmGroup2Ptr.h"
 #include "../../include/metgm/MetGmGroup3Ptr.h"
@@ -43,30 +44,28 @@
 
 namespace MetNoFimex {
 
-    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTags(boost::shared_ptr<CDMReader>& pCdmReader,
-                                                            const CDMVariable* pVariable,
-                                                            boost::shared_ptr<MetGmGroup3Ptr>& pg3,
-                                                            const float* pFillValue)
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+                                                                      const CDMVariable* pVariable,
+                                                                      const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
+                                                                      const unsigned short p_id,
+                                                                      const float* pFillValue)
     {
         boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
-        tags->pGp3_   = pg3;
-        tags->dimTag_ = MetGmHDTag::createMetGmHDTag(pCdmReader, pVariable);
+        tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(mgmHandle, p_id);
+        tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->gp3(), pFillValue);
 
         return tags;
     }
 
-    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForReading(boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
-                                                                      boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
-                                                                      boost::shared_ptr<MetGmGroup3Ptr>   pGp3,
-                                                                      boost::shared_ptr<MetGmVerticalTag> vTag)
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                      const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
+                                                                      const boost::shared_ptr<MetGmVerticalTag> vTag)
     {
-        boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
-        tags->pGp1_   = pGp1;
-        tags->pGp2_   = pGp2;
-        tags->pGp3_   = pGp3;
-        tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTag(pGp1, pGp3, vTag);
-        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForReading(pGp3, tags->dimTag_);
+        boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags(pGp1, pGp2));
+        tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pGp1->mgmHandle());
+        tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTag(pGp1, tags->pGp3_, vTag);
+        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForReading(tags->pGp3_, tags->dimTag_);
         return tags;
     }
 }

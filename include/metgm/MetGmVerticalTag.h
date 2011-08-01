@@ -46,7 +46,7 @@ namespace MetNoFimex {
     class MetGmVerticalTag {
     public:
 
-        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(boost::shared_ptr<CDMReader>& pCdmReader,
+        static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
                                                                                     const CDMVariable* pVar);
 
         static boost::shared_ptr<MetGmVerticalTag> createMetGmVerticalTagForReading(boost::shared_ptr<MetGmGroup3Ptr>   pGp3,

@@ -254,7 +254,7 @@ namespace MetNoFimex {
 
     void MetGmCDMWriterImpl::writeGroup1Data()
     {
-        boost::shared_ptr<MetGmGroup1Ptr> pg1 = MetGmGroup1Ptr::createMetGmGroup1Ptr(cdmReader);
+        boost::shared_ptr<MetGmGroup1Ptr> pg1 = MetGmGroup1Ptr::createMetGmGroup1PtrForWriting(cdmReader);
 
         MGM_THROW_ON_ERROR(mgm_set_analysis_date_time(*metgmHandle_, pg1->analysisTime()))
 
@@ -442,12 +442,12 @@ namespace MetNoFimex {
 //                    << std::endl;
 
             MetGmTagsPtr tags;
-            boost::shared_ptr<MetGmGroup3Ptr> gp3 =
-                    MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(metgmHandle_);
+//            boost::shared_ptr<MetGmGroup3Ptr> gp3 =
+//                    MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(metgmHandle_);
 
-            assert(gp3.get());
+//            assert(gp3.get());
 
-            gp3->set_p_id(entry.p_id_);
+//            gp3->set_p_id(entry.p_id_);
 
             cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
             if(nameView.find(entry.cdmName_) != nameView.end()) {
@@ -458,9 +458,9 @@ namespace MetNoFimex {
 
             if(entry.fillValue_.get())
             {
-                tags = MetGmTags::createMetGmTags(cdmReader, pVariable, gp3, entry.fillValue_.get());
+                tags = MetGmTags::createMetGmTagsForWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_, entry.fillValue_.get());
             } else {
-                tags = MetGmTags::createMetGmTags(cdmReader, pVariable, gp3, 0);
+                tags = MetGmTags::createMetGmTagsForWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_, 0);
             }
 
             assert(tags.get());
@@ -500,7 +500,7 @@ namespace MetNoFimex {
             xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
         }
 
-        metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTag(cdmReader);
+        metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTagGlobal(cdmReader);
         metgmVersion_ = MetGmVersion::createMetGmVersion(xmlDoc);
         metgmFileHandle_ = MetGmFileHandlePtr::createMetGmFileHandlePtrForWriting(outputFile);
         metgmHandle_ = MetGmHandlePtr::createMetGmHandleForWriting(metgmFileHandle_, metgmVersion_);

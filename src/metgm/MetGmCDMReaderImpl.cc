@@ -712,7 +712,7 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmVerticalTag> prevZTag;
 
         for(int index = 0; index < pGroup2_->totalnp(); ++index) {
-            boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
+//            boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
 
 //            std::cerr << std::endl
 //                      << __FUNCTION__ << " @ " << __LINE__ << " : "
@@ -723,7 +723,7 @@ namespace MetNoFimex {
 //                      << "  pz = " <<  gp3->pz() << " } "
 //                      << std::endl;
 
-            boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, gp3, prevZTag);
+            boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, prevZTag);
 
             prevZTag = tags->dimTag()->zTag();
 
@@ -731,12 +731,12 @@ namespace MetNoFimex {
 
             std::string kildeName;
             std::string standardName;
-            std::string strUnit(mgm_get_param_unit(gp3->p_id(), *pHandle_));
+            std::string strUnit(mgm_get_param_unit(tags->gp3()->p_id(), *pHandle_));
             boost::shared_ptr<float> fillValue;
-            if(pidView.count(gp3->p_id()) == 0) {
+            if(pidView.count(tags->gp3()->p_id()) == 0) {
 
-            } else if(pidView.count(gp3->p_id()) == 1) {
-                MetGmConfigurationMappings entry = *(pidView.find(gp3->p_id()));
+            } else if(pidView.count(tags->gp3()->p_id()) == 1) {
+                MetGmConfigurationMappings entry = *(pidView.find(tags->gp3()->p_id()));
                 kildeName = entry.cdmName_;
                 standardName = entry.standardName_;
                 fillValue = entry.fillValue_;
@@ -744,7 +744,7 @@ namespace MetNoFimex {
                     strUnit = entry.units_;
             } else {
                 xmlPidView::iterator ic0, ic1;
-                boost::tuples::tie(ic0,ic1) = pidView.equal_range(gp3->p_id());
+                boost::tuples::tie(ic0,ic1) = pidView.equal_range(tags->gp3()->p_id());
                 for(; ic0 != ic1; ++ic0) {
                     if(!ic0->units_.empty() && ic0->units_ == strUnit) {
                         kildeName = ic0->cdmName_;
@@ -760,7 +760,7 @@ namespace MetNoFimex {
 
                 std::string fixedKildeName(kildeName);
 
-                switch(gp3->pr()) {
+                switch(tags->gp3()->pr()) {
                 case 0:
                     if(!boost::algorithm::ends_with(kildeName, "MSL"))
                         fixedKildeName.append("_MSL");
@@ -775,7 +775,7 @@ namespace MetNoFimex {
                     break;
                 }
 
-                MetGmCDMVariableProfile profile(gp3->p_id(), fixedKildeName, tags);
+                MetGmCDMVariableProfile profile(tags->gp3()->p_id(), fixedKildeName, tags);
                 profile.standardName_ = standardName;
                 profile.units_ = strUnit;
                 profile.pfillValue_ = fillValue;

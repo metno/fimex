@@ -125,7 +125,9 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                                                                  const boost::shared_ptr<MetGmGroup3Ptr> pg3,
                                                                                  const float* pFillValue)
 {
-    boost::shared_ptr<MetGmHDTag> hdtag = MetGmHDTag::createMetGmHDTag(pCdmReader, pVariable);
+    boost::shared_ptr<MetGmHDTag> hdtag =
+            MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
+
     float fillValue = 9999.0f;
 
     switch(hdtag->asShort()) {

@@ -37,7 +37,7 @@
 
 namespace MetNoFimex {
 
-    MetGmGroup3Ptr::MetGmGroup3Ptr(boost::shared_ptr<MetGmHandlePtr> pHandle)
+    MetGmGroup3Ptr::MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle)
         : pHandle_(pHandle), group3_(0)
     {
         assert(pHandle_.get());
@@ -45,10 +45,20 @@ namespace MetNoFimex {
         assert(group3_);
     }
 
-    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(boost::shared_ptr<MetGmHandlePtr> pHandle)
+    MetGmGroup3Ptr::MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id)
+        : pHandle_(pHandle), group3_(0)
+    {
+        assert(pHandle_.get());
+        group3_ = mgm_new_group3();
+        assert(group3_);
+        MGM_THROW_ON_ERROR(mgm_set_p_id(group3_, p_id));
+    }
+
+    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(const boost::shared_ptr<MetGmHandlePtr> pHandle,
+                                                                                     const unsigned short p_id)
     {
         assert(pHandle.get());
-        boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));
+        boost::shared_ptr<MetGmGroup3Ptr> gp3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle, p_id));
         return gp3;
     }
 
@@ -58,12 +68,12 @@ namespace MetNoFimex {
             mgm_free_group3(group3_);
     }
 
-    boost::shared_ptr<MetGmHandlePtr> MetGmGroup3Ptr::mgmHandle()
+    const boost::shared_ptr<MetGmHandlePtr>& MetGmGroup3Ptr::mgmHandle()
     {
         return pHandle_;
     }
 
-    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(boost::shared_ptr<MetGmHandlePtr> pHandle)
+    boost::shared_ptr<MetGmGroup3Ptr> MetGmGroup3Ptr::createMetGmGroup3PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pHandle)
     {
         assert(pHandle.get());
         boost::shared_ptr<MetGmGroup3Ptr> pg3 = boost::shared_ptr<MetGmGroup3Ptr>(new MetGmGroup3Ptr(pHandle));

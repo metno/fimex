@@ -65,14 +65,11 @@ namespace MetNoFimex {
     class MetGmHorizontalTag {
     public:
 
-        static boost::shared_ptr<MetGmXTag> createMetGmXTag(boost::shared_ptr<CDMReader>& pCdmReader);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTag(boost::shared_ptr<CDMReader>& pCdmReader);
+        static boost::shared_ptr<MetGmXTag> createMetGmXTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable);
+        static boost::shared_ptr<MetGmYTag> createMetGmYTagForWriting(const boost::shared_ptr<CDMReader> pCdmReader, const CDMVariable* pVariable);
 
-        static boost::shared_ptr<MetGmXTag> createMetGmXTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTag(boost::shared_ptr<CDMReader>& pCdmReader, const CDMVariable* pVariable);
-
-        static boost::shared_ptr<MetGmXTag> createMetGmXTag(boost::shared_ptr<MetGmGroup3Ptr>& pg3);
-        static boost::shared_ptr<MetGmYTag> createMetGmYTag(boost::shared_ptr<MetGmGroup3Ptr>& pg3);
+        static boost::shared_ptr<MetGmXTag> createMetGmXTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3);
+        static boost::shared_ptr<MetGmYTag> createMetGmYTagForReading(const boost::shared_ptr<MetGmGroup3Ptr> pg3);
 
         inline unsigned int         numberOfPoints()     { return numberOfPoints_; }
         inline double               distance()           { return distance_; }
@@ -84,39 +81,14 @@ namespace MetNoFimex {
         inline MetGmHorizontalTag()
             : numberOfPoints_(0), center_(0), distance_(0) { }
 
-//        inline bool hasNegativeHorizontalPoints() {
-//            std::less_equal<float> leq;
-//            return std::find_if(horizontalPoints_.begin(), horizontalPoints_.end(), boost::bind( leq, _1, 0 ) ) != horizontalPoints_.end();
-//        }
-
-//        inline bool hasNonEquidistantHorizontalPoints() {
-//            std::deque<double> adjDiff(horizontalPoints_.size());
-//            std::adjacent_difference(horizontalPoints_.begin(), horizontalPoints_.end(), adjDiff.begin());
-//            adjDiff.pop_front(); // remove first element
-
-//            std::deque<double>::iterator it = std::unique_copy(adjDiff.begin(), adjDiff.end(), adjDiff.begin());
-//            std::sort(adjDiff.begin(), it);
-
-//            adjDiff.resize(it - adjDiff.begin());
-
-//            return adjDiff.size() != 1;
-//        }
-
         inline void extractHorizontalPoints(const boost::shared_ptr<Data>& data)
         {
-
             if(data->size() <= 1)
                 throw CDMException("horizontal axis has one point can't determine distance needed for MetGm");
 
             const boost::shared_array<double> hArray = data->asConstDouble();
 
             horizontalPoints_ = std::vector<double>(&hArray[0], &hArray[data->size()]);
-
-//            if(hasNegativeHorizontalPoints())
-//                throw CDMException("negative values on the horizontal axis not supported");
-
-//            if(hasNonEquidistantHorizontalPoints())
-//                throw CDMException("time points at horizontal axis are not equidistant [use extractor to split file on boundaries]");
         }
 
         unsigned int        numberOfPoints_;

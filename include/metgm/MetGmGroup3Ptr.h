@@ -44,15 +44,16 @@ namespace MetNoFimex {
     class MetGmGroup3Ptr {
     public:
 
-        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForWriting(boost::shared_ptr<MetGmHandlePtr> pHandle);
-        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForReading(boost::shared_ptr<MetGmHandlePtr> pHandle);
+        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForWriting(const boost::shared_ptr<MetGmHandlePtr> pHandle,
+                                                                                const unsigned short p_id);
+        static boost::shared_ptr<MetGmGroup3Ptr> createMetGmGroup3PtrForReading(const boost::shared_ptr<MetGmHandlePtr> pHandle);
 
         ~MetGmGroup3Ptr();
 
         inline operator mgm_group3* () { return group3_; }
         inline operator const mgm_group3* () const { return group3_; }
 
-        boost::shared_ptr<MetGmHandlePtr> mgmHandle();
+        const boost::shared_ptr<MetGmHandlePtr>& mgmHandle();
 
         int p_id() const;
         int nz()   const;
@@ -88,12 +89,11 @@ namespace MetNoFimex {
         bool neq(boost::shared_ptr<MetGmGroup3Ptr> &rhs) const;
 
     private:
-        MetGmGroup3Ptr(boost::shared_ptr<MetGmHandlePtr> pHandle);
+        MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle);
+        MetGmGroup3Ptr(const boost::shared_ptr<MetGmHandlePtr> pHandle, const unsigned short p_id);
 
-        // not owning
-        boost::shared_ptr<MetGmHandlePtr> pHandle_;
+        const boost::shared_ptr<MetGmHandlePtr> pHandle_;
 
-        // owning
         mgm_group3* group3_;
     };
 
