@@ -289,9 +289,6 @@ void WdbConfiguration::initXml_(const boost::filesystem::path & configFile)
 	// Level is not supported yet
 	BOOST_FOREACH(int dataVersion, values<int>(document, read + "dataversion"))
 		querySpec_.addDataVersion(dataVersion);
-
-
-	std::clog << "---  " << validTime << std::endl;
 }
 
 
