@@ -77,7 +77,7 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = fimex kdtree++ felt gridexer
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -258,8 +258,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-@HAVE_LIBPQ_TRUE@USE_GRIDEXER = gridexer
-SUBDIRS = fimex kdtree++ felt $(USE_GRIDEXER)
+SUBDIRS = fimex kdtree++ felt
 all: all-recursive
 
 .SUFFIXES:
@@ -606,7 +605,6 @@ uninstall-am:
 	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
 	uninstall uninstall-am
 
-AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

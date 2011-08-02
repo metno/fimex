@@ -19429,7 +19429,7 @@ $as_echo "#define DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN /**/" >>confdefs.h
 
 ac_config_headers="$ac_config_headers config.h"
 
-ac_config_files="$ac_config_files fimex.pc Doxyfile Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/fimex/coordSys/Makefile include/felt/Makefile include/kdtree++/Makefile include/gridexer/Makefile"
+ac_config_files="$ac_config_files fimex.pc Doxyfile Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/fimex/coordSys/Makefile include/felt/Makefile include/kdtree++/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -20544,7 +20544,6 @@ do
     "include/fimex/coordSys/Makefile") CONFIG_FILES="$CONFIG_FILES include/fimex/coordSys/Makefile" ;;
     "include/felt/Makefile") CONFIG_FILES="$CONFIG_FILES include/felt/Makefile" ;;
     "include/kdtree++/Makefile") CONFIG_FILES="$CONFIG_FILES include/kdtree++/Makefile" ;;
-    "include/gridexer/Makefile") CONFIG_FILES="$CONFIG_FILES include/gridexer/Makefile" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

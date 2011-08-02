@@ -188,8 +188,7 @@ AC_CONFIG_FILES([fimex.pc
                           include/fimex/Makefile
                           include/fimex/coordSys/Makefile
                           include/felt/Makefile
-                          include/kdtree++/Makefile
-						  include/gridexer/Makefile])
+                          include/kdtree++/Makefile])
 AC_OUTPUT
 
 
