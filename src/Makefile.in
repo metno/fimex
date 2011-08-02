@@ -61,16 +61,15 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/wdb/database_access/make.mk \
 	$(srcdir)/wdb/gridInformation/make.mk $(srcdir)/wdb/make.mk
 @HAVE_LIBPQ_TRUE@am__append_5 = @BOOST_PROGRAM_OPTIONS_LIB@
-@HAVE_LIBPQ_TRUE@am__append_6 = WdbCDMReader.h WdbCDMReader.cc \
-@HAVE_LIBPQ_TRUE@	wdb/WdbIndex.h wdb/WdbIndex.cpp \
-@HAVE_LIBPQ_TRUE@	wdb/DataSummary.h wdb/DataSummary.cpp \
-@HAVE_LIBPQ_TRUE@	wdb/ParameterData.h wdb/ParameterData.cpp \
-@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.h wdb/Wdb2CdmBuilder.cpp \
-@HAVE_LIBPQ_TRUE@	wdb/DataHandler.h wdb/TimeHandler.h \
-@HAVE_LIBPQ_TRUE@	wdb/TimeHandler.cpp wdb/LevelHandler.h \
-@HAVE_LIBPQ_TRUE@	wdb/LevelHandler.cpp wdb/VersionHandler.h \
-@HAVE_LIBPQ_TRUE@	wdb/VersionHandler.cpp wdb/GridHandler.h \
-@HAVE_LIBPQ_TRUE@	wdb/GridHandler.cpp \
+@HAVE_LIBPQ_TRUE@am__append_6 = WdbCDMReader.cc wdb/WdbIndex.h \
+@HAVE_LIBPQ_TRUE@	wdb/WdbIndex.cpp wdb/DataSummary.h \
+@HAVE_LIBPQ_TRUE@	wdb/DataSummary.cpp wdb/ParameterData.h \
+@HAVE_LIBPQ_TRUE@	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
+@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h \
+@HAVE_LIBPQ_TRUE@	wdb/TimeHandler.h wdb/TimeHandler.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/LevelHandler.h wdb/LevelHandler.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/VersionHandler.h wdb/VersionHandler.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/GridHandler.h wdb/GridHandler.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.h \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.cpp \
 @HAVE_LIBPQ_TRUE@	wdb/gridInformation/LatLonGridInformation.h \
@@ -191,9 +190,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	metgm/MetGmGroup5Ptr.cc metgm/MetGmCommentAttributeParser.cc \
 	metgm/MetGmDimensionsTag.cc metgm/MetGmTags.cc \
 	metgm/MetGmHandlePtr.cc FeltCDMReader.cc Felt_Array.cc \
-	Felt_File.cc WdbCDMReader.h WdbCDMReader.cc wdb/WdbIndex.h \
-	wdb/WdbIndex.cpp wdb/DataSummary.h wdb/DataSummary.cpp \
-	wdb/ParameterData.h wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
+	Felt_File.cc WdbCDMReader.cc wdb/WdbIndex.h wdb/WdbIndex.cpp \
+	wdb/DataSummary.h wdb/DataSummary.cpp wdb/ParameterData.h \
+	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
 	wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h wdb/TimeHandler.h \
 	wdb/TimeHandler.cpp wdb/LevelHandler.h wdb/LevelHandler.cpp \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp wdb/GridHandler.h \

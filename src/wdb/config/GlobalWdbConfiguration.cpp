@@ -28,7 +28,6 @@
 
 #include "GlobalWdbConfiguration.h"
 #include <fimex/CDMException.h>
-#include <fimex/XMLDoc.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libxml/xinclude.h>
@@ -62,7 +61,7 @@ void GlobalWdbConfiguration::init_(const boost::filesystem::path & configFile)
 
 	XMLDoc config(configFile.string());
 	initParseGlobalAttributes_(config);
-	initParseValueParameter_(config);
+	initParseAllParameters_(config);
 }
 
 GlobalWdbConfiguration::~GlobalWdbConfiguration()
@@ -99,7 +98,7 @@ namespace
 	}
 }
 
-GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(const std::string & wdbParameter, const std::string & defaultUnit) const
+GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(const std::string & wdbParameter, const std::string & wdbUnit) const
 {
 	AttributeList ret;
 
@@ -108,7 +107,7 @@ GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(cons
 		ret = find->second;
 
 	// all these may be overridden by config file:
-	setAttribute(ret, "units", defaultUnit);
+	setAttribute(ret, "units", cfName(wdbUnit));
 	setAttribute(ret, "standard_name", cfName(wdbParameter));
 	setAttribute(ret, "long_name", wdbParameter);
 
@@ -138,41 +137,61 @@ void GlobalWdbConfiguration::initParseGlobalAttributes_(XMLDoc & config)
 	}
 }
 
-void GlobalWdbConfiguration::initParseValueParameter_(XMLDoc & config)
+void GlobalWdbConfiguration::initParseTranslation_(const xmlNodePtr & translationNode)
 {
-	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter");
-	if ( parameters->nodesetval )
+	if(translationNode->type != XML_ELEMENT_NODE)
+	    throw CDMException("not XML_ELEMENT_NODE!");
+	std::string wdbName = getXmlProp(translationNode, "wdbname");
+	std::string cfName  = getXmlProp(translationNode, "cfname");
+
+	if ( not cfName.empty() )
 	{
-		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
+		wdb2cf_[wdbName] = cfName;
+		cf2wdb_[cfName] = wdbName;
+	}
+}
+
+void GlobalWdbConfiguration::initParseParameters_(const XPathObjPtr parameters)
+{
+	if ( parameters->nodesetval )
 		{
-			xmlNodePtr node = parameters->nodesetval->nodeTab[i];
-			if(node->type != XML_ELEMENT_NODE)
-			    throw CDMException("not XML_ELEMENT_NODE!");
-			std::string wdbName = getXmlProp(node, "wdbname");
-			std::string cfName  = getXmlProp(node, "cfname");
-
-			if ( not cfName.empty() )
+			for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
 			{
-				wdb2cf_[wdbName] = cfName;
-				cf2wdb_[cfName] = wdbName;
-			}
+				xmlNodePtr node = parameters->nodesetval->nodeTab[i];
+				initParseTranslation_(node);
 
-			for ( xmlNodePtr child = node->children; child; child = child->next )
-			{
-				std::string name = std::string(reinterpret_cast<const char *>(child->name));
-				if ((child->type == XML_ELEMENT_NODE) and "attribute" == name )
+				std::string wdbName = getXmlProp(node, "wdbname");
+
+				for ( xmlNodePtr child = node->children; child; child = child->next )
 				{
-					std::string name = getXmlProp(child, "name");
-					std::string value = getXmlProp(child, "value");
-					std::string dataType = getXmlProp(child, "type");
-					if ( dataType.empty() )
-						dataType = "string";
+					std::string name = std::string(reinterpret_cast<const char *>(child->name));
+					if ((child->type == XML_ELEMENT_NODE) and "attribute" == name )
+					{
+						std::string name = getXmlProp(child, "name");
+						std::string value = getXmlProp(child, "value");
+						std::string dataType = getXmlProp(child, "type");
+						if ( dataType.empty() )
+							dataType = "string";
 
-					attributes_[wdbName].push_back(CDMAttribute(name, dataType, value));
+						attributes_[wdbName].push_back(CDMAttribute(name, dataType, value));
+					}
 				}
 			}
 		}
-	}
+}
+
+void GlobalWdbConfiguration::initParseAllParameters_(XMLDoc & config)
+{
+	initParseParameters_(config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter"));
+	initParseParameters_(config.getXPathObject("/wdb_fimex_config/wdb_parameters/level_parameter"));
+
+	XPathObjPtr units = config.getXPathObject("/wdb_fimex_config/units/translation");
+	if ( units->nodesetval )
+			for ( int i = 0; i < units->nodesetval->nodeNr; ++ i )
+			{
+				xmlNodePtr node = units->nodesetval->nodeTab[i];
+				initParseTranslation_(node);
+			}
 }
 
 }

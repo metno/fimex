@@ -30,6 +30,7 @@
 #define WDBTRANSLATIONS_H_
 
 #include <fimex/CDMAttribute.h>
+#include <fimex/XMLDoc.h>
 #include <boost/filesystem/path.hpp>
 #include <string>
 #include <map>
@@ -94,7 +95,11 @@ private:
 	void init_(const boost::filesystem::path & configFile);
 
 	void initParseGlobalAttributes_(XMLDoc & config);
-	void initParseValueParameter_(XMLDoc & config);
+	void initParseAllParameters_(XMLDoc & config);
+	void initParseTranslation_(const xmlNodePtr & translationNode);
+	void initParseParameters_(const XPathObjPtr parameters);
+
+
 
 	static const boost::filesystem::path defaultConfigFile_;
 
