@@ -3,7 +3,7 @@ if HAVE_LIBPQ
 libfimex_la_LIBADD += @BOOST_PROGRAM_OPTIONS_LIB@
 
 libfimex_la_SOURCES += \
-	WdbCDMReader.h WdbCDMReader.cc \
+	WdbCDMReader.cc \
 	wdb/WdbIndex.h wdb/WdbIndex.cpp \
 	wdb/DataSummary.h wdb/DataSummary.cpp \
 	wdb/ParameterData.h wdb/ParameterData.cpp \
