@@ -23,7 +23,7 @@
 
 //fimex
 //
-#include "fimex/MetgmCDMWriter.h"
+#include "fimex/MetGmCDMWriter.h"
 
 // private/implementation code
 #include "../include/metgm/MetGmCDMWriterImpl.h"
