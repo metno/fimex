@@ -6,7 +6,7 @@
 
 namespace MetNoFimex {
 
-    METGM_CDMReader::METGM_CDMReader(const std::string& metgmsource, const std::string& configfilename)
+    MetGmCDMReader::MetGmCDMReader(const std::string& metgmsource, const std::string& configfilename)
         : CDMReader()
     {
         try {
@@ -16,14 +16,14 @@ namespace MetNoFimex {
         }
     }
 
-    METGM_CDMReader::~METGM_CDMReader() { }
+    MetGmCDMReader::~MetGmCDMReader() { }
 
-    boost::shared_ptr<Data> METGM_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
+    boost::shared_ptr<Data> MetGmCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
         return d_ptr->getDataSlice(varName, unLimDimPos);
     }
 
-    boost::shared_ptr<Data> METGM_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+    boost::shared_ptr<Data> MetGmCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
         return d_ptr->getDataSlice(varName, sb);
     }

@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(test_read_sample_ed1) {
     }
 
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> metgmReaderEd1(new METGM_CDMReader(fileName, topSrcDir+"/share/etc/cdmMetgmReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, topSrcDir+"/share/etc/cdmMetgmReaderConfig.xml"));
     BOOST_CHECK(true); // made it so far
     NetCDF_CDMWriter(metgmReaderEd1, "testMetgmReadEd1.nc");
     BOOST_CHECK(true); // and it is even writeable
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_read_metgm2) {
     }
 
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> metgmReaderEd2(new METGM_CDMReader(fileName, topSrcDir+"/share/etc/cdmMetgmReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> metgmReaderEd2(new MetGmCDMReader(fileName, topSrcDir+"/share/etc/cdmMetgmReaderConfig.xml"));
     BOOST_CHECK(true); // made it so far
     NetCDF_CDMWriter(metgmReaderEd2, "testMetgmReadEd2.nc");
     BOOST_CHECK(true); // and it is even writeable

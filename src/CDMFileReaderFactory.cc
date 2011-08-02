@@ -154,7 +154,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #endif
 #ifdef HAVE_METGM_H
     case MIFI_FILETYPE_METGM: {
-        return boost::shared_ptr<CDMReader>(new METGM_CDMReader(fileName, configFile));
+        return boost::shared_ptr<CDMReader>(new MetGmCDMReader(fileName, configFile));
     }
 #endif
 #ifdef HAVE_LIBPQ

@@ -14,11 +14,11 @@ namespace MetNoFimex {
     /* forward declarations */
     class MetGmCDMReaderImpl;
 
-    class METGM_CDMReader : public CDMReader
+    class MetGmCDMReader : public CDMReader
     {
     public:
-        METGM_CDMReader(const std::string& metgmsource, const std::string& configfilename);
-        ~METGM_CDMReader();
+        MetGmCDMReader(const std::string& metgmsource, const std::string& configfilename);
+        ~MetGmCDMReader();
 
         boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
         boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
