@@ -7,7 +7,6 @@ if HAVE_LIBPQ
   	wdb/GridDataFactory.h wdb/GridDataFactory.cpp \
   	wdb/Wdb2CdmBuilderTest.cc \
   	wdb/WdbIndexTest.cc \
-  	wdb/WdbConfigurationTest.cpp \
   	wdb/ConfigurationTest.cpp \
   	wdb/GlobalWdbConfigurationTest.cpp \
   	wdb/TimeHandlerTest.cpp

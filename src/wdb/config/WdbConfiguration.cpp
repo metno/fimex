@@ -53,18 +53,7 @@ WdbConfiguration::WdbConfiguration(const boost::filesystem::path & configFile)
 	if ( is_directory(configFile) )
 		throw CDMException(configFile.string() + " is a directory");
 
-	if ( configFile.extension() == ".xml" )
-		initXml_(configFile);
-	else
-	{
-		boost::filesystem::ifstream configStream(configFile);
-		initPlain_(configStream);
-	}
-}
-
-WdbConfiguration::WdbConfiguration(std::istream & configStream)
-{
-	initPlain_(configStream);
+	init_(configFile);
 }
 
 WdbConfiguration::~WdbConfiguration()
@@ -108,7 +97,7 @@ std::string getDefaultHost()
 /** Returns the default user of WDB applications
  * @deprecated
  */
-std::string getDefaultUser() // Not used
+std::string getDefaultUser()
 {
     const char * dbuser = getenv( "PGUSER" );
     if ( dbuser )
@@ -142,90 +131,8 @@ int getDefaultPort()
     const int DEFAULT_POSTGRES_PORT = 5432;
     return DEFAULT_POSTGRES_PORT;
 }
-
 }
 
-void WdbConfiguration::initPlain_(std::istream & configStream)
-{
-	using namespace boost::program_options;
-
-    options_description database("Database configuration");
-    database.add_options()
-    ( "database,d", value( & database_ )->default_value( getDefaultTarget() ), "Database name (ex. wdb)" )
-    ( "host,h", value( & host_ )->default_value( getDefaultHost() ), "Database host (ex. somehost.met.no)" )
-    ( "user,u", value( & user_ )->default_value( getDefaultUser() ), "Database user name" )
-    ( "port,p", value( & port_ )->default_value( getDefaultPort() ), "Database port number to connect to" )
-    ;
-
-    options_description wciBegin("wci.begin options");
-    wciBegin.add_options()
-    ( "wci.user", value( & wciUser_ ), "User name for wci. Defaults to database user name." )
-    ;
-
-    std::vector<std::string> dataprovider;
-    std::vector<std::string> valueparameter;
-    std::vector<int> dataversion;
-
-    options_description queryOptions("wci.read query options");
-    queryOptions.add_options()
-    ( "wci.read.dataprovider", value(& dataprovider), "Dataproviders to request")
-    ( "wci.read.location", value<std::string>(), "Name of grid to request")
-    ( "wci.read.referencetime", value<std::string>(), "Reference time to use")
-    ( "wci.read.valueparameter", value(& valueparameter), "Value parameters to use")
-    ( "wci.read.dataversion", value(& dataversion), "Data versions to use")
-    		;
-
-    options_description moreConfig("Extra config files");
-    moreConfig.add_options()
-    ( "include", value<boost::filesystem::path>(), "read aditional configuration from this file")
-    		;
-
-
-    options_description allOptions("Options");
-    allOptions.add(database);
-    allOptions.add(wciBegin);
-    allOptions.add(queryOptions);
-    allOptions.add(moreConfig);
-
-    variables_map vm;
-    try
-    {
-    	store(parse_config_file(configStream, allOptions, true), vm);
-    	notify(vm);
-    }
-    catch ( std::exception & e )
-    {
-    	throw CDMException(e.what());
-    }
-
-    BOOST_FOREACH(const std::string & val, dataprovider )
-    	querySpec_.addDataProvider(val);
-
-    if ( vm.count("wci.read.location") )
-    	querySpec_.setLocation(vm["wci.read.location"].as<std::string>());
-    if ( vm.count("wci.read.referencetime") )
-    	querySpec_.setReferenceTime(vm["wci.read.referencetime"].as<std::string>());
-
-    BOOST_FOREACH(const std::string & val, valueparameter )
-    	querySpec_.addParameter(val);
-    BOOST_FOREACH(int i, dataversion )
-    	querySpec_.addDataVersion(i);
-
-    if ( wciUser_.empty() )
-    	wciUser_ = user_;
-
-    if ( vm.count("include") )
-    {
-    	boost::filesystem::path configFile = vm["include"].as<boost::filesystem::path>();
-    	if ( ! exists(configFile) )
-    		throw std::runtime_error(configFile.string() + ": no such file");
-    	if ( is_directory(configFile) )
-    		throw std::runtime_error(configFile.string() + " is a directory");
-
-    	boost::filesystem::ifstream config(configFile);
-    	initPlain_(config);
-    }
-}
 
 namespace
 {
@@ -259,7 +166,7 @@ std::vector<T> values(const XMLDoc & document, const std::string & path)
 
 }
 
-void WdbConfiguration::initXml_(const boost::filesystem::path & configFile)
+void WdbConfiguration::init_(const boost::filesystem::path & configFile)
 {
 	XMLDoc document(configFile.file_string());
 
@@ -267,7 +174,11 @@ void WdbConfiguration::initXml_(const boost::filesystem::path & configFile)
 
 	database_ = singleValue(document, connection + "database", getDefaultTarget());
 	host_ = singleValue(document, connection + "host", getDefaultHost());
-	port_ = boost::lexical_cast<int>(singleValue(document, connection + "port", "5432"));
+	std::string port = singleValue(document, connection + "port", "");
+	if ( not port.empty() )
+		port_ = boost::lexical_cast<int>(port);
+	else
+		port_ = getDefaultPort();
 	user_ = singleValue(document, connection + "user", getDefaultUser());
 
 	wciUser_ = singleValue(document, "//wci/begin/user", user_);

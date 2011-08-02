@@ -53,13 +53,6 @@ public:
 	 */
 	explicit WdbConfiguration(const boost::filesystem::path & configFile);
 
-	/**
-	 * Initialize with data read from the given stream
-	 *
-	 * @throws CDMException on error
-	 */
-	explicit WdbConfiguration(std::istream & configStream);
-
 	~WdbConfiguration();
 
 	/**
@@ -78,8 +71,7 @@ public:
 	const WciReadQuerySpecification & query() const { return querySpec_; }
 
 private:
-	void initPlain_(std::istream & configStream);
-	void initXml_(const boost::filesystem::path & configFile);
+	void init_(const boost::filesystem::path & configFile);
 
 	std::string database_;
 	std::string host_;
