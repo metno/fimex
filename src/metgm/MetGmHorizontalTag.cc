@@ -134,7 +134,7 @@ namespace MetNoFimex {
 
         double x0 = XTag->cx() - (XTag->nx() - 1) * XTag->dx() / 2.0;
 
-        for (int index = 0; index < XTag->nx(); ++index) {
+        for(size_t index = 0; index < XTag->nx(); ++index) {
             XTag->horizontalPoints_.push_back(x0 + index * XTag->dx());
         }
 
