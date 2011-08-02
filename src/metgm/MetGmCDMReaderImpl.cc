@@ -76,7 +76,6 @@ namespace MetNoFimex {
 
             std::string kildeName = getXmlProp(node, "name");
             if(kildeName.empty()) {
-//                std::cerr << __FUNCTION__ << "@" << __LINE__ << " : " << " kildeName empty " << std::endl;
                 continue;
             }
 
@@ -668,23 +667,9 @@ namespace MetNoFimex {
 
         pGroup2_ = MetGmGroup2Ptr::createMetGmGroup2PtrForReading(pHandle_);
 
-//        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__
-//                  << " total np " << pGroup2_->totalnp()
-//                  << std::endl;
-
         boost::shared_ptr<MetGmVerticalTag> prevZTag;
 
         for(int index = 0; index < pGroup2_->totalnp(); ++index) {
-//            boost::shared_ptr<MetGmGroup3Ptr> gp3 = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pHandle_);
-
-//            std::cerr << std::endl
-//                      << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << "--------------- START ---------------------------"
-//                      << "[parsing index=" << index << "] : "
-//                      << "[pid=" << gp3->p_id() << "]"
-//                      << "{ pr = " <<  gp3->pr() << " , "
-//                      << "  pz = " <<  gp3->pz() << " } "
-//                      << std::endl;
 
             boost::shared_ptr<MetGmTags> tags = MetGmTags::createMetGmTagsForReading(pGroup1_, pGroup2_, prevZTag);
 
@@ -753,12 +738,6 @@ namespace MetNoFimex {
                 cdmConfiguration_.insert(profile);
 
             }
-
-//            std::cerr << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                      << "--------------- END ---------------------------"
-//                      << " [parsing index =" << index << "] : "
-//                      << " [pid = " << gp3->p_id() << "]"
-//                      << std::endl << std::endl;
         }
     }
 }
