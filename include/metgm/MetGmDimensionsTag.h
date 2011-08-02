@@ -78,7 +78,9 @@ namespace MetNoFimex {
                 case HD_1D:   return "HD_1D";
                 case HD_0D_T: return "HD_0D_T";
                 case HD_0D:   return "HD_0D";
+                default:      return "Undefined_HD";
             }
+            return "Undefined_HD";
         }
 
         MetGmHD hd()    { return hd_; }
