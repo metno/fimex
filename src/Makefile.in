@@ -47,8 +47,8 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@                         GribFileIndex.cc \
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
 
-@HAVE_METGM_TRUE@am__append_3 = MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
-@HAVE_METGM_TRUE@                         MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
+@HAVE_METGM_TRUE@am__append_3 = MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
+@HAVE_METGM_TRUE@                         MetGmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
 @HAVE_METGM_TRUE@                         metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
 @HAVE_METGM_TRUE@                         metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
 @HAVE_METGM_TRUE@                         metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
@@ -182,8 +182,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
 	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
-	GribUtils.cc MetgmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
-	MetgmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
+        GribUtils.cc MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
+        MetGmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
 	metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
 	metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
 	metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc \
@@ -225,8 +225,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl1.lo \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl2.lo GribCDMReader.lo \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
-@HAVE_METGM_TRUE@am__objects_3 = MetgmCDMReader.lo \
-@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo MetgmCDMWriter.lo \
+@HAVE_METGM_TRUE@am__objects_3 = MetGmCDMReader.lo \
+@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo MetGmCDMWriter.lo \
 @HAVE_METGM_TRUE@	MetGmCDMWriterImpl.lo MetGmHorizontalTag.lo \
 @HAVE_METGM_TRUE@	MetGmTimeTag.lo MetGmVerticalTag.lo \
 @HAVE_METGM_TRUE@	MetGmGroup1Ptr.lo MetGmGroup2Ptr.lo \
@@ -691,8 +691,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmTags.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmTimeTag.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmVerticalTag.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMReader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetgmCDMWriter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReader.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetricGridInformation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMReader.Plo@am__quote@

@@ -43,7 +43,7 @@ if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
 if HAVE_METGM
-  CC_TESTS += testMetgmReader testMetGmWriter
+  CC_TESTS += testMetGmReader testMetGmWriter
 endif
 include wdb/make.mk
 
@@ -67,7 +67,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
-testMetgmReader_SOURCES = testMetgmReader.cc
+testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
 testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc

@@ -33,7 +33,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
-#include "fimex/MetgmCDMReader.h"
+#include "fimex/MetGmCDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"

@@ -1,4 +1,4 @@
-#include "fimex/MetgmCDMReader.h"
+#include "fimex/MetGmCDMReader.h"
 #include <fimex/CDM.h>
 
 // private implementation details

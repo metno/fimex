@@ -57,8 +57,8 @@ include/fimex/GribApiCDMWriter_Impl1.h
 include/fimex/GribApiCDMWriter_Impl2.h
 include/fimex/GribApiCDMWriter_ImplAbstract.h
 include/fimex/GribCDMReader.h
-include/fimex/MetgmCDMReader.h
-include/fimex/MetgmCDMWriter.h
+include/fimex/MetGmCDMReader.h
+include/fimex/MetGmCDMWriter.h
 include/fimex/GribFileIndex.h
 include/fimex/GribUtils.h
 include/fimex/GridDefinition.h
@@ -177,8 +177,8 @@ src/GribApiCDMWriter_Impl1.cc
 src/GribApiCDMWriter_Impl2.cc
 src/GribApiCDMWriter_ImplAbstract.cc
 src/GribCDMReader.cc
-src/MetgmCDMReader.cc
-src/MetgmCDMWriter.cc
+src/MetGmCDMReader.cc
+src/MetGmCDMWriter.cc
 src/GribFileIndex.cc
 src/GribUtils.cc
 src/GridDefinition.cc

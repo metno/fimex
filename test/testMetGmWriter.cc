@@ -1,5 +1,5 @@
 /*
- * Fimex, testMetgmReader.cc
+ * Fimex, testMetGmWriter.cc
  *
  * (C) Copyright 2011, met.no
  *
@@ -33,8 +33,8 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
-#include "fimex/MetgmCDMReader.h"
-#include "fimex/MetgmCDMWriter.h"
+#include "fimex/MetGmCDMReader.h"
+#include "fimex/MetGmCDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CDMReader.h"
 #include "fimex/Null_CDMWriter.h"

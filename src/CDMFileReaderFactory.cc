@@ -51,7 +51,7 @@
 #include "fimex/WdbCDMReader.h"
 #endif
 #ifdef HAVE_METGM_H
-#include "fimex/MetgmCDMReader.h"
+#include "fimex/MetGmCDMReader.h"
 #endif
 
 
