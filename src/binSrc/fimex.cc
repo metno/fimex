@@ -63,7 +63,7 @@ static LoggerPtr logger = getLogger("fimex");
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
-    out << "             --output.file FILENAME [--output.type OUTPUT_TYPE]" << endl;
+    out << "             [--output.file FILENAME [--output.type OUTPUT_TYPE]]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
     out << "             [--extract....]" << endl;
     out << "             [--qualityExtract....]" << endl;
@@ -622,9 +622,9 @@ int run(int argc, char* args[])
     if (vm.count("debug") && !vm.count("print-options")) {
     	writeOptions(cerr, vm);
     }
-    if (!(vm.count("input.file") && vm.count("output.file"))) {
+    if (!(vm.count("input.file"))) {
     	writeUsage(cerr, generic, config);
-    	LOG4FIMEX(logger, Logger::FATAL, "input.file and output.file required");
+    	LOG4FIMEX(logger, Logger::FATAL, "input.file required");
     	return 1;
     }
 
@@ -634,7 +634,11 @@ int run(int argc, char* args[])
 	dataReader = getCDMTimeInterpolator(vm, dataReader);
 	dataReader = getCDMInterpolator(vm, dataReader);
 	dataReader = getNcmlCDMReader(vm, dataReader);
-	writeCDM(dataReader, vm);
+	if (vm.count("output.file")) {
+	    writeCDM(dataReader, vm);
+	} else {
+	    clog << "no output.file selected, only data-structure analysis possible" << endl;
+	}
 
 	return 0;
 }
