@@ -2,7 +2,7 @@
 #include <fimex/CDM.h>
 
 // private implementation details
-#include "../include/metgm/MetGmCDMReaderImpl.h"
+#include "./metgm/MetGmCDMReaderImpl.h"
 
 namespace MetNoFimex {
 

@@ -23,7 +23,7 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmCommentAttributeParser.h"
+#include "MetGmCommentAttributeParser.h"
 
 // fimex
 //

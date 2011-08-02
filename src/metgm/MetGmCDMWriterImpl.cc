@@ -21,27 +21,30 @@
  * USA.
  */
 
-#include "../../include/metgm/MetGmCDMWriterImpl.h"
+#include "MetGmCDMWriterImpl.h"
 
+// private/implementation code
+//
+#include "MetGmTags.h"
+#include "MetGmUtils.h"
+#include "MetGmVersion.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmGroup1Ptr.h"
+#include "MetGmGroup2Ptr.h"
+#include "MetGmGroup3Ptr.h"
+#include "MetGmGroup5Ptr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmConfigurationMappings.h"
+
+// METGM C Lib
 #include "metgm.h"
 
 // fimex
+//
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
 #include "fimex/interpolation.h"
-
-// private/implementation code
-#include "../../include/metgm/MetGmTags.h"
-#include "../../include/metgm/MetGmUtils.h"
-#include "../../include/metgm/MetGmVersion.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmGroup1Ptr.h"
-#include "../../include/metgm/MetGmGroup2Ptr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
-#include "../../include/metgm/MetGmGroup5Ptr.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmConfigurationMappings.h"
 
 // udunits
 #include <udunits2.h>

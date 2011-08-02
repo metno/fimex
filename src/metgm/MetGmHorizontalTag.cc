@@ -23,8 +23,8 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmHorizontalTag.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "MetGmHorizontalTag.h"
+#include "MetGmGroup3Ptr.h"
 
 // fimex
 //

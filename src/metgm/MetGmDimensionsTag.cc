@@ -24,12 +24,12 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmDimensionsTag.h"
-#include "../../include/metgm/MetGmGroup1Ptr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmUtils.h"
+#include "MetGmDimensionsTag.h"
+#include "MetGmGroup1Ptr.h"
+#include "MetGmGroup3Ptr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmUtils.h"
 
 #include "metgm.h"
 

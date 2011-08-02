@@ -23,8 +23,8 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmGroup2Ptr.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
+#include "MetGmGroup2Ptr.h"
+#include "MetGmHandlePtr.h"
 
 // METGM C API
 //

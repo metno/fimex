@@ -23,11 +23,11 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmTimeTag.h"
-#include "../../include/metgm/MetGmCommentAttributeParser.h"
-#include "../../include/metgm/MetGmGroup1Ptr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmTimeTag.h"
+#include "MetGmCommentAttributeParser.h"
+#include "MetGmGroup1Ptr.h"
 
 // fimex
 //

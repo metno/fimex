@@ -23,11 +23,11 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmVerticalTag.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmUtils.h"
+#include "MetGmVerticalTag.h"
+#include "MetGmGroup3Ptr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmUtils.h"
 
 
 // fimex

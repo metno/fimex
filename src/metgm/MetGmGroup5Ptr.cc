@@ -23,12 +23,12 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmUtils.h"
-#include "../../include/metgm/MetGmGroup5Ptr.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmDimensionsTag.h"
-#include "../../include/metgm/MetGmVersion.h"
+#include "MetGmUtils.h"
+#include "MetGmGroup5Ptr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmDimensionsTag.h"
+#include "MetGmVersion.h"
 
 // fimex
 //

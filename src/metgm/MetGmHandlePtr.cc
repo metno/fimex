@@ -24,14 +24,16 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmTags.h"
-#include "../../include/metgm/MetGmDimensionsTag.h"
-#include "../../include/metgm/MetGmGroup1Ptr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmUtils.h"
+#include "MetGmTags.h"
+#include "MetGmDimensionsTag.h"
+#include "MetGmGroup1Ptr.h"
+#include "MetGmGroup3Ptr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmUtils.h"
 
+// METGM C Library
+//
 #include "metgm.h"
 
 namespace MetNoFimex {

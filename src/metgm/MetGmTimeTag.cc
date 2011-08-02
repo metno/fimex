@@ -23,9 +23,9 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmTimeTag.h"
-#include "../../include/metgm/MetGmGroup1Ptr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "MetGmTimeTag.h"
+#include "MetGmGroup1Ptr.h"
+#include "MetGmGroup3Ptr.h"
 
 // fimex
 //

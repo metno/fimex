@@ -1,4 +1,39 @@
-#include "../../include/metgm/MetGmCDMReaderImpl.h"
+/*
+ * Fimex
+ *
+ * (C) Copyright 2011, met.no
+ *
+ * Project Info:  https://wiki.met.no/fimex/start
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ */
+
+#include "MetGmCDMReaderImpl.h"
+
+// private implementation details
+//
+#include "MetGmUtils.h"
+#include "MetGmVersion.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmGroup1Ptr.h"
+#include "MetGmGroup2Ptr.h"
+#include "MetGmGroup3Ptr.h"
+#include "MetGmGroup5Ptr.h"
+#include "MetGmDimensionsTag.h"
+#include "MetGmFileHandlePtr.h"
 
 // METGM C lib
 //
@@ -13,17 +48,6 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/CDMException.h"
-
-// private implementation details
-#include "../../include/metgm/MetGmUtils.h"
-#include "../../include/metgm/MetGmVersion.h"
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmGroup1Ptr.h"
-#include "../../include/metgm/MetGmGroup2Ptr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
-#include "../../include/metgm/MetGmGroup5Ptr.h"
-#include "../../include/metgm/MetGmDimensionsTag.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
 
 // boost
 //

@@ -26,7 +26,7 @@
 #include "fimex/MetGmCDMWriter.h"
 
 // private/implementation code
-#include "../include/metgm/MetGmCDMWriterImpl.h"
+#include "./metgm/MetGmCDMWriterImpl.h"
 
 namespace MetNoFimex {
 

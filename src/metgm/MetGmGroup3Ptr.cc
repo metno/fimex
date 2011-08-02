@@ -23,9 +23,9 @@
 
 // internals
 //
-#include "../../include/metgm/MetGmHandlePtr.h"
-#include "../../include/metgm/MetGmFileHandlePtr.h"
-#include "../../include/metgm/MetGmGroup3Ptr.h"
+#include "MetGmHandlePtr.h"
+#include "MetGmFileHandlePtr.h"
+#include "MetGmGroup3Ptr.h"
 
 // METGM C Lib
 //
