@@ -590,9 +590,10 @@ int mifi_get_values_log_log_f(const float* infieldA, const float* infieldB, floa
     if (a <= 0 || b <= 0 || x <= 0) {
         return MIFI_ERROR;
     }
-    double log_a = log(a);
-    double log_b = log(b);
-    double log_x = log(x);
+    // add M_E to make sure that the log remains positive
+    double log_a = log(a + M_E);
+    double log_b = log(b + M_E);
+    double log_x = log(x + M_E);
     mifi_get_values_log_f(infieldA, infieldB, outfield, n, log_a, log_b, log_x);
     return MIFI_OK;
 
