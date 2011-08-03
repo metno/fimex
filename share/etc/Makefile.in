@@ -284,7 +284,7 @@ config_DATA = \
 	ncmlCDMConfig.ncml\
 	wdb_config.xml \
 	wdb_config.xsd \
-	example.wdb.conf
+	wdb.example.wdbml
 
 EXTRA_DIST = $(config_DATA)
 all: all-am

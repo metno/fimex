@@ -40,7 +40,7 @@ config_DATA = \
 	ncmlCDMConfig.ncml\
 	wdb_config.xml \
 	wdb_config.xsd \
-	example.wdb.conf
+	wdb.example.wdbml
 
 
 				
