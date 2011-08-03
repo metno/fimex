@@ -221,12 +221,13 @@ extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, con
  * @param a position of infieldA
  * @param b position of infieldB
  * @param x position of outfield
+ * @return MIFI_OK return-value set for compatibility with mifi_get_values_log_f()
  */
-extern void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+extern int mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
 /**
  * This is the same as mifi_get_values_linear_f() for double input/output values.
  */
-extern void mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x);
+extern int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x);
 
 /**
  * Logarithmic interpolation/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x

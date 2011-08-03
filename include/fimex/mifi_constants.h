@@ -148,6 +148,34 @@
 #define MIFI_VECTOR_RESIZE    1
 
 
+/**
+ * @brief vertical interpolation type
+ *
+ * vertical interpolation to pressure levels in hPa
+ */
+#define MIFI_VINT_PRESSURE 0
+
+/**
+ * @brief vertical interpolation method
+ *
+ * linear interpolation, e.g. mifi_get_values_lin_f()
+ */
+#define MIFI_VINT_METHOD_LIN 0
+
+/**
+ * @brief vertical interpolation method
+ *
+ * logarithmic interpolation, e.g. mifi_get_values_log_f()
+ */
+#define MIFI_VINT_METHOD_LOG 1
+
+/**
+ * @brief vertical interpolation method
+ *
+ * double logarithmic interpolation, e.g. mifi_get_values_log_f()
+ */
+#define MIFI_VINT_METHOD_LOGLOG 2
+
 /** @brief undefined value for floats */
 #define MIFI_UNDEFINED_F (nanf(""))
 /** @brief undefined value for doubles */

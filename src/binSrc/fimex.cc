@@ -35,6 +35,7 @@
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMTimeInterpolator.h"
+#include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
@@ -68,6 +69,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             [--extract....]" << endl;
     out << "             [--qualityExtract....]" << endl;
     out << "             [--interpolate....]" << endl;
+    out << "             [--verticalInterpolate....]" << endl;
     out << "             [--timeInterpolate....]" << endl;
     out << "             [--ncml.config NCMLFILE]" << endl;
     out << endl;
@@ -179,6 +181,12 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "interpolate.preprocess", vm);
 	writeOptionAny(out, "interpolate.printNcML", vm);
     writeOptionAny(out, "interpolate.printCS", vm);
+    writeOption<string>(out, "verticalInterpolate.method", vm);
+    writeOption<string>(out, "verticalInterpolate.type", vm);
+    writeOption<string>(out, "verticalInterpolate.level1", vm);
+    writeOption<string>(out, "verticalInterpolate.level2", vm);
+    writeOptionAny(out, "verticalInterpolate.printNcML", vm);
+    writeOptionAny(out, "verticalInterpolate.printCS", vm);
 	writeOption<string>(out, "timeInterpolate.timeSpec", vm);
 	writeOptionAny(out, "timeInterpolate.printNcML", vm);
 	writeOptionAny(out, "timeInterpolate.printCS", vm);
@@ -378,15 +386,39 @@ static boost::shared_ptr<CDMReader> getCDMQualityExtractor(po::variables_map& vm
 
 static boost::shared_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
 	if (! vm.count("timeInterpolate.timeSpec")) {
-		LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec not found, no interpolation used");
 		return dataReader;
 	}
+    LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << vm["timeInterpolate.timeSpec"].as<string>());
 	boost::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
 	timeInterpolator->changeTimeAxis(vm["timeInterpolate.timeSpec"].as<string>());
 	printReaderStatements("timeInterpolate", vm, timeInterpolator.get());
 
 	return boost::shared_ptr<CDMReader>(timeInterpolator);
 }
+
+static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+    if (! vm.count("verticalInterpolate.type")) {
+        return dataReader;
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
+    if (! (vm.count("verticalInterpolate.method") && vm.count("verticalInterpolate.level1"))) {
+        LOG4FIMEX(logger, Logger::ERROR, "verticalInterpolate needs method and level1");
+        exit(1);
+    }
+    vector<double> level1 = tokenizeDotted<double>(vm["verticalInterpolate.level1"].as<string>(),",");
+    vector<double> level2;
+    if (vm.count("verticalInterpolate.level2"))
+        level2 = tokenizeDotted<double>(vm["verticalInterpolate.level2"].as<string>(),",");
+    boost::shared_ptr<CDMVerticalInterpolator> vInterpolator(new CDMVerticalInterpolator(boost::shared_ptr<CDMReader>(dataReader),
+                                                                                         vm["verticalInterpolate.type"].as<string>(),
+                                                                                         vm["verticalInterpolate.method"].as<string>(),
+                                                                                         level1,
+                                                                                         level2));
+    printReaderStatements("verticalInterpolate", vm, vInterpolator.get());
+
+    return boost::shared_ptr<CDMReader>(vInterpolator);
+}
+
 
 static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
 	if (! vm.count("interpolate.projString")) {
@@ -475,6 +507,10 @@ static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boos
 
 
 static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
+    if (!vm.count("output.file")) {
+        clog << "no output.file selected, only data-structure analysis possible" << endl;
+        return;
+    }
 	string type = getType("output", vm);
 	// boost::shared_ptr to shared_ptr
 	boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
@@ -573,6 +609,12 @@ int run(int argc, char* args[])
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2)\"")
         ("interpolate.printNcML", "print NcML description of interpolator")
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
+        ("verticalInterpolate.type", po::value<string>(), "currently, only interpolation to 'pressure'")
+        ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
+        ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
+        ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
+        ("verticalInterpolate.printNcML", "print NcML description of vertcial interpolator")
+        ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
         ("timeInterpolate.printNcML", "print NcML description of timeInterpolator")
         ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
@@ -633,12 +675,9 @@ int run(int argc, char* args[])
 	dataReader = getCDMExtractor(vm, dataReader);
 	dataReader = getCDMTimeInterpolator(vm, dataReader);
 	dataReader = getCDMInterpolator(vm, dataReader);
+	dataReader = getCDMVerticalInterpolator(vm, dataReader);
 	dataReader = getNcmlCDMReader(vm, dataReader);
-	if (vm.count("output.file")) {
-	    writeCDM(dataReader, vm);
-	} else {
-	    clog << "no output.file selected, only data-structure analysis possible" << endl;
-	}
+    writeCDM(dataReader, vm);
 
 	return 0;
 }

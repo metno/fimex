@@ -543,7 +543,7 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
 
 //o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
 //b = o(a)
-void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+int mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
 {
 	const double f = (a == b) ? 0 :  ((x - a) / (b - a));
 	int i = 0;
@@ -553,10 +553,10 @@ void mifi_get_values_linear_f(const float* infieldA, const float* infieldB, floa
 		float* o = outfield++; // position!
 		*o = iA + f * (iB - iA);
 	}
-	return;
+	return MIFI_OK;
 }
 
-void mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x)
+int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x)
 {
     const double f = (a == b) ? 0 :  ((x - a) / (b - a));
     int i = 0;
@@ -566,7 +566,7 @@ void mifi_get_values_linear_d(const double* infieldA, const double* infieldB, do
         double* o = outfield++; // position!
         *o = iA + f * (iB - iA);
     }
-    return;
+    return MIFI_OK;
 }
 
 // o(x) = m*log(x) + c

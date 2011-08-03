@@ -28,6 +28,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 CDMReaderUtils.cc \
 					 CDMTimeInterpolator.cc \
 					 CDMVariable.cc \
+					 CDMVerticalInterpolator.cc \
                      CDM_XMLConfigHelper.cc \
                      CDM_XMLConfigHelper.h \
                      CoordinateSystemSliceBuilder.cc \
