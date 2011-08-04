@@ -29,12 +29,77 @@
 //
 #include "fimex/CDMException.h"
 
+// boost
+//
+#include <boost/lexical_cast.hpp>
+
 // standard
 //
+#include <strstream>
 #include <iostream>
+#include <time.h>
 
 #ifndef METGM_UTILS_H
 #define METGM_UTILS_H
+
+class MetGmProfilingTimer
+{
+public:
+    inline MetGmProfilingTimer()
+    {
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_);
+    }
+
+    inline ~MetGmProfilingTimer()
+    {
+//        clock_gettime(CL OCK_PROCESS_CPUTIME_ID, &end_);
+//        timespec elapsed = diff(start_, end_);
+//        std::cerr << "[sec = " << elapsed.tv_sec
+//                  << ":"
+//                  << "usec = " << elapsed.tv_nsec << "]"
+//                  << std::endl;
+    }
+
+    inline void restart()
+    {
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_);
+        end_ = start_;
+    }
+
+    timespec elapsed()
+    {
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_);
+        timespec delta = diff(start_, end_);
+        start_ = end_;
+        return delta;
+    }
+
+    std::string elapsedToString()
+    {
+        timespec delta = elapsed();
+        std::string ss; ss.clear();
+        ss.append("[sec = ").append(boost::lexical_cast<std::string>(delta.tv_sec)).append(":").append("msec = ").append(boost::lexical_cast<std::string>(delta.tv_nsec / 1000000)).append("]");
+        return ss;
+    }
+
+private:
+
+    inline timespec diff(timespec start, timespec end)
+    {
+        timespec temp;
+        if ((end.tv_nsec-start.tv_nsec)<0) {
+            temp.tv_sec = end.tv_sec-start.tv_sec-1;
+            temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+        } else {
+            temp.tv_sec = end.tv_sec-start.tv_sec;
+            temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+        }
+        return temp;
+    }
+
+    timespec start_;
+    timespec end_;
+};
 
 #define MGM_THROW_ON_ERROR(expression)                            \
         {                                                         \
@@ -57,6 +122,15 @@
                       << __FUNCTION__ << " @ "            \
                       << __LINE__     << " : "            \
                       << " CHECK POINT"                   \
+                      << std::endl;                       \
+        };                                                \
+
+#define MGM_MESSAGE_POINT(msg)                            \
+        {                                                 \
+            std::cerr << __FILE__     << " @ "            \
+                      << __FUNCTION__ << " @ "            \
+                      << __LINE__     << " : "            \
+                      << " " << msg << " "                \
                       << std::endl;                       \
         };                                                \
 
