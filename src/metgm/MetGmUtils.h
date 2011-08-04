@@ -50,7 +50,7 @@ public:
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_);
     }
 
-    inline ~MetGmProfilingTimer()
+    virtual inline ~MetGmProfilingTimer()
     {
 //        clock_gettime(CL OCK_PROCESS_CPUTIME_ID, &end_);
 //        timespec elapsed = diff(start_, end_);
@@ -82,8 +82,7 @@ public:
         return ss;
     }
 
-private:
-
+protected:
     inline timespec diff(timespec start, timespec end)
     {
         timespec temp;
@@ -99,6 +98,26 @@ private:
 
     timespec start_;
     timespec end_;
+};
+
+
+class MetGmProfilingTimerOnDestruction : public MetGmProfilingTimer
+{
+public:
+    inline MetGmProfilingTimerOnDestruction() : MetGmProfilingTimer()
+    {
+
+    }
+
+    inline ~MetGmProfilingTimerOnDestruction()
+    {
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_);
+        timespec elapsed = diff(start_, end_);
+        std::cerr << "[sec = " << elapsed.tv_sec
+                  << ":"
+                  << "msec = " << elapsed.tv_nsec / 1000000 << "]"
+                  << std::endl;
+    }
 };
 
 #define MGM_THROW_ON_ERROR(expression)                            \

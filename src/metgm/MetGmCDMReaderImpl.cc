@@ -570,6 +570,7 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> MetGmCDMReaderImpl::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
+//        MetGmProfilingTimerOnDestruction timer;
         CDMVariable& variable = cdm_->getVariable(varName);
         if(variable.hasData()) {
             return getDataSliceFromMemory(variable, unLimDimPos);
@@ -580,6 +581,8 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> MetGmCDMReaderImpl::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
+//        MetGmProfilingTimerOnDestruction timer;
+
         if(!cdm_->hasVariable(varName))
             return boost::shared_ptr<Data>();
 

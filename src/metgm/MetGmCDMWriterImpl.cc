@@ -386,7 +386,12 @@ namespace MetNoFimex {
         cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
 
         MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
+
+//        MetGmProfilingTimer timer;
+
         MGM_THROW_ON_ERROR(mgm_write_group5 (*metgmFileHandle_, *metgmHandle_, profile.pTags_->data().get()));
+
+//        MGM_MESSAGE_POINT(timer.elapsedToString().append("for kb = ").append(boost::lexical_cast<std::string>(profile.pTags_->totalDataSize() * sizeof(float) / 1024)).append("\n"))
     }
 
     void MetGmCDMWriterImpl::init()

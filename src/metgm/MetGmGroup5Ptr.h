@@ -69,9 +69,13 @@ namespace MetNoFimex {
 
     private:
 
-        void changeFillValue();
+//        void changeFillValue();
         void toFimexLayout();
         void toMetGmLayout();
+
+        void toMetGmLayout(const float oldFill, const float oldScale, const float oldOffset,
+                           const float newFill, const float newScale, const float newOffset,
+                           const float unitsScale, const float unitsOffset);
 
         explicit MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                 const boost::shared_ptr<MetGmHDTag>     hdTag,

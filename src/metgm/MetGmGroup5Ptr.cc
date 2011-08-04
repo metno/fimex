@@ -34,6 +34,10 @@
 //
 #include "fimex/DataTypeChanger.h"
 
+// boost
+//
+#include <boost/progress.hpp>
+
 namespace MetNoFimex {
 
 MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
@@ -48,18 +52,21 @@ MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
 
     }
 
-void MetGmGroup5Ptr::changeFillValue() {
-    for(size_t index = 0; index < hdTag_->totalSize(); ++index) {
-        if(!fillValue_.empty() && data_[index] == boost::lexical_cast<float>(fillValue_)) {
-            data_[index] = 9999.0;
-        } else if(isnan(data_[index])) {
-            data_[index] = 9999.0;
-        }
-    }
-}
+//void MetGmGroup5Ptr::changeFillValue() {
+//    float fillToChange = boost::lexical_cast<float>(fillValue_);
+//    for(size_t index = 0; index < hdTag_->totalSize(); ++index) {
+//        if(!fillValue_.empty() && data_[index] == fillToChange) {
+//            data_[index] = 9999.0;
+//        } else if(isnan(data_[index])) {
+//            data_[index] = 9999.0;
+//        }
+//    }
+//}
 
 void MetGmGroup5Ptr::toMetGmLayout()
 {
+//    MetGmProfilingTimer timer;
+
     if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
         return;
 
@@ -88,10 +95,56 @@ void MetGmGroup5Ptr::toMetGmLayout()
     } // sliceIndex
 
     data_.swap(dataT);
+
+//    MGM_MESSAGE_POINT(timer.elapsedToString())
+}
+
+void MetGmGroup5Ptr::toMetGmLayout(const float oldFill, const float oldScale, const float oldOffset,
+                                   const float newFill, const float newScale, const float newOffset,
+                                   const float unitsScale, const float unitsOffset)
+{
+    if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
+        return;
+
+    float offset = oldOffset * oldOffset + unitsOffset;
+    float scale  = oldScale * unitsScale;
+
+    boost::shared_array<float> dataT(new float[hdTag_->totalSize()]);
+
+    float* slice = data_.get();
+    float* sliceT = dataT.get();
+
+    for(size_t sIndex = 0; sIndex < hdTag_->tSize(); ++sIndex) {
+
+        slice = data_.get() + sIndex * hdTag_->sliceSize();
+        sliceT = dataT.get() + sIndex * hdTag_->sliceSize();
+
+        for(size_t z_index = 0; z_index < hdTag_->zSize(); ++z_index) {
+
+            for(size_t y_index = 0; y_index < hdTag_->ySize(); ++y_index) {
+                for(size_t x_index = 0; x_index < hdTag_->xSize(); ++x_index) {
+                    float value = slice[z_index * (hdTag_->ySize() * hdTag_->xSize()) + y_index * hdTag_->xSize() + x_index];
+                    if (value == oldFill || isinf(static_cast<double>(value))) {
+                        value = newFill;
+                    } else {
+                        value = (value * scale + offset) * newScale + newOffset;
+                    }
+                    sliceT[z_index + x_index * hdTag_->zSize() + y_index * (hdTag_->zSize() * hdTag_->xSize())] = value;
+                } // x_index
+
+            } // y_index
+
+        } // z_index
+
+    } // sliceIndex
+
+    data_.swap(dataT);
 }
 
 void MetGmGroup5Ptr::toFimexLayout()
 {
+//    MetGmProfilingTimer timer;
+
     if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
         return;
 
@@ -122,6 +175,8 @@ void MetGmGroup5Ptr::toFimexLayout()
     } // sliceIndex
 
     data_.swap(dataT);
+
+//    MGM_MESSAGE_POINT(timer.elapsedToString())
 }
 
 boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
@@ -162,33 +217,43 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     mgmUnits = std::string(mgm_get_param_unit(pg3->p_id(), *(pg3->mgmHandle())));
                 }
 
-                double oldFill = pCdmReader->getCDM().getFillValue(pVariable->getName());
-                double oldScale = 1.0;  // as already applied to from getScaledDataInUnit
-                double oldOffset = 0.0; // as already applied to from getScaledDataInUnit
+//                MetGmProfilingTimer timer;
 
-                double newFill = fillValue.empty() ?
-                                     pCdmReader->getCDM().getFillValue(pVariable->getName())
-                                     :
-                                     boost::lexical_cast<double>(fillValue);
+                const CDM& cdmRef = pCdmReader->getCDM();
+                const std::string varName = pVariable->getName();
 
-                double newScale = scaleFactor.empty() ? 1.0 : boost::lexical_cast<double>(scaleFactor);
-                double newOffset = addOffset.empty() ? 0.0 : boost::lexical_cast<double>(addOffset);
+                float oldScale  = 1.0;
+                float oldOffset = 0.0;
+                float oldFill   = MIFI_UNDEFINED_F;
 
-                boost::shared_ptr<Data> raw_data  = pCdmReader->getScaledDataInUnit(pVariable->getName(), mgmUnits.c_str());
+                CDMAttribute attr;
+                if (cdmRef.getAttribute(varName, "scale_factor", attr)) {
+                    oldScale = attr.getData()->asConstFloat()[0];
+                }
+                if (cdmRef.getAttribute(varName, "add_offset", attr)) {
+                    oldOffset = attr.getData()->asConstFloat()[0];
+                }
+                if(cdmRef.getAttribute(varName, "_FillValue", attr)) {
+                    oldFill = attr.getData()->asDouble()[0];
+                }
 
-                DataTypeChanger dtc(CDM_FLOAT, oldFill, oldScale, oldOffset, CDM_FLOAT, newFill, newScale, newOffset);
+                double unitsScale = 1.0;
+                double unitsOffset = 0.0;
 
-                raw_data = dtc.convertData(raw_data);
+                Units unitsConvertor;
+                unitsConvertor.convert(cdmRef.getUnits(varName), mgmUnits , unitsScale, unitsOffset);
 
-//                std::string fill = !fillValue.empty() ? fillValue : boost::lexical_cast<std::string>(pCdmReader->getCDM().getFillValue(pVariable->getName()));
+                float newFill = fillValue.empty() ? 9999.0f : boost::lexical_cast<float>(fillValue);
+                float newScale  = scaleFactor.empty() ? 1.0 : boost::lexical_cast<float>(scaleFactor);
+                float newOffset = addOffset.empty()   ? 0.0 : boost::lexical_cast<float>(addOffset);
 
-//                boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asConstFloat(), fill));
+                boost::shared_ptr<Data> raw_data  = pCdmReader->getData(varName);
 
                 boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asConstFloat()));
 
-//                gp5->changeFillValue();
+                gp5->toMetGmLayout(oldFill, oldScale, oldOffset, newFill, newScale, newOffset, unitsScale, unitsOffset);
 
-                gp5->toMetGmLayout();
+//                MGM_MESSAGE_POINT(timer.elapsedToString().append(" for kb = ").append(boost::lexical_cast<std::string>(raw_data->size() * raw_data->bytes_for_one() / 1024)))
 
                 return gp5;
             }
@@ -214,15 +279,22 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             case MetGmHDTag::HD_2D_T:
             case MetGmHDTag::HD_3D_T:
                 {
+//                    MetGmProfilingTimer timer;
+
                     boost::shared_array<float> data(new float[hdTag->totalSize()]);
 
                     MGM_THROW_ON_ERROR(mgm_read_group5(*gp3->mgmHandle()->fileHandle(), *gp3->mgmHandle(), data.get()))
+
+//                    MGM_MESSAGE_POINT(timer.elapsedToString().append("for kb = ").append(boost::lexical_cast<std::string>(hdTag->totalSize() * sizeof(float) / 1024)))
+
                     MGM_THROW_ON_ERROR(mgm_param_is_convertible(gp3->p_id(), *gp3->mgmHandle()->version()))
 
                     boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, data));
 
                     // from METGM to Fimex layout
                     gp5->toFimexLayout();
+
+//                    MGM_MESSAGE_POINT(timer.elapsedToString().append("for kb = ").append(boost::lexical_cast<std::string>(hdTag->totalSize() * sizeof(float) / 1024)))
 
                     return gp5;
                 }
