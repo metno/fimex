@@ -30,12 +30,17 @@
 #include "DataSanitizer.h"
 #include "WciReadQuerySpecification.h"
 #include "../gridInformation/GridInformation.h"
+#include <fimex/Logger.h>
 #include <boost/scoped_array.hpp>
 
 namespace MetNoFimex
 {
 namespace wdb
 {
+namespace
+{
+LoggerPtr logger = getLogger("WdbConnection");
+}
 
 WdbConnection::WdbConnection(const std::string & connectString, const std::string & wciUser)
 {
@@ -45,6 +50,8 @@ WdbConnection::WdbConnection(const std::string & connectString, const std::strin
 
 	std::ostringstream begin;
 	begin << "SELECT wci.begin('" << DataSanitizer(connection_)(wciUser) << "')";
+
+	LOG4FIMEX(logger, Logger::DEBUG, begin.str());
 
 	PQclear(call_(begin.str()));
 }
@@ -78,7 +85,8 @@ public:
 void WdbConnection::readGid(std::vector<GridData> & out, const WciReadQuerySpecification & readParameters)
 {
 	std::string query = readParameters.query(DataSanitizer(connection_));
-	std::cout << query << std::endl;
+
+	LOG4FIMEX(logger, Logger::DEBUG, query);
 
 	Scoped_PGresult result(call_(query));
 
@@ -123,6 +131,8 @@ float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 {
 	std::ostringstream query;
 	query << "SELECT grid::bytea FROM wci.fetch(" << gridIdentifier << ", NULL::wci.grid)";
+
+	LOG4FIMEX(logger, Logger::DEBUG, query.str());
 
 	Scoped_PGresult result(call_(query.str(), BinaryResult));
 

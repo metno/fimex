@@ -37,6 +37,7 @@
 
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
 #include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/WdbIndex.h"
 #include "wdb/config/GlobalWdbConfiguration.h"
@@ -47,6 +48,10 @@
 
 namespace MetNoFimex
 {
+namespace
+{
+LoggerPtr logger = getLogger("WdbCDMReader");
+}
 
 /**
  * All data members of WdbCDMReader are kept "hidden" in this class, in
@@ -98,7 +103,6 @@ public:
 WdbCDMReader::WdbCDMReader(const std::string& source, const std::string& configfilename)
 {
 	d_ = new InternalData(source, configfilename, * cdm_);
-	//cdm_->toXMLStream(std::cout);
 }
 
 WdbCDMReader::~WdbCDMReader()
@@ -109,7 +113,7 @@ WdbCDMReader::~WdbCDMReader()
 boost::shared_ptr<Data> WdbCDMReader::getDataSlice(
 		const std::string& varName, size_t unLimDimPos)
 {
-	std::cout << __func__ << "(\"" << varName << "\", " << unLimDimPos << ");" << std::endl;
+	LOG4FIMEX(logger, Logger::DEBUG, __func__ << "(\"" << varName << "\", " << unLimDimPos << ")");
 
 	const CDMVariable& variable = cdm_->getVariable(varName);
 
@@ -127,7 +131,7 @@ boost::shared_ptr<Data> WdbCDMReader::getDataSlice(
 
 boost::shared_ptr<Data> WdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
-	std::cout << __func__ << "(\"" << varName << "\", <slice>);" << std::endl;
+	LOG4FIMEX(logger, Logger::DEBUG, __func__ << "(\"" << varName << "\", <slice>)");
 
 	const CDMVariable& variable = cdm_->getVariable(varName);
 
