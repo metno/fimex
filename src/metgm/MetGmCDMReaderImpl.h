@@ -28,17 +28,6 @@
 #include <string>
 #include <vector>
 
-
-/**
-  * TODO:
-
-       1. parameters can have different vertical profile -- make it properly
-
-       2. one of the winds parameters has to be multiplied by -1
-          maybe to have slope as -1?
-
-  */
-
 namespace MetNoFimex {
 
     class XMLDoc;
@@ -76,6 +65,8 @@ namespace MetNoFimex {
         void addHorizontalDimensions();
         void addVerticalDimensions();
         void addVariables();
+
+        void sanityCheck();
 
     private:
 

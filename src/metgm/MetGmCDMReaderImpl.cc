@@ -186,6 +186,9 @@ namespace MetNoFimex {
         addHorizontalDimensions();
         addVerticalDimensions();
         addVariables();
+
+        sanityCheck();
+
     }
 
     void MetGmCDMReaderImpl::addGlobalCDMAttributes()
@@ -766,5 +769,21 @@ namespace MetNoFimex {
 
             }
         }
+    }
+
+    void MetGmCDMReaderImpl::sanityCheck()
+    {
+        // check for variables that are MSL dependant
+        // but MSL itself has not been included
+        std::vector<std::string> msl = cdm_->findVariables("standard_name", "topography");
+        if(msl.empty()) {
+            const std::vector<CDMVariable>& varVec = cdm_->getVariables();
+            for(size_t index = 0; index < varVec.size(); ++index) {
+                if(varVec.at(index).getName().find("_MSL") != std::string::npos)
+                    throw CDMException("There are MSL dependent variable in CDm modell but MSL has not been included");
+            }
+            return;
+        }
+
     }
 }
