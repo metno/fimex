@@ -66,7 +66,6 @@ namespace MetNoFimex {
         void dumpMetGmLayout();
 
         boost::shared_array<float>& data() { return data_; }
-
     private:
 
 //        void changeFillValue();

@@ -177,6 +177,7 @@ void MetGmGroup5Ptr::toFimexLayout()
     data_.swap(dataT);
 
 //    MGM_MESSAGE_POINT(timer.elapsedToString())
+
 }
 
 boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
