@@ -35,7 +35,7 @@
 
 // standard
 //
-#include <strstream>
+#include <sstream>
 #include <iostream>
 #include <time.h>
 
