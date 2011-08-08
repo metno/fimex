@@ -26,6 +26,7 @@
 
 #include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/interpolation.h"
+#include "fimex/vertical_coordinate_transformations.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDM.h"
 #include "fimex/Logger.h"
@@ -120,11 +121,14 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
     }
 
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-    // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
+    // get all coordinate systems from file
     vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_->getCDM());
     for (size_t i = 0; i < coordSys.size(); i++) {
-        CoordinateSystem::ConstAxisPtr axis = coordSys[i]->getGeoZAxis();
-        if (axis != 0) {
+        CoordinateSystem::ConstAxisPtr xAxis = coordSys[i]->getGeoXAxis();
+        CoordinateSystem::ConstAxisPtr yAxis = coordSys[i]->getGeoYAxis();
+        CoordinateSystem::ConstAxisPtr zAxis = coordSys[i]->getGeoZAxis();
+        // require x and y axis (ps(x,y)) and obviously zAxis
+        if (xAxis != 0 && yAxis != 0 && zAxis != 0) {
             pimpl_->changeCoordSys.push_back(coordSys[i]);
             // change the shape of the variable: remove the old axis, add the new one
             const CDM::VarVec vars = dataReader_->getCDM().getVariables();
@@ -132,7 +136,7 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
                 if (coordSys[i]->isCSFor(varIt->getName()) && coordSys[i]->isComplete(varIt->getName())) {
                     CDMVariable& var = cdm_->getVariable(varIt->getName());
                     vector<string> shape = var.getShape();
-                    vector<string>::iterator axisPos = find(shape.begin(), shape.end(), axis->getName());
+                    vector<string>::iterator axisPos = find(shape.begin(), shape.end(), zAxis->getName());
                     if (axisPos != shape.end()) {
                         // change to new axis
                         *axisPos = pimpl_->vAxis;
@@ -142,7 +146,7 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
                         CDMAttribute coord;
                         if (cdm_->getAttribute(varIt->getName(), "coordinates", coord)) {
                             string coords = coord.getData()->asString();
-                            coords = boost::regex_replace(coords, boost::regex("\\b\\Q"+axis->getName()+"\\E\\b"), "");
+                            coords = boost::regex_replace(coords, boost::regex("\\b\\Q"+zAxis->getName()+"\\E\\b"), "");
                             cdm_->removeAttribute(varIt->getName(), "coordinates");
                             cdm_->addAttribute(varIt->getName(), CDMAttribute("coordinates", coords));
                         }
@@ -203,14 +207,30 @@ public:
 class PressureToPressureConverter : public ToPressureConverter {
     const vector<double> pres_;
 public:
-    PressureToPressureConverter(const vector<double> pressure) : pres_(pressure.begin(), pressure.end()) {}
+    PressureToPressureConverter(const vector<double>& pressure) : pres_(pressure.begin(), pressure.end()) {}
     virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
 };
-
+class HybridSigmaApToPressureConverter : public ToPressureConverter {
+    const vector<double> ap_;
+    const vector<double> b_;
+    const boost::shared_array<double> ps_;
+    size_t nx_;
+    size_t ny_;
+    size_t nt_;
+public:
+    HybridSigmaApToPressureConverter(const vector<double>& ap, const vector<double>& b, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
+    : ap_(ap.begin(), ap.end()), b_(b.begin(), b.end()), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {
+        vector<double> p(ap_.size());
+        mifi_atmosphere_hybrid_sigma_ap_pressure(ap_.size(), ps_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)], &ap_[0], &b_[0], &p[0]);
+        return p;
+    }
+};
 
 
 boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos)
 {
+    assert(cs->isCSFor(varName) && cs->isComplete(varName));
     // get all axes
     CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
     assert(zAxis.get() != 0); // defined by construction of cs
@@ -278,6 +298,59 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
         }
         break;
     case CoordinateAxis::Height: assert(false); break; // TODO
+    case CoordinateAxis::GeoZ:
+        {
+            CDMAttribute standardName;
+            if (cdm_->getAttribute(zAxis->getName(), "standard_name", standardName)) {
+                CDMAttribute formulaTerms;
+                if (cdm_->getAttribute(zAxis->getName(), "formula_terms", formulaTerms)) {
+                    if (standardName.getStringValue() == "atmosphere_hybrid_sigma_pressure_coordinate") {
+                        // require ap, b, ps(x,y,t)
+                        boost::smatch what;
+                        string ap, b, ps;
+                        if (boost::regex_match(formulaTerms.getStringValue(), what, boost::regex(".*b:\\s*(\\S+).*"))) {
+                            b = what[1];
+                        } else {
+                            throw CDMException("atmosphere_hybrid_sigma_pressure formular-term b not found in " + formulaTerms.getStringValue());
+                        }
+                        if (boost::regex_match(formulaTerms.getStringValue(), what, boost::regex(".*ps:\\s*(\\S+).*"))) {
+                            ps = what[1];
+                        } else {
+                            throw CDMException("atmosphere_hybrid_sigma_pressure formular-term ps not found in " + formulaTerms.getStringValue());
+                        }
+                        if (boost::regex_match(formulaTerms.getStringValue(), what, boost::regex(".*ap:\\s*(\\S+).*"))) {
+                            ap = what[1];
+                        } else {
+                            throw CDMException("atmosphere_hybrid_sigma_pressure formular-term ap not found in " + formulaTerms.getStringValue());
+                        }
+                        boost::shared_ptr<Data> apData = dataReader_->getScaledDataInUnit(ap, "hPa");
+                        const boost::shared_array<double> apAry = apData->asConstDouble();
+                        vector<double> apVec(&apAry[0], &apAry[0]+apData->size());
+                        boost::shared_ptr<Data> bData = dataReader_->getScaledData(b);
+                        const boost::shared_array<double> bAry = bData->asConstDouble();
+                        vector<double> bVec(&bAry[0], &bAry[0]+bData->size());
+                        boost::shared_ptr<Data> psData = dataReader_->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
+                        if (nx*ny*(nt-startT) != psData->size()) {
+                            throw CDMException("unexpected size of pressure "+ps+"("+type2string(unLimDimPos)+") for variable "+varName+", should be "+type2string(nx*ny*(nt-startT))+ " != " +type2string(psData->size()));
+                        }
+                        presConv = boost::shared_ptr<ToPressureConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asConstDouble(), nx, ny, nt-startT));
+                        vector<double> test = (*presConv)(0,0,0);
+                        for (int i = 0; i < test.size(); ++i) {
+                            cerr << i << ": " << test[i] << endl;
+                        }
+                        // or require a, b, ps(x,y,t), p0
+                    } else {
+                        throw CDMException("unimplemented vertical axis with standard_name: " + standardName.getStringValue());
+                    }
+
+                } else {
+                    throw CDMException("no formular_terms for vertical axis: " + zAxis->getName());
+                }
+            } else {
+                throw CDMException("no standard_name for vertical axis: " + zAxis->getName());
+            }
+        }
+        break;
     default: throw CDMException("unknown vertical coordinate type:" + type2string(zAxis->getAxisType()));// TODO: dimensionless coordinate axis
     }
 
@@ -302,15 +375,17 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
     for (size_t t = startT; t < nt; ++t) {
         float* inData = &iData[0];
         float* outData = &oData[0];
+        size_t pTimePos = 1; // unLimited, just one xy-slice
         if ((nt-startT) > 1) {
             // move to start of time slice
             inData = &iData[t*(nx*ny*nz)];
             outData = &oData[t*(nx*ny*pOut.size())];
+            pTimePos = t; // move to correct slice
         }
         for (size_t y = 0; y < ny; ++y) {
             for (size_t x = 0; x < nx; ++x) {
                 // interpolate in between the pressure values
-                vector<double> pIn = (*presConv)(x, y, t);
+                vector<double> pIn = (*presConv)(x, y, pTimePos);
                 if (pIn.size() != nz) {
                     throw CDMException("input pressure level size: "
                             + type2string(pIn.size()) + " must be " + type2string(nz));
