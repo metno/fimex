@@ -31,10 +31,11 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "boost/regex.hpp"
+#include <boost/regex.hpp>
 #include <iterator>
 #include <algorithm>
 #include <string>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -190,6 +191,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getDataSlice(const std::string&
 // TODO: implement those classe for all vertical coordinate transformations
 class ToPressureConverter {
 public:
+    virtual ~ToPressureConverter() {}
     /**
      * @param x
      * @param y
@@ -209,11 +211,61 @@ public:
 
 boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos)
 {
+    // get all axes
     CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
     assert(zAxis.get() != 0); // defined by construction of cs
-    // TODO: detect x and y axis
-    size_t nx = 5;
-    size_t ny = 7;
+    size_t nz = 1;
+    {
+        const vector<string>& shape = zAxis->getShape();
+        if (shape.size() == 1) {
+            nz = cdm_->getDimension(shape.at(0)).getLength();
+        } else {
+            throw CDMException("vertical interpolation not possible with 2d z-Axis");
+        }
+    }
+    // detect x and y axis
+    size_t nx = 1;
+    CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
+    if (xAxis.get() != 0) {
+        const vector<string>& shape = xAxis->getShape();
+        if (shape.size() == 1) {
+            nx = cdm_->getDimension(shape.at(0)).getLength();
+        } else {
+            throw CDMException("vertical interpolation not possible with 2d x-Axis");
+        }
+    }
+    size_t ny = 1;
+    CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+    if (yAxis.get() != 0) {
+        const vector<string>& shape = yAxis->getShape();
+        if (shape.size() == 1) {
+            ny = cdm_->getDimension(shape.at(0)).getLength();
+        } else {
+            throw CDMException("vertical interpolation not possible with 2d y-Axis");
+        }
+    }
+
+    // detect time axis
+    size_t nt = 1;
+    size_t startT = 0;
+    CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis();
+    if (tAxis.get() != 0) {
+        const vector<string>& shape = tAxis->getShape();
+        if (shape.size() == 1) {
+            const CDMDimension& tDim = cdm_->getDimension(shape.at(0));
+            if (tDim.isUnlimited()) {
+                // artifically creating a loop of size 1 at correct position
+                nt = unLimDimPos + 1;
+                startT = unLimDimPos;
+            } else {
+                nt = tDim.getLength();
+                startT = 0;
+            }
+        } else {
+            throw CDMException(
+                    "vertical interpolation not possible with 2d time-axis");
+        }
+    }
 
     boost::shared_ptr<ToPressureConverter> presConv;
     switch (zAxis->getAxisType()) {
@@ -226,7 +278,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
         }
         break;
     case CoordinateAxis::Height: assert(false); break; // TODO
-    default: assert(false);// TODO: dimensionless coordinate axis
+    default: throw CDMException("unknown vertical coordinate type:" + type2string(zAxis->getAxisType()));// TODO: dimensionless coordinate axis
     }
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
@@ -239,50 +291,69 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
 
     vector<double>& pOut = pimpl_->level1;
     boost::shared_ptr<Data> data = dataReader_->getDataSlice(varName, unLimDimPos);
+    if (data->size() != (nx*ny*nz*(nt-startT))) {
+        throw CDMException("unexpected dataslice of variable " + varName +": (nx*ny*nz*nt) = (" +
+                           type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+
+                           ") != " + type2string(data->size()));
+    }
     const boost::shared_array<float> iData = data->asConstFloat();
-    boost::shared_array<float> oData(new float[nx*ny*pOut.size()]);
+    boost::shared_array<float> oData(new float[nx*ny*pOut.size()*(nt-startT)]);
 
-    // TODO interpolate in between the pressure values
-    // unlimdim = time
-    for (size_t y = 0; y < ny; ++y) {
-        for (size_t x = 0; x < nx; ++x) {
-            vector<double> pIn = (*presConv)(x,y,unLimDimPos);
-            if (pIn.size() < 2) {
-                throw CDMException("input pressure level size: " + type2string(pIn.size()) + " must be >1");
-            }
-            // pIn should be growing (top (e.g. pres=10 to bottom pres=1000)
-            bool reversePIn = false;
-            if ((pIn[1] - pIn[0]) < 0) {
-                reversePIn = true;
-                reverse(pIn.begin(), pIn.end());
-            }
-            for (size_t k = 0; k < pOut.size(); k++) {
-                // find element
-                vector<double>::iterator ub = upper_bound(pIn.begin(), pIn.end(), pOut[k]);
-                size_t ubPos = distance(pIn.begin(), ub);
-                if (ubPos <= 1) {
-                    // possibly ekstrapolation before pIn[0]
-                    ubPos = 1;
-                } else if (ub == pIn.end()) {
-                    // surely ekstrapolation to pIn[pIn.size()-1]
-                    ubPos = pIn.size()-1;
-                } else {
-                    // intrapolation
+    for (size_t t = startT; t < nt; ++t) {
+        float* inData = &iData[0];
+        float* outData = &oData[0];
+        if ((nt-startT) > 1) {
+            // move to start of time slice
+            inData = &iData[t*(nx*ny*nz)];
+            outData = &oData[t*(nx*ny*pOut.size())];
+        }
+        for (size_t y = 0; y < ny; ++y) {
+            for (size_t x = 0; x < nx; ++x) {
+                // interpolate in between the pressure values
+                vector<double> pIn = (*presConv)(x, y, t);
+                if (pIn.size() != nz) {
+                    throw CDMException("input pressure level size: "
+                            + type2string(pIn.size()) + " must be " + type2string(nz));
                 }
-                size_t elUbPos = ubPos;
-                size_t elUbPosM1 = ubPos-1;
-                if (reversePIn) {
-                    elUbPos = pIn.size()-1-ubPos;
-                    elUbPosM1 = pIn.size()-1-(ubPos-1);
+                // pIn should be growing (top (e.g. pres=10 to bottom pres=1000)
+                bool reversePIn = false;
+                if ((pIn[1] - pIn[0]) < 0) {
+                    reversePIn = true;
+                    reverse(pIn.begin(), pIn.end());
                 }
-                size_t inPos = mifi_3d_array_position(x, y, elUbPos, nx, ny, pIn.size());
-                size_t inPosM1 = mifi_3d_array_position(x, y, elUbPosM1, nx, ny, pIn.size());
-                size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
-                (*intFunc)(&iData[inPos], &iData[inPosM1], &oData[outPos], 1, pIn.at(ubPos), pIn.at(ubPos-1), pOut.at(k));
+                for (size_t k = 0; k < pOut.size(); k++) {
+                    // find element
+                    vector<double>::iterator ub = upper_bound(pIn.begin(),
+                            pIn.end(), pOut[k]);
+                    size_t ubPos = distance(pIn.begin(), ub);
+                    if (ubPos <= 1) {
+                        // possibly ekstrapolation before pIn[0]
+                        ubPos = 1;
+                    } else if (ub == pIn.end()) {
+                        // surely ekstrapolation to pIn[pIn.size()-1]
+                        ubPos = pIn.size() - 1;
+                    } else {
+                        // intrapolation
+                    }
+                    size_t elUbPos = ubPos;
+                    size_t elUbPosM1 = ubPos - 1;
+                    if (reversePIn) {
+                        elUbPos = pIn.size() - 1 - ubPos;
+                        elUbPosM1 = pIn.size() - 1 - (ubPos - 1);
+                    }
+                    size_t inPos = mifi_3d_array_position(x, y, elUbPos, nx,
+                            ny, nz);
+                    size_t inPosM1 = mifi_3d_array_position(x, y, elUbPosM1,
+                            nx, ny, nz);
+                    size_t outPos = mifi_3d_array_position(x, y, k, nx, ny,
+                            pOut.size());
+                    (*intFunc)(&inData[inPos], &inData[inPosM1], &outData[outPos],
+                            1, pIn.at(ubPos), pIn.at(ubPos - 1), pOut.at(k));
+                }
             }
         }
     }
-    return createData(nx*ny*pOut.size(), oData);
+    return createData(nx*ny*pOut.size()*(nt-startT), oData);
 }
 
 }

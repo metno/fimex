@@ -49,7 +49,7 @@ class CoordinateSystem;
  *
  * @warning CDMVerticalInterpolator requires a valid coordinate-system. In addition, the vertical axis may
  * not be the unlimited dimension. Furthermore, the vertical layer may not depend
- * or more dimensions than x,y and time.
+ * or more dimensions than x,y and time. The order of dimensions must be time, k, y, x.
  */
 class CDMVerticalInterpolator: public MetNoFimex::CDMReader
 {
