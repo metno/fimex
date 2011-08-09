@@ -373,7 +373,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
         float* outData = &oData[0];
         size_t pTimePos = 0; // time = unLimited, just one xy-slice
         if ((nt-startT) > 1) {
-            // move to start of time slice
+            // move to start of time slice, if time is not self-slicing (unlimited)
             inData = &iData[t*(nx*ny*nz)];
             outData = &oData[t*(nx*ny*pOut.size())];
             pTimePos = t; // move to correct slice

@@ -1,5 +1,9 @@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc test_0time.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
-             coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc \
+CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
+             testQualityExtractor.nc test_0time.nc \
+             testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
+             coordTestFilled.nc test.grb1 test.grb2 \
+             bicubicOutData.txt bilinearOutData.txt \
+             testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
 
 CC_TESTS = testInterpolation \
@@ -37,7 +41,7 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
   GRIBAPI_NC_TESTS = testGribReader
-  SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh
+  SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh testVerticalInterpolator.sh testVerticalInterpolator2.sh
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
@@ -48,7 +52,10 @@ endif
 include wdb/make.mk
 
 
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc coordRefTimeTest.nc
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
+             coordRefTimeTest.nc \
+             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc  verticalSigmaHybridPressure.nc
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 

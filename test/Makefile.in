@@ -37,7 +37,7 @@ host_triplet = @host@
 @HAVE_MILIB_TRUE@am__append_2 = 
 @HAVE_FELT_OR_MILIB_TRUE@am__append_3 = testQualityExtractor
 @HAVE_NETCDF_TRUE@am__append_4 = ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
-@HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh
+@HAVE_NETCDF_TRUE@am__append_5 = ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh testVerticalInterpolator.sh testVerticalInterpolator2.sh
 @HAVE_GRIBAPI_TRUE@am__append_6 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_METGM_TRUE@am__append_7 = testMetGmReader testMetGmWriter
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -339,7 +339,9 @@ CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
 @HAVE_NETCDF_TRUE@am__EXEEXT_11 = $(NETCDF_MI_SH_TESTS) \
-@HAVE_NETCDF_TRUE@	testInterpolatorFill.sh
+@HAVE_NETCDF_TRUE@	testInterpolatorFill.sh \
+@HAVE_NETCDF_TRUE@	testVerticalInterpolator.sh \
+@HAVE_NETCDF_TRUE@	testVerticalInterpolator2.sh
 am__EXEEXT_12 = $(am__EXEEXT_11)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -496,8 +498,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-CLEANFILES = test.nc test2.nc test3.nc test4.nc testQualityExtractor.nc test_0time.nc testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
-             coordTestFilled.nc test.grb1 test.grb2 bicubicOutData.txt bilinearOutData.txt testMetgmReadEd1.nc testMetgmReadEd2.nc \
+CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
+             testQualityExtractor.nc test_0time.nc \
+             testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
+             coordTestFilled.nc test.grb1 test.grb2 \
+             bicubicOutData.txt bilinearOutData.txt \
+             testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
 
 CC_TESTS = testInterpolation testVerticalCoordinates \
@@ -528,7 +534,11 @@ AM_CFLAGS =
 
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\" @MIFI_PQ_CPPFLAGS@
 @HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc coordRefTimeTest.nc
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
+             coordRefTimeTest.nc \
+             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc  verticalSigmaHybridPressure.nc
+
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
