@@ -75,6 +75,12 @@ int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, 
     return MIFI_OK;
 }
 
+int mifi_barometric_standard_pressure(size_t n, const double* h, double* pressure)
+{
+    return mifi_barometric_pressure(n, 1013.25, h, 288.15, pressure);
+}
+
+
 int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, double* height)
 {
     const double g = 9.80665;

@@ -116,6 +116,13 @@ extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const d
 extern int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, double* pressure);
 
 /**
+ * convert height to pressure using the formular http://en.wikipedia.org/wiki/Barometric_formula
+ * and using the international standard atmosphere http://en.wikimedia.org/wiki/International_Standard_Atmosphere
+ */
+extern int mifi_barometric_standard_pressure(size_t n, const double* h, double* pressure);
+
+
+/**
  * convert pressure to height using the inverse formular http://en.wikipedia.org/wiki/Barometric_formula
  *
  * h(k) = -R*T_b/g*M * log(p(k)/P_b);

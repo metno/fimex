@@ -177,8 +177,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc \
+	ToPressureConverter.h Units.cc Utils.cc \
+	vertical_coordinate_transformations.c XMLDoc.cc \
 	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
 	NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
@@ -547,8 +548,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc Units.cc \
-	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc \
+	ToPressureConverter.h Units.cc Utils.cc \
+	vertical_coordinate_transformations.c XMLDoc.cc \
 	$(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4) $(am__append_6)
 all: all-recursive
