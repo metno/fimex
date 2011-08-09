@@ -52,12 +52,6 @@ public:
 
     virtual inline ~MetGmProfilingTimer()
     {
-//        clock_gettime(CL OCK_PROCESS_CPUTIME_ID, &end_);
-//        timespec elapsed = diff(start_, end_);
-//        std::cerr << "[sec = " << elapsed.tv_sec
-//                  << ":"
-//                  << "usec = " << elapsed.tv_nsec << "]"
-//                  << std::endl;
     }
 
     inline void restart()
