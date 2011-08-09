@@ -334,10 +334,6 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
                             throw CDMException("unexpected size of pressure "+ps+"("+type2string(unLimDimPos)+") for variable "+varName+", should be "+type2string(nx*ny*(nt-startT))+ " != " +type2string(psData->size()));
                         }
                         presConv = boost::shared_ptr<ToPressureConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asConstDouble(), nx, ny, nt-startT));
-                        vector<double> test = (*presConv)(0,0,0);
-                        for (int i = 0; i < test.size(); ++i) {
-                            cerr << i << ": " << test[i] << endl;
-                        }
                         // or require a, b, ps(x,y,t), p0
                     } else {
                         throw CDMException("unimplemented vertical axis with standard_name: " + standardName.getStringValue());
@@ -375,7 +371,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
     for (size_t t = startT; t < nt; ++t) {
         float* inData = &iData[0];
         float* outData = &oData[0];
-        size_t pTimePos = 1; // unLimited, just one xy-slice
+        size_t pTimePos = 0; // time = unLimited, just one xy-slice
         if ((nt-startT) > 1) {
             // move to start of time slice
             inData = &iData[t*(nx*ny*nz)];
@@ -401,12 +397,12 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::sha
                     vector<double>::iterator ub = upper_bound(pIn.begin(),
                             pIn.end(), pOut[k]);
                     size_t ubPos = distance(pIn.begin(), ub);
-                    if (ubPos <= 1) {
-                        // possibly ekstrapolation before pIn[0]
-                        ubPos = 1;
-                    } else if (ub == pIn.end()) {
-                        // surely ekstrapolation to pIn[pIn.size()-1]
+                    if (ub == pIn.end()) {
+                        // extrapolation to pIn[pIn.size()-1]
                         ubPos = pIn.size() - 1;
+                    } else if (ubPos <= 1) {
+                        // possibly extrapolation before pIn[0]
+                        ubPos = 1;
                     } else {
                         // intrapolation
                     }
