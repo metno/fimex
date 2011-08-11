@@ -210,8 +210,10 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                           * and the values for pid=7 (if reported)
                           * are heights given in meters above MSL
                           */
+//                        MGM_CHECK_POINT()
                         mgmUnits = "m";
                     } else {
+//                        MGM_CHECK_POINT()
                         mgmUnits = "hPa";
                     }
                 } else {
@@ -242,7 +244,15 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                 double unitsOffset = 0.0;
 
                 Units unitsConvertor;
-                unitsConvertor.convert(cdmRef.getUnits(varName), mgmUnits , unitsScale, unitsOffset);
+//                MGM_CHECK_POINT()
+                if(unitsConvertor.areConvertible(cdmRef.getUnits(varName), mgmUnits)) {
+                    unitsConvertor.convert(cdmRef.getUnits(varName), mgmUnits , unitsScale, unitsOffset);
+                } else {
+//                    MGM_CHECK_POINT()
+                    boost::shared_array<float> empty;
+                    return boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(pg3, hdtag, empty));
+                }
+//              MGM_CHECK_POINT()
 
                 float newFill = fillValue.empty() ? 9999.0f : boost::lexical_cast<float>(fillValue);
                 float newScale  = scaleFactor.empty() ? 1.0 : boost::lexical_cast<float>(scaleFactor);
