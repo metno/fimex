@@ -775,12 +775,19 @@ namespace MetNoFimex {
     {
         // check for variables that are MSL dependant
         // but MSL itself has not been included
-        std::vector<std::string> msl = cdm_->findVariables("standard_name", "topography");
+        std::vector<std::string> msl = cdm_->findVariables("standard_name", "altitude");
+        cdmNameView& nameView = cdmConfiguration_.get<cdm_name_index>();
         if(msl.empty()) {
             const std::vector<CDMVariable>& varVec = cdm_->getVariables();
             for(size_t index = 0; index < varVec.size(); ++index) {
-                if(varVec.at(index).getName().find("_MSL") != std::string::npos)
-                    throw CDMException("There are MSL dependent variable in CDm modell but MSL has not been included");
+                if(varVec.at(index).getName().find("_MSL") != std::string::npos) {
+                    cdmNameView::iterator nIt = nameView.find(varVec.at(index).getName());
+                    if(nIt != nameView.end()) {
+                        MGM_MESSAGE_POINT(std::string(" removing MSL dependent variable ").append(varVec.at(index).getName()).append(" because MSL(altitude) is not included by config file"))
+                        nameView.erase(nIt);
+                    }
+//                    throw CDMException("There are MSL dependent variable in CDM modell but MSL(altitude) has not been included");
+                }
             }
             return;
         }
