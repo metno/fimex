@@ -89,7 +89,7 @@ include/kdtree++/region.hpp
 lgpl.txt
 share/doc/examples/coordinateSystem.cpp
 share/etc/cdmGribReaderConfig.xml
-share/etc/cdmMetgmReaderConfig.xml
+share/etc/cdmMetGmReaderConfig.xml
 share/etc/cdmGribWriterConfig.xml
 share/etc/cdmQualityConfig.xml
 share/etc/cdmWriterConfig.xml

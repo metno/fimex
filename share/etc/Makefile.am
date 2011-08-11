@@ -2,7 +2,7 @@ configdir=$(pkgdatadir)
 config_DATA = \
     cdmGribReaderConfig.xml\
 	cdmGribWriterConfig.xml\
-	cdmMetgmReaderConfig.xml\
+	cdmMetGmReaderConfig.xml\
 	cdmQualityConfig.xml\
 	cdmWriterConfig.xml\
 	cdmWriterConfigDeprecated.xml\
