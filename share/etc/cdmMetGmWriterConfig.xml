@@ -12,14 +12,14 @@
 
 <writer>
 
+    <metgm_parameter name="altitude">
+        <attribute name="standard_name" value="altitude" type="string" />
+        <attribute name="metgm_p_id"    value="0"                 type="short" />
+    </metgm_parameter>
+
     <metgm_parameter name="humidity">
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="metgm_p_id"    value="6"                 type="short" />
-    </metgm_parameter>
-
-    <metgm_parameter name="potential_temperature">
-        <attribute name="standard_name" value="air_potential_temperature" type="string" />
-        <attribute name="metgm_p_id"    value="5"                         type="short" />
     </metgm_parameter>
 
     <metgm_parameter name="temperature">
@@ -37,43 +37,23 @@
         <attribute name="metgm_p_id"    value="2"      type="short" />
     </metgm_parameter>
 
-    <variable name="air_potential_temperature">
-        <attribute name="standard_name" value="air_potential_temperature" type="string" />
-        <attribute name="metgm_p_id"    value="5"                         type="short"  />
-    </variable>
+    <metgm_parameter name="z_wind">
+        <attribute name="standard_name" value="upward_air_velocity" type="string" />
+        <attribute name="metgm_p_id"    value="2"      type="short" />
+    </metgm_parameter>
 
+<!--
     <variable name="geopotential_height" >
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="metgm_p_id"    value="7"                   type="short"  />
         <attribute name="units"         value="m"                   type="string"/>
     </variable>
+-->
 
     <metgm_parameter name="pressure" >
         <attribute name="standard_name" value="pressure" type="string" />
         <attribute name="metgm_p_id"    value="7"        type="short" />
-    </metgm_parameter>
-
-    <metgm_parameter name="geopotentialheight" >
-        <attribute name="standard_name" value="geopotential_height" type="string" />
-        <attribute name="metgm_p_id"    value="7"                   type="short" />
-    </metgm_parameter>
-
-    <metgm_parameter name="geopotentialheight">
-        <attribute name="standard_name" value="geopotential_height" type="string"/>
-        <attribute name="metgm_p_id"    value="7"                   type="short" />
-        <attribute name="units"         value="m"                   type="string"/>
-    </metgm_parameter>
-
-    <metgm_parameter name="pressure">
-        <attribute name="standard_name" value="pressure"            type="string"/>
-        <attribute name="metgm_p_id"    value="7"                   type="short" />
-        <attribute name="units"         value="hPa"                 type="string"/>
-    </metgm_parameter>
-
-    <metgm_parameter name="airpressure">
-        <attribute name="standard_name" value="air_pressure"            type="string"/>
-        <attribute name="metgm_p_id"    value="7"                   type="short" />
-        <attribute name="units"         value="hPa"                 type="string"/>
+        <attribute name="units"         value="hPa"                   type="string"/>
     </metgm_parameter>
 
 </writer>

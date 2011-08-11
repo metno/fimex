@@ -55,6 +55,9 @@
 #ifdef HAVE_GRIBAPI_H
 #include "fimex/GribApiCDMWriter.h"
 #endif
+#ifdef HAVE_METGM_H
+#include "fimex/MetGmCDMWriter.h"
+#endif
 
 namespace po = boost::program_options;
 using namespace std;
@@ -541,6 +544,14 @@ static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map&
 		GribApiCDMWriter(sharedDataReader, vm["output.file"].as<string>(), gribVersion, vm["output.config"].as<string>());
 		return;
 	}
+#endif
+#ifdef HAVE_METGM_H
+    if (type == "metgm") {
+        LOG4FIMEX(logger, Logger::DEBUG, "writing metgm-file " << vm["output.file"].as<string>() << " with config " << vm["output.config"].as<string>());
+        if (!vm.count("output.config")) throw CDMException("Cannot write metgm-file without config");
+        MetGmCDMWriter(sharedDataReader, vm["output.file"].as<string>(), vm["output.config"].as<string>());
+        return;
+    }
 #endif
 
 	if (type == "null") {

@@ -15,8 +15,8 @@
 
 <reader>
 
-    <variable name="MSL">
-        <attribute name="standard_name" value="topography" type="string" />
+    <variable name="altitude">
+        <attribute name="standard_name" value="altitude" type="string" />
         <attribute name="metgm_p_id"    value="0"          type="short" />
     </variable>
 
