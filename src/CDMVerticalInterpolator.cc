@@ -174,10 +174,6 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
 
         }
     }
-
-
-
-
 }
 
 CDMVerticalInterpolator::~CDMVerticalInterpolator()
@@ -198,13 +194,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getDataSlice(const std::string&
         return dataReader_->getDataSlice(varName, unLimDimPos);
     }
 
-    switch (pimpl_->verticalType) {
-    case MIFI_VINT_PRESSURE: return getPressureDataSlice(*varSysIt, varName, unLimDimPos);
-    case MIFI_VINT_HEIGHT: return getHeightDataSlice(*varSysIt, varName, unLimDimPos);
-    default: throw CDMException("unknown vertical type");
-    }
-    // should never go below this
-    assert(false);
+    return getLevelDataSlice(*varSysIt, varName, unLimDimPos);
 }
 
 // fetch a parameter-value from the formula_terms attribute
@@ -231,7 +221,7 @@ static boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::sh
     case CoordinateAxis::Pressure: {
         boost::shared_ptr<Data> p = reader->getScaledDataSliceInUnit(zAxis->getName(), "hPa", unLimDimPos);
         const boost::shared_array<double> pa = p->asConstDouble();
-        presConv = boost::shared_ptr<ToVLevelConverter>(new PressureToPressureConverter(vector<double> (&pa[0], &pa[0] + p->size())));
+        presConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&pa[0], &pa[0] + p->size())));
     }
         break;
     case CoordinateAxis::Height: {
@@ -316,138 +306,58 @@ static boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::sh
     return presConv;
 }
 
-boost::shared_ptr<Data> CDMVerticalInterpolator::getPressureDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos)
+static boost::shared_ptr<ToVLevelConverter> getHeightConverter(
+        const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+        const CoordinateSystem::ConstAxisPtr xAxis,
+        const CoordinateSystem::ConstAxisPtr yAxis,
+        const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny,
+        size_t nz, size_t nt)
 {
-    assert(cs->isCSFor(varName) && cs->isComplete(varName));
-    // get all axes
-    CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
-    assert(zAxis.get() != 0); // defined by construction of cs
-    size_t nz = 1;
-    {
-        const vector<string>& shape = zAxis->getShape();
-        if (shape.size() == 1) {
-            nz = cdm_->getDimension(shape.at(0)).getLength();
-        } else {
-            throw CDMException("vertical interpolation not possible with 2d z-Axis");
+    boost::shared_ptr<ToVLevelConverter> heightConv;
+    switch (zAxis->getAxisType()) {
+        case CoordinateAxis::GeoZ:
+        {
+            boost::shared_ptr<Data> hd = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
+            const boost::shared_array<double> ha = hd->asConstDouble();
+            heightConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
         }
-    }
-    // detect x and y axis
-    size_t nx = 1;
-    CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
-    if (xAxis.get() != 0) {
-        const vector<string>& shape = xAxis->getShape();
-        if (shape.size() == 1) {
-            nx = cdm_->getDimension(shape.at(0)).getLength();
-        } else {
-            throw CDMException("vertical interpolation not possible with 2d x-Axis");
-        }
-    }
-    size_t ny = 1;
-    CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
-    if (yAxis.get() != 0) {
-        const vector<string>& shape = yAxis->getShape();
-        if (shape.size() == 1) {
-            ny = cdm_->getDimension(shape.at(0)).getLength();
-        } else {
-            throw CDMException("vertical interpolation not possible with 2d y-Axis");
-        }
-    }
-
-    // detect time axis
-    size_t nt = 1;
-    size_t startT = 0;
-    CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis();
-    if (tAxis.get() != 0) {
-        const vector<string>& shape = tAxis->getShape();
-        if (shape.size() == 1) {
-            const CDMDimension& tDim = cdm_->getDimension(shape.at(0));
-            if (tDim.isUnlimited()) {
-                // artifically creating a loop of size 1 at correct position
-                nt = unLimDimPos + 1;
-                startT = unLimDimPos;
+        break;
+    default:
+        { // try geopotential_height or fall back to pressure
+            map<string, string> attrs;
+            vector<string> dims;
+            dims.push_back(xAxis->getShape()[0]);
+            dims.push_back(yAxis->getShape()[0]);
+            dims.push_back(zAxis->getShape()[0]);
+            attrs["standard_name"] = "geopotential_height";
+            vector<string> geoVars = reader->getCDM().findVariables(attrs, dims);
+            if (geoVars.size() > 0) {
+                LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
+                boost::shared_ptr<Data> geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
+                if (geoPotData->size() != (nx * ny * nz * nt))
+                    throw CDMException("geopotential height '" + geoVars[0] + "' has strange size: " + type2string(geoPotData->size()) + " != " + type2string(nx * ny * nz * nt));
+                heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asConstDouble(), nx, ny, nz, nt));
             } else {
-                nt = tDim.getLength();
-                startT = 0;
-            }
-        } else {
-            throw CDMException(
-                    "vertical interpolation not possible with 2d time-axis");
-        }
-    }
-
-    boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(dataReader_, unLimDimPos, zAxis, nx, ny, nt-startT);
-
-    int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
-    switch (pimpl_->verticalInterpolationMethod) {
-    case MIFI_VINT_METHOD_LIN: intFunc = &mifi_get_values_linear_f; break;
-    case MIFI_VINT_METHOD_LOG: intFunc = &mifi_get_values_log_f; break;
-    case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
-    default: assert(false);
-    }
-
-    vector<double>& pOut = pimpl_->level1;
-    boost::shared_ptr<Data> data = dataReader_->getDataSlice(varName, unLimDimPos);
-    if (data->size() != (nx*ny*nz*(nt-startT))) {
-        throw CDMException("unexpected dataslice of variable " + varName +": (nx*ny*nz*nt) = (" +
-                           type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+
-                           ") != " + type2string(data->size()));
-    }
-    const boost::shared_array<float> iData = data->asConstFloat();
-    boost::shared_array<float> oData(new float[nx*ny*pOut.size()*(nt-startT)]);
-
-    // loop over data-array, interpolating cell for cell
-    for (size_t t = startT; t < nt; ++t) {
-        size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-        float* inData = &iData[timePos*(nx*ny*nz)];
-        float* outData = &oData[timePos*(nx*ny*pOut.size())];
-        for (size_t y = 0; y < ny; ++y) {
-            for (size_t x = 0; x < nx; ++x) {
-                // interpolate in between the pressure values
-                vector<double> pIn = (*presConv)(x, y, timePos);
-                if (pIn.size() != nz) {
-                    throw CDMException("input level size: "
-                            + type2string(pIn.size()) + " must be " + type2string(nz));
-                }
-                // pIn should be growing (top (e.g. pres=10 to bottom pres=1000)
-                bool reversePIn = false;
-                if ((pIn[1] - pIn[0]) < 0) {
-                    reversePIn = true;
-                    reverse(pIn.begin(), pIn.end());
-                }
-                for (size_t k = 0; k < pOut.size(); k++) {
-                    // find element
-                    vector<double>::iterator ub = upper_bound(pIn.begin(), pIn.end(), pOut[k]);
-                    size_t ubPos = distance(pIn.begin(), ub);
-                    if (ub == pIn.end()) {
-                        // extrapolation to pIn[pIn.size()-1]
-                        ubPos = pIn.size() - 1;
-                    } else if (ubPos <= 1) {
-                        // possibly extrapolation before pIn[0]
-                        ubPos = 1;
-                    } else {
-                        // intrapolation, nothing needs to change
-                    }
-                    size_t elUbPos = ubPos;
-                    size_t elUbPosM1 = ubPos - 1;
-                    if (reversePIn) {
-                        elUbPos = pIn.size() - 1 - ubPos;
-                        elUbPosM1 = pIn.size() - 1 - (ubPos - 1);
-                    }
-                    size_t inPos = mifi_3d_array_position(x, y, elUbPos, nx, ny, nz);
-                    size_t inPosM1 = mifi_3d_array_position(x, y, elUbPosM1, nx, ny, nz);
-                    size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
-                    (*intFunc)(&inData[inPos], &inData[inPosM1], &outData[outPos],
-                            1, pIn.at(ubPos), pIn.at(ubPos - 1), pOut.at(k));
-                }
+                LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
+                boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
+                heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
             }
         }
     }
-    return createData(nx*ny*pOut.size()*(nt-startT), oData);
+    return heightConv;
+}
+
+static boost::shared_ptr<ToVLevelConverter> getLevelConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt)
+{
+    switch (verticalType) {
+    case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
+    case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, nt);
+    default: throw CDMException("unknown vertical type");
+    }
 }
 
 
-// TODO: this is largely a copy of getPressureDataSlice - cleanup!
-boost::shared_ptr<Data> CDMVerticalInterpolator::getHeightDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos)
+boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos)
 {
     assert(cs->isCSFor(varName) && cs->isComplete(varName));
     // get all axes
@@ -506,27 +416,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getHeightDataSlice(boost::share
         }
     }
 
-    boost::shared_ptr<ToVLevelConverter> heightConv;
-    {
-        map<string, string> attrs;
-        vector<string> dims;
-        dims.push_back(xAxis->getShape()[0]);
-        dims.push_back(yAxis->getShape()[0]);
-        dims.push_back(zAxis->getShape()[0]);
-        attrs["standard_name"] = "geopotential_height";
-        vector<string> geoVars = dataReader_->getCDM().findVariables(attrs, dims);
-        if (geoVars.size() > 0) {
-            LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
-            boost::shared_ptr<Data> geoPotData = dataReader_->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
-            if (geoPotData->size() != (nx*ny*nz*(nt-startT)))
-                throw CDMException("geopotential height '"+geoVars[0]+"' has strange size: "+type2string(geoPotData->size()) + " != " + type2string(nx*ny*nz*(nt-startT)));
-            heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asConstDouble(), nx, ny, nz, (nt-startT)));
-        } else {
-            LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
-            boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(dataReader_, unLimDimPos, zAxis, nx, ny, nt-startT);
-            heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
-        }
-    }
+    boost::shared_ptr<ToVLevelConverter> levConv = getLevelConverter(dataReader_, pimpl_->verticalType, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, (nt-startT));
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
     switch (pimpl_->verticalInterpolationMethod) {
@@ -554,7 +444,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getHeightDataSlice(boost::share
         for (size_t y = 0; y < ny; ++y) {
             for (size_t x = 0; x < nx; ++x) {
                 // interpolate in between the pressure values
-                vector<double> pIn = (*heightConv)(x, y, timePos);
+                vector<double> pIn = (*levConv)(x, y, timePos);
                 if (pIn.size() != nz) {
                     throw CDMException("input level size: "
                             + type2string(pIn.size()) + " must be " + type2string(nz));

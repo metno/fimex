@@ -55,16 +55,16 @@ public:
 };
 
 /**
- * Constant pressure levels in time and space.
+ * Constant v-levels in time and space, no changes needed
  */
-class PressureToPressureConverter : public ToVLevelConverter {
-    const vector<double> pres_;
+class IdentityToVLevelConverter : public ToVLevelConverter {
+    const vector<double> vlevel_;
 public:
     /**
      * @param pressure The constant pressure levels in hPa
      */
-    PressureToPressureConverter(const vector<double>& pressure) : pres_(pressure) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
+    IdentityToVLevelConverter(const vector<double>& vlevel) : vlevel_(vlevel) {}
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return vlevel_;}
 };
 
 /**
