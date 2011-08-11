@@ -248,7 +248,9 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                 if(unitsConvertor.areConvertible(cdmRef.getUnits(varName), mgmUnits)) {
                     unitsConvertor.convert(cdmRef.getUnits(varName), mgmUnits , unitsScale, unitsOffset);
                 } else {
-//                    MGM_CHECK_POINT()
+                    std::string msg(" can't convert from ");
+                    msg.append(cdmRef.getUnits(varName)).append(" to ").append(mgmUnits).append(" for variable ").append(varName).append(" -- excluding");
+                    MGM_MESSAGE_POINT(msg)
                     boost::shared_array<float> empty;
                     return boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(pg3, hdtag, empty));
                 }
