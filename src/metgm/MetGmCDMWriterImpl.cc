@@ -89,7 +89,7 @@ namespace MetNoFimex {
         const CDM& cdmRef = cdmReader->getCDM();
 
         // start metgm_parameter
-        XPathObjPtr xpathObj = doc->getXPathObject("/metgm/metgm_parameter");
+        XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         size_t size = (nodes) ? nodes->nodeNr : 0;
         for (size_t i = 0; i < size; ++i) {
@@ -101,7 +101,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"metgm_p_id\"]");
             std::string str_p_id;
             short p_id = 0;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
@@ -114,19 +114,19 @@ namespace MetNoFimex {
                 continue;
             }
 
-            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"_FillValue\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"_FillValue\"]");
             std::string str_FillValue;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
-            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"units\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"units\"]");
             std::string str_units;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
-            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"standard_name\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+metgmName+"\"]/attribute[@name=\"standard_name\"]");
             std::string str_standard_name;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -166,7 +166,7 @@ namespace MetNoFimex {
         }
         // end metgm_parameter
 
-        xpathObj = doc->getXPathObject("/metgm/variable");
+        xpathObj = doc->getXPathObject("/metgm_config/writer/variable");
         nodes = xpathObj->nodesetval;
         size = (nodes) ? nodes->nodeNr : 0;
         for (size_t i = 0; i < size; ++i) {
@@ -182,7 +182,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
             std::string str_p_id;
             short p_id = 0;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
@@ -195,7 +195,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            xpathObj = doc->getXPathObject("/metgm/metgm_parameter[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/metgm_parameter[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
             std::string str_units;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -213,17 +213,17 @@ namespace MetNoFimex {
 
             MetGmConfigurationMappings cfgEntry(p_id, pVar->getName());
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
             if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 cfgEntry.fillValue_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
             if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 cfgEntry.addOffset_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/writer/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
             if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 cfgEntry.scaleFactor_ = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }

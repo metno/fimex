@@ -1,63 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<metgm>
+<metgm_config xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="metgm_config.xsd">
 
 <!-- meta data -->
-<metgm_meta_data>
+<meta_data>
         <attribute name="metgm_analysis_date_time" value="2005-02-04T00:00:00" type="string" />
         <attribute name="metgm_start_date_time" value="2005-02-04T06:00:00" type="string" />
         <attribute name="metgm_version" value="STANAG_6022_Edition_2" type="string" />
         <attribute name="metgm_data_type" value="2 - Numerical weather prediction" type="string" />
         <attribute name="metgm_production_nation" value="FRA" type="string" />
         <attribute name="metgm_model_type" value="modelType-------" type="string" />
-</metgm_meta_data>
+</meta_data>
 
 <!-- map variable to metgm p_id value -->
 
-<variable name="MSL">
-    <attribute name="standard_name" value="topography" type="string" />
-    <attribute name="metgm_p_id"    value="0"          type="short" />
-</variable>
+<reader>
 
-<variable name="cloud_area">
-    <attribute name="standard_name" value="cloud_area_fraction" type="string" />
-    <attribute name="metgm_p_id"    value="1"                   type="short"  />
-</variable>
+    <variable name="MSL">
+        <attribute name="standard_name" value="topography" type="string" />
+        <attribute name="metgm_p_id"    value="0"          type="short" />
+    </variable>
 
-<variable name="x_wind">
-    <attribute name="standard_name" value="eastward_wind" type="string" />
-    <attribute name="metgm_p_id"    value="2"             type="short"  />
-</variable>
+    <variable name="cloud_area">
+        <attribute name="standard_name" value="cloud_area_fraction" type="string" />
+        <attribute name="metgm_p_id"    value="1"                   type="short"  />
+    </variable>
 
-<variable name="y_wind">
-    <attribute name="standard_name" value="northward_wind" type="string" />
-    <attribute name="metgm_p_id"    value="3"              type="short"  />
-</variable>
+    <variable name="x_wind">
+        <attribute name="standard_name" value="eastward_wind" type="string" />
+        <attribute name="metgm_p_id"    value="2"             type="short"  />
+    </variable>
 
-<variable name="z_wind">
-    <attribute name="standard_name" value="upward_air_velocity" type="string" />
-    <attribute name="metgm_p_id"    value="4"                   type="short"  />
-</variable>
+    <variable name="y_wind">
+        <attribute name="standard_name" value="northward_wind" type="string" />
+        <attribute name="metgm_p_id"    value="3"              type="short"  />
+    </variable>
 
-<variable name="air_temperature">
-    <attribute name="standard_name" value="air_temperature"     type="string" />
-    <attribute name="metgm_p_id"    value="5"                   type="short"  />
-</variable>
+    <variable name="z_wind">
+        <attribute name="standard_name" value="upward_air_velocity" type="string" />
+        <attribute name="metgm_p_id"    value="4"                   type="short"  />
+    </variable>
 
-<variable name="relative_humidity">
-    <attribute name="standard_name" value="relative_humidity" type="string" />
-    <attribute name="metgm_p_id"    value="6"                 type="short"  />
-</variable>
+    <variable name="air_temperature">
+        <attribute name="standard_name" value="air_temperature"     type="string" />
+        <attribute name="metgm_p_id"    value="5"                   type="short"  />
+    </variable>
 
-<variable name="pressure">
-    <attribute name="standard_name" value="pressure"            type="string" />
-    <attribute name="metgm_p_id"    value="7"                   type="short"  />
-    <attribute name="units"         value="hPa"                 type="string" />
-</variable>
+    <variable name="relative_humidity">
+        <attribute name="standard_name" value="relative_humidity" type="string" />
+        <attribute name="metgm_p_id"    value="6"                 type="short"  />
+    </variable>
 
-<variable name="geopotential_height">
-    <attribute name="standard_name" value="geopotential_height" type="string" />
-    <attribute name="metgm_p_id"    value="7"                   type="short"  />
-    <attribute name="units"         value="m"                   type="string" />
-</variable>
+    <variable name="pressure">
+        <attribute name="standard_name" value="pressure"            type="string" />
+        <attribute name="metgm_p_id"    value="7"                   type="short"  />
+        <attribute name="units"         value="hPa"                 type="string" />
+    </variable>
 
-</metgm>
+    <variable name="geopotential_height">
+        <attribute name="standard_name" value="geopotential_height" type="string" />
+        <attribute name="metgm_p_id"    value="7"                   type="short"  />
+        <attribute name="units"         value="m"                   type="string" />
+    </variable>
+
+</reader>
+
+</metgm_config>

@@ -60,7 +60,7 @@
 <xs:complexType name="metgm_config_type">
     <xs:all>
         <!--xs:choice minOccurs="0" maxOccurs="unbounded"-->
-            <xs:element name="metgm_meta_data" type="attribute_list"         minOccurs="0"/>
+            <xs:element name="meta_data"       type="attribute_list"         minOccurs="0"/>
             <xs:element name="reader"          type="variable_mapping_list"  minOccurs="0"/>
             <xs:element name="writer"          type="metgm_mapping_list"     minOccurs="0"/>
         <!--xs:choice-->

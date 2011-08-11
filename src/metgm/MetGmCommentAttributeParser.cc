@@ -52,7 +52,7 @@ boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::crea
             boost::shared_ptr<XMLDoc> doc = XMLDoc::fromString(metgmMetaData.getStringValue());
 
             if(doc.get() != 0) {
-                XPathObjPtr xpathObj = doc->getXPathObject("/metgm_meta_data/attribute");
+                XPathObjPtr xpathObj = doc->getXPathObject("/meta_data/attribute");
                 xmlNodeSetPtr nodes = xpathObj->nodesetval;
                 size_t size = (nodes) ? nodes->nodeNr : 0;
                 for (size_t i = 0; i < size; ++i) {

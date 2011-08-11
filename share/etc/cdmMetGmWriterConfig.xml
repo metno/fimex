@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metgm_config xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="metgm_config.xsd">
 
-<metgm_meta_data>
+<meta_data>
     <attribute name="metgm_analysis_date_time" value="2005-02-04T00:00:00" type="string" />
     <attribute name="metgm_start_date_time" value="2005-02-04T06:00:00" type="string" />
     <attribute name="metgm_version" value="STANAG_6022_Edition_1" type="string" />
     <attribute name="metgm_data_type" value="2 - Numerical weather prediction" type="string" />
     <attribute name="metgm_production_nation" value="FRA" type="string" />
-</metgm_meta_data>
+</meta_data>
 
 
 <writer>

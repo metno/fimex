@@ -91,7 +91,7 @@ namespace MetNoFimex {
         if(!doc.get())
             throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
 
-        XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable");
+        XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/reader/variable");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         size_t size = (nodes) ? nodes->nodeNr : 0;
         for (size_t i = 0; i < size; ++i) {
@@ -103,7 +103,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            XPathObjPtr xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
+            XPathObjPtr xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"metgm_p_id\"]");
             std::string str_p_id;
             short p_id = 0;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
@@ -116,7 +116,7 @@ namespace MetNoFimex {
                 continue;
             }
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"standard_name\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"standard_name\"]");
             std::string str_standard_name;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_standard_name = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -126,19 +126,19 @@ namespace MetNoFimex {
                 continue;
             }
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"units\"]");
             std::string str_units;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_units = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"add_offset\"]");
             std::string str_offset;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_offset = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
             }
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"scale_factor\"]");
             std::string str_scale;
             if(xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_scale = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -150,7 +150,7 @@ namespace MetNoFimex {
             cfgEntry.addOffset_    = str_offset;
             cfgEntry.scaleFactor_  = str_scale;
 
-            xpathObj = doc->getXPathObject("/metgm/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
+            xpathObj = doc->getXPathObject("/metgm_config/reader/variable[@name=\""+kildeName+"\"]/attribute[@name=\"_FillValue\"]");
             std::string str_FillValue;
             if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
                 str_FillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
@@ -240,7 +240,7 @@ namespace MetNoFimex {
           */
         std::stringstream metgm_comment;
         metgm_comment
-                << "<metgm_meta_data>"
+                << "<meta_data>"
                 << std::endl
 
                 << "\t<attribute"
@@ -293,7 +293,7 @@ namespace MetNoFimex {
                     << std::endl;
         }
 
-        metgm_comment << "</metgm_meta_data>";
+        metgm_comment << "</meta_data>";
 
         CDMAttribute cdmCommentAttribute("comment", "string", metgm_comment.str());
         cdm_->addAttribute(cdm_->globalAttributeNS(), cdmCommentAttribute);
