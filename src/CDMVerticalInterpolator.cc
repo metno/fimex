@@ -171,7 +171,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
                     }
                 }
             }
-
+            // remove the old zAxis
+            cdm_->removeVariable(zAxis->getName());
         }
     }
 }
