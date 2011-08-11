@@ -1,4 +1,9 @@
-  * 2011-06-16 {{:fimex:fimex-0.29.tar.gz|fimex-0.29}}
+  * 2011-08-?? fimex-0.30
+    * vertical interpolation to pressure from pressure, height, sigma, lnP and sigma_hybrid
+    * logarithmic and double-logarithmic interpolation
+    * wdb using wdbml setup-format (same as wdb-netcdf-java)
+    * metgm-improved, ready for production
+  * 2011-06-16 fimex-0.29
     * much improved and production ready [[http://sourceforge.net/projects/wdb/|wdb]]-reader
     * beta version of MetGM / STANAG6022 reader and writer (MetgmCDMReader.[h|cc] and MetgmCDMWriter.[h|cc] files)
     * support for [[http://www.unidata.ucar.edu/software/netcdf/ncml/v2.2/FmrcAggregation.html|FMRC]] / reference time axis

@@ -93,3 +93,9 @@ int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, do
     }
     return MIFI_OK;
 }
+
+int mifi_barometric_standard_height(size_t n, const double* p, double* height)
+{
+    return mifi_barometric_height(n, 1013.25, p, 288.15, height);
+}
+

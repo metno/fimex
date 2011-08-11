@@ -73,6 +73,7 @@ private:
     boost::shared_ptr<CDMReader> dataReader_;
     boost::shared_ptr<VIntPimpl> pimpl_;
     boost::shared_ptr<Data> getPressureDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
+    boost::shared_ptr<Data> getHeightDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
 };
 
 }

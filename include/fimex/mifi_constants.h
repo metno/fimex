@@ -156,6 +156,14 @@
 #define MIFI_VINT_PRESSURE 0
 
 /**
+ * @brief vertical interpolation type
+ *
+ * vertical interpolation to height above ground levels in m
+ */
+#define MIFI_VINT_HEIGHT 1
+
+
+/**
  * @brief vertical interpolation method
  *
  * linear interpolation, e.g. mifi_get_values_lin_f()
