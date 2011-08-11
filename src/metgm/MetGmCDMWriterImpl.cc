@@ -401,6 +401,8 @@ namespace MetNoFimex {
 
             MetGmConfigurationMappings entry = *pIt;
 
+//            MGM_MESSAGE_POINT(std::string(" writing parameter with pid = ").append(boost::lexical_cast<std::string>(entry.p_id_)))
+
             MetGmTagsPtr tags;
 
             cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
@@ -414,6 +416,11 @@ namespace MetNoFimex {
                                                         entry.p_id_, entry.fillValue_, entry.addOffset_, entry.scaleFactor_);
 
             assert(tags.get());
+
+            if(tags->data().get() == 0) {
+//                MGM_MESSAGE_POINT(" EMPTY DATA -- not writing this wariable to mgm")
+                continue;
+            }
 
             MetGmCDMVariableProfile profile(entry.p_id_, entry.cdmName_, tags);
             cdmConfiguration_.insert(profile);
