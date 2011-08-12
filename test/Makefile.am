@@ -24,7 +24,11 @@ CC_TESTS = testInterpolation \
 SH_TESTS = 
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
-AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include ${milib_CFLAGS} ${NETCDF_CPPFLAGS} @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@
+AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include \
+              ${milib_CFLAGS} \
+              @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ \
+              @MIFI_PROJ_CPPFLAGS@ @MIFI_NETCDF_CPPFLAGS@ @XML_CPPFLAGS@ \
+              @BOOST_CPPFLAGS@
 AM_CXXFLAGS = 
 AM_CFLAGS = 
 
@@ -41,7 +45,9 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
   GRIBAPI_NC_TESTS = testGribReader
-  SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh testVerticalInterpolator.sh testVerticalInterpolator2.sh
+  SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh \
+              testVerticalInterpolator.sh testVerticalInterpolator2.sh \
+              testVerticalInterpolatorHeight.sh
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
