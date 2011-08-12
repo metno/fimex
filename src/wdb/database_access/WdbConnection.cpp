@@ -32,6 +32,10 @@
 #include "../gridInformation/GridInformation.h"
 #include <fimex/Logger.h>
 #include <boost/scoped_array.hpp>
+extern "C"
+{
+#include <arpa/inet.h>
+}
 
 namespace MetNoFimex
 {
@@ -126,6 +130,25 @@ WdbConnection::GridInformationPtr WdbConnection::readGridInformation(const std::
 	return find->second;
 }
 
+namespace
+{
+struct convert_to_host_order : public std::unary_function<float, float>
+{
+	float operator () (float f)
+	{
+		union
+		{
+			int32_t i;
+			float f;
+		} data;
+		data.f = f;
+
+		data.i = ntohl(data.i);
+
+		return data.f;
+	}
+};
+}
 
 float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 {
@@ -148,7 +171,12 @@ float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 	if ( dataLength % sizeof(float) )
 		throw WdbException("Invalid field size");
 
+// If this is defined, expect wdb to send back floats in network order, instead of it's native order.
+#ifdef EXPECT_NETWORK_ORDER_BYTES
+	float * ret = std::transform(data, data + (dataLength / 4), buffer, convert_to_host_order());
+#else
 	float * ret = std::copy(data, data + (dataLength / 4), buffer);
+#endif
 
 	return ret;
 }
