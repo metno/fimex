@@ -23,6 +23,7 @@ libfimex_la_SOURCES = interpolation.c \
                      CDMFileReaderFactory.cc \
 					 CDMInterpolator.cc \
 					 CDMNamedEntity.cc \
+					 CDMPressureConversions.cc \
 					 CDMQualityExtractor.cc \
 					 CDMReader.cc \
 					 CDMReaderUtils.cc \
@@ -69,7 +70,8 @@ libfimex_la_SOURCES = interpolation.c \
 					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
 					 TimeSpec.cc \
-					 ToPressureConverter.h \
+					 ToVLevelConverter.h \
+					 ToVLevelConverter.cc \
 					 Units.cc \
 					 Utils.cc \
 					 vertical_coordinate_transformations.c \

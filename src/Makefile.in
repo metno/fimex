@@ -152,13 +152,14 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
 	CDM.cc CDMAttribute.cc CDMconstants.cc CDMDimension.cc \
 	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
-	CDMInterpolator.cc CDMNamedEntity.cc CDMQualityExtractor.cc \
-	CDMReader.cc CDMReaderUtils.cc CDMTimeInterpolator.cc \
-	CDMVariable.cc CDMVerticalInterpolator.cc \
-	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
-	CoordinateSystemSliceBuilder.cc coordSys/CoordinateSystem.cc \
-	coordSys/CoordinateAxis.cc coordSys/CoordSysImpl.h \
-	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
+	CDMInterpolator.cc CDMNamedEntity.cc CDMPressureConversions.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
+	CDMTimeInterpolator.cc CDMVariable.cc \
+	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
+	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
+	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
+	coordSys/CoordSysImpl.h coordSys/Projection.cc \
+	coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \
@@ -178,7 +179,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc \
-	ToPressureConverter.h Units.cc Utils.cc \
+	ToVLevelConverter.h ToVLevelConverter.cc Units.cc Utils.cc \
 	vertical_coordinate_transformations.c XMLDoc.cc \
 	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
 	NetCDF_Utils.h GribApiCDMWriter.cc \
@@ -255,8 +256,8 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
 	CDMconstants.lo CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMFileReaderFactory.lo CDMInterpolator.lo CDMNamedEntity.lo \
-	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
-	CDMTimeInterpolator.lo CDMVariable.lo \
+	CDMPressureConversions.lo CDMQualityExtractor.lo CDMReader.lo \
+	CDMReaderUtils.lo CDMTimeInterpolator.lo CDMVariable.lo \
 	CDMVerticalInterpolator.lo CDM_XMLConfigHelper.lo \
 	CoordinateSystemSliceBuilder.lo CoordinateSystem.lo \
 	CoordinateAxis.lo Projection.lo ProjectionImpl.lo \
@@ -274,8 +275,9 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	Felt_File2.lo FeltParameters.lo GridDefinition.lo Logger.lo \
 	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo Units.lo \
-	Utils.lo vertical_coordinate_transformations.lo XMLDoc.lo \
+	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo \
+	ToVLevelConverter.lo Units.lo Utils.lo \
+	vertical_coordinate_transformations.lo XMLDoc.lo \
 	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
 	$(am__objects_4) $(am__objects_5)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
@@ -523,8 +525,8 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMconstants.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
-	CDMTimeInterpolator.cc CDMVariable.cc \
+	CDMPressureConversions.cc CDMQualityExtractor.cc CDMReader.cc \
+	CDMReaderUtils.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
@@ -549,7 +551,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc \
-	ToPressureConverter.h Units.cc Utils.cc \
+	ToVLevelConverter.h ToVLevelConverter.cc Units.cc Utils.cc \
 	vertical_coordinate_transformations.c XMLDoc.cc \
 	$(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4) $(am__append_6)
@@ -637,6 +639,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMFileReaderFactory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMPressureConversions.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMQualityExtractor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReaderUtils.Plo@am__quote@
@@ -722,6 +725,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ToVLevelConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransverseMercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UnknownToFgdcProjection.Plo@am__quote@

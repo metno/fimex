@@ -28,11 +28,16 @@
 #define TO_VLEVEL_CONVERTER_H_
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/noncopyable.hpp>
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/mifi_constants.h"
 
 namespace MetNoFimex
 {
+// forward decl.
+class CDMReader;
 
 using namespace std;
 
@@ -52,6 +57,10 @@ public:
      * @return pressure-levels in hPa at position (x,y,t)
      */
     virtual const vector<double> operator()(size_t x, size_t y, size_t t) = 0;
+    static boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt);
+    static boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nt);
+    static boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt);
+
 };
 
 /**
@@ -77,7 +86,7 @@ public:
      * @param p0 reference-pressure in hPa
      * @param lnP The constant pressure levels given as ln(P/P0)
      */
-    LnPressureToPressureConverter(double p0, const vector<double>& lnP) : pres_(lnP.size()) {mifi_atmosphere_ln_pressure(lnP.size(), p0, &lnP[0], &pres_[0]);}
+    LnPressureToPressureConverter(double p0, const vector<double>& lnP);
     virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
 };
 
@@ -90,7 +99,7 @@ public:
     /**
      * @param h given in m
      */
-    HeightStandardToPressureConverter(const vector<double>& h) : pres_(h.size()) {mifi_barometric_standard_pressure(h.size(), &h[0], &pres_[0]);}
+    HeightStandardToPressureConverter(const vector<double>& h);
     virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
 };
 
@@ -116,11 +125,7 @@ public:
      */
     SigmaToPressureConverter(const vector<double>& sigma, double ptop, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
     : sigma_(sigma), ptop_(ptop), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {
-        vector<double> p(sigma_.size());
-        mifi_atmosphere_sigma_pressure(sigma_.size(), ptop_, ps_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)], &sigma_[0], &p[0]);
-        return p;
-    }
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 
@@ -146,11 +151,7 @@ public:
      */
     HybridSigmaApToPressureConverter(const vector<double>& ap, const vector<double>& b, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
     : ap_(ap), b_(b), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {
-        vector<double> p(ap_.size());
-        mifi_atmosphere_hybrid_sigma_ap_pressure(ap_.size(), ps_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)], &ap_[0], &b_[0], &p[0]);
-        return p;
-    }
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -177,11 +178,7 @@ public:
      */
     HybridSigmaToPressureConverter(const vector<double>& a, const vector<double>& b, double p0, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
     : a_(a), b_(b), p0_(p0), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {
-        vector<double> p(a_.size());
-        mifi_atmosphere_hybrid_sigma_pressure(a_.size(), p0_, ps_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)], &a_[0], &b_[0], &p[0]);
-        return p;
-    }
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -195,12 +192,7 @@ public:
      * @param h given in m
      */
     PressureToStandardHeightConverter(boost::shared_ptr<ToVLevelConverter> presConv) : presConv_(presConv) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {
-        const vector<double> p((*presConv_)(x,y,t));
-        vector<double> h(p.size());
-        mifi_barometric_standard_height(p.size(), &p[0], &h[0]);
-        return h;
-    }
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -217,15 +209,7 @@ class GeopotentialToHeightConverter : public ToVLevelConverter {
 public:
     GeopotentialToHeightConverter(const boost::shared_array<double> geopotential, size_t nx, size_t ny, size_t nk, size_t nt)
     : geopot_(geopotential), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {
-        vector<double> h(nz_);
-        for (size_t z = 0; z < nz_; z++) {
-            double hg = geopot_[((t*nz_ + z)*ny_ + y)*nx_ +x];
-            // correction for high levels (1/r^2 dependency of g => 1/r dependency of hg (integral of 1/r^2))
-            h.at(z) =  hg * (MIFI_EARTH_RADIUS_M  / (MIFI_EARTH_RADIUS_M - hg));
-        }
-        return h;
-    }
+    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 } // namespace
