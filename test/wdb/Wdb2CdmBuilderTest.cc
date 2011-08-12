@@ -763,7 +763,7 @@ BOOST_FIXTURE_TEST_CASE(insertsEntriesForMissingVersion, Wdb2CdmBuilderFixture)
 	const CDMDimension & versionDimension = cdm.getDimension("ensemble_member");
 	BOOST_CHECK_EQUAL(3, versionDimension.getLength());
 
-	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), 1/*t("2011-03-31 18:00:00")*/);
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(cdmId(), 1/*t("2011-03-31 18:00:00")*/);
 
 	BOOST_CHECK_EQUAL(3, gids.size());
 	BOOST_REQUIRE(gids.size() >= 3);
@@ -804,7 +804,7 @@ BOOST_FIXTURE_TEST_CASE(sliceReferenceTime, Wdb2CdmBuilderFixture)
 	SliceBuilder slicer(cdm, tr.cfName(defaultParameter.name()));
 	slicer.setStartAndSize(wdb::TimeHandler::referenceTimeName, 2, 1);
 
-	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), slicer, cdm);
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(cdmId(), slicer, cdm);
 
 	BOOST_REQUIRE_LE(2, gids.size());
 	BOOST_CHECK_EQUAL(4, gids[0]);
@@ -847,7 +847,7 @@ BOOST_FIXTURE_TEST_CASE(sliceLevel, Wdb2CdmBuilderFixture)
 	SliceBuilder slicer(cdm, tr.cfName(defaultParameter.name()));
 	slicer.setStartAndSize("height", 1, 2);
 
-	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(defaultParameter.name(), slicer, cdm);
+	std::vector<wdb::Wdb2CdmBuilder::gid> gids = di.getGridIdentifiers(cdmId(), slicer, cdm);
 
 	BOOST_REQUIRE_LE(2, gids.size());
 	BOOST_CHECK_EQUAL(1, gids[0]);

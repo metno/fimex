@@ -79,8 +79,8 @@ private:
 
 	boost::shared_ptr<Data> cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const;
 
-	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos, const std::string & wdbName) const;
-	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb, const std::string & wdbName) const;
+	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const;
+	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const;
 
 	class InternalData;
 	InternalData * d_;

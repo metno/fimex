@@ -74,16 +74,20 @@ void Wdb2CdmBuilder::populate(CDM & cdm) const
 
 bool Wdb2CdmBuilder::isDatabaseField(const std::string & variableName) const
 {
-	return index_.hasParameter(variableName);
+	const std::string & wdbName = getWdbName(variableName);
+	return index_.hasParameter(wdbName);
 }
 
-std::set<float> Wdb2CdmBuilder::getLevelValues(const std::string & levelName) const
+std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & varName, unsigned unLimDimPos) const
 {
-	return index_.getLevelValues(levelName);
+	return index_.getData(getWdbName(varName), unLimDimPos);
 }
 
-std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & wdbName, const SliceBuilder & slicer, const CDM & cdm) const
+
+std::vector<Wdb2CdmBuilder::gid> Wdb2CdmBuilder::getGridIdentifiers(const std::string & varName, const SliceBuilder & slicer, const CDM & cdm) const
 {
+	const std::string & wdbName = getWdbName(varName);
+
 	std::vector<std::string> dimensions;
 	getDimensionList(dimensions, wdbName);
 
@@ -163,22 +167,22 @@ namespace
 	}
 }
 
-void Wdb2CdmBuilder::getDimensionList(std::vector<std::string> & out, const std::string & parameter) const
+void Wdb2CdmBuilder::getDimensionList(std::vector<std::string> & out, const std::string & wdbParameter) const
 {
 	gridInformation().addSpatialDimensions(out);
 
-	if ( index_.versionsForParameter(parameter).size() > 1 )
-		out.push_back("ensemble_member");
-	if ( index_.levelsForParameter(parameter).size() > 1 )
-		out.push_back(config_.cfName(index_.levelTypeForParameter(parameter).name()));
-	if ( index_.timesForParameter(parameter).size() > 1 )
+	if ( index_.versionsForParameter(wdbParameter).size() > 1 )
+		out.push_back(VersionHandler::cfName());
+	if ( index_.levelsForParameter(wdbParameter).size() > 1 )
+		out.push_back(getCfName(index_.levelTypeForParameter(wdbParameter).name()));
+	if ( index_.timesForParameter(wdbParameter).size() > 1 )
 	{
-		if ( index_.referenceTimesForParameter(parameter).size() > 1 )
+		if ( index_.referenceTimesForParameter(wdbParameter).size() > 1 )
 			out.push_back(TimeHandler::timeOffsetName);
 		else
 			out.push_back(TimeHandler::validTimeName);
 	}
-	if ( index_.referenceTimesForParameter(parameter).size() > 1 )
+	if ( index_.referenceTimesForParameter(wdbParameter).size() > 1 )
 		out.push_back(TimeHandler::referenceTimeName);
 }
 
@@ -191,7 +195,7 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 			throw CDMException("Internal error - unable to find grid mapping"); // should never happen
 		GridData::GridInformationPtr gridInfo = find->second;
 
-		std::string dimension = config_.cfName(parameter);
+		std::string dimension = getCfName(parameter);
 
 		std::vector<std::string> dimensions;
 		getDimensionList(dimensions, parameter);
@@ -211,6 +215,31 @@ void Wdb2CdmBuilder::addParameterVariables_(CDM & cdm) const
 		BOOST_FOREACH( const CDMAttribute & attribute, attributes )
 			cdm.addAttribute(dimension, attribute);
 	}
+}
+
+const std::string & Wdb2CdmBuilder::getCfName(const std::string & wdbName) const
+{
+	std::string cfName = config_.cfName(wdbName);
+
+	// We store all translations for later retrieval by the getWdbName method.
+	CfNameToWdbName::iterator find = usedTranslations.find(cfName);
+	if ( find == usedTranslations.end() )
+		find = usedTranslations.insert(std::make_pair(cfName, wdbName)).first;
+	else // Sanity check translation
+		if( find->second != wdbName )
+			throw std::runtime_error("Multiple translations for same variable: " + cfName);
+
+	return find->first;
+}
+
+const std::string & Wdb2CdmBuilder::getWdbName(const std::string & cfName) const
+{
+	CfNameToWdbName::const_iterator find = usedTranslations.find(cfName);
+	if ( find == usedTranslations.end() )
+		return cfName;
+		//throw std::runtime_error("internal error: No translation registered internally for " + cfName);
+
+	return find->second;
 }
 
 

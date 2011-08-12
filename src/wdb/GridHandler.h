@@ -53,7 +53,7 @@ public:
 
 	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
-	virtual bool canHandle(const std::string & wdbName) const;
+	virtual bool canHandle(const std::string & cfName) const;
 
 private:
 	const wdb::GridInformation & gridInfo_() const;

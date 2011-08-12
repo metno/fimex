@@ -78,9 +78,9 @@ boost::shared_ptr<Data> GridHandler::getData(const CDMVariable & variable, size_
 	return gridInfo_().getField(variable);
 }
 
-bool GridHandler::canHandle(const std::string & wdbName) const
+bool GridHandler::canHandle(const std::string & cfName) const
 {
-	return gridInfo_().canHandle(wdbName);
+	return gridInfo_().canHandle(cfName);
 }
 
 const wdb::GridInformation & GridHandler::gridInfo_() const

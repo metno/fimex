@@ -121,11 +121,11 @@ boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_
 	return ret;
 }
 
-bool TimeHandler::canHandle(const std::string & wdbName) const
+bool TimeHandler::canHandle(const std::string & cfName) const
 {
-	return wdbName == validTimeName
-			or wdbName == referenceTimeName
-			or wdbName == timeOffsetName;
+	return cfName == validTimeName
+			or cfName == referenceTimeName
+			or cfName == timeOffsetName;
 }
 
 void TimeHandler::addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const

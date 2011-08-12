@@ -56,23 +56,25 @@ void LevelHandler::addToCdm(CDM & cdm) const
 	BOOST_FOREACH(const std::string & parameter, index_.allParameters())
 	{
 		const LevelType & levelType = index_.levelTypeForParameter(parameter);
-		std::string levelName = levelType.name();
-		if ( addedLevels.find(levelName) == addedLevels.end() )
+		std::string wdbLevelName = levelType.name();
+		if ( addedLevels.find(wdbLevelName) == addedLevels.end() )
 		{
 			const std::vector<float> & levels = index_.levelsForParameter(parameter);
 			if ( levels.size() > 1 )
 			{
-				const std::string & dimension = config_.cfName(levelName);
+				const std::string & cfDimension = config_.cfName(wdbLevelName);
 
-				cdm.addDimension(CDMDimension(dimension, levels.size()));
+				levels_[cfDimension] = wdbLevelName;
 
-				cdm.addVariable(CDMVariable(dimension, CDM_FLOAT, std::vector<std::string>(1, dimension)));
+				cdm.addDimension(CDMDimension(cfDimension, levels.size()));
 
-				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(levelName, levelType.unit()) )
-					cdm.addAttribute(dimension, attribute);
-				cdm.addAttribute(dimension, CDMAttribute("axis", "Z"));
+				cdm.addVariable(CDMVariable(cfDimension, CDM_FLOAT, std::vector<std::string>(1, cfDimension)));
 
-				addedLevels.insert(levelName);
+				BOOST_FOREACH( const CDMAttribute & attribute, config_.getAttributes(wdbLevelName, levelType.unit()) )
+					cdm.addAttribute(cfDimension, attribute);
+				cdm.addAttribute(cfDimension, CDMAttribute("axis", "Z"));
+
+				addedLevels.insert(wdbLevelName);
 			}
 		}
 	}
@@ -80,7 +82,7 @@ void LevelHandler::addToCdm(CDM & cdm) const
 
 boost::shared_ptr<Data> LevelHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
-	const std::set<float> & levels =  index_.getLevelValues(config_.wdbName(variable.getName()));
+	const std::set<float> & levels =  index_.getLevelValues(wdbFromCf_(variable.getName()));
 
 	boost::shared_ptr<Data> ret = createData(CDM_FLOAT, levels.size());
 
@@ -90,9 +92,18 @@ boost::shared_ptr<Data> LevelHandler::getData(const CDMVariable & variable, size
 	return ret;
 }
 
-bool LevelHandler::canHandle(const std::string & wdbName) const
+bool LevelHandler::canHandle(const std::string & cfName) const
 {
+	std::string wdbName = wdbFromCf_(cfName);
 	return index_.hasLevel(wdbName);
+}
+
+std::string LevelHandler::wdbFromCf_(const std::string & cfName) const
+{
+	std::map<std::string, std::string>::const_iterator find = levels_.find(cfName);
+	if ( find == levels_.end() )
+		return std::string();
+	return find->second;
 }
 
 }

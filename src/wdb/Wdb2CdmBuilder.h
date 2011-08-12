@@ -81,36 +81,13 @@ public:
 	 */
 	bool isDatabaseField(const std::string & variableName) const;
 
-	/**
-	 * Does the given name refer to a level?
-	 */
-	bool isLevel(const std::string & levelName) const
-	{
-		try
-		{
-			getLevelValues(levelName);
-			return true;
-		}
-		catch (...)
-		{
-			return false;
-		}
-	}
-
-	/**
-	 * Get all values for the given level type
-	 */
-	std::set<float> getLevelValues(const std::string & levelName) const;
 
 	/**
 	 * get all grid idenitfiers for the given variable name and timestep
 	 */
-	std::vector<gid> getGridIdentifiers(const std::string & wdbName, unsigned unLimDimPos) const
-	{
-		return index_.getData(wdbName, unLimDimPos);
-	}
+	std::vector<gid> getGridIdentifiers(const std::string & varName, unsigned unLimDimPos) const;
 
-	std::vector<gid> getGridIdentifiers(const std::string & wdbName, const SliceBuilder & slicer, const CDM & cdm) const;
+	std::vector<gid> getGridIdentifiers(const std::string & varName, const SliceBuilder & slicer, const CDM & cdm) const;
 
 	/**
 	 * Get information about the grid in use.
@@ -139,13 +116,15 @@ public:
 
 private:
 
-	void getDimensionList(std::vector<std::string> & out, const std::string & parameter) const;
+	void getDimensionList(std::vector<std::string> & out, const std::string & wdbParameter) const;
 
 	void addDimensions_(CDM & cdm) const;
 	void addVersionDimension_(CDM & cdm) const;
 
 	void addParameterVariables_(CDM & cdm) const;
 
+	const std::string & getCfName(const std::string & wdbName) const;
+	const std::string & getWdbName(const std::string & cfName) const;
 
 	const WdbIndex index_;
 	const GlobalWdbConfiguration & config_;
@@ -154,6 +133,9 @@ private:
 	GridSpecMap grids_;
 
 	std::vector<DataHandler::Ptr> dataHandlers_;
+
+	typedef std::map<std::string, std::string> CfNameToWdbName;
+	mutable CfNameToWdbName usedTranslations;
 };
 
 }

@@ -48,7 +48,9 @@ public:
 
 	boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
-	bool canHandle(const std::string & wdbName) const;
+	bool canHandle(const std::string & cfName) const;
+
+	static std::string cfName();
 
 private:
 	const WdbIndex & index_;

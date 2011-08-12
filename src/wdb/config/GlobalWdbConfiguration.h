@@ -68,13 +68,6 @@ public:
 	 */
 	std::string cfName(const std::string & wdbName) const;
 
-	/**
-	 * Translate a cf standard name (value- or level-) into a wdb parameter
-	 * name. If no explicit translations are given in configuration - make
-	 * a guess.
-	 */
-	std::string wdbName(const std::string & cfName) const;
-
 	/// A collection of attributes
 	typedef std::vector<CDMAttribute> AttributeList;
 

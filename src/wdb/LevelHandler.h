@@ -30,6 +30,7 @@
 #define LEVELHANDLER_H_
 
 #include "DataHandler.h"
+#include <map>
 
 namespace MetNoFimex
 {
@@ -47,11 +48,14 @@ public:
 
 	boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
-	bool canHandle(const std::string & wdbName) const;
+	bool canHandle(const std::string & cfName) const;
 
 private:
+	std::string wdbFromCf_(const std::string & cfName) const;
+
 	const WdbIndex & index_;
 	const GlobalWdbConfiguration & config_;
+	mutable std::map<std::string, std::string> levels_; // cf name to wdb name
 };
 
 }

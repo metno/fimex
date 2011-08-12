@@ -54,13 +54,13 @@ void VersionHandler::addToCdm(CDM & cdm) const
 		const std::vector<int> & versions = index_.versionsForParameter(parameter);
 		if ( versions.size() > 1 )
 		{
-			std::string dimension = "ensemble_member";
+			std::string dimension = cfName();
 			cdm.addDimension(CDMDimension(dimension, versions.size()));
 
 			cdm.addVariable(CDMVariable(dimension, CDM_INT, std::vector<std::string>(1, dimension)));
 
 			cdm.addAttribute(dimension, CDMAttribute("long_name", "ensemble run number"));
-			//cdm.addAttribute(dimension, CDMAttribute("standard_name", "ensemble_member"));
+			//cdm.addAttribute(dimension, CDMAttribute("standard_name", cfName()));
 			//cdm.addAttribute(dimension, CDMAttribute("axis", "Ensemble"));
 
 			versions_ = versions;
@@ -81,11 +81,15 @@ boost::shared_ptr<Data> VersionHandler::getData(const CDMVariable & variable, si
 
 }
 
-bool VersionHandler::canHandle(const std::string & wdbName) const
+bool VersionHandler::canHandle(const std::string & cfName) const
 {
-	return wdbName == "ensemble_member";
+	return cfName == VersionHandler::cfName();
 }
 
+std::string VersionHandler::cfName()
+{
+	return "ensemble_member";
+}
 
 }
 }

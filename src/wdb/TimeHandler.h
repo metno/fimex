@@ -70,7 +70,7 @@ public:
 	 * Does the given cdm variable name refer to anything that this object can
 	 * handle via the getData method?
 	 */
-	virtual bool canHandle(const std::string & wdbName) const;
+	virtual bool canHandle(const std::string & cfName) const;
 
 	virtual void addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const;
 

@@ -117,9 +117,8 @@ boost::shared_ptr<Data> WdbCDMReader::getDataSlice(
 
 	const CDMVariable& variable = cdm_->getVariable(varName);
 
-	const std::string & wdbName = d_->translator->wdbName(varName);
-	if ( d_->dataIndex->isDatabaseField(wdbName) )
-		return getDatabaseFields(variable, unLimDimPos, wdbName);
+	if ( d_->dataIndex->isDatabaseField(varName) )
+		return getDatabaseFields(variable, unLimDimPos);
 	else
 	{
 		BOOST_FOREACH(const wdb::DataHandler::Ptr & handler, d_->dataIndex->dataHandlers())
@@ -135,9 +134,8 @@ boost::shared_ptr<Data> WdbCDMReader::getDataSlice(const std::string& varName, c
 
 	const CDMVariable& variable = cdm_->getVariable(varName);
 
-	const std::string & wdbName = d_->translator->wdbName(varName);
-	if ( d_->dataIndex->isDatabaseField(wdbName) )
-		return getDatabaseFields(variable, sb, wdbName);
+	if ( d_->dataIndex->isDatabaseField(varName) )
+		return getDatabaseFields(variable, sb);
 	else
 		return CDMReader::getDataSlice(varName, sb);
 }
@@ -222,15 +220,15 @@ boost::shared_ptr<Data> WdbCDMReader::cutGrid(const boost::shared_ptr<Data> & d,
 	return d->slice(orgDimSize, startDims, outputDimSize);
 }
 
-boost::shared_ptr<Data> WdbCDMReader::getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos, const std::string & wdbName) const
+boost::shared_ptr<Data> WdbCDMReader::getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const
 {
-	std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, unLimDimPos);
+	std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(variable.getName(), unLimDimPos);
 	return extractDataFromField(variable, fieldIdentifiers);
 }
 
-boost::shared_ptr<Data> WdbCDMReader::getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb, const std::string & wdbName) const
+boost::shared_ptr<Data> WdbCDMReader::getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const
 {
-	std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(wdbName, sb, * cdm_);
+	std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(variable.getName(), sb, * cdm_);
 	boost::shared_ptr<Data> ret = extractDataFromField(variable, fieldIdentifiers);
 	return cutGrid(ret, variable, sb);
 }

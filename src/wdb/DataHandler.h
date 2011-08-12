@@ -67,7 +67,7 @@ public:
 	 * Does the given cdm variable name refer to anything that this object can
 	 * handle via the getData method?
 	 */
-	virtual bool canHandle(const std::string & wdbName) const =0;
+	virtual bool canHandle(const std::string & cfName) const =0;
 
 	/**
 	 * Override this if subclass creates variables that needs entries in the coordinates attribute

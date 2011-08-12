@@ -77,15 +77,6 @@ std::string GlobalWdbConfiguration::cfName(const std::string & wdbName) const
 	return boost::algorithm::replace_all_copy(wdbName, " ", "_");
 }
 
-std::string GlobalWdbConfiguration::wdbName(const std::string & cfName) const
-{
-	NameTranslation::const_iterator find = cf2wdb_.find(cfName);
-	if ( find != cf2wdb_.end() )
-		return find->second;
-
-	return boost::algorithm::replace_all_copy(cfName, "_", " ");
-}
-
 namespace
 {
 	template <typename T>
