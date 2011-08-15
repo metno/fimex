@@ -70,20 +70,20 @@ public:
 	 * @param attName original attribute name (before config: newname)
 	 * @return an attribute contained in the writers attribute, possibly added by config
 	 */
-	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException);
+	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
 
 
 
 private:
-	void init() throw(CDMException);
-	void initNcmlReader(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
-	void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
-	void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
-	void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
+	void init();
+	void initNcmlReader(std::auto_ptr<XMLDoc>& doc);
+	void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc);
+	void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc);
+	void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc);
 	/** clear all fields to remove */
-	void initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException);
+	void initRemove(std::auto_ptr<XMLDoc>& doc);
 	/** test if the variable exists in the cdmReader or throw an CDMException */
-	void testVariableExists(const std::string& varName) throw(CDMException);
+	void testVariableExists(const std::string& varName);
 
 	NcDimMap defineDimensions();
 	NcVarMap defineVariables(const NcDimMap& dimMap);

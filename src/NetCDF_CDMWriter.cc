@@ -132,6 +132,15 @@ NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 }
 #endif /* HAVE_NCFILE_FILEFORMAT */
 
+void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
+{
+    XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    if (size == 0)
+        throw CDMException("no root element (/cdm_ncwriter_config) in " + filename);
+}
+
 NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
 : CDMWriter(cdmReader, outputFile)
 {
@@ -141,6 +150,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 		doc = std::auto_ptr<XMLDoc>(0);
 	} else {
 		doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
+		checkDoc(doc, configFile);
 	}
 	ncErr = std::auto_ptr<NcError>(new NcError(NcError::verbose_nonfatal));
 #ifdef HAVE_NCFILE_FILEFORMAT
@@ -175,7 +185,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 
 }
 
-void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
 {
     if (doc.get() != 0) {
         XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/ncmlConfig");
@@ -190,7 +200,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc) throw(CDMExcep
     cdm = cdmReader->getCDM();
 }
 
-void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
 {
 	if (doc.get() != 0) {
 		{
@@ -229,7 +239,7 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc) throw(CDMException
 	}
 }
 
-void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc)
 {
 	if (doc.get() != 0) {
 		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@newname]");
@@ -249,7 +259,7 @@ void NetCDF_CDMWriter::initFillRenameDimension(std::auto_ptr<XMLDoc>& doc) throw
 	}
 }
 
-void NetCDF_CDMWriter::testVariableExists(const std::string& varName) throw(CDMException)
+void NetCDF_CDMWriter::testVariableExists(const std::string& varName)
 {
 	try {
 		cdm.getVariable(varName);
@@ -258,7 +268,7 @@ void NetCDF_CDMWriter::testVariableExists(const std::string& varName) throw(CDME
 	}
 }
 
-void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
 {
 	if (doc.get() != 0) {
 		XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/variable[@newname]");
@@ -310,7 +320,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc) throw(
 
 }
 
-void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc) throw(CDMException)
+void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc)
 {
 	// make a complete copy of the original attributes
 	if (doc.get() != 0) {
@@ -542,7 +552,7 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 	}
 }
 
-void NetCDF_CDMWriter::init() throw(CDMException)
+void NetCDF_CDMWriter::init()
 {
 	// write metadata
 	if (! ncFile->is_valid()) {
@@ -558,7 +568,7 @@ NetCDF_CDMWriter::~NetCDF_CDMWriter()
 {
 }
 
-const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException)
+const CDMAttribute& NetCDF_CDMWriter::getAttribute(const std::string& varName, const std::string& attName) const
 {
 	return cdm.getAttribute(varName, attName);
 }
