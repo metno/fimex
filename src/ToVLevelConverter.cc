@@ -244,6 +244,8 @@ const vector<double> GeopotentialToHeightConverter::operator()(size_t x, size_t 
         double hg = geopot_[((t*nz_ + z)*ny_ + y)*nx_ +x];
         // correction for high levels (1/r^2 dependency of g => 1/r dependency of hg (integral of 1/r^2))
         h.at(z) =  hg * (MIFI_EARTH_RADIUS_M  / (MIFI_EARTH_RADIUS_M - hg));
+//        if (x == 0 && y == 0 && t == 0)
+//            cerr << z << ": " << hg << " ... " << h.at(z) << "\n";
     }
     return h;
 }

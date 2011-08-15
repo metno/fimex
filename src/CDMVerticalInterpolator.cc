@@ -291,7 +291,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(boost::shared
                 }
                 // pIn should be growing (top (e.g. pres=10 to bottom pres=1000)
                 bool reversePIn = false;
-                if ((pIn[1] - pIn[0]) < 0) {
+                if ((pIn[nz-1] - pIn[0]) < 0) {
                     reversePIn = true;
                     reverse(pIn.begin(), pIn.end());
                 }
