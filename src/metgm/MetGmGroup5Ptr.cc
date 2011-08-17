@@ -77,7 +77,7 @@ void MetGmGroup5Ptr::toMetGmLayout()
             for(size_t y = 0; y < ny; ++y) {
                 for(size_t x = 0; x < nx; ++x) {
                     float value = *slicePos++;
-                    if (isinf(value)) {
+                    if (isnan(value)) {
                         value = 9999.f;
                     }
                     sliceT[nz*(nx*y + x) + z] = value;
