@@ -25,6 +25,8 @@
 #define UTILS_H_
 
 #include <vector>
+#include <utility>
+#include <iterator>
 #include <sstream>
 #include <cmath>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -62,6 +64,50 @@ std::string join(InputIterator start, InputIterator end, std::string delim = ","
     }
     buffer << *current;
     return buffer.str();
+}
+
+/**
+ * Find closest distinct elements in an unordered list. The order of elements is not defined.
+ *
+ * Except for the case where all elements are equal, it is always ensured that the neighbors
+ * are distinct.
+
+ * @param start
+ * @param end
+ * @return pair of the positions of a and b, with a closer than b
+ */
+template<typename InputIterator>
+std::pair<typename std::iterator_traits<InputIterator>::difference_type, typename std::iterator_traits<InputIterator>::difference_type>
+find_closest_distinct_elements(InputIterator start, InputIterator end, double x)
+{
+    using namespace std;
+    typename iterator_traits<InputIterator>::difference_type retVal1 = 0;
+    typename iterator_traits<InputIterator>::difference_type retVal2 = 0;
+    InputIterator cur = start;
+    typename iterator_traits<InputIterator>::value_type v1;
+    double v1Diff, v2Diff;
+    if (start != end) {
+        v1 = *start;
+        v1Diff = abs(x-*start);
+        v2Diff = v1Diff;
+    }
+    while (cur != end) {
+        double vDiff = fabs(x-*cur);
+        if (vDiff <= v2Diff) {
+            if (vDiff < v1Diff) {
+                retVal2 = retVal1;
+                v2Diff = v1Diff;
+                v1 = *cur;
+                retVal1 = distance(start, cur);
+                v1Diff = vDiff;
+            } else if (*cur != v1) {
+                retVal2 = distance(start, cur);
+                v2Diff = vDiff;
+            }
+        } // else nothing to be done
+        cur++;
+    }
+    return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(retVal1, retVal2);
 }
 
 /**

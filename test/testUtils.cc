@@ -88,6 +88,31 @@ BOOST_AUTO_TEST_CASE(test_tokenizeDotted)
 
 }
 
+BOOST_AUTO_TEST_CASE(test_find_closest_distinct_elements)
+{
+    int ary[8] = {1, 2, 3, 4, 4, -1, -2, 5};
+    pair<size_t, size_t> p = find_closest_distinct_elements(&ary[0], &ary[0]+8, 1.5);
+    BOOST_CHECK_EQUAL(p.first, 0);
+    BOOST_CHECK_EQUAL(p.second, 1);
+
+    p = find_closest_distinct_elements(&ary[0], &ary[0]+8, 4);
+    BOOST_CHECK_EQUAL(p.first, 3);
+    BOOST_CHECK_EQUAL(p.second, 7);
+
+    p = find_closest_distinct_elements(&ary[0], &ary[0]+8, -1);
+    BOOST_CHECK_EQUAL(p.first, 5);
+    BOOST_CHECK_EQUAL(p.second, 6);
+
+    p = find_closest_distinct_elements(&ary[0], &ary[0]+8, -3);
+    BOOST_CHECK_EQUAL(p.first, 6);
+    BOOST_CHECK_EQUAL(p.second, 5);
+
+    p = find_closest_distinct_elements(&ary[0], &ary[0]+8, 5);
+    BOOST_CHECK_EQUAL(p.first, 7);
+    BOOST_CHECK_EQUAL(p.second, 3);
+
+}
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

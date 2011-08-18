@@ -289,36 +289,14 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(boost::shared
                     throw CDMException("input level size: "
                             + type2string(pIn.size()) + " must be " + type2string(nz));
                 }
-                // pIn should be growing (top (e.g. pres=10 to bottom pres=1000)
-                bool reversePIn = false;
-                if ((pIn[nz-1] - pIn[0]) < 0) {
-                    reversePIn = true;
-                    reverse(pIn.begin(), pIn.end());
-                }
                 for (size_t k = 0; k < pOut.size(); k++) {
-                    // find element
-                    vector<double>::iterator ub = upper_bound(pIn.begin(), pIn.end(), pOut[k]);
-                    size_t ubPos = distance(pIn.begin(), ub);
-                    if (ub == pIn.end()) {
-                        // extrapolation to pIn[pIn.size()-1]
-                        ubPos = pIn.size() - 1;
-                    } else if (ubPos <= 1) {
-                        // possibly extrapolation before pIn[0]
-                        ubPos = 1;
-                    } else {
-                        // intrapolation, nothing needs to change
-                    }
-                    size_t elUbPos = ubPos;
-                    size_t elUbPosM1 = ubPos - 1;
-                    if (reversePIn) {
-                        elUbPos = pIn.size() - 1 - ubPos;
-                        elUbPosM1 = pIn.size() - 1 - (ubPos - 1);
-                    }
-                    size_t inPos = mifi_3d_array_position(x, y, elUbPos, nx, ny, nz);
-                    size_t inPosM1 = mifi_3d_array_position(x, y, elUbPosM1, nx, ny, nz);
+                    pair<size_t, size_t> pos = find_closest_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
+                    cerr << k << ": " << pOut[k] << " (" << pIn[pos.first] << "-" << pIn[pos.second] << ")" << endl;
+                    size_t inPos1 = mifi_3d_array_position(x, y, pos.first, nx, ny, nz);
+                    size_t inPos2 = mifi_3d_array_position(x, y, pos.second, nx, ny, nz);
                     size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
-                    intFunc(&inData[inPos], &inData[inPosM1], &outData[outPos],
-                            1, pIn.at(ubPos), pIn.at(ubPos - 1), pOut.at(k));
+                    intFunc(&inData[inPos1], &inData[inPos2], &outData[outPos],
+                            1, pIn.at(pos.first), pIn.at(pos.second), pOut.at(k));
                 }
             }
         }
