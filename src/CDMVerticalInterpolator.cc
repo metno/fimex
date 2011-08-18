@@ -291,7 +291,6 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(boost::shared
                 }
                 for (size_t k = 0; k < pOut.size(); k++) {
                     pair<size_t, size_t> pos = find_closest_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
-                    cerr << k << ": " << pOut[k] << " (" << pIn[pos.first] << "-" << pIn[pos.second] << ")" << endl;
                     size_t inPos1 = mifi_3d_array_position(x, y, pos.first, nx, ny, nz);
                     size_t inPos2 = mifi_3d_array_position(x, y, pos.second, nx, ny, nz);
                     size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
