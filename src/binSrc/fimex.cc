@@ -36,6 +36,7 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/CDMVerticalInterpolator.h"
+#include "fimex/CDMPressureConversions.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
@@ -188,6 +189,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "verticalInterpolate.type", vm);
     writeOption<string>(out, "verticalInterpolate.level1", vm);
     writeOption<string>(out, "verticalInterpolate.level2", vm);
+    writeVectorOptionString(out, "verticalInterpolate.dataConversion", vm);
     writeOptionAny(out, "verticalInterpolate.printNcML", vm);
     writeOptionAny(out, "verticalInterpolate.printCS", vm);
 	writeOption<string>(out, "timeInterpolate.timeSpec", vm);
@@ -404,6 +406,17 @@ static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map
         return dataReader;
     }
     LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
+    if (vm.count("verticalInterpolate.dataConversion")) {
+        vector<string> operations = vm["verticalInterpolate.dataConversion"].as<vector<string> >();
+        boost::shared_ptr<CDMPressureConversions> pressConv;
+        try {
+            pressConv = boost::shared_ptr<CDMPressureConversions>(new CDMPressureConversions(dataReader, operations));
+            dataReader = pressConv;
+        } catch (CDMException& ex) {
+            LOG4FIMEX(logger, Logger::ERROR, "invalid verticalInterpolate.dataConversion: " + join(operations.begin(), operations.end(), ",") + " " + ex.what());
+            exit(1);
+        }
+    }
     if (! (vm.count("verticalInterpolate.method") && vm.count("verticalInterpolate.level1"))) {
         LOG4FIMEX(logger, Logger::ERROR, "verticalInterpolate needs method and level1");
         exit(1);
@@ -624,6 +637,7 @@ int run(int argc, char* args[])
         ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
+        ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T or add4Dpressure")
         ("verticalInterpolate.printNcML", "print NcML description of vertcial interpolator")
         ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")

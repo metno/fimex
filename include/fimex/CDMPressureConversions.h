@@ -52,6 +52,8 @@ public:
      * @param operations list of operations
      *    - theta2T translates theta (detected by standard_name) to air_temperature,
      *    - add4Dpressure will add variable pressure(t,k,x,y) comparable to the first 4D field found
+     *
+     * @warning the routine does not handle invalid values, except float/double nans
      */
     CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations);
     virtual ~CDMPressureConversions() {}
