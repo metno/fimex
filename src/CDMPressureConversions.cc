@@ -57,7 +57,7 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
 {
     p_->ops = operations;
     *cdm_ = dataReader->getCDM();
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(getCDM());
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(dataReader_->getCDM());
 
     for (vector<string>::iterator op = p_->ops.begin(); op != p_->ops.end(); ++op) {
         if (*op == "theta2T") {
@@ -65,7 +65,7 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
             map<string, string> atts;
             atts["standard_name"] = "air_potential_temperature";
             vector<string> thetaV = cdm_->findVariables(atts, dims);
-            if (!thetaV.size() > 0) {
+            if (thetaV.size() == 0) {
                 LOG4FIMEX(logger, Logger::WARN, "no air_potential_temperature (theta) found");
             } else {
                 vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
@@ -80,7 +80,6 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                     cdm_->removeVariable(thetaV[0]);
                     p_->oldTheta = thetaV[0];
                     string varName = "air_temperature";
-                    p_->changeVars.push_back(varName);
                     cdm_->addVariable(CDMVariable(varName, thetaType, shape));
                     for (size_t i = 0; i < thetaAtts.size(); i++) {
                         if (thetaAtts[i].getName() != "standard_name" &&
@@ -89,10 +88,39 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                         }
                     }
                     cdm_->addAttribute(varName, CDMAttribute("standard_name", "air_temperature"));
+                    p_->changeVars.push_back(varName);
                 }
             }
         } else if (*op == "add4Dpressure") {
-            // TODO
+            if (p_->cs.get() == 0) {
+                for (size_t i = 0; i < coordSys.size(); i++) {
+                    if (coordSys[i]->getGeoXAxis().get() != 0 &&
+                            coordSys[i]->getGeoYAxis().get() != 0 &&
+                            coordSys[i]->getGeoZAxis().get() != 0 &&
+                            coordSys[i]->getTimeAxis().get() != 0) {
+                        p_->cs = coordSys[i];
+                        break;
+                    }
+                }
+                if (p_->cs.get() == 0)
+                    throw CDMException("no x,y,z,t 4D-coordinate system found");
+            }
+            CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
+            size_t nx, ny, nz, nt;
+            bool tIsUnlimited;
+            CDMVerticalInterpolator::getSimpleAxes(p_->cs, dataReader_->getCDM(),
+                    xAxis, yAxis, zAxis, tAxis,
+                    nx, ny, nz, nt, tIsUnlimited);
+            vector<string> shape;
+            shape.push_back(xAxis->getShape()[0]);
+            shape.push_back(yAxis->getShape()[0]);
+            shape.push_back(zAxis->getShape()[0]);
+            shape.push_back(tAxis->getShape()[0]);
+            string varName = "air_pressure4D";
+            cdm_->addVariable(CDMVariable(varName, CDM_FLOAT, shape));
+            cdm_->addAttribute(varName, CDMAttribute("units", "hPa"));
+            cdm_->addAttribute(varName, CDMAttribute("standard_name", "air_pressure"));
+            p_->changeVars.push_back(varName);
         } else
             throw CDMException("unknown CDMPressureConversion-operation: " + *op);
     }
@@ -143,8 +171,25 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
             }
         }
         return createData(size, da);
+    } else if (varName == "air_pressure4D") {
+        const size_t size = nx*ny*nz*(nt-startT);
+        boost::shared_array<float> ary(new float[size]);
+        for (size_t t = startT; t < nt; t++) {
+            float *pos = &ary[(t-startT)*(nx*ny*nz)];
+            for (size_t y = 0; y < ny; y++) {
+                for (size_t x = 0; x < nx; x++) {
+                    vector<double> p = (*pConv)(x, y, t);
+                    assert(p.size() == nz);
+                    for (size_t z = 0; z < nz; z++) {
+                        // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
+                        pos[mifi_3d_array_position(x,y,z,nx,ny,nz)] = p[z];
+                    }
+                }
+            }
+        }
+        return createData(size, ary);
     }
-    //TODO
+
     throw CDMException("don't know what to to with variable varName");
 
 }
