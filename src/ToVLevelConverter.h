@@ -197,18 +197,18 @@ public:
 
 /**
  * Use geopotential height and altitude to calculate the
- * height above ground. A 1/r dependency for g is taken into account
- * for large heights. Coriolis-effects are not taken into account.
+ * height above ground (hg = geop.h. - alt)
  */
 class GeopotentialToHeightConverter : public ToVLevelConverter {
-    const boost::shared_array<double> geopot_;
+    const boost::shared_array<float> geopot_;
+    const boost::shared_array<float> alti_;
     size_t nx_;
     size_t ny_;
     size_t nz_;
     size_t nt_;
 public:
-    GeopotentialToHeightConverter(const boost::shared_array<double> geopotential, size_t nx, size_t ny, size_t nk, size_t nt)
-    : geopot_(geopotential), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
+    GeopotentialToHeightConverter(const boost::shared_array<float> geopotential, const boost::shared_array<float> altitude, size_t nx, size_t ny, size_t nk, size_t nt)
+    : geopot_(geopotential), alti_(altitude), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
     virtual const vector<double> operator()(size_t x, size_t y, size_t t);
 };
 

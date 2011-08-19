@@ -176,12 +176,22 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
             dims.push_back(zAxis->getShape()[0]);
             attrs["standard_name"] = "geopotential_height";
             vector<string> geoVars = reader->getCDM().findVariables(attrs, dims);
-            if (geoVars.size() > 0) {
+            dims.clear();
+            dims.push_back(xAxis->getShape()[0]);
+            dims.push_back(yAxis->getShape()[0]);
+            attrs["standard_name"] = "altitude";
+            vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
+            if (geoVars.size() > 0 && altVars.size() > 0) {
                 LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
                 boost::shared_ptr<Data> geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
                 if (geoPotData->size() != (nx * ny * nz * nt))
                     throw CDMException("geopotential height '" + geoVars[0] + "' has strange size: " + type2string(geoPotData->size()) + " != " + type2string(nx * ny * nz * nt));
-                heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asConstDouble(), nx, ny, nz, nt));
+                    LOG4FIMEX(logger, Logger::INFO, "using altitude "<<altVars[0]<<" to retrieve height");
+                    boost::shared_ptr<Data> altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
+                if (altData->size() != (nx * ny))
+                    throw CDMException("altitude '" + altVars[0] + "' has strange size: " + type2string(altData->size()) + " != " + type2string(nx * ny));
+                heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asConstFloat(), altData->asConstFloat(), nx, ny, nz, nt));
+                vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
             } else {
                 LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
                 boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
@@ -241,12 +251,8 @@ const vector<double> PressureToStandardHeightConverter::operator()(size_t x, siz
 const vector<double> GeopotentialToHeightConverter::operator()(size_t x, size_t y, size_t t) {
     vector<double> h(nz_);
     for (size_t z = 0; z < nz_; z++) {
-        double hg = geopot_[((t*nz_ + z)*ny_ + y)*nx_ +x];
-        // TODO formular should be h.at(z) = hg - altitude
-        // correction for high levels (1/r^2 dependency of g => 1/r dependency of hg (integral of 1/r^2))
-        h.at(z) =  hg * (MIFI_EARTH_RADIUS_M  / (MIFI_EARTH_RADIUS_M - hg));
-//        if (x == 0 && y == 0 && t == 0)
-//            cerr << z << ": " << hg << " ... " << h.at(z) << "\n";
+        float hg = geopot_[((t*nz_ + z)*ny_ + y)*nx_ +x];
+        h.at(z) =  static_cast<double>(hg - alti_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)]);
     }
     return h;
 }
