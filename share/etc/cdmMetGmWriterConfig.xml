@@ -49,8 +49,8 @@
         <attribute name="units"         value="m"                   type="string"/>
     </variable>
 
-    <metgm_parameter name="pressure" >
-        <attribute name="standard_name" value="pressure" type="string" />
+    <metgm_parameter name="air_pressure" >
+        <attribute name="standard_name" value="air_pressure" type="string" />
         <attribute name="metgm_p_id"    value="7"        type="short" />
         <attribute name="units"         value="hPa"                   type="string"/>
     </metgm_parameter>
