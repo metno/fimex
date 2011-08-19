@@ -30,6 +30,7 @@
 #include <sstream>
 #include <cmath>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <limits>
 #include "fimex/CDMException.h"
 
 namespace MetNoFimex
@@ -110,6 +111,60 @@ find_closest_distinct_elements(InputIterator start, InputIterator end, double x)
     return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(retVal1, retVal2);
 }
 
+/**
+ * Find closest distinct neighbor elements in an unordered list, with a <= x < b
+ * It might extrapolate if x is smaller than all elements (or x > all elements) and
+ * fall back to find_closest_distinct_elements()
+ *
+ * Except for the case where all elements are equal, it is always ensured that the neighbors
+ * are distinct.
+
+ * @param start
+ * @param end
+ * @return pair of the positions of a and b, with a closer than b
+ */
+template<typename InputIterator>
+std::pair<typename std::iterator_traits<InputIterator>::difference_type, typename std::iterator_traits<InputIterator>::difference_type>
+find_closest_neighbor_distinct_elements(InputIterator start, InputIterator end, double x)
+{
+    using namespace std;
+    if (start == end)
+        return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(0, 0);
+
+    InputIterator lowest = start;
+    InputIterator heighest = start;
+    InputIterator cur = start;
+    double lowDiff = x - *cur;
+    double heighDiff = *cur -x;
+    double maxDiff = std::numeric_limits<double>::max();
+    if (lowDiff < 0)
+        lowDiff = maxDiff;
+    if (heighDiff < 0)
+        heighDiff = maxDiff;
+    while (++cur != end) {
+        if (*cur <= x) {
+            double diff = x - *cur;
+            if (diff < lowDiff) {
+                lowDiff = diff;
+                lowest = cur;
+            }
+        } else {
+            double diff = *cur - x;
+            if (diff < heighDiff) {
+                heighDiff = diff;
+                heighest = cur;
+            }
+        }
+    }
+    if (lowDiff == maxDiff ||
+            heighDiff == maxDiff) {
+        // extrapolating
+        return find_closest_distinct_elements(start, end, x);
+    }
+
+    return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(distance(start, lowest), distance(start, heighest));
+
+}
 /**
  * Join values from an iterator of pointers to a string, using delimiter as separator.
  *

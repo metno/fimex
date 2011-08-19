@@ -292,7 +292,8 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr c
                            ") != " + type2string(data->size()));
     }
     const boost::shared_array<float> iData = data->asConstFloat();
-    boost::shared_array<float> oData(new float[nx*ny*pOut.size()*(nt-startT)]);
+    size_t oSize = nx*ny*pOut.size()*(nt-startT);
+    boost::shared_array<float> oData(new float[oSize]);
 
     // loop over data-array, interpolating cell for cell
     for (size_t t = startT; t < nt; ++t) {
@@ -308,16 +309,37 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr c
                             + type2string(pIn.size()) + " must be " + type2string(nz));
                 }
                 for (size_t k = 0; k < pOut.size(); k++) {
-                    pair<size_t, size_t> pos = find_closest_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
+                    pair<size_t, size_t> pos = find_closest_neighbor_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
                     size_t inPos1 = mifi_3d_array_position(x, y, pos.first, nx, ny, nz);
                     size_t inPos2 = mifi_3d_array_position(x, y, pos.second, nx, ny, nz);
                     size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
                     intFunc(&inData[inPos1], &inData[inPos2], &outData[outPos],
                             1, pIn.at(pos.first), pIn.at(pos.second), pOut.at(k));
+#if 0
+                    // bad input or extrapolation
+                    if (varName == "relative_humidity" && outData[outPos] > 100) {
+                        cerr << pIn.at(pos.first) << "," << pIn.at(pos.second) << ": " << pOut.at(k) << endl;
+                        cerr << inData[inPos1] << "," << inData[inPos2] << ": " << outData[outPos] << endl;
+                        if (pos.first > 0) {
+                            cerr << pIn.at(pos.first - 1) << endl;
+                        }
+                    }
+#endif
                 }
             }
         }
     }
+
+    // correct data going out of bounds
+    if (!isnan(cdm_->getValidMin(varName))) {
+        float minVal = static_cast<float>(cdm_->getValidMin(varName));
+        replace_if(&oData[0], &oData[0]+oSize, bind2nd(less<float>(), minVal), minVal);
+    }
+    if (!isnan(cdm_->getValidMax(varName))) {
+        float maxVal = static_cast<float>(cdm_->getValidMax(varName));
+        replace_if(&oData[0], &oData[0]+oSize, bind2nd(greater<float>(), maxVal), maxVal);
+    }
+
     return createData(nx*ny*pOut.size()*(nt-startT), oData);
 }
 

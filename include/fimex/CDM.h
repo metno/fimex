@@ -270,9 +270,22 @@ public:
 	/**
 	 * get the fill value of an variable (_FillValue attribute)
 	 *
-	 * @return value of _FillValue attribute, or MIFI_UNDEFINED_F
+	 * @return value of _FillValue attribute, or MIFI_UNDEFINED_D
 	 */
 	double getFillValue(const std::string& varName) const;
+    /**
+     * get the valid minimum value of an variable
+     *
+     * @return value of valid_min or valid_range attribute, or MIFI_UNDEFINED_D
+     */
+	double getValidMin(const std::string& varName) const;
+    /**
+     * get the valid maximum value of an variable
+     *
+     * @return value of valid_max or valid_range attribute, or MIFI_UNDEFINED_D
+     */
+	double getValidMax(const std::string& varName) const;
+
 	/**
 	 * get the value of the "units" attribute
 	 * @return unitsString or ""

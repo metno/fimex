@@ -476,8 +476,34 @@ double CDM::getFillValue(const std::string& varName) const
     if (getAttribute(varName, "_FillValue", attr)) {
         return attr.getData()->asDouble()[0];
     }
-	return MIFI_UNDEFINED_F;
+	return MIFI_UNDEFINED_D;
 }
+
+double CDM::getValidMin(const std::string& varName) const
+{
+    CDMAttribute attr;
+    if (getAttribute(varName, "valid_min", attr)) {
+        return attr.getData()->asDouble()[0];
+    } else if (getAttribute(varName, "valid_range", attr)) {
+        return attr.getData()->asDouble()[0];
+    }
+    return MIFI_UNDEFINED_D;
+}
+
+double CDM::getValidMax(const std::string& varName) const
+{
+    CDMAttribute attr;
+    if (getAttribute(varName, "valid_max", attr)) {
+        return attr.getData()->asDouble()[0];
+    } else if (getAttribute(varName, "valid_range", attr)) {
+        boost::shared_ptr<Data> data = attr.getData();
+        if (data->size() > 1) {
+            return data->asDouble()[1];
+        }
+    }
+    return MIFI_UNDEFINED_D;
+}
+
 
 std::string CDM::getUnits(const std::string& varName) const
 {
