@@ -25,12 +25,14 @@
  */
 
 #include "fimex/CDMPressureConversions.h"
+#include "fimex/CDMVerticalInterpolator.h"
 #include "ToVLevelConverter.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 
 namespace MetNoFimex
 {
@@ -45,6 +47,7 @@ struct CDMPressureConversionsImpl {
     boost::shared_ptr<ToVLevelConverter> pConv;
     vector<string> changeVars;
     string oldTheta;
+    boost::shared_ptr<const CoordinateSystem> cs;
 };
 
 CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations)
@@ -52,13 +55,11 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
 {
     p_->ops = operations;
     *cdm_ = dataReader->getCDM();
-    const CDM::VarVec& variables = cdm_->getVariables();
 
     // find a 4d variable coordSys
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     // get all coordinate systems from file
     vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_->getCDM());
-    CoordSysPtr cs;
     for (size_t i = 0; i < coordSys.size(); i++) {
         CoordinateSystem::ConstAxisPtr xAxis = coordSys[i]->getGeoXAxis();
         CoordinateSystem::ConstAxisPtr yAxis = coordSys[i]->getGeoYAxis();
@@ -70,16 +71,16 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                 yAxis->getShape().size() == 1 &&
                 zAxis->getShape().size() == 1 &&
                 tAxis->getShape().size() == 1) {
-            cs == coordSys[i];
+            p_->cs == coordSys[i];
         }
     }
-    if (cs.get() == 0)
+    if (p_->cs.get() == 0)
         throw CDMException("CDMPressureConversions could not find 4d coordinate system");
 
-    CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
-    CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
-    CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
-    CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis();
+    CoordinateSystem::ConstAxisPtr xAxis = p_->cs->getGeoXAxis();
+    CoordinateSystem::ConstAxisPtr yAxis = p_->cs->getGeoYAxis();
+    CoordinateSystem::ConstAxisPtr zAxis = p_->cs->getGeoZAxis();
+    CoordinateSystem::ConstAxisPtr tAxis = p_->cs->getTimeAxis();
 
 
     for (vector<string>::iterator op = p_->ops.begin(); op != p_->ops.end(); ++op) {
@@ -120,13 +121,24 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
     if (find(p_->changeVars.begin(), p_->changeVars.end(), varName) == p_->changeVars.end()) {
         return dataReader_->getDataSlice(varName, unLimDimPos);
     }
+    // get all axes
+    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
+    size_t nx, ny, nz, nt;
+    bool tIsUnlimited;
+    CDMVerticalInterpolator::getSimpleAxes(p_->cs, dataReader_->getCDM(),
+            xAxis, yAxis, zAxis, tAxis,
+            nx, ny, nz, nt, tIsUnlimited);
+    // changing t-loop if unlimited to a 1-time loop at correct position
+    size_t startT = 0;
+    if (tIsUnlimited) {
+        nt = unLimDimPos + 1;
+        startT = unLimDimPos;
+    }
 
-    //boost::shared_ptr<ToVLevelConverter> p_->pConv = ToVLevelConverter::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nt);
+    boost::shared_ptr<ToVLevelConverter> pConv = ToVLevelConverter::getPressureConverter(dataReader_, unLimDimPos, zAxis, nx, ny, (nt-startT));
     //TODO
-    throw CDMException("not implemented yet");
-
     if (varName == "air_temperature") {
-        // theta -> temp conversion
+
     }
 
 }

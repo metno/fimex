@@ -27,7 +27,6 @@
 #include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
-#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDM.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
@@ -197,65 +196,83 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getDataSlice(const std::string&
     return getLevelDataSlice(*varSysIt, varName, unLimDimPos);
 }
 
-boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos)
+void
+CDMVerticalInterpolator::getSimpleAxes(
+        const CoordSysPtr& cs,
+        const CDM& cdm,
+        CoordinateSystem::ConstAxisPtr& xAxis,
+        CoordinateSystem::ConstAxisPtr& yAxis,
+        CoordinateSystem::ConstAxisPtr& zAxis,
+        CoordinateSystem::ConstAxisPtr& tAxis,
+        size_t& nx, size_t& ny, size_t& nz, size_t& nt,
+        bool& tIsUnlimited)
 {
-    assert(cs->isCSFor(varName) && cs->isComplete(varName));
-    // get all axes
-    CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+    zAxis = cs->getGeoZAxis();
     assert(zAxis.get() != 0); // defined by construction of cs
-    size_t nz = 1;
+    nz = 1;
     {
         const vector<string>& shape = zAxis->getShape();
         if (shape.size() == 1) {
-            nz = cdm_->getDimension(shape.at(0)).getLength();
+            nz = cdm.getDimension(shape.at(0)).getLength();
         } else {
             throw CDMException("vertical interpolation not possible with 2d z-Axis");
         }
     }
     // detect x and y axis
-    size_t nx = 1;
-    CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
+    xAxis = cs->getGeoXAxis();
+    nx = 1;
     if (xAxis.get() != 0) {
         const vector<string>& shape = xAxis->getShape();
         if (shape.size() == 1) {
-            nx = cdm_->getDimension(shape.at(0)).getLength();
+            nx = cdm.getDimension(shape.at(0)).getLength();
         } else {
             throw CDMException("vertical interpolation not possible with 2d x-Axis");
         }
     }
-    size_t ny = 1;
-    CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+
+    yAxis = cs->getGeoYAxis();
+    ny = 1;
     if (yAxis.get() != 0) {
         const vector<string>& shape = yAxis->getShape();
         if (shape.size() == 1) {
-            ny = cdm_->getDimension(shape.at(0)).getLength();
+            ny = cdm.getDimension(shape.at(0)).getLength();
         } else {
             throw CDMException("vertical interpolation not possible with 2d y-Axis");
         }
     }
 
     // detect time axis
-    size_t nt = 1;
-    size_t startT = 0;
-    CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis();
+    tAxis = cs->getTimeAxis();
+    nt = 1;
     if (tAxis.get() != 0) {
         const vector<string>& shape = tAxis->getShape();
         if (shape.size() == 1) {
-            const CDMDimension& tDim = cdm_->getDimension(shape.at(0));
-            if (tDim.isUnlimited()) {
-                // artifically creating a loop of size 1 at correct position
-                nt = unLimDimPos + 1;
-                startT = unLimDimPos;
-            } else {
-                nt = tDim.getLength();
-                startT = 0;
-            }
+            const CDMDimension& tDim = cdm.getDimension(shape.at(0));
+            nt = tDim.getLength();
+            tIsUnlimited = tDim.isUnlimited();
         } else {
             throw CDMException(
                     "vertical interpolation not possible with 2d time-axis");
         }
     }
+}
 
+boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)
+{
+    assert(cs->isCSFor(varName) && cs->isComplete(varName));
+    // get all axes
+    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
+    size_t nx, ny, nz, nt;
+    bool tIsUnlimited;
+    getSimpleAxes(cs, dataReader_->getCDM(),
+            xAxis, yAxis, zAxis, tAxis,
+            nx, ny, nz, nt, tIsUnlimited);
+    // changing t-loop if unlimited to a 1-time loop at correct position
+    size_t startT = 0;
+    if (tIsUnlimited) {
+        nt = unLimDimPos + 1;
+        startT = unLimDimPos;
+    }
     boost::shared_ptr<ToVLevelConverter> levConv = ToVLevelConverter::getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, (nt-startT));
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
@@ -265,6 +282,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(boost::shared
     case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
     default: assert(false);
     }
+
 
     vector<double>& pOut = pimpl_->level1;
     boost::shared_ptr<Data> data = dataReader_->getDataSlice(varName, unLimDimPos);
