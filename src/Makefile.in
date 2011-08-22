@@ -47,13 +47,38 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@                         GribFileIndex.cc \
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
 
-@HAVE_METGM_TRUE@am__append_3 = MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
-@HAVE_METGM_TRUE@                         MetGmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmCommentAttributeParser.cc metgm/MetGmDimensionsTag.cc \
-@HAVE_METGM_TRUE@                         metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc
+@HAVE_METGM_TRUE@am__append_3 = MetGmCDMReader.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmCDMReaderImpl.cc \
+@HAVE_METGM_TRUE@                         MetGmCDMWriter.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmCDMWriterImpl.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmHorizontalTag.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmTimeTag.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmVerticalTag.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup1Ptr.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup2Ptr.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup3Ptr.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup5Ptr.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmCommentAttributeParser.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmDimensionsTag.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup5Ptr.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmConfigurationMappings.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmVersion.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup2Ptr.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmUtils.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmTags.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmCDMWriterImpl.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmCommentAttributeParser.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup1Ptr.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmGroup3Ptr.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmCDMReaderImpl.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmVerticalTag.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmHorizontalTag.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmHandlePtr.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmTimeTag.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmCDMVariableProfile.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmFileHandlePtr.h \
+@HAVE_METGM_TRUE@                         metgm/MetGmDimensionsTag.h
 
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/wdb/config/make.mk \
@@ -190,9 +215,18 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc \
 	metgm/MetGmGroup5Ptr.cc metgm/MetGmCommentAttributeParser.cc \
 	metgm/MetGmDimensionsTag.cc metgm/MetGmTags.cc \
-	metgm/MetGmHandlePtr.cc WdbCDMReader.cc wdb/WdbIndex.h \
-	wdb/WdbIndex.cpp wdb/DataSummary.h wdb/DataSummary.cpp \
-	wdb/ParameterData.h wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
+	metgm/MetGmHandlePtr.cc metgm/MetGmGroup5Ptr.h \
+	metgm/MetGmConfigurationMappings.h metgm/MetGmVersion.h \
+	metgm/MetGmGroup2Ptr.h metgm/MetGmUtils.h metgm/MetGmTags.h \
+	metgm/MetGmCDMWriterImpl.h metgm/MetGmCommentAttributeParser.h \
+	metgm/MetGmGroup1Ptr.h metgm/MetGmGroup3Ptr.h \
+	metgm/MetGmCDMReaderImpl.h metgm/MetGmVerticalTag.h \
+	metgm/MetGmHorizontalTag.h metgm/MetGmHandlePtr.h \
+	metgm/MetGmTimeTag.h metgm/MetGmCDMVariableProfile.h \
+	metgm/MetGmFileHandlePtr.h metgm/MetGmDimensionsTag.h \
+	WdbCDMReader.cc wdb/WdbIndex.h wdb/WdbIndex.cpp \
+	wdb/DataSummary.h wdb/DataSummary.cpp wdb/ParameterData.h \
+	wdb/ParameterData.cpp wdb/Wdb2CdmBuilder.h \
 	wdb/Wdb2CdmBuilder.cpp wdb/DataHandler.h wdb/TimeHandler.h \
 	wdb/TimeHandler.cpp wdb/LevelHandler.h wdb/LevelHandler.cpp \
 	wdb/VersionHandler.h wdb/VersionHandler.cpp wdb/GridHandler.h \

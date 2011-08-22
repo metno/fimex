@@ -6,7 +6,7 @@ SUBDIRS = src include test share/etc
 
 EXTRA_DIST = doxydoc.txt libstdc++.tag share/doc/examples 
 
-DISTCHECK_CONFIGURE_FLAGS=--with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.1.1
+DISTCHECK_CONFIGURE_FLAGS=--with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.1.1 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2'
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = @PACKAGE_TARNAME@.pc

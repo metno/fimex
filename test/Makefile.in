@@ -42,6 +42,9 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_METGM_TRUE@am__append_5 = testMetGmReader testMetGmWriter
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/testVerticalInterpolator.sh.in \
+	$(srcdir)/testVerticalInterpolator2.sh.in \
+	$(srcdir)/testVerticalInterpolatorHeight.sh.in \
 	$(srcdir)/wdb/make.mk
 @HAVE_LIBPQ_TRUE@am__append_6 = wdbTest
 @HAVE_LIBPQ_TRUE@am__append_7 = @BOOST_PROGRAM_OPTIONS_LIB@
@@ -71,7 +74,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = testVerticalInterpolator.sh \
+	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_FELT_TRUE@am__EXEEXT_1 = testQualityExtractor$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_2 = testNetcdfWriter$(EXEEXT) \
@@ -467,6 +471,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
+             coordRefTimeTest.nc \
+             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
+             verticalSigmaHybridPressure.nc verticalPressureHeight.nc
+
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
              testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
@@ -507,11 +517,6 @@ AM_CFLAGS =
 
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\" @MIFI_PQ_CPPFLAGS@
 @HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
-             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
-             coordRefTimeTest.nc \
-             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc  verticalSigmaHybridPressure.nc
-
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
@@ -573,6 +578,12 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+testVerticalInterpolator.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolator.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testVerticalInterpolator2.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolator2.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testVerticalInterpolatorHeight.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorHeight.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \

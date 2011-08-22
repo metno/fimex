@@ -1,3 +1,9 @@
+EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
+             coordRefTimeTest.nc \
+             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
+             verticalSigmaHybridPressure.nc verticalPressureHeight.nc
+
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
              testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
@@ -5,7 +11,7 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              bicubicOutData.txt bilinearOutData.txt \
              testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
-
+             
 CC_TESTS = testInterpolation \
            testVerticalCoordinates \
            testBinaryConstants \
@@ -54,10 +60,6 @@ endif
 include wdb/make.mk
 
 
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
-             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
-             coordRefTimeTest.nc \
-             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc  verticalSigmaHybridPressure.nc
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
 

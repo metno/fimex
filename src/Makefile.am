@@ -96,13 +96,39 @@ if HAVE_GRIBAPI
 endif
 
 if HAVE_METGM
-  libfimex_la_SOURCES += MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
-                         MetGmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc \
-                         metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
-                         metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
-                         metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc metgm/MetGmGroup5Ptr.cc \
-                         metgm/MetGmCommentAttributeParser.cc metgm/MetGmDimensionsTag.cc \
-                         metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc
+  libfimex_la_SOURCES += MetGmCDMReader.cc \
+                         metgm/MetGmCDMReaderImpl.cc \
+                         MetGmCDMWriter.cc \
+                         metgm/MetGmCDMWriterImpl.cc \
+                         metgm/MetGmHorizontalTag.cc \
+                         metgm/MetGmTimeTag.cc \
+                         metgm/MetGmVerticalTag.cc \
+                         metgm/MetGmGroup1Ptr.cc \
+                         metgm/MetGmGroup2Ptr.cc \
+                         metgm/MetGmGroup3Ptr.cc \
+                         metgm/MetGmGroup5Ptr.cc \
+                         metgm/MetGmCommentAttributeParser.cc \
+                         metgm/MetGmDimensionsTag.cc \
+                         metgm/MetGmTags.cc metgm/MetGmHandlePtr.cc \
+                         metgm/MetGmGroup5Ptr.h \
+                         metgm/MetGmConfigurationMappings.h \
+                         metgm/MetGmVersion.h \
+                         metgm/MetGmGroup2Ptr.h \
+                         metgm/MetGmUtils.h \
+                         metgm/MetGmTags.h \
+                         metgm/MetGmCDMWriterImpl.h \
+                         metgm/MetGmCommentAttributeParser.h \
+                         metgm/MetGmGroup1Ptr.h \
+                         metgm/MetGmGroup3Ptr.h \
+                         metgm/MetGmCDMReaderImpl.h \
+                         metgm/MetGmVerticalTag.h \
+                         metgm/MetGmHorizontalTag.h \
+                         metgm/MetGmHandlePtr.h \
+                         metgm/MetGmTimeTag.h \
+                         metgm/MetGmCDMVariableProfile.h \
+                         metgm/MetGmFileHandlePtr.h \
+                         metgm/MetGmDimensionsTag.h
+                         
 
 endif
 

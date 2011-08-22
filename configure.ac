@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.30beta],[heiko.klein@met.no])
+AC_INIT([fimex],[0.30],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 
@@ -154,18 +154,21 @@ DEBUG_MODE
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([fimex.pc
-                          Doxyfile
-                          Makefile
-                          src/Makefile
-                          src/felt/Makefile
-                          src/binSrc/Makefile
-                          test/Makefile
-                          share/etc/Makefile
-                          include/Makefile
-                          include/fimex/Makefile
-                          include/fimex/coordSys/Makefile
-                          include/felt/Makefile
-                          include/kdtree++/Makefile])
+                 Doxyfile
+                 Makefile
+                 src/Makefile
+                 src/felt/Makefile
+                 src/binSrc/Makefile
+                 test/Makefile
+                 share/etc/Makefile
+                 include/Makefile
+                 include/fimex/Makefile
+                 include/fimex/coordSys/Makefile
+                 include/felt/Makefile
+                 include/kdtree++/Makefile])
+AC_CONFIG_FILES([test/testVerticalInterpolator.sh],[chmod +x test/testVerticalInterpolator.sh])
+AC_CONFIG_FILES([test/testVerticalInterpolator2.sh],[chmod +x test/testVerticalInterpolator2.sh])
+AC_CONFIG_FILES([test/testVerticalInterpolatorHeight.sh],[chmod +x test/testVerticalInterpolatorHeight.sh])
 AC_OUTPUT
 
 
