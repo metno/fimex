@@ -32,11 +32,7 @@
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
-#ifdef HAVE_LIBMIC
-#include "fimex/FeltCDMReader.h"
-#else
 #include "fimex/FeltCDMReader2.h"
-#endif
 #include "fimex/GribApiCDMWriter.h"
 
 #define BOOST_TEST_MAIN
@@ -57,11 +53,7 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 		// no testfile, skip test
 		return;
 	}
-#ifdef HAVE_LIBMIC
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#else
     boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#endif
 
 	string outputFile("test.grb1");
 	GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
@@ -77,11 +69,7 @@ BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
 		// no testfile, skip test
 		return;
 	}
-#ifdef HAVE_LIBMIC
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#else
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#endif
 	string outputFile("test.grb2");
 	GribApiCDMWriter(feltReader, outputFile, 2, topSrcDir+"/share/etc/cdmGribWriterConfig.xml");
 	fs::path out( outputFile );

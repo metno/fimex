@@ -38,9 +38,6 @@
 #ifdef HAVE_FELT
 #include "fimex/FeltCDMReader2.h"
 #endif
-#ifdef HAVE_LIBMIC
-#include "fimex/FeltCDMReader.h"
-#endif
 #ifdef MIFI_HAVE_NETCDF
 #include "fimex/NetCDF_CDMReader.h"
 #endif
@@ -130,11 +127,6 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #ifdef HAVE_FELT
     case MIFI_FILETYPE_FELT:
         return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configFile));
-#else
-#ifdef HAVE_LIBMIC
-    case MIFI_FILETYPE_FELT:
-        return boost::shared_ptr<CDMReader>(new FeltCDMReader(fileName, configFile));
-#endif /* LIBMIC */
 #endif /* FELT */
 #ifdef HAVE_GRIBAPI_H
     case MIFI_FILETYPE_GRIB: {

@@ -33,11 +33,7 @@ using boost::unit_test_framework::test_suite;
 #include <iostream>
 #include <fstream>
 
-#ifdef HAVE_LIBMIC
-#include "fimex/FeltCDMReader.h"
-#else
 #include "fimex/FeltCDMReader2.h"
-#endif
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/interpolation.h"
@@ -57,11 +53,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 		// no testfile, skip test
 		return;
 	}
-#ifdef HAVE_LIBMIC
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#else
 	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#endif
 	boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
 	vector<double> xAxis, yAxis;
 	for (int i = -100; i < 10; i++) {
@@ -93,11 +85,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2)
 	ifstream inputFile(grdFile.c_str());
 	if (inputFile.is_open()) {
 		inputFile.close();
-#ifdef HAVE_LIBMIC
-		boost::shared_ptr<CDMReader> feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
-#else
 		boost::shared_ptr<CDMReader> feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader2(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
-#endif
 		boost::shared_ptr<CDMInterpolator> interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
 		vector<double> xAxis, yAxis;
 		xAxis = vector<double>();
@@ -123,11 +111,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
         // no testfile, skip test
         return;
     }
-#ifdef HAVE_LIBMIC
-    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#else
     boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-#endif
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
     interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", "0,50000,...,x;relativeStart=0", "0,50000,...,x;relativeStart=0", "m", "m");
     //interpolator->getCDM().toXMLStream(cerr);

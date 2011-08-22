@@ -32,11 +32,7 @@ using boost::unit_test_framework::test_suite;
 
 #include <iostream>
 #include <fstream>
-#ifdef HAVE_LIBMIC
-#include "fimex/FeltCDMReader.h"
-#else
 #include "fimex/FeltCDMReader2.h"
-#endif
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/Logger.h"
@@ -54,11 +50,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
 		// no testfile, skip test
 		return;
 	}
-#ifdef HAVE_LIBMIC
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
-#else
     boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
-#endif
 	boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
 	extract->removeVariable("relative_humidity");
 	try {

@@ -219,18 +219,9 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         if (vm.count("input.config")) {
             config = vm["input.config"].as<string>();
         }
-#ifdef HAVE_LIBMIC
-        if (type == "flt" || type == "dat" || type == "felt") {
-            LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File " << vm["input.file"].as<string>() << " with config " << config);
-            returnPtr = boost::shared_ptr<CDMReader>(new FeltCDMReader(vm["input.file"].as<string>(), config));
-        } else {
-#endif // HAVE_LIBMIC
         // use FELT library for all flt2 files, and for flt files if LIBMIC not available
         LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm["input.file"].as<string>() << " with config " << config);
         returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, vm["input.file"].as<string>(), config);
-#ifdef HAVE_LIBMIC
-        }
-#endif // HAVE_LIBMIC
     }
 #ifdef HAVE_GRIBAPI_H
     if (type == "grb" || type == "grib" ||
