@@ -106,8 +106,4 @@ if HAVE_METGM
 
 endif
 
-if HAVE_MILIB
-  libfimex_la_SOURCES += FeltCDMReader.cc Felt_Array.cc Felt_File.cc
-endif
-
 include wdb/make.mk

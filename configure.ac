@@ -117,16 +117,6 @@ if test [ "x$with_netcdf" == "xyes" ]; then
 fi
 AM_CONDITIONAL([HAVE_NETCDF], [test "x$with_netcdf" == xyes])
 
-# Check for the libmi / milib library.
-AC_ARG_ENABLE(milib, [  --enable-milib          enable milib felt-reader [[default=no]]],[
-  if test "$enableval" = yes; then
-    use_milib=yes
-  else
-    use_milib=no
-  fi
-  ],[ use_milib=no ])
-AM_CONDITIONAL([HAVE_MILIB], [test x$use_milib = xyes])
-
 # Check for felt c++ library, currently always src included
 AC_ARG_ENABLE(felt, [  --enable-felt           enable the c++ felt-reader [[default=yes]]],[
   if test "$enableval" = no; then
@@ -138,19 +128,6 @@ AC_ARG_ENABLE(felt, [  --enable-felt           enable the c++ felt-reader [[defa
 AM_CONDITIONAL([HAVE_FELT], [test x$use_felt = xyes])
 if test x$use_felt = xyes; then
     AC_DEFINE([HAVE_FELT], [1], [define if felt/FeltFile.h is available])
-fi
-AM_CONDITIONAL([HAVE_FELT_OR_MILIB], [test x$use_felt = xyes || test x$use_milib = xyes])
-
-if test "$use_milib" = yes; then
-# Check for the milib library.
-if test "x$PKG_CONFIG" != "x"; then
-   PKG_CHECK_MODULES([milib], [milib])
-fi
-METNO_CHECK_HEADERS([milib/milib.h], , , ,
-                    [$milib_CFLAGS], [the milib package])
-
-METNO_CHECK_LIB([mic], [mrfelt], , , , [$milib_LIBS],
-                 [the milib package])
 fi
 
 # forcing jasper and png libraries on grib_api
@@ -209,9 +186,9 @@ AC_MSG_RESULT([Manuals:          $mandir])
 AC_MSG_RESULT([Data:             $datadir])
 AC_MSG_RESULT([System Config:    $sysconfdir])
 AC_MSG_RESULT([ ])
-AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS])
+AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS])
 AC_MSG_RESULT([LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS])
-AC_MSG_RESULT([LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB])
+AC_MSG_RESULT([LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB])
 AC_MSG_RESULT([DEFS:             $DEFS])
 AC_MSG_RESULT([  ])
 AC_MSG_RESULT([------------------------------------------------------------])

@@ -42,10 +42,6 @@
 #include "fimex/Logger.h"
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
-/* FeltCDMReader not in factory - should be removed? */
-#ifdef HAVE_LIBMIC
-#include "fimex/FeltCDMReader.h"
-#endif
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/NcmlCDMReader.h"

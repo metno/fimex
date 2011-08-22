@@ -1,8 +1,10 @@
   * 2011-08-?? fimex-0.30
-    * vertical interpolation to pressure from pressure, height, sigma, lnP and sigma_hybrid
+    * vertical interpolation to pressure and height from pressure, height, sigma, lnP and sigma_hybrid
+    * data-transformations for vertical-levels: add4Dpressure, theta2T
     * logarithmic and double-logarithmic interpolation
     * wdb using wdbml setup-format (same as wdb-netcdf-java)
     * metgm-improved, ready for production
+    * remove deprecated FeltCDMReader (use FeltCDMReader2)
   * 2011-06-16 fimex-0.29
     * much improved and production ready [[http://sourceforge.net/projects/wdb/|wdb]]-reader
     * beta version of MetGM / STANAG6022 reader and writer (MetgmCDMReader.[h|cc] and MetgmCDMWriter.[h|cc] files)

@@ -32,11 +32,7 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../includ
 AM_CXXFLAGS = 
 AM_CFLAGS = 
 
-if HAVE_MILIB
-  LDADD += ${milib_LIBS}
-  CC_TESTS += 
-endif
-if HAVE_FELT_OR_MILIB 
+if HAVE_FELT
   CC_TESTS += testQualityExtractor
   NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh
   NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer

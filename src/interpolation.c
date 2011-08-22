@@ -471,7 +471,6 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
 
 int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
-	// TODO: better tests
 	// convolution matrix for a = -0.5
 	double M[4][4] = {{ 0, 2, 0, 0},
 				      {-1, 0, 1, 0},

@@ -755,14 +755,8 @@ HAVE_GRIBAPI_TRUE
 MIFI_GRIB_API_LDFLAGS
 MIFI_GRIB_API_CPPFLAGS
 MIFI_GRIB_API_LIBS
-milib_LIBS
-milib_CFLAGS
-HAVE_FELT_OR_MILIB_FALSE
-HAVE_FELT_OR_MILIB_TRUE
 HAVE_FELT_FALSE
 HAVE_FELT_TRUE
-HAVE_MILIB_FALSE
-HAVE_MILIB_TRUE
 HAVE_NETCDF_FALSE
 HAVE_NETCDF_TRUE
 MIFI_NETCDF_CPP_LIBS
@@ -938,7 +932,6 @@ with_boost_unit_test_framework
 enable_openmp
 with_pq
 with_netcdf
-enable_milib
 enable_felt
 with_grib_api
 with_metgm
@@ -957,9 +950,7 @@ CXXFLAGS
 CCC
 CPP
 CXXCPP
-PKG_CONFIG
-milib_CFLAGS
-milib_LIBS'
+PKG_CONFIG'
 
 
 # Initialize some variables set by options.
@@ -1588,7 +1579,6 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-xmltest       Do not try to compile and run a test LIBXML program
   --enable-openmp         enable use of openmp [default=no]
-  --enable-milib          enable milib felt-reader [default=no]
   --enable-felt           enable the c++ felt-reader [default=yes]
   --enable-debug-mode     Compile program in debugging mode, using no
                           optimization, debugging flags, and removing
@@ -1673,9 +1663,6 @@ Some influential environment variables:
   CPP         C preprocessor
   CXXCPP      C++ preprocessor
   PKG_CONFIG  path to pkg-config utility
-  milib_CFLAGS
-              C compiler flags for milib, overriding pkg-config
-  milib_LIBS  linker flags for milib, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -5667,13 +5654,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5670: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5657: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5673: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5660: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5676: output\"" >&5)
+  (eval echo "\"\$as_me:5663: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6879,7 +6866,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6882 "configure"' > conftest.$ac_ext
+  echo '#line 6869 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8936,11 +8923,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8939: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8926: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8943: \$? = $ac_status" >&5
+   echo "$as_me:8930: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9275,11 +9262,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9278: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9265: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9282: \$? = $ac_status" >&5
+   echo "$as_me:9269: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9380,11 +9367,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9383: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9370: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9387: \$? = $ac_status" >&5
+   echo "$as_me:9374: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9435,11 +9422,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9438: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9425: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9442: \$? = $ac_status" >&5
+   echo "$as_me:9429: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11819,7 +11806,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11822 "configure"
+#line 11809 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11915,7 +11902,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11918 "configure"
+#line 11905 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13871,11 +13858,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13874: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13861: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13878: \$? = $ac_status" >&5
+   echo "$as_me:13865: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13970,11 +13957,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13973: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13960: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13977: \$? = $ac_status" >&5
+   echo "$as_me:13964: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14022,11 +14009,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14025: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14012: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14029: \$? = $ac_status" >&5
+   echo "$as_me:14016: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18917,29 +18904,6 @@ else
 fi
 
 
-# Check for the libmi / milib library.
-# Check whether --enable-milib was given.
-if test "${enable_milib+set}" = set; then :
-  enableval=$enable_milib;
-  if test "$enableval" = yes; then
-    use_milib=yes
-  else
-    use_milib=no
-  fi
-
-else
-   use_milib=no
-fi
-
- if test x$use_milib = xyes; then
-  HAVE_MILIB_TRUE=
-  HAVE_MILIB_FALSE='#'
-else
-  HAVE_MILIB_TRUE='#'
-  HAVE_MILIB_FALSE=
-fi
-
-
 # Check for felt c++ library, currently always src included
 # Check whether --enable-felt was given.
 if test "${enable_felt+set}" = set; then :
@@ -18966,200 +18930,6 @@ if test x$use_felt = xyes; then
 
 $as_echo "#define HAVE_FELT 1" >>confdefs.h
 
-fi
- if test x$use_felt = xyes || test x$use_milib = xyes; then
-  HAVE_FELT_OR_MILIB_TRUE=
-  HAVE_FELT_OR_MILIB_FALSE='#'
-else
-  HAVE_FELT_OR_MILIB_TRUE='#'
-  HAVE_FELT_OR_MILIB_FALSE=
-fi
-
-
-if test "$use_milib" = yes; then
-# Check for the milib library.
-if test "x$PKG_CONFIG" != "x"; then
-
-pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for milib" >&5
-$as_echo_n "checking for milib... " >&6; }
-
-if test -n "$PKG_CONFIG"; then
-    if test -n "$milib_CFLAGS"; then
-        pkg_cv_milib_CFLAGS="$milib_CFLAGS"
-    else
-        if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"milib\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "milib") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_milib_CFLAGS=`$PKG_CONFIG --cflags "milib" 2>/dev/null`
-else
-  pkg_failed=yes
-fi
-    fi
-else
-	pkg_failed=untried
-fi
-if test -n "$PKG_CONFIG"; then
-    if test -n "$milib_LIBS"; then
-        pkg_cv_milib_LIBS="$milib_LIBS"
-    else
-        if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"milib\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "milib") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-  pkg_cv_milib_LIBS=`$PKG_CONFIG --libs "milib" 2>/dev/null`
-else
-  pkg_failed=yes
-fi
-    fi
-else
-	pkg_failed=untried
-fi
-
-
-
-if test $pkg_failed = yes; then
-
-if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
-        _pkg_short_errors_supported=yes
-else
-        _pkg_short_errors_supported=no
-fi
-        if test $_pkg_short_errors_supported = yes; then
-	        milib_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "milib"`
-        else
-	        milib_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "milib"`
-        fi
-	# Put the nasty error message in config.log where it belongs
-	echo "$milib_PKG_ERRORS" >&5
-
-	as_fn_error "Package requirements (milib) were not met:
-
-$milib_PKG_ERRORS
-
-Consider adjusting the PKG_CONFIG_PATH environment variable if you
-installed software in a non-standard prefix.
-
-Alternatively, you may set the environment variables milib_CFLAGS
-and milib_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-" "$LINENO" 5
-elif test $pkg_failed = untried; then
-	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error "The pkg-config script could not be found or is too old.  Make sure it
-is in your PATH or set the PKG_CONFIG environment variable to the full
-path to pkg-config.
-
-Alternatively, you may set the environment variables milib_CFLAGS
-and milib_LIBS to avoid the need to call pkg-config.
-See the pkg-config man page for more details.
-
-To get pkg-config, see <http://pkg-config.freedesktop.org/>.
-See \`config.log' for more details." "$LINENO" 5; }
-else
-	milib_CFLAGS=$pkg_cv_milib_CFLAGS
-	milib_LIBS=$pkg_cv_milib_LIBS
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-	:
-fi
-fi
-{
-  # Backup the original CPPFLAGS value.
-  metno_save_CPPFLAGS="$CPPFLAGS"
-  # Inlcude the necessary -I flags.
-  CPPFLAGS="$CPPFLAGS $milib_CFLAGS"
-  # Do the check.
-  for ac_header in milib/milib.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "milib/milib.h" "ac_cv_header_milib_milib_h" "$ac_includes_default"
-if test "x$ac_cv_header_milib_milib_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_MILIB_MILIB_H 1
-_ACEOF
-
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error "Could not find some of the headers from the milib package.
-
-Please make sure that the milib package is properly installed.
-See \`config.log' for more details." "$LINENO" 5; }
-fi
-
-done
-
-  # Reset the CPPFLAGS value.
-  CPPFLAGS="$metno_save_CPPFLAGS"
-}
-
-{
-  # Backup the original LIBS value.
-  metno_save_LIBS="$LIBS"
-  # Inlcude the necessary -l, and -L flags.
-  LIBS="$LIBS $milib_LIBS"
-  # Do the check.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mrfelt in -lmic" >&5
-$as_echo_n "checking for mrfelt in -lmic... " >&6; }
-if test "${ac_cv_lib_mic_mrfelt+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmic  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char mrfelt ();
-int
-main ()
-{
-return mrfelt ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_mic_mrfelt=yes
-else
-  ac_cv_lib_mic_mrfelt=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mic_mrfelt" >&5
-$as_echo "$ac_cv_lib_mic_mrfelt" >&6; }
-if test "x$ac_cv_lib_mic_mrfelt" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMIC 1
-_ACEOF
-
-  LIBS="-lmic $LIBS"
-
-else
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error "The function mrfelt in mic from the milib package could not be found.
-
-Please make sure that the milib package is properly installed.
-See \`config.log' for more details." "$LINENO" 5; }
-fi
-
-  # Reset the LIBS value.
-  LIBS="$metno_save_LIBS"
-}
 fi
 
 # forcing jasper and png libraries on grib_api
@@ -19560,16 +19330,8 @@ if test -z "${HAVE_NETCDF_TRUE}" && test -z "${HAVE_NETCDF_FALSE}"; then
   as_fn_error "conditional \"HAVE_NETCDF\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${HAVE_MILIB_TRUE}" && test -z "${HAVE_MILIB_FALSE}"; then
-  as_fn_error "conditional \"HAVE_MILIB\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${HAVE_FELT_TRUE}" && test -z "${HAVE_FELT_FALSE}"; then
   as_fn_error "conditional \"HAVE_FELT\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${HAVE_FELT_OR_MILIB_TRUE}" && test -z "${HAVE_FELT_OR_MILIB_FALSE}"; then
-  as_fn_error "conditional \"HAVE_FELT_OR_MILIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_GRIBAPI_TRUE}" && test -z "${HAVE_GRIBAPI_FALSE}"; then
@@ -22096,12 +21858,12 @@ $as_echo "Data:             $datadir" >&6; }
 $as_echo "System Config:    $sysconfdir" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result:  " >&5
 $as_echo " " >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&5
-$as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $milib_CFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&5
+$as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&5
 $as_echo "LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&5
-$as_echo "LIBS:             $LIBS $XML_LIBS ${milib_LIBS} $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&5
+$as_echo "LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: DEFS:             $DEFS" >&5
 $as_echo "DEFS:             $DEFS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result:   " >&5

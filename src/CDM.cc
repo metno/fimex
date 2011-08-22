@@ -549,7 +549,6 @@ const CDM::StrAttrVecMap& CDM::getAttributes() const
 }
 
 
-// TODO: in CF: projection belongs to variable, not to file!!
 bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException)
 {
 	bool retVal = true;

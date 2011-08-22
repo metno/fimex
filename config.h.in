@@ -43,9 +43,6 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
-/* Define to 1 if you have the `mic' library (-lmic). */
-#undef HAVE_LIBMIC
-
 /* Define if you have libpq */
 #undef HAVE_LIBPQ
 
@@ -57,9 +54,6 @@
 
 /* 'Define to 1 if you have the <metgm.h> header file.' */
 #undef HAVE_METGM_H
-
-/* Define to 1 if you have the <milib/milib.h> header file. */
-#undef HAVE_MILIB_MILIB_H
 
 /* define if the compiler implements namespaces */
 #undef HAVE_NAMESPACES
