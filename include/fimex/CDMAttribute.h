@@ -74,7 +74,7 @@ public:
 	void setData(boost::shared_ptr<Data> data) {this->data = data;}
 	/// retrieve the datatype of the attribute
 	const CDMDataType getDataType() const {return datatype;}
-	void toXMLStream(std::ostream& out) const;
+	void toXMLStream(std::ostream& out, const std::string& indent = "") const;
 private:
 	std::string name;
 	CDMDataType datatype;

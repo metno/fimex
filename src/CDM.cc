@@ -514,10 +514,15 @@ std::string CDM::getUnits(const std::string& varName) const
 
 void CDM::toXMLStream(std::ostream& out) const
 {
-	out << "<cdm>" << std::endl;
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl <<
+            "<netcdf xmlns=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2\"" << std::endl <<
+            "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << std::endl <<
+            "        xsi:schemaLocation=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 http://www.unidata.ucar.edu/schemas/netcdf/ncml-2.2.xsd\">" << std::endl;
+    out << std::endl;
 	for (DimVec::const_iterator it = pimpl_->dimensions.begin(); it != pimpl_->dimensions.end(); ++it) {
 		it->toXMLStream(out);
 	}
+	out << std::endl;
 	if (pimpl_->attributes.find(globalAttributeNS()) != pimpl_->attributes.end()) {
 		const AttrVec& attrs = pimpl_->attributes.find(globalAttributeNS())->second;
 		for (AttrVec::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
@@ -525,6 +530,7 @@ void CDM::toXMLStream(std::ostream& out) const
 		}
 	}
 	for (VarVec::const_iterator it = pimpl_->variables.begin(); it != pimpl_->variables.end(); ++it) {
+        out << std::endl;
 		if (pimpl_->attributes.find(it->getName()) != pimpl_->attributes.end()) {
 			it->toXMLStream(out, pimpl_->attributes.find(it->getName())->second);
 		} else {
@@ -532,7 +538,7 @@ void CDM::toXMLStream(std::ostream& out) const
 		}
 	}
 
-	out << "</cdm>" << std::endl;
+	out << "</netcdf>" << std::endl;
 }
 
 const CDM::DimVec& CDM::getDimensions() const

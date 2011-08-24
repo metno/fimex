@@ -163,9 +163,9 @@ const std::string CDMAttribute::getStringValue() const
         return "";
 }
 
-void CDMAttribute::toXMLStream(std::ostream& out) const
+void CDMAttribute::toXMLStream(std::ostream& out, const std::string& indent) const
 {
-	out << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
+	out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
 }
 
 /* init data arrays for all types */

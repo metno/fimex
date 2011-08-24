@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -62,7 +62,7 @@ void CDMVariable::shapeToXMLStream(std::ostream& out) const
 				out << "\" ";
 			}
 		}
-	}	
+	}
 }
 void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const
 {
@@ -70,7 +70,7 @@ void CDMVariable::toXMLStream(std::ostream& out, const std::vector<CDMAttribute>
 	shapeToXMLStream(out);
 	out << ">" << std::endl;
 	for (std::vector<CDMAttribute>::const_iterator it = attrs.begin(); it != attrs.end(); ++it) {
-		it->toXMLStream(out);
+		it->toXMLStream(out, "  ");
 	}
 	out << "</variable>" << std::endl;
 }
