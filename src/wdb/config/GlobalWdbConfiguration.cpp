@@ -109,7 +109,7 @@ GlobalWdbConfiguration::AttributeList GlobalWdbConfiguration::getAttributes(cons
 
 void GlobalWdbConfiguration::initParseGlobalAttributes_(XMLDoc & config)
 {
-	XPathObjPtr parameters = config.getXPathObject("/wdb_fimex_config/global_attributes/attribute");
+	XPathObjPtr parameters = config.getXPathObject("/wdb_netcdf_config/global_attributes/attribute");
 	if ( parameters->nodesetval )
 	{
 		for ( int i = 0; i < parameters->nodesetval->nodeNr; ++ i )
