@@ -173,10 +173,10 @@ void GlobalWdbConfiguration::initParseParameters_(const XPathObjPtr parameters)
 
 void GlobalWdbConfiguration::initParseAllParameters_(XMLDoc & config)
 {
-	initParseParameters_(config.getXPathObject("/wdb_fimex_config/wdb_parameters/value_parameter"));
-	initParseParameters_(config.getXPathObject("/wdb_fimex_config/wdb_parameters/level_parameter"));
+	initParseParameters_(config.getXPathObject("/wdb_netcdf_config/wdb_parameters/value_parameter"));
+	initParseParameters_(config.getXPathObject("/wdb_netcdf_config/wdb_parameters/level_parameter"));
 
-	XPathObjPtr units = config.getXPathObject("/wdb_fimex_config/units/translation");
+	XPathObjPtr units = config.getXPathObject("/wdb_netcdf_config/units/translation");
 	if ( units->nodesetval )
 			for ( int i = 0; i < units->nodesetval->nodeNr; ++ i )
 			{
