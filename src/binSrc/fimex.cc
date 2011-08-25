@@ -176,6 +176,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "interpolate.yAxisValues", vm);
 	writeOption<string>(out, "interpolate.xAxisUnit", vm);
 	writeOption<string>(out, "interpolate.yAxisUnit", vm);
+    writeOption<string>(out, "interpolate.xAxisType", vm);
+    writeOption<string>(out, "interpolate.yAxisType", vm);
 	writeOption<string>(out, "interpolate.latitudeName", vm);
 	writeOption<string>(out, "interpolate.longitudeName", vm);
     writeOption<string>(out, "interpolate.preprocess", vm);
@@ -492,7 +494,10 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
 	    exit(1);
 	}
 
-	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(), vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(), vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>());
+	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(),
+	                                       vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(),
+	                                       vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>(),
+	                                       vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
 	printReaderStatements("interpolate", vm, interpolator.get());
 
 	return boost::shared_ptr<CDMReader>(interpolator);
@@ -615,6 +620,8 @@ int run(int argc, char* args[])
         ("interpolate.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
         ("interpolate.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
+        ("interpolate.xAxisType", po::value<string>()->default_value("double"), "datatype of x-axis (double,float,int,short)")
+        ("interpolate.yAxisType", po::value<string>()->default_value("double"), "datatype of y-axis")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2)\"")

@@ -28,6 +28,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
+#include "fimex/deprecated.h"
 
 
 namespace MetNoFimex
@@ -77,9 +78,9 @@ private:
     std::string longitudeName;
     /** converter for axes-strings */
     void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
-    void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
-    void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
-    void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+    void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
+    void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
+    void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
     boost::shared_ptr<const CoordinateSystem> findBestCoordinateSystemAndProjectionVars(bool withProjection);
     bool hasSpatialVectors() const;
 public:
@@ -90,6 +91,19 @@ public:
 	 *
 	 */
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    /**
+     * @ brief change the (main) projection of the dataReaders cdm to this new projection
+     *
+     * @param method Interpolation method
+     * @param proj_input input-string for proj4, used as output projection
+     * @param out_x_axis values of the output x-axis
+     * @param out_y_axis values of the output y-axis
+     * @param out_x_axis_unit unit of the output x-axis
+     * @param out_y_axis_unit unit of the output y-axis
+     * @param out_x_axis_type type of CDM_TYPE (DOUBLE, FLOAT, ...) of x-axis
+     * @param out_y_axis_type type of CDM_TYPE (DOUBLE, FLOAT, ...) of y-axis
+     */
+    virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
 	/**
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
 	 *
@@ -99,8 +113,10 @@ public:
 	 * @param out_y_axis values of the output y-axis
 	 * @param out_x_axis_unit unit of the output x-axis
 	 * @param out_y_axis_unit unit of the output y-axis
+     *
+     * @deprecated use version changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit)
 	 */
-	virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+    DEPRECATED(virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit));
 	/**
 	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
 	 *
@@ -110,8 +126,11 @@ public:
 	 * @param out_y_axis config-string for y_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
 	 * @param out_x_axis_unit unit of the output x-axis
 	 * @param out_y_axis_unit unit of the output y-axis
+     * @param out_x_axis_type type (double, float, int, short) of x-axis
+     * @param out_y_axis_type type of MIFI_TYPE (double, float, int, short) of y-axis
+	 *
 	 */
-	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit);
+	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, const std::string& out_x_axis_type = "double", const std::string& out_y_axis_type = "double");
 	/**
 	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for latitude

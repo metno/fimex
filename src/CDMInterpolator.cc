@@ -164,8 +164,7 @@ static string getProjectionName(const string& proj_input) {
     return newProj;
 }
 
-
-void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
+void CDMInterpolator::changeProjection(int method, const string& proj_input, const string& out_x_axis, const string& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& out_x_axis_type, const string& out_y_axis_type)
 {
     SpatialAxisSpec xAxisSpec(out_x_axis);
     SpatialAxisSpec yAxisSpec(out_y_axis);
@@ -201,27 +200,40 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
             throw CDMException("changeProjection with autotuning axes only implemented for projections in m, not degree yet");
         }
     }
-    changeProjection(method, proj_input, xAxisSpec.getAxisSteps(), yAxisSpec.getAxisSteps(), out_x_axis_unit, out_y_axis_unit);
+    CDMDataType xType = string2datatype(out_x_axis_type);
+    CDMDataType yType = string2datatype(out_y_axis_type);
+    changeProjection(method, proj_input, xAxisSpec.getAxisSteps(), yAxisSpec.getAxisSteps(), out_x_axis_unit, out_y_axis_unit, xType, yType);
 }
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
 {
+    return changeProjection(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, CDM_DOUBLE, CDM_DOUBLE);
+
+}
+
+
+void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
+{
+    if (out_x_axis_type == CDM_NAT ||
+            out_y_axis_type == CDM_NAT) {
+        throw CDMException("axis type of interpolation not well defined");
+    }
     *cdm_ = dataReader->getCDM(); // reset previous changes
     projectionVariables.assign(0, ""); // reset variables
     switch (method) {
     case MIFI_INTERPOL_NEAREST_NEIGHBOR:
     case MIFI_INTERPOL_BILINEAR:
     case MIFI_INTERPOL_BICUBIC:
-        changeProjectionByProjectionParameters(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+        changeProjectionByProjectionParameters(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, out_x_axis_type, out_y_axis_type); break;
     case MIFI_INTERPOL_COORD_NN:
     case MIFI_INTERPOL_COORD_NN_KD:
-        changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+        changeProjectionByCoordinates(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, out_x_axis_type, out_y_axis_type); break;
     case MIFI_INTERPOL_FORWARD_SUM:
     case MIFI_INTERPOL_FORWARD_MEAN:
     case MIFI_INTERPOL_FORWARD_MEDIAN:
     case MIFI_INTERPOL_FORWARD_MAX:
     case MIFI_INTERPOL_FORWARD_MIN:
-        changeProjectionByForwardInterpolation(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit); break;
+        changeProjectionByForwardInterpolation(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, out_x_axis_type, out_y_axis_type); break;
     default: throw CDMException("unknown projection method: " + type2string(method));
     }
 }
@@ -345,7 +357,7 @@ CoordSysPtr CDMInterpolator::findBestCoordinateSystemAndProjectionVars(bool with
  * @param orgYAxis
  */
 //void changeCDM(CDM& cdm, const string& proj_input, const string& orgProjection, const vector<string>& projectionVariables, const string& orgXAxis, const string& orgYAxis, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& longitudeName, const string& latitudeName)
-static void changeCDM(CDM& cdm, const string& proj_input, const CoordSysPtr& cs, const vector<string>& projectionVariables, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, const string& longitudeName, const string& latitudeName)
+static void changeCDM(CDM& cdm, const string& proj_input, const CoordSysPtr& cs, const vector<string>& projectionVariables, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType xAxisType, CDMDataType yAxisType, const string& longitudeName, const string& latitudeName)
 {
     string newProj = getProjectionName(proj_input);
     string orgProjection;
@@ -423,17 +435,17 @@ static void changeCDM(CDM& cdm, const string& proj_input, const CoordSysPtr& cs,
         // create dimension-variable
         vector<string> shape;
         shape.push_back(orgXAxis);
-        cdm.addVariable(CDMVariable(orgXAxis, CDM_DOUBLE, shape));
+        cdm.addVariable(CDMVariable(orgXAxis, xAxisType, shape));
     } else {
-        cdm.getVariable(orgXAxis).setDataType(CDM_DOUBLE);
+        cdm.getVariable(orgXAxis).setDataType(xAxisType);
     }
     if (!cdm.hasVariable(orgYAxis)) {
         // create dimension-variable
         vector<string> shape;
         shape.push_back(orgYAxis);
-        cdm.addVariable(CDMVariable(orgYAxis, CDM_DOUBLE, shape));
+        cdm.addVariable(CDMVariable(orgYAxis, yAxisType, shape));
     } else {
-        cdm.getVariable(orgYAxis).setDataType(CDM_DOUBLE);
+        cdm.getVariable(orgYAxis).setDataType(yAxisType);
     }
     cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
     cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
@@ -739,12 +751,13 @@ static void lonLatVals2Matrix(boost::shared_array<double>& lonVals, boost::share
     latVals = matrixLatVals;
 }
 
-void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
+void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
     CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(false);
 
     changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
               out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+              out_x_axis_type, out_y_axis_type,
               getLongitudeName(), getLatitudeName());
 
     string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
@@ -824,12 +837,13 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
 }
 
-void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
+void CDMInterpolator::changeProjectionByCoordinates(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
     CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(false);
 
     changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
               out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+              out_x_axis_type, out_y_axis_type,
               getLongitudeName(), getLatitudeName());
 
     string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
@@ -928,12 +942,13 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 
 }
 
-void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
+void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
     CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(true);
 
     changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
               out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+              out_x_axis_type, out_y_axis_type,
               getLongitudeName(), getLatitudeName());
 
     // translate axes to 'm' if given in other metric units
