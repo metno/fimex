@@ -81,8 +81,19 @@ static void printReaderStatements(const string& readerName, const po::variables_
 {
     if (vm.count(readerName+".printNcML")) {
         cout << readerName << " as NcML:" << endl;
-        reader->getCDM().toXMLStream(cout);
-        cout << endl;
+        if (vm[readerName+".printNcML"].as<string>() == "-") {
+            reader->getCDM().toXMLStream(cout);
+            cout << endl;
+        } else {
+            ofstream file;
+            file.open(vm[readerName+".printNcML"].as<string>().c_str(), ios::out);
+            if (file.is_open()) {
+                reader->getCDM().toXMLStream(file);
+                file.close();
+            } else {
+                throw CDMException("cannot write ncml-file: " + vm[readerName+".printNcML"].as<string>());
+            }
+        }
     }
     if (vm.count(readerName+".printCS")) {
         cout << readerName + " CoordinateSystems: ";
@@ -145,7 +156,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "input.file", vm);
 	writeOption<string>(out, "input.type", vm);
 	writeOption<string>(out, "input.config", vm);
-	writeOptionAny(out, "input.printNcML", vm);
+	writeOption<string>(out, "input.printNcML", vm);
     writeOptionAny(out, "input.printCS", vm);
 	writeOption<string>(out, "output.file", vm);
 	writeOption<string>(out, "output.type", vm);
@@ -168,7 +179,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<double>(out, "extract.reduceToBoundingBox.north", vm);
     writeOption<double>(out, "extract.reduceToBoundingBox.west", vm);
     writeOption<double>(out, "extract.reduceToBoundingBox.east", vm);
-    writeOptionAny(out, "extract.printNcML", vm);
+    writeOption<string>(out, "extract.printNcML", vm);
     writeOptionAny(out, "extract.printCS", vm);
 	writeOption<string>(out, "interpolate.projString", vm);
 	writeOption<string>(out, "interpolate.method", vm);
@@ -181,20 +192,20 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "interpolate.latitudeName", vm);
 	writeOption<string>(out, "interpolate.longitudeName", vm);
     writeOption<string>(out, "interpolate.preprocess", vm);
-	writeOptionAny(out, "interpolate.printNcML", vm);
+	writeOption<string>(out, "interpolate.printNcML", vm);
     writeOptionAny(out, "interpolate.printCS", vm);
     writeOption<string>(out, "verticalInterpolate.method", vm);
     writeOption<string>(out, "verticalInterpolate.type", vm);
     writeOption<string>(out, "verticalInterpolate.level1", vm);
     writeOption<string>(out, "verticalInterpolate.level2", vm);
     writeVectorOptionString(out, "verticalInterpolate.dataConversion", vm);
-    writeOptionAny(out, "verticalInterpolate.printNcML", vm);
+    writeOption<string>(out, "verticalInterpolate.printNcML", vm);
     writeOptionAny(out, "verticalInterpolate.printCS", vm);
 	writeOption<string>(out, "timeInterpolate.timeSpec", vm);
-	writeOptionAny(out, "timeInterpolate.printNcML", vm);
+	writeOption<string>(out, "timeInterpolate.printNcML", vm);
 	writeOptionAny(out, "timeInterpolate.printCS", vm);
 	writeOption<string>(out, "ncml.config", vm);
-    writeOptionAny(out, "ncml.printNcML", vm);
+    writeOption<string>(out, "ncml.printNcML", vm);
     writeOptionAny(out, "ncml.printCS", vm);
 }
 
@@ -589,7 +600,7 @@ int run(int argc, char* args[])
 		("input.file", po::value<string>(), "input file")
 		("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
 		("input.config", po::value<string>(), "non-standard input configuration")
-		("input.printNcML", "print NcML description of input file")
+		("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input file")
 		("input.printCS", "print CoordinateSystems of input file")
 		("output.file", po::value<string>(), "output file")
 		("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
@@ -608,11 +619,11 @@ int run(int argc, char* args[])
         ("extract.reduceToBoundingBox.north", po::value<double>(), "geographical bounding-box in degree")
         ("extract.reduceToBoundingBox.east", po::value<double>(), "geographical bounding-box in degree")
         ("extract.reduceToBoundingBox.west", po::value<double>(), "geographical bounding-box in degree")
-        ("extract.printNcML", "print NcML description of extractor")
+        ("extract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
         ("extract.printCS", "print CoordinateSystems of extractor")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
         ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
-        ("qualityExtract.printNcML", "print NcML description of extractor")
+        ("qualityExtract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
         ("qualityExtract.printCS", "print CoordinateSystems of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
@@ -625,20 +636,20 @@ int run(int argc, char* args[])
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2)\"")
-        ("interpolate.printNcML", "print NcML description of interpolator")
+        ("interpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of interpolator")
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
         ("verticalInterpolate.type", po::value<string>(), "pressure or height")
         ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T or add4Dpressure")
-        ("verticalInterpolate.printNcML", "print NcML description of vertcial interpolator")
+        ("verticalInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of vertcial interpolator")
         ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
-        ("timeInterpolate.printNcML", "print NcML description of timeInterpolator")
+        ("timeInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of timeInterpolator")
         ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
         ("ncml.config", po::value<string>(), "modify/configure with ncml-file")
-        ("ncml.printNcML", "print NcML description after ncml-configuration")
+        ("ncml.printNcML", po::value<string>()->implicit_value("-"), "print NcML description after ncml-configuration")
         ("ncml.printCS", "print CoordinateSystems after ncml-configuration")
 		;
 
