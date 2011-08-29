@@ -1,3 +1,8 @@
+  * 2011-08-29 fimex-0.31
+    * fixing global attributes in wdb
+    * improving error-messages in metgm
+    * improving ncml-output with redirection to files
+    * configurable axes-types in interpolation
   * 2011-08-22 fimex-0.30
     * vertical interpolation to pressure and height from pressure, height, sigma, lnP and sigma_hybrid
     * data-transformations for vertical-levels: add4Dpressure, theta2T
