@@ -43,8 +43,9 @@
 // standard
 //
 #include <cstdio>
+#include <cerrno>
+#include <cstring>
 #include <string>
-
 namespace MetNoFimex {
 
     class MetGmFileHandlePtr {
@@ -98,15 +99,18 @@ namespace MetNoFimex {
                 switch(direction) {
                     case READ:
                         handle_ = fopen(fileName_.c_str() , "rb");
+                        if(handle_ == 0)
+                            throw CDMException("can't read file "+fileName_+": "+strerror(errno));
                         break;
                     case WRITE:
                         handle_ = fopen(fileName_.c_str() , "wb");
+                        if(handle_ == 0)
+                            throw CDMException("can't write file "+fileName_+": "+strerror(errno));
                         break;
+                    default:
+                        throw CDMException("invalid IODirection");
                 }
 
-                if(handle_ == 0) {
-                    throw CDMException("can't open output file");
-                }
 
                 fgetpos(handle_, &startPos_);
             }
