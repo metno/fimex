@@ -38,6 +38,9 @@
 //
 #include <boost/progress.hpp>
 
+// standard
+#include <cmath>
+
 namespace MetNoFimex {
 
 MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
@@ -55,6 +58,8 @@ MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
 
 void MetGmGroup5Ptr::toMetGmLayout()
 {
+    MetGmProfilingTimer timer;
+
     if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
         return;
 
@@ -90,11 +95,108 @@ void MetGmGroup5Ptr::toMetGmLayout()
     } // sliceIndex
 
     data_.swap(dataT);
+
+MGM_MESSAGE_POINT(timer.elapsedToString().append(" for ").append(boost::lexical_cast<std::string>(hdTag_->totalSize() * sizeof(float) / 1024)).append(" [kb]"))
+}
+
+/*
+ * transforming ND index to 1D index:
+ *
+ * (x, y)         -> x + (nx * y)
+ * (y, x)         -> y + (ny * x)
+ *
+ * (x, y, z)      -> x + (nx * y) + (nx * ny) * z
+ * (z, x, y)      -> z + (nz * x) + (nz * nx) * y
+ *
+ * (x, y, z, t)   -> x + (nx * y) + (nx * ny) * z + (nx * ny * nz) * t
+ * (z, x, y, t)   -> z + (nz * x) + (nz * nx) * y + (nx * ny * nz) * t
+ */
+
+void MetGmGroup5Ptr::toMetGmLayoutOptimized()
+{
+    /*
+     *  (z, x, y, t) = (x, y, z, t)
+     * (z, x, y, t)   -> z + nz * x + Nzx * y + Nxyz * t -> z + zLeap + zxLeap + xyzLeap
+     * (x, y, z, t)   -> x + nx * y + Nxy * z + Nxyz * t -> x + xLeap + xyLeap + xyzLeap
+     */
+//    MetGmProfilingTimer timer;
+
+    if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
+        return;
+
+    boost::shared_array<float> dataT(new float[hdTag_->totalSize()]);
+
+    float* pos = data_.get();
+    float* posT = dataT.get();
+
+    size_t nz = hdTag_->zSize();
+    size_t ny = hdTag_->ySize();
+    size_t nx = hdTag_->xSize();
+    size_t nt = hdTag_->tSize();
+
+    size_t Nxy  = nx * ny;
+    size_t Nzx  = nz * nx;
+    size_t Nxyz = Nxy * nz;
+
+
+    size_t xyzLeap = -Nxyz;
+
+    for(size_t t = 0; t < nt; ++t) {
+
+        xyzLeap += Nxyz;
+
+        size_t xLeap  = -nx;
+        size_t zxLeap = -Nzx;
+
+        for(size_t y = 0; y < ny; ++y) {
+
+            xLeap += nx;
+            zxLeap += Nzx;
+
+            size_t zLeapF = -nz;
+
+            for(size_t x = 0; x < nx; ++x) {
+
+                zLeapF += nz;
+
+                size_t xyLeapF = -Nxy;
+                size_t xyLeapB = nz * Nxy;
+
+                size_t midz = nz / 2 + nz % 2;
+                for(size_t z = 0; z < midz; ++z) {
+
+                    xyLeapF += Nxy;
+                    xyLeapB -= Nxy;
+
+                    float valueFz = *(pos + x + xLeap + xyLeapF + xyzLeap);
+                    if (isnan(valueFz)) {
+                        valueFz = 9999.f;
+                    }
+                    *(posT + z + zLeapF + zxLeap + xyzLeap) = valueFz;
+
+                    float valueBz = *(pos + x + xLeap + xyLeapB + xyzLeap);
+                    if (isnan(valueBz)) {
+                        valueBz = 9999.f;
+                    }
+                    *(posT + (nz - 1 - z) + zLeapF + zxLeap + xyzLeap) = valueBz;
+
+
+                } // z
+
+            } // x
+
+        } // y
+
+    } // t
+
+    data_.swap(dataT);
+
+//MGM_MESSAGE_POINT(timer.elapsedToString().append(" for ").append(boost::lexical_cast<std::string>(hdTag_->totalSize() * sizeof(float) / 1024)).append(" [kb]"))
 }
 
 void MetGmGroup5Ptr::toFimexLayout()
 {
-//    MetGmProfilingTimer timer;
+    MetGmProfilingTimer timer;
 
     if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
         return;
@@ -127,8 +229,87 @@ void MetGmGroup5Ptr::toFimexLayout()
 
     data_.swap(dataT);
 
-//    MGM_MESSAGE_POINT(timer.elapsedToString())
+MGM_MESSAGE_POINT(timer.elapsedToString().append(" for ").append(boost::lexical_cast<std::string>(hdTag_->totalSize() * sizeof(float) / 1024)).append(" [kb]"))
+}
 
+void MetGmGroup5Ptr::toFimexLayoutOptimized()
+{
+    /*
+     *  (x, y, z, t) = (z, x, y, t)
+     * (x, y, z, t)   -> x + nx * y + Nxy * z + Nxyz * t -> x + xLeap + xyLeap + xyzLeap
+     * (z, x, y, t)   -> z + nz * x + Nzx * y + Nxyz * t -> z + zLeap + zxLeap + xyzLeap
+     */
+//    MetGmProfilingTimer timer;
+
+    if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
+        return;
+
+    boost::shared_array<float> dataT(new float[hdTag_->totalSize()]);
+
+    float* pos = data_.get();
+    float* posT = dataT.get();
+
+    size_t nz = hdTag_->zSize();
+    size_t ny = hdTag_->ySize();
+    size_t nx = hdTag_->xSize();
+    size_t nt = hdTag_->tSize();
+
+    size_t Nxy  = nx * ny;
+    size_t Nzx  = nz * nx;
+    size_t Nxyz = Nxy * nz;
+
+
+    size_t xyzLeap = -Nxyz;
+
+    for(size_t t = 0; t < nt; ++t) {
+
+        xyzLeap += Nxyz;
+
+        size_t xLeap  = -nx;
+        size_t zxLeap = -Nzx;
+
+        for(size_t y = 0; y < ny; ++y) {
+
+            xLeap += nx;
+            zxLeap += Nzx;
+
+            size_t xyLeap = -Nxy;
+
+            for(size_t z = 0; z < nz; ++z) {
+
+                xyLeap += Nxy;
+
+                size_t zLeapF = -nz;
+                size_t zLeapB = nx * nz;
+
+                size_t midx = nx / 2 + nx % 2;
+                for(size_t x = 0; x < midx; ++x) {
+
+                    zLeapF += nz;
+                    zLeapB -= nz;
+
+                    float valueFx = *(pos + z + zLeapF + zxLeap + xyzLeap);
+                    if (isnan(valueFx)) {
+                        valueFx = 9999.f;
+                    }
+                    *(posT + x + xLeap + xyLeap + xyzLeap) = valueFx;
+
+                    float valueBx = *(pos + z + zLeapB + zxLeap + xyzLeap);
+                    if (isnan(valueBx)) {
+                        valueBx = 9999.f;
+                    }
+                    *(posT + (nx - 1 - x) + xLeap + xyLeap + xyzLeap) = valueBx;
+                }
+
+            } // z
+
+        } // y
+
+    } // t
+
+    data_.swap(dataT);
+
+//MGM_MESSAGE_POINT(timer.elapsedToString().append(" for ").append(boost::lexical_cast<std::string>(hdTag_->totalSize() * sizeof(float) / 1024)).append(" [kb]"))
 }
 
 boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(const boost::shared_ptr<CDMReader> pCdmReader,
@@ -191,7 +372,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
 
                 boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asConstFloat()));
 
-                gp5->toMetGmLayout();
+                gp5->toMetGmLayoutOptimized();
 
 //                MGM_MESSAGE_POINT(timer.elapsedToString().append(" for kb = ").append(boost::lexical_cast<std::string>(raw_data->size() * raw_data->bytes_for_one() / 1024)))
 
@@ -232,7 +413,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, data));
 
                     // from METGM to Fimex layout
-                    gp5->toFimexLayout();
+                    gp5->toFimexLayoutOptimized();
 
 //                    MGM_MESSAGE_POINT(timer.elapsedToString().append("for kb = ").append(boost::lexical_cast<std::string>(hdTag->totalSize() * sizeof(float) / 1024)))
 

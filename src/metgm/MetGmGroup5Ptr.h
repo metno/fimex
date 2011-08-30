@@ -70,9 +70,11 @@ namespace MetNoFimex {
 
 //        void changeFillValue();
         void toFimexLayout();
+        void toFimexLayoutOptimized();
 
         // reorder z-axis and set fill-values
         void toMetGmLayout();
+        void toMetGmLayoutOptimized();
 
         explicit MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                 const boost::shared_ptr<MetGmHDTag>     hdTag,
