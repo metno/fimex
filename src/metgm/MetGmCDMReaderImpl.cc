@@ -722,15 +722,15 @@ namespace MetNoFimex {
                 fillValue = entry.fillValue_;
                 addOffset = entry.addOffset_;
                 scaleFactor = entry.scaleFactor_;
-                if(!entry.units_.empty())
-                    strUnit = entry.units_;
+//                if(!entry.units_.empty())
+//                    strUnit = entry.units_;
             } else {
                 xmlPidView::iterator ic0, ic1;
                 boost::tuples::tie(ic0,ic1) = pidView.equal_range(tags->p_id());
                 for(; ic0 != ic1; ++ic0) {
                     if(!ic0->units_.empty() && ic0->units_ == strUnit) {
                         kildeName = ic0->cdmName_;
-                        strUnit = ic0->units_;
+//                        strUnit = ic0->units_;
                         standardName = ic0->standardName_;
                         fillValue = ic0->fillValue_;
                         addOffset = ic0->addOffset_;
@@ -786,11 +786,9 @@ namespace MetNoFimex {
                         MGM_MESSAGE_POINT(std::string(" removing MSL dependent variable ").append(varVec.at(index).getName()).append(" because MSL(altitude) is not included by config file"))
                         nameView.erase(nIt);
                     }
-//                    throw CDMException("There are MSL dependent variable in CDM modell but MSL(altitude) has not been included");
                 }
             }
             return;
         }
-
     }
 }
