@@ -281,8 +281,10 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
 
     }
 
-    // libmi used constant earth radius for all projections (earthr.f); no_defs = no (US) defaults
-    projStr << " +a=" << EARTH_RADIUS << " +e=0 +no_defs";
+    // all model-files are assumed to be WGS84 datum
+    // since topography is WGS84 and verification is WGS84
+    // (though model uses spherical computations)
+    projStr << " +ellps=WGS84 +towgs=0,0,0 +no_defs";
 
     return projStr.str();
 }
