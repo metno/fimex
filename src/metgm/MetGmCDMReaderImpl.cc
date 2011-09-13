@@ -193,7 +193,7 @@ namespace MetNoFimex {
         addVerticalDimensions();
         addVariables();
 
-        sanityCheck();
+//        sanityCheck();
 
     }
 
