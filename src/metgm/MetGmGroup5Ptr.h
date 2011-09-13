@@ -73,11 +73,10 @@ namespace MetNoFimex {
                                                                                       const boost::shared_ptr<MetGmGroup3Ptr> gp3
                                                                                       );
 
-        boost::shared_array<float> readDataSlice(size_t pos);
+//        boost::shared_array<float> readDataSlice(size_t pos);
         void sliceToMetGmLayout(boost::shared_array<float>& slice);
 
         boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
-        void slicesToFimexLayout(boost::shared_array<float>& slices, size_t numberOfSlices);
 
         void dumpFimexLayout();
         void dumpMetGmLayout();
@@ -88,12 +87,10 @@ namespace MetNoFimex {
     private:
 
         void toFimexLayout();
-        void toFimexLayoutOptimized();
-        void sliceToFimexLayout(boost::shared_array<float>& slice);
+        void slicesToFimexLayout(boost::shared_array<float>& slices, size_t numberOfSlices);
 
         // reorder z-axis and set fill-values
         void toMetGmLayout();
-        void toMetGmLayoutOptimized();
 
         explicit MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                 const boost::shared_ptr<MetGmHDTag>     hdTag,

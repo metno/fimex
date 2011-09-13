@@ -101,7 +101,6 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmVerticalTag>& zTag();
         boost::shared_ptr<MetGmTimeTag>&     tTag();
 
-        boost::shared_array<float> readDataSlice(size_t pos);
         void sliceToMetGmLayout(boost::shared_array<float>& slice);
 
         boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);

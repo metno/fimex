@@ -122,7 +122,6 @@ namespace MetNoFimex {
 
     const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
 
-    boost::shared_array<float> MetGmTags::readDataSlice(size_t pos) {return pGp5_->readDataSlice(pos); }
     void MetGmTags::sliceToMetGmLayout(boost::shared_array<float>& slice) { pGp5_->sliceToMetGmLayout(slice); }
 
     boost::shared_array<float> MetGmTags::readDataSlices(size_t pos, size_t numberOfSlices)

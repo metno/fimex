@@ -57,49 +57,6 @@ MetGmGroup5Ptr::MetGmGroup5Ptr(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
     }
 
 
-void MetGmGroup5Ptr::toMetGmLayout()
-{
-//    MetGmProfilingTimer timer;
-
-    if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
-        return;
-
-    boost::shared_array<float> dataT(new float[hdTag_->totalSize()]);
-
-    float* slicePos = data_.get();
-    float* sliceT = dataT.get();
-
-    size_t nz = hdTag_->zSize();
-    size_t ny = hdTag_->ySize();
-    size_t nx = hdTag_->xSize();
-
-    for(size_t sIndex = 0; sIndex < hdTag_->tSize(); ++sIndex) {
-
-        slicePos = data_.get() + sIndex * hdTag_->sliceSize();
-        sliceT = dataT.get() + sIndex * hdTag_->sliceSize();
-
-        for(size_t z = 0; z < nz; ++z) {
-
-            for(size_t y = 0; y < ny; ++y) {
-                for(size_t x = 0; x < nx; ++x) {
-                    float value = *slicePos++;
-//                    if (isnan(value)) {
-//                        value = 9999.f;
-//                    }
-                    sliceT[nz*(nx*y + x) + z] = value;
-                } // x_index
-
-            } // y_index
-
-        } // z_index
-
-    } // sliceIndex
-
-    data_.swap(dataT);
-
-//    MGM_MESSAGE_POINT(timer.elapsedToString().append(" for ").append(boost::lexical_cast<std::string>(hdTag_->totalSize() * sizeof(float) / 1024)).append(" [kb]"))
-}
-
 /*
  * transforming ND index to 1D index:
  *
@@ -113,7 +70,7 @@ void MetGmGroup5Ptr::toMetGmLayout()
  * (z, x, y, t)   -> z + (nz * x) + (nz * nx) * y + (nx * ny * nz) * t
  */
 
-void MetGmGroup5Ptr::toMetGmLayoutOptimized()
+void MetGmGroup5Ptr::toMetGmLayout()
 {
     /*
      *  (z, x, y, t) = (x, y, z, t)
@@ -196,44 +153,6 @@ void MetGmGroup5Ptr::toMetGmLayoutOptimized()
 }
 
 void MetGmGroup5Ptr::toFimexLayout()
-{
-    MetGmProfilingTimer timer;
-
-    if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
-        return;
-
-    boost::shared_array<float> dataT(new float[hdTag_->totalSize()]);
-
-    float* slice = data_.get();
-    float* sliceT = dataT.get();
-
-    for(size_t sIndex = 0; sIndex < hdTag_->tSize(); ++sIndex) {
-
-        slice = data_.get() + sIndex * hdTag_->sliceSize();
-        sliceT = dataT.get() + sIndex * hdTag_->sliceSize();
-
-        for(size_t z_index = 0; z_index < hdTag_->zSize(); ++z_index) {
-
-            for(size_t y_index = 0; y_index < hdTag_->ySize(); ++y_index) {
-
-                for(size_t x_index = 0; x_index < hdTag_->xSize(); ++x_index) {
-
-                    sliceT[z_index * (hdTag_->ySize() * hdTag_->xSize()) + y_index * hdTag_->xSize() + x_index] =
-                            slice[z_index + x_index * hdTag_->zSize() + y_index * (hdTag_->zSize() * hdTag_->xSize())];
-                } // x_index
-
-            } // y_index
-
-        } // z_index
-
-    } // sliceIndex
-
-    data_.swap(dataT);
-
-MGM_MESSAGE_POINT(timer.elapsedToString().append(" for ").append(boost::lexical_cast<std::string>(hdTag_->totalSize() * sizeof(float) / 1024)).append(" [kb]"))
-}
-
-void MetGmGroup5Ptr::toFimexLayoutOptimized()
 {
     /*
      *  (x, y, z, t) = (z, x, y, t)
@@ -367,7 +286,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
 
                 boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asConstFloat()));
 
-                gp5->toMetGmLayoutOptimized();
+                gp5->toMetGmLayout();
 
                 return gp5;
             }
@@ -407,7 +326,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     MGM_THROW_ON_ERROR(mgm_param_is_convertible(gp3->p_id(), *gp3->mgmHandle()->version()))
 
                     // from METGM to Fimex layout
-                    gp5->toFimexLayoutOptimized();
+                    gp5->toFimexLayout();
 
 //                    MGM_MESSAGE_POINT(timer.elapsedToString().append("for kb = ").append(boost::lexical_cast<std::string>(hdTag->totalSize() * sizeof(float) / 1024)))
 
@@ -463,66 +382,6 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
         }
 
         return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>(0)));
-    }
-
-    void MetGmGroup5Ptr::sliceToFimexLayout(boost::shared_array<float>& data)
-    {
-        if(hdTag_->asShort() !=  MetGmHDTag::HD_3D_T)
-            return;
-
-        boost::shared_array<float> dataT(new float[hdTag_->sliceSize()]);
-
-        float* pos = data.get();
-        float* posT = dataT.get();
-
-        size_t nz = hdTag_->zSize();
-        size_t ny = hdTag_->ySize();
-        size_t nx = hdTag_->xSize();
-
-        size_t Nxy  = nx * ny;
-        size_t Nzx  = nz * nx;
-
-        size_t xLeap  = -nx;
-        size_t zxLeap = -Nzx;
-
-        for(size_t y = 0; y < ny; ++y) {
-
-            xLeap += nx;
-            zxLeap += Nzx;
-
-            size_t xyLeap = -Nxy;
-
-            for(size_t z = 0; z < nz; ++z) {
-
-                xyLeap += Nxy;
-
-                size_t zLeapF = -nz;
-                size_t zLeapB = nx * nz;
-
-                size_t midx = nx / 2 + nx % 2;
-                for(size_t x = 0; x < midx; ++x) {
-
-                    zLeapF += nz;
-                    zLeapB -= nz;
-
-                    float valueFx = *(pos + z + zLeapF + zxLeap);
-//                    if (isnan(valueFx)) {
-//                        valueFx = 9999.f;
-//                    }
-                    *(posT + x + xLeap + xyLeap) = valueFx;
-
-                    float valueBx = *(pos + z + zLeapB + zxLeap);
-//                    if (isnan(valueBx)) {
-//                        valueBx = 9999.f;
-//                    }
-                    *(posT + (nx - 1 - x) + xLeap + xyLeap) = valueBx;
-                }
-
-            } // z
-
-        } // y
-
-        data.swap(dataT);
     }
 
     void MetGmGroup5Ptr::slicesToFimexLayout(boost::shared_array<float>& slices, size_t numberOfSlices)
@@ -588,166 +447,166 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
         slices.swap(dataT);
     }
 
-    boost::shared_array<float> MetGmGroup5Ptr::readDataSlice(size_t pos)
-    {
-        assert(pos >= 1 && pos <= hdTag_->tSize());
+//    boost::shared_array<float> MetGmGroup5Ptr::readDataSlice(size_t pos)
+//    {
+//        assert(pos >= 1 && pos <= hdTag_->tSize());
 
-        switch(hdTag_->asShort()) {
-            case MetGmHDTag::HD_2D:
-            case MetGmHDTag::HD_2D_T:
-            case MetGmHDTag::HD_3D_T:
-                {
-                    FILE* fh = fopen(pGp3_->mgmHandle()->fileHandle()->fileName().c_str(), "rb");;
-                    if(!fh) {
-                        return boost::shared_array<float>(0);
-                    }
+//        switch(hdTag_->asShort()) {
+//            case MetGmHDTag::HD_2D:
+//            case MetGmHDTag::HD_2D_T:
+//            case MetGmHDTag::HD_3D_T:
+//                {
+//                    FILE* fh = fopen(pGp3_->mgmHandle()->fileHandle()->fileName().c_str(), "rb");;
+//                    if(!fh) {
+//                        return boost::shared_array<float>(0);
+//                    }
 
-                    mgm_handle* mh = mgm_new_handle();
-                    if(!mh) {
-                        fclose(fh);
-                        return boost::shared_array<float>(0);
-                    }
+//                    mgm_handle* mh = mgm_new_handle();
+//                    if(!mh) {
+//                        fclose(fh);
+//                        return boost::shared_array<float>(0);
+//                    }
 
-                    mgm_group3* gp3 = mgm_new_group3();
-                    if(!gp3) {
-                        mgm_free_handle(mh);
-                        fclose(fh);
-                        return boost::shared_array<float>(0);
-                    }
+//                    mgm_group3* gp3 = mgm_new_group3();
+//                    if(!gp3) {
+//                        mgm_free_handle(mh);
+//                        fclose(fh);
+//                        return boost::shared_array<float>(0);
+//                    }
 
-                    int call_result = MGM_OK;
+//                    int call_result = MGM_OK;
 
-                    int n = 0;
-                    int np = 0;
-                    int ndp = 0;
+//                    int n = 0;
+//                    int np = 0;
+//                    int ndp = 0;
 
-                    call_result = mgm_read_header(fh, mh);
+//                    call_result = mgm_read_header(fh, mh);
 
-//                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                              << " mgm_read_header : " << mgm_string_error(call_result)
-//                              << " param name: " << mgm_get_param_name(pGp3_->p_id(), mh)
-//                              << std::endl;
+////                    std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+////                              << " mgm_read_header : " << mgm_string_error(call_result)
+////                              << " param name: " << mgm_get_param_name(pGp3_->p_id(), mh)
+////                              << std::endl;
 
-                    if(call_result != MGM_OK) {
-                        mgm_free_group3(gp3);
-                        mgm_free_handle(mh);
-                        fclose(fh);
-                        return boost::shared_array<float>(0);
-                    }
+//                    if(call_result != MGM_OK) {
+//                        mgm_free_group3(gp3);
+//                        mgm_free_handle(mh);
+//                        fclose(fh);
+//                        return boost::shared_array<float>(0);
+//                    }
 
-                    np = mgm_get_number_of_params(mh);
-                    ndp = mgm_get_number_of_dist_params(mh);
+//                    np = mgm_get_number_of_params(mh);
+//                    ndp = mgm_get_number_of_dist_params(mh);
 
-                    for (n = 0; n < np; n++)
-                    {
-                        call_result = mgm_read_group3(fh, mh, gp3);
+//                    for (n = 0; n < np; n++)
+//                    {
+//                        call_result = mgm_read_group3(fh, mh, gp3);
 
-                        if(call_result != MGM_OK) {
-                            mgm_free_group3(gp3);
-                            mgm_free_handle(mh);
-                            fclose(fh);
-                            return boost::shared_array<float>(0);
-                        }
+//                        if(call_result != MGM_OK) {
+//                            mgm_free_group3(gp3);
+//                            mgm_free_handle(mh);
+//                            fclose(fh);
+//                            return boost::shared_array<float>(0);
+//                        }
 
-//                        int p_id = mgm_get_p_id(gp3);
+////                        int p_id = mgm_get_p_id(gp3);
 
-//                        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                                  << " mgm_read_group3 : " << mgm_string_error(call_result)
-//                                  << " param name: " << mgm_get_param_name(p_id, mh)
-//                                  << std::endl;
+////                        std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+////                                  << " mgm_read_group3 : " << mgm_string_error(call_result)
+////                                  << " param name: " << mgm_get_param_name(p_id, mh)
+////                                  << std::endl;
 
-//                        group3_dump(gp3);
+////                        group3_dump(gp3);
 
-                        if (mgm_get_pz(gp3) > 0) {
-                            call_result = mgm_skip_group4(fh, mh);
-//                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                                      << " mgm_skip_group4 : " << mgm_string_error(call_result)
-//                                      << std::endl;
-                            if(call_result != MGM_OK) {
-                                mgm_free_group3(gp3);
-                                mgm_free_handle(mh);
-                                fclose(fh);
-                                return boost::shared_array<float>(0);
-                            }
+//                        if (mgm_get_pz(gp3) > 0) {
+//                            call_result = mgm_skip_group4(fh, mh);
+////                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+////                                      << " mgm_skip_group4 : " << mgm_string_error(call_result)
+////                                      << std::endl;
+//                            if(call_result != MGM_OK) {
+//                                mgm_free_group3(gp3);
+//                                mgm_free_handle(mh);
+//                                fclose(fh);
+//                                return boost::shared_array<float>(0);
+//                            }
 
-                        } else {
-//                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
-//                                      << "\t WATCH OUT for pz == 0 for pid = " << p_id
-//                                      << std::endl;
-                        }
+//                        } else {
+////                            std::cerr << __FILE__ << " @ " << __FUNCTION__ << " @ " << __LINE__ << " : "
+////                                      << "\t WATCH OUT for pz == 0 for pid = " << p_id
+////                                      << std::endl;
+//                        }
 
-                        long cOffset = ftell(fh);
-                        if(cOffset < sOffset_) {
-                            // skip group5 data
-                            int nt = mgm_get_nt(gp3);
-                            for(int slice_index = 1; slice_index <= nt; ++slice_index)
-                            {
-                                size_t cSlicePos = 0;
-                                call_result = mgm_skip_group5_slice(fh, mh, &cSlicePos);
-                                if(call_result != MGM_OK) {
-                                    mgm_free_group3(gp3);
-                                    mgm_free_handle(mh);
-                                    fclose(fh);
-                                    return boost::shared_array<float>(0);
-                                }
-                            }
-                        } else if(cOffset > sOffset_) {
-                            // something wrong
-                            mgm_free_group3(gp3);
-                            mgm_free_handle(mh);
-                            fclose(fh);
-                            return boost::shared_array<float>(0);
-                        } else {
-                            boost::shared_array<float> data(new float[hdTag_->sliceSize()]);
-//                            std::cerr << "p_id " <<  p_id
-//                                      << " param name " << mgm_get_param_name(p_id, mh)
-//                                      << std::endl;
-                            for(size_t slice_index = 1; slice_index <= hdTag_->tSize(); ++slice_index)
-                            {
-                                size_t cSlicePos = -1;
-                                call_result = mgm_read_group5_slice(fh, mh, data.get(), &cSlicePos);
-                                if(call_result != MGM_OK) {
-                                    mgm_free_group3(gp3);
-                                    mgm_free_handle(mh);
-                                    fclose(fh);
-                                    return boost::shared_array<float>(0);
-                                }
-                                if(cSlicePos == pos) {
-                                    // slice found
-                                    mgm_free_group3(gp3);
-                                    mgm_free_handle(mh);
-                                    fclose(fh);
+//                        long cOffset = ftell(fh);
+//                        if(cOffset < sOffset_) {
+//                            // skip group5 data
+//                            int nt = mgm_get_nt(gp3);
+//                            for(int slice_index = 1; slice_index <= nt; ++slice_index)
+//                            {
+//                                size_t cSlicePos = 0;
+//                                call_result = mgm_skip_group5_slice(fh, mh, &cSlicePos);
+//                                if(call_result != MGM_OK) {
+//                                    mgm_free_group3(gp3);
+//                                    mgm_free_handle(mh);
+//                                    fclose(fh);
+//                                    return boost::shared_array<float>(0);
+//                                }
+//                            }
+//                        } else if(cOffset > sOffset_) {
+//                            // something wrong
+//                            mgm_free_group3(gp3);
+//                            mgm_free_handle(mh);
+//                            fclose(fh);
+//                            return boost::shared_array<float>(0);
+//                        } else {
+//                            boost::shared_array<float> data(new float[hdTag_->sliceSize()]);
+////                            std::cerr << "p_id " <<  p_id
+////                                      << " param name " << mgm_get_param_name(p_id, mh)
+////                                      << std::endl;
+//                            for(size_t slice_index = 1; slice_index <= hdTag_->tSize(); ++slice_index)
+//                            {
+//                                size_t cSlicePos = -1;
+//                                call_result = mgm_read_group5_slice(fh, mh, data.get(), &cSlicePos);
+//                                if(call_result != MGM_OK) {
+//                                    mgm_free_group3(gp3);
+//                                    mgm_free_handle(mh);
+//                                    fclose(fh);
+//                                    return boost::shared_array<float>(0);
+//                                }
+//                                if(cSlicePos == pos) {
+//                                    // slice found
+//                                    mgm_free_group3(gp3);
+//                                    mgm_free_handle(mh);
+//                                    fclose(fh);
 
-                                    MGM_THROW_ON_ERROR(mgm_param_is_convertible(pGp3_->p_id(), *pGp3_->mgmHandle()->version()))
+//                                    MGM_THROW_ON_ERROR(mgm_param_is_convertible(pGp3_->p_id(), *pGp3_->mgmHandle()->version()))
 
-                                    sliceToFimexLayout(data);
+//                                    slicesToFimexLayout(data,1);
 
-                                    return data;
-                                }
-                            }
-                        }
-                    }
+//                                    return data;
+//                                }
+//                            }
+//                        }
+//                    }
 
-                    mgm_free_group3(gp3);
-                    mgm_free_handle(mh);
-                    fclose(fh);
-                    return  boost::shared_array<float>(0);
-                }
-                break;
-            case MetGmHDTag::HD_0D:
-            case MetGmHDTag::HD_0D_T:
-            case MetGmHDTag::HD_1D:
-            case MetGmHDTag::HD_1D_T:
-            case MetGmHDTag::HD_3D:
-            default:
-                throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
-                                   + hdTag_->asString()
-                                   + " for p_id ="
-                                   + boost::lexical_cast<std::string>(pGp3_->p_id()));
-        }
+//                    mgm_free_group3(gp3);
+//                    mgm_free_handle(mh);
+//                    fclose(fh);
+//                    return  boost::shared_array<float>(0);
+//                }
+//                break;
+//            case MetGmHDTag::HD_0D:
+//            case MetGmHDTag::HD_0D_T:
+//            case MetGmHDTag::HD_1D:
+//            case MetGmHDTag::HD_1D_T:
+//            case MetGmHDTag::HD_3D:
+//            default:
+//                throw CDMException(  std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :")
+//                                   + hdTag_->asString()
+//                                   + " for p_id ="
+//                                   + boost::lexical_cast<std::string>(pGp3_->p_id()));
+//        }
 
-        return  boost::shared_array<float>(0);
-    }
+//        return  boost::shared_array<float>(0);
+//    }
 
     boost::shared_array<float> MetGmGroup5Ptr::readDataSlices(size_t pos, size_t numberOfSlices)
     {
