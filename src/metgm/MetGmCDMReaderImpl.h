@@ -54,24 +54,17 @@ namespace MetNoFimex {
 
     protected:
 
-        std::string spaceToUnderscore(const std::string& text);
-
-        void fillPidToMetNoNameMap(const std::auto_ptr<XMLDoc>& doc);
-        void fillPidToCdmNameMap(const std::auto_ptr<XMLDoc>& doc);
-        void fillPidToFillValueMap(const std::auto_ptr<XMLDoc>& doc);
+        virtual void configure(const std::auto_ptr<XMLDoc>& doc);
+        virtual void parseMgmFile(const std::string& mgmFileName);
+        virtual void addVariables();
 
         void addGlobalCDMAttributes();
         void addTimeDimension();
         void addHorizontalDimensions();
         void addVerticalDimensions();
-        void addVariables();
-
         void sanityCheck();
 
-    private:
-
-        void configure(const std::auto_ptr<XMLDoc>& doc);
-        void parseMgmFile(const std::string& mgmFileName);
+        std::string spaceToUnderscore(const std::string& text);
 
         std::string                            sourceFileName_;
         std::string                            configFileName_;
