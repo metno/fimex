@@ -64,13 +64,19 @@ namespace MetNoFimex {
                                                                             const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
                                                                             const boost::shared_ptr<MetGmVerticalTag> vTag);
 
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+                                                                            const CDMVariable* pVariable,
+                                                                            const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
+                                                                            const unsigned short p_id);
+
         const boost::shared_ptr<MetGmGroup3Ptr>& gp3()    { return pGp3_; }
 //        const boost::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
 
-        const unsigned short p_id() const;
-        const int            pr()   const;
-        const int            pz()   const;
-        const unsigned short hd()   const;
+        const unsigned short p_id()  const;
+        const int            pr()    const;
+        const int            pz()    const;
+        const unsigned short hd()    const;
+        const std::string    units() const;
 
         int set_nt(int nt);
         int set_dt(float dt);
@@ -95,7 +101,11 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmVerticalTag>& zTag();
         boost::shared_ptr<MetGmTimeTag>&     tTag();
 
-        boost::shared_array<float> getDataSlice(size_t pos);
+        boost::shared_array<float> readDataSlice(size_t pos);
+        void sliceToMetGmLayout(boost::shared_array<float>& slice);
+
+        boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
+//        void slicesToMetGmLayout(boost::shared_array<float>& slices, size_t numberOfSlices);
 
     private:
         MetGmTags() { }

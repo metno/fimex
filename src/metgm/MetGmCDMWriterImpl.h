@@ -62,9 +62,9 @@ namespace MetNoFimex {
     class MetGmYTag;
     class MetGmTags;
 
-class MetGmCDMWriterImpl : public CDMWriter
-{
-public:
+    class MetGmCDMWriterImpl : public CDMWriter
+    {
+    public:
         /**
          * @param cdmReader dataSource
          * @param outputFile file-name to write to
@@ -75,7 +75,7 @@ public:
                 (
                         boost::shared_ptr<CDMReader> cdmReader,
                         const std::string& outputFile,
-                        const std::string& configFile = std::string()
+                        const std::string& configFile
                 );
 
         virtual ~MetGmCDMWriterImpl();
@@ -98,7 +98,9 @@ public:
          */
         const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const throw(CDMException);
 
-private:
+    protected:
+
+        explicit MetGmCDMWriterImpl(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile);
 
         void configure(const std::auto_ptr<XMLDoc>& doc);
 
@@ -113,9 +115,10 @@ private:
         void writeGroup3HorizontalAxis(const CDMVariable* pVar);
 
         void writeGroup4Data(const CDMVariable* pVar);
-        void writeGroup5Data(const CDMVariable* pVar);
 
-        void init();
+
+        virtual void init();
+        virtual void writeGroup5Data(const CDMVariable* pVar);
 
         typedef boost::shared_ptr<MetGmTags> MetGmTagsPtr;
 
@@ -130,7 +133,7 @@ private:
 
         xml_configuration                           xmlConfiguration_;
         cdm_configuration                           cdmConfiguration_;
-};
+    };
 
 }
 

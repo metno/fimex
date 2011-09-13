@@ -82,6 +82,19 @@ namespace MetNoFimex {
         return tags;
     }
 
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+                                                                            const CDMVariable* pVariable,
+                                                                            const boost::shared_ptr<MetGmHandlePtr> mgmHandle,
+                                                                            const unsigned short p_id)
+    {
+        boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags);
+        tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(mgmHandle, p_id);
+        tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
+        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(pCdmReader, pVariable, tags->pGp3_);
+
+        return tags;
+    }
+
     const unsigned short MetGmTags::p_id() const { return pGp3_->p_id(); }
     const int MetGmTags::pr() const { return pGp3_->pr(); }
     const int MetGmTags::pz() const { return pGp3_->pz(); }
@@ -108,9 +121,22 @@ namespace MetNoFimex {
     boost::shared_ptr<MetGmTimeTag>&     MetGmTags::tTag() { return dimTag_->tTag(); }
 
     const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
-    boost::shared_array<float> MetGmTags::getDataSlice(size_t pos) {return pGp5_->getDataSlice(pos); }
-    const boost::shared_array<float>& MetGmTags::data() { return pGp5_->data(); }
 
+    boost::shared_array<float> MetGmTags::readDataSlice(size_t pos) {return pGp5_->readDataSlice(pos); }
+    void MetGmTags::sliceToMetGmLayout(boost::shared_array<float>& slice) { pGp5_->sliceToMetGmLayout(slice); }
+
+    boost::shared_array<float> MetGmTags::readDataSlices(size_t pos, size_t numberOfSlices)
+    {
+        return pGp5_->readDataSlices(pos, numberOfSlices);
+    }
+
+//    void MetGmTags::slicesToMetGmLayout(boost::shared_array<float>& slices, size_t numberOfSlices)
+//    {
+//        pGp5_->slicesToMetGmLayout(slices, numberOfSlices);
+//    }
+
+    const boost::shared_array<float>& MetGmTags::data() { return pGp5_->data(); }
+    const std::string MetGmTags::units() const { return pGp5_->units(); }
 }
 
 

@@ -21,34 +21,34 @@
  * USA.
  */
 
-//fimex
-//
-#include "fimex/MetGmCDMWriter.h"
+#ifndef METGM_CDMWRITER_SLICED_IMPL_HPP
+#define METGM_CDMWRITER_SLICED_IMPL_HPP
 
-// private/implementation code
-#include "./metgm/MetGmCDMWriterImpl.h"
-#include "./metgm/MetGmCDMWriterSlicedImpl.h"
+// implementation stuff
+//
+#include "MetGmCDMWriterImpl.h"
 
 namespace MetNoFimex {
 
-    MetGmCDMWriter::MetGmCDMWriter
-            (
-                const boost::shared_ptr<CDMReader> cdmReader,
-                const std::string& outputFile,
-                const std::string& configFile
-            ) : CDMWriter(cdmReader, outputFile)
+    class MetGmCDMWriterSlicedImpl : public MetGmCDMWriterImpl
     {
-//        d_ptr = boost::shared_ptr<MetGmCDMWriterImpl>(new MetGmCDMWriterImpl(cdmReader, outputFile, configFile));
+    public:
 
-        d_ptr = boost::shared_ptr<MetGmCDMWriterSlicedImpl>(new MetGmCDMWriterSlicedImpl(cdmReader, outputFile, configFile));
-    }
+        explicit MetGmCDMWriterSlicedImpl
+                (
+                        boost::shared_ptr<CDMReader> cdmReader,
+                        const std::string& outputFile,
+                        const std::string& configFile = std::string()
+                );
 
+        virtual ~MetGmCDMWriterSlicedImpl();
 
-    MetGmCDMWriter::~MetGmCDMWriter()
-    {
+    protected:
 
-    }
+        virtual void init();
+        virtual void writeGroup5Data(const CDMVariable* pVar);
+    };
 
-} // end namespace
+}
 
-
+#endif // METGM_CDMWRITER_SLICED_IMPL_HPP

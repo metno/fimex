@@ -68,12 +68,22 @@ namespace MetNoFimex {
         static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                                                                       const boost::shared_ptr<MetGmHDTag>     hdTag);
 
-        boost::shared_array<float> getDataSlice(size_t pos);
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
+                                                                                      const CDMVariable* pVariable,
+                                                                                      const boost::shared_ptr<MetGmGroup3Ptr> gp3
+                                                                                      );
+
+        boost::shared_array<float> readDataSlice(size_t pos);
+        void sliceToMetGmLayout(boost::shared_array<float>& slice);
+
+        boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
+        void slicesToFimexLayout(boost::shared_array<float>& slices, size_t numberOfSlices);
 
         void dumpFimexLayout();
         void dumpMetGmLayout();
 
         boost::shared_array<float>& data() { return data_; }
+        std::string units() {return units_; }
 
     private:
 
@@ -98,6 +108,7 @@ namespace MetNoFimex {
         long eOffset_;
         boost::shared_array<float>    data_;
         std::string                   fillValue_;
+        std::string                   units_;
     };
 
 

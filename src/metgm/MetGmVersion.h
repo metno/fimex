@@ -107,6 +107,10 @@ namespace MetNoFimex {
             return version_;
         }
 
+        inline mgm_version as_mgm_version()
+        {
+            return version_;
+        }
 
     private:
         mgm_version version_;

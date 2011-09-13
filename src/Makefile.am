@@ -101,6 +101,7 @@ if HAVE_METGM
                          metgm/MetGmCDMReaderSlicedImpl.cc \
                          MetGmCDMWriter.cc \
                          metgm/MetGmCDMWriterImpl.cc \
+                         metgm/MetGmCDMWriterSlicedImpl.cc \
                          metgm/MetGmHorizontalTag.cc \
                          metgm/MetGmTimeTag.cc \
                          metgm/MetGmVerticalTag.cc \
@@ -118,6 +119,7 @@ if HAVE_METGM
                          metgm/MetGmUtils.h \
                          metgm/MetGmTags.h \
                          metgm/MetGmCDMWriterImpl.h \
+                         metgm/MetGmCDMWriterSlicedImpl.h \
                          metgm/MetGmCommentAttributeParser.h \
                          metgm/MetGmGroup1Ptr.h \
                          metgm/MetGmGroup3Ptr.h \

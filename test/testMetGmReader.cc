@@ -37,6 +37,12 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
+#include "fimex/CDM.h"
+#include "fimex/CDMFileReaderFactory.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CoordinateSystemSliceBuilder.h"
+#include "fimex/Data.h"
+
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
@@ -82,6 +88,30 @@ BOOST_AUTO_TEST_CASE(test_read_metgm2) {
 
 }
 
+BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/sample_ed1.gm");
+    boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml"));
+    const CDM& cdm = metgmReaderEd1->getCDM();
+    // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    // find an appropriate coordinate system for a variable
+    string varName = "air_temperature_GND";
+    vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =
+            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    if (csIt == coordSys.end()) BOOST_CHECK(false);
+    CoordinateSystemSliceBuilder sb(cdm, *csIt);
+    sb.setReferenceTimePos(1);
+    sb.setTimeStartAndSize(0, 2);
+
+    BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "height_in_meters_above_ground_level_pid_5");
+    BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "latitude");
+    BOOST_CHECK(sb.getUnsetDimensionNames()[2] == "longitude");
+
+    boost::shared_ptr<Data> data = metgmReaderEd1->getDataSlice("air_temperature_GND", sb.getTimeVariableSliceBuilder());
+//    BOOST_CHECK(data->size() == 2);
+}
 
 #else
 // no boost testframework
