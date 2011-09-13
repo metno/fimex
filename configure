@@ -19068,6 +19068,8 @@ fi
 
 case $with_metgm in
     yes)
+     addincdir="/usr/include/metgm-dev-0.93"
+     mifi_CPPFLAGS="-I$addincdir"
      echo "Using system implementation of libmetgm-dev-0.93"
      ;;
     no)
