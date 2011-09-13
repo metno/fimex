@@ -90,6 +90,10 @@ private:
      */
     std::map<std::string, std::string> variableFlags;
     /*
+     * fillValue for each variable (default = _FillValue, or set per variable in config)
+     */
+    std::map<std::string, double> variableFill;
+    /*
      * map ofthe variableName to the valid values in the statusVariable.
      * statusVariable needs to be set!
      */

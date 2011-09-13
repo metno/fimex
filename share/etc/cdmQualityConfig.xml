@@ -10,7 +10,8 @@
    </status_flag_variable>
 </variable>
 
-<variable name="air_temperature">
+<!-- set air_temperature to explicit fillValue -999 (default: implicit fillValue) -->
+<variable name="air_temperature" fillValue="-999">
    <status_flag_variable name="altitude">
       <allowed_values use="min:1000" />
    </status_flag_variable>

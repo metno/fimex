@@ -120,6 +120,7 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
             vector<string> correspondingVars = findCorrespondingVariables(cdm, *varIt);
             for (vector<string>::iterator cVarIt = correspondingVars.begin(); cVarIt != correspondingVars.end(); ++cVarIt) {
                 statusVariable[*cVarIt] = *varIt;
+                variableFill[*cVarIt] = cdm.getFillValue(*cVarIt);
                 variableValues[*cVarIt] = getValidValues(cdm, *varIt, autoConfString, "flag_values");
             }
         }
@@ -143,6 +144,7 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
         for (size_t i = 0; i < size; i++) {
             xmlNodePtr node = nodes->nodeTab[i];
             string varName = getXmlProp(node, "name");
+            string fillValStr = getXmlProp(node, "fillValue");
             XPathObjPtr statusVarXPath = doc.getXPathObject("status_flag_variable", node);
             int statusVarNr = statusVarXPath->nodesetval ? statusVarXPath->nodesetval->nodeNr : 0;
             string statusVarName;
@@ -162,12 +164,12 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
             }
             if (statusVarName == "") throw CDMException("could not find status_flag_variable for var: " + varName);
             LOG4FIMEX(logger,Logger::DEBUG, "adding (variable,statusVar,use,vals): ("<<varName<<","<<statusVarName<<","<<statusVarUse<<","<<statusVarValues<<")");
+            statusVariable[varName] = statusVarName;
+            variableFill[varName] = (fillValStr == "") ? cdm.getFillValue(varName) : string2type<double>(fillValStr);
             vector<double> statusVarVals = tokenizeDotted<double>(statusVarValues);
             if (statusVarVals.size() > 0) {
-                statusVariable[varName] = statusVarName;
                 variableValues[varName] = statusVarVals;
             } else if (statusVarUse != "") {
-                statusVariable[varName] = statusVarName;
                 variableFlags[varName] = statusVarUse;
             } else {
                 throw CDMException("unable to quality-assure variable " + varName + ": no use or values given");
@@ -312,7 +314,7 @@ boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& var
                     sdIt++;
                 }
             }
-            double fillValue = cdm_->getFillValue(varName);
+            double fillValue = variableFill[varName];
             double *sdIt = &sd[0];
             for (size_t i = 0; i < size; ++i) {
                 if (isnan(*sdIt)) {

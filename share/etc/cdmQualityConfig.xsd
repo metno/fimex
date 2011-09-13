@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <xs:complexType name="allowed_values_type">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <!-- use = (highest|lowest|all|min:xxx.x|max:xxx.x) -->
+        <xs:attribute name="use" type="xs:string" use="optional" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="status_flag_variable_type">
+    <xs:sequence>
+        <xs:element name="allowed_values" type="allowed_values_type" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="variable_type">
+    <xs:sequence>
+        <xs:element name="status_flag_variable" type="status_flag_variable_type" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="fillValue" type="xs:double" />
+  </xs:complexType>
+
+
+  <xs:complexType name="cdmQualityConfig_type">
+    <xs:sequence>
+      <xs:element name="variable" type="variable_type" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:element name="cdmQualityConfig" type="cdmQualityConfig_type" />
+
+
+</xs:schema>
