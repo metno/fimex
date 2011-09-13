@@ -3,6 +3,7 @@
 
 // private implementation details
 #include "./metgm/MetGmCDMReaderImpl.h"
+#include "./metgm/MetGmCDMReaderSlicedImpl.h"
 
 namespace MetNoFimex {
 
@@ -10,7 +11,11 @@ namespace MetNoFimex {
         : CDMReader()
     {
         try {
-            d_ptr = boost::shared_ptr<MetGmCDMReaderImpl>(new MetGmCDMReaderImpl(metgmsource, configfilename, cdm_));
+
+//            d_ptr = boost::shared_ptr<MetGmCDMReaderImpl>(new MetGmCDMReaderImpl(metgmsource, configfilename, cdm_));
+
+            d_ptr = boost::shared_ptr<MetGmCDMReaderSlicedImpl>(new MetGmCDMReaderSlicedImpl(metgmsource, configfilename, cdm_));
+
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("METGM_CDMReader error: ") + exp.what());
         }

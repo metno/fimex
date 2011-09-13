@@ -19068,11 +19068,11 @@ fi
 
 case $with_metgm in
     yes)
-     echo "Using system implementation of libmetgm"
+     echo "Using system implementation of libmetgm-dev-0.93"
      ;;
     no)
-     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libmetgm dependent functions disabled" >&5
-$as_echo "$as_me: WARNING: Building library with libmetgm dependent functions disabled" >&2;}
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libmetgm-dev-0.93 dependent functions disabled" >&5
+$as_echo "$as_me: WARNING: Building library with libmetgm-dev-0.93 dependent functions disabled" >&2;}
      ;;
     *,*)
       addincdir="`echo $with_metgm | cut -f1 -d,`"
@@ -19081,7 +19081,7 @@ $as_echo "$as_me: WARNING: Building library with libmetgm dependent functions di
       mifi_LDFLAGS="-L$addlibdir"
       ;;
     *)
-      addincdir="$with_metgm/include"
+      addincdir="$with_metgm/include/metgm-dev-0.93"
       addlibdir="$with_metgm/lib"
       mifi_CPPFLAGS="-I$addincdir"
       mifi_LDFLAGS="-L$addlibdir"
@@ -19092,13 +19092,13 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_metgm != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_new_handle in -lmetgm" >&5
-$as_echo_n "checking for mgm_new_handle in -lmetgm... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_new_handle in -lmetgm-dev-0.93" >&5
+$as_echo_n "checking for mgm_new_handle in -lmetgm-dev-0.93... " >&6; }
 if test "${ac_cv_lib_metgm_mgm_new_handle+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmetgm  $LIBS"
+LIBS="-lmetgm-dev-0.93  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -19130,8 +19130,8 @@ fi
 $as_echo "$ac_cv_lib_metgm_mgm_new_handle" >&6; }
 if test "x$ac_cv_lib_metgm_mgm_new_handle" = x""yes; then :
   with_metgm=yes;
-         MIFI_METGM_LIBS="-lmetgm $mifi_LIBS";
-         MIFI_METGM_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_METGM_LIBS="-lmetgm-dev-0.93 $mifi_LIBS";
+         MIFI_METGM_CPPFLAGS="$mifi_CPPFLAGS"
          MIFI_METGM_LDFLAGS=$mifi_LDFLAGS;
 
 
@@ -19141,10 +19141,10 @@ else
   with_metgm=no;
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libmetgm" >&5
-$as_echo "$as_me: WARNING: Did not find libmetgm" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libmetgm dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libmetgm-dev-0.93" >&5
+$as_echo "$as_me: WARNING: Did not find libmetgm-dev-0.93" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm-dev-0.93 dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libmetgm-dev-0.93 dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
 fi

@@ -48,6 +48,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
+// standard
+#include <cstdio>
+
 namespace MetNoFimex {
 
     class MetGmGroup5Ptr {
@@ -62,15 +65,21 @@ namespace MetNoFimex {
         static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
                                                                                 const boost::shared_ptr<MetGmHDTag>     hdTag);
 
+        static boost::shared_ptr<MetGmGroup5Ptr> createMetGmGroup5PtrForSlicedReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
+                                                                                      const boost::shared_ptr<MetGmHDTag>     hdTag);
+
+        boost::shared_array<float> getDataSlice(size_t pos);
+
         void dumpFimexLayout();
         void dumpMetGmLayout();
 
         boost::shared_array<float>& data() { return data_; }
+
     private:
 
-//        void changeFillValue();
         void toFimexLayout();
         void toFimexLayoutOptimized();
+        void sliceToFimexLayout(boost::shared_array<float>& slice);
 
         // reorder z-axis and set fill-values
         void toMetGmLayout();
@@ -85,6 +94,8 @@ namespace MetNoFimex {
         const boost::shared_ptr<MetGmGroup3Ptr> pGp3_;
         const boost::shared_ptr<MetGmHDTag>     hdTag_;
 
+        long sOffset_;
+        long eOffset_;
         boost::shared_array<float>    data_;
         std::string                   fillValue_;
     };

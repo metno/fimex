@@ -71,6 +71,17 @@ namespace MetNoFimex {
         return tags;
     }
 
+    boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForSlicedReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                            const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
+                                                                            const boost::shared_ptr<MetGmVerticalTag> vTag)
+    {
+        boost::shared_ptr<MetGmTags> tags = boost::shared_ptr<MetGmTags>(new MetGmTags(pGp1, pGp2));
+        tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pGp1->mgmHandle());
+        tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTag(pGp1, tags->pGp3_, vTag);
+        tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedReading(tags->pGp3_, tags->dimTag_);
+        return tags;
+    }
+
     const unsigned short MetGmTags::p_id() const { return pGp3_->p_id(); }
     const int MetGmTags::pr() const { return pGp3_->pr(); }
     const int MetGmTags::pz() const { return pGp3_->pz(); }
@@ -97,7 +108,9 @@ namespace MetNoFimex {
     boost::shared_ptr<MetGmTimeTag>&     MetGmTags::tTag() { return dimTag_->tTag(); }
 
     const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
+    boost::shared_array<float> MetGmTags::getDataSlice(size_t pos) {return pGp5_->getDataSlice(pos); }
     const boost::shared_array<float>& MetGmTags::data() { return pGp5_->data(); }
+
 }
 
 

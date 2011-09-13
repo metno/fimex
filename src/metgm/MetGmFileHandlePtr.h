@@ -85,7 +85,7 @@ namespace MetNoFimex {
         }
 
         inline operator FILE* () { return handle_; }
-        inline FILE* handle() { return handle_; }
+        inline FILE* & handle() { return handle_; }
         inline std::string fileName() { return fileName_; }
 
     private:

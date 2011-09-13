@@ -54,6 +54,8 @@ namespace MetNoFimex {
 
     protected:
 
+        explicit MetGmCDMReaderImpl(const boost::shared_ptr<CDM>& cdm);
+
         virtual void configure(const std::auto_ptr<XMLDoc>& doc);
         virtual void parseMgmFile(const std::string& mgmFileName);
         virtual void addVariables();

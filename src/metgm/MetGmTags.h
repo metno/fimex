@@ -60,6 +60,10 @@ namespace MetNoFimex {
                                                                       const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
                                                                       const boost::shared_ptr<MetGmVerticalTag> vTag);
 
+        static boost::shared_ptr<MetGmTags> createMetGmTagsForSlicedReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
+                                                                            const boost::shared_ptr<MetGmGroup2Ptr>   pGp2,
+                                                                            const boost::shared_ptr<MetGmVerticalTag> vTag);
+
         const boost::shared_ptr<MetGmGroup3Ptr>& gp3()    { return pGp3_; }
 //        const boost::shared_ptr<MetGmHDTag>&     dimTag() { return dimTag_;}
 
@@ -90,6 +94,8 @@ namespace MetNoFimex {
         boost::shared_ptr<MetGmYTag>&        yTag();
         boost::shared_ptr<MetGmVerticalTag>& zTag();
         boost::shared_ptr<MetGmTimeTag>&     tTag();
+
+        boost::shared_array<float> getDataSlice(size_t pos);
 
     private:
         MetGmTags() { }

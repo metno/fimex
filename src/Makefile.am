@@ -98,6 +98,7 @@ endif
 if HAVE_METGM
   libfimex_la_SOURCES += MetGmCDMReader.cc \
                          metgm/MetGmCDMReaderImpl.cc \
+                         metgm/MetGmCDMReaderSlicedImpl.cc \
                          MetGmCDMWriter.cc \
                          metgm/MetGmCDMWriterImpl.cc \
                          metgm/MetGmHorizontalTag.cc \
@@ -121,6 +122,7 @@ if HAVE_METGM
                          metgm/MetGmGroup1Ptr.h \
                          metgm/MetGmGroup3Ptr.h \
                          metgm/MetGmCDMReaderImpl.h \
+                         metgm/MetGmCDMReaderSlicedImpl.h \
                          metgm/MetGmVerticalTag.h \
                          metgm/MetGmHorizontalTag.h \
                          metgm/MetGmHandlePtr.h \

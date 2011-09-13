@@ -79,6 +79,12 @@ namespace MetNoFimex {
         }
     }
 
+    MetGmCDMReaderImpl::MetGmCDMReaderImpl(const boost::shared_ptr<CDM>& cdm)
+        : CDMReader()
+    {
+        cdm_ = cdm; // as not accesible via initialzation list
+    }
+
     MetGmCDMReaderImpl::~MetGmCDMReaderImpl() { }
 
     std::string MetGmCDMReaderImpl::spaceToUnderscore(const std::string& name)
