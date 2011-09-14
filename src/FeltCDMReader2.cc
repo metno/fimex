@@ -131,7 +131,7 @@ std::vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const
 	}
 	return retValues;
 }
-void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(MetNoFelt::Felt_File_Error)
+void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
 {
 	std::string addAxisXPath(xpathLevelString + "/additional_axis_variable");
 	XPathObjPtr xpathObj = doc.getXPathObject(addAxisXPath);
@@ -177,7 +177,7 @@ FeltCDMReader2::~FeltCDMReader2()
 {
 }
 
-void FeltCDMReader2::init() throw(MetNoFelt::Felt_File_Error, CDMException) {
+void FeltCDMReader2::init() {
     // test lib vs compile version
     MetNoFimex::XMLDoc doc(configFilename);
     XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config");

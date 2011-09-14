@@ -184,8 +184,11 @@ boost::array<float, 6> gridParametersGeographic_(int ilat, int ilon, int latDist
     scaleExtraData_(gridPar, parsUsed, 10000., extraData);
 
     // check consistency
-    if (gridPar[2] == 0 || gridPar[3] == 0)
-        throw std::runtime_error("(rotated) geographic: gridDistance > 0 required");
+    if (gridPar[2] == 0 || gridPar[3] == 0) {
+        std::stringstream ss;
+        ss <<  "(rotated) geographic: gridDistance > 0 required, got '" << gridPar[2] << "' '" <<gridPar[3] << "'";
+        throw std::runtime_error(ss.str());
+    }
 
     return gridPar;
 }

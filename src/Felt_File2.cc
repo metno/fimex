@@ -53,7 +53,7 @@ using namespace MetNoFimex;
 static LoggerPtr logger = getLogger("fimex.Felt_File2");
 
 
-Felt_File2::Felt_File2(const string& filename) throw(Felt_File_Error)
+Felt_File2::Felt_File2(const string& filename)
 	: filename_(filename)
 {
 	int pos = filename.rfind("/");
@@ -70,7 +70,7 @@ Felt_File2::Felt_File2(const string& filename) throw(Felt_File_Error)
 	init(options);
 }
 
-Felt_File2::Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options) throw(Felt_File_Error)
+Felt_File2::Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options)
 : filename_(filename), feltParameters(dianaParamList)
 {
 	init(options);
@@ -102,7 +102,7 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 	}
 }
 
-void Felt_File2::init(const std::map<std::string, std::string>& options) throw(Felt_File_Error)
+void Felt_File2::init(const std::map<std::string, std::string>& options)
 {
 	setOptions(options);
 	try {
@@ -151,7 +151,7 @@ bool Felt_File2::findOrCreateFeltArray(boost::shared_ptr<felt::FeltField> field)
 	}
 }
 
-const boost::shared_ptr<Felt_Array2> Felt_File2::getFeltArray(const string& arrayName) const throw(Felt_File_Error){
+const boost::shared_ptr<Felt_Array2> Felt_File2::getFeltArray(const string& arrayName) const {
 	map<string, boost::shared_ptr<Felt_Array2> >::const_iterator it = feltArrayMap_.find(arrayName);
 	if (it == feltArrayMap_.end()) {
 		throw Felt_File_Error("unknown parameter: " + arrayName);
@@ -187,7 +187,7 @@ boost::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata
 	return MetNoFimex::createData(indata.size(), data);
 }
 
-boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level) throw(Felt_File_Error)
+boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level)
 {
     size_t dataSize = feltArray->getX() * feltArray->getY();
     vector<short> data;
@@ -265,7 +265,8 @@ int Felt_File2::getNY() const {
 	return ny;
 }
 
-boost::shared_ptr<Data> Felt_File2::getXData() const throw(Felt_File_Error) {
+boost::shared_ptr<Data> Felt_File2::getXData() const
+{
 	boost::shared_ptr<Data> xData = createData(CDM_FLOAT, getNX());
 	boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
 	for (int i = 0; i < getNX(); i++) {
@@ -275,7 +276,7 @@ boost::shared_ptr<Data> Felt_File2::getXData() const throw(Felt_File_Error) {
 	return xData;
 }
 
-boost::shared_ptr<Data> Felt_File2::getYData() const throw(Felt_File_Error)
+boost::shared_ptr<Data> Felt_File2::getYData() const
 {
 	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNY());
     boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
@@ -286,7 +287,7 @@ boost::shared_ptr<Data> Felt_File2::getYData() const throw(Felt_File_Error)
     return yData;
 }
 
-int Felt_File2::getGridType() const throw(Felt_File_Error)
+int Felt_File2::getGridType() const
 {
     if (feltArrayMap_.size() > 0) {
         int gridType = feltArrayMap_.begin()->second->getGridType();
@@ -305,7 +306,8 @@ int Felt_File2::getGridType() const throw(Felt_File_Error)
     return -1; // default
 }
 
-boost::shared_ptr<felt::FeltGridDefinition> Felt_File2::getGridDefinition() const throw(Felt_File_Error) {
+boost::shared_ptr<felt::FeltGridDefinition> Felt_File2::getGridDefinition() const
+{
 	std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin();
 	if (feltArrayMap_.size() > 0) {
 	    return fait->second->getGridDefinition();

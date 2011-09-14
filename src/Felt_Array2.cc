@@ -85,7 +85,7 @@ void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
     }
 }
 
-void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField> field) throw(Felt_File_Error)
+void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField> field)
 {
     if (!field->valid()) {
         // no data, no field
@@ -140,7 +140,7 @@ vector<LevelPair> Felt_Array2::getLevelPairs() const {
 	return retVal;
 }
 
-const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const throw(Felt_File_Error)
+const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const
 {
     TimeLevelFieldMap::const_iterator tlm;
     if (hasTime()) {
@@ -157,7 +157,7 @@ const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time
     throw Felt_File_Error("time/pair value not found in field");
 }
 
-int Felt_Array2::getIdent19(boost::posix_time::ptime time, LevelPair levelPair) const throw(Felt_File_Error)
+int Felt_Array2::getIdent19(boost::posix_time::ptime time, LevelPair levelPair) const
 {
     return getField(time, levelPair)->miscField();
 }
@@ -192,14 +192,14 @@ int Felt_Array2::getY() const
 {
     return defaultField_->yNum();
 }
-int Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut) throw(Felt_File_Error)
+int Felt_Array2::getGrid(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut)
 {
     boost::array<float, 6> nullDelta;
     for (int i = 0; i < 6; i++) nullDelta[i] = 0;
     return getGridAllowDelta(time, levelPair, gridOut, nullDelta);
 }
 
-int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta) throw(Felt_File_Error)
+int Felt_Array2::getGridAllowDelta(boost::posix_time::ptime time, LevelPair levelPair, vector<short>& gridOut, const boost::array<float, 6>& gridParameterDelta)
 {
     const boost::shared_ptr<felt::FeltField>& field = getField(time, levelPair);
 

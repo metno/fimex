@@ -31,7 +31,6 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDimension.h"
 #include "fimex/Felt_Types.h"
-#include "fimex/Felt_File_Error.h"
 #include "fimex/ReplaceStringObject.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -68,7 +67,7 @@ private:
 	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
 	 */
 	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
-	void init() throw(MetNoFelt::Felt_File_Error, CDMException);
+	void init();
 	// the following methods are parts of the init function and should not
 	// be called from elsewhere
 	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc);
@@ -86,7 +85,7 @@ private:
 	 * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
 	 * @param templateReplacements replacements for template parameters
 	 */
-	void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(MetNoFelt::Felt_File_Error);
+	void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
 	std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath);
 	void initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates);
 	void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<short, CDMDimension>& levelDims);

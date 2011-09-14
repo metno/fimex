@@ -58,14 +58,14 @@ public:
 	 * open and read toc of a felt file
 	 * \param filename name of felt file
 	 */
-	explicit Felt_File2(const std::string& filename) throw(Felt_File_Error);
+	explicit Felt_File2(const std::string& filename);
 	/**
 	 * open and read toc of a felt file
 	 * \param paramList a list of known parameters (in diana format, e.g. 17,2,1000:prod=74), only the known parameters will be read
 	 * \warning The diana format is extended by dataType=short|float|double and fillValue=(number in short|float|double) to add the return type of the data.
 	 * Autoscaling will be turned on for 'getDataSlice'. default is dataType=short:fillValue=-32767
 	 */
-	explicit Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options) throw(Felt_File_Error);
+	explicit Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options);
 	virtual ~Felt_File2();
 	//float* getData(const string& compName);
 
@@ -73,7 +73,7 @@ public:
 	/**
 	 * \param compName parameter name of felt file as named in diana setup
 	 */
-	const boost::shared_ptr<Felt_Array2> getFeltArray(const std::string& compName) const throw(Felt_File_Error);
+	const boost::shared_ptr<Felt_Array2> getFeltArray(const std::string& compName) const;
 	/// retrieve a data slice
 	/**
 	 * retrieve the data prescaled (if float or double) and replaced with the new fill value
@@ -82,7 +82,7 @@ public:
 	 * @param time time of slice
 	 * @param level level of slice
 	 */
-	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level) throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level);
 
 	/**
 	 *  retrieve all felt arrays
@@ -113,16 +113,16 @@ public:
 	/// get size in y direction
 	int getNY() const;
 	/// get the values of the x axis
-	boost::shared_ptr<MetNoFimex::Data> getXData() const throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getXData() const;
 	/// get the values of the y axis
-	boost::shared_ptr<MetNoFimex::Data> getYData() const throw(Felt_File_Error);
+	boost::shared_ptr<MetNoFimex::Data> getYData() const;
 
     /**
      *  assumes one set of grid-parameters for the whole file, returns parameter between 1 and 6, without extra definition
      */
-    int getGridType() const throw(Felt_File_Error);
+    int getGridType() const;
 	/// assumes one set of grid-parameters for the whole file
-	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const throw(Felt_File_Error);
+	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
 
 private:
     std::string filename_;
@@ -134,7 +134,7 @@ private:
 
     bool findOrCreateFeltArray(const boost::shared_ptr<felt::FeltField>);
     /// actually read the data with the parameters from the felt_file, should be called from constructors
-    void init(const std::map<std::string, std::string>& options) throw(Felt_File_Error);
+    void init(const std::map<std::string, std::string>& options);
     /// add processing options by strings, called from init()
     void setOptions(const std::map<std::string, std::string>& options);
 
