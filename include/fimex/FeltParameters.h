@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -42,9 +42,9 @@ public:
 	FeltParameters();
 	/**
 	 * initialize all known felt parameters from a diana-setup file
-	 * 
+	 *
 	 * @param filename diana setup file
-	 * 
+	 *
 	 */
 	explicit FeltParameters(std::string filename);
 	/**
@@ -59,14 +59,14 @@ public:
 	// local static objects
 	const static std::string& DEFAULT_CONFIG() {
 		const static std::string DEFAULT_CONFIG("/metno/local/diana/etc/diana.setup-COMMON");
-		return DEFAULT_CONFIG; 
+		return DEFAULT_CONFIG;
 	}
 private:
 	void init(std::string filename=DEFAULT_CONFIG());
 	boost::array<short, 16> diana2feltparameters(const std::string&);
 };
 
-std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error);
+std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters);
 
 inline const int ANY_VALUE() { return -32767;}
 const std::string& UNDEFINED();

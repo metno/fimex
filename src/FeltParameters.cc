@@ -220,7 +220,7 @@ double FeltParameters::getParameterFillValue(const std::string& parameterName) c
 }
 
 
-std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters) throw(Felt_File_Error)
+std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters)
 {
 	std::ostringstream tempProj;
 	std::string earth("+ellps=sphere +a="+MetNoFimex::type2string(MIFI_EARTH_RADIUS_M)+" +e=0");

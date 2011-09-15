@@ -179,6 +179,11 @@ void FeltField::grid(std::vector<word> & out) const
     // read header together with data, unless read before
     getGridHeader_();
 	size_t from = (startingGridBlock() * blockWords) + 20;
+    //offset
+     if (header_[6] > 1) {
+         from += header_[6] - 1;
+     }
+
 	size_t size = gridSize();
 	feltFile_.get_(out, from, size);
 	// read footer together with data, unless read before
@@ -227,6 +232,12 @@ const std::vector<word> & FeltField::getGridHeader_() const
 	{
 		size_t startingBlock = startingGridBlock();
 		size_t readFrom = startingBlock * blockWords;
+
+		//offset
+		if (header_[6] > 1) {
+		    readFrom += header_[6] - 1;
+		}
+
 		feltFile_.get_(gridHeader_, readFrom, 20);
 	}
 	return gridHeader_;
@@ -242,6 +253,11 @@ const std::vector<short int>& FeltField::getExtraGeometrySpecification_() const
             extraGridSpec_.resize(readSize);
 
             size_t readFrom = (startingGridBlock() * blockWords) + gridSize() + 20;
+            //offset
+            if (header_[6] > 1) {
+                readFrom += header_[6] - 1;
+            }
+
             feltFile_.get_(extraGridSpec_, readFrom, readSize);
         }
     }

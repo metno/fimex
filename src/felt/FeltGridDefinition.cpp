@@ -186,7 +186,13 @@ boost::array<float, 6> gridParametersGeographic_(int ilat, int ilon, int latDist
     // check consistency
     if (gridPar[2] == 0 || gridPar[3] == 0) {
         std::stringstream ss;
-        ss <<  "(rotated) geographic: gridDistance > 0 required, got '" << gridPar[2] << "' '" <<gridPar[3] << "'";
+        ss <<  "(rotated) geographic: gridDistance > 0 required, got: ";
+        ss << gridPar[0] << " ";
+        ss << gridPar[1] << " ";
+        ss << gridPar[2] << " ";
+        ss << gridPar[3] << " ";
+        ss << gridPar[4] << " ";
+        ss << gridPar[5] << " ";
         throw std::runtime_error(ss.str());
     }
 

@@ -685,6 +685,8 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 		}
 	} catch (MetNoFelt::Felt_File_Error& ffe) {
 		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());
+	} catch (std::exception& e) {
+	    throw CDMException(std::string("non-Felt_File_Error: ") + e.what());
 	}
 	return data;
 }
