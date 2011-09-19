@@ -148,10 +148,6 @@ boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName
     }
 }
 
-static void degreeToRad(double& val) {
-    val *= DEG_TO_RAD;
-}
-
 static string getProjectionName(const string& proj_input) {
     // get the new projection
     std::string newProj;
@@ -180,8 +176,8 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
         size_t latSize = dataReader->getData(latitude)->size();
         boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
-        for_each(&latVals[0], &latVals[latSize], degreeToRad);
-        for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+        transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+        transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         if (getProjectionName(proj_input) != "latlong") {
             std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
             if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
@@ -765,8 +761,8 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
     boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
     size_t latSize = dataReader->getData(latitude)->size();
     boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
-    for_each(&latVals[0], &latVals[latSize], degreeToRad);
-    for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+    transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+    transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
     size_t orgXDimSize;
     size_t orgYDimSize;
@@ -802,11 +798,11 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
     vector<double> outYAxis = out_y_axis;
     boost::regex degree(".*degree.*");
     if (boost::regex_match(out_x_axis_unit, degree)) {
-        for_each(outXAxis.begin(), outXAxis.end(), degreeToRad);
+        transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
         miupXAxis = MIFI_LONGITUDE;
     }
     if (boost::regex_match(out_y_axis_unit, degree)) {
-        for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
+        transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
         miupYAxis = MIFI_LATITUDE;
     }
 
@@ -851,8 +847,8 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
     boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
     size_t latSize = dataReader->getData(latitude)->size();
     boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
-    for_each(&latVals[0], &latVals[latSize], degreeToRad);
-    for_each(&lonVals[0], &lonVals[latSize], degreeToRad);
+    transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+    transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
     size_t orgXDimSize;
     size_t orgYDimSize;
@@ -886,10 +882,10 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
     vector<double> outYAxis = out_y_axis;
     boost::regex degree(".*degree.*");
     if (boost::regex_match(out_x_axis_unit, degree)) {
-        for_each(outXAxis.begin(), outXAxis.end(), degreeToRad);
+        transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
     }
     if (boost::regex_match(out_y_axis_unit, degree)) {
-        for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
+        transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
     }
     // get output axes expressed in latitude, longitude
     size_t fieldSize = outXAxis.size() * outYAxis.size();
@@ -962,10 +958,10 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
     vector<double> outYAxis = out_y_axis;
     boost::regex degree(".*degree.*");
     if (boost::regex_match(out_x_axis_unit, degree)) {
-        for_each(outXAxis.begin(), outXAxis.end(), degreeToRad);
+        transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
     }
     if (boost::regex_match(out_y_axis_unit, degree)) {
-        for_each(outYAxis.begin(), outYAxis.end(), degreeToRad);
+        transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
     }
 
     // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
@@ -985,9 +981,9 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
     boost::shared_array<double> orgYAxisValsArray = orgYAxisVals->asDouble();
     if (cs->getProjection()->isDegree()) {
         miupXAxis = MIFI_LONGITUDE;
-        for_each(&orgXAxisValsArray[0], &orgXAxisValsArray[orgXAxisVals->size()], degreeToRad);
+        transform(&orgXAxisValsArray[0], &orgXAxisValsArray[0]+orgXAxisVals->size(), &orgXAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         miupYAxis = MIFI_LATITUDE;
-        for_each(&orgYAxisValsArray[0], &orgYAxisValsArray[orgYAxisVals->size()], degreeToRad);
+        transform(&orgYAxisValsArray[0], &orgYAxisValsArray[0]+orgYAxisVals->size(), &orgXAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
     }
     // translate coordinates (in rad or m) to indices
     mifi_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
