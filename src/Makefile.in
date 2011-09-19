@@ -211,9 +211,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
 	NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-        GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc GribUtils.cc \
-        MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc metgm/MetGmCDMReaderSlicedImpl.cc \
-        MetGmCDMWriter.cc metgm/MetGmCDMWriterImpl.cc metgm/MetGmCDMWriterSlicedImpl.cc \
+	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
+	GribUtils.cc MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
+	metgm/MetGmCDMReaderSlicedImpl.cc MetGmCDMWriter.cc \
+	metgm/MetGmCDMWriterImpl.cc metgm/MetGmCDMWriterSlicedImpl.cc \
 	metgm/MetGmHorizontalTag.cc metgm/MetGmTimeTag.cc \
 	metgm/MetGmVerticalTag.cc metgm/MetGmGroup1Ptr.cc \
 	metgm/MetGmGroup2Ptr.cc metgm/MetGmGroup3Ptr.cc \
@@ -222,10 +223,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	metgm/MetGmHandlePtr.cc metgm/MetGmGroup5Ptr.h \
 	metgm/MetGmConfigurationMappings.h metgm/MetGmVersion.h \
 	metgm/MetGmGroup2Ptr.h metgm/MetGmUtils.h metgm/MetGmTags.h \
-        metgm/MetGmCDMWriterImpl.h metgm/MetGmCDMWriterSlicedImpl.h \
-        metgm/MetGmCommentAttributeParser.h \
-	metgm/MetGmGroup1Ptr.h metgm/MetGmGroup3Ptr.h \
-        metgm/MetGmCDMReaderImpl.h metgm/MetGmCDMReaderSlicedImpl.h metgm/MetGmVerticalTag.h \
+	metgm/MetGmCDMWriterImpl.h metgm/MetGmCDMWriterSlicedImpl.h \
+	metgm/MetGmCommentAttributeParser.h metgm/MetGmGroup1Ptr.h \
+	metgm/MetGmGroup3Ptr.h metgm/MetGmCDMReaderImpl.h \
+	metgm/MetGmCDMReaderSlicedImpl.h metgm/MetGmVerticalTag.h \
 	metgm/MetGmHorizontalTag.h metgm/MetGmHandlePtr.h \
 	metgm/MetGmTimeTag.h metgm/MetGmCDMVariableProfile.h \
 	metgm/MetGmFileHandlePtr.h metgm/MetGmDimensionsTag.h \
@@ -265,11 +266,14 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl2.lo GribCDMReader.lo \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
 @HAVE_METGM_TRUE@am__objects_3 = MetGmCDMReader.lo \
-@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo MetGmCDMReaderSlicedImpl.lo \
-@HAVE_METGM_TRUE@	MetGmCDMWriter.lo MetGmCDMWriterImpl.lo MetGmCDMWriterSlicedImpl.lo \
-@HAVE_METGM_TRUE@	MetGmTimeTag.lo MetGmVerticalTag.lo MetGmHorizontalTag.lo \
-@HAVE_METGM_TRUE@	MetGmGroup1Ptr.lo MetGmGroup2Ptr.lo \
-@HAVE_METGM_TRUE@	MetGmGroup3Ptr.lo MetGmGroup5Ptr.lo \
+@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo \
+@HAVE_METGM_TRUE@	MetGmCDMReaderSlicedImpl.lo MetGmCDMWriter.lo \
+@HAVE_METGM_TRUE@	MetGmCDMWriterImpl.lo \
+@HAVE_METGM_TRUE@	MetGmCDMWriterSlicedImpl.lo \
+@HAVE_METGM_TRUE@	MetGmHorizontalTag.lo MetGmTimeTag.lo \
+@HAVE_METGM_TRUE@	MetGmVerticalTag.lo MetGmGroup1Ptr.lo \
+@HAVE_METGM_TRUE@	MetGmGroup2Ptr.lo MetGmGroup3Ptr.lo \
+@HAVE_METGM_TRUE@	MetGmGroup5Ptr.lo \
 @HAVE_METGM_TRUE@	MetGmCommentAttributeParser.lo \
 @HAVE_METGM_TRUE@	MetGmDimensionsTag.lo MetGmTags.lo \
 @HAVE_METGM_TRUE@	MetGmHandlePtr.lo
@@ -954,7 +958,7 @@ MetGmCDMReaderSlicedImpl.lo: metgm/MetGmCDMReaderSlicedImpl.cc
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCDMReaderSlicedImpl.Tpo $(DEPDIR)/MetGmCDMReaderSlicedImpl.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMReaderSlicedImpl.cc' object='MetGmCDMReaderSlicedImpl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMReaderSlicedImpl.lo `test -f 'metgm/MetGmCDMReaderImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderSlicedImpl.cc
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMReaderSlicedImpl.lo `test -f 'metgm/MetGmCDMReaderSlicedImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderSlicedImpl.cc
 
 MetGmCDMWriterImpl.lo: metgm/MetGmCDMWriterImpl.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMWriterImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMWriterImpl.Tpo -c -o MetGmCDMWriterImpl.lo `test -f 'metgm/MetGmCDMWriterImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterImpl.cc

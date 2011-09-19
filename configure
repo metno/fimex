@@ -19092,9 +19092,9 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_metgm != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_new_handle in -lmetgm" >&5
-$as_echo_n "checking for mgm_new_handle in -lmetgm... " >&6; }
-if test "${ac_cv_lib_metgm_mgm_new_handle+set}" = set; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_read_group5_slice in -lmetgm" >&5
+$as_echo_n "checking for mgm_read_group5_slice in -lmetgm... " >&6; }
+if test "${ac_cv_lib_metgm_mgm_read_group5_slice+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19108,30 +19108,30 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char mgm_new_handle ();
+char mgm_read_group5_slice ();
 int
 main ()
 {
-return mgm_new_handle ();
+return mgm_read_group5_slice ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_metgm_mgm_new_handle=yes
+  ac_cv_lib_metgm_mgm_read_group5_slice=yes
 else
-  ac_cv_lib_metgm_mgm_new_handle=no
+  ac_cv_lib_metgm_mgm_read_group5_slice=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_metgm_mgm_new_handle" >&5
-$as_echo "$ac_cv_lib_metgm_mgm_new_handle" >&6; }
-if test "x$ac_cv_lib_metgm_mgm_new_handle" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_metgm_mgm_read_group5_slice" >&5
+$as_echo "$ac_cv_lib_metgm_mgm_read_group5_slice" >&6; }
+if test "x$ac_cv_lib_metgm_mgm_read_group5_slice" = x""yes; then :
   with_metgm=yes;
          MIFI_METGM_LIBS="-lmetgm $mifi_LIBS";
-         MIFI_METGM_CPPFLAGS="$mifi_CPPFLAGS"
+         MIFI_METGM_CPPFLAGS=$mifi_CPPFLAGS;
          MIFI_METGM_LDFLAGS=$mifi_LDFLAGS;
 
 

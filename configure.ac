@@ -140,7 +140,7 @@ if test "x$with_grib_api" = "xyes"; then
     AC_DEFINE([HAVE_GRIBAPI_H], 1, 'Define to 1 if you have the <grib_api.h> header file.')
 fi
 
-MIFI_USELIB([metgm], [mgm_new_handle], [])
+MIFI_USELIB([metgm], [mgm_read_group5_slice], [])
 AM_CONDITIONAL([HAVE_METGM], [test "x$with_metgm" = "xyes"])
 if test "x$with_metgm" = "xyes"; then
     AC_DEFINE([HAVE_METGM_H], 1, 'Define to 1 if you have the <metgm.h> header file.')
