@@ -73,7 +73,6 @@ namespace MetNoFimex {
                                                                                       const boost::shared_ptr<MetGmGroup3Ptr> gp3
                                                                                       );
 
-//        boost::shared_array<float> readDataSlice(size_t pos);
         void sliceToMetGmLayout(boost::shared_array<float>& slice);
 
         boost::shared_array<float> readDataSlices(size_t pos, size_t numberOfSlices);
