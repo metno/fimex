@@ -39,6 +39,8 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMQualityExtractor.h"
 #ifdef MIFI_HAVE_NETCDF
 #include "fimex/NetCDF_CDMWriter.h"
+#else
+#include "fimex/Null_CDMWriter.h"
 #endif
 #include "fimex/Logger.h"
 
