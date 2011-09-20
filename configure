@@ -19068,11 +19068,11 @@ fi
 
 case $with_metgm in
     yes)
-     echo "Using system implementation of libmetgm"
+     echo "Using system implementation of libmetgm (>= 0.93.2)"
      ;;
     no)
-     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libmetgm dependent functions disabled" >&5
-$as_echo "$as_me: WARNING: Building library with libmetgm dependent functions disabled" >&2;}
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libmetgm (>= 0.93.2) dependent functions disabled" >&5
+$as_echo "$as_me: WARNING: Building library with libmetgm (>= 0.93.2) dependent functions disabled" >&2;}
      ;;
     *,*)
       addincdir="`echo $with_metgm | cut -f1 -d,`"
@@ -19092,8 +19092,8 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_metgm != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_read_group5_slice in -lmetgm" >&5
-$as_echo_n "checking for mgm_read_group5_slice in -lmetgm... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_read_group5_slice in -lmetgm (>= 0.93.2)" >&5
+$as_echo_n "checking for mgm_read_group5_slice in -lmetgm (>= 0.93.2)... " >&6; }
 if test "${ac_cv_lib_metgm_mgm_read_group5_slice+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
@@ -19141,10 +19141,10 @@ else
   with_metgm=no;
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libmetgm" >&5
-$as_echo "$as_me: WARNING: Did not find libmetgm" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libmetgm dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libmetgm (>= 0.93.2)" >&5
+$as_echo "$as_me: WARNING: Did not find libmetgm (>= 0.93.2)" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm (>= 0.93.2) dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libmetgm (>= 0.93.2) dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
 fi
