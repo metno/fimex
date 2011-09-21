@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
     NetCDF_CDMWriter(qe, outputFile);
     BOOST_CHECK((ifstream(outputFile.c_str()) != 0));
 #else
-    Null_CDMWriter(qe);
+    Null_CDMWriter(qe, "");
     BOOST_CHECK(true);
 #endif /* NETCDF */
     BOOST_CHECK(true);
