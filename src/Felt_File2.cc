@@ -280,8 +280,15 @@ boost::shared_ptr<Data> Felt_File2::getYData() const
 {
 	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNY());
     boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
+    float start = gridDef->startY();
+    float incr = gridDef->getYIncrement();
+    if (gridDef->getScanMode() == felt::FeltGridDefinition::LeftUpperHorizontal) {
+        incr *= -1;
+        float tmp = start;
+        start = tmp - (getNY()-1)*incr;
+    }
     for (int i = 0; i < getNY(); i++) {
-        float value = gridDef->startY() + i * gridDef->getYIncrement();
+        float value = start + i * incr;
         yData->setValue(i, value);
     }
     return yData;
