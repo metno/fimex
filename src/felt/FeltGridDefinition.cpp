@@ -293,7 +293,7 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
     // all model-files are assumed to be WGS84 datum
     // since topography is WGS84 and verification is WGS84
     // (though model uses spherical computations)
-    projStr << " +ellps=WGS84 +towgs=0,0,0 +no_defs";
+    projStr << " +ellps=WGS84 +towgs84=0,0,0 +no_defs";
 
     return projStr.str();
 }
@@ -392,6 +392,7 @@ FeltGridDefinition::geographicProj_( int gridType,
     incrementY_ = gridPars_[3];
     startX_ = gridPars_[0];
     startY_= gridPars_[1];
+
 }
 
 void
@@ -542,9 +543,6 @@ FeltGridDefinition::geographicProj( int gridType,
     if (FeltFile::isLogging())
         FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
-    /* no longer supported
-     * orientation_ = getScanMode_(gs, yNum_);
-     */
     orientation_ = getScanMode();
     incrementX_ = gridPars_[2];
     incrementY_ = gridPars_[3];
