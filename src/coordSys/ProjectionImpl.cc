@@ -149,6 +149,12 @@ std::string ProjectionImpl::getProj4EarthString() const
     } else {
         out << " +a=" << MIFI_EARTH_RADIUS_M << " +e=0"; // default
     }
+
+    // use towgs84=0,0,0 as default datum to make sure that proj starts
+    // geodetic->gecentric conversion -- this needs to be changed
+    // when a future CF adds Bursa Wolf parameters or similar
+    out << " towgs84=0,0,0";
+
     return out.str();
 }
 

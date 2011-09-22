@@ -24,7 +24,6 @@
 #ifndef CACHEDINTERPOLATION_H_
 #define CACHEDINTERPOLATION_H_
 
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include "fimex/interpolation.h"
 #include "fimex/Data.h"

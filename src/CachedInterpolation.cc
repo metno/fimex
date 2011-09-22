@@ -23,6 +23,7 @@
 
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Data.h"
+#include <boost/scoped_array.hpp>
 namespace MetNoFimex
 {
 
@@ -43,7 +44,7 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
 {
 	size_t inZ = size / (inX*inY);
 	newSize = outX*outY*inZ;
-	boost::shared_array<float> zValues(new float[inZ]);
+	boost::scoped_array<float> zValues(new float[inZ]);
 	boost::shared_array<float> outfield(new float[newSize]);
 	for (size_t y = 0; y < outY; ++y) {
 		for (size_t x = 0; x < outX; ++x) {

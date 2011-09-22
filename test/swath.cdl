@@ -1,0 +1,45 @@
+netcdf swath {
+dimensions:
+	none = UNLIMITED ; // (0 currently)
+	x = 5 ;
+	y = 1 ;
+variables:
+	short none(none) ;
+	int x(x) ;
+		x:long_name = "x-coordinate in Cartesian system" ;
+		x:standard_name = "projection_x_coordinate" ;
+		x:units = "m" ;
+	int y(y) ;
+		y:long_name = "y-coordinate in Cartesian system" ;
+		y:standard_name = "projection_y_coordinate" ;
+		y:units = "m" ;
+	double longitude(y, x) ;
+		longitude:units = "degree_east" ;
+		longitude:long_name = "longitude" ;
+		longitude:standard_name = "longitude" ;
+	double latitude(y, x) ;
+		latitude:units = "degree_north" ;
+		latitude:long_name = "latitude" ;
+		latitude:standard_name = "latitude" ;
+	float referenceVariable(none, y, x) ;
+		referenceVariable:coordinates = "longitude latitude" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+        :time_coverage_start = "2011-01-17T06:00:00Z"
+        :time_coverage_end = "2011-01-17T06:10:00Z"
+data:
+
+ x = 0, 1, 2, 3, 4;
+
+ y = 0;
+
+ longitude =
+  -13.9377996159233, -13.5431788713008, -13.1472444238949, -12.7500277028342, 
+    -12.3515608341056;
+
+ latitude =
+  28.4443934391326, 28.529204665858, 28.6116926308595, 28.6918393575517, 
+    28.7696272800954;
+
+}
