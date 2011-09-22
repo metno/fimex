@@ -1,3 +1,11 @@
+  * 2011-09-22 fimex-0.32
+    * switching to metgm-library >=0.93.2, allowing lower memory consumption through slicing
+    * faster reindexing in metgm-writer
+    * allowing own fillValue in cdmQualityReader
+    * consistent handling of datum (through towgs84-parameters)
+    * allowing different scan-mode in felt-reader
+    * allowing continuous felt-files (felt-type = 1)
+    * using WGS84-ellipsoid world for all data from felt
   * 2011-08-29 fimex-0.31
     * fixing global attributes in wdb
     * improving error-messages in metgm
