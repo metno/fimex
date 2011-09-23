@@ -234,6 +234,17 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
     }
 }
 
+// TODO - ab: add new changeProjection CDMInterpolator::changeProjection(int method, std::string netcdf-file)
+//      attention: check what happens if netcdf is not compiled in - should be a smooth warning
+//      function should be similar to above changeProjection (in particular concerning, but detect already)
+//               -- only support MIFI_INTERPOL_NEAREST_NEIGHBOR, MIFI_INTERPOL_BILINEAR, MIFI_INTERPOL_BICUBIC
+//                  warn that the other methods are not implemented (I don't see that it makes sense)
+//                  redirect to a function 'changeProjectionByProjectionParametersToLatLonList(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, out_x_axis_type, out_y_axis_type, data(latVals), data(lonVals))'
+//                           all the parameters can be extracted from the netcdf-file
+//      read below about changeProjectionByProjectionParametersToLatLonList
+//
+//      add new changeProjection - function to fimex.cc (add --interpolate.definitionNcFile)
+
 CoordSysPtr CDMInterpolator::findBestCoordinateSystemAndProjectionVars(bool withProjection)
 {
     typedef vector<CoordSysPtr> CoordSysVec;
@@ -1000,6 +1011,59 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         cachedVectorReprojection = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size()));
     }
 }
+// TODO - ab: this function needs to get adjusted
+#if 0
+void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type, boost::shared_ptr<Data> latVals, boost::shared_ptr<Data> lonVals)
+{
+    CoordSysPtr cs = findBestCoordinateSystemAndProjectionVars(true);
+
+    // TODO: similar functionality to changeCDM required, but changeCDM
+    //       won't work 100% since we have no proper proj_input and the
+    //       cdm.generateProjectionCoordinates in changeCDM is here defined by the latVals and lonVals
+    changeCDM(*cdm_.get(), proj_input, cs, projectionVariables,
+              out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
+              out_x_axis_type, out_y_axis_type,
+              getLongitudeName(), getLatitudeName());
+
+    // store projection changes to be used in data-section
+    // translate temporary new axes from deg2rad if required
+    boost::shared_array<double> latY = latVals->asDouble();
+    boost::shared_array<double> lonX = lonVals->asDouble();
+    // TODO put lat-vals and lon-vals into one array with (lat1,lon1,lat2,lon2,...)
+    transform(latY.begin(), latY.end(), latY.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
+    transform(lonX.begin(), lonX.end(), lonX.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
+
+    // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
+    std::string orgProjStr = cs->getProjection()->getProj4String();
+    // TODO: is it (lat, lon) or vv
+    if (MIFI_OK != mifi_project_values(proj_input.c_str(), orgProjStr.c_str(), &lonX[0], &latY[0], latVals->size())) {
+        throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "mifi_project_axes: "<< proj_input << "," << orgProjStr << "," << outXAxis[0] << "," << outYAxis[0] << " => " << pointsOnXAxis[0] << "," << pointsOnYAxis[0]);
+
+    // now latVals and lonVals are given in original-input coordinates
+    // translate original axes from deg2rad if required
+    int miupXAxis = MIFI_PROJ_AXIS;
+    int miupYAxis = MIFI_PROJ_AXIS;
+    if (cs->getProjection()->isDegree()) {
+        miupXAxis = MIFI_LONGITUDE;
+        transform(&orgXAxisValsArray[0], &orgXAxisValsArray[0]+orgXAxisVals->size(), &orgXAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+        miupYAxis = MIFI_LATITUDE;
+        transform(&orgYAxisValsArray[0], &orgYAxisValsArray[0]+orgYAxisVals->size(), &orgXAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+    }
+    // translate coordinates (in rad or m) to indices
+    mifi_points2position(&lonX[0], lonVals->size(), orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
+    mifi_points2position(&latX[0], latVals->size(), orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
+
+    LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
+    cachedInterpolation = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
+
+    if (hasSpatialVectors()) {
+        // prepare interpolation of vectors
+        LOG4FIMEX(logger, Logger::WARN, "spatial vectors not implemented for translation to lat-lon list");
+    }
+}
+#endif
 
 bool CDMInterpolator::hasSpatialVectors() const
 {
