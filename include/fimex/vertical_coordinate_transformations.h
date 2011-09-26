@@ -151,6 +151,19 @@ extern int mifi_barometric_height(size_t n, double P_b, const double* p, double 
 extern int mifi_barometric_standard_height(size_t n, const double* p, double* height);
 
 
+/**
+ * convert the vertical pressure change omega to vertical wind-speed using omega = - rho * g * w
+ *
+ * @param n size of the array omega, p, t, w
+ * @param omega vertical flow in Pa/s
+ * @param p pressure in Pa
+ * @param t temperature in K
+ * @param w output-array for vertical wind speed in m/s
+ * @return MIFI_OK status
+ */
+extern int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, const double* t, double* w);
+
+
 #ifdef __cplusplus
 }
 #endif

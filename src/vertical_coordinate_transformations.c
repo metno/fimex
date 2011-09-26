@@ -99,3 +99,20 @@ int mifi_barometric_standard_height(size_t n, const double* p, double* height)
     return mifi_barometric_height(n, 1013.25, p, 288.15, height);
 }
 
+int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, const double* t, double* w)
+{
+    // omega = - rho * g * w -> w = -omega/(g*rho)
+    //
+    // rho = p / ( R * T )  (see http://wikimedia.org/wikipedia/en/wiki/Density_of_air )
+    // -> w = -omega * R * T / (g * p)
+    // R (dry_air) = 287.058 J/(kg·K)
+    const double g = 9.80665;
+    const double mR_g = -1 * 287.058 / g;
+
+    int i = 0;
+    while (i++ < n) {
+        *w++ = mR_g * *omega++ * *t++ / *p++;
+    }
+
+    return MIFI_OK;
+}
