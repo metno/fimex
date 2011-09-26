@@ -165,7 +165,7 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
                     assert(p.size() == nz);
                     for (size_t z = 0; z < nz; z++) {
                         // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
-                        dPos[mifi_3d_array_position(x,y,z,nx,ny,nz)] *= pow(p[z]*psX1, Rcp);
+                        dPos[mifi_3d_array_position(x,y,z,nx,ny,nz)] *= pow(static_cast<float>(p[z]*psX1), Rcp);
                     }
                 }
             }

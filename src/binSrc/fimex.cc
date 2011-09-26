@@ -21,14 +21,15 @@
  * USA.
  */
 
+#include "../../config.h"
 #include <iostream>
 #include <fstream>
 #include <cctype>
+#include <boost/version.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
-#include "../../config.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMExtractor.h"
@@ -600,7 +601,11 @@ int run(int argc, char* args[])
 		("input.file", po::value<string>(), "input file")
 		("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
 		("input.config", po::value<string>(), "non-standard input configuration")
-		("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input file")
+#if BOOST_VERSION >= 104000
+        ("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("input.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
 		("input.printCS", "print CoordinateSystems of input file")
 		("output.file", po::value<string>(), "output file")
 		("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
@@ -619,11 +624,20 @@ int run(int argc, char* args[])
         ("extract.reduceToBoundingBox.north", po::value<double>(), "geographical bounding-box in degree")
         ("extract.reduceToBoundingBox.east", po::value<double>(), "geographical bounding-box in degree")
         ("extract.reduceToBoundingBox.west", po::value<double>(), "geographical bounding-box in degree")
+#if BOOST_VERSION >= 104000
+        ("extract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("extract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
         ("extract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
         ("extract.printCS", "print CoordinateSystems of extractor")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
         ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
+#if BOOST_VERSION >= 104000
         ("qualityExtract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("qualityExtract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
         ("qualityExtract.printCS", "print CoordinateSystems of extractor")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
@@ -636,20 +650,36 @@ int run(int argc, char* args[])
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2)\"")
-        ("interpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of interpolator")
+#if BOOST_VERSION >= 104000
+        ("interpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("interpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
         ("verticalInterpolate.type", po::value<string>(), "pressure or height")
         ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T or add4Dpressure")
-        ("verticalInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of vertcial interpolator")
+#if BOOST_VERSION >= 104000
+        ("verticalInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("verticalInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
         ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
-        ("timeInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of timeInterpolator")
+#if BOOST_VERSION >= 104000
+        ("timeInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("timeInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
         ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
         ("ncml.config", po::value<string>(), "modify/configure with ncml-file")
-        ("ncml.printNcML", po::value<string>()->implicit_value("-"), "print NcML description after ncml-configuration")
+#if BOOST_VERSION >= 104000
+        ("ncml.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("ncml.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
         ("ncml.printCS", "print CoordinateSystems after ncml-configuration")
 		;
 
