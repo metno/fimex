@@ -629,7 +629,6 @@ int run(int argc, char* args[])
 #else
         ("extract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
-        ("extract.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
         ("extract.printCS", "print CoordinateSystems of extractor")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
         ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
