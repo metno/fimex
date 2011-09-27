@@ -42,6 +42,7 @@ class CoordinateSystem;
 class InterpolatorProcess2d {
 public:
     virtual void operator()(float* array, size_t nx, size_t ny) = 0;
+    virtual ~InterpolatorProcess2d() {};
 };
 
 class InterpolatorFill2d : public InterpolatorProcess2d {
