@@ -70,7 +70,7 @@ ifeq ($(DEB_HOST_ARCH),i386)
 	cp -f $(DEBIAN_DIR)/libfimex.preinst.i386 $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst
 	cp -f $(DEBIAN_DIR)/libfelt.preinst.i386 $(DEBIAN_DIR)/libfelt-$(VERSION)-0.preinst
 endif
-	./configure --with-netcdf=/opt/netcdf4.1.1 --with-pq --with-metgm --with-udunits2=/opt/udunits2.1.20 --with-grib_api=/opt/grib-api1.9.9 --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CXXFLAGS)"
+	./configure --with-netcdf=/opt/netcdf4.1.1 --with-pq=/usr/include/postgresql,/usr/lib --with-metgm --with-udunits2=/opt/udunits2.1.20 --with-grib_api=/opt/grib-api1.9.9 --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CXXFLAGS)"
 
 
 build: build-stamp

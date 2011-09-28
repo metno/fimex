@@ -750,6 +750,11 @@ HAVE_METGM_TRUE
 MIFI_METGM_LDFLAGS
 MIFI_METGM_CPPFLAGS
 MIFI_METGM_LIBS
+HAVE_LIBPQ_FALSE
+HAVE_LIBPQ_TRUE
+MIFI_PQ_LDFLAGS
+MIFI_PQ_CPPFLAGS
+MIFI_PQ_LIBS
 HAVE_GRIBAPI_FALSE
 HAVE_GRIBAPI_TRUE
 MIFI_GRIB_API_LDFLAGS
@@ -763,12 +768,6 @@ MIFI_NETCDF_CPP_LIBS
 MIFI_NETCDF_LDFLAGS
 MIFI_NETCDF_CPPFLAGS
 MIFI_NETCDF_LIBS
-HAVE_LIBPQ_FALSE
-HAVE_LIBPQ_TRUE
-MIFI_PQ_CPPFLAGS
-MIFI_PQ_LDFLAGS
-MIFI_PQ_LIBS
-PGCONFIG
 PKG_CONFIG
 BOOST_UNIT_TEST_FRAMEWORK_LIB
 BOOST_IOSTREAMS_LIB
@@ -930,10 +929,10 @@ with_boost_date_time
 with_boost_iostreams
 with_boost_unit_test_framework
 enable_openmp
-with_pq
 with_netcdf
 enable_felt
 with_grib_api
+with_pq
 with_metgm
 enable_debug_mode
 '
@@ -1641,12 +1640,12 @@ Optional Packages:
                           is possible to specify a certain library for the
                           linker e.g.
                           --with-boost-unit-test-framework=boost_unit_test_framework-gcc
-  --with-pq=PATH          Specify the pg_config binary. (if empty, pg_config
-                          in the default path is used) (disabled by default)
   --with-netcdf=DIR       the location of optional libnetcdf files and library
                           either as DIR or INC,LIB
   --with-grib_api=DIR     the location of optional libgrib_api files and
                           library either as DIR or INC,LIB
+  --with-pq=DIR           the location of optional libpq files and library
+                          either as DIR or INC,LIB
   --with-metgm=DIR        the location of optional libmetgm files and library
                           either as DIR or INC,LIB
 
@@ -5654,13 +5653,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5657: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5656: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5660: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5659: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5663: output\"" >&5)
+  (eval echo "\"\$as_me:5662: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6866,7 +6865,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6869 "configure"' > conftest.$ac_ext
+  echo '#line 6868 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8923,11 +8922,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8926: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8925: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8930: \$? = $ac_status" >&5
+   echo "$as_me:8929: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9262,11 +9261,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9265: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9264: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9269: \$? = $ac_status" >&5
+   echo "$as_me:9268: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9367,11 +9366,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9370: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9369: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9374: \$? = $ac_status" >&5
+   echo "$as_me:9373: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9422,11 +9421,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9425: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9424: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9429: \$? = $ac_status" >&5
+   echo "$as_me:9428: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11806,7 +11805,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11809 "configure"
+#line 11808 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11902,7 +11901,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11905 "configure"
+#line 11904 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13858,11 +13857,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13861: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13860: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13865: \$? = $ac_status" >&5
+   echo "$as_me:13864: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13957,11 +13956,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13960: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13959: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13964: \$? = $ac_status" >&5
+   echo "$as_me:13963: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14009,11 +14008,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14012: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14011: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14016: \$? = $ac_status" >&5
+   echo "$as_me:14015: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16054,14 +16053,8 @@ _ACEOF
 
 else
   with_udunits=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header udunits.h" >&5
-$as_echo "$as_me: WARNING: Did not find header udunits.h" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libudunits dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libudunits dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libudunits: udunits.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libudunits: udunits.h not found" >&2;};
 
 fi
 
@@ -16116,14 +16109,8 @@ if test "x$ac_cv_lib_udunits_utInit" = x""yes; then :
 
 else
   with_udunits=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libudunits" >&5
-$as_echo "$as_me: WARNING: Did not find libudunits" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libudunits dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libudunits dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libudunits: libudunits not found" >&5
+$as_echo "$as_me: WARNING: disabling libudunits: libudunits not found" >&2;};
 
 fi
 
@@ -16184,14 +16171,8 @@ _ACEOF
 
 else
   with_udunits2=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header udunits2.h" >&5
-$as_echo "$as_me: WARNING: Did not find header udunits2.h" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libudunits2 dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libudunits2 dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libudunits2: udunits2.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libudunits2: udunits2.h not found" >&2;};
 
 fi
 
@@ -16246,14 +16227,8 @@ if test "x$ac_cv_lib_udunits2_ut_new_system" = x""yes; then :
 
 else
   with_udunits2=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libudunits2" >&5
-$as_echo "$as_me: WARNING: Did not find libudunits2" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libudunits2 dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libudunits2 dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libudunits2: libudunits2 not found" >&5
+$as_echo "$as_me: WARNING: disabling libudunits2: libudunits2 not found" >&2;};
 
 fi
 
@@ -18712,121 +18687,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 # optional io libraries
 
-saved_CPPFLAGS=$CPPFLAGS
-saved_LDFLAGS=$LDFLAGS
-saved_LIBS=$LIBS
-# Set up option
-
-# Check whether --with-pq was given.
-if test "${with_pq+set}" = set; then :
-  withval=$with_pq; if test "x$with_pq" != "xyes"; then
-            PGCONFIG="${with_pq}"
-         fi
-else
-  with_pq="no"
-
-fi
-
-
-if test "x$with_pq" != xno; then :
-  # Extract the first word of "pg_config", so it can be a program name with args.
-set dummy pg_config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if test "${ac_cv_path_PGCONFIG+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $PGCONFIG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_PGCONFIG="$PGCONFIG" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_path_PGCONFIG="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  ;;
-esac
-fi
-PGCONFIG=$ac_cv_path_PGCONFIG
-if test -n "$PGCONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PGCONFIG" >&5
-$as_echo "$PGCONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-        if test -f "${PGCONFIG}"; then
-         MIFI_PQ_CPPFLAGS="-I`${PGCONFIG} --includedir`"
-         MIFI_PQ_LDFLAGS="-L`${PGCONFIG} --libdir`"
-         MIFI_PQ_LIBS="-lpq"
-	     CPPFLAGS="$CPPFLAGS $MIFI_PQ_CPPFLAGS"
-	     LDFLAGS="$LDFLAGS $MIFI_PQ_LDFLAGS"
-	     LIBS="$LIBS $MIFI_PQ_LIBS"
-	     ac_fn_cxx_check_header_mongrel "$LINENO" "postgresql/libpq-fe.h" "ac_cv_header_postgresql_libpq_fe_h" "$ac_includes_default"
-if test "x$ac_cv_header_postgresql_libpq_fe_h" = x""yes; then :
-
-$as_echo "#define HAVE_LIBPQ 1" >>confdefs.h
-
-else
-  as_fn_error "
--------------------------------------------------------------------------
-    Could not locate pq.h x$with_pq $PGCONFIG $pgconfig
-    This indicates that Postgres may not be correctly installed for AX
-    on your site. AX requires the development files for server-side
-    programming of PostgreSQL to be installed.
-
-    CPPFLAGS=$CPPFLAGS
--------------------------------------------------------------------------
-            " "$LINENO" 5
-
-fi
-
-
-        else
-	     as_fn_error "
-$PGCONFIG $pgconfig
--------------------------------------------------------------------------
-   Unable to find pg_config. If Postgres is installed, make sure
-   pg_config is in your PATH, or specify the path in which postgres
-   is installed with --with-pgsql=PATH
--------------------------------------------------------------------------
-	               " "$LINENO" 5
-        fi
-
-
-fi
-
-
-
-CPPFLAGS=$saved_CPPFLAGS
-LDFLAGS=$saved_LDFLAGS
-LIBS=$saved_LIBS
-
-
- if test "x$with_pq" != xno; then
-  HAVE_LIBPQ_TRUE=
-  HAVE_LIBPQ_FALSE='#'
-else
-  HAVE_LIBPQ_TRUE='#'
-  HAVE_LIBPQ_FALSE=
-fi
-
-
-
 # Checks for libraries that can be dropped
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
@@ -18876,14 +18736,8 @@ _ACEOF
 
 else
   with_netcdf=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header netcdf.h" >&5
-$as_echo "$as_me: WARNING: Did not find header netcdf.h" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libnetcdf dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libnetcdf dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libnetcdf: netcdf.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libnetcdf: netcdf.h not found" >&2;};
 
 fi
 
@@ -18938,14 +18792,8 @@ if test "x$ac_cv_lib_netcdf_nc_create" = x""yes; then :
 
 else
   with_netcdf=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libnetcdf" >&5
-$as_echo "$as_me: WARNING: Did not find libnetcdf" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libnetcdf dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libnetcdf dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libnetcdf: libnetcdf not found" >&5
+$as_echo "$as_me: WARNING: disabling libnetcdf: libnetcdf not found" >&2;};
 
 fi
 
@@ -19098,14 +18946,8 @@ _ACEOF
 
 else
   with_grib_api=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header grib_api.h" >&5
-$as_echo "$as_me: WARNING: Did not find header grib_api.h" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libgrib_api dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libgrib_api dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libgrib_api: grib_api.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libgrib_api: grib_api.h not found" >&2;};
 
 fi
 
@@ -19160,14 +19002,8 @@ if test "x$ac_cv_lib_grib_api_grib_set_string" = x""yes; then :
 
 else
   with_grib_api=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libgrib_api" >&5
-$as_echo "$as_me: WARNING: Did not find libgrib_api" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libgrib_api dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libgrib_api dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libgrib_api: libgrib_api not found" >&5
+$as_echo "$as_me: WARNING: disabling libgrib_api: libgrib_api not found" >&2;};
 
 fi
 
@@ -19182,6 +19018,131 @@ LIBS="$saved_LIBS";
 else
   HAVE_GRIBAPI_TRUE='#'
   HAVE_GRIBAPI_FALSE=
+fi
+
+
+
+# Checks for libraries that can be dropped
+saved_CPPFLAGS="$CPPFLAGS"
+saved_LDFLAGS="$LDFLAGS"
+saved_LIBS="$LIBS"
+mifi_LIBS=""
+
+# Check whether --with-pq was given.
+if test "${with_pq+set}" = set; then :
+  withval=$with_pq;
+else
+  with_pq=yes
+fi
+
+case $with_pq in
+    yes)
+     echo "Using system implementation of libpq"
+     ;;
+    no)
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libpq dependent functions disabled" >&5
+$as_echo "$as_me: WARNING: Building library with libpq dependent functions disabled" >&2;}
+     ;;
+    *,*)
+      addincdir="`echo $with_pq | cut -f1 -d,`"
+      addlibdir="`echo $with_pq | cut -f2 -d,`"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+    *)
+      addincdir="$with_pq/include"
+      addlibdir="$with_pq/lib"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+esac
+mifi_have_feat=MIFI_HAVE_LIBPQ
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_pq != xno; then
+    for ac_header in libpq-fe.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "libpq-fe.h" "ac_cv_header_libpq_fe_h" "$ac_includes_default"
+if test "x$ac_cv_header_libpq_fe_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPQ_FE_H 1
+_ACEOF
+
+else
+  with_pq=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libpq: libpq-fe.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libpq: libpq-fe.h not found" >&2;};
+
+fi
+
+done
+
+fi
+if test  x$with_pq != xno; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PQconnectdb in -lpq" >&5
+$as_echo_n "checking for PQconnectdb in -lpq... " >&6; }
+if test "${ac_cv_lib_pq_PQconnectdb+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpq  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PQconnectdb ();
+int
+main ()
+{
+return PQconnectdb ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_pq_PQconnectdb=yes
+else
+  ac_cv_lib_pq_PQconnectdb=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pq_PQconnectdb" >&5
+$as_echo "$ac_cv_lib_pq_PQconnectdb" >&6; }
+if test "x$ac_cv_lib_pq_PQconnectdb" = x""yes; then :
+  with_pq=yes;
+         MIFI_PQ_LIBS="-lpq $mifi_LIBS";
+         MIFI_PQ_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_PQ_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
+else
+  with_pq=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libpq: libpq not found" >&5
+$as_echo "$as_me: WARNING: disabling libpq: libpq not found" >&2;};
+
+fi
+
+fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
+
+ if test "x$with_pq" != xno; then
+  HAVE_LIBPQ_TRUE=
+  HAVE_LIBPQ_FALSE='#'
+else
+  HAVE_LIBPQ_TRUE='#'
+  HAVE_LIBPQ_FALSE=
 fi
 
 
@@ -19235,14 +19196,8 @@ _ACEOF
 
 else
   with_metgm=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header metgm.h" >&5
-$as_echo "$as_me: WARNING: Did not find header metgm.h" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libmetgm dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libmetgm: metgm.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libmetgm: metgm.h not found" >&2;};
 
 fi
 
@@ -19297,14 +19252,8 @@ if test "x$ac_cv_lib_metgm_mgm_read_group5_slice" = x""yes; then :
 
 else
   with_metgm=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find libmetgm" >&5
-$as_echo "$as_me: WARNING: Did not find libmetgm" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm dependent functions" >&5
-$as_echo "$as_me: WARNING: Disabling libmetgm dependent functions" >&2;};
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
-$as_echo "$as_me: WARNING: =======================================" >&2;}
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libmetgm: libmetgm not found" >&5
+$as_echo "$as_me: WARNING: disabling libmetgm: libmetgm not found" >&2;};
 
 fi
 
@@ -19482,10 +19431,6 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
   as_fn_error "conditional \"am__fastdepCXX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${HAVE_LIBPQ_TRUE}" && test -z "${HAVE_LIBPQ_FALSE}"; then
-  as_fn_error "conditional \"HAVE_LIBPQ\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${HAVE_NETCDF_TRUE}" && test -z "${HAVE_NETCDF_FALSE}"; then
   as_fn_error "conditional \"HAVE_NETCDF\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -19496,6 +19441,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_GRIBAPI_TRUE}" && test -z "${HAVE_GRIBAPI_FALSE}"; then
   as_fn_error "conditional \"HAVE_GRIBAPI\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_LIBPQ_TRUE}" && test -z "${HAVE_LIBPQ_FALSE}"; then
+  as_fn_error "conditional \"HAVE_LIBPQ\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_METGM_TRUE}" && test -z "${HAVE_METGM_FALSE}"; then

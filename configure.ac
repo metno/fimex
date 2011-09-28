@@ -95,9 +95,6 @@ AX_OPENMP([AC_DEFINE(HAVE_OPENMP,1,[Define if OpenMP is enabled])
 AC_LANG_POP(C++)
 
 # optional io libraries
-MIFI_POSTGRES_CHECK
-AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
-
 MIFI_USELIB([netcdf], [netcdf.h], [nc_create])
 if test [ "x$with_netcdf" == "xyes" ]; then
     # check also netcdf-cpp, can't use mifi_reqlib because of ++ (not allowed in m4)
@@ -142,6 +139,9 @@ fi
 # I will just try that
 MIFI_USELIB([grib_api], [grib_api.h], [grib_set_string], [-ljasper -lpng])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"])
+
+MIFI_USELIB([pq], [libpq-fe.h], [PQconnectdb])
+AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
 
 MIFI_USELIB([metgm], [metgm.h], [mgm_read_group5_slice], [])
 AM_CONDITIONAL([HAVE_METGM], [test "x$with_metgm" = "xyes"])

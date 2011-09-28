@@ -21,7 +21,7 @@
 # AUTHOR
 #
 #   Heiko Klein <Heiko.Klein@met.no>
-#   derived from work by �ystein God�y and Thomas Lavergne
+#   derived from work by O. Godoy and T. Lavergne
 ############
 
 AC_DEFUN([MIFI_REQLIB],[
@@ -122,10 +122,7 @@ if test [ x$with_$1 != xno]; then
     AC_CHECK_HEADERS([$2],
         [],
         [with_$1=no;
-         AC_MSG_WARN([=======================================]);
-         AC_MSG_WARN([Did not find header $2]);
-         AC_MSG_WARN([Disabling lib$1 dependent functions]);
-         AC_MSG_WARN([=======================================])
+         AC_MSG_WARN([disabling lib$1: $2 not found]);
         ])
 fi
 if test [ x$with_$1 != xno]; then
@@ -139,10 +136,7 @@ if test [ x$with_$1 != xno]; then
          AC_SUBST(m4_toupper(MIFI_$1_LDFLAGS))
         ],
         [with_$1=no;
-         AC_MSG_WARN([=======================================]);
-         AC_MSG_WARN([Did not find lib$1]);
-         AC_MSG_WARN([Disabling lib$1 dependent functions]);
-         AC_MSG_WARN([=======================================])
+         AC_MSG_WARN([disabling lib$1: lib$1 not found]);
         ])
 fi
 CPPFLAGS="$saved_CPPFLAGS";

@@ -107,7 +107,7 @@ int fimexHas(int fileType)
     return 0;
 #endif
     case MIFI_FILETYPE_WDB:
-#ifdef HAVE_LIBPQ
+#ifdef HAVE_LIBPQ_FE_H
     return 1;
 #else
     return 0;
