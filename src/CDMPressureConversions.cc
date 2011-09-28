@@ -35,6 +35,7 @@
 #include "fimex/Logger.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
+#include "fimex/vertical_coordinate_transformations.h"
 
 namespace MetNoFimex
 {
@@ -49,6 +50,8 @@ struct CDMPressureConversionsImpl {
     boost::shared_ptr<ToVLevelConverter> pConv;
     vector<string> changeVars;
     string oldTheta;
+    string oldOmega;
+    string air_temp;
     boost::shared_ptr<const CoordinateSystem> cs;
 };
 
@@ -89,6 +92,41 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                     }
                     cdm_->addAttribute(varName, CDMAttribute("standard_name", "air_temperature"));
                     p_->changeVars.push_back(varName);
+                }
+            }
+        } else if (*op == "omega2vwind") {
+            vector<string> dims;
+            map<string, string> atts;
+            atts["standard_name"] = "(omega|lagrangian_tendency_of_air_pressure|vertical_air_velocity_expressed_as_tendency_of_pressure)";
+            vector<string> omegaV = cdm_->findVariables(atts, dims);
+            atts["standard_name"] = "air_temperature";
+            vector<string> tempV = cdm_->findVariables(atts, dims);
+            if (omegaV.size() == 0) {
+                LOG4FIMEX(logger, Logger::WARN, "no omega|lagrangian_tendency_of_air_pressure|vertical_air_velocity_expressed_as_tendency_of_pressure found");
+            } else {
+                if (tempV.size() == 0) {
+                    LOG4FIMEX(logger, Logger::WARN, "no air_temperature found needed for omega2vwind");
+                } else {
+                    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+                        find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(omegaV[0]));
+                    if (varSysIt == coordSys.end() || CompleteCoordinateSystemForComparator(tempV[0])(*varSysIt)) {
+                        LOG4FIMEX(logger, Logger::WARN, "no coordinate system for omega and air_temperature found");
+                    } else {
+                        p_->air_temp = tempV[0];
+                        p_->cs = *varSysIt;
+                        vector<string> shape = cdm_->getVariable(omegaV[0]).getShape();
+                        p_->oldOmega = omegaV[0];
+                        string varName = "upward_air_velocity";
+                        cdm_->addVariable(CDMVariable(varName, CDM_FLOAT, shape));
+                        cdm_->addAttribute(varName, CDMAttribute("standard_name", "upward_air_velocity"));
+                        cdm_->addAttribute(varName, CDMAttribute("units", "m/s"));
+                        CDMAttribute xatt;
+                        if (cdm_->getAttribute(varName, "coordinates", xatt)) {
+                            cdm_->addAttribute(varName, xatt);
+                        }
+                        cdm_->removeVariable(omegaV[0]);
+                        p_->changeVars.push_back(varName);
+                    }
                 }
             }
         } else if (*op == "add4Dpressure") {
@@ -166,6 +204,40 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
                     for (size_t z = 0; z < nz; z++) {
                         // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
                         dPos[mifi_3d_array_position(x,y,z,nx,ny,nz)] *= pow(static_cast<float>(p[z]*psX1), Rcp);
+                    }
+                }
+            }
+        }
+        return createData(size, da);
+    } else if (varName == "upward_air_velocity") {
+        boost::shared_ptr<Data> td = getDataSlice(p_->air_temp, unLimDimPos);
+        assert(td.get() != 0);
+        const boost::shared_array<float> tda = td->asConstFloat();
+        boost::shared_ptr<Data> d = dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos);
+        assert(d.get() != 0);
+        size_t size = d->size();
+        assert(size == td->size());
+        boost::shared_array<float> da = d->asFloat();
+        td.reset(); // deallocate td
+        d.reset(); // deallocate d
+        vector<double> omega(nz);
+        vector<double> w(nz);
+        vector<double> tv(nz);
+        for (size_t t = startT; t < nt; t++) {
+            float *dPos = &da[(t-startT)*(nx*ny*nz)];
+            float *tPos = &tda[(t-startT)*(nx*ny*nz)];
+            for (size_t y = 0; y < ny; y++) {
+                for (size_t x = 0; x < nx; x++) {
+                    vector<double> p = (*pConv)(x, y, t);
+                    assert(p.size() == nz);
+                    for (size_t z = 0; z < nz; z++) {
+                        size_t xyzPos = mifi_3d_array_position(x,y,z,nx,ny,nz);
+                        omega.at(z) = dPos[xyzPos];
+                        tv.at(z) = tPos[xyzPos];
+                    }
+                    mifi_omega_to_vertical_wind(nz, &omega[0], &p[0], &tv[0], &w[0]);
+                    for (size_t z = 0; z < nz; z++) {
+                        dPos[mifi_3d_array_position(x,y,z,nx,ny,nz)] = w.at(z);
                     }
                 }
             }

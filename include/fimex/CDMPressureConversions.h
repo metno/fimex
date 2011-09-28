@@ -51,6 +51,7 @@ public:
      * @param dataReader source of data
      * @param operations list of operations
      *    - theta2T translates theta (detected by standard_name) to air_temperature,
+     *    - omega2vwind will convert vertical pressure flux (omega) to vertical wind
      *    - add4Dpressure will add variable pressure(t,k,x,y) comparable to the first 4D field found
      *
      * @warning the routine does not handle invalid values, except float/double nans
