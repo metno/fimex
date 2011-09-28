@@ -16888,7 +16888,7 @@ $as_echo "$as_me: We could not detect the boost libraries (version $boost_lib_ve
 $as_echo "$as_me: Your boost libraries seems to old (version $_version)." >&6;}
         fi
         # execute ACTION-IF-NOT-FOUND (if present):
-        :
+        as_fn_error "Boost libraries required!" "$LINENO" 5
     else
 
 
@@ -17135,8 +17135,7 @@ fi
 	fi
 
 if test "x$ax_cv_boost_regex" != "xyes"; then
-   { as_fn_set_status this is required!
-as_fn_error "Could not find libboost_regex" "$LINENO" 5; }
+   as_fn_error "Could not find libboost_regex, this is required!" "$LINENO" 5
 fi
 
 
@@ -17367,8 +17366,7 @@ fi
 	fi
 
 if test "x$ax_cv_boost_program_options" != "xyes"; then
-   { as_fn_set_status this is required!
-as_fn_error "Could not find libboost_program_options" "$LINENO" 5; }
+   as_fn_error "Could not find libboost_program_options, this is required!" "$LINENO" 5
 fi
 
 
@@ -17857,8 +17855,7 @@ fi
 	fi
 
 if test "x$ax_cv_boost_filesystem" != "xyes"; then
-   { as_fn_set_status this is required!
-as_fn_error "Could not find libboost_filesystem" "$LINENO" 5; }
+   as_fn_error "Could not find libboost_filesystem, this is required!" "$LINENO" 5
 fi
 
 
@@ -18093,8 +18090,7 @@ fi
 	fi
 
 if test "x$ax_cv_boost_date_time" != "xyes"; then
-   { as_fn_set_status this is required!
-as_fn_error "Could not find libboost_date_time" "$LINENO" 5; }
+   as_fn_error "Could not find libboost_date_time, this is required!" "$LINENO" 5
 fi
 
 

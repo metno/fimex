@@ -59,23 +59,23 @@ fi
 
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([*** Libxml is required to build fimex; Available at http://www.libxml.org/.]))
 
-AX_BOOST_BASE([1.32.0])
+AX_BOOST_BASE([1.32.0], [], [AC_MSG_ERROR([Boost libraries required!])])
 AX_BOOST_REGEX
 if test "x$ax_cv_boost_regex" != "xyes"; then
-   AC_MSG_ERROR(Could not find libboost_regex, this is required!)
+   AC_MSG_ERROR([Could not find libboost_regex, this is required!])
 fi
 AX_BOOST_PROGRAM_OPTIONS
 if test "x$ax_cv_boost_program_options" != "xyes"; then
-   AC_MSG_ERROR(Could not find libboost_program_options, this is required!)
+   AC_MSG_ERROR([Could not find libboost_program_options, this is required!])
 fi
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
 if test "x$ax_cv_boost_filesystem" != "xyes"; then
-   AC_MSG_ERROR(Could not find libboost_filesystem, this is required!)
+   AC_MSG_ERROR([Could not find libboost_filesystem, this is required!])
 fi
 AX_BOOST_DATE_TIME
 if test "x$ax_cv_boost_date_time" != "xyes"; then
-   AC_MSG_ERROR(Could not find libboost_date_time, this is required!)
+   AC_MSG_ERROR([Could not find libboost_date_time, this is required!])
 fi
 AX_BOOST_IOSTREAMS
 AX_BOOST_UNIT_TEST_FRAMEWORK
