@@ -25,7 +25,7 @@
 #include "fimex/Logger.h"
 #include "config.h"
 #include "boost/shared_ptr.hpp"
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"
 #else // UDUNITS1
@@ -38,7 +38,7 @@ extern "C" int utIsInit();
 
 namespace MetNoFimex
 {
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
 static ut_system* utSystem;
 #endif
 
@@ -47,7 +47,7 @@ static LoggerPtr logger = getLogger("fimex.Units");
 void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitException)
 {
     switch (unitErrCode) {
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     case UT_SUCCESS: break;
     case UT_BAD_ARG:  throw UnitException("An argument violates the function's contract: " + message);
     case UT_EXISTS: throw UnitException("Unit, prefix, or identifier already exists: " + message);
@@ -85,7 +85,7 @@ void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitEx
 int Units::counter = 0;
 Units::Units()
 {
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     if (utSystem == 0) {
         ut_set_error_message_handler(&ut_ignore);
         utSystem = ut_read_xml(0);
@@ -117,7 +117,7 @@ Units::~Units()
 bool Units::unload(bool force) throw(UnitException)
 {
     if (force || counter <= 0) {
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
         if (utSystem) ut_free_system(utSystem);
         utSystem = 0;
 #else
@@ -138,7 +138,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 		offset = 0.;
 		return;
 	}
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
 	boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
 	handleUdUnitError(ut_get_status(), from);
 	boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
@@ -158,7 +158,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const
 {
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     int areConv = 0;
     try {
         boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
@@ -186,7 +186,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 }
 bool Units::isTime(const std::string& timeUnit) const
 {
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");
 #else
 	utUnit unit;
@@ -196,7 +196,7 @@ bool Units::isTime(const std::string& timeUnit) const
 }
 
 const void* Units::exposeInternals() const {
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     return utSystem;
 #else
     return 0;

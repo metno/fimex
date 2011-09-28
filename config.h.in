@@ -34,8 +34,8 @@
 /* define if felt/FeltFile.h is available */
 #undef HAVE_FELT
 
-/* 'Define to 1 if you have the <grib_api.h> header file.' */
-#undef HAVE_GRIBAPI_H
+/* Define to 1 if you have the <grib_api.h> header file. */
+#undef HAVE_GRIB_API_H
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -52,7 +52,7 @@
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
-/* 'Define to 1 if you have the <metgm.h> header file.' */
+/* Define to 1 if you have the <metgm.h> header file. */
 #undef HAVE_METGM_H
 
 /* define if the compiler implements namespaces */
@@ -61,11 +61,17 @@
 /* netcdf knows NcFile::FileFormat enum */
 #undef HAVE_NCFILE_FILEFORMAT
 
+/* Define to 1 if you have the <netcdf.h> header file. */
+#undef HAVE_NETCDF_H
+
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
 
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
+
+/* Define to 1 if you have the <proj_api.h> header file. */
+#undef HAVE_PROJ_API_H
 
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
@@ -104,14 +110,17 @@
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define if UDUNITS is enabled */
-#undef HAVE_UDUNITS
+/* Define to 1 if you have the <udunits2.h> header file. */
+#undef HAVE_UDUNITS2_H
 
-/* Define if UDUNITS2 is enabled */
-#undef HAVE_UDUNITS2
+/* Define to 1 if you have the <udunits.h> header file. */
+#undef HAVE_UDUNITS_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <ut_new_system> header file. */
+#undef HAVE_UT_NEW_SYSTEM
 
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
@@ -123,9 +132,6 @@
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
-
-/* 'Define to 1 if you have the <netcdf.h> header file.' */
-#undef MIFI_HAVE_NETCDF
 
 /* Name of package */
 #undef PACKAGE

@@ -94,14 +94,14 @@ int fimexHas(int fileType)
     return 0;
 #endif
     case MIFI_FILETYPE_NETCDF:
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
     return 1;
 #else
     return 0;
 #endif
     case MIFI_FILETYPE_NCML: return 1;
     case MIFI_FILETYPE_GRIB:
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
     return 1;
 #else
     return 0;
@@ -126,7 +126,7 @@ int fimexHas(int fileType)
 // the functions below are deprecated and will be removed soon
 int fimexHasNetcdf()
 {
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
     return 1;
 #else
     return 0;
@@ -134,7 +134,7 @@ int fimexHasNetcdf()
 }
 int fimexHasGribApi()
 {
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
     return 1;
 #else
     return 0;

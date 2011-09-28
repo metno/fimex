@@ -771,8 +771,8 @@ MIFI_PQ_LIBS
 PGCONFIG
 PKG_CONFIG
 BOOST_UNIT_TEST_FRAMEWORK_LIB
-BOOST_DATE_TIME_LIB
 BOOST_IOSTREAMS_LIB
+BOOST_DATE_TIME_LIB
 BOOST_FILESYSTEM_LIB
 BOOST_SYSTEM_LIB
 BOOST_PROGRAM_OPTIONS_LIB
@@ -926,8 +926,8 @@ with_boost_regex
 with_boost_program_options
 with_boost_system
 with_boost_filesystem
-with_boost_iostreams
 with_boost_date_time
+with_boost_iostreams
 with_boost_unit_test_framework
 enable_openmp
 with_pq
@@ -1626,16 +1626,16 @@ Optional Packages:
                           use the Filesystem library from boost - it is
                           possible to specify a certain library for the linker
                           e.g. --with-boost-filesystem=boost_filesystem-gcc-mt
-  --with-boost-iostreams[=special-lib]
-                          use the IOStreams library from boost - it is
-                          possible to specify a certain library for the linker
-                          e.g.
-                          --with-boost-iostreams=boost_iostreams-gcc-mt-d-1_33_1
   --with-boost-date-time[=special-lib]
                           use the Date_Time library from boost - it is
                           possible to specify a certain library for the linker
                           e.g.
                           --with-boost-date-time=boost_date_time-gcc-mt-d-1_33_1
+  --with-boost-iostreams[=special-lib]
+                          use the IOStreams library from boost - it is
+                          possible to specify a certain library for the linker
+                          e.g.
+                          --with-boost-iostreams=boost_iostreams-gcc-mt-d-1_33_1
   --with-boost-unit-test-framework[=special-lib]
                           use the Unit_Test_Framework library from boost - it
                           is possible to specify a certain library for the
@@ -15979,7 +15979,24 @@ if test "x$ac_cv_lib_proj_pj_init" = x""yes; then :
 else
   with_proj=no;
          as_fn_error "Did not find libproj, this is required to continue" "$LINENO" 5
+
 fi
+
+    for ac_header in proj_api.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_proj_api_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PROJ_API_H 1
+_ACEOF
+
+else
+  with_proj=no;
+         as_fn_error "Did not find header proj_api.h, this is required to continue" "$LINENO" 5
+
+fi
+
+done
 
 fi
 CPPFLAGS="$saved_CPPFLAGS";
@@ -16026,6 +16043,31 @@ mifi_have_feat=MIFI_HAVE_LIBUDUNITS
 LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_udunits != xno; then
+    for ac_header in udunits.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "udunits.h" "ac_cv_header_udunits_h" "$ac_includes_default"
+if test "x$ac_cv_header_udunits_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UDUNITS_H 1
+_ACEOF
+
+else
+  with_udunits=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header udunits.h" >&5
+$as_echo "$as_me: WARNING: Did not find header udunits.h" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libudunits dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libudunits dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;}
+
+fi
+
+done
+
+fi
 if test  x$with_udunits != xno; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utInit in -ludunits" >&5
 $as_echo_n "checking for utInit in -ludunits... " >&6; }
@@ -16082,6 +16124,7 @@ $as_echo "$as_me: WARNING: Did not find libudunits" >&2;};
 $as_echo "$as_me: WARNING: Disabling libudunits dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
+
 fi
 
 fi
@@ -16130,6 +16173,31 @@ mifi_have_feat=MIFI_HAVE_LIBUDUNITS2
 LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_udunits2 != xno; then
+    for ac_header in udunits2.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "udunits2.h" "ac_cv_header_udunits2_h" "$ac_includes_default"
+if test "x$ac_cv_header_udunits2_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UDUNITS2_H 1
+_ACEOF
+
+else
+  with_udunits2=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header udunits2.h" >&5
+$as_echo "$as_me: WARNING: Did not find header udunits2.h" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libudunits2 dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libudunits2 dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;}
+
+fi
+
+done
+
+fi
 if test  x$with_udunits2 != xno; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ut_new_system in -ludunits2" >&5
 $as_echo_n "checking for ut_new_system in -ludunits2... " >&6; }
@@ -16186,6 +16254,7 @@ $as_echo "$as_me: WARNING: Did not find libudunits2" >&2;};
 $as_echo "$as_me: WARNING: Disabling libudunits2 dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
+
 fi
 
 fi
@@ -16200,7 +16269,7 @@ LIBS="$saved_LIBS";
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
-mifi_LIBS="-lexpat"
+mifi_LIBS=""
 
 # Check whether --with-udunits2 was given.
 if test "${with_udunits2+set}" = set; then :
@@ -16234,9 +16303,9 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_udunits2 != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ut_new_system in -ludunits2" >&5
-$as_echo_n "checking for ut_new_system in -ludunits2... " >&6; }
-if test "${ac_cv_lib_udunits2_ut_new_system+set}" = set; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -lexpat in -ludunits2" >&5
+$as_echo_n "checking for -lexpat in -ludunits2... " >&6; }
+if test "${ac_cv_lib_udunits2__lexpat+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -16250,27 +16319,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char ut_new_system ();
+char -lexpat ();
 int
 main ()
 {
-return ut_new_system ();
+return -lexpat ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_udunits2_ut_new_system=yes
+  ac_cv_lib_udunits2__lexpat=yes
 else
-  ac_cv_lib_udunits2_ut_new_system=no
+  ac_cv_lib_udunits2__lexpat=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits2_ut_new_system" >&5
-$as_echo "$ac_cv_lib_udunits2_ut_new_system" >&6; }
-if test "x$ac_cv_lib_udunits2_ut_new_system" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits2__lexpat" >&5
+$as_echo "$ac_cv_lib_udunits2__lexpat" >&6; }
+if test "x$ac_cv_lib_udunits2__lexpat" = x""yes; then :
   with_udunits2=yes;
          MIFI_UDUNITS2_LIBS="-ludunits2 $mifi_LIBS";
          MIFI_UDUNITS2_CPPFLAGS=$mifi_CPPFLAGS;
@@ -16282,7 +16351,24 @@ if test "x$ac_cv_lib_udunits2_ut_new_system" = x""yes; then :
 else
   with_udunits2=no;
          as_fn_error "Did not find libudunits2, this is required to continue" "$LINENO" 5
+
 fi
+
+    for ac_header in ut_new_system
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "ut_new_system" "ac_cv_header_ut_new_system" "$ac_includes_default"
+if test "x$ac_cv_header_ut_new_system" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UT_NEW_SYSTEM 1
+_ACEOF
+
+else
+  with_udunits2=no;
+         as_fn_error "Did not find header ut_new_system, this is required to continue" "$LINENO" 5
+
+fi
+
+done
 
 fi
 CPPFLAGS="$saved_CPPFLAGS";
@@ -16290,15 +16376,6 @@ LDFLAGS="$saved_LDFLAGS";
 LIBS="$saved_LIBS";
 
     fi
-    if test  "x$with_udunits2" == "xyes" ; then
-
-$as_echo "#define HAVE_UDUNITS2 1" >>confdefs.h
-
-    fi
-else
-
-$as_echo "#define HAVE_UDUNITS 1" >>confdefs.h
-
 fi
 
 
@@ -17057,6 +17134,10 @@ fi
 	LDFLAGS="$LDFLAGS_SAVED"
 	fi
 
+if test "x$ax_cv_boost_regex" != "xyes"; then
+   { as_fn_set_status this is required!
+as_fn_error "Could not find libboost_regex" "$LINENO" 5; }
+fi
 
 
 # Check whether --with-boost-program-options was given.
@@ -17285,6 +17366,10 @@ fi
 	LDFLAGS="$LDFLAGS_SAVED"
 	fi
 
+if test "x$ax_cv_boost_program_options" != "xyes"; then
+   { as_fn_set_status this is required!
+as_fn_error "Could not find libboost_program_options" "$LINENO" 5; }
+fi
 
 
 # Check whether --with-boost-system was given.
@@ -17771,6 +17856,246 @@ fi
 		LIBS="$LIBS_SAVED"
 	fi
 
+if test "x$ax_cv_boost_filesystem" != "xyes"; then
+   { as_fn_set_status this is required!
+as_fn_error "Could not find libboost_filesystem" "$LINENO" 5; }
+fi
+
+
+# Check whether --with-boost-date-time was given.
+if test "${with_boost_date_time+set}" = set; then :
+  withval=$with_boost_date_time;
+        if test "$withval" = "no"; then
+			want_boost="no"
+        elif test "$withval" = "yes"; then
+            want_boost="yes"
+            ax_boost_user_date_time_lib=""
+        else
+		    want_boost="yes"
+		ax_boost_user_date_time_lib="$withval"
+		fi
+
+else
+  want_boost="yes"
+
+fi
+
+
+	if test "x$want_boost" = "xyes"; then
+
+		CPPFLAGS_SAVED="$CPPFLAGS"
+		CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+		export CPPFLAGS
+
+		LDFLAGS_SAVED="$LDFLAGS"
+		LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
+		export LDFLAGS
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Boost::Date_Time library is available" >&5
+$as_echo_n "checking whether the Boost::Date_Time library is available... " >&6; }
+if test "${ax_cv_boost_date_time+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+		 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+int
+main ()
+{
+using namespace boost::gregorian; date d(2002,Jan,10);
+                                     return 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  ax_cv_boost_date_time=yes
+else
+  ax_cv_boost_date_time=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+         ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_date_time" >&5
+$as_echo "$ax_cv_boost_date_time" >&6; }
+		if test "x$ax_cv_boost_date_time" = "xyes"; then
+
+$as_echo "#define HAVE_BOOST_DATE_TIME /**/" >>confdefs.h
+
+            BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/[^\/]*//'`
+            if test "x$ax_boost_user_date_time_lib" = "x"; then
+                for libextension in `ls $BOOSTLIBDIR/libboost_date_time*.so* $BOOSTLIBDIR/libboost_date_time*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_date_time.*\)\.so.*$;\1;' -e 's;^lib\(boost_date_time.*\)\.a*$;\1;'` ; do
+                     ax_lib=${libextension}
+				    as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_exit" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for exit in -l$ax_lib" >&5
+$as_echo_n "checking for exit in -l$ax_lib... " >&6; }
+if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$ax_lib  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char exit ();
+int
+main ()
+{
+return exit ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+eval as_val=\$$as_ac_Lib
+   if test "x$as_val" = x""yes; then :
+  BOOST_DATE_TIME_LIB="-l$ax_lib";  link_date_time="yes"; break
+else
+  link_date_time="no"
+fi
+
+				done
+                if test "x$link_date_time" != "xyes"; then
+                for libextension in `ls $BOOSTLIBDIR/boost_date_time*.{dll,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_date_time.*\)\.dll.*$;\1;' -e 's;^\(boost_date_time.*\)\.a*$;\1;'` ; do
+                     ax_lib=${libextension}
+				    as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_exit" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for exit in -l$ax_lib" >&5
+$as_echo_n "checking for exit in -l$ax_lib... " >&6; }
+if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$ax_lib  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char exit ();
+int
+main ()
+{
+return exit ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+eval as_val=\$$as_ac_Lib
+   if test "x$as_val" = x""yes; then :
+  BOOST_DATE_TIME_LIB="-l$ax_lib";  link_date_time="yes"; break
+else
+  link_date_time="no"
+fi
+
+				done
+                fi
+
+            else
+               for ax_lib in $ax_boost_user_date_time_lib boost_date_time-$ax_boost_user_date_time_lib; do
+				      as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_main" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -l$ax_lib" >&5
+$as_echo_n "checking for main in -l$ax_lib... " >&6; }
+if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$ax_lib  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+eval as_val=\$$as_ac_Lib
+   if test "x$as_val" = x""yes; then :
+  BOOST_DATE_TIME_LIB="-l$ax_lib";  link_date_time="yes"; break
+else
+  link_date_time="no"
+fi
+
+                  done
+
+            fi
+            if test "x$ax_lib" = "x"; then
+                as_fn_error "Could not find a version of the library!" "$LINENO" 5
+            fi
+			if test "x$link_date_time" != "xyes"; then
+				as_fn_error "Could not link against $ax_lib !" "$LINENO" 5
+			fi
+		fi
+
+		CPPFLAGS="$CPPFLAGS_SAVED"
+	LDFLAGS="$LDFLAGS_SAVED"
+	fi
+
+if test "x$ax_cv_boost_date_time" != "xyes"; then
+   { as_fn_set_status this is required!
+as_fn_error "Could not find libboost_date_time" "$LINENO" 5; }
+fi
 
 
 # Check whether --with-boost-iostreams was given.
@@ -17999,238 +18324,6 @@ fi
                 as_fn_error "Could not find a version of the library!" "$LINENO" 5
             fi
 			if test "x$link_iostreams" != "xyes"; then
-				as_fn_error "Could not link against $ax_lib !" "$LINENO" 5
-			fi
-		fi
-
-		CPPFLAGS="$CPPFLAGS_SAVED"
-	LDFLAGS="$LDFLAGS_SAVED"
-	fi
-
-
-
-# Check whether --with-boost-date-time was given.
-if test "${with_boost_date_time+set}" = set; then :
-  withval=$with_boost_date_time;
-        if test "$withval" = "no"; then
-			want_boost="no"
-        elif test "$withval" = "yes"; then
-            want_boost="yes"
-            ax_boost_user_date_time_lib=""
-        else
-		    want_boost="yes"
-		ax_boost_user_date_time_lib="$withval"
-		fi
-
-else
-  want_boost="yes"
-
-fi
-
-
-	if test "x$want_boost" = "xyes"; then
-
-		CPPFLAGS_SAVED="$CPPFLAGS"
-		CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-		export CPPFLAGS
-
-		LDFLAGS_SAVED="$LDFLAGS"
-		LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"
-		export LDFLAGS
-
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the Boost::Date_Time library is available" >&5
-$as_echo_n "checking whether the Boost::Date_Time library is available... " >&6; }
-if test "${ax_cv_boost_date_time+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-		 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/date_time/gregorian/gregorian_types.hpp>
-int
-main ()
-{
-using namespace boost::gregorian; date d(2002,Jan,10);
-                                     return 0;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ax_cv_boost_date_time=yes
-else
-  ax_cv_boost_date_time=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-         ac_ext=cpp
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_date_time" >&5
-$as_echo "$ax_cv_boost_date_time" >&6; }
-		if test "x$ax_cv_boost_date_time" = "xyes"; then
-
-$as_echo "#define HAVE_BOOST_DATE_TIME /**/" >>confdefs.h
-
-            BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/[^\/]*//'`
-            if test "x$ax_boost_user_date_time_lib" = "x"; then
-                for libextension in `ls $BOOSTLIBDIR/libboost_date_time*.so* $BOOSTLIBDIR/libboost_date_time*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_date_time.*\)\.so.*$;\1;' -e 's;^lib\(boost_date_time.*\)\.a*$;\1;'` ; do
-                     ax_lib=${libextension}
-				    as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_exit" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for exit in -l$ax_lib" >&5
-$as_echo_n "checking for exit in -l$ax_lib... " >&6; }
-if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$ax_lib  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char exit ();
-int
-main ()
-{
-return exit ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
-else
-  eval "$as_ac_Lib=no"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-eval as_val=\$$as_ac_Lib
-   if test "x$as_val" = x""yes; then :
-  BOOST_DATE_TIME_LIB="-l$ax_lib";  link_date_time="yes"; break
-else
-  link_date_time="no"
-fi
-
-				done
-                if test "x$link_date_time" != "xyes"; then
-                for libextension in `ls $BOOSTLIBDIR/boost_date_time*.{dll,a}* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^\(boost_date_time.*\)\.dll.*$;\1;' -e 's;^\(boost_date_time.*\)\.a*$;\1;'` ; do
-                     ax_lib=${libextension}
-				    as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_exit" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for exit in -l$ax_lib" >&5
-$as_echo_n "checking for exit in -l$ax_lib... " >&6; }
-if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$ax_lib  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char exit ();
-int
-main ()
-{
-return exit ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
-else
-  eval "$as_ac_Lib=no"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-eval as_val=\$$as_ac_Lib
-   if test "x$as_val" = x""yes; then :
-  BOOST_DATE_TIME_LIB="-l$ax_lib";  link_date_time="yes"; break
-else
-  link_date_time="no"
-fi
-
-				done
-                fi
-
-            else
-               for ax_lib in $ax_boost_user_date_time_lib boost_date_time-$ax_boost_user_date_time_lib; do
-				      as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_main" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -l$ax_lib" >&5
-$as_echo_n "checking for main in -l$ax_lib... " >&6; }
-if { as_var=$as_ac_Lib; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-l$ax_lib  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
-else
-  eval "$as_ac_Lib=no"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-eval as_val=\$$as_ac_Lib
-   if test "x$as_val" = x""yes; then :
-  BOOST_DATE_TIME_LIB="-l$ax_lib";  link_date_time="yes"; break
-else
-  link_date_time="no"
-fi
-
-                  done
-
-            fi
-            if test "x$ax_lib" = "x"; then
-                as_fn_error "Could not find a version of the library!" "$LINENO" 5
-            fi
-			if test "x$link_date_time" != "xyes"; then
 				as_fn_error "Could not link against $ax_lib !" "$LINENO" 5
 			fi
 		fi
@@ -18777,6 +18870,31 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_netcdf != xno; then
+    for ac_header in netcdf.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "netcdf.h" "ac_cv_header_netcdf_h" "$ac_includes_default"
+if test "x$ac_cv_header_netcdf_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETCDF_H 1
+_ACEOF
+
+else
+  with_netcdf=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header netcdf.h" >&5
+$as_echo "$as_me: WARNING: Did not find header netcdf.h" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libnetcdf dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libnetcdf dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;}
+
+fi
+
+done
+
+fi
+if test  x$with_netcdf != xno; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nc_create in -lnetcdf" >&5
 $as_echo_n "checking for nc_create in -lnetcdf... " >&6; }
 if test "${ac_cv_lib_netcdf_nc_create+set}" = set; then :
@@ -18832,6 +18950,7 @@ $as_echo "$as_me: WARNING: Did not find libnetcdf" >&2;};
 $as_echo "$as_me: WARNING: Disabling libnetcdf dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
+
 fi
 
 fi
@@ -18890,9 +19009,6 @@ ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-
-$as_echo "#define MIFI_HAVE_NETCDF 1" >>confdefs.h
 
 fi
  if test "x$with_netcdf" == xyes; then
@@ -18976,6 +19092,31 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test  x$with_grib_api != xno; then
+    for ac_header in grib_api.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "grib_api.h" "ac_cv_header_grib_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_grib_api_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GRIB_API_H 1
+_ACEOF
+
+else
+  with_grib_api=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header grib_api.h" >&5
+$as_echo "$as_me: WARNING: Did not find header grib_api.h" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libgrib_api dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libgrib_api dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;}
+
+fi
+
+done
+
+fi
+if test  x$with_grib_api != xno; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grib_set_string in -lgrib_api" >&5
 $as_echo_n "checking for grib_set_string in -lgrib_api... " >&6; }
 if test "${ac_cv_lib_grib_api_grib_set_string+set}" = set; then :
@@ -19031,6 +19172,7 @@ $as_echo "$as_me: WARNING: Did not find libgrib_api" >&2;};
 $as_echo "$as_me: WARNING: Disabling libgrib_api dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
+
 fi
 
 fi
@@ -19046,11 +19188,6 @@ else
   HAVE_GRIBAPI_FALSE=
 fi
 
-if test "x$with_grib_api" = "xyes"; then
-
-$as_echo "#define HAVE_GRIBAPI_H 1" >>confdefs.h
-
-fi
 
 
 # Checks for libraries that can be dropped
@@ -19091,6 +19228,31 @@ mifi_have_feat=MIFI_HAVE_LIBMETGM
 LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_metgm != xno; then
+    for ac_header in metgm.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "metgm.h" "ac_cv_header_metgm_h" "$ac_includes_default"
+if test "x$ac_cv_header_metgm_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_METGM_H 1
+_ACEOF
+
+else
+  with_metgm=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Did not find header metgm.h" >&5
+$as_echo "$as_me: WARNING: Did not find header metgm.h" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling libmetgm dependent functions" >&5
+$as_echo "$as_me: WARNING: Disabling libmetgm dependent functions" >&2;};
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
+$as_echo "$as_me: WARNING: =======================================" >&2;}
+
+fi
+
+done
+
+fi
 if test  x$with_metgm != xno; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mgm_read_group5_slice in -lmetgm" >&5
 $as_echo_n "checking for mgm_read_group5_slice in -lmetgm... " >&6; }
@@ -19147,6 +19309,7 @@ $as_echo "$as_me: WARNING: Did not find libmetgm" >&2;};
 $as_echo "$as_me: WARNING: Disabling libmetgm dependent functions" >&2;};
          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: =======================================" >&5
 $as_echo "$as_me: WARNING: =======================================" >&2;}
+
 fi
 
 fi
@@ -19162,11 +19325,6 @@ else
   HAVE_METGM_FALSE=
 fi
 
-if test "x$with_metgm" = "xyes"; then
-
-$as_echo "#define HAVE_METGM_H 1" >>confdefs.h
-
-fi
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

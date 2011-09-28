@@ -47,10 +47,10 @@
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/NcmlCDMReader.h"
 /* currently no factory for writer */
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
 #endif
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
 #include "fimex/GribApiCDMWriter.h"
 #endif
 #ifdef HAVE_METGM_H
@@ -237,7 +237,7 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm["input.file"].as<string>() << " with config " << config);
         returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, vm["input.file"].as<string>(), config);
     }
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
     if (type == "grb" || type == "grib" ||
             type == "grb1" || type == "grib1" ||
                 type == "grb2" || type == "grib2") {
@@ -249,7 +249,7 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_GRIB, vm["input.file"].as<string>(), config);
     }
 #endif
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
     if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
         if (vm.count("input.config")) {
             std::string config = vm["input.config"].as<string>();
@@ -534,7 +534,7 @@ static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map&
 	string type = getType("output", vm);
 	// boost::shared_ptr to shared_ptr
 	boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 	if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
 		int version = 3;
 		if (type == "nc4") version = 4;
@@ -548,7 +548,7 @@ static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map&
 		return;
 	}
 #endif
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
 	if (type == "grb" || type == "grib" ||
 			type == "grb1" || type == "grib1" ||
 			type == "grb2" || type == "grib2") {

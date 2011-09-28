@@ -38,10 +38,10 @@
 #ifdef HAVE_FELT
 #include "fimex/FeltCDMReader2.h"
 #endif
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
 #endif
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
 #include "fimex/GribCDMReader.h"
 #endif
 #ifdef HAVE_LIBPQ
@@ -128,14 +128,14 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
     case MIFI_FILETYPE_FELT:
         return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configFile));
 #endif /* FELT */
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
     case MIFI_FILETYPE_GRIB: {
         std::vector<std::string> files(args.begin(), args.end());
         files.insert(files.begin(), fileName);
         return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configFile));
     }
 #endif
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
     case MIFI_FILETYPE_NETCDF: {
         boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
         if (configFile != "") {

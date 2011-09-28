@@ -27,7 +27,7 @@
 #include "fimex/Utils.h"
 #include <limits>
 
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"
 #else
@@ -161,7 +161,7 @@ FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 
 void void_ut_free(void* ptr) {
     //    std::cerr << "trying to dealloc pUnit" << std::endl;
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     ut_free(reinterpret_cast<ut_unit*>(ptr));
 #else
     // only the udunits1 wrapper of udunits2 contains utFree
@@ -175,7 +175,7 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 		throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
 	} else {
 		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
 		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
 		handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
 #else
@@ -211,7 +211,7 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
 	FimexTime fiTime;
 	float second;
 	int year, month, mday, hour, minute;
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second"),
                                         ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit seconds");
@@ -239,7 +239,7 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 {
     float second;
     int year, month, mday, hour, minute;
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second"),
                                         ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit second");
@@ -261,7 +261,7 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMExce
 {
 	float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
 	double unitTime;
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"),
                                         ut_free);
     double encodedTime = ut_encode_time(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second);
@@ -283,7 +283,7 @@ double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const throw(
     boost::posix_time::time_duration pTimeDur = pTime.time_of_day();
     double unitTime;
     float seconds = pTimeDur.seconds() + (pTimeDur.fractional_seconds() * 1. / boost::posix_time::time_duration::ticks_per_second());
-#ifdef HAVE_UDUNITS2
+#ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"),
                                         ut_free);
     handleUdUnitError(ut_get_status(), "parsing unit second");

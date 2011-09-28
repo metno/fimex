@@ -45,32 +45,39 @@ AC_CHECK_FUNCS([memset pow sqrt strstr])
 AC_CHECK_LIB([m],[cos])
 
 # proj is a strong requirements
-MIFI_REQLIB([proj], [pj_init])
+MIFI_REQLIB([proj], [proj_api.h], [pj_init])
 
-MIFI_USELIB([udunits], [utInit])
+MIFI_USELIB([udunits], [udunits.h], [utInit])
 if test [ "x$with_udunits" != "xyes" ]; then
     # check older udunits, at least one is required
-    MIFI_USELIB([udunits2], [ut_new_system])
+    MIFI_USELIB([udunits2], [udunits2.h], [ut_new_system])
     if test [ "x$with_udunits2" != "xyes" ]; then
         # check for udunits2 with external expat
         MIFI_REQLIB([udunits2], [ut_new_system], [-lexpat])
     fi
-    if test [ "x$with_udunits2" == "xyes" ]; then
-        AC_DEFINE(HAVE_UDUNITS2,1,[Define if UDUNITS2 is enabled])
-    fi
-else
-    AC_DEFINE(HAVE_UDUNITS,1,[Define if UDUNITS is enabled])
 fi
 
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([*** Libxml is required to build fimex; Available at http://www.libxml.org/.]))
 
 AX_BOOST_BASE([1.32.0])
 AX_BOOST_REGEX
+if test "x$ax_cv_boost_regex" != "xyes"; then
+   AC_MSG_ERROR(Could not find libboost_regex, this is required!)
+fi
 AX_BOOST_PROGRAM_OPTIONS
+if test "x$ax_cv_boost_program_options" != "xyes"; then
+   AC_MSG_ERROR(Could not find libboost_program_options, this is required!)
+fi
 AX_BOOST_SYSTEM
 AX_BOOST_FILESYSTEM
-AX_BOOST_IOSTREAMS
+if test "x$ax_cv_boost_filesystem" != "xyes"; then
+   AC_MSG_ERROR(Could not find libboost_filesystem, this is required!)
+fi
 AX_BOOST_DATE_TIME
+if test "x$ax_cv_boost_date_time" != "xyes"; then
+   AC_MSG_ERROR(Could not find libboost_date_time, this is required!)
+fi
+AX_BOOST_IOSTREAMS
 AX_BOOST_UNIT_TEST_FRAMEWORK
 
 # Make sure pkg-config also considers $prefix/lib/pkgconfig.
@@ -91,7 +98,7 @@ AC_LANG_POP(C++)
 MIFI_POSTGRES_CHECK
 AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
 
-MIFI_USELIB([netcdf], [nc_create])
+MIFI_USELIB([netcdf], [netcdf.h], [nc_create])
 if test [ "x$with_netcdf" == "xyes" ]; then
     # check also netcdf-cpp, can't use mifi_reqlib because of ++ (not allowed in m4)
     AC_LANG_PUSH(C++)
@@ -113,7 +120,6 @@ if test [ "x$with_netcdf" == "xyes" ]; then
     CPPFLAGS="$save_CPPFLAGS"
     AC_SUBST(MIFI_NETCDF_CPP_LIBS)
     AC_LANG_POP(C++)
-    AC_DEFINE([MIFI_HAVE_NETCDF], 1, 'Define to 1 if you have the <netcdf.h> header file.')
 fi
 AM_CONDITIONAL([HAVE_NETCDF], [test "x$with_netcdf" == xyes])
 
@@ -134,17 +140,11 @@ fi
 # this might not be required for any build, but as long
 # as grib_api does not provide a list over required libraries (e.g. pkgconfig, libtool)
 # I will just try that
-MIFI_USELIB([grib_api], [grib_set_string], [-ljasper -lpng])
+MIFI_USELIB([grib_api], [grib_api.h], [grib_set_string], [-ljasper -lpng])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"])
-if test "x$with_grib_api" = "xyes"; then
-    AC_DEFINE([HAVE_GRIBAPI_H], 1, 'Define to 1 if you have the <grib_api.h> header file.')
-fi
 
-MIFI_USELIB([metgm], [mgm_read_group5_slice], [])
+MIFI_USELIB([metgm], [metgm.h], [mgm_read_group5_slice], [])
 AM_CONDITIONAL([HAVE_METGM], [test "x$with_metgm" = "xyes"])
-if test "x$with_metgm" = "xyes"; then
-    AC_DEFINE([HAVE_METGM_H], 1, 'Define to 1 if you have the <metgm.h> header file.')
-fi
 
 AC_LANG_POP(C++)
 

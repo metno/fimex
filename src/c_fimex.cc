@@ -35,11 +35,11 @@
 #include "boost/shared_array.hpp"
 #include "fimex/CDMReader.h"
 #include "fimex/FeltCDMReader2.h"
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CDMReader.h"
 #endif
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
 #include "fimex/GribApiCDMWriter.h"
 #include "fimex/GribCDMReader.h"
 #endif
@@ -75,7 +75,7 @@ mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFi
     return 0;
 }
 
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 {
     try {
@@ -88,7 +88,7 @@ mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 }
 #endif
 
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
 mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile)
 {
     try {
@@ -127,7 +127,7 @@ mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncm
 }
 
 
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
 {
     try {
@@ -142,7 +142,7 @@ int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char
 }
 #endif
 
-#ifdef HAVE_GRIBAPI_H
+#ifdef HAVE_GRIB_API_H
 int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version)
 {
     try {

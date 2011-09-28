@@ -1,17 +1,17 @@
 ############
 # SYNOPSIS
 #
-#   MIFI_REQLIB([LIBNAME],[FUNCTIONNAME], [EXTRA_LIBS])
-#   MIFI_USELIB([LIBNAME],[FUNCTIONNAME], [EXTRA_LIBS])
+#   MIFI_REQLIB([LIBNAME],[HEADERNAME], [FUNCTIONNAME], [EXTRA_LIBS])
+#   MIFI_USELIB([LIBNAME],[HEADERNAME],[FUNCTIONNAME], [EXTRA_LIBS])
 #
 # DESCRIPTION
 #
 #   These macro will check for the existence of a library.
 #   The library will be added by a --with-LIBNAME option.
 #   Libraries and Includes will be added by --with-LIBNAME=DIR or --with-LIBNAME=LIB/INCLUDE
-# 
+#
 #   With 'REQLIB' configure will stop when the the library cannot be found. 'USELIB' will continue.
-#  
+#
 #
 #   Libs and includes will be automatically added to the CPPFLAGS, LDFLAGS and LIBS.
 #
@@ -21,7 +21,7 @@
 # AUTHOR
 #
 #   Heiko Klein <Heiko.Klein@met.no>
-#   derived from work by Øystein Godøy and Thomas Lavergne
+#   derived from work by ï¿½ystein Godï¿½y and Thomas Lavergne
 ############
 
 AC_DEFUN([MIFI_REQLIB],[
@@ -29,7 +29,7 @@ AC_DEFUN([MIFI_REQLIB],[
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
-mifi_LIBS="$3"
+mifi_LIBS="$4"
 AC_ARG_WITH([$1],
     AC_HELP_STRING([--with-$1=DIR],
     [the location of mandatory lib$1 files and library either as DIR or INC,LIB]),
@@ -60,7 +60,7 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test [ x$with_$1 != xno]; then
-    AC_CHECK_LIB([$1],[$2],
+    AC_CHECK_LIB([$1],[$3],
         [with_$1=yes;
          m4_toupper(MIFI_$1_LIBS)="-l$1 $mifi_LIBS";
          m4_toupper(MIFI_$1_CPPFLAGS)=$mifi_CPPFLAGS;
@@ -70,7 +70,13 @@ if test [ x$with_$1 != xno]; then
          AC_SUBST(m4_toupper(MIFI_$1_LDFLAGS))
         ],
         [with_$1=no;
-         AC_MSG_ERROR([Did not find lib$1, this is required to continue])])
+         AC_MSG_ERROR([Did not find lib$1, this is required to continue])
+        ])
+    AC_CHECK_HEADERS([$2],
+        [],
+        [with_$1=no;
+         AC_MSG_ERROR([Did not find header $2, this is required to continue])
+        ])
 fi
 CPPFLAGS="$saved_CPPFLAGS";
 LDFLAGS="$saved_LDFLAGS";
@@ -82,7 +88,7 @@ AC_DEFUN([MIFI_USELIB],[
 saved_CPPFLAGS="$CPPFLAGS"
 saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
-mifi_LIBS="$3"
+mifi_LIBS="$4"
 AC_ARG_WITH([$1],
     AC_HELP_STRING([--with-$1=DIR],
     [the location of optional lib$1 files and library either as DIR or INC,LIB]),
@@ -113,7 +119,17 @@ LIBS="$LIBS $mifi_LIBS"
 CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
 LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test [ x$with_$1 != xno]; then
-    AC_CHECK_LIB([$1],[$2],
+    AC_CHECK_HEADERS([$2],
+        [],
+        [with_$1=no;
+         AC_MSG_WARN([=======================================]);
+         AC_MSG_WARN([Did not find header $2]);
+         AC_MSG_WARN([Disabling lib$1 dependent functions]);
+         AC_MSG_WARN([=======================================])
+        ])
+fi
+if test [ x$with_$1 != xno]; then
+    AC_CHECK_LIB([$1],[$3],
         [with_$1=yes;
          m4_toupper(MIFI_$1_LIBS)="-l$1 $mifi_LIBS";
          m4_toupper(MIFI_$1_CPPFLAGS)=$mifi_CPPFLAGS;
@@ -126,7 +142,8 @@ if test [ x$with_$1 != xno]; then
          AC_MSG_WARN([=======================================]);
          AC_MSG_WARN([Did not find lib$1]);
          AC_MSG_WARN([Disabling lib$1 dependent functions]);
-         AC_MSG_WARN([=======================================])])
+         AC_MSG_WARN([=======================================])
+        ])
 fi
 CPPFLAGS="$saved_CPPFLAGS";
 LDFLAGS="$saved_LDFLAGS";

@@ -29,7 +29,7 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include "../config.h"
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
 #endif
 #include "fimex/Logger.h"
@@ -49,7 +49,7 @@ static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 NcmlCDMReader::NcmlCDMReader(std::string configFile)
     : configFile(configFile)
 {
-#ifdef MIFI_HAVE_NETCDF
+#ifdef HAVE_NETCDF_H
     setConfigDoc();
 
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
