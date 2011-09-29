@@ -438,10 +438,7 @@ static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map
 
 
 static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-	if (! vm.count("interpolate.projString")) {
-		LOG4FIMEX(logger, Logger::DEBUG, "interpolate.projString not found, no interpolation used");
-		return dataReader;
-	}
+
 	boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
 	if (vm.count("interpolate.latitudeName")) {
 		interpolator->setLatitudeName(vm["interpolate.latitudeName"].as<string>());
@@ -496,20 +493,33 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
 		}
 	}
 
-	if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
-		cerr << "ERROR: xAxisUnit and yAxisUnit required" << endl;
-		exit(1);
-	}
+    if(!vm.count("interpolate.template")) {
 
-    if (!(vm.count("interpolate.xAxisValues") && vm.count("interpolate.yAxisValues"))) {
-	    cerr << "ERROR: xAxisValues and yAxisValues required" << endl;
-	    exit(1);
-	}
+        if (! vm.count("interpolate.projString") ) {
+                LOG4FIMEX(logger, Logger::DEBUG, "interpolate.projString not found, no interpolation used");
+                return dataReader;
+        }
 
-	interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(),
-	                                       vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(),
-	                                       vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>(),
-	                                       vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
+        if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
+                cerr << "ERROR: xAxisUnit and yAxisUnit required" << endl;
+                exit(1);
+        }
+
+        if (!(vm.count("interpolate.xAxisValues") && vm.count("interpolate.yAxisValues"))) {
+            cerr << "ERROR: xAxisValues and yAxisValues required" << endl;
+            exit(1);
+        }
+
+        interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(),
+                                               vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(),
+                                               vm["interpolate.xAxisUnit"].as<string>(), vm["interpolate.yAxisUnit"].as<string>(),
+                                               vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
+    } else {
+
+        interpolator->changeProjection(method, vm["interpolate.template"].as<string>());
+    }
+
+
 	printReaderStatements("interpolate", vm, interpolator.get());
 
 	return boost::shared_ptr<CDMReader>(interpolator);
@@ -655,6 +665,7 @@ int run(int argc, char* args[])
         ("interpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
+        ("interpolate.template", po::value<string>(), "netcdf file containing lat/lon list used in interpolation")
         ("verticalInterpolate.type", po::value<string>(), "pressure or height")
         ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
