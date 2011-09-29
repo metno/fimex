@@ -82,6 +82,18 @@ private:
     void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
     void changeProjectionByCoordinates(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
     void changeProjectionByForwardInterpolation(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
+
+    void changeProjectionByProjectionParametersToLatLonList(int method,
+                                                            const std::string& proj_input,
+                                                            const std::vector<double>& out_x_axis,
+                                                            const std::vector<double>& out_y_axis,
+                                                            const std::string& out_x_axis_unit,
+                                                            const std::string& out_y_axis_unit,
+                                                            CDMDataType out_x_axis_type,
+                                                            CDMDataType out_y_axis_type,
+                                                            boost::shared_ptr<Data> latVals,
+                                                            boost::shared_ptr<Data> lonVals);
+
     boost::shared_ptr<const CoordinateSystem> findBestCoordinateSystemAndProjectionVars(bool withProjection);
     bool hasSpatialVectors() const;
 public:
@@ -132,10 +144,19 @@ public:
 	 *
 	 */
 	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, const std::string& out_x_axis_type = "double", const std::string& out_y_axis_type = "double");
-	/**
+        /**
+          * @ brief change the (main) projection of the dataReaders cdm to this new projection
+          *
+          * @param method Interpolation method
+          * @param netcdf-template-file input-string for netcf template filename
+          *
+          */
+        virtual void changeProjection(int method, const std::string& netcdf_template_file);
+        /**
 	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for latitude
 	 */
+
 	virtual void setLatitudeName(const std::string& latName) {this->latitudeName = latName;}
 	/**
 	 * @return the name used for latitude in the automatic coordinate generation
