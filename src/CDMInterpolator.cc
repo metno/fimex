@@ -1258,8 +1258,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonList(int met
     // check is we have to translate original axes from deg2rad
     int miupXAxis = MIFI_PROJ_AXIS;
     int miupYAxis = MIFI_PROJ_AXIS;
-    boost::shared_ptr<Data> orgXAxisData = cs->getGeoXAxis()->getData();
-    boost::shared_ptr<Data> orgYAxisData = cs->getGeoYAxis()->getData();
+    boost::shared_ptr<Data> orgXAxisData = getData(cs->getGeoXAxis()->getName());
+    boost::shared_ptr<Data> orgYAxisData = getData(cs->getGeoYAxis()->getName());
     boost::shared_array<double> orgXAxisArray = orgXAxisData->asDouble();
     boost::shared_array<double> orgYAxisArray = orgYAxisData->asDouble();
     if (cs->getProjection()->isDegree()) {
