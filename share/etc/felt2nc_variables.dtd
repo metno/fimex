@@ -23,6 +23,7 @@
 <!--- processing option, gridParameterDelta|globalParameterRestrictions -->
 <!--- e.g. <option name="gridParameterDelta" value="0 0 0 0 0 0"/> -->
 <!--- e.g. <option name="globalParameterRestrictions" value="grid=1394:level=1000:prod=88"/> -->
+<!---            possible values are       param,prod,grid,dtype,vcoord,level,idnum -->
 <!ELEMENT option EMPTY>
 <!ATTLIST option
 	name CDATA #REQUIRED

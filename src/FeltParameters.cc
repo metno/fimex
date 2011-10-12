@@ -176,8 +176,12 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
 				diana2feltParameters[12] = id;
 			} else if (what[1].str() == "idnum") {
 				diana2feltParameters[13] = id;
-			} else {
-			    LOG4FIMEX(logger, MetNoFimex::Logger::WARN, "unknown restriction: " << id << ", must be (prod|grid|dtype|level|idnum)");
+			} else if (what[1].str() == "param") {
+                diana2feltParameters[11] = id;
+            } else if (what[1].str() == "vcoord") {
+                diana2feltParameters[10] = id;
+            } else {
+			    LOG4FIMEX(logger, MetNoFimex::Logger::WARN, "unknown restriction: " << id << ", must be (prod|grid|dtype|param|vcoord|level|idnum)");
 			}
 		}
 	}
