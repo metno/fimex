@@ -70,7 +70,7 @@ private:
 	void init();
 	// the following methods are parts of the init function and should not
 	// be called from elsewhere
-	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc);
+	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc, const std::map<std::string, std::string>& options);
 	void initAddGlobalAttributesFromXML(const XMLDoc& doc);
 	/**
 	 * read processOptions/option from the xml file

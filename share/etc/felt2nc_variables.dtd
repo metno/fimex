@@ -20,7 +20,9 @@
 
 <!--- optional processing options used by FeltFile -->
 <!ELEMENT processOptions (option*)>
-<!--- processing option, currently only gridParameterDelta allowed -->
+<!--- processing option, gridParameterDelta|globalParameterRestrictions -->
+<!--- e.g. <option name="gridParameterDelta" value="0 0 0 0 0 0"/> -->
+<!--- e.g. <option name="globalParameterRestrictions" value="grid=1394:level=1000:prod=88"/> -->
 <!ELEMENT option EMPTY>
 <!ATTLIST option
 	name CDATA #REQUIRED

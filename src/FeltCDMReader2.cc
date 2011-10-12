@@ -55,26 +55,26 @@ using namespace MetNoFelt;
 
 static LoggerPtr logger = getLogger("fimex.FeltCDMReader2");
 
-std::vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath)
+vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const string& variableXPath)
 {
-	std::vector<double> retValues;
-	std::string valuesXPath(variableXPath + "/values");
+	vector<double> retValues;
+	string valuesXPath(variableXPath + "/values");
 	XPathObjPtr xpathObj = doc.getXPathObject(valuesXPath);
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	int size = (nodes) ? nodes->nodeNr : 0;
 	for (int i = 0; i < size; i++) {
 		xmlNodePtr node = nodes->nodeTab[i];
 		if (node->type == XML_ELEMENT_NODE) {
-			std::string mode = getXmlProp(node, "mode");
+			string mode = getXmlProp(node, "mode");
 			if (mode == "" || mode == "inline") {
 				// add all space delimited values to the retVal vector
 				xmlChar *valuePtr = xmlNodeGetContent(node);
-				std::string
+				string
 				values(reinterpret_cast<const char *>(valuePtr));
 				xmlFree(valuePtr);
-				std::vector<std::string> tokens = tokenize(values, " ");
-				std::transform(tokens.begin(), tokens.end(),
-						std::back_inserter(retValues), string2type<double>);
+				vector<string> tokens = tokenize(values, " ");
+				transform(tokens.begin(), tokens.end(),
+						back_inserter(retValues), string2type<double>);
 			} else if (mode == "level2") {
 				// get level-id from variableXPath
 				boost::smatch matches;
@@ -121,19 +121,19 @@ std::vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const
 					retValues.push_back(apData[i]/p0 + bData[i]);
 				}
 			}
-			std::string sscale = getXmlProp(node, "scale_factor");
+			string sscale = getXmlProp(node, "scale_factor");
 			if (sscale != "") {
 				double scale = string2type<double>(sscale);
-				std::transform(retValues.begin(), retValues.end(),
-						retValues.begin(), std::bind1st(multiplies<double>(), scale));
+				transform(retValues.begin(), retValues.end(),
+						retValues.begin(), bind1st(multiplies<double>(), scale));
 			}
 		}
 	}
 	return retValues;
 }
-void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
+void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const string& xpathLevelString, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements)
 {
-	std::string addAxisXPath(xpathLevelString + "/additional_axis_variable");
+	string addAxisXPath(xpathLevelString + "/additional_axis_variable");
 	XPathObjPtr xpathObj = doc.getXPathObject(addAxisXPath);
 	if (xpathObj.get() != 0) {
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -144,8 +144,8 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 			string type = getXmlProp(node, "type");
 			string axis = getXmlProp(node, "axis");
 			CDMDataType dataType = string2datatype(type);
-			std::vector<double> values = readValuesFromXPath(doc, addAxisXPath + "[@name='" + name + "']");
-			std::vector<std::string> shape;
+			vector<double> values = readValuesFromXPath(doc, addAxisXPath + "[@name='" + name + "']");
+			vector<string> shape;
 			shape.push_back(axis);
 			CDMVariable var(name, dataType, shape);
 			var.setData(createData(dataType, values.begin(), values.end()));
@@ -153,9 +153,9 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 
 
 			// add the attributes of the extra variables
-			std::vector<CDMAttribute> attributes;
+			vector<CDMAttribute> attributes;
 			fillAttributeListFromXMLNode(attributes, node->children, templateReplacements);
-			for (std::vector<CDMAttribute>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
+			for (vector<CDMAttribute>::iterator it = attributes.begin(); it != attributes.end(); ++it) {
 				cdm_->addAttribute(name, *it);
 			}
 		}
@@ -163,13 +163,13 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 }
 
 
-FeltCDMReader2::FeltCDMReader2(std::string filename, std::string configFilename)
+FeltCDMReader2::FeltCDMReader2(string filename, string configFilename)
 : filename(filename), configFilename(configFilename)
 {
 	try {
 		init();
 	} catch (MetNoFelt::Felt_File_Error& ffe) {
-		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());
+		throw CDMException(string("Felt_File_Error: ") + ffe.what());
 	}
 }
 
@@ -186,13 +186,13 @@ void FeltCDMReader2::init() {
         throw CDMException("config-file "+configFilename+" is not a /cdm_felt_config configuration");
     }
 
+    map<string, string> options = initGetOptionsFromXML(doc);
 	// open the feltFile with the desired parameters
-	std::vector<std::string> knownFeltIds = initGetKnownFeltIdsFromXML(doc);
-	std::map<std::string, std::string> options = initGetOptionsFromXML(doc);
+	vector<string> knownFeltIds = initGetKnownFeltIdsFromXML(doc, options);
 	feltfile_ = boost::shared_ptr<MetNoFelt::Felt_File2>(new MetNoFelt::Felt_File2(filename, knownFeltIds, options));
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
-		std::vector<boost::posix_time::ptime> feltTimes = feltfile_->getFeltTimes();
+		vector<boost::posix_time::ptime> feltTimes = feltfile_->getFeltTimes();
 		if (feltTimes.size() > 0) {
 		    templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(feltTimes[0])));
 		    size_t lastTime = (feltTimes.size() > 1) ? (feltTimes.size() - 1) : 0;
@@ -212,14 +212,14 @@ void FeltCDMReader2::init() {
 	// time
 	CDMDimension timeDim = initAddTimeDimensionFromXML(doc);
 	// levels
-	std::map<short, CDMDimension> levelDims = initAddLevelDimensionsFromXML(doc);
+	map<short, CDMDimension> levelDims = initAddLevelDimensionsFromXML(doc);
 	//x,y dim will be set with the projection, can also = long/lat
 	// setting default-value
     xDim = CDMDimension("x", feltfile_->getNX());
     yDim = CDMDimension("y", feltfile_->getNY());
 
     // projection of the array (currently only one allowed
-    std::string projName, coordinates;
+    string projName, coordinates;
     // get projection and coordinates
     initAddProjectionFromXML(doc, projName, coordinates);
 
@@ -227,9 +227,14 @@ void FeltCDMReader2::init() {
     initAddVariablesFromXML(doc, projName, coordinates, timeDim, levelDims);
 }
 
-std::vector<std::string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc& doc)
+vector<string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc& doc, const map<string, string>& options)
 {
-	std::vector<std::string> knownFeltIds;
+    string globalRestrictions;
+    if (options.find("globalParameterRestrictions") != options.end()) {
+        globalRestrictions = ":" + options.find("globalParameterRestrictions")->second;
+    }
+
+    vector<string> knownFeltIds;
 	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
@@ -237,41 +242,41 @@ std::vector<std::string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc
 		xmlNodePtr node = nodes->nodeTab[i];
 		string id = getXmlProp(node, "id");
 		// get the datatype
-		std::string dataType = getXmlProp(node, "type");
+		string dataType = getXmlProp(node, "type");
 		if (dataType != "") {
 			dataType = ":dataType=" + dataType;
 		}
 		// get the fill value
 		XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/variables/parameter[@id=\""+id+"\"]/attribute[@name=\"_FillValue\"]");
-		std::string fillValue;
+		string fillValue;
 		if (xpathObj->nodesetval && xpathObj->nodesetval->nodeNr > 0) {
 			fillValue = getXmlProp(xpathObj->nodesetval->nodeTab[0], "value");
 			if (fillValue != "") {
 				fillValue = ":fillValue=" + fillValue;
 			}
 		}
-		knownFeltIds.push_back(id + dataType + fillValue);
+		knownFeltIds.push_back(id + dataType + fillValue + globalRestrictions);
 	}
 	return knownFeltIds;
 }
 
-std::map<std::string, std::string> FeltCDMReader2::initGetOptionsFromXML(const XMLDoc& doc)
+map<string, string> FeltCDMReader2::initGetOptionsFromXML(const XMLDoc& doc)
 {
-	std::map<std::string, std::string> options;
+	map<string, string> options;
 	// optional processing options
 	XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/processOptions/option");
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
 	for (int i = 0; i < size; ++i) {
-		std::string name = getXmlProp(nodes->nodeTab[i], "name");
-		std::string value = getXmlProp(nodes->nodeTab[i], "value");
+		string name = getXmlProp(nodes->nodeTab[i], "name");
+		string value = getXmlProp(nodes->nodeTab[i], "value");
 		options[name] = value;
 	}
 	return options;
 }
 void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 {
-	std::string xpathString("/cdm_felt_config/global_attributes");
+	string xpathString("/cdm_felt_config/global_attributes");
 	XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
@@ -281,9 +286,9 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 	for (int i = 0; i < size; ++i) {
 		xmlNodePtr node = nodes->nodeTab[i];
 		assert(node->type == XML_ELEMENT_NODE);
-		std::vector<CDMAttribute> globAttributes;
+		vector<CDMAttribute> globAttributes;
 		fillAttributeListFromXMLNode(globAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
-		for (std::vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
+		for (vector<CDMAttribute>::iterator it = globAttributes.begin(); it != globAttributes.end(); ++it) {
 			cdm_->addAttribute(cdm_->globalAttributeNS(), *it);
 		}
 	}
@@ -326,7 +331,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	CDMDimension timeDim(timeName, timeSize);
 	timeDim.setUnlimited(true);
 	cdm_->addDimension(timeDim);
-	std::vector<std::string> timeShape;
+	vector<string> timeShape;
 	timeShape.push_back(timeDim.getName());
     CDMDataType timeDataType = string2datatype(timeType);
 	CDMVariable timeVar(timeName, timeDataType, timeShape);
@@ -339,9 +344,9 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	boost::shared_ptr<Data> timeData = createData(timeDataType, timeUnitVec.begin(), timeUnitVec.end());
 	timeVar.setData(timeData);
 	cdm_->addVariable(timeVar);
-	std::vector<CDMAttribute> timeAttributes;
+	vector<CDMAttribute> timeAttributes;
 	fillAttributeListFromXMLNode(timeAttributes, timeNode->children, templateReplacementAttributes);
-	for (std::vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
+	for (vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
 		cdm_->addAttribute(timeVar.getName(), *it);
 	}
 
@@ -350,8 +355,8 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	    boost::shared_ptr<boost::posix_time::ptime> refTime = feltfile_->getUniqueReferenceTime();
 	    if (refTime.get() != 0) {
 	        // TODO: move reference time name to config
-	        std::string referenceTime = "forecast_reference_time";
-	        std::vector<std::string> nullShape;
+	        string referenceTime = "forecast_reference_time";
+	        vector<string> nullShape;
 	        CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
 	        boost::shared_ptr<Data> timeData = createData(timeDataType, 1);
 	        timeData->setValue(0, tu.posixTime2unitTime(*refTime));
@@ -367,13 +372,13 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
 	return timeDim;
 }
 
-std::map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(const XMLDoc& doc)
+map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(const XMLDoc& doc)
 {
 	map<short, CDMDimension> levelDims;
-	std::map<short, vector<LevelPair> > levels = feltfile_->getFeltLevelPairs();
-	for (std::map<short, vector<LevelPair> >::const_iterator it = levels.begin(); it != levels.end(); ++it) {
+	map<short, vector<LevelPair> > levels = feltfile_->getFeltLevelPairs();
+	for (map<short, vector<LevelPair> >::const_iterator it = levels.begin(); it != levels.end(); ++it) {
 		// add a level
-		std::string xpathLevelString("/cdm_felt_config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
+		string xpathLevelString("/cdm_felt_config/axes/vertical_axis[@felt_id='"+type2string(it->first)+"']");
 		XPathObjPtr xpathObj = doc.getXPathObject(xpathLevelString);
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	    int size = (nodes) ? nodes->nodeNr : 0;
@@ -388,20 +393,20 @@ std::map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(cons
 		CDMDataType levelDataType = string2datatype(levelType);
 		long levelSize = it->second.size();
 		CDMDimension levelDim(levelId, levelSize);
-		levelDims.insert(std::pair<short, CDMDimension>(it->first, levelDim));
+		levelDims.insert(pair<short, CDMDimension>(it->first, levelDim));
 		cdm_->addDimension(levelDim);
 		levelVecMap[levelDim.getName()] = it->second;
 
 		// create level variable without data!
-		std::vector<std::string> levelShape;
+		vector<string> levelShape;
 		levelShape.push_back(levelDim.getName());
 		CDMVariable levelVar(levelId, levelDataType, levelShape);
 		cdm_->addVariable(levelVar);
 
 		// add attributes
-		std::vector<CDMAttribute> levelAttributes;
+		vector<CDMAttribute> levelAttributes;
 		fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
-		for (std::vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
+		for (vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
 			cdm_->addAttribute(levelVar.getName(), *ait);
 		}
 
@@ -410,7 +415,7 @@ std::map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(cons
 
 		// read level data after! additional axis variables since additional axis variable might contain
 		// data needed from level data (i.e. for hybrid_sigma levels)
-		std::vector<double> lv = readValuesFromXPath(doc, xpathLevelString);
+		vector<double> lv = readValuesFromXPath(doc, xpathLevelString);
 		boost::shared_ptr<Data> data;
 		if (lv.size() > 0) {
 			// use values from xml-file
@@ -418,7 +423,7 @@ std::map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(cons
 		} else {
 			//use values from felt-file
 		    const vector<LevelPair>& lpv = it->second;
-			std::vector<short> lvs;
+			vector<short> lvs;
 			for (vector<LevelPair>::const_iterator level_it =  lpv.begin(); level_it != lpv.end(); ++level_it) {
 			    lvs.push_back(level_it->first);
 			}
@@ -431,78 +436,78 @@ std::map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(cons
 	return levelDims;
 }
 
-void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates)
+void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projName, string& coordinates)
 {
 	boost::shared_ptr<felt::FeltGridDefinition> gridDef = feltfile_->getGridDefinition();
-	std::string projStr = gridDef->projDefinition();
+	string projStr = gridDef->projDefinition();
 	int gridType = feltfile_->getGridType();
-	projName = std::string("projection_" + type2string(gridType));
+	projName = string("projection_" + type2string(gridType));
 	// projection-variable without datatype and dimension
-	CDMVariable projVar(projName, CDM_NAT, std::vector<std::string>());
+	CDMVariable projVar(projName, CDM_NAT, vector<string>());
 	cdm_->addVariable(projVar);
-	std::vector<CDMAttribute> projAttr = Projection::createByProj4(projStr)->getParameters();
-	for (std::vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
+	vector<CDMAttribute> projAttr = Projection::createByProj4(projStr)->getParameters();
+	for (vector<CDMAttribute>::iterator attrIt = projAttr.begin(); attrIt != projAttr.end(); ++attrIt) {
 		cdm_->addAttribute(projName, *attrIt);
 	}
 
 	{
 		// create the x dimension variables and dimensions
-		std::string xpathStringX("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='x']");
-		std::vector<CDMAttribute> xVarAttributes;
-		std::map<string, string> xXmlAttributes;
+		string xpathStringX("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='x']");
+		vector<CDMAttribute> xVarAttributes;
+		map<string, string> xXmlAttributes;
 		int found = readXPathNodeWithCDMAttributes(doc, xpathStringX, xXmlAttributes, xVarAttributes, templateReplacementAttributes);
 		if (found != 1) {
 			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringX);
 		}
-		std::string xName(xXmlAttributes["name"]);
+		string xName(xXmlAttributes["name"]);
 		xDim = CDMDimension(xName, feltfile_->getNX());
 		CDMDataType xDataType = string2datatype(xXmlAttributes["type"]);
-		std::vector<std::string> xDimShape;
+		vector<string> xDimShape;
 		xDimShape.push_back(xDim.getName());
 		CDMVariable xVar(xName, xDataType, xDimShape);
 		xVar.setData(feltfile_->getXData());
 		cdm_->addDimension(xDim);
 		cdm_->addVariable(xVar);
-		for (std::vector<CDMAttribute>::iterator attrIt = xVarAttributes.begin(); attrIt != xVarAttributes.end(); ++attrIt) {
+		for (vector<CDMAttribute>::iterator attrIt = xVarAttributes.begin(); attrIt != xVarAttributes.end(); ++attrIt) {
 			cdm_->addAttribute(xName, *attrIt);
 		}
 	}
 	{
 		// create the y dimension variables and dimensions
-		std::string xpathStringY("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='y']");
-		std::vector<CDMAttribute> yVarAttributes;
-		std::map<string, string> yXmlAttributes;
+		string xpathStringY("/cdm_felt_config/axes/spatial_axis[@projection_felt_id='"+type2string(gridType)+"' and @id='y']");
+		vector<CDMAttribute> yVarAttributes;
+		map<string, string> yXmlAttributes;
 		int found = readXPathNodeWithCDMAttributes(doc, xpathStringY, yXmlAttributes, yVarAttributes, templateReplacementAttributes);
 		if (found != 1) {
 			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringY);
 		}
-		std::string yName(yXmlAttributes["name"]);
+		string yName(yXmlAttributes["name"]);
 		yDim = CDMDimension(yName, feltfile_->getNY());
 		CDMDataType yDataType = string2datatype(yXmlAttributes["type"]);
-		std::vector<std::string> yDimShape;
+		vector<string> yDimShape;
 		yDimShape.push_back(yDim.getName());
 		CDMVariable yVar(yName, yDataType, yDimShape);
 		yVar.setData(feltfile_->getYData());
 		cdm_->addDimension(yDim);
 		cdm_->addVariable(yVar);
-		for (std::vector<CDMAttribute>::iterator attrIt = yVarAttributes.begin(); attrIt != yVarAttributes.end(); ++attrIt) {
+		for (vector<CDMAttribute>::iterator attrIt = yVarAttributes.begin(); attrIt != yVarAttributes.end(); ++attrIt) {
 			cdm_->addAttribute(yName, *attrIt);
 		}
 	}
 
-	std::string longName;
-	std::string latName;
+	string longName;
+	string latName;
 	{
 		// read longitude and latitude names for projection axes
-		std::string xpathStringLong("/cdm_felt_config/axes/spatial_axis[@id='longitude']");
-		std::vector<CDMAttribute> lonlatVarAttributes;
-		std::map<string, string> lonlatXmlAttributes;
+		string xpathStringLong("/cdm_felt_config/axes/spatial_axis[@id='longitude']");
+		vector<CDMAttribute> lonlatVarAttributes;
+		map<string, string> lonlatXmlAttributes;
 		int found = readXPathNodeWithCDMAttributes(doc, xpathStringLong, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
 		if (found != 1) {
 			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLong);
 		}
 		longName = lonlatXmlAttributes["name"];
-		std::string xpathStringLat("/cdm_felt_config/axes/spatial_axis[@id='latitude']");
+		string xpathStringLat("/cdm_felt_config/axes/spatial_axis[@id='latitude']");
 		found = readXPathNodeWithCDMAttributes(doc, xpathStringLat, lonlatXmlAttributes, lonlatVarAttributes, templateReplacementAttributes);
 		if (found != 1) {
 			throw MetNoFelt::Felt_File_Error("error in config-file: not exactly 1 entry for xpath: " + xpathStringLat);
@@ -522,11 +527,11 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, std::string& pr
 }
 
 
-void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<short, CDMDimension>& levelDims)
+void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& projName, const string& coordinates, const CDMDimension& timeDim, const map<short, CDMDimension>& levelDims)
 {
 	vector<boost::shared_ptr<Felt_Array2> > fArrays(feltfile_->listFeltArrays());
-	for (std::vector<boost::shared_ptr<Felt_Array2> >::const_iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
-		std::string xpathString("/cdm_felt_config/variables/parameter[@id='"+(*it)->getName()+"']");
+	for (vector<boost::shared_ptr<Felt_Array2> >::const_iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
+		string xpathString("/cdm_felt_config/variables/parameter[@id='"+(*it)->getName()+"']");
 		XPathObjPtr xpathObj = doc.getXPathObject(xpathString);
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 		int size = (nodes) ? nodes->nodeNr : 0;
@@ -534,11 +539,11 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
 			throw MetNoFelt::Felt_File_Error("error in config-file: several entries for parameter: " + (*it)->getName());
 		}
     	if (size < 1) {
-    		std::cerr << "config-file doesn't contain parameter: " << xpathString << std::endl;
+    		cerr << "config-file doesn't contain parameter: " << xpathString << endl;
     	} else {
     		assert(nodes->nodeTab[0]->type == XML_ELEMENT_NODE);
-    		std::string varName = getXmlProp(nodes->nodeTab[0], "name");
-    		std::vector<CDMAttribute> attributes;
+    		string varName = getXmlProp(nodes->nodeTab[0], "name");
+    		vector<CDMAttribute> attributes;
     		fillAttributeListFromXMLNode(attributes, nodes->nodeTab[0]->children, templateReplacementAttributes);
     		// add the projection
     		attributes.push_back(CDMAttribute("grid_mapping",projName));
@@ -562,7 +567,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
     		}
 
     		// map shape, generate variable, set attributes/variable to CDM (fastest moving index (x) first, slowest (unlimited, time) last
-    		std::vector<std::string> shape;
+    		vector<string> shape;
     		shape.push_back(xDim.getName());
     		shape.push_back(yDim.getName());
     		if ((*it)->getLevelPairs().size() > 1) {
@@ -581,7 +586,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
     		//  update scaling factor attribute with value from felt-file and xml-setup (only for short-values)
     		if ((*it)->getScalingFactor() != 1) {
     			bool found = false;
-        		for (std::vector<CDMAttribute>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
+        		for (vector<CDMAttribute>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
         			if (attrIt->getName() == "scale_factor") {
         				found = true;
         				float scale = (attrIt->getData()->asConstFloat())[0] * (*it)->getScalingFactor();
@@ -592,14 +597,14 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const std::strin
         			attributes.push_back(CDMAttribute("scale_factor", static_cast<float>((*it)->getScalingFactor())));
         		}
     		}
-    		for (std::vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
+    		for (vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
     			cdm_->addAttribute(varName, *attrIt);
     		}
     	}
 	}
 }
 
-boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName, size_t unLimDimPos) {
+boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) {
     LOG4FIMEX(logger, Logger::DEBUG, "reading var: "<< varName << " slice: " << unLimDimPos);
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
@@ -611,10 +616,10 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 	}
 
 	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y;
-	const vector<std::string>& dims = variable.getShape();
+	const vector<string>& dims = variable.getShape();
 	const CDMDimension* layerDim = 0;
 	size_t xy_size = 1;
-	for (vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
+	for (vector<string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
 		CDMDimension& dim = cdm_->getDimension(*it);
 		if (dim.getName() != xDim.getName() &&
 			dim.getName() != yDim.getName() &&
@@ -628,7 +633,7 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 	}
 	boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size);
 	try {
-		std::map<std::string, std::string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName());
+		map<string, string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName());
 		if (foundId != varNameFeltIdMap.end()) {
 			boost::shared_ptr<MetNoFelt::Felt_Array2> fa(feltfile_->getFeltArray(foundId->second));
 
@@ -651,14 +656,14 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 			}
 
 			// select all available layers
-			std::vector<LevelPair> layerVals;
+			vector<LevelPair> layerVals;
 			if ((layerDim != 0) && (layerDim->getLength() > 0)) {
 				for (size_t i = 0; i < layerDim->getLength(); ++i) {
 					layerVals.push_back(levelVecMap[layerDim->getName()][i]);
 				}
 			} else {
 				// no layers, just 1 level
-				std::vector<LevelPair> levels = fa->getLevelPairs();
+				vector<LevelPair> levels = fa->getLevelPairs();
 				if (levels.size() == 1) {
 					layerVals.push_back(*(levels.begin()));
 				} else {
@@ -671,7 +676,7 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 			int yDim = fa->getY();
 			vector<short> gridData;
 			gridData.reserve(xDim*yDim);
-			for (std::vector<LevelPair>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
+			for (vector<LevelPair>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
 			    // get the posix-time, if available
 			    boost::posix_time::ptime t;
 			    if (timeVec.size() > 0) {
@@ -684,15 +689,15 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const std::string& varName,
 			}
 		}
 	} catch (MetNoFelt::Felt_File_Error& ffe) {
-		throw CDMException(std::string("Felt_File_Error: ") + ffe.what());
-	} catch (std::exception& e) {
-	    throw CDMException(std::string("non-Felt_File_Error: ") + e.what());
+		throw CDMException(string("Felt_File_Error: ") + ffe.what());
+	} catch (exception& e) {
+	    throw CDMException(string("non-Felt_File_Error: ") + e.what());
 	}
 	return data;
 }
 
 
-boost::shared_ptr<FeltCDMReader2> getFeltReader(std::string filename, std::string configFilename)
+boost::shared_ptr<FeltCDMReader2> getFeltReader(string filename, string configFilename)
 {
     return boost::shared_ptr<FeltCDMReader2>(new FeltCDMReader2(filename, configFilename));
 }

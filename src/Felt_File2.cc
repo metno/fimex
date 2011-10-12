@@ -61,19 +61,18 @@ Felt_File2::Felt_File2(const string& filename)
 	std::ifstream setupFile(dianaSetup.c_str());
 	if (setupFile.is_open()) {
 		setupFile.close();
-		feltParameters = FeltParameters(dianaSetup);
+		feltParameters_ = FeltParameters(dianaSetup);
 	}
 	// else default constructor
-
-	// read the data
-	std::map<std::string, std::string> options;
-	init(options);
+	init();
 }
 
 Felt_File2::Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options)
-: filename_(filename), feltParameters(dianaParamList)
+: filename_(filename)
 {
-	init(options);
+    setOptions(options);
+	feltParameters_ = FeltParameters(dianaParamList, globalParameterOptions_);
+    init();
 }
 
 void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
@@ -83,6 +82,7 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
     for (int i = 0; i < 6; i++) gridParameterDelta_[i] = 0;
 
 	std::string optName = "gridParameterDelta";
+    knownOptions.insert(optName);
 	std::map<std::string, std::string>::const_iterator gridParOpt = options.find("gridParameterDelta");
 	if (gridParOpt != options.end()) {
 		std::vector<std::string> tokens = tokenize(gridParOpt->second);
@@ -91,8 +91,13 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 			gridParameterDelta_.at(i) = string2type<double>(tokens[i]);
 		}
 		LOG4FIMEX(logger, Logger::DEBUG, "adding " << optName << " processing-option: " << gridParOpt->second);
-		knownOptions.insert(optName);
 	}
+
+	optName = "globalParameterRestrictions";
+    knownOptions.insert(optName);
+    if (options.find(optName) != options.end()) {
+        globalParameterOptions_ = options.find(optName)->second;
+    }
 
 	// test for unknown options
 	for (std::map<std::string, std::string>::const_iterator oit = options.begin(); oit != options.end(); ++oit) {
@@ -102,9 +107,8 @@ void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
 	}
 }
 
-void Felt_File2::init(const std::map<std::string, std::string>& options)
+void Felt_File2::init()
 {
-	setOptions(options);
 	try {
         feltFile_ = boost::shared_ptr<felt::FeltFile>(new felt::FeltFile(
                 boost::filesystem::path(filename_)));
@@ -114,7 +118,7 @@ void Felt_File2::init(const std::map<std::string, std::string>& options)
                 != feltFile_->end(); ++ffit) {
             felt::FeltFile::FeltFieldPtr field = *ffit;
             const felt::FeltField::Header& header = field->getHeader();
-            std::string name = feltParameters.getParameterName(header);
+            std::string name = feltParameters_.getParameterName(header);
             if (name != UNDEFINED()) {
                 findOrCreateFeltArray(field);
                 if (field->verticalCoordinate() == 10) {
@@ -137,12 +141,12 @@ Felt_File2::~Felt_File2()
 
 // true = find, false = create
 bool Felt_File2::findOrCreateFeltArray(boost::shared_ptr<felt::FeltField> field) {
-	string name = feltParameters.getParameterName(field->getHeader());
-	string dataType = feltParameters.getParameterDatatype(name);
+	string name = feltParameters_.getParameterName(field->getHeader());
+	string dataType = feltParameters_.getParameterDatatype(name);
 	map<string, boost::shared_ptr<Felt_Array2> >::iterator it = feltArrayMap_.find(name);
 	if (it == feltArrayMap_.end()) {
-		LOG4FIMEX(logger, Logger::DEBUG, "new FeltArray " << name << ": " << dataType << " " << feltParameters.getParameterFillValue(name) << " vTime: " << field->validTime());
-		boost::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters.getParameterFillValue(name)));
+		LOG4FIMEX(logger, Logger::DEBUG, "new FeltArray " << name << ": " << dataType << " " << feltParameters_.getParameterFillValue(name) << " vTime: " << field->validTime());
+		boost::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters_.getParameterFillValue(name)));
 		feltArrayMap_[name] = fa;   // copy to map
 		return false; // reference from map
 	} else {

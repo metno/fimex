@@ -181,6 +181,13 @@ BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
 
 	const CDMAttribute& attr = feltCDM.getCDM().getAttribute(feltCDM.getCDM().globalAttributeNS(), "min_time");
 	BOOST_CHECK(attr.getStringValue().substr(0,4) == "2007");
+
+
+    FeltCDMReader2 feltCDM2(fileName, topSrcDir + "/test/felt2nc_variables_level1000.xml");
+    // without level restrictions:
+    BOOST_CHECK(feltCDM.getData("sigma")->size() == 4);
+    // with level restrictions
+    BOOST_CHECK(feltCDM2.getData("sigma")->size() == 1);
 }
 
 #else

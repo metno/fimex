@@ -5,7 +5,7 @@
 <processOptions>
     <!-- allowed deviation of gridParameter (6 values, see felt.doc) to still assumed to be the same grid, default: no deviation allowed -->
 	<!--  <option name="gridParameterDelta" value="0 0 0 0 0 0"/> -->
-	<!--  <option name="globalParameterRestrictions" value="level=1000" />  -->
+	<option name="globalParameterRestrictions" value="level=1000" />
 </processOptions>
 <global_attributes>
 	<attribute name="Conventions" value="CF-1.0" type="string" />
@@ -14,7 +14,7 @@
 	<attribute name="title" value="unknown" type="string" />
 	<attribute name="min_time" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
 	<attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string" />
-	<attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string" />
+	<attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string" />	
 	<attribute name="references" value="unknown" type="string" />
 	<!-- <attribute name="history" value="unknown" type="string" /> -->
 	<attribute name="comment" value="none" type="string" />
@@ -169,7 +169,7 @@
 </vertical_axis>
 </axes>
 <variables>
-<!--
+<!-- 
 <parameter id="1" name="geopotential_height">
 	<attribute name="_FillValue" value="-32767" type="short" />
 	<attribute name="long_name" value="geopotential_height" type="string" />

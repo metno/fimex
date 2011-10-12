@@ -24,6 +24,7 @@
 #include "fimex/FeltParameters.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Utils.h"
+#include "fimex/Logger.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -34,6 +35,9 @@
 
 namespace MetNoFelt {
 
+static MetNoFimex::LoggerPtr logger = MetNoFimex::getLogger("fimex.FeltParameters");
+
+
 FeltParameters::FeltParameters() {
 	init();
 }
@@ -43,13 +47,13 @@ FeltParameters::FeltParameters(std::string filename)
 	init(filename);
 }
 
-FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) {
+FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams, const std::string& globalRestrictions) {
 	for (std::vector<std::string>::const_iterator it = dianaFeltParams.begin(); it != dianaFeltParams.end(); ++it) {
 		std::string paramName(*it);
 		std::string dataType("none");
 		boost::smatch what;
 		boost::regex dTypeRegex(":dataType=([a-z]*)");
-		// cerr << "paramName: " << paramName;
+		// get dataType and remove from paramName
 		if (boost::regex_search(paramName, what, dTypeRegex)) {
 			dataType = what[1].str();
 			if (!(dataType == "short" || dataType == "float" || dataType == "double")) {
@@ -57,6 +61,7 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) 
 			}
 			paramName = boost::regex_replace(paramName, dTypeRegex, "");
 		}
+		// get fillValue and remove from paramName
 		boost::regex fillValueRegex(":fillValue=([^:]*)");
 		if (boost::regex_search(paramName, what, fillValueRegex)) {
 			std::stringstream ss;
@@ -66,9 +71,12 @@ FeltParameters::FeltParameters(const std::vector<std::string>& dianaFeltParams) 
 			paramName = boost::regex_replace(paramName, fillValueRegex, "");
 			parameterFillValueMap[paramName] = fillValue;
 		}
-		parameterMap[paramName] = diana2feltparameters(paramName);
+		// remove the global restrictions from the parameter-name
+		// which might be used as ID, too
+		string cleanParamName = boost::regex_replace(paramName, boost::regex(":?\\Q"+globalRestrictions+"\\E"), "");
+		parameterMap[cleanParamName] = diana2feltparameters(paramName);
 		if (dataType != "none") {
-			parameterDatatypeMap[paramName] = dataType;
+			parameterDatatypeMap[cleanParamName] = dataType;
 		}
 		//cerr << "Parameter " << paramName << ": " << parameterDatatypeMap[paramName] << " " << parameterFillValueMap[paramName] << endl;
 	}
@@ -168,6 +176,8 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
 				diana2feltParameters[12] = id;
 			} else if (what[1].str() == "idnum") {
 				diana2feltParameters[13] = id;
+			} else {
+			    LOG4FIMEX(logger, MetNoFimex::Logger::WARN, "unknown restriction: " << id << ", must be (prod|grid|dtype|level|idnum)");
 			}
 		}
 	}
