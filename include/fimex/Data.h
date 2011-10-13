@@ -67,6 +67,26 @@ namespace MetNoFimex
 		virtual const boost::shared_array<int> asConstInt() const = 0;
 		/// @brief retrieve data as int
 		virtual boost::shared_array<int> asInt() = 0;
+        /// @brief retrieve data as int64
+        virtual const boost::shared_array<long long> asConstInt64() const = 0;
+        /// @brief retrieve data as int64
+        virtual boost::shared_array<long long> asInt64() = 0;
+        /// @brief retrieve data as uchar
+        virtual const boost::shared_array<unsigned char> asConstUChar() const = 0;
+        /// @brief retrieve data as uchar
+        virtual boost::shared_array<unsigned char> asUChar() = 0;
+        /// @brief retrieve data as short
+        virtual const boost::shared_array<unsigned short> asConstUShort() const = 0;
+        /// @brief retrieve data as short
+        virtual boost::shared_array<unsigned short> asUShort() = 0;
+        /// @brief retrieve data as uint
+        virtual const boost::shared_array<unsigned int> asConstUInt() const = 0;
+        /// @brief retrieve data as uint
+        virtual boost::shared_array<unsigned int> asUInt() = 0;
+        /// @brief retrieve data as uint64
+        virtual const boost::shared_array<unsigned long long> asConstUInt64() const = 0;
+        /// @brief retrieve data as uint64
+        virtual boost::shared_array<unsigned long long> asUInt64() = 0;
 		/// @brief retrieve data as float
 		virtual const boost::shared_array<float> asConstFloat() const = 0;
 		/// @brief retrieve data as float (eventually copy)
@@ -168,13 +188,53 @@ namespace MetNoFimex
      */
     boost::shared_ptr<Data> createData(size_t length, boost::shared_array<short> array);
     /**
-     * @brief create a Data-pointer of type CDM_BYTE
+     * @brief create a Data-pointer of type CDM_CHAR
      *
      * @param size_t length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
     boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array);
+    /**
+     * @brief create a Data-pointer of type CDM_UINT
+     *
+     * @param size_t length of the data array
+     * @param array the data array
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned int> array);
+    /**
+     * @brief create a Data-pointer of type CDM_INT64
+     *
+     * @param size_t length of the data array
+     * @param array the data array
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<long long> array);
+    /**
+     * @brief create a Data-pointer of type CDM_UINT64
+     *
+     * @param size_t length of the data array
+     * @param array the data array
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned long long> array);
+    /**
+     * @brief create a Data-pointer of type CDM_USHORT
+     *
+     * @param size_t length of the data array
+     * @param array the data array
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned short> array);
+    /**
+     * @brief create a Data-pointer of type CDM_UCHAR
+     *
+     * @param size_t length of the data array
+     * @param array the data array
+     * @return Base-Class ptr of the DataImpl belonging to the datatype
+     */
+    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned char> array);
 
     /**
      * @brief create a Data-pointer of the datatype and fill with the data from the iterator
@@ -208,6 +268,11 @@ namespace MetNoFimex
                 case CDM_INT:    { boost::shared_array<int> ary(new int[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
                 case CDM_SHORT:  { boost::shared_array<short> ary(new short[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
                 case CDM_CHAR:   { boost::shared_array<char> ary(new char[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_INT64:    { boost::shared_array<long long> ary(new long long[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_UINT:    { boost::shared_array<unsigned int> ary(new unsigned int[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_UINT64:    { boost::shared_array<unsigned long long> ary(new unsigned long long[length]);       std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_USHORT:  { boost::shared_array<unsigned short> ary(new unsigned short[length]);   std::copy(first, last, ary.get()); return createData(length, ary); }
+                case CDM_UCHAR:   { boost::shared_array<unsigned char> ary(new unsigned char[length]);     std::copy(first, last, ary.get()); return createData(length, ary); }
 	        case CDM_NAT: ;
 	        default: ;
 	     }

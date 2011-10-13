@@ -26,12 +26,10 @@
 
 #include "fimex/CDMReader.h"
 
-// forward decl
-class NcFile;
-class NcAtt;
-
 namespace MetNoFimex
 {
+// forward decl
+class Nc;
 
 /**
  * @headerfile "fimex/NetCDF_CDMReader.h"
@@ -40,15 +38,14 @@ namespace MetNoFimex
 
 class NetCDF_CDMReader : public MetNoFimex::CDMReader
 {
-	std::string filename;
-	const std::auto_ptr<NcFile> ncFile;
+	const std::auto_ptr<Nc> ncFile;
 public:
 	NetCDF_CDMReader(const std::string& fileName);
 	virtual ~NetCDF_CDMReader();
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 private:
-	void addAttribute(const std::string& varName, NcAtt* ncAtt);
+    void addAttribute(const std::string& varName, int varid, const std::string& attName);
 };
 
 }

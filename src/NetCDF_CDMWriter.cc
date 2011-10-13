@@ -41,6 +41,7 @@ extern "C" {
 #include <libxml/xpath.h>
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
+#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

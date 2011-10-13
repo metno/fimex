@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -26,11 +26,16 @@
 
 #include <boost/shared_ptr.hpp>
 #include "netcdfcpp.h"
+extern "C" {
+#include "netcdf.h"
+}
 #include "fimex/CDMDataType.h"
-#include "fimex/Data.h"
 
 namespace MetNoFimex
 {
+// forward decl
+class Data;
+
 /**
  * @headerfile "fimex/NetCDF_Utils.h"
  */
@@ -46,9 +51,30 @@ NcType cdmDataType2ncType(CDMDataType dt);
 CDMDataType ncType2cdmDataType(NcType dt);
 
 /**
+ * conversion from nc_type to CDMDataType
+ */
+CDMDataType ncType2cdmDataType(nc_type dt);
+
+/**
+ * read a nc-status and throw an error if status != NC_NOERR
+ */
+void ncCheck(int status);
+
+boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type dt);
+boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t* start, const size_t* count);
+
+
+/**
+ * convert void* pointer to a Data pointer
+ * @warning: the data belonging to values will be delete[]ed within this function
+ * or with the shared_array. Do not free the values otherwise!
+ */
+boost::shared_ptr<Data> ncValues2Data(void* values, nc_type dt, size_t length);
+
+/**
  * convert ncValues to a Data pointer
  * @warning: the data belonging to values will be freed within this function
- * or with the shared_array. Do not free the values otherwise! 
+ * or with the shared_array. Do not free the values otherwise!
  */
 boost::shared_ptr<Data> ncValues2Data(NcValues* values, NcType dt, size_t length);
 

@@ -103,6 +103,26 @@ namespace MetNoFimex
 		virtual boost::shared_array<short> asShort() {return as<short>();}
 		const virtual boost::shared_array<int> asConstInt() const {return as<int>();}
 		virtual boost::shared_array<int> asInt() {return as<int>();}
+        /// @brief retrieve data as int64
+        virtual const boost::shared_array<long long> asConstInt64() const {return as<long long>();}
+        /// @brief retrieve data as int64
+        virtual boost::shared_array<long long> asInt64() {return as<long long>();}
+        /// @brief retrieve data as uchar
+        virtual const boost::shared_array<unsigned char> asConstUChar() const {return as<unsigned char>();}
+        /// @brief retrieve data as uchar
+        virtual boost::shared_array<unsigned char> asUChar() {return as<unsigned char>();}
+        /// @brief retrieve data as short
+        virtual const boost::shared_array<unsigned short> asConstUShort() const {return as<unsigned short>();}
+        /// @brief retrieve data as short
+        virtual boost::shared_array<unsigned short> asUShort() {return as<unsigned short>();}
+        /// @brief retrieve data as uint
+        virtual const boost::shared_array<unsigned int> asConstUInt() const {return as<unsigned int>();}
+        /// @brief retrieve data as uint
+        virtual boost::shared_array<unsigned int> asUInt() {return as<unsigned int>();}
+        /// @brief retrieve data as uint64
+        virtual const boost::shared_array<unsigned long long> asConstUInt64() const {return as<unsigned long long>();}
+        /// @brief retrieve data as uint64
+        virtual boost::shared_array<unsigned long long> asUInt64() {return as<unsigned long long>();}
 		const virtual boost::shared_array<float> asConstFloat() const {return as<float>();}
 		virtual boost::shared_array<float> asFloat() {return as<float>();}
 		const virtual boost::shared_array<double> asConstDouble() const {return as<double>();}
@@ -194,6 +214,16 @@ namespace MetNoFimex
 	void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>
 	void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
+    template<>
+    void DataImpl<unsigned char>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
+    template<>
+    void DataImpl<unsigned short>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
+    template<>
+    void DataImpl<unsigned int>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
+    template<>
+    void DataImpl<long long>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
+    template<>
+    void DataImpl<unsigned long long>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>
 	void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last);
 	template<>

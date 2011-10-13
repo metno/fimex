@@ -25,57 +25,97 @@
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
-#include "netcdfcpp.h"
-#include <numeric>
+extern "C" {
+#include "netcdf.h"
+}
 
 namespace MetNoFimex
 {
 using namespace std;
 
+class Nc {
+public:
+    Nc() : isOpen(false) {}
+    ~Nc() {
+        if (isOpen) {
+            ncCheck(nc_close(ncId));
+        }
+    }
+    string filename;
+    int ncId;
+    bool isOpen;
+};
+
+
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
-: filename(filename), ncFile(std::auto_ptr<NcFile>(new NcFile(filename.c_str(), NcFile::ReadOnly)))
+: ncFile(std::auto_ptr<Nc>(new Nc()))
 {
-	NcError ncErr(NcError::verbose_nonfatal);
-	if (!ncFile->is_valid()) {
-	    // ncErr.get_err does not work in new NcFile, try to get the error message manually
-	    size_t *bufrsizeptr = new size_t;
-	    int the_id;
-	    int error = nc__open(filename.c_str(), NC_NOWRITE, bufrsizeptr, &the_id);
-        throw CDMException(nc_strerror(error));
-		//throw CDMException(nc_strerror(ncErr.get_err()));
+    ncFile->filename = filename;
+    ncCheck(nc_open(ncFile->filename.c_str(), NC_NOWRITE, &ncFile->ncId));
+    ncFile->isOpen = true;
+
+    // investigate the dimensions
+    {
+        int ndims;
+        ncCheck(nc_inq_ndims(ncFile->ncId, &ndims));
+        int dimids[ndims];
+        int recid;
+        ncCheck(nc_inq_unlimdim(ncFile->ncId, &recid));
+        ncCheck(nc_inq_dimids(ncFile->ncId, &ndims, dimids, 0));
+        // read metadata to cdm
+        // define dimensions
+        char ncName[NC_MAX_NAME + 1];
+        for (int i = 0; i < ndims; ++i) {
+            size_t dimlen;
+            ncCheck(nc_inq_dimname (ncFile->ncId, dimids[i], ncName));
+            ncCheck(nc_inq_dimlen(ncFile->ncId, dimids[i], &dimlen));
+            CDMDimension d(string(ncName), dimlen);
+            d.setUnlimited(recid == dimids[i]);
+            cdm_->addDimension(d);
+        }
 	}
 
-	// read metadata to cdm
-	// define dimensions
-	for (int i = 0; i < ncFile->num_dims(); ++i) {
-		NcDim* dim = ncFile->get_dim(i);
-		CDMDimension d(dim->name(), dim->size());
-		d.setUnlimited(dim->is_unlimited());
-		cdm_->addDimension(d);
-	}
-	// define variables
-	for (int i = 0; i < ncFile->num_vars(); ++i) {
-		NcVar* var = ncFile->get_var(i);
-		CDMDataType type = ncType2cdmDataType(var->type());
-		std::vector<std::string> shape;
-		// reverse dimensions
-		for (int j = var->num_dims()-1; j >= 0; --j) {
-			NcDim* dim = var->get_dim(j);
-			shape.push_back(dim->name());
-		}
-		cdm_->addVariable(CDMVariable(var->name(), type, shape));
-		// define the attributes of the variable
-		for (int j = 0; j < var->num_atts(); ++j) {
-			addAttribute(var->name(), var->get_att(j));
-		}
-	}
+    // define variables
+    {
+        int nvars;
+        ncCheck(nc_inq_nvars(ncFile->ncId, &nvars));
+        int varids[nvars];
+        ncCheck(nc_inq_varids(ncFile->ncId, &nvars, varids));
+        int ndims;
+        int dimids[NC_MAX_VAR_DIMS];
+        int natts;
+        char ncName[NC_MAX_NAME + 1];
+        for (int i = 0; i < nvars; ++i) {
+            nc_type dtype;
+            nc_inq_var(ncFile->ncId, varids[i], ncName, &dtype, &ndims, dimids, &natts);
+            CDMDataType type = ncType2cdmDataType(dtype);
+            std::vector<std::string> shape;
+            // reverse dimensions
+            char dimName[NC_MAX_NAME + 1];
+            for (int j = ndims-1; j >= 0; --j) {
+                ncCheck(nc_inq_dimname (ncFile->ncId, dimids[j], dimName));
+                shape.push_back(dimName);
+            }
+            cdm_->addVariable(CDMVariable(ncName, type, shape));
+            // define the attributes of the variable
+            char attName[NC_MAX_NAME + 1];
+            for (int j = 0; j < natts; ++j) {
+                ncCheck(nc_inq_attname(ncFile->ncId, varids[i], j, attName));
+                addAttribute(ncName, varids[i], attName);
+            }
+        }
+    }
+
 	// define global attributes
-	for (int i = 0; i < ncFile->num_atts(); ++i) {
-		addAttribute(cdm_->globalAttributeNS(), ncFile->get_att(i));
-	}
-	if (ncErr.get_err() != NC_NOERR) {
-	    throw CDMException(nc_strerror(ncErr.get_err()));
-	}
+    {
+        int natts;
+        nc_inq_varnatts(ncFile->ncId, NC_GLOBAL, &natts);
+        char attName[NC_MAX_NAME + 1];
+        for (int j = 0; j < natts; ++j) {
+            ncCheck(nc_inq_attname(ncFile->ncId, NC_GLOBAL, j, attName));
+            addAttribute(cdm_->globalAttributeNS(), NC_GLOBAL, attName);
+        }
+    }
 }
 
 NetCDF_CDMReader::~NetCDF_CDMReader()
@@ -89,21 +129,26 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
 		return getDataSliceFromMemory(var, unLimDimPos);
 	}
 
-	NcVar* ncVar = ncFile->get_var(var.getName().c_str());
+	int varid;
+	ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
+	nc_type dtype;
+	ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
+	int dimLen;
+	ncCheck(nc_inq_varndims(ncFile->ncId, varid, &dimLen));
+	int dimIds[dimLen];
+    ncCheck(nc_inq_vardimid(ncFile->ncId, varid, &dimIds[0]));
+    size_t count[dimLen];
+    size_t start[dimLen];
+    for (int i = 0; i < dimLen; ++i) {
+        start[i] = 0;
+        ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
+    }
 	if (cdm_->hasUnlimitedDim(var)) {
-		return ncValues2Data(ncVar->get_rec(unLimDimPos), ncVar->type(), ncVar->rec_size());
-	} else {
-		return ncValues2Data(ncVar->values(), ncVar->type(), ncVar->num_vals());
+	    // unlimited dim always at 0
+	    start[0] = unLimDimPos;
+	    count[0] = 1;
 	}
-}
-
-template<typename T>
-boost::shared_ptr<Data> getData_(NcVar* ncVar, long* count)
-{
-    size_t length = accumulate(count, count + ncVar->num_dims(), 1, multiplies<size_t>());
-    boost::shared_array<T> vals(new T[length]);
-    if (!ncVar->get(&vals[0], &count[0])) throw CDMException("cannot get netcdf dataslice values");
-    return createData(length, vals);
+	return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
 }
 
 boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
@@ -115,42 +160,33 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
                                     sb.getDimensionSizes());
     }
 
-    NcVar* ncVar = ncFile->get_var(var.getName().c_str());
-    vector<long> ncStartPos;
-    copy(sb.getDimensionStartPositions().begin(), sb.getDimensionStartPositions().end(), back_inserter(ncStartPos));
-    reverse(ncStartPos.begin(), ncStartPos.end()); // netcdf/c++ uses opposite dimension numbering
-    if (static_cast<int>(ncStartPos.size()) != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf variable "+ varName);
-    if (!ncVar->set_cur(&ncStartPos[0])) throw CDMException("cannot set the netcdf dataslice start-position");
+    int varid;
+    ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
+    nc_type dtype;
+    ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
+    int dimLen;
+    ncCheck(nc_inq_varndims(ncFile->ncId, varid, &dimLen));
 
-    vector<long> count;
+    vector<size_t> start;
+    copy(sb.getDimensionStartPositions().begin(), sb.getDimensionStartPositions().end(), back_inserter(start));
+    reverse(start.begin(), start.end()); // netcdf/c++ uses opposite dimension numbering
+    assert(start.size() == static_cast<size_t>(dimLen));
+
+    vector<size_t> count;
     copy(sb.getDimensionSizes().begin(), sb.getDimensionSizes().end(), back_inserter(count));
     reverse(count.begin(), count.end()); // netcdf/c++ uses opposite dimension numbering
-    if (static_cast<int>(count.size()) != ncVar->num_dims()) throw CDMException("dimension mismatch between slicebuilder and netcdf size of variable "+ varName);
+    assert(count.size() == static_cast<size_t>(dimLen));
 
-    boost::shared_ptr<Data> retData;
-    switch (var.getDataType()) {
-    case CDM_CHAR:
-    case CDM_STRING:
-        retData = getData_<char>(ncVar, &count[0]); break;
-    case CDM_SHORT:
-        retData = getData_<short>(ncVar, &count[0]); break;
-    case CDM_INT:
-        retData = getData_<int>(ncVar, &count[0]); break;
-    case CDM_FLOAT:
-        retData = getData_<float>(ncVar, &count[0]); break;
-    case CDM_DOUBLE:
-        retData = getData_<double>(ncVar, &count[0]); break;
-    default:
-        throw CDMException("Cannot read netcdf-data without know type: "+var.getDataType());
-    }
-    return retData;
+    return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
 }
 
-void NetCDF_CDMReader::addAttribute(const std::string& varName, NcAtt* ncAtt)
+void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const string& attName)
 {
-	CDMDataType dt(ncType2cdmDataType(ncAtt->type()));
-	boost::shared_ptr<Data> attrData = ncValues2Data(ncAtt->values(), ncAtt->type(), ncAtt->num_vals());
-	cdm_->addAttribute(varName, CDMAttribute(ncAtt->name(), dt, attrData));
+    nc_type dtype;
+    ncCheck(nc_inq_atttype(ncFile->ncId, varid, attName.c_str(), &dtype));
+    CDMDataType dt(ncType2cdmDataType(dtype));
+	boost::shared_ptr<Data> attrData = ncGetAttValues(ncFile->ncId, varid, attName, dtype);
+	cdm_->addAttribute(varName, CDMAttribute(attName, dt, attrData));
 }
 
 

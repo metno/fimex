@@ -35,6 +35,11 @@ CDMDataType string2datatype(const std::string& s) {
     else if (str == "long") { return CDM_INT; }
 	else if (str == "short") { return CDM_SHORT; }
 	else if (str == "char") { return CDM_CHAR; }
+    else if (str == "int64") { return CDM_INT64; }
+    else if (str == "uint64") { return CDM_UINT64; }
+    else if (str == "uint") { return CDM_UINT; }
+    else if (str == "ushort") { return CDM_USHORT; }
+    else if (str == "uchar") { return CDM_UCHAR; }
 	else if (str == "string") { return CDM_STRING; }
     else if (str == "String") { return CDM_STRING; }
 	else { return CDM_NAT; }
@@ -48,6 +53,11 @@ std::string datatype2string(CDMDataType type) {
 	   case CDM_SHORT: return "short";
 	   case CDM_CHAR: return "char";
 	   case CDM_STRING: return "String";
+       case CDM_UCHAR: return "uchar";
+       case CDM_USHORT: return  "ushort";
+	   case CDM_UINT: return  "uint";
+       case CDM_INT64: return  "int64";
+       case CDM_UINT64: return  "uint64";
 	   default: return "NAT"; // not a type
 	}
 }

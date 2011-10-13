@@ -37,26 +37,42 @@ boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double v
 	return data;
 }
 
+template<typename T>
+boost::shared_ptr<Data> createDataT(size_t length, boost::shared_array<T> array)
+{
+    return boost::shared_ptr<Data>(new DataImpl<T>(array, length));
+}
+
 boost::shared_ptr<Data> createData(size_t length, boost::shared_array<double> array)
-{
-    return boost::shared_ptr<Data>(new DataImpl<double>(array, length));
-}
+{ return createDataT(length, array); }
+
 boost::shared_ptr<Data> createData(size_t length, boost::shared_array<float> array)
-{
-    return boost::shared_ptr<Data>(new DataImpl<float>(array, length));
-}
+{ return createDataT(length, array); }
+
 boost::shared_ptr<Data> createData(size_t length, boost::shared_array<int> array)
-{
-    return boost::shared_ptr<Data>(new DataImpl<int>(array, length));
-}
+{ return createDataT(length, array); }
+
 boost::shared_ptr<Data> createData(size_t length, boost::shared_array<short> array)
-{
-    return boost::shared_ptr<Data>(new DataImpl<short>(array, length));
-}
+{ return createDataT(length, array); }
+
 boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array)
-{
-    return boost::shared_ptr<Data>(new DataImpl<char>(array, length));
-}
+{ return createDataT(length, array); }
+
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned int> array)
+{ return createDataT(length, array); }
+
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned short> array)
+{ return createDataT(length, array); }
+
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned char> array)
+{ return createDataT(length, array); }
+
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<long long> array)
+{ return createDataT(length, array); }
+
+boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned long long> array)
+{ return createDataT(length, array); }
+
 
 boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)  {
 	switch (datatype) {
@@ -81,6 +97,26 @@ void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first,
 template<>
 void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
 	copyData(startPos, data.asConstInt(), data.size(), first, last);
+}
+template<>
+void DataImpl<unsigned char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
+    copyData(startPos, data.asConstUChar(), data.size(), first, last);
+}
+template<>
+void DataImpl<unsigned short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
+    copyData(startPos, data.asConstUShort(), data.size(), first, last);
+}
+template<>
+void DataImpl<unsigned int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
+    copyData(startPos, data.asConstUInt(), data.size(), first, last);
+}
+template<>
+void DataImpl<long long>::setValues(size_t startPos, const Data& data, size_t first, size_t last)  {
+    copyData(startPos, data.asConstInt64(), data.size(), first, last);
+}
+template<>
+void DataImpl<unsigned long long>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
+    copyData(startPos, data.asConstUInt64(), data.size(), first, last);
 }
 template<>
 void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
