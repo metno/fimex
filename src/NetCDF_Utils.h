@@ -25,16 +25,26 @@
 #define NETCDF_UTILS_H_
 
 #include <boost/shared_ptr.hpp>
-#include "netcdfcpp.h"
-extern "C" {
-#include "netcdf.h"
-}
 #include "fimex/CDMDataType.h"
 
 namespace MetNoFimex
 {
 // forward decl
 class Data;
+
+/// storage class for netcdf-file pointer
+class Nc {
+public:
+    Nc() : isOpen(false) {}
+    ~Nc();
+    std::string filename;
+    int ncId;
+    int format;
+    bool isOpen;
+};
+
+
+
 
 /**
  * @headerfile "fimex/NetCDF_Utils.h"
@@ -43,40 +53,49 @@ class Data;
 /**
  * conversion from CDMDataType to NcType
  */
-NcType cdmDataType2ncType(CDMDataType dt);
-
-/**
- * conversion from NcType to CDMDataType
- */
-CDMDataType ncType2cdmDataType(NcType dt);
+int cdmDataType2ncType(CDMDataType dt);
 
 /**
  * conversion from nc_type to CDMDataType
  */
-CDMDataType ncType2cdmDataType(nc_type dt);
+CDMDataType ncType2cdmDataType(int nc_type);
 
 /**
  * read a nc-status and throw an error if status != NC_NOERR
  */
 void ncCheck(int status);
 
-boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type dt);
-boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t* start, const size_t* count);
-
+/**
+ * read values from an attribute to a data
+ * @param ncId netcdf file id
+ * @param varId variable id or NC_GLOBAL
+ * @param attName attribute name
+ * @param nc_type attribute datatype (in netcdf-notation)
+ */
+boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, int nc_type);
+/**
+ * read value-slices from a variable to a data
+ * @param ncId netcdf file id
+ * @param varId variable id or NC_GLOBAL
+ * @param nc_type attribute datatype (in netcdf-notation)
+ * @param dimLen number of dimensions
+ * @param start start-point for each dimension
+ * @param count size in each dimension
+ */
+boost::shared_ptr<Data> ncGetValues(int ncId, int varId, int nc_type, size_t dimLen, const size_t* start, const size_t* count);
 
 /**
- * convert void* pointer to a Data pointer
- * @warning: the data belonging to values will be delete[]ed within this function
- * or with the shared_array. Do not free the values otherwise!
+ * write value-slices from a variable to disk
+ * @param data the data to put
+ * @param ncId netcdf file id
+ * @param varId variable id or NC_GLOBAL
+ * @param nc_type attribute datatype (in netcdf-notation)
+ * @param dimLen number of dimensions
+ * @param start start-point for each dimension
+ * @param count size in each dimension
  */
-boost::shared_ptr<Data> ncValues2Data(void* values, nc_type dt, size_t length);
+void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, int nc_type, size_t dimLen, const size_t* start, const size_t* count);
 
-/**
- * convert ncValues to a Data pointer
- * @warning: the data belonging to values will be freed within this function
- * or with the shared_array. Do not free the values otherwise!
- */
-boost::shared_ptr<Data> ncValues2Data(NcValues* values, NcType dt, size_t length);
 
 }
 

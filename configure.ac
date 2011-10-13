@@ -96,28 +96,6 @@ AC_LANG_POP(C++)
 
 # optional io libraries
 MIFI_USELIB([netcdf], [netcdf.h], [nc_create])
-if test [ "x$with_netcdf" == "xyes" ]; then
-    # check also netcdf-cpp, can't use mifi_reqlib because of ++ (not allowed in m4)
-    AC_LANG_PUSH(C++)
-    save_LIBS="$LIBS"
-    save_LDFLAGS="$LDFLAGS"
-    save_CPPFLAGS="$CPPFLAGS"
-    MIFI_NETCDF_CPP_LIBS="-lnetcdf_c++"
-    LIBS="$LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_NETCDF_LIBS"
-    LDFLAGS="$LDFLAGS $MIFI_NETCDF_LDFLAGS"
-    CPPFLAGS="$CPPFLAGS $MIFI_NETCDF_CPPFLAGS"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <netcdfcpp.h>], [NcError::set_err(5)])],
-                   [],
-                   [AC_MSG_ERROR([Did not find libnetcdf_c++, this is required to continue])])
-    AC_CHECK_TYPE([NcFile::FileFormat],[  AC_DEFINE([HAVE_NCFILE_FILEFORMAT],[1],
-                                                     [netcdf knows NcFile::FileFormat enum])
-                                                    ],[],[#include "netcdfcpp.h"])
-    LIBS="$save_LIBS"
-    LDFLAGS="$save_LDFLAGS"
-    CPPFLAGS="$save_CPPFLAGS"
-    AC_SUBST(MIFI_NETCDF_CPP_LIBS)
-    AC_LANG_POP(C++)
-fi
 AM_CONDITIONAL([HAVE_NETCDF], [test "x$with_netcdf" == xyes])
 
 # Check for felt c++ library, currently always src included
@@ -189,9 +167,9 @@ AC_MSG_RESULT([Manuals:          $mandir])
 AC_MSG_RESULT([Data:             $datadir])
 AC_MSG_RESULT([System Config:    $sysconfdir])
 AC_MSG_RESULT([ ])
-AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $MIFI_NETCDF_CPPFLAGS $BOOST_CPPFLAGS])
+AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS])
 AC_MSG_RESULT([LDFLAGS:          $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS])
-AC_MSG_RESULT([LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_NETCDF_CPP_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB])
+AC_MSG_RESULT([LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB])
 AC_MSG_RESULT([DEFS:             $DEFS])
 AC_MSG_RESULT([  ])
 AC_MSG_RESULT([------------------------------------------------------------])

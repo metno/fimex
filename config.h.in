@@ -58,9 +58,6 @@
 /* define if the compiler implements namespaces */
 #undef HAVE_NAMESPACES
 
-/* netcdf knows NcFile::FileFormat enum */
-#undef HAVE_NCFILE_FILEFORMAT
-
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
 

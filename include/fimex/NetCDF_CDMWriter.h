@@ -29,21 +29,16 @@
 #include <map>
 #include <string>
 
-/* forward declarations */
-class NcFile;
-class NcError;
-class NcDim;
-class NcVar;
-
 namespace MetNoFimex
 {
 /* forward declarations */
 class XMLDoc;
+class Nc;
 
 class NetCDF_CDMWriter : public CDMWriter
 {
-	typedef std::map<std::string, NcDim*> NcDimMap;
-	typedef std::map<std::string, NcVar*> NcVarMap;
+	typedef std::map<std::string, int> NcDimIdMap;
+	typedef std::map<std::string, int> NcVarIdMap;
 
 public:
 	/**
@@ -85,15 +80,14 @@ private:
 	/** test if the variable exists in the cdmReader or throw an CDMException */
 	void testVariableExists(const std::string& varName);
 
-	NcDimMap defineDimensions();
-	NcVarMap defineVariables(const NcDimMap& dimMap);
-	void writeAttributes(const NcVarMap& varMap);
-	void writeData(const NcVarMap& varMap);
+	NcDimIdMap defineDimensions();
+	NcVarIdMap defineVariables(const NcDimIdMap& dimMap);
+	void writeAttributes(const NcVarIdMap& varMap);
+	void writeData(const NcVarIdMap& varMap);
 	double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
 	double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
 	CDM cdm; /* local storage of the changed cdm-outline, except variable name changes */
-	std::auto_ptr<NcFile> ncFile;
-	std::auto_ptr<NcError> ncErr;
+	std::auto_ptr<Nc> ncFile;
 	std::map<std::string, std::string> variableNameChanges;
 	std::map<std::string, CDMDataType> variableTypeChanges;
 	std::map<std::string, unsigned int> variableCompression;

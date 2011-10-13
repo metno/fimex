@@ -23,13 +23,13 @@
 
 #include "fimex/NetCDF_CDMWriter.h"
 #include "../config.h"
-#include "netcdfcpp.h"
 extern "C" {
-#include "netcdf.h"             // the C interface
+#include "netcdf.h"
 }
 
 #include <iostream>
 #include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 #include "fimex/mifi_constants.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataTypeChanger.h"
@@ -42,6 +42,7 @@ extern "C" {
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Data.h"
+#include "NetCDF_Utils.h"
 
 namespace MetNoFimex
 {
@@ -49,60 +50,13 @@ namespace MetNoFimex
 static LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 
 
-static NcBool putRecData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
-	if (data->size() == 0) return true;
-
-	NcDim* dim = var->get_dim(0); // 0 dimension must be record dimension (unlimited if any)
-	var->set_rec(dim, recNum);
-	switch (dt) {
-	case CDM_NAT: return false;
-	case CDM_CHAR: return var->put_rec(dim, reinterpret_cast<const ncbyte*>(data->asConstChar().get()));
-	case CDM_STRING: return var->put_rec(dim, data->asConstChar().get());
-	case CDM_SHORT:  return var->put_rec(dim, data->asConstShort().get());
-	case CDM_INT: return var->put_rec(dim, data->asConstInt().get());
-	case CDM_FLOAT: return var->put_rec(dim, data->asConstFloat().get());
-	case CDM_DOUBLE: return var->put_rec(dim, data->asConstDouble().get());
-	default: return false;
-	}
-
-}
-
-
-static NcBool putVarData(NcVar* var, CDMDataType dt, boost::shared_ptr<Data> data) {
-	size_t size = data->size();
-	if (size == 0) return true;
-
-	boost::shared_array<long> edges(var->edges());
-	int dims = var->num_dims();
-	int dim_size = 1;
-	for (int i = 0; i < dims; i++) {
-		dim_size *= edges[i];
-	}
-	if (size != static_cast<size_t>(dim_size)) {
-		return false;
-	}
-
-	switch (dt) {
-	case CDM_NAT: return false;
-	case CDM_CHAR:   return var->put(reinterpret_cast<const ncbyte*>(data->asChar().get()),  edges.get());
-	case CDM_STRING: return var->put(data->asConstChar().get(),  edges.get());
-	case CDM_SHORT:  return var->put(data->asConstShort().get(), edges.get());
-	case CDM_INT:    return var->put(data->asConstInt().get(),   edges.get());
-	case CDM_FLOAT:  return var->put(data->asConstFloat().get(), edges.get());
-	case CDM_DOUBLE: return var->put(data->asConstDouble().get(),edges.get());
-	default: return false;
-	}
-
-}
-
-#ifdef HAVE_NCFILE_FILEFORMAT
-NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
+int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 {
-	NcFile::FileFormat retVal = NcFile::Classic;
+	int retVal = NC_CLOBBER;
 	switch (version) {
-		case 3: retVal = NcFile::Classic; break;
+		case 3: retVal = NC_CLOBBER; break;
 #ifdef NC_NETCDF4
-		case 4: retVal = NcFile::Netcdf4; break;
+		case 4: retVal = NC_CLOBBER | NC_CLASSIC_MODEL | NC_NETCDF4; break;
 #endif
 		default: LOG4FIMEX(logger, Logger::ERROR, "unknown netcdf-version "<< version << " using 3 instead");
 	}
@@ -113,15 +67,15 @@ NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 		if (nodes->nodeNr) {
 			std::string filetype = string2lowerCase(getXmlProp(nodes->nodeTab[0], "filetype"));
 			if (filetype == "netcdf3") {
-				retVal = NcFile::Classic;
+				retVal = NC_CLOBBER;
 			} else if (filetype == "netcdf3_64bit") {
-				retVal = NcFile::Offset64Bits;
+				retVal = NC_CLOBBER | NC_64BIT_OFFSET;
 			}
 #ifdef NC_NETCDF4
 			else if (filetype == "netcdf4") {
-				retVal = NcFile::Netcdf4;
+				retVal = NC_CLOBBER | NC_NETCDF4;
 			} else if (filetype == "netcdf4classic") {
-				retVal = NcFile::Netcdf4Classic;
+				retVal = NC_CLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL;
 			}
 #endif
 			else {
@@ -131,7 +85,6 @@ NcFile::FileFormat getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
 	}
 	return retVal;
 }
-#endif /* HAVE_NCFILE_FILEFORMAT */
 
 void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
 {
@@ -143,7 +96,7 @@ void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
 }
 
 NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
-: CDMWriter(cdmReader, outputFile)
+: CDMWriter(cdmReader, outputFile), ncFile(std::auto_ptr<Nc>(new Nc()))
 {
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	std::auto_ptr<XMLDoc> doc;
@@ -153,28 +106,24 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 		doc = std::auto_ptr<XMLDoc>(new XMLDoc(configFile));
 		checkDoc(doc, configFile);
 	}
-	ncErr = std::auto_ptr<NcError>(new NcError(NcError::verbose_nonfatal));
-#ifdef HAVE_NCFILE_FILEFORMAT
-	NcFile::FileFormat ncVersion = getNcVersion(version, doc);
-	ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace, 0, 0, ncVersion));
-	switch (ncFile->get_format()) {
-		case NcFile::Classic: LOG4FIMEX(logger, Logger::DEBUG, "classic format, version: "); break;
+	int ncVersion = getNcVersion(version, doc);
+	ncFile->filename = outputFile;
+	ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId));
+	ncFile->isOpen = true;
+
+
+    ncCheck(nc_inq_format(ncFile->ncId, &ncFile->format));
 #ifdef NC_NETCDF4
-		case NcFile::Netcdf4: LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format, version: "); break;
+	if ((ncFile->format & NC_NETCDF4) != 0)
+	    if ((ncVersion & NC_CLASSIC_MODEL) != 0) {
+	        LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format, classic mode");
+	    } else {
+	        LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format");
+	    }
+    else
 #endif
-		default: LOG4FIMEX(logger, Logger::DEBUG, "format: " << ncFile->get_format());
-	}
-#else
-    ncFile = std::auto_ptr<NcFile>(new NcFile(outputFile.c_str(), NcFile::Replace));
-#endif /* HAVE_NCFILE_FILEFORMAT */
-    if (!ncFile->is_valid()) {
-        // ncErr.get_err does not work in new NcFile, try to get the error message manually
-        size_t *bufrsizeptr = new size_t;
-        int the_id;
-        int error = nc__create(outputFile.c_str(), NC_WRITE|NC_NOCLOBBER, 0, bufrsizeptr, &the_id);
-        throw CDMException(nc_strerror(error));
-        //throw CDMException(nc_strerror(ncErr.get_err()));
-    }
+    LOG4FIMEX(logger, Logger::DEBUG, "netcdf3 format");
+
     initNcmlReader(doc);
 	initRemove(doc);
 	// variable needs to be called before dimension!!!
@@ -362,33 +311,31 @@ void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc)
 }
 
 
-NetCDF_CDMWriter::NcDimMap NetCDF_CDMWriter::defineDimensions() {
+NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
 	const CDM::DimVec& cdmDims = cdm.getDimensions();
-	NcDimMap ncDimMap;
+	NcDimIdMap ncDimMap;
 	for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
 		int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
 		// NcDim is organized by NcFile, no need to clean
 		// change the name written to the file according to getDimensionName
-		NcDim* dim = ncFile->add_dim(getDimensionName(it->getName()).c_str(), length);
-		if (dim == 0) throw CDMException(nc_strerror(ncErr->get_err()));
-		ncDimMap[it->getName()] = dim;
+		int dimId;
+		ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(it->getName()).c_str(), length, &dimId));
+		ncDimMap[it->getName()] = dimId;
 	}
 	return ncDimMap;
 }
 
-NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncDimMap) {
+NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap& ncDimIdMap) {
 	LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
 	const CDM::VarVec& cdmVars = cdm.getVariables();
-	NcVarMap ncVarMap;
+	NcVarIdMap ncVarMap;
 	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		const CDMVariable& var = *it;
 		const std::vector<std::string>& shape = var.getShape();
-		// the const-ness required by the library
-		typedef const NcDim* NcDimPtr;
-		boost::shared_array<NcDimPtr> ncshape(new NcDimPtr[shape.size()]);
+		boost::scoped_array<int> ncshape(new int[shape.size()]);
 		for (size_t i = 0; i < shape.size(); i++) {
 			// revert order, cdm requires fastest moving first, netcdf-cplusplus requires fastest moving first
-			ncshape[i] = ncDimMap.find(shape[(shape.size()-1-i)])->second;
+			ncshape[i] = ncDimIdMap.find(shape[(shape.size()-1-i)])->second;
 		}
 		CDMDataType datatype = var.getDataType();
 		if (variableTypeChanges.find(var.getName()) != variableTypeChanges.end()) {
@@ -399,13 +346,12 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 			// empty variable, use int datatype
 			datatype = CDM_INT;
 		}
-		NcVar *ncVar = ncFile->add_var(getVariableName(var.getName()).c_str(), cdmDataType2ncType(datatype), shape.size(), ncshape.get());
-		if (! ncVar) {
-			throw CDMException(nc_strerror(ncErr->get_err()));
-		}
+		int varId;
+		ncCheck(nc_def_var(ncFile->ncId, getVariableName(var.getName()).c_str(), cdmDataType2ncType(datatype), shape.size(), &ncshape[0], &varId));
+        ncVarMap[var.getName()] = varId;
 #ifdef NC_NETCDF4
 		// set compression
-		if (ncFile->get_format() == NcFile::Netcdf4) {
+		if ((ncFile->format & NC_NETCDF4) != 0) {
 			int compression = 0;
 			assert(variableCompression.find(var.getName()) != variableCompression.end());
 			if (variableCompression.find(var.getName()) != variableCompression.end()) {
@@ -413,19 +359,15 @@ NetCDF_CDMWriter::NcVarMap NetCDF_CDMWriter::defineVariables(const NcDimMap& ncD
 			}
 			if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
 				LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
-				int ncerr = nc_def_var_deflate(ncFile->id(), ncVar->id(), 0, 1, compression);
-				if (ncerr != NC_NOERR) {
-					throw CDMException(nc_strerror(ncerr));
-				}
+				ncCheck(nc_def_var_deflate(ncFile->ncId, varId, 0, 1, compression));
 			}
 		}
 #endif
-		ncVarMap[var.getName()] = ncVar;
 	}
 	return ncVarMap;
 }
 
-void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
+void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap) {
 	// using C interface since it offers a combined interface to global and var attributes
 	const CDM::StrAttrVecMap& attributes = cdm.getAttributes();
 	for (CDM::StrAttrVecMap::const_iterator it = attributes.begin(); it != attributes.end(); ++it) {
@@ -433,37 +375,49 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarMap& ncVarMap) {
 		if (it->first == CDM::globalAttributeNS()) {
 			varId = NC_GLOBAL;
 		} else {
-			varId = ncVarMap.find(it->first)->second->id();
+			varId = ncVarMap.find(it->first)->second;
 		}
 		for (CDM::AttrVec::const_iterator ait = it->second.begin(); ait != it->second.end(); ++ait) {
-			int errCode = NC_NOERR;
 			const CDMAttribute& attr = *ait;
 			CDMDataType dt = attr.getDataType();
 			switch (dt) {
 			case CDM_STRING: ;
-                errCode = nc_put_att_text(ncFile->id(), varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asConstChar().get() );
+                ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asConstChar().get() ));
                 break;
 			case CDM_CHAR:
-			    errCode = nc_put_att_schar(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asConstChar().get()) );
+			    ncCheck(nc_put_att_schar(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asConstChar().get()) ));
 				break;
 			case CDM_SHORT:
-				errCode = nc_put_att_short(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstShort().get() );
+				ncCheck(nc_put_att_short(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstShort().get() ));
 				break;
 			case CDM_INT:
-				errCode = nc_put_att_int(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstInt().get() );
+				ncCheck(nc_put_att_int(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstInt().get() ));
 				break;
 			case CDM_FLOAT:
-				errCode = nc_put_att_float(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstFloat().get() );
+				ncCheck(nc_put_att_float(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstFloat().get() ));
 				break;
 			case CDM_DOUBLE:
-				errCode = nc_put_att_double(ncFile->id(), varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstDouble().get() );
+				ncCheck(nc_put_att_double(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstDouble().get() ));
 				break;
+#ifdef NC_NETCDF4
+            case CDM_UCHAR:
+                ncCheck(nc_put_att_uchar(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUChar().get() ));
+                break;
+            case CDM_USHORT:
+                ncCheck(nc_put_att_ushort(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUShort().get() ));
+                break;
+            case CDM_UINT:
+                ncCheck(nc_put_att_uint(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUInt().get() ));
+                break;
+            case CDM_INT64:
+                ncCheck(nc_put_att_longlong(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstInt64().get() ));
+                break;
+            case CDM_UINT64:
+                ncCheck(nc_put_att_ulonglong(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUInt64().get() ));
+                break;
+#endif
 			case CDM_NAT:
 			default: throw CDMException("unknown datatype for attribute " + attr.getName());
-			}
-			if (errCode != NC_NOERR) {
-			    std::cerr << "attribute writing error: " << it->first << " " << varId << std::endl;
-				throw CDMException(nc_strerror(errCode));
 			}
 		}
 	}
@@ -489,7 +443,7 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 }
 
 
-void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
+void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 	Units units;
 	const CDM::VarVec& cdmVars = cdm.getVariables();
 	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
@@ -524,7 +478,18 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 
 			dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
 		}
-		NcVar* ncVar = ncVarMap.find(cdmVar.getName())->second;
+		int varId = ncVarMap.find(cdmVar.getName())->second;
+	    int dimLen;
+	    ncCheck(nc_inq_varndims(ncFile->ncId, varId, &dimLen));
+	    int dimIds[dimLen];
+	    ncCheck(nc_inq_vardimid(ncFile->ncId, varId, &dimIds[0]));
+	    size_t count[dimLen];
+	    size_t start[dimLen];
+	    for (int i = 0; i < dimLen; ++i) {
+	        start[i] = 0;
+	        ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
+	    }
+
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
 			boost::shared_ptr<Data> data = cdmReader->getData(cdmVar.getName());
 			try {
@@ -532,8 +497,12 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 			} catch (CDMException& e) {
 				throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
 			}
-			if (!putVarData(ncVar, dtc.getDataType(), data)) {
-				throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + nc_strerror(ncErr->get_err()) + ", datalength: " + type2string(data->size()));
+			if (data->size() > 0) {
+			    try {
+			        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
+			    } catch (CDMException& ex) {
+			        throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
+			    }
 			}
 		} else {
 			// iterate over each unlimited dim (usually time)
@@ -545,8 +514,16 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 				} catch (CDMException& e) {
 					throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
 				}
-				if (!putRecData(ncVar, dtc.getDataType(), data, i)) {
-					throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + nc_strerror(ncErr->get_err()) + ", datalength: " + type2string(data->size()));
+				// unlim-dim is in position 0
+				if (data->size() > 0) {
+				    count[0] = 1;
+				    start[0] = i;
+				    try {
+				        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
+	                } catch (CDMException& ex) {
+	                    throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );
+	                }
+
 				}
 			}
 		}
@@ -556,13 +533,12 @@ void NetCDF_CDMWriter::writeData(const NcVarMap& ncVarMap) {
 void NetCDF_CDMWriter::init()
 {
 	// write metadata
-	if (! ncFile->is_valid()) {
-		throw CDMException(nc_strerror(ncErr->get_err()));
-	}
-	NcDimMap ncDimMap = defineDimensions();
-	NcVarMap ncVarMap = defineVariables(ncDimMap);
-	writeAttributes(ncVarMap);
-	writeData(ncVarMap);
+	NcDimIdMap ncDimIdMap = defineDimensions();
+	NcVarIdMap ncVarIdMap = defineVariables(ncDimIdMap);
+	writeAttributes(ncVarIdMap);
+	// write data
+	ncCheck(nc_enddef(ncFile->ncId));
+	writeData(ncVarIdMap);
 }
 
 NetCDF_CDMWriter::~NetCDF_CDMWriter()

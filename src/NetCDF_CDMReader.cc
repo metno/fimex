@@ -33,20 +33,6 @@ namespace MetNoFimex
 {
 using namespace std;
 
-class Nc {
-public:
-    Nc() : isOpen(false) {}
-    ~Nc() {
-        if (isOpen) {
-            ncCheck(nc_close(ncId));
-        }
-    }
-    string filename;
-    int ncId;
-    bool isOpen;
-};
-
-
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
 {

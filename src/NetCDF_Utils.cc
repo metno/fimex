@@ -27,6 +27,9 @@
 #include <boost/scoped_array.hpp>
 #include <functional>
 #include <numeric>
+extern "C" {
+#include "netcdf.h"
+}
 
 namespace MetNoFimex
 {
@@ -36,17 +39,30 @@ void ncCheck(int status) {
         throw CDMException(nc_strerror(status));
 }
 
+Nc::~Nc()
+{
+   if (isOpen) {
+       ncCheck(nc_close(ncId));
+   }
+}
 
-NcType cdmDataType2ncType(CDMDataType dt) {
+nc_type cdmDataType2ncType(CDMDataType dt) {
 	switch (dt) {
-	case CDM_NAT: return ncNoType;
-	case CDM_CHAR: return ncByte;
-	case CDM_STRING: return ncChar;
-	case CDM_SHORT: return ncShort;
-	case CDM_INT: return ncInt;
-	case CDM_FLOAT: return ncFloat;
-	case CDM_DOUBLE: return ncDouble;
-	default: return ncNoType;
+	case CDM_CHAR: return NC_BYTE;
+	case CDM_STRING: return NC_CHAR;
+	case CDM_SHORT: return NC_SHORT;
+	case CDM_INT: return NC_INT;
+	case CDM_FLOAT: return NC_FLOAT;
+	case CDM_DOUBLE: return NC_DOUBLE;
+#ifdef NC_NETCDF4
+    case CDM_UCHAR: return NC_UBYTE;
+    case CDM_USHORT: return NC_USHORT;
+    case CDM_UINT: return NC_UINT;
+    case CDM_INT64: return NC_INT64;
+    case CDM_UINT64: return NC_UINT64;
+#endif
+    case CDM_NAT:
+	default: return NC_NAT;
 	}
 }
 
@@ -67,20 +83,6 @@ CDMDataType ncType2cdmDataType(nc_type dt) {
     case NC_UINT64: return CDM_UINT64;
     default: return CDM_NAT;
     }
-}
-
-CDMDataType ncType2cdmDataType(NcType dt) {
-	switch (dt) {
-	case ncNoType: return CDM_NAT;
-	case ncByte: return CDM_CHAR;
-	case ncChar: return CDM_STRING;
-	case ncShort: return CDM_SHORT;
-	case ncInt: return CDM_INT;
-//	case ncLong: return CDM_INT; // ncLong is deprecated, and identical to ncInt
-	case ncFloat: return CDM_FLOAT;
-	case ncDouble: return CDM_DOUBLE;
-	default: return CDM_NAT;
-	}
 }
 
 boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type dt)
@@ -219,18 +221,73 @@ boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type dt, size_t dimL
     }
 }
 
-boost::shared_ptr<Data> ncValues2Data(NcValues* values, NcType dt, size_t length) {
-	switch (dt) {
-	case ncByte: return createData(length, boost::shared_array<char>(reinterpret_cast<char*>(values->base())));
-	case ncChar: return createData(length, boost::shared_array<char>(reinterpret_cast<char*>(values->base())));
-	case ncShort: return createData(length, boost::shared_array<short>(reinterpret_cast<short*>(values->base())));
-	case ncInt: return createData(length, boost::shared_array<int>(reinterpret_cast<int*>(values->base())));
-//	case ncLong: return CDM_INT; // ncLong is deprecated, and identical to ncInt
-	case ncFloat: return createData(length, boost::shared_array<float>(reinterpret_cast<float*>(values->base())));
-	case ncDouble: return createData(length, boost::shared_array<double>(reinterpret_cast<double*>(values->base())));
-	case ncNoType:
-	default: delete values; return createData(0, boost::shared_array<int>(new int[0]));
-	}
+void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, int nc_dt, size_t dimLen, const size_t* start, const size_t* count)
+{
+    size_t sliceLen;
+    boost::scoped_array<size_t> mstart(new size_t[(dimLen == 0) ? 1 : dimLen]);
+    boost::scoped_array<size_t> mcount(new size_t[(dimLen == 0) ? 1 : dimLen]);
+    if (dimLen == 0) {
+        // scalar
+        sliceLen = 1;
+        mstart[0] = 0;
+        mcount[0] = 1;
+    } else {
+        sliceLen = std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
+        std::copy(&start[0], &start[0]+dimLen, &mstart[0]);
+        std::copy(&count[0], &count[0]+dimLen, &mcount[0]);
+    }
+    if (sliceLen != data->size())
+        throw CDMException("sliceLength != dataSize");
+
+    switch (nc_dt) {
+    case NC_BYTE:
+    case NC_STRING:
+    case NC_CHAR: {
+        ncCheck(nc_put_vara_schar(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<signed char*>(data->asConstChar().get())));
+        break;
+    }
+    case NC_SHORT: {
+        ncCheck(nc_put_vara_short(ncId, varId, &mstart[0], &mcount[0], data->asConstShort().get()));
+        break;
+    }
+    case NC_INT: {
+        ncCheck(nc_put_vara_int(ncId, varId, &mstart[0], &mcount[0], data->asConstInt().get()));
+        break;
+    }
+    case NC_FLOAT: {
+        ncCheck(nc_put_vara_float(ncId, varId, &mstart[0], &mcount[0], data->asConstFloat().get()));
+        break;
+    }
+    case NC_DOUBLE: {
+        ncCheck(nc_put_vara_double(ncId, varId, &mstart[0], &mcount[0], data->asConstDouble().get()));
+        break;
+    }
+#if NC_NETCDF4
+    case NC_UBYTE: {
+        ncCheck(nc_put_vara_uchar(ncId, varId, &mstart[0], &mcount[0], data->asConstUChar().get()));
+        break;
+    }
+    case NC_USHORT: {
+        ncCheck(nc_put_vara_ushort(ncId, varId, &mstart[0], &mcount[0], data->asConstUShort().get()));
+        break;
+    }
+    case NC_UINT: {
+        ncCheck(nc_put_vara_uint(ncId, varId, &mstart[0], &mcount[0], data->asConstUInt().get()));
+        break;
+    }
+    case NC_INT64: {
+        ncCheck(nc_put_vara_longlong(ncId, varId, &mstart[0], &mcount[0], data->asConstInt64().get()));
+        break;
+    }
+    case NC_UINT64: {
+        ncCheck(nc_put_vara_ulonglong(ncId, varId, &mstart[0], &mcount[0], data->asConstUInt64().get()));
+        break;
+    }
+#endif
+    case NC_NAT:
+    default: break;
+    }
+
 }
 
 
