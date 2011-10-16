@@ -160,7 +160,7 @@ namespace MetNoFimex {
                 return boost::shared_ptr<Data>();
 
             MetGmCDMVariableProfile profile = *it;
-            boost::shared_ptr<Data> data = createData(profile.pTags_->totalDataSize(), profile.pTags_->readDataSlices(unLimDimPos + 1, 1));
+            boost::shared_ptr<Data> data = createData(profile.pTags_->sliceDataSize(), profile.pTags_->readDataSlices(unLimDimPos + 1, 1));
 
             return data;
         }

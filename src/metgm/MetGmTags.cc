@@ -121,6 +121,7 @@ namespace MetNoFimex {
     boost::shared_ptr<MetGmTimeTag>&     MetGmTags::tTag() { return dimTag_->tTag(); }
 
     const unsigned long MetGmTags::totalDataSize() { return dimTag_->totalSize(); }
+    const unsigned long MetGmTags::sliceDataSize() { return dimTag_->sliceSize(); }
 
     void MetGmTags::sliceToMetGmLayout(boost::shared_array<float>& slice) { pGp5_->sliceToMetGmLayout(slice); }
 

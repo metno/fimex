@@ -94,6 +94,7 @@ namespace MetNoFimex {
         int set_cy(float cy);
 
         const unsigned long totalDataSize();
+        const unsigned long sliceDataSize();
         const boost::shared_array<float>& data();
 
         boost::shared_ptr<MetGmXTag>&        xTag();
