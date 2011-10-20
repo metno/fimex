@@ -62,13 +62,14 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
 	// TODO: detect more projections
 	boost::shared_ptr<const Projection> proj = cdm.getProjectionOf(varName);
 	if (proj.get() != 0) {
-        if (proj->getName() == "stereographic" || proj->getName() == "polar_stereographic") {
-            CDM::AttrVec projAttrs = proj->getParameters();
+        CDM::AttrVec projAttrs = proj->getParameters();
+        const std::string projection(proj->getName());
+        if (projection == "stereographic" || projection == "polar_stereographic") {
             // latitude_of_projection_origin (polar_stereographic, +- 90), via scale_factor_at_projection_origin (stereographic
             // straight_vertical_longitude_from_pole (polar_stereographic), longitude_of_projection_origin (stereographic)
             double latitudeWhereDxAndDyAreSpecifiedInDegrees = 60.;
             double orientationOfTheGridInDegrees = 0.;
-            if (proj->getName() == "polar_stereograhpic") {
+            if (projection == "polar_stereograhpic") {
                 LOG4FIMEX(logger, Logger::INFO, "polar_stereographic projection for" << varName);
                 // get lat_ts fixed
                 latitudeWhereDxAndDyAreSpecifiedInDegrees = 60.;
@@ -131,14 +132,69 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 throw CDMException("grib1 does not support polar_stereographic with lat_ts != 60degree");
                 //GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
             }
-        } else if (proj->getName() == "latitude_longitude") {
-            throw CDMException("projection " + proj->getName() + " not supported yet by GribApiCDMWriter");
-        } else if (proj->getName() == "rotated_latitude_longitude") {
-            throw CDMException("projection " + proj->getName() + " not supported yet by GribApiCDMWriter");
-        } else if (proj->getName() == "transverse_mercator") {
-            throw CDMException("projection " + proj->getName() + " not supported yet by GribApiCDMWriter");
+        } else if (projection == "latitude_longitude") {
+            throw CDMException("projection " + projection + " not supported yet by GribApiCDMWriter");
+        } else if (projection == "rotated_latitude_longitude") {
+            LOG4FIMEX(logger, Logger::INFO, "rotated latlong projection for " << varName);
+            const std::string rotLon = cdm.getHorizontalXAxis(varName);
+            const std::string rotLat = cdm.getHorizontalYAxis(varName);
+            boost::shared_ptr<Data> rLonData = cdmReader->getScaledDataInUnit(rotLon, "degree");
+            boost::shared_ptr<Data> rLatData = cdmReader->getScaledDataInUnit(rotLat, "degree");
+            size_t ni = rLonData->size();
+            size_t nj = rLatData->size();
+            if (ni < 2 || nj < 2) {
+                throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
+            }
+            double di, dj, rlon0, rlat0, rlonX, rlatX;
+            const boost::shared_array<double> rlongs = rLonData->asConstDouble();
+            const boost::shared_array<double> rlats = rLatData->asConstDouble();
+            di = rlongs[1] - rlongs[0];
+            dj = rlats[1] - rlats[0];
+            rlat0 = rlats[0];
+            rlatX = rlats[nj-1];
+            rlon0 = rlongs[0];
+            rlonX = rlongs[ni-1];
+            while (rlon0 < 0) {
+                rlon0 += 360;
+            }
+            while (rlonX < 0) {
+                rlonX += 360;
+            }
+            CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_longitude"));
+            if (ait == projAttrs.end()) throw CDMException("grid_north_pole_longitude not found for projection " + proj->toString());
+            double northPoleLon = ait->getData()->asConstDouble()[0];
+            ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_latitude"));
+            if (ait == projAttrs.end()) throw CDMException("grid_north_pole_latitude not found for projection " + proj->toString());
+            double northPoleLat = ait->getData()->asConstDouble()[0];
+
+            double southPoleLat = -1 * northPoleLat;
+            while (southPoleLat < -90) {
+                southPoleLat += 180;
+            }
+
+            double southPoleLon = northPoleLon - 180;
+            while (southPoleLon < 0) {
+                southPoleLon += 360;
+            }
+
+            std::string typeOfGrid("rotated_ll");
+            // TODO: this seems still to be imperfect, more tests required
+            size_t tog_size = typeOfGrid.size();
+            GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAParallel", ni),"");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAMeridian", nj),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", di),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", dj),"");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "latitudeOfSouthernPoleInDegrees", static_cast<long>(southPoleLat)), "");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "longitudeOfSouthernPoleInDegrees", static_cast<long>(southPoleLon)), "");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", rlat0),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", rlon0),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", rlatX),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", rlonX),"");
+        } else if (projection == "transverse_mercator") {
+            throw CDMException("projection " + projection + " not supported yet by GribApiCDMWriter");
         } else {
-            throw CDMException("projection " + proj->getName() + " not supported yet by GribApiCDMWriter");
+            throw CDMException("projection " + projection + " not supported yet by GribApiCDMWriter");
         }
     } else {
         throw CDMException("Cannot find projection or coordinate-system of variable " + varName);

@@ -206,10 +206,10 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
 			}
 			CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_longitude"));
 			if (ait == projAttrs.end()) throw CDMException("grid_north_pole_longitude not found for projection " + proj->toString());
-            double northPoleLon = cdmReader->getData(ait->getName())->asConstDouble()[0];
+            double northPoleLon = ait->getData()->asConstDouble()[0];
             ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_latitude"));
             if (ait == projAttrs.end()) throw CDMException("grid_north_pole_latitude not found for projection " + proj->toString());
-			double northPoleLat = cdmReader->getData(ait->getName())->asConstDouble()[0];
+			double northPoleLat = ait->getData()->asConstDouble()[0];
 
 			double southPoleLat = -1 * northPoleLat;
 			while (southPoleLat < -90) {
@@ -229,8 +229,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
 			GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAMeridian", nj),"");
 			GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", di),"");
 			GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", dj),"");
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "latitudeOfTheSouthernPoleOfProjection", static_cast<long>(southPoleLat * 1000000)), "");
-			GRIB_CHECK(grib_set_long(gribHandle.get(), "longitudeOfTheSouthernPoleOfProjection", static_cast<long>(southPoleLon * 1000000)), "");
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "latitudeOfSouthernPoleInDegrees", static_cast<long>(southPoleLat)), "");
+			GRIB_CHECK(grib_set_long(gribHandle.get(), "longitudeOfSouthernPoleInDegrees", static_cast<long>(southPoleLon)), "");
 			GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", rlat0),"");
 			GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", rlon0),"");
 			GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", rlatX),"");
