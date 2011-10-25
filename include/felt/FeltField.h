@@ -61,16 +61,32 @@ public:
 	boost::posix_time::ptime referenceTime() const;
 	boost::posix_time::ptime validTime() const;
 
-	int parameter() const { return header_[11]; }
+	/**
+	 * Get the parameter value. This is the logical value, which means that if
+	 * the parameter is part of an ensemble run, til will not start with 4000.
+	 */
+	int parameter() const;
+
 	/**
 	 * read the time dataType, i.e. 1=analysis 2=interpolated/initialization 3=prognosis 4=parameter-field(no time)
 	 */
 	int dataType() const { return header_[8]; }
 
 	int verticalCoordinate() const { return header_[10]; }
-	int level1() const {return header_[12]; }
-	int level2() const {return header_[13]; }
-    int gridType() const { return header_[14]; }
+
+	/**
+	 * Get primary level value
+	 */
+	int level1() const;
+
+	/**
+	 * Get the secondary level value, or 0 if that level field has internally
+	 * been used for something else. This will happen if the field is part of
+	 * an enseble run.
+	 */
+	int level2() const;
+
+	int gridType() const { return header_[14]; }
 
 	/**
 	 * Read the grid from file.
@@ -82,6 +98,12 @@ public:
 	int yNum() const;
 	/// this field is described in the felt documentation as "word 19 in data part"
 	int miscField() const;
+
+	bool isEpsSingleRunParameter() const
+	{
+		int param = parameterUnmodified_();
+		return 4000 <= param and param < 5000;
+	}
 
 	/**
 	 * Get data version if this is an eps parameter, otherwise 0
@@ -101,6 +123,7 @@ private:
 
 	int timeParameter() const { return header_[9]; }
 
+	int parameterUnmodified_() const { return header_[11]; }
 
 	/**
 	 * Checks consistency between index and grid header
