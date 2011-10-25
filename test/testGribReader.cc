@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, topSrcDir+"/share/etc/cdmGribReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(true); // made it so far
     NetCDF_CDMWriter(grbReader, "testGribRead.nc");
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb2) {
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, topSrcDir+"/share/etc/cdmGribReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(true); // made it so far
     Null_CDMWriter(grbReader, "");

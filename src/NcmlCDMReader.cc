@@ -46,16 +46,16 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 
-NcmlCDMReader::NcmlCDMReader(std::string configFile)
-    : configFile(configFile)
+NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
+    : configId(configXML.id())
 {
 #ifdef HAVE_NETCDF_H
-    setConfigDoc();
+    setConfigDoc(configXML);
 
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
-        throw CDMException("config-file "+configFile+" does not contain location-attribute");
+        throw CDMException("config "+configId+" does not contain location-attribute");
     }
     string ncFile = getXmlProp(nodes->nodeTab[0], "location");
     // remove file: URL-prefix
@@ -71,28 +71,26 @@ NcmlCDMReader::NcmlCDMReader(std::string configFile)
 #endif
 }
 
-NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile)
-    : configFile(configFile), dataReader(dataReader)
+NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, const XMLInput& configXML)
+    : configId(configXML.id()), dataReader(dataReader)
 {
-    setConfigDoc();
+    setConfigDoc(configXML);
     init();
 }
 
 NcmlCDMReader::~NcmlCDMReader()
 {
-    // doc cannot get copied, just created or deleted
-    delete doc;
 }
 
-void NcmlCDMReader::setConfigDoc()
+void NcmlCDMReader::setConfigDoc(const XMLInput& configXML)
 {
-    doc = new XMLDoc(configFile);
-    if (configFile != "") {
+    doc = configXML.getXMLDoc();
+    if (!configXML.isEmpty()) {
         doc->registerNamespace("nc", "http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2");
         XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr != 1) {
-            throw CDMException("config-file "+configFile+" is not a ncml document with root /nc:netcdf");
+            throw CDMException("config "+configId+" is not a ncml document with root /nc:netcdf");
         }
     }
 }
@@ -102,7 +100,7 @@ void NcmlCDMReader::init()
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf");
     int size = xpathObj->nodesetval ? xpathObj->nodesetval->nodeNr : 0;
     if (size == 0) {
-        LOG4FIMEX(logger, Logger::WARN, "config-file " << configFile << " not a ncml-file, ignoring");
+        LOG4FIMEX(logger, Logger::WARN, "config " << configId << " not a ncml-file, ignoring");
         return;
     }
     *cdm_.get() = dataReader->getCDM();
@@ -134,9 +132,9 @@ void NcmlCDMReader::initRemove() {
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configFile);
+        if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configId);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
-        if (type == "") throw CDMException("type attribute required for /nc:netcdf/nc:remove element in "+configFile);
+        if (type == "") throw CDMException("type attribute required for /nc:netcdf/nc:remove element in "+configId);
         if (type == "variable") {
             LOG4FIMEX(logger, Logger::DEBUG, "removing variable " << name);
             cdm_->removeVariable(name);
@@ -150,8 +148,8 @@ void NcmlCDMReader::initRemove() {
             LOG4FIMEX(logger, Logger::DEBUG, "request to remove group " << name << " ignored");
             // groups not supported
         } else {
-            LOG4FIMEX(logger, Logger::FATAL, "unknown type to remove in "+configFile);
-            throw CDMException("unknown type to remove in "+configFile);
+            LOG4FIMEX(logger, Logger::FATAL, "unknown type to remove in "+configId);
+            throw CDMException("unknown type to remove in "+configId);
         }
     }
 
@@ -162,11 +160,11 @@ void NcmlCDMReader::initRemove() {
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configFile);
+        if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configId);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
-        if (type != "attribute") throw CDMException("type attribute required = 'attribute' for /nc:netcdf/nc:variable/nc:remove element in "+configFile);
+        if (type != "attribute") throw CDMException("type attribute required = 'attribute' for /nc:netcdf/nc:variable/nc:remove element in "+configId);
         std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
-        if (varName == "") throw CDMException("name attribute required for all variable element in "+configFile);
+        if (varName == "") throw CDMException("name attribute required for all variable element in "+configId);
         cdm_->removeAttribute(varName, name);
     }
 }
@@ -185,7 +183,7 @@ void NcmlCDMReader::initVariableTypeChange()
     for (int i = 0; i < size; i++) {
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
-        if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
+        if (name == "") throw CDMException("ncml-file "+ configId + " has no name for variable");
         if (cdm_->hasVariable(name)) {
             CDMVariable& var = cdm_->getVariable(name);
             CDMDataType oldType = var.getDataType();
@@ -206,7 +204,7 @@ void NcmlCDMReader::initVariableDataChange()
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i]->parent, "name");
-        if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable");
+        if (name == "") throw CDMException("ncml-file "+ configId + " has no name for variable");
         if (cdm_->hasVariable(name)) {
             std::string values = getXmlContent(nodes->nodeTab[i]);
             std::vector<std::string> tokens = tokenize(values, " \t\r\n");
@@ -281,7 +279,7 @@ void NcmlCDMReader::initVariableNameChange()
         std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
         if (cdm_->hasVariable(orgName)) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for variable with orgName: "+ orgName);
+            if (name == "") throw CDMException("ncml-file "+ configId + " has no name for variable with orgName: "+ orgName);
             cdm_->renameVariable(orgName, name);
             variableNameChanges[name] = orgName;
         }
@@ -316,7 +314,7 @@ void NcmlCDMReader::initDimensionNameChange()
         std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
         if (cdm_->hasVariable(orgName)) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for dimension with orgName: "+ orgName);
+            if (name == "") throw CDMException("ncml-file "+ configId + " has no name for dimension with orgName: "+ orgName);
             cdm_->renameDimension(orgName, name);
         }
     }
@@ -384,7 +382,7 @@ void NcmlCDMReader::initAttributeNameChange()
         for (int i = 0; i < size; i++) {
             std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for attribute with orgName: "+ orgName);
+            if (name == "") throw CDMException("ncml-file "+ configId + " has no name for attribute with orgName: "+ orgName);
             try {
                 CDMAttribute& attr = cdm_->getAttribute(CDM::globalAttributeNS(), orgName);
                 cdm_->removeAttribute(CDM::globalAttributeNS(), name); // remove other attributes with same name
@@ -402,7 +400,7 @@ void NcmlCDMReader::initAttributeNameChange()
             std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
             std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            if (name == "") throw CDMException("ncml-file "+ configFile + " has no name for attribute with orgName: "+ orgName);
+            if (name == "") throw CDMException("ncml-file "+ configId + " has no name for attribute with orgName: "+ orgName);
             try {
                 CDMAttribute& attr = cdm_->getAttribute(varName, orgName);
                 cdm_->removeAttribute(varName, name); // remove other attributes with same name

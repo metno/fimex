@@ -75,7 +75,8 @@ libfimex_la_SOURCES = interpolation.c \
 					 Units.cc \
 					 Utils.cc \
 					 vertical_coordinate_transformations.c \
-					 XMLDoc.cc
+					 XMLDoc.cc \
+					 XMLInput.cc
 
 
 if HAVE_NETCDF

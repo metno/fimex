@@ -144,7 +144,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
         if (size > 0) {
             std::string configFile = getXmlProp(nodes->nodeTab[0], "filename");
             LOG4FIMEX(logger, Logger::DEBUG, "configuring CDMWriter with ncml config file: " << configFile);
-            cdmReader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(cdmReader, configFile));
+            cdmReader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(cdmReader, XMLInputFile(configFile)));
         }
     }
     cdm = cdmReader->getCDM();

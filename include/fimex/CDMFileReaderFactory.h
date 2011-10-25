@@ -30,6 +30,8 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
+#include "fimex/XMLInput.h"
+#include "fimex/deprecated.h"
 
 namespace MetNoFimex
 {
@@ -69,12 +71,36 @@ public:
      * @param options optional options for the CDMReader
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
+     * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
     static boost::shared_ptr<CDMReader> create(int fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
     /**
      * @brief same as the other create(), but with a fileType string
+     * @deprecated use create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
      */
     static boost::shared_ptr<CDMReader> create(const std::string& fileType, const std::string& fileName, const std::string& configFile = "", const std::vector<std::string>& args = std::vector<std::string>());
+    /**
+     * @brief Factory for CDMReader of input-files
+     *
+     * The function create reader tries to create a reader by filetype MIFI_FILETYPE_*.
+     * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
+     * if arguments are not desired.
+     *
+     * @param fileNype, one of MIFI_FILETYPE_*, possibly read by detectFileType()
+     * @param fileName, name of input type
+     * @param configXML config source
+     * @param options optional options for the CDMReader
+     * @return pointer to CDMReader
+     * @throws CDMException if type not compiled in, or creation fails
+     * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
+     */
+    static boost::shared_ptr<CDMReader> create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
+    /**
+     * @brief same as the other create(), but with a fileType string
+     */
+    static boost::shared_ptr<CDMReader> create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
+
+
 };
 
 }

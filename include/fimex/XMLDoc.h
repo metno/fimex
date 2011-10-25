@@ -56,7 +56,7 @@ public:
 	 * @param filename xml input-file
 	 * @throw CDMException if problems with libxml or problems with input-file
 	 */
-	XMLDoc(const std::string& filename);
+	explicit XMLDoc(const std::string& filename);
 	virtual ~XMLDoc();
 	/**
 	 * get a ptr to the node defined by xpath
@@ -75,8 +75,9 @@ public:
 	 */
 	void registerNamespace(const std::string& prefix, const std::string& uri);
 
-        static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
-        static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer);
+    static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
+    static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer, const std::string& url = "");
+    static boost::shared_ptr<XMLDoc> fromURL(const std::string& url);
 
 private:
         /**

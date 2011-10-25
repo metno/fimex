@@ -4,6 +4,7 @@
 // fimex
 //
 #include "fimex/CDMReader.h"
+#include "fimex/XMLInput.h"
 
 
 // boost
@@ -17,7 +18,7 @@ namespace MetNoFimex {
     class MetGmCDMReader : public CDMReader
     {
     public:
-        MetGmCDMReader(const std::string& metgmsource, const std::string& configfilename);
+        MetGmCDMReader(const std::string& metgmsource, const XMLInput& configXML);
         ~MetGmCDMReader();
 
         boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);

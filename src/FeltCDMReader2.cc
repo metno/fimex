@@ -164,31 +164,44 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
 
 
 FeltCDMReader2::FeltCDMReader2(string filename, string configFilename)
-: filename(filename), configFilename(configFilename)
+: filename(filename)
 {
 	try {
-		init();
+	    XMLInputFile config(configFilename);
+		init(config);
 	} catch (MetNoFelt::Felt_File_Error& ffe) {
 		throw CDMException(string("Felt_File_Error: ") + ffe.what());
 	}
 }
 
+FeltCDMReader2::FeltCDMReader2(string filename, const XMLInput& configInput)
+: filename(filename)
+{
+    try {
+        init(configInput);
+    } catch (MetNoFelt::Felt_File_Error& ffe) {
+        throw CDMException(string("Felt_File_Error: ") + ffe.what());
+    }
+}
+
+
 FeltCDMReader2::~FeltCDMReader2()
 {
 }
 
-void FeltCDMReader2::init() {
+void FeltCDMReader2::init(const XMLInput& configInput) {
     // test lib vs compile version
-    MetNoFimex::XMLDoc doc(configFilename);
-    XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config");
+    boost::shared_ptr<XMLDoc> doc = configInput.getXMLDoc();
+    configId = configInput.id();
+    XPathObjPtr xpathObj = doc->getXPathObject("/cdm_felt_config");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
-        throw CDMException("config-file "+configFilename+" is not a /cdm_felt_config configuration");
+        throw CDMException("config "+configId+" is not a /cdm_felt_config configuration");
     }
 
-    map<string, string> options = initGetOptionsFromXML(doc);
+    map<string, string> options = initGetOptionsFromXML(*doc);
 	// open the feltFile with the desired parameters
-	vector<string> knownFeltIds = initGetKnownFeltIdsFromXML(doc, options);
+	vector<string> knownFeltIds = initGetKnownFeltIdsFromXML(*doc, options);
 	feltfile_ = boost::shared_ptr<MetNoFelt::Felt_File2>(new MetNoFelt::Felt_File2(filename, knownFeltIds, options));
 	{
 		// fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
@@ -205,14 +218,14 @@ void FeltCDMReader2::init() {
 	// TODO: translate producer-ids to something useful?
 
 	// global attributes from config
-	initAddGlobalAttributesFromXML(doc);
+	initAddGlobalAttributesFromXML(*doc);
 
 
 	// add axes
 	// time
-	CDMDimension timeDim = initAddTimeDimensionFromXML(doc);
+	CDMDimension timeDim = initAddTimeDimensionFromXML(*doc);
 	// levels
-	map<short, CDMDimension> levelDims = initAddLevelDimensionsFromXML(doc);
+	map<short, CDMDimension> levelDims = initAddLevelDimensionsFromXML(*doc);
 	//x,y dim will be set with the projection, can also = long/lat
 	// setting default-value
     xDim = CDMDimension("x", feltfile_->getNX());
@@ -221,10 +234,10 @@ void FeltCDMReader2::init() {
     // projection of the array (currently only one allowed
     string projName, coordinates;
     // get projection and coordinates
-    initAddProjectionFromXML(doc, projName, coordinates);
+    initAddProjectionFromXML(*doc, projName, coordinates);
 
     // add variables
-    initAddVariablesFromXML(doc, projName, coordinates, timeDim, levelDims);
+    initAddVariablesFromXML(*doc, projName, coordinates, timeDim, levelDims);
 }
 
 vector<string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc& doc, const map<string, string>& options)
@@ -281,7 +294,7 @@ void FeltCDMReader2::initAddGlobalAttributesFromXML(const XMLDoc& doc)
 	xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
 	if (size != 1) {
-		throw MetNoFelt::Felt_File_Error("unable to find " + xpathString + " in config: " + configFilename);
+		throw MetNoFelt::Felt_File_Error("unable to find " + xpathString + " in config: " + configId);
 	}
 	for (int i = 0; i < size; ++i) {
 		xmlNodePtr node = nodes->nodeTab[i];
@@ -308,7 +321,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size != 1) {
-            throw MetNoFelt::Felt_File_Error("unable to find exactly 1 'time'-axis in config: " + configFilename);
+            throw MetNoFelt::Felt_File_Error("unable to find exactly 1 'time'-axis in config: " + configId);
         }
         timeNode = nodes->nodeTab[0];
         assert(timeNode->type == XML_ELEMENT_NODE);
@@ -383,7 +396,7 @@ map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(const XML
 		xmlNodeSetPtr nodes = xpathObj->nodesetval;
 	    int size = (nodes) ? nodes->nodeNr : 0;
 		if (size != 1) {
-			throw MetNoFelt::Felt_File_Error("unable to find 'vertical'-axis "+type2string(it->first)+" in config: " + configFilename);
+			throw MetNoFelt::Felt_File_Error("unable to find 'vertical'-axis "+type2string(it->first)+" in config: " + configId);
 		}
 		xmlNodePtr node = nodes->nodeTab[0];
 		assert(node->type == XML_ELEMENT_NODE);
@@ -694,12 +707,6 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
 	    throw CDMException(string("non-Felt_File_Error: ") + e.what());
 	}
 	return data;
-}
-
-
-boost::shared_ptr<FeltCDMReader2> getFeltReader(string filename, string configFilename)
-{
-    return boost::shared_ptr<FeltCDMReader2>(new FeltCDMReader2(filename, configFilename));
 }
 
 

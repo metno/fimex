@@ -34,6 +34,7 @@
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMReader.h"
 #include "fimex/ReplaceStringObject.h"
+#include "fimex/XMLInput.h"
 
 namespace MetNoFimex
 {
@@ -46,12 +47,12 @@ class Data;
 class GribCDMReader: public MetNoFimex::CDMReader
 {
 public:
-    GribCDMReader(const std::vector<std::string>& fileNames, const std::string& configFile);
+    GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML);
     virtual ~GribCDMReader();
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
-    std::string configFile_;
+    std::string configId_;
     std::vector<GribFileMessage> indices_;
     boost::shared_ptr<XMLDoc> doc_;
     std::string xDimName_;

@@ -29,6 +29,7 @@
 
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
+#include "fimex/XMLInput.h"
 #include <map>
 
 namespace MetNoFimex
@@ -54,16 +55,16 @@ class NcmlCDMReader: public MetNoFimex::CDMReader
 
 public:
     /**
-     * @param configFile ncml-file with location set
+     * @param configXML ncml-file with location set
      * @throw CDMException
      */
-    NcmlCDMReader(std::string configFile);
+    NcmlCDMReader(const XMLInput& configXML);
     /**
      * @param cdmReader a file reader opened elsewhere
      * @param configFile ncml-file with location set
      * @throw CDMException
      */
-    NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, std::string configFile);
+    NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, const XMLInput& configXML);
     virtual ~NcmlCDMReader();
     /**
      * reading the data from the required source
@@ -76,7 +77,7 @@ private:
      * main function for all constructors
      */
     void init();
-    void setConfigDoc();
+    void setConfigDoc(const XMLInput& configXML);
     /* log a info of msg if xpath in config file */
     void initRemove();
     void warnUnsupported(std::string xpath, std::string msg);
@@ -89,8 +90,8 @@ private:
     void initAttributeNameChange();
     void initAddReassignAttribute();
 
-    std::string configFile;
-    XMLDoc* doc;
+    std::string configId;
+    boost::shared_ptr<XMLDoc> doc;
     boost::shared_ptr<CDMReader> dataReader;
     /*
      * maps containing the changes. The key will reflect

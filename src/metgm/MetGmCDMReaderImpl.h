@@ -10,6 +10,7 @@
 //
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/XMLInput.h"
 
 // boost
 //
@@ -40,10 +41,10 @@ namespace MetNoFimex {
     {
     public:
 
-        explicit MetGmCDMReaderImpl(const std::string& metgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm);
+        explicit MetGmCDMReaderImpl(const std::string& metgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm);
         ~MetGmCDMReaderImpl();
 
-        void init() throw(CDMException);
+        void init(const XMLInput& configXML) throw(CDMException);
         bool deinit();
 
         int getPidForMetgmName(const std::string& metgm_name);
@@ -56,7 +57,7 @@ namespace MetNoFimex {
 
         explicit MetGmCDMReaderImpl(const boost::shared_ptr<CDM>& cdm);
 
-        virtual void configure(const std::auto_ptr<XMLDoc>& doc);
+        virtual void configure(const boost::shared_ptr<XMLDoc>& doc);
         virtual void parseMgmFile(const std::string& mgmFileName);
         virtual void addVariables();
 
@@ -69,7 +70,7 @@ namespace MetNoFimex {
         std::string spaceToUnderscore(const std::string& text);
 
         std::string                            sourceFileName_;
-        std::string                            configFileName_;
+        std::string                            configId_;
         boost::shared_ptr<MetGmHandlePtr>      pHandle_;
         boost::shared_ptr<MetGmGroup1Ptr>      pGroup1_;
         boost::shared_ptr<MetGmGroup2Ptr>      pGroup2_;

@@ -61,14 +61,14 @@ LoggerPtr logger = getLogger("WdbCDMReader");
 class WdbCDMReader::InternalData
 {
 public:
-	InternalData(const std::string& source, const std::string& configfilename, CDM & cdm) :
+	InternalData(const std::string& source, const XMLInput& configXML, CDM & cdm) :
 		wdbConnection(0), dataIndex(0), translator(0)
 	{
 		try
 		{
 			wdb::WdbConfiguration configuration(source);
 
-			translator = new wdb::GlobalWdbConfiguration(configfilename);
+			translator = new wdb::GlobalWdbConfiguration(configXML);
 
 			wdbConnection = new wdb::WdbConnection(configuration.pqDatabaseConnectString(), configuration.wciUser());
 
@@ -100,9 +100,9 @@ public:
 };
 
 
-WdbCDMReader::WdbCDMReader(const std::string& source, const std::string& configfilename)
+WdbCDMReader::WdbCDMReader(const std::string& source, const XMLInput& configXML)
 {
-	d_ = new InternalData(source, configfilename, * cdm_);
+	d_ = new InternalData(source, configXML, * cdm_);
 }
 
 WdbCDMReader::~WdbCDMReader()

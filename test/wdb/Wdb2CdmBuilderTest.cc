@@ -52,7 +52,7 @@ using namespace MetNoFimex;
 class Wdb2CdmBuilderFixture : public wdb::GridDataFactory
 {
 public:
-	Wdb2CdmBuilderFixture() : tr(TEST_DIR"/wdb_config.xml") {}
+	Wdb2CdmBuilderFixture() : tr(XMLInputFile(TEST_DIR"/wdb_config.xml")) {}
 
 	std::string cdmId() const
 	{

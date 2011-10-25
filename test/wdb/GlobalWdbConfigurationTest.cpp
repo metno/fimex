@@ -70,20 +70,9 @@ const CDMAttribute * getAttribute(const std::string & name, const std::vector<CD
 
 
 
-BOOST_AUTO_TEST_CASE(nonExistingFile)
-{
-	BOOST_CHECK_THROW(GlobalWdbConfiguration globalConfig("/no_such_file.xml"), CDMException);
-}
-
-BOOST_AUTO_TEST_CASE(directoryInsteadOfFileName)
-{
-	BOOST_CHECK_THROW(GlobalWdbConfiguration globalConfig("."), CDMException);
-}
-
-
 BOOST_AUTO_TEST_CASE(globalVariables)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 
 	const GlobalWdbConfiguration::AttributeList & globals = globalConfig.getGlobalAttributes();
 
@@ -100,7 +89,7 @@ BOOST_AUTO_TEST_CASE(globalVariables)
 
 BOOST_AUTO_TEST_CASE(implicitCfName)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 
 	BOOST_CHECK_EQUAL("air_temperature", globalConfig.cfName("air temperature"));
 	BOOST_CHECK_EQUAL("x_wind", globalConfig.cfName("x wind"));
@@ -108,13 +97,13 @@ BOOST_AUTO_TEST_CASE(implicitCfName)
 
 BOOST_AUTO_TEST_CASE(explicitCfName)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 	BOOST_CHECK_EQUAL("mslp", globalConfig.cfName("mean sea level pressure"));
 }
 
 BOOST_AUTO_TEST_CASE(getsAttributes)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 	std::vector<CDMAttribute> attributes = globalConfig.getAttributes("x wind");
 
 	const CDMAttribute * units = getAttribute("units", attributes);
@@ -130,7 +119,7 @@ BOOST_AUTO_TEST_CASE(getsAttributes)
 
 BOOST_AUTO_TEST_CASE(getsAttributes2)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 	std::vector<CDMAttribute> attributes = globalConfig.getAttributes("y wind");
 
 	const CDMAttribute * units = getAttribute("units", attributes);
@@ -146,7 +135,7 @@ BOOST_AUTO_TEST_CASE(getsAttributes2)
 
 BOOST_AUTO_TEST_CASE(implicitLongName)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 	std::vector<CDMAttribute> attributes = globalConfig.getAttributes("y wind");
 
 	const CDMAttribute * longName = getAttribute("long_name", attributes);
@@ -157,7 +146,7 @@ BOOST_AUTO_TEST_CASE(implicitLongName)
 
 BOOST_AUTO_TEST_CASE(overrideDefaultValues)
 {
-	GlobalWdbConfiguration globalConfig(TEST_DIR"/wdb_config.xml");
+	GlobalWdbConfiguration globalConfig(XMLInputFile(TEST_DIR"/wdb_config.xml"));
 	std::vector<CDMAttribute> attributes = globalConfig.getAttributes("high cloud cover");
 
 	const CDMAttribute * longName = getAttribute("long_name", attributes);

@@ -28,7 +28,6 @@
 
 #include "GlobalWdbConfiguration.h"
 #include <fimex/CDMException.h>
-#include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libxml/xinclude.h>
 #include <libxml/xpathInternals.h>
@@ -41,27 +40,21 @@ namespace MetNoFimex
 namespace wdb
 {
 
-const boost::filesystem::path GlobalWdbConfiguration::defaultConfigFile_ = PKGDATADIR"/wdb_config.xml";
+const std::string GlobalWdbConfiguration::defaultConfigFile_ = PKGDATADIR"/wdb_config.xml";
 
-GlobalWdbConfiguration::GlobalWdbConfiguration(const boost::filesystem::path & configFile)
+GlobalWdbConfiguration::GlobalWdbConfiguration(const XMLInput& configXML)
 {
-	if ( configFile.empty() )
-		init_(defaultConfigFile_);
+	if ( configXML.isEmpty() )
+		init_(XMLInputFile(defaultConfigFile_));
 	else
-		init_(configFile);
+		init_(configXML);
 }
 
-void GlobalWdbConfiguration::init_(const boost::filesystem::path & configFile)
+void GlobalWdbConfiguration::init_(const XMLInput& configXML)
 {
-	if ( ! exists(configFile) )
-		throw CDMException(configFile.string() + ": Unable to find configuration file");
-
-	if ( is_directory(configFile) )
-		throw CDMException(configFile.string() + ": Configuration file is a directory");
-
-	XMLDoc config(configFile.string());
-	initParseGlobalAttributes_(config);
-	initParseAllParameters_(config);
+	boost::shared_ptr<XMLDoc> xmlDoc = configXML.getXMLDoc();
+	initParseGlobalAttributes_(*xmlDoc);
+	initParseAllParameters_(*xmlDoc);
 }
 
 GlobalWdbConfiguration::~GlobalWdbConfiguration()

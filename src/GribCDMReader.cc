@@ -86,16 +86,16 @@ bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs)
 bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
 
 
-GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const std::string& configFile)
-    : configFile_(configFile)
+GribCDMReader::GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML)
+    : configId_(configXML.id())
 {
-    doc_ = boost::shared_ptr<XMLDoc>(new XMLDoc(configFile_));
+    doc_ = configXML.getXMLDoc();
     doc_->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
     {
         // check config for root element
         XPathObjPtr xpathObj = doc_->getXPathObject("/gr:cdmGribReaderConfig");
         size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
-        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + configFile);
+        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + configId_);
     }
 
 
@@ -203,7 +203,7 @@ void GribCDMReader::initAddGlobalAttributes()
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size != 1) {
-        throw CDMException("unable to find " + xpathString + " in config: " + configFile_);
+        throw CDMException("unable to find " + xpathString + " in config: " + configId_);
     }
     for (int i = 0; i < size; ++i) {
         xmlNodePtr node = nodes->nodeTab[i];
@@ -229,7 +229,7 @@ void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levels
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size != 1) {
-            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(lit->first)+" in config: " + configFile_ +" and xpath: " + xpathLevelString);
+            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(lit->first)+" in config: " + configId_ +" and xpath: " + xpathLevelString);
         }
         xmlNodePtr node = nodes->nodeTab[0];
         assert(node->type == XML_ELEMENT_NODE);
@@ -318,7 +318,7 @@ void GribCDMReader::initAddTimeDimension()
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     if (size != 1) {
-        throw CDMException("unable to find exactly 1 'time'-axis in config: " + configFile_);
+        throw CDMException("unable to find exactly 1 'time'-axis in config: " + configId_);
     }
     xmlNodePtr node = nodes->nodeTab[0];
     assert(node->type == XML_ELEMENT_NODE);

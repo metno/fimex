@@ -35,6 +35,7 @@
 #include "boost/shared_array.hpp"
 #include "fimex/CDMReader.h"
 #include "fimex/FeltCDMReader2.h"
+#include "fimex/XMLInput.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CDMReader.h"
@@ -94,7 +95,7 @@ mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFi
     try {
         std::vector<string> files;
         files.push_back(filename);
-        boost::shared_ptr<GribCDMReader> reader(new GribCDMReader(files, configFile));
+        boost::shared_ptr<GribCDMReader> reader(new GribCDMReader(files, XMLInputFile(configFile)));
         return new mifi_cdm_reader(reader);
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_grib_reader: " << ex.what());
@@ -107,7 +108,7 @@ mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFi
 mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
 {
     try {
-        boost::shared_ptr<NcmlCDMReader> reader(new NcmlCDMReader(ncmlFile));
+        boost::shared_ptr<NcmlCDMReader> reader(new NcmlCDMReader(XMLInputFile(ncmlFile)));
         return new mifi_cdm_reader(reader);
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in ncmlCDMReader: " << ex.what());
@@ -118,7 +119,7 @@ mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
 mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile)
 {
     try {
-        boost::shared_ptr<NcmlCDMReader> ncml_reader(new NcmlCDMReader(reader->get(), ncmlFile));
+        boost::shared_ptr<NcmlCDMReader> ncml_reader(new NcmlCDMReader(reader->get(), XMLInputFile(ncmlFile)));
         return new mifi_cdm_reader(ncml_reader);
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in ncml_modifier: " << ex.what());

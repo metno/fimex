@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(test_write_hirlam12_nc) {
     BOOST_CHECK(true); // made it so far
 
     // create metgm reader to read newly writen mgm file
-    boost::shared_ptr<CDMReader> mgmReader(new MetGmCDMReader(mgmFile, topSrcDir + "/share/etc/cdmMetGmReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> mgmReader(new MetGmCDMReader(mgmFile, XMLInputFile(topSrcDir + "/share/etc/cdmMetGmReaderConfig.xml")));
     BOOST_CHECK(true); // made it so far
 
     // from metgm reader write again to nc file and compare:

@@ -67,13 +67,13 @@
 
 namespace MetNoFimex {
 
-    MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm)
-        : CDMReader(), sourceFileName_(mgmsource) ,configFileName_(configfilename)
+    MetGmCDMReaderImpl::MetGmCDMReaderImpl(const std::string& mgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm)
+        : CDMReader(), sourceFileName_(mgmsource), configId_(configXML.id())
     {
         cdm_ = cdm; // as not accesible via initialzation list
 
         try {
-            init();
+            init(configXML);
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("MetGmCDMReaderImpl error: ") + exp.what());
         }
@@ -92,7 +92,7 @@ namespace MetNoFimex {
         return boost::algorithm::replace_all_copy(name, " ", "_");
     }
 
-    void MetGmCDMReaderImpl::configure(const std::auto_ptr<XMLDoc>& doc)
+    void MetGmCDMReaderImpl::configure(const boost::shared_ptr<XMLDoc>& doc)
     {
         if(!doc.get())
             throw CDMException("Please supply xml config file the MetGmReader has to be informed how are pids mapped to actual CDM variables");
@@ -171,15 +171,9 @@ namespace MetNoFimex {
         }
     }
 
-    void MetGmCDMReaderImpl::init() throw(CDMException)
+    void MetGmCDMReaderImpl::init(const XMLInput& configXML) throw(CDMException)
     {
-        std::auto_ptr<XMLDoc> xmlDoc;
-        if (configFileName_ == std::string()) {
-            xmlDoc = std::auto_ptr<XMLDoc>(0);
-        } else {
-            xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
-        }
-
+        boost::shared_ptr<XMLDoc> xmlDoc = configXML.getXMLDoc();
         configure(xmlDoc);
 
         parseMgmFile(sourceFileName_);

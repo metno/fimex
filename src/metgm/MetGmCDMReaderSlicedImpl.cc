@@ -67,14 +67,14 @@
 
 namespace MetNoFimex {
 
-    MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource, const std::string& configfilename, const boost::shared_ptr<CDM>& cdm)
+    MetGmCDMReaderSlicedImpl::MetGmCDMReaderSlicedImpl(const std::string& mgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm)
         : MetGmCDMReaderImpl(cdm)
     {
         sourceFileName_ = mgmsource;
-        configFileName_ = configfilename;
+        configId_ = configXML.id();
 
         try {
-            init();
+            init(configXML);
         } catch (std::runtime_error& exp) {
             throw CDMException(std::string("MetGmCDMReaderImpl error: ") + exp.what());
         }

@@ -32,7 +32,9 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/Felt_Types.h"
 #include "fimex/ReplaceStringObject.h"
+#include "fimex/XMLInput.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+
 
 namespace MetNoFelt {
     class Felt_File2; // forward decl.
@@ -45,6 +47,7 @@ class XMLDoc; // declaration without import
 class FeltCDMReader2 : public CDMReader
 {
 public:
+    FeltCDMReader2(std::string filename, const XMLInput& configInput);
 	FeltCDMReader2(std::string filename, std::string configFilename);
 	virtual ~FeltCDMReader2();
 
@@ -52,7 +55,7 @@ public:
 
 private:
 	const std::string filename;
-	const std::string configFilename;
+	std::string configId;
 	boost::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
 	CDMDimension xDim;
 	CDMDimension yDim;
@@ -67,7 +70,7 @@ private:
 	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
 	 */
 	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
-	void init();
+	void init(const XMLInput& configInput);
 	// the following methods are parts of the init function and should not
 	// be called from elsewhere
 	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc, const std::map<std::string, std::string>& options);
@@ -92,9 +95,6 @@ private:
 
 
 };
-
-/// convenience function to retrieve a reader as shared_ptr instead of calling new
-boost::shared_ptr<FeltCDMReader2> getFeltReader(std::string filename, std::string configFilename);
 
 }
 

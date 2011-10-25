@@ -31,7 +31,7 @@
 
 #include <fimex/CDMAttribute.h>
 #include <fimex/XMLDoc.h>
-#include <boost/filesystem/path.hpp>
+#include <fimex/XMLInput.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -58,7 +58,7 @@ public:
 	/**
 	 * Initialize object with content from the given configuration file
 	 */
-	explicit GlobalWdbConfiguration(const boost::filesystem::path & configFile);
+	explicit GlobalWdbConfiguration(const XMLInput& configXML);
 	~GlobalWdbConfiguration();
 
 	/**
@@ -85,7 +85,7 @@ public:
 	const AttributeList & getGlobalAttributes() const { return globalAttributes_; }
 
 private:
-	void init_(const boost::filesystem::path & configFile);
+	void init_(const XMLInput& configXML);
 
 	void initParseGlobalAttributes_(XMLDoc & config);
 	void initParseAllParameters_(XMLDoc & config);
@@ -94,7 +94,7 @@ private:
 
 
 
-	static const boost::filesystem::path defaultConfigFile_;
+	static const std::string defaultConfigFile_;
 
 	typedef std::map<std::string, std::string> NameTranslation;
 	NameTranslation wdb2cf_;

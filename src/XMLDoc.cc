@@ -74,21 +74,23 @@ void XMLDoc::setXPathCtx(xmlDoc* pdoc)
 
 boost::shared_ptr<XMLDoc> XMLDoc::fromFile(const std::string& filename)
 {
+    return boost::shared_ptr<XMLDoc>(new XMLDoc(filename));
+}
+
+boost::shared_ptr<XMLDoc> XMLDoc::fromString(const std::string& buffer, const std::string& url)
+{
     boost::shared_ptr<XMLDoc> pdoc(new XMLDoc());
-    xmlDoc* pxmldoc = xmlReadFile(filename.c_str(), NULL, 0);
+    xmlDoc* pxmldoc = xmlReadMemory(buffer.c_str(), buffer.length(), url.c_str(), NULL, 0);
     pdoc->setDoc(pxmldoc);
     pdoc->setXPathCtx(pxmldoc);
     return pdoc;
 }
 
-boost::shared_ptr<XMLDoc> XMLDoc::fromString(const std::string& buffer)
+boost::shared_ptr<XMLDoc> XMLDoc::fromURL(const std::string& url)
 {
-    boost::shared_ptr<XMLDoc> pdoc(new XMLDoc());
-    xmlDoc* pxmldoc = xmlReadMemory(buffer.c_str(), buffer.length(), 0, NULL, 0);
-    pdoc->setDoc(pxmldoc);
-    pdoc->setXPathCtx(pxmldoc);
-    return pdoc;
+    return fromURL(url);
 }
+
 
 void XMLDoc::registerNamespace(const std::string& prefix, const std::string& href)
 {

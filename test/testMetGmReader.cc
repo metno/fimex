@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(test_read_sample_ed1) {
     }
 
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
     BOOST_CHECK(true); // made it so far
     NetCDF_CDMWriter(metgmReaderEd1, "testMetgmReadEd1.nc");
     BOOST_CHECK(true); // and it is even writeable
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_read_metgm2) {
     }
 
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> metgmReaderEd2(new MetGmCDMReader(fileName, topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> metgmReaderEd2(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
     BOOST_CHECK(true); // made it so far
     NetCDF_CDMWriter(metgmReaderEd2, "testMetgmReadEd2.nc");
     BOOST_CHECK(true); // and it is even writeable
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
 {
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/sample_ed1.gm");
-    boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml"));
+    boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
     const CDM& cdm = metgmReaderEd1->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);

@@ -30,6 +30,7 @@
 #define WDBCDMREADER_H_
 
 #include "fimex/CDMReader.h"
+#include "fimex/XMLInput.h"
 #include <string>
 
 
@@ -63,7 +64,7 @@ public:
 	 * it is given in the file with name source. Generic specifications are
 	 * given in the file with name configfilename.
 	 */
-	WdbCDMReader(const std::string& source, const std::string& configfilename);
+	WdbCDMReader(const std::string& source, const XMLInput& configXML);
 
 	virtual ~WdbCDMReader();
 

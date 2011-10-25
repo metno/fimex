@@ -529,7 +529,7 @@ static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boos
     if (! vm.count("ncml.config")) {
         return dataReader;
     }
-    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),vm["ncml.config"].as<string>()));
+    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),XMLInputFile(vm["ncml.config"].as<string>())));
     printReaderStatements("ncml", vm, ncmlReader.get());
 
     return boost::shared_ptr<CDMReader>(ncmlReader);

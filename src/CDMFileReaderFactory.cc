@@ -119,43 +119,48 @@ int CDMFileReaderFactory::detectFileType(const std::string & fileName)
     return MIFI_FILETYPE_UNKNOWN;
 }
 
-
-
 boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const std::string & configFile, const std::vector<std::string> & args)
+{
+    XMLInputFile configXML(configFile);
+    return create(fileType, fileName, configXML, args);
+}
+
+
+boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
 {
     switch (fileType) {
 #ifdef HAVE_FELT
     case MIFI_FILETYPE_FELT:
-        return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configFile));
+        return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configXML));
 #endif /* FELT */
 #ifdef HAVE_GRIB_API_H
     case MIFI_FILETYPE_GRIB: {
         std::vector<std::string> files(args.begin(), args.end());
         files.insert(files.begin(), fileName);
-        return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configFile));
+        return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configXML));
     }
 #endif
 #ifdef HAVE_NETCDF_H
     case MIFI_FILETYPE_NETCDF: {
         boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
-        if (configFile != "") {
-            reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, configFile));
+        if (!configXML.isEmpty()) {
+            reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, configXML));
         }
         return reader;
     }
 #endif
 #ifdef HAVE_METGM_H
     case MIFI_FILETYPE_METGM: {
-        return boost::shared_ptr<CDMReader>(new MetGmCDMReader(fileName, configFile));
+        return boost::shared_ptr<CDMReader>(new MetGmCDMReader(fileName, configXML));
     }
 #endif
 #ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
     case MIFI_FILETYPE_WDB: {
-        return boost::shared_ptr<CDMReader>(new WdbCDMReader(fileName, configFile));
+        return boost::shared_ptr<CDMReader>(new WdbCDMReader(fileName, configXML));
     }
 #endif
     case MIFI_FILETYPE_NCML:
-        return boost::shared_ptr<CDMReader>(new NcmlCDMReader(fileName));
+        return boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputFile(fileName)));
     default: throw CDMException("Unknown fileType: " + type2string(fileType) + " for file: "+fileName);
     }
 }
@@ -165,5 +170,12 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(const std::string& fil
     int fileType = mifi_get_filetype(fileTypeName.c_str());
     return create(fileType, fileName, configFile, args);
 }
+
+boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(const std::string& fileTypeName, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
+{
+    int fileType = mifi_get_filetype(fileTypeName.c_str());
+    return create(fileType, fileName, configXML, args);
+}
+
 
 }
