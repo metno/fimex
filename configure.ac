@@ -118,13 +118,14 @@ fi
 MIFI_USELIB([grib_api], [grib_api.h], [grib_set_string], [-ljasper -lpng])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"])
 
-MIFI_USELIB([pq], [libpq-fe.h], [PQconnectdb])
-AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
-
 MIFI_USELIB([metgm], [metgm.h], [mgm_read_group5_slice], [])
 AM_CONDITIONAL([HAVE_METGM], [test "x$with_metgm" = "xyes"])
 
 AC_LANG_POP(C++)
+
+MIFI_USELIB([pq], [postgresql/libpq-fe.h], [PQconnectdb])
+AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
+
 
 DEBUG_MODE
 

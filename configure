@@ -745,16 +745,16 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
-HAVE_METGM_FALSE
-HAVE_METGM_TRUE
-MIFI_METGM_LDFLAGS
-MIFI_METGM_CPPFLAGS
-MIFI_METGM_LIBS
 HAVE_LIBPQ_FALSE
 HAVE_LIBPQ_TRUE
 MIFI_PQ_LDFLAGS
 MIFI_PQ_CPPFLAGS
 MIFI_PQ_LIBS
+HAVE_METGM_FALSE
+HAVE_METGM_TRUE
+MIFI_METGM_LDFLAGS
+MIFI_METGM_CPPFLAGS
+MIFI_METGM_LIBS
 HAVE_GRIBAPI_FALSE
 HAVE_GRIBAPI_TRUE
 MIFI_GRIB_API_LDFLAGS
@@ -931,8 +931,8 @@ enable_openmp
 with_netcdf
 enable_felt
 with_grib_api
-with_pq
 with_metgm
+with_pq
 enable_debug_mode
 '
       ac_precious_vars='build_alias
@@ -1643,9 +1643,9 @@ Optional Packages:
                           either as DIR or INC,LIB
   --with-grib_api=DIR     the location of optional libgrib_api files and
                           library either as DIR or INC,LIB
-  --with-pq=DIR           the location of optional libpq files and library
-                          either as DIR or INC,LIB
   --with-metgm=DIR        the location of optional libmetgm files and library
+                          either as DIR or INC,LIB
+  --with-pq=DIR           the location of optional libpq files and library
                           either as DIR or INC,LIB
 
 Some influential environment variables:
@@ -2379,6 +2379,99 @@ fi
   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
 
 } # ac_fn_cxx_check_header_mongrel
+
+# ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
+# -------------------------------------------------------
+# Tests whether HEADER exists, giving a warning if it cannot be compiled using
+# the include files in INCLUDES and setting the cache variable VAR
+# accordingly.
+ac_fn_c_check_header_mongrel ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
+$as_echo_n "checking $2 usability... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_header_compiler=yes
+else
+  ac_header_compiler=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
+$as_echo_n "checking $2 presence... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <$2>
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+  ac_header_preproc=yes
+else
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in #((
+  yes:no: )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: $2: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: $2:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: $2: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+( cat <<\_ASBOX
+## --------------------------------- ##
+## Report this to heiko.klein@met.no ##
+## --------------------------------- ##
+_ASBOX
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  eval "$3=\$ac_header_compiler"
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+fi
+  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
+
+} # ac_fn_c_check_header_mongrel
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -5652,13 +5745,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:5655: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:5748: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5658: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:5751: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:5661: output\"" >&5)
+  (eval echo "\"\$as_me:5754: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -6864,7 +6957,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6867 "configure"' > conftest.$ac_ext
+  echo '#line 6960 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8921,11 +9014,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8924: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9017: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8928: \$? = $ac_status" >&5
+   echo "$as_me:9021: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9260,11 +9353,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9263: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9356: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9267: \$? = $ac_status" >&5
+   echo "$as_me:9360: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9365,11 +9458,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9368: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9461: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9372: \$? = $ac_status" >&5
+   echo "$as_me:9465: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -9420,11 +9513,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9423: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9516: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9427: \$? = $ac_status" >&5
+   echo "$as_me:9520: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11804,7 +11897,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11807 "configure"
+#line 11900 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11900,7 +11993,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11903 "configure"
+#line 11996 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13856,11 +13949,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13859: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13952: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13863: \$? = $ac_status" >&5
+   echo "$as_me:13956: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13955,11 +14048,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13958: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14051: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13962: \$? = $ac_status" >&5
+   echo "$as_me:14055: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14007,11 +14100,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14010: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14103: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14014: \$? = $ac_status" >&5
+   echo "$as_me:14107: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18974,131 +19067,6 @@ saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
 mifi_LIBS=""
 
-# Check whether --with-pq was given.
-if test "${with_pq+set}" = set; then :
-  withval=$with_pq;
-else
-  with_pq=yes
-fi
-
-case $with_pq in
-    yes)
-     echo "Using system implementation of libpq"
-     ;;
-    no)
-     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libpq dependent functions disabled" >&5
-$as_echo "$as_me: WARNING: Building library with libpq dependent functions disabled" >&2;}
-     ;;
-    *,*)
-      addincdir="`echo $with_pq | cut -f1 -d,`"
-      addlibdir="`echo $with_pq | cut -f2 -d,`"
-      mifi_CPPFLAGS="-I$addincdir"
-      mifi_LDFLAGS="-L$addlibdir"
-      ;;
-    *)
-      addincdir="$with_pq/include"
-      addlibdir="$with_pq/lib"
-      mifi_CPPFLAGS="-I$addincdir"
-      mifi_LDFLAGS="-L$addlibdir"
-      ;;
-esac
-mifi_have_feat=MIFI_HAVE_LIBPQ
-LIBS="$LIBS $mifi_LIBS"
-CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
-LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
-if test  x$with_pq != xno; then
-    for ac_header in libpq-fe.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "libpq-fe.h" "ac_cv_header_libpq_fe_h" "$ac_includes_default"
-if test "x$ac_cv_header_libpq_fe_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPQ_FE_H 1
-_ACEOF
-
-else
-  with_pq=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libpq: libpq-fe.h not found" >&5
-$as_echo "$as_me: WARNING: disabling libpq: libpq-fe.h not found" >&2;};
-
-fi
-
-done
-
-fi
-if test  x$with_pq != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PQconnectdb in -lpq" >&5
-$as_echo_n "checking for PQconnectdb in -lpq... " >&6; }
-if test "${ac_cv_lib_pq_PQconnectdb+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpq  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char PQconnectdb ();
-int
-main ()
-{
-return PQconnectdb ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_pq_PQconnectdb=yes
-else
-  ac_cv_lib_pq_PQconnectdb=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pq_PQconnectdb" >&5
-$as_echo "$ac_cv_lib_pq_PQconnectdb" >&6; }
-if test "x$ac_cv_lib_pq_PQconnectdb" = x""yes; then :
-  with_pq=yes;
-         MIFI_PQ_LIBS="-lpq $mifi_LIBS";
-         MIFI_PQ_CPPFLAGS=$mifi_CPPFLAGS;
-         MIFI_PQ_LDFLAGS=$mifi_LDFLAGS;
-
-
-
-
-else
-  with_pq=no;
-         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libpq: libpq not found" >&5
-$as_echo "$as_me: WARNING: disabling libpq: libpq not found" >&2;};
-
-fi
-
-fi
-CPPFLAGS="$saved_CPPFLAGS";
-LDFLAGS="$saved_LDFLAGS";
-LIBS="$saved_LIBS";
-
- if test "x$with_pq" != xno; then
-  HAVE_LIBPQ_TRUE=
-  HAVE_LIBPQ_FALSE='#'
-else
-  HAVE_LIBPQ_TRUE='#'
-  HAVE_LIBPQ_FALSE=
-fi
-
-
-
-# Checks for libraries that can be dropped
-saved_CPPFLAGS="$CPPFLAGS"
-saved_LDFLAGS="$LDFLAGS"
-saved_LIBS="$LIBS"
-mifi_LIBS=""
-
 # Check whether --with-metgm was given.
 if test "${with_metgm+set}" = set; then :
   withval=$with_metgm;
@@ -19222,6 +19190,132 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+# Checks for libraries that can be dropped
+saved_CPPFLAGS="$CPPFLAGS"
+saved_LDFLAGS="$LDFLAGS"
+saved_LIBS="$LIBS"
+mifi_LIBS=""
+
+# Check whether --with-pq was given.
+if test "${with_pq+set}" = set; then :
+  withval=$with_pq;
+else
+  with_pq=yes
+fi
+
+case $with_pq in
+    yes)
+     echo "Using system implementation of libpq"
+     ;;
+    no)
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Building library with libpq dependent functions disabled" >&5
+$as_echo "$as_me: WARNING: Building library with libpq dependent functions disabled" >&2;}
+     ;;
+    *,*)
+      addincdir="`echo $with_pq | cut -f1 -d,`"
+      addlibdir="`echo $with_pq | cut -f2 -d,`"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+    *)
+      addincdir="$with_pq/include"
+      addlibdir="$with_pq/lib"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+esac
+mifi_have_feat=MIFI_HAVE_LIBPQ
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_pq != xno; then
+    for ac_header in postgresql/libpq-fe.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "postgresql/libpq-fe.h" "ac_cv_header_postgresql_libpq_fe_h" "$ac_includes_default"
+if test "x$ac_cv_header_postgresql_libpq_fe_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_POSTGRESQL_LIBPQ_FE_H 1
+_ACEOF
+
+else
+  with_pq=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libpq: postgresql/libpq-fe.h not found" >&5
+$as_echo "$as_me: WARNING: disabling libpq: postgresql/libpq-fe.h not found" >&2;};
+
+fi
+
+done
+
+fi
+if test  x$with_pq != xno; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PQconnectdb in -lpq" >&5
+$as_echo_n "checking for PQconnectdb in -lpq... " >&6; }
+if test "${ac_cv_lib_pq_PQconnectdb+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpq  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PQconnectdb ();
+int
+main ()
+{
+return PQconnectdb ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pq_PQconnectdb=yes
+else
+  ac_cv_lib_pq_PQconnectdb=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pq_PQconnectdb" >&5
+$as_echo "$ac_cv_lib_pq_PQconnectdb" >&6; }
+if test "x$ac_cv_lib_pq_PQconnectdb" = x""yes; then :
+  with_pq=yes;
+         MIFI_PQ_LIBS="-lpq $mifi_LIBS";
+         MIFI_PQ_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_PQ_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
+else
+  with_pq=no;
+         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling libpq: libpq not found" >&5
+$as_echo "$as_me: WARNING: disabling libpq: libpq not found" >&2;};
+
+fi
+
+fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
+
+ if test "x$with_pq" != xno; then
+  HAVE_LIBPQ_TRUE=
+  HAVE_LIBPQ_FALSE='#'
+else
+  HAVE_LIBPQ_TRUE='#'
+  HAVE_LIBPQ_FALSE=
+fi
+
 
 
 
@@ -19389,12 +19483,12 @@ if test -z "${HAVE_GRIBAPI_TRUE}" && test -z "${HAVE_GRIBAPI_FALSE}"; then
   as_fn_error "conditional \"HAVE_GRIBAPI\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${HAVE_LIBPQ_TRUE}" && test -z "${HAVE_LIBPQ_FALSE}"; then
-  as_fn_error "conditional \"HAVE_LIBPQ\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${HAVE_METGM_TRUE}" && test -z "${HAVE_METGM_FALSE}"; then
   as_fn_error "conditional \"HAVE_METGM\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_LIBPQ_TRUE}" && test -z "${HAVE_LIBPQ_FALSE}"; then
+  as_fn_error "conditional \"HAVE_LIBPQ\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

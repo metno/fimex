@@ -44,7 +44,7 @@
 #ifdef HAVE_GRIB_API_H
 #include "fimex/GribCDMReader.h"
 #endif
-#ifdef HAVE_LIBPQ_FE_H
+#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
 #include "fimex/WdbCDMReader.h"
 #endif
 #ifdef HAVE_METGM_H
@@ -149,7 +149,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         return boost::shared_ptr<CDMReader>(new MetGmCDMReader(fileName, configFile));
     }
 #endif
-#ifdef HAVE_LIBPQ_FE_H
+#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
     case MIFI_FILETYPE_WDB: {
         return boost::shared_ptr<CDMReader>(new WdbCDMReader(fileName, configFile));
     }

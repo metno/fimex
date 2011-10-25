@@ -30,7 +30,7 @@
 #define DATASANITIZER_H_
 
 
-#include <libpq-fe.h>
+#include <postgresql/libpq-fe.h>
 #include <string>
 
 
