@@ -33,7 +33,7 @@
 #include "Level.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/shared_ptr.hpp>
-#include <postgresql/libpq-fe.h>
+#include <libpq-fe.h>
 
 
 namespace MetNoFimex
