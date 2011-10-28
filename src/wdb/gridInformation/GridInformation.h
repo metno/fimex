@@ -31,7 +31,7 @@
 
 #include <string>
 #include <vector>
-#include <postgresql/libpq-fe.h>
+#include <libpq-fe.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
