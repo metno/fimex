@@ -55,6 +55,13 @@ void WdbIndex::init_(const std::vector<GridData> & gridData)
 
 	for ( std::map<Parameter, DataSummary>::const_iterator it = dataSummary.begin(); it != dataSummary.end(); ++ it )
 		data_.insert(std::make_pair(it->first, ParameterData(it->second, gridData)));
+
+	for ( std::map<Parameter, DataSummary>::const_iterator it = dataSummary.begin(); it != dataSummary.end(); ++ it )
+	{
+		const std::set<boost::posix_time::time_duration> & validTimes = it->second.validTimes();
+		if ( validTimes.size() > 1 )
+			allValidtimes_.insert(validTimes.begin(), validTimes.end());
+	}
 }
 
 WdbIndex::WdbIndex(const std::vector<GridData> & data)
@@ -63,7 +70,7 @@ WdbIndex::WdbIndex(const std::vector<GridData> & data)
 
 	BOOST_FOREACH(const GridData & d, data)
 	{
-		allValidtimes_.insert(d.validTo() - d.referenceTime());
+//		allValidtimes_.insert(d.validTo() - d.referenceTime());
 		allReferenceTimes_.insert(d.referenceTime());
 		levels_[d.level().type().name()].insert(d.level().to());
 	}

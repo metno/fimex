@@ -35,6 +35,7 @@
 #include <wdb/gridInformation/GridInformation.h>
 #include <fimex/SliceBuilder.h>
 #include <fimex/CDMException.h>
+#include <boost/foreach.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -149,17 +150,19 @@ BOOST_FIXTURE_TEST_CASE(parameterWithSingleTime, WdbIndexTestFixture)
 
 BOOST_FIXTURE_TEST_CASE(parameterWithUniqueTime, WdbIndexTestFixture)
 {
-	// do we want this?
+	add(Parameter("temperature", "c"), "2011-04-06 06:00:00");
+	add(Parameter("temperature", "c"), "2011-04-06 07:00:00");
+	add(Parameter("temperature", "c"), "2011-04-06 08:00:00");
+	add(Parameter("terrain height", "m"), "1900-01-01 00:00:00");
+	WdbIndex index(gridData());
 
-//	add(Parameter("temperature", "c"), "2011-04-06 06:00:00");
-//	add(Parameter("temperature", "c"), "2011-04-06 07:00:00");
-//	add(Parameter("temperature", "c"), "2011-04-06 08:00:00");
-//	add(Parameter("terrain height", "m"), "1900-01-01 00:00:00");
-//	WdbIndex index(gridData());
-//
-//	WdbIndex::GidList gids = index.getData("temperature", 0);
-//	BOOST_REQUIRE_EQUAL(1, gids.size());
-//	BOOST_CHECK_EQUAL(0, gids.front());
+
+	BOOST_CHECK_EQUAL(3, index.timesForParameter("temperature").size());
+
+	WdbIndex::GidList gids = index.getData("temperature", 0);
+	BOOST_REQUIRE_EQUAL(1, gids.size());
+
+	BOOST_CHECK_EQUAL(0, gids.front());
 }
 
 

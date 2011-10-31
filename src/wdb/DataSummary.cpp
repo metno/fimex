@@ -78,7 +78,7 @@ void DataSummary::mergeWith(const DataSummary & other)
 		referenceTimes_.insert(toMerge.begin(), toMerge.end());
 	}
 
-	if ( validTimes_.size() > 1 )
+	if ( validTimes_.size() > 1 and other.validTimes().size() > 1 )
 	{
 		const std::set<boost::posix_time::time_duration> & toMerge = other.validTimes();
 		validTimes_.insert(toMerge.begin(), toMerge.end());

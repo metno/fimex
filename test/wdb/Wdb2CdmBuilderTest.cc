@@ -112,23 +112,23 @@ BOOST_FIXTURE_TEST_CASE(setsDimensionSizes, Wdb2CdmBuilderFixture)
 	BOOST_CHECK_EQUAL(3, lvlDimension->getLength());
 }
 
-BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep, Wdb2CdmBuilderFixture)
-{
-	// Even if there is no need for valid time as a dimension for parameters,
-	// we still add it, in order to give information that _all_ data has the
-	// specified valid time.
-
-	add(wdb::Level("lvl", "m", 2, 2));
-
-	const wdb::Wdb2CdmBuilder di(gridData(), tr);
-	di.populate(cdm);
-
-	const CDM::DimVec & dims = cdm.getDimensions();
-
-	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName));
-	BOOST_REQUIRE(timeDimension != dims.end());
-	BOOST_CHECK_EQUAL(1, timeDimension->getLength());
-}
+//BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSizeWithOneTimeStep, Wdb2CdmBuilderFixture)
+//{
+//	// Even if there is no need for valid time as a dimension for parameters,
+//	// we still add it, in order to give information that _all_ data has the
+//	// specified valid time.
+//
+//	add(wdb::Level("lvl", "m", 2, 2));
+//
+//	const wdb::Wdb2CdmBuilder di(gridData(), tr);
+//	di.populate(cdm);
+//
+//	const CDM::DimVec & dims = cdm.getDimensions();
+//
+//	CDM::DimVec::const_iterator timeDimension = std::find_if(dims.begin(), dims.end(), same_entity(wdb::TimeHandler::validTimeName));
+//	BOOST_REQUIRE(timeDimension != dims.end());
+//	BOOST_CHECK_EQUAL(1, timeDimension->getLength());
+//}
 
 BOOST_FIXTURE_TEST_CASE(setsCorrectTimeDimensionSize, Wdb2CdmBuilderFixture)
 {
