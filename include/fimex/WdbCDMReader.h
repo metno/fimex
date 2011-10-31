@@ -46,8 +46,18 @@ namespace MetNoFimex
  * "real" data file. This configuration file tells how to connect to a wdb
  * database, and what query to perform on it.
  *
- * Information about database specification files are given in the example
- * configuration file example.wdb.conf
+ * General syntax for the wdb query file may be found in the wdb_query.xsd
+ * file, with an annotated example in the wdb.example.wdbml file.
+ *
+ * It is possible to use a hybrid specification, in which you give additions
+ * to the queries in the query file. If you want to specify queries in this
+ * way you must follow the syntax, used in the following example:
+ *
+ * "file=whatever.wdbml:dataprovider=whoever:referencetime=latest"
+ *
+ * The following keywords are recognized: file, dataprovider, location,
+ * referencetime, validtime, parameter and dataversion. They follow the same
+ * rule as the corresponding keywords in the xml-files.
  *
  * Syntax for global configuration is given in wdb_conf.xsd.
  *
