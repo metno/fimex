@@ -158,6 +158,11 @@ void WciReadQuerySpecification::addDataProvider(const std::string & dataProvider
 	dataProvider_.insert(dataProvider);
 }
 
+void WciReadQuerySpecification::removeDataProviders()
+{
+	dataProvider_.clear();
+}
+
 void WciReadQuerySpecification::setLocation(const std::string & location)
 {
 	location_ = location;
@@ -178,9 +183,19 @@ void WciReadQuerySpecification::addParameter(const std::string & parameter)
 	parameter_.insert(parameter);
 }
 
+void WciReadQuerySpecification::removeParameters()
+{
+	parameter_.clear();
+}
+
 void WciReadQuerySpecification::addDataVersion(int version)
 {
 	dataVersion_.insert(version);
+}
+
+void WciReadQuerySpecification::removeDataVersions()
+{
+	dataVersion_.clear();
 }
 
 std::ostream & WciReadQuerySpecification::referenceTimeQuery_(std::ostream & s, const DataSanitizer & sanitizer) const

@@ -33,6 +33,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <iostream>
 #include <libxml/xinclude.h>
@@ -41,19 +42,21 @@
 
 namespace MetNoFimex
 {
-
 namespace wdb
 {
 
-WdbConfiguration::WdbConfiguration(const boost::filesystem::path & configFile)
+WdbConfiguration::WdbConfiguration(const std::string & configFile)
 {
-	if ( not exists(configFile) )
-		throw CDMException(configFile.string() + " no such file");
+	boost::filesystem::path configFilePath(configFile);
 
-	if ( is_directory(configFile) )
-		throw CDMException(configFile.string() + " is a directory");
-
-	init_(configFile);
+	if ( not exists(configFilePath) )
+		init_(configFile);
+	else
+	{
+		if ( is_directory(configFilePath) )
+			throw CDMException(configFile + " is a directory");
+		init_(configFilePath);
+	}
 }
 
 WdbConfiguration::~WdbConfiguration()
@@ -202,7 +205,62 @@ void WdbConfiguration::init_(const boost::filesystem::path & configFile)
 		querySpec_.addDataVersion(dataVersion);
 }
 
+void WdbConfiguration::init_(const std::string & configSpec)
+{
+	std::vector<std::string> elements;
+	boost::split(elements, configSpec, boost::is_any_of(":"));
 
+	BOOST_FOREACH(const std::string & element, elements)
+	{
+		if ( element.empty() )
+			continue;
+
+		 std::string::size_type splitIndex = element.find('=');
+		 if ( splitIndex == std::string::npos )
+			 throw std::runtime_error("Invalid element specification: " + element);
+
+		 const std::string & key = element.substr(0, splitIndex);
+		 const std::string & value = element.substr(splitIndex +1, std::string::npos);
+
+		 if ( key == "file" )
+			 init_(boost::filesystem::path(value));
+		 else if ( key == "dataprovider" )
+		 {
+			 if ( value == "-" )
+				 querySpec_.removeDataProviders();
+			 else
+				 querySpec_.addDataProvider(value);
+		 }
+		 else if ( key == "location" )
+			 querySpec_.setLocation(value);
+		 else if ( key == "referencetime" )
+			 querySpec_.setReferenceTime(value);
+		 else if ( key == "validtime" )
+			 querySpec_.setValidTime(value);
+		 else if ( key == "parameter" )
+		 {
+			 if ( value == "-" )
+				 querySpec_.removeParameters();
+			 else
+				 querySpec_.addParameter(value);
+		 }
+		 else if ( key == "dataversion" )
+		 {
+			 if ( value == "-" )
+				 querySpec_.removeDataVersions();
+			 else
+				 try
+			 	 {
+					 querySpec_.addDataVersion(boost::lexical_cast<int>(value));
+			 	 }
+			 	 catch ( boost::bad_lexical_cast & e )
+			 	 {
+			 		 throw std::runtime_error("Bad value for data version: " + value);
+			 	 }
+		 }
+
+	}
 }
 
+}
 }

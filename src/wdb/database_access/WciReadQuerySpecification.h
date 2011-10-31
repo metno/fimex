@@ -80,6 +80,12 @@ public:
 	void addDataProvider(const std::string & dataProvider);
 
 	/**
+	 * Clear the dataproviders list. This will cause all data providers to be
+	 * requested on a read call.
+	 */
+	void removeDataProviders();
+
+	/**
 	 * Only request data from the given location. Only one location may be
 	 * given, but if you don't specify any location, all available will be
 	 * requested.
@@ -111,6 +117,12 @@ public:
 	void addParameter(const std::string & parameter);
 
 	/**
+	 * Clear the parameters list. This will cause all parameters to be
+	 * requested on a read call.
+	 */
+	void removeParameters();
+
+	/**
 	 * Add a data version to the request list. You may add any number of
 	 * versions, but adding none means requesting any.
 	 *
@@ -119,6 +131,11 @@ public:
 	 */
 	void addDataVersion(int version);
 
+	/**
+	 * Clear the versions list. This will cause all data versions to be
+	 * requested on a read call.
+	 */
+	void removeDataVersions();
 
 	const std::set<std::string> * dataProvider() const { return dataProvider_.empty() ? 0 : & dataProvider_; }
 	const std::string * location() const { return location_.empty() ? 0 : & location_; }

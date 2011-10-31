@@ -39,6 +39,7 @@
 
 using namespace MetNoFimex::wdb;
 
+
 class ConfigurationTest
 {
 	WdbConfiguration config_;
@@ -47,32 +48,159 @@ public:
 		config_(TEST_DIR"/local.wdb.xml")
 	{}
 
+	explicit ConfigurationTest(const std::string & init) :
+		config_(init)
+	{}
+
+	/// Get correct database connecion string, provided that the zero-argument constructor was called.
+	std::string connectString() const
+	{
+		return "dbname=wdb host=localhost port=5432 user=vegardb";
+	}
+
+	/// Get correct query specification, provided that the zero-argument constructor was called.
+	WciReadQuerySpecification expected() const
+	{
+		std::set<std::string> dataProvider = boost::assign::list_of("met.no eceps modification");
+		std::string referenceTime = "2011-05-12 02:00:00+02";
+		std::set<int> dataVersion = boost::assign::list_of(0);
+
+		return WciReadQuerySpecification(& dataProvider, 0, & referenceTime, 0, 0, & dataVersion);
+	}
+
 	const WdbConfiguration & config() const
 	{
 		return config_;
 	}
 };
 
-BOOST_FIXTURE_TEST_CASE(testConnectionSpecification, ConfigurationTest)
+BOOST_FIXTURE_TEST_CASE(testFileInitialization, ConfigurationTest)
 {
-	BOOST_CHECK_EQUAL("dbname=wdb host=localhost port=5432 user=vegardb", config().pqDatabaseConnectString());
-}
-
-BOOST_FIXTURE_TEST_CASE(testImplicitWciUser, ConfigurationTest)
-{
+	BOOST_CHECK_EQUAL(connectString(), config().pqDatabaseConnectString());
 	BOOST_CHECK_EQUAL("vegardb", config().wciUser());
+	BOOST_CHECK_EQUAL(expected(), config().query());
 }
 
-BOOST_FIXTURE_TEST_CASE(testReadQuery, ConfigurationTest)
+
+BOOST_FIXTURE_TEST_CASE(indirectSpecifictionOfConfigFile, ConfigurationTest)
 {
-	std::set<std::string> dataProvider = boost::assign::list_of("met.no eceps modification");
-	std::string referenceTime = "2011-05-12 02:00:00+02";
-	std::set<int> dataVersion = boost::assign::list_of(0);
-
-	WciReadQuerySpecification expected(& dataProvider, 0, & referenceTime, 0, 0, & dataVersion);
-
-	BOOST_CHECK_EQUAL(expected, config().query());
+	WdbConfiguration config("file="TEST_DIR"/local.wdb.xml");
+	BOOST_CHECK_EQUAL("dbname=wdb host=localhost port=5432 user=vegardb", config.pqDatabaseConnectString());
+	BOOST_CHECK_EQUAL("vegardb", config.wciUser());
+	BOOST_CHECK_EQUAL(expected(), config.query());
 }
+
+BOOST_FIXTURE_TEST_CASE(dataProviderAdditionToConfigFile, ConfigurationTest)
+{
+	WdbConfiguration config("file="TEST_DIR"/local.wdb.xml:dataprovider=someone");
+	BOOST_CHECK_EQUAL("dbname=wdb host=localhost port=5432 user=vegardb", config.pqDatabaseConnectString());
+	BOOST_CHECK_EQUAL("vegardb", config.wciUser());
+
+	WciReadQuerySpecification spec = expected();
+	spec.addDataProvider("someone");
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(removeDataProviderFromConfigFile, ConfigurationTest)
+{
+	WdbConfiguration config("file="TEST_DIR"/local.wdb.xml:dataprovider=-:dataprovider=someone");
+
+	WciReadQuerySpecification s = expected();
+	WciReadQuerySpecification spec(0, s.location(), s.referenceTime(), s.validTime(), s.parameter(), s.dataVersion());
+	spec.addDataProvider("someone");
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(locationInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("location=somewhere");
+	WciReadQuerySpecification spec;
+	spec.setLocation("somewhere");
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(referencetimeInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("referencetime=sometime");
+	WciReadQuerySpecification spec;
+	spec.setReferenceTime("sometime");
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(validtimeInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("validtime=sometime");
+	WciReadQuerySpecification spec;
+	spec.setValidTime("sometime");
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(parameterInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("parameter=foo:parameter=-:parameter=bar:parameter=baz");
+	WciReadQuerySpecification spec;
+	spec.addParameter("bar");
+	spec.addParameter("baz");
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(dataVersionAdditionToConfigFile, ConfigurationTest)
+{
+	WdbConfiguration config("file="TEST_DIR"/local.wdb.xml:dataversion=34");
+
+	WciReadQuerySpecification spec = expected();
+	spec.addDataVersion(34);
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(removeDataVersionFromConfigFile, ConfigurationTest)
+{
+	WdbConfiguration config("file="TEST_DIR"/local.wdb.xml:dataversion=-:dataversion=4");
+
+	WciReadQuerySpecification s = expected();
+	WciReadQuerySpecification spec(s.dataProvider(), s.location(), s.referenceTime(), s.validTime(), s.parameter(), 0);
+	spec.addDataVersion(4);
+	BOOST_CHECK_EQUAL(spec, config.query());
+}
+
+BOOST_FIXTURE_TEST_CASE(notIntegerInDataVersion, ConfigurationTest)
+{
+	BOOST_CHECK_THROW(
+			WdbConfiguration("file="TEST_DIR"/local.wdb.xml:dataversion=q"),
+			std::runtime_error
+	);
+}
+
+BOOST_FIXTURE_TEST_CASE(missingValueInExtraSpec, ConfigurationTest)
+{
+	BOOST_CHECK_THROW(
+			WdbConfiguration("file="TEST_DIR"/local.wdb.xml:dataversion"),
+			std::runtime_error
+	);
+}
+
+BOOST_FIXTURE_TEST_CASE(rubbishInExtraSpec, ConfigurationTest)
+{
+	BOOST_CHECK_THROW(
+			WdbConfiguration("file="TEST_DIR"/local.wdb.xml:qwerty#!$"),
+			std::runtime_error
+	);
+}
+
+BOOST_FIXTURE_TEST_CASE(emptyContentBetweenSeparators, ConfigurationTest)
+{
+	BOOST_CHECK_NO_THROW(
+			WdbConfiguration("file="TEST_DIR"/local.wdb.xml:::dataprovider=af")
+	);
+}
+
+BOOST_FIXTURE_TEST_CASE(specEndingWithSeparator, ConfigurationTest)
+{
+	BOOST_CHECK_NO_THROW(
+			WdbConfiguration("file="TEST_DIR"/local.wdb.xml:dataprovider=af:")
+	);
+}
+
 
 
 #endif

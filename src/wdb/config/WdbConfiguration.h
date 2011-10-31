@@ -51,7 +51,7 @@ public:
 	 *
 	 * @throws CDMException on error
 	 */
-	explicit WdbConfiguration(const boost::filesystem::path & configFile);
+	explicit WdbConfiguration(const std::string & configFile);
 
 	~WdbConfiguration();
 
@@ -72,6 +72,7 @@ public:
 
 private:
 	void init_(const boost::filesystem::path & configFile);
+	void init_(const std::string & configSpec);
 
 	std::string database_;
 	std::string host_;
