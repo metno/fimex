@@ -63,7 +63,7 @@ public:
 	/**
 	 * username for wci call
 	 */
-	const std::string & wciUser() const { return wciUser_; }
+	const std::string & wciUser() const;
 
 	/**
 	 * Get a specification for what wci.read query to perform on the database.

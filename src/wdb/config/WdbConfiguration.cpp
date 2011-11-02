@@ -46,7 +46,7 @@ namespace wdb
 {
 
 WdbConfiguration::WdbConfiguration(const std::string & configFile) :
-		port_(5432)
+		database_("wdb"),port_(5432),user_("wdb")
 {
 	boost::filesystem::path configFilePath(configFile);
 
@@ -80,6 +80,12 @@ std::string WdbConfiguration::pqDatabaseConnectString() const
 	return ret.str();
 }
 
+const std::string & WdbConfiguration::wciUser() const
+{
+	if ( wciUser_.empty() )
+		return user_;
+	return wciUser_;
+}
 
 namespace
 {
