@@ -114,7 +114,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 
     ncCheck(nc_inq_format(ncFile->ncId, &ncFile->format));
 #ifdef NC_NETCDF4
-	if ((ncFile->format & NC_NETCDF4) != 0)
+	if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC))
 	    if ((ncVersion & NC_CLASSIC_MODEL) != 0) {
 	        LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format, classic mode");
 	    } else {
@@ -351,7 +351,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
         ncVarMap[var.getName()] = varId;
 #ifdef NC_NETCDF4
 		// set compression
-		if ((ncFile->format & NC_NETCDF4) != 0) {
+        if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC)) {
 			int compression = 0;
 			assert(variableCompression.find(var.getName()) != variableCompression.end());
 			if (variableCompression.find(var.getName()) != variableCompression.end()) {
