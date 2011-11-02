@@ -113,7 +113,7 @@ BOOST_FIXTURE_TEST_CASE(removeDataProviderFromConfigFile, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(locationInExtraSpec, ConfigurationTest)
 {
-	WdbConfiguration config("location=somewhere");
+	WdbConfiguration config("dbname=foo:user=bar:location=somewhere");
 	WciReadQuerySpecification spec;
 	spec.setLocation("somewhere");
 	BOOST_CHECK_EQUAL(spec, config.query());
@@ -121,7 +121,7 @@ BOOST_FIXTURE_TEST_CASE(locationInExtraSpec, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(referencetimeInExtraSpec, ConfigurationTest)
 {
-	WdbConfiguration config("referencetime=sometime");
+	WdbConfiguration config("dbname=foo:user=bar:referencetime=sometime");
 	WciReadQuerySpecification spec;
 	spec.setReferenceTime("sometime");
 	BOOST_CHECK_EQUAL(spec, config.query());
@@ -129,7 +129,7 @@ BOOST_FIXTURE_TEST_CASE(referencetimeInExtraSpec, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(validtimeInExtraSpec, ConfigurationTest)
 {
-	WdbConfiguration config("validtime=sometime");
+	WdbConfiguration config("dbname=foo:user=bar:validtime=sometime");
 	WciReadQuerySpecification spec;
 	spec.setValidTime("sometime");
 	BOOST_CHECK_EQUAL(spec, config.query());
@@ -137,7 +137,7 @@ BOOST_FIXTURE_TEST_CASE(validtimeInExtraSpec, ConfigurationTest)
 
 BOOST_FIXTURE_TEST_CASE(parameterInExtraSpec, ConfigurationTest)
 {
-	WdbConfiguration config("parameter=foo:parameter=-:parameter=bar:parameter=baz");
+	WdbConfiguration config("dbname=foo:user=bar::parameter=foo:parameter=-:parameter=bar:parameter=baz");
 	WciReadQuerySpecification spec;
 	spec.addParameter("bar");
 	spec.addParameter("baz");
@@ -169,6 +169,43 @@ BOOST_FIXTURE_TEST_CASE(notIntegerInDataVersion, ConfigurationTest)
 			WdbConfiguration("file="TEST_DIR"/local.wdb.xml:dataversion=q"),
 			std::runtime_error
 	);
+}
+
+BOOST_FIXTURE_TEST_CASE(databaseNameInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("dbname=wdb;user=someone");
+
+	BOOST_CHECK_EQUAL("dbname=wdb port=5432 user=someone", config.pqDatabaseConnectString());
+}
+
+BOOST_FIXTURE_TEST_CASE(portInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("dbname=wdb1;port=1234;user=someoneelse");
+
+	BOOST_CHECK_EQUAL("dbname=wdb1 port=1234 user=someoneelse", config.pqDatabaseConnectString());
+}
+
+BOOST_FIXTURE_TEST_CASE(rubbishValueForPortInExtraSpec, ConfigurationTest)
+{
+	BOOST_CHECK_THROW(
+			WdbConfiguration("dbname=wdb1;port=foo;user=someoneelse"),
+			std::runtime_error
+	);
+}
+
+BOOST_FIXTURE_TEST_CASE(hostInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("dbname=wdb1;host=some.where.com;port=1234;user=someoneelse");
+
+	BOOST_CHECK_EQUAL("dbname=wdb1 host=some.where.com port=1234 user=someoneelse", config.pqDatabaseConnectString());
+}
+
+BOOST_FIXTURE_TEST_CASE(wciUserInExtraSpec, ConfigurationTest)
+{
+	WdbConfiguration config("dbname=wdb;user=someone;wciUser=someoneelse");
+
+	BOOST_CHECK_EQUAL("dbname=wdb port=5432 user=someone", config.pqDatabaseConnectString());
+	BOOST_CHECK_EQUAL("someoneelse", config.wciUser());
 }
 
 BOOST_FIXTURE_TEST_CASE(missingValueInExtraSpec, ConfigurationTest)

@@ -45,7 +45,8 @@ namespace MetNoFimex
 namespace wdb
 {
 
-WdbConfiguration::WdbConfiguration(const std::string & configFile)
+WdbConfiguration::WdbConfiguration(const std::string & configFile) :
+		port_(5432)
 {
 	boost::filesystem::path configFilePath(configFile);
 
@@ -57,6 +58,11 @@ WdbConfiguration::WdbConfiguration(const std::string & configFile)
 			throw CDMException(configFile + " is a directory");
 		init_(configFilePath);
 	}
+
+	if ( database_.empty() )
+		throw std::runtime_error("Missing database name in spec");
+	if ( user_.empty() )
+		throw std::runtime_error("Missing user name in spec");
 }
 
 WdbConfiguration::~WdbConfiguration()
@@ -208,7 +214,7 @@ void WdbConfiguration::init_(const boost::filesystem::path & configFile)
 void WdbConfiguration::init_(const std::string & configSpec)
 {
 	std::vector<std::string> elements;
-	boost::split(elements, configSpec, boost::is_any_of(":"));
+	boost::split(elements, configSpec, boost::is_any_of(":;"));
 
 	BOOST_FOREACH(const std::string & element, elements)
 	{
@@ -224,6 +230,25 @@ void WdbConfiguration::init_(const std::string & configSpec)
 
 		 if ( key == "file" )
 			 init_(boost::filesystem::path(value));
+		 else if ( key == "dbname" )
+			 database_ = value;
+		 else if ( key == "user" )
+			 user_ = value;
+		 else if ( key == "host" )
+			 host_ = value;
+		 else if ( key == "port" )
+		 {
+			 try
+		 	 {
+				 port_ = boost::lexical_cast<int>(value);
+		 	 }
+		 	 catch ( boost::bad_lexical_cast & e )
+		 	 {
+		 		 throw std::runtime_error("Bad value for port: " + value);
+		 	 }
+		 }
+		 else if ( key == "wciUser" )
+			 wciUser_ = value;
 		 else if ( key == "dataprovider" )
 		 {
 			 if ( value == "-" )
