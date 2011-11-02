@@ -229,6 +229,15 @@ std::map<short, std::vector<LevelPair> > Felt_File2::getFeltLevelPairs() const {
 	return typeLevelVector;
 }
 
+std::vector<short> Felt_File2::getEnsembleMembers() const {
+    std::set<short> ensembles;
+    for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
+        vector<short> em = fait->second->getEnsembleMembers();
+        ensembles.insert(em.begin(), em.end());
+    }
+    return std::vector<short>(ensembles.begin(), ensembles.end());
+}
+
 boost::shared_ptr<boost::posix_time::ptime> Felt_File2::getUniqueReferenceTime() const {
     std::set<boost::posix_time::ptime> refTimes;
     for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {

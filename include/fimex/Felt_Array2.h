@@ -108,21 +108,26 @@ public:
 
 	/**
 	 * return the level pairs (niveau 1, niveau 2) for this parameter as used by hybrid levels
+	 * for ensemble, niveau 2 is set to 0 and should be retrieved from the ensemble-members
 	 */
 	vector<LevelPair> getLevelPairs() const;
+    /**
+     * @return the ensemble member
+     */
+    vector<short> getEnsembleMembers() const;
 	/**
 	 * get the ident19 parameter from the data-header, throw error if levelPair/time doesn't exists
 	 *  @warning only ident19 of data already read will be taken into account
 	 */
 	int getIdent19(boost::posix_time::ptime time, LevelPair levelPair) const;
 
-	/** return x/longitude size */
+	/** @return x/longitude size */
 	int getX() const;
-	/** return y/latitude size */
+	/** @return y/latitude size */
 	int getY() const;
 	/** get the files scaleFactor, this corresponds to scalingFactor by 10^(scaleFactor) == scalingFactor */
 	int scaleFactor() const;
-	/** return scalingFactor */
+	/** @return scalingFactor */
 	double getScalingFactor() const;
 	boost::shared_ptr<felt::FeltGridDefinition> getGridDefinition() const;
 	int getGridType() const;

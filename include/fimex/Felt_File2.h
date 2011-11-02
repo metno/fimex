@@ -99,6 +99,10 @@ public:
 	 * @return map consisting of felt level-ids and a sorted vector of level-pairs of values
 	 */
 	std::map<short, std::vector<LevelPair> > getFeltLevelPairs() const;
+	/**
+	 * get all members of ensembles
+	 */
+	std::vector<short> getEnsembleMembers() const;
 	const std::map<LevelPair, int>& getHybridLevels() const {return hybridLevels_;}
 	/// all time values, sorted
 	std::vector<boost::posix_time::ptime> getFeltTimes() const;

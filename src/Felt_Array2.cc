@@ -58,7 +58,12 @@ Felt_Array2::~Felt_Array2()
 void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
 {
     boost::posix_time::ptime time = field->validTime();
-    LevelPair level = make_pair(field->level1(), field->level2());
+    LevelPair level;
+    if (field->isEpsSingleRunParameter()) {
+        level = make_pair(field->level1(), field->dataVersion());
+    } else {
+        level = make_pair(field->level1(), field->level2());
+    }
     LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG, "adding field to param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second);
 
     TimeLevelFieldMap::iterator timeSliceIt = feltFields_.find(time);
@@ -132,13 +137,33 @@ vector<LevelPair> Felt_Array2::getLevelPairs() const {
     set<LevelPair, LevelPairLess> lset; // unique, sorted set of levels
     for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
         for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
-            lset.insert(lm->first);
+            if (defaultField_->isEpsSingleRunParameter()) {
+                // make sure, level2 is dataVersion 0 for all pairs
+                LevelPair lp = lm->first;
+                lp.second = 0;
+                lset.insert(lp);
+            } else {
+                lset.insert(lm->first);
+            }
         }
     }
-	vector<LevelPair > retVal(lset.begin(), lset.end());
+	vector<LevelPair> retVal(lset.begin(), lset.end());
 	// retVal is sorted since the set is sorted
 	return retVal;
 }
+
+vector<short> Felt_Array2::getEnsembleMembers() const {
+    set<short> ensembleMembers;
+    if (defaultField_->isEpsSingleRunParameter()) {
+        for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
+            for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
+                ensembleMembers.insert(lm->first.second);
+            }
+        }
+    }
+    return vector<short>(ensembleMembers.begin(), ensembleMembers.end());
+}
+
 
 const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time::ptime time, LevelPair levelPair) const
 {

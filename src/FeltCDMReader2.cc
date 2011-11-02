@@ -224,6 +224,19 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
 	// add axes
 	// time
 	CDMDimension timeDim = initAddTimeDimensionFromXML(*doc);
+	// ensembleMembers
+	CDMDimension ensembleDim;
+	vector<short> eMembers = feltfile_->getEnsembleMembers();
+	if (eMembers.size() > 0) {
+	    ensembleDim = CDMDimension("ensemble_member", eMembers.size());
+	    cdm_->addDimension(ensembleDim);
+	    vector<string> varShape(1, "ensemble_member");
+	    CDMVariable ensembleVar("ensemble_member", CDM_SHORT, varShape);
+	    boost::shared_ptr<Data> eData = createData(CDM_SHORT, eMembers.begin(), eMembers.end());
+        ensembleVar.setData(eData);
+	    cdm_->addVariable(ensembleVar);
+        cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
+	}
 	// levels
 	map<short, CDMDimension> levelDims = initAddLevelDimensionsFromXML(*doc);
 	//x,y dim will be set with the projection, can also = long/lat
@@ -237,7 +250,7 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
     initAddProjectionFromXML(*doc, projName, coordinates);
 
     // add variables
-    initAddVariablesFromXML(*doc, projName, coordinates, timeDim, levelDims);
+    initAddVariablesFromXML(*doc, projName, coordinates, timeDim, ensembleDim, levelDims);
 }
 
 vector<string> FeltCDMReader2::initGetKnownFeltIdsFromXML(const XMLDoc& doc, const map<string, string>& options)
@@ -540,7 +553,7 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
 }
 
 
-void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& projName, const string& coordinates, const CDMDimension& timeDim, const map<short, CDMDimension>& levelDims)
+void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& projName, const string& coordinates, const CDMDimension& timeDim, const CDMDimension& ensembleDim, const map<short, CDMDimension>& levelDims)
 {
 	vector<boost::shared_ptr<Felt_Array2> > fArrays(feltfile_->listFeltArrays());
 	for (vector<boost::shared_ptr<Felt_Array2> >::const_iterator it = fArrays.begin(); it != fArrays.end(); ++it) {
@@ -583,6 +596,9 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
     		vector<string> shape;
     		shape.push_back(xDim.getName());
     		shape.push_back(yDim.getName());
+            if ((*it)->getEnsembleMembers().size() > 1) {
+                shape.push_back(ensembleDim.getName());
+            }
     		if ((*it)->getLevelPairs().size() > 1) {
     			shape.push_back(levelDims.find((*it)->getLevelType())->second.getName());
     		}
@@ -631,6 +647,7 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
 	// felt data can be x,y,level,time; x,y,level; x,y,time; x,y;
 	const vector<string>& dims = variable.getShape();
 	const CDMDimension* layerDim = 0;
+    const CDMDimension* ensembleDim = 0;
 	size_t xy_size = 1;
 	for (vector<string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
 		CDMDimension& dim = cdm_->getDimension(*it);
@@ -638,7 +655,11 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
 			dim.getName() != yDim.getName() &&
 			!dim.isUnlimited())
 		{
-			layerDim = &dim;
+		    if (dim.getName() == "ensemble_member") {
+		        ensembleDim = &dim;
+		    } else {
+		        layerDim = &dim;
+		    }
 		}
 		if (! dim.isUnlimited()) {
 			xy_size *= dim.getLength();
@@ -683,6 +704,20 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
 					throw CDMException("variable " +variable.getName() + " has unspecified levels");
 				}
 			}
+			// combine all available level/ensemble combinations
+			if ((ensembleDim != 0)) {
+			    vector<short> ensembles = feltfile_->getEnsembleMembers();
+			    vector<LevelPair> ensembleLayerVals;
+			    for (size_t i = 0; i < layerVals.size(); i++) {
+			        LevelPair lp = layerVals.at(i);
+			        for (size_t j = 0; j < ensembles.size(); j++) {
+			            lp.second = ensembles.at(j);
+			            ensembleLayerVals.push_back(lp);
+			        }
+			    }
+			    layerVals = ensembleLayerVals;
+			}
+
 			size_t dataCurrentPos = 0;
 			// xa
 			int xDim = fa->getX();

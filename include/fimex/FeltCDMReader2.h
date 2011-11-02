@@ -91,7 +91,7 @@ private:
 	void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
 	std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath);
 	void initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates);
-	void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const std::map<short, CDMDimension>& levelDims);
+	void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const CDMDimension& ensembleDim, const std::map<short, CDMDimension>& levelDims);
 
 
 };
