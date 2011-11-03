@@ -74,7 +74,7 @@ int FeltField::parameter() const
 	int param = parameterUnmodified_();
 
 	// Parameter is part of an ensemble run
-	if ( isEpsSingleRunParameter() )
+	if ( isEpsRunParameter() )
 		param %= 1000;
 
 	return param;
@@ -192,7 +192,7 @@ int FeltField::level1() const
 
 int FeltField::level2() const
 {
-	if ( isEpsSingleRunParameter() )
+	if ( isEpsRunParameter() )
 		return 0;
 	return header_[13];
 }
@@ -246,7 +246,7 @@ size_t FeltField::gridSize() const
 
 int FeltField::dataVersion() const
 {
-	if ( isEpsSingleRunParameter() )
+	if ( isEpsRunParameter() )
 		return header_[13]; // level2 unmodified
 	return 0;
 }

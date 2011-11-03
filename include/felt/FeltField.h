@@ -100,7 +100,7 @@ public:
 	/// this field is described in the felt documentation as "word 19 in data part"
 	int miscField() const;
 
-	bool isEpsSingleRunParameter() const
+	bool isEpsRunParameter() const
 	{
 		int param = parameterUnmodified_();
 		return 2000 <= param and param < 5000;

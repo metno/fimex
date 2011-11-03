@@ -59,7 +59,7 @@ void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
 {
     boost::posix_time::ptime time = field->validTime();
     LevelPair level;
-    if (field->isEpsSingleRunParameter()) {
+    if (field->isEpsRunParameter()) {
         level = make_pair(field->level1(), field->dataVersion());
     } else {
         level = make_pair(field->level1(), field->level2());
@@ -137,7 +137,7 @@ vector<LevelPair> Felt_Array2::getLevelPairs() const {
     set<LevelPair, LevelPairLess> lset; // unique, sorted set of levels
     for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
         for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
-            if (defaultField_->isEpsSingleRunParameter()) {
+            if (defaultField_->isEpsRunParameter()) {
                 // make sure, level2 is dataVersion 0 for all pairs
                 LevelPair lp = lm->first;
                 lp.second = 0;
@@ -154,7 +154,7 @@ vector<LevelPair> Felt_Array2::getLevelPairs() const {
 
 vector<short> Felt_Array2::getEnsembleMembers() const {
     set<short> ensembleMembers;
-    if (defaultField_->isEpsSingleRunParameter()) {
+    if (defaultField_->isEpsRunParameter()) {
         for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
             for (LevelFieldMap::const_iterator lm = tlm->second.begin(); lm != tlm->second.end(); ++lm) {
                 ensembleMembers.insert(lm->first.second);
