@@ -37,7 +37,7 @@ AC_ARG_WITH([$1],
     [with_$1=yes])
 case $with_$1 in
     yes)
-     echo "Using system implementation of lib$1"
+     AC_MSG_NOTICE([Using system implementation of lib$1])
      ;;
     no)
      AC_MSG_ERROR([lib$1 is required])
@@ -98,13 +98,13 @@ AC_ARG_WITH([$1],
     [with_$1=check])
 case $with_$1 in
     yes)
-     echo "Using system implementation of lib$1"
+     AC_MSG_NOTICE([Using system implementation of lib$1])
      ;;
     check)
-     echo "Checking system implementation of lib$1"
+     AC_MSG_NOTICE([Checking system implementation of lib$1])
      ;;
     no)
-     AC_MSG_WARN([Building library with lib$1 dependent functions disabled])
+     AC_MSG_NOTICE([Building library with lib$1 dependent functions disabled])
      ;;
     *,*)
       addincdir="`echo $with_$1 | cut -f1 -d,`"
@@ -128,7 +128,7 @@ if test [ x$with_$1 != xno]; then
         [],
         [
          if test [ x$with_$1 == xcheck ]; then
-            AC_MSG_WARN([disabling lib$1: $2 not found]);
+            AC_MSG_NOTICE([disabling lib$1: $2 not found]);
             with_$1=no;
          else
             AC_MSG_ERROR([$2 not found, please fix or disable -with-$1]);
@@ -147,7 +147,7 @@ if test [ x$with_$1 != xno]; then
         ],
         [
          if test [ x$with_$1 == xcheck ]; then
-            AC_MSG_WARN([disabling lib$1: not found]);
+            AC_MSG_NOTICE([disabling lib$1: not found]);
             with_$1=no;
          else
             AC_MSG_ERROR([lib$1 not found, please fix or disable --with-$1]);
