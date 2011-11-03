@@ -37,7 +37,7 @@ AC_ARG_WITH([$1],
     [with_$1=yes])
 case $with_$1 in
     yes)
-     echo "Using system implementation of lib$1"
+     AC_MSG_NOTICE([Using system implementation of lib$1])
      ;;
     no)
      AC_MSG_ERROR([lib$1 is required])
@@ -77,6 +77,8 @@ if test [ x$with_$1 != xno]; then
         [with_$1=no;
          AC_MSG_ERROR([Did not find header $2, this is required to continue])
         ])
+else
+    AC_MSG_ERROR([$2 disabled, but this is required to continue])
 fi
 CPPFLAGS="$saved_CPPFLAGS";
 LDFLAGS="$saved_LDFLAGS";
@@ -92,14 +94,17 @@ mifi_LIBS="$4"
 AC_ARG_WITH([$1],
     AC_HELP_STRING([--with-$1=DIR],
     [the location of optional lib$1 files and library either as DIR or INC,LIB]),
-    ,
-    [with_$1=yes])
+    [],
+    [with_$1=check])
 case $with_$1 in
     yes)
-     echo "Using system implementation of lib$1"
+     AC_MSG_NOTICE([Using system implementation of lib$1])
+     ;;
+    check)
+     AC_MSG_NOTICE([Checking system implementation of lib$1])
      ;;
     no)
-     AC_MSG_WARN([Building library with lib$1 dependent functions disabled])
+     AC_MSG_NOTICE([Building library with lib$1 dependent functions disabled])
      ;;
     *,*)
       addincdir="`echo $with_$1 | cut -f1 -d,`"
@@ -121,8 +126,13 @@ LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
 if test [ x$with_$1 != xno]; then
     AC_CHECK_HEADERS([$2],
         [],
-        [with_$1=no;
-         AC_MSG_WARN([disabling lib$1: $2 not found]);
+        [
+         if test [ x$with_$1 == xcheck ]; then
+            AC_MSG_NOTICE([disabling lib$1: $2 not found]);
+            with_$1=no;
+         else
+            AC_MSG_ERROR([$2 not found, please fix or disable -with-$1]);
+         fi
         ])
 fi
 if test [ x$with_$1 != xno]; then
@@ -135,8 +145,13 @@ if test [ x$with_$1 != xno]; then
          AC_SUBST(m4_toupper(MIFI_$1_CPPFLAGS))
          AC_SUBST(m4_toupper(MIFI_$1_LDFLAGS))
         ],
-        [with_$1=no;
-         AC_MSG_WARN([disabling lib$1: lib$1 not found]);
+        [
+         if test [ x$with_$1 == xcheck ]; then
+            AC_MSG_NOTICE([disabling lib$1: not found]);
+            with_$1=no;
+         else
+            AC_MSG_ERROR([lib$1 not found, please fix or disable --with-$1]);
+         fi
         ])
 fi
 CPPFLAGS="$saved_CPPFLAGS";

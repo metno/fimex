@@ -2,7 +2,8 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
              coordRefTimeTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
-             verticalSigmaHybridPressure.nc verticalPressureHeight.nc
+             verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
+             sample_ed1.gm sample_ed2.gm
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
