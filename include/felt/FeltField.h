@@ -63,7 +63,8 @@ public:
 
 	/**
 	 * Get the parameter value. This is the logical value, which means that if
-	 * the parameter is part of an ensemble run, til will not start with 4000.
+	 * the parameter is part of an ensemble run, it will not start with
+	 * 2000,3000,4000.
 	 */
 	int parameter() const;
 
@@ -102,7 +103,7 @@ public:
 	bool isEpsSingleRunParameter() const
 	{
 		int param = parameterUnmodified_();
-		return 4000 <= param and param < 5000;
+		return 2000 <= param and param < 5000;
 	}
 
 	/**

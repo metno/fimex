@@ -74,8 +74,8 @@ int FeltField::parameter() const
 	int param = parameterUnmodified_();
 
 	// Parameter is part of an ensemble run
-	if ( param >= 4000 and param < 5000 )
-		param -= 4000;
+	if ( isEpsSingleRunParameter() )
+		param %= 1000;
 
 	return param;
 }
