@@ -101,7 +101,7 @@ case $with_$1 in
      echo "Using system implementation of lib$1"
      ;;
     check)
-     echo "Using system implementation of lib$1"
+     echo "Checking system implementation of lib$1"
      ;;
     no)
      AC_MSG_WARN([Building library with lib$1 dependent functions disabled])
