@@ -86,7 +86,7 @@ namespace MetNoFimex {
             if(data->size() <= 1)
                 throw CDMException("horizontal axis has one point can't determine distance needed for MetGm");
 
-            const boost::shared_array<double> hArray = data->asConstDouble();
+            const boost::shared_array<double> hArray = data->asDouble();
 
             horizontalPoints_ = std::vector<double>(&hArray[0], &hArray[data->size()]);
         }

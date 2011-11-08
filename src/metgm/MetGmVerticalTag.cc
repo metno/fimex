@@ -155,7 +155,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
 
     void MetGmVerticalTag::extractVerticalPoints(const boost::shared_ptr<Data>& data)
     {
-        points_ = data->asConstFloat();
+        points_ = data->asFloat();
     }
 
     void MetGmVerticalTag::dump() {

@@ -53,7 +53,7 @@ static string getTerm(const CDMAttribute& formulaTerms, string parameter)
 static const vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const string& var, const string& unit, int unLimDimPos)
 {
     boost::shared_ptr<Data> data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
-    const boost::shared_array<double> array = data->asConstDouble();
+    boost::shared_array<double> array = data->asDouble();
     return vector<double>(&array[0], &array[0] + data->size());
 }
 
@@ -65,13 +65,13 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
     switch (zAxis->getAxisType()) {
     case CoordinateAxis::Pressure: {
         boost::shared_ptr<Data> p = reader->getScaledDataSliceInUnit(zAxis->getName(), "hPa", unLimDimPos);
-        const boost::shared_array<double> pa = p->asConstDouble();
+        boost::shared_array<double> pa = p->asDouble();
         presConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&pa[0], &pa[0] + p->size())));
     }
         break;
     case CoordinateAxis::Height: {
         boost::shared_ptr<Data> h = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
-        const boost::shared_array<double> ha = h->asConstDouble();
+        boost::shared_array<double> ha = h->asDouble();
         presConv = boost::shared_ptr<ToVLevelConverter>(new HeightStandardToPressureConverter(vector<double> (&ha[0],&ha[0] + h->size())));
     }
         break;
@@ -96,7 +96,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
                         throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
                     }
-                    presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asConstDouble(), nx, ny, nt));
+                    presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asDouble(), nx, ny, nt));
                 } else if (a != "") {
                     //formular with a,p0,b,ps
                     string p0 = getTerm(formulaTerms, "p0");
@@ -110,7 +110,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
                         throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
                     }
-                    presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaToPressureConverter(aVec, bVec, p0Vec.at(0), psData->asConstDouble(), nx, ny, nt));
+                    presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaToPressureConverter(aVec, bVec, p0Vec.at(0), psData->asDouble(), nx, ny, nt));
                 } else {
                     throw CDMException("atmosphere_hybrid_sigma_pressure formular-term with 'a' or 'ap' not found in " + formulaTerms.getStringValue());
                 }
@@ -135,7 +135,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
                     throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                        "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
                 }
-                presConv = boost::shared_ptr<ToVLevelConverter>(new SigmaToPressureConverter(sigmaVec, ptopVec[0], psData->asConstDouble(), nx, ny, nt));
+                presConv = boost::shared_ptr<ToVLevelConverter>(new SigmaToPressureConverter(sigmaVec, ptopVec[0], psData->asDouble(), nx, ny, nt));
             } else {
                 throw CDMException("unimplemented vertical axis with standard_name: " + standardName.getStringValue());
             }
@@ -163,7 +163,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
         case CoordinateAxis::GeoZ:
         {
             boost::shared_ptr<Data> hd = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
-            const boost::shared_array<double> ha = hd->asConstDouble();
+            const boost::shared_array<double> ha = hd->asDouble();
             heightConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
         }
         break;
@@ -190,7 +190,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
                     boost::shared_ptr<Data> altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
                 if (altData->size() != (nx * ny))
                     throw CDMException("altitude '" + altVars[0] + "' has strange size: " + type2string(altData->size()) + " != " + type2string(nx * ny));
-                heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asConstFloat(), altData->asConstFloat(), nx, ny, nz, nt));
+                heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asFloat(), altData->asFloat(), nx, ny, nz, nt));
                 vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
             } else {
                 LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");

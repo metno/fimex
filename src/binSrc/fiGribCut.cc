@@ -198,7 +198,7 @@ static boost::shared_ptr<grib_handle> cutBoundingBox(const boost::shared_ptr<gri
             MIFI_GRIB_CHECK(grib_set_double(newGh.get(), "Ni", (lonFirstLast.second-lonFirstLast.first)),0);
 
             // set the data
-            boost::shared_array<double> outArray = outData->asConstDouble();
+            boost::shared_array<const double> outArray = outData->asConstDouble();
             if (debug) cerr << "setting new data" << endl;
             MIFI_GRIB_CHECK(grib_set_double_array(newGh.get(), "values", &outArray[0], outData->size()), 0);
 

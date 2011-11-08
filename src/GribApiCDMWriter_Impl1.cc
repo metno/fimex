@@ -115,9 +115,9 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongXAxis", xData->size()),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()),"");
             // grib1 doesn't allow to set double values for this! // (grib2 not checked)
-            const boost::shared_array<double> xArray = xData->asConstDouble();
+            boost::shared_array<double> xArray = xData->asDouble();
             GRIB_CHECK(grib_set_long(gribHandle.get(), "DxInMetres", static_cast<long>(xArray[1] - xArray[0])),"");
-            const boost::shared_array<double> yArray = yData->asConstDouble();
+            boost::shared_array<double> yArray = yData->asDouble();
             GRIB_CHECK(grib_set_long(gribHandle.get(), "DyInMetres", static_cast<long>(yArray[1] - yArray[0])),"");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
@@ -146,8 +146,8 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
             }
             double di, dj, rlon0, rlat0, rlonX, rlatX;
-            const boost::shared_array<double> rlongs = rLonData->asConstDouble();
-            const boost::shared_array<double> rlats = rLatData->asConstDouble();
+            boost::shared_array<double> rlongs = rLonData->asDouble();
+            boost::shared_array<double> rlats = rLatData->asDouble();
             di = rlongs[1] - rlongs[0];
             dj = rlats[1] - rlats[0];
             rlat0 = rlats[0];

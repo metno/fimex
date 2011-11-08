@@ -56,43 +56,43 @@ namespace MetNoFimex
 		virtual void toStream(std::ostream&, std::string separator = "") const = 0;
 
 		/// @brief retrieve data as char
-		virtual const boost::shared_array<char> asConstChar() const = 0;
+		virtual boost::shared_array<const char> asConstChar() const = 0;
 		/// @brief retrieve data as char
 		virtual boost::shared_array<char> asChar() = 0;
 		/// @brief retrieve data as short
-		virtual const boost::shared_array<short> asConstShort() const = 0;
+		virtual boost::shared_array<const short> asConstShort() const = 0;
 		/// @brief retrieve data as short
 		virtual boost::shared_array<short> asShort() = 0;
 		/// @brief retrieve data as int
-		virtual const boost::shared_array<int> asConstInt() const = 0;
+		virtual boost::shared_array<const int> asConstInt() const = 0;
 		/// @brief retrieve data as int
 		virtual boost::shared_array<int> asInt() = 0;
         /// @brief retrieve data as int64
-        virtual const boost::shared_array<long long> asConstInt64() const = 0;
+        virtual boost::shared_array<const long long> asConstInt64() const = 0;
         /// @brief retrieve data as int64
         virtual boost::shared_array<long long> asInt64() = 0;
         /// @brief retrieve data as uchar
-        virtual const boost::shared_array<unsigned char> asConstUChar() const = 0;
+        virtual boost::shared_array<const unsigned char> asConstUChar() const = 0;
         /// @brief retrieve data as uchar
         virtual boost::shared_array<unsigned char> asUChar() = 0;
         /// @brief retrieve data as short
-        virtual const boost::shared_array<unsigned short> asConstUShort() const = 0;
+        virtual boost::shared_array<const unsigned short> asConstUShort() const = 0;
         /// @brief retrieve data as short
         virtual boost::shared_array<unsigned short> asUShort() = 0;
         /// @brief retrieve data as uint
-        virtual const boost::shared_array<unsigned int> asConstUInt() const = 0;
+        virtual boost::shared_array<const unsigned int> asConstUInt() const = 0;
         /// @brief retrieve data as uint
         virtual boost::shared_array<unsigned int> asUInt() = 0;
         /// @brief retrieve data as uint64
-        virtual const boost::shared_array<unsigned long long> asConstUInt64() const = 0;
+        virtual boost::shared_array<const unsigned long long> asConstUInt64() const = 0;
         /// @brief retrieve data as uint64
         virtual boost::shared_array<unsigned long long> asUInt64() = 0;
 		/// @brief retrieve data as float
-		virtual const boost::shared_array<float> asConstFloat() const = 0;
+		virtual boost::shared_array<const float> asConstFloat() const = 0;
 		/// @brief retrieve data as float (eventually copy)
 		virtual boost::shared_array<float> asFloat() = 0;
 		/// @brief retrieve data as double
-		virtual const boost::shared_array<double> asConstDouble() const = 0;
+		virtual boost::shared_array<const double> asConstDouble() const = 0;
 		/// @brief retrieve data as double
 		virtual boost::shared_array<double> asDouble() = 0;
 		/// @brief retrieve the whole array as a string (with possible separator)

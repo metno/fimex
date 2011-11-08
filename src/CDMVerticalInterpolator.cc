@@ -291,14 +291,14 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr c
                            type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+
                            ") != " + type2string(data->size()));
     }
-    const boost::shared_array<float> iData = data->asConstFloat();
+    boost::shared_array<const float> iData = data->asConstFloat();
     size_t oSize = nx*ny*pOut.size()*(nt-startT);
     boost::shared_array<float> oData(new float[oSize]);
 
     // loop over data-array, interpolating cell for cell
     for (size_t t = startT; t < nt; ++t) {
         size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-        float* inData = &iData[timePos*(nx*ny*nz)];
+        const float* inData = &iData[timePos*(nx*ny*nz)];
         float* outData = &oData[timePos*(nx*ny*pOut.size())];
         for (size_t y = 0; y < ny; ++y) {
             for (size_t x = 0; x < nx; ++x) {

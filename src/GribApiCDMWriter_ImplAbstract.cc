@@ -168,7 +168,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 	std::string unit;
 	if (verticalAxis != ""){
 		boost::shared_ptr<Data> myLevelData = cdmReader->getData(verticalAxis);
-		const boost::shared_array<double> levelDataArray = myLevelData->asConstDouble();
+		const boost::shared_array<double> levelDataArray = myLevelData->asDouble();
 		levelData= std::vector<double>(&levelDataArray[0], &levelDataArray[myLevelData->size()]);
 		CDMAttribute attr;
 		if (cdm.getAttribute(verticalAxis, "standard_name", attr)) {

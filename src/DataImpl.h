@@ -50,13 +50,27 @@ namespace MetNoFimex
 
 	/**
 	 * @brief create a new shared array with a different type using static_cast
+	 *        or return the original array
+	 *
+	 * Usage: boost::shared_array<OUTTYPE> x = ArrayTypeConverter<OUTTYPE, INTYPE>(inData, inLength)();
+	 *
+	 * Using functor here since case INTYPE == OUTTYPE will be partially specialized, and that is only allowed
+	 * for classes, not for functions in C++.
 	 *
 	 * @param inData original data
 	 * @param length length of original data array
 	 *
 	 */
-	template<typename T1, typename T2>
-	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length);
+    template<typename T1, typename T2>
+	struct ArrayTypeConverter {
+        ArrayTypeConverter(const boost::shared_array<T2>& inData, size_t length) : inData(inData), length(length){}
+        boost::shared_array<T1> operator()();
+      private:
+        boost::shared_array<T2> inData;
+        long length;
+    };
+
+
 	/**
 	 * @brief return a shared array of this data, possibly pointer to internal data
 	 *
@@ -65,7 +79,7 @@ namespace MetNoFimex
 	 *
 	 */
 	template<typename T1, typename T2>
-	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length);
+	boost::shared_array<const T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length);
 
 
 
@@ -93,39 +107,39 @@ namespace MetNoFimex
 		 * general conversion function, not in base since template methods not allowed
 		 */
 		template<typename T>
-		const boost::shared_array<T> as() const {return constConvertArrayType<T, C>(theData, length);}
+		boost::shared_array<const T> as() const {return constConvertArrayType<T, C>(theData, length);}
 		template<typename T>
-		boost::shared_array<T> as() {return duplicateArrayType<T, C>(theData, length);}
+		boost::shared_array<T> as() {return ArrayTypeConverter<T, C>(theData, length)();}
 		// conversion function
-		const virtual boost::shared_array<char> asConstChar() const {return as<char>();}
+		virtual boost::shared_array<const char> asConstChar() const {return as<char>();}
 		virtual boost::shared_array<char> asChar() {return as<char>();}
-		const virtual boost::shared_array<short> asConstShort() const {return as<short>();}
+		virtual boost::shared_array<const short> asConstShort() const {return as<short>();}
 		virtual boost::shared_array<short> asShort() {return as<short>();}
-		const virtual boost::shared_array<int> asConstInt() const {return as<int>();}
+		virtual boost::shared_array<const int> asConstInt() const {return as<int>();}
 		virtual boost::shared_array<int> asInt() {return as<int>();}
         /// @brief retrieve data as int64
-        virtual const boost::shared_array<long long> asConstInt64() const {return as<long long>();}
+        virtual boost::shared_array<const long long> asConstInt64() const {return as<long long>();}
         /// @brief retrieve data as int64
         virtual boost::shared_array<long long> asInt64() {return as<long long>();}
         /// @brief retrieve data as uchar
-        virtual const boost::shared_array<unsigned char> asConstUChar() const {return as<unsigned char>();}
+        virtual boost::shared_array<const unsigned char> asConstUChar() const {return as<unsigned char>();}
         /// @brief retrieve data as uchar
         virtual boost::shared_array<unsigned char> asUChar() {return as<unsigned char>();}
         /// @brief retrieve data as short
-        virtual const boost::shared_array<unsigned short> asConstUShort() const {return as<unsigned short>();}
+        virtual boost::shared_array<const unsigned short> asConstUShort() const {return as<unsigned short>();}
         /// @brief retrieve data as short
         virtual boost::shared_array<unsigned short> asUShort() {return as<unsigned short>();}
         /// @brief retrieve data as uint
-        virtual const boost::shared_array<unsigned int> asConstUInt() const {return as<unsigned int>();}
+        virtual boost::shared_array<const unsigned int> asConstUInt() const {return as<unsigned int>();}
         /// @brief retrieve data as uint
         virtual boost::shared_array<unsigned int> asUInt() {return as<unsigned int>();}
         /// @brief retrieve data as uint64
-        virtual const boost::shared_array<unsigned long long> asConstUInt64() const {return as<unsigned long long>();}
+        virtual boost::shared_array<const unsigned long long> asConstUInt64() const {return as<unsigned long long>();}
         /// @brief retrieve data as uint64
         virtual boost::shared_array<unsigned long long> asUInt64() {return as<unsigned long long>();}
-		const virtual boost::shared_array<float> asConstFloat() const {return as<float>();}
+		virtual boost::shared_array<const float> asConstFloat() const {return as<float>();}
 		virtual boost::shared_array<float> asFloat() {return as<float>();}
-		const virtual boost::shared_array<double> asConstDouble() const {return as<double>();}
+		virtual boost::shared_array<const double> asConstDouble() const {return as<double>();}
 		virtual boost::shared_array<double> asDouble() {return as<double>();}
 		virtual std::string asString(std::string separator = "") const;
 
@@ -150,7 +164,7 @@ namespace MetNoFimex
 		boost::shared_array<C> theData;
 		DataImpl(const DataImpl<C>& rhs);
 		DataImpl<C>& operator=(const DataImpl<C> & rhs);
-		void copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd);
+		void copyData(size_t startPos, const boost::shared_array<const C>& otherData, size_t otherSize, size_t otherStart, size_t otherEnd);
 	};
 
 	// below follow implementations of templates
@@ -190,7 +204,7 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	void DataImpl<C>::copyData(size_t startPos, const boost::shared_array<C>& otherData, size_t otherSize, size_t otherFirst, size_t otherLast) {
+	void DataImpl<C>::copyData(size_t startPos, const boost::shared_array<const C>& otherData, size_t otherSize, size_t otherFirst, size_t otherLast) {
 		if (otherFirst > otherSize) {
 			throw(CDMException("data-region-start "+ type2string(otherFirst) + " outside range: "+ type2string(otherSize)));
 		}
@@ -324,16 +338,28 @@ namespace MetNoFimex
 
 
 	template<typename T1, typename T2>
-	boost::shared_array<T1> duplicateArrayType(const boost::shared_array<T2>& inData, long length) {
-		boost::shared_array<T1> outData(new T1[length]);
-		std::transform(&inData[0], &inData[length], &outData[0], staticCast<T2>());
-		return outData;
-	}
-	// this version is identical to duplicateArrayType one, except that it allows for specializations
+    boost::shared_array<T1> ArrayTypeConverter<T1,T2>::operator()() {
+        boost::shared_array<T1> outData(new T1[length]);
+        std::transform(&inData[0], &inData[length], &outData[0], staticCast<T2>());
+        return outData;
+    }
+
+	// partial specialization for T1==T2
+    template<typename T>
+    struct ArrayTypeConverter<T,T> {
+        ArrayTypeConverter(const boost::shared_array<T>& inData, size_t length) : inData(inData), length(length){}
+        boost::shared_array<T> operator()() {return inData;}
+      private:
+        boost::shared_array<T> inData;
+        long length;
+    };
+
+
+    // this version is identical to duplicateArrayType one, except that it allows for specializations
 	// in the case of T1 == T2 (see Data.cc)
 	template<typename T1, typename T2>
-	const boost::shared_array<T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length) {
-		return duplicateArrayType<T1,T2>(inData, length);
+	boost::shared_array<const T1> constConvertArrayType(const boost::shared_array<T2>& inData, long length) {
+		return makeSharedArrayConst(ArrayTypeConverter<T1,T2>(inData, length)());
 	}
 
 }

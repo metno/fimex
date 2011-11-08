@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
 	timeInterpol->changeTimeAxis("2007-05-16 10:00:00,2007-05-16 13:00:00,...,2007-05-16 22:00:00;unit=hours since 2007-05-16 00:00:00");
 	boost::shared_ptr<Data> times = timeInterpol->getCDM().getVariable("time").getData();
 	BOOST_CHECK_EQUAL(times->size(), 5);
-	const boost::shared_array<float> timeAry = times->asConstFloat();
+	boost::shared_array<const float> timeAry = times->asConstFloat();
 	BOOST_CHECK_EQUAL(timeAry[0], 10);
 	BOOST_CHECK_EQUAL(timeAry[4], 10+12);
 	string airTemp = "air_temperature";
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolator )
     boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader("test4.nc"));
     boost::shared_ptr<Data> ncTimes = ncReader->getData("time");
     BOOST_CHECK_EQUAL(ncTimes->size(), 5);
-    const boost::shared_array<float> ncTimeAry = ncTimes->asConstFloat();
+    boost::shared_array<const float> ncTimeAry = ncTimes->asConstFloat();
     BOOST_CHECK_EQUAL(ncTimeAry[0], 10);
     BOOST_CHECK_EQUAL(ncTimeAry[4], 10+12);
 
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
 	timeInterpol->changeTimeAxis("0,3,...,x;relativeUnit=hours since 2001-01-01 10:00:00;unit=hours since 2007-05-16 00:00:00");
 	boost::shared_ptr<Data> times = timeInterpol->getCDM().getVariable("time").getData();
 	BOOST_CHECK_EQUAL(times->size(), 21);
-	const boost::shared_array<float> timeAry = times->asConstFloat();
+	boost::shared_array<const float> timeAry = times->asConstFloat();
 	BOOST_CHECK_EQUAL(timeAry[0], -2);
 	BOOST_CHECK_EQUAL(timeAry[4], 10);
 	string airTemp = "air_temperature";
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_timeInterpolatorRelative )
     boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader("test4.nc"));
 	boost::shared_ptr<Data> ncTimes = ncReader->getData("time");
 	BOOST_CHECK_EQUAL(ncTimes->size(), 21);
-	const boost::shared_array<float> ncTimeAry = ncTimes->asConstFloat();
+	boost::shared_array<const float> ncTimeAry = ncTimes->asConstFloat();
 	BOOST_CHECK_EQUAL(ncTimeAry[0], -2);
 	BOOST_CHECK_EQUAL(ncTimeAry[4], 10);
 

@@ -143,7 +143,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
 			string unit = cdm_->getAttribute(timeDimName, "units").getStringValue();
 			TimeUnit tu(unit);
 			vector<FimexTime> oldTimes;
-			boost::shared_array<double> oldTimesPtr = times->asConstDouble();
+			boost::shared_array<double> oldTimesPtr = times->asDouble();
 			size_t nEl = times->size();
 			transform(oldTimesPtr.get(),
 					  oldTimesPtr.get()+nEl,

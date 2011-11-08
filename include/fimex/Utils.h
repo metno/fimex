@@ -32,6 +32,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <limits>
 #include "fimex/CDMException.h"
+#include <boost/shared_array.hpp>
 
 namespace MetNoFimex
 {
@@ -331,6 +332,30 @@ public:
         }
     }
 };
+
+/**
+ *  delete-class for shared_array's, making sure that the original shared_array does not expire before
+ *  the current shared_array. Use as
+ *
+ *  boost::shared_array<int> bla;
+ *  boost::shared_array<const int>(bla.get(), SharedArrayConstCastDeleter(bla));
+ *
+ */
+template<typename T>
+struct SharedArrayConstCastDeleter {
+    SharedArrayConstCastDeleter( boost::shared_array<T> ptr ) : ptr(ptr) {};
+    template<typename C> void operator()(C*) {}
+protected:
+    boost::shared_array<T> ptr;
+};
+/**
+ * convert a shared_array<T> to a shared_array<const T> (which will be automatically possilbe in boost::shared_array 1.47)
+ */
+template<typename T>
+boost::shared_array<const T> makeSharedArrayConst(const boost::shared_array<T>& sa) {
+    return boost::shared_array<const T>(sa.get(), SharedArrayConstCastDeleter<T>(sa));
+}
+
 
 }
 

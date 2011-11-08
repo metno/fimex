@@ -119,17 +119,17 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
             if (xData->size() < 2 || yData->size() < 2) throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongXAxis", xData->size()),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()),"");
-            const boost::shared_array<double> xArray = xData->asConstDouble();
+            const boost::shared_array<double> xArray = xData->asDouble();
             GRIB_CHECK(grib_set_double(gribHandle.get(), "DxInMetres", (xArray[1] - xArray[0])),"");
-            const boost::shared_array<double> yArray = yData->asConstDouble();
+            const boost::shared_array<double> yArray = yData->asDouble();
             GRIB_CHECK(grib_set_double(gribHandle.get(), "DyInMetres", (yArray[1] - yArray[0])),"");
             std::string latitude, longitude;
             if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
-                double lon = cdmReader->getData(longitude)->asConstDouble()[0];
+                double lon = cdmReader->getData(longitude)->asDouble()[0];
                 while (lon < 0) {
                     lon += 360;
                 }
-                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asConstDouble()[0]),"");
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getData(latitude)->asDouble()[0]),"");
                 GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon),"");
             } else {
                 throw CDMException("unable to find latitude/longitude for variable " + varName);
@@ -149,8 +149,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
                 if (ni < 2 || nj < 2) {
                     throw CDMException("longitude, latitude for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
                 }
-                const boost::shared_array<double> longs = lonData->asConstDouble();
-                const boost::shared_array<double> lats = latData->asConstDouble();
+                const boost::shared_array<double> longs = lonData->asDouble();
+                const boost::shared_array<double> lats = latData->asDouble();
                di = longs[1] - longs[0];
 				dj = lats[1] - lats[0];
 				lat0 = lats[0];
@@ -190,8 +190,8 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
 				throw CDMException("(ni,nj) for varName " + varName + " has to small dimension for grid: (" + type2string(ni) + "," + type2string(nj) + ")");
 			}
 			double di, dj, rlon0, rlat0, rlonX, rlatX;
-			const boost::shared_array<double> rlongs = rLonData->asConstDouble();
-			const boost::shared_array<double> rlats = rLatData->asConstDouble();
+			const boost::shared_array<double> rlongs = rLonData->asDouble();
+			const boost::shared_array<double> rlats = rLatData->asDouble();
 			di = rlongs[1] - rlongs[0];
 			dj = rlats[1] - rlats[0];
 			rlat0 = rlats[0];
@@ -206,10 +206,10 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
 			}
 			CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_longitude"));
 			if (ait == projAttrs.end()) throw CDMException("grid_north_pole_longitude not found for projection " + proj->toString());
-            double northPoleLon = ait->getData()->asConstDouble()[0];
+            double northPoleLon = ait->getData()->asDouble()[0];
             ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("grid_north_pole_latitude"));
             if (ait == projAttrs.end()) throw CDMException("grid_north_pole_latitude not found for projection " + proj->toString());
-			double northPoleLat = ait->getData()->asConstDouble()[0];
+			double northPoleLat = ait->getData()->asDouble()[0];
 
 			double southPoleLat = -1 * northPoleLat;
 			while (southPoleLat < -90) {
@@ -303,10 +303,10 @@ boost::shared_ptr<Data> GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(co
 	double scale = 1.;
 	double offset = 0.;
 	if (cdm.getAttribute(varName, "scale_factor", attr)) {
-		scale = attr.getData()->asConstDouble()[0];
+		scale = attr.getData()->asDouble()[0];
 	}
 	if (cdm.getAttribute(varName, "add_offset", attr)) {
-		offset = attr.getData()->asConstDouble()[0];
+		offset = attr.getData()->asDouble()[0];
 	}
 	// scale and offset by units
 	if (cdm.getAttribute(varName, "units", attr)) {

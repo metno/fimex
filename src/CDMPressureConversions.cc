@@ -212,7 +212,7 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
     } else if (varName == "upward_air_velocity") {
         boost::shared_ptr<Data> td = getDataSlice(p_->air_temp, unLimDimPos);
         assert(td.get() != 0);
-        const boost::shared_array<float> tda = td->asConstFloat();
+        boost::shared_array<float> tda = td->asFloat();
         boost::shared_ptr<Data> d = dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos);
         assert(d.get() != 0);
         size_t size = d->size();

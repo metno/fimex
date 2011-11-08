@@ -124,7 +124,7 @@ namespace MetNoFimex {
         {
             size_t cSlicePos = -1;
             boost::shared_ptr<Data> raw_slice  = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);
-            boost::shared_array<float> slice_to_write = raw_slice->asConstFloat();
+            boost::shared_array<float> slice_to_write = raw_slice->asFloat();
             profile.pTags_->sliceToMetGmLayout(slice_to_write);
             MGM_THROW_ON_ERROR(mgm_write_group5_slice(*metgmFileHandle_, *metgmHandle_, slice_to_write.get(), &cSlicePos));
 //            MGM_MESSAGE_POINT(std::string(" slice # written: ").append(boost::lexical_cast<std::string>(cSlicePos)))

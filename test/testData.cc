@@ -37,15 +37,37 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
+BOOST_AUTO_TEST_CASE( test_data_retrieval )
+{
+    DataImpl<int> data(10);
+    for (int i = 0; i < 10; i++) {
+        data.setValue(i, i);
+    }
+    BOOST_CHECK(data.asBase()[0] == 0);
+    BOOST_CHECK(data.asBase()[4] == 4);
+    BOOST_CHECK(data.asInt()[0] == 0);
+    BOOST_CHECK(data.asConstInt()[0] == 0);
+
+    // changing data
+    data.asInt()[0] = 10;
+    BOOST_CHECK(data.asInt()[0] == 10);
+    BOOST_CHECK(data.asConstInt()[0] == 10);
+
+    // changing data with different type not reflected
+    data.asDouble()[0] = 100;
+    BOOST_CHECK(data.asInt()[0] == 10);
+    BOOST_CHECK(data.asConstInt()[0] == 10);
+}
+
 BOOST_AUTO_TEST_CASE( test_slicing )
 {
-	DataImpl<int> data(10);
-	for (int i = 0; i < 10; i++) {
-		data.setValue(i, i);
-	}
-	BOOST_CHECK(data.asBase()[0] == 0);
-	int start = 4;
-	BOOST_CHECK(data.asBase()[start] == start);
+    DataImpl<int> data(10);
+    for (int i = 0; i < 10; i++) {
+        data.setValue(i, i);
+    }
+    BOOST_CHECK(data.asBase()[0] == 0);
+    int start = 4;
+    BOOST_CHECK(data.asBase()[start] == start);
 
 	std::vector<size_t> orgDimSize(1, 10);
 	std::vector<size_t> newDimStart(1, start);

@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     boost::shared_ptr<Data> allData = reader->getData("cloud_area_fraction_in_atmosphere_layer");
     size_t n = 11 * 11 * 4 * 4;
     BOOST_CHECK(allData->size() == n);
-    boost::shared_array<short> all = allData->asConstShort();
+    boost::shared_array<const short> all = allData->asConstShort();
     BOOST_CHECK(accumulate(all.get(), all.get()+n, 0) == (n*(n-1)/2)); // gauss computation of sum of sequence
 
     // check accessor function
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     boost::shared_ptr<Data> sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     size_t s = 11*11;
     BOOST_CHECK(sData->size() == s);
-    boost::shared_array<short> slice = sData->asConstShort();
+    boost::shared_array<const short> slice = sData->asConstShort();
     BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0) == (n*(n-1)/2 - (n-s)*(n-s-1)/2));
 
     // native slice reader

@@ -101,7 +101,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const
             const std::string t_unit = tUnitAttribute.getStringValue();
             const TimeUnit kilde_tu(t_unit);
 
-            const boost::shared_array<double> tArray = data->asConstDouble();
+            const boost::shared_array<double> tArray = data->asDouble();
 
             for(size_t index = 0; index < data->size(); ++index) {
                 time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);
@@ -208,7 +208,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const
         const std::string t_unit = tUnitAttribute.getStringValue();
         const TimeUnit kilde_tu(t_unit);
 
-        const boost::shared_array<double> tArray = tData->asConstDouble();
+        const boost::shared_array<double> tArray = tData->asDouble();
 
         for(size_t index = 0; index < tData->size(); ++index) {
             time_t t = kilde_tu.unitTime2epochSeconds(tArray[index]);

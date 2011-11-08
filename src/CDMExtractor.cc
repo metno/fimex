@@ -194,7 +194,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
             usedDimensions.insert(shape[0]);
             boost::shared_ptr<Data> vData = dataReader->getScaledData((*va)->getName());
             if (vData->size() > 0) {
-                const boost::shared_array<double> vArray = vData->asConstDouble();
+                boost::shared_array<double> vArray = vData->asDouble();
                 // calculate everything in the original unit
                 string vaUnits = cdm.getUnits((*va)->getName());
                 double offset,slope;

@@ -186,9 +186,9 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         string latitude = coordSys->findAxisOfType(CoordinateAxis::Lat)->getName();
         if (latitude == "" || longitude == "") throw CDMException("could not find lat/long variables");
         const vector<string> dims = cdm_->getVariable(latitude).getShape();
-        boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
+        boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asDouble();
         size_t latSize = dataReader->getData(latitude)->size();
-        boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
+        boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asDouble();
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         if (getProjectionName(proj_input) != "latlong") {
@@ -247,26 +247,6 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
     }
 }
 
-// TODO - ab: add new changeProjection CDMInterpolator::changeProjection(int method, std::string netcdf-file)
-//      attention: check what happens if netcdf is not compiled in - should be a smooth warning
-//      function should be similar to above changeProjection (in particular concerning, but detect already)
-//               -- only support MIFI_INTERPOL_NEAREST_NEIGHBOR, MIFI_INTERPOL_BILINEAR, MIFI_INTERPOL_BICUBIC
-//                  warn that the other methods are not implemented (I don't see that it makes sense)
-//                  redirect to a function 'changeProjectionByProjectionParametersToLatLonList(method,
-//                                                                                               proj_input,
-//                                                                                               out_x_axis,
-//                                                                                               out_y_axis,
-//                                                                                               out_x_axis_unit,
-//                                                                                               out_y_axis_unit,
-//                                                                                               out_x_axis_type,
-//                                                                                               out_y_axis_type,
-//                                                                                               data(latVals),
-//                                                                                               data(lonVals))'
-//                           all the parameters can be extracted from the netcdf-file
-//      read below about changeProjectionByProjectionParametersToLatLonList
-//
-//      add new changeProjection - function to fimex.cc (add --interpolate.definitionNcFile)
-
 void CDMInterpolator::changeProjection(int method, const std::string& netcdf_template_file)
 {
     if (!std::ifstream(netcdf_template_file.c_str())) {
@@ -303,10 +283,12 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            std::string tmplYName;
            tmplXName = tmplCdmRef.getHorizontalXAxis(tmplRefVarName);
            tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
-           boost::shared_array<double> tmplXArray = tmplReader->getData(tmplXName)->asConstDouble();
-           boost::shared_array<double> tmplYArray = tmplReader->getData(tmplYName)->asConstDouble();
-           vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplReader->getData(tmplXName)->size());
-           vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplReader->getData(tmplYName)->size());
+           boost::shared_ptr<Data> tmplXData = tmplReader->getData(tmplXName);
+           boost::shared_ptr<Data> tmplYData = tmplReader->getData(tmplYName);
+           boost::shared_array<const double> tmplXArray = tmplXData->asConstDouble();
+           boost::shared_array<const double> tmplYArray = tmplYData->asConstDouble();
+           vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
+           vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
 
            std::string proj4string("+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs");
 
@@ -860,9 +842,9 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
     string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
     string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
-    boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
+    boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asDouble();
     size_t latSize = dataReader->getData(latitude)->size();
-    boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
+    boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asDouble();
     transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
     transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
@@ -946,9 +928,9 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 
     string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
     string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
-    boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asConstDouble();
+    boost::shared_array<double> latVals = dataReader->getScaledData(latitude)->asDouble();
     size_t latSize = dataReader->getData(latitude)->size();
-    boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asConstDouble();
+    boost::shared_array<double> lonVals = dataReader->getScaledData(longitude)->asDouble();
     transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
     transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
@@ -1085,7 +1067,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         miupXAxis = MIFI_LONGITUDE;
         transform(&orgXAxisValsArray[0], &orgXAxisValsArray[0]+orgXAxisVals->size(), &orgXAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         miupYAxis = MIFI_LATITUDE;
-        transform(&orgYAxisValsArray[0], &orgYAxisValsArray[0]+orgYAxisVals->size(), &orgXAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+        transform(&orgYAxisValsArray[0], &orgYAxisValsArray[0]+orgYAxisVals->size(), &orgYAxisValsArray[0], bind1st(multiplies<double>(), DEG_TO_RAD));
     }
     // translate coordinates (in rad or m) to indices
     mifi_points2position(&pointsOnXAxis[0], fieldSize, orgXAxisValsArray.get(), orgXAxisVals->size(), miupXAxis);
@@ -1093,6 +1075,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 
     LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
     cachedInterpolation = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
+    LOG4FIMEX(logger, Logger::DEBUG, "done");
 
     if (hasSpatialVectors()) {
         // prepare interpolation of vectors

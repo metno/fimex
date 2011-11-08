@@ -243,7 +243,7 @@ void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, int nc_dt, s
     case NC_BYTE:
     case NC_STRING:
     case NC_CHAR: {
-        ncCheck(nc_put_vara_schar(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<signed char*>(data->asConstChar().get())));
+        ncCheck(nc_put_vara_schar(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<const signed char*>(data->asConstChar().get())));
         break;
     }
     case NC_SHORT: {
