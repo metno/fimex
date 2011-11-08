@@ -78,9 +78,14 @@ boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, 
 	switch (datatype) {
 		case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > mydata(new DataImpl<double>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > mydata(new DataImpl<float>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_INT64:    { boost::shared_ptr<DataImpl<long long> > mydata(new DataImpl<long long>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_INT:    { boost::shared_ptr<DataImpl<int> > mydata(new DataImpl<int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > mydata(new DataImpl<short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_CHAR:   { boost::shared_ptr<DataImpl<char> > mydata(new DataImpl<char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_UINT64:    { boost::shared_ptr<DataImpl<unsigned long long> > mydata(new DataImpl<unsigned long long>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_UINT:    { boost::shared_ptr<DataImpl<unsigned int> > mydata(new DataImpl<unsigned int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_USHORT:  { boost::shared_ptr<DataImpl<unsigned short> > mydata(new DataImpl<unsigned short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_UCHAR:   { boost::shared_ptr<DataImpl<unsigned char> > mydata(new DataImpl<unsigned char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
 		case CDM_NAT: return boost::shared_ptr<Data>(new DataImpl<char>(0));
 		default: ;
 	}
@@ -134,6 +139,16 @@ template<>
 CDMDataType DataImpl<short>::getDataType() const {return CDM_SHORT;}
 template<>
 CDMDataType DataImpl<int>::getDataType() const {return CDM_INT;}
+template<>
+CDMDataType DataImpl<long long>::getDataType() const {return CDM_INT64;}
+template<>
+CDMDataType DataImpl<unsigned char>::getDataType() const {return CDM_UCHAR;}
+template<>
+CDMDataType DataImpl<unsigned short>::getDataType() const {return CDM_USHORT;}
+template<>
+CDMDataType DataImpl<unsigned int>::getDataType() const {return CDM_UINT;}
+template<>
+CDMDataType DataImpl<unsigned long long>::getDataType() const {return CDM_UINT64;}
 template<>
 CDMDataType DataImpl<float>::getDataType() const {return CDM_FLOAT;}
 template<>

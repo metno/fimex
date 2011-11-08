@@ -269,11 +269,11 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
             for (int x = 0; x < ox; ++x) {
 				// find a delta <<< than the diagonal to the next cell
 				if (x < (ox-1) && y < (oy-1)) {
-					delta[y*ox+x] = in_xproj_axis[(y+1)*ox +(x+1)] - in_xproj_axis[y*ox +x] * 1e-3;
+					delta[y*ox+x] = (in_xproj_axis[(y+1)*ox +(x+1)] - in_xproj_axis[y*ox +x]) * 1e-3;
 				} else if (x < (ox-1)) {
-					delta[y*ox+x] = in_xproj_axis[y*ox +(x+1)] - in_xproj_axis[y*ox +x] * 1e-3;
+					delta[y*ox+x] = (in_xproj_axis[y*ox +(x+1)] - in_xproj_axis[y*ox +x]) * 1e-3;
 				} else if (y < (oy-1)){
-					delta[y*ox+x] = in_xproj_axis[(y+1)*ox +x] - in_xproj_axis[y*ox +x] * 1e-3;
+					delta[y*ox+x] = (in_xproj_axis[(y+1)*ox +x] - in_xproj_axis[y*ox +x]) * 1e-3;
 				} else {
 					delta[y*ox+x] = delta[y*ox+x-1];
 				}
@@ -312,11 +312,11 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
             for (int x = 0; x < ox; ++x) {
 				// find a delta <<< than the diagonal to the next cell
 				if (x < (ox-1) && y < (oy-1)) {
-					delta[y*ox+x] = in_yproj_axis[(y+1)*ox +(x+1)] - in_yproj_axis[y*ox +x] * 1e-3;
+					delta[y*ox+x] = (in_yproj_axis[(y+1)*ox +(x+1)] - in_yproj_axis[y*ox +x]) * 1e-3;
 				} else if (x < (ox-1)) {
-					delta[y*ox+x] = in_yproj_axis[y*ox +(x+1)] - in_yproj_axis[y*ox +x] * 1e-3;
+					delta[y*ox+x] = (in_yproj_axis[y*ox +(x+1)] - in_yproj_axis[y*ox +x]) * 1e-3;
 				} else if (y < (oy-1)){
-					delta[y*ox+x] = in_yproj_axis[(y+1)*ox +x] - in_yproj_axis[y*ox +x] * 1e-3;
+					delta[y*ox+x] = (in_yproj_axis[(y+1)*ox +x] - in_yproj_axis[y*ox +x]) * 1e-3;
 				} else {
 					delta[y*ox+x] = delta[y*ox+x-1];
 				}
@@ -380,8 +380,8 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 				m3 = *matrixPos++;
 				u_old = *uCur;
 				v_old = *vCur;
-				u_new = u_old * m0 + v_old * m1;
-				v_new = u_old * m2 + v_old * m3;
+				u_new = u_old * m0 + v_old * m2;
+				v_new = u_old * m1 + v_old * m3;
 				if (method == MIFI_VECTOR_KEEP_SIZE) {
 					double norm = sqrt( (u_old*u_old + v_old*v_old) /
 										(u_new*u_new + v_new*v_new) );

@@ -328,6 +328,11 @@ namespace MetNoFimex
 		case CDM_CHAR: data = boost::shared_ptr<Data>(new DataImpl<char>(convertArrayType<char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
 		case CDM_SHORT: data = boost::shared_ptr<Data>(new DataImpl<short>(convertArrayType<short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
 		case CDM_INT: data = boost::shared_ptr<Data>(new DataImpl<int>(convertArrayType<int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_UCHAR: data = boost::shared_ptr<Data>(new DataImpl<unsigned char>(convertArrayType<unsigned char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_USHORT: data = boost::shared_ptr<Data>(new DataImpl<unsigned short>(convertArrayType<unsigned short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_UINT: data = boost::shared_ptr<Data>(new DataImpl<unsigned int>(convertArrayType<unsigned int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_INT64: data = boost::shared_ptr<Data>(new DataImpl<long long>(convertArrayType<long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_UINT64: data = boost::shared_ptr<Data>(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
 		case CDM_FLOAT: data = boost::shared_ptr<Data>(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
 		case CDM_DOUBLE: data = boost::shared_ptr<Data>(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
 		case CDM_STRING: throw CDMException("cannot convert string datatype"); break;
