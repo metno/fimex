@@ -85,12 +85,10 @@ namespace MetNoFimex {
 
             tags = MetGmTags::createMetGmTagsForSlicedWriting(cdmReader, pVariable, metgmHandle_, entry.p_id_);
 
-            assert(tags.get());
-
-//            if(tags->data().get() == 0) {
-//                MGM_MESSAGE_POINT(" EMPTY DATA -- not writing this wariable to mgm")
-//                continue;
-//            }
+            if(!tags.get()) {
+                MGM_MESSAGE_POINT(std::string(" MetGmTag null -- not writing variable :").append(entry.cdmName_))
+                continue;
+            }
 
             MetGmCDMVariableProfile profile(entry.p_id_, entry.cdmName_, tags);
             // make sure that units are aligned
@@ -120,7 +118,18 @@ namespace MetNoFimex {
 
         MetGmCDMVariableProfile profile = *(nameView.find(pVar->getName()));
 
-        for(size_t slice_index = 0; slice_index < profile.pTags_->tTag()->nT(); ++slice_index)
+//        MGM_MESSAGE_POINT(std::string("variable name=").append(pVar->getName()))
+
+        assert(profile.pTags_.get());
+
+        size_t total_num_of_slices = 0;
+        if(!profile.pTags_->tTag().get()) {
+            total_num_of_slices = 1;
+        } else {
+            total_num_of_slices = profile.pTags_->tTag()->nT();
+        }
+
+        for(size_t slice_index = 0; slice_index < total_num_of_slices; ++slice_index)
         {
             size_t cSlicePos = -1;
             boost::shared_ptr<Data> raw_slice  = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);

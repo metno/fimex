@@ -57,7 +57,7 @@ namespace MetNoFimex {
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForWriting(pCdmReader, pVariable, tags->pGp3_, fillValue, addOffset, scaleFactor);
 
-        if(tags->dimTag_.get() && tags->pGp3_.get() && tags->pGp5_.get())
+        if(tags->pGp5_.get() && tags->dimTag_.get() && tags->pGp3_.get())
             return tags;
         else
             boost::shared_ptr<MetGmTags>();
@@ -71,10 +71,7 @@ namespace MetNoFimex {
         tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pGp1->mgmHandle());
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTag(pGp1, tags->pGp3_, vTag);
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForReading(tags->pGp3_, tags->dimTag_);
-        if(tags->dimTag_.get() && tags->pGp3_.get() && tags->pGp5_.get())
-            return tags;
-        else
-            boost::shared_ptr<MetGmTags>();
+        return tags;
     }
 
     boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForSlicedReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,
@@ -85,10 +82,7 @@ namespace MetNoFimex {
         tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForReading(pGp1->mgmHandle());
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTag(pGp1, tags->pGp3_, vTag);
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedReading(tags->pGp3_, tags->dimTag_);
-        if(tags->dimTag_.get() && tags->pGp3_.get() && tags->pGp5_.get())
-            return tags;
-        else
-            boost::shared_ptr<MetGmTags>();
+        return tags;
     }
 
     boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
@@ -100,10 +94,10 @@ namespace MetNoFimex {
         tags->pGp3_   = MetGmGroup3Ptr::createMetGmGroup3PtrForWriting(mgmHandle, p_id);
         tags->dimTag_ = MetGmHDTag::createMetGmDimensionsTagForWriting(pCdmReader, pVariable);
         tags->pGp5_   = MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(pCdmReader, pVariable, tags->pGp3_);
-        if(tags->dimTag_.get() && tags->pGp3_.get() && tags->pGp5_.get())
+        if(tags->pGp5_.get() && tags->dimTag_.get() && tags->pGp3_.get())
             return tags;
         else
-            boost::shared_ptr<MetGmTags>();
+            return boost::shared_ptr<MetGmTags>();
     }
 
     const unsigned short MetGmTags::p_id() const { return pGp3_->p_id(); }
