@@ -623,8 +623,10 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                         std::string msg(" can't convert from ");
                         msg.append(cdmRef.getUnits(varName)).append(" to ").append(mgmUnits).append(" for variable ").append(varName).append(" -- excluding");
                         MGM_MESSAGE_POINT(msg)
-                        boost::shared_array<float> empty;
-                        return boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(pg3, hdtag, empty));
+//                        boost::shared_array<float> empty;
+//                        boost::shared_ptr<MetGmGroup5Ptr> mgm5group(new MetGmGroup5Ptr(pg3, hdtag, empty));
+//                        return mgm5group;
+                          return boost::shared_ptr<MetGmGroup5Ptr>();
                     }
 
                     boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(0)));
