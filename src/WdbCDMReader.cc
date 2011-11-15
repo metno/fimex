@@ -105,6 +105,11 @@ WdbCDMReader::WdbCDMReader(const std::string& source, const XMLInput& configXML)
 	d_ = new InternalData(source, configXML, * cdm_);
 }
 
+WdbCDMReader::WdbCDMReader(const std::string& source, const std::string & configFile )
+{
+	d_ = new InternalData(source, XMLInputFile(configFile), * cdm_);
+}
+
 WdbCDMReader::~WdbCDMReader()
 {
 	delete d_;

@@ -80,6 +80,9 @@ public:
 	 */
 	WdbCDMReader(const std::string& source, const XMLInput& configXML);
 
+	WdbCDMReader(const std::string& source, const std::string & configFile );
+
+
 	virtual ~WdbCDMReader();
 
 	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
