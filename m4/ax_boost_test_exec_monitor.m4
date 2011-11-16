@@ -71,6 +71,7 @@ AC_DEFUN([AX_BOOST_TEST_EXEC_MONITOR],
          AC_LANG_POP([C++])
 		])
 		if test "x$ax_cv_boost_test_exec_monitor" = "xyes"; then
+            ax_lib=""
 			AC_DEFINE(HAVE_BOOST_TEST_EXEC_MONITOR,,[define if the Boost::Test_Exec_Monitor library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
 

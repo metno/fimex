@@ -78,6 +78,7 @@ AC_DEFUN([AX_BOOST_IOSTREAMS],
 		if test "x$ax_cv_boost_iostreams" = "xyes"; then
 			AC_DEFINE(HAVE_BOOST_IOSTREAMS,,[define if the Boost::IOStreams library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
+            ax_lib=""
             if test "x$ax_boost_user_iostreams_lib" = "x"; then
                 for libextension in `ls $BOOSTLIBDIR/libboost_iostreams*.so* $BOOSTLIBDIR/libboost_iostreams*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_iostreams.*\)\.so.*$;\1;' -e 's;^lib\(boost_iostreams.*\)\.a*$;\1;'` ; do
                      ax_lib=${libextension}
