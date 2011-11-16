@@ -93,43 +93,43 @@ boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, 
 }
 template<>
 void DataImpl<char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-	copyData(startPos, data.asConstChar(), data.size(), first, last);
+	copyData(startPos, data.asChar(), data.size(), first, last);
 }
 template<>
 void DataImpl<short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-	copyData(startPos, data.asConstShort(), data.size(), first, last);
+	copyData(startPos, data.asShort(), data.size(), first, last);
 }
 template<>
 void DataImpl<int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-	copyData(startPos, data.asConstInt(), data.size(), first, last);
+	copyData(startPos, data.asInt(), data.size(), first, last);
 }
 template<>
 void DataImpl<unsigned char>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-    copyData(startPos, data.asConstUChar(), data.size(), first, last);
+    copyData(startPos, data.asUChar(), data.size(), first, last);
 }
 template<>
 void DataImpl<unsigned short>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-    copyData(startPos, data.asConstUShort(), data.size(), first, last);
+    copyData(startPos, data.asUShort(), data.size(), first, last);
 }
 template<>
 void DataImpl<unsigned int>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-    copyData(startPos, data.asConstUInt(), data.size(), first, last);
+    copyData(startPos, data.asUInt(), data.size(), first, last);
 }
 template<>
 void DataImpl<long long>::setValues(size_t startPos, const Data& data, size_t first, size_t last)  {
-    copyData(startPos, data.asConstInt64(), data.size(), first, last);
+    copyData(startPos, data.asInt64(), data.size(), first, last);
 }
 template<>
 void DataImpl<unsigned long long>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-    copyData(startPos, data.asConstUInt64(), data.size(), first, last);
+    copyData(startPos, data.asUInt64(), data.size(), first, last);
 }
 template<>
 void DataImpl<float>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-	copyData(startPos, data.asConstFloat(), data.size(), first, last);
+	copyData(startPos, data.asFloat(), data.size(), first, last);
 }
 template<>
 void DataImpl<double>::setValues(size_t startPos, const Data& data, size_t first, size_t last) {
-	copyData(startPos, data.asConstDouble(), data.size(), first, last);
+	copyData(startPos, data.asDouble(), data.size(), first, last);
 }
 
 // specializations of getDataType

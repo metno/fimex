@@ -16985,6 +16985,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_regex" >&5
 $as_echo "$ax_cv_boost_regex" >&6; }
 		if test "x$ax_cv_boost_regex" = "xyes"; then
+		    ax_lib=""
 
 $as_echo "#define HAVE_BOOST_REGEX /**/" >>confdefs.h
 
@@ -17218,6 +17219,8 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_program_options" >&5
 $as_echo "$ax_cv_boost_program_options" >&6; }
 		if test "$ax_cv_boost_program_options" = yes; then
+		        ax_lib=""
+
 
 $as_echo "#define HAVE_BOOST_PROGRAM_OPTIONS /**/" >>confdefs.h
 
@@ -17461,6 +17464,7 @@ $as_echo "#define HAVE_BOOST_SYSTEM /**/" >>confdefs.h
 
 			LDFLAGS_SAVE=$LDFLAGS
             if test "x$ax_boost_user_system_lib" = "x"; then
+                ax_lib=""
                 for libextension in `ls $BOOSTLIBDIR/libboost_system*.so* $BOOSTLIBDIR/libboost_system*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_system.*\)\.so.*$;\1;' -e 's;^lib\(boost_system.*\)\.a*$;\1;'` ; do
                      ax_lib=${libextension}
 				    as_ac_Lib=`$as_echo "ac_cv_lib_$ax_lib''_exit" | $as_tr_sh`
@@ -17698,6 +17702,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_filesystem" >&5
 $as_echo "$ax_cv_boost_filesystem" >&6; }
 		if test "x$ax_cv_boost_filesystem" = "xyes"; then
+            ax_lib=""
 
 $as_echo "#define HAVE_BOOST_FILESYSTEM /**/" >>confdefs.h
 
@@ -17939,6 +17944,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_date_time" >&5
 $as_echo "$ax_cv_boost_date_time" >&6; }
 		if test "x$ax_cv_boost_date_time" = "xyes"; then
+            ax_lib=""
 
 $as_echo "#define HAVE_BOOST_DATE_TIME /**/" >>confdefs.h
 
@@ -18182,6 +18188,7 @@ $as_echo "$ax_cv_boost_iostreams" >&6; }
 $as_echo "#define HAVE_BOOST_IOSTREAMS /**/" >>confdefs.h
 
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/[^\/]*//'`
+            ax_lib=""
             if test "x$ax_boost_user_iostreams_lib" = "x"; then
                 for libextension in `ls $BOOSTLIBDIR/libboost_iostreams*.so* $BOOSTLIBDIR/libboost_iostreams*.a* 2>/dev/null | sed 's,.*/,,' | sed -e 's;^lib\(boost_iostreams.*\)\.so.*$;\1;' -e 's;^lib\(boost_iostreams.*\)\.a*$;\1;'` ; do
                      ax_lib=${libextension}
@@ -18409,6 +18416,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_boost_unit_test_framework" >&5
 $as_echo "$ax_cv_boost_unit_test_framework" >&6; }
 		if test "x$ax_cv_boost_unit_test_framework" = "xyes"; then
+            ax_lib=""
 
 $as_echo "#define HAVE_BOOST_UNIT_TEST_FRAMEWORK /**/" >>confdefs.h
 
