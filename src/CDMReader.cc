@@ -111,7 +111,7 @@ boost::shared_ptr<Data> CDMReader::getData(const std::string& varName)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
-		return variable.getData();
+		return variable.getData()->clone();
 	} else {
 		if (cdm_->hasUnlimitedDim(variable)) {
 			const CDMDimension* udim = cdm_->getUnlimitedDim();
@@ -213,7 +213,7 @@ boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& var
 			size_t sliceSize = getSliceSize(*cdm_.get(), variable);
 			return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
 		} else {
-			return variable.getData();
+			return variable.getData()->clone();
 		}
 	} else {
 		return boost::shared_ptr<Data>();
