@@ -72,6 +72,7 @@ AC_DEFUN([AX_BOOST_REGEX],
          AC_LANG_POP([C++])
 		])
 		if test "x$ax_cv_boost_regex" = "xyes"; then
+		    ax_lib=""
 			AC_DEFINE(HAVE_BOOST_REGEX,,[define if the Boost::Regex library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
             if test "x$ax_boost_user_regex_lib" = "x"; then

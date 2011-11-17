@@ -78,6 +78,7 @@ AC_DEFUN([AX_BOOST_FILESYSTEM],
          AC_LANG_POP([C++])
 		])
 		if test "x$ax_cv_boost_filesystem" = "xyes"; then
+            ax_lib=""
 			AC_DEFINE(HAVE_BOOST_FILESYSTEM,,[define if the Boost::Filesystem library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
             if test "x$ax_boost_user_filesystem_lib" = "x"; then

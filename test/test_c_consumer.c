@@ -101,6 +101,7 @@ int testFeltData(const char* feltFile, const char* configFile) {
                 for (int i = 0; i < size; ++i) {
                     // check accessibility of data, might segfault on error
                     double x = data[i];
+                    x++;
                 }
                 free(data);
             }
@@ -126,6 +127,7 @@ int testFeltData(const char* feltFile, const char* configFile) {
                 for (int i = 0; i < size; ++i) {
                     // check accessibility of data, might segfault on error
                     double x = data[i];
+                    x++;
                     //printf("i: %f\n", data[i]);
                 }
                 if (fabs(data[0]+5718494.) > 1) {

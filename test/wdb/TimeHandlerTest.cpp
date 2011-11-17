@@ -56,7 +56,7 @@ namespace
 {
 GridData::Time timeFromData(const boost::shared_ptr<Data> & data, int index = 0)
 {
-	double time = data->asConstDouble()[index];
+	double time = data->asDouble()[index];
 	return boost::posix_time::from_time_t(time);
 }
 }
@@ -220,7 +220,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimesCreatesTimeOffsetVariable
 	const CDMVariable & offsetVar = cdm.getVariable(TimeHandler::timeOffsetName);
 	boost::shared_ptr<Data> d = timeHandler.getData(offsetVar, 0);
 	BOOST_REQUIRE_EQUAL(2, d->size());
-	boost::shared_array<const double> array = d->asConstDouble();
+	boost::shared_array<double> array = d->asDouble();
 	BOOST_CHECK_EQUAL(0, array[0]);
 	BOOST_CHECK_EQUAL(24*60*60, array[1]);
 

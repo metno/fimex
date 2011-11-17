@@ -291,7 +291,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr c
                            type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+
                            ") != " + type2string(data->size()));
     }
-    boost::shared_array<const float> iData = data->asConstFloat();
+    boost::shared_array<float> iData = data->asFloat();
     size_t oSize = nx*ny*pOut.size()*(nt-startT);
     boost::shared_array<float> oData(new float[oSize]);
 

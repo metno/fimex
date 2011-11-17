@@ -285,8 +285,8 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
            boost::shared_ptr<Data> tmplXData = tmplReader->getData(tmplXName);
            boost::shared_ptr<Data> tmplYData = tmplReader->getData(tmplYName);
-           boost::shared_array<const double> tmplXArray = tmplXData->asConstDouble();
-           boost::shared_array<const double> tmplYArray = tmplYData->asConstDouble();
+           boost::shared_array<double> tmplXArray = tmplXData->asDouble();
+           boost::shared_array<double> tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
            vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
 

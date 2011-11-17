@@ -37,11 +37,11 @@ static bool putRecData(CDMDataType dt, boost::shared_ptr<Data> data, size_t recN
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
-	case CDM_STRING: data->asConstChar().get(); break;
-	case CDM_SHORT:  data->asConstShort().get(); break;
-	case CDM_INT:    data->asConstInt().get(); break;
-	case CDM_FLOAT:  data->asConstFloat().get(); break;
-	case CDM_DOUBLE: data->asConstDouble().get(); break;
+	case CDM_STRING: data->asChar().get(); break;
+	case CDM_SHORT:  data->asShort().get(); break;
+	case CDM_INT:    data->asInt().get(); break;
+	case CDM_FLOAT:  data->asFloat().get(); break;
+	case CDM_DOUBLE: data->asDouble().get(); break;
 	default: return false;
 	}
 	return true;
@@ -62,11 +62,11 @@ static bool putVarData(CDMDataType dt, boost::shared_ptr<Data> data) {
 	switch (dt) {
 	case CDM_NAT: return false;
 	case CDM_CHAR:
-	case CDM_STRING: data->asConstChar().get(); break;
-	case CDM_SHORT:  data->asConstShort().get(); break;
-	case CDM_INT:    data->asConstInt().get(); break;
-	case CDM_FLOAT:  data->asConstFloat().get(); break;
-	case CDM_DOUBLE: data->asConstDouble().get(); break;
+	case CDM_STRING: data->asChar().get(); break;
+	case CDM_SHORT:  data->asShort().get(); break;
+	case CDM_INT:    data->asInt().get(); break;
+	case CDM_FLOAT:  data->asFloat().get(); break;
+	case CDM_DOUBLE: data->asDouble().get(); break;
 	default: return false;
 	}
 	return true;
@@ -113,19 +113,19 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 			switch (dt) {
 			case CDM_STRING: ;
 			case CDM_CHAR:
-				attr.getData()->asConstChar().get();
+				attr.getData()->asChar().get();
 				break;
 			case CDM_SHORT:
-				attr.getData()->asConstShort().get();
+				attr.getData()->asShort().get();
 				break;
 			case CDM_INT:
-				attr.getData()->asConstInt().get();
+				attr.getData()->asInt().get();
 				break;
 			case CDM_FLOAT:
-				attr.getData()->asConstFloat().get();
+				attr.getData()->asFloat().get();
 				break;
 			case CDM_DOUBLE:
-				attr.getData()->asConstDouble().get();
+				attr.getData()->asDouble().get();
 				break;
 			case CDM_NAT:
 			default: throw CDMException("unknown datatype for attribute " + attr.getName());

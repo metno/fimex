@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_feltfile )
     vector<LevelPair> levels = fa.getLevelPairs();
     BOOST_CHECK((fa.getX() * fa.getY()) == 44884);
     vector<short> data(fa.getX()*fa.getY());
-    int scaleFacter = fa.getGrid(fa.getTimes().at(50), levels.at(0), data);
+    fa.getGrid(fa.getTimes().at(50), levels.at(0), data);
     BOOST_CHECK( levels.size() == 1 );
 	BOOST_CHECK( fa.getName() == "u10m" );
 	BOOST_CHECK( fa.getTimes().size() == 61);

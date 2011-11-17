@@ -258,26 +258,29 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	// calculation of deltas: (x+d, y), (x, y+d) -> proj-values
 	double* out_x_delta_proj_axis = malloc(ox*oy*sizeof(double));
 	double* out_y_delta_proj_axis = malloc(ox*oy*sizeof(double));
-	double* delta = malloc(ox*oy*sizeof(double)); // dynamic delta
-	if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL || delta == NULL) {
+	if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL) {
 		fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
 		exit(1);
 	}
 	{// conversion along x axis
-		delta[0] = 1e-3; // will be overwritten if x > 1
+	    // delta usually .1% of distance between neighboring cells
+		double delta;
+		if (ox > 1) {
+		    if (oy > 1) {
+		        delta = 1e-3 * (in_xproj_axis[(1)*ox +(1)] - in_xproj_axis[0]);
+		    } else {
+		        delta = 1e-3 * (in_xproj_axis[(0)*ox +(1)] - in_xproj_axis[0]);
+		    }
+		} else {
+		    if (oy > 1) {
+		        delta = 1e-3 * (in_xproj_axis[(1)*ox +(0)] - in_xproj_axis[0]);
+		    } else {
+		        delta = 1e-3; // no neighbors?
+		    }
+		}
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-				// find a delta <<< than the diagonal to the next cell
-				if (x < (ox-1) && y < (oy-1)) {
-					delta[y*ox+x] = (in_xproj_axis[(y+1)*ox +(x+1)] - in_xproj_axis[y*ox +x]) * 1e-3;
-				} else if (x < (ox-1)) {
-					delta[y*ox+x] = (in_xproj_axis[y*ox +(x+1)] - in_xproj_axis[y*ox +x]) * 1e-3;
-				} else if (y < (oy-1)){
-					delta[y*ox+x] = (in_xproj_axis[(y+1)*ox +x] - in_xproj_axis[y*ox +x]) * 1e-3;
-				} else {
-					delta[y*ox+x] = delta[y*ox+x-1];
-				}
-				out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x] + delta[y*ox+x];
+				out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x] + delta;
 				out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x];
 				pointsZ[y*ox +x] = 0;
 			}
@@ -289,15 +292,14 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			pj_free(outputPJ);
 			free(in_yproj_axis);
 			free(in_xproj_axis);
-			free(delta);
 			free(out_y_delta_proj_axis);
 			free(out_x_delta_proj_axis);
 			return MIFI_ERROR;
 		}
 
+        double deltaInv = 1/delta;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-				double deltaInv = 1/delta[y*ox+x];
 				matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
 						- outXAxis[x]) * deltaInv;
 				matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
@@ -307,21 +309,25 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	}
 
 	{	// conversion along y axis
-		delta[0] = 1e-3; // will be overwritten if x > 1
+        // delta usually .1% of distance between neighboring cells
+        double delta;
+        if (ox > 1) {
+            if (oy > 1) {
+                delta = 1e-3 * (in_xproj_axis[(1)*ox +(1)] - in_xproj_axis[0]);
+            } else {
+                delta = 1e-3 * (in_xproj_axis[(0)*ox +(1)] - in_xproj_axis[0]);
+            }
+        } else {
+            if (oy > 1) {
+                delta = 1e-3 * (in_xproj_axis[(1)*ox +(0)] - in_xproj_axis[0]);
+            } else {
+                delta = 1e-3; // no neighbors?
+            }
+        }
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-				// find a delta <<< than the diagonal to the next cell
-				if (x < (ox-1) && y < (oy-1)) {
-					delta[y*ox+x] = (in_yproj_axis[(y+1)*ox +(x+1)] - in_yproj_axis[y*ox +x]) * 1e-3;
-				} else if (x < (ox-1)) {
-					delta[y*ox+x] = (in_yproj_axis[y*ox +(x+1)] - in_yproj_axis[y*ox +x]) * 1e-3;
-				} else if (y < (oy-1)){
-					delta[y*ox+x] = (in_yproj_axis[(y+1)*ox +x] - in_yproj_axis[y*ox +x]) * 1e-3;
-				} else {
-					delta[y*ox+x] = delta[y*ox+x-1];
-				}
-				out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x];
-				out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x] + delta[y*ox+x];
+                out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x];
+				out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x] + delta;
 				pointsZ[y*ox +x] = 0;
 			}
 		}
@@ -332,15 +338,14 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 			pj_free(outputPJ);
 			free(in_yproj_axis);
 			free(in_xproj_axis);
-			free(delta);
 			free(out_y_delta_proj_axis);
 			free(out_x_delta_proj_axis);
 			return MIFI_ERROR;
 		}
 
+        double deltaInv = 1/delta;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-				double deltaInv = 1/delta[y*ox+x];
 				matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
 						- outXAxis[x]) * deltaInv;
 				matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
@@ -353,7 +358,6 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
 	pj_free(outputPJ);
 	free(in_yproj_axis);
 	free(in_xproj_axis);
-	free(delta);
 	free(out_y_delta_proj_axis);
 	free(out_x_delta_proj_axis);
 	return MIFI_OK;

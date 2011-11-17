@@ -84,7 +84,7 @@ std::ostream& RotatedLatitudeLongitudeProjection::getProj4ProjectionPart(std::os
     std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(params_.begin(), params_.end(), CDMNameEqual("grid_north_pole_longitude"));
     if (foundAttr != params_.end()) {
         if (foundAttr->getData()->size() > 0) {
-            oproj << " +lon_0=" << (foundAttr->getData()->asConstDouble()[0]-180);
+            oproj << " +lon_0=" << (foundAttr->getData()->asDouble()[0]-180);
         }
     }
     addParameterToStream(oproj, "grid_north_pole_latitude", " +o_lat_p=");

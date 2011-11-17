@@ -111,7 +111,7 @@ boost::shared_ptr<Data> CDMReader::getData(const std::string& varName)
 {
 	const CDMVariable& variable = cdm_->getVariable(varName);
 	if (variable.hasData()) {
-		return variable.getData();
+		return variable.getData()->clone();
 	} else {
 		if (cdm_->hasUnlimitedDim(variable)) {
 			const CDMDimension* udim = cdm_->getUnlimitedDim();
@@ -137,10 +137,10 @@ void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, d
 
     CDMAttribute attr;
     if (cdm_->getAttribute(varName, "scale_factor", attr)) {
-        scale = attr.getData()->asConstDouble()[0];
+        scale = attr.getData()->asDouble()[0];
     }
     if (cdm_->getAttribute(varName, "add_offset", attr)) {
-        offset = attr.getData()->asConstDouble()[0];
+        offset = attr.getData()->asDouble()[0];
     }
 }
 
@@ -213,7 +213,7 @@ boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& var
 			size_t sliceSize = getSliceSize(*cdm_.get(), variable);
 			return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
 		} else {
-			return variable.getData();
+			return variable.getData()->clone();
 		}
 	} else {
 		return boost::shared_ptr<Data>();

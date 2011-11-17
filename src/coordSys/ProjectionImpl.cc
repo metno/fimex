@@ -165,7 +165,7 @@ bool ProjectionImpl::addParameterToStream(std::ostream& outStream, const std::st
     if (found != params_.end()) {
         if (replaceName == "") replaceName = name;
         if (found->getData()->size() > 0) {
-            outStream << replaceName << found->getData()->asConstDouble()[0];
+            outStream << replaceName << found->getData()->asDouble()[0];
             return true;
         }
     }

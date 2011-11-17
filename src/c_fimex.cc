@@ -241,7 +241,7 @@ int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size
             *size = 0;
             return -1;
         }
-        boost::shared_array<const double> vArray = vData->asConstDouble();
+        boost::shared_array<double> vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], *data);
         return 0;
     } catch (exception& ex) {
@@ -261,7 +261,7 @@ int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** 
             *size = 0;
             return -1;
         }
-        boost::shared_array<const double> vArray = vData->asConstDouble();
+        boost::shared_array<double> vArray = vData->asDouble();
         copy(&vArray[0], &vArray[*size], *data);
         return 0;
     } catch (exception& ex) {

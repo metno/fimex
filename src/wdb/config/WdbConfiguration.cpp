@@ -220,7 +220,7 @@ void WdbConfiguration::init_(const boost::filesystem::path & configFile)
 void WdbConfiguration::init_(const std::string & configSpec)
 {
 	std::vector<std::string> elements;
-	boost::split(elements, configSpec, boost::is_any_of(":;"));
+	boost::split(elements, configSpec, boost::is_any_of(std::string(":;")));
 
 	BOOST_FOREACH(const std::string & element, elements)
 	{

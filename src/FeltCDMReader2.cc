@@ -115,8 +115,8 @@ vector<double> FeltCDMReader2::readValuesFromXPath(const XMLDoc& doc, const stri
 				double p0 = 100000;
 				const CDMVariable& ap = getCDM().getVariable("ap");
 				const CDMVariable& b = getCDM().getVariable("b");
-				boost::shared_array<const double> apData = ap.getData()->asConstDouble();
-				boost::shared_array<const double> bData = b.getData()->asConstDouble();
+				boost::shared_array<double> apData = ap.getData()->asDouble();
+				boost::shared_array<double> bData = b.getData()->asDouble();
 				for (size_t i = 0; i < ap.getData()->size(); ++i) {
 					retValues.push_back(apData[i]/p0 + bData[i]);
 				}
@@ -618,7 +618,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
         		for (vector<CDMAttribute>::iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
         			if (attrIt->getName() == "scale_factor") {
         				found = true;
-        				float scale = (attrIt->getData()->asConstFloat())[0] * (*it)->getScalingFactor();
+        				float scale = (attrIt->getData()->asFloat())[0] * (*it)->getScalingFactor();
         				attrIt->getData()->setValue(0, scale);
         			}
         		}

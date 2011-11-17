@@ -82,7 +82,7 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
 	// if unlimdim = time-axis, fetch all needed original slices
 	CDMDimension timeDim = cdm_->getDimension(timeAxis);
 	if (timeDim.isUnlimited()) {
-		double currentTime = getDataSliceFromMemory(cdm_->getVariable(timeAxis), unLimDimPos)->asConstDouble()[0];
+		double currentTime = getDataSliceFromMemory(cdm_->getVariable(timeAxis), unLimDimPos)->asDouble()[0];
 		// interpolate and return the time-slices
 		pair<size_t, size_t> orgTimes = timeChangeMap_[timeAxis][unLimDimPos];
         double d1Time = dataReaderTimesInNewUnits_[timeDim.getName()].at(orgTimes.first);
@@ -97,7 +97,7 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
 		    data = d1;
 		} else {
 	        boost::shared_array<float> out(new float[d1->size()]);
-		    mifi_get_values_linear_f(d1->asConstFloat().get(), d2->asConstFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
+		    mifi_get_values_linear_f(d1->asFloat().get(), d2->asFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
 		    data = createData(d1->size(), out);
 		}
 	} else {

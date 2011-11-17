@@ -32,6 +32,7 @@
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
 #include "fimex/Utils.h"
+#include "fimex/deprecated.h"
 
 namespace MetNoFimex
 {
@@ -55,46 +56,61 @@ namespace MetNoFimex
 		/// @brief printing of the current data to ostream, with optional separator
 		virtual void toStream(std::ostream&, std::string separator = "") const = 0;
 
+		/**
+		 *  @brief retrieve data as char
+		 *  @deprecated use asChar()
+		 */
+		DEPRECATED(virtual const boost::shared_array<char> asConstChar() const) = 0;
 		/// @brief retrieve data as char
-		virtual boost::shared_array<const char> asConstChar() const = 0;
-		/// @brief retrieve data as char
-		virtual boost::shared_array<char> asChar() = 0;
+		virtual boost::shared_array<char> asChar() const = 0;
+		/**
+		 *  @brief retrieve data as short
+		 *  @deprecated use asShort()
+		 */
+		DEPRECATED(virtual const boost::shared_array<short> asConstShort() const) = 0;
 		/// @brief retrieve data as short
-		virtual boost::shared_array<const short> asConstShort() const = 0;
-		/// @brief retrieve data as short
-		virtual boost::shared_array<short> asShort() = 0;
+		virtual boost::shared_array<short> asShort() const = 0;
+		/**
+		 *  @brief retrieve data as int
+		 *  @deprecated use asInt()
+		 */
+		DEPRECATED(virtual const boost::shared_array<int> asConstInt() const) = 0;
 		/// @brief retrieve data as int
-		virtual boost::shared_array<const int> asConstInt() const = 0;
-		/// @brief retrieve data as int
-		virtual boost::shared_array<int> asInt() = 0;
+		virtual boost::shared_array<int> asInt() const = 0;
+        /**
+         *  @brief retrieve data as int64
+         *  @deprecated use asInt64()
+         */
+        DEPRECATED(virtual const boost::shared_array<long long> asConstInt64() const) = 0;
         /// @brief retrieve data as int64
-        virtual boost::shared_array<const long long> asConstInt64() const = 0;
-        /// @brief retrieve data as int64
-        virtual boost::shared_array<long long> asInt64() = 0;
+        virtual boost::shared_array<long long> asInt64() const = 0;
+        /**
+         * @brief retrieve data as uchar
+         * @deprecated use asUChar()
+         */
+        DEPRECATED(virtual const boost::shared_array<unsigned char> asConstUChar() const) = 0;
         /// @brief retrieve data as uchar
-        virtual boost::shared_array<const unsigned char> asConstUChar() const = 0;
-        /// @brief retrieve data as uchar
-        virtual boost::shared_array<unsigned char> asUChar() = 0;
+        virtual boost::shared_array<unsigned char> asUChar() const = 0;
         /// @brief retrieve data as short
-        virtual boost::shared_array<const unsigned short> asConstUShort() const = 0;
+        DEPRECATED(virtual const boost::shared_array<unsigned short> asConstUShort() const) = 0;
         /// @brief retrieve data as short
-        virtual boost::shared_array<unsigned short> asUShort() = 0;
+        virtual boost::shared_array<unsigned short> asUShort() const = 0;
         /// @brief retrieve data as uint
-        virtual boost::shared_array<const unsigned int> asConstUInt() const = 0;
+        DEPRECATED(virtual const boost::shared_array<unsigned int> asConstUInt() const) = 0;
         /// @brief retrieve data as uint
-        virtual boost::shared_array<unsigned int> asUInt() = 0;
+        virtual boost::shared_array<unsigned int> asUInt() const = 0;
         /// @brief retrieve data as uint64
-        virtual boost::shared_array<const unsigned long long> asConstUInt64() const = 0;
+        DEPRECATED(virtual const boost::shared_array<unsigned long long> asConstUInt64() const) = 0;
         /// @brief retrieve data as uint64
-        virtual boost::shared_array<unsigned long long> asUInt64() = 0;
+        virtual boost::shared_array<unsigned long long> asUInt64() const = 0;
 		/// @brief retrieve data as float
-		virtual boost::shared_array<const float> asConstFloat() const = 0;
+		DEPRECATED(virtual const boost::shared_array<float> asConstFloat() const) = 0;
 		/// @brief retrieve data as float (eventually copy)
-		virtual boost::shared_array<float> asFloat() = 0;
+		virtual boost::shared_array<float> asFloat() const = 0;
 		/// @brief retrieve data as double
-		virtual boost::shared_array<const double> asConstDouble() const = 0;
+		DEPRECATED(virtual const boost::shared_array<double> asConstDouble() const) = 0;
 		/// @brief retrieve data as double
-		virtual boost::shared_array<double> asDouble() = 0;
+		virtual boost::shared_array<double> asDouble() const = 0;
 		/// @brief retrieve the whole array as a string (with possible separator)
 		virtual std::string asString(std::string separator = "") const = 0;
 

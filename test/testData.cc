@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_slicing )
 	scalar.setValue(0, 3.);
     boost::shared_ptr<Data> scalarSlice = scalar.slice(vector<size_t>(0), vector<size_t>(0), vector<size_t>(0));
     BOOST_CHECK(scalar.size() == scalarSlice->size());
-    BOOST_CHECK(scalar.asConstDouble()[0] == scalarSlice->asConstDouble()[0]);
+    BOOST_CHECK(scalar.asDouble()[0] == scalarSlice->asDouble()[0]);
 }
 
 BOOST_AUTO_TEST_CASE( test_slicing2D )
@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE( test_slicing2D )
 	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
 	BOOST_CHECK(slice->size() == newSize*newSize);
-	BOOST_CHECK((slice->asInt())[0] == (newDimStart[1]*10 + start)); // 44
-	BOOST_CHECK((slice->asInt())[newSize] == (newDimStart[1]*10 + (newSize-1)*10 + start)); // 44
+	BOOST_CHECK((slice->asInt())[0] == static_cast<int>(newDimStart[1]*10 + start)); // 44
+	BOOST_CHECK((slice->asInt())[newSize] == static_cast<int>(newDimStart[1]*10 + (newSize-1)*10 + start)); // 44
 }
 
 BOOST_AUTO_TEST_CASE( test_slicing3D )
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( test_slice_asym )
 			for (size_t k = 0; k < newDimSize[0]; k++) {
 				int pos = k + j * (newDimSize[0]) + i * (newDimSize[1]*newDimSize[0]);
 				//std::cerr << i << ":" << j << ":" << k << " = " << pos << ":" << intSlice[pos] << std::endl;
-				BOOST_CHECK(intSlice[pos] == j + newDimStart[1]);
+				BOOST_CHECK(intSlice[pos] == static_cast<int>(j + newDimStart[1]));
 			}
 }
 

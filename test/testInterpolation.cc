@@ -445,11 +445,11 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_values_rotate_90 )
 	mifi_vector_reproject_values_f(MIFI_VECTOR_KEEP_SIZE, emepProj.c_str(), emepProj2.c_str(), uOut, vOut, emepIOutAxis, emepJOutAxis, MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, 5, 5, 1);
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 5; ++j) {
-			//std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << std::endl;
-			//std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << std::endl;
-			// rotation of 90deg -> u->v, v->-u
-			BOOST_CHECK(fabs(vRot[j*5+i] + uOut[j*5+i]) < 1e-5);
-			BOOST_CHECK(fabs(uRot[j*5+i] - vOut[j*5+i]) < 1e-5);
+			//std::cerr << "uOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << uOut[j*5+i] << " " << vRot[j*5+i] << std::endl;
+			//std::cerr << "vOut(" << emepIOutAxis[i] << "," << emepJOutAxis[j] << ") = " << vOut[j*5+i] << " " << uRot[j*5+i] << std::endl;
+			// rotation of 90deg -> u->-v, v->u
+			BOOST_CHECK(fabs(vRot[j*5+i] - uOut[j*5+i]) < 1e-4);
+			BOOST_CHECK(fabs(uRot[j*5+i] + vOut[j*5+i]) < 1e-4);
 		}
 	}
 	BOOST_CHECK(true);

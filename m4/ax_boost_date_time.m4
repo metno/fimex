@@ -73,6 +73,7 @@ AC_DEFUN([AX_BOOST_DATE_TIME],
          AC_LANG_POP([C++])
 		])
 		if test "x$ax_cv_boost_date_time" = "xyes"; then
+            ax_lib=""
 			AC_DEFINE(HAVE_BOOST_DATE_TIME,,[define if the Boost::Date_Time library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
             if test "x$ax_boost_user_date_time_lib" = "x"; then

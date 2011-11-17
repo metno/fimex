@@ -71,6 +71,8 @@ AC_DEFUN([AX_BOOST_PROGRAM_OPTIONS],
 					AC_LANG_POP([C++])
 		])
 		if test "$ax_cv_boost_program_options" = yes; then
+		        ax_lib=""
+
 				AC_DEFINE(HAVE_BOOST_PROGRAM_OPTIONS,,[define if the Boost::PROGRAM_OPTIONS library is available])
                   BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
                 if test "x$ax_boost_user_program_options_lib" = "x"; then

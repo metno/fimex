@@ -63,7 +63,7 @@ std::vector<CDMAttribute> PolarStereographicProjection::parametersFromProj4(cons
     // switch longitude_of_projection_origin to straight_vertical_longitude_from_pole
     found = find_if(attrs.begin(), attrs.end(), CDMNameEqual("longitude_of_projection_origin"));
     assert(found != attrs.end());
-    double lonVal = found->getData()->asConstDouble()[0];
+    double lonVal = found->getData()->asDouble()[0];
     *found = CDMAttribute("straight_vertical_longitude_from_pole", lonVal);
     return attrs;
 }
