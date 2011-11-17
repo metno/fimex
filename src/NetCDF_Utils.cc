@@ -243,44 +243,44 @@ void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, int nc_dt, s
     case NC_BYTE:
     case NC_STRING:
     case NC_CHAR: {
-        ncCheck(nc_put_vara_schar(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<const signed char*>(data->asConstChar().get())));
+        ncCheck(nc_put_vara_schar(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<const signed char*>(data->asChar().get())));
         break;
     }
     case NC_SHORT: {
-        ncCheck(nc_put_vara_short(ncId, varId, &mstart[0], &mcount[0], data->asConstShort().get()));
+        ncCheck(nc_put_vara_short(ncId, varId, &mstart[0], &mcount[0], data->asShort().get()));
         break;
     }
     case NC_INT: {
-        ncCheck(nc_put_vara_int(ncId, varId, &mstart[0], &mcount[0], data->asConstInt().get()));
+        ncCheck(nc_put_vara_int(ncId, varId, &mstart[0], &mcount[0], data->asInt().get()));
         break;
     }
     case NC_FLOAT: {
-        ncCheck(nc_put_vara_float(ncId, varId, &mstart[0], &mcount[0], data->asConstFloat().get()));
+        ncCheck(nc_put_vara_float(ncId, varId, &mstart[0], &mcount[0], data->asFloat().get()));
         break;
     }
     case NC_DOUBLE: {
-        ncCheck(nc_put_vara_double(ncId, varId, &mstart[0], &mcount[0], data->asConstDouble().get()));
+        ncCheck(nc_put_vara_double(ncId, varId, &mstart[0], &mcount[0], data->asDouble().get()));
         break;
     }
 #if NC_NETCDF4
     case NC_UBYTE: {
-        ncCheck(nc_put_vara_uchar(ncId, varId, &mstart[0], &mcount[0], data->asConstUChar().get()));
+        ncCheck(nc_put_vara_uchar(ncId, varId, &mstart[0], &mcount[0], data->asUChar().get()));
         break;
     }
     case NC_USHORT: {
-        ncCheck(nc_put_vara_ushort(ncId, varId, &mstart[0], &mcount[0], data->asConstUShort().get()));
+        ncCheck(nc_put_vara_ushort(ncId, varId, &mstart[0], &mcount[0], data->asUShort().get()));
         break;
     }
     case NC_UINT: {
-        ncCheck(nc_put_vara_uint(ncId, varId, &mstart[0], &mcount[0], data->asConstUInt().get()));
+        ncCheck(nc_put_vara_uint(ncId, varId, &mstart[0], &mcount[0], data->asUInt().get()));
         break;
     }
     case NC_INT64: {
-        ncCheck(nc_put_vara_longlong(ncId, varId, &mstart[0], &mcount[0], data->asConstInt64().get()));
+        ncCheck(nc_put_vara_longlong(ncId, varId, &mstart[0], &mcount[0], data->asInt64().get()));
         break;
     }
     case NC_UINT64: {
-        ncCheck(nc_put_vara_ulonglong(ncId, varId, &mstart[0], &mcount[0], data->asConstUInt64().get()));
+        ncCheck(nc_put_vara_ulonglong(ncId, varId, &mstart[0], &mcount[0], data->asUInt64().get()));
         break;
     }
 #endif

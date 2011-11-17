@@ -56,7 +56,7 @@ namespace
 {
 GridData::Time timeFromData(const boost::shared_ptr<Data> & data, int index = 0)
 {
-	double time = data->asConstDouble()[index];
+	double time = data->asDouble()[index];
 	return boost::posix_time::from_time_t(time);
 }
 }

@@ -137,10 +137,10 @@ void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, d
 
     CDMAttribute attr;
     if (cdm_->getAttribute(varName, "scale_factor", attr)) {
-        scale = attr.getData()->asConstDouble()[0];
+        scale = attr.getData()->asDouble()[0];
     }
     if (cdm_->getAttribute(varName, "add_offset", attr)) {
-        offset = attr.getData()->asConstDouble()[0];
+        offset = attr.getData()->asDouble()[0];
     }
 }
 

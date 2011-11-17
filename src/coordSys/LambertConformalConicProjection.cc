@@ -88,11 +88,11 @@ std::ostream& LambertConformalConicProjection::getProj4ProjectionPart(std::ostre
     if (foundAttr != params_.end()) {
         // standard_parallel - There may be 1 or 2 values.
         boost::shared_ptr<Data> spData = foundAttr->getData();
-        oproj << " +lat_1=" << spData->asConstDouble()[0];
+        oproj << " +lat_1=" << spData->asDouble()[0];
         if (spData->size() > 2) {
-            oproj << " +lat_2=" << spData->asConstDouble()[1];
+            oproj << " +lat_2=" << spData->asDouble()[1];
         } else {
-            oproj << " +lat_2=" << spData->asConstDouble()[0];
+            oproj << " +lat_2=" << spData->asDouble()[0];
         }
     } else {
         oproj << " +lat_1=0 +lat_2=0";

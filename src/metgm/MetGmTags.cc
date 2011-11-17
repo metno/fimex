@@ -60,7 +60,7 @@ namespace MetNoFimex {
         if(tags->pGp5_.get() && tags->dimTag_.get() && tags->pGp3_.get())
             return tags;
         else
-            boost::shared_ptr<MetGmTags>();
+            return boost::shared_ptr<MetGmTags>();
     }
 
     boost::shared_ptr<MetGmTags> MetGmTags::createMetGmTagsForReading(const boost::shared_ptr<MetGmGroup1Ptr>   pGp1,

@@ -144,7 +144,7 @@ void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
 }
 void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data)
 {
-	GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asConstDouble().get(), data->size()), "setting values");
+	GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");
 }
 
 void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const FimexTime& fTime)

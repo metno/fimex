@@ -382,38 +382,38 @@ void NetCDF_CDMWriter::writeAttributes(const NcVarIdMap& ncVarMap) {
 			CDMDataType dt = attr.getDataType();
 			switch (dt) {
 			case CDM_STRING: ;
-                ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asConstChar().get() ));
+                ncCheck(nc_put_att_text(ncFile->ncId, varId, attr.getName().c_str(), attr.getData()->size(), attr.getData()->asChar().get() ));
                 break;
 			case CDM_CHAR:
-			    ncCheck(nc_put_att_schar(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asConstChar().get()) ));
+			    ncCheck(nc_put_att_schar(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), reinterpret_cast<const signed char*>(attr.getData()->asChar().get()) ));
 				break;
 			case CDM_SHORT:
-				ncCheck(nc_put_att_short(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstShort().get() ));
+				ncCheck(nc_put_att_short(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asShort().get() ));
 				break;
 			case CDM_INT:
-				ncCheck(nc_put_att_int(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstInt().get() ));
+				ncCheck(nc_put_att_int(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asInt().get() ));
 				break;
 			case CDM_FLOAT:
-				ncCheck(nc_put_att_float(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstFloat().get() ));
+				ncCheck(nc_put_att_float(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asFloat().get() ));
 				break;
 			case CDM_DOUBLE:
-				ncCheck(nc_put_att_double(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstDouble().get() ));
+				ncCheck(nc_put_att_double(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asDouble().get() ));
 				break;
 #ifdef NC_NETCDF4
             case CDM_UCHAR:
-                ncCheck(nc_put_att_uchar(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUChar().get() ));
+                ncCheck(nc_put_att_uchar(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asUChar().get() ));
                 break;
             case CDM_USHORT:
-                ncCheck(nc_put_att_ushort(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUShort().get() ));
+                ncCheck(nc_put_att_ushort(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asUShort().get() ));
                 break;
             case CDM_UINT:
-                ncCheck(nc_put_att_uint(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUInt().get() ));
+                ncCheck(nc_put_att_uint(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asUInt().get() ));
                 break;
             case CDM_INT64:
-                ncCheck(nc_put_att_longlong(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstInt64().get() ));
+                ncCheck(nc_put_att_longlong(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asInt64().get() ));
                 break;
             case CDM_UINT64:
-                ncCheck(nc_put_att_ulonglong(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asConstUInt64().get() ));
+                ncCheck(nc_put_att_ulonglong(ncFile->ncId, varId, attr.getName().c_str(), static_cast<nc_type>(cdmDataType2ncType(dt)), attr.getData()->size(), attr.getData()->asUInt64().get() ));
                 break;
 #endif
 			case CDM_NAT:

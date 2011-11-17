@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     size_t n = 11 * 11 * 4 * 4;
     BOOST_CHECK(allData->size() == n);
     boost::shared_array<short> all = allData->asShort();
-    BOOST_CHECK(accumulate(all.get(), all.get()+n, 0) == (n*(n-1)/2)); // gauss computation of sum of sequence
+    BOOST_CHECK(accumulate(all.get(), all.get()+n, 0UL) == static_cast<size_t>(n*(n-1)/2)); // gauss computation of sum of sequence
 
     // check accessor function
     string timeAxis = reader->getCDM().getTimeAxis("cloud_area_fraction_in_atmosphere_layer");
@@ -160,14 +160,14 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     size_t s = 11*11;
     BOOST_CHECK(sData->size() == s);
     boost::shared_array<short> slice = sData->asShort();
-    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0) == (n*(n-1)/2 - (n-s)*(n-s-1)/2));
+    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0UL) == static_cast<size_t>(n*(n-1)/2 - (n-s)*(n-s-1)/2));
 
     // native slice reader
     sData = reader->getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     s = 11*11;
     BOOST_CHECK(sData->size() == s);
     slice = sData->asShort();
-    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0) == (n*(n-1)/2 - (n-s)*(n-s-1)/2));
+    BOOST_CHECK(accumulate(slice.get(), slice.get()+s, 0UL) == static_cast<size_t>(n*(n-1)/2 - (n-s)*(n-s-1)/2));
 
     // vertical slice, general reader
     sb.setStartAndSize(cs.getGeoXAxis(), 1, 1);
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     BOOST_CHECK(sData->size() == 4);
     short firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == firstVal+(i*s));
+        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s)));
     }
 
     // general time slice
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     BOOST_CHECK(sData->size() == 4);
     firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == firstVal+(i*s*4));
+        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s*4)));
     }
 
     // vertical slice, native reader
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     BOOST_CHECK(sData->size() == 4);
     firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == firstVal+(i*s));
+        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s)));
     }
 
     // native time slice
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     BOOST_CHECK(sData->size() == 4);
     firstVal = slice[0];
     for (size_t i = 1; i < 4; i++) {
-        BOOST_CHECK(slice[i] == firstVal+(i*s*4));
+        BOOST_CHECK(slice[i] == static_cast<short>(firstVal+(i*s*4)));
     }
 
     // check reference time
