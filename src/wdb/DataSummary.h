@@ -32,6 +32,7 @@
 #include "database_access/Parameter.h"
 #include "database_access/Level.h"
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <set>
 
 
@@ -55,7 +56,8 @@ public:
 	const std::set<boost::posix_time::ptime> & referenceTimes() const { return referenceTimes_; }
 	const std::set<boost::posix_time::time_duration> & validTimes() const { return validTimes_; }
 	const std::set<float> & levelValues() const { return levelValues_; }
-	const std::set<int> & versions() const { return versions_; }
+	const std::set<int> & versions() const;
+	bool hasManyVersions() const { return hasManyVersions_; }
 
 	const Parameter & parameter() const { return parameter_; }
     int refereneceTimeIndex(const boost::posix_time::ptime & t) const;
@@ -73,6 +75,10 @@ private:
 	LevelType * level_;
 	std::set<float> levelValues_;
 	std::set<int> versions_;
+	bool hasManyVersions_;
+
+	typedef boost::tuple<boost::posix_time::ptime, boost::posix_time::time_duration, float> DataSummaryExceptVersion;
+	std::set<DataSummaryExceptVersion> uniqueDataExceptDataVersion_;
 };
 
 }

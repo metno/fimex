@@ -316,6 +316,20 @@ BOOST_FIXTURE_TEST_CASE(missingVersions, WdbIndexTestFixture)
 	BOOST_CHECK_EQUAL(WdbIndex::UNDEFINED_GID, gids[1]);
 }
 
+BOOST_FIXTURE_TEST_CASE(variousVersionsForTimesteps, WdbIndexTestFixture)
+{
+	add(0, "2011-04-07 06:00:00");
+	add(1, "2011-04-07 07:00:00");
+	WdbIndex index(gridData());
+
+	WdbIndex::GidList gids1 = index.getData(defaultParameter.name(), 0);
+	BOOST_REQUIRE_EQUAL(1, gids1.size());
+	BOOST_CHECK_EQUAL(0, gids1[0]);
+	WdbIndex::GidList gids = index.getData(defaultParameter.name(), 1);
+	BOOST_REQUIRE_EQUAL(1, gids.size());
+	BOOST_CHECK_EQUAL(1, gids[0]);
+}
+
 BOOST_FIXTURE_TEST_CASE(missingTimeStepWithManyVersions, WdbIndexTestFixture)
 {
 	add(Parameter("temperature", "C"), "2011-04-07 06:00:00");

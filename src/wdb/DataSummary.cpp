@@ -29,6 +29,8 @@
 #include "DataSummary.h"
 #include "database_access/GridData.h"
 #include <boost/foreach.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
+#include <boost/assign/list_of.hpp>
 #include <stdexcept>
 
 namespace MetNoFimex
@@ -38,7 +40,7 @@ namespace wdb
 
 
 DataSummary::DataSummary() :
-	level_(0)
+	level_(0), hasManyVersions_(false)
 {
 }
 
@@ -67,6 +69,13 @@ void DataSummary::add(const GridData & gridData)
 	else
 		level_ = new LevelType(gridData.level().type());
 	levelValues_.insert(gridData.level().to());
+
+	DataSummaryExceptVersion collection(gridData.referenceTime(), gridData.validTo() - gridData.referenceTime(), gridData.level().to());
+	if ( uniqueDataExceptDataVersion_.find(collection) != uniqueDataExceptDataVersion_.end() )
+		hasManyVersions_ = true;
+	else
+		uniqueDataExceptDataVersion_.insert(collection);
+
 	versions_.insert(gridData.version());
 }
 
@@ -90,11 +99,24 @@ void DataSummary::mergeWith(const DataSummary & other)
 		levelValues_.insert(lvls.begin(), lvls.end());
 	}
 
-	if ( versions_.size() > 1 )
+	if ( hasManyVersions() )
 	{
 		const std::set<int> & vers = other.versions();
 		versions_.insert(vers.begin(), vers.end());
 	}
+}
+
+const std::set<int> & DataSummary::versions() const
+{
+	if ( hasManyVersions() )
+		return versions_;
+
+	std::set<int> * ret = new std::set<int>;
+	ret->insert(0);
+	return * ret;
+
+//	static const std::set<int> ret = boost::assign::list_of(0);
+//	return ret;
 }
 
 namespace
@@ -137,7 +159,9 @@ int DataSummary::levelIndex(float level) const
 
 int DataSummary::versionIndex(int index) const
 {
-	return indexOf(index, versions_);
+	if ( hasManyVersions() )
+		return indexOf(index, versions_);
+	return 0;
 }
 
 }
