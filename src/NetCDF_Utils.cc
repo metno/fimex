@@ -237,7 +237,11 @@ void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, int nc_dt, s
         std::copy(&count[0], &count[0]+dimLen, &mcount[0]);
     }
     if (sliceLen != data->size())
-        throw CDMException("sliceLength != dataSize");
+    {
+    	std::ostringstream msg;
+    	msg << "sliceLength (" << sliceLen << ") != dataSize (" << data->size() << ")";
+        throw CDMException(msg.str());
+    }
 
     switch (nc_dt) {
     case NC_BYTE:
