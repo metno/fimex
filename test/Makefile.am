@@ -48,6 +48,7 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
   GRIBAPI_NC_TESTS = testGribReader
+  METGM_NC_TESTS = testMetGmWriter 
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
               testVerticalInterpolatorHeight.sh
@@ -56,7 +57,7 @@ if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 endif
 if HAVE_METGM
-  CC_TESTS += testMetGmReader testMetGmWriter
+  CC_TESTS += testMetGmReader ${METGM_NC_TESTS}
 endif
 include wdb/make.mk
 
