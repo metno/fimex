@@ -38,7 +38,9 @@
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
 #include "kdtree++/kdtree.hpp"
+#ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
+#endif
 
 // PROJ.4
 //
@@ -249,6 +251,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 
 void CDMInterpolator::changeProjection(int method, const std::string& netcdf_template_file)
 {
+#ifdef HAVE_NETCDF_H
     if (!std::ifstream(netcdf_template_file.c_str())) {
         LOG4FIMEX(logger, Logger::WARN, "changeProjection, netcdf_template_file: not found" );
         return;
@@ -316,6 +319,10 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
         default:
             throw CDMException("unknown projection method: " + type2string(method));
     }
+#else
+    LOG4FIMEX(logger, Logger::ERROR, "fimex not compiled with netcdf-support, can't change projection by netcdf-template" );
+    return;
+#endif
 }
 
 CoordSysPtr CDMInterpolator::findBestCoordinateSystemAndProjectionVars(bool withProjection)

@@ -26,6 +26,10 @@
 
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMDataType.h"
+extern "C" {
+#include "netcdf.h"
+}
+
 
 namespace MetNoFimex
 {
@@ -53,12 +57,12 @@ public:
 /**
  * conversion from CDMDataType to NcType
  */
-int cdmDataType2ncType(CDMDataType dt);
+nc_type cdmDataType2ncType(CDMDataType dt);
 
 /**
  * conversion from nc_type to CDMDataType
  */
-CDMDataType ncType2cdmDataType(int nc_type);
+CDMDataType ncType2cdmDataType(nc_type nctype);
 
 /**
  * read a nc-status and throw an error if status != NC_NOERR
@@ -70,31 +74,31 @@ void ncCheck(int status);
  * @param ncId netcdf file id
  * @param varId variable id or NC_GLOBAL
  * @param attName attribute name
- * @param nc_type attribute datatype (in netcdf-notation)
+ * @param type attribute datatype (in netcdf-notation)
  */
-boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, int nc_type);
+boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type type);
 /**
  * read value-slices from a variable to a data
  * @param ncId netcdf file id
  * @param varId variable id or NC_GLOBAL
- * @param nc_type attribute datatype (in netcdf-notation)
+ * @param type attribute datatype (in netcdf-notation)
  * @param dimLen number of dimensions
  * @param start start-point for each dimension
  * @param count size in each dimension
  */
-boost::shared_ptr<Data> ncGetValues(int ncId, int varId, int nc_type, size_t dimLen, const size_t* start, const size_t* count);
+boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
 
 /**
  * write value-slices from a variable to disk
  * @param data the data to put
  * @param ncId netcdf file id
  * @param varId variable id or NC_GLOBAL
- * @param nc_type attribute datatype (in netcdf-notation)
+ * @param type attribute datatype (in netcdf-notation)
  * @param dimLen number of dimensions
  * @param start start-point for each dimension
  * @param count size in each dimension
  */
-void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, int nc_type, size_t dimLen, const size_t* start, const size_t* count);
+void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
 
 
 }

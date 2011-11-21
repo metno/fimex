@@ -34,7 +34,9 @@
 #include <vector>
 
 #include "fimex/MetGmCDMReader.h"
+#ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
+#endif
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
 #include "fimex/CDM.h"
@@ -63,8 +65,10 @@ BOOST_AUTO_TEST_CASE(test_read_sample_ed1) {
     defaultLogLevel(Logger::INFO);
     boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
     BOOST_CHECK(true); // made it so far
+#ifdef HAVE_NETCDF_H
     NetCDF_CDMWriter(metgmReaderEd1, "testMetgmReadEd1.nc");
     BOOST_CHECK(true); // and it is even writeable
+#endif
     Null_CDMWriter(metgmReaderEd1, "");
     BOOST_CHECK(true); // and it is even writeable
 
@@ -81,8 +85,10 @@ BOOST_AUTO_TEST_CASE(test_read_metgm2) {
     defaultLogLevel(Logger::INFO);
     boost::shared_ptr<CDMReader> metgmReaderEd2(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
     BOOST_CHECK(true); // made it so far
+#ifdef HAVE_NETCDF_H
     NetCDF_CDMWriter(metgmReaderEd2, "testMetgmReadEd2.nc");
     BOOST_CHECK(true); // and it is even writeable
+#endif
     Null_CDMWriter(metgmReaderEd2, "");
     BOOST_CHECK(true); // and it is even writeable
 

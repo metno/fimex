@@ -44,19 +44,17 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
     {
         int ndims;
         ncCheck(nc_inq_ndims(ncFile->ncId, &ndims));
-        int dimids[ndims];
         int recid;
         ncCheck(nc_inq_unlimdim(ncFile->ncId, &recid));
-        ncCheck(nc_inq_dimids(ncFile->ncId, &ndims, dimids, 0));
         // read metadata to cdm
         // define dimensions
         char ncName[NC_MAX_NAME + 1];
         for (int i = 0; i < ndims; ++i) {
             size_t dimlen;
-            ncCheck(nc_inq_dimname (ncFile->ncId, dimids[i], ncName));
-            ncCheck(nc_inq_dimlen(ncFile->ncId, dimids[i], &dimlen));
+            ncCheck(nc_inq_dimname (ncFile->ncId, i, ncName));
+            ncCheck(nc_inq_dimlen(ncFile->ncId, i, &dimlen));
             CDMDimension d(string(ncName), dimlen);
-            d.setUnlimited(recid == dimids[i]);
+            d.setUnlimited(recid == i);
             cdm_->addDimension(d);
         }
 	}
@@ -65,15 +63,13 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
     {
         int nvars;
         ncCheck(nc_inq_nvars(ncFile->ncId, &nvars));
-        int varids[nvars];
-        ncCheck(nc_inq_varids(ncFile->ncId, &nvars, varids));
         int ndims;
         int dimids[NC_MAX_VAR_DIMS];
         int natts;
         char ncName[NC_MAX_NAME + 1];
         for (int i = 0; i < nvars; ++i) {
             nc_type dtype;
-            nc_inq_var(ncFile->ncId, varids[i], ncName, &dtype, &ndims, dimids, &natts);
+            nc_inq_var(ncFile->ncId, i, ncName, &dtype, &ndims, dimids, &natts);
             CDMDataType type = ncType2cdmDataType(dtype);
             std::vector<std::string> shape;
             // reverse dimensions
@@ -86,8 +82,8 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
             // define the attributes of the variable
             char attName[NC_MAX_NAME + 1];
             for (int j = 0; j < natts; ++j) {
-                ncCheck(nc_inq_attname(ncFile->ncId, varids[i], j, attName));
-                addAttribute(ncName, varids[i], attName);
+                ncCheck(nc_inq_attname(ncFile->ncId, i, j, attName));
+                addAttribute(ncName, i, attName);
             }
         }
     }
