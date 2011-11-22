@@ -1,3 +1,10 @@
+fimex (0.33.2-2) hardy; urgency=low
+
+  * removing dependency to grib-api
+
+ -- Heiko Klein <heiko.klein@met.no>  Tue, 22 Nov 2011 10:40:00 +0100
+
+
 fimex (0.33.2-1) hardy; urgency=low
 
   * initial release
