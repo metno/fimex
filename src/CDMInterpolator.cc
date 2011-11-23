@@ -1285,8 +1285,10 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 
     // store projection changes to be used in data-section
     // as template data is in degrees we have to do deg2rad
-    vector<double> latY(tmplLatVals->asDouble().get(), tmplLatVals->asDouble().get()+tmplLatVals->size());
-    vector<double> lonX(tmplLonVals->asDouble().get(), tmplLonVals->asDouble().get()+tmplLonVals->size());
+    boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
+    boost::shared_array<double> tmplLonArray = tmplLonVals->asDouble();
+    vector<double> latY(tmplLatArray.get(), tmplLatArray.get()+tmplLatVals->size());
+    vector<double> lonX(tmplLonArray.get(), tmplLonArray.get()+tmplLonVals->size());
     transform(&latY[0], &latY[0]+tmplLatVals->size(), &latY[0], bind1st(multiplies<double>(), DEG_TO_RAD));
     transform(&lonX[0], &lonX[0]+tmplLonVals->size(), &lonX[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
