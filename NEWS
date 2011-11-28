@@ -1,6 +1,7 @@
   * 2011-11-21 fimex-0.33.2
     * backport to netcdf 3.6
     * enabling build without netcdf
+    * wdb: dropping ensemble_member dimension when only data-version differs in parameter
   * 2011-11-17 fimex-0.33.1
     * fixing vector-projection interpolation of wind-fields
     * fixing interpolation to projections in degree
