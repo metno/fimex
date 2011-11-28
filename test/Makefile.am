@@ -1,5 +1,5 @@
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
-             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc \
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc\
              coordRefTimeTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
@@ -49,7 +49,7 @@ if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
-  SH_TESTS += ${NETCDF_MI_SH_TESTS} testInterpolatorFill.sh \
+  SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh testInterpolatorFill.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
               testVerticalInterpolatorHeight.sh
 endif
