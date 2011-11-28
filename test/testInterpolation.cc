@@ -225,22 +225,22 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_f )
     float outfield[nr];
     // corner value 100.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 100.);
-    BOOST_CHECK_CLOSE(outfield[0], 100., 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 100.f, 1e-3);
     // corner value 1000.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 1000.);
-    BOOST_CHECK_CLOSE(outfield[0], 1000., 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 1000.f, 1e-3);
     // interpolation at 500.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 500.);
-    BOOST_CHECK_CLOSE(outfield[0], 729.073, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 729.073f, 1e-3);
     // extrapolation at 1500.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 1500.);
-    BOOST_CHECK_CLOSE(outfield[0], 1158.482, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 1158.482f, 1e-3);
     // interpolation at 200.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 200.);
-    BOOST_CHECK_CLOSE(outfield[0], 370.927, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 370.927f, 1e-3);
     // interpolation at 800.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 800.);
-    BOOST_CHECK_CLOSE(outfield[0], 912.781, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 912.781f, 1e-3);
 }
 
 BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
@@ -251,21 +251,21 @@ BOOST_AUTO_TEST_CASE( test_mifi_get_values_log_log_f )
     float outfield[nr];
     // corner value 100.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 100.);
-    BOOST_CHECK_CLOSE(outfield[0], 100., 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 100.f, 1e-3);
     // corner value 1000.
     mifi_get_values_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 1000.);
-    BOOST_CHECK_CLOSE(outfield[0], 1000., 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 1000.f, 1e-3);
 
     // below are results from NCLs vintp2p_ecmwf
     // interpolation at 500.
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 500.);
-    BOOST_CHECK_CLOSE(outfield[0], 763.1873, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 763.1873f, 1e-3);
     // interpolation at 200.
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 200.);
-    BOOST_CHECK_CLOSE(outfield[0], 408.0904, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 408.0904f, 1e-3);
     // interpolation at 800.
     mifi_get_values_log_log_f(infieldA, infieldB, outfield, nr, 1000., 100., 800.);
-    BOOST_CHECK_CLOSE(outfield[0], 926.384, 1e-3);
+    BOOST_CHECK_CLOSE(outfield[0], 926.384f, 1e-3);
 }
 
 

@@ -30,6 +30,7 @@
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 using boost::unit_test_framework::test_suite;
 
 #include <iostream>
