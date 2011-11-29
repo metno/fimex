@@ -85,6 +85,7 @@ private:
     void initVariableNameChange();
     void initVariableTypeChange();
     void initVariableDataChange();
+    void initVariableSpatialVector();
     void initDimensionNameChange();
     void initDimensionUnlimited();
     void initAttributeNameChange();

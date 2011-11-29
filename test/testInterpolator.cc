@@ -35,6 +35,7 @@ using boost::unit_test_framework::test_suite;
 
 #include "fimex/FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/NcmlCDMReader.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
@@ -120,6 +121,33 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
     BOOST_CHECK(interpolator->getDataSlice("y")->size() == 286);
 //    NetCDF_CDMWriter(interpolator, "testInterpolator3.nc");
 //    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/test.ncml");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> reader(new NcmlCDMReader(XMLInputFile(fileName)));
+    const CDM cdm = reader->getCDM();
+    if (cdm.hasVariable("x_wind")) {
+        CDMVariable var = cdm.getVariable("x_wind");
+        BOOST_CHECK(var.isSpatialVector());
+        BOOST_CHECK(var.getSpatialVectorCounterpart() == "y_wind");
+    } else {
+        BOOST_CHECK(false);
+    }
+    if (cdm.hasVariable("y_wind")) {
+        CDMVariable var = cdm.getVariable("y_wind");
+        BOOST_CHECK(var.isSpatialVector());
+        BOOST_CHECK(var.getSpatialVectorCounterpart() == "x_wind");
+    } else {
+        BOOST_CHECK(false);
+    }
+
 }
 
 #else

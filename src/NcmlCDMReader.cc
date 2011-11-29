@@ -112,6 +112,7 @@ void NcmlCDMReader::init()
     initVariableNameChange();
     initVariableTypeChange();
     initVariableDataChange();
+    initVariableSpatialVector();
     initAttributeNameChange();
     initAddReassignAttribute();
     initWarnUnsupported();
@@ -228,6 +229,23 @@ void NcmlCDMReader::initVariableDataChange()
                 throw CDMException("values from ncml does not match shape for variable "+name);
             }
             var.setData(createData(var.getDataType(), dvals.begin(), dvals.end()));
+        }
+    }
+}
+
+void NcmlCDMReader::initVariableSpatialVector()
+{
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable/nc:spatial_vector");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string name = getXmlProp(nodes->nodeTab[i]->parent, "name");
+        if (name == "") throw CDMException("ncml-file "+ configId + " has no name for variable");
+        if (cdm_->hasVariable(name)) {
+            std::string direction = getXmlProp(nodes->nodeTab[i], "direction");
+            std::string counterPart = getXmlProp(nodes->nodeTab[i], "counterpart");
+            CDMVariable& var = cdm_->getVariable(name);
+            var.setAsSpatialVector(counterPart, direction);
         }
     }
 }
