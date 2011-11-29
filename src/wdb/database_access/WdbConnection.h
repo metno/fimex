@@ -31,6 +31,7 @@
 
 #include "GridData.h"
 #include <fimex/CDMException.h>
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 #include <libpq-fe.h>
@@ -91,21 +92,7 @@ public:
 
 private:
 
-	enum QueryResultFormat
-	{
-		TextResult, BinaryResult
-	};
-
-	/**
-	 * Make a database call.
-	 *
-	 * You should call PQclear on result to free memory.
-	 *
-	 * @throws WdbException on error
-	 */
-	PGresult * call_(const std::string & query, QueryResultFormat resultFormat = TextResult);
-
-	PGconn * connection_;
+	boost::shared_ptr<PGconn> connection_;
 
 	typedef std::map<std::string, GridInformationPtr> GridList;
 	GridList gridsInUse_;

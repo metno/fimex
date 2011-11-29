@@ -32,6 +32,7 @@
 #include "../gridInformation/GridInformation.h"
 #include <fimex/Logger.h>
 #include <boost/scoped_array.hpp>
+#include <boost/weak_ptr.hpp>
 extern "C"
 {
 #include <arpa/inet.h>
@@ -46,25 +47,66 @@ namespace
 LoggerPtr logger = getLogger("WdbConnection");
 }
 
+// a cache holding references to all connections
+static std::map<std::string, boost::weak_ptr<PGconn> > sharedConnections;
+
+enum QueryResultFormat
+{
+    TextResult, BinaryResult
+};
+
+/**
+ * Make a database call.
+ *
+ * You should call PQclear on result to free memory.
+ *
+ * @throws WdbException on error
+ */
+static PGresult * call(boost::shared_ptr<PGconn> connection, const std::string & query, QueryResultFormat resultFormat  = TextResult)
+{
+
+    PGresult * result = PQexecParams(connection.get(), query.c_str(), 0, NULL, NULL, NULL, NULL, resultFormat == BinaryResult ? 1 : 0);
+    if ( PQresultStatus(result) != PGRES_TUPLES_OK )
+    {
+        PQclear(result);
+        throw WdbException(connection.get());
+    }
+    return result;
+}
+
+static boost::shared_ptr<PGconn> createConnection(const std::string & connectString, const std::string & wciUser)
+{
+    boost::shared_ptr<PGconn> connection(PQconnectdb(connectString.c_str()), PQfinish);
+    if ( CONNECTION_OK != PQstatus(connection.get()) )
+        throw WdbException(connection.get());
+
+    std::ostringstream begin;
+    begin << "SELECT wci.begin('" << DataSanitizer(connection.get())(wciUser) << "')";
+
+    LOG4FIMEX(logger, Logger::DEBUG, begin.str());
+
+    PQclear(call(connection, begin.str()));
+    return connection;
+}
+
 WdbConnection::WdbConnection(const std::string & connectString, const std::string & wciUser)
 {
-	connection_ = PQconnectdb(connectString.c_str());
-	if ( CONNECTION_OK != PQstatus(connection_) )
-		throw WdbException(connection_);
+    std::string connectionId = connectString + ";wciUser="+wciUser;
 
-	std::ostringstream begin;
-	begin << "SELECT wci.begin('" << DataSanitizer(connection_)(wciUser) << "')";
-
-	LOG4FIMEX(logger, Logger::DEBUG, begin.str());
-
-	PQclear(call_(begin.str()));
+    // retrieve connecton from sharedConnections
+    std::map<std::string, boost::weak_ptr<PGconn> >::iterator shared_conn = sharedConnections.find(connectionId);
+    if (shared_conn != sharedConnections.end()) {
+        connection_ = shared_conn->second.lock();
+    }
+    if (connection_.get() == 0) {
+        // update sharedConnections if connection not present or out of date
+        connection_ = createConnection(connectString, wciUser);
+        sharedConnections[connectionId] = boost::weak_ptr<PGconn>(connection_);
+    }
 }
 
 WdbConnection::~WdbConnection()
-{
-	if (connection_)
-		PQfinish(connection_);
-}
+{}
 
 
 namespace
@@ -88,11 +130,11 @@ public:
 
 void WdbConnection::readGid(std::vector<GridData> & out, const WciReadQuerySpecification & readParameters)
 {
-	std::string query = readParameters.query(DataSanitizer(connection_));
+	std::string query = readParameters.query(DataSanitizer(connection_.get()));
 
 	LOG4FIMEX(logger, Logger::DEBUG, query);
 
-	Scoped_PGresult result(call_(query));
+	Scoped_PGresult result(call(connection_, query));
 
 	int tuples = PQntuples(result.get());
 
@@ -116,7 +158,7 @@ WdbConnection::GridInformationPtr WdbConnection::readGridInformation(const std::
 	GridList::const_iterator find = gridsInUse_.find(gridName);
 	if ( find == gridsInUse_.end() )
 	{
-		Scoped_PGresult result(call_(GridInformation::query(gridName, DataSanitizer(connection_))));
+		Scoped_PGresult result(call(connection_, GridInformation::query(gridName, DataSanitizer(connection_.get()))));
 
 		int tuples = PQntuples(result.get());
 		if ( tuples == 0 )
@@ -157,7 +199,7 @@ float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 
 	LOG4FIMEX(logger, Logger::DEBUG, query.str());
 
-	Scoped_PGresult result(call_(query.str(), BinaryResult));
+	Scoped_PGresult result(call(connection_, query.str(), BinaryResult));
 
 	int tuples = PQntuples(result.get());
 	if ( tuples == 0 )
@@ -179,20 +221,6 @@ float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 #endif
 
 	return ret;
-}
-
-
-PGresult * WdbConnection::call_(const std::string & query, QueryResultFormat resultFormat)
-{
-
-	PGresult * result = PQexecParams(connection_, query.c_str(), 0, NULL, NULL, NULL, NULL, resultFormat == BinaryResult ? 1 : 0);
-	//PGresult * result = PQexec(connection_, query.c_str());
-	if ( PQresultStatus(result) != PGRES_TUPLES_OK )
-	{
-		PQclear(result);
-		throw WdbException(connection_);
-	}
-	return result;
 }
 
 
