@@ -33,7 +33,10 @@ using boost::unit_test_framework::test_suite;
 #include <iostream>
 #include <fstream>
 
+#include <boost/foreach.hpp>
+
 #include "fimex/FeltCDMReader2.h"
+#include "fimex/NetCDF_CDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/CDMInterpolator.h"
@@ -147,7 +150,33 @@ BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
     } else {
         BOOST_CHECK(false);
     }
+}
 
+BOOST_AUTO_TEST_CASE(test_interpolator_template)
+{
+    string topSrcDir(TOP_SRCDIR);
+    string ncFileName(topSrcDir+"/test/erai.sfc.40N.0.75d.200301011200.nc");
+    if (!ifstream(ncFileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    string templateFileName(topSrcDir+"/test/template_noaa17.nc");
+    if (!ifstream(templateFileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+    interpolator->changeProjection(MIFI_INTERPOL_BICUBIC, templateFileName);
+    BOOST_CHECK(true);
+    BOOST_CHECK(interpolator->getDataSlice("x")->size() == 29);
+    BOOST_CHECK(interpolator->getDataSlice("y")->size() == 31);
+    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == 29*31);
+    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
+    BOOST_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
+    boost::shared_array<double> array = interpolator->getData("ga_skt")->asDouble();
+    BOOST_CHECK( (!mifi_isnanf(array[0])) && (array[0] < 280) && (array[0] > 270));
+    BOOST_CHECK(true);
 }
 
 #else
