@@ -1,6 +1,0 @@
-include/felt
-include/fimex/coordSys
-include/fimex
-include/gridexer
-src/coordSys
-src
