@@ -39,6 +39,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/NetCDF_CDMReader.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
@@ -129,12 +130,13 @@ BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
 BOOST_AUTO_TEST_CASE(test_interpolatorNcml)
 {
     string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/test.ncml");
+    string fileName(topSrcDir+"/test/coordTest.nc");
+    string ncmlName(topSrcDir+"/test/test.ncml");
     if (!ifstream(fileName.c_str())) {
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> reader(new NcmlCDMReader(XMLInputFile(fileName)));
+    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
     const CDM cdm = reader->getCDM();
     if (cdm.hasVariable("x_wind")) {
         CDMVariable var = cdm.getVariable("x_wind");

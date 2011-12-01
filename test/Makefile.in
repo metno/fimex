@@ -471,10 +471,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc\
-             coordRefTimeTest.nc \
+             coordRefTimeTest.nc test.ncml\
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
-             sample_ed1.gm sample_ed2.gm
+             sample_ed1.gm sample_ed2.gm \
+             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
