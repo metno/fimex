@@ -64,7 +64,7 @@ private:
     std::map<std::string, std::vector<std::vector<long> > > levels_;
     /**
      * config attributes may contain template parameters marked with %PARAM%
-     * which should be replaced by dynamic values from the felt-file and stored
+     * which should be replaced by dynamic values from the grib-file and stored
      * temporary in this map
      *
      * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string

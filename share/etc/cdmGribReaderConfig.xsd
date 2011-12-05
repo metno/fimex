@@ -134,16 +134,18 @@
   </xs:complexType>
   <xs:element name="grib1">
     <xs:complexType>
-      <xs:attribute name="gribTablesVersionNo" use="required" type="xs:integer"/>
-      <xs:attribute name="identificationOfOriginatingGeneratingCentre" use="required" type="xs:integer"/>
       <xs:attribute name="indicatorOfParameter" use="required" type="xs:integer"/>
+      <xs:attribute name="gribTablesVersionNo" use="optional" type="xs:integer"/>
+      <xs:attribute name="identificationOfOriginatingGeneratingCentre" use="optional" type="xs:integer"/>
+      <xs:attribute name="typeOfLevel" use="optional" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="grib2">
     <xs:complexType>
-      <xs:attribute name="discipline" use="required" type="xs:integer"/>
-      <xs:attribute name="parameterCategory" use="required" type="xs:integer"/>
       <xs:attribute name="parameterNumber" use="required" type="xs:integer"/>
+      <xs:attribute name="discipline" use="required" type="xs:integer"/>
+      <xs:attribute name="parameterCategory" use="optional" type="xs:integer"/>
+      <xs:attribute name="typeOfLevel" use="optional" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
 </xs:schema>

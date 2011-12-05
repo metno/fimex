@@ -211,19 +211,20 @@
         <!-- multi-id for grib1 and grib2 -->
         <!-- high clouds -->
         <grib1 indicatorOfParameter="188" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
-        <!-- medium clouds -->
-        <grib1 indicatorOfParameter="187" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <!-- medium clouds, sigma level-->
+        <grib1 typeOfLevel="107" indicatorOfParameter="187" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <!-- below examples allow omission of identificationOfOriginatingGeneratingCentre or gribTablesVersionNo -->
         <!-- low clouds -->
-        <grib1 indicatorOfParameter="186" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <grib1 indicatorOfParameter="186" gribTablesVersionNo="128" />
         <!-- fog -->
-        <grib1 indicatorOfParameter="248" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <grib1 indicatorOfParameter="248" identificationOfOriginatingGeneratingCentre="98"/>
         <!--  <grib2 discipline="" parameterCategory="" parameterNumber=""/> -->
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="long_name" value="cloud coverage" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
     <parameter name="total_precipitation" type="float">
-        <grib1 indicatorOfParameter="61" gribTablesVersionNo="3" identificationOfOriginatingGeneratingCentre="88"/>
+        <grib1 indicatorOfParameter="61" gribTablesVersionNo="3"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="long_name" value="total_precipitation" type="string" />
         <attribute name="units" value="kg m^-2" type="string" />

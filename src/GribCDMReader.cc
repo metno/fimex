@@ -159,21 +159,46 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
 {
     string xpathString;
     const vector<long>& pars = msg.getParameterIds();
+    map<string, long> optionals;
+    optionals["typeOfLevel"] = msg.getLevelType();
     if (msg.getEdition() == 1) {
-        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"' and @gribTablesVersionNo='"+type2string(pars.at(1))+"' and @identificationOfOriginatingGeneratingCentre='"+type2string(pars.at(2))+"']");
+        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"']");
+        optionals["gribTablesVersionNo"] = pars.at(1);
+        optionals["identificationOfOriginatingGeneratingCentre"] = pars.at(2);
     } else {
-        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"' and @parameterCategory='"+type2string(pars.at(1))+"' and @discipline='"+type2string(pars.at(2))+"']");
+        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"']");
+        optionals["parameterCategory"] = pars.at(1);
+        optionals["discipline"] = pars.at(2);
     }
     XPathObjPtr xpathObj = doc_->getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
+    size_t size = (nodes) ? nodes->nodeNr : 0;
     if (size >= 1) {
         LOG4FIMEX(logger, Logger::DEBUG, "found parameter at " << xpathString);
-        if (size > 1)  LOG4FIMEX(logger, Logger::WARN, "using first of several parameters for " << xpathString);
-        return nodes->nodeTab[0]->parent; // return the parent, since xpath looks for grib1/2 node
-    } else {
-        LOG4FIMEX(logger, Logger::DEBUG, "no parameter found in config for " << xpathString);
+        vector<xmlNodePtr> matchingNodes;
+        for (size_t i = 0; i < size; ++i) {
+            xmlNodePtr node = nodes->nodeTab[0];
+            bool allOptionalsMatch = true;
+            for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
+                string optVal = getXmlProp(node, opt->first);
+                if (optVal != "") {
+                    if (opt->second != string2type<long>(optVal)) {
+                        // optional set and not the same as this message value, don't use
+                        allOptionalsMatch = false;
+                    }
+                }
+            }
+            if (allOptionalsMatch) {
+                matchingNodes.push_back(node->parent);
+            }
+        }
+
+        if (matchingNodes.size() >= 1) {
+            if (matchingNodes.size() > 1)  LOG4FIMEX(logger, Logger::WARN, "using first of several parameters for " << xpathString);
+            return matchingNodes.at(0); // return the parent, since xpath looks for grib1/2 node
+        }
     }
+    LOG4FIMEX(logger, Logger::DEBUG, "no parameter found in config for " << xpathString);
     return 0;
 }
 
@@ -466,7 +491,7 @@ void GribCDMReader::initAddVariables(const std::string& projName, const std::str
         if (node == 0) {
             // prepend names from grib-api with 'ga_'
             // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
-            varName = "ga_" + gfmIt->getShortName();
+            varName = "ga_" + gfmIt->getShortName() + "_" + type2string(gfmIt->getLevelType());
         } else {
             varName = getXmlProp(node, "name");
         }
