@@ -33,6 +33,8 @@
 #include <fimex/Logger.h>
 #include <boost/scoped_array.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 extern "C"
 {
 #include <arpa/inet.h>
@@ -64,8 +66,16 @@ enum QueryResultFormat
  */
 static PGresult * call(boost::shared_ptr<PGconn> connection, const std::string & query, QueryResultFormat resultFormat  = TextResult)
 {
-
+    using namespace boost::posix_time;
+    ptime startTime;
+    if (logger->isEnabledFor(Logger::DEBUG)) {
+        startTime = microsec_clock::universal_time();
+    }
     PGresult * result = PQexecParams(connection.get(), query.c_str(), 0, NULL, NULL, NULL, NULL, resultFormat == BinaryResult ? 1 : 0);
+    if (logger->isEnabledFor(Logger::DEBUG)) {
+        time_duration diff = microsec_clock::universal_time() - startTime;
+        LOG4FIMEX(logger, Logger::DEBUG, "wdb called '"<< query << "' in " << (diff.total_milliseconds() / 1000.) <<"s");
+    }
     if ( PQresultStatus(result) != PGRES_TUPLES_OK )
     {
         PQclear(result);
@@ -82,8 +92,6 @@ static boost::shared_ptr<PGconn> createConnection(const std::string & connectStr
 
     std::ostringstream begin;
     begin << "SELECT wci.begin('" << DataSanitizer(connection.get())(wciUser) << "')";
-
-    LOG4FIMEX(logger, Logger::DEBUG, begin.str());
 
     PQclear(call(connection, begin.str()));
     return connection;
@@ -131,8 +139,6 @@ public:
 void WdbConnection::readGid(std::vector<GridData> & out, const WciReadQuerySpecification & readParameters)
 {
 	std::string query = readParameters.query(DataSanitizer(connection_.get()));
-
-	LOG4FIMEX(logger, Logger::DEBUG, query);
 
 	Scoped_PGresult result(call(connection_, query));
 
@@ -196,8 +202,6 @@ float * WdbConnection::getGrid(float * buffer, GridData::gid gridIdentifier)
 {
 	std::ostringstream query;
 	query << "SELECT grid::bytea FROM wci.fetch(" << gridIdentifier << ", NULL::wci.grid)";
-
-	LOG4FIMEX(logger, Logger::DEBUG, query.str());
 
 	Scoped_PGresult result(call(connection_, query.str(), BinaryResult));
 
