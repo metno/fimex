@@ -25,14 +25,18 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/TimeLevelDataSliceFetcher.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CoordinateSystemSliceBuilder.h"
 #include <grib_api.h>
 #include <cmath>
 #include <functional>
+#include <algorithm>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace MetNoFimex
 {
@@ -72,45 +76,149 @@ GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
 
 void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 {
+    using namespace std;
+    using namespace boost::posix_time;
 	LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
 	setGlobalAttributes();
 
 	const CDM& cdm = cdmReader->getCDM();
-	const CDM::VarVec& vars = cdm.getVariables();
-	// iterator over all variables
-	for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
-		const std::string& varName = vi->getName();
-		try {
-		    std::vector<FimexTime> times = getTimes(varName);
-		    std::vector<double> levels = getLevels(varName);
-		    TimeLevelDataSliceFetcher tld(cdmReader, varName);
-		    try {
-		        setProjection(varName);
-		    } catch (CDMException& e) {
-		        LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << varName << " due to projection problems: " << e.what());
-		        continue;
-		    }
-		    for (size_t t = 0; t < times.size(); t++) {
-		        for (size_t l = 0; l < levels.size(); l++) {
-		            boost::shared_ptr<Data> data = tld.getTimeLevelSlice(t, l);
-		            if (data->size() == 0) {
-		                // no data, silently skip to next level/time
-		                continue;
-		            }
-		            double levelVal = levels[l];
-		            const FimexTime& fTime = times[t];
-		            data = handleTypeScaleAndMissingData(varName, fTime, levelVal, data);
-		            setData(data);
-		            setLevel(varName, levelVal);
-		            setTime(varName, fTime);
-		            setParameter(varName, fTime, levelVal);
-		            writeGribHandleToFile();
-		        }
-		    }
-		} catch (CDMException& e) {
-			LOG4FIMEX(logger, Logger::WARN, "unable to write parameter "<< varName << ": " << e.what());
-		}
-	}
+    // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    for (vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = coordSys.begin();
+            varSysIt != coordSys.end();
+            ++varSysIt) {
+
+        const CDM::VarVec& vars = cdm.getVariables();
+        if ((*varSysIt)->isSimpleSpatialGridded()) {
+            vector<string> csVars;
+            // iterator over all variables
+            for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
+                if (CompleteCoordinateSystemForComparator(vi->getName())(*varSysIt)) {
+                    csVars.push_back(vi->getName());
+                }
+            }
+            try {
+                // TODO: this would be nicer with varSysIt->getProjection() instead of csVars[0]
+                setProjection(csVars.at(0));
+            } catch (CDMException& e) {
+                LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << join(csVars.begin(), csVars.end(), ", ") << " due to projection problems: " << e.what());
+                continue;
+            }
+
+            CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+            CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+            CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z
+            CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
+
+            CoordinateSystemSliceBuilder sb(cdm, *varSysIt);
+            sb.setAll(xAxis->getName());
+            sb.setAll(yAxis->getName());
+            // handling of time
+            vector<ptime> refTimes;
+            vector<FimexTime> vTimes;
+            if (tAxis.get() != 0) {
+                // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
+                if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
+                    CoordinateSystem::ConstAxisPtr rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
+                    boost::shared_ptr<Data> refTimesD = cdmReader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
+                    boost::shared_array<unsigned long long> refs = refTimesD->asUInt64();
+                    /* do something with the refTimes and select the wanted Position */
+                    size_t refTimePos = 0; /* or whatever you select between 0 (default) and refTimes->size()-1 */
+                    sb.setReferenceTimePos(refTimePos);
+                    TimeUnit tu("seconds since 1970-01-01 00:00:00");
+                    transform(&refs[0],
+                            &refs[0] + refTimesD->size(),
+                            back_inserter(refTimes),
+                            bind1st(mem_fun_ref(&TimeUnit::unitTime2posixTime), tu));
+                } else {
+                    try {
+                        refTimes.push_back(getUniqueForecastReferenceTime(cdmReader));
+                    } catch (CDMException& ex) {
+                        refTimes.push_back(time_from_string("1970-01-01 00:00:00"));
+                    }
+                }
+                stringstream ss;
+                time_facet* facet (new time_facet("%Y-%m-%d %H:%M:%S"));
+                ss.imbue(locale(ss.getloc(), facet));
+                ss << "seconds since " << refTimes[0];
+                boost::shared_ptr<Data> times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
+                boost::shared_array<long long> timesA = times->asInt64();
+                TimeUnit tu(ss.str());
+                transform(&timesA[0],
+                        &timesA[0] + times->size(),
+                        back_inserter(vTimes),
+                        bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+
+                /* select the first startTime and the size for the time-dimension */
+                sb.setTimeStartAndSize(0, 1); // default is all of ReferenceTimePos
+            }
+            // TODO: fetch the levels from the cs, not from a variable
+            std::vector<double> levels = getLevels(csVars.at(0));
+            if (zAxis.get() != 0) {
+                sb.setStartAndSize(zAxis->getName(), 0, 1);
+            }
+
+            // TODO: handle ensembles
+            // reducing all unset dimensions to the first slice
+            vector<string> dims = sb.getUnsetDimensionNames();
+            for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
+                LOG4FIMEX(logger, Logger::WARN, "unknown dimension in grib-writer: '" << *dim << "' using first slice" )
+                sb.setStartAndSize(*dim, 0, 1);
+            }
+
+            // loops over ref-times, times, variables and levels
+            map<string, string> variableWarnings;
+            size_t rtPos = 0;
+            for (vector<ptime>::iterator rTime = refTimes.begin(); rTime != refTimes.end(); ++rTime, ++rtPos) {
+                if (refTimes.size() > 1) {
+                    sb.setReferenceTimePos(rtPos);
+                    stringstream ss;
+                    time_facet* facet (new time_facet("%Y-%m-%d %H:%M:%S"));
+                    ss.imbue(locale(ss.getloc(), facet));
+                    ss << "seconds since " << refTimes[0];
+                    boost::shared_ptr<Data> times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
+                    boost::shared_array<long long> timesA = times->asInt64();
+                    TimeUnit tu(ss.str());
+                    transform(&timesA[0],
+                            &timesA[0] + times->size(),
+                            back_inserter(vTimes),
+                            bind1st(mem_fun_ref(&TimeUnit::unitTime2fimexTime), tu));
+                }
+                size_t vtPos = 0;
+                for (vector<FimexTime>::iterator vTime = vTimes.begin(); vTime != vTimes.end(); ++vTime, ++vtPos) {
+                    if (vTimes.size() > 1) {
+                        sb.setTimeStartAndSize(vtPos, 1);
+                    }
+                    for (vector<string>::iterator var = csVars.begin(); var != csVars.end(); ++var) {
+                        // TODO: time must be split into ref-time and steps and independent of var
+                        setTime(*var, *vTime);
+                        for (size_t levelPos = 0; levelPos < levels.size(); ++levelPos) {
+                            if (zAxis.get() != 0) {
+                                sb.setStartAndSize(zAxis, levelPos, 1);
+                            }
+                            double levelVal = levels.at(levelPos);
+                            try {
+                                // level and var are dependent due to splitting possibilities
+                                setLevel(*var, levelVal);
+                                setParameter(*var, levelVal);
+                                boost::shared_ptr<Data> data = cdmReader->getDataSlice(*var, sb);
+                                if (data->size() != 0) {
+                                    data = handleTypeScaleAndMissingData(*var, levelVal, data);
+                                    setData(data);
+                                    writeGribHandleToFile();
+                                }
+                            } catch (CDMException& ex) {
+                                variableWarnings[*var] = ex.what();
+                            }
+                        }
+                    }
+                }
+            }
+            for (map<string, string>::iterator w = variableWarnings.begin(); w != variableWarnings.end(); ++w) {
+                LOG4FIMEX(logger, Logger::WARN, "unable to write parameter "<< w->first << ": " << w->second);
+            }
+        }
+    }
 }
 
 void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
@@ -295,7 +403,7 @@ void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
     gribFile.write(reinterpret_cast<const char*>(buffer), size);
 }
 
-xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, double levelValue) throw(CDMException)
 {
 	xmlNodePtr node = 0;
 	std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");

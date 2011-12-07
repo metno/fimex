@@ -39,10 +39,10 @@ public:
 	GribApiCDMWriter_Impl1(const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile);
 	virtual ~GribApiCDMWriter_Impl1();
 
-	virtual void setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException);
+	virtual void setParameter(const std::string& varName, double levelValue) throw(CDMException);
 	virtual void setProjection(const std::string& varName) throw(CDMException);
 	virtual void setLevel(const std::string& varName, double levelValue);
-	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData);
+	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, double levelValue, boost::shared_ptr<Data> inData);
 
 };
 

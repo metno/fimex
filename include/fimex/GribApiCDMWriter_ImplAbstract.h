@@ -70,7 +70,7 @@ protected:
 	 * @throw CDMException if parameters cannot be set
 	 */
 	virtual void setProjection(const std::string& varName) throw(CDMException) = 0;
-	virtual void setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException) = 0;
+	virtual void setParameter(const std::string& varName, double levelValue) throw(CDMException) = 0;
 	virtual void setTime(const std::string& varName, const FimexTime& fTime);
 	virtual void setLevel(const std::string& varName, double levelValue) = 0;
 	/**
@@ -89,16 +89,15 @@ protected:
 	 * and change the datatype if needed, change the missingValue of the data if need
 	 * @return modified data
 	 */
-	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData) = 0;
+	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, double levelValue, boost::shared_ptr<Data> inData) = 0;
 	virtual void writeGribHandleToFile();
 	/**
 	 * get the node belonging to varName, level and time from the
 	 * config file
 	 * @param varName name of the variable
-	 * @param fTime current time
 	 * @param level curent level
 	 */
-	xmlNode* getNodePtr(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException);
+	xmlNode* getNodePtr(const std::string& varName, double levelValue) throw(CDMException);
 
 protected:
 	int gribVersion;

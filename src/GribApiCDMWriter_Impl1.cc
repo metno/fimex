@@ -45,10 +45,10 @@ GribApiCDMWriter_Impl1::~GribApiCDMWriter_Impl1()
 {
 }
 
-void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, const FimexTime& fTime, double levelValue) throw(CDMException)
+void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, double levelValue) throw(CDMException)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << fTime << ", " << levelValue << ")" );
-	xmlNodePtr node = getNodePtr(varName, fTime, levelValue);
+	LOG4FIMEX(logger, Logger::DEBUG, "setParameter(" << varName << ", " << levelValue << ")" );
+	xmlNodePtr node = getNodePtr(varName, levelValue);
 	std::string parameter = getXmlProp(node, "parameterNumber");
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
 	std::string tableNumber = getXmlProp(node, "codeTable");
@@ -246,9 +246,9 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
 	GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
 }
 
-boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string& varName, const FimexTime& fTime, double levelValue, boost::shared_ptr<Data> inData)
+boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string& varName, double levelValue, boost::shared_ptr<Data> inData)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "handleTypeScaleAndMissingData(" << varName << ", " << fTime << ", " << levelValue << ")" );
+	LOG4FIMEX(logger, Logger::DEBUG, "handleTypeScaleAndMissingData(" << varName << ", " << levelValue << ")" );
 	const CDM& cdm = cdmReader->getCDM();
 	double inFillValue = cdm.getFillValue(varName);
 	double outFillValue = inFillValue;
@@ -268,7 +268,7 @@ boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(co
 	// scale and offset by units
 	if (cdm.getAttribute(varName, "units", attr)) {
 		std::string unit = attr.getData()->asString();
-		xmlNodePtr node = getNodePtr(varName, fTime, levelValue);
+		xmlNodePtr node = getNodePtr(varName, levelValue);
 		std::string gUnit = getXmlProp(node, "units");
 		if (gUnit != "") {
 			double slope, uOffset;
