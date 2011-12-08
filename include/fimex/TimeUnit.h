@@ -94,6 +94,9 @@ public:
     /// millisecond
     unsigned short getMSecond() const {return msecond;}
     void setMSecond(unsigned short msecond) {this->msecond = msecond;}
+
+    boost::posix_time::ptime asPosixTime() const;
+
 	/// compare two fimexTimes
 	bool operator==(const FimexTime &rhs) const;
 	/// compare two fimexTimes

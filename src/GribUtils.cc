@@ -25,6 +25,7 @@
  */
 
 #include "fimex/GribUtils.h"
+#include "fimex/CDMException.h"
 #include <sstream>
 #include <grib_api.h>
 
@@ -66,6 +67,72 @@ GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle
     }
 
     return static_cast<GridDefinition::Orientation>(mode);
+}
+
+unsigned long gribStepUnits2seconds(const std::string& stepUnits) {
+    unsigned long seconds;
+    if (stepUnits == "s") {
+        seconds = 1;
+    } else if (stepUnits == "m") {
+        seconds = 60;
+    } else if (stepUnits == "h") {
+        seconds = 60*60;
+    } else if (stepUnits == "3h") {
+        seconds = 3 * 60 * 60;
+    } else if (stepUnits == "6h") {
+        seconds = 6 * 60 * 60;
+    } else if (stepUnits == "12h") {
+        seconds = 12 * 60 * 60;
+    } else if (stepUnits == "D") {
+        seconds = 24 * 60 * 60;
+    } else if (stepUnits == "M") {
+        seconds = 24 * 60 * 60 * 30;
+    } else if (stepUnits == "Y") {
+        seconds = 24 * 60 * 60 * 365;
+    } else if (stepUnits == "10Y") {
+        seconds = 24 * 60 * 60 * 365 * 10;
+    } else if (stepUnits == "30Y") {
+        seconds = 24 * 60 * 60 * 365 * 30;
+    } else if (stepUnits == "C") {
+        seconds = 24UL * 60 * 60 * 365 * 100;
+    } else {
+        throw CDMException("found undefined stepUnits in gribReader: " + stepUnits);
+    }
+    return seconds;
+}
+
+std::string gribSeconds2stepUnits(unsigned long seconds) {
+    if (seconds <= 0) {
+        throw CDMException("cannot find grib-stepUnits when offset-seconds <= 0");
+    }
+    std::string stepUnits;
+    if ((seconds % (24UL * 60 * 60 * 365 * 100)) == 0) {
+        stepUnits = "C";
+    } else if ((seconds % (24 * 60 * 60 * 365 * 30)) == 0) {
+        stepUnits = "30Y";
+    } else if ((seconds % (24 * 60 * 60 * 365 * 10)) == 0) {
+        stepUnits = "10Y";
+    } else if ((seconds % (24 * 60 * 60 * 365)) == 0) {
+        stepUnits = "Y";
+    } else if ((seconds % (24 * 60 * 60 * 30)) == 0) {
+        stepUnits = "M";
+    } else if ((seconds % (24 * 60 * 60)) == 0) {
+        stepUnits = "D";
+    } else if ((seconds % (12 * 60 * 60)) == 0) {
+        stepUnits = "12h";
+    } else if ((seconds % (6 * 60 * 60)) == 0) {
+        stepUnits = "6h";
+    } else if ((seconds % (3 * 60 * 60)) == 0) {
+        stepUnits = "3h";
+    } else if ((seconds % (60 * 60)) == 0) {
+        stepUnits = "h";
+    } else if ((seconds % (60)) == 0) {
+        stepUnits = "m";
+    } else {
+        stepUnits = "s";
+    }
+
+    return stepUnits;
 }
 
 }

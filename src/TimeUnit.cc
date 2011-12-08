@@ -123,6 +123,14 @@ bool FimexTime::parseISO8601(const std::string& isoStr)
     }
 }
 
+boost::posix_time::ptime FimexTime::asPosixTime() const
+{
+    using namespace boost::posix_time;
+    using namespace boost::gregorian;
+    return ptime(date(year,month,mday), time_duration(hour, minute, (int) second) + milliseconds(msecond));
+}
+
+
 bool FimexTime::operator==(const FimexTime &rhs) const
 {
 	return year == rhs.year &&

@@ -54,6 +54,18 @@ namespace MetNoFimex
  */
 GridDefinition::Orientation gribGetGridOrientation(boost::shared_ptr<grib_handle> gh);
 
+/**
+ * convert the stepUnits to seconds, i.e. D (day) = 60*60*24
+ *
+ * @warning this method is not highly accurate for stepUnits >= month due to missing calendar support (month = 30days, year = 365 days)
+ */
+unsigned long gribStepUnits2seconds(const std::string& stepUnits);
+/**
+ * find the largest unit covering the seconds, i.e. the opposite of gribStepUnits2seconds()
+ */
+std::string gribSeconds2stepUnits(unsigned long seconds);
+
+
 }
 
 #endif /* GRIBUTILS_H_ */
