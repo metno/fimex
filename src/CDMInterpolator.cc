@@ -33,7 +33,7 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
-#include "fimex/CachedForwardInterpolation.h"
+#include "CachedForwardInterpolation.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"

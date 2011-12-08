@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/CachedForwardInterpolation.h"
+#include "CachedForwardInterpolation.h"
 #include "fimex/interpolation.h"
 #include "fimex/Utils.h"
 #include <numeric>

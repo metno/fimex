@@ -24,7 +24,7 @@
 #ifndef GRIBAPICDMWRITER_IMPL1_H_
 #define GRIBAPICDMWRITER_IMPL1_H_
 
-#include "fimex/GribApiCDMWriter_ImplAbstract.h"
+#include "GribApiCDMWriter_ImplAbstract.h"
 
 namespace MetNoFimex
 {

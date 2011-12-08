@@ -21,8 +21,8 @@
  * USA.
  */
 
-#include "fimex/Felt_File2.h"
-#include "fimex/Felt_Array2.h"
+#include "Felt_File2.h"
+#include "Felt_Array2.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltField.h"
 #include "felt/FeltGridDefinition.h"

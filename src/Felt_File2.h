@@ -31,8 +31,8 @@
 #include <boost/shared_array.hpp>
 #include "fimex/Data.h"
 #include "fimex/Felt_Types.h"
-#include "fimex/Felt_File_Error.h"
-#include "fimex/FeltParameters.h"
+#include "Felt_File_Error.h"
+#include "FeltParameters.h"
 #include "fimex/Logger.h"
 #include "felt/FeltTypes.h"
 

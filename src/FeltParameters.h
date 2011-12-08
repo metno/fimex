@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 #include <boost/array.hpp>
-#include "fimex/Felt_File_Error.h"
+#include "Felt_File_Error.h"
 
 namespace MetNoFelt {
 

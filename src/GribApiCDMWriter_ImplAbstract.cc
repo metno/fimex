@@ -21,9 +21,8 @@
  * USA.
  */
 
-#include "fimex/GribApiCDMWriter_ImplAbstract.h"
+#include "GribApiCDMWriter_ImplAbstract.h"
 #include "fimex/TimeUnit.h"
-#include "fimex/TimeLevelDataSliceFetcher.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Utils.h"

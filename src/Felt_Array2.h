@@ -31,7 +31,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <fimex/Felt_Types.h>
-#include "fimex/Felt_File_Error.h"
+#include "Felt_File_Error.h"
 
 #include "felt/FeltTypes.h"
 

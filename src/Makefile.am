@@ -12,6 +12,7 @@ libfimex_la_SOURCES = interpolation.c \
                      c_fimex.cc \
                      C_CDMReader.cc \
 					 CachedInterpolation.cc \
+                     CachedForwardInterpolation.h \
 					 CachedForwardInterpolation.cc \
 					 CachedVectorReprojection.cc \
 					 CDM.cc \
@@ -55,9 +56,13 @@ libfimex_la_SOURCES = interpolation.c \
 					 Data.cc \
 					 DataImpl.h \
 					 DataTypeChanger.cc \
+					 Felt_Array2.h \
 					 Felt_Array2.cc \
                      FeltCDMReader2.cc \
+                     Felt_File_Error.h \
+                     Felt_File2.h \
 					 Felt_File2.cc \
+					 FeltParameters.h \
 					 FeltParameters.cc \
                      GridDefinition.cc \
 					 Logger.cc \
@@ -67,7 +72,6 @@ libfimex_la_SOURCES = interpolation.c \
 					 ReplaceStringTimeObject.cc \
 					 SpatialAxisSpec.cc \
                      SliceBuilder.cc \
-					 TimeLevelDataSliceFetcher.cc \
 					 TimeUnit.cc \
 					 TimeSpec.cc \
 					 ToVLevelConverter.h \
@@ -88,9 +92,12 @@ endif
 
 if HAVE_GRIBAPI
   libfimex_la_SOURCES += GribApiCDMWriter.cc \
+                         GribApiCDMWriter_ImplAbstract.h \
                          GribApiCDMWriter_ImplAbstract.cc \
+                         GribApiCDMWriter_Impl1.h \
                          GribApiCDMWriter_Impl1.cc \
                          GribApiCDMWriter_Impl2.cc \
+                         GribApiCDMWriter_Impl2.h \
                          GribCDMReader.cc \
                          GribFileIndex.cc \
                          GribUtils.cc 

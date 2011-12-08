@@ -40,9 +40,12 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@                         NetCDF_Utils.h
 
 @HAVE_GRIBAPI_TRUE@am__append_2 = GribApiCDMWriter.cc \
+@HAVE_GRIBAPI_TRUE@                         GribApiCDMWriter_ImplAbstract.h \
 @HAVE_GRIBAPI_TRUE@                         GribApiCDMWriter_ImplAbstract.cc \
+@HAVE_GRIBAPI_TRUE@                         GribApiCDMWriter_Impl1.h \
 @HAVE_GRIBAPI_TRUE@                         GribApiCDMWriter_Impl1.cc \
 @HAVE_GRIBAPI_TRUE@                         GribApiCDMWriter_Impl2.cc \
+@HAVE_GRIBAPI_TRUE@                         GribApiCDMWriter_Impl2.h \
 @HAVE_GRIBAPI_TRUE@                         GribCDMReader.cc \
 @HAVE_GRIBAPI_TRUE@                         GribFileIndex.cc \
 @HAVE_GRIBAPI_TRUE@                         GribUtils.cc 
@@ -175,12 +178,12 @@ am__DEPENDENCIES_1 =
 libfimex_la_DEPENDENCIES = felt/libfelt.la $(am__DEPENDENCIES_1)
 am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	C_CDMReader.cc CachedInterpolation.cc \
-	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
-	CDM.cc CDMAttribute.cc CDMconstants.cc CDMDimension.cc \
-	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
-	CDMInterpolator.cc CDMNamedEntity.cc CDMPressureConversions.cc \
-	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
-	CDMTimeInterpolator.cc CDMVariable.cc \
+	CachedForwardInterpolation.h CachedForwardInterpolation.cc \
+	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
+	CDMconstants.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
+	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
+	CDMPressureConversions.cc CDMQualityExtractor.cc CDMReader.cc \
+	CDMReaderUtils.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
@@ -200,17 +203,20 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
-	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
-	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
+	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
+	FeltParameters.h FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc \
-	ToVLevelConverter.h ToVLevelConverter.cc Units.cc Utils.cc \
+	TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
+	ToVLevelConverter.cc Units.cc Utils.cc \
 	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
 	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
 	NetCDF_Utils.h GribApiCDMWriter.cc \
-	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.cc \
-	GribApiCDMWriter_Impl2.cc GribCDMReader.cc GribFileIndex.cc \
+	GribApiCDMWriter_ImplAbstract.h \
+	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.h \
+	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
+	GribApiCDMWriter_Impl2.h GribCDMReader.cc GribFileIndex.cc \
 	GribUtils.cc MetGmCDMReader.cc metgm/MetGmCDMReaderImpl.cc \
 	metgm/MetGmCDMReaderSlicedImpl.cc MetGmCDMWriter.cc \
 	metgm/MetGmCDMWriterImpl.cc metgm/MetGmCDMWriterSlicedImpl.cc \
@@ -312,8 +318,7 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	Felt_File2.lo FeltParameters.lo GridDefinition.lo Logger.lo \
 	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	TimeLevelDataSliceFetcher.lo TimeUnit.lo TimeSpec.lo \
-	ToVLevelConverter.lo Units.lo Utils.lo \
+	TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo Units.lo Utils.lo \
 	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
 	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
 	$(am__objects_4)
@@ -553,12 +558,13 @@ libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ \
 	@XML_LIBS@ @BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ \
 	@BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@ $(am__append_4)
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
-	CachedInterpolation.cc CachedForwardInterpolation.cc \
-	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
-	CDMconstants.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
-	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMPressureConversions.cc CDMQualityExtractor.cc CDMReader.cc \
-	CDMReaderUtils.cc CDMTimeInterpolator.cc CDMVariable.cc \
+	CachedInterpolation.cc CachedForwardInterpolation.h \
+	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
+	CDM.cc CDMAttribute.cc CDMconstants.cc CDMDimension.cc \
+	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
+	CDMInterpolator.cc CDMNamedEntity.cc CDMPressureConversions.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
+	CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
@@ -578,12 +584,13 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
-	DataTypeChanger.cc Felt_Array2.cc FeltCDMReader2.cc \
-	Felt_File2.cc FeltParameters.cc GridDefinition.cc Logger.cc \
+	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
+	FeltParameters.h FeltParameters.cc GridDefinition.cc Logger.cc \
 	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	TimeLevelDataSliceFetcher.cc TimeUnit.cc TimeSpec.cc \
-	ToVLevelConverter.h ToVLevelConverter.cc Units.cc Utils.cc \
+	TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
+	ToVLevelConverter.cc Units.cc Utils.cc \
 	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
 	$(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_5)
@@ -753,7 +760,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpatialAxisSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StereographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeHandler.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeLevelDataSliceFetcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ToVLevelConverter.Plo@am__quote@

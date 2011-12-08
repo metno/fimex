@@ -32,7 +32,7 @@ CC_TESTS = testInterpolation \
 SH_TESTS = 
 LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
-AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I../include \
+AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_srcdir)/src \
               ${milib_CFLAGS} \
               @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ \
               @MIFI_PROJ_CPPFLAGS@ @XML_CPPFLAGS@ \

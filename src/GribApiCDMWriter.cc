@@ -22,8 +22,8 @@
  */
 
 #include "fimex/GribApiCDMWriter.h"
-#include "fimex/GribApiCDMWriter_Impl1.h"
-#include "fimex/GribApiCDMWriter_Impl2.h"
+#include "GribApiCDMWriter_Impl1.h"
+#include "GribApiCDMWriter_Impl2.h"
 #include "fimex/Utils.h"
 
 namespace MetNoFimex

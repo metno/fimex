@@ -23,10 +23,10 @@
 
 #include "fimex/CDM.h"
 #include "fimex/FeltCDMReader2.h"
-#include "fimex/Felt_File2.h"
+#include "Felt_File2.h"
 #include "fimex/Utils.h"
-#include "fimex/Felt_File_Error.h"
-#include "fimex/Felt_Array2.h"
+#include "Felt_File_Error.h"
+#include "Felt_Array2.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Data.h"
 #include "fimex/ReplaceStringTimeObject.h"
