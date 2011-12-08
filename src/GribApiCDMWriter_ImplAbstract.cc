@@ -81,6 +81,14 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 	LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
 	setGlobalAttributes();
 
+	string pType("grid_second_order");
+	try {
+	    size_t pTypeSize = pType.size();
+	    GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting endStep");
+	} catch (...) {
+	    LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
+	}
+
 	const CDM& cdm = cdmReader->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
@@ -159,7 +167,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                 /* select the first startTime and the size for the time-dimension */
                 sb.setTimeStartAndSize(0, 1); // default is all of ReferenceTimePos
             }
-            // TODO: fetch the levels from the cs, not from a variable
+            // fetch the levels from first variable
             std::vector<double> levels = getLevels(csVars.at(0));
             if (zAxis.get() != 0) {
                 sb.setStartAndSize(zAxis->getName(), 0, 1);
@@ -200,7 +208,6 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                         sb.setTimeStartAndSize(vtPos, 1);
                     }
                     for (vector<string>::iterator var = csVars.begin(); var != csVars.end(); ++var) {
-                        // TODO: time must be split into ref-time and steps and independent of var
                         setTime(*var, *rTime, *vTime, stepUnit);
                         for (size_t levelPos = 0; levelPos < levels.size(); ++levelPos) {
                             if (zAxis.get() != 0) {
