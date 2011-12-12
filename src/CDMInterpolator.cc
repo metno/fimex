@@ -37,7 +37,7 @@
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
-#include "kdtree++/kdtree.hpp"
+#include "nanoflann/nanoflann.hpp"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
 #endif
@@ -573,47 +573,48 @@ static void changeCDM(CDM& cdm, const string& proj_input, const CoordSysPtr& cs,
 
 }
 
-// internal setup for kd-tree
-typedef double p2dtype;
-class point2d {
-private:
-    p2dtype x;
-    p2dtype y;
-    int i;
-    int j;
-public:
-    point2d(p2dtype x, p2dtype y, int i, int j) : x(x), y(y), i(i), j(j) {}
-    point2d() : x(0), y(0), i(-1), j(-1) {}
-    // squared distance
-    double distance_to(const point2d& rhs) const {return (x-rhs.x)*(x-rhs.x) + (y-rhs.y)*(y-rhs.y);}
-    p2dtype operator[](size_t N) const { assert(N<2); return (N == 0) ? x : y; }
-    p2dtype getX() const {return x;}
-    p2dtype getY() const {return y;}
-    int getI() const {return i;}
-    int getJ() const {return j;}
+// internal setup for nanoflann kd-tree
+template <typename T>
+struct PointCloud
+{
+        struct Point
+        {
+                T  x,y;
+        };
+
+        std::vector<Point>  pts;
+
+        // Must return the number of data points
+        inline size_t kdtree_get_point_count() const { return pts.size(); }
+
+        // Returns the distance between the vector "p1[0:size-1]" and the data point with index "idx_p2" stored in the class:
+        inline float kdtree_distance(const float *p1, const size_t idx_p2, size_t size) const
+        {
+                float d0=p1[0]-pts[idx_p2].x;
+                float d1=p1[1]-pts[idx_p2].y;
+                return d0*d0+d1*d1;
+        }
+
+        // Returns the dim'th component of the idx'th point in the class:
+        // Since this is inlined and the "dim" argument is typically an immediate value, the
+        //  "if/else's" are actually solved at compile time.
+        inline float kdtree_get_pt(const size_t idx, int dim) const
+        {
+                if (dim==0) return pts[idx].x;
+                else return pts[idx].y;
+        }
+
+        // Optional bounding-box computation: return false to default to a standard bbox computation loop.
+        //   Return true if the BBOX was already computed by the class and returned in "bb" so it can be avoided to redo it again.
+        //   Look at bb.size() to find out the expected dimensionality (e.g. 2 or 3 for point clouds)
+        template <class BBOX>
+        bool kdtree_get_bbox(BBOX &bb) const { return false; }
+
 };
-inline bool operator==(const point2d& A, const point2d& B)
-{
-    return A.getX() == B.getX() && A.getY() == B.getY();
-}
-std::ostream& operator<<(std::ostream& out, const point2d& P)
-{
-    return out << '(' << P.getX() << ',' << P.getY() << ')';
-}
-// p2d accessor
-inline p2dtype pac(point2d p, size_t k) { return p[k]; }
-typedef KDTree::KDTree<2,point2d,std::pointer_to_binary_function<point2d,size_t,p2dtype> > tree_type;
 
-class DoesNotEqual {
-    point2d p;
-public:
-    DoesNotEqual(point2d p) : p(p) {}
-    bool operator()( const point2d& rhs ) const { return !(p == rhs); };
-};
-
-
-void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, size_t xAxisSize, size_t yAxisSize, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+void flannTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, size_t xAxisSize, size_t yAxisSize, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
 {
+    using namespace nanoflann;
     // find the max distance of two neighboring points in the output
     // this is the region of influence for a cell
     double maxDist;
@@ -631,32 +632,46 @@ void kdTreeTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vect
     LOG4FIMEX(logger, Logger::DEBUG, "maximum allowed distance from cell-center: " << maxDist);
     assert(maxDist != 0);
 
+
     // pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in m on projectionSpace
-    vector<point2d> llPoints;
-    llPoints.reserve(orgXDimSize*orgYDimSize);
+    time_t start = time(0);
+    PointCloud<float> cloud;
+    cloud.pts.resize(orgXDimSize*orgYDimSize);
     for (size_t ix = 0; ix < orgXDimSize; ix++) {
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
             size_t pos = ix+iy*orgXDimSize;
             if (!(isnan(lonVals[pos]) || isnan(latVals[pos]))) {
-                llPoints.push_back(point2d(lonVals[pos], latVals[pos], ix, iy));
+                cloud.pts[pos].x = lonVals[pos];
+                cloud.pts[pos].y = latVals[pos];
             }
         }
     }
-    time_t start = time(0);
-    tree_type lonLatTree(llPoints.begin(), llPoints.end(), std::ptr_fun(pac));
+    // construct a kd-tree index:
+    typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<float, PointCloud<float> > ,
+                                     PointCloud<float>,
+                                     2 /* dim */> my_kd_tree_t;
+    my_kd_tree_t index(2 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */) );
+    index.buildIndex();
     LOG4FIMEX(logger, Logger::DEBUG, "finished loading kdTree after " << (time(0) - start) << "s");
-    llPoints.clear(); // release memory
 
+    const float search_radius = static_cast<float>(maxDist * maxDist); // using square since distance is not sqrt
+    nanoflann::SearchParams params;
+    params.sorted = true;
     for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
-        point2d target(pointsOnXAxis[i], pointsOnYAxis[i], -1, -1);
-        std::pair<tree_type::const_iterator,double> found = lonLatTree.find_nearest(target, maxDist);
-        if (found.first != lonLatTree.end()) {
-            //LOG4FIMEX(logger, Logger::DEBUG, "found (" << pointsOnXAxis[i] << "," << pointsOnYAxis[i] << ") at (" << found.first->getI() << "," << found.first->getJ() << ")");
-            pointsOnXAxis[i] = found.first->getI();
-            pointsOnYAxis[i] = found.first->getJ();
+        const float query_pt[2] = { pointsOnXAxis[i], pointsOnYAxis[i]};
+
+        std::vector<std::pair<int,float> > ret_matches;
+        const size_t nMatches = index.radiusSearch(&query_pt[0], search_radius, ret_matches, params);
+        if (nMatches > 0) {
+            size_t pos = ret_matches.at(0).first; // pos = ix+orgXDimSize*iy =>
+            int ix = pos % orgXDimSize;
+            int iy = pos / orgXDimSize;
+            // LOG4FIMEX(logger, Logger::DEBUG, "found (" << pointsOnXAxis[i] << "," << pointsOnYAxis[i] << ") at (" << ix << "," << iy << ")");
+            pointsOnXAxis[i] = ix;
+            pointsOnYAxis[i] = iy;
         }
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "finished kdTreeTranslatePointsToClosestInputCell");
+    LOG4FIMEX(logger, Logger::DEBUG, "finished flannKDTranslatePointsToClosestInputCell");
 }
 
 double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize) {
@@ -1015,7 +1030,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
                 }
             }
         }
-        kdTreeTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, outXAxis.size(), outYAxis.size(), &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+        flannTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, outXAxis.size(), outYAxis.size(), &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
     } else {
         throw CDMException("unkown interpolation method for coordinates: " + type2string(method));
     }

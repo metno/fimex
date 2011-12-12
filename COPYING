@@ -1,6 +1,7 @@
-This software comes bundled with libkdtree++-0.7.0, which has the
-'Artistic License', see include/kdtree++/COPYING. Everything else is:
- 
+This software comes bundled with nanoflann 1.0.0 ( http://code.google.com/p/nanoflann/ ),
+which has the 'BSD License', see include/nanoflann/COPYING.
+Everything else is:
+
 
 		    GNU GENERAL PUBLIC LICENSE
 		       Version 2, June 1991

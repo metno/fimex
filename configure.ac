@@ -143,7 +143,7 @@ AC_CONFIG_FILES([fimex.pc
                  include/fimex/Makefile
                  include/fimex/coordSys/Makefile
                  include/felt/Makefile
-                 include/kdtree++/Makefile])
+                 include/nanoflann/Makefile])
 AC_CONFIG_FILES([test/testVerticalInterpolator.sh],[chmod +x test/testVerticalInterpolator.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolator2.sh],[chmod +x test/testVerticalInterpolator2.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolatorHeight.sh],[chmod +x test/testVerticalInterpolatorHeight.sh])
