@@ -25,7 +25,6 @@
  */
 
 #include <boost/program_options.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -41,7 +40,6 @@
 #include "fimex/Data.h"
 
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 namespace io = boost::iostreams;
 
 using namespace std;

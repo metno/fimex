@@ -24,14 +24,14 @@
  *      Author: Heiko Klein
  */
 
+#include "fimex/GribFileIndex.h"
+#include "fimex/CDMconstants.h"
+#include <grib_api.h>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
-#include "fimex/GribFileIndex.h"
-#include "fimex/CDMconstants.h"
-#include "grib_api.h"
 
 
 namespace po = boost::program_options;

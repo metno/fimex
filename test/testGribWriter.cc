@@ -31,6 +31,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
+#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/operations.hpp>
 #include "fimex/FeltCDMReader2.h"
 #include "fimex/GribApiCDMWriter.h"

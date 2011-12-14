@@ -30,6 +30,7 @@
 #define WDBCONFIGURATION_H_
 
 #include "../database_access/WciReadQuerySpecification.h"
+#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/path.hpp>
 #include <iosfwd>
 
