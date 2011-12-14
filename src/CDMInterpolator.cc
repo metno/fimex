@@ -660,12 +660,12 @@ void flannTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vecto
     for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
         const float query_pt[2] = { pointsOnXAxis[i], pointsOnYAxis[i]};
 
-        std::vector<std::pair<int,float> > ret_matches;
+        std::vector<std::pair<size_t,float> > ret_matches;
         const size_t nMatches = index.radiusSearch(&query_pt[0], search_radius, ret_matches, params);
         if (nMatches > 0) {
             size_t pos = ret_matches.at(0).first; // pos = ix+orgXDimSize*iy =>
-            int ix = pos % orgXDimSize;
-            int iy = pos / orgXDimSize;
+            size_t ix = pos % orgXDimSize;
+            size_t iy = pos / orgXDimSize;
             // LOG4FIMEX(logger, Logger::DEBUG, "found (" << pointsOnXAxis[i] << "," << pointsOnYAxis[i] << ") at (" << ix << "," << iy << ")");
             pointsOnXAxis[i] = ix;
             pointsOnYAxis[i] = iy;
