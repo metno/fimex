@@ -62,6 +62,8 @@
 namespace MetNoFimex
 {
 
+const std::string LAT_LON_PROJSTR = "+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs";
+
 using namespace std;
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
@@ -69,7 +71,7 @@ const bool DEBUG = false;
 static LoggerPtr logger = getLogger("fimex.CDMInterpolator");
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
-: dataReader(dataReader), latitudeName("lat"), longitudeName("lon")
+: dataReader(dataReader), maxDistance_(-1), latitudeName("lat"), longitudeName("lon")
 {
     *cdm_ = dataReader->getCDM();
 }
@@ -194,7 +196,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         if (getProjectionName(proj_input) != "latlong") {
-            std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+            std::string orgProjStr = LAT_LON_PROJSTR;
             if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
                 throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input);
             }
@@ -293,7 +295,7 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
            vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
 
-           std::string proj4string("+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs");
+           std::string proj4string(LAT_LON_PROJSTR);
 
            changeProjectionByProjectionParametersToLatLonTemplate(method,
                                                                   proj4string,
@@ -573,13 +575,38 @@ static void changeCDM(CDM& cdm, const string& proj_input, const CoordSysPtr& cs,
 
 }
 
+double CDMInterpolator::getMaxDistanceOfInterest(const vector<double>& out_x_axis, const vector<double>& out_y_axis, bool isMetric) const
+{
+    if (maxDistance_ > 0) return maxDistance_;
+    // find the max distance of two neighboring points in the output
+    // this is the region of influence for a cell
+    double factor = 1.;
+    if (!isMetric) {
+        factor = MIFI_EARTH_RADIUS_M;
+    }
+    double maxDist = 0;
+    {
+        double maxX = 0;
+        for (size_t i = 0; i < out_x_axis.size() - 1; ++i) {
+            maxX = max(factor*abs(out_x_axis[i+1]-out_x_axis[i]), maxX);
+        }
+        double maxY = 0;
+        for (size_t j = 0; j < out_y_axis.size()-1; ++j) {
+            maxY = max(factor*abs(out_y_axis[j+1] - out_y_axis[j]), maxY);
+        }
+        maxDist = max(maxX, maxY);
+    }
+    return maxDist;
+}
+
+
 // internal setup for nanoflann kd-tree
 template <typename T>
 struct PointCloud
 {
         struct Point
         {
-                T  x,y;
+                T  x,y,z;
         };
 
         std::vector<Point>  pts;
@@ -588,20 +615,22 @@ struct PointCloud
         inline size_t kdtree_get_point_count() const { return pts.size(); }
 
         // Returns the distance between the vector "p1[0:size-1]" and the data point with index "idx_p2" stored in the class:
-        inline float kdtree_distance(const float *p1, const size_t idx_p2, size_t size) const
+        inline T kdtree_distance(const T *p1, const size_t idx_p2, size_t size) const
         {
-                float d0=p1[0]-pts[idx_p2].x;
-                float d1=p1[1]-pts[idx_p2].y;
-                return d0*d0+d1*d1;
+                T d0=p1[0]-pts[idx_p2].x;
+                T d1=p1[1]-pts[idx_p2].y;
+                T d2=p1[2]-pts[idx_p2].z;
+                return d0*d0+d1*d1+d2*d2;
         }
 
         // Returns the dim'th component of the idx'th point in the class:
         // Since this is inlined and the "dim" argument is typically an immediate value, the
         //  "if/else's" are actually solved at compile time.
-        inline float kdtree_get_pt(const size_t idx, int dim) const
+        inline T kdtree_get_pt(const size_t idx, int dim) const
         {
                 if (dim==0) return pts[idx].x;
-                else return pts[idx].y;
+                else if (dim==1) return pts[idx].y;
+                else return pts[idx].z;
         }
 
         // Optional bounding-box computation: return false to default to a standard bbox computation loop.
@@ -612,63 +641,73 @@ struct PointCloud
 
 };
 
-void flannTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, size_t xAxisSize, size_t yAxisSize, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
+void flannTranslatePointsToClosestInputCell(double maxDist, vector<double>& pointsOnXAxis, vector<double>& pointsOnYAxis, size_t xAxisSize, size_t yAxisSize, double* lonVals, double* latVals, size_t orgXDimSize, size_t orgYDimSize)
 {
+    // pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in rad
+
     using namespace nanoflann;
-    // find the max distance of two neighboring points in the output
-    // this is the region of influence for a cell
-    double maxDist;
-    {
-        double maxX = 0;
-        for (size_t i = 0; i < xAxisSize-1; ++i) {
-            maxX = max(abs(pointsOnXAxis[i+1]-pointsOnXAxis[i]), maxX);
-        }
-        double maxY = 0;
-        for (size_t j = 0; j < yAxisSize-1; ++j) {
-            maxY = max(abs(pointsOnXAxis[(j+1)*xAxisSize] - pointsOnXAxis[j*xAxisSize]), maxY);
-        }
-        maxDist = max(maxX, maxY);
-    }
     LOG4FIMEX(logger, Logger::DEBUG, "maximum allowed distance from cell-center: " << maxDist);
     assert(maxDist != 0);
 
+    // all calculations on a sphere with unit 1
+    maxDist /= MIFI_EARTH_RADIUS_M;
 
-    // pointsOnXAxis and pointsOnYAxis as well as lonVals and latVals are now represented in m on projectionSpace
+
     time_t start = time(0);
-    PointCloud<float> cloud;
+    PointCloud<double> cloud;
     cloud.pts.resize(orgXDimSize*orgYDimSize);
     for (size_t ix = 0; ix < orgXDimSize; ix++) {
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
             size_t pos = ix+iy*orgXDimSize;
-            if (!(isnan(lonVals[pos]) || isnan(latVals[pos]))) {
-                cloud.pts[pos].x = lonVals[pos];
-                cloud.pts[pos].y = latVals[pos];
+            if (!(mifi_isnanf(latVals[pos]) || mifi_isnanf(lonVals[pos]))) {
+                double sinLat = sin(latVals[pos]);
+                double cosLat = cos(latVals[pos]);
+                double sinLon = sin(lonVals[pos]);
+                double cosLon = cos(lonVals[pos]);
+                cloud.pts[pos].x = cosLat * cosLon;
+                cloud.pts[pos].y = cosLat * sinLon;
+                cloud.pts[pos].z = sinLat;
+            } else {
+                cloud.pts[pos].x = MIFI_UNDEFINED_D;
+                cloud.pts[pos].y = MIFI_UNDEFINED_D;
+                cloud.pts[pos].z = MIFI_UNDEFINED_D;
             }
         }
     }
     // construct a kd-tree index:
-    typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<float, PointCloud<float> > ,
-                                     PointCloud<float>,
-                                     2 /* dim */> my_kd_tree_t;
-    my_kd_tree_t index(2 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(10 /* max leaf */) );
+    typedef KDTreeSingleIndexAdaptor<L2_Simple_Adaptor<double, PointCloud<double> > ,
+                                     PointCloud<double>,
+                                     3 /* dim */> my_kd_tree_t;
+    my_kd_tree_t index(3 /*dim*/, cloud, KDTreeSingleIndexAdaptorParams(12 /* max leaf */) );
     index.buildIndex();
     LOG4FIMEX(logger, Logger::DEBUG, "finished loading kdTree after " << (time(0) - start) << "s");
 
-    const float search_radius = static_cast<float>(maxDist * maxDist); // using square since distance is not sqrt
+    // using square since distance is not sqrt
+    const double search_radius = static_cast<double>(maxDist * maxDist);
     nanoflann::SearchParams params;
     params.sorted = true;
     for (size_t i = 0; i < pointsOnXAxis.size(); i++) {
-        const float query_pt[2] = { pointsOnXAxis[i], pointsOnYAxis[i]};
+        double sinLat = sin(pointsOnYAxis[i]);
+        double cosLat = cos(pointsOnYAxis[i]);
+        double sinLon = sin(pointsOnXAxis[i]);
+        double cosLon = cos(pointsOnXAxis[i]);
+        const double query_pt[3] = { cosLat * cosLon,
+                                     cosLat * sinLon,
+                                     sinLat };
 
-        std::vector<std::pair<size_t,float> > ret_matches;
+        std::vector<std::pair<size_t,double> > ret_matches;
         const size_t nMatches = index.radiusSearch(&query_pt[0], search_radius, ret_matches, params);
         if (nMatches > 0) {
             size_t pos = ret_matches.at(0).first; // pos = ix+orgXDimSize*iy =>
             size_t ix = pos % orgXDimSize;
             size_t iy = pos / orgXDimSize;
-            // LOG4FIMEX(logger, Logger::DEBUG, "found (" << pointsOnXAxis[i] << "," << pointsOnYAxis[i] << ") at (" << ix << "," << iy << ")");
+            //LOG4FIMEX(logger, Logger::DEBUG, "found (" << RAD_TO_DEG*pointsOnXAxis[i] << "," << RAD_TO_DEG*pointsOnYAxis[i] << ") at (" << ix << "," << iy << ") dist: " << ret_matches.at(0).second);
             pointsOnXAxis[i] = ix;
             pointsOnYAxis[i] = iy;
+        } else {
+            // set to any value outside the axes (0 - x/y-size)
+            pointsOnXAxis[i] = -1000;
+            pointsOnYAxis[i] = -1000;
         }
     }
     LOG4FIMEX(logger, Logger::DEBUG, "finished flannKDTranslatePointsToClosestInputCell");
@@ -913,7 +952,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
     }
 
     // translate all input points to output-coordinates, stored in lonVals and latVals
-    std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
+    std::string orgProjStr = LAT_LON_PROJSTR;
     if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
         throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
     }
@@ -987,7 +1026,9 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
     vector<double> outXAxis = out_x_axis;
     vector<double> outYAxis = out_y_axis;
     boost::regex degree(".*degree.*");
+    bool isMetric = true;
     if (boost::regex_match(out_x_axis_unit, degree)) {
+        isMetric = false;
         transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
     }
     if (boost::regex_match(out_y_axis_unit, degree)) {
@@ -997,40 +1038,15 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
     size_t fieldSize = outXAxis.size() * outYAxis.size();
     vector<double> pointsOnXAxis(fieldSize);
     vector<double> pointsOnYAxis(fieldSize);
+    std::string orgProjStr = LAT_LON_PROJSTR;
+    if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
+        throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
+    }
     if (method == MIFI_INTERPOL_COORD_NN) {
-        if (getProjectionName(proj_input) != "latlong") {
-            std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
-            if (MIFI_OK != mifi_project_axes(proj_input.c_str(), orgProjStr.c_str(), &outXAxis[0], &outYAxis[0], outXAxis.size(), outYAxis.size(), &pointsOnXAxis[0], &pointsOnYAxis[0])) {
-                throw CDMException("unable to project axes from "+orgProjStr+ " to " +proj_input.c_str());
-            }
-        }
         fastTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
     } else if (method == MIFI_INTERPOL_COORD_NN_KD) {
-        for (size_t ix = 0; ix < outXAxis.size(); ix++) {
-            for (size_t iy = 0; iy < outYAxis.size(); iy++) {
-                size_t pos = ix+iy*outXAxis.size();
-                pointsOnXAxis[pos] = outXAxis[ix];
-                pointsOnYAxis[pos] = outYAxis[iy];
-            }
-        }
-        if (getProjectionName(proj_input) != "latlong") {
-            std::string orgProjStr = "+ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0 +proj=latlong";
-            if (MIFI_OK != mifi_project_values(orgProjStr.c_str(), proj_input.c_str(), &lonVals[0], &latVals[0], latSize)) {
-                throw CDMException("unable to project axes from "+proj_input+ " to " +orgProjStr);
-            }
-        } else {
-            throw CDMException("unable to use kd-tree interpolation when output-projection in degree");
-        }
-        if (DEBUG) {
-            boost::shared_array<double> oLatVals = dataReader->getData(latitude)->asDouble();
-            boost::shared_array<double> oLonVals = dataReader->getData(longitude)->asDouble();
-            for (size_t i = 0; i < latSize; i++) {
-                if ((!isnan(latVals[i])) && (!isnan(lonVals[i]))) {
-                    cerr << i << ": (" << oLatVals[i] << "," <<oLonVals[i] << ") -> (" << latVals[i] << "," << lonVals[i] << ")" << endl;
-                }
-            }
-        }
-        flannTranslatePointsToClosestInputCell(pointsOnXAxis, pointsOnYAxis, outXAxis.size(), outYAxis.size(), &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
+        double maxDistance = getMaxDistanceOfInterest(out_x_axis, out_y_axis, isMetric);
+        flannTranslatePointsToClosestInputCell(maxDistance, pointsOnXAxis, pointsOnYAxis, outXAxis.size(), outYAxis.size(), &lonVals[0], &latVals[0], orgXDimSize, orgYDimSize);
     } else {
         throw CDMException("unkown interpolation method for coordinates: " + type2string(method));
     }

@@ -73,6 +73,7 @@ private:
     boost::shared_ptr<CDMReader> dataReader;
     std::vector<std::string> projectionVariables;
     std::vector<boost::shared_ptr<InterpolatorProcess2d> > preprocesses;
+    double maxDistance_; // negative = undefined
     boost::shared_ptr<CachedInterpolationInterface> cachedInterpolation;
     boost::shared_ptr<CachedVectorReprojection> cachedVectorReprojection;
     std::string latitudeName;
@@ -151,8 +152,8 @@ public:
           * @param netcdf-template-file input-string for netcf template filename
           *
           */
-        virtual void changeProjection(int method, const std::string& netcdf_template_file);
-        /**
+    virtual void changeProjection(int method, const std::string& netcdf_template_file);
+    /**
 	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for latitude
 	 */
@@ -171,6 +172,25 @@ public:
 	 * @return the name used for longitude in the automatic coordinate generation
 	 */
 	virtual const std::string& getLongitudeName() const {return longitudeName;}
+	/**
+	 * get the maximum distance allowed between the center of two cells
+	 * to still influence each others
+	 *
+	 * @param out_x_axis the available new x-axis (in meter or radian)
+	 * @param out_y_axis the available new y-axis (in meter or radian)
+	 * @param isMetric indicate if y-axis is already given in m, or is in degree
+	 *
+	 * @return the maximum distance (in m) between adjacent points,
+	 *         or the value given with setDistanceOfInterest()
+	 */
+	virtual double getMaxDistanceOfInterest(const std::vector<double>& out_y_axis, const std::vector<double>& out_x_axis, bool isMetric) const;
+	/**
+	 * set the distance of interest, usually the radius of input-points + ~1/2 cell-size of output
+	 * Negative values invalidate the distance.
+	 *
+	 * @param dist distance in meter
+	 */
+	virtual void setDistanceOfInterest(double dist) {maxDistance_ = dist;}
 	/**
 	 * add a process to the internal list of preprocesses
 	 *

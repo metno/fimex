@@ -190,6 +190,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOption<string>(out, "interpolate.yAxisUnit", vm);
     writeOption<string>(out, "interpolate.xAxisType", vm);
     writeOption<string>(out, "interpolate.yAxisType", vm);
+    writeOption<double>(out, "interpolate.distanceOfInterest", vm);
 	writeOption<string>(out, "interpolate.latitudeName", vm);
 	writeOption<string>(out, "interpolate.longitudeName", vm);
     writeOption<string>(out, "interpolate.preprocess", vm);
@@ -509,6 +510,9 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
             cerr << "ERROR: xAxisValues and yAxisValues required" << endl;
             exit(1);
         }
+        if (vm.count("interpolate.distanceOfInterest")) {
+            interpolator->setDistanceOfInterest(vm["interpolate.distanceOfInterest"].as<double>());
+        }
 
         interpolator->changeProjection(method, vm["interpolate.projString"].as<string>(),
                                                vm["interpolate.xAxisValues"].as<string>(), vm["interpolate.yAxisValues"].as<string>(),
@@ -656,6 +660,7 @@ int run(int argc, char* args[])
         ("interpolate.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
         ("interpolate.xAxisType", po::value<string>()->default_value("double"), "datatype of x-axis (double,float,int,short)")
         ("interpolate.yAxisType", po::value<string>()->default_value("double"), "datatype of y-axis")
+        ("interpolate.distanceOfInterest", po::value<double>(), "optional distance of interest used differently depending on method")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2)\"")
