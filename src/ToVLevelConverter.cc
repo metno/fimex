@@ -217,6 +217,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getConverter(const boost
     switch (verticalType) {
     case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
     case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, nt);
+    case MIFI_VINT_DEPTH: return getHeightConverter(reader, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, nt);
     default: throw CDMException("unknown vertical type");
     }
 }

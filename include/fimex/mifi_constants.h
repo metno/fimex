@@ -162,6 +162,13 @@
  */
 #define MIFI_VINT_HEIGHT 1
 
+/**
+ * @brief vertical interpolation type
+ *
+ * vertical interpolation to depth below sea-level in m
+ */
+#define MIFI_VINT_DEPTH 2
+
 
 /**
  * @brief vertical interpolation method

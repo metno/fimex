@@ -87,6 +87,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
         pimpl_->verticalType = MIFI_VINT_PRESSURE;
     } else if (verticalType == "height") {
         pimpl_->verticalType = MIFI_VINT_HEIGHT;
+    } else if (verticalType == "depth") {
+        pimpl_->verticalType = MIFI_VINT_DEPTH;
     } else {
         throw CDMException("unknown vertical type: " + verticalType);
     }
@@ -128,6 +130,19 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
                 cdm_->addVariable(var);
                 cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("units", "m"));
                 cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("positive", "up"));
+            }
+            break;
+        case MIFI_VINT_DEPTH:
+            pimpl_->vAxis = findUniqueDimVarName(dataReader->getCDM(), "depth");
+            {
+                cdm_->addDimension(CDMDimension(pimpl_->vAxis, level1.size()));
+                CDMVariable var(pimpl_->vAxis, CDM_DOUBLE, vector<string>(1, pimpl_->vAxis));
+                boost::shared_array<double> height(new double[level1.size()]);
+                copy(level1.begin(), level1.end(), &height[0]);
+                var.setData(createData(level1.size(), height));
+                cdm_->addVariable(var);
+                cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("units", "m"));
+                cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("positive", "down"));
             }
             break;
         default:

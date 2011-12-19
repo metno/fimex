@@ -671,7 +671,7 @@ int run(int argc, char* args[])
 #endif
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
         ("interpolate.template", po::value<string>(), "netcdf file containing lat/lon list used in interpolation")
-        ("verticalInterpolate.type", po::value<string>(), "pressure or height")
+        ("verticalInterpolate.type", po::value<string>(), "pressure, height or depth")
         ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
