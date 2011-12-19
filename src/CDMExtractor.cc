@@ -274,12 +274,15 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
     using namespace std;
     // check input
     if (south > north) throw CDMException("reduceLatLonBoundingBox south > north: "+type2string(south) + ">" +type2string(north));
-    if (west > east) throw CDMException("reduceLatLonBoundingBox west > east: "+type2string(west) + ">" +type2string(east));
+
     if (south < -90. || south > 90) throw CDMException("reduceLatLonBoundingBox south outside domain: " + type2string(south));
     if (north < -90. || north > 90) throw CDMException("reduceLatLonBoundingBox north outside domain: " + type2string(north));
     if (west < -180. || west > 180) throw CDMException("reduceLatLonBoundingBox west outside domain: " + type2string(west));
     if (east < -180. || east > 180) throw CDMException("reduceLatLonBoundingBox east outside domain: " + type2string(east));
 
+    if (west > east) {
+        west -= 360;
+    }
     // find coordinate-systems
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
     CsList coordsys = listCoordinateSystems(getCDM());
