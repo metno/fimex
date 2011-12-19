@@ -186,7 +186,7 @@ public:
 	virtual double getMaxDistanceOfInterest(const std::vector<double>& out_y_axis, const std::vector<double>& out_x_axis, bool isMetric) const;
 	/**
 	 * set the distance of interest, usually the radius of input-points + ~1/2 cell-size of output
-	 * Negative values invalidate the distance.
+	 * Negative values invalidate the distance. To have effect, this function must be set before calling changeProjection()
 	 *
 	 * @param dist distance in meter
 	 */
