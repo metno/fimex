@@ -42,15 +42,19 @@ CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> point
 
 boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
 {
-	size_t inZ = size / (inX*inY);
-	newSize = outX*outY*inZ;
+    const size_t layerSize = (inX*inY);
+	const size_t inZ = size / layerSize;
+	newSize = layerSize*inZ;
 	boost::scoped_array<float> zValues(new float[inZ]);
 	boost::shared_array<float> outfield(new float[newSize]);
 	for (size_t y = 0; y < outY; ++y) {
 		for (size_t x = 0; x < outX; ++x) {
+	        float* outPos = &outfield[y*outX + x];
 			if (func(inData.get(), zValues.get(), pointsOnXAxis[y*outX+x], pointsOnYAxis[y*outX+x], inX, inY, inZ) != MIFI_ERROR) {
 				for (size_t z = 0; z < inZ; ++z) {
-					outfield[mifi_3d_array_position(x, y, z, outX, outY, inZ)] = zValues[z];
+				    outPos[z*layerSize] = zValues[z];
+				    // same but faster then
+					// outfield[mifi_3d_array_position(x, y, z, outX, outY, inZ)] = zValues[z];
 				}
 			} else (throw CDMException("error during interpolation"));
 		}

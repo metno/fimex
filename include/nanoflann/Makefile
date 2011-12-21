@@ -107,13 +107,13 @@ BOOST_SYSTEM_LIB = -lboost_system-mt
 BOOST_UNIT_TEST_FRAMEWORK_LIB = -lboost_unit_test_framework-mt
 CC = gcc -std=gnu99 -std=gnu99
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O2 -mfpmath=sse -msse2 -Wall
+CFLAGS = -O2 -mfpmath=sse -msse2 -ftree-vectorize -ftree-vectorizer-verbose=5 -Wall
 CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2 -mfpmath=sse -msse2 -Wall
+CXXFLAGS = -O2 -mfpmath=sse -msse2 -ftree-vectorize -ftree-vectorizer-verbose=5 -Wall
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
