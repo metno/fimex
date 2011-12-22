@@ -122,6 +122,12 @@
     <attribute name="positive" value="up" type="string" />
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
+<vertical_axis id="layer_between_altitudes" name="layer_between_altitudes" grib1_id="104" type="float">
+    <attribute name="description" value="layer between two altitudes" type="string" />
+    <attribute name="long_name" value="layer between two altitudes" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <attribute name="units" value="100m" type="string" />
+</vertical_axis>
 <vertical_axis id="height" name="height" grib2_id="103" grib1_id="105" type="float">
     <attribute name="description" value="height above ground" type="string" />
     <attribute name="long_name" value="height" type="string" />
