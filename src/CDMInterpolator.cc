@@ -109,7 +109,7 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
     assert((nz*nx*ny) == size);
 
 #ifdef HAVE_OPENMP
-#pragma omp parallel default(shared)
+#pragma omp parallel default(shared) if (nz >= 4)
     {
 #pragma omp for nowait
 #endif
@@ -730,7 +730,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
 #ifdef HAVE_OPENMP
     omp_lock_t my_lock;
     omp_init_lock(&my_lock);
-#pragma omp parallel default(shared)
+#pragma omp parallel default(shared) if (steps > 4)
     {
 #pragma omp for nowait
 #endif
