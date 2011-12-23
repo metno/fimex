@@ -25,6 +25,7 @@
 #define CDMINTERPOLATOR_H_
 
 #include <vector>
+#include <map>
 #include "fimex/CDMReader.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
@@ -35,6 +36,7 @@ namespace MetNoFimex
 {
 // forward decl
 class CoordinateSystem;
+struct CDMInterpolatorInternals;
 
 /**
  * operator interface to work on 2d arrays of size nx*ny
@@ -70,14 +72,8 @@ public:
 class CDMInterpolator : public MetNoFimex::CDMReader
 {
 private:
-    boost::shared_ptr<CDMReader> dataReader;
-    std::vector<std::string> projectionVariables;
-    std::vector<boost::shared_ptr<InterpolatorProcess2d> > preprocesses;
-    double maxDistance_; // negative = undefined
-    boost::shared_ptr<CachedInterpolationInterface> cachedInterpolation;
-    boost::shared_ptr<CachedVectorReprojection> cachedVectorReprojection;
-    std::string latitudeName;
-    std::string longitudeName;
+    // the pimpl
+    struct boost::shared_ptr<CDMInterpolatorInternals> p_;
     /** converter for axes-strings */
     void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
     void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
@@ -95,7 +91,10 @@ private:
                                                                 boost::shared_ptr<Data> templateLatValues,
                                                                 boost::shared_ptr<Data> templateLonValues);
 
-    boost::shared_ptr<const CoordinateSystem> findBestCoordinateSystemAndProjectionVars(bool withProjection);
+    /**
+     * map of CoordinateSystem::horizontalId() and the CoordinateSystem
+     */
+    std::map<std::string, boost::shared_ptr<const CoordinateSystem> > findBestCoordinateSystemsAndProjectionVars(bool withProjection);
     bool hasSpatialVectors() const;
 public:
 	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
@@ -157,21 +156,20 @@ public:
 	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for latitude
 	 */
-
-	virtual void setLatitudeName(const std::string& latName) {this->latitudeName = latName;}
+	virtual void setLatitudeName(const std::string& latName);
 	/**
 	 * @return the name used for latitude in the automatic coordinate generation
 	 */
-	virtual const std::string& getLatitudeName() const {return latitudeName;}
+	virtual const std::string& getLatitudeName() const;
 	/**
 	 * set the name for the automatically generated longitude coordinate axis. This must be set before changeProjection is called.
 	 * @param latName name for longitude
 	 */
-	virtual void setLongitudeName(const std::string& lonName) {this->longitudeName = lonName;}
+	virtual void setLongitudeName(const std::string& lonName);
 	/**
 	 * @return the name used for longitude in the automatic coordinate generation
 	 */
-	virtual const std::string& getLongitudeName() const {return longitudeName;}
+	virtual const std::string& getLongitudeName() const;
 	/**
 	 * get the maximum distance allowed between the center of two cells
 	 * to still influence each others
@@ -190,7 +188,7 @@ public:
 	 *
 	 * @param dist distance in meter
 	 */
-	virtual void setDistanceOfInterest(double dist) {maxDistance_ = dist;}
+	virtual void setDistanceOfInterest(double dist);
 	/**
 	 * add a process to the internal list of preprocesses
 	 *

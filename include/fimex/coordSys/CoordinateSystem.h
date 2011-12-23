@@ -78,6 +78,12 @@ public:
      */
     virtual std::string id() const;
     /**
+     * get an id for the horizontal part of the coordinate system, i.e.
+     * geoXAxis and geoYAxis
+     */
+    virtual std::string horizontalId() const;
+
+    /**
      * @return the name of convention used to build the CS
      */
     virtual std::string getConventionName() const;

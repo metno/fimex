@@ -127,11 +127,12 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
     {
         vector<double> xAxis, yAxis;
-        for (int i = -100; i < 10; i++) {
-            xAxis.push_back(i * 50000);
-            yAxis.push_back(i * 50000);
+        for (int i = 0; i < 12; i++) {
+            xAxis.push_back(-1705516 + i * 50000);
+            yAxis.push_back(-6872225 + i * 50000);
         }
-        interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+        interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+        //NetCDF_CDMWriter(interpolator, "test2coordsNNKDInterpolator.nc");
     }
     BOOST_CHECK(true);
     {
@@ -139,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
         boost::shared_array<double> tmpArray = temp2Data->asDouble();
         int found = 0;
         for (size_t i = 0; i < temp2Data->size(); i++) {
-            if (tmpArray[i] > 2000) {
+            if (tmpArray[i] > 29000) {
                 found++;
             }
         }
@@ -149,11 +150,12 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
     interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(reader));
     {
         vector<double> xAxis, yAxis;
-        for (int i = -100; i < 10; i++) {
-            xAxis.push_back(i * 50000);
-            yAxis.push_back(i * 50000);
+        for (int i = 0; i < 12; i++) {
+            xAxis.push_back(-1705516 + i * 50000);
+            yAxis.push_back(-6872225 + i * 50000);
         }
-        interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+        interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+        //NetCDF_CDMWriter(interpolator, "test2nearestneighborInterpolator.nc");
     }
     BOOST_CHECK(true);
     {
@@ -161,7 +163,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
         boost::shared_ptr<Data> temp2Data = interpolator->getDataSlice("temp2");
         boost::shared_array<double> tmpArray = temp2Data->asDouble();
         for (size_t i = 0; i < temp2Data->size(); i++) {
-            if (tmpArray[i] > 2000) {
+            if (tmpArray[i] > 29000) {
                 found++;
             }
         }

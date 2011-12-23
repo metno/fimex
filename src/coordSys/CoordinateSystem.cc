@@ -74,6 +74,21 @@ std::string CoordinateSystem::id() const
 
 }
 
+std::string CoordinateSystem::horizontalId() const
+{
+    ConstAxisPtr xAxis = getGeoXAxis();
+    ConstAxisPtr yAxis = getGeoYAxis();
+    string id;
+    if (xAxis.get() != 0) {
+        id = xAxis->getName() + ",";
+    }
+    if (yAxis.get() != 0) {
+        id += yAxis->getName();
+    }
+    return id;
+}
+
+
 
 std::string CoordinateSystem::getConventionName() const
 {
