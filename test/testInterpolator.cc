@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 		xAxis.push_back(i * 50000);
 		yAxis.push_back(i * 50000);
 	}
-	interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+	interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
 	//interpolator->changeProjection(MIFI_INTERPOL_COORD_NN, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
     //NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	//interpolator->getCDM().toXMLStream(cerr);
@@ -83,6 +83,94 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
 	NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	BOOST_CHECK(true);
 }
+
+BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
+{
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/flth00.dat");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
+    vector<double> xAxis, yAxis;
+    for (int i = -100; i < 10; i++) {
+        xAxis.push_back(i * 50000);
+        yAxis.push_back(i * 50000);
+    }
+    interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+    BOOST_CHECK(true);
+    boost::shared_ptr<Data> altitudeData = interpolator->getDataSlice("altitude");
+    boost::shared_array<double> altArray = altitudeData->asDouble();
+    int found = 0;
+    for (size_t i = 0; i < altitudeData->size(); i++) {
+        if (altArray[i] > 2000) {
+            found++;
+        }
+    }
+    BOOST_CHECK(found > 100); // at least 100 cells above 2000m
+    BOOST_CHECK(true);
+}
+
+BOOST_AUTO_TEST_CASE(test_interpolator2coords)
+{
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/twoCoordsTest.nc");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
+    {
+        vector<double> xAxis, yAxis;
+        for (int i = -100; i < 10; i++) {
+            xAxis.push_back(i * 50000);
+            yAxis.push_back(i * 50000);
+        }
+        interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+    }
+    BOOST_CHECK(true);
+    {
+        boost::shared_ptr<Data> temp2Data = interpolator->getDataSlice("temp2");
+        boost::shared_array<double> tmpArray = temp2Data->asDouble();
+        int found = 0;
+        for (size_t i = 0; i < temp2Data->size(); i++) {
+            if (tmpArray[i] > 2000) {
+                found++;
+            }
+        }
+        BOOST_CHECK(found > 100); // at least 100 cells above 2000m
+    }
+
+    interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(reader));
+    {
+        vector<double> xAxis, yAxis;
+        for (int i = -100; i < 10; i++) {
+            xAxis.push_back(i * 50000);
+            yAxis.push_back(i * 50000);
+        }
+        interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+    }
+    BOOST_CHECK(true);
+    {
+        int found = 0;
+        boost::shared_ptr<Data> temp2Data = interpolator->getDataSlice("temp2");
+        boost::shared_array<double> tmpArray = temp2Data->asDouble();
+        for (size_t i = 0; i < temp2Data->size(); i++) {
+            if (tmpArray[i] > 2000) {
+                found++;
+            }
+        }
+        BOOST_CHECK(found > 100); // at least 100 cells above 2000m
+    }
+    BOOST_CHECK(true);
+}
+
+
 BOOST_AUTO_TEST_CASE(test_interpolator2)
 {
 	string topSrcDir(TOP_SRCDIR);
@@ -101,7 +189,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2)
 		for (int i = -147; i < 48; i++) {
 			yAxis.push_back(i * 50000);
 		}
-		interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+		interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
 		BOOST_CHECK(true);
 		NetCDF_CDMWriter(interpolator, "testInterpolator2.nc");
 		BOOST_CHECK(true);
