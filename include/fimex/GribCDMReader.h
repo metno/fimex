@@ -43,6 +43,7 @@ namespace MetNoFimex
 class CDM;
 class CDMDimension;
 class Data;
+struct GribCDMReaderImpl;
 
 class GribCDMReader: public MetNoFimex::CDMReader
 {
@@ -52,28 +53,8 @@ public:
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
-    std::string configId_;
-    std::vector<GribFileMessage> indices_;
-    boost::shared_ptr<XMLDoc> doc_;
-    std::string xDimName_;
-    std::string yDimName_;
-    std::string timeDimName_;
-    // store ptimes of all times
-    std::vector<boost::posix_time::ptime> times_;
-    // store level parameters of level-ids: edition, level-type, level-no
-    std::map<std::string, std::vector<std::vector<long> > > levels_;
-    /**
-     * config attributes may contain template parameters marked with %PARAM%
-     * which should be replaced by dynamic values from the grib-file and stored
-     * temporary in this map
-     *
-     * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
-     */
-    std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes_;
-    /**
-     * map from cdm variable names to list of gribMessages
-     */
-    std::map<std::string, std::vector<GribFileMessage> > varName2gribMessages_;
+    // pimpl
+    boost::shared_ptr<GribCDMReaderImpl> p_;
 
     /** Define which parameters to select
      * @param select can be "all", "definedOnly"
@@ -89,8 +70,8 @@ private:
     void initLevels(long edition, const std::map<long, std::set<long> >& levelsOfType, std::map<std::string, CDMDimension>& levelDimsOfType);
     std::map<std::string, CDMDimension> initAddLevelDimensions();
     void initAddTimeDimension();
-    void initAddProjection(std::string& projName, std::string& coordinates);
-    void initAddVariables(const std::string& projName, const std::string& coordinates, const std::map<std::string, CDMDimension>& levelDims);
+    void initAddProjection();
+    void initAddVariables(const std::map<std::string, CDMDimension>& levelDims);
 
 };
 

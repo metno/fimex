@@ -3,8 +3,6 @@
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <!--                     xsi:schemaLocation="http://www.met.no/schema/fimex/cdmGribReaderConfig cdmGribReaderConfig.xsd" -->
 <processOptions>
-    <!-- allow up to 1% numerical errors in gridDefinition -->
-    <option name="gridDefinitionDelta" value="0.01"/>
     <!-- parameters to select: all, definedOnly -->
     <option name="selectParameters" value="all" />
 </processOptions>

@@ -26,6 +26,7 @@
 
 #include "fimex/GridDefinition.h"
 #include <cmath>
+#include <sstream>
 
 namespace MetNoFimex
 {
@@ -166,5 +167,22 @@ bool GridDefinition::comparableTo(const GridDefinition& rhs, double delta) const
     return true;
 }
 
+std::string GridDefinition::id() const
+{
+    std::stringstream ss;
+    ss << gridDef->projDefinition << "_";
+    ss << gridDef->xSize << "_";
+    ss << gridDef->ySize << "_";
+    ss << static_cast<long long>(gridDef->xIncr * 1000LL) << "_";
+    ss << static_cast<long long>(gridDef->yIncr * 1000LL) << "_";
+    ss << static_cast<long long>(gridDef->xStart * 1000LL) << "_";
+    ss << static_cast<long long>(gridDef->yStart * 1000LL);
+    return ss.str();
+}
+
+bool GridDefinition::operator<(const GridDefinition& rhs) const
+{
+    return id() < rhs.id();
+}
 
 }

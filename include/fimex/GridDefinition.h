@@ -118,6 +118,21 @@ public:
      * @param delta the relative delta to compare to (a == 0) ? (abs(b) <= delta) : abs((b-a)/a) <= delta
      */
     virtual bool comparableTo(const GridDefinition& rhs, double delta = 0.) const;
+
+    /**
+     * Return a id/hash-key for the grid-definition.
+     *
+     * The id is generated with a 0.001 degree/m accuracy for the start-position and increment.
+     * Depending on construction, two GridDefinitions can still be identical, even if
+     * they have different id's.
+     */
+    std::string id() const;
+    /**
+     * Less than operator, for usabity of GridDefinition in maps. It does
+     * not have any other meaning than a useful sort-order.
+     */
+    bool operator<(const GridDefinition& rhs) const;
+
 private:
     boost::shared_ptr<GridDefImpl> gridDef;
 
