@@ -25,6 +25,10 @@
 #include "proj_api.h"
 #include <string.h>
 #include <stdio.h>
+#include "../config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
 
 static int ascendingDoubleComparator(const void * a, const void * b)
 {
@@ -363,34 +367,34 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 						float* u_out, float* v_out,
 						int ox, int oy, int oz)
 {
-	/*forks off the threads*/
-	int layerSize = ox*oy;
-	{
-		for (int z = 0; z < oz; ++z) {
-			const double *matrixPos = matrix; // reset matrix for each z
-			float *uCur = &u_out[z*layerSize]; // current layer of u (cannot use global because of omp)
-			float *vCur = &v_out[z*layerSize]; // current layer of v (cannot use global because of omp)
-			double m0, m1, m2, m3, u_old, v_old, u_new, v_new;
-			// loop over one layer: calc uv' = A*uv at each pos
-			for (int i = 0; i < layerSize; i++) {
-				m0 = *matrixPos++;
-				m1 = *matrixPos++;
-				m2 = *matrixPos++;
-				m3 = *matrixPos++;
-				u_old = *uCur;
-				v_old = *vCur;
-				u_new = u_old * m0 + v_old * m2;
-				v_new = u_old * m1 + v_old * m3;
-				if (method == MIFI_VECTOR_KEEP_SIZE) {
-					double norm = sqrt( (u_old*u_old + v_old*v_old) /
-										(u_new*u_new + v_new*v_new) );
-					u_new *= norm;
-					v_new *= norm;
-				}
-				*uCur++ = u_new;
-				*vCur++ = v_new;
+    size_t layerSize = ox*oy;
+	for (size_t z = 0; z < oz; ++z) {
+	    const double *matrixPos = matrix; // reset matrix for each z
+	    float *uz = &u_out[z*layerSize]; // current z-layer of u
+	    float *vz = &v_out[z*layerSize]; // current z-layer of v
+
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(shared) if (layerSize >= 64)
+	    {
+#pragma omp for
+#endif
+	    // loop over one layer: calc uv' = A*uv at each pos
+	    for (size_t i = 0; i < layerSize; i++) {
+	        const double* m = &matrixPos[4*i];
+			double u_new = uz[i] * m[0] + vz[i] * m[2];
+			double v_new = uz[i] * m[1] + vz[i] * m[3];
+			if (method == MIFI_VECTOR_KEEP_SIZE) {
+			    double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) /
+			                        (u_new*u_new + v_new*v_new) );
+			    u_new *= norm;
+			    v_new *= norm;
 			}
-		}
+			uz[i] = u_new;
+			vz[i] = v_new;
+	    }
+#ifdef HAVE_OPENMP
+	    }
+#endif
 	}
 	return MIFI_OK;
 }
