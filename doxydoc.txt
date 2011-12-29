@@ -383,14 +383,17 @@ in the following cases:
 Fimex can be build with parallelization support with OpenMP with the --enable-openmp
 flag of @c configure. The following code-parts are currently (0.35) parallelized:
 
+  - interpolation: repositioning of values
+       scales about factor 1.8 per processor for bilinear, better for bicubic, worse for nearestneighbor
   - interpolation: fill2d
     This scales well with the number of input layers (sigma, depth)
   - interpolation with coord_nearestneighbor
     This contains some parallelized part in the startup of the interpolation. But
     this is still much slower than the coord_kdtree.
 
-@warning Due to a bug in libtool, the options required for linking again a parallelized libfimex are not set automatically and need be entered manually by the programmer using libfimex:
-         https://lists.gnu.org/archive/html/bug-libtool/2011-03/msg00022.html
+Often, the performance is limited by the IO-system.
+The number of threads used can be controlled by the OpenMP environment variable
+OMP_NUM_THREADS. The default is to use the number of available (virtual) processors.
 
 @subsection Thread-safety
 
