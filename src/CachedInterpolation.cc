@@ -24,6 +24,12 @@
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Data.h"
 #include <boost/scoped_array.hpp>
+#include "../config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
+
+
 namespace MetNoFimex
 {
 
@@ -45,21 +51,29 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
     const size_t outLayerSize = outX * outY;
 	const size_t inZ = size / (inX*inY);
 	newSize = outLayerSize*inZ;
-	boost::scoped_array<float> zValues(new float[inZ]);
-	boost::shared_array<float> outfield(new float[newSize]);
-	size_t p = 0;
-	for (size_t y = 0; y < outY; ++y) {
-		for (size_t x = 0; x < outX; ++x, ++p) {
-		    float* outPos = &outfield[p];
-			if (func(inData.get(), zValues.get(), pointsOnXAxis[p], pointsOnYAxis[p], inX, inY, inZ) != MIFI_ERROR) {
-				for (size_t z = 0; z < inZ; ++z) {
-				    outPos[z*outLayerSize] = zValues[z];
-				    // same but faster then
-					// outfield[mifi_3d_array_position(x, y, z, outX, outY, inZ)] = zValues[z];
-				}
-			} else (throw CDMException("error during interpolation"));
-		}
+    boost::shared_array<float> outfield(new float[newSize]);
+
+#ifdef HAVE_OPENMP
+#pragma omp parallel default(shared)
+    {
+#endif
+    boost::scoped_array<float> zValues(new float[inZ]);
+#ifdef HAVE_OPENMP
+#pragma omp for
+#endif
+	for (size_t xy = 0; xy < outLayerSize; ++xy) {
+        float* outPos = &outfield[xy];
+        if (func(inData.get(), zValues.get(), pointsOnXAxis[xy], pointsOnYAxis[xy], inX, inY, inZ) != MIFI_ERROR) {
+            for (size_t z = 0; z < inZ; ++z) {
+                *outPos = zValues[z];
+                outPos += outLayerSize;
+            }
+        } else (throw CDMException("error during interpolation"));
 	}
+#ifdef HAVE_OPENMP
+    }
+#endif
+
 	return outfield;
 }
 
