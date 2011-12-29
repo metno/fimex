@@ -444,10 +444,10 @@ int mifi_get_values_f(const float* infield, float* outvalues, const double x, co
 int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
 	int x0 = floor(x);
-	int x1 = x0 + 1;
+	int x1 = ceil(x);
 	double xfrac = x - x0;
 	int y0 = floor(y);
-	int y1 = y0 + 1;
+	int y1 = ceil(y);
 	double yfrac = y - y0;
 	if (((0 <= x0) && (x0 < ix)) &&
 		((0 <= y0) && (y0 < iy)) &&
