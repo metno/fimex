@@ -440,10 +440,10 @@ int mifi_get_values_f(const float* infield, float* outvalues, const double x, co
 int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
 	int x0 = floor(x);
-	int x1 = ceil(x);
+	int x1 = x0 + 1;
 	double xfrac = x - x0;
 	int y0 = floor(y);
-	int y1 = ceil(y);
+	int y1 = y0 + 1;
 	double yfrac = y - y0;
 	if (((0 <= x0) && (x0 < ix)) &&
 		((0 <= y0) && (y0 < iy)) &&
@@ -451,10 +451,11 @@ int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const dou
 		((0 <= y1) && (y1 < iy))) { // pos in range
 
 		for (int z = 0; z < iz; ++z) {
-			float s00 = infield[mifi_3d_array_position(x0, y0, z, ix, iy, iz)];
-			float s01 = infield[mifi_3d_array_position(x1, y0, z, ix, iy, iz)];
-			float s10 = infield[mifi_3d_array_position(x0, y1, z, ix, iy, iz)];
-			float s11 = infield[mifi_3d_array_position(x1, y1, z, ix, iy, iz)];
+		    size_t pos = mifi_3d_array_position(x0, y0, z, ix, iy, iz);
+			float s00 = infield[pos];
+			float s01 = infield[pos+1];
+			float s10 = infield[pos+ix];
+			float s11 = infield[pos+ix+1];
 			// Missing values: NANs will be propagated by IEEE
 			outvalues[z] = (1 - yfrac) * ((1 - xfrac)*s00 + xfrac*s01) +
 							yfrac      * ((1 - xfrac)*s10 + xfrac*s11);
