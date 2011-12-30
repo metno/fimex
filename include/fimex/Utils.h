@@ -285,6 +285,9 @@ struct staticCast {
     OUT operator()(const IN& in) { return static_cast<OUT>(in); }
 };
 
+// this is usually declared in interpolation.h,
+// but no need to include the complete header here
+extern "C" int mifi_isnand(double);
 
 /**
  * Scale a value using fill, offset and scale
@@ -304,7 +307,7 @@ public:
         oldFill_(static_cast<IN>(oldFill)), oldScale_(oldScale), oldOffset_(oldOffset),
         newFill_(static_cast<OUT>(newFill)), newScale_(newScale), newOffset_(newOffset) {}
     OUT operator()(const IN& in) const {
-        if (in == oldFill_ || isinf(static_cast<double>(in))) {
+        if (in == oldFill_ || mifi_isnand(static_cast<double>(in))) {
             return newFill_;
         } else {
             return static_cast<OUT>(((oldScale_*in + oldOffset_)-newOffset_)/newScale_);
@@ -325,7 +328,7 @@ public:
     ChangeMissingValue(double oldFill, double newFill) :
         oldFill_(static_cast<IN>(oldFill)), newFill_(static_cast<OUT>(newFill)) {}
     OUT operator()(const IN& in) const {
-        if (in == oldFill_ || isinf(static_cast<double>(in))) {
+        if (in == oldFill_ || mifi_isnand(static_cast<double>(in))) {
             return newFill_;
         } else {
             return static_cast<OUT>(in);
