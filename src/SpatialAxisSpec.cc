@@ -61,8 +61,10 @@ public:
                 if (what.size() >= 3) {
                     if (what[1] == '+') {
                         retDouble = finalValue + string2type<double> (what[2]);
-                    } else {
+                    } else if (what[1] == '-'){
                         retDouble = finalValue - string2type<double> (what[2]);
+                    } else {
+                        retDouble = finalValue;
                     }
                 } else {
                     retDouble = finalValue;
@@ -124,8 +126,7 @@ void SpatialAxisSpec::init()
                     "SpatialAxisSpec requires at least 2 values with relative start definition, got: "
                             + axisStepStr);
         }
-        double delta = string2type<double> (places[1]) - string2type<double> (
-                places[0]);
+        double delta = string2type<double> (places[1]) - string2type<double>(places[0]);
         Units units;
         // find the position 0 in the relative times
         double startU = start; // TODO check unit

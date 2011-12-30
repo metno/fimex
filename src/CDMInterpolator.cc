@@ -275,9 +275,11 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
             throw CDMException("changeProjection with autotuning axes only implemented for projections in m, not degree yet");
         }
     }
+
     CDMDataType xType = string2datatype(out_x_axis_type);
     CDMDataType yType = string2datatype(out_y_axis_type);
     changeProjection(method, proj_input, xAxisSpec.getAxisSteps(), yAxisSpec.getAxisSteps(), out_x_axis_unit, out_y_axis_unit, xType, yType);
+    vector<double> yAxisSpecV = yAxisSpec.getAxisSteps();
 }
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit)
@@ -1126,7 +1128,6 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
 void CDMInterpolator::changeProjectionByProjectionParameters(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
     map<string, CoordSysPtr> csMap = findBestCoordinateSystemsAndProjectionVars(true);
-
     changeCDM(*cdm_.get(), proj_input, csMap, p_->projectionVariables,
               out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit,
               out_x_axis_type, out_y_axis_type,
