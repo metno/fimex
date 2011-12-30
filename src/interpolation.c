@@ -426,8 +426,8 @@ int mifi_vector_reproject_values_f(int method,
 
 int mifi_get_values_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
-	int rx = (int) round(x);
-	int ry = (int) round(y);
+	int rx = lround(x);
+	int ry = lround(y);
 	if (((rx >= 0) && (rx < ix)) &&
 		((ry >= 0) && (ry < iy))) { // pos in range
 		for (int z = 0; z < iz; ++z) {
@@ -443,32 +443,74 @@ int mifi_get_values_f(const float* infield, float* outvalues, const double x, co
 
 int mifi_get_values_bilinear_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz)
 {
-	int x0 = floor(x);
-	int x1 = ceil(x);
+	int x0 = (int) floor(x);
+	int x1 = x0 + 1;
 	double xfrac = x - x0;
-	int y0 = floor(y);
-	int y1 = ceil(y);
+	int y0 = (int) floor(y);
+	int y1 = y0 + 1;
 	double yfrac = y - y0;
-	if (((0 <= x0) && (x0 < ix)) &&
-		((0 <= y0) && (y0 < iy)) &&
-		((0 <= x1) && (x1 < ix)) &&
-		((0 <= y1) && (y1 < iy))) { // pos in range
-
-		for (int z = 0; z < iz; ++z) {
-		    size_t pos = mifi_3d_array_position(x0, y0, z, ix, iy, iz);
-			float s00 = infield[pos];
-			float s01 = infield[pos+1];
-			float s10 = infield[pos+ix];
-			float s11 = infield[pos+ix+1];
-			// Missing values: NANs will be propagated by IEEE
-			outvalues[z] = (1 - yfrac) * ((1 - xfrac)*s00 + xfrac*s01) +
-							yfrac      * ((1 - xfrac)*s10 + xfrac*s11);
-		}
-	} else {
-		for (int z = 0; z < iz; ++z) {
-			outvalues[z] = MIFI_UNDEFINED_F;
-		}
-	}
+	if ((0 <= x0) && (x1 < ix)) {
+	    if ((0 <= y0) && (y1 < iy)) {
+	        // pos in range
+	        for (int z = 0; z < iz; ++z) {
+	            size_t pos = mifi_3d_array_position(x0, y0, z, ix, iy, iz);
+	            float s00 = infield[pos];
+	            float s01 = infield[pos+1];
+	            float s10 = infield[pos+ix];
+	            float s11 = infield[pos+ix+1];
+	            // Missing values: NANs will be propagated by IEEE
+	            outvalues[z] = (1 - yfrac) * ((1 - xfrac)*s00 + xfrac*s01) +
+							    yfrac      * ((1 - xfrac)*s10 + xfrac*s11);
+	        }
+	    } else {
+            y0 = lround(y);
+	        if ((0 <= y0) && (y0 < iy)) {
+	            // linear interpolation in x, nearest-neighbor in y
+	            for (int z = 0; z < iz; ++z) {
+	                size_t pos = mifi_3d_array_position(x0, y0, z, ix, iy, iz);
+	                float s00 = infield[pos];
+	                float s01 = infield[pos+1];
+	                outvalues[z] = (1 - xfrac)*s00 + xfrac*s01;
+	            }
+	        } else {
+	            // outside usefull y
+	            for (int z = 0; z < iz; ++z) {
+	                outvalues[z] = MIFI_UNDEFINED_F;
+	            }
+	        }
+	    }
+    } else {
+        x0 = lround(x);
+        if ((0 <= x0) && (x0 < ix)) {
+            // nearest neighbor in x
+            if ((0 <= y0) && (y1 < iy)) {
+                // linear in y
+                for (int z = 0; z < iz; ++z) {
+                    size_t pos = mifi_3d_array_position(x0, y0, z, ix, iy, iz);
+                    float s00 = infield[pos];
+                    float s10 = infield[pos+ix];
+                    outvalues[z] = (1 - yfrac)*s00 + (yfrac*s10);
+                }
+            } else {
+                y0 = lround(y);
+                if ((0 <= y0) && (y0 <= iy)) {
+                    // nearest neighbor in y
+                    for (int z = 0; z < iz; ++z) {
+                        size_t pos = mifi_3d_array_position(x0, y0, z, ix, iy, iz);
+                        outvalues[z] = infield[pos];
+                    }
+                } else {
+                    for (int z = 0; z < iz; ++z) {
+                        outvalues[z] = MIFI_UNDEFINED_F;
+                    }
+                }
+            }
+        } else {
+            for (int z = 0; z < iz; ++z) {
+                outvalues[z] = MIFI_UNDEFINED_F;
+            }
+        }
+    }
 
 	return MIFI_OK;
 }
