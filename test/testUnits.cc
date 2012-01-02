@@ -52,7 +52,6 @@ BOOST_AUTO_TEST_CASE( test_UnitsError )
 {
 	double slope, offset;
 	Units units;
-    cerr << __LINE__ << endl;
 	try {
 		units.convert("km", "s", slope, offset);
 		BOOST_CHECK(false);
@@ -66,7 +65,6 @@ BOOST_AUTO_TEST_CASE( test_UnitsConvertible )
 	Units units;
 	BOOST_CHECK(!units.areConvertible("km", "s"));
 	BOOST_CHECK(units.areConvertible("hours since 2000-01-01 19:30:00", "seconds since 1970-01-01"));
-    cerr << __LINE__ << endl;
 }
 
 BOOST_AUTO_TEST_CASE( test_UnitsTime )

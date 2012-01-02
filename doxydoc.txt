@@ -383,6 +383,8 @@ in the following cases:
 Fimex can be build with parallelization support with OpenMP with the --enable-openmp
 flag of @c configure. The following code-parts are currently (0.35) parallelized:
 
+  - NetCDF-writer/Null-writer: fetches each data-slice in a thread of it's own
+       next to perfect scaling until IO-system is saturated
   - interpolation: repositioning of values
        scales about factor 1.8 per processor for bilinear, better for bicubic, worse for nearestneighbor
   - interpolation: fill2d
@@ -400,6 +402,20 @@ OMP_NUM_THREADS. The default is to use the number of available (virtual) process
 The Fimex library can be used in threaded environments. Fimex objects are
 generally not thread-safe, so every object should only be used from a single
 thread. But several threads can create their own Fimex objects.
+
+In addition, all CDMReader::get*Data*() operations are thread-safe and the following
+code will work nicely:
+
+@verbatim
+#pragma omp parallel for default(shared)
+{
+    for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+        try {
+            doSomething(reader->getDataSlice(varName, i));
+        } catch (...) {}
+    }
+}
+@endverbatim
 
 
 */

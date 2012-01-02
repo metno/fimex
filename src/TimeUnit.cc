@@ -36,6 +36,7 @@ extern "C" {
 }
 #endif
 
+// TODO: make thread-safe with mifi_units lock
 
 namespace MetNoFimex
 {
