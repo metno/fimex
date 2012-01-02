@@ -23,8 +23,13 @@
 
 #include "fimex/Units.h"
 #include "fimex/Logger.h"
-#include "config.h"
+
 #include "boost/shared_ptr.hpp"
+#include "../config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
+
 #ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"
@@ -39,7 +44,7 @@ extern "C" int utIsInit();
 namespace MetNoFimex
 {
 #ifdef HAVE_UDUNITS2_H
-static ut_system* utSystem;
+static boost::shared_ptr<ut_system> utSystem;
 #endif
 
 static LoggerPtr logger = getLogger("fimex.Units");
@@ -85,10 +90,14 @@ void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitEx
 int Units::counter = 0;
 Units::Units()
 {
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_units)
+    {
+#endif
 #ifdef HAVE_UDUNITS2_H
     if (utSystem == 0) {
         ut_set_error_message_handler(&ut_ignore);
-        utSystem = ut_read_xml(0);
+        utSystem = boost::shared_ptr<ut_system>(ut_read_xml(0), &ut_free_system);
         handleUdUnitError(ut_get_status());
     }
 #else
@@ -97,11 +106,21 @@ Units::Units()
 	}
 #endif
 	++counter;
+#ifdef HAVE_OPENMP
+    }
+#endif
 }
 
 Units::Units(const Units& u)
 {
-	counter++;
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_units)
+    {
+#endif
+    counter++;
+#ifdef HAVE_OPENMP
+    }
+#endif
 }
 
 Units& Units::operator=(const Units& rhs)
@@ -111,22 +130,37 @@ Units& Units::operator=(const Units& rhs)
 
 Units::~Units()
 {
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_units)
+    {
+#endif
     --counter;
+#ifdef HAVE_OPENMP
+    }
+#endif
 }
 
 bool Units::unload(bool force) throw(UnitException)
 {
+    bool retVal = false;
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_units)
+    {
+#endif
     if (force || counter <= 0) {
 #ifdef HAVE_UDUNITS2_H
-        if (utSystem) ut_free_system(utSystem);
-        utSystem = 0;
+        utSystem.reset();
 #else
         utTerm();
 #endif
         counter = 0;
-        return true;
+        retVal = true;
     }
-    return false;
+#ifdef HAVE_OPENMP
+    }
+#endif
+
+    return retVal;
 }
 
 
@@ -138,10 +172,18 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 		offset = 0.;
 		return;
 	}
+#ifdef HAVE_OPENMP
+	// this might be solved nicely by setting using an auto-destroying lock (shared_ptr)
+	UnitException ue;
+	bool threwException = false;
+#pragma omp critical (mifi_units)
+    {
+	try {
+#endif
 #ifdef HAVE_UDUNITS2_H
-	boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
+	boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem.get(), from.c_str(), UT_UTF8), ut_free);
 	handleUdUnitError(ut_get_status(), from);
-	boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
+	boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem.get(), to.c_str(), UT_UTF8), ut_free);
 	handleUdUnitError(ut_get_status(), to);
 	boost::shared_ptr<cv_converter> conv(ut_get_converter(fromUnit.get(), toUnit.get()), cv_free);
     handleUdUnitError(ut_get_status(), from + " -> " + to);
@@ -153,36 +195,66 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 	handleUdUnitError(utScan(to.c_str(), &toUnit), to);
 	handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
 #endif
+#ifdef HAVE_OPENMP
+	} catch (UnitException e) {
+	    ue = e;
+	    threwException = true;
+	}
+    }
+    if (threwException) throw ue;
+#endif
 }
 
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const
 {
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
-#ifdef HAVE_UDUNITS2_H
     int areConv = 0;
+#ifdef HAVE_UDUNITS2_H
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_units)
+    {
+#endif
     try {
-        boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
+        boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem.get(), unit1.c_str(), UT_UTF8), ut_free);
         handleUdUnitError(ut_get_status(), unit1);
-        boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, unit2.c_str(), UT_UTF8), ut_free);
+        boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem.get(), unit2.c_str(), UT_UTF8), ut_free);
         handleUdUnitError(ut_get_status(), unit2);
         areConv = ut_are_convertible(fromUnit.get(), toUnit.get());
     } catch (UnitException& ue) {
         LOG4FIMEX(logger, Logger::WARN, ue.what());
     }
-    return areConv;
+#ifdef HAVE_OPENMP
+    }
+#endif
 #else
+#ifdef HAVE_OPENMP
+    UnitException ue;
+    bool threwException = false;
+#pragma omp critical (mifi_units)
+    {
+    try {
+#endif
 	utUnit fromUnit, toUnit;
 	double slope, offset;
 	handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
 	handleUdUnitError(utScan(unit2.c_str(), &toUnit), unit2);
 	int error = utConvert(&fromUnit, &toUnit, &slope, &offset);
 	switch (error) {
-	case 0: return true;
-	case UT_ECONVERT: return false;
+	case 0: areConv = 1; break;
+	case UT_ECONVERT: areConv = 0; break;
 	default: handleUdUnitError(error);
 	}
+#ifdef HAVE_OPENMP
+    } catch (UnitException e) {
+        ue = e;
+        threwException = true;
+    }
+    }
+    if (threwException) throw ue;
 #endif
-	return false;
+#endif
+
+	return areConv;
 }
 bool Units::isTime(const std::string& timeUnit) const
 {
@@ -197,7 +269,7 @@ bool Units::isTime(const std::string& timeUnit) const
 
 const void* Units::exposeInternals() const {
 #ifdef HAVE_UDUNITS2_H
-    return utSystem;
+    return utSystem.get();
 #else
     return 0;
 #endif

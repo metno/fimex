@@ -39,6 +39,10 @@
 #include "fimex/coordSys/Projection.h"
 #include <set>
 #include <algorithm>
+#include "../config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
 
 namespace MetNoFimex
 {
@@ -149,20 +153,20 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
     }
 
 
-    if (p_->indices.size() == 0) return;
+    if (p_->indices.size() != 0) {
+        // time-dimension needs to be added before global attributes due to replacements
+        initAddTimeDimension();
+        // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
+        if (p_->times.size() > 0) {
+            p_->templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(0))));
+            p_->templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(p_->times.size()-1))));
+        }
 
-    // time-dimension needs to be added before global attributes due to replacements
-    initAddTimeDimension();
-    // fill templateReplacementAttributes: MIN_DATETIME, MAX_DATETIME
-    if (p_->times.size() > 0) {
-        p_->templateReplacementAttributes["MIN_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(0))));
-        p_->templateReplacementAttributes["MAX_DATETIME"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTimeObject(posixTime2epochTime(p_->times.at(p_->times.size()-1))));
+        initAddGlobalAttributes();
+        map<string, CDMDimension> levelDims = initAddLevelDimensions();
+        initAddProjection();
+        initAddVariables(levelDims);
     }
-
-    initAddGlobalAttributes();
-    map<string, CDMDimension> levelDims = initAddLevelDimensions();
-    initAddProjection();
-    initAddVariables(levelDims);
 }
 
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
@@ -607,7 +611,6 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const string& varName, size_
         throw CDMException("requested time outside data-region");
     }
 
-
     vector<GribFileMessage> slices;
     map<string, vector<GribFileMessage> >::const_iterator gribMessagesIt = p_->varName2gribMessages.find(varName);
     if (gribMessagesIt == p_->varName2gribMessages.end()) {
@@ -677,7 +680,17 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const string& varName, size_
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels
         if (gfmIt->isValid()) {
-            size_t dataRead = gfmIt->readData(gridData, missingValue);
+            boost::shared_ptr<Data> data;
+            size_t dataRead;
+            #ifdef HAVE_OPENMP
+            #pragma omp critical (mifi_gribcdmreader)
+            {
+            #endif
+            dataRead = gfmIt->readData(gridData, missingValue);
+            #ifdef HAVE_OPENMP
+            }
+            #endif
+
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
             copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
         } else {

@@ -35,6 +35,11 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "../../../config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
+
 extern "C"
 {
 #include <arpa/inet.h>
@@ -71,6 +76,7 @@ static PGresult * call(boost::shared_ptr<PGconn> connection, const std::string &
     if (logger->isEnabledFor(Logger::DEBUG)) {
         startTime = microsec_clock::universal_time();
     }
+
     PGresult * result = PQexecParams(connection.get(), query.c_str(), 0, NULL, NULL, NULL, NULL, resultFormat == BinaryResult ? 1 : 0);
     if (logger->isEnabledFor(Logger::DEBUG)) {
         time_duration diff = microsec_clock::universal_time() - startTime;
@@ -100,7 +106,14 @@ static boost::shared_ptr<PGconn> createConnection(const std::string & connectStr
 WdbConnection::WdbConnection(const std::string & connectString, const std::string & wciUser)
 {
     std::string connectionId = connectString + ";wciUser="+wciUser;
-
+#ifdef HAVE_OPENMP
+    if (!PQisthreadsafe() && (omp_get_num_threads() > 1)) {
+        LOG4FIMEX(logger, Logger::WARN, "fimex compiled with OPENMP, but libpq not compiled with" <<
+                "thread-safe : make sure to set environment variable OMP_NUM_THREADS=1");
+    }
+#pragma omp critical (mifi_wdbconnection)
+    {
+#endif
     // retrieve connecton from sharedConnections
     std::map<std::string, boost::weak_ptr<PGconn> >::iterator shared_conn = sharedConnections.find(connectionId);
     if (shared_conn != sharedConnections.end()) {
@@ -111,6 +124,9 @@ WdbConnection::WdbConnection(const std::string & connectString, const std::strin
         connection_ = createConnection(connectString, wciUser);
         sharedConnections[connectionId] = boost::weak_ptr<PGconn>(connection_);
     }
+#ifdef HAVE_OPENMP
+    }
+#endif
 }
 
 WdbConnection::~WdbConnection()

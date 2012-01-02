@@ -21,7 +21,7 @@
  * USA.
  */
 
-#include "config.h"
+#include "../config.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"

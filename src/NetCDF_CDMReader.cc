@@ -28,6 +28,11 @@
 extern "C" {
 #include "netcdf.h"
 }
+#include "../config.h"
+#ifdef HAVE_OPENMP
+#include <omp.h>
+#endif
+
 
 namespace MetNoFimex
 {
@@ -36,6 +41,11 @@ using namespace std;
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
 {
+    // TODO: move from global lock(mifi_netcdf_cdmreader) to object-lock
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_netcdf_cdmreader)
+    {
+#endif
     ncFile->filename = filename;
     ncCheck(nc_open(ncFile->filename.c_str(), NC_NOWRITE, &ncFile->ncId));
     ncFile->isOpen = true;
@@ -98,6 +108,9 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
             addAttribute(cdm_->globalAttributeNS(), NC_GLOBAL, attName);
         }
     }
+#ifdef HAVE_OPENMP
+    }
+#endif
 }
 
 NetCDF_CDMReader::~NetCDF_CDMReader()
@@ -106,12 +119,17 @@ NetCDF_CDMReader::~NetCDF_CDMReader()
 
 boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-	const CDMVariable& var = cdm_->getVariable(varName);
-	if (var.hasData()) {
-		return getDataSliceFromMemory(var, unLimDimPos);
-	}
+    const CDMVariable& var = cdm_->getVariable(varName);
+    if (var.hasData()) {
+        return getDataSliceFromMemory(var, unLimDimPos);
+    }
 
-	int varid;
+    boost::shared_ptr<Data> data;
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_netcdf_cdmreader)
+    {
+#endif
+    int varid;
 	ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
 	nc_type dtype;
 	ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
@@ -130,7 +148,11 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
 	    start[0] = unLimDimPos;
 	    count[0] = 1;
 	}
-	return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
+	data = ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
+#ifdef HAVE_OPENMP
+    } // critical
+#endif
+    return data;
 }
 
 boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
@@ -142,6 +164,11 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
                                     sb.getDimensionSizes());
     }
 
+    boost::shared_ptr<Data> data;
+#ifdef HAVE_OPENMP
+#pragma omp critical (mifi_netcdf_cdmreader)
+    {
+#endif
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;
@@ -159,7 +186,11 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
     reverse(count.begin(), count.end()); // netcdf/c++ uses opposite dimension numbering
     assert(count.size() == static_cast<size_t>(dimLen));
 
-    return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
+    data = ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
+#ifdef HAVE_OPENMP
+    } // critical
+#endif
+    return data;
 }
 
 void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const string& attName)
