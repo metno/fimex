@@ -407,9 +407,10 @@ In addition, all CDMReader::get*Data*() operations are thread-safe and the follo
 code will work nicely:
 
 @verbatim
+size_t unlimSlices = unLimDim->getLength();
 #pragma omp parallel for default(shared)
 {
-    for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+    for (size_t i = 0; i < unlimSlices; ++i) {
         try {
             doSomething(reader->getDataSlice(varName, i));
         } catch (...) {}
