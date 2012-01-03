@@ -450,6 +450,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 	Units units;
 	const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
+	// TODO: fix exception handling within critical regions
 #ifdef HAVE_OPENMP
 #pragma omp parallel default(shared)
     {

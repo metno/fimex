@@ -42,7 +42,6 @@ public:
  */
 class Units
 {
-	static int counter;
 public:
 	/**
 	 * initialization of unit handling, i.e. parsing of unit file etc if required
