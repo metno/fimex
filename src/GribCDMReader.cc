@@ -39,10 +39,8 @@
 #include "fimex/coordSys/Projection.h"
 #include <set>
 #include <algorithm>
-#include "../config.h"
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
+#include <stdexcept>
+#include <MutexLock.h>
 
 namespace MetNoFimex
 {
@@ -62,6 +60,7 @@ struct GribCDMReaderImpl {
     string configId;
     vector<GribFileMessage> indices;
     boost::shared_ptr<XMLDoc> doc;
+    MutexType mutex;
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
     // store ptimes of all times
@@ -682,15 +681,10 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const string& varName, size_
         if (gfmIt->isValid()) {
             boost::shared_ptr<Data> data;
             size_t dataRead;
-            #ifdef HAVE_OPENMP
-            #pragma omp critical (mifi_gribcdmreader)
             {
-            #endif
-            dataRead = gfmIt->readData(gridData, missingValue);
-            #ifdef HAVE_OPENMP
+                ScopedCritical lock(p_->mutex);
+                dataRead = gfmIt->readData(gridData, missingValue);
             }
-            #endif
-
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
             copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
         } else {

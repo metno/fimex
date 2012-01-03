@@ -46,10 +46,6 @@
 #include <cstdlib>
 #include <functional>
 #include <algorithm>
-#include "../config.h"
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
 
 namespace MetNoFimex
 {
@@ -736,14 +732,10 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
 			    }
                 // read the slice
 			    boost::shared_ptr<Data> levelData;
-#ifdef HAVE_OPENMP
-#pragma omp critical (mifi_feltcdmreader2)
 			    {
-#endif
-			    levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
-#ifdef HAVE_OPENMP
+			        ScopedCritical lock(mutex_);
+			        levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
 			    }
-#endif
 				data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
 				dataCurrentPos += levelData->size();
 			}

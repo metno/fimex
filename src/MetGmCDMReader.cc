@@ -1,16 +1,14 @@
 #include "fimex/MetGmCDMReader.h"
 #include <fimex/CDM.h>
-
-#include "../config.h"
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
+#include "MutexLock.h"
 
 // private implementation details
 #include "./metgm/MetGmCDMReaderImpl.h"
 #include "./metgm/MetGmCDMReaderSlicedImpl.h"
 
 namespace MetNoFimex {
+
+    static MutexType mutex;
 
     MetGmCDMReader::MetGmCDMReader(const std::string& metgmsource, const XMLInput& configXML)
         : CDMReader()
@@ -26,30 +24,14 @@ namespace MetNoFimex {
 
     boost::shared_ptr<Data> MetGmCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
-        boost::shared_ptr<Data> data;
-#ifdef HAVE_OPENMP
-#pragma omp critical (mifi_metgmcdmreader)
-    {
-#endif
-        data = d_ptr->getDataSlice(varName, unLimDimPos);
-#ifdef HAVE_OPENMP
-    }
-#endif
-        return data;
+        ScopedCritical lock(mutex);
+        return d_ptr->getDataSlice(varName, unLimDimPos);
     }
 
     boost::shared_ptr<Data> MetGmCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
-        boost::shared_ptr<Data> data;
-#ifdef HAVE_OPENMP
-#pragma omp critical (mifi_metgmcdmreader)
-        {
-#endif
-        data = d_ptr->getDataSlice(varName, sb);
-#ifdef HAVE_OPENMP
-        }
-#endif
-        return data;
+        ScopedCritical lock(mutex);
+        return d_ptr->getDataSlice(varName, sb);
     }
 
 }

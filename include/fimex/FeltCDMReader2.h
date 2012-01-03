@@ -34,6 +34,7 @@
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/XMLInput.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "MutexLock.h"
 
 
 namespace MetNoFelt {
@@ -57,6 +58,7 @@ private:
 	const std::string filename;
 	std::string configId;
 	boost::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
+	MutexType mutex_;
 	CDMDimension xDim;
 	CDMDimension yDim;
 	std::map<std::string, std::string> varNameFeltIdMap;

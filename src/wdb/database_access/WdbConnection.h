@@ -93,7 +93,6 @@ public:
 private:
 
 	boost::shared_ptr<PGconn> connection_;
-
 	typedef std::map<std::string, GridInformationPtr> GridList;
 	GridList gridsInUse_;
 };

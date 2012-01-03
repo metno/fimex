@@ -125,8 +125,11 @@ bool Units::unload(bool force) throw(UnitException)
 {
     bool retVal = false;
 #ifdef HAVE_OPENMP
+    UnitException ue;
+    bool threwException = false;
 #pragma omp critical (mifi_units)
     {
+    try {
 #endif
     if (force) {
 #ifdef HAVE_UDUNITS2_H
@@ -137,7 +140,12 @@ bool Units::unload(bool force) throw(UnitException)
         retVal = true;
     }
 #ifdef HAVE_OPENMP
+    } catch (UnitException& e) {
+        ue = e;
+        threwException++;
     }
+    } // critical
+    if (threwException) throw ue;
 #endif
 
     return retVal;
@@ -153,7 +161,6 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 		return;
 	}
 #ifdef HAVE_OPENMP
-	// this might be solved nicely by setting using an auto-destroying lock (shared_ptr)
 	UnitException ue;
 	bool threwException = false;
 #pragma omp critical (mifi_units)
@@ -229,7 +236,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
         ue = e;
         threwException = true;
     }
-    }
+    } // critical
     if (threwException) throw ue;
 #endif
 #endif
@@ -241,9 +248,26 @@ bool Units::isTime(const std::string& timeUnit) const
 #ifdef HAVE_UDUNITS2_H
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");
 #else
+    bool isTime = false;
+#ifdef HAVE_OPENMP
+    UnitException ue;
+    bool threwException = false;
+#pragma omp critical (mifi_units)
+    {
+    try {
+#endif
 	utUnit unit;
 	handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
-	return utIsTime(&unit) != 0;
+	isTime = (utIsTime(&unit) != 0);
+#ifdef HAVE_OPENMP
+    } catch (UnitException e) {
+        ue = e;
+        threwException = true;
+    }
+    } // critical
+    if (threwException) throw ue;
+#endif
+    return isTime;
 #endif
 }
 

@@ -26,6 +26,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMDataType.h"
+#include "MutexLock.h"
 extern "C" {
 #include "netcdf.h"
 }
@@ -42,6 +43,7 @@ public:
     Nc() : isOpen(false) {}
     ~Nc();
     std::string filename;
+    MutexType mutex;
     int ncId;
     int format;
     bool isOpen;

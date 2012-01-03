@@ -22,14 +22,9 @@
  */
 
 #include "fimex/NetCDF_CDMWriter.h"
-#include "../config.h"
 extern "C" {
 #include "netcdf.h"
 }
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
-
 #include <iostream>
 #include <boost/shared_array.hpp>
 #include <boost/scoped_array.hpp>
@@ -450,8 +445,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 	Units units;
 	const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
-	// TODO: fix exception handling within critical regions
-#ifdef HAVE_OPENMP
+	MutexType writerMutex;
+#ifdef _OPENMP
 #pragma omp parallel default(shared)
     {
 #pragma omp single
@@ -502,7 +497,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 	    }
 
 		if (!cdm.hasUnlimitedDim(cdmVar)) {
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi)
             {
 #endif
@@ -514,26 +509,20 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 			}
 			if (data->size() > 0) {
 			    try {
-#ifdef HAVE_OPENMP
-#pragma omp critical (netcdf_cdmwriter)
-                    {
-#endif
+	                ScopedCritical lock(writerMutex);
 			        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
-#ifdef HAVE_OPENMP
-                    }
-#endif
 			    } catch (CDMException& ex) {
 			        throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
 			    }
 			}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
             }
 #endif
 		} else {
 			// iterate over each unlimited dim (usually time)
 			const CDMDimension* unLimDim = cdm.getUnlimitedDim();
 			for (size_t i = 0; i < unLimDim->getLength(); ++i) {
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi,i)
 			    {
 #endif
@@ -548,26 +537,20 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 				    count[0] = 1;
 				    start[0] = i;
 				    try {
-#ifdef HAVE_OPENMP
-#pragma omp critical (netcdf_cdmwriter)
-				        {
-#endif
+	                    ScopedCritical lock(writerMutex);
 				        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
-#ifdef HAVE_OPENMP
-				        }
-#endif
 	                } catch (CDMException& ex) {
 	                    throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );
 	                }
 
 				}
 			}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 			}
 #endif
 		}
 	}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     } // single
     } // parallel
 #endif

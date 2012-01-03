@@ -184,6 +184,13 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 		throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
 	} else {
 		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
+#ifdef HAVE_OPENMP
+		UnitException ue;
+		bool threwException = false;
+#pragma omp critical (mifi_units)
+		{
+		try {
+#endif
 #ifdef HAVE_UDUNITS2_H
 		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
 		handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
@@ -191,6 +198,15 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
         utScan(timeUnitString.c_str(), reinterpret_cast<utUnit*>(pUnit.get()));
 #endif
+#ifdef HAVE_OPENMP
+            } catch (UnitException e) {
+                ue = e;
+                threwException = true;
+            }
+		} // critical
+    if (threwException) throw ue;
+#endif
+
 	}
 }
 
