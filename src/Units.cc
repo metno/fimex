@@ -28,7 +28,8 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
+#include <MutexLock.h>
+#include "../config.h"
 #ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"
 #include "converter.h"
@@ -45,6 +46,11 @@ namespace MetNoFimex
 #ifdef HAVE_UDUNITS2_H
 static ut_system* utSystem;
 #endif
+
+static MutexType unitsMutex;
+extern MutexType& getUnitsMutex() {
+    return unitsMutex;
+}
 
 static LoggerPtr logger = getLogger("fimex.Units");
 
@@ -89,10 +95,7 @@ void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitEx
 
 Units::Units()
 {
-#ifdef _OPENMP
-#pragma omp critical (mifi_units)
-    {
-#endif
+    ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
     if (utSystem == 0) {
         ut_set_error_message_handler(&ut_ignore);
@@ -103,9 +106,6 @@ Units::Units()
 	if (!utIsInit()) {
 		handleUdUnitError(utInit(0));
 	}
-#endif
-#ifdef _OPENMP
-    }
 #endif
 }
 
@@ -123,13 +123,7 @@ Units::~Units()
 bool Units::unload(bool force) throw(UnitException)
 {
     bool retVal = false;
-#ifdef _OPENMP
-    UnitException ue;
-    bool threwException = false;
-#pragma omp critical (mifi_units)
-    {
-    try {
-#endif
+    ScopedCritical lock(unitsMutex);
     if (force) {
 #ifdef HAVE_UDUNITS2_H
         ut_free_system(utSystem);
@@ -138,14 +132,6 @@ bool Units::unload(bool force) throw(UnitException)
 #endif
         retVal = true;
     }
-#ifdef _OPENMP
-    } catch (UnitException& e) {
-        ue = e;
-        threwException++;
-    }
-    } // critical
-    if (threwException) throw ue;
-#endif
 
     return retVal;
 }
@@ -159,13 +145,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 		offset = 0.;
 		return;
 	}
-#ifdef _OPENMP
-	UnitException ue;
-	bool threwException = false;
-#pragma omp critical (mifi_units)
-    {
-	try {
-#endif
+	ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
 	boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
 	handleUdUnitError(ut_get_status(), from);
@@ -181,25 +161,14 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 	handleUdUnitError(utScan(to.c_str(), &toUnit), to);
 	handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
 #endif
-#ifdef _OPENMP
-	} catch (UnitException e) {
-	    ue = e;
-	    threwException = true;
-	}
-    }
-    if (threwException) throw ue;
-#endif
 }
 
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const
 {
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
     int areConv = 0;
+    ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
-#ifdef _OPENMP
-#pragma omp critical (mifi_units)
-    {
-#endif
     try {
         boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
         handleUdUnitError(ut_get_status(), unit1);
@@ -209,17 +178,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
     } catch (UnitException& ue) {
         LOG4FIMEX(logger, Logger::WARN, ue.what());
     }
-#ifdef _OPENMP
-    }
-#endif
 #else
-#ifdef _OPENMP
-    UnitException ue;
-    bool threwException = false;
-#pragma omp critical (mifi_units)
-    {
-    try {
-#endif
 	utUnit fromUnit, toUnit;
 	double slope, offset;
 	handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
@@ -230,14 +189,6 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 	case UT_ECONVERT: areConv = 0; break;
 	default: handleUdUnitError(error);
 	}
-#ifdef _OPENMP
-    } catch (UnitException e) {
-        ue = e;
-        threwException = true;
-    }
-    } // critical
-    if (threwException) throw ue;
-#endif
 #endif
 
 	return areConv;
@@ -248,24 +199,10 @@ bool Units::isTime(const std::string& timeUnit) const
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");
 #else
     bool isTime = false;
-#ifdef _OPENMP
-    UnitException ue;
-    bool threwException = false;
-#pragma omp critical (mifi_units)
-    {
-    try {
-#endif
+    ScopedCritical lock(unitsMutex);
 	utUnit unit;
 	handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
 	isTime = (utIsTime(&unit) != 0);
-#ifdef _OPENMP
-    } catch (UnitException e) {
-        ue = e;
-        threwException = true;
-    }
-    } // critical
-    if (threwException) throw ue;
-#endif
     return isTime;
 #endif
 }

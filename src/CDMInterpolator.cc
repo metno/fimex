@@ -37,6 +37,7 @@
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
 #include "nanoflann/nanoflann.hpp"
+#include "../config.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"
 #endif
