@@ -25,8 +25,7 @@
 #include "proj_api.h"
 #include <string.h>
 #include <stdio.h>
-#include "../config.h"
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -373,7 +372,7 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 	    float *uz = &u_out[z*layerSize]; // current z-layer of u
 	    float *vz = &v_out[z*layerSize]; // current z-layer of v
 
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel default(shared) if (layerSize >= 64)
 	    {
 #pragma omp for
@@ -392,7 +391,7 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
 			uz[i] = u_new;
 			vz[i] = v_new;
 	    }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 	    }
 #endif
 	}

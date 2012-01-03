@@ -25,8 +25,7 @@
 #include "fimex/Logger.h"
 
 #include "boost/shared_ptr.hpp"
-#include "../config.h"
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -90,7 +89,7 @@ void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitEx
 
 Units::Units()
 {
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp critical (mifi_units)
     {
 #endif
@@ -105,7 +104,7 @@ Units::Units()
 		handleUdUnitError(utInit(0));
 	}
 #endif
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     }
 #endif
 }
@@ -124,7 +123,7 @@ Units::~Units()
 bool Units::unload(bool force) throw(UnitException)
 {
     bool retVal = false;
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     UnitException ue;
     bool threwException = false;
 #pragma omp critical (mifi_units)
@@ -139,7 +138,7 @@ bool Units::unload(bool force) throw(UnitException)
 #endif
         retVal = true;
     }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     } catch (UnitException& e) {
         ue = e;
         threwException++;
@@ -160,7 +159,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 		offset = 0.;
 		return;
 	}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 	UnitException ue;
 	bool threwException = false;
 #pragma omp critical (mifi_units)
@@ -182,7 +181,7 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
 	handleUdUnitError(utScan(to.c_str(), &toUnit), to);
 	handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
 #endif
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 	} catch (UnitException e) {
 	    ue = e;
 	    threwException = true;
@@ -197,7 +196,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
     LOG4FIMEX(logger, Logger::DEBUG, "test convertibility of " << unit1 << " to " << unit2);
     int areConv = 0;
 #ifdef HAVE_UDUNITS2_H
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp critical (mifi_units)
     {
 #endif
@@ -210,11 +209,11 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
     } catch (UnitException& ue) {
         LOG4FIMEX(logger, Logger::WARN, ue.what());
     }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     }
 #endif
 #else
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     UnitException ue;
     bool threwException = false;
 #pragma omp critical (mifi_units)
@@ -231,7 +230,7 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 	case UT_ECONVERT: areConv = 0; break;
 	default: handleUdUnitError(error);
 	}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     } catch (UnitException e) {
         ue = e;
         threwException = true;
@@ -249,7 +248,7 @@ bool Units::isTime(const std::string& timeUnit) const
     return areConvertible(timeUnit, "seconds since 1970-01-01 00:00:00");
 #else
     bool isTime = false;
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     UnitException ue;
     bool threwException = false;
 #pragma omp critical (mifi_units)
@@ -259,7 +258,7 @@ bool Units::isTime(const std::string& timeUnit) const
 	utUnit unit;
 	handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
 	isTime = (utIsTime(&unit) != 0);
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     } catch (UnitException e) {
         ue = e;
         threwException = true;

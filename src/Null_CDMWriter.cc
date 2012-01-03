@@ -27,12 +27,7 @@
 #include "fimex/CDMDataType.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-
-#include "../config.h"
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
-
+#include "MutexLock.h"
 
 namespace MetNoFimex
 {
@@ -140,7 +135,8 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 	}
 
 	// write data
-#ifdef HAVE_OPENMP
+    MutexType writerMutex;
+#ifdef _OPENMP
 #pragma omp parallel default(shared)
     {
     //omp_set_nested(1);
@@ -150,7 +146,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
 //	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
 		if (!cdm.hasUnlimitedDim(cdmVars.at(vi))) {
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp task firstprivate(vi)
 		    {
 #endif
@@ -159,23 +155,18 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 		    //ss << omp_get_thread_num() << ":" << vi << ":" << cdmVar.getName() << std::endl;
 		    //std::cerr << ss.str();
 			boost::shared_ptr<Data> data = cdmReader->getData(cdmVar.getName());
-#ifdef HAVE_OPENMP
-#pragma omp critical (mifi_null_cdmwriter)
-			{
-#endif
-
+			ScopedCritical lock(writerMutex);
             if (!putVarData(cdmVar.getDataType(), data)) {
                 throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
             }
-#ifdef HAVE_OPENMP
-			} // critical
+#ifdef _OPENMP
 		    } // task
 #endif
 		} else {
 			// iterate over each unlimited dim (usually time)
 			const CDMDimension* unLimDim = cdm.getUnlimitedDim();
 			for (size_t i = 0; i < unLimDim->getLength(); ++i) {
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp task firstprivate(vi,i)
 			    {
 #endif
@@ -184,22 +175,18 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
                 //ss << omp_get_thread_num() << ":" << i << ":" << cdmVar.getName() << std::endl;
                 //std::cerr << ss.str();
 				boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), i);
-#ifdef HAVE_OPENMP
-#pragma omp critical (mifi_null_cdmwriter)
-                {
-#endif
-                if (!putRecData(cdmVar.getDataType(), data, i)) {
+				ScopedCritical lock(writerMutex);
+				if (!putRecData(cdmVar.getDataType(), data, i)) {
                     throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
                 }
-#ifdef HAVE_OPENMP
-                } // critical
+#ifdef _OPENMP
 			    } // task
 #endif
 			}
 
 		}
 	}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     } // single
     omp_set_nested(0);
     } // parallel

@@ -21,7 +21,6 @@
  * USA.
  */
 
-#include "../config.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "fimex/TimeUnit.h"
 #include "fimex/Utils.h"
@@ -184,7 +183,7 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 		throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
 	} else {
 		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 		UnitException ue;
 		bool threwException = false;
 #pragma omp critical (mifi_units)
@@ -198,7 +197,7 @@ void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
         utScan(timeUnitString.c_str(), reinterpret_cast<utUnit*>(pUnit.get()));
 #endif
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
             } catch (UnitException e) {
                 ue = e;
                 threwException = true;

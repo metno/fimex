@@ -22,8 +22,7 @@
  */
 
 
-#include "../config.h"
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -126,7 +125,7 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
     int nz = static_cast<int>(size / (nx*ny));
     assert((nz*nx*ny) == size);
 
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel default(shared) if (nz >= 4)
     {
 #pragma omp for nowait
@@ -138,7 +137,7 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
             processes[i]->operator()(arrayPos, nx, ny);
         }
     }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     }
 #endif
     return;
@@ -789,7 +788,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
         stepSize = 1;
         steps = orgXDimSize * orgYDimSize;
     }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     omp_lock_t my_lock;
     omp_init_lock(&my_lock);
 #pragma omp parallel default(shared) if (steps > 4)
@@ -821,16 +820,16 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
                     }
                 }
             }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
             omp_set_lock (&my_lock);
 #endif
             samples.push_back(min_cos_d);
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
             omp_unset_lock (&my_lock);
 #endif
         }
     }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     omp_destroy_lock(&my_lock);
     }
 #endif
@@ -877,7 +876,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
     }
     // sort latlons by latitudes
     sort(latlons.begin(), latlons.end());
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel default(shared)
     {
 #pragma omp for nowait
@@ -930,7 +929,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
         pointsOnYAxis[i] = p.y;
         pointsOnXAxis[i] = p.x;
     }
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     }
 #endif
 }

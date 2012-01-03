@@ -24,8 +24,7 @@
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Data.h"
 #include <boost/scoped_array.hpp>
-#include "../config.h"
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -53,12 +52,12 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
 	newSize = outLayerSize*inZ;
     boost::shared_array<float> outfield(new float[newSize]);
 
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp parallel default(shared)
     {
 #endif
     boost::scoped_array<float> zValues(new float[inZ]);
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
 #pragma omp for
 #endif
 	for (size_t xy = 0; xy < outLayerSize; ++xy) {
@@ -70,7 +69,7 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
             }
         } else (throw CDMException("error during interpolation"));
 	}
-#ifdef HAVE_OPENMP
+#ifdef _OPENMP
     }
 #endif
 
