@@ -34,7 +34,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include "../../MutexLock.h"
 
 extern "C"
 {
@@ -52,8 +51,6 @@ LoggerPtr logger = getLogger("WdbConnection");
 
 // a cache holding references to all connections
 static std::map<std::string, boost::weak_ptr<PGconn> > sharedConnections;
-// mutex for the sharedConnections
-static MutexType mutex_;
 
 enum QueryResultFormat
 {
@@ -104,13 +101,6 @@ static boost::shared_ptr<PGconn> createConnection(const std::string & connectStr
 WdbConnection::WdbConnection(const std::string & connectString, const std::string & wciUser)
 {
     std::string connectionId = connectString + ";wciUser="+wciUser;
-#ifdef _OPENMP
-    if (!PQisthreadsafe() && (omp_get_num_threads() > 1)) {
-        LOG4FIMEX(logger, Logger::WARN, "fimex compiled with OPENMP, but libpq not compiled with" <<
-                "thread-safe : make sure to set environment variable OMP_NUM_THREADS=1");
-    }
-#endif
-    ScopedCritical lock(mutex_);
     // retrieve connecton from sharedConnections
     std::map<std::string, boost::weak_ptr<PGconn> >::iterator shared_conn = sharedConnections.find(connectionId);
     if (shared_conn != sharedConnections.end()) {

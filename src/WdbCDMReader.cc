@@ -38,6 +38,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
+#include "MutexLock.h"
 #include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/WdbIndex.h"
 #include "wdb/config/GlobalWdbConfiguration.h"
@@ -52,6 +53,9 @@ namespace
 {
 LoggerPtr logger = getLogger("WdbCDMReader");
 }
+
+// mutex for the get*Data*
+static MutexType wdbmutex;
 
 /**
  * All data members of WdbCDMReader are kept "hidden" in this class, in
@@ -122,6 +126,7 @@ boost::shared_ptr<Data> WdbCDMReader::getDataSlice(
 
 	const CDMVariable& variable = cdm_->getVariable(varName);
 
+    ScopedCritical lock(wdbmutex);
 	if ( d_->dataIndex->isDatabaseField(varName) )
 		return getDatabaseFields(variable, unLimDimPos);
 	else
@@ -139,10 +144,14 @@ boost::shared_ptr<Data> WdbCDMReader::getDataSlice(const std::string& varName, c
 
 	const CDMVariable& variable = cdm_->getVariable(varName);
 
-	if ( d_->dataIndex->isDatabaseField(varName) )
-		return getDatabaseFields(variable, sb);
-	else
-		return CDMReader::getDataSlice(varName, sb);
+	boost::shared_ptr<Data> data;
+	if ( d_->dataIndex->isDatabaseField(varName) ) {
+	    ScopedCritical lock(wdbmutex);
+		data = getDatabaseFields(variable, sb);
+	} else {
+		data = CDMReader::getDataSlice(varName, sb);
+	}
+	return data;
 }
 
 std::size_t WdbCDMReader::getXSize(const CDMVariable& variable) const
