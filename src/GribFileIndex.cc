@@ -580,29 +580,29 @@ boost::posix_time::ptime GribFileMessage::getValidTime() const
     long years(0);
     // add step offset:
     if (stepUnits_ == "s") {
-        timeOffset = boost::posix_time::time_duration(0,0, stepStart_);
+        timeOffset = boost::posix_time::time_duration(0,0, stepEnd_);
     } else if (stepUnits_ == "m") {
-        timeOffset =  boost::posix_time::time_duration(0,stepStart_, 0);
+        timeOffset =  boost::posix_time::time_duration(0,stepEnd_, 0);
     } else if (stepUnits_ == "h") {
-        timeOffset =  boost::posix_time::time_duration(stepStart_, 0, 0);
+        timeOffset =  boost::posix_time::time_duration(stepEnd_, 0, 0);
     } else if (stepUnits_ == "3h") {
-        timeOffset =  boost::posix_time::time_duration(3*stepStart_, 0, 0);
+        timeOffset =  boost::posix_time::time_duration(3*stepEnd_, 0, 0);
     } else if (stepUnits_ == "6h") {
-        timeOffset =  boost::posix_time::time_duration(6*stepStart_, 0, 0);
+        timeOffset =  boost::posix_time::time_duration(6*stepEnd_, 0, 0);
     } else if (stepUnits_ == "12h") {
-        timeOffset =  boost::posix_time::time_duration(12*stepStart_, 0, 0);
+        timeOffset =  boost::posix_time::time_duration(12*stepEnd_, 0, 0);
     } else if (stepUnits_ == "D") {
-        days = stepStart_;
+        days = stepEnd_;
     } else if (stepUnits_ == "M") {
-        months = stepStart_;
+        months = stepEnd_;
     } else if (stepUnits_ == "Y") {
-        years = stepStart_;
+        years = stepEnd_;
     } else if (stepUnits_ == "10Y") {
-        years = 10*stepStart_;
+        years = 10*stepEnd_;
     } else if (stepUnits_ == "30Y") {
-        years = 30*stepStart_;
+        years = 30*stepEnd_;
     } else if (stepUnits_ == "C") {
-        years = 100*stepStart_;
+        years = 100*stepEnd_;
     } else {
         throw CDMException("found undefined stepUnits in gribReader: " + stepUnits_);
     }
