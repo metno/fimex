@@ -1,3 +1,25 @@
+  * 2012-01-04 fimex-0.35
+    * grib-reader: supporting several types of levels for same parameter
+    * grib-reader: supporting several horizontal CS for different parameters
+    * grib-writer: fixing date-settings
+    * grib-writer: using second-order packing if possible
+    * interpolation: support for several horizontal CS (e.g. staggered grids)
+    * interpolation: using nanoflann instead of kdtree++, 4*speedup
+    * interpolation: supporting degree-based projections in coord_kdtree
+    * interpolation: configurable radius for coord_kdtree
+    * interpolation: improved index-access, 1.1*speedup
+    * interpolation: bilinear: better border handling, 1.3*speedup
+    * interpolation: parallelization of nn, bilinear, cubic and vectors
+    * vertical-interpolation: support for depth
+    * using WGS84 coordinates of latitude/longitude instead of spherical
+    * extract-reduceToBoundigBox supporting bb around -180
+    * make get*Data* operations thread-safe
+    * make (Time-)Units thread-safe
+    * parallelization of NetCDF-writer and NullCDMWriter
+    * upgrade to libtool 2.4.2 (including openmp support)
+    * adding ThreadPool.h for runtime configuration of threads
+    * forcing boost-filesystem api to be compatible with newer boost-versions
+    * remove isinf - not part of C++03
   * 2011-12-01 fimex-0.34
     * shared connections to wdb databases
     * spatial_vector extension in ncml
