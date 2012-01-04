@@ -37,6 +37,13 @@
  */
 
 /**
+ * Integral version of the fimex api version, that is
+ * the last date of change as YYYYMMDD. This should
+ * be used for preprocessor conditionals: #ifdef FIMEX_API_VERSION > 20110931
+ */
+#define MIFI_API_VERSION 20120104
+
+/**
  * M_PI is no longer part of C99, so it needs to be declared for fimex
  */
 #define MIFI_PI 3.1415926535897932384626433832795

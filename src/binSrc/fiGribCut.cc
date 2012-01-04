@@ -38,6 +38,7 @@
 #include "fimex/Utils.h"
 #include "fimex/GribUtils.h"
 #include "fimex/Data.h"
+#include "fimex/ThreadPool.h"
 
 namespace po = boost::program_options;
 namespace io = boost::iostreams;
@@ -267,6 +268,8 @@ static int gribCut(ostream& outStream, const vector<string>& inputFiles, const v
 int
 main(int argc, char* args[])
 {
+    // only use one thread
+    mifi_setNumThreads(1);
     /*
      * inputFile: path; repeatable = concattenation
      * outputFile: path; not-repeatable

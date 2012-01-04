@@ -26,6 +26,7 @@
 
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/ThreadPool.h"
 #include <grib_api.h>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -56,6 +57,9 @@ indexGrib(const fs::path& input, const fs::path& output, bool force)
 int
 main(int argc, char* args[])
 {
+    // only use one thread
+    mifi_setNumThreads(1);
+
     po::options_description options("options");
     options.add_options()
         ("help,h", "help message")

@@ -384,7 +384,8 @@ Fimex can be build with parallelization support with OpenMP with the --enable-op
 flag of @c configure. The following code-parts are currently (0.35) parallelized:
 
   - NetCDF-writer/Null-writer: fetches each data-slice in a thread of it's own
-       next to perfect scaling until IO-system is saturated
+       Next to perfect scaling until IO-system is saturated. The memory-consumption is
+       linear with the number of threads.
   - interpolation: repositioning of values
        scales about factor 1.8 per processor for bilinear, better for bicubic, worse for nearestneighbor
   - interpolation: fill2d
@@ -394,8 +395,21 @@ flag of @c configure. The following code-parts are currently (0.35) parallelized
     this is still much slower than the coord_kdtree.
 
 Often, the performance is limited by the IO-system.
-The number of threads used can be controlled by the OpenMP environment variable
-OMP_NUM_THREADS. The default is to use the number of available (virtual) processors.
+
+On the fimex-commandline, the number of threads can be set using:
+@code
+fimex --num_threads=2 -c test.cfg
+@endcode
+
+When using the library, one should use:
+@code
+#include "fimex/ThreadPool.h"
+...
+if (MIFI_OK == mifi_setNumThreads(2)) {
+   /* below starts the other fimex code */
+}
+...
+@endcode
 
 @subsection Thread-safety
 
