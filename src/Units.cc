@@ -25,9 +25,6 @@
 #include "fimex/Logger.h"
 
 #include "boost/shared_ptr.hpp"
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 #include <MutexLock.h>
 #include "../config.h"
 #ifdef HAVE_UDUNITS2_H

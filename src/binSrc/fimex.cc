@@ -42,6 +42,7 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMFileReaderFactory.h"
@@ -67,6 +68,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
     out << "             [--output.file FILENAME [--output.type OUTPUT_TYPE]]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
+    out << "             [--num_threads ...]" << endl;
     out << "             [--extract....]" << endl;
     out << "             [--qualityExtract....]" << endl;
     out << "             [--interpolate....]" << endl;
@@ -154,6 +156,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
 	writeOptionAny(out, "debug", vm);
 	writeOptionAny(out, "print-options", vm);
 	writeOption<string>(out, "config", vm);
+	writeOption<int>(out, "num_threads", vm);
 	writeOption<string>(out, "input.file", vm);
 	writeOption<string>(out, "input.type", vm);
 	writeOption<string>(out, "input.config", vm);
@@ -599,12 +602,14 @@ int run(int argc, char* args[])
 	// Declare the supported options.
 	po::options_description generic("Generic options");
 	std::string configFile("fimex.cfg");
+	int num_threads = 1;
 	generic.add_options()
 	    ("help,h", "help message")
 	    ("version", "program version")
 	    ("debug", "debug program")
 	    ("print-options", "print all options")
 	    ("config,c", po::value<string>(&configFile)->default_value(configFile), "configuration file")
+	    ("num_threads,n", po::value<int>(&num_threads)->default_value(num_threads), "number of threads")
 	    ;
 
 	// Declare a group of options that will be
@@ -733,6 +738,7 @@ int run(int argc, char* args[])
     } else if (vm.count("debug") > 1) {
     	defaultLogLevel(Logger::DEBUG);
     }
+    mifi_setNumThreads(num_threads);
     if (vm.count("print-options")) {
     	writeOptions(cout, vm);
     }

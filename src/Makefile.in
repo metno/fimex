@@ -206,13 +206,13 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
 	FeltParameters.h FeltParameters.cc GridDefinition.cc Logger.cc \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
-	ToVLevelConverter.cc Units.cc Utils.cc \
-	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
-	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
-	NetCDF_Utils.h GribApiCDMWriter.cc \
+	MutexLock.h NcmlCDMReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
+	TimeSpec.cc ToVLevelConverter.h ToVLevelConverter.cc Units.cc \
+	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	XMLInput.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
+	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.h \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.h \
 	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
@@ -318,10 +318,10 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	Felt_File2.lo FeltParameters.lo GridDefinition.lo Logger.lo \
 	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo Units.lo Utils.lo \
-	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
+	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
+	Units.lo Utils.lo vertical_coordinate_transformations.lo \
+	XMLDoc.lo XMLInput.lo $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) $(am__objects_4)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -590,12 +590,12 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
 	FeltParameters.h FeltParameters.cc GridDefinition.cc Logger.cc \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
-	ToVLevelConverter.cc Units.cc Utils.cc \
-	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
-	$(am__append_1) $(am__append_2) $(am__append_3) \
+	MutexLock.h NcmlCDMReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
+	TimeSpec.cc ToVLevelConverter.h ToVLevelConverter.cc Units.cc \
+	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	XMLInput.cc $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_5)
 all: all-recursive
 
@@ -762,6 +762,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpatialAxisSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StereographicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadPool.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@

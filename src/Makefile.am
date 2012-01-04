@@ -66,12 +66,14 @@ libfimex_la_SOURCES = interpolation.c \
 					 FeltParameters.cc \
                      GridDefinition.cc \
 					 Logger.cc \
+					 MutexLock.h \
 					 NcmlCDMReader.cc \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
 					 SpatialAxisSpec.cc \
                      SliceBuilder.cc \
+                     ThreadPool.c \
 					 TimeUnit.cc \
 					 TimeSpec.cc \
 					 ToVLevelConverter.h \
