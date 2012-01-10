@@ -405,7 +405,7 @@ void NcmlCDMReader::initAttributeNameChange()
                 CDMAttribute& attr = cdm_->getAttribute(CDM::globalAttributeNS(), orgName);
                 cdm_->removeAttribute(CDM::globalAttributeNS(), name); // remove other attributes with same name
                 attr.setName(name);
-            } catch (CDMException ex) {
+            } catch (CDMException& ex) {
                 // no such attribute, don't care
             }
         }
@@ -423,7 +423,7 @@ void NcmlCDMReader::initAttributeNameChange()
                 CDMAttribute& attr = cdm_->getAttribute(varName, orgName);
                 cdm_->removeAttribute(varName, name); // remove other attributes with same name
                 attr.setName(name);
-            } catch (CDMException ex) {
+            } catch (CDMException& ex) {
                 // no such attribute, don't care
             }
         }

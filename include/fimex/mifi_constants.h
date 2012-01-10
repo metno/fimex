@@ -198,11 +198,18 @@
  */
 #define MIFI_VINT_METHOD_LOGLOG 2
 
+#ifdef __cplusplus
+#include <limits>
+/** @brief undefined value for floats */
+#define MIFI_UNDEFINED_F (std::numeric_limits<float>::quiet_NaN())
+/** @brief undefined value for doubles */
+#define MIFI_UNDEFINED_D (std::numeric_limits<double>::quiet_NaN())
+#else
 /** @brief undefined value for floats */
 #define MIFI_UNDEFINED_F (nanf(""))
 /** @brief undefined value for doubles */
 #define MIFI_UNDEFINED_D (nan(""))
-
+#endif
 /** @brief return code, error */
 #define MIFI_ERROR -1
 /** @brief return code, ok */

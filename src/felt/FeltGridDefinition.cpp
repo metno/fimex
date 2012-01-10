@@ -269,8 +269,8 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
     switch (gridType) {
     case 1:
     case 4:
-    	projStr << "+proj=stere +lat_0=90 +lon_0=" << (gs[3]) << " +lat_ts=" << (gs[4]) << " +units=m";
-    	break;
+        projStr << "+proj=stere +lat_0=90 +lon_0=" << (gs[3]) << " +lat_ts=" << (gs[4]) << " +units=m";
+        break;
     case 2:
         projStr << "+proj=longlat";
         break;
@@ -281,6 +281,7 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
         // lat_0!=0 not supported for merc, lon_0 and lat_0 part of startx, starty
         // TODO: untested, missing test case
         projStr << "+proj=merc +lat_ts=" << (gs[4]);
+        break;
     case 6:
         // libmi supports only lat_0=0 = non-oblique (pole) lcc
         // TODO: untested, missing test case
@@ -300,21 +301,21 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
 
 FeltGridDefinition::Orientation FeltGridDefinition::getScanMode_()
 {
-	float & jIncrement = gridPars_[3];
-	float & startLatitude = gridPars_[1];
-	if(jIncrement < 0)
+    float & jIncrement = gridPars_[3];
+    float & startLatitude = gridPars_[1];
+    if(jIncrement < 0)
     {
-		jIncrement = jIncrement * -1;
-		startLatitude = startLatitude - (yNum_ * jIncrement) + jIncrement;
+        jIncrement = jIncrement * -1;
+        startLatitude = startLatitude - (yNum_ * jIncrement) + jIncrement;
         return LeftUpperHorizontal;
     }
     return LeftLowerHorizontal;
 }
 
 FeltGridDefinition::FeltGridDefinition( int gridType,
-										int xNum, int yNum, int a, int b, int c, int d,
-										const std::vector<short int> & extraData) :
-										    gridType_(gridType), xNum_(xNum), yNum_(yNum)
+                                        int xNum, int yNum, int a, int b, int c, int d,
+                                        const std::vector<short int> & extraData) :
+                                            gridType_(gridType), xNum_(xNum), yNum_(yNum)
 {
     switch (gridType){
     case 0:
@@ -322,16 +323,18 @@ FeltGridDefinition::FeltGridDefinition( int gridType,
     case 1:
     case 4:
         FeltFile::log("FeltGridDefinition: stereograhpic grids");
-   		polarStereographicProj_( gridType, a, b, c, d, extraData );
-    	break;
+           polarStereographicProj_( gridType, a, b, c, d, extraData );
+        break;
     case 2:
     case 3:
-      	geographicProj_( gridType, a, b, c, d, extraData );
+          geographicProj_( gridType, a, b, c, d, extraData );
         break;
     case 5:
         mercatorProj_( gridType, a, b, c, d, extraData );
+        break;
     case 6:
         lambertConicProj_( gridType, a, b, c, d, extraData );
+        break;
     default:
         throw std::invalid_argument("Unknown grid specification");
     }
@@ -456,9 +459,9 @@ FeltGridDefinition::lambertConicProj_( int gridType,
 
 void
 FeltGridDefinition::polarStereographicProj( int gridType,
-									        float poleX, float poleY,
-									        float gridD, float rot,
-									        const std::vector<short int> & extraData)
+                                            float poleX, float poleY,
+                                            float gridD, float rot,
+                                            const std::vector<short int> & extraData)
 {
     FeltFile::log("FeltGridDefinition: Polar stereographic projection identified in FELT file");
     if ( extraData.empty() )
@@ -473,8 +476,8 @@ FeltGridDefinition::polarStereographicProj( int gridType,
         gridPars_[2] = gridD * (6371.* (1+std::sin(pi/180.*gridPars_[4]))) / (79.*150.);
         gridPars_[5] = 0.0;
     }
-	else
-		throw std::runtime_error("The encoded polar stereographic grid specification in the FELT file is not supported");
+    else
+        throw std::runtime_error("The encoded polar stereographic grid specification in the FELT file is not supported");
 
     if (FeltFile::isLogging()) {
         std::ostringstream buffer;
@@ -496,9 +499,9 @@ FeltGridDefinition::polarStereographicProj( int gridType,
 
 void
 FeltGridDefinition::geographicProj( int gridType,
-									float startLongitude, float startLatitude,
-									float iInc, float jInc,
-									const std::vector<short int> & extraData)
+                                    float startLongitude, float startLatitude,
+                                    float iInc, float jInc,
+                                    const std::vector<short int> & extraData)
 {
     FeltFile::log("FeltGridDefinition: Geographic projection identified in FELT file");
     const int gsSize = 6;
@@ -515,22 +518,22 @@ FeltGridDefinition::geographicProj( int gridType,
     }
     else if ( extraData.size() == gsSize * 2 )
     {
-		for(int i = 0;i < gsSize;i++)
-			gridPars_[i] = static_cast<float>((extraData[i * 2] * scale) + extraData[(i * 2) + 1]) / scale;
-	}
-	else if ( extraData.size() == 2 + (gsSize * 3) )
-	{
-		if(extraData[0] != gsSize)
-			throw std::runtime_error("First word in the grid encoding does not correspond to the gridspec size");
+        for(int i = 0;i < gsSize;i++)
+            gridPars_[i] = static_cast<float>((extraData[i * 2] * scale) + extraData[(i * 2) + 1]) / scale;
+    }
+    else if ( extraData.size() == 2 + (gsSize * 3) )
+    {
+        if(extraData[0] != gsSize)
+            throw std::runtime_error("First word in the grid encoding does not correspond to the gridspec size");
 
-		if(extraData[1] != 3)
-			throw std::runtime_error("Second word in the grid encoding does not correspond to 3 (rotated grid)");
+        if(extraData[1] != 3)
+            throw std::runtime_error("Second word in the grid encoding does not correspond to 3 (rotated grid)");
 
-		for(int i = 0;i < gsSize;i++)
-			gridPars_[i] = static_cast<float>((extraData[(i * 3) + 3] * scale) + extraData[(i * 3) + 4]) / (extraData[(i * 3) + 2] * 10.0);
-	}
-	else
-		throw std::runtime_error("The encoded grid specification in the FELT file is not supported");
+        for(int i = 0;i < gsSize;i++)
+            gridPars_[i] = static_cast<float>((extraData[(i * 3) + 3] * scale) + extraData[(i * 3) + 4]) / (extraData[(i * 3) + 2] * 10.0);
+    }
+    else
+        throw std::runtime_error("The encoded grid specification in the FELT file is not supported");
 
 
     if (FeltFile::isLogging()) {
@@ -552,7 +555,7 @@ FeltGridDefinition::geographicProj( int gridType,
 
 std::string FeltGridDefinition::projDefinition() const
 {
-	return gridParametersToProjDefinition(gridType_, getGridParameters());
+    return gridParametersToProjDefinition(gridType_, getGridParameters());
 };
 
 int
@@ -570,42 +573,42 @@ FeltGridDefinition::getYNumber() const
 float
 FeltGridDefinition::getXIncrement() const
 {
-	return incrementX_;
+    return incrementX_;
 };
 
 float
 FeltGridDefinition::getYIncrement() const
 {
-	return incrementY_;
+    return incrementY_;
 };
 
 float
 FeltGridDefinition::startLatitude() const
 {
-	return startY_;
+    return startY_;
 };
 
 float
 FeltGridDefinition::startLongitude() const
 {
-	return startX_;
+    return startX_;
 };
 
 float
 FeltGridDefinition::startX() const
 {
-	return startX_;
+    return startX_;
 };
 
 float
 FeltGridDefinition::startY() const
 {
-	return startY_;
+    return startY_;
 };
 
 FeltGridDefinition::Orientation FeltGridDefinition::getScanMode() const
 {
-	return orientation_;
+    return orientation_;
 };
 
 const boost::array<float, 6>&
@@ -617,8 +620,8 @@ FeltGridDefinition::getGridParameters() const
 
 std::ostream & contentSummary(std::ostream & out, const FeltGridDefinition & grid)
 {
-	return out << "FeltGridDefinition( " << grid.getXIncrement() << ", "<<grid.getYIncrement() << ", "
-		<< grid.startLongitude() << ", " << grid.startLatitude() << " )" << std::endl;
+    return out << "FeltGridDefinition( " << grid.getXIncrement() << ", "<<grid.getYIncrement() << ", "
+        << grid.startLongitude() << ", " << grid.startLatitude() << " )" << std::endl;
 }
 
 }

@@ -36,6 +36,7 @@ namespace MetNoFimex
  */
 class CachedInterpolationInterface {
 public:
+    virtual ~CachedInterpolationInterface() {}
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
     /** return x-size of input array */
     virtual size_t getInX() const = 0;
@@ -50,34 +51,34 @@ public:
 class CachedInterpolation : public CachedInterpolationInterface
 {
 private:
-	std::vector<double> pointsOnXAxis;
-	std::vector<double> pointsOnYAxis;
-	size_t inX;
-	size_t inY;
-	size_t outX;
-	size_t outY;
-	int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
+    std::vector<double> pointsOnXAxis;
+    std::vector<double> pointsOnYAxis;
+    size_t inX;
+    size_t inY;
+    size_t outX;
+    size_t outY;
+    int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
-	/**
-	 * @param funcType {@link interpolation.h} interpolation method
-	 * @param pointsOnXAxis projected values of the new projections coordinates expressed in the current x-coordinate (size = outX*outY)
-	 * @param pointsOnYAxis projected values of the new projections coordinates expressed in the current y-coordinate (size = outX*outY)
-	 * @param inX size of current X axis
-	 * @param inY size of current Y axis
-	 * @param outX size of new X axis
-	 * @param outY size of new Y axis
-	 */
-	CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
-	virtual ~CachedInterpolation() {}
-	/**
-	 * Actually interpolate the data. The data will be interpolated as floats internally.
-	 *
-	 * @param inData the input data
-	 * @param the size of the input data array
-	 * @param newSize return the size of the output-array
-	 */
-	virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
-	virtual size_t getInX() const {return inX;}
+    /**
+     * @param funcType {@link interpolation.h} interpolation method
+     * @param pointsOnXAxis projected values of the new projections coordinates expressed in the current x-coordinate (size = outX*outY)
+     * @param pointsOnYAxis projected values of the new projections coordinates expressed in the current y-coordinate (size = outX*outY)
+     * @param inX size of current X axis
+     * @param inY size of current Y axis
+     * @param outX size of new X axis
+     * @param outY size of new Y axis
+     */
+    CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
+    virtual ~CachedInterpolation() {}
+    /**
+     * Actually interpolate the data. The data will be interpolated as floats internally.
+     *
+     * @param inData the input data
+     * @param the size of the input data array
+     * @param newSize return the size of the output-array
+     */
+    virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
+    virtual size_t getInX() const {return inX;}
     virtual size_t getInY() const {return inY;}
 };
 

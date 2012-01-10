@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.35],[heiko.klein@met.no])
+AC_INIT([fimex],[0.36beta],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 
@@ -14,7 +14,7 @@ old_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Wall"
 AC_TRY_COMPILE([],[],AC_MSG_RESULT(yes),
                      AC_MSG_RESULT(no)
-	                 CFLAGS="$old_CFLAGS")
+                     CFLAGS="$old_CFLAGS")
 
 
 # Checks for libraries.
@@ -28,7 +28,7 @@ old_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="$CXXFLAGS -Wall"
 AC_TRY_COMPILE([],[],AC_MSG_RESULT(yes),
                      AC_MSG_RESULT(no)
-	                 CXXFLAGS="$old_CXXFLAGS")
+                     CXXFLAGS="$old_CXXFLAGS")
 
 # Checks for header files.
 AC_HEADER_STDC

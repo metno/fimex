@@ -29,22 +29,22 @@ namespace MetNoFimex
 
 Logger::LogLevel defaultLL = Logger::WARN;
 Logger::LogLevel defaultLogLevel() {
-	return defaultLL;
+    return defaultLL;
 }
 void defaultLogLevel(Logger::LogLevel logLevel) {
-	defaultLL = logLevel;
+    defaultLL = logLevel;
 }
 
 
 LoggerPtr getLogger(const std::string& className)
 {
-	// TODO implement a logger based upon log4cxx
-	return boost::shared_ptr<Logger>(new Logger(className));
+    // TODO implement a logger based upon log4cxx
+    return boost::shared_ptr<Logger>(new Logger(className));
 }
 
 Logger::Logger(const std::string& className)
 {
-	// default, nothing to do
+    // default, nothing to do
 }
 
 Logger::~Logger()
@@ -52,22 +52,22 @@ Logger::~Logger()
 }
 
 bool Logger::isEnabledFor(LogLevel level) {
-	if (level >= defaultLogLevel()) {
-		return true;
-	}
-	return false;
+    if (level >= defaultLogLevel()) {
+        return true;
+    }
+    return false;
 }
 void Logger::forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber) {
-	std::string levelName;
-	switch (level) {
-	case Logger::FATAL: levelName = "FATAL: "; break;
-	case Logger::ERROR: levelName = "ERROR: "; break;
-	case Logger::WARN : levelName = "WARN: "; break;
-	case Logger::INFO:  levelName = "INFO: "; break;
-	case Logger::DEBUG: levelName = "DEBUG: "; break;
-	default: levelName = "LOG: ";
-	}
-	std::cerr << levelName << message << " in " << filename << " at line " << lineNumber << std::endl;
+    std::string levelName;
+    switch (level) {
+    case Logger::FATAL: levelName = "FATAL: "; break;
+    case Logger::ERROR: levelName = "ERROR: "; break;
+    case Logger::WARN : levelName = "WARN: "; break;
+    case Logger::INFO:  levelName = "INFO: "; break;
+    case Logger::DEBUG: levelName = "DEBUG: "; break;
+    default: levelName = "LOG: "; break;
+    }
+    std::cerr << levelName << message << " in " << filename << " at line " << lineNumber << std::endl;
 }
 
 }

@@ -75,7 +75,7 @@ boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::crea
                     }
                 }
             }
-        } catch (CDMException exception) {
+        } catch (CDMException& exception) {
             // just ignore
         }
     }

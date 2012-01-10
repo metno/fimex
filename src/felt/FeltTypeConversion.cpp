@@ -45,10 +45,8 @@ boost::posix_time::ptime parseTimeNoThrow(const word * data)
 	{
 		return parseTime(data);
 	}
-	catch(std::exception &)
-	{
-		return boost::posix_time::ptime();
-	}
+	catch(std::exception &) {}
+    return boost::posix_time::ptime();
 }
 
 }

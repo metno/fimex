@@ -197,6 +197,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
                 boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
                 heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
             }
+            break;
         }
     }
     return heightConv;

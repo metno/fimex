@@ -295,7 +295,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr c
     case MIFI_VINT_METHOD_LIN: intFunc = &mifi_get_values_linear_f; break;
     case MIFI_VINT_METHOD_LOG: intFunc = &mifi_get_values_log_f; break;
     case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
-    default: assert(false);
+    default: assert(false); break;
     }
 
 
