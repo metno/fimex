@@ -28,6 +28,8 @@
 #define C_FIMEX_H_
 
 #include <stddef.h>
+#include "fimex/CDMconstants.h"
+#include "fimex/deprecated.h"
 
 /**
  * This is the public C-Api for fimex. It is a wrapper api for the underlying C++ api.
@@ -52,36 +54,49 @@ typedef int (*doubleDatasliceCallbackPtr)(mifi_cdm_reader* reader, const char* v
 void mifi_free_cdm_reader(mifi_cdm_reader* reader);
 
 /**
- * Get a new reader from a felt file.
+ * Get a new reader from a file.
+ * @param file_type MIFI_FILETYPE_* constant
  * @param filename name of the felt-file
  * @param configFile configuration file for the felt-file
  * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
  */
-mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile);
+mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile);
+
+/**
+ * Get a new reader from a felt file.
+ * @param filename name of the felt-file
+ * @param configFile configuration file for the felt-file
+ * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ * @deprecated use mifi_new_io_reader()
+ */
+DEPRECATED(mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile));
 
 /**
  * Get a new reader from a netcdf file.
  * @param filename name of the felt-file
  * @param configFile configuration file for the felt-file
  * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ * @deprecated use mifi_new_io_reader()
  */
-mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename);
+DEPRECATED(mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename));
 
 /**
  * Get a new reader from a grib1/2 file.
  * @param filename name of the grib-file
  * @param configFile configuration file for the grib-file
  * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ * @deprecated use mifi_new_io_reader()
  */
-mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile);
+DEPRECATED(mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile));
 
 
 /**
  * Get a new reader from a ncml file.
  * @param ncmlFile name of the ncml config file
  * @return the reader object-pointer, use #mifi_freeCDMReader to free, or NULL on error.
+ * @deprecated use mifi_new_io_reader()
  */
-mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile);
+DEPRECATED(mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile));
 
 /**
  * Modify a reader using a ncml file.
