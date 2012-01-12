@@ -21,7 +21,9 @@
  * USA.
  */
 
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
@@ -58,7 +60,7 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
             d.setUnlimited(recid == i);
             cdm_->addDimension(d);
         }
-	}
+    }
 
     // define variables
     {
@@ -89,7 +91,7 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
         }
     }
 
-	// define global attributes
+    // define global attributes
     {
         int natts;
         nc_inq_varnatts(ncFile->ncId, NC_GLOBAL, &natts);
@@ -115,12 +117,12 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
     boost::shared_ptr<Data> data;
     ScopedCritical lock(ncFile->mutex);
     int varid;
-	ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
-	nc_type dtype;
-	ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
-	int dimLen;
-	ncCheck(nc_inq_varndims(ncFile->ncId, varid, &dimLen));
-	int dimIds[dimLen];
+    ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
+    nc_type dtype;
+    ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
+    int dimLen;
+    ncCheck(nc_inq_varndims(ncFile->ncId, varid, &dimLen));
+    int dimIds[dimLen];
     ncCheck(nc_inq_vardimid(ncFile->ncId, varid, &dimIds[0]));
     size_t count[dimLen];
     size_t start[dimLen];
@@ -128,12 +130,12 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
         start[i] = 0;
         ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
     }
-	if (cdm_->hasUnlimitedDim(var)) {
-	    // unlimited dim always at 0
-	    start[0] = unLimDimPos;
-	    count[0] = 1;
-	}
-	return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
+    if (cdm_->hasUnlimitedDim(var)) {
+        // unlimited dim always at 0
+        start[0] = unLimDimPos;
+        count[0] = 1;
+    }
+    return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
 }
 
 boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
@@ -172,8 +174,8 @@ void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const
     nc_type dtype;
     ncCheck(nc_inq_atttype(ncFile->ncId, varid, attName.c_str(), &dtype));
     CDMDataType dt(ncType2cdmDataType(dtype));
-	boost::shared_ptr<Data> attrData = ncGetAttValues(ncFile->ncId, varid, attName, dtype);
-	cdm_->addAttribute(varName, CDMAttribute(attName, dt, attrData));
+    boost::shared_ptr<Data> attrData = ncGetAttValues(ncFile->ncId, varid, attName, dtype);
+    cdm_->addAttribute(varName, CDMAttribute(attName, dt, attrData));
 }
 
 

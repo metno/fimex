@@ -26,7 +26,9 @@
 
 #include "fimex/CDM.h"
 #include <boost/regex.hpp>
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/GribCDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/GridDefinition.h"
 #include "fimex/GribFileIndex.h"
 #include "CDM_XMLConfigHelper.h"

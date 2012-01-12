@@ -24,6 +24,19 @@
 #ifndef FELTCDMREADER2_H_
 #define FELTCDMREADER2_H_
 
+#ifndef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#warning \
+  This header-file is deprecated and \
+  may be removed without further notice at a future date. Please use a \
+  non-deprecated interface with equivalent functionality instead, i.e. \
+  instead of \
+    *CDMReader(file,config) \
+  use \
+    CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
+#endif
+
+
+
 #include <string>
 #include <vector>
 #include <map>
@@ -49,51 +62,51 @@ class FeltCDMReader2 : public CDMReader
 {
 public:
     FeltCDMReader2(std::string filename, const XMLInput& configInput);
-	FeltCDMReader2(std::string filename, std::string configFilename);
-	virtual ~FeltCDMReader2();
+    FeltCDMReader2(std::string filename, std::string configFilename);
+    virtual ~FeltCDMReader2();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
-	const std::string filename;
-	std::string configId;
-	boost::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
-	MutexType mutex_;
-	CDMDimension xDim;
-	CDMDimension yDim;
-	std::map<std::string, std::string> varNameFeltIdMap;
-	std::vector<boost::posix_time::ptime> timeVec;
-	std::map<std::string, std::vector<MetNoFelt::LevelPair> > levelVecMap;
-	/**
-	 * config attributes may contain template parameters marked with %PARAM%
-	 * which should be replaced by dynamic values from the felt-file and stored
-	 * temporary in this map
-	 *
-	 * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
-	 */
-	std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
-	void init(const XMLInput& configInput);
-	// the following methods are parts of the init function and should not
-	// be called from elsewhere
-	std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc, const std::map<std::string, std::string>& options);
-	void initAddGlobalAttributesFromXML(const XMLDoc& doc);
-	/**
-	 * read processOptions/option from the xml file
-	 */
-	std::map<std::string, std::string> initGetOptionsFromXML(const XMLDoc& doc);
-	CDMDimension initAddTimeDimensionFromXML(const XMLDoc& doc);
-	std::map<short, CDMDimension> initAddLevelDimensionsFromXML(const XMLDoc& doc);
-	/**
-	 * add additional axis from the xml-file to this cdm
-	 *
-	 * @param xpathCtx xpath context of the file
-	 * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
-	 * @param templateReplacements replacements for template parameters
-	 */
-	void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
-	std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath);
-	void initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates);
-	void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const CDMDimension& ensembleDim, const std::map<short, CDMDimension>& levelDims);
+    const std::string filename;
+    std::string configId;
+    boost::shared_ptr<MetNoFelt::Felt_File2> feltfile_;
+    MutexType mutex_;
+    CDMDimension xDim;
+    CDMDimension yDim;
+    std::map<std::string, std::string> varNameFeltIdMap;
+    std::vector<boost::posix_time::ptime> timeVec;
+    std::map<std::string, std::vector<MetNoFelt::LevelPair> > levelVecMap;
+    /**
+     * config attributes may contain template parameters marked with %PARAM%
+     * which should be replaced by dynamic values from the felt-file and stored
+     * temporary in this map
+     *
+     * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
+     */
+    std::map<std::string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
+    void init(const XMLInput& configInput);
+    // the following methods are parts of the init function and should not
+    // be called from elsewhere
+    std::vector<std::string> initGetKnownFeltIdsFromXML(const XMLDoc& doc, const std::map<std::string, std::string>& options);
+    void initAddGlobalAttributesFromXML(const XMLDoc& doc);
+    /**
+     * read processOptions/option from the xml file
+     */
+    std::map<std::string, std::string> initGetOptionsFromXML(const XMLDoc& doc);
+    CDMDimension initAddTimeDimensionFromXML(const XMLDoc& doc);
+    std::map<short, CDMDimension> initAddLevelDimensionsFromXML(const XMLDoc& doc);
+    /**
+     * add additional axis from the xml-file to this cdm
+     *
+     * @param xpathCtx xpath context of the file
+     * @param xpathLevelString xpath-string of the level which might have additional_axis_variable
+     * @param templateReplacements replacements for template parameters
+     */
+    void readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, const std::string& xpathLevelString, const std::map<std::string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements);
+    std::vector<double> readValuesFromXPath(const XMLDoc& doc, const std::string& variableXPath);
+    void initAddProjectionFromXML(const XMLDoc& doc, std::string& projName, std::string& coordinates);
+    void initAddVariablesFromXML(const XMLDoc& doc, const std::string& projName, const std::string& coordinates, const CDMDimension& timeDim, const CDMDimension& ensembleDim, const std::map<short, CDMDimension>& levelDims);
 
 
 };
