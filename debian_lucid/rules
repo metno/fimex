@@ -31,8 +31,8 @@ endif
 ifeq ($(DEB_HOST_ARCH),i386)
     # require SSE2 on i386(in preinst)
     # until I've written some autodetect code
-    CFLAGS  += -mfpmath=sse -msse2
-    CXXFLAGS += -mfpmath=sse -msse2
+    CFLAGS  += -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno
+    CXXFLAGS += -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno
 endif
 
 
@@ -47,61 +47,61 @@ major=`ls src/.libs/lib*.so.* | \
  awk '{if (match($$0,/\.so\.[0-9]+$$/)) print substr($$0,RSTART+4)}'`
 
 prepare:
-	mv $(DEBIAN_DIR)/libfimex.install $(DEBIAN_DIR)/libfimex-$(VERSION)-0.install
-	mv $(DEBIAN_DIR)/libfelt.install $(DEBIAN_DIR)/libfelt-$(VERSION)-0.install
-	mv $(DEBIAN_DIR)/libfimex.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs
-	mv $(DEBIAN_DIR)/libfelt.shlibs $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs
-	for i in $(DEBIAN_DIR)/control $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs; do \
-		perl -pi -e "s/0\.25\.1/$(VERSION)/g;" $$i; \
-	done
+    mv $(DEBIAN_DIR)/libfimex.install $(DEBIAN_DIR)/libfimex-$(VERSION)-0.install
+    mv $(DEBIAN_DIR)/libfelt.install $(DEBIAN_DIR)/libfelt-$(VERSION)-0.install
+    mv $(DEBIAN_DIR)/libfimex.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs
+    mv $(DEBIAN_DIR)/libfelt.shlibs $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs
+    for i in $(DEBIAN_DIR)/control $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs; do \
+        perl -pi -e "s/0\.25\.1/$(VERSION)/g;" $$i; \
+    done
 
 
 
 config.status: configure
-	dh_testdir
-	# Add here commands to configure the package.
+    dh_testdir
+    # Add here commands to configure the package.
 ifneq "$(wildcard /usr/share/misc/config.sub)" ""
-	cp -f /usr/share/misc/config.sub config.sub
+    cp -f /usr/share/misc/config.sub config.sub
 endif
 ifneq "$(wildcard /usr/share/misc/config.guess)" ""
-	cp -f /usr/share/misc/config.guess config.guess
+    cp -f /usr/share/misc/config.guess config.guess
 endif
 ifeq ($(DEB_HOST_ARCH),i386)
-	cp -f $(DEBIAN_DIR)/libfimex.preinst.i386 $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst
-	cp -f $(DEBIAN_DIR)/libfelt.preinst.i386 $(DEBIAN_DIR)/libfelt-$(VERSION)-0.preinst
+    cp -f $(DEBIAN_DIR)/libfimex.preinst.i386 $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst
+    cp -f $(DEBIAN_DIR)/libfelt.preinst.i386 $(DEBIAN_DIR)/libfelt-$(VERSION)-0.preinst
 endif
-	./configure --enable-openmp --with-netcdf --with-pq=/usr/include/postgresql,/usr/lib --with-udunits2 --with-grib_api --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CXXFLAGS)"
+    ./configure --enable-openmp --with-netcdf --with-pq=/usr/include/postgresql,/usr/lib --with-udunits2 --with-grib_api --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CXXFLAGS)"
 
 
 build: build-stamp
 
 build-stamp:  config.status
-	dh_testdir
+    dh_testdir
 
-	# Add here commands to compile the package.
-	$(MAKE)
+    # Add here commands to compile the package.
+    $(MAKE)
 
-	touch $@
+    touch $@
 
 clean:
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp
+    dh_testdir
+    dh_testroot
+    rm -f build-stamp
 
-	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
-	#rm -f config.sub config.guess
+    # Add here commands to clean up after the build process.
+    -$(MAKE) distclean
+    #rm -f config.sub config.guess
 
-	dh_clean
+    dh_clean
 
 install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
+    dh_testdir
+    dh_testroot
+    dh_clean -k
+    dh_installdirs
 
-	# Add here commands to install the package into debian/tmp
-	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+    # Add here commands to install the package into debian/tmp
+    $(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
 
 
 # Build architecture-independent files here.
@@ -110,12 +110,12 @@ binary-indep: build install
 
 # Build architecture-dependent files here.
 binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
-	dh_installexamples
-	dh_install --sourcedir=debian/tmp
+    dh_testdir
+    dh_testroot
+    dh_installchangelogs
+    dh_installdocs
+    dh_installexamples
+    dh_install --sourcedir=debian/tmp
 #	dh_installmenu
 #	dh_installdebconf
 #	dh_installlogrotate
@@ -125,19 +125,19 @@ binary-arch: build install
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
+    dh_installman
+    dh_link
+    dh_strip
+    dh_compress
+    dh_fixperms
 #	dh_perl
 #	dh_python
-	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
+    dh_makeshlibs
+    dh_installdeb
+    dh_shlibdeps
+    dh_gencontrol
+    dh_md5sums
+    dh_builddeb
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install

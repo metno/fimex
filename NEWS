@@ -1,3 +1,7 @@
+  * 2012-02-07 fimex-0.35.1
+    * fixing bug in interpretation of lambert-parameters for felt-files
+    * improving performance: vectorization of vector-interpolation
+    * deprecating IOCDMReader in favour of CDMReaderFactory
   * 2012-01-04 fimex-0.35
     * grib-reader: supporting several types of levels for same parameter
     * grib-reader: supporting several horizontal CS for different parameters
