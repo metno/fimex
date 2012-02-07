@@ -30,7 +30,9 @@
 #include <libxml/xpath.h>
 #include "../config.h"
 #ifdef HAVE_NETCDF_H
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NetCDF_CDMReader.h"
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #endif
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"

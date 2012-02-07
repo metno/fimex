@@ -34,6 +34,7 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMException.h"
 #include "fimex/Utils.h"
+#define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NcmlCDMReader.h"
 #ifdef HAVE_FELT
 #include "fimex/FeltCDMReader2.h"
@@ -50,6 +51,7 @@
 #ifdef HAVE_METGM_H
 #include "fimex/MetGmCDMReader.h"
 #endif
+#undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
 
 namespace MetNoFimex {
