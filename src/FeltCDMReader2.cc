@@ -238,6 +238,7 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
         ensembleVar.setData(eData);
         cdm_->addVariable(ensembleVar);
         cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
+        cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("standard_name", "realization"));
     }
     // levels
     map<short, CDMDimension> levelDims = initAddLevelDimensionsFromXML(*doc);
