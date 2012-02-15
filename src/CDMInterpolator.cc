@@ -969,11 +969,16 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         CoordSysPtr cs = csIt->second;
         string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
-        boost::shared_array<double> latVals = p_->dataReader->getScaledData(latitude)->asDouble();
-        size_t latSize = p_->dataReader->getData(latitude)->size();
-        boost::shared_array<double> lonVals = p_->dataReader->getScaledData(longitude)->asDouble();
+        boost::shared_ptr<Data> latData = p_->dataReader->getScaledData(latitude);
+        boost::shared_array<double> latVals = latData->asDouble();
+        size_t latSize = latData->size();
+        latData.reset();
+        boost::shared_ptr<Data> lonData = p_->dataReader->getScaledData(longitude);
+        boost::shared_array<double> lonVals = lonData->asDouble();
+        size_t lonSize = lonData->size();
+        lonData.reset();
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
-        transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+        transform(&lonVals[0], &lonVals[0]+lonSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
         size_t orgXDimSize;
         size_t orgYDimSize;
@@ -1057,11 +1062,16 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         CoordSysPtr cs = csIt->second;
         string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
-        boost::shared_array<double> latVals = p_->dataReader->getScaledData(latitude)->asDouble();
-        size_t latSize = p_->dataReader->getData(latitude)->size();
-        boost::shared_array<double> lonVals = p_->dataReader->getScaledData(longitude)->asDouble();
+        boost::shared_ptr<Data> latData = p_->dataReader->getScaledData(latitude);
+        boost::shared_array<double> latVals = latData->asDouble();
+        size_t latSize = latData->size();
+        latData.reset();
+        boost::shared_ptr<Data> lonData = p_->dataReader->getScaledData(longitude);
+        boost::shared_array<double> lonVals = lonData->asDouble();
+        size_t lonSize = lonData->size();
+        lonData.reset();
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
-        transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+        transform(&lonVals[0], &lonVals[0]+lonSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
         size_t orgXDimSize;
         size_t orgYDimSize;
