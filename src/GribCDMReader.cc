@@ -504,7 +504,7 @@ void GribCDMReader::initAddProjection()
             if (found != 1) {
                 throw CDMException("error in config-file: not exactly 1 entry for xpath: " + xpathStringLat);
             }
-            latName = lonlatXmlAttributes["name"];
+            latName = lonlatXmlAttributes["name"] + appendix;
         }
 
         // add projection axes 'coordinates = "lon lat";
