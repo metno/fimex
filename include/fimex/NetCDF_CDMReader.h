@@ -24,6 +24,17 @@
 #ifndef NETCDF_CDMREADER_H_
 #define NETCDF_CDMREADER_H_
 
+#ifndef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#warning \
+  This header-file is deprecated and \
+  may be removed without further notice at a future date. Please use a \
+  non-deprecated interface with equivalent functionality instead, i.e. \
+  instead of \
+    *CDMReader(file,config) \
+  use \
+    CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
+#endif
+
 #include "fimex/CDMReader.h"
 
 namespace MetNoFimex
@@ -38,11 +49,11 @@ class Nc;
 
 class NetCDF_CDMReader : public MetNoFimex::CDMReader
 {
-	const std::auto_ptr<Nc> ncFile;
+    const std::auto_ptr<Nc> ncFile;
 public:
-	NetCDF_CDMReader(const std::string& fileName);
-	virtual ~NetCDF_CDMReader();
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    NetCDF_CDMReader(const std::string& fileName);
+    virtual ~NetCDF_CDMReader();
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 private:
     void addAttribute(const std::string& varName, int varid, const std::string& attName);

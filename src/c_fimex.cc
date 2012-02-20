@@ -34,15 +34,13 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
 #include "fimex/CDMReader.h"
-#include "fimex/FeltCDMReader2.h"
 #include "fimex/XMLInput.h"
+#include "fimex/CDMFileReaderFactory.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NetCDF_CDMReader.h"
 #endif
 #ifdef HAVE_GRIB_API_H
 #include "fimex/GribApiCDMWriter.h"
-#include "fimex/GribCDMReader.h"
 #endif
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
@@ -65,55 +63,39 @@ void mifi_free_cdm_reader(mifi_cdm_reader* reader)
     delete(reader);
 }
 
-mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile)
+mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile)
 {
     try {
-        boost::shared_ptr<FeltCDMReader2> reader(new FeltCDMReader2(filename, configFile));
-        return new mifi_cdm_reader(reader);
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in felt-reader: " << ex.what());
-    }
-    return 0;
+            boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create(file_type, std::string(filename), XMLInputFile(configFile));
+            return new mifi_cdm_reader(reader);
+        } catch (exception& ex) {
+            LOG4FIMEX(logger, Logger::WARN, "error in reader: " << ex.what());
+        }
+        return 0;
+}
+mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile)
+{
+    return mifi_new_io_reader(MIFI_FILETYPE_FELT, filename, configFile);
 }
 
 #ifdef HAVE_NETCDF_H
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 {
-    try {
-        boost::shared_ptr<NetCDF_CDMReader> reader(new NetCDF_CDMReader(filename));
-        return new mifi_cdm_reader(reader);
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_netcdf_reader: " << ex.what());
-    }
-    return 0;
+    return mifi_new_io_reader(MIFI_FILETYPE_NETCDF, filename, "");
 }
 #endif
 
 #ifdef HAVE_GRIB_API_H
 mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile)
 {
-    try {
-        std::vector<string> files;
-        files.push_back(filename);
-        boost::shared_ptr<GribCDMReader> reader(new GribCDMReader(files, XMLInputFile(configFile)));
-        return new mifi_cdm_reader(reader);
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_grib_reader: " << ex.what());
-    }
-    return 0;
+    return mifi_new_io_reader(MIFI_FILETYPE_GRIB, filename, configFile);
 }
 #endif
 
 
 mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
 {
-    try {
-        boost::shared_ptr<NcmlCDMReader> reader(new NcmlCDMReader(XMLInputFile(ncmlFile)));
-        return new mifi_cdm_reader(reader);
-    } catch (exception& ex) {
-        LOG4FIMEX(logger, Logger::WARN, "error in ncmlCDMReader: " << ex.what());
-    }
-    return 0;
+    return mifi_new_io_reader(MIFI_FILETYPE_NCML, ncmlFile, "");
 }
 
 mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile)

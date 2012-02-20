@@ -24,15 +24,15 @@ CFLAGS = -Wall
 LD_LIBRARY_PATH += :/opt/udunits2.1.20/lib:/opt/grib-api1.9.9/lib
 LDFLAGS = -lexpat
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
-    CFLAGS += -O0
+	CFLAGS += -O0
 else
-    CFLAGS += -O2
+	CFLAGS += -O2
 endif
 ifeq ($(DEB_HOST_ARCH),i386)
-    # require SSE2 on i386(in preinst)
-    # until I've written some autodetect code
-    CFLAGS  += -mfpmath=sse -msse2
-    CXXFLAGS += -mfpmath=sse -msse2
+	# require SSE2 on i386(in preinst)
+	# until I've written some autodetect code
+	CFLAGS  += -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno
+	CXXFLAGS += -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno
 endif
 
 

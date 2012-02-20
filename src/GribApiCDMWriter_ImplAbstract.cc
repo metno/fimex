@@ -44,30 +44,30 @@ namespace MetNoFimex
 /** helper classes Scale and UnScale to transform double vectors */
 class Scale : public std::unary_function<std::string, bool>
 {
-	const double scale_factor;
-	const double add_offset;
+    const double scale_factor;
+    const double add_offset;
 public:
-	Scale(double scale_factor, double add_offset) : scale_factor(scale_factor), add_offset(add_offset) {}
-	virtual ~Scale() {}
-	virtual double operator() (double x) const {return x*scale_factor + add_offset;}
+    Scale(double scale_factor, double add_offset) : scale_factor(scale_factor), add_offset(add_offset) {}
+    virtual ~Scale() {}
+    virtual double operator() (double x) const {return x*scale_factor + add_offset;}
 };
 
 class UnScale : public Scale
 {
 public:
-	UnScale(double scale_factor, double add_offset) : Scale(1/scale_factor, -1 * add_offset/scale_factor) {}
-	virtual ~UnScale() {}
+    UnScale(double scale_factor, double add_offset) : Scale(1/scale_factor, -1 * add_offset/scale_factor) {}
+    virtual ~UnScale() {}
 };
 
 GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, const boost::shared_ptr<CDMReader>& cdmReader, const std::string& outputFile, const std::string& configFile)
 : CDMWriter(cdmReader, outputFile), gribVersion(gribVersion), configFile(configFile), xmlConfig(new XMLDoc(configFile)), gribFile(outputFile.c_str(), std::ios::binary|std::ios::out)
 {
-	logger = getLogger("fimex.GribApi_CDMWriter");
-	std::string gribTemplate("GRIB" + type2string(gribVersion));
-	gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
-	if (gribHandle.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
-	// check the file
-	if (!gribFile.is_open()) throw CDMException("Cannot write grib-file: "+outputFile);
+    logger = getLogger("fimex.GribApi_CDMWriter");
+    std::string gribTemplate("GRIB" + type2string(gribVersion));
+    gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
+    if (gribHandle.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
+    // check the file
+    if (!gribFile.is_open()) throw CDMException("Cannot write grib-file: "+outputFile);
 }
 
 GribApiCDMWriter_ImplAbstract::~GribApiCDMWriter_ImplAbstract()
@@ -78,25 +78,26 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
 {
     using namespace std;
     using namespace boost::posix_time;
-	LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
-	setGlobalAttributes();
+    LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
+    setGlobalAttributes();
 
-	string pType("grid_second_order");
-	try {
-	    size_t pTypeSize = pType.size();
-	    GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting endStep");
-	} catch (...) {
-	    LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
-	}
+    string pType("grid_second_order");
+    try {
+        size_t pTypeSize = pType.size();
+        GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting endStep");
+    } catch (...) {
+        LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
+    }
 
-	const CDM& cdm = cdmReader->getCDM();
+    const CDM& cdm = cdmReader->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    const CDM::VarVec& vars = cdm.getVariables();
+    set<string> usedVariables;
     for (vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = coordSys.begin();
             varSysIt != coordSys.end();
             ++varSysIt) {
 
-        const CDM::VarVec& vars = cdm.getVariables();
         if ((*varSysIt)->isSimpleSpatialGridded()) {
             vector<string> csVars;
             // iterator over all variables
@@ -105,6 +106,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                     csVars.push_back(vi->getName());
                 }
             }
+            usedVariables.insert(csVars.begin(), csVars.end());
             try {
                 // TODO: this would be nicer with varSysIt->getProjection() instead of csVars[0]
                 setProjection(csVars.at(0));
@@ -166,7 +168,18 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                 }
                 /* select the first startTime and the size for the time-dimension */
                 sb.setTimeStartAndSize(0, 1); // default is all of ReferenceTimePos
+            } else {
+                // no times found
+                try {
+                    ptime refTime = getUniqueForecastReferenceTime(cdmReader);
+                    refTimes.push_back(refTime);
+                    vTimes.push_back(FimexTime(refTime.date().year(), refTime.date().month(), refTime.date().day(), refTime.time_of_day().hours(), refTime.time_of_day().minutes(), refTime.time_of_day().seconds()));
+                } catch (CDMException& ex) {
+                    refTimes.push_back(not_a_date_time);
+                    vTimes.push_back(FimexTime(FimexTime::min_date_time));
+                }
             }
+
             // fetch the levels from first variable
             std::vector<double> levels = getLevels(csVars.at(0));
             if (zAxis.get() != 0) {
@@ -186,6 +199,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
             size_t rtPos = 0;
             for (vector<ptime>::iterator rTime = refTimes.begin(); rTime != refTimes.end(); ++rTime, ++rtPos) {
                 if (refTimes.size() > 1) {
+                    vTimes.clear(); // will be filled anew
                     sb.setReferenceTimePos(rtPos);
                     stringstream ss;
                     time_facet* facet (new time_facet("%Y-%m-%d %H:%M:%S"));
@@ -242,60 +256,65 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
             }
         }
     }
+    for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
+        if (usedVariables.find(vi->getName()) == usedVariables.end()) {
+            LOG4FIMEX(logger, Logger::DEBUG, "variable not written to grib: " << vi->getName());
+        }
+    }
 }
 
 void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
 {
-	std::string globalAttrXPath("/cdm_gribwriter_config/global_attributes/");
-	std::string gattr = "g" + type2string(gribVersion) + "attribute";
-	std::string attr[] = {"attribute", gattr};
-	for (int i = 0; i < 2; i++) {
-		std::string attrXPath = globalAttrXPath + attr[i];
-		XPathObjPtr xPObj = xmlConfig->getXPathObject(attrXPath);
-		xmlNodeSetPtr nodes = xPObj->nodesetval;
-		int size = (nodes) ? nodes->nodeNr : 0;
-		for (int j = 0; j < size; j++) {
-			xmlNodePtr node = nodes->nodeTab[j];
-			std::string name = getXmlProp(node, "name");
-			std::string value = getXmlProp(node, "value");
-			std::string type = getXmlProp(node, "type");
-			LOG4FIMEX(logger, Logger::DEBUG, "setting global attribute: " << name << "(" << value << "," << type << ")");
-			if (type == "long") {
-				GRIB_CHECK(grib_set_long(gribHandle.get(), name.c_str(), string2type<long>(value)), "setting global attr");
-			} else if (type == "double") {
-				GRIB_CHECK(grib_set_double(gribHandle.get(), name.c_str(), string2type<double>(value)), "setting global attr");
-			} else if (type == "string") {
-				size_t msgSize = value.size();
-				GRIB_CHECK(grib_set_string(gribHandle.get(), name.c_str(), value.c_str(), &msgSize), "setting global attr");
-			} else {
-				throw CDMException("unknown type for grib global_attributes: " + type );
-			}
-		}
-	}
+    std::string globalAttrXPath("/cdm_gribwriter_config/global_attributes/");
+    std::string gattr = "g" + type2string(gribVersion) + "attribute";
+    std::string attr[] = {"attribute", gattr};
+    for (int i = 0; i < 2; i++) {
+        std::string attrXPath = globalAttrXPath + attr[i];
+        XPathObjPtr xPObj = xmlConfig->getXPathObject(attrXPath);
+        xmlNodeSetPtr nodes = xPObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        for (int j = 0; j < size; j++) {
+            xmlNodePtr node = nodes->nodeTab[j];
+            std::string name = getXmlProp(node, "name");
+            std::string value = getXmlProp(node, "value");
+            std::string type = getXmlProp(node, "type");
+            LOG4FIMEX(logger, Logger::DEBUG, "setting global attribute: " << name << "(" << value << "," << type << ")");
+            if (type == "long") {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), name.c_str(), string2type<long>(value)), "setting global attr");
+            } else if (type == "double") {
+                GRIB_CHECK(grib_set_double(gribHandle.get(), name.c_str(), string2type<double>(value)), "setting global attr");
+            } else if (type == "string") {
+                size_t msgSize = value.size();
+                GRIB_CHECK(grib_set_string(gribHandle.get(), name.c_str(), value.c_str(), &msgSize), "setting global attr");
+            } else {
+                throw CDMException("unknown type for grib global_attributes: " + type );
+            }
+        }
+    }
 }
 void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data)
 {
-	GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");
+    GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");
 }
 
 void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const boost::posix_time::ptime& rtime, const FimexTime& vTime, const std::string& stepUnits)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << rtime << ", " << vTime << ")" );
-	long date, time, startStep, endStep;
-	if (rtime == boost::date_time::not_a_date_time) {
-	    // no reference-time, using time itself as reference-time
-	    date = vTime.getYear() * 10000 + vTime.getMonth() * 100 + vTime.getMDay();
-	    time = vTime.getHour() * 100 + vTime.getMinute();
-	    startStep = 0;
-	    endStep = 0;
-	} else {
-	    date = rtime.date().year() * 10000 + rtime.date().month() * 100 + rtime.date().day();
-	    time = rtime.time_of_day().hours() * 100 + rtime.time_of_day().minutes();
-	    long steps =  static_cast<long>(.5 + ((vTime.asPosixTime() - rtime).total_seconds() / gribStepUnits2seconds(stepUnits)));
-	    startStep = steps;
-	    // TODO: step length should be determined by bounds
-	    endStep = steps;
-	}
+    LOG4FIMEX(logger, Logger::DEBUG, "setTime(" << varName << ", " << rtime << ", " << vTime << ")" );
+    long date, time, startStep, endStep;
+    if (rtime == boost::date_time::not_a_date_time) {
+        // no reference-time, using time itself as reference-time
+        date = vTime.getYear() * 10000 + vTime.getMonth() * 100 + vTime.getMDay();
+        time = vTime.getHour() * 100 + vTime.getMinute();
+        startStep = 0;
+        endStep = 0;
+    } else {
+        date = rtime.date().year() * 10000 + rtime.date().month() * 100 + rtime.date().day();
+        time = rtime.time_of_day().hours() * 100 + rtime.time_of_day().minutes();
+        long steps =  static_cast<long>(.5 + ((vTime.asPosixTime() - rtime).total_seconds() / gribStepUnits2seconds(stepUnits)));
+        startStep = steps;
+        // TODO: step length should be determined by bounds
+        endStep = steps;
+    }
     GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", date), "setting dataDate");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", time), "setting dataTime");
     size_t sSize = stepUnits.size();
@@ -307,136 +326,136 @@ void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const bo
 
 std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& varName) throw(CDMException)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "getLevels(" << varName << ")" );
-	Units units;
-	std::vector<double> levelData;
-	// TODO: check what to do with hybrid levels
-	const CDM& cdm = cdmReader->getCDM();
-	std::string verticalAxis = cdm.getVerticalAxis(varName);
-	std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
-	std::string unit;
-	if (verticalAxis != ""){
-		boost::shared_ptr<Data> myLevelData = cdmReader->getData(verticalAxis);
-		const boost::shared_array<double> levelDataArray = myLevelData->asDouble();
-		levelData= std::vector<double>(&levelDataArray[0], &levelDataArray[myLevelData->size()]);
-		CDMAttribute attr;
-		if (cdm.getAttribute(verticalAxis, "standard_name", attr)) {
-			verticalAxisXPath += "[@standard_name=\""+ attr.getData()->asString() + "\"]";
-		} else if (cdmReader->getCDM().getAttribute(verticalAxis, "units", attr)) {
-			// units compatible to Pa or m
-			std::string unit = attr.getData()->asString();
-			if (units.areConvertible(unit, "m")) {
-				verticalAxisXPath += "[@unitCompatibleTo=\"m\"]";
-			} else if (units.areConvertible(unit, "Pa")) {
-				verticalAxisXPath += "[@unitCompatibleTo=\"Pa\"]";
-			} else {
-				throw CDMException("units of vertical axis " + verticalAxis + " should be compatible with m or Pa but are: " + unit);
-			}
-		} else {
-			throw CDMException("couldn't find standard_name or units for vertical Axis " + verticalAxis + ". Is this CF compatible?");
-		}
-	} else {
-		// cdmGribWriterConfig should contain something like standard_name=""
-		verticalAxisXPath += "[@standard_name=\"\"]";
-	}
-	// scale the original levels according to the cdm
-	double scale_factor = 1.;
-	double add_offset = 0.;
-	CDMAttribute attr;
-	if (cdm.getAttribute(verticalAxis, "scale_factor", attr)) {
-		scale_factor = attr.getData()->asDouble()[0];
-	}
-	if (cdm.getAttribute(verticalAxis, "add_offset", attr)) {
-		add_offset = attr.getData()->asDouble()[0];
-	}
-	std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(scale_factor, add_offset));
+    LOG4FIMEX(logger, Logger::DEBUG, "getLevels(" << varName << ")" );
+    Units units;
+    std::vector<double> levelData;
+    // TODO: check what to do with hybrid levels
+    const CDM& cdm = cdmReader->getCDM();
+    std::string verticalAxis = cdm.getVerticalAxis(varName);
+    std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
+    std::string unit;
+    if (verticalAxis != ""){
+        boost::shared_ptr<Data> myLevelData = cdmReader->getData(verticalAxis);
+        const boost::shared_array<double> levelDataArray = myLevelData->asDouble();
+        levelData= std::vector<double>(&levelDataArray[0], &levelDataArray[myLevelData->size()]);
+        CDMAttribute attr;
+        if (cdm.getAttribute(verticalAxis, "standard_name", attr)) {
+            verticalAxisXPath += "[@standard_name=\""+ attr.getData()->asString() + "\"]";
+        } else if (cdmReader->getCDM().getAttribute(verticalAxis, "units", attr)) {
+            // units compatible to Pa or m
+            std::string unit = attr.getData()->asString();
+            if (units.areConvertible(unit, "m")) {
+                verticalAxisXPath += "[@unitCompatibleTo=\"m\"]";
+            } else if (units.areConvertible(unit, "Pa")) {
+                verticalAxisXPath += "[@unitCompatibleTo=\"Pa\"]";
+            } else {
+                throw CDMException("units of vertical axis " + verticalAxis + " should be compatible with m or Pa but are: " + unit);
+            }
+        } else {
+            throw CDMException("couldn't find standard_name or units for vertical Axis " + verticalAxis + ". Is this CF compatible?");
+        }
+    } else {
+        // cdmGribWriterConfig should contain something like standard_name=""
+        verticalAxisXPath += "[@standard_name=\"\"]";
+    }
+    // scale the original levels according to the cdm
+    double scale_factor = 1.;
+    double add_offset = 0.;
+    CDMAttribute attr;
+    if (cdm.getAttribute(verticalAxis, "scale_factor", attr)) {
+        scale_factor = attr.getData()->asDouble()[0];
+    }
+    if (cdm.getAttribute(verticalAxis, "add_offset", attr)) {
+        add_offset = attr.getData()->asDouble()[0];
+    }
+    std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(scale_factor, add_offset));
 
 
-	// scale the levels according to grib
-	verticalAxisXPath += "/grib" + type2string(gribVersion);
-	XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
-	xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
-	int size = (nodes) ? nodes->nodeNr : 0;
-	if (size == 1) {
-		xmlNodePtr node = nodes->nodeTab[0];
-		if (levelData.size() == 0) {
-			// add default value from config
-			std::string value = getXmlProp(node, "value");
-			if (value != "") {
-				levelData.push_back(string2type<double>(value));
-			} else {
-				LOG4FIMEX(logger, Logger::ERROR, "no level data available");
-				throw CDMException("no level-data available");
-			}
-		}
-		// scale the levels from cf-units to grib-untis
-		std::string gribUnits = getXmlProp(node, "units");
-		if (gribUnits != "") {
-			if (cdm.getAttribute(verticalAxis, "units", attr)) {
-				double slope;
-				double offset;
-				units.convert(attr.getData()->asString(), gribUnits, slope, offset);
-				std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(slope, offset));
-			}
-		}
+    // scale the levels according to grib
+    verticalAxisXPath += "/grib" + type2string(gribVersion);
+    XPathObjPtr verticalXPObj = xmlConfig->getXPathObject(verticalAxisXPath);
+    xmlNodeSetPtr nodes = verticalXPObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    if (size == 1) {
+        xmlNodePtr node = nodes->nodeTab[0];
+        if (levelData.size() == 0) {
+            // add default value from config
+            std::string value = getXmlProp(node, "value");
+            if (value != "") {
+                levelData.push_back(string2type<double>(value));
+            } else {
+                LOG4FIMEX(logger, Logger::ERROR, "no level data available");
+                throw CDMException("no level-data available");
+            }
+        }
+        // scale the levels from cf-units to grib-untis
+        std::string gribUnits = getXmlProp(node, "units");
+        if (gribUnits != "") {
+            if (cdm.getAttribute(verticalAxis, "units", attr)) {
+                double slope;
+                double offset;
+                units.convert(attr.getData()->asString(), gribUnits, slope, offset);
+                std::transform(levelData.begin(), levelData.end(), levelData.begin(), Scale(slope, offset));
+            }
+        }
 
-		// unscale to be able to put the data into values suitable to grib
-		std::string gribScaleFactorStr = getXmlProp(node, "scale_factor");
-		std::string gribAddOffsetStr = getXmlProp(node, "add_offset");
-		scale_factor = 1.;
-		add_offset = 0.;
-		if (gribScaleFactorStr != "") {
-			scale_factor = string2type<double>(gribScaleFactorStr);
-		}
-		if (gribAddOffsetStr != "") {
-			add_offset = string2type<double>(gribAddOffsetStr);
-		}
-		std::transform(levelData.begin(), levelData.end(), levelData.begin(), UnScale(scale_factor, add_offset));
-	} else if (size > 1) {
-		throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
-	} else {
-		std::cerr << "could not find vertical Axis " << verticalAxisXPath << " in " << configFile << ", skipping parameter " << varName << std::endl;
-	}
-	return levelData;
+        // unscale to be able to put the data into values suitable to grib
+        std::string gribScaleFactorStr = getXmlProp(node, "scale_factor");
+        std::string gribAddOffsetStr = getXmlProp(node, "add_offset");
+        scale_factor = 1.;
+        add_offset = 0.;
+        if (gribScaleFactorStr != "") {
+            scale_factor = string2type<double>(gribScaleFactorStr);
+        }
+        if (gribAddOffsetStr != "") {
+            add_offset = string2type<double>(gribAddOffsetStr);
+        }
+        std::transform(levelData.begin(), levelData.end(), levelData.begin(), UnScale(scale_factor, add_offset));
+    } else if (size > 1) {
+        throw CDMException("several entries in grib-config at " + configFile + ": " + verticalAxisXPath);
+    } else {
+        LOG4FIMEX(logger, Logger::WARN,  "could not find vertical Axis " << verticalAxisXPath << " in " << configFile << ", skipping parameter " << varName);
+    }
+    return levelData;
 }
 
 std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string& varName) throw(CDMException)
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
-	const CDM& cdm = cdmReader->getCDM();
-	std::string time = cdm.getTimeAxis(varName);
-	std::vector<FimexTime> timeData;
-	std::vector<double> timeDataVector;
-	if (time != "") {
-	    const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
-		timeDataVector.insert(timeDataVector.begin(), &timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
-	} else {
-		// find a somewhat useful default, wild guess: first time in first time-axis found
-	    typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
-	    CoordSysList css = listCoordinateSystems(cdm);
-	    for (CoordSysList::iterator csit = css.begin(); csit != css.end(); ++csit) {
-	        CoordinateSystem::ConstAxisPtr timeAxis = (*csit)->getTimeAxis();
-	        if (timeAxis.get() != 0) {
-	            time = timeAxis->getName();
-	            const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
-	            timeDataVector.insert(timeDataVector.begin(), timeDataArray[0]);
-	        }
-	    }
-	}
-	if (timeDataVector.size() > 0) {
-	    TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
-	    std::transform(timeDataVector.begin(),
-	            timeDataVector.end(),
-	            std::back_inserter(timeData),
-	            std::bind1st(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu));
-	}
-	return timeData;
+    LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
+    const CDM& cdm = cdmReader->getCDM();
+    std::string time = cdm.getTimeAxis(varName);
+    std::vector<FimexTime> timeData;
+    std::vector<double> timeDataVector;
+    if (time != "") {
+        const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+        timeDataVector.insert(timeDataVector.begin(), &timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
+    } else {
+        // find a somewhat useful default, wild guess: first time in first time-axis found
+        typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
+        CoordSysList css = listCoordinateSystems(cdm);
+        for (CoordSysList::iterator csit = css.begin(); csit != css.end(); ++csit) {
+            CoordinateSystem::ConstAxisPtr timeAxis = (*csit)->getTimeAxis();
+            if (timeAxis.get() != 0) {
+                time = timeAxis->getName();
+                const boost::shared_array<double> timeDataArray = cdmReader->getData(time)->asDouble();
+                timeDataVector.insert(timeDataVector.begin(), timeDataArray[0]);
+            }
+        }
+    }
+    if (timeDataVector.size() > 0) {
+        TimeUnit tu(cdm.getAttribute(time, "units").getStringValue());
+        std::transform(timeDataVector.begin(),
+                timeDataVector.end(),
+                std::back_inserter(timeData),
+                std::bind1st(std::mem_fun(&TimeUnit::unitTime2fimexTime), &tu));
+    }
+    return timeData;
 }
 
 void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
 {
-	LOG4FIMEX(logger, Logger::DEBUG, "writeGribHandleToFile");
-	// write data to file
+    LOG4FIMEX(logger, Logger::DEBUG, "writeGribHandleToFile");
+    // write data to file
     size_t size;
     const void* buffer;
     /* get the coded message in a buffer */
@@ -446,50 +465,50 @@ void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
 
 xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, double levelValue) throw(CDMException)
 {
-	xmlNodePtr node = 0;
-	std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
-	{
-		CDMAttribute attr;
-		if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
-			parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
-		} else {
-			parameterXPath += "[@name=\"" + varName + "\"]";
-		}
-	}
-	parameterXPath += "/grib"+type2string(gribVersion);
-	XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
-	xmlNodeSetPtr nodes = xpathObj->nodesetval;
-	int size = (nodes) ? nodes->nodeNr : 0;
-	std::vector<std::map<std::string, std::string> > levelParameters;
-	if (size >= 1) {
-		// find node with corresponding level
-		std::vector<int> possibleNodes;
-		for (int i = 0; i < size; i++) {
-			xmlNodePtr node = nodes->nodeTab[i];
-			xmlNodePtr parent = node->parent;
-			std::string level = getXmlProp(parent, "level");
-			if (level != "") {
-				LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
-				double xLevelValue = string2type<double>(level);
-				if (std::fabs(levelValue - xLevelValue) < (1e-6*levelValue)) {
-					LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
-					possibleNodes.push_back(i);
-				}
-			} else {
-				LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
-				possibleNodes.push_back(i);
-			}
-		}
-		if (possibleNodes.size() != 1) {
-			throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile + ": " + parameterXPath);
-		}
-		node = nodes->nodeTab[possibleNodes[0]];
-	} else if (size > 1) {
-		throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
-	} else {
-		throw CDMException("could not find " + varName + " in " + configFile + " ("+parameterXPath+"), skipping parameter");
-	}
-	return node;
+    xmlNodePtr node = 0;
+    std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
+    {
+        CDMAttribute attr;
+        if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
+            parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+        } else {
+            parameterXPath += "[@name=\"" + varName + "\"]";
+        }
+    }
+    parameterXPath += "/grib"+type2string(gribVersion);
+    XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    std::vector<std::map<std::string, std::string> > levelParameters;
+    if (size >= 1) {
+        // find node with corresponding level
+        std::vector<int> possibleNodes;
+        for (int i = 0; i < size; i++) {
+            xmlNodePtr node = nodes->nodeTab[i];
+            xmlNodePtr parent = node->parent;
+            std::string level = getXmlProp(parent, "level");
+            if (level != "") {
+                LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
+                double xLevelValue = string2type<double>(level);
+                if (std::fabs(levelValue - xLevelValue) < (1e-6*levelValue)) {
+                    LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
+                    possibleNodes.push_back(i);
+                }
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
+                possibleNodes.push_back(i);
+            }
+        }
+        if (possibleNodes.size() != 1) {
+            throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile + ": " + parameterXPath);
+        }
+        node = nodes->nodeTab[possibleNodes[0]];
+    } else if (size > 1) {
+        throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
+    } else {
+        throw CDMException("could not find " + varName + " in " + configFile + " ("+parameterXPath+"), skipping parameter");
+    }
+    return node;
 }
 
 

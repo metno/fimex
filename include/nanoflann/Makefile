@@ -107,13 +107,13 @@ BOOST_SYSTEM_LIB = -lboost_system-mt
 BOOST_UNIT_TEST_FRAMEWORK_LIB = -lboost_unit_test_framework-mt
 CC = gcc -std=gnu99 -std=gnu99
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O2 -mfpmath=sse -msse2 -Wall -fopenmp
+CFLAGS = -O2 -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno -Wall -fopenmp
 CPP = gcc -std=gnu99 -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2 -mfpmath=sse -msse2 -Wall -fopenmp
+CXXFLAGS = -O2 -mfpmath=sse -msse2 -ftree-vectorize -fno-math-errno -Wall -fopenmp
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -148,8 +148,8 @@ MIFI_GRIB_API_LIBS = -lgrib_api -ljasper -lpng
 MIFI_METGM_CPPFLAGS = -I/usr/include/postgresql
 MIFI_METGM_LDFLAGS = -L/usr/lib
 MIFI_METGM_LIBS = -lmetgm 
-MIFI_NETCDF_CPPFLAGS = -I/opt/netcdf4.1.1//include
-MIFI_NETCDF_LDFLAGS = -L/opt/netcdf4.1.1//lib
+MIFI_NETCDF_CPPFLAGS = -I/disk1/heiko/local/netcdf4.2-rc1//include
+MIFI_NETCDF_LDFLAGS = -L/disk1/heiko/local/netcdf4.2-rc1//lib
 MIFI_NETCDF_LIBS = -lnetcdf 
 MIFI_PQ_CPPFLAGS = -I/usr/include/postgresql
 MIFI_PQ_LDFLAGS = -L/usr/lib
@@ -174,10 +174,10 @@ OTOOL64 =
 PACKAGE = fimex
 PACKAGE_BUGREPORT = heiko.klein@met.no
 PACKAGE_NAME = fimex
-PACKAGE_STRING = fimex 0.36beta
+PACKAGE_STRING = fimex 0.35.2
 PACKAGE_TARNAME = fimex
 PACKAGE_URL = 
-PACKAGE_VERSION = 0.36beta
+PACKAGE_VERSION = 0.35.2
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 RANLIB = ranlib
@@ -185,7 +185,7 @@ SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = strip
-VERSION = 0.36beta
+VERSION = 0.35.2
 XML2_CONFIG = /usr/bin/xml2-config
 XML_CPPFLAGS = -I/usr/include/libxml2
 XML_LIBS = -lxml2

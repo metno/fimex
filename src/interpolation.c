@@ -372,28 +372,26 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
         float *uz = &u_out[z*layerSize]; // current z-layer of u
         float *vz = &v_out[z*layerSize]; // current z-layer of v
 
-#ifdef _OPENMP
-#pragma omp parallel default(shared) if (layerSize >= 64)
-        {
-#pragma omp for
-#endif
         // loop over one layer: calc uv' = A*uv at each pos
-        for (size_t i = 0; i < layerSize; i++) {
-            const double* m = &matrixPos[4*i];
-            double u_new = uz[i] * m[0] + vz[i] * m[2];
-            double v_new = uz[i] * m[1] + vz[i] * m[3];
-            if (method == MIFI_VECTOR_KEEP_SIZE) {
+        if (method == MIFI_VECTOR_KEEP_SIZE) {
+            for (size_t i = 0; i < layerSize; i++) {
+                const double* m = &matrixPos[4*i];
+                double u_new = uz[i] * m[0] + vz[i] * m[2];
+                double v_new = uz[i] * m[1] + vz[i] * m[3];
                 double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) /
                                     (u_new*u_new + v_new*v_new) );
-                u_new *= norm;
-                v_new *= norm;
+                uz[i] = u_new * norm;
+                vz[i] = v_new * norm;
             }
-            uz[i] = u_new;
-            vz[i] = v_new;
+        } else {
+            for (size_t i = 0; i < layerSize; i++) {
+                const double* m = &matrixPos[4*i];
+                double u_new = uz[i] * m[0] + vz[i] * m[2];
+                double v_new = uz[i] * m[1] + vz[i] * m[3];
+                uz[i] = u_new;
+                vz[i] = v_new;
+            }
         }
-#ifdef _OPENMP
-        }
-#endif
     }
     return MIFI_OK;
 }

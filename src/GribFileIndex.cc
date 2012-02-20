@@ -344,6 +344,13 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "indicatorOfParameter", &gridParameterIds_[0]), 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "gribTablesVersionNo", &gridParameterIds_[1]), 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "centre", &gridParameterIds_[2]), 0);
+        if (gridParameterIds_[0] == 254) {
+            long level;
+            MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &level), 0);
+            if (level == -1) {
+                throw CDMException("Asimof-message deteced, cannot decode this message");
+            }
+        }
     } else if (edition_ == 2) {
         gridParameterIds_ = vector<long> (3, 0);
         MIFI_GRIB_CHECK(grib_get_long(gh.get(), "parameterNumber", &gridParameterIds_[0]), 0);
@@ -855,7 +862,11 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
                 msgPos++;
                 // don't change lastPos
             }
-            messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos));
+            try {
+                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos));
+            } catch (CDMException& ex) {
+                LOG4FIMEX(getLogger("fimex.GribFileIndex"), Logger::WARN, "ignoring grib-message at byte " << msgPos <<": " << ex.what());
+            }
         }
     }
 

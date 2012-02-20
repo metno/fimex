@@ -29,6 +29,17 @@
 #ifndef WDBCDMREADER_H_
 #define WDBCDMREADER_H_
 
+#ifndef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#warning \
+  This header-file is deprecated and \
+  may be removed without further notice at a future date. Please use a \
+  non-deprecated interface with equivalent functionality instead, i.e. \
+  instead of \
+    *CDMReader(file,config) \
+  use \
+    CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
+#endif
+
 #include "fimex/CDMReader.h"
 #include "fimex/XMLInput.h"
 #include <string>
@@ -73,35 +84,35 @@ class WdbCDMReader: public CDMReader
 {
 public:
 
-	/**
-	 * Specifications of where to find the database, and what query to run on
-	 * it is given in the file with name source. Generic specifications are
-	 * given in the file with name configfilename.
-	 */
-	WdbCDMReader(const std::string& source, const XMLInput& configXML);
+    /**
+     * Specifications of where to find the database, and what query to run on
+     * it is given in the file with name source. Generic specifications are
+     * given in the file with name configfilename.
+     */
+    WdbCDMReader(const std::string& source, const XMLInput& configXML);
 
-	WdbCDMReader(const std::string& source, const std::string & configFile );
+    WdbCDMReader(const std::string& source, const std::string & configFile );
 
 
-	virtual ~WdbCDMReader();
+    virtual ~WdbCDMReader();
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
 private:
-	std::size_t getXSize(const CDMVariable& variable) const;
-	std::size_t getYSize(const CDMVariable& variable) const;
-	std::size_t getGridSize(const CDMVariable& variable) const;
-	boost::shared_ptr<Data> extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const;
+    std::size_t getXSize(const CDMVariable& variable) const;
+    std::size_t getYSize(const CDMVariable& variable) const;
+    std::size_t getGridSize(const CDMVariable& variable) const;
+    boost::shared_ptr<Data> extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const;
 
-	boost::shared_ptr<Data> cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const;
+    boost::shared_ptr<Data> cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const;
 
-	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const;
-	boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const;
+    boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const;
+    boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const;
 
-	class InternalData;
-	InternalData * d_;
+    class InternalData;
+    InternalData * d_;
 };
 
 

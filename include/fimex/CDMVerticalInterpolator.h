@@ -63,7 +63,7 @@ public:
      * Initialize a vertical interpolator.
      *
      * @param dataReader the data-source
-     * @param verticalType must be 'pressure'
+     * @param verticalType must be 'pressure' (hPa), 'height' (m) or 'depth' (m)
      * @param interpolationMethod one of 'linear', 'log', 'loglog'
      * @param level1 the new vertical levels, for 'pressure', that is pressure in hPa
      * @param level2 only required for hybrid levels, not yet supported

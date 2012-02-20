@@ -236,7 +236,7 @@ boost::array<float, 6> gridParametersLambertConic_(int iWestBound, int iSouthBou
     gridPar[3] = iYincr * .1;
 
     // corrections from extraData
-    scaleExtraData_(gridPar, parsUsed, 100., extraData);
+    scaleExtraData_(gridPar, parsUsed, 10000., extraData);
 
     // check consistency
     if (gridPar[2] == 0 || gridPar[3] == 0)
