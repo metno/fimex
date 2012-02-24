@@ -23,7 +23,7 @@
 <variable orgName="sea_level_pressure" name="sea_pressure" />
 <variable orgName="x" name="x_c" />
 
-<variable name="surface_snow_sickness">
+<variable name="surface_snow_thickness">
    <!--remove a variable-attribute -->
    <remove name="long_name" type="attribute"/>
 </variable>

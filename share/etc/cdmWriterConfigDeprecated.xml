@@ -47,7 +47,7 @@
 <!-- remove a variable -->
 <remove name="land_ice_area_fraction" type="variable" />
 
-<variable name="surface_snow_sickness">
+<variable name="surface_snow_thickness">
    <!--remove a variable-attribute -->
    <remove name="long_name" type="attribute"/>
 </variable>
