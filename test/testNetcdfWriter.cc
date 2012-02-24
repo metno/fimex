@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( test_feltNetcdfWriteConfig )
 
 	exceptionThrown = false;
 	try {
-		writer.getAttribute("surface_snow_sickness", "long_name");
+		writer.getAttribute("surface_snow_thickness", "long_name");
 	} catch (CDMException& ex) {
 		exceptionThrown = true;
 	}
