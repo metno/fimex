@@ -587,13 +587,21 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
 //b = o(a)
 int mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
 {
-    const double f = (a == b) ? 0 :  ((x - a) / (b - a));
-    int i = 0;
-    while (n > i++) {
-        float iA = *infieldA++;
-        float iB = *infieldB++;
-        float* o = outfield++; // position!
-        *o = iA + f * (iB - iA);
+    const float f = (a == b) ? 0 :  ((x - a) / (b - a));
+    if (f == 0) {
+        // avoid numerical side-effects, like 0*nan = nan
+        memcpy(outfield, infieldA, n * sizeof(float));
+    } else if (f == 1) {
+        // avoid numerical side-effects, like 0*nan = nan
+        memcpy(outfield, infieldB, n * sizeof(float));
+    } else {
+        int i = 0;
+        while (n > i++) {
+            float iA = *infieldA++;
+            float iB = *infieldB++;
+            float* o = outfield++; // position!
+            *o = iA + f * (iB - iA);
+        }
     }
     return MIFI_OK;
 }
@@ -601,12 +609,20 @@ int mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float
 int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x)
 {
     const double f = (a == b) ? 0 :  ((x - a) / (b - a));
-    int i = 0;
-    while (n > i++) {
-        double iA = *infieldA++;
-        double iB = *infieldB++;
-        double* o = outfield++; // position!
-        *o = iA + f * (iB - iA);
+    if (f == 0) {
+        // avoid numerical side-effects, like 0*nan = nan
+        memcpy(outfield, infieldA, n * sizeof(float));
+    } else if (f == 1) {
+        // avoid numerical side-effects, like 0*nan = nan
+        memcpy(outfield, infieldB, n * sizeof(float));
+    } else {
+        int i = 0;
+        while (n > i++) {
+            double iA = *infieldA++;
+            double iB = *infieldB++;
+            double* o = outfield++; // position!
+            *o = iA + f * (iB - iA);
+        }
     }
     return MIFI_OK;
 }
