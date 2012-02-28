@@ -109,6 +109,26 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
     return data;
 }
 
+/**
+ *  find the lower bound of value val in vector ft starting from startPos. This is similar to
+ *  std::lower_bound, except that it returns an array-position rather than an iterator. In
+ *  addition, it does not require sorted input.
+ *
+ *  @return position of lower_bound of val, might be == ft.size() if all values are smaller.
+ */
+size_t lower_bound_pos(const vector<FimexTime>& ft, size_t startPos, const FimexTime& val)
+{
+    if (startPos >= ft.size()) {
+        return ft.size();
+    }
+    for (size_t i = startPos; i < ft.size(); ++i) {
+        if (val <= ft[i]) {
+            return i;
+        }
+    }
+    return ft.size();
+}
+
 void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
 {
     // changing time-axes
@@ -138,8 +158,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
             size_t lastPos = 0;
             vector<pair<size_t, size_t> > timeMapping(newTimes.size());
             for (vector<FimexTime>::const_iterator it = newTimes.begin(); it != newTimes.end(); ++it, ++newTimePos) {
-                vector<FimexTime>::iterator olb = lower_bound(oldTimes.begin() + lastPos, oldTimes.end(), *it);
-                size_t pos = distance(oldTimes.begin(), olb);
+                size_t pos = lower_bound_pos(oldTimes, lastPos, *it);
                 size_t t1, t2;
                 if (pos == oldTimes.size()) {
                     // extrapolation at the end, starting with last and previous element

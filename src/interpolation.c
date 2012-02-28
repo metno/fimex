@@ -611,10 +611,10 @@ int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, dou
     const double f = (a == b) ? 0 :  ((x - a) / (b - a));
     if (f == 0) {
         // avoid numerical side-effects, like 0*nan = nan
-        memcpy(outfield, infieldA, n * sizeof(float));
+        memcpy(outfield, infieldA, n * sizeof(double));
     } else if (f == 1) {
         // avoid numerical side-effects, like 0*nan = nan
-        memcpy(outfield, infieldB, n * sizeof(float));
+        memcpy(outfield, infieldB, n * sizeof(double));
     } else {
         int i = 0;
         while (n > i++) {
