@@ -94,6 +94,27 @@
     <attribute name="positive" value="up" type="string" />
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
+<vertical_axis id="isotherm_0C_level" name="isotherm_0C_level" grib2_id="4" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="description" value="level of 0degreeC isotherm" type="string" />
+    <attribute name="long_name" value="isotherm 0C" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="maximum_wind_level" name="maximum_wind_level" grib2_id="6" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="max wind level" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="tropopause" name="tropopause" grib2_id="7" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="Tropopause" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="top_of_atmosphere" name="top_of_atmosphere" grib2_id="8" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="nominal top of atmosphere" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
 <vertical_axis id="mean_sea_level" name="mean_sea_level" grib2_id="101" grib1_id="102" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="description" value="mean sea level" type="string" />
@@ -179,6 +200,24 @@
         <attribute name="units" value="m" type="string" />
     </grib2>
 </vertical_axis>
+<vertical_axis id="specified_pressure_difference" name="specified_pressure_difference" grib2_id="108" type="float">
+    <attribute name="description" value="Level at specified pressure difference from ground to level" type="string" />
+    <attribute name="long_name" value="specified pressure difference from ground" type="string" />
+    <attribute name="standard_name" value="air_pressure" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <grib2>
+        <attribute name="units" value="Pa" type="string" />
+    </grib2>
+</vertical_axis>
+<vertical_axis id="potential_vorticity_surface" name="potential_vorticity_surface" grib2_id="109" type="float">
+    <attribute name="description" value="Potential vorticity surface" type="string" />
+    <attribute name="long_name" value="potential vorticity surface" type="string" />
+    <attribute name="standard_name" value="ertel_potential_vorticity" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <grib2>
+        <attribute name="units" value="K m^2 kg^-1 s^-1" type="string" />
+    </grib2>
+</vertical_axis>
 <vertical_axis id="depth_between_layers" name="depth_between_layers" grib1_id="112" type="short">
 <!-- TODO, the 2 layers are not read correctly yet. I need a special function to extract the 2 levels from one grib-field
            like in  hybridSigma -->
@@ -199,6 +238,83 @@
     <attribute name="standard_name" value="depth" type="string" />
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
+
+<vertical_axis id="local_vertical_level_200" name="local_vertical_level_200" grib2_id="200" type="float">
+    <attribute name="description" value="vertical level 200, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 200" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_204" name="local_vertical_level_204" grib2_id="204" type="float">
+    <attribute name="description" value="vertical level 204, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 204" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_211" name="local_vertical_level_211" grib2_id="211" type="float">
+    <attribute name="description" value="vertical level 211, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 211" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_212" name="local_vertical_level_212" grib2_id="212" type="float">
+    <attribute name="description" value="vertical level 212, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 212" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_213" name="local_vertical_level_213" grib2_id="213" type="float">
+    <attribute name="description" value="vertical level 213, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 213" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_214" name="local_vertical_level_214" grib2_id="214" type="float">
+    <attribute name="description" value="vertical level 214, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 214" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_222" name="local_vertical_level_222" grib2_id="222" type="float">
+    <attribute name="description" value="vertical level 222, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 222" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_223" name="local_vertical_level_223" grib2_id="223" type="float">
+    <attribute name="description" value="vertical level 223, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 223" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_224" name="local_vertical_level_224" grib2_id="224" type="float">
+    <attribute name="description" value="vertical level 224, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 224" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_232" name="local_vertical_level_232" grib2_id="232" type="float">
+    <attribute name="description" value="vertical level 232, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 232" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_233" name="local_vertical_level_233" grib2_id="233" type="float">
+    <attribute name="description" value="vertical level 233, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 233" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_234" name="local_vertical_level_234" grib2_id="234" type="float">
+    <attribute name="description" value="vertical level 234, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 234" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_242" name="local_vertical_level_242" grib2_id="242" type="float">
+    <attribute name="description" value="vertical level 242, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 242" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_243" name="local_vertical_level_243" grib2_id="243" type="float">
+    <attribute name="description" value="vertical level 243, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 243" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="local_vertical_level_244" name="local_vertical_level_244" grib2_id="244" type="float">
+    <attribute name="description" value="vertical level 244, defined locally, ask center" type="string" />
+    <attribute name="long_name" value="unknown vertical level 244" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+
 </axes>
 
 <variables>

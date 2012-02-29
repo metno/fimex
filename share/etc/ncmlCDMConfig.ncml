@@ -12,7 +12,7 @@
    <attribute name="standard_name" value="temperature" type="string" />
 </variable>
 
-<!-- change the type of a variable -->
+<!-- change the type of a variable, repack -->
 <variable name="precipitation_amount" type="short">
    <attribute name="_FillValue" value="-32767" type="short" />
    <attribute name="scale_factor" value="0.001" type="float" />
