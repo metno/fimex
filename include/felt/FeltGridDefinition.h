@@ -74,20 +74,32 @@ public:
         LeftUpperHorizontal = 0,  // 00000000
         LeftLowerHorizontal = 64  // 01000000
     };
-	/**
-	 * The parameters a, b, c, d are words 15 to 18 in the FELT header definition. These usually describe elements
-	 * of the grid specification (variable meaning, depending on the grid specification used)
-	 */
+    /**
+     * The parameters a, b, c, d are words 15 to 18 in the FELT header definition. These usually describe elements
+     * of the grid specification (variable meaning, depending on the grid specification used)
+     */
     FeltGridDefinition(int gridType, int xNum, int yNum, int a, int b, int c, int d, const std::vector<short int> & extraData);
     virtual ~FeltGridDefinition();
     virtual std::string projDefinition() const;
     virtual int getXNumber() const;
     virtual int getYNumber() const;
+    /**
+     * @return X-increment in m or degree
+     */
     virtual float getXIncrement() const;
+    /**
+     * @return Y-increment in m or degree
+     */
     virtual float getYIncrement() const;
     virtual float startLongitude() const;
     virtual float startLatitude() const;
+    /**
+     * @return X-start in m or degree
+     */
     virtual float startX() const;
+    /**
+     * @return Y-start in m or degree
+     */
     virtual float startY() const;
     virtual const boost::array<float, 6>& getGridParameters() const;
     Orientation getScanMode() const;

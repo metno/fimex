@@ -417,8 +417,8 @@ FeltGridDefinition::mercatorProj_( int gridType,
         FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = LeftLowerHorizontal; // Default
-    incrementX_ = gridPars_[2];
-    incrementY_ = gridPars_[3];
+    incrementX_ = gridPars_[2] * 1000; // km -> m
+    incrementY_ = gridPars_[3] * 1000; // km -> m
 
     // gridPars_[0] and gridPars_[1] are startX and startY given in degree, not in projection-plane, convert using proj
     double startX, startY;
@@ -446,8 +446,8 @@ FeltGridDefinition::lambertConicProj_( int gridType,
         FeltFile::log("FeltGridDefinition: Proj Specification: " + gridParametersToProjDefinition(gridType, gridPars_));
 
     orientation_ = LeftLowerHorizontal; // Default
-    incrementX_ = gridPars_[2];
-    incrementY_ = gridPars_[3];
+    incrementX_ = gridPars_[2] * 1000; // km -> m
+    incrementY_ = gridPars_[3] * 1000; // km -> m
 
     // gridPars_[0] and gridPars_[1] are startX and startY given in degree, not in projection-plane, convert using proj
     double startX, startY;
