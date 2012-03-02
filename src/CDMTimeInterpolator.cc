@@ -34,6 +34,7 @@
 #include "fimex/Data.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
+#include "MutexLock.h"
 
 namespace MetNoFimex
 {
@@ -45,7 +46,7 @@ static LoggerPtr logger = getLogger("fimex.CDMTimeInterpolator");
 CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader)
    : dataReader_(dataReader)
 {
-    *cdm_.get() = dataReader_->getCDM();
+    *cdm_ = dataReader_->getCDM();
     // removing all time-dependant data in cdm
     // just to be sure it's read from the dataReader_ or assigned in #changeTimeAxis
     const CDM::VarVec& variables = cdm_->getVariables();
@@ -61,11 +62,17 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 {
 }
 
+MutexType staticMutex;
 boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    std::string timeAxis = cdm_->getTimeAxis(varName);
+    std::string timeAxis;
+    {
+        // TODO: change to explicit known coordinate-system and remove lock
+        ScopedCritical lock(staticMutex);
+        timeAxis = cdm_->getTimeAxis(varName);
+    }
     LOG4FIMEX(logger, Logger::DEBUG, "getting time-interpolated data-slice for " << varName << " with time-axis: " << timeAxis);
-    if (timeAxis == "" || (dataReaderTimesInNewUnits_[timeAxis].size() == 0)) {
+    if (timeAxis == "" || (dataReaderTimesInNewUnits_.find(timeAxis)->second.size() == 0)) {
         // not time-axis or "changeTimeAxis" never called
         // no changes, simply forward
         return dataReader_->getDataSlice(varName, unLimDimPos);
@@ -84,9 +91,9 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
     if (timeDim.isUnlimited()) {
         double currentTime = getDataSliceFromMemory(cdm_->getVariable(timeAxis), unLimDimPos)->asDouble()[0];
         // interpolate and return the time-slices
-        pair<size_t, size_t> orgTimes = timeChangeMap_[timeAxis][unLimDimPos];
-        double d1Time = dataReaderTimesInNewUnits_[timeDim.getName()].at(orgTimes.first);
-        double d2Time = dataReaderTimesInNewUnits_[timeDim.getName()].at(orgTimes.second);
+        pair<size_t, size_t> orgTimes = timeChangeMap_.find(timeAxis)->second.at(unLimDimPos);
+        double d1Time = dataReaderTimesInNewUnits_.find(timeDim.getName())->second.at(orgTimes.first);
+        double d2Time = dataReaderTimesInNewUnits_.find(timeDim.getName())->second.at(orgTimes.second);
         boost::shared_ptr<Data> d1 = dataReader_->getDataSlice(varName, orgTimes.first);
         boost::shared_ptr<Data> d2 = dataReader_->getDataSlice(varName, orgTimes.second);
         LOG4FIMEX(logger, Logger::DEBUG, "interpolation between " << d1Time << " and " << d2Time << " at " << currentTime);
@@ -95,10 +102,12 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
             data = d2;
         } else if (d2->size() == 0) {
             data = d1;
-        } else {
+        } else if (d1->size() == d2->size()) {
             boost::shared_array<float> out(new float[d1->size()]);
             mifi_get_values_linear_f(d1->asFloat().get(), d2->asFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
             data = createData(d1->size(), out);
+        } else {
+            throw CDMException("getDataSlice for " + varName + ": got slices with different size");
         }
     } else {
         // TODO
@@ -107,26 +116,6 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
         throw CDMException("TimeDimension != unlimited dimension not implemented yet in CDMTimeInterpolator");
     }
     return data;
-}
-
-/**
- *  find the lower bound of value val in vector ft starting from startPos. This is similar to
- *  std::lower_bound, except that it returns an array-position rather than an iterator. In
- *  addition, it does not require sorted input.
- *
- *  @return position of lower_bound of val, might be == ft.size() if all values are smaller.
- */
-size_t lower_bound_pos(const vector<FimexTime>& ft, size_t startPos, const FimexTime& val)
-{
-    if (startPos >= ft.size()) {
-        return ft.size();
-    }
-    for (size_t i = startPos; i < ft.size(); ++i) {
-        if (val <= ft[i]) {
-            return i;
-        }
-    }
-    return ft.size();
 }
 
 void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
@@ -158,7 +147,8 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
             size_t lastPos = 0;
             vector<pair<size_t, size_t> > timeMapping(newTimes.size());
             for (vector<FimexTime>::const_iterator it = newTimes.begin(); it != newTimes.end(); ++it, ++newTimePos) {
-                size_t pos = lower_bound_pos(oldTimes, lastPos, *it);
+                vector<FimexTime>::iterator olb = lower_bound(oldTimes.begin() + lastPos, oldTimes.end(), *it);
+                size_t pos = distance(oldTimes.begin(), olb);
                 size_t t1, t2;
                 if (pos == oldTimes.size()) {
                     // extrapolation at the end, starting with last and previous element
