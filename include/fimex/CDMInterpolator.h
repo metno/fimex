@@ -97,13 +97,13 @@ private:
     std::map<std::string, boost::shared_ptr<const CoordinateSystem> > findBestCoordinateSystemsAndProjectionVars(bool withProjection);
     bool hasSpatialVectors() const;
 public:
-	CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
-	virtual ~CDMInterpolator();
-	/**
-	 * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
-	 *
-	 */
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
+    virtual ~CDMInterpolator();
+    /**
+     * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
+     *
+     */
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
      * @ brief change the (main) projection of the dataReaders cdm to this new projection
      *
@@ -117,33 +117,33 @@ public:
      * @param out_y_axis_type type of CDM_TYPE (DOUBLE, FLOAT, ...) of y-axis
      */
     virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
-	/**
-	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
-	 *
-	 * @param method Interpolation method
-	 * @param proj_input input-string for proj4, used as output projection
-	 * @param out_x_axis values of the output x-axis
-	 * @param out_y_axis values of the output y-axis
-	 * @param out_x_axis_unit unit of the output x-axis
-	 * @param out_y_axis_unit unit of the output y-axis
+    /**
+     * @ brief change the (main) projection of the dataReaders cdm to this new projection
+     *
+     * @param method Interpolation method
+     * @param proj_input input-string for proj4, used as output projection
+     * @param out_x_axis values of the output x-axis
+     * @param out_y_axis values of the output y-axis
+     * @param out_x_axis_unit unit of the output x-axis
+     * @param out_y_axis_unit unit of the output y-axis
      *
      * @deprecated use version changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit)
-	 */
+     */
     DEPRECATED(virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit));
-	/**
-	 * @ brief change the (main) projection of the dataReaders cdm to this new projection
-	 *
-	 * @param method Interpolation method
-	 * @param proj_input input-string for proj4, used as output projection
-	 * @param out_x_axis config-string for x_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
-	 * @param out_y_axis config-string for y_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
-	 * @param out_x_axis_unit unit of the output x-axis
-	 * @param out_y_axis_unit unit of the output y-axis
+    /**
+     * @ brief change the (main) projection of the dataReaders cdm to this new projection
+     *
+     * @param method Interpolation method
+     * @param proj_input input-string for proj4, used as output projection
+     * @param out_x_axis config-string for x_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
+     * @param out_y_axis config-string for y_axis, either '1,2,...,5' or 'auto' or 'auto,distance=3.5'
+     * @param out_x_axis_unit unit of the output x-axis
+     * @param out_y_axis_unit unit of the output y-axis
      * @param out_x_axis_type type (double, float, int, short) of x-axis
      * @param out_y_axis_type type of MIFI_TYPE (double, float, int, short) of y-axis
-	 *
-	 */
-	virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, const std::string& out_x_axis_type = "double", const std::string& out_y_axis_type = "double");
+     *
+     */
+    virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, const std::string& out_x_axis_type = "double", const std::string& out_y_axis_type = "double");
         /**
           * @ brief change the (main) projection of the dataReaders cdm to this new projection
           *
@@ -152,49 +152,50 @@ public:
           *
           */
     virtual void changeProjection(int method, const std::string& netcdf_template_file);
+    virtual void changeProjection(int method, const std::vector<double>& lonVals, const std::vector<double>& latVals);
     /**
-	 * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
-	 * @param latName name for latitude
-	 */
-	virtual void setLatitudeName(const std::string& latName);
-	/**
-	 * @return the name used for latitude in the automatic coordinate generation
-	 */
-	virtual const std::string& getLatitudeName() const;
-	/**
-	 * set the name for the automatically generated longitude coordinate axis. This must be set before changeProjection is called.
-	 * @param latName name for longitude
-	 */
-	virtual void setLongitudeName(const std::string& lonName);
-	/**
-	 * @return the name used for longitude in the automatic coordinate generation
-	 */
-	virtual const std::string& getLongitudeName() const;
-	/**
-	 * get the maximum distance allowed between the center of two cells
-	 * to still influence each others
-	 *
-	 * @param out_x_axis the available new x-axis (in meter or radian)
-	 * @param out_y_axis the available new y-axis (in meter or radian)
-	 * @param isMetric indicate if y-axis is already given in m, or is in degree
-	 *
-	 * @return the maximum distance (in m) between adjacent points,
-	 *         or the value given with setDistanceOfInterest()
-	 */
-	virtual double getMaxDistanceOfInterest(const std::vector<double>& out_y_axis, const std::vector<double>& out_x_axis, bool isMetric) const;
-	/**
-	 * set the distance of interest, usually the radius of input-points + ~1/2 cell-size of output
-	 * Negative values invalidate the distance. To have effect, this function must be set before calling changeProjection()
-	 *
-	 * @param dist distance in meter
-	 */
-	virtual void setDistanceOfInterest(double dist);
-	/**
-	 * add a process to the internal list of preprocesses
-	 *
-	 * @warning this function is not completely thought through and might change
-	 */
-	virtual void addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process);
+     * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
+     * @param latName name for latitude
+     */
+    virtual void setLatitudeName(const std::string& latName);
+    /**
+     * @return the name used for latitude in the automatic coordinate generation
+     */
+    virtual const std::string& getLatitudeName() const;
+    /**
+     * set the name for the automatically generated longitude coordinate axis. This must be set before changeProjection is called.
+     * @param latName name for longitude
+     */
+    virtual void setLongitudeName(const std::string& lonName);
+    /**
+     * @return the name used for longitude in the automatic coordinate generation
+     */
+    virtual const std::string& getLongitudeName() const;
+    /**
+     * get the maximum distance allowed between the center of two cells
+     * to still influence each others
+     *
+     * @param out_x_axis the available new x-axis (in meter or radian)
+     * @param out_y_axis the available new y-axis (in meter or radian)
+     * @param isMetric indicate if y-axis is already given in m, or is in degree
+     *
+     * @return the maximum distance (in m) between adjacent points,
+     *         or the value given with setDistanceOfInterest()
+     */
+    virtual double getMaxDistanceOfInterest(const std::vector<double>& out_y_axis, const std::vector<double>& out_x_axis, bool isMetric) const;
+    /**
+     * set the distance of interest, usually the radius of input-points + ~1/2 cell-size of output
+     * Negative values invalidate the distance. To have effect, this function must be set before calling changeProjection()
+     *
+     * @param dist distance in meter
+     */
+    virtual void setDistanceOfInterest(double dist);
+    /**
+     * add a process to the internal list of preprocesses
+     *
+     * @warning this function is not completely thought through and might change
+     */
+    virtual void addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process);
 };
 
 }
