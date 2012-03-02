@@ -171,9 +171,13 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
                 {
 #endif
                 const CDMVariable& cdmVar = cdmVars.at(vi);
-                //std::stringstream ss;
-                //ss << omp_get_thread_num() << ":" << i << ":" << cdmVar.getName() << std::endl;
-                //std::cerr << ss.str();
+#if 0
+                std::stringstream ss;
+                ss << omp_get_thread_num() << ":" << i << ":" << cdmVar.getName() << std::endl;
+                std::cout << ss.str();//    NetCDF_CDMWriter(timeInterpol, "test4.nc");
+                BOOST_CHECK(true);
+
+#endif
                 boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), i);
                 ScopedCritical lock(writerMutex);
                 if (!putRecData(cdmVar.getDataType(), data, i)) {

@@ -31,6 +31,7 @@
 #include "CDMReader.h"
 #include <map>
 #include <vector>
+#include "fimex/coordSys/CoordinateSystem.h"
 
 namespace MetNoFimex
 {
@@ -38,30 +39,31 @@ namespace MetNoFimex
 class CDMTimeInterpolator: public MetNoFimex::CDMReader
 {
 public:
-	CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader);
-	virtual ~CDMTimeInterpolator();
-	/**
-	 * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
-	 *
-	 * @param varName name of variable
-	 * @param size_t unLimDimPos position of the unlimited dimension, most commonly time-position of the output as set in #changeTimeAxis
-	 */
-	virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
-	/**
-	 * change the time-axis from from the one given to a new specification
-	 * @param timeSpec string of time-specification
-	 * @throws CDMException on unparsable timeSpec
-	 * @see @ref secTimeSpec
-	 */
-	virtual void changeTimeAxis(std::string timeSpec);
+    CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader);
+    virtual ~CDMTimeInterpolator();
+    /**
+     * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
+     *
+     * @param varName name of variable
+     * @param size_t unLimDimPos position of the unlimited dimension, most commonly time-position of the output as set in #changeTimeAxis
+     */
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    /**
+     * change the time-axis from from the one given to a new specification
+     * @param timeSpec string of time-specification
+     * @throws CDMException on unparsable timeSpec
+     * @see @ref secTimeSpec
+     */
+    virtual void changeTimeAxis(std::string timeSpec);
 
 private:
-	boost::shared_ptr<CDMReader> dataReader_;
-	// map each new time-position to the closest time-positions in the old times
-	typedef std::map<std::string, std::vector<std::pair<size_t,size_t> > > TimeChangeMap;
-	TimeChangeMap timeChangeMap_;
-	// store the datareaders times as doubles of the new units
-	std::map<std::string, std::vector<double> > dataReaderTimesInNewUnits_;
+    boost::shared_ptr<CDMReader> dataReader_;
+    // map each new time-position to the closest time-positions in the old times
+    typedef std::map<std::string, std::vector<std::pair<size_t,size_t> > > TimeChangeMap;
+    TimeChangeMap timeChangeMap_;
+    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSystems_;
+    // store the datareaders times as doubles of the new units
+    std::map<std::string, std::vector<double> > dataReaderTimesInNewUnits_;
 };
 
 } /* MetNoFimex */
