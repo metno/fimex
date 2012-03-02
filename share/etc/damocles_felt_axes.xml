@@ -69,7 +69,7 @@
     <attribute name="standard_name" value="projection_x_coordinate" type="string" />
     <attribute name="units" value="m" type="string" />
 </spatial_axis>
-<spatial_axis projection_felt_id="5" id="y" name="Yc">
+<spatial_axis projection_felt_id="5" id="y" name="Yc" type="int">
     <attribute name="axis" value="Y" type="string" />
     <attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
     <attribute name="standard_name" value="projection_y_coordinate" type="string" />
@@ -81,7 +81,7 @@
     <attribute name="standard_name" value="projection_x_coordinate" type="string" />
     <attribute name="units" value="m" type="string" />
 </spatial_axis>
-<spatial_axis projection_felt_id="6" id="y" name="y">
+<spatial_axis projection_felt_id="6" id="y" name="y" type="int">
     <attribute name="long_name" value="y-coordinate in Cartesian system" type="string" />
     <attribute name="standard_name" value="projection_y_coordinate" type="string" />
     <attribute name="units" value="m" type="string" />

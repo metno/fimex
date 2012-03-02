@@ -293,6 +293,7 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
 
 void CDMInterpolator::changeProjection(int method, const string& proj_input, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "changing projection to new axes");
     if (out_x_axis_type == CDM_NAT ||
             out_y_axis_type == CDM_NAT) {
         throw CDMException("axis type of interpolation not well defined");
@@ -317,8 +318,67 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
     }
 }
 
+
+struct static_cast_func
+{
+  float operator()(const double& x) const { return static_cast<float>(x); }
+};
+
+void CDMInterpolator::changeProjection(int method,
+        const vector<double>& lonVals, const vector<double>& latVals)
+{
+    LOG4FIMEX(logger, Logger::DEBUG,
+            "changing projection to latitude/longitude values");
+    if (lonVals.size() != latVals.size()) {
+        LOG4FIMEX(logger, Logger::ERROR,
+                "changeProjection, number of longitude and latitude values differs: " << lonVals.size() << " != " << latVals.size());
+        return;
+    }
+
+    switch (method) {
+    case MIFI_INTERPOL_NEAREST_NEIGHBOR:
+    case MIFI_INTERPOL_BILINEAR:
+    case MIFI_INTERPOL_BICUBIC: {
+        boost::shared_array<float> tmplLatVals(new float[latVals.size()]);
+        boost::shared_array<float> tmplLonVals(new float[lonVals.size()]);
+
+        std::transform(latVals.begin(), latVals.end(), &tmplLatVals[0],
+                static_cast_func());
+        std::transform(lonVals.begin(), lonVals.end(), &tmplLonVals[0],
+                static_cast_func());
+
+        vector<double> yVals(1);
+        yVals.at(0) = 0;
+        vector<double> xVals(lonVals.size());
+        // creating a squared array with all possibilities
+        for (size_t i = 0; i < lonVals.size(); i++) {
+            xVals.at(i) = i;
+        }
+        changeProjectionByProjectionParametersToLatLonTemplate(method,
+                LAT_LON_PROJSTR, xVals, yVals, "1", "1", CDM_DOUBLE, CDM_DOUBLE,
+                createData(latVals.size(), tmplLatVals),
+                createData(lonVals.size(), tmplLonVals));
+        break;
+    }
+    case MIFI_INTERPOL_COORD_NN:
+    case MIFI_INTERPOL_COORD_NN_KD:
+    case MIFI_INTERPOL_FORWARD_SUM:
+    case MIFI_INTERPOL_FORWARD_MEAN:
+    case MIFI_INTERPOL_FORWARD_MEDIAN:
+    case MIFI_INTERPOL_FORWARD_MAX:
+    case MIFI_INTERPOL_FORWARD_MIN:
+        throw CDMException(
+                "projection method: " + type2string(method)
+                        + ", not supported");
+        break;
+    default:
+        throw CDMException("unknown projection method: " + type2string(method));
+    }
+}
+
 void CDMInterpolator::changeProjection(int method, const std::string& netcdf_template_file)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "changing projection to template");
 #ifdef HAVE_NETCDF_H
     if (!std::ifstream(netcdf_template_file.c_str())) {
         LOG4FIMEX(logger, Logger::WARN, "changeProjection, netcdf_template_file: not found" );
