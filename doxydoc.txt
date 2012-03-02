@@ -113,6 +113,12 @@ Configurational options:
   --interpolate.preprocess arg            add a 2d preprocess to before the
                                           interpolation, i.e.
                                           "fill2d(critx,cor,maxLoop)"
+  --interpolate.latitudeValues arg        string with latitude values in
+                                          degree, i.e. 60.5,70,90
+  --interpolate.longitudeValues arg       string with longitude values in
+                                          degree, i.e. -10.5,-10.5,29.5
+  --interpolate.template arg              netcdf file containing lat/lon
+                                          list used in interpolation
   --interpolate.printNcML                 print NcML description of
                                           interpolator
   --interpolate.printCS                   print CoordinateSystems of

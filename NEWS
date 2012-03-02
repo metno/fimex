@@ -1,4 +1,10 @@
-  * 2012-02-07 fimex-0.35.2
+  * 2012-03-02 fimex-0.36
+    * interpolation to simple list of lat/lon values (e.g. multiple profiles)
+    * avoid numerical effect in linear interpolation
+    * fix race-condition in timeInterpolator
+    * fix axes of lambert felt-files
+    * update of examples
+  * 2012-02-20 fimex-0.35.2
     * allow to read ASIMOF-grib files
     * allow writing grib-data without time
     * fix forward/coordinate interpolation bug from latlon-projection
