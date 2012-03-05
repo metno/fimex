@@ -151,10 +151,10 @@ public:
      * input to latitude/longitude values given from a netcdf-CF-template. The
      * template must at least contain the information given in this example:
      *
-     * @verbinclude share/etc/template4interpolation.xml
+     * @verbinclude ../share/etc/template4interpolation.cdl
      *
      * @param method Interpolation method, only nearestneighbor, bilinear and bicubic supported
-     * @param netcdf-template-file input-string for netcf template filename
+     * @param netcdf_template_file input-string for netcf template filename
      *
      */
     virtual void changeProjection(int method, const std::string& netcdf_template_file);
