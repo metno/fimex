@@ -26,6 +26,7 @@
 
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
 #include <boost/regex.hpp>
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {
@@ -69,7 +70,7 @@ std::vector<CDMAttribute> RotatedLatitudeLongitudeProjection::parametersFromProj
     if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
         north_pole_lon = string2type<double>(what[1].str());
     }
-    attrs.push_back(CDMAttribute("grid_north_pole_longitude", 180+north_pole_lon));
+    attrs.push_back(CDMAttribute("grid_north_pole_longitude", normalizeLongitude180(180+north_pole_lon)));
     attrs.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));
 
 

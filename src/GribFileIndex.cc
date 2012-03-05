@@ -215,9 +215,8 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
         }
     }
 
-    // TODO: test, might be rotation by lat/long = 180degree
     ostringstream oss;
-    oss << "+proj=ob_tran +o_proj=longlat +lon_0=" << (lonRot) << " +o_lat_p=" << (-1 * latRot);
+    oss << "+proj=ob_tran +o_proj=longlat +lon_0=" << normalizeLongitude180(lonRot) << " +o_lat_p=" << (-1 * latRot);
     oss << " " + getEarthsFigure(edition, gh);
     string proj =  oss.str();
 

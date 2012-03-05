@@ -209,9 +209,9 @@ std::string string2lowerCase(const std::string& str);
  */
 template<typename T>
 std::string type2string(T in) {
-	std::ostringstream buffer;
-	buffer << in;
-	return buffer.str();
+    std::ostringstream buffer;
+    buffer << in;
+    return buffer.str();
 }
 
 /**
@@ -223,12 +223,30 @@ std::string type2string<double>(double in);
 
 template<typename T>
 T string2type(std::string s) {
-	T retVal;
-	std::stringstream buffer;
-	buffer << s;
-	buffer >> retVal;
-	return retVal;
+    T retVal;
+    std::stringstream buffer;
+    buffer << s;
+    buffer >> retVal;
+    return retVal;
 }
+
+/**
+ * normalize Longitude to be within [-180:180]
+ * @param in longitude in degree
+ * @return longitude in degree within [-180:180]
+ */
+template<typename T>
+T normalizeLongitude180(T in) {
+    while (in < -180) {
+        in += 360;
+    }
+    while (in > 180) {
+        in -= 360;
+    }
+    return in;
+}
+
+
 
 typedef long epoch_seconds;
 /**
@@ -245,11 +263,11 @@ epoch_seconds posixTime2epochTime(const boost::posix_time::ptime& time);
 template<typename T>
 std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimiter = ",") throw(CDMException)
 {
-	std::vector<std::string> tokens = tokenize(str, delimiter);
+    std::vector<std::string> tokens = tokenize(str, delimiter);
     std::vector<T> vals;
     for (std::vector<std::string>::iterator tok = tokens.begin(); tok != tokens.end(); ++tok) {
-		std::string current = trim(*tok);
-		if (current == "...") {
+        std::string current = trim(*tok);
+        if (current == "...") {
             size_t currentPos = vals.size();
             if (currentPos < 2) {
                 throw CDMException("tokenizeDotted: cannot use ... expansion at position " + type2string(currentPos-1) +", need at least two values before");
@@ -270,12 +288,12 @@ std::vector<T> tokenizeDotted(const std::string& str, const std::string& delimit
                 // add the afterDotVal
                 vals.push_back(afterDotVal);
             }
-		} else {
-			T val = string2type<T>(current);
-			vals.push_back(val);
-		}
-	}
-	return vals;
+        } else {
+            T val = string2type<T>(current);
+            vals.push_back(val);
+        }
+    }
+    return vals;
 }
 
 /** static_cast as a functor */
