@@ -144,14 +144,27 @@ public:
      *
      */
     virtual void changeProjection(int method, const std::string& proj_input, const std::string& out_x_axis, const std::string& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, const std::string& out_x_axis_type = "double", const std::string& out_y_axis_type = "double");
-        /**
-          * @ brief change the (main) projection of the dataReaders cdm to this new projection
-          *
-          * @param method Interpolation method
-          * @param netcdf-template-file input-string for netcf template filename
-          *
-          */
+    /**
+     * @brief change the (main) projection of the dataReaders cdm to this new projection
+     *
+     * Interpolate/extract latitude/longitude values from regularly gridded
+     * input to latitude/longitude values given from a netcdf-CF-template. The
+     * template must at least contain the information given in this example:
+     *
+     * @verbinclude share/etc/template4interpolation.xml
+     *
+     * @param method Interpolation method, only nearestneighbor, bilinear and bicubic supported
+     * @param netcdf-template-file input-string for netcf template filename
+     *
+     */
     virtual void changeProjection(int method, const std::string& netcdf_template_file);
+    /**
+     * @brief extract/interpolate a list of lat/lon points
+     *
+     * @param method Interpolation method, only nearestneighbor, bilinear and bicubic supported
+     * @param lonVals longitude values in degree
+     * @param latVals latitude values in degree (lonVals.size() == latVals.size())
+     */
     virtual void changeProjection(int method, const std::vector<double>& lonVals, const std::vector<double>& latVals);
     /**
      * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.

@@ -36,8 +36,9 @@ config_DATA = \
 	felt_variables_hirlam12sf_60h.xml\
 	felt_variables_hirlam20.xml\
 	fimex_example.cfg\
-	ncml-2.2.xsd\
-	ncmlCDMConfig.ncml\
+	ncml-2.2.xsd \
+	ncmlCDMConfig.ncml \
+	template4interpolation.cdl \
 	wdb_config.xml \
 	wdb_config.xsd \
 	wdb.example.wdbml

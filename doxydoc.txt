@@ -119,6 +119,7 @@ Configurational options:
                                           degree, i.e. -10.5,-10.5,29.5
   --interpolate.template arg              netcdf file containing lat/lon
                                           list used in interpolation
+                                          see Fimex::CDMInterpolator::changeProjection
   --interpolate.printNcML                 print NcML description of
                                           interpolator
   --interpolate.printCS                   print CoordinateSystems of
@@ -142,6 +143,7 @@ All the configurational options can be configured using a configuration file whi
 using the --config option. All command line options (CLO) will overwrite the config-file. As a rule of
 thump, use the CLO for testing and use the config-file for productive usage. The CLOs will be further
 explained in @ref fimex_config.
+
 
 @subsection fimex_config fimex Setup File
 

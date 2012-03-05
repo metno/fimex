@@ -1,0 +1,29 @@
+netcdf template4interpolation {
+dimensions:
+	x = 4 ;
+	y = 1 ;
+variables:
+	int x(x) ;
+		x:standard_name = "projection_x_coordinate" ;
+		x:units = "m" ; // meters in a unspecified coordinate system
+	int y(y) ;
+		y:standard_name = "projection_y_coordinate" ;
+		y:units = "m" ; // meters in a unspecified coordinate system
+	float latitude(y, x) ;
+		latitude:standard_name = "latitude" ;
+		latitude:units = "degrees_north" ;
+	float longitude(y, x) ;
+		longitude:standard_name = "longitude" ;
+		longitude:units = "degrees_east" ;
+	float referenceVariable(y, x) ;
+		referenceVariable:coordinates = "longitude latitude" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+data:
+ x =  0, 1, 2, 3; // just a list
+ y = 0;           // just a list 
+ latitude =  60, 60, 60.1, 45.4;
+ longitude = 10,  9,  9,   17;
+// no data required for 'referenceVariable'
+}
