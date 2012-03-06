@@ -1216,12 +1216,16 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         // translate temporary new axes from deg2rad if required
         vector<double> outXAxis = out_x_axis;
         vector<double> outYAxis = out_y_axis;
+        int outXAxisType = MIFI_PROJ_AXIS;
+        int outYAxisType = MIFI_PROJ_AXIS;
         boost::regex degree(".*degree.*");
         if (boost::regex_match(out_x_axis_unit, degree)) {
             transform(outXAxis.begin(), outXAxis.end(), outXAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
+            outXAxisType = MIFI_LONGITUDE;
         }
         if (boost::regex_match(out_y_axis_unit, degree)) {
             transform(outYAxis.begin(), outYAxis.end(), outYAxis.begin(), bind1st(multiplies<double>(), DEG_TO_RAD));
+            outYAxisType = MIFI_LATITUDE;
         }
 
         // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
@@ -1254,10 +1258,11 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         LOG4FIMEX(logger, Logger::DEBUG, "...created");
 
         if (hasSpatialVectors()) {
+
             // prepare interpolation of vectors
             LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
             boost::shared_array<double> matrix(new double[out_x_axis.size() * out_y_axis.size() * 4]);
-            mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], miupXAxis, miupYAxis, out_x_axis.size(), out_y_axis.size(), matrix.get());
+            mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], outXAxisType, outYAxisType, out_x_axis.size(), out_y_axis.size(), matrix.get());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csIt->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size()));
         }

@@ -295,6 +295,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
             return MIFI_ERROR;
         }
 
+        // the deltaInv is rather important for sign than for magnitude
         double deltaInv = 1/delta;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
@@ -341,6 +342,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
             return MIFI_ERROR;
         }
 
+        // the deltaInv is rather important for sign than for magnitude
         double deltaInv = 1/delta;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {

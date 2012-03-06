@@ -114,15 +114,15 @@ extern int mifi_interpolate_d(int method,
  * @return MIFI_OK or error value
  */
 extern int mifi_vector_reproject_values_f(int method,
-						const char* proj_input,
-						const char* proj_output,
-						float* u_out, float* v_out,
-						const double* out_x_axis, const double* out_y_axis,
-						int out_x_axis_type, int out_y_axis_type,
-						int ox, int oy, int oz);
+                        const char* proj_input,
+                        const char* proj_output,
+                        float* u_out, float* v_out,
+                        const double* out_x_axis, const double* out_y_axis,
+                        int out_x_axis_type, int out_y_axis_type,
+                        int ox, int oy, int oz);
 /**
  * calculate the reprojected vectors with a known matrix for #mifi_vector_reproject_values_f
- * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE) (for RESIZE you must be sure that the matrix is normed correctly!)
  * @param matrix reprojection matrix of size (4,ox,oy)
  * @param u_out values of u, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
  * @param v_out values of v, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
@@ -132,9 +132,9 @@ extern int mifi_vector_reproject_values_f(int method,
  * @return MIFI_OK or error value
  */
 extern int mifi_vector_reproject_values_by_matrix_f(int method,
-						const double* matrix,
-						float* u_out, float* v_out,
-						int ox, int oy, int oz);
+                        const double* matrix,
+                        float* u_out, float* v_out,
+                        int ox, int oy, int oz);
 
 /**
  * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f
@@ -152,11 +152,11 @@ extern int mifi_vector_reproject_values_by_matrix_f(int method,
  * @return MIFI_OK or error value
  */
 extern int mifi_get_vector_reproject_matrix(const char* proj_input,
-						const char* proj_output,
-						const double* out_x_axis, const double* out_y_axis,
-						int out_x_axis_type, int out_y_axis_type,
-						int ox, int oy,
-						double* matrix);
+                        const char* proj_output,
+                        const double* out_x_axis, const double* out_y_axis,
+                        int out_x_axis_type, int out_y_axis_type,
+                        int ox, int oy,
+                        double* matrix);
 
 
 /**
