@@ -637,17 +637,17 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
     assert(yDimLength == yVar.getData()->size());
     std::string xUnits = getAttribute(xDim, "units").getData()->asString();
     if (boost::regex_match(xUnits, boost::regex(".*degree.*"))) {
-        // convert degrees to radians
-        for (size_t i = 0; i < xDimLength; ++i) {
-            xData[i] *= DEG_TO_RAD;
-        }
+        // convert degrees to radians, create a new array so data in cdm does not get overwritten
+        boost::shared_array<double> newXData(new double[xDimLength]);
+        std::transform(&xData[0], &xData[0]+xDimLength, &newXData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+        xData = newXData;
     }
     std::string yUnits = getAttribute(yDim, "units").getData()->asString();;
     if (boost::regex_match(yUnits, boost::regex(".*degree.*"))) {
-        // convert degrees to radians
-        for (size_t i = 0; i < yDimLength; ++i) {
-            yData[i] *= DEG_TO_RAD;
-        }
+        // convert degrees to radians, create a new array so data in cdm does not get overwritten
+        boost::shared_array<double> newYData(new double[yDimLength]);
+        std::transform(&yData[0], &yData[0]+yDimLength, &newYData[0], std::bind1st(std::multiplies<double>(), DEG_TO_RAD));
+        yData = newYData;
     }
     size_t fieldSize = xDimLength * yDimLength;
     boost::shared_array<double> longVal(new double[fieldSize]);
