@@ -495,5 +495,54 @@ boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, 
     return data;
 }
 
+boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+{
+    // return unchanged data from this CDM
+    const CDMVariable& variable = cdm_->getVariable(varName);
+    if (variable.hasData()) {
+        return variable.getData()->slice(sb.getMaxDimensionSizes(),
+                                         sb.getDimensionStartPositions(),
+                                         sb.getDimensionSizes());
+    }
+
+    // find the original name, to fetch the data from the dataReader
+    std::string orgVarName = varName;
+    map<string, string>::iterator vit = variableNameChanges.find(varName);
+    if (vit != variableNameChanges.end()) {
+        orgVarName = vit->second;
+    }
+
+    // get data from original source with slicebuilder
+    boost::shared_ptr<Data> data = dataReader->getDataSlice(orgVarName, sb);
+
+    // eventually, change the type from the old type to the new type
+    map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);
+    if (dtIt != variableTypeChanges.end()) {
+        const CDM& orgCDM = dataReader->getCDM();
+        double orgFill = orgCDM.getFillValue(orgVarName);
+        CDMAttribute attr;
+        double orgScale = 1.;
+        double orgOffset = 0.;
+        if (orgCDM.getAttribute(varName, "scale_factor", attr)) {
+            orgScale = attr.getData()->asDouble()[0];
+        }
+        if (orgCDM.getAttribute(varName, "add_offset", attr)) {
+            orgOffset = attr.getData()->asDouble()[0];
+        }
+        double newFill = cdm_->getFillValue(varName);
+        double newScale = 1.;
+        double newOffset = 0.;
+        if (cdm_->getAttribute(varName, "scale_factor", attr)) {
+            newScale = attr.getData()->asDouble()[0];
+        }
+        if (cdm_->getAttribute(varName, "add_offset", attr)) {
+            newOffset = attr.getData()->asDouble()[0];
+        }
+
+        data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
+    }
+
+    return data;
+}
 
 }

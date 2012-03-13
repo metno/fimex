@@ -25,6 +25,7 @@
 #include "fimex/NetCDF_CDMReader.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/Data.h"
+#include "fimex/Logger.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
 extern "C" {
@@ -34,6 +35,8 @@ extern "C" {
 namespace MetNoFimex
 {
 using namespace std;
+
+static LoggerPtr logger = getLogger("fimex.NetCDF_CDMReader");
 
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
@@ -135,6 +138,7 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
         start[0] = unLimDimPos;
         count[0] = 1;
     }
+    LOG4FIMEX(logger, Logger::DEBUG, "ncGetValues for " << varName << ": (" << join(start, start + dimLen) <<") size (" << join(count, count+dimLen) << ")");
     return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
 }
 
@@ -166,6 +170,7 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
     reverse(count.begin(), count.end()); // netcdf/c++ uses opposite dimension numbering
     assert(count.size() == static_cast<size_t>(dimLen));
 
+    LOG4FIMEX(logger, Logger::DEBUG, "ncGetValues SB for " << varName << ": (" << join(start.begin(), start.end()) <<") size (" << join(count.begin(), count.end()) << ")");
     return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
 }
 

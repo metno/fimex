@@ -47,10 +47,12 @@ if HAVE_FELT
   GRIBAPI_MI_TESTS = testGribWriter
 endif
 if HAVE_NETCDF
-  CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys testCoordinateSystemSliceBuilder
+  CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys \
+              testCoordinateSystemSliceBuilder  testNcmlReader
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
-  SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh testInterpolatorFill.sh \
+  SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
+              testInterpolatorFill.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
               testVerticalInterpolatorHeight.sh
 endif
@@ -81,6 +83,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
 testGribReader_SOURCES = testGribReader.cc

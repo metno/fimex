@@ -70,6 +70,10 @@ public:
      * reading the data from the required source
      */
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    /**
+     * reading the data from the required source with SliceBuilder
+     */
+    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
 
 private:
