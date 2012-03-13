@@ -61,13 +61,13 @@ namespace MetNoFimex
  * file, with an annotated example in the wdb.example.wdbml file.
  *
  * Also, it is possible to use a specification in place of the file. That
- * specification is a colon- or semicolon separated list of name-value pairs.
+ * specification is a semicolon separated list of name-value pairs.
  *
  * It is possible to use a hybrid specification, in which you give additions
  * to the queries in the query file. If you want to specify queries in this
  * way you must follow the syntax, used in the following example:
  *
- * "file=whatever.wdbml:dataprovider=whoever:referencetime=latest"
+ * "file=whatever.wdbml;dataprovider=whoever;referencetime=latest"
  *
  * The following keywords are recognized: file, dbname, host, port, user,
  * wciUser, dataprovider, location, referencetime, validtime, parameter and
