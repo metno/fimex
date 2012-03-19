@@ -470,13 +470,34 @@ std::vector<CDMAttribute> CDM::getAttributes(const std::string& varName) const
     return results;
 }
 
+static double defaultFillValue_(CDMDataType dt)
+{
+    switch (dt) {
+    case CDM_DOUBLE: return MIFI_FILL_DOUBLE;
+    case CDM_FLOAT:  return MIFI_FILL_FLOAT;
+    case CDM_INT64:  return MIFI_FILL_INT64;
+    case CDM_INT:    return MIFI_FILL_INT;
+    case CDM_SHORT:  return MIFI_FILL_SHORT;
+    case CDM_CHAR:   return MIFI_FILL_CHAR;
+    case CDM_UINT64: return MIFI_FILL_UINT64;
+    case CDM_UINT:   return MIFI_FILL_UINT;
+    case CDM_USHORT: return MIFI_FILL_USHORT;
+    case CDM_UCHAR:  return MIFI_FILL_UCHAR;
+    default:    return MIFI_UNDEFINED_D;
+    }
+}
+
 double CDM::getFillValue(const std::string& varName) const
 {
     CDMAttribute attr;
     if (getAttribute(varName, "_FillValue", attr)) {
         return attr.getData()->asDouble()[0];
     }
-    return MIFI_UNDEFINED_D;
+    if (hasVariable(varName)) {
+        return defaultFillValue_(getVariable(varName).getDataType());
+    } else {
+        return MIFI_UNDEFINED_D;
+    }
 }
 
 double CDM::getValidMin(const std::string& varName) const

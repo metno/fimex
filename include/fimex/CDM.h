@@ -270,7 +270,8 @@ public:
     /**
      * get the fill value of an variable (_FillValue attribute)
      *
-     * @return value of _FillValue attribute, or MIFI_UNDEFINED_D
+     * @return value of _FillValue attribute,
+     *         or the default fill value of variables datatype (MIFI_FILL_XXXX)
      */
     double getFillValue(const std::string& varName) const;
     /**

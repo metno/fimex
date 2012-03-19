@@ -37,6 +37,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMProcessor.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include <boost/shared_ptr.hpp>
@@ -61,6 +62,7 @@ BOOST_AUTO_TEST_CASE( test_function )
     BOOST_CHECK_CLOSE(time[1], 3600., 1e-5);
     BOOST_CHECK_CLOSE(time[2], 3600., 1e-5);
     BOOST_CHECK_CLOSE(time[3], 3600., 1e-5);
+
 }
 
 #else

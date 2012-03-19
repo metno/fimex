@@ -31,6 +31,21 @@
 #define MIFI_FILETYPE_WDB    4
 #define MIFI_FILETYPE_METGM  5
 
+/**
+ * default fill values taken from netcdf.h
+ */
+#define MIFI_FILL_CHAR    ((signed char)-127)
+#define MIFI_FILL_SHORT   ((short)-32767)
+#define MIFI_FILL_INT     (-2147483647L)
+#define MIFI_FILL_FLOAT   (9.9692099683868690e+36f) /* near 15 * 2^119 */
+#define MIFI_FILL_DOUBLE  (9.9692099683868690e+36)
+#define MIFI_FILL_UCHAR   (255)
+#define MIFI_FILL_USHORT  (65535)
+#define MIFI_FILL_UINT    (4294967295U)
+#define MIFI_FILL_INT64   ((long long)-9223372036854775806LL)
+#define MIFI_FILL_UINT64  ((unsigned long long)18446744073709551614ULL)
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
