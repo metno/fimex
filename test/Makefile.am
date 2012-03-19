@@ -48,7 +48,8 @@ if HAVE_FELT
 endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys \
-              testCoordinateSystemSliceBuilder  testNcmlReader
+              testCoordinateSystemSliceBuilder  testNcmlReader \
+              testProcessor
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
@@ -90,6 +91,7 @@ testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testFileReaderFactory_SOURCES = testFileReaderFactory.cc
 testExtractor_SOURCES = testExtractor.cc
+testProcessor_SOURCES = testProcessor.cc
 testQualityExtractor_SOURCES = testQualityExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
 testTimeInterpolator_SOURCES = testTimeInterpolator.cc

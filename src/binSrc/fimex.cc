@@ -38,6 +38,7 @@
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/CDMPressureConversions.h"
+#include "fimex/CDMProcessor.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
@@ -69,6 +70,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             [--output.file FILENAME [--output.type OUTPUT_TYPE]]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
     out << "             [--num_threads ...]" << endl;
+    out << "             [--process....]" << endl;
     out << "             [--extract....]" << endl;
     out << "             [--qualityExtract....]" << endl;
     out << "             [--interpolate....]" << endl;
@@ -165,6 +167,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "output.file", vm);
     writeOption<string>(out, "output.type", vm);
     writeOption<string>(out, "output.config", vm);
+    writeVectorOptionString(out, "process.deaccumulateVariable", vm);
     writeOption<string>(out, "qualityExtract.autoConfigString", vm);
     writeOption<string>(out, "qualityExtract.config", vm);
     writeOption<string>(out, "qualityExtract.printNcML", vm);
@@ -292,6 +295,21 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
     }
 
     return returnPtr;
+}
+
+static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+    if (! (vm.count("process.deaccumulateVariable"))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "process.deaccumulateVariable not found, no process used");
+        return dataReader;
+    }
+    boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(boost::shared_ptr<CDMReader>(dataReader)));
+    if (vm.count("process.deaccumulateVariable")) {
+        vector<string> vars = vm["process.deaccumulateVariable"].as<vector<string> >();
+        for (size_t i = 0; i < vars.size(); i++) {
+            processor->deAccumulate(vars.at(i));
+        }
+    }
+    return processor;
 }
 
 static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
@@ -627,14 +645,21 @@ int run(int argc, char* args[])
         ("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
         ("input.config", po::value<string>(), "non-standard input configuration")
 #if BOOST_VERSION >= 104000
-        ("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+        ("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input")
 #else
-        ("input.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+        ("input.printNcML", po::value<string>(), "print NcML description of input (use - for command-line")
 #endif
         ("input.printCS", "print CoordinateSystems of input file")
         ("output.file", po::value<string>(), "output file")
         ("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
         ("output.config", po::value<string>(), "non-standard output configuration")
+        ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
+#if BOOST_VERSION >= 104000
+        ("process.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of process")
+#else
+        ("process.printNcML", po::value<string>(), "print NcML description of process (use - for command-line")
+#endif
+        ("process.printCS", "print CoordinateSystems of process")
         ("extract.removeVariable", po::value<vector<string> >()->composing(), "remove variables")
         ("extract.selectVariables", po::value<vector<string> >()->composing(), "select only those variables")
         ("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
@@ -760,6 +785,7 @@ int run(int argc, char* args[])
     }
 
     boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
+    dataReader = getCDMProcessor(vm, dataReader);
     dataReader = getCDMQualityExtractor(vm, dataReader);
     dataReader = getCDMExtractor(vm, dataReader);
     dataReader = getCDMTimeInterpolator(vm, dataReader);

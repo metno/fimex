@@ -182,8 +182,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMconstants.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMPressureConversions.cc CDMQualityExtractor.cc CDMReader.cc \
-	CDMReaderUtils.cc CDMTimeInterpolator.cc CDMVariable.cc \
+	CDMPressureConversions.cc CDMProcessor.cc \
+	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
+	CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
@@ -299,8 +300,9 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
 	CDMconstants.lo CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMFileReaderFactory.lo CDMInterpolator.lo CDMNamedEntity.lo \
-	CDMPressureConversions.lo CDMQualityExtractor.lo CDMReader.lo \
-	CDMReaderUtils.lo CDMTimeInterpolator.lo CDMVariable.lo \
+	CDMPressureConversions.lo CDMProcessor.lo \
+	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
+	CDMTimeInterpolator.lo CDMVariable.lo \
 	CDMVerticalInterpolator.lo CDM_XMLConfigHelper.lo \
 	CoordinateSystemSliceBuilder.lo CoordinateSystem.lo \
 	CoordinateAxis.lo Projection.lo ProjectionImpl.lo \
@@ -566,8 +568,8 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDM.cc CDMAttribute.cc CDMconstants.cc CDMDimension.cc \
 	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMPressureConversions.cc \
-	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
-	CDMTimeInterpolator.cc CDMVariable.cc \
+	CDMProcessor.cc CDMQualityExtractor.cc CDMReader.cc \
+	CDMReaderUtils.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
@@ -682,6 +684,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMPressureConversions.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMProcessor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMQualityExtractor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReaderUtils.Plo@am__quote@
