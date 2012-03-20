@@ -401,8 +401,39 @@ void GribCDMReader::initAddTimeDimension()
 
 }
 
+static string replaceProj4Earthform(const string& proj4, const string& newEarthform)
+{
+    if (newEarthform == "") {
+        return proj4;
+    }
+    vector<string> parts = tokenize(proj4, " ");
+    vector<string> newParts;
+    for (size_t i = 0; i < parts.size(); i++) {
+        if (parts.at(i).find("+a=") != string::npos) continue;
+        if (parts.at(i).find("+b=") != string::npos) continue;
+        if (parts.at(i).find("+e=") != string::npos) continue;
+        if (parts.at(i).find("+R=") != string::npos) continue;
+        if (parts.at(i).find("+ellps=") != string::npos) continue;
+        if (parts.at(i).find("+datum=") != string::npos) continue;
+        newParts.push_back(parts.at(i));
+    }
+    newParts.push_back(newEarthform);
+    return join(newParts.begin(), newParts.end(), " ");
+}
+
 void GribCDMReader::initAddProjection()
 {
+    // get the overruled earthform
+    XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthform");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    string replaceEarthString = "";
+    if (size == 1) {
+        replaceEarthString = getXmlProp(nodes->nodeTab[0], "proj4");
+        LOG4FIMEX(logger, Logger::DEBUG,"overruling earth-parametes with " << replaceEarthString);
+    }
+
+
     // gridDefinition -> gridType
     map<GridDefinition, string> gridDefs;
     for (vector<GribFileMessage>::const_iterator idx = p_->indices.begin(); idx != p_->indices.end(); ++idx) {
@@ -416,7 +447,7 @@ void GribCDMReader::initAddProjection()
         const GridDefinition& gridDef(gd->first);
         LOG4FIMEX(logger, Logger::DEBUG,"adding gridDef:" << gridDef.id());
         string& gridType(gd->second);
-        string projStr = gridDef.getProjDefinition();
+        string projStr = replaceProj4Earthform(gridDef.getProjDefinition(), replaceEarthString);
         ProjectionInfo pi;
 
         string appendix;

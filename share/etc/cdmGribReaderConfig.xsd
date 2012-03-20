@@ -7,6 +7,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="c:processOptions" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="c:overrule" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="c:global_attributes" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="c:axes" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="c:variables" minOccurs="1" maxOccurs="1"/>
@@ -24,6 +25,19 @@
     <xs:complexType>
       <xs:attribute name="name" use="required" type="xs:string"/>
       <xs:attribute name="value" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="overrule">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="c:earthform"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="earthform">
+    <xs:complexType>
+      <!-- string describing earth in proj4, e.g. "+ellps=WGS84 +towgs84=0,0,0"-->
+      <xs:attribute name="proj4" use="required" type="xs:string"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="global_attributes">

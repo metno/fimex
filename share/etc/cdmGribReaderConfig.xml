@@ -6,6 +6,10 @@
     <!-- parameters to select: all, definedOnly -->
     <option name="selectParameters" value="all" />
 </processOptions>
+<overrule>
+    <!-- use these values instead of the values in the grib-messages -->
+    <!-- <earthform proj4="+ellps=WGS84 +towgs84=0,0,0" /> -->
+</overrule>
 <global_attributes>
     <attribute name="Conventions" value="CF-1.0" type="string" />
     <attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />
