@@ -609,10 +609,13 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
                         (*it)->getLevelPairs().at(0).first == 1000)
                       ||
                        ((*it)->getLevelType() == 8)
+                      ||
+                       ((*it)->getLevelType() == 3)
                       )
                    ) {
                     // no vertical axis for surface parameters 2,1000
                     // no vertical axis for sea-surface parameter 8
+                    // level 3 used as sea-surface for some wave-models
                 } else {
                     shape.push_back(levelDims.find((*it)->getLevelType())->second.getName());
                 }
