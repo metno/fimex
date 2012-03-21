@@ -30,11 +30,11 @@
   <xs:element name="overrule">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="1" ref="c:earthform"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="c:earthFigure"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="earthform">
+  <xs:element name="earthFigure">
     <xs:complexType>
       <!-- string describing earth in proj4, e.g. "+ellps=WGS84 +towgs84=0,0,0"-->
       <xs:attribute name="proj4" use="required" type="xs:string"/>

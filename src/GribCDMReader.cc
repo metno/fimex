@@ -401,9 +401,9 @@ void GribCDMReader::initAddTimeDimension()
 
 }
 
-static string replaceProj4Earthform(const string& proj4, const string& newEarthform)
+static string replaceProj4Earthfigure(const string& proj4, const string& newEarthfigure)
 {
-    if (newEarthform == "") {
+    if (newEarthfigure == "") {
         return proj4;
     }
     vector<string> parts = tokenize(proj4, " ");
@@ -417,14 +417,14 @@ static string replaceProj4Earthform(const string& proj4, const string& newEarthf
         if (parts.at(i).find("+datum=") != string::npos) continue;
         newParts.push_back(parts.at(i));
     }
-    newParts.push_back(newEarthform);
+    newParts.push_back(newEarthfigure);
     return join(newParts.begin(), newParts.end(), " ");
 }
 
 void GribCDMReader::initAddProjection()
 {
     // get the overruled earthform
-    XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthform");
+    XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     int size = (nodes) ? nodes->nodeNr : 0;
     string replaceEarthString = "";
@@ -447,7 +447,7 @@ void GribCDMReader::initAddProjection()
         const GridDefinition& gridDef(gd->first);
         LOG4FIMEX(logger, Logger::DEBUG,"adding gridDef:" << gridDef.id());
         string& gridType(gd->second);
-        string projStr = replaceProj4Earthform(gridDef.getProjDefinition(), replaceEarthString);
+        string projStr = replaceProj4Earthfigure(gridDef.getProjDefinition(), replaceEarthString);
         ProjectionInfo pi;
 
         string appendix;
