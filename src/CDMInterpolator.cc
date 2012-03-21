@@ -51,6 +51,7 @@
 // boost
 //
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 // standard
 #include <functional>
@@ -407,7 +408,25 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            // get lat / lon info
            std::string tmplLatName;
            std::string tmplLonName;
-           tmplCdmRef.getLatitudeLongitude(tmplRefVarName, tmplLatName, tmplLonName);
+           MetNoFimex::CDMAttribute coordsAtt;
+
+           if(!tmplCdmRef.getLatitudeLongitude(tmplRefVarName, tmplLatName, tmplLonName)) {
+               if(tmplCdmRef.getAttribute(tmplRefVarName, "coordinates", coordsAtt)) {
+                   std::vector<std::string> coords;
+                   boost::split(coords, coordsAtt.getStringValue(), boost::is_any_of(" "));
+                   if(coords.size() == 2){
+                       tmplLonName = boost::algorithm::trim_copy(coords[0]);
+                       tmplLatName = boost::algorithm::trim_copy(coords[1]);
+                   }
+               }
+           }
+
+           // force things
+           if(tmplLonName.empty())
+               tmplLonName = "longitude";
+           if(tmplLatName.empty())
+               tmplLatName = "latitude";
+
            boost::shared_ptr<Data> tmplLatVals = tmplReader->getData(tmplLatName);
            boost::shared_ptr<Data> tmplLonVals = tmplReader->getData(tmplLonName);
 
@@ -1271,7 +1290,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 
 static void changeCDMToLatLonTemplate(CDM& cdm,
                                       const string& tmpl_proj_input,
-                                      const CoordSysPtr& cs,
+                                      const map<string, CoordSysPtr>& csMap,
                                       const map<string, string>& projectionVariables,
                                       const vector<double>& out_x_axis,
                                       const vector<double>& out_y_axis,
@@ -1282,54 +1301,94 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
                                       boost::shared_ptr<Data> tmplLatVals,
                                       boost::shared_ptr<Data> tmplLonVals)
 {
-    string newProjection = getProjectionName(tmpl_proj_input);
+    string newProj = getProjectionName(tmpl_proj_input);
+
+    string newXAxis("x");
+    string newYAxis("y");
 
     // expecting latlon - test
-    assert(newProjection == "latlong");
+    assert(newProj == "latlong");
 
-    string orgProjection;
-    if (cs->hasProjection()) {
-        orgProjection = cs->getProjection()->getName();
-        // remove all other projections, those might confuse other programs, i.e. IDV
-        // this is not int the orgProjection name i.e. stereographic but in the variable name projection_stere
-        std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
-        for (size_t i = 0; i < gridMappings.size(); i++) {
-            LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gridMappings[i]);
-            cdm.removeVariable(gridMappings[i]);
+    for (map<string, CoordSysPtr>::const_iterator csi = csMap.begin(); csi != csMap.end(); ++csi) {
+        string key = csi->first;
+        CoordSysPtr cs = csi->second;
+        string orgProjection;
+        if (cs->hasProjection()) {
+            orgProjection = cs->getProjection()->getName();
+            // remove all other projections, those might confuse other programs, i.e. IDV
+            // this is not int the orgProjection name i.e. stereographic but in the variable name projection_stere
+            std::vector<std::string> gridMappings = cdm.findVariables("grid_mapping_name", ".*");
+            for (size_t i = 0; i < gridMappings.size(); i++) {
+                LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gridMappings[i]);
+                cdm.removeVariable(gridMappings[i]);
+            }
+            LOG4FIMEX(logger, Logger::DEBUG, "original projection: " << orgProjection);
         }
-    }
 
-    string orgXAxis = cs->getGeoXAxis()->getName();
-    string orgYAxis = cs->getGeoYAxis()->getName();
-    if (cs->hasAxisType(CoordinateAxis::Lon) && (cs->getGeoXAxis()->getName() == cs->findAxisOfType(CoordinateAxis::Lon)->getName())) {
-        // x and y axis not properly defined, guessing
-        vector<string> lonShape = cdm.getVariable(orgXAxis).getShape();
-        if (lonShape.size() == 2) {
-            orgXAxis = lonShape[0];
-            orgYAxis = lonShape[1];
-            LOG4FIMEX(logger, Logger::WARN, "need to guess x and y axis: " << lonShape[0] << " " << lonShape[1]);
+        string orgXAxis = cs->getGeoXAxis()->getName();
+        string orgYAxis = cs->getGeoYAxis()->getName();
+        if (cs->hasAxisType(CoordinateAxis::Lon) && (cs->getGeoXAxis()->getName() == cs->findAxisOfType(CoordinateAxis::Lon)->getName())) {
+            // x and y axis not properly defined, guessing
+            vector<string> lonShape = cdm.getVariable(orgXAxis).getShape();
+            if (lonShape.size() == 2) {
+                orgXAxis = lonShape[0];
+                orgYAxis = lonShape[1];
+                LOG4FIMEX(logger, Logger::WARN, "need to guess x and y axis: " << lonShape[0] << " " << lonShape[1]);
+            }
         }
-    }
 
-    // remove projection and coordinates (lon lat)
-    if (cs->hasAxisType(CoordinateAxis::Lat) && cs->hasAxisType(CoordinateAxis::Lon)) {
-        typedef CoordinateSystem::ConstAxisPtr ConstAxisPtr;
-        ConstAxisPtr latAxis = cs->findAxisOfType(CoordinateAxis::Lat);
-        ConstAxisPtr lonAxis = cs->findAxisOfType(CoordinateAxis::Lon);
-        LOG4FIMEX(logger, Logger::DEBUG, "removing old coordinate axes " << latAxis->getName() << " and " << lonAxis->getName());
-        cdm.removeVariable(latAxis->getName());
-        cdm.removeVariable(lonAxis->getName());
+        // use the new x/y-axis in shape for all variables
+        for (map<string, string>::const_iterator varIt = projectionVariables.begin(); varIt != projectionVariables.end(); ++varIt) {
+            LOG4FIMEX(logger, Logger::DEBUG, "changing shape for newX/YAxis for : " << varIt->first);
+            vector<string> shape = cdm.getVariable(varIt->first).getShape();
+            replace(shape.begin(), shape.end(), orgXAxis, newXAxis);
+            replace(shape.begin(), shape.end(), orgYAxis, newYAxis);
+            cdm.getVariable(varIt->first).setShape(shape);
+        }
+
+        // remove projection and coordinates (lon lat)
+        if (cs->hasAxisType(CoordinateAxis::Lat) && cs->hasAxisType(CoordinateAxis::Lon)) {
+            typedef CoordinateSystem::ConstAxisPtr ConstAxisPtr;
+            ConstAxisPtr latAxis = cs->findAxisOfType(CoordinateAxis::Lat);
+            ConstAxisPtr lonAxis = cs->findAxisOfType(CoordinateAxis::Lon);
+            LOG4FIMEX(logger, Logger::DEBUG, "removing old coordinate axes " << latAxis->getName() << " and " << lonAxis->getName());
+            cdm.removeVariable(latAxis->getName());
+            cdm.removeVariable(lonAxis->getName());
+        }
+
+        if(newXAxis != orgXAxis && newYAxis != orgYAxis) {
+            cdm.removeVariable(orgXAxis);
+            cdm.removeVariable(orgYAxis);
+            cdm.removeDimension(orgXAxis);
+            cdm.removeDimension(orgYAxis);
+        }
+
     }
 
     // add new projection and parameters
-    LOG4FIMEX(logger, Logger::DEBUG, "orgX, orgY: " << orgXAxis << ", "<< orgYAxis);
-    LOG4FIMEX(logger, Logger::DEBUG, "original projection: " << orgProjection);
-    LOG4FIMEX(logger, Logger::DEBUG, "new projection: " << newProjection);
+    std::string newProjection = "latlong";
+    if (newProj != "latlong") {
+        newProjection = "projection_"+newProj;
+        int i = 0;
+        while (cdm.hasVariable(newProjection)) newProjection = "projection_"+newProj+type2string(++i);
+        CDMVariable projVar(newProjection, CDM_NAT, std::vector<std::string>());
+        projVar.setData(createData(CDM_NAT, 0)); // define empty data
+        cdm.addVariable(projVar);
+        std::vector<CDMAttribute> projAttrs = Projection::createByProj4(tmpl_proj_input)->getParameters();
+        for (std::vector<CDMAttribute>::iterator it = projAttrs.begin(); it != projAttrs.end(); ++it) {
+            cdm.addAttribute(newProjection, *it);
+        }
+    }
+
+    // add new projection and parameters
+    LOG4FIMEX(logger, Logger::DEBUG, "orgX, orgY: " << newXAxis << ", "<< newYAxis);
+    LOG4FIMEX(logger, Logger::DEBUG, "original projection: " << newProjection);
+    LOG4FIMEX(logger, Logger::DEBUG, "new projection: " << newProj);
 
     // change/add new axes
     // don't change the name of the dimension, even if this might look strange if e.g. lon is a projection_x_coordinate
-    cdm.removeAttribute(orgXAxis, "long_name");
-    cdm.removeAttribute(orgYAxis, "long_name");
+    cdm.removeAttribute(newXAxis, "long_name");
+    cdm.removeAttribute(newYAxis, "long_name");
 
     std::string xTemplAxis("x");
     std::string xStandardName("projection_x_coordinate");
@@ -1352,13 +1411,13 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
         cdm.getVariable(xTemplAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
         cdm.addDimension(CDMDimension(xTemplAxis, out_x_axis.size()));
     } else {
-        cdm.getVariable(orgXAxis).setDataType(xAxisType);
-        cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("axis", xAxisAtt));
-        cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("long_name", xLongName));
-        cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("standard_name", xStandardName));
-        cdm.addOrReplaceAttribute(orgXAxis, CDMAttribute("units", out_x_axis_unit));
-        cdm.getVariable(orgXAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
-        cdm.getDimension(orgXAxis).setLength(out_x_axis.size());
+        cdm.getVariable(newXAxis).setDataType(xAxisType);
+        cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("axis", xAxisAtt));
+        cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("long_name", xLongName));
+        cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("standard_name", xStandardName));
+        cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", out_x_axis_unit));
+        cdm.getVariable(newXAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
+        cdm.getDimension(newXAxis).setLength(out_x_axis.size());
     }
 
     if (!cdm.hasVariable(yTemplAxis)) {
@@ -1373,13 +1432,13 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
         cdm.getVariable(yTemplAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
         cdm.addDimension(CDMDimension(yTemplAxis, out_y_axis.size()));
     } else {
-        cdm.getVariable(orgYAxis).setDataType(yAxisType);
-        cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("axis", yAxisAtt));
-        cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("long_name", yLongName));
-        cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("standard_name", yStandardName));
-        cdm.addOrReplaceAttribute(orgYAxis, CDMAttribute("units", out_y_axis_unit));
-        cdm.getVariable(orgYAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
-        cdm.getDimension(orgYAxis).setLength(out_y_axis.size());
+        cdm.getVariable(newYAxis).setDataType(yAxisType);
+        cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("axis", yAxisAtt));
+        cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("long_name", yLongName));
+        cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("standard_name", yStandardName));
+        cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", out_y_axis_unit));
+        cdm.getVariable(newYAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
+        cdm.getDimension(newYAxis).setLength(out_y_axis.size());
     }
 
     // adding lat & long from list
@@ -1409,8 +1468,8 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
         for (map<string, string>::const_iterator varIt = projectionVariables.begin(); varIt != projectionVariables.end(); ++varIt) {
             CDMVariable& varRef = cdm.getVariable(varIt->first);
             vector<string> shape = varRef.getShape();
-            std::replace(shape.begin(), shape.end(), orgXAxis, xTemplAxis);
-            std::replace(shape.begin(), shape.end(), orgYAxis, yTemplAxis);
+            std::replace(shape.begin(), shape.end(), newXAxis, xTemplAxis);
+            std::replace(shape.begin(), shape.end(), newYAxis, yTemplAxis);
             varRef.setShape(shape);
             cdm.addOrReplaceAttribute(varIt->first, CDMAttribute("coordinates", "longitude latitude"));
             cdm.removeAttribute(varIt->first, "grid_mapping");
@@ -1422,7 +1481,14 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
     if(xTemplAxis != "latitude") {
         cdm.removeDimension("latitude");
     }
+
 }
+
+struct CSGridDefinition {
+    std::string key;
+    boost::shared_ptr<Data> xAxisData;
+    boost::shared_ptr<Data> yAxisData;
+};
 
 void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int method,
                                                                              const string& tmpl_proj_input,
@@ -1437,22 +1503,22 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 {
     map<string, CoordSysPtr> csMap = findBestCoordinateSystemsAndProjectionVars(true);
 
-    if (csMap.size() > 1) {
-        throw CDMException("template-interpolation support only one input horizontal grid, but found several");
+    map<string, CSGridDefinition> orgGrids;
+
+    for (map<string, CoordSysPtr>::const_iterator csi = csMap.begin(); csi != csMap.end(); ++csi) {
+        // copy all the data you might need before CDM model changes
+        // and you will definitely save on debugging time
+        CSGridDefinition def;
+        def.key = csi->first;
+        def.xAxisData = getData(csi->second->getGeoXAxis()->getName());
+        def.yAxisData = getData(csi->second->getGeoYAxis()->getName());
+
+        orgGrids.insert(std::make_pair<string, CSGridDefinition>(def.key, def));
     }
-
-    CoordSysPtr cs = csMap.begin()->second;
-
-    // copy all the data you might need before CDM model changes
-    // and you will definitely save on debugging time
-    boost::shared_ptr<Data> orgXAxisData = getData(cs->getGeoXAxis()->getName());
-    boost::shared_ptr<Data> orgYAxisData = getData(cs->getGeoYAxis()->getName());
-    boost::shared_array<double> orgXAxisArray = orgXAxisData->asDouble();
-    boost::shared_array<double> orgYAxisArray = orgYAxisData->asDouble();
 
     changeCDMToLatLonTemplate(*cdm_.get(),
                               tmpl_proj_input,
-                              cs,
+                              csMap,
                               p_->projectionVariables,
                               out_x_axis,
                               out_y_axis,
@@ -1465,49 +1531,56 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 
     assert(tmplLatVals->size() == tmplLonVals->size());
 
-    // store projection changes to be used in data-section
-    // as template data is in degrees we have to do deg2rad
-    boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
-    boost::shared_array<double> tmplLonArray = tmplLonVals->asDouble();
-    vector<double> latY(tmplLatArray.get(), tmplLatArray.get()+tmplLatVals->size());
-    vector<double> lonX(tmplLonArray.get(), tmplLonArray.get()+tmplLonVals->size());
-    transform(&latY[0], &latY[0]+tmplLatVals->size(), &latY[0], bind1st(multiplies<double>(), DEG_TO_RAD));
-    transform(&lonX[0], &lonX[0]+tmplLonVals->size(), &lonX[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+    for (map<string, CoordSysPtr>::const_iterator csi = csMap.begin(); csi != csMap.end(); ++csi) {
+        string key = csi->first;
+        CSGridDefinition def = orgGrids[key];
+        boost::shared_array<double> orgXAxisArray = def.xAxisData->asDouble();
+        boost::shared_array<double> orgYAxisArray = def.yAxisData->asDouble();
 
-    // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
-    std::string orgProjStr = cs->getProjection()->getProj4String();
+        // store projection changes to be used in data-section
+        // as template data is in degrees we have to do deg2rad
+        boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
+        boost::shared_array<double> tmplLonArray = tmplLonVals->asDouble();
+        vector<double> latY(tmplLatArray.get(), tmplLatArray.get()+tmplLatVals->size());
+        vector<double> lonX(tmplLonArray.get(), tmplLonArray.get()+tmplLonVals->size());
+        transform(&latY[0], &latY[0]+tmplLatVals->size(), &latY[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+        transform(&lonX[0], &lonX[0]+tmplLonVals->size(), &lonX[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
-    // projects lat / lon from template to axis-projection found in model file
-    // we want to get template lat/long expressed in terms of the original projection
-    if (MIFI_OK != mifi_project_values(tmpl_proj_input.c_str(), orgProjStr.c_str(), &lonX[0], &latY[0], tmplLatVals->size())) {
-        throw CDMException("unable to project values from "+orgProjStr+ " to " +tmpl_proj_input.c_str());
+        // calculate the mapping from the new projection points to the original axes pointsOnXAxis(x_new, y_new), pointsOnYAxis(x_new, y_new)
+        std::string orgProjStr = csi->second->getProjection()->getProj4String();
+
+        // projects lat / lon from template to axis-projection found in model file
+        // we want to get template lat/long expressed in terms of the original projection
+        if (MIFI_OK != mifi_project_values(tmpl_proj_input.c_str(), orgProjStr.c_str(), &lonX[0], &latY[0], tmplLatVals->size())) {
+            throw CDMException("unable to project values from "+orgProjStr+ " to " +tmpl_proj_input.c_str());
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "mifi_project_values: "<< tmpl_proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << lonX[0] << "," << latY[0]);
+
+        // now latVals and lonVals are given in original-input coordinates
+        // check if we have to translate original axes from deg2rad
+        int miupXAxis = MIFI_PROJ_AXIS;
+        int miupYAxis = MIFI_PROJ_AXIS;
+
+        if (csi->second->getProjection()->isDegree()) {
+            miupXAxis = MIFI_LONGITUDE;
+            transform(orgXAxisArray.get(), orgXAxisArray.get()+def.xAxisData->size(), orgXAxisArray.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
+            miupYAxis = MIFI_LATITUDE;
+            transform(orgYAxisArray.get(), orgYAxisArray.get()+def.yAxisData->size(), orgYAxisArray.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
+        }
+
+        // translate coordinates (in radians) to indices
+        mifi_points2position(&latY[0], tmplLatVals->size(), orgYAxisArray.get(), def.yAxisData->size(), miupYAxis);
+        mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), def.xAxisData->size(), miupXAxis);
+
+        LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << def.xAxisData->size() << "x" << def.yAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
+        p_->cachedInterpolation[csMap.begin()->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method,
+                                                                                                                                lonX,
+                                                                                                                                latY,
+                                                                                                                                def.xAxisData->size(),
+                                                                                                                                def.yAxisData->size(),
+                                                                                                                                out_x_axis.size(),
+                                                                                                                                out_y_axis.size()));
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "mifi_project_values: "<< tmpl_proj_input << "," << orgProjStr << "," << out_x_axis[0] << "," << out_y_axis[0] << " => " << lonX[0] << "," << latY[0]);
-
-    // now latVals and lonVals are given in original-input coordinates
-    // check if we have to translate original axes from deg2rad
-    int miupXAxis = MIFI_PROJ_AXIS;
-    int miupYAxis = MIFI_PROJ_AXIS;
-
-    if (cs->getProjection()->isDegree()) {
-        miupXAxis = MIFI_LONGITUDE;
-        transform(orgXAxisArray.get(), orgXAxisArray.get()+orgXAxisData->size(), orgXAxisArray.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
-        miupYAxis = MIFI_LATITUDE;
-        transform(orgYAxisArray.get(), orgYAxisArray.get()+orgYAxisData->size(), orgYAxisArray.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
-    }
-
-    // translate coordinates (in radians) to indices
-    mifi_points2position(&latY[0], tmplLatVals->size(), orgYAxisArray.get(), orgYAxisData->size(), miupYAxis);
-    mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), orgXAxisData->size(), miupXAxis);
-
-    LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisData->size() << "x" << orgYAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-    p_->cachedInterpolation[csMap.begin()->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method,
-                                                                                                                            lonX,
-                                                                                                                            latY,
-                                                                                                                            orgXAxisData->size(),
-                                                                                                                            orgYAxisData->size(),
-                                                                                                                            out_x_axis.size(),
-                                                                                                                            out_y_axis.size()));
 
     if (hasSpatialVectors()) {
         // prepare interpolation of vectors
