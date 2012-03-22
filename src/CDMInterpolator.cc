@@ -403,7 +403,8 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
 
            const std::string tmplRefVarName("referenceVariable");
 
-           assert(tmplCdmRef.hasVariable(tmplRefVarName));
+           if (! tmplCdmRef.hasVariable(tmplRefVarName))
+               throw CDMException(netcdf_template_file + " does not contain reference Variable "+ tmplRefVarName);
 
            // get lat / lon info
            std::string tmplLatName;
@@ -429,7 +430,6 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
 
            boost::shared_ptr<Data> tmplLatVals = tmplReader->getData(tmplLatName);
            boost::shared_ptr<Data> tmplLonVals = tmplReader->getData(tmplLonName);
-
            // get X / Y info
            std::string tmplXName;
            std::string tmplYName;
@@ -441,7 +441,6 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            boost::shared_array<double> tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
            vector<double> tmplYAxisVec(tmplYArray.get(), tmplYArray.get()+tmplYData->size());
-
            std::string proj4string(LAT_LON_PROJSTR);
 
            changeProjectionByProjectionParametersToLatLonTemplate(method,
@@ -479,30 +478,15 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
     typedef map<string, CoordSysPtr> CoordSysMap;
     typedef vector<CoordSysPtr> CoordSysVec;
     CoordSysMap coordSysMap;
-    CoordSysVec coordSys = listCoordinateSystems(getCDM());
-    for (CoordSysVec::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
-        if (((!withProjection) || ((*cs)->isSimpleSpatialGridded() && (*cs)->hasProjection())) &&
-              (withProjection || ((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {
-            coordSysMap[(*cs)->horizontalId()] = *cs;
-        } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "CS dropped: simpleSpatialGrid="<<(*cs)->isSimpleSpatialGridded() << " projection=" << (*cs)->hasProjection() << " lon="<<(*cs)->hasAxisType(CoordinateAxis::Lon)<< " lat="<<(*cs)->hasAxisType(CoordinateAxis::Lat));
-        }
-    }
-    if (coordSysMap.empty()) {
+    p_->projectionVariables.clear();
+    vector<string> incompatibleVariables;
+    if (0 == findBestHorizontalCoordinateSystems(withProjection, getCDM(), coordSysMap, p_->projectionVariables, incompatibleVariables)) {
         LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems" << (withProjection ? " with projection found, maybe you should try coordinate interpolation" : " found"));
         throw CDMException("no coordinate-systems found");
     }
-    // mapping all variables with matching orgX/orgY dimensions
-    // find all variables belonging to a cs containing the projection
-    p_->projectionVariables.clear();
-    const CDM::VarVec& vars = getCDM().getVariables();
-    for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-        CoordSysVec::iterator vCs = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(v->getName()));
-        if (coordSys.end() != vCs) {
-            if (coordSysMap.find((*vCs)->horizontalId()) != coordSysMap.end()) {
-                p_->projectionVariables[v->getName()] = (*vCs)->horizontalId();
-            }
-        }
+    for (vector<string>::iterator iv = incompatibleVariables.begin(); iv != incompatibleVariables.end(); ++iv) {
+        LOG4FIMEX(logger, Logger::WARN, "removing variable " << *iv << " since it is not compatible with the reprojected coordinates");
+        cdm_->removeVariable(*iv);
     }
     vector<string> pVars;
     for (map<string, string>::iterator pvi = p_->projectionVariables.begin(); pvi != p_->projectionVariables.end(); ++pvi) {
@@ -510,72 +494,7 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
     }
     LOG4FIMEX(logger, Logger::DEBUG, "projection variables: " << join(pVars.begin(), pVars.end(), ","));
 
-    // remove all variables which are not part of any coordinate-system
-    // but which share geographical-dimensions (x,y,lon,lat) with the system
-    for (CoordSysMap::iterator csmi = coordSysMap.begin(); csmi != coordSysMap.end(); ++csmi){
-        set<std::string> geoDimensions;
-        vector<string>  xShape = getCDM().getVariable(csmi->second->getGeoXAxis()->getName()).getShape();
-        vector<string>  yShape = getCDM().getVariable(csmi->second->getGeoYAxis()->getName()).getShape();
-        geoDimensions.insert(xShape.begin(), xShape.end());
-        geoDimensions.insert(yShape.begin(), yShape.end());
-        CDM::VarVec vars = getCDM().getVariables();
-        CoordinateSystem::ConstAxisList axes = csmi->second->getAxes();
-        for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-            if ((axes.end() == find_if(axes.begin(), axes.end(), CDMNameEqualPtr(v->getName()))) &&
-                (p_->projectionVariables.end() == p_->projectionVariables.find(v->getName()))) {
-                // v is not an axis
-                // v is not a projectionVariable
-                vector<string> vShape = getCDM().getVariable(v->getName()).getShape();
-                sort(vShape.begin(), vShape.end());
-                vector<string> intersect;
-                set_intersection(geoDimensions.begin(), geoDimensions.end(),
-                                 vShape.begin(), vShape.end(),
-                                 back_inserter(intersect));
-                if (intersect.size() > 0) {
-                    cdm_->removeVariable(v->getName());
-                    LOG4FIMEX(logger, Logger::WARN, "removing variable " << v->getName() << " since it is not compatible with the reprojected coordinates");
-                }
-            }
-        }
-    }
-
-    CoordSysMap csMapOut;
-    // make the coordinateSystems minimal
-    for (CoordSysMap::iterator csmi = coordSysMap.begin(); csmi != coordSysMap.end(); ++csmi) {
-        boost::shared_ptr<CoordinateSystem> cs(new CoordinateSystem());
-        cs->setConventionName(csmi->second->getConventionName());
-        cs->setAxis(csmi->second->getGeoXAxis());
-        cs->setAxis(csmi->second->getGeoYAxis());
-        // find lat and lon, eventually different from GeoX and GeoY
-
-        if (csmi->second->hasProjection()) {
-            cs->setProjection(csmi->second->getProjection());
-        }
-        if (csmi->second->hasAxisType(CoordinateAxis::Lon)) {
-            cs->setAxis(csmi->second->findAxisOfType(CoordinateAxis::Lon));
-        }
-        if (csmi->second->hasAxisType(CoordinateAxis::Lat)) {
-            cs->setAxis(csmi->second->findAxisOfType(CoordinateAxis::Lat));
-        }
-
-        // add all variables to the coordinate system
-        for (map<string, string>::const_iterator v = p_->projectionVariables.begin(); v != p_->projectionVariables.end(); ++v) {
-            if (cs->horizontalId() == v->second) {
-                cs->setCSFor(v->first);
-            }
-        }
-
-        LOG4FIMEX(logger,Logger::DEBUG, "interpolator of cs " << *cs);
-        csMapOut[csmi->first] = cs;
-    }
-    if (csMapOut.empty()) {
-        LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems" << (withProjection ? " with projection found, maybe you should try coordinate interpolation" : " found"));
-        throw CDMException("no coordinate-systems found");
-    }
-    for (CoordSysMap::iterator csIt = csMapOut.begin(); csIt != csMapOut.end(); ++csIt) {
-        assert(csIt->second.get() != 0);
-    }
-    return csMapOut;
+    return coordSysMap;
 }
 
 /**
