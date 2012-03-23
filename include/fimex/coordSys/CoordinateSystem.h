@@ -29,6 +29,8 @@
 
 #include <functional>
 #include <vector>
+#include <map>
+#include <string>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
 #include "fimex/coordSys/CoordinateAxis.h"
@@ -198,6 +200,21 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
  * fetch all coordinate system from a MetNoFimex::CDM
  */
 std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm);
+
+/**
+ * find all horizontal coordinate systems, either with or without projections, list
+ * the variables belonging to the coordinate systems and mention all incompatible variables
+ * with a coordinate system
+ *
+ * @param withProjection select only horizontal coordinatesystems either with (true) or without (false) projection
+ * @param cdm the CDM to search coordinate systems in
+ * @param systems Output of coordinateSystems (horizontalId -> system)
+ * @param variables Output with all variables having a horizontal coordinate system
+ * @param incompatibleVariables Output with a all variables which have a partial horizontal coordinate system
+ *        which might interfere when changing dimensions
+ * @return number of horizontal coordinate systems found, i.e. systems.size()
+ */
+int findBestHorizontalCoordinateSystems(bool withProjection, const CDM& cdm, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
 
 /**
  * Functor to check if a coordinate system completely describes a variable, i.e. all axes match fully.

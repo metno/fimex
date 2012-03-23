@@ -14,9 +14,14 @@
  */
 
 /**
- * the default radius of a sperical earth in meter
+ * the default radius of a spherical earth in meter
  */
 #define MIFI_EARTH_RADIUS_M 6371000
+
+/**
+ * the default earth projection (WGS84 latlong)
+ */
+#define MIFI_WGS84_LATLON_PROJ4 "+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs"
 
 /**
  * The MIFI_FILETYPE_* define the available input and output file-formats

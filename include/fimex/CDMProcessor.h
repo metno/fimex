@@ -54,6 +54,12 @@ public:
      * @param varName name of the variable to de-accumulate
      */
     void deAccumulate(const std::string& varName);
+    /**
+     * rotate the vector from direction in x/y axes to direction in lat/lon axes
+     * @param varNameX the x-part of the vector
+     * @param varNameY the y-part of the vector
+     */
+    void rotateVectorToLatLon(const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY);
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 private:
     // pimpl

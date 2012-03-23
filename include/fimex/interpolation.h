@@ -158,6 +158,26 @@ extern int mifi_get_vector_reproject_matrix(const char* proj_input,
                         int ox, int oy,
                         double* matrix);
 
+/**
+ * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f without changing the axes, just the
+ * direction of the vectors.
+ *
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
+ * @param proj_input proj4-string of projection of infield
+ * @param proj_output proj4-string of projection of outfield
+ * @param in_x_field field of size ox*oy with the values in the input-projection in_x_field[x+oy*y] = inXAxis[x]. The values must be in radian or m.
+ * @param in_y_field field of size ox*oy with the values in the input-projection in_y_field[x+oy*y] = inYAxis[y]. The values must be in radian or m.
+ * @param ox x-dimension of in/outfield
+ * @param oy y-dimension of in/outfield
+ * @param matrix matrix of size (4*ox*oy)
+ * @return MIFI_OK or error value
+ */
+int mifi_get_vector_reproject_matrix_field(const char* proj_input,
+                        const char* proj_output,
+                        const double* in_x_field, const double* in_y_field, // both ox*oy
+                        int ox, int oy,
+                        double* matrix);
+
 
 /**
  * Get the nearest neighbor of a value. Values are rounded to array-position.

@@ -211,6 +211,23 @@ public:
     virtual void addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process);
 };
 
+/**
+ * convert the data inplace to an array useful for interpolation (i.e. badValue->nan)
+ * @param inData
+ * @param badValue
+ * @return
+ */
+extern boost::shared_array<float> data2InterpolationArray(const boost::shared_ptr<Data>& inData, double badValue);
+/**
+ * convert the data inplace from an interpolation-array (with badValue) to one used within data
+ * @param iData
+ * @param size
+ * @param badValue
+ * @return
+ */
+extern boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue);
+
+
 }
 
 #endif /*CDMINTERPOLATOR_H_*/

@@ -196,6 +196,165 @@ int mifi_interpolate_f(const int method,
     return mifi_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
+// common implementation of mifi_get_vector_reproject_matrix_*
+static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ,
+                        const double* in_x_field, const double* in_y_field, // both ox*oy
+                        const double* out_x_field, const double* out_y_field, // both ox*oy
+                        double* pointsZ, // ox*oy, used within proj, but values not used
+                        int ox, int oy,
+                        double* matrix) // 4*ox*oy
+{
+    // calculation of deltas: (x+d, y), (x, y+d) -> proj-values
+    double* out_x_delta_proj_axis = (double*) malloc(ox*oy*sizeof(double));
+    double* out_y_delta_proj_axis = (double*) malloc(ox*oy*sizeof(double));
+
+    if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL || pointsZ == NULL) {
+        fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
+        exit(1);
+    }
+    {
+        // conversion along x axis
+        // delta usually .1% of distance between neighboring cells
+        double delta;
+        if (ox > 1) {
+            if (oy > 1) {
+                delta = 1e-3 * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+            } else {
+                delta = 1e-3 * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
+            }
+        } else {
+            if (oy > 1) {
+                delta = 1e-3 * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
+            } else {
+                delta = 1e-3; // no neighbors?
+            }
+        }
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
+                out_x_delta_proj_axis[y*ox +x] = in_x_field[y*ox +x] + delta;
+                out_y_delta_proj_axis[y*ox +x] = in_y_field[y*ox +x];
+                pointsZ[y*ox +x] = 0;
+            }
+        }
+        if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_delta_proj_axis,
+                out_y_delta_proj_axis, pointsZ) != 0) {
+            fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+            free(out_y_delta_proj_axis);
+            free(out_x_delta_proj_axis);
+            return MIFI_ERROR;
+        }
+
+        // the deltaInv is rather important for sign than for magnitude
+        double deltaInv = 1/delta;
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
+                matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
+                        - out_x_field[y*ox+x]) * deltaInv;
+                matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
+                        - out_y_field[y*ox+x]) * deltaInv;
+            }
+        }
+    }
+
+    {
+        // conversion along y axis
+        // delta usually .1% of distance between neighboring cells
+        double delta;
+        if (ox > 1) {
+            if (oy > 1) {
+                delta = 1e-3 * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+            } else {
+                delta = 1e-3 * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
+            }
+        } else {
+            if (oy > 1) {
+                delta = 1e-3 * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
+            } else {
+                delta = 1e-3; // no neighbors?
+            }
+        }
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
+                out_x_delta_proj_axis[y*ox +x] = in_x_field[y*ox +x];
+                out_y_delta_proj_axis[y*ox +x] = in_y_field[y*ox +x] + delta;
+                pointsZ[y*ox +x] = 0;
+            }
+        }
+        if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_delta_proj_axis,
+                out_y_delta_proj_axis, pointsZ) != 0) {
+            fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+            free(out_y_delta_proj_axis);
+            free(out_x_delta_proj_axis);
+            free(pointsZ);
+            return MIFI_ERROR;
+        }
+
+        // the deltaInv is rather important for sign than for magnitude
+        double deltaInv = 1/delta;
+        for (int y = 0; y < oy; ++y) {
+            for (int x = 0; x < ox; ++x) {
+                matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
+                        - out_x_field[y*ox+x]) * deltaInv;
+                matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
+                        - out_y_field[y*ox+x]) * deltaInv;
+                //fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[mifi_3d_array_position(x,y,0,ox,oy,4)], matrix[mifi_3d_array_position(x,y,1,ox,oy,4)], matrix[mifi_3d_array_position(x,y,2,ox,oy,4)], matrix[mifi_3d_array_position(x,y,3,ox,oy,4)]);
+            }
+        }
+    }
+    free(out_y_delta_proj_axis);
+    free(out_x_delta_proj_axis);
+    return MIFI_OK;
+}
+
+
+int mifi_get_vector_reproject_matrix_field(const char* proj_input,
+                        const char* proj_output,
+                        const double* in_x_field, const double* in_y_field, // both ox*oy
+                        int ox, int oy,
+                        double* matrix) // 4*ox*oy
+{
+    // init projections
+    projPJ inputPJ;
+    projPJ outputPJ;
+    if (MIFI_DEBUG > 0) {
+        fprintf(stderr, "input proj: %s\n", proj_input);
+        fprintf(stderr, "output proj: %s\n", proj_output);
+    }
+
+    if (!(inputPJ = pj_init_plus(proj_input))) {
+        fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+        return MIFI_ERROR;
+    }
+    if (!(outputPJ = pj_init_plus(proj_output))) {
+        fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+        pj_free(inputPJ);
+        return MIFI_ERROR;
+    }
+    double* out_x_field = (double*) malloc(ox*oy*sizeof(double));
+    double* out_y_field = (double*) malloc(ox*oy*sizeof(double));
+    double* pointsZ     = (double*) calloc(sizeof(double),ox*oy); // z currently of no interest, no height attached to values
+    if (out_x_field == NULL || out_y_field == NULL || pointsZ == NULL) {
+        fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
+        exit(1);
+    }
+    memcpy(out_x_field, in_x_field, ox*oy*sizeof(double));
+    memcpy(out_y_field, in_y_field, ox*oy*sizeof(double));
+    int retVal = MIFI_ERROR;
+    if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_field, out_y_field, pointsZ) != 0) {
+        fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+        retVal = MIFI_ERROR;
+    } else {
+        // start real calc
+        retVal = mifi_get_vector_reproject_matrix_proj(inputPJ, outputPJ, in_x_field, in_y_field, out_x_field, out_y_field, pointsZ, ox, oy, matrix);
+    }
+    pj_free(inputPJ);
+    pj_free(outputPJ);
+    free(out_x_field);
+    free(out_y_field);
+    free(pointsZ);
+    return retVal;
+}
+
 int mifi_get_vector_reproject_matrix(const char* proj_input,
                         const char* proj_output,
                         const double* out_x_axis, const double* out_y_axis,
@@ -228,139 +387,42 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
     convertAxis(out_y_axis, oy, out_y_axis_type, outYAxis);
 
 
-    double* in_xproj_axis = malloc(ox*oy*sizeof(double));
-    double* in_yproj_axis = malloc(ox*oy*sizeof(double));
-    if (in_xproj_axis == NULL || in_yproj_axis == NULL) {
+    double* in_xproj_axis = (double*) malloc(ox*oy*sizeof(double));
+    double* in_yproj_axis = (double*) malloc(ox*oy*sizeof(double));
+    double* out_xproj_axis = (double*) malloc(ox*oy*sizeof(double));
+    double* out_yproj_axis = (double*) malloc(ox*oy*sizeof(double));
+    double* pointsZ        = (double*) calloc(sizeof(double),ox*oy); // z currently of no interest, no height attached to values
+    if (in_xproj_axis == NULL || in_yproj_axis == NULL ||
+        out_xproj_axis == NULL || out_yproj_axis == NULL ||
+        pointsZ == NULL) {
         fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
         exit(1);
     }
-    double pointsZ[ox*oy]; // z currently of no interest, no height attached to values
     for (int y = 0; y < oy; ++y) {
         for (int x = 0; x < ox; ++x) {
             in_xproj_axis[y*ox +x] = outXAxis[x];
             in_yproj_axis[y*ox +x] = outYAxis[y];
-            pointsZ[y*ox +x] = 0;
+            out_xproj_axis[y*ox +x] = outXAxis[x];
+            out_yproj_axis[y*ox +x] = outYAxis[y];
         }
     }
 
     // getting positions in the original projection
+    int retVal = MIFI_ERROR;
     if (pj_transform(outputPJ, inputPJ, ox*oy, 0, in_xproj_axis, in_yproj_axis, pointsZ) != 0) {
         fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
-        pj_free(inputPJ);
-        pj_free(outputPJ);
-        free(in_yproj_axis);
-        free(in_xproj_axis);
-        return MIFI_ERROR;
-    }
-
-    // calculation of deltas: (x+d, y), (x, y+d) -> proj-values
-    double* out_x_delta_proj_axis = malloc(ox*oy*sizeof(double));
-    double* out_y_delta_proj_axis = malloc(ox*oy*sizeof(double));
-    if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL) {
-        fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
-        exit(1);
-    }
-    {// conversion along x axis
-        // delta usually .1% of distance between neighboring cells
-        double delta;
-        if (ox > 1) {
-            if (oy > 1) {
-                delta = 1e-3 * (in_xproj_axis[(1)*ox +(1)] - in_xproj_axis[0]);
-            } else {
-                delta = 1e-3 * (in_xproj_axis[(0)*ox +(1)] - in_xproj_axis[0]);
-            }
-        } else {
-            if (oy > 1) {
-                delta = 1e-3 * (in_xproj_axis[(1)*ox +(0)] - in_xproj_axis[0]);
-            } else {
-                delta = 1e-3; // no neighbors?
-            }
-        }
-        for (int y = 0; y < oy; ++y) {
-            for (int x = 0; x < ox; ++x) {
-                out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x] + delta;
-                out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x];
-                pointsZ[y*ox +x] = 0;
-            }
-        }
-        if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_delta_proj_axis,
-                out_y_delta_proj_axis, pointsZ) != 0) {
-            fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
-            pj_free(inputPJ);
-            pj_free(outputPJ);
-            free(in_yproj_axis);
-            free(in_xproj_axis);
-            free(out_y_delta_proj_axis);
-            free(out_x_delta_proj_axis);
-            return MIFI_ERROR;
-        }
-
-        // the deltaInv is rather important for sign than for magnitude
-        double deltaInv = 1/delta;
-        for (int y = 0; y < oy; ++y) {
-            for (int x = 0; x < ox; ++x) {
-                matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
-                        - outXAxis[x]) * deltaInv;
-                matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
-                        - outYAxis[y]) * deltaInv;
-            }
-        }
-    }
-
-    {	// conversion along y axis
-        // delta usually .1% of distance between neighboring cells
-        double delta;
-        if (ox > 1) {
-            if (oy > 1) {
-                delta = 1e-3 * (in_xproj_axis[(1)*ox +(1)] - in_xproj_axis[0]);
-            } else {
-                delta = 1e-3 * (in_xproj_axis[(0)*ox +(1)] - in_xproj_axis[0]);
-            }
-        } else {
-            if (oy > 1) {
-                delta = 1e-3 * (in_xproj_axis[(1)*ox +(0)] - in_xproj_axis[0]);
-            } else {
-                delta = 1e-3; // no neighbors?
-            }
-        }
-        for (int y = 0; y < oy; ++y) {
-            for (int x = 0; x < ox; ++x) {
-                out_x_delta_proj_axis[y*ox +x] = in_xproj_axis[y*ox +x];
-                out_y_delta_proj_axis[y*ox +x] = in_yproj_axis[y*ox +x] + delta;
-                pointsZ[y*ox +x] = 0;
-            }
-        }
-        if (pj_transform(inputPJ, outputPJ, ox*oy, 0, out_x_delta_proj_axis,
-                out_y_delta_proj_axis, pointsZ) != 0) {
-            fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
-            pj_free(inputPJ);
-            pj_free(outputPJ);
-            free(in_yproj_axis);
-            free(in_xproj_axis);
-            free(out_y_delta_proj_axis);
-            free(out_x_delta_proj_axis);
-            return MIFI_ERROR;
-        }
-
-        // the deltaInv is rather important for sign than for magnitude
-        double deltaInv = 1/delta;
-        for (int y = 0; y < oy; ++y) {
-            for (int x = 0; x < ox; ++x) {
-                matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
-                        - outXAxis[x]) * deltaInv;
-                matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
-                        - outYAxis[y]) * deltaInv;
-                //fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[mifi_3d_array_position(x,y,0,ox,oy,4)], matrix[mifi_3d_array_position(x,y,1,ox,oy,4)], matrix[mifi_3d_array_position(x,y,2,ox,oy,4)], matrix[mifi_3d_array_position(x,y,3,ox,oy,4)]);
-            }
-        }
+        retVal = MIFI_ERROR;
+    } else {
+        // start real calc
+        retVal = mifi_get_vector_reproject_matrix_proj(inputPJ, outputPJ, in_xproj_axis, in_yproj_axis, out_xproj_axis, out_yproj_axis, pointsZ, ox, oy, matrix);
     }
     pj_free(inputPJ);
     pj_free(outputPJ);
     free(in_yproj_axis);
     free(in_xproj_axis);
-    free(out_y_delta_proj_axis);
-    free(out_x_delta_proj_axis);
-    return MIFI_OK;
+    free(out_yproj_axis);
+    free(out_xproj_axis);
+    return retVal;
 }
 
 int mifi_vector_reproject_values_by_matrix_f(int method,

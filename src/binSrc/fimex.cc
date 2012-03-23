@@ -168,6 +168,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "output.type", vm);
     writeOption<string>(out, "output.config", vm);
     writeVectorOptionString(out, "process.deaccumulateVariable", vm);
+    writeVectorOptionString(out, "process.rotateVectorToLatLonX", vm);
+    writeVectorOptionString(out, "process.rotateVectorToLatLonY", vm);
     writeOption<string>(out, "qualityExtract.autoConfigString", vm);
     writeOption<string>(out, "qualityExtract.config", vm);
     writeOption<string>(out, "qualityExtract.printNcML", vm);
@@ -298,8 +300,8 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 }
 
 static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! (vm.count("process.deaccumulateVariable"))) {
-        LOG4FIMEX(logger, Logger::DEBUG, "process.deaccumulateVariable not found, no process used");
+    if (! (vm.count("process.deaccumulateVariable") || vm.count("process.rotateVectorToLatLonX"))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "process.deaccumulateVariable or rotateVectorToLatLonX not found, no process used");
         return dataReader;
     }
     boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(boost::shared_ptr<CDMReader>(dataReader)));
@@ -308,6 +310,11 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
         for (size_t i = 0; i < vars.size(); i++) {
             processor->deAccumulate(vars.at(i));
         }
+    }
+    if (vm.count("process.rotateVectorToLatLonX")) {
+        vector<string> xvars = vm["process.rotateVectorToLatLonX"].as<vector<string> >();
+        vector<string> yvars = vm["process.rotateVectorToLatLonY"].as<vector<string> >();
+        processor->rotateVectorToLatLon(xvars, yvars);
     }
     return processor;
 }
@@ -654,6 +661,8 @@ int run(int argc, char* args[])
         ("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
         ("output.config", po::value<string>(), "non-standard output configuration")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
+        ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
+        ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
 #if BOOST_VERSION >= 104000
         ("process.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of process")
 #else

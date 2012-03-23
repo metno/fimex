@@ -80,7 +80,7 @@ struct CDMInterpolatorInternals {
     map<string, boost::shared_ptr<CachedVectorReprojection> > cachedVectorReprojection;
 };
 
-const std::string LAT_LON_PROJSTR = "+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs";
+const std::string LAT_LON_PROJSTR = MIFI_WGS84_LATLON_PROJ4;
 
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
@@ -101,14 +101,14 @@ CDMInterpolator::~CDMInterpolator()
 {
 }
 
-static boost::shared_array<float> data2InterpolationArray(const boost::shared_ptr<Data>& inData, double badValue) {
+boost::shared_array<float> data2InterpolationArray(const boost::shared_ptr<Data>& inData, double badValue) {
     boost::shared_array<float> array = inData->asFloat();
     mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
     return array;
 }
 
 // for performance reasons, the iData-reference will be modified and used within the return data
-static boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
+boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
     mifi_nanf2bad(&iData[0], &iData[size], badValue);
     return createData(size, iData);
 }
