@@ -33,11 +33,6 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/coordSys/Projection.h"
 
-// include projects.h since I need to access some of projs internals (proj -V)
-// PJ_LIB__ required for LP.phi, LP.lam
-#include <projects.h>
-
-
 namespace MetNoFimex
 {
 
@@ -49,51 +44,51 @@ CDMAttribute::CDMAttribute()
 CDMAttribute::CDMAttribute(std::string name, std::string value)
 : name(name), datatype(CDM_STRING)
 {
-	boost::shared_array<char> cstr(new char [value.size()]);
-	for (size_t i = 0; i < value.size(); i++) {
-		cstr[i] = value.at(i);
-	}
-	data = createData(value.size(), cstr);
+    boost::shared_array<char> cstr(new char [value.size()]);
+    for (size_t i = 0; i < value.size(); i++) {
+        cstr[i] = value.at(i);
+    }
+    data = createData(value.size(), cstr);
 }
 
 
 CDMAttribute::CDMAttribute(std::string name, double value)
 : name(name), datatype(CDM_DOUBLE)
 {
-	boost::shared_array<double> xvalue(new double[1]);
-	xvalue[0] = value;
-	data = createData(1, xvalue);
+    boost::shared_array<double> xvalue(new double[1]);
+    xvalue[0] = value;
+    data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, int value)
 : name(name), datatype(CDM_INT)
 {
-	boost::shared_array<int> xvalue(new int[1]);
-	xvalue[0] = value;
+    boost::shared_array<int> xvalue(new int[1]);
+    xvalue[0] = value;
     data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, short value)
 : name(name), datatype(CDM_SHORT)
 {
-	boost::shared_array<short> xvalue(new short[1]);
-	xvalue[0] = value;
+    boost::shared_array<short> xvalue(new short[1]);
+    xvalue[0] = value;
     data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, char value)
 : name(name), datatype(CDM_CHAR)
 {
-	boost::shared_array<char> xvalue(new char[1]);
-	xvalue[0] = value;
+    boost::shared_array<char> xvalue(new char[1]);
+    xvalue[0] = value;
     data = createData(1, xvalue);
 }
 
 CDMAttribute::CDMAttribute(std::string name, float value)
 : name(name), datatype(CDM_FLOAT)
 {
-	boost::shared_array<float> xvalue(new float[1]);
-	xvalue[0] = value;
+    boost::shared_array<float> xvalue(new float[1]);
+    xvalue[0] = value;
     data = createData(1, xvalue);
 }
 
@@ -105,10 +100,10 @@ CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, boost::shared
 CDMAttribute::CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException)
 : name(name)
 {
-	this->datatype = string2datatype(datatype);
-	std::vector<std::string> vals;
-	vals.push_back(value);
-	initDataByArray(vals);
+    this->datatype = string2datatype(datatype);
+    std::vector<std::string> vals;
+    vals.push_back(value);
+    initDataByArray(vals);
 }
 
 CDMAttribute::CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException)
@@ -165,7 +160,7 @@ const std::string CDMAttribute::getStringValue() const
 
 void CDMAttribute::toXMLStream(std::ostream& out, const std::string& indent) const
 {
-	out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
+    out << indent << "<attribute name=\"" << getName() << "\" type=\"" << datatype2string(getDataType()) << "\" value=\"" << getStringValue() << "\" />" << std::endl;
 }
 
 /* init data arrays for all types */
