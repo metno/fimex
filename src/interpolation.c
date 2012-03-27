@@ -197,6 +197,64 @@ int mifi_interpolate_f(const int method,
 }
 
 // common implementation of mifi_get_vector_reproject_matrix_*
+static int mifi_get_vector_reproject_matrix_proj_new(projPJ inputPJ, projPJ outputPJ,
+                        const double* in_x_field, const double* in_y_field, // both ox*oy
+                        const double* out_x_field, const double* out_y_field, // both ox*oy
+                        double* pointsZ, // ox*oy, used within proj, but values not used
+                        int ox, int oy,
+                        double* matrix) // 4*ox*oy
+{
+
+    {
+        // conversion along x axis
+        if (ox > 1) {
+            double delta = in_x_field[1] - in_x_field[0];
+
+            // the deltaInv is rather important for sign than for magnitude
+            double deltaInv = 1/delta;
+            for (int y = 0; y < oy; ++y) {
+                for (int x = 0; x < (ox-1); ++x) {
+                    matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_field[y*ox+(x+1)]
+                                                                    - out_x_field[y*ox+x]) * deltaInv;
+                    matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_field[y*ox+(x+1)]
+                                                                    - out_y_field[y*ox+x]) * deltaInv;
+                }
+            }
+        }
+        // cover border (and ox = 1) case, no rotation
+        for (int y = 0; y < oy; ++y) {
+            matrix[mifi_3d_array_position(0,ox-1,y,4,ox,oy)] = 1;
+            matrix[mifi_3d_array_position(1,ox-1,y,4,ox,oy)] = 0;
+        }
+    }
+
+    {
+        // conversion along y axis
+        if (oy > 1) {
+            double delta = in_y_field[(1)*ox +(0)] - in_y_field[0];
+            // the deltaInv is rather important for sign than for magnitude
+            double deltaInv = 1/delta;
+            for (int y = 0; y < (oy-1); ++y) {
+                for (int x = 0; x < ox; ++x) {
+                    matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_field[(y+1)*ox+x]
+                                                                    - out_x_field[y*ox+x]) * deltaInv;
+                    matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_field[(y+1)*ox+x]
+                                                                    - out_y_field[y*ox+x]) * deltaInv;
+                //fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[mifi_3d_array_position(x,y,0,ox,oy,4)], matrix[mifi_3d_array_position(x,y,1,ox,oy,4)], matrix[mifi_3d_array_position(x,y,2,ox,oy,4)], matrix[mifi_3d_array_position(x,y,3,ox,oy,4)]);
+                }
+            }
+        }
+        // cover border (and oy = 1) case, no rotation
+        for (int x = 0; x < ox; ++x) {
+            matrix[mifi_3d_array_position(0,x,oy-1,4,ox,oy)] = 0;
+            matrix[mifi_3d_array_position(1,x,oy-1,4,ox,oy)] = 1;
+        }
+    }
+    return MIFI_OK;
+}
+
+
+// common implementation of mifi_get_vector_reproject_matrix_*
 static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ,
                         const double* in_x_field, const double* in_y_field, // both ox*oy
                         const double* out_x_field, const double* out_y_field, // both ox*oy
@@ -212,21 +270,22 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
         fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
         exit(1);
     }
+    // delta usually .1% of distance between neighboring cells
+    const double xDelta = 1e-3;
     {
         // conversion along x axis
-        // delta usually .1% of distance between neighboring cells
         double delta;
         if (ox > 1) {
             if (oy > 1) {
-                delta = 1e-3 * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+                delta = xDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
             } else {
-                delta = 1e-3 * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
+                delta = xDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
             }
         } else {
             if (oy > 1) {
-                delta = 1e-3 * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
+                delta = xDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
             } else {
-                delta = 1e-3; // no neighbors?
+                delta = xDelta; // no neighbors?
             }
         }
         for (int y = 0; y < oy; ++y) {
@@ -262,15 +321,15 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
         double delta;
         if (ox > 1) {
             if (oy > 1) {
-                delta = 1e-3 * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+                delta = xDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
             } else {
-                delta = 1e-3 * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
+                delta = xDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
             }
         } else {
             if (oy > 1) {
-                delta = 1e-3 * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
+                delta = xDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
             } else {
-                delta = 1e-3; // no neighbors?
+                delta = xDelta; // no neighbors?
             }
         }
         for (int y = 0; y < oy; ++y) {
