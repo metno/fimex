@@ -1,3 +1,14 @@
+  * 2012-03-27 fimex-0.37
+    * fix colon-separated variable-indicators for felt
+    * fix axes in vector-interpolation (deg2rad)
+    * disabling colon delimiter in wdb-sourcestrings
+    * performance-improvements/memory reduction in NcmlCDMReader
+    * adding de-accumulation processor
+    * synchronize default fill-value with netcdf
+    * fine-tuning usage of surface-variables from felt
+    * allowing to force earth-figure in grib-files
+    * template interpolation supports several coordinate systems
+    * adding alpha-version of vector to latlon rotation
   * 2012-03-02 fimex-0.36
     * interpolation to simple list of lat/lon values (e.g. multiple profiles)
     * avoid numerical effect in linear interpolation
