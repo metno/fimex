@@ -35,6 +35,7 @@
 #include <iostream>
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/Projection.h"
+#include "fimex/deprecated.h"
 
 
 namespace MetNoFimex
@@ -199,7 +200,12 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
 /**
  * fetch all coordinate system from a MetNoFimex::CDM
  */
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm);
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
+/**
+ * @deprecated call the non-constant version, since some "conventions" require strange manipulations.
+ *    Non-constant CDM's can be retrieved via CDMReader::getInternalCDM
+ */
+DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm));
 
 /**
  * find all horizontal coordinate systems, either with or without projections, list

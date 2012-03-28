@@ -45,20 +45,13 @@ CF1_xCoordSysBuilder::~CF1_xCoordSysBuilder()
 {
 }
 
-void CF1_xCoordSysBuilder::setCDM(boost::shared_ptr<CDM> cdm)
+bool CF1_xCoordSysBuilder::isMine(const CDM& cdm)
 {
-    this->cdm_ = cdm;
-}
-
-bool CF1_xCoordSysBuilder::isMine()
-{
-    if (cdm_.get() == 0) return false;
-
     CDMAttribute conventionAttr;
     string conventions;
-    if (cdm_->getAttribute(cdm_->globalAttributeNS(), "Conventions", conventionAttr)) {
+    if (cdm.getAttribute(cdm.globalAttributeNS(), "Conventions", conventionAttr)) {
         conventions = conventionAttr.getStringValue();
-    } else if (cdm_->getAttribute(cdm_->globalAttributeNS(), "conventions", conventionAttr)) {
+    } else if (cdm.getAttribute(cdm.globalAttributeNS(), "conventions", conventionAttr)) {
         conventions = conventionAttr.getStringValue();
     }
     if ((conventions.find("CF-1.") != string::npos) ||
@@ -200,28 +193,26 @@ static string getPtrName(const boost::shared_ptr<const CDMNamedEntity>& ptr)
     return ptr->getName();
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems()
+std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 {
-    if (cdm_.get() == 0) return std::vector<boost::shared_ptr<const CoordinateSystem> >(0);
-
     typedef CoordinateSystem::AxisPtr AxisPtr;
     // step 1: find all coordinate axes, that are dimensions and coordinates
     map<string, AxisPtr> coordinateAxes;
     {
         set<string> tmpCoordinateAxes;
-        const CDM::DimVec& dims = cdm_->getDimensions();
+        const CDM::DimVec& dims = cdm.getDimensions();
         for (CDM::DimVec::const_iterator dim = dims.begin(); dim != dims.end(); ++dim) {
             tmpCoordinateAxes.insert(dim->getName());
         }
-        vector<string> vars = cdm_->findVariables("coordinates", ".*");
+        vector<string> vars = cdm.findVariables("coordinates", ".*");
         for (vector<string>::iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-            vector<string> coordinates = tokenize(cdm_->getAttribute(*varIt, "coordinates").getStringValue(), " ");
+            vector<string> coordinates = tokenize(cdm.getAttribute(*varIt, "coordinates").getStringValue(), " ");
             tmpCoordinateAxes.insert(coordinates.begin(), coordinates.end());
         }
         // create CoordinateAxis
         for (set<string>::iterator coord = tmpCoordinateAxes.begin(); coord != tmpCoordinateAxes.end(); ++coord) {
-            if (cdm_->hasVariable(*coord)) {
-                coordinateAxes[*coord] = AxisPtr(new CoordinateAxis(cdm_->getVariable(*coord)));
+            if (cdm.hasVariable(*coord)) {
+                coordinateAxes[*coord] = AxisPtr(new CoordinateAxis(cdm.getVariable(*coord)));
             } else {
                 // add a dimension without a variable with a 'virtual' variable
                 vector<string> shape(1, *coord);
@@ -232,10 +223,10 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
 
     // step 2: set the axis type of the axes of each coordinate system
     {
-        const CDM::DimVec& dims = cdm_->getDimensions();
+        const CDM::DimVec& dims = cdm.getDimensions();
         for (map<string, AxisPtr >::iterator ca = coordinateAxes.begin(); ca != coordinateAxes.end(); ++ca) {
             AxisPtr& axis = ca->second;
-            CoordinateAxis::AxisType type = getAxisTypeCF1_x(*cdm_, axis->getName());
+            CoordinateAxis::AxisType type = getAxisTypeCF1_x(cdm, axis->getName());
             axis->setAxisType(type);
             if (find_if(dims.begin(), dims.end(), CDMNameEqual(axis->getName())) == dims.end()) {
                 axis->setExplicit(false);
@@ -250,12 +241,12 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     // the coordinateSystems here are intermediate, since the axes still don't have types
     map<string, CoordinateSystem> coordSystems;
     {
-        const CDM::VarVec& vars = cdm_->getVariables();
+        const CDM::VarVec& vars = cdm.getVariables();
         for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
             if (coordinateAxes.find(varIt->getName()) != coordinateAxes.end()) {
                 // variable is coordinateAxis, i.e. it doesn't need a coordinateSystem
             } else {
-                set<string> axes = getCoordinateAxesNamesCF1_x(*cdm_, *varIt);
+                set<string> axes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
                 if (axes.size()) {
                     CoordinateSystem cs("CF-1.X");
                     for (set<string>::iterator axis = axes.begin(); axis != axes.end(); ++axis) {
@@ -276,13 +267,13 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     //         e.g. isComplete, isCSFor, isSimpleSpatial, ... (transformations?)
     // isComplete, isCSFor
     {
-        const CDM::VarVec& vars = cdm_->getVariables();
+        const CDM::VarVec& vars = cdm.getVariables();
         for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
             CoordinateSystem::ConstAxisList csAxesPtr = cit->second.getAxes();
             vector<string> csAxes;
             transform(csAxesPtr.begin(), csAxesPtr.end(), back_inserter(csAxes), getPtrName);
             for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-                set<string> varAxes = getCoordinateAxesNamesCF1_x(*cdm_, *varIt);
+                set<string> varAxes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
                 if (includes(varAxes.begin(), varAxes.end(),
                              csAxes.begin(), csAxes.end())) {
                     // all csAxes part of varAxes
@@ -324,17 +315,17 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
 
     // transformations
     {
-        const CDM::VarVec& vars = cdm_->getVariables();
+        const CDM::VarVec& vars = cdm.getVariables();
         for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
             CoordinateSystem& cs = cit->second;
             // set the projection of the first matching var
             for (CDM::VarVec::const_iterator var = vars.begin(); (var != vars.end() && !cs.hasProjection()); ++var) {
                 if (cs.isCSFor(var->getName()) && cs.isComplete(var->getName())) {
                     CDMAttribute mappingAttr;
-                    if (cdm_->getAttribute(var->getName(), "grid_mapping", mappingAttr)) {
+                    if (cdm.getAttribute(var->getName(), "grid_mapping", mappingAttr)) {
                         std::string varName = mappingAttr.getStringValue();
-                        if (cdm_->hasVariable(varName)) {
-                            boost::shared_ptr<Projection> proj = Projection::create(cdm_->getAttributes(varName));
+                        if (cdm.hasVariable(varName)) {
+                            boost::shared_ptr<Projection> proj = Projection::create(cdm.getAttributes(varName));
                             cs.setProjection(proj);
                         }
                     } else {

@@ -38,6 +38,7 @@
 #include "CoordSysImpl.h"
 #include "CoordSysBuilder.h"
 #include "CF1_xCoordSysBuilder.h"
+#include "WRFCoordSysBuilder.h"
 
 namespace MetNoFimex
 {
@@ -360,8 +361,11 @@ int findBestHorizontalCoordinateSystems(bool withProjection, const CDM& cdm, std
 }
 
 
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm) {
+    return listCoordinateSystems(const_cast<CDM&>(cdm));
+}
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm)
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm)
 {
     // the return value
     vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
@@ -369,14 +373,13 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(co
     vector<boost::shared_ptr<CoordSysBuilder> > builders;
     // TODO: support more conventions
     builders.push_back(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
+    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
 
     string logCat = "fimex/coordSys/CoordinateSystem";
-    boost::shared_ptr<CDM> cdmPtr(new CDM(cdm));
     for (size_t i = 0; i < builders.size(); ++i) {
         boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
-        builder->setCDM(cdmPtr);
-        if (builder->isMine()) {
-            vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems();
+        if (builder->isMine(cdm)) {
+            vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems(cdm);
             LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
             copy(myCoordSystems.begin(), myCoordSystems.end(), back_inserter(coordSystems));
         } else {

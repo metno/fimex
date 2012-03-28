@@ -27,6 +27,7 @@
 #ifndef COORDSYSBUILDER_H_
 #define COORDSYSBUILDER_H_
 
+
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
@@ -43,10 +44,9 @@ class CoordSysBuilder
 public:
     CoordSysBuilder() {};
     virtual ~CoordSysBuilder() {};
-    virtual void setCDM(boost::shared_ptr<CDM> cdm) = 0;
     virtual std::string getName() = 0;
-    virtual bool isMine() = 0;
-    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems() = 0;
+    virtual bool isMine(const CDM& cdm) = 0;
+    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm) = 0;
 };
 
 } /* namespace MetNoFimex */

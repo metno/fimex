@@ -31,15 +31,15 @@ namespace MetNoFimex {
 
 // retrieve size of data slice
 static size_t getSliceSize(const CDM& cdm, const CDMVariable& variable) {
-	size_t sliceSize = 1;
-	std::vector<std::string> shape = variable.getShape();
-	for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
-	    const CDMDimension& dim = cdm.getDimension(*dimIt);
-	    if (!dim.isUnlimited()) {
-	        sliceSize *= dim.getLength();
-	    }
-	}
-	return sliceSize;
+    size_t sliceSize = 1;
+    std::vector<std::string> shape = variable.getShape();
+    for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
+        const CDMDimension& dim = cdm.getDimension(*dimIt);
+        if (!dim.isUnlimited()) {
+            sliceSize *= dim.getLength();
+        }
+    }
+    return sliceSize;
 }
 
 CDMReader::CDMReader()
@@ -51,6 +51,12 @@ const CDM& CDMReader::getCDM() const
 {
     return *(cdm_.get());
 }
+
+CDM& CDMReader::getInternalCDM()
+{
+    return const_cast<CDM&>(getCDM());
+}
+
 
 boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
@@ -109,24 +115,24 @@ boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, cons
 
 boost::shared_ptr<Data> CDMReader::getData(const std::string& varName)
 {
-	const CDMVariable& variable = cdm_->getVariable(varName);
-	if (variable.hasData()) {
-		return variable.getData()->clone();
-	} else {
-		if (cdm_->hasUnlimitedDim(variable)) {
-			const CDMDimension* udim = cdm_->getUnlimitedDim();
-			size_t uDimSize = udim->getLength();
-			size_t sliceSize = getSliceSize(getCDM(), variable);
-			boost::shared_ptr<Data> data = createData(variable.getDataType(), uDimSize*sliceSize);
-			for (size_t i = 0; i < uDimSize; i++) {
-				boost::shared_ptr<Data> slice = getDataSlice(varName, i);
-				data->setValues(i*sliceSize, *slice, 0, sliceSize);
-			}
-			return data;
-		} else {
-			return getDataSlice(varName, 0);
-		}
-	}
+    const CDMVariable& variable = cdm_->getVariable(varName);
+    if (variable.hasData()) {
+        return variable.getData()->clone();
+    } else {
+        if (cdm_->hasUnlimitedDim(variable)) {
+            const CDMDimension* udim = cdm_->getUnlimitedDim();
+            size_t uDimSize = udim->getLength();
+            size_t sliceSize = getSliceSize(getCDM(), variable);
+            boost::shared_ptr<Data> data = createData(variable.getDataType(), uDimSize*sliceSize);
+            for (size_t i = 0; i < uDimSize; i++) {
+                boost::shared_ptr<Data> slice = getDataSlice(varName, i);
+                data->setValues(i*sliceSize, *slice, 0, sliceSize);
+            }
+            return data;
+        } else {
+            return getDataSlice(varName, 0);
+        }
+    }
 }
 
 void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset)
@@ -147,19 +153,19 @@ void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, d
 // handle data scaling using add_offset, scale_factor and _FillValue from the varName variable
 boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale, double unitOffset)
 {
-	// retrieve scale and offset
-	double scale, offset;
-	getScaleAndOffsetOf(varName, scale, offset);
+    // retrieve scale and offset
+    double scale, offset;
+    getScaleAndOffsetOf(varName, scale, offset);
 
-	// v = scale*x + offset
-	// v(newUnit) = unitScale*v + unitOffset;
-	double totalScale = scale * unitScale;
-	double totalOffset = unitScale*offset + unitOffset;
+    // v = scale*x + offset
+    // v(newUnit) = unitScale*v + unitOffset;
+    double totalScale = scale * unitScale;
+    double totalOffset = unitScale*offset + unitOffset;
 
-	// fillValue
-	double inFillValue = cdm_->getFillValue(varName);
+    // fillValue
+    double inFillValue = cdm_->getFillValue(varName);
 
-	return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
+    return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
 }
 boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& newUnit)
 {
@@ -177,7 +183,7 @@ boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName,
 
 boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-	return scaleDataOf(varName, getDataSlice(varName, unLimDimPos));
+    return scaleDataOf(varName, getDataSlice(varName, unLimDimPos));
 }
 
 boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos)
@@ -197,7 +203,7 @@ boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& v
 
 boost::shared_ptr<Data> CDMReader::getScaledData(const std::string& varName)
 {
-	return scaleDataOf(varName, getData(varName));
+    return scaleDataOf(varName, getData(varName));
 }
 
 boost::shared_ptr<Data> CDMReader::getScaledDataInUnit(const std::string& varName, const std::string& unit)
@@ -207,17 +213,17 @@ boost::shared_ptr<Data> CDMReader::getScaledDataInUnit(const std::string& varNam
 
 boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos)
 {
-	if (variable.hasData()) {
-		if (cdm_->hasUnlimitedDim(variable)) {
-			// cut out the unlimited dim data
-			size_t sliceSize = getSliceSize(*cdm_.get(), variable);
-			return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
-		} else {
-			return variable.getData()->clone();
-		}
-	} else {
-		return boost::shared_ptr<Data>();
-	}
+    if (variable.hasData()) {
+        if (cdm_->hasUnlimitedDim(variable)) {
+            // cut out the unlimited dim data
+            size_t sliceSize = getSliceSize(*cdm_.get(), variable);
+            return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
+        } else {
+            return variable.getData()->clone();
+        }
+    } else {
+        return boost::shared_ptr<Data>();
+    }
 }
 
 }

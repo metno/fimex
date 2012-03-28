@@ -1,5 +1,5 @@
 /*
- * Fimex, CF1xCoordSysBuilder.h
+ * Fimex, WRFCoordSysBuilder.h
  *
  * (C) Copyright 2012, met.no
  *
@@ -24,8 +24,8 @@
  *      Author: Heiko Klein
  */
 
-#ifndef CF1XCOORDSYSBUILDER_H_
-#define CF1XCOORDSYSBUILDER_H_
+#ifndef WRFCOORDSYSBUILDER_H_
+#define WRFCOORDSYSBUILDER_H_
 
 #include "coordSys/CoordSysBuilder.h"
 
@@ -33,17 +33,31 @@ namespace MetNoFimex
 {
 
 /**
- * coordinate system builder to handle CF-1.x and compatible coordinate systems (COARDS)
+ * class to build a CoordinateSystems for WRF model output, except ARW (Advanced Research WRF)
+ *
+ * I'm trying to follow:
+ * http://www.mmm.ucar.edu/wrf/users/docs/user_guide_V3.1/users_guide_chap5.htm
+ *
+ * @see ucar.nc2.dataset.conv.WRFConvention.java http://grepcode.com/file/repo1.maven.org/maven2/edu.ucar/netcdf/4.2/ucar/nc2/dataset/conv/WRFConvention.java
+ *
  */
-class CF1_xCoordSysBuilder : public CoordSysBuilder
+class WRFCoordSysBuilder: public MetNoFimex::CoordSysBuilder
 {
 public:
-    CF1_xCoordSysBuilder();
-    virtual ~CF1_xCoordSysBuilder();
-    virtual std::string getName() {return "CF-1.x";}
+    WRFCoordSysBuilder();
+    virtual ~WRFCoordSysBuilder();
+    virtual std::string getName() {return "WRF";}
     virtual bool isMine(const CDM& cdm);
+    /**
+     * List the CoordinateSystems belonging to WRF convention. This will actually
+     * change the cdm.
+     * @param cdm
+     * @return
+     */
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
+private:
+    boost::shared_ptr<CDM> cdm_;
 };
 
 } /* namespace MetNoFimex */
-#endif /* CF1XCOORDSYSBUILDER_H_ */
+#endif /* WRFCOORDSYSBUILDER_H_ */
