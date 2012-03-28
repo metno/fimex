@@ -300,8 +300,8 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
 }
 
 static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! (vm.count("process.deaccumulateVariable") || vm.count("process.rotateVectorToLatLonX"))) {
-        LOG4FIMEX(logger, Logger::DEBUG, "process.deaccumulateVariable or rotateVectorToLatLonX not found, no process used");
+    if (! (vm.count("process.deaccumulateVariable") || vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction"))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "process.deaccumulateVariable or rotateVector.direction not found, no process used");
         return dataReader;
     }
     boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(boost::shared_ptr<CDMReader>(dataReader)));
@@ -314,7 +314,31 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
     if (vm.count("process.rotateVectorToLatLonX")) {
         vector<string> xvars = vm["process.rotateVectorToLatLonX"].as<vector<string> >();
         vector<string> yvars = vm["process.rotateVectorToLatLonY"].as<vector<string> >();
-        processor->rotateVectorToLatLon(xvars, yvars);
+        processor->rotateVectorToLatLon(true, xvars, yvars);
+    }
+    if (vm.count("process.rotateVector.direction")) {
+        bool toLatLon = true;
+        if (vm["process.rotateVector.direction"].as<string>() == "latlon") {
+            toLatLon = true;
+        } else if (vm["process.rotateVector.direction"].as<string>() == "grid") {
+            toLatLon = false;
+        } else {
+            cerr << "process.rotateVector.direction != 'latlon' or 'grid' : " << vm["process.rotateVector.direction"].as<string>() << " invalid" << endl;
+            exit(1);
+        }
+        if (vm.count("process.rotateVector.x") && vm.count("process.rotateVector.x")) {
+            vector<string> xvars = vm["process.rotateVector.x"].as<vector<string> >();
+            vector<string> yvars = vm["process.rotateVector.y"].as<vector<string> >();
+            vector<string> stdX, stdY;
+            if (vm.count("process.rotateVector.stdNameX"))
+                stdX = vm["process.rotateVector.stdNameX"].as<vector<string> >();
+            if (vm.count("process.rotateVector.stdNameY"))
+                stdX = vm["process.rotateVector.stdNameY"].as<vector<string> >();
+            processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
+        } else {
+            cerr << "process.rotateVector.x or process.rotateVector.y not found" << endl;
+            exit(1);
+        }
     }
     return processor;
 }
