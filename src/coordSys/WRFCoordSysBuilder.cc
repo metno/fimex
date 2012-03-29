@@ -250,8 +250,19 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
                     + datetime.at(1) + " +0000";
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             boost::shared_array<float> vals(new float[dimSize]);
+
+            // TODO: try to read the time from the data-reader TIMES-variable
+            float timeStep = 180.;
+            CDMAttribute timeStepAttr;
+            if (cdm.getAttribute(cdm.globalAttributeNS(), "TIME_STEP_MN", timeStepAttr)) {
+                // attribute from ncml
+                timeStep = timeStepAttr.getData()->asFloat()[0];
+            } else {
+                LOG4FIMEX(logger, Logger::WARN, "Could not find attribute TIME_STEP_MN, guessing 180minutes time-steps");
+            }
+            timeStep /= 60;
             for (size_t i = 0; i < dimSize; i++) {
-                vals[i] = 3 * i; // TODO, this is fake, the time should be read from the data
+                vals[i] = timeStep * i;
             }
             cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
             cdm.addAttribute(shape.at(0), CDMAttribute("units", units));
@@ -271,9 +282,9 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
                     + refdatetime.at(1) + " +0000";
             cdm.addAttribute(reftime, CDMAttribute("units", refunits));
             cdm.addAttribute(reftime, CDMAttribute("standard_name", reftime));
-            boost::shared_array<float> refvals(new float[0]);
+            boost::shared_array<float> refvals(new float[1]);
             refvals[0] = 0;
-            cdm.getVariable(reftime).setData(createData(0, refvals));
+            cdm.getVariable(reftime).setData(createData(1, refvals));
         }
     }
 
