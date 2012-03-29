@@ -63,7 +63,7 @@ bool WRFCoordSysBuilder::isMine(const CDM& cdm)
 static double findAttributeDouble(const CDM& cdm, std::string attName)
 {
     CDMAttribute attr;
-    if (!cdm.getAttribute(cdm.globalAttributeNS(), "MAP_PROJ", attr))
+    if (!cdm.getAttribute(cdm.globalAttributeNS(), attName, attr))
         return MIFI_UNDEFINED_D;
     else
         return attr.getData()->asDouble()[0];
@@ -123,16 +123,19 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("west_east")) {
         vector<string> shape;
         shape.push_back("west_east");
-        int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asInt()[0];
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = centerX - dx * (dimSize - 1) / 2;
+        if (!cdm.hasVariable(shape.at(0))) {
+            int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asInt()[0];
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            double startX = centerX - dx * (dimSize - 1) / 2;
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = startX + i * dx;
+            }
+            cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
-        cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         westAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         westAxis->setAxisType(CoordinateAxis::GeoX);
         westAxis->setExplicit(true);
@@ -140,16 +143,19 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("west_east_stag")) {
         vector<string> shape;
         shape.push_back("west_east_stag");
-        int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asInt()[0];
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = centerX - dx * (dimSize - 1) / 2;
+        if (!cdm.hasVariable(shape.at(0))) {
+            int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asInt()[0];
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            double startX = centerX - dx * (dimSize - 1) / 2;
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = startX + i * dx;
+            }
+            cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
-        cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         stagWestAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         stagWestAxis->setAxisType(CoordinateAxis::GeoX);
         stagWestAxis->setExplicit(true);
@@ -157,16 +163,21 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("south_north")) {
         vector<string> shape;
         shape.push_back("south_north");
-        int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asInt()[0];
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = centerX - dx * (dimSize - 1) / 2;
+        if (!cdm.hasVariable(shape.at(0))) {
+            int dy =
+                    cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asInt()[0];
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            double startY = centerY - dy * (dimSize - 1) / 2;
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = startY + i * dy;
+            }
+            cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            cdm.addAttribute(shape.at(0),
+                    CDMAttribute("standard_name", "projection_y_axis"));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
-        cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_y_axis"));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         northAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         northAxis->setAxisType(CoordinateAxis::GeoY);
         northAxis->setExplicit(true);
@@ -174,16 +185,21 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("south_north_stag")) {
         vector<string> shape;
         shape.push_back("south_north_stag");
-        int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asInt()[0];
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = centerX - dx * (dimSize - 1) / 2;
+        if (!cdm.hasVariable(shape.at(0))) {
+            int dy =
+                    cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asInt()[0];
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            double startY = centerY - dy * (dimSize - 1) / 2;
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = startY + i * dy;
+            }
+            cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            cdm.addAttribute(shape.at(0),
+                    CDMAttribute("standard_name", "projection_y_axis"));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
-        cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_y_axis"));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         stagNorthAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         stagNorthAxis->setAxisType(CoordinateAxis::GeoY);
         stagNorthAxis->setExplicit(true);
@@ -191,14 +207,16 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("bottom_top")) {
         vector<string> shape;
         shape.push_back("bottom_top");
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = i;
+        if (!cdm.hasVariable(shape.at(0))) {
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = i;
+            }
+            cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", "1"));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", "1"));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         bottomAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         bottomAxis->setAxisType(CoordinateAxis::GeoZ);
         bottomAxis->setExplicit(true);
@@ -206,14 +224,16 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("bottom_top_stag")) {
         vector<string> shape;
         shape.push_back("bottom_top_stag");
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = i;
+        if (!cdm.hasVariable(shape.at(0))) {
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = i;
+            }
+            cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", "1"));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", "1"));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         stagBottomAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         stagBottomAxis->setAxisType(CoordinateAxis::GeoZ);
         stagBottomAxis->setExplicit(true);
@@ -222,31 +242,39 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     if (cdm.hasDimension("Time")) {
         vector<string> shape;
         shape.push_back("Time");
-        string start = cdm.getAttribute(cdm.globalAttributeNS(), "START_DATE").getStringValue();
-        vector<string> datetime = tokenize(start, "_");
-        string units = "hours since " + datetime.at(0) + " " + datetime.at(1) + " +0000";
-        size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
-        boost::shared_array<float> vals(new float[dimSize]);
-        for (size_t i = 0; i < dimSize; i++) {
-            vals[i] = 3 * i; // TODO, this is fake, the time should be read from the data
+        if (!cdm.hasVariable(shape.at(0))) {
+            string start = cdm.getAttribute(cdm.globalAttributeNS(),
+                    "START_DATE").getStringValue();
+            vector<string> datetime = tokenize(start, "_");
+            string units = "hours since " + datetime.at(0) + " "
+                    + datetime.at(1) + " +0000";
+            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            boost::shared_array<float> vals(new float[dimSize]);
+            for (size_t i = 0; i < dimSize; i++) {
+                vals[i] = 3 * i; // TODO, this is fake, the time should be read from the data
+            }
+            cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
+            cdm.addAttribute(shape.at(0), CDMAttribute("units", units));
+            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-        cdm.addAttribute(shape.at(0), CDMAttribute("units", units));
-        cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         timeAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
         timeAxis->setAxisType(CoordinateAxis::Time);
         timeAxis->setExplicit(true);
         // ref-time
         string reftime = "forecast_reference_time";
-        cdm.addVariable(CDMVariable(reftime, CDM_INT, vector<string>(0)));
-        string ref = cdm.getAttribute(cdm.globalAttributeNS(), "SIMULATION_START_DATE").getStringValue();
-        vector<string> refdatetime = tokenize(start, "_");
-        string refunits = "hours since " + refdatetime.at(0) + " " + refdatetime.at(1) + " +0000";
-        cdm.addAttribute(reftime, CDMAttribute("units", refunits));
-        cdm.addAttribute(reftime, CDMAttribute("standard_name", reftime));
-        boost::shared_array<float> refvals(new float[0]);
-        refvals[0] = 0;
-        cdm.getVariable(reftime).setData(createData(0, refvals));
+        if (!cdm.hasVariable(reftime)) {
+            cdm.addVariable(CDMVariable(reftime, CDM_INT, vector<string>(0)));
+            string ref = cdm.getAttribute(cdm.globalAttributeNS(),
+                    "SIMULATION_START_DATE").getStringValue();
+            vector<string> refdatetime = tokenize(ref, "_");
+            string refunits = "hours since " + refdatetime.at(0) + " "
+                    + refdatetime.at(1) + " +0000";
+            cdm.addAttribute(reftime, CDMAttribute("units", refunits));
+            cdm.addAttribute(reftime, CDMAttribute("standard_name", reftime));
+            boost::shared_array<float> refvals(new float[0]);
+            refvals[0] = 0;
+            cdm.getVariable(reftime).setData(createData(0, refvals));
+        }
     }
 
     // now, create the coordinate-systems depending on the variables shape
@@ -277,19 +305,23 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
                     } else if (*dimIt == "bottom_top_stag") {
                         coord->setAxis(stagBottomAxis);
                     } else {
-                        CoordinateSystem::AxisPtr other;
-                        if (cdm.hasVariable(*dimIt)) {
-                            other = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(*dimIt)));
-                            other->setExplicit(true);
-                        } else {
+                        if (!cdm.hasVariable(*dimIt)) {
                             // add a dimension without a variable with a 'virtual' variable
                             vector<string> myshape(1, *dimIt);
-                            other = CoordinateSystem::AxisPtr(new CoordinateAxis(CDMVariable(*dimIt, CDM_INT, myshape)));
-                            other->setExplicit(true);
+                            cdm.addVariable(CDMVariable(*dimIt, CDM_INT, myshape));
+                            size_t dimSize = cdm.getDimension(*dimIt).getLength();
+                            boost::shared_array<float> vals(new float[dimSize]);
+                            for (size_t i = 0; i < dimSize; i++) {
+                                vals[i] = i;
+                            }
+                            cdm.getVariable(*dimIt).setData(createData(dimSize, vals));
                         }
+                        CoordinateSystem::AxisPtr other = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(*dimIt)));
+                        other->setExplicit(true);
                         coord->setAxis(other);
                     }
                 }
+                coord->setSimpleSpatialGridded(true);
                 cs[shapeId] = coord;
             }
             boost::shared_ptr<CoordinateSystem> coord = cs[shapeId];
