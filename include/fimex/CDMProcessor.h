@@ -56,10 +56,13 @@ public:
     void deAccumulate(const std::string& varName);
     /**
      * rotate the vector from direction in x/y axes to direction in lat/lon axes
+     * @param toLatLon convert to latLon if true, otherwise, convert latLon to grid-axes
      * @param varNameX the x-part of the vector
      * @param varNameY the y-part of the vector
+     * @param stdNameX optional new standard_name for x
+     * @param stdNameY optional new standard_name for y
      */
-    void rotateVectorToLatLon(const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY);
+    void rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY, const std::vector<std::string>& stdNameX = std::vector<std::string>(0), const std::vector<std::string>& stdNameY = std::vector<std::string>(0));
     virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
 private:
     // pimpl

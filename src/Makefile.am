@@ -37,6 +37,11 @@ libfimex_la_SOURCES = interpolation.c \
                      CoordinateSystemSliceBuilder.cc \
                      coordSys/CoordinateSystem.cc \
                      coordSys/CoordinateAxis.cc \
+                     coordSys/CoordSysBuilder.h \
+                     coordSys/CF1_xCoordSysBuilder.h \
+                     coordSys/CF1_xCoordSysBuilder.cc \
+                     coordSys/WRFCoordSysBuilder.h \
+                     coordSys/WRFCoordSysBuilder.cc \
                      coordSys/CoordSysImpl.h \
                      coordSys/Projection.cc \
                      coordSys/ProjectionImpl.cc \

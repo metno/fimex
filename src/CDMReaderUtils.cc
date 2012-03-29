@@ -43,6 +43,10 @@ boost::posix_time::ptime
 getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
 {
     const CDM& cdm = reader->getCDM();
+//    const CDM::VarVec vars = cdm.getVariables();
+//    for (int i = 0; i < vars.size(); i++) {
+//        cerr << "var: " << vars.at(i).getName() << endl;
+//    }
     vector<string> refVarnames = cdm.findVariables("standard_name", "forecast_reference_time");
     set<boost::posix_time::ptime> refTimes;
     for (vector<string>::iterator varname = refVarnames.begin(); varname != refVarnames.end(); ++varname) {
