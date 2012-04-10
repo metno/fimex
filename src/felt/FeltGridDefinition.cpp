@@ -291,11 +291,8 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
 
     }
 
-    // all model-files are assumed to be WGS84 datum
-    // since topography is WGS84 and verification is WGS84
-    // (though model uses spherical computations)
-    projStr << " +ellps=WGS84 +towgs84=0,0,0 +no_defs";
-
+    // using spherical earth for all data in felt
+    projStr << " +R="<< EARTH_RADIUS <<" +no_defs";
     return projStr.str();
 }
 
