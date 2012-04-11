@@ -1,3 +1,7 @@
+  * 2012-04-11 fimex-0.37.2
+    * using towgs84 parameter of CF-1.7-proposal
+    * setting felt earth-figure to simple earth
+    * allow overruling of felt-earth-figure in config
   * 2012-03-27 fimex-0.37.1
     * adding preliminar WRF output support
   * 2012-03-27 fimex-0.37
