@@ -13,9 +13,9 @@
 -->
 
 <!--- Put your DTDDoc comment here. -->
-<!ELEMENT cdm_felt_config (processOptions|variables|axes|global_attributes)*>
+<!ELEMENT cdm_felt_config (processOptions|overrule|variables|axes|global_attributes)*>
 <!ATTLIST cdm_felt_config
-	xmlns:xi CDATA #IMPLIED
+    xmlns:xi CDATA #IMPLIED
   >
 
 <!--- optional processing options used by FeltFile -->
@@ -26,9 +26,18 @@
 <!---            possible values are       param,prod,grid,dtype,vcoord,level,idnum -->
 <!ELEMENT option EMPTY>
 <!ATTLIST option
-	name CDATA #REQUIRED
-	value CDATA #REQUIRED
+    name CDATA #REQUIRED
+    value CDATA #REQUIRED
   >
+
+<!--- overrule standard information from felt, currently only earthFigure -->
+<!ELEMENT overrule (earthFigure?)>
+<!--- earth figure in proj4, e.g. <earthFigure proj4="+ellps=WGS84 +towgs84=0,0,0"/>-->
+<!ELEMENT earthFigure EMPTY>
+<!ATTLIST earthFigure
+    proj4 CDATA #REQUIRED
+  >
+
 
 <!--- Put your DTDDoc comment here. -->
 <!ELEMENT global_attributes (attribute*)>
@@ -44,8 +53,8 @@
 <!--- list of space separated values -->
 <!ELEMENT values (#PCDATA)>
 <!ATTLIST values
-	mode CDATA "inline"
-	scale_factor CDATA "1."
+    mode CDATA "inline"
+    scale_factor CDATA "1."
   >
 
 <!--- Put your DTDDoc comment here. -->
@@ -70,9 +79,9 @@
 
 <!ELEMENT additional_axis_variable (attribute|values)*>
 <!ATTLIST additional_axis_variable
-	name CDATA #REQUIRED
-	type CDATA #REQUIRED
-	axis CDATA #REQUIRED
+    name CDATA #REQUIRED
+    type CDATA #REQUIRED
+    axis CDATA #REQUIRED
   >
 
 <!--- Put your DTDDoc comment here. -->

@@ -98,6 +98,16 @@ protected:
 /** output-stream for projections, implemented using toString() */
 std::ostream& operator<<(std::ostream& out, const Projection& proj);
 
+/**
+ *
+ * helper function to
+ * replace the earth figure of the given proj4 string with a new earth-figure
+ *
+ * @param proj4 original proj-string
+ * @param newEarthfigure earth-figure in proj-format, e.g. +ellps=sphere +R=6371000 +towgs84=0,0,0
+ */
+std::string replaceProj4Earthfigure(const std::string& proj4, const std::string& newEarthfigure);
+
 } /* namespace MetNoFimex */
 
 #endif /* PROJECTION_H_ */

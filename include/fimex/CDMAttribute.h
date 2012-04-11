@@ -42,43 +42,43 @@ class CDMAttribute : public CDMNamedEntity
 {
 
 public:
-	CDMAttribute();
-	/// create a string attribute
-	explicit CDMAttribute(std::string name, std::string value);
-	/// create a char attribute with a char array of length 1
-	explicit CDMAttribute(std::string name, char value);
-	/// create a int attribute with a int array of length 1
-	explicit CDMAttribute(std::string name, int value);
-	/// create a short attribute with a short array of length 1
-	explicit CDMAttribute(std::string name, short value);
-	/// create a float attribute with a float array of length 1
-	explicit CDMAttribute(std::string name, float value);
-	/// create a double attribute with a double array of length 1
-	explicit CDMAttribute(std::string name, double value);
-	/// create a attribute with the low level information
-	explicit CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data);
-	/// create a attribute from a string representation
-	explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException);
-	/// create a attribute with a vector of values in string representation
-	explicit CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException);
-	virtual ~CDMAttribute();
-	/// retrieve the name of the attribute
-	const std::string& getName() const {return name;}
+    CDMAttribute();
+    /// create a string attribute
+    explicit CDMAttribute(std::string name, std::string value);
+    /// create a char attribute with a char array of length 1
+    explicit CDMAttribute(std::string name, char value);
+    /// create a int attribute with a int array of length 1
+    explicit CDMAttribute(std::string name, int value);
+    /// create a short attribute with a short array of length 1
+    explicit CDMAttribute(std::string name, short value);
+    /// create a float attribute with a float array of length 1
+    explicit CDMAttribute(std::string name, float value);
+    /// create a double attribute with a double array of length 1
+    explicit CDMAttribute(std::string name, double value);
+    /// create a attribute with the low level information
+    explicit CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data);
+    /// create a attribute from a string representation
+    explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException);
+    /// create a attribute with a vector of values in string representation
+    explicit CDMAttribute(const std::string& name, CDMDataType datatype, const std::vector<std::string>& values) throw(CDMException);
+    virtual ~CDMAttribute();
+    /// retrieve the name of the attribute
+    const std::string& getName() const {return name;}
     /// set the name of the attribute
     void setName(std::string newName) {name = newName;}
-	/// retrieve the stringified value of the attribute
-	const std::string getStringValue() const;
-	/// retrieve the data-pointer of the attribute
-	const boost::shared_ptr<Data> getData() const {return data;}
-	/// set the data for this attribute
-	void setData(boost::shared_ptr<Data> data) {this->data = data;}
-	/// retrieve the datatype of the attribute
-	const CDMDataType getDataType() const {return datatype;}
-	void toXMLStream(std::ostream& out, const std::string& indent = "") const;
+    /// retrieve the stringified value of the attribute
+    const std::string getStringValue() const;
+    /// retrieve the data-pointer of the attribute
+    const boost::shared_ptr<Data> getData() const {return data;}
+    /// set the data for this attribute
+    void setData(boost::shared_ptr<Data> data) {this->data = data;}
+    /// retrieve the datatype of the attribute
+    const CDMDataType getDataType() const {return datatype;}
+    void toXMLStream(std::ostream& out, const std::string& indent = "") const;
 private:
-	std::string name;
-	CDMDataType datatype;
-	boost::shared_ptr<Data> data;
+    std::string name;
+    CDMDataType datatype;
+    boost::shared_ptr<Data> data;
     /* datatype and name must be set to call this init function */
     void initDataByArray(const std::vector<std::string>& values);
     /* init data arrays for all types */

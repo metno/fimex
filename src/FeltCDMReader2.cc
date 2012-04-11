@@ -469,6 +469,20 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
 {
     boost::shared_ptr<felt::FeltGridDefinition> gridDef = feltfile_->getGridDefinition();
     string projStr = gridDef->projDefinition();
+
+    // get the overruled earthform
+    {
+        XPathObjPtr xpathObj = doc.getXPathObject("/cdm_felt_config/overrule/earthFigure");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        string replaceEarthString = "";
+        if (size == 1) {
+            replaceEarthString = getXmlProp(nodes->nodeTab[0], "proj4");
+            LOG4FIMEX(logger, Logger::DEBUG,"overruling earth-parametes with " << replaceEarthString);
+            projStr = replaceProj4Earthfigure(projStr, replaceEarthString);
+        }
+    }
+
     int gridType = feltfile_->getGridType();
     projName = string("projection_" + type2string(gridType));
     // projection-variable without datatype and dimension

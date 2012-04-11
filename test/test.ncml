@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	    xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 ../share/etc/ncml-2.2-fimex-0.xsd "
-		location="file:coordTest.nc">
+        xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 ../share/etc/ncml-2.2-fimex-0.xsd "
+        location="file:coordTest.nc">
 <dimension name="dummy" length="3" />
 <variable name="dummy" shape="dummy" type="float">
   <attribute name="test" value="lon_rho"/>
@@ -21,7 +21,10 @@
   <spatial_vector direction="y,latitude" counterpart="x_wind" />
 </variable>
 
-
+<variable name="projection_1">
+  <remove type="attribute" name="proj4" />
+  <attribute name="towgs84" type="double" value="0 0 0"/>
+</variable>
 
 </netcdf>
 

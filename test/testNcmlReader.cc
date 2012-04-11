@@ -39,6 +39,8 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/Data.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/CDM.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
 
 using namespace std;
@@ -67,6 +69,16 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
     for (size_t i = 0; i < data->size(); i++) {
         BOOST_CHECK(d[i] == ds[i]);
     }
+
+    // proj4-string removed
+    CDMAttribute proj4;
+    BOOST_CHECK(!reader->getCDM().getAttribute("projection_1", "proj4",proj4));
+
+    // find towgs84
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader->getCDM());
+    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("sea_surface_temperature"));
+    string s = (*varSysIt)->getProjection()->getProj4String();
+    BOOST_CHECK(s.find("+towgs84=") != string::npos);
 
 }
 

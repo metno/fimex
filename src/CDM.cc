@@ -673,7 +673,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
     size_t fieldSize = xDimLength * yDimLength;
     boost::shared_array<double> longVal(new double[fieldSize]);
     boost::shared_array<double> latVal(new double[fieldSize]);
-    std::string lonLatProj("+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs");
+    std::string lonLatProj(MIFI_WGS84_LATLON_PROJ4);
     std::string projStr = Projection::create(getAttributes(projectionVariable))->getProj4String();
     LOG4FIMEX(logger, Logger::DEBUG, "generating lat("<<xDim<<","<<yDim<<"),lon("<<xDim<<","<<yDim<<") using proj4: "+projStr);
     if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
