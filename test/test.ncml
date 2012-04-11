@@ -23,7 +23,7 @@
 
 <variable name="projection_1">
   <remove type="attribute" name="proj4" />
-  <attribute name="towgs84" type="double" value="0,0,0"/>
+  <attribute name="towgs84" type="double" value="0 0 0"/>
 </variable>
 
 </netcdf>

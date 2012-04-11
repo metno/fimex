@@ -401,26 +401,6 @@ void GribCDMReader::initAddTimeDimension()
 
 }
 
-static string replaceProj4Earthfigure(const string& proj4, const string& newEarthfigure)
-{
-    if (newEarthfigure == "") {
-        return proj4;
-    }
-    vector<string> parts = tokenize(proj4, " ");
-    vector<string> newParts;
-    for (size_t i = 0; i < parts.size(); i++) {
-        if (parts.at(i).find("+a=") != string::npos) continue;
-        if (parts.at(i).find("+b=") != string::npos) continue;
-        if (parts.at(i).find("+e=") != string::npos) continue;
-        if (parts.at(i).find("+R=") != string::npos) continue;
-        if (parts.at(i).find("+ellps=") != string::npos) continue;
-        if (parts.at(i).find("+datum=") != string::npos) continue;
-        newParts.push_back(parts.at(i));
-    }
-    newParts.push_back(newEarthfigure);
-    return join(newParts.begin(), newParts.end(), " ");
-}
-
 void GribCDMReader::initAddProjection()
 {
     // get the overruled earthform

@@ -7,6 +7,11 @@
     <!--  <option name="gridParameterDelta" value="0 0 0 0 0 0"/> -->
     <!--  <option name="globalParameterRestrictions" value="level=1000" />  -->
 </processOptions>
+<!-- allow overruling the build-in earth figure -->
+<!-- <overrule>
+<earthFigure proj4="+ellps=sphere +R=6371000 +towgs84=0,0,0"/>
+</overrule> -->
+
 <global_attributes>
     <attribute name="Conventions" value="CF-1.0" type="string" />
     <attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />
