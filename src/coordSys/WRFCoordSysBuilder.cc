@@ -113,7 +113,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
         LOG4FIMEX(logger, Logger::WARN, "unknown projection-id: " << map_proj);
         return coordSys;
     }
-    proj4 << " +R="<<MIFI_EARTH_RADIUS_M<< " +no_defs";
+    proj4 << " +R=6370000 +no_defs"; // WRF earth radius = 6370km
     boost::shared_ptr<Projection> proj = Projection::createByProj4(proj4.str());
     double centerX = centralLon * DEG_TO_RAD;
     double centerY = centralLat * DEG_TO_RAD;
