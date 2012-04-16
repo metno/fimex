@@ -288,6 +288,8 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         } else {
             bw.resize(3, 0); // default
         }
+        boost::shared_ptr<Data> towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
+        attrList.push_back(CDMAttribute("towgs84", CDM_DOUBLE, towgs));
     }
 
 }
