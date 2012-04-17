@@ -43,6 +43,7 @@ namespace MetNoFimex
 
 //forward decl.
 class CDM;
+class CDMReader;
 struct CoordSysImpl;
 
 /**
@@ -198,12 +199,20 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
  * Example on using the CoordinateSystem in combination with a CDMReader.
  */
 /**
- * fetch all coordinate system from a MetNoFimex::CDM
+ * fetch all coordinate system from a MetNoFimex::CDMReader
+ * @param reader the data-source. Depending on the internal structure of the datasource,
+ *        the source might be manipulated, i.e. the WRF-system is missing several variables.
  */
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
+
 /**
- * @deprecated call the non-constant version, since some "conventions" require strange manipulations.
- *    Non-constant CDM's can be retrieved via CDMReader::getInternalCDM
+ * fetch all coordinate system from a MetNoFimex::CDM
+ * @deprecated call listCoordinateSystems(boost::shared_ptr<CDMReader> reader) instead
+ */
+DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm));
+/**
+ * fetch all coordinate system from a MetNoFimex::CDM
+ * @deprecated call listCoordinateSystems(boost::shared_ptr<CDMReader> reader) instead
  */
 DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm));
 

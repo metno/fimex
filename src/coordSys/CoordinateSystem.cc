@@ -31,6 +31,7 @@
 #include <set>
 #include <map>
 #include "fimex/CDM.h"
+#include "fimex/CDMReader.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -371,7 +372,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
 
     vector<boost::shared_ptr<CoordSysBuilder> > builders;
-    // TODO: support more conventions
+    // support more conventions
     builders.push_back(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
     builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
 
@@ -390,6 +391,30 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "total conventions found: " << coordSystems.size());
     return coordSystems;
 }
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
+{
+    // the return value
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSystems;
 
+    vector<boost::shared_ptr<CoordSysBuilder> > builders;
+    // support more conventions
+    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
+    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
+
+    string logCat = "fimex/coordSys/CoordinateSystem";
+    for (size_t i = 0; i < builders.size(); ++i) {
+        boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
+        if (builder->isMine(reader->getCDM())) {
+            vector<boost::shared_ptr<const CoordinateSystem> > myCoordSystems = builder->listCoordinateSystems(reader);
+            LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "found convention: " << builder->getName() << ", amount: " << myCoordSystems.size());
+            copy(myCoordSystems.begin(), myCoordSystems.end(), back_inserter(coordSystems));
+        } else {
+            LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "no convention found for convention: " << builder->getName());
+        }
+    }
+
+    LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "total conventions found: " << coordSystems.size());
+    return coordSystems;
+}
 
 }

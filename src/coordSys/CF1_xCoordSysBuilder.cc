@@ -27,6 +27,7 @@
 #include "coordSys/CF1_xCoordSysBuilder.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMReader.h"
 #include "fimex/CDMAttribute.h"
 #include "fimex/Utils.h"
 #include "fimex/Units.h"
@@ -192,6 +193,12 @@ static string getPtrName(const boost::shared_ptr<const CDMNamedEntity>& ptr)
 {
     return ptr->getName();
 }
+
+std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
+{
+    return listCoordinateSystems(reader->getInternalCDM());
+}
+
 
 std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::listCoordinateSystems(CDM& cdm)
 {

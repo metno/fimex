@@ -50,13 +50,12 @@ public:
     virtual bool isMine(const CDM& cdm);
     /**
      * List the CoordinateSystems belonging to WRF convention. This will actually
-     * change the cdm.
-     * @param cdm
+     * change the cdm and require some data from the reader.
+     * @param reader
      * @return
      */
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
-private:
-    boost::shared_ptr<CDM> cdm_;
+    virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
 };
 
 } /* namespace MetNoFimex */

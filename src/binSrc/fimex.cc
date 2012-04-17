@@ -82,7 +82,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << config << endl;
 }
 
-static void printReaderStatements(const string& readerName, const po::variables_map& vm, const CDMReader* reader)
+static void printReaderStatements(const string& readerName, const po::variables_map& vm, boost::shared_ptr<CDMReader> reader)
 {
     if (vm.count(readerName+".printNcML")) {
         cout << readerName << " as NcML:" << endl;
@@ -102,7 +102,7 @@ static void printReaderStatements(const string& readerName, const po::variables_
     }
     if (vm.count(readerName+".printCS")) {
         cout << readerName + " CoordinateSystems: ";
-        vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(reader->getCDM());
+        vector<boost::shared_ptr<const CoordinateSystem> > csVec = listCoordinateSystems(reader);
         cout << csVec.size() << ": ";
         cout << joinPtr(csVec.begin(), csVec.end(), " | ");
         cout << endl;
@@ -293,7 +293,7 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
         exit(1);
     } else {
-        printReaderStatements("input", vm, returnPtr.get());
+        printReaderStatements("input", vm, returnPtr);
     }
 
     return returnPtr;
@@ -426,7 +426,7 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
             extractor->removeVariable(*it);
         }
     }
-    printReaderStatements("extract", vm, extractor.get());
+    printReaderStatements("extract", vm, extractor);
 
     return boost::shared_ptr<CDMReader>(extractor);
 }
@@ -439,7 +439,7 @@ static boost::shared_ptr<CDMReader> getCDMQualityExtractor(po::variables_map& vm
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
         dataReader = boost::shared_ptr<CDMReader>(new CDMQualityExtractor(boost::shared_ptr<CDMReader>(dataReader), autoConf, config));
     }
-    printReaderStatements("qualityExtract", vm, dataReader.get());
+    printReaderStatements("qualityExtract", vm, dataReader);
 
     return dataReader;
 }
@@ -452,7 +452,7 @@ static boost::shared_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm
     LOG4FIMEX(logger, Logger::DEBUG, "timeInterpolate.timeSpec found with spec: " << vm["timeInterpolate.timeSpec"].as<string>());
     boost::shared_ptr<CDMTimeInterpolator> timeInterpolator(new CDMTimeInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
     timeInterpolator->changeTimeAxis(vm["timeInterpolate.timeSpec"].as<string>());
-    printReaderStatements("timeInterpolate", vm, timeInterpolator.get());
+    printReaderStatements("timeInterpolate", vm, timeInterpolator);
 
     return boost::shared_ptr<CDMReader>(timeInterpolator);
 }
@@ -486,7 +486,7 @@ static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map
                                                                                          vm["verticalInterpolate.method"].as<string>(),
                                                                                          level1,
                                                                                          level2));
-    printReaderStatements("verticalInterpolate", vm, vInterpolator.get());
+    printReaderStatements("verticalInterpolate", vm, vInterpolator);
 
     return boost::shared_ptr<CDMReader>(vInterpolator);
 }
@@ -582,7 +582,7 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
     }
 
 
-    printReaderStatements("interpolate", vm, interpolator.get());
+    printReaderStatements("interpolate", vm, interpolator);
 
     return boost::shared_ptr<CDMReader>(interpolator);
 }
@@ -592,7 +592,7 @@ static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boos
         return dataReader;
     }
     boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),XMLInputFile(vm["ncml.config"].as<string>())));
-    printReaderStatements("ncml", vm, ncmlReader.get());
+    printReaderStatements("ncml", vm, ncmlReader);
 
     return boost::shared_ptr<CDMReader>(ncmlReader);
 }

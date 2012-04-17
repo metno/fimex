@@ -27,6 +27,7 @@
 #include "WRFCoordSysBuilder.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMReader.h"
 #include "fimex/CDMAttribute.h"
 #include "fimex/Data.h"
 #include "fimex/mifi_constants.h"
@@ -36,6 +37,8 @@
 #include <cmath>
 #include <vector>
 #include <map>
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace MetNoFimex
 {
@@ -70,12 +73,14 @@ static double findAttributeDouble(const CDM& cdm, std::string attName)
 
 }
 
-std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(CDM& cdm)
+// function for compatibility between the old (only CDM) and new (only CDMReader) interface
+static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinateSystems(CDM& cdm, boost::shared_ptr<CDMReader> reader)
 {
+    // reader might be 0
     using namespace std;
     LoggerPtr logger = getLogger("fimex.coordSys.WRFCoordSysBuilder");
     std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys;
-    if (!isMine(cdm))
+    if (!WRFCoordSysBuilder().isMine(cdm))
         return coordSys;
     /*
     The definition for map projection options:
@@ -239,36 +244,69 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
         stagBottomAxis->setExplicit(true);
     }
 
-    if (cdm.hasDimension("Time")) {
+    // determine the Time
+    if (cdm.hasDimension("Time") && !cdm.hasVariable("Time")) {
         vector<string> shape;
         shape.push_back("Time");
         if (!cdm.hasVariable(shape.at(0))) {
-            string start = cdm.getAttribute(cdm.globalAttributeNS(),
-                    "START_DATE").getStringValue();
-            vector<string> datetime = tokenize(start, "_");
-            string units = "hours since " + datetime.at(0) + " "
-                    + datetime.at(1) + " +0000";
+            string units;
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             boost::shared_array<float> vals(new float[dimSize]);
+            if (reader.get() == 0) {
+                // try to guess the time-steps
+                string start = cdm.getAttribute(cdm.globalAttributeNS(),
+                        "START_DATE").getStringValue();
+                vector<string> datetime = tokenize(start, "_");
+                units = "hours since " + datetime.at(0) + " "
+                        + datetime.at(1) + " +0000";
 
-            // TODO: try to read the time from the data-reader TIMES-variable
-            float timeStep = 180.;
-            CDMAttribute timeStepAttr;
-            if (cdm.getAttribute(cdm.globalAttributeNS(), "TIME_STEP_MN", timeStepAttr)) {
-                // attribute from ncml
-                timeStep = timeStepAttr.getData()->asFloat()[0];
+                float timeStep = 180.;
+                CDMAttribute timeStepAttr;
+                if (cdm.getAttribute(cdm.globalAttributeNS(), "TIME_STEP_MN",
+                        timeStepAttr)) {
+                    // attribute from ncml
+                    timeStep = timeStepAttr.getData()->asFloat()[0];
+                } else {
+                    LOG4FIMEX(logger, Logger::WARN,
+                            "Could not find attribute TIME_STEP_MN, guessing 180minutes time-steps");
+                }
+                timeStep /= 60;
+                for (size_t i = 0; i < dimSize; i++) {
+                    vals[i] = timeStep * i;
+                }
             } else {
-                LOG4FIMEX(logger, Logger::WARN, "Could not find attribute TIME_STEP_MN, guessing 180minutes time-steps");
-            }
-            timeStep /= 60;
-            for (size_t i = 0; i < dimSize; i++) {
-                vals[i] = timeStep * i;
+                // try to read the time from the data-reader TIMES-variable
+                // Times is usually given as 'YYYY-MM-DD_HH:MM:SS' in UTM as string
+                SliceBuilder sb(cdm, "Times");
+                size_t timeSize = cdm.getDimension("Time").getLength();
+                boost::posix_time::ptime ptFirst;
+                for (size_t i = 0; i < timeSize; ++i) {
+                    sb.setStartAndSize("Time", i, 1);
+                    boost::shared_ptr<Data> data = reader->getDataSlice("Times", sb);
+                    // define units and set time in that unit as float to vals
+                    string thisTime = data->asString();
+                    if (thisTime.find("_") != string::npos) {
+                        thisTime = thisTime.replace(thisTime.find("_"), 1, " "); // replace _ with space
+                    }
+                    boost::posix_time::ptime pt(boost::posix_time::time_from_string(thisTime));
+                    if (i == 0) {
+                        ptFirst = pt;
+                        boost::posix_time::time_facet* time_output = new boost::posix_time::time_facet("hours since %Y-%m-%d %H:%M:%S");
+                        stringstream ss;
+                        ss.imbue(std::locale(ss.getloc(), time_output));
+                        ss << ptFirst;
+                        units = ss.str();
+                    }
+                    boost::posix_time::time_duration td(pt - ptFirst);
+                    vals[i] = td.hours() + td.minutes()/60. + td.seconds()/3600.;
+                }
             }
             cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
             cdm.addAttribute(shape.at(0), CDMAttribute("units", units));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
-        timeAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
+        timeAxis = CoordinateSystem::AxisPtr(
+                new CoordinateAxis(cdm.getVariable(shape.at(0))));
         timeAxis->setAxisType(CoordinateAxis::Time);
         timeAxis->setExplicit(true);
         // ref-time
@@ -298,7 +336,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
             && ((find(shape.begin(), shape.end(), "south_north") != shape.end()) || (find(shape.begin(), shape.end(), "south_north_stag") != shape.end()))) {
             string shapeId = join(shape.begin(), shape.end());
             if (cs.find(shapeId) == cs.end()) {
-                boost::shared_ptr<CoordinateSystem> coord(new CoordinateSystem(getName()));
+                boost::shared_ptr<CoordinateSystem> coord(new CoordinateSystem(WRFCoordSysBuilder().getName()));
                 coord->setProjection(proj);
                 for (vector<string>::iterator dimIt = shape.begin(); dimIt != shape.end(); dimIt++) {
                     if (*dimIt == "west_east") {
@@ -347,5 +385,36 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
 
     return coordSys;
 }
+std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(CDM& cdm)
+{
+    return wrfListCoordinateSystems(cdm, boost::shared_ptr<CDMReader>());
+}
 
+std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
+{
+    return wrfListCoordinateSystems(reader->getInternalCDM(), reader);
+}
+
+#if 0
+    // do the tasks which don't require the reader (compatibility with older interface
+    std::vector<boost::shared_ptr<const CoordinateSystem> > cs = listCoordinateSystems(reader->getInternalCDM());
+
+    // read the Time information (ASCII times) and add them to the dimension-variable 'Time'
+    CDM& cdm = reader->getInternalCDM();
+    if (cdm.hasDimension("Time") && (!cdm.hasVariable("Time")) && cdm.hasVariable("Times")) {
+        std::cerr << "I am here now";
+        // Times is usually given as 'YYYY-MM-DD_HH:MM:SS' in UTM as string
+        SliceBuilder sb(cdm, "Times");
+        size_t timeSize = cdm.getDimension("Time").getLength();
+        for (size_t i = 0; i < timeSize; ++i) {
+            sb.setStartAndSize("Time", i, 1);
+            boost::shared_ptr<Data> data = reader->getDataSlice("Times", sb);
+            std::cerr << data->asString() << std::endl;
+        }
+    }
+
+    return cs;
+}
+
+#endif
 } /* namespace MetNoFimex */
