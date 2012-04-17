@@ -72,9 +72,8 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const
 {
     boost::shared_ptr<MetGmTimeTag> TTag;
 
+    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
     const CDM& cdmRef = pCdmReader->getCDM();
-
-    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdmRef);
 
     std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
             find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVariable->getName()));

@@ -89,9 +89,9 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
         LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
     }
 
-    const CDM& cdm = cdmReader->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdmReader);
+    const CDM& cdm = cdmReader->getCDM();
     const CDM::VarVec& vars = cdm.getVariables();
     set<string> usedVariables;
     for (vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt = coordSys.begin();
@@ -422,6 +422,8 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
 std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string& varName) throw(CDMException)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "getTimes(" << varName << ")" );
+    typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
+    CoordSysList css = listCoordinateSystems(cdmReader);
     const CDM& cdm = cdmReader->getCDM();
     std::string time = cdm.getTimeAxis(varName);
     std::vector<FimexTime> timeData;
@@ -431,8 +433,6 @@ std::vector<FimexTime> GribApiCDMWriter_ImplAbstract::getTimes(const std::string
         timeDataVector.insert(timeDataVector.begin(), &timeDataArray[0], &timeDataArray[cdm.getDimension(time).getLength()]);
     } else {
         // find a somewhat useful default, wild guess: first time in first time-axis found
-        typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
-        CoordSysList css = listCoordinateSystems(cdm);
         for (CoordSysList::iterator csit = css.begin(); csit != css.end(); ++csit) {
             CoordinateSystem::ConstAxisPtr timeAxis = (*csit)->getTimeAxis();
             if (timeAxis.get() != 0) {

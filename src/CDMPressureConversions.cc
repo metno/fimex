@@ -59,8 +59,8 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
 : dataReader_(dataReader), p_(new CDMPressureConversionsImpl())
 {
     p_->ops = operations;
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(dataReader_);
     *cdm_ = dataReader->getCDM();
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(dataReader_->getCDM());
 
     for (vector<string>::iterator op = p_->ops.begin(); op != p_->ops.end(); ++op) {
         if (*op == "theta2T") {

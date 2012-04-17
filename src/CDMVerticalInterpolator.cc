@@ -75,6 +75,10 @@ string findUniqueDimVarName(const CDM& cdm, string baseVar)
 CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, string verticalType, string verticalInterpolationMethod, const std::vector<double> level1, const std::vector<double> level2)
 : dataReader_(dataReader), pimpl_(new VIntPimpl())
 {
+    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+    // get all coordinate systems from file before changing this cdm
+    vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_);
+
     *cdm_ = dataReader->getCDM();
     const CDM::VarVec& variables = cdm_->getVariables();
     // remove all data associated with this cdm - either it will be set below
@@ -150,9 +154,6 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
             throw CDMException("undefined vertical type: "+type2string(verticalType));
     }
 
-    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
-    // get all coordinate systems from file
-    vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_->getCDM());
     for (size_t i = 0; i < coordSys.size(); i++) {
         CoordinateSystem::ConstAxisPtr xAxis = coordSys[i]->getGeoXAxis();
         CoordinateSystem::ConstAxisPtr yAxis = coordSys[i]->getGeoYAxis();

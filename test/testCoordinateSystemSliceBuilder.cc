@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_simple )
 {
     string topSrcDir(TOP_SRCDIR);
     boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordTest.nc");
-    const CDM& cdm = reader->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    const CDM& cdm = reader->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature";
     vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =
@@ -73,9 +73,9 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_reftime )
 {
     string topSrcDir(TOP_SRCDIR);
     boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordRefTimeTest.nc");
-    const CDM& cdm = reader->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    const CDM& cdm = reader->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature";
     vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =

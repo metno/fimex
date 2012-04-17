@@ -269,13 +269,14 @@ void CoordinateSystem::setAxis(ConstAxisPtr axis)
     v.push_back(axis);
 }
 
-int findBestHorizontalCoordinateSystems(bool withProjection, const CDM& cdm, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
+int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
 {
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     typedef map<string, CoordSysPtr> CoordSysMap;
     typedef vector<CoordSysPtr> CoordSysVec;
     CoordSysMap coordSysMap;
-    CoordSysVec coordSys = listCoordinateSystems(cdm);
+    CoordSysVec coordSys = listCoordinateSystems(reader);
+    const CDM& cdm = reader->getCDM();
     for (CoordSysVec::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
         if (((!withProjection) || ((*cs)->isSimpleSpatialGridded() && (*cs)->hasProjection())) &&
               (withProjection || ((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {

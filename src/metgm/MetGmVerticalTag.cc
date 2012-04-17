@@ -52,9 +52,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
 {
     boost::shared_ptr<MetGmVerticalTag> VTag;
 
-    const CDM& cdmRef = pCdmReader->getCDM();
-
-    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdmRef);
+    std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
 
     std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
             find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVariable->getName()));

@@ -68,8 +68,8 @@ static std::string getTimeAxis(const CoordSysList& cs, const CDM& cdm, const std
 CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader)
    : dataReader_(dataReader)
 {
+    coordSystems_ = listCoordinateSystems(dataReader_);
     *cdm_ = dataReader_->getCDM();
-    coordSystems_ = listCoordinateSystems(getCDM());
     // removing all time-dependant data in cdm
     // just to be sure it's read from the dataReader_ or assigned in #changeTimeAxis
     const CDM::VarVec& variables = cdm_->getVariables();

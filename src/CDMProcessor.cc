@@ -88,7 +88,7 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
     CoordSysMap coordSysMap;
     map<string, string> projectionVariables;
     vector<string> incompatibleVariables;
-    if (0 == findBestHorizontalCoordinateSystems(true, getCDM(), coordSysMap, projectionVariables, incompatibleVariables)) {
+    if (0 == findBestHorizontalCoordinateSystems(true, p_->dataReader, coordSysMap, projectionVariables, incompatibleVariables)) {
         LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems with projection found, rotateVectorToLatLon not possible");
         throw CDMException("no coordinate-systems found");
     }

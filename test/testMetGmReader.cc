@@ -99,9 +99,9 @@ BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/sample_ed1.gm");
     boost::shared_ptr<CDMReader> metgmReaderEd1(new MetGmCDMReader(fileName, XMLInputFile(topSrcDir+"/share/etc/cdmMetGmReaderConfig.xml")));
-    const CDM& cdm = metgmReaderEd1->getCDM();
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(metgmReaderEd1);
+    const CDM& cdm = metgmReaderEd1->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature_GND";
     vector<boost::shared_ptr<const CoordinateSystem> >::iterator csIt =

@@ -202,6 +202,12 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
  * fetch all coordinate system from a MetNoFimex::CDMReader
  * @param reader the data-source. Depending on the internal structure of the datasource,
  *        the source might be manipulated, i.e. the WRF-system is missing several variables.
+ * @warning since this function might change the CDM of the reader, it is usually a good idea to
+ *          run this function before copying the readers CDM, e.g.
+ *          @verbatim
+     vector<boost::shared_ptr<const CoordinateSystem> > css = listCoordinateSystems(reader);
+     CDM cdm = reader.getCDM();
+ *          @endverbatim
  */
 std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
 
@@ -222,14 +228,14 @@ DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinat
  * with a coordinate system
  *
  * @param withProjection select only horizontal coordinatesystems either with (true) or without (false) projection
- * @param cdm the CDM to search coordinate systems in
+ * @param reader the CDMReader to search coordinate systems in, comparable to listCoordinateSystems()
  * @param systems Output of coordinateSystems (horizontalId -> system)
  * @param variables Output with all variables having a horizontal coordinate system
  * @param incompatibleVariables Output with a all variables which have a partial horizontal coordinate system
  *        which might interfere when changing dimensions
  * @return number of horizontal coordinate systems found, i.e. systems.size()
  */
-int findBestHorizontalCoordinateSystems(bool withProjection, const CDM& cdm, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
+int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
 
 /**
  * Functor to check if a coordinate system completely describes a variable, i.e. all axes match fully.

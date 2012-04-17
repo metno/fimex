@@ -128,6 +128,9 @@ struct CDMImpl {
 static void enhance(CDMImpl* pimpl, const CDM& cdm)
 {
     if (!pimpl->coordsInitialized) {
+        // TODO: all functions requiring the 'enhance' step should be deprecated
+        //       since 'enhancing' cannot be done by the CDM alone and it is a source
+        //       for race-conditions...
         pimpl->coordSystems = listCoordinateSystems(cdm);
         pimpl->coordsInitialized = true;
     }

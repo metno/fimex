@@ -480,7 +480,7 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
     CoordSysMap coordSysMap;
     p_->projectionVariables.clear();
     vector<string> incompatibleVariables;
-    if (0 == findBestHorizontalCoordinateSystems(withProjection, getCDM(), coordSysMap, p_->projectionVariables, incompatibleVariables)) {
+    if (0 == findBestHorizontalCoordinateSystems(withProjection, p_->dataReader, coordSysMap, p_->projectionVariables, incompatibleVariables)) {
         LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems" << (withProjection ? " with projection found, maybe you should try coordinate interpolation" : " found"));
         throw CDMException("no coordinate-systems found");
     }

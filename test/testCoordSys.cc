@@ -54,10 +54,10 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         return;
     }
     boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
-    const CDM& cdm = reader->getCDM();
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdm);
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    const CDM& cdm = reader->getCDM();
     BOOST_CHECK(coordSys.size() == 3);
 
     // find an appropriate coordinate system for a variable

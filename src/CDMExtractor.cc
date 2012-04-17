@@ -157,6 +157,10 @@ void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, lo
     reduceDimension(dimName, start, length);
 }
 
+void noDelete(CDMReader* r) {
+    // don't delete this reader from a shared_ptr
+}
+
 void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal)
 {
     using namespace std;
@@ -167,9 +171,9 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
     }
 
     Units units;
-    const CDM& cdm = getCDM();
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList coordsys = listCoordinateSystems(cdm);
+    CsList coordsys = listCoordinateSystems(dataReader);
+    const CDM& cdm = dataReader->getCDM();
     typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
     VAxesList vAxes;
     for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
@@ -285,7 +289,7 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
     }
     // find coordinate-systems
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList coordsys = listCoordinateSystems(getCDM());
+    CsList coordsys = listCoordinateSystems(dataReader);
     typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
     VAxesList vAxes;
     set<string> convertedAxes;
