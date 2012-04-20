@@ -103,9 +103,15 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
             // iterator over all variables
             for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
                 if (CompleteCoordinateSystemForComparator(vi->getName())(*varSysIt)) {
-                    csVars.push_back(vi->getName());
+                    xmlNodeSetPtr nodes;
+                    if (hasNodePtr(vi->getName(), nodes)) {
+                        csVars.push_back(vi->getName());
+                    } else {
+                        LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << vi->getName() << ": not declared in config-file " << configFile);
+                    }
                 }
             }
+            if (csVars.empty()) continue;
             usedVariables.insert(csVars.begin(), csVars.end());
             try {
                 // TODO: this would be nicer with varSysIt->getProjection() instead of csVars[0]
@@ -463,9 +469,9 @@ void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
     gribFile.write(reinterpret_cast<const char*>(buffer), size);
 }
 
-xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, double levelValue) throw(CDMException)
+bool GribApiCDMWriter_ImplAbstract::hasNodePtr(const std::string& varName, void* nodeset)
 {
-    xmlNodePtr node = 0;
+    xmlNodeSetPtr nodes = reinterpret_cast<xmlNodeSetPtr>(nodeset);
     std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
     {
         CDMAttribute attr;
@@ -477,36 +483,45 @@ xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, d
     }
     parameterXPath += "/grib"+type2string(gribVersion);
     XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
+    nodes = xpathObj->nodesetval;
+    return (nodes) ? (nodes->nodeNr > 0) : false;
+}
+
+xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, double levelValue)
+{
+    xmlNodePtr node;
     std::vector<std::map<std::string, std::string> > levelParameters;
-    if (size >= 1) {
-        // find node with corresponding level
-        std::vector<int> possibleNodes;
-        for (int i = 0; i < size; i++) {
-            xmlNodePtr node = nodes->nodeTab[i];
-            xmlNodePtr parent = node->parent;
-            std::string level = getXmlProp(parent, "level");
-            if (level != "") {
-                LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
-                double xLevelValue = string2type<double>(level);
-                if (std::fabs(levelValue - xLevelValue) < (1e-6*levelValue)) {
-                    LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
+    xmlNodeSetPtr nodes; // nodes intentionally uninitialized
+    if (hasNodePtr(varName, nodes)) {
+        int size = (nodes) ? nodes->nodeNr : 0;
+        if (size == 1) {
+            // find node with corresponding level
+            std::vector<int> possibleNodes;
+            for (int i = 0; i < size; i++) {
+                xmlNodePtr node = nodes->nodeTab[i];
+                xmlNodePtr parent = node->parent;
+                std::string level = getXmlProp(parent, "level");
+                if (level != "") {
+                    LOG4FIMEX(logger, Logger::DEBUG, "found parameter with level " << level << " in xml");
+                    double xLevelValue = string2type<double>(level);
+                    if (std::fabs(levelValue - xLevelValue) < (1e-6*levelValue)) {
+                        LOG4FIMEX(logger, Logger::DEBUG, "level matches value");
+                        possibleNodes.push_back(i);
+                    }
+                } else {
+                    LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
                     possibleNodes.push_back(i);
                 }
-            } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "found parameter without level");
-                possibleNodes.push_back(i);
             }
+            if (possibleNodes.size() != 1) {
+                throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile);
+            }
+            node = nodes->nodeTab[possibleNodes[0]];
+        } else if (size > 1) {
+            throw CDMException("several entries in grib-config at " + configFile);
         }
-        if (possibleNodes.size() != 1) {
-            throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile + ": " + parameterXPath);
-        }
-        node = nodes->nodeTab[possibleNodes[0]];
-    } else if (size > 1) {
-        throw CDMException("several entries in grib-config at " + configFile + ": " + parameterXPath);
     } else {
-        throw CDMException("could not find " + varName + " in " + configFile + " ("+parameterXPath+"), skipping parameter");
+        throw CDMException("could not find " + varName + " in " + configFile + " , skipping parameter");
     }
     return node;
 }
