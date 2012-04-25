@@ -71,7 +71,10 @@
         <xs:element minOccurs="0" maxOccurs="1" ref="grib2"/>
       </xs:sequence>
       <xs:attribute name="level" type="xs:integer"/>
-      <xs:attribute name="standard_name" use="required" type="xs:string"/>
+      <!-- one of standard_name or name is required, but it is not -->
+      <!-- possible to express this with xsd -->
+      <xs:attribute name="standard_name" use="optional" type="xs:string"/>
+      <xs:attribute name="name" use="optional" type="xs:string"/>
     </xs:complexType>
   </xs:element>
   <xs:complexType name="gribAxis">

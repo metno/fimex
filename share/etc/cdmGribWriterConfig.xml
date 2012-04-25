@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cdm_gribwriter_config
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<!--                        xsi:schemaLocation="cdmGribWriterConfig.xsd" -->
+<!--                        xsi:noNamespaceSchemaLocation="cdmGribWriterConfig.xsd"> -->
 <global_attributes>
-	<!-- type can be double, long, string -->
-	<attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
-	<!-- use for grib1 only attributes -->
-	<!--  <g1attribute name="" value="" type="" /> -->
-	<!-- use for grib2 only attributes -->
-	<g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
-	<g2attribute name="typeOfPacking" value="grid_simple" type="string" /> <!-- jpeg2000 -->
+    <!-- type can be double, long, string -->
+    <attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
+    <!-- use for grib1 only attributes -->
+    <!--  <g1attribute name="" value="" type="" /> -->
+    <!-- use for grib2 only attributes -->
+    <g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
+    <g2attribute name="typeOfPacking" value="grid_simple" type="string" /> <!-- jpeg2000 -->
 </global_attributes>
 <axes>
 <!-- no vertical axis -->
@@ -33,8 +33,8 @@
    <grib2 id="100" units="Pa" type="double"/>
 </vertical_axis>
 <vertical_axis standard_name="atmosphere_sigma_coordinate">
-	<grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
-	<grib2 id="104" type="double" />
+    <grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
+    <grib2 id="104" type="double" />
 </vertical_axis>
 </axes>
 <variables>
@@ -51,11 +51,18 @@
     <grib1 parameterNumber="61" codeTable="128" units="kg/m2"/>
     <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
 </parameter>
-<parameter standard_name="x_wind">
+<!-- if standard_name is ambiguous, use the variable name -->
+<parameter name="x_wind">
     <grib1 parameterNumber="131" codeTable="128" units="m/s"/>
 </parameter>
-<parameter standard_name="y_wind">
+<parameter name="y_wind">
     <grib1 parameterNumber="132" codeTable="128" units="m/s"/>
+</parameter>
+<parameter name="x_wind_10m">
+    <grib1 parameterNumber="166" codeTable="128" units="m/s"/>
+</parameter>
+<parameter name="y_wind_10m">
+    <grib1 parameterNumber="166" codeTable="128" units="m/s"/>
 </parameter>
 <parameter standard_name="relative_humidity">
     <grib1 parameterNumber="157" codeTable="128" units="%"/>
