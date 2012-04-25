@@ -192,7 +192,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
         LOG4FIMEX(logger, Logger::DEBUG, "found parameter at " << xpathString);
         vector<xmlNodePtr> matchingNodes;
         for (size_t i = 0; i < size; ++i) {
-            xmlNodePtr node = nodes->nodeTab[0];
+            xmlNodePtr node = nodes->nodeTab[i];
             bool allOptionalsMatch = true;
             for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
                 string optVal = getXmlProp(node, opt->first);
