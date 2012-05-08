@@ -96,10 +96,10 @@ protected:
      * check if the varName exists in the config file
      *
      * @param varName
-     * @param nodeset return nodes with from config
+     * @param usedXPath return xpath under which results have been found
      * @return true if nodes are found in config
      */
-    bool hasNodePtr(const std::string& varName, void* nodeset);
+    bool hasNodePtr(const std::string& varName, std::string& usedXPath);
     /**
      * get the node belonging to varName, level and time from the
      * config file

@@ -103,8 +103,8 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
             // iterator over all variables
             for (CDM::VarVec::const_iterator vi = vars.begin(); vi != vars.end(); ++vi) {
                 if (CompleteCoordinateSystemForComparator(vi->getName())(*varSysIt)) {
-                    xmlNodeSetPtr nodes;
-                    if (hasNodePtr(vi->getName(), nodes)) {
+                    std::string usedXPath;
+                    if (hasNodePtr(vi->getName(), usedXPath)) {
                         csVars.push_back(vi->getName());
                     } else {
                         LOG4FIMEX(logger, Logger::WARN, "cannot write variable " << vi->getName() << ": not declared in config-file " << configFile);
@@ -469,34 +469,45 @@ void GribApiCDMWriter_ImplAbstract::writeGribHandleToFile()
     gribFile.write(reinterpret_cast<const char*>(buffer), size);
 }
 
-bool GribApiCDMWriter_ImplAbstract::hasNodePtr(const std::string& varName, void* nodeset)
+bool GribApiCDMWriter_ImplAbstract::hasNodePtr(const std::string& varName, std::string& usedXPath)
 {
-    xmlNodeSetPtr nodes = reinterpret_cast<xmlNodeSetPtr>(nodeset);
-    std::string parameterXPath("/cdm_gribwriter_config/variables/parameter");
-    {
+    std::string baseXPath("/cdm_gribwriter_config/variables/parameter");
+    std::string parameterXPath = baseXPath + "[@name=\"" + varName + "\"]";
+    parameterXPath += "/grib"+type2string(gribVersion);
+    // try first with name
+    XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    size_t found = (nodes) ? (nodes->nodeNr > 0) : 0;
+    if (found == 0) {
         CDMAttribute attr;
         if (cdmReader->getCDM().getAttribute(varName, "standard_name", attr)) {
-            parameterXPath += "[@standard_name=\"" + attr.getData()->asString() + "\"]";
-        } else {
-            parameterXPath += "[@name=\"" + varName + "\"]";
+            std::string stdNameXPath = baseXPath + "[@standard_name=\"" + attr.getData()->asString() + "\"]";
+            stdNameXPath += "/grib"+type2string(gribVersion);
+            XPathObjPtr xpathObj2 = xmlConfig->getXPathObject(stdNameXPath);
+            nodes = xpathObj2->nodesetval;
+            found = (nodes) ? (nodes->nodeNr > 0) : 0;
+            if (found > 0)
+                usedXPath = stdNameXPath;
         }
+    } else {
+        usedXPath = parameterXPath;
     }
-    parameterXPath += "/grib"+type2string(gribVersion);
-    XPathObjPtr xpathObj = xmlConfig->getXPathObject(parameterXPath);
-    nodes = xpathObj->nodesetval;
-    return (nodes) ? (nodes->nodeNr > 0) : false;
+    return found > 0;
 }
 
 xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, double levelValue)
 {
-    xmlNodePtr node;
+    xmlNodePtr node = 0;
     std::vector<std::map<std::string, std::string> > levelParameters;
-    xmlNodeSetPtr nodes; // nodes intentionally uninitialized
-    if (hasNodePtr(varName, nodes)) {
+    std::vector<int> possibleNodes;
+    std::string usedXPath;
+    if (hasNodePtr(varName, usedXPath)) {
+        XPathObjPtr xpathObj = xmlConfig->getXPathObject(usedXPath);
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
+        assert(size > 0); // checked with hasNodePtr
         if (size == 1) {
             // find node with corresponding level
-            std::vector<int> possibleNodes;
             for (int i = 0; i < size; i++) {
                 xmlNodePtr node = nodes->nodeTab[i];
                 xmlNodePtr parent = node->parent;
@@ -513,12 +524,13 @@ xmlNode* GribApiCDMWriter_ImplAbstract::getNodePtr(const std::string& varName, d
                     possibleNodes.push_back(i);
                 }
             }
-            if (possibleNodes.size() != 1) {
+            if (possibleNodes.size() == 1) {
+                node = nodes->nodeTab[possibleNodes[0]];
+            } else {
                 throw CDMException("found "+type2string(possibleNodes.size())+" entries in grib-config at " + configFile);
             }
-            node = nodes->nodeTab[possibleNodes[0]];
         } else if (size > 1) {
-            throw CDMException("several entries in grib-config at " + configFile);
+            throw CDMException(type2string(size)+" entries of '" + varName + "' in grib-config at " + configFile);
         }
     } else {
         throw CDMException("could not find " + varName + " in " + configFile + " , skipping parameter");
