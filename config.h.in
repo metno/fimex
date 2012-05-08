@@ -61,6 +61,9 @@
 /* Define to 1 if you have the <netcdf.h> header file. */
 #undef HAVE_NETCDF_H
 
+/* netcdf comes with netcdf4 functions/hdf5 support */
+#undef HAVE_NETCDF_HDF5_LIB
+
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
 

@@ -30,6 +30,10 @@
 extern "C" {
 #include "netcdf.h"
 }
+#include "../config.h"
+#ifndef HAVE_NETCDF_HDF5_LIB
+#undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
+#endif
 
 namespace MetNoFimex
 {
@@ -47,13 +51,13 @@ Nc::~Nc()
 }
 
 nc_type cdmDataType2ncType(CDMDataType dt) {
-	switch (dt) {
-	case CDM_CHAR: return NC_BYTE;
-	case CDM_STRING: return NC_CHAR;
-	case CDM_SHORT: return NC_SHORT;
-	case CDM_INT: return NC_INT;
-	case CDM_FLOAT: return NC_FLOAT;
-	case CDM_DOUBLE: return NC_DOUBLE;
+    switch (dt) {
+    case CDM_CHAR: return NC_BYTE;
+    case CDM_STRING: return NC_CHAR;
+    case CDM_SHORT: return NC_SHORT;
+    case CDM_INT: return NC_INT;
+    case CDM_FLOAT: return NC_FLOAT;
+    case CDM_DOUBLE: return NC_DOUBLE;
 #ifdef NC_NETCDF4
     case CDM_UCHAR: return NC_UBYTE;
     case CDM_USHORT: return NC_USHORT;
@@ -62,8 +66,8 @@ nc_type cdmDataType2ncType(CDMDataType dt) {
     case CDM_UINT64: return NC_UINT64;
 #endif
     case CDM_NAT:
-	default: return NC_NAT;
-	}
+    default: return NC_NAT;
+    }
 }
 
 CDMDataType ncType2cdmDataType(nc_type dt) {
@@ -248,8 +252,8 @@ void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, nc_type type
     }
     if (sliceLen != data->size())
     {
-    	std::ostringstream msg;
-    	msg << "sliceLength (" << sliceLen << ") != dataSize (" << data->size() << ")";
+        std::ostringstream msg;
+        msg << "sliceLength (" << sliceLen << ") != dataSize (" << data->size() << ")";
         throw CDMException(msg.str());
     }
 

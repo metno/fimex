@@ -96,8 +96,7 @@ AC_LANG_POP(C++)
 AC_SUBST(OPENMP_CXXFLAGS)
 
 # optional io libraries
-MIFI_USELIB([netcdf], [netcdf.h], [nc_create])
-AM_CONDITIONAL([HAVE_NETCDF], [test "x$with_netcdf" == xyes])
+MIFI_USE_NETCDF()
 
 # Check for felt c++ library, currently always src included
 AC_ARG_ENABLE(felt, [  --enable-felt           enable the c++ felt-reader [[default=yes]]],[
