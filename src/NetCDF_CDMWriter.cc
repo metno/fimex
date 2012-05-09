@@ -25,6 +25,11 @@
 extern "C" {
 #include "netcdf.h"
 }
+#include "../config.h"
+#ifndef HAVE_NETCDF_HDF5_LIB
+#undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
+#endif
+
 #include <iostream>
 #include <boost/shared_array.hpp>
 #include <boost/scoped_array.hpp>

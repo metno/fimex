@@ -53,7 +53,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/mifi_checklib.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/mifi_checklib.m4 \
+	$(top_srcdir)/m4/mifi_netcdf.m4 $(top_srcdir)/m4/pkg.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -148,9 +149,9 @@ MIFI_GRIB_API_LIBS = -lgrib_api -ljasper -lpng
 MIFI_METGM_CPPFLAGS = -I/usr/include/postgresql
 MIFI_METGM_LDFLAGS = -L/usr/lib
 MIFI_METGM_LIBS = -lmetgm 
-MIFI_NETCDF_CPPFLAGS = -I/disk1/heiko/local/netcdf4.2-rc1//include
-MIFI_NETCDF_LDFLAGS = -L/disk1/heiko/local/netcdf4.2-rc1//lib
-MIFI_NETCDF_LIBS = -lnetcdf 
+MIFI_NETCDF_CPPFLAGS = -I/disk1/heiko/local/netcdf4.2-rc1/include -I/disk1/heiko/local/hdf5-1.8.7/include/
+MIFI_NETCDF_LDFLAGS = -L/disk1/heiko/local/netcdf4.2-rc1/lib -lnetcdf
+MIFI_NETCDF_LIBS = -lnetcdf
 MIFI_PQ_CPPFLAGS = -I/usr/include/postgresql
 MIFI_PQ_LDFLAGS = -L/usr/lib
 MIFI_PQ_LIBS = -lpq 
@@ -174,10 +175,10 @@ OTOOL64 =
 PACKAGE = fimex
 PACKAGE_BUGREPORT = heiko.klein@met.no
 PACKAGE_NAME = fimex
-PACKAGE_STRING = fimex 0.38beta
+PACKAGE_STRING = fimex 0.37.2
 PACKAGE_TARNAME = fimex
 PACKAGE_URL = 
-PACKAGE_VERSION = 0.38beta
+PACKAGE_VERSION = 0.37.2
 PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 RANLIB = ranlib
@@ -185,7 +186,7 @@ SED = /bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = strip
-VERSION = 0.38beta
+VERSION = 0.37.2
 XML2_CONFIG = /usr/bin/xml2-config
 XML_CPPFLAGS = -I/usr/include/libxml2
 XML_LIBS = -lxml2

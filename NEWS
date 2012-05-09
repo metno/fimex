@@ -1,3 +1,10 @@
+  * 2012-05-09 fimex-0.37.3
+    * enabling build with nc-config and netcdf-4.1.2 to 4.2 without hdf5
+    * enabling build with proj-4.8
+    * adding latlon projection in gribwriter
+    * fixing bug in gribreader with special options
+    * enabling name and standard_name selection of variables in grib_writer
+    * fixing WRF earth radius
   * 2012-04-11 fimex-0.37.2
     * using towgs84 parameter of CF-1.7-proposal
     * setting felt earth-figure to simple earth

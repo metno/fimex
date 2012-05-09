@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.38beta],[heiko.klein@met.no])
+AC_INIT([fimex],[0.37.2],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 
@@ -96,8 +96,7 @@ AC_LANG_POP(C++)
 AC_SUBST(OPENMP_CXXFLAGS)
 
 # optional io libraries
-MIFI_USELIB([netcdf], [netcdf.h], [nc_create])
-AM_CONDITIONAL([HAVE_NETCDF], [test "x$with_netcdf" == xyes])
+MIFI_USE_NETCDF()
 
 # Check for felt c++ library, currently always src included
 AC_ARG_ENABLE(felt, [  --enable-felt           enable the c++ felt-reader [[default=yes]]],[
