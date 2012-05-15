@@ -96,13 +96,24 @@ boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& a
     size_t attrLen;
     ncCheck(nc_inq_attlen (ncId, varId, attName.c_str(), &attrLen));
     switch (dt) {
-    case NC_BYTE:
+    case NC_BYTE: {
+        boost::shared_array<char> vals(new char[attrLen]);
+        ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
+        return createData(attrLen, vals);
+    }
 #ifdef NC_NETCDF4
     case NC_STRING:
 #endif
     case NC_CHAR: {
         boost::shared_array<char> vals(new char[attrLen]);
         ncCheck(nc_get_att(ncId, varId, attName.c_str(), reinterpret_cast<void*>(&vals[0])));
+        if (attrLen > 0 && vals[attrLen-1] == 0) {
+            // remove terminating 0 character
+            boost::shared_array<char> valsX(new char[attrLen-1]);
+            std::copy(&vals[0], &vals[0] + attrLen -1, &valsX[0]);
+            vals = valsX;
+            attrLen--;
+        }
         return createData(attrLen, vals);
     }
     case NC_SHORT: {
