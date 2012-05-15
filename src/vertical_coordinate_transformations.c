@@ -38,11 +38,24 @@ int mifi_atmosphere_ln_pressure(size_t n, double p0, const double* lev, double* 
 int mifi_atmosphere_sigma_pressure(size_t n, double ptop, double ps, const double* sigma, double* pressure)
 {
     int i = 0;
+    double pDiff = (ps - ptop);
     while (i++ < n) {
-        *pressure++ = ptop + *sigma++ * (ps - ptop);
+        *pressure++ = ptop + *sigma++ * pDiff;
     }
     return MIFI_OK;
 }
+
+int mifi_atmosphere_pressure_sigma(size_t n, double ptop, double ps, const double* pressure, double* sigma)
+{
+    int i = 0;
+    double pDiffInv = 1/(ps-ptop);
+    while (i++ < n) {
+        *sigma++ = (*pressure++ - ptop) * pDiffInv;
+    }
+    return MIFI_OK;
+
+}
+
 
 int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps, const double* a, const double* b, double* pressure)
 {

@@ -176,6 +176,13 @@
  */
 #define MIFI_VINT_DEPTH 2
 
+/**
+ * @brief vertical interpolation type
+ *
+ * vertical interpolation to sigma dimensionless vertical coordinate
+ */
+#define MIFI_VINT_SIGMA 3
+
 
 /**
  * @brief vertical interpolation method

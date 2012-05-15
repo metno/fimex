@@ -56,11 +56,26 @@ extern int mifi_atmosphere_ln_pressure(size_t n, double p0, const double* lev, d
  * @param n size of arrays sigma and pressure
  * @param ptop pressure on model top layer (constant for a model)
  * @param ps surface pressure - usually varying in time,x,y
- * @param sigma level values
+ * @param lev sigma level values
  * @param pressure output values in the same unit as ptop and ps and at the same place as ps
  * @return MIFI_OK on success or MIFI_ERROR on failure
  */
-extern int mifi_atmosphere_sigma_pressure(size_t n, double ptop, double ps, const double* lev, double* pressure);
+extern int mifi_atmosphere_sigma_pressure(size_t n, double ptop, double ps, const double* level, double* pressure);
+
+/**
+ * convert a pressure to standard_name="atmosphere_sigma_coordinate" using the
+ * formular  p(k) = ptop + sigma(k)*(ps-ptop) ->
+ *       sigma(k) = (p(k) - ptop)/(ps-ptop)
+ *
+ *
+ * @param n size of arrays sigma and pressure
+ * @param ptop pressure on model top layer (constant for a model)
+ * @param ps surface pressure - usually varying in time,x,y
+ * @param pressure pressure level values in the same unit as ptop and ps
+ * @param level sigma output values at the same place as ps
+ * @return MIFI_OK on success or MIFI_ERROR on failure
+ */
+extern int mifi_atmosphere_pressure_sigma(size_t n, double ptop, double ps, const double* pressure, double* level);
 
 /**
  * convert a standard_name="atmosphere_hybrid_sigma_pressure_coordinate" to pressure using the
