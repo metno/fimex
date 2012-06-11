@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -28,13 +28,19 @@
 #include <string>
 
 namespace MetNoFelt {
-	
+
 using namespace std;
 
 class Felt_File_Error : public std::runtime_error
 {
 public:
-	explicit Felt_File_Error(const std::string& message) : std::runtime_error("FeltError: " + message) {}
+    explicit Felt_File_Error(const std::string& message) : std::runtime_error("FeltError: " + message) {}
+};
+
+class NoSuchField_Felt_File_Error : public Felt_File_Error
+{
+public:
+    explicit NoSuchField_Felt_File_Error(const std::string& message) : Felt_File_Error(message) {}
 };
 
 } // end namespace MetNoFelt

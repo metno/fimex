@@ -107,7 +107,7 @@ void Felt_Array2::addInformationByField(const boost::shared_ptr<felt::FeltField>
         }
         throw Felt_File_Error(msg.str());
     }
-	addField_(field);
+    addField_(field);
 }
 
 vector<boost::posix_time::ptime> Felt_Array2::getReferenceTimes() const {
@@ -123,14 +123,14 @@ vector<boost::posix_time::ptime> Felt_Array2::getReferenceTimes() const {
 }
 
 vector<boost::posix_time::ptime> Felt_Array2::getTimes() const {
-	vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>();
-	if (!hasTime()) return vTimes;
+    vector<boost::posix_time::ptime> vTimes = vector<boost::posix_time::ptime>();
+    if (!hasTime()) return vTimes;
 
-	vTimes.reserve(feltFields_.size());
-	for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
-	    vTimes.push_back(tlm->first);
-	}
-	return vTimes;
+    vTimes.reserve(feltFields_.size());
+    for (TimeLevelFieldMap::const_iterator tlm = feltFields_.begin(); tlm != feltFields_.end(); ++tlm) {
+        vTimes.push_back(tlm->first);
+    }
+    return vTimes;
 }
 
 vector<LevelPair> Felt_Array2::getLevelPairs() const {
@@ -147,9 +147,9 @@ vector<LevelPair> Felt_Array2::getLevelPairs() const {
             }
         }
     }
-	vector<LevelPair> retVal(lset.begin(), lset.end());
-	// retVal is sorted since the set is sorted
-	return retVal;
+    vector<LevelPair> retVal(lset.begin(), lset.end());
+    // retVal is sorted since the set is sorted
+    return retVal;
 }
 
 vector<short> Felt_Array2::getEnsembleMembers() const {
@@ -179,7 +179,7 @@ const boost::shared_ptr<felt::FeltField> Felt_Array2::getField(boost::posix_time
             return lm->second;
         }
     }
-    throw Felt_File_Error("time/pair value not found in field");
+    throw NoSuchField_Felt_File_Error("time/pair value not found in field");
 }
 
 int Felt_Array2::getIdent19(boost::posix_time::ptime time, LevelPair levelPair) const
@@ -194,12 +194,12 @@ int Felt_Array2::scaleFactor() const
 
 double Felt_Array2::getScalingFactor() const
 {
-	return (dataType_ == "short") ? std::pow(10,static_cast<double>(defaultField_->scaleFactor())) : 1;
+    return (dataType_ == "short") ? std::pow(10,static_cast<double>(defaultField_->scaleFactor())) : 1;
 }
 
 const string& Felt_Array2::getName() const
 {
-	return feltArrayName_;
+    return feltArrayName_;
 }
 
 int Felt_Array2::getLevelType() const

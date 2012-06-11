@@ -1,3 +1,5 @@
+  *            fimex-0.38beta
+    * fixing netcdf-files with 0-terminated strings
   * 2012-05-09 fimex-0.37.3
     * enabling build with nc-config and netcdf-4.1.2 to 4.2 without hdf5
     * enabling build with proj-4.8

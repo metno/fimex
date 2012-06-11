@@ -752,10 +752,8 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
 
             size_t dataCurrentPos = 0;
             // xa
-            int xDim = fa->getX();
-            int yDim = fa->getY();
-            vector<short> gridData;
-            gridData.reserve(xDim*yDim);
+            unsigned int xDim = fa->getX();
+            unsigned int yDim = fa->getY();
             for (vector<LevelPair>::const_iterator lit = layerVals.begin(); lit != layerVals.end(); ++lit) {
                 // get the posix-time, if available
                 boost::posix_time::ptime t;
@@ -766,8 +764,14 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
                 boost::shared_ptr<Data> levelData;
                 {
                     ScopedCritical lock(mutex_);
-                    levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
+                    // level-data might be undefined, create a undefined slice then
+                    try {
+                        levelData = feltfile_->getScaledDataSlice(fa, t, *lit);
+                    } catch (NoSuchField_Felt_File_Error nsfe) {
+                        levelData = createData(variable.getDataType(), xDim*yDim, cdm_->getFillValue(varName));
+                    }
                 }
+                assert(levelData->size() == (xDim*yDim));
                 data->setValues(dataCurrentPos, *levelData, 0, levelData->size());
                 dataCurrentPos += levelData->size();
             }
