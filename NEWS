@@ -1,5 +1,6 @@
-  *            fimex-0.38beta
+  * 2012-07-05 fimex-0.37.4
     * fixing netcdf-files with 0-terminated strings
+    * felt: using undefined-values for undefined levels
   * 2012-05-09 fimex-0.37.3
     * enabling build with nc-config and netcdf-4.1.2 to 4.2 without hdf5
     * enabling build with proj-4.8
