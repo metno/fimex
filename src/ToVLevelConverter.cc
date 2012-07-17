@@ -160,11 +160,59 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
 {
     boost::shared_ptr<ToVLevelConverter> heightConv;
     switch (zAxis->getAxisType()) {
-        case CoordinateAxis::GeoZ:
+        case CoordinateAxis::Height:
         {
             boost::shared_ptr<Data> hd = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
             const boost::shared_array<double> ha = hd->asDouble();
             heightConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
+        }
+        break;
+        case CoordinateAxis::GeoZ: {
+            CDMAttribute standardName, formulaTerms;
+            if (reader->getCDM().getAttribute(zAxis->getName(), "standard_name", standardName)
+                    && reader->getCDM().getAttribute(zAxis->getName(), "formula_terms", formulaTerms)) {
+                if (standardName.getStringValue() == "ocean_s_coordinate_g1" || standardName.getStringValue() == "ocean_s_coordinate_g2") {
+                    string s = getTerm(formulaTerms, "s");
+                    string C = getTerm(formulaTerms, "C");
+                    string eta = getTerm(formulaTerms, "eta");
+                    string depth = getTerm(formulaTerms, "depth");
+                    string depth_c = getTerm(formulaTerms, "depth_c");
+                    if (s == "" || C == "" || depth == "" || depth_c == "")
+                        throw CDMException("ocean_s_coordinate_g? formula_terms (s,C,depth,depth_c) not all found in " + formulaTerms.getStringValue());
+                    vector<double> sVec = getDataSliceInUnit(reader, s, "", unLimDimPos); // size k
+                    vector<double> CVec = getDataSliceInUnit(reader, C, "", unLimDimPos); // size k
+                    vector<double> depth_cVec = getDataSliceInUnit(reader, depth_c, "m", unLimDimPos); // size 1
+                    boost::shared_ptr<Data> depthD = reader->getScaledDataSliceInUnit(depth, "m", unLimDimPos);
+                    bool timeDependentDepth;
+                    if ((nx * ny * nt) == depthD->size()) {
+                        timeDependentDepth = true;
+                    } else if ((nx * ny) == depthD->size()) {
+                        timeDependentDepth = false;
+                    } else {
+                        throw CDMException("unexpected size of depth " + depth + "(" + type2string(unLimDimPos) +
+                                "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
+                    }
+                    boost::shared_ptr<Data> etaD;
+                    if (eta != "") {
+                        etaD = reader->getScaledDataSliceInUnit(eta, "m", unLimDimPos);
+                        if ((nx * ny) != depthD->size()) {
+                            throw CDMException("unexpected size of eta " + eta + "(" + type2string(unLimDimPos) +
+                                               "), should be " + type2string(nx * ny) + " != " + type2string(etaD->size()));
+                        }
+                    }
+                    if (standardName.getStringValue() == "ocean_s_coordinate_g1") {
+                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaD->asFloat(), depthD->asFloat(), timeDependentDepth,
+                                    nx, ny, nz, nt, mifi_ocean_s_g1_z));
+                    } else {
+                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaD->asFloat(), depthD->asFloat(), timeDependentDepth,
+                                    nx, ny, nz, nt, mifi_ocean_s_g2_z));
+                    }
+                } else {
+                    throw CDMException("unimplemented vertical axis with standard_name: " + standardName.getStringValue());
+                }
+            } else {
+                throw CDMException("no standard_name or formular_terms for vertical axis: " + zAxis->getName());
+            }
         }
         break;
     default:
@@ -257,6 +305,23 @@ const vector<double> GeopotentialToHeightConverter::operator()(size_t x, size_t 
         h.at(z) =  static_cast<double>(hg - alti_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)]);
     }
     return h;
+}
+
+const vector<double> OceanSCoordinateGToDepthConverter::operator()(size_t x, size_t y, size_t t) {
+    vector<double> z(nz_);
+    float depth, eta;
+    if (timeDependentDepth_) {
+        depth = depth_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)];
+    } else {
+        depth = depth_[nx_*y+x];
+    }
+    if (eta_.get() == 0) {
+        eta = 0;
+    } else {
+        eta = eta_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)];
+    }
+    func_(nz_, depth, depth_c_, eta, &s_[0], &C_[0], &z[0]);
+    return z;
 }
 
 

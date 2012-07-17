@@ -231,9 +231,10 @@ CDMVerticalInterpolator::getSimpleAxes(
         if (shape.size() == 1) {
             nz = cdm.getDimension(shape.at(0)).getLength();
         } else {
-            throw CDMException("vertical interpolation not possible with 2d z-Axis");
+            throw CDMException("vertical interpolation not possible with 2d z-Axis: "+zAxis->getName());
         }
     }
+    // TODO: this is nonesense, 2d x/y-axes should nicely work!
     // detect x and y axis
     xAxis = cs->getGeoXAxis();
     nx = 1;
@@ -242,7 +243,7 @@ CDMVerticalInterpolator::getSimpleAxes(
         if (shape.size() == 1) {
             nx = cdm.getDimension(shape.at(0)).getLength();
         } else {
-            throw CDMException("vertical interpolation not possible with 2d x-Axis");
+            throw CDMException("vertical interpolation not possible with 2d x-Axis: "+xAxis->getName());
         }
     }
 
@@ -253,7 +254,7 @@ CDMVerticalInterpolator::getSimpleAxes(
         if (shape.size() == 1) {
             ny = cdm.getDimension(shape.at(0)).getLength();
         } else {
-            throw CDMException("vertical interpolation not possible with 2d y-Axis");
+            throw CDMException("vertical interpolation not possible with 2d y-Axis: "+yAxis->getName());
         }
     }
 
