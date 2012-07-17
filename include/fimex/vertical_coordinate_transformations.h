@@ -165,6 +165,38 @@ extern int mifi_barometric_height(size_t n, double P_b, const double* p, double 
  */
 extern int mifi_barometric_standard_height(size_t n, const double* p, double* height);
 
+/**
+ * convert a standard_name="ocean_s_coordinate_g1" to z using the
+ * formular  z(k) = h_c*sigma(k) + C(k)*(h - h_c) + zeta*(1+(h_c*sigma(k)+C(k)*(h-h_c)/h))
+ *
+ * @param n size of arrays s and C pressure
+ * @param h unperturbed water column thickness - varying in x,y (might be varying in time for sediment applications)
+ * @param h_c critical depth, usually min(h(x,y))
+ * @param zeta time-varying free surface - varying in time,x,y
+ * @param sigma(k) dimensionless s coordinate
+ * @param C(k) streching function
+ * @param z output values in the same unit as h and h_c and at the same place as h
+ * @return MIFI_OK on success or MIFI_ERROR on failure
+ * @see https://www.myroms.org/wiki/index.php?title=Vertical_S-coordinate
+ */
+extern int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z);
+
+/**
+ * convert a standard_name="ocean_s_coordinate_g1" to z using the
+ * formular  z(k) = zeta + (zeta +h)*(h_c*sigma + h*C(k))/(h_c+h)
+ *
+ * @param n size of arrays s and C pressure
+ * @param h unperturbed water column thickness - varying in x,y (might be varying in time for sediment applications)
+ * @param h_c critical depth, usually min(h(x,y))
+ * @param zeta time-varying free surface - varying in time,x,y
+ * @param s(k) dimensionless s coordinate
+ * @param C(k) streching function
+ * @param z output values in the same unit as h and h_c and at the same place as h
+ * @return MIFI_OK on success or MIFI_ERROR on failure
+ * @see https://www.myroms.org/wiki/index.php?title=Vertical_S-coordinate
+ */
+extern int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z);
+
 
 /**
  * convert the vertical pressure change omega to vertical wind-speed using omega = - rho * g * w

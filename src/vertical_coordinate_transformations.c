@@ -28,8 +28,7 @@
 
 int mifi_atmosphere_ln_pressure(size_t n, double p0, const double* lev, double* pressure)
 {
-    int i = 0;
-    while (i++ < n) {
+    while (n--) {
         *pressure++ = p0 * exp(-(*lev++));
     }
     return MIFI_OK;
@@ -37,9 +36,8 @@ int mifi_atmosphere_ln_pressure(size_t n, double p0, const double* lev, double* 
 
 int mifi_atmosphere_sigma_pressure(size_t n, double ptop, double ps, const double* sigma, double* pressure)
 {
-    int i = 0;
     double pDiff = (ps - ptop);
-    while (i++ < n) {
+    while (n--) {
         *pressure++ = ptop + *sigma++ * pDiff;
     }
     return MIFI_OK;
@@ -47,9 +45,8 @@ int mifi_atmosphere_sigma_pressure(size_t n, double ptop, double ps, const doubl
 
 int mifi_atmosphere_pressure_sigma(size_t n, double ptop, double ps, const double* pressure, double* sigma)
 {
-    int i = 0;
     double pDiffInv = 1/(ps-ptop);
-    while (i++ < n) {
+    while (n--) {
         *sigma++ = (*pressure++ - ptop) * pDiffInv;
     }
     return MIFI_OK;
@@ -59,8 +56,7 @@ int mifi_atmosphere_pressure_sigma(size_t n, double ptop, double ps, const doubl
 
 int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps, const double* a, const double* b, double* pressure)
 {
-    int i = 0;
-    while (i++ < n) {
+    while (n--) {
         *pressure++ = (*a++ * p0) + (*b++ * ps);
     }
     return MIFI_OK;
@@ -68,8 +64,7 @@ int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps, const 
 
 int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const double* ap, const double* b, double* pressure)
 {
-    int i = 0;
-    while (i++ < n) {
+    while (n--) {
         *pressure++ = (*ap++) + (*b++ * ps);
     }
     return MIFI_OK;
@@ -81,8 +76,7 @@ int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, 
     const double M = 0.0289644;
     const double R = 8.31432;
     const double C = -g*M/(R*T_b);
-    int i = 0;
-    while (i++ < n) {
+    while (n--) {
         *pressure++ = P_b * exp(C * (*h++));
     }
     return MIFI_OK;
@@ -100,8 +94,7 @@ int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, do
     const double M = 0.0289644;
     const double R = 8.31432;
     const double K = -R*T_b/(g*M);
-    int i = 0;
-    while (i++ < n) {
+    while (n--) {
         *height++ =  K * log(*p++/P_b);
     }
     return MIFI_OK;
@@ -111,6 +104,26 @@ int mifi_barometric_standard_height(size_t n, const double* p, double* height)
 {
     return mifi_barometric_height(n, 1013.25, p, 288.15, height);
 }
+
+int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z)
+{
+    double h_inv = 1/h;
+    while (n--) {
+        double S   = h_c * *sigma++ + (h-h_c) * *C++;
+        *z++ = S + zeta*(1+S*h_inv);
+    }
+    return MIFI_OK;
+}
+int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z)
+{
+    double hph_c_inv = 1/(h+h_c);
+    while (n--) {
+        double S = hph_c_inv * (h_c* *sigma++ +h * *C++);
+        *z++ = zeta + (zeta + h)*S;
+    }
+    return MIFI_OK;
+}
+
 
 int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, const double* t, double* w)
 {
@@ -122,8 +135,7 @@ int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, 
     const double g = 9.80665;
     const double mR_g = -1 * 287.058 / g;
 
-    int i = 0;
-    while (i++ < n) {
+    while (n--) {
         *w++ = mR_g * *omega++ * *t++ / *p++;
     }
 
