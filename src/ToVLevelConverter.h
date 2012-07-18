@@ -33,6 +33,7 @@
 #include <boost/noncopyable.hpp>
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/mifi_constants.h"
+#include "fimex/IndexedData.h"
 
 namespace MetNoFimex
 {
@@ -220,10 +221,9 @@ class OceanSCoordinateGToDepthConverter : public ToVLevelConverter {
     vector<double> s_;
     vector<double> C_;
     double depth_c_;
-    const boost::shared_array<float> eta_;
-    const boost::shared_array<float> depth_;
+    const IndexedData eta_;
+    const IndexedData depth_;
     /* eta might be 0 */
-    bool timeDependentDepth_;
     size_t nx_;
     size_t ny_;
     size_t nz_;
@@ -237,14 +237,13 @@ public:
      * @param depth_c critical depth (~ min(h(x,y)))
      * @param eta time-varying free surface, might be 0
      * @param depth ocean-depth, might be time-varying for sediment applications
-     * @param timeDependentDepth flag, true if above depth is time-dependent
      * @param func either mifi_ocean_s_g1_z() or mifi_ocean_s_g2_z()
      */
     OceanSCoordinateGToDepthConverter(const vector<double>& s, const vector<double>& C, double depth_c,
-                                      const boost::shared_array<float> eta, const boost::shared_array<float> depth, bool timeDependentDepth,
+                                      IndexedData eta, IndexedData depth,
                                       size_t nx, size_t ny, size_t nk, size_t nt,
                                       int (*func)(size_t, double, double, double, const double*, const double*, double*))
-    : s_(s), C_(C), depth_c_(depth_c), eta_(eta), depth_(depth), timeDependentDepth_(timeDependentDepth),
+    : s_(s), C_(C), depth_c_(depth_c), eta_(eta), depth_(depth),
       nx_(nx), ny_(ny), nz_(nk), nt_(nt)
     {
             func_ = func;

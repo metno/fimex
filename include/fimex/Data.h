@@ -50,6 +50,7 @@ namespace MetNoFimex
 
         /// @brief size of the data
         virtual size_t size() const = 0;
+
         /// @brief sizeof the data-impl datatype
         virtual int bytes_for_one() const = 0;
         virtual void* getDataPtr() = 0;
@@ -114,8 +115,22 @@ namespace MetNoFimex
         /// @brief retrieve the whole array as a string (with possible separator)
         virtual std::string asString(std::string separator = "") const = 0;
 
+
+        /**
+         *  @brief get a value at the desired position
+         *
+         *  Usefull in combination with MetNoFimex::Index and getDims().
+         */
+        virtual double getDouble(size_t pos) = 0;
+        /**
+         *  @brief get a value at the desired position
+         *
+         *  Usefull in combination with MetNoFimex::Index and getDims().
+         */
+        virtual long long getLongLong(size_t pos) = 0;
+
         /// @brief set a value at the desired position
-        virtual void setValue(long pos, double val) = 0;
+        virtual void setValue(size_t pos, double val) = 0;
         /**
          * set the values from another Data implementation
          * @param startPos the first position the data should be written to

@@ -183,28 +183,27 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
                     vector<double> CVec = getDataSliceInUnit(reader, C, "", unLimDimPos); // size k
                     vector<double> depth_cVec = getDataSliceInUnit(reader, depth_c, "m", unLimDimPos); // size 1
                     DataPtr depthD = reader->getScaledDataSliceInUnit(depth, "m", unLimDimPos);
-                    bool timeDependentDepth;
-                    if ((nx * ny * nt) == depthD->size()) {
-                        timeDependentDepth = true;
-                    } else if ((nx * ny) == depthD->size()) {
-                        timeDependentDepth = false;
-                    } else {
+                    IndexedData depthDI(depthD, reader->getDimsSlice(depth));
+                    size_t dSize = (depthDI.idx().getDims().size() == 3) ? (nx*ny*nt) : (nx*ny);
+                    if (depthD->size() < dSize) {
                         throw CDMException("unexpected size of depth " + depth + "(" + type2string(unLimDimPos) +
                                 "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
+                        // I allow depthD to be larger than dSize for staggered grids (grids with +-1 cell)
                     }
-                    DataPtr etaD;
+                    IndexedData etaDI;
                     if (eta != "") {
-                        etaD = reader->getScaledDataSliceInUnit(eta, "m", unLimDimPos);
-                        if ((nx * ny) != depthD->size()) {
+                        DataPtr etaD = reader->getScaledDataSliceInUnit(eta, "m", unLimDimPos);
+                        if (etaD->size() < (nx * ny)) {
                             throw CDMException("unexpected size of eta " + eta + "(" + type2string(unLimDimPos) +
                                                "), should be " + type2string(nx * ny) + " != " + type2string(etaD->size()));
                         }
+                        etaDI = IndexedData(etaD, reader->getDimsSlice(eta));
                     }
                     if (standardName.getStringValue() == "ocean_s_coordinate_g1") {
-                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaD->asFloat(), depthD->asFloat(), timeDependentDepth,
+                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaDI, depthDI,
                                     nx, ny, nz, nt, mifi_ocean_s_g1_z));
                     } else {
-                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaD->asFloat(), depthD->asFloat(), timeDependentDepth,
+                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaDI, depthDI,
                                     nx, ny, nz, nt, mifi_ocean_s_g2_z));
                     }
                 } else {
@@ -310,15 +309,15 @@ const vector<double> GeopotentialToHeightConverter::operator()(size_t x, size_t 
 const vector<double> OceanSCoordinateGToDepthConverter::operator()(size_t x, size_t y, size_t t) {
     vector<double> z(nz_);
     float depth, eta;
-    if (timeDependentDepth_) {
-        depth = depth_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)];
+    if (depth_.idx().getDims().size() == 3) {
+        depth = depth_.getDouble(x,y,t);
     } else {
-        depth = depth_[nx_*y+x];
+        depth = depth_.getDouble(x,y);
     }
-    if (eta_.get() == 0) {
+    if (eta_.getDataPtr()->size() == 0) {
         eta = 0;
     } else {
-        eta = eta_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)];
+        eta = eta_.getDouble(x,y,t);
     }
     func_(nz_, depth, depth_c_, eta, &s_[0], &C_[0], &z[0]);
     return z;

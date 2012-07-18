@@ -26,21 +26,10 @@
 #include "fimex/mifi_constants.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
+#include <functional>
+#include <numeric>
 
 namespace MetNoFimex {
-
-// retrieve size of data slice
-static size_t getSliceSize(const CDM& cdm, const CDMVariable& variable) {
-    size_t sliceSize = 1;
-    std::vector<std::string> shape = variable.getShape();
-    for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
-        const CDMDimension& dim = cdm.getDimension(*dimIt);
-        if (!dim.isUnlimited()) {
-            sliceSize *= dim.getLength();
-        }
-    }
-    return sliceSize;
-}
 
 CDMReader::CDMReader()
     : cdm_(new CDM())
@@ -55,6 +44,32 @@ const CDM& CDMReader::getCDM() const
 CDM& CDMReader::getInternalCDM()
 {
     return const_cast<CDM&>(getCDM());
+}
+
+std::vector<std::size_t> CDMReader::getDims(std::string varName)
+{
+    std::vector<std::size_t> dims;
+    const CDMVariable& variable = getCDM().getVariable(varName);
+    std::vector<std::string> shape = variable.getShape();
+    for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
+        const CDMDimension& dim = getCDM().getDimension(*dimIt);
+        dims.push_back(dim.getLength());
+    }
+    return dims;
+}
+
+std::vector<std::size_t> CDMReader::getDimsSlice(std::string varName)
+{
+    std::vector<std::size_t> dims;
+    const CDMVariable& variable = getCDM().getVariable(varName);
+    std::vector<std::string> shape = variable.getShape();
+    for (std::vector<std::string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
+        const CDMDimension& dim = getCDM().getDimension(*dimIt);
+        if (!dim.isUnlimited()) {
+            dims.push_back(dim.getLength());
+        }
+    }
+    return dims;
 }
 
 
@@ -122,7 +137,8 @@ DataPtr CDMReader::getData(const std::string& varName)
         if (cdm_->hasUnlimitedDim(variable)) {
             const CDMDimension* udim = cdm_->getUnlimitedDim();
             size_t uDimSize = udim->getLength();
-            size_t sliceSize = getSliceSize(getCDM(), variable);
+            std::vector<size_t> dims = getDimsSlice(varName);
+            size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
             DataPtr data = createData(variable.getDataType(), uDimSize*sliceSize);
             for (size_t i = 0; i < uDimSize; i++) {
                 DataPtr slice = getDataSlice(varName, i);
@@ -216,7 +232,8 @@ DataPtr CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t un
     if (variable.hasData()) {
         if (cdm_->hasUnlimitedDim(variable)) {
             // cut out the unlimited dim data
-            size_t sliceSize = getSliceSize(*cdm_.get(), variable);
+            std::vector<size_t> dims = getDimsSlice(variable.getName());
+            size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
             return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
         } else {
             return variable.getData()->clone();

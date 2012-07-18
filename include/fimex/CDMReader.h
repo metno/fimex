@@ -62,6 +62,42 @@ public:
      * Only in rare cases, this might be required.
      */
     virtual CDM& getInternalCDM();
+
+    /**
+     * @brief Read the sizes of the dimensions belonging to a variable.
+     *
+     * Read the dimension-sizes of a variable. This can be used to set the index
+     * of the Data as received with on of the getData() functions, e.g.
+     *
+     * @code
+     *  DataPtr d = reader->getData("my_var");
+     *  if (d.size() != 0) {
+     *     d.setDims(reader->getDims("my_var"));
+     *  }
+     * @endcode
+     * @param varName the variables name
+     * @return a vector with the dimension sizes usable with MetNoFimex::Index
+     */
+    virtual std::vector<std::size_t> getDims(std::string varName);
+    /**
+     * @brief Read the sizes of the dimensions belonging to a variable slice.
+     *
+     * Read the dimension-sizes of a variable. This can be used to set the index
+     * of the Data as received with on of the getData() functions, e.g.
+     *
+     * @code
+     *  DataPtr d = reader->getScaledDataSliceInUnit("my_var", "m", 3);
+     *  if (d.size() != 0) {
+     *     d.setDims(reader->getDimsSlice("my_var"));
+     *  }
+     * @endcode
+     *
+     * When using getDataSlice with a MetNoFimex::SliceBuilder, use SliceBuilder::getDimensionSizes().
+     *
+     * @param varName the variables name
+     * @return a vector with the dimension sizes usable with MetNoFimex::Index
+     */
+    virtual std::vector<std::size_t> getDimsSlice(std::string varName);
     /**
      * @brief data-reading function to be called from the CDMWriter
      *

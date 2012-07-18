@@ -71,6 +71,8 @@ libfimex_la_SOURCES = interpolation.c \
 					 FeltParameters.h \
 					 FeltParameters.cc \
                      GridDefinition.cc \
+                     Index.cc \
+                     IndexedData.cc \
 					 Logger.cc \
 					 MutexLock.h \
 					 NcmlCDMReader.cc \
