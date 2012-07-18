@@ -228,6 +228,7 @@ class OceanSCoordinateGToDepthConverter : public ToVLevelConverter {
     size_t ny_;
     size_t nz_;
     size_t nt_;
+    bool timeDependentDepth_;
     int (*func_)(size_t, double, double, double, const double*, const double*, double*);
 
 public:
@@ -246,6 +247,7 @@ public:
     : s_(s), C_(C), depth_c_(depth_c), eta_(eta), depth_(depth),
       nx_(nx), ny_(ny), nz_(nk), nt_(nt)
     {
+            timeDependentDepth_ = (depth_.idx().getDims().size() == 3);
             func_ = func;
     }
     virtual const vector<double> operator()(size_t x, size_t y, size_t t);

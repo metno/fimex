@@ -25,6 +25,7 @@
  */
 
 #include "fimex/Index.h"
+#include <algorithm>
 
 namespace MetNoFimex
 {
@@ -32,7 +33,7 @@ namespace MetNoFimex
 Index::Index(std::vector<std::size_t> dimSizes)
 : dims_(dimSizes)
 {
-    slices_.resize(dims_.size());
+    slices_= std::vector<std::size_t>(std::max(dims_.size(),(size_t)5), 0);
     if (dims_.size() > 0)
         slices_[0] = 1;
     for (size_t i = 1; i < dims_.size(); ++i ) {

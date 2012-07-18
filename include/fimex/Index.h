@@ -38,7 +38,7 @@ private:
     std::vector<std::size_t> dims_;
     std::vector<std::size_t> slices_;
 public:
-    Index() : dims_(0), slices_(0) {}
+    Index() : dims_(0), slices_(5, 0) {}
     /**
      *  Creates an index for an array with applied dimSizes. The first
      *  dimension is the fastest moving (fortran-array style).

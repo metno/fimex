@@ -190,12 +190,13 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
                                 "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
                         // I allow depthD to be larger than dSize for staggered grids (grids with +-1 cell)
                     }
-                    IndexedData etaDI;
+                    // default eta: single value, 0
+                    IndexedData etaDI(createData(CDM_DOUBLE, 1, 0.), vector<size_t>(1,1));
                     if (eta != "") {
                         DataPtr etaD = reader->getScaledDataSliceInUnit(eta, "m", unLimDimPos);
-                        if (etaD->size() < (nx * ny)) {
+                        if (etaD->size() < (nx * ny * nt)) {
                             throw CDMException("unexpected size of eta " + eta + "(" + type2string(unLimDimPos) +
-                                               "), should be " + type2string(nx * ny) + " != " + type2string(etaD->size()));
+                                               "), should be " + type2string(nx * ny * nt) + " != " + type2string(etaD->size()));
                         }
                         etaDI = IndexedData(etaD, reader->getDimsSlice(eta));
                     }
@@ -309,16 +310,12 @@ const vector<double> GeopotentialToHeightConverter::operator()(size_t x, size_t 
 const vector<double> OceanSCoordinateGToDepthConverter::operator()(size_t x, size_t y, size_t t) {
     vector<double> z(nz_);
     float depth, eta;
-    if (depth_.idx().getDims().size() == 3) {
+    if (timeDependentDepth_) {
         depth = depth_.getDouble(x,y,t);
     } else {
         depth = depth_.getDouble(x,y);
     }
-    if (eta_.getDataPtr()->size() == 0) {
-        eta = 0;
-    } else {
-        eta = eta_.getDouble(x,y,t);
-    }
+    eta = eta_.getDouble(x,y,t);
     func_(nz_, depth, depth_c_, eta, &s_[0], &C_[0], &z[0]);
     return z;
 }
