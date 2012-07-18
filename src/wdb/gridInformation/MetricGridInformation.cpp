@@ -86,9 +86,9 @@ std::string MetricGridInformation::getCoordinatesAttribute() const
 	return "lon1 lat1";
 }
 
-boost::shared_ptr<Data> MetricGridInformation::getField(const CDMVariable & variable) const
+DataPtr MetricGridInformation::getField(const CDMVariable & variable) const
 {
-	boost::shared_ptr<Data> ret;
+	DataPtr ret;
 
 	const std::string & variableName = variable.getName();
 	if ( variableName == "xc" )

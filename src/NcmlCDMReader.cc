@@ -433,7 +433,7 @@ void NcmlCDMReader::initAttributeNameChange()
 }
 
 
-boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -448,7 +448,7 @@ boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, 
         orgVarName = vit->second;
     }
 
-    boost::shared_ptr<Data> data;
+    DataPtr data;
     // check if the first new unlimited dimension is part of the variable
     // (for simplicity check only first)
     if ( (unlimitedDimensionChanges.size() > 0) &&
@@ -495,7 +495,7 @@ boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, 
     return data;
 }
 
-boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -513,7 +513,7 @@ boost::shared_ptr<Data> NcmlCDMReader::getDataSlice(const std::string& varName, 
     }
 
     // get data from original source with slicebuilder
-    boost::shared_ptr<Data> data = dataReader->getDataSlice(orgVarName, sb);
+    DataPtr data = dataReader->getDataSlice(orgVarName, sb);
 
     // eventually, change the type from the old type to the new type
     map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);

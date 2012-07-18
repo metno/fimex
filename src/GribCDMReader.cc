@@ -375,7 +375,7 @@ void GribCDMReader::initAddTimeDimension()
     vector<double> timeVecLong;
     // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
     transform(p_->times.begin(), p_->times.end(), back_inserter(timeVecLong), posixTime2epochTime);
-    boost::shared_ptr<Data> timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
+    DataPtr timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
     timeVar.setData(timeData);
     cdm_->addVariable(timeVar);
     vector<CDMAttribute> timeAttributes;
@@ -390,7 +390,7 @@ void GribCDMReader::initAddTimeDimension()
     string referenceTime = "forecast_reference_time";
     vector<string> nullShape;
     CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
-    boost::shared_ptr<Data> refTimeData = createData(timeDataType, 1);
+    DataPtr refTimeData = createData(timeDataType, 1);
     // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
     refTimeData->setValue(0, posixTime2epochTime(refTime));
     refTimeVar.setData(refTimeData);
@@ -608,7 +608,7 @@ GribCDMReader::~GribCDMReader()
 {
 }
 
-boost::shared_ptr<Data> GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
+DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
 
@@ -685,14 +685,14 @@ boost::shared_ptr<Data> GribCDMReader::getDataSlice(const string& varName, size_
     // prefill with missing values
     double missingValue = cdm_->getFillValue(varName);
     fill(&doubleArray[0], &doubleArray[xy_size], missingValue);
-    boost::shared_ptr<Data> data = createData(xy_size, doubleArray);
+    DataPtr data = createData(xy_size, doubleArray);
     // storage for one layer
     vector<double> gridData(xy_size/slices.size());
     size_t dataCurrentPos = 0;
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels
         if (gfmIt->isValid()) {
-            boost::shared_ptr<Data> data;
+            DataPtr data;
             size_t dataRead;
             {
                 ScopedCritical lock(p_->mutex);

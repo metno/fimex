@@ -32,7 +32,7 @@
 namespace MetNoFimex
 {
 
-static bool putRecData(CDMDataType dt, boost::shared_ptr<Data> data, size_t recNum) {
+static bool putRecData(CDMDataType dt, DataPtr data, size_t recNum) {
     if (data->size() == 0) return true;
 
     switch (dt) {
@@ -50,7 +50,7 @@ static bool putRecData(CDMDataType dt, boost::shared_ptr<Data> data, size_t recN
 }
 
 
-static bool putVarData(CDMDataType dt, boost::shared_ptr<Data> data) {
+static bool putVarData(CDMDataType dt, DataPtr data) {
     size_t size = data->size();
     if (size == 0) return true;
 
@@ -154,7 +154,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
             //std::stringstream ss;
             //ss << omp_get_thread_num() << ":" << vi << ":" << cdmVar.getName() << std::endl;
             //std::cerr << ss.str();
-            boost::shared_ptr<Data> data = cdmReader->getData(cdmVar.getName());
+            DataPtr data = cdmReader->getData(cdmVar.getName());
             ScopedCritical lock(writerMutex);
             if (!putVarData(cdmVar.getDataType(), data)) {
                 throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
@@ -178,7 +178,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
                 BOOST_CHECK(true);
 
 #endif
-                boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), i);
+                DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), i);
                 ScopedCritical lock(writerMutex);
                 if (!putRecData(cdmVar.getDataType(), data, i)) {
                     throw CDMException("problems writing datarecord " + type2string(i) + " to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));

@@ -73,7 +73,7 @@ public:
     /**
      * retrieve data from the underlying dataReader and interpolate the values to the new vertical levels
      */
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
      * Get the axes of a simple (1-dim x,y,z,t) coordinate-system. The t-axis might be omitted or unlimited,
      * the order of the axes must be as written above (x,y order might be reversed).
@@ -93,7 +93,7 @@ public:
 private:
     boost::shared_ptr<CDMReader> dataReader_;
     boost::shared_ptr<VIntPimpl> pimpl_;
-    boost::shared_ptr<Data> getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
+    DataPtr getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
 };
 
 }

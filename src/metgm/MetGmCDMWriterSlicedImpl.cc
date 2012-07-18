@@ -132,7 +132,7 @@ namespace MetNoFimex {
         for(size_t slice_index = 0; slice_index < total_num_of_slices; ++slice_index)
         {
             size_t cSlicePos = -1;
-            boost::shared_ptr<Data> raw_slice  = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);
+            DataPtr raw_slice  = cdmReader->getScaledDataSliceInUnit(pVar->getName(), profile.units_, slice_index);
             boost::shared_array<float> slice_to_write = raw_slice->asFloat();
             profile.pTags_->sliceToMetGmLayout(slice_to_write);
             MGM_THROW_ON_ERROR(mgm_write_group5_slice(*metgmFileHandle_, *metgmHandle_, slice_to_write.get(), &cSlicePos));

@@ -28,6 +28,7 @@
 #include <vector>
 #include <ostream>
 #include <boost/shared_ptr.hpp>
+#include "fimex/DataDecl.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"
 #include "fimex/CDMException.h"
@@ -35,8 +36,6 @@
 
 namespace MetNoFimex
 {
-/* forward declaration */
-class Data;
 
 class CDMAttribute : public CDMNamedEntity
 {
@@ -56,7 +55,7 @@ public:
     /// create a double attribute with a double array of length 1
     explicit CDMAttribute(std::string name, double value);
     /// create a attribute with the low level information
-    explicit CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data);
+    explicit CDMAttribute(std::string name, CDMDataType datatype, DataPtr data);
     /// create a attribute from a string representation
     explicit CDMAttribute(const std::string& name, const std::string& datatype, const std::string& value) throw(CDMException);
     /// create a attribute with a vector of values in string representation
@@ -69,16 +68,16 @@ public:
     /// retrieve the stringified value of the attribute
     const std::string getStringValue() const;
     /// retrieve the data-pointer of the attribute
-    const boost::shared_ptr<Data> getData() const {return data;}
+    const DataPtr getData() const {return data;}
     /// set the data for this attribute
-    void setData(boost::shared_ptr<Data> data) {this->data = data;}
+    void setData(DataPtr data) {this->data = data;}
     /// retrieve the datatype of the attribute
     const CDMDataType getDataType() const {return datatype;}
     void toXMLStream(std::ostream& out, const std::string& indent = "") const;
 private:
     std::string name;
     CDMDataType datatype;
-    boost::shared_ptr<Data> data;
+    DataPtr data;
     /* datatype and name must be set to call this init function */
     void initDataByArray(const std::vector<std::string>& values);
     /* init data arrays for all types */

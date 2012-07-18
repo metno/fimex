@@ -42,7 +42,7 @@ public:
 	virtual void setParameter(const std::string& varName, double levelValue) throw(CDMException);
 	virtual void setProjection(const std::string& varName) throw(CDMException);
 	virtual void setLevel(const std::string& varName, double levelValue);
-	virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, double levelValue, boost::shared_ptr<Data> inData);
+	virtual DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData);
 
 };
 

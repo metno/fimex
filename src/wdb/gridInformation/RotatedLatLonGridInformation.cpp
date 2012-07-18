@@ -92,9 +92,9 @@ std::string RotatedLatLonGridInformation::getCoordinatesAttribute() const
 	return "longitude latitude";
 }
 
-boost::shared_ptr<Data> RotatedLatLonGridInformation::getField(const CDMVariable & variable) const
+DataPtr RotatedLatLonGridInformation::getField(const CDMVariable & variable) const
 {
-	boost::shared_ptr<Data> ret;
+	DataPtr ret;
 
 	const std::string & variableName = variable.getName();
 	if ( variableName == "rlon" )

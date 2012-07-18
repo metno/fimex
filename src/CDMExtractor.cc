@@ -47,7 +47,7 @@ CDMExtractor::~CDMExtractor()
 {
 }
 
-boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
@@ -55,7 +55,7 @@ boost::shared_ptr<Data> CDMExtractor::getDataSlice(const std::string& varName, s
         // don't have in local in memory data, so return the memory data is save here
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
-    boost::shared_ptr<Data> data;
+    DataPtr data;
     if (dimChanges.empty()) {
         // simple read
         data = dataReader->getDataSlice(varName, unLimDimPos);
@@ -138,7 +138,7 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
     for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
         const std::vector<std::string>& shape = it->getShape();
         if (std::find(shape.begin(), shape.end(), dim.getName()) != shape.end()) {
-            cdm_->getVariable(it->getName()).setData(boost::shared_ptr<Data>());
+            cdm_->getVariable(it->getName()).setData(DataPtr());
         }
     }
 }
@@ -196,7 +196,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
         } else if (usedDimensions.find(shape[0]) == usedDimensions.end()) {
             // set usedDimensions to not process dimension again
             usedDimensions.insert(shape[0]);
-            boost::shared_ptr<Data> vData = dataReader->getScaledData((*va)->getName());
+            DataPtr vData = dataReader->getScaledData((*va)->getName());
             if (vData->size() > 0) {
                 boost::shared_array<double> vArray = vData->asDouble();
                 // calculate everything in the original unit

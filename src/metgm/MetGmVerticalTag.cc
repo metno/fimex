@@ -67,7 +67,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
 
             VTag = boost::shared_ptr<MetGmVerticalTag>(new MetGmVerticalTag());
 
-            boost::shared_ptr<Data> data;
+            DataPtr data;
 
             data = pCdmReader->getData(zAxis->getName());
 
@@ -151,7 +151,7 @@ boost::shared_ptr<MetGmVerticalTag> MetGmVerticalTag::createMetGmVerticalTagForW
         return std::find_if(&points_[0], &points_[nz_], boost::bind( leq, _1, 0 ) ) != &points_[nz_];
     }
 
-    void MetGmVerticalTag::extractVerticalPoints(const boost::shared_ptr<Data>& data)
+    void MetGmVerticalTag::extractVerticalPoints(const DataPtr& data)
     {
         points_ = data->asFloat();
     }

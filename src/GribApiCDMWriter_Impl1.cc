@@ -109,8 +109,8 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             std::string polar_stereographic("polar_stereographic");
             size_t ps_size = polar_stereographic.size();
             GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", polar_stereographic.c_str(), &ps_size), "");
-            const boost::shared_ptr<Data> xData = cdmReader->getScaledDataInUnit(cdm.getHorizontalXAxis(varName), "m");
-            const boost::shared_ptr<Data> yData = cdmReader->getScaledDataInUnit(cdm.getHorizontalYAxis(varName), "m");
+            const DataPtr xData = cdmReader->getScaledDataInUnit(cdm.getHorizontalXAxis(varName), "m");
+            const DataPtr yData = cdmReader->getScaledDataInUnit(cdm.getHorizontalYAxis(varName), "m");
             if (xData->size() < 2 || yData->size() < 2) throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongXAxis", xData->size()),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongYAxis", yData->size()),"");
@@ -136,8 +136,8 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             LOG4FIMEX(logger, Logger::INFO, "latlong projection for " << varName);
             const std::string lon = cdm.getHorizontalXAxis(varName);
             const std::string lat = cdm.getHorizontalYAxis(varName);
-            boost::shared_ptr<Data> lonData = cdmReader->getScaledDataInUnit(lon, "degree");
-            boost::shared_ptr<Data> latData = cdmReader->getScaledDataInUnit(lat, "degree");
+            DataPtr lonData = cdmReader->getScaledDataInUnit(lon, "degree");
+            DataPtr latData = cdmReader->getScaledDataInUnit(lat, "degree");
             size_t ni = lonData->size();
             size_t nj = latData->size();
             if (ni < 2 || nj < 2) {
@@ -173,8 +173,8 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             LOG4FIMEX(logger, Logger::INFO, "rotated latlong projection for " << varName);
             const std::string rotLon = cdm.getHorizontalXAxis(varName);
             const std::string rotLat = cdm.getHorizontalYAxis(varName);
-            boost::shared_ptr<Data> rLonData = cdmReader->getScaledDataInUnit(rotLon, "degree");
-            boost::shared_ptr<Data> rLatData = cdmReader->getScaledDataInUnit(rotLat, "degree");
+            DataPtr rLonData = cdmReader->getScaledDataInUnit(rotLon, "degree");
+            DataPtr rLatData = cdmReader->getScaledDataInUnit(rotLat, "degree");
             size_t ni = rLonData->size();
             size_t nj = rLatData->size();
             if (ni < 2 || nj < 2) {
@@ -281,7 +281,7 @@ void GribApiCDMWriter_Impl1::setLevel(const std::string& varName, double levelVa
     GRIB_CHECK(grib_set_long(gribHandle.get(), "level", static_cast<long>(levelValue)), "setting level");
 }
 
-boost::shared_ptr<Data> GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string& varName, double levelValue, boost::shared_ptr<Data> inData)
+DataPtr GribApiCDMWriter_Impl1::handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "handleTypeScaleAndMissingData(" << varName << ", " << levelValue << ")" );
     const CDM& cdm = cdmReader->getCDM();

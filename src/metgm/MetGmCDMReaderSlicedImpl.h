@@ -22,8 +22,8 @@ namespace MetNoFimex {
         explicit MetGmCDMReaderSlicedImpl(const std::string& metgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm);
         ~MetGmCDMReaderSlicedImpl();
 
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
+        virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+        virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
     protected:
         virtual void parseMgmFile(const std::string& mgmFileName);

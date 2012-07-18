@@ -64,7 +64,7 @@ protected:
      * add the global attributes from the config to the default grib-handle
      */
     virtual void setGlobalAttributes();
-    virtual void setData(const boost::shared_ptr<Data>& data);
+    virtual void setData(const DataPtr& data);
     /**
      * set the projection parameters, throw an exception if none are available
      * @param varName
@@ -90,7 +90,7 @@ protected:
      * and change the datatype if needed, change the missingValue of the data if need
      * @return modified data
      */
-    virtual boost::shared_ptr<Data> handleTypeScaleAndMissingData(const std::string& varName, double levelValue, boost::shared_ptr<Data> inData) = 0;
+    virtual DataPtr handleTypeScaleAndMissingData(const std::string& varName, double levelValue, DataPtr inData) = 0;
     virtual void writeGribHandleToFile();
     /**
      * check if the varName exists in the config file

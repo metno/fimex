@@ -50,8 +50,8 @@ namespace MetNoFimex {
         int getPidForMetgmName(const std::string& metgm_name);
         int getPidForCdmName(const std::string& cdm_name);
 
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
-        virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
+        virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+        virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
     protected:
 

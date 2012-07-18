@@ -328,7 +328,7 @@ namespace MetNoFimex {
         CDMVariable timeVariable(hcTimeDimensionName, timeDimensionDataType, timeDimensionShape);
 
         std::vector<double> timeInUnitsVector = pIt->pTags_->tTag()->pointsAsDouble();
-        boost::shared_ptr<Data> timeDimensionData = createData(timeDimensionDataType, timeInUnitsVector.begin(), timeInUnitsVector.end());
+        DataPtr timeDimensionData = createData(timeDimensionDataType, timeInUnitsVector.begin(), timeInUnitsVector.end());
         timeVariable.setData(timeDimensionData);
 
         cdm_->addDimension(tDim_);
@@ -346,7 +346,7 @@ namespace MetNoFimex {
 
         // analysis time -> unique forecast reference time
         CDMVariable analysisTimeVar("analysis_time", timeDimensionDataType, std::vector<std::string>());
-        boost::shared_ptr<Data> analysisTimeData = createData(timeDimensionDataType, 1);
+        DataPtr analysisTimeData = createData(timeDimensionDataType, 1);
         analysisTimeData->setValue(0, pGroup1_->analysisTime());
         analysisTimeVar.setData(analysisTimeData);
         cdm_->addVariable(analysisTimeVar);
@@ -378,7 +378,7 @@ namespace MetNoFimex {
         std::vector<std::string> xDimShape;
         xDimShape.push_back(xDim_.getName());
         CDMVariable xVar(xName, CDM_DOUBLE, xDimShape);
-        boost::shared_ptr<Data> xData = createData(CDM_DOUBLE,
+        DataPtr xData = createData(CDM_DOUBLE,
                                                    profile.pTags_->xTag()->xPoints().begin(),
                                                    profile.pTags_->xTag()->xPoints().end());
         xVar.setData(xData);
@@ -396,7 +396,7 @@ namespace MetNoFimex {
         std::vector<std::string> yDimShape;
         yDimShape.push_back(yDim_.getName());
         CDMVariable yVar(yName, CDM_DOUBLE, yDimShape);
-        boost::shared_ptr<Data> yData = createData(CDM_DOUBLE,
+        DataPtr yData = createData(CDM_DOUBLE,
                                                    profile.pTags_->yTag()->yPoints().begin(),
                                                    profile.pTags_->yTag()->yPoints().end());
         yVar.setData(yData);
@@ -474,7 +474,7 @@ namespace MetNoFimex {
                 // to create unique fimex name for CDM modell
                 longName.append("_pid_").append(boost::lexical_cast<std::string>(profile.p_id_));
 
-                boost::shared_ptr<Data> data =
+                DataPtr data =
                         createData(CDM_FLOAT,
                                    profile.pTags_->zTag()->points().get(),
                                    profile.pTags_->zTag()->points().get() + profile.pTags_->zTag()->nz());
@@ -560,7 +560,7 @@ namespace MetNoFimex {
 
             CDMVariable var(profile.cdmName_, CDM_FLOAT, shape);
 
-            boost::shared_ptr<Data> data = createData(profile.pTags_->totalDataSize(), profile.pTags_->data());
+            DataPtr data = createData(profile.pTags_->totalDataSize(), profile.pTags_->data());
             var.setData(data);
 
             cdm_->addVariable(var);
@@ -571,7 +571,7 @@ namespace MetNoFimex {
         }
     }
 
-    boost::shared_ptr<Data> MetGmCDMReaderImpl::getDataSlice(const std::string& varName, size_t unLimDimPos)
+    DataPtr MetGmCDMReaderImpl::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
 //        MetGmProfilingTimerOnDestruction timer;
         CDMVariable& variable = cdm_->getVariable(varName);
@@ -582,12 +582,12 @@ namespace MetNoFimex {
         }
     }
 
-    boost::shared_ptr<Data> MetGmCDMReaderImpl::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+    DataPtr MetGmCDMReaderImpl::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
 //        MetGmProfilingTimerOnDestruction timer;
 
         if(!cdm_->hasVariable(varName))
-            return boost::shared_ptr<Data>();
+            return DataPtr();
 
         CDMVariable& variable = cdm_->getVariable(varName);
 
@@ -633,12 +633,12 @@ namespace MetNoFimex {
 
             if(!variable.hasData()) {
                 // this will actually load all the data
-                boost::shared_ptr<Data> data = getDataSlice(varName, 0);
+                DataPtr data = getDataSlice(varName, 0);
             }
 
             assert(variable.hasData());
 
-            boost::shared_ptr<Data> sliceData =
+            DataPtr sliceData =
                     variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
 
             return sliceData;
@@ -647,12 +647,12 @@ namespace MetNoFimex {
 
             if(!variable.hasData()) {
                 // this will actually load all the data
-                boost::shared_ptr<Data> data = getDataSlice(varName, 0);
+                DataPtr data = getDataSlice(varName, 0);
             }
 
             assert(variable.hasData());
 
-            boost::shared_ptr<Data> sliceData =
+            DataPtr sliceData =
                     variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
 
             return sliceData;
@@ -664,12 +664,12 @@ namespace MetNoFimex {
         } else if(!dims.empty() && layerDim == 0 && timeDimension == 0) { // 2D - x , y
 
             if(!variable.hasData()) {
-                boost::shared_ptr<Data> data = getDataSlice(varName, 0);
+                DataPtr data = getDataSlice(varName, 0);
             }
 
             assert(variable.hasData());
 
-            boost::shared_ptr<Data> sliceData =
+            DataPtr sliceData =
                     variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
 
             return sliceData;
@@ -678,7 +678,7 @@ namespace MetNoFimex {
 
             assert(variable.hasData());
 
-            boost::shared_ptr<Data> sliceData =
+            DataPtr sliceData =
                     variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
 
             return sliceData;

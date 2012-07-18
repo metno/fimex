@@ -81,7 +81,7 @@ namespace MetNoFimex {
         inline MetGmHorizontalTag()
             : numberOfPoints_(0), center_(0), distance_(0) { }
 
-        inline void extractHorizontalPoints(const boost::shared_ptr<Data>& data)
+        inline void extractHorizontalPoints(const DataPtr& data)
         {
             if(data->size() <= 1)
                 throw CDMException("horizontal axis has one point can't determine distance needed for MetGm");

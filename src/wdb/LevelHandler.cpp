@@ -80,11 +80,11 @@ void LevelHandler::addToCdm(CDM & cdm) const
 	}
 }
 
-boost::shared_ptr<Data> LevelHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
+DataPtr LevelHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
 	const std::set<float> & levels =  index_.getLevelValues(wdbFromCf_(variable.getName()));
 
-	boost::shared_ptr<Data> ret = createData(CDM_FLOAT, levels.size());
+	DataPtr ret = createData(CDM_FLOAT, levels.size());
 
 	float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
 	std::copy(levels.begin(), levels.end(), dataIdx);

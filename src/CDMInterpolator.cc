@@ -101,14 +101,14 @@ CDMInterpolator::~CDMInterpolator()
 {
 }
 
-boost::shared_array<float> data2InterpolationArray(const boost::shared_ptr<Data>& inData, double badValue) {
+boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue) {
     boost::shared_array<float> array = inData->asFloat();
     mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
     return array;
 }
 
 // for performance reasons, the iData-reference will be modified and used within the return data
-boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
+DataPtr interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
     mifi_nanf2bad(&iData[0], &iData[size], badValue);
     return createData(size, iData);
 }
@@ -147,7 +147,7 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
     return;
 }
 
-boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
@@ -158,7 +158,7 @@ boost::shared_ptr<Data> CDMInterpolator::getDataSlice(const std::string& varName
         return p_->dataReader->getDataSlice(varName, unLimDimPos);
     } else {
         string horizontalId = p_->projectionVariables.find(varName)->second;
-        boost::shared_ptr<Data> data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+        DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
         boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
@@ -428,15 +428,15 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
            if(tmplLatName.empty())
                tmplLatName = "latitude";
 
-           boost::shared_ptr<Data> tmplLatVals = tmplReader->getData(tmplLatName);
-           boost::shared_ptr<Data> tmplLonVals = tmplReader->getData(tmplLonName);
+           DataPtr tmplLatVals = tmplReader->getData(tmplLatName);
+           DataPtr tmplLonVals = tmplReader->getData(tmplLonName);
            // get X / Y info
            std::string tmplXName;
            std::string tmplYName;
            tmplXName = tmplCdmRef.getHorizontalXAxis(tmplRefVarName);
            tmplYName = tmplCdmRef.getHorizontalYAxis(tmplRefVarName);
-           boost::shared_ptr<Data> tmplXData = tmplReader->getData(tmplXName);
-           boost::shared_ptr<Data> tmplYData = tmplReader->getData(tmplYName);
+           DataPtr tmplXData = tmplReader->getData(tmplXName);
+           DataPtr tmplYData = tmplReader->getData(tmplYName);
            boost::shared_array<double> tmplXArray = tmplXData->asDouble();
            boost::shared_array<double> tmplYArray = tmplYData->asDouble();
            vector<double> tmplXAxisVec(tmplXArray.get(), tmplXArray.get()+tmplXData->size());
@@ -967,11 +967,11 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         CoordSysPtr cs = csIt->second;
         string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
-        boost::shared_ptr<Data> latData = p_->dataReader->getScaledData(latitude);
+        DataPtr latData = p_->dataReader->getScaledData(latitude);
         boost::shared_array<double> latVals = latData->asDouble();
         size_t latSize = latData->size();
         latData.reset();
-        boost::shared_ptr<Data> lonData = p_->dataReader->getScaledData(longitude);
+        DataPtr lonData = p_->dataReader->getScaledData(longitude);
         boost::shared_array<double> lonVals = lonData->asDouble();
         size_t lonSize = lonData->size();
         lonData.reset();
@@ -1060,11 +1060,11 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         CoordSysPtr cs = csIt->second;
         string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
-        boost::shared_ptr<Data> latData = p_->dataReader->getScaledData(latitude);
+        DataPtr latData = p_->dataReader->getScaledData(latitude);
         boost::shared_array<double> latVals = latData->asDouble();
         size_t latSize = latData->size();
         latData.reset();
-        boost::shared_ptr<Data> lonData = p_->dataReader->getScaledData(longitude);
+        DataPtr lonData = p_->dataReader->getScaledData(longitude);
         boost::shared_array<double> lonVals = lonData->asDouble();
         size_t lonSize = lonData->size();
         lonData.reset();
@@ -1147,8 +1147,8 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         CoordSysPtr cs = csIt->second;
         // translate axes to 'm' if given in other metric units
         std::string orgUnit = cs->getProjection()->isDegree() ? "degree" : "m";
-        boost::shared_ptr<Data> orgXAxisVals = p_->dataReader->getScaledDataInUnit(cs->getGeoXAxis()->getName(), orgUnit);
-        boost::shared_ptr<Data> orgYAxisVals = p_->dataReader->getScaledDataInUnit(cs->getGeoYAxis()->getName(), orgUnit);
+        DataPtr orgXAxisVals = p_->dataReader->getScaledDataInUnit(cs->getGeoXAxis()->getName(), orgUnit);
+        DataPtr orgYAxisVals = p_->dataReader->getScaledDataInUnit(cs->getGeoYAxis()->getName(), orgUnit);
 
         // store projection changes to be used in data-section
         // translate temporary new axes from deg2rad if required
@@ -1217,8 +1217,8 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
                                       const string& out_y_axis_unit,
                                       CDMDataType xAxisType,
                                       CDMDataType yAxisType,
-                                      boost::shared_ptr<Data> tmplLatVals,
-                                      boost::shared_ptr<Data> tmplLonVals)
+                                      DataPtr tmplLatVals,
+                                      DataPtr tmplLonVals)
 {
     string newProj = getProjectionName(tmpl_proj_input);
 
@@ -1405,8 +1405,8 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
 
 struct CSGridDefinition {
     std::string key;
-    boost::shared_ptr<Data> xAxisData;
-    boost::shared_ptr<Data> yAxisData;
+    DataPtr xAxisData;
+    DataPtr yAxisData;
 };
 
 void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int method,
@@ -1417,8 +1417,8 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
                                                                              const string& out_y_axis_unit,
                                                                              CDMDataType out_x_axis_type,
                                                                              CDMDataType out_y_axis_type,
-                                                                             boost::shared_ptr<Data> tmplLatVals,
-                                                                             boost::shared_ptr<Data> tmplLonVals)
+                                                                             DataPtr tmplLatVals,
+                                                                             DataPtr tmplLonVals)
 {
     map<string, CoordSysPtr> csMap = findBestCoordinateSystemsAndProjectionVars(true);
 

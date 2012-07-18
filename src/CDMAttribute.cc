@@ -92,7 +92,7 @@ CDMAttribute::CDMAttribute(std::string name, float value)
     data = createData(1, xvalue);
 }
 
-CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, boost::shared_ptr<Data> data)
+CDMAttribute::CDMAttribute(std::string name, CDMDataType datatype, DataPtr data)
 : name(name), datatype(datatype), data(data)
 {
 }

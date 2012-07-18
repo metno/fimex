@@ -520,7 +520,7 @@ double CDM::getValidMax(const std::string& varName) const
     if (getAttribute(varName, "valid_max", attr)) {
         return attr.getData()->asDouble()[0];
     } else if (getAttribute(varName, "valid_range", attr)) {
-        boost::shared_ptr<Data> data = attr.getData();
+        DataPtr data = attr.getData();
         if (data->size() > 1) {
             return data->asDouble()[1];
         }

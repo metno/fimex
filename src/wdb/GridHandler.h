@@ -51,7 +51,7 @@ public:
 
 	virtual void addToCdm(CDM & cdm) const;
 
-	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
+	virtual DataPtr getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
 	virtual bool canHandle(const std::string & cfName) const;
 

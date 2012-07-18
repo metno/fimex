@@ -282,7 +282,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                 boost::posix_time::ptime ptFirst;
                 for (size_t i = 0; i < timeSize; ++i) {
                     sb.setStartAndSize("Time", i, 1);
-                    boost::shared_ptr<Data> data = reader->getDataSlice("Times", sb);
+                    DataPtr data = reader->getDataSlice("Times", sb);
                     // define units and set time in that unit as float to vals
                     string thisTime = data->asString();
                     if (thisTime.find("_") != string::npos) {
@@ -408,7 +408,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
         size_t timeSize = cdm.getDimension("Time").getLength();
         for (size_t i = 0; i < timeSize; ++i) {
             sb.setStartAndSize("Time", i, 1);
-            boost::shared_ptr<Data> data = reader->getDataSlice("Times", sb);
+            DataPtr data = reader->getDataSlice("Times", sb);
             std::cerr << data->asString() << std::endl;
         }
     }

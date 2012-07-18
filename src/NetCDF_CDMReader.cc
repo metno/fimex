@@ -110,14 +110,14 @@ NetCDF_CDMReader::~NetCDF_CDMReader()
 {
 }
 
-boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& var = cdm_->getVariable(varName);
     if (var.hasData()) {
         return getDataSliceFromMemory(var, unLimDimPos);
     }
 
-    boost::shared_ptr<Data> data;
+    DataPtr data;
     ScopedCritical lock(ncFile->mutex);
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
@@ -142,7 +142,7 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
     return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
 }
 
-boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     const CDMVariable& var = cdm_->getVariable(varName);
     if (var.hasData()) {
@@ -151,7 +151,7 @@ boost::shared_ptr<Data> NetCDF_CDMReader::getDataSlice(const std::string& varNam
                                     sb.getDimensionSizes());
     }
 
-    boost::shared_ptr<Data> data;
+    DataPtr data;
     ScopedCritical lock(ncFile->mutex);
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
@@ -179,7 +179,7 @@ void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const
     nc_type dtype;
     ncCheck(nc_inq_atttype(ncFile->ncId, varid, attName.c_str(), &dtype));
     CDMDataType dt(ncType2cdmDataType(dtype));
-    boost::shared_ptr<Data> attrData = ncGetAttValues(ncFile->ncId, varid, attName, dtype);
+    DataPtr attrData = ncGetAttValues(ncFile->ncId, varid, attName, dtype);
     cdm_->addAttribute(varName, CDMAttribute(attName, dt, attrData));
 }
 

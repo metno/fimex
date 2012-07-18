@@ -30,51 +30,51 @@ namespace MetNoFimex
 // pure abstract class, impl. required for linker
 Data::~Data() {}
 
-boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val) {
+DataPtr createData(CDMDataType datatype, size_t length, double val) {
     std::vector<char> v(length);
-    boost::shared_ptr<Data> data = createData(datatype, v.begin(), v.end());
+    DataPtr data = createData(datatype, v.begin(), v.end());
     data->setAllValues(val);
     return data;
 }
 
 template<typename T>
-boost::shared_ptr<Data> createDataT(size_t length, boost::shared_array<T> array)
+DataPtr createDataT(size_t length, boost::shared_array<T> array)
 {
-    return boost::shared_ptr<Data>(new DataImpl<T>(array, length));
+    return DataPtr(new DataImpl<T>(array, length));
 }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<double> array)
+DataPtr createData(size_t length, boost::shared_array<double> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<float> array)
+DataPtr createData(size_t length, boost::shared_array<float> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<int> array)
+DataPtr createData(size_t length, boost::shared_array<int> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<short> array)
+DataPtr createData(size_t length, boost::shared_array<short> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array)
+DataPtr createData(size_t length, boost::shared_array<char> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned int> array)
+DataPtr createData(size_t length, boost::shared_array<unsigned int> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned short> array)
+DataPtr createData(size_t length, boost::shared_array<unsigned short> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned char> array)
+DataPtr createData(size_t length, boost::shared_array<unsigned char> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<long long> array)
+DataPtr createData(size_t length, boost::shared_array<long long> array)
 { return createDataT(length, array); }
 
-boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned long long> array)
+DataPtr createData(size_t length, boost::shared_array<unsigned long long> array)
 { return createDataT(length, array); }
 
 
-boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)  {
+DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)  {
     switch (datatype) {
         case CDM_DOUBLE: { boost::shared_ptr<DataImpl<double> > mydata(new DataImpl<double>(length)); mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_FLOAT:  { boost::shared_ptr<DataImpl<float> > mydata(new DataImpl<float>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
@@ -86,7 +86,7 @@ boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, 
         case CDM_UINT:    { boost::shared_ptr<DataImpl<unsigned int> > mydata(new DataImpl<unsigned int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_USHORT:  { boost::shared_ptr<DataImpl<unsigned short> > mydata(new DataImpl<unsigned short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_UCHAR:   { boost::shared_ptr<DataImpl<unsigned char> > mydata(new DataImpl<unsigned char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
-        case CDM_NAT: return boost::shared_ptr<Data>(new DataImpl<char>(0));
+        case CDM_NAT: return DataPtr(new DataImpl<char>(0));
         default: break;
     }
     throw(CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype)));

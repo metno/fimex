@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         }
 
         // fetch the data
-        boost::shared_ptr<Data> data = reader->getDataSlice(altitude, sb);
+        DataPtr data = reader->getDataSlice(altitude, sb);
         BOOST_CHECK(data->size() == 11*5*2); // x=11,y=5, v=none, t = 2
 
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
         BOOST_CHECK(false);
     }
     const CoordinateSystem& cs = **varSysIt;
-    boost::shared_ptr<Data> allData = reader->getData("cloud_area_fraction_in_atmosphere_layer");
+    DataPtr allData = reader->getData("cloud_area_fraction_in_atmosphere_layer");
     size_t n = 11 * 11 * 4 * 4;
     BOOST_CHECK(allData->size() == n);
     boost::shared_array<short> all = allData->asShort();
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     sb.setStartAndSize(cs.getGeoZAxis(), 3, 1);
     sb.setStartAndSize(cs.getTimeAxis(), 3, 1);
     // generic slice reader
-    boost::shared_ptr<Data> sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
+    DataPtr sData = reader->CDMReader::getDataSlice("cloud_area_fraction_in_atmosphere_layer", sb);
     size_t s = 11*11;
     BOOST_CHECK(sData->size() == s);
     boost::shared_array<short> slice = sData->asShort();

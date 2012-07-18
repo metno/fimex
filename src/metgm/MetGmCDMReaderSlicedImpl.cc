@@ -132,7 +132,7 @@ namespace MetNoFimex {
 
             CDMVariable var(profile.cdmName_, CDM_FLOAT, shape);
 
-//            boost::shared_ptr<Data> data = createData(profile.pTags_->totalDataSize(), profile.pTags_->data());
+//            DataPtr data = createData(profile.pTags_->totalDataSize(), profile.pTags_->data());
 //            var.setData(data);
 
             cdm_->addVariable(var);
@@ -143,12 +143,12 @@ namespace MetNoFimex {
         }
     }
 
-    boost::shared_ptr<Data> MetGmCDMReaderSlicedImpl::getDataSlice(const std::string& varName, size_t unLimDimPos)
+    DataPtr MetGmCDMReaderSlicedImpl::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
         CDMVariable& variable = cdm_->getVariable(varName);
 
         if(!cdm_->hasVariable(varName))
-            return boost::shared_ptr<Data>();
+            return DataPtr();
 
         if(variable.hasData()) {
             return getDataSliceFromMemory(variable, unLimDimPos);
@@ -157,20 +157,20 @@ namespace MetNoFimex {
             cdmNameView::iterator it = nameView.find(varName);
 
             if(it == nameView.end())
-                return boost::shared_ptr<Data>();
+                return DataPtr();
 
             MetGmCDMVariableProfile profile = *it;
-            boost::shared_ptr<Data> data = createData(profile.pTags_->sliceDataSize(), profile.pTags_->readDataSlices(unLimDimPos + 1, 1));
+            DataPtr data = createData(profile.pTags_->sliceDataSize(), profile.pTags_->readDataSlices(unLimDimPos + 1, 1));
 
             return data;
         }
     }
 
-    boost::shared_ptr<Data> MetGmCDMReaderSlicedImpl::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+    DataPtr MetGmCDMReaderSlicedImpl::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
 //        MGM_CHECK_POINT()
         using namespace std;
-        boost::shared_ptr<Data> retData;
+        DataPtr retData;
         const CDMVariable& variable = cdm_->getVariable(varName);
         if (variable.hasData()) {
             retData = variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
@@ -208,7 +208,7 @@ namespace MetNoFimex {
                 cdmNameView::iterator it = nameView.find(varName);
 
                 if(it == nameView.end())
-                    return boost::shared_ptr<Data>();
+                    return DataPtr();
 
                 MetGmCDMVariableProfile profile = *it;
                 retData = createData(unLimSliceSize * unLimDimSize, profile.pTags_->readDataSlices(unLimDimStart + 1, unLimDimSize));

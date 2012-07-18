@@ -73,7 +73,7 @@ void GridHandler::addToCdm(CDM & cdm) const
 
 }
 
-boost::shared_ptr<Data> GridHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
+DataPtr GridHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
 	return gridInfo_().getField(variable);
 }

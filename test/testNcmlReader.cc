@@ -58,10 +58,10 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
     }
     boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName, XMLInputFile(ncmlName)));
     BOOST_CHECK(true);
-    boost::shared_ptr<Data> data = reader->getDataSlice("sea_surface_temperature", 1);
+    DataPtr data = reader->getDataSlice("sea_surface_temperature", 1);
     SliceBuilder sb(reader->getCDM(), "sea_surface_temperature");
     sb.setStartAndSize("time", 1, 1);
-    boost::shared_ptr<Data> dataSlice = reader->getDataSlice("sea_surface_temperature", sb);
+    DataPtr dataSlice = reader->getDataSlice("sea_surface_temperature", sb);
     BOOST_CHECK(true);
     BOOST_CHECK(data->size() == dataSlice->size());
     boost::shared_array<short> d = data->asShort();

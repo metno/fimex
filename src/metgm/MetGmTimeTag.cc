@@ -92,7 +92,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForWriting(const
             if(tAxis->getAxisType() != CoordinateAxis::Time)
                 throw CDMException("time axis not found");
 
-            boost::shared_ptr<Data> data = pCdmReader->getData(tAxis->getName());
+            DataPtr data = pCdmReader->getData(tAxis->getName());
 
             TTag->nT_ = data->size();
 
@@ -201,7 +201,7 @@ boost::shared_ptr<MetGmTimeTag> MetGmTimeTag::createMetGmTimeTagForReading(const
         const CDM& cdmRef = pCdmReader->getCDM();
         const CDMVariable& tVar = cdmRef.getVariable("time");
 
-        boost::shared_ptr<Data> tData = pCdmReader->getData(tVar.getName());
+        DataPtr tData = pCdmReader->getData(tVar.getName());
 
         const CDMAttribute& tUnitAttribute(cdmRef.getAttribute("time", std::string("units")));
         const std::string t_unit = tUnitAttribute.getStringValue();

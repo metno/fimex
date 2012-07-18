@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_simple )
     BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "x");
     BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "y");
 
-    boost::shared_ptr<Data> data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(),
+    DataPtr data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(),
                                                         sb.getTimeVariableSliceBuilder());
     BOOST_CHECK(data->size() == 4);
     BOOST_CHECK(data->asInt()[1] == 1179313200);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_reftime )
     BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "x");
     BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "y");
 
-    boost::shared_ptr<Data> data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(),
+    DataPtr data = reader->getDataSlice((*csIt)->getTimeAxis()->getName(),
                                                         sb.getTimeVariableSliceBuilder());
     BOOST_CHECK(data->size() == 2);
     BOOST_CHECK(data->asShort()[1] == 27);

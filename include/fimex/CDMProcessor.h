@@ -63,7 +63,7 @@ public:
      * @param stdNameY optional new standard_name for y
      */
     void rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY, const std::vector<std::string>& stdNameX = std::vector<std::string>(0), const std::vector<std::string>& stdNameY = std::vector<std::string>(0));
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 private:
     // pimpl
     boost::shared_ptr<CDMProcessorImpl> p_;

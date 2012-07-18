@@ -70,9 +70,9 @@ void VersionHandler::addToCdm(CDM & cdm) const
 	}
 }
 
-boost::shared_ptr<Data> VersionHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
+DataPtr VersionHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
-	boost::shared_ptr<Data> ret = createData(CDM_INT, versions_.size());
+	DataPtr ret = createData(CDM_INT, versions_.size());
 
 	int * dataIdx = reinterpret_cast<int *>(ret->getDataPtr());
 	std::copy(versions_.begin(), versions_.end(), dataIdx);

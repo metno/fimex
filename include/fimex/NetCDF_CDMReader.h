@@ -53,8 +53,8 @@ class NetCDF_CDMReader : public MetNoFimex::CDMReader
 public:
     NetCDF_CDMReader(const std::string& fileName);
     virtual ~NetCDF_CDMReader();
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 private:
     void addAttribute(const std::string& varName, int varid, const std::string& attName);
 };

@@ -52,7 +52,7 @@ static string getTerm(const CDMAttribute& formulaTerms, string parameter)
 
 static const vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const string& var, const string& unit, int unLimDimPos)
 {
-    boost::shared_ptr<Data> data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
+    DataPtr data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
     boost::shared_array<double> array = data->asDouble();
     return vector<double>(&array[0], &array[0] + data->size());
 }
@@ -64,13 +64,13 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
     boost::shared_ptr<ToVLevelConverter> presConv;
     switch (zAxis->getAxisType()) {
     case CoordinateAxis::Pressure: {
-        boost::shared_ptr<Data> p = reader->getScaledDataSliceInUnit(zAxis->getName(), "hPa", unLimDimPos);
+        DataPtr p = reader->getScaledDataSliceInUnit(zAxis->getName(), "hPa", unLimDimPos);
         boost::shared_array<double> pa = p->asDouble();
         presConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&pa[0], &pa[0] + p->size())));
     }
         break;
     case CoordinateAxis::Height: {
-        boost::shared_ptr<Data> h = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
+        DataPtr h = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
         boost::shared_array<double> ha = h->asDouble();
         presConv = boost::shared_ptr<ToVLevelConverter>(new HeightStandardToPressureConverter(vector<double> (&ha[0],&ha[0] + h->size())));
     }
@@ -91,7 +91,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
                         throw CDMException("atmosphere_hybrid_sigma_pressure formula_terms (ap,b,ps) not found in " + formulaTerms.getStringValue());
                     const vector<double> apVec = getDataSliceInUnit(reader, ap, "hPa", unLimDimPos);
                     const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
-                    boost::shared_ptr<Data> psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
+                    DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
                     if (nx * ny * nt != psData->size()) {
                         throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
@@ -105,7 +105,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
                     const vector<double> aVec = getDataSliceInUnit(reader, a, "", unLimDimPos);
                     const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
                     const vector<double> p0Vec = getDataSliceInUnit(reader, p0, "hPa", unLimDimPos);
-                    boost::shared_ptr<Data> psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
+                    DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
                     if (nx * ny * nt != psData->size()) {
                         throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
@@ -130,7 +130,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(con
                     throw CDMException("atmosphere_sigma_coordinate formula_terms (ptop,sigma,ps) not all found in " + formulaTerms.getStringValue());
                 const vector<double> sigmaVec = getDataSliceInUnit(reader, sigma, "", unLimDimPos);
                 const vector<double> ptopVec = getDataSliceInUnit(reader, ptop, "hPa", unLimDimPos);
-                boost::shared_ptr<Data> psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
+                DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
                 if (nx * ny * nt != psData->size()) {
                     throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                        "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
@@ -162,7 +162,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
     switch (zAxis->getAxisType()) {
         case CoordinateAxis::Height:
         {
-            boost::shared_ptr<Data> hd = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
+            DataPtr hd = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
             const boost::shared_array<double> ha = hd->asDouble();
             heightConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
         }
@@ -182,7 +182,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
                     vector<double> sVec = getDataSliceInUnit(reader, s, "", unLimDimPos); // size k
                     vector<double> CVec = getDataSliceInUnit(reader, C, "", unLimDimPos); // size k
                     vector<double> depth_cVec = getDataSliceInUnit(reader, depth_c, "m", unLimDimPos); // size 1
-                    boost::shared_ptr<Data> depthD = reader->getScaledDataSliceInUnit(depth, "m", unLimDimPos);
+                    DataPtr depthD = reader->getScaledDataSliceInUnit(depth, "m", unLimDimPos);
                     bool timeDependentDepth;
                     if ((nx * ny * nt) == depthD->size()) {
                         timeDependentDepth = true;
@@ -192,7 +192,7 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
                         throw CDMException("unexpected size of depth " + depth + "(" + type2string(unLimDimPos) +
                                 "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
                     }
-                    boost::shared_ptr<Data> etaD;
+                    DataPtr etaD;
                     if (eta != "") {
                         etaD = reader->getScaledDataSliceInUnit(eta, "m", unLimDimPos);
                         if ((nx * ny) != depthD->size()) {
@@ -231,11 +231,11 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
             vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
             if (geoVars.size() > 0 && altVars.size() > 0) {
                 LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
-                boost::shared_ptr<Data> geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
+                DataPtr geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
                 if (geoPotData->size() != (nx * ny * nz * nt))
                     throw CDMException("geopotential height '" + geoVars[0] + "' has strange size: " + type2string(geoPotData->size()) + " != " + type2string(nx * ny * nz * nt));
                     LOG4FIMEX(logger, Logger::INFO, "using altitude "<<altVars[0]<<" to retrieve height");
-                    boost::shared_ptr<Data> altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
+                    DataPtr altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
                 if (altData->size() != (nx * ny))
                     throw CDMException("altitude '" + altVars[0] + "' has strange size: " + type2string(altData->size()) + " != " + type2string(nx * ny));
                 heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asFloat(), altData->asFloat(), nx, ny, nz, nt));

@@ -32,12 +32,12 @@
 
 #include <boost/shared_ptr.hpp>
 #include <string>
+#include "fimex/DataDecl.h"
 
 namespace MetNoFimex
 {
 class CDM;
 class CDMVariable;
-class Data;
 
 namespace wdb
 {
@@ -51,30 +51,30 @@ class WdbIndex;
 class DataHandler
 {
 public:
-	virtual ~DataHandler() {}
+    virtual ~DataHandler() {}
 
-	/**
-	 * Add relevant dimensions and -variables to the given CDM object.
-	 */
-	virtual void addToCdm(CDM & cdm) const =0;
+    /**
+     * Add relevant dimensions and -variables to the given CDM object.
+     */
+    virtual void addToCdm(CDM & cdm) const =0;
 
-	/**
-	 * Get data for the given variable name and unlimited dimension
-	 */
-	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const =0;
+    /**
+     * Get data for the given variable name and unlimited dimension
+     */
+    virtual DataPtr getData(const CDMVariable & variable, size_t unLimDimPos) const =0;
 
-	/**
-	 * Does the given cdm variable name refer to anything that this object can
-	 * handle via the getData method?
-	 */
-	virtual bool canHandle(const std::string & cfName) const =0;
+    /**
+     * Does the given cdm variable name refer to anything that this object can
+     * handle via the getData method?
+     */
+    virtual bool canHandle(const std::string & cfName) const =0;
 
-	/**
-	 * Override this if subclass creates variables that needs entries in the coordinates attribute
-	 */
-	virtual void addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const {}
+    /**
+     * Override this if subclass creates variables that needs entries in the coordinates attribute
+     */
+    virtual void addToCoordinatesAttribute(std::string & coordinates, const std::string & wdbName) const {}
 
-	typedef boost::shared_ptr<DataHandler> Ptr;
+    typedef boost::shared_ptr<DataHandler> Ptr;
 };
 
 }

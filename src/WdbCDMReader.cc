@@ -121,7 +121,7 @@ WdbCDMReader::~WdbCDMReader()
     delete d_;
 }
 
-boost::shared_ptr<Data> WdbCDMReader::getDataSlice(
+DataPtr WdbCDMReader::getDataSlice(
         const std::string& varName, size_t unLimDimPos)
 {
     LOG4FIMEX(logger, Logger::DEBUG, __func__ << "(\"" << varName << "\", " << unLimDimPos << ")");
@@ -140,13 +140,13 @@ boost::shared_ptr<Data> WdbCDMReader::getDataSlice(
     throw CDMException("internal error: " + varName + ": unrecognized variable");
 }
 
-boost::shared_ptr<Data> WdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+DataPtr WdbCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     LOG4FIMEX(logger, Logger::DEBUG, __func__ << "(\"" << varName << "\", <slice>)");
 
     const CDMVariable& variable = cdm_->getVariable(varName);
 
-    boost::shared_ptr<Data> data;
+    DataPtr data;
     if ( d_->dataIndex->isDatabaseField(varName) ) {
         ScopedCritical lock(wdbmutex);
         data = getDatabaseFields(variable, sb);
@@ -187,9 +187,9 @@ std::size_t WdbCDMReader::getGridSize(const CDMVariable& variable) const
     return getXSize(variable) * getYSize(variable);
 }
 
-boost::shared_ptr<Data> WdbCDMReader::extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const
+DataPtr WdbCDMReader::extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const
 {
-    boost::shared_ptr<Data> ret = createData(variable.getDataType(), fieldIdentifiers.size() * getGridSize(variable));
+    DataPtr ret = createData(variable.getDataType(), fieldIdentifiers.size() * getGridSize(variable));
 
     float * dataIdx = reinterpret_cast<float *>(ret->getDataPtr());
     for ( std::vector<wdb::Wdb2CdmBuilder::gid>::const_iterator it = fieldIdentifiers.begin(); it != fieldIdentifiers.end(); ++ it )
@@ -205,7 +205,7 @@ boost::shared_ptr<Data> WdbCDMReader::extractDataFromField(const CDMVariable& va
     return ret;
 }
 
-boost::shared_ptr<Data> WdbCDMReader::cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const
+DataPtr WdbCDMReader::cutGrid(const DataPtr & d, const CDMVariable& variable, const SliceBuilder & sb) const
 {
     // We assume that the two last dimensions are x and y in the grid.
 
@@ -236,16 +236,16 @@ boost::shared_ptr<Data> WdbCDMReader::cutGrid(const boost::shared_ptr<Data> & d,
     return d->slice(orgDimSize, startDims, outputDimSize);
 }
 
-boost::shared_ptr<Data> WdbCDMReader::getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const
+DataPtr WdbCDMReader::getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const
 {
     std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(variable.getName(), unLimDimPos);
     return extractDataFromField(variable, fieldIdentifiers);
 }
 
-boost::shared_ptr<Data> WdbCDMReader::getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const
+DataPtr WdbCDMReader::getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const
 {
     std::vector<wdb::Wdb2CdmBuilder::gid> fieldIdentifiers = d_->dataIndex->getGridIdentifiers(variable.getName(), sb, * cdm_);
-    boost::shared_ptr<Data> ret = extractDataFromField(variable, fieldIdentifiers);
+    DataPtr ret = extractDataFromField(variable, fieldIdentifiers);
     return cutGrid(ret, variable, sb);
 }
 

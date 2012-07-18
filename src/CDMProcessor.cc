@@ -130,8 +130,8 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
             ConstAxisPtr yAxis = cs->getGeoYAxis();
             assert(yAxis.get() != 0);
 
-            boost::shared_ptr<Data> xAxisData;
-            boost::shared_ptr<Data> yAxisData;
+            DataPtr xAxisData;
+            DataPtr yAxisData;
             if (cs->getProjection()->isDegree()) {
                 xAxisData = p_->dataReader->getScaledDataInUnit(xAxis->getName(), "radian");
                 yAxisData = p_->dataReader->getScaledDataInUnit(yAxis->getName(), "radian");
@@ -171,14 +171,14 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
 
 }
 
-boost::shared_ptr<Data> CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    boost::shared_ptr<Data> data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+    DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
     // deaccumulation
     if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
         LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
         if (unLimDimPos != 0) { // cannot deaccumulate first
-            boost::shared_ptr<Data> dataP = p_->dataReader->getDataSlice(varName, unLimDimPos-1);
+            DataPtr dataP = p_->dataReader->getDataSlice(varName, unLimDimPos-1);
             if ((data->size() != 0) && (dataP->size() != 0)) {
                 assert(data->size() == dataP->size());
                 boost::shared_array<double> d = data->asDouble();
@@ -195,8 +195,8 @@ boost::shared_ptr<Data> CDMProcessor::getDataSlice(const std::string& varName, s
         if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
             LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
         }
-        boost::shared_ptr<Data> xData;
-        boost::shared_ptr<Data> yData;
+        DataPtr xData;
+        DataPtr yData;
         string xVar, yVar, csId;
         bool xIsFirst;
         if (p_->rotateLatLonVectorX.find(varName) != p_->rotateLatLonVectorX.end()) {

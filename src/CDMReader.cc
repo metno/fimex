@@ -58,10 +58,10 @@ CDM& CDMReader::getInternalCDM()
 }
 
 
-boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+DataPtr CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     using namespace std;
-    boost::shared_ptr<Data> retData;
+    DataPtr retData;
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
         retData = variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
@@ -99,7 +99,7 @@ boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, cons
             // join those slices
             retData = createData(variable.getDataType(), unLimSliceSize*unLimDimSize, cdm_->getFillValue(varName));
             for (size_t i = 0; i < unLimDimSize; ++i) {
-                boost::shared_ptr<Data> unLimDimData = getDataSlice(varName, i+unLimDimStart);
+                DataPtr unLimDimData = getDataSlice(varName, i+unLimDimStart);
                 if (unLimDimData->size() != 0) {
                     unLimDimData = unLimDimData->slice(maxDimSize, dimStart, dimSize);
                     assert(unLimDimData->size() == unLimSliceSize);
@@ -113,7 +113,7 @@ boost::shared_ptr<Data> CDMReader::getDataSlice(const std::string& varName, cons
     return retData;
 }
 
-boost::shared_ptr<Data> CDMReader::getData(const std::string& varName)
+DataPtr CDMReader::getData(const std::string& varName)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
@@ -123,9 +123,9 @@ boost::shared_ptr<Data> CDMReader::getData(const std::string& varName)
             const CDMDimension* udim = cdm_->getUnlimitedDim();
             size_t uDimSize = udim->getLength();
             size_t sliceSize = getSliceSize(getCDM(), variable);
-            boost::shared_ptr<Data> data = createData(variable.getDataType(), uDimSize*sliceSize);
+            DataPtr data = createData(variable.getDataType(), uDimSize*sliceSize);
             for (size_t i = 0; i < uDimSize; i++) {
-                boost::shared_ptr<Data> slice = getDataSlice(varName, i);
+                DataPtr slice = getDataSlice(varName, i);
                 data->setValues(i*sliceSize, *slice, 0, sliceSize);
             }
             return data;
@@ -151,7 +151,7 @@ void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, d
 }
 
 // handle data scaling using add_offset, scale_factor and _FillValue from the varName variable
-boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost::shared_ptr<Data> data, double unitScale, double unitOffset)
+DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, double unitScale, double unitOffset)
 {
     // retrieve scale and offset
     double scale, offset;
@@ -167,7 +167,7 @@ boost::shared_ptr<Data> CDMReader::scaleDataOf(const std::string& varName, boost
 
     return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
 }
-boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName, boost::shared_ptr<Data> data, const std::string& newUnit)
+DataPtr CDMReader::scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& newUnit)
 {
     std::string myUnit = cdm_->getUnits(varName);
     double unitOffset = 0.;
@@ -181,37 +181,37 @@ boost::shared_ptr<Data> CDMReader::scaleDataToUnitOf(const std::string& varName,
 
 
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMReader::getScaledDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     return scaleDataOf(varName, getDataSlice(varName, unLimDimPos));
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos)
+DataPtr CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos)
 {
     return scaleDataToUnitOf(varName, getDataSlice(varName, unLimDimPos), unit);
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSlice(const std::string& varName, const SliceBuilder& sb)
+DataPtr CDMReader::getScaledDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
     return scaleDataOf(varName, getDataSlice(varName, sb));
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb)
+DataPtr CDMReader::getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb)
 {
     return scaleDataToUnitOf(varName, getDataSlice(varName, sb), unit);
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledData(const std::string& varName)
+DataPtr CDMReader::getScaledData(const std::string& varName)
 {
     return scaleDataOf(varName, getData(varName));
 }
 
-boost::shared_ptr<Data> CDMReader::getScaledDataInUnit(const std::string& varName, const std::string& unit)
+DataPtr CDMReader::getScaledDataInUnit(const std::string& varName, const std::string& unit)
 {
     return scaleDataToUnitOf(varName, getData(varName), unit);
 }
 
-boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos)
+DataPtr CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos)
 {
     if (variable.hasData()) {
         if (cdm_->hasUnlimitedDim(variable)) {
@@ -222,7 +222,7 @@ boost::shared_ptr<Data> CDMReader::getDataSliceFromMemory(const CDMVariable& var
             return variable.getData()->clone();
         }
     } else {
-        return boost::shared_ptr<Data>();
+        return DataPtr();
     }
 }
 

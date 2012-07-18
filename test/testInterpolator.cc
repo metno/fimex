@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
     //NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
 	//interpolator->getCDM().toXMLStream(cerr);
 	BOOST_CHECK(true);
-    boost::shared_ptr<Data> altitudeData = interpolator->getDataSlice("altitude");
+    DataPtr altitudeData = interpolator->getDataSlice("altitude");
     boost::shared_array<double> altArray = altitudeData->asDouble();
     int found = 0;
     for (size_t i = 0; i < altitudeData->size(); i++) {
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
     }
     interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
     BOOST_CHECK(true);
-    boost::shared_ptr<Data> altitudeData = interpolator->getDataSlice("altitude");
+    DataPtr altitudeData = interpolator->getDataSlice("altitude");
     boost::shared_array<double> altArray = altitudeData->asDouble();
     int found = 0;
     for (size_t i = 0; i < altitudeData->size(); i++) {
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
     }
     BOOST_CHECK(true);
     {
-        boost::shared_ptr<Data> temp2Data = interpolator->getDataSlice("temp2");
+        DataPtr temp2Data = interpolator->getDataSlice("temp2");
         boost::shared_array<double> tmpArray = temp2Data->asDouble();
         int found = 0;
         for (size_t i = 0; i < temp2Data->size(); i++) {
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
     BOOST_CHECK(true);
     {
         int found = 0;
-        boost::shared_ptr<Data> temp2Data = interpolator->getDataSlice("temp2");
+        DataPtr temp2Data = interpolator->getDataSlice("temp2");
         boost::shared_array<double> tmpArray = temp2Data->asDouble();
         for (size_t i = 0; i < temp2Data->size(); i++) {
             if (tmpArray[i] > 29000) {

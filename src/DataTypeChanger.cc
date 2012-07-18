@@ -46,7 +46,7 @@ DataTypeChanger::~DataTypeChanger()
 {
 }
 
-boost::shared_ptr<Data> DataTypeChanger::convertData(boost::shared_ptr<Data> data) const throw(CDMException)
+DataPtr DataTypeChanger::convertData(DataPtr data) const throw(CDMException)
 {
 	if (newType == CDM_NAT) {
 		return data; // null - initialization, do nothing

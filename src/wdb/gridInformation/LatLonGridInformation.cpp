@@ -70,9 +70,9 @@ void LatLonGridInformation::addToCdm(CDM & cdm) const
 	cdm.addAttribute("latitude", CDMAttribute("axis", "Y"));
 }
 
-boost::shared_ptr<Data> LatLonGridInformation::getField(const CDMVariable & variable) const
+DataPtr LatLonGridInformation::getField(const CDMVariable & variable) const
 {
-	boost::shared_ptr<Data> ret;
+	DataPtr ret;
 	if ( variable.getName() == "longitude" )
 	{
 		ret = createData(variable.getDataType(), numberX());

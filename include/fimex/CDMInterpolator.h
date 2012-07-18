@@ -88,8 +88,8 @@ private:
                                                                 const std::string& out_y_axis_unit,
                                                                 CDMDataType out_x_axis_type,
                                                                 CDMDataType out_y_axis_type,
-                                                                boost::shared_ptr<Data> templateLatValues,
-                                                                boost::shared_ptr<Data> templateLonValues);
+                                                                DataPtr templateLatValues,
+                                                                DataPtr templateLonValues);
 
     /**
      * map of CoordinateSystem::horizontalId() and the CoordinateSystem
@@ -103,7 +103,7 @@ public:
      * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
      *
      */
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
      * @ brief change the (main) projection of the dataReaders cdm to this new projection
      *
@@ -217,7 +217,7 @@ public:
  * @param badValue
  * @return
  */
-extern boost::shared_array<float> data2InterpolationArray(const boost::shared_ptr<Data>& inData, double badValue);
+extern boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue);
 /**
  * convert the data inplace from an interpolation-array (with badValue) to one used within data
  * @param iData
@@ -225,7 +225,7 @@ extern boost::shared_array<float> data2InterpolationArray(const boost::shared_pt
  * @param badValue
  * @return
  */
-extern boost::shared_ptr<Data> interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue);
+extern DataPtr interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue);
 
 
 }

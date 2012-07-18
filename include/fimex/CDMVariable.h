@@ -75,7 +75,7 @@ public:
 	/// print a xml representation to the stream with attributes
 	void toXMLStream(std::ostream& out, const std::vector<CDMAttribute>& attrs) const;
 	/// add data to the variable
-	void setData(boost::shared_ptr<Data> data) {this->data = data;}
+	void setData(DataPtr data) {this->data = data;}
 	/**
 	 * @brief retrieve volatile data from this variable
 	 *
@@ -83,7 +83,7 @@ public:
 	 * this method will not try to read data from the disk. Use CDMReader::getData(const std::string& varName)
 	 * to get the data from memory or from disk.
 	 */
-	const boost::shared_ptr<Data> getData() const {return data;}
+	const DataPtr getData() const {return data;}
 	/// check if real data has been set with setData() (null-pointer reference returns false)
 	int hasData() const {return (data.get() != 0);}
 private:
@@ -91,7 +91,7 @@ private:
 	CDMDataType datatype;
 	std::vector<std::string> shape;
 	void shapeToXMLStream(std::ostream& out) const;
-	boost::shared_ptr<Data> data;
+	DataPtr data;
 	std::string spatialVectorCounterpart;
 	std::string spatialVectorDirection;
 };

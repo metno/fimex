@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( test_function )
     boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
     proc->deAccumulate("time");
 
-    boost::shared_ptr<Data> data = proc->getData("time");
+    DataPtr data = proc->getData("time");
     boost::shared_array<double> time = data->asDouble();
     BOOST_CHECK_CLOSE(time[0], 1179309600., 1e-5); // unchanged
     BOOST_CHECK_CLOSE(time[1], 3600., 1e-5);

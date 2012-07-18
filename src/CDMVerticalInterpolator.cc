@@ -84,7 +84,7 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
     // remove all data associated with this cdm - either it will be set below
     // or it can be retrieved from the dataReader
     for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-        cdm_->getVariable(it->getName()).setData(boost::shared_ptr<Data>());
+        cdm_->getVariable(it->getName()).setData(DataPtr());
     }
 
     if (verticalType == "pressure") {
@@ -196,7 +196,7 @@ CDMVerticalInterpolator::~CDMVerticalInterpolator()
     // auto-destruction
 }
 
-boost::shared_ptr<Data> CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
@@ -234,7 +234,7 @@ CDMVerticalInterpolator::getSimpleAxes(
             throw CDMException("vertical interpolation not possible with 2d z-Axis: "+zAxis->getName());
         }
     }
-    // TODO: this is nonesense, 2d x/y-axes should nicely work!
+
     // detect x and y axis
     xAxis = cs->getGeoXAxis();
     nx = 1;
@@ -274,7 +274,7 @@ CDMVerticalInterpolator::getSimpleAxes(
     }
 }
 
-boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)
+DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)
 {
     assert(cs->isCSFor(varName) && cs->isComplete(varName));
     // get all axes
@@ -302,7 +302,7 @@ boost::shared_ptr<Data> CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr c
 
 
     vector<double>& pOut = pimpl_->level1;
-    boost::shared_ptr<Data> data = dataReader_->getDataSlice(varName, unLimDimPos);
+    DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
     if (data->size() != (nx*ny*nz*(nt-startT))) {
         throw CDMException("unexpected dataslice of variable " + varName +": (nx*ny*nz*nt) = (" +
                            type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+

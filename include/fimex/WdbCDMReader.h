@@ -96,20 +96,20 @@ public:
 
     virtual ~WdbCDMReader();
 
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
 private:
     std::size_t getXSize(const CDMVariable& variable) const;
     std::size_t getYSize(const CDMVariable& variable) const;
     std::size_t getGridSize(const CDMVariable& variable) const;
-    boost::shared_ptr<Data> extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const;
+    DataPtr extractDataFromField(const CDMVariable& variable, const std::vector<long long> & fieldIdentifiers) const;
 
-    boost::shared_ptr<Data> cutGrid(const boost::shared_ptr<Data> & d, const CDMVariable& variable, const SliceBuilder & sb) const;
+    DataPtr cutGrid(const DataPtr & d, const CDMVariable& variable, const SliceBuilder & sb) const;
 
-    boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const;
-    boost::shared_ptr<Data> getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const;
+    DataPtr getDatabaseFields(const CDMVariable& variable, size_t unLimDimPos) const;
+    DataPtr getDatabaseFields(const CDMVariable& variable, const SliceBuilder & sb) const;
 
     class InternalData;
     InternalData * d_;

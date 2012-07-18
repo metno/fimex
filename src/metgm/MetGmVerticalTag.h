@@ -32,10 +32,10 @@
 //
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include "fimex/DataDecl.h"
 
 namespace MetNoFimex {
 
-    class Data;
     class CDMReader;
     class CDMVariable;
     class MetGmFileHandlePtr;
@@ -64,7 +64,7 @@ namespace MetNoFimex {
         inline MetGmVerticalTag() : nz_(0), pr_(0), pz_(0) { }
 
         bool hasNegativePoints();
-        void extractVerticalPoints(const boost::shared_ptr<Data>& data);
+        void extractVerticalPoints(const DataPtr& data);
 
         unsigned int                nz_;
         unsigned int                pr_;

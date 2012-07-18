@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( test_felt_axis )
     boost::array<float, 6> gridPar = ff.getGridDefinition()->getGridParameters();
     BOOST_CHECK(ff.getGridType() == 1);
 
-    boost::shared_ptr<Data> xdata = ff.getXData();
+    DataPtr xdata = ff.getXData();
     //cerr << ff.getGridDefinition()->startX() - 5.71849e+06  << " x " << ff.getGridDefinition()->getXIncrement() - 50162.2<< endl;
     //cerr << gridPar[0] << "'" << ((int)gridPar[0]-1) << ": "<< (xdata->asFloat())[(int)gridPar[0]-1] << " x " << (xdata->asFloat())[(int)gridPar[0]-1] << endl;
     BOOST_CHECK(fabs((xdata->asFloat())[(int)gridPar[0]-1]) < .5);
@@ -174,8 +174,8 @@ BOOST_AUTO_TEST_CASE( test_felt_cdm_reader )
     BOOST_CHECK(projYAxis == "y");
     BOOST_CHECK(projXUnit == "m");
     BOOST_CHECK(projYUnit == "m");
-    boost::shared_ptr<Data> xVals = feltCDM.getData(projXAxis);
-    boost::shared_ptr<Data> yVals = feltCDM.getData(projYAxis);
+    DataPtr xVals = feltCDM.getData(projXAxis);
+    DataPtr yVals = feltCDM.getData(projYAxis);
     BOOST_CHECK(xVals->size() == 229);
     BOOST_CHECK(yVals->size() == 196);
 

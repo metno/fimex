@@ -278,9 +278,9 @@ int Felt_File2::getNY() const {
 	return ny;
 }
 
-boost::shared_ptr<Data> Felt_File2::getXData() const
+DataPtr Felt_File2::getXData() const
 {
-	boost::shared_ptr<Data> xData = createData(CDM_FLOAT, getNX());
+	DataPtr xData = createData(CDM_FLOAT, getNX());
 	boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
 	for (int i = 0; i < getNX(); i++) {
 		float value = gridDef->startX() + i * gridDef->getXIncrement();
@@ -289,9 +289,9 @@ boost::shared_ptr<Data> Felt_File2::getXData() const
 	return xData;
 }
 
-boost::shared_ptr<Data> Felt_File2::getYData() const
+DataPtr Felt_File2::getYData() const
 {
-	boost::shared_ptr<Data> yData = createData(CDM_FLOAT, getNY());
+	DataPtr yData = createData(CDM_FLOAT, getNY());
     boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
     float start = gridDef->startY();
     float incr = gridDef->getYIncrement();

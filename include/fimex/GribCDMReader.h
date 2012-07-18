@@ -61,7 +61,7 @@ class GribCDMReader: public MetNoFimex::CDMReader
 public:
     GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML);
     virtual ~GribCDMReader();
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
     // pimpl

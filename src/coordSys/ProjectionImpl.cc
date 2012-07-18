@@ -274,7 +274,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         } else {
             bw.resize(7,0);
         }
-        boost::shared_ptr<Data> towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
+        DataPtr towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
         attrList.push_back(CDMAttribute("towgs84", CDM_DOUBLE, towgs));
     } else if (boost::regex_search(proj4Str, what, boost::regex("\\+datum=(\\S+)"))) {
         // towgs84 parameters implicitly defined by datum (using towgs84=0,0,0 as default)
@@ -288,7 +288,7 @@ void ProjectionImpl::proj4GetEarthAttributes(const std::string& proj4Str, std::v
         } else {
             bw.resize(3, 0); // default
         }
-        boost::shared_ptr<Data> towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
+        DataPtr towgs = createData(CDM_DOUBLE, bw.begin(), bw.end());
         attrList.push_back(CDMAttribute("towgs84", CDM_DOUBLE, towgs));
     }
 

@@ -164,7 +164,7 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
     }
 }
 
-boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     if (find(p_->changeVars.begin(), p_->changeVars.end(), varName) == p_->changeVars.end()) {
         return dataReader_->getDataSlice(varName, unLimDimPos);
@@ -190,7 +190,7 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
         const float ps = 1000.; // hPa
         const float psX1 = 1/ps;
         const float Rcp = R/cp;
-        boost::shared_ptr<Data> d = dataReader_->getDataSlice(p_->oldTheta, unLimDimPos);
+        DataPtr d = dataReader_->getDataSlice(p_->oldTheta, unLimDimPos);
         assert(d.get() != 0);
         size_t size = d->size();
         boost::shared_array<float> da = d->asFloat();
@@ -210,10 +210,10 @@ boost::shared_ptr<Data> CDMPressureConversions::getDataSlice(const std::string& 
         }
         return createData(size, da);
     } else if (varName == "upward_air_velocity") {
-        boost::shared_ptr<Data> td = getDataSlice(p_->air_temp, unLimDimPos);
+        DataPtr td = getDataSlice(p_->air_temp, unLimDimPos);
         assert(td.get() != 0);
         boost::shared_array<float> tda = td->asFloat();
-        boost::shared_ptr<Data> d = dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos);
+        DataPtr d = dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos);
         assert(d.get() != 0);
         size_t size = d->size();
         assert(size == td->size());

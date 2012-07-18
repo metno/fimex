@@ -91,7 +91,7 @@ CDMDataType ncType2cdmDataType(nc_type dt) {
     }
 }
 
-boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type dt)
+DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type dt)
 {
     size_t attrLen;
     ncCheck(nc_inq_attlen (ncId, varId, attName.c_str(), &attrLen));
@@ -168,7 +168,7 @@ boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& a
     }
 }
 
-boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t* start, const size_t* count)
+DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t* start, const size_t* count)
 {
     size_t sliceLen;
     boost::scoped_array<size_t> mstart(new size_t[(dimLen == 0) ? 1 : dimLen]);
@@ -246,7 +246,7 @@ boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type dt, size_t dimL
     }
 }
 
-void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count)
+void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count)
 {
     size_t sliceLen;
     boost::scoped_array<size_t> mstart(new size_t[(dimLen == 0) ? 1 : dimLen]);

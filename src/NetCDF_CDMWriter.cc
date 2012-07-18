@@ -506,7 +506,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 #pragma omp task firstprivate(cdmVar,varName,vi)
             {
 #endif
-            boost::shared_ptr<Data> data = cdmReader->getData(varName);
+            DataPtr data = cdmReader->getData(varName);
             try {
                 data = dtc.convertData(data);
             } catch (CDMException& e) {
@@ -531,7 +531,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 #pragma omp task firstprivate(cdmVar,varName,vi,i)
                 {
 #endif
-                boost::shared_ptr<Data> data = cdmReader->getDataSlice(cdmVar.getName(), i);
+                DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), i);
                 try {
                     data = dtc.convertData(data);
                 } catch (CDMException& e) {

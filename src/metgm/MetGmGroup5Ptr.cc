@@ -264,7 +264,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     return boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(pg3, hdtag, empty));
                 }
 
-                boost::shared_ptr<Data> raw_data  = pCdmReader->getScaledDataInUnit(varName, mgmUnits);
+                DataPtr raw_data  = pCdmReader->getScaledDataInUnit(varName, mgmUnits);
 
                 boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, raw_data->asFloat()));
 

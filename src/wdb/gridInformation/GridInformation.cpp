@@ -128,9 +128,9 @@ std::string GridInformation::getProjectionName() const
 {
 	return "projection_" + projection_->getName();
 }
-boost::shared_ptr<Data> GridInformation::getField(const CDMVariable & variable) const
+DataPtr GridInformation::getField(const CDMVariable & variable) const
 {
-	boost::shared_ptr<Data> ret;
+	DataPtr ret;
 
 	std::string name = variable.getName();
 	if ( name.substr(0, 11) == "projection_" )

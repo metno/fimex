@@ -54,7 +54,7 @@ using namespace MetNoFimex;
 int main(int argc, char* argv[])
 {
     boost::shared_ptr<CDMReader> r1 = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile("../../share/etc/wdb_config.xml"));
-    boost::shared_ptr<Data> x = r1->getData("time");
+    DataPtr x = r1->getData("time");
     if (x->size() > 0) {
         clog << "1. connection successfully established" << endl;
     } else {
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     size_t startI = 0;
     for (size_t i = 0; i < MAX_CONN; ++i) {
         boost::shared_ptr<CDMReader> r = CDMFileReaderFactory::create(MIFI_FILETYPE_WDB, "wdb.wdbml", XMLInputFile("../../share/etc/wdb_config.xml"));
-        boost::shared_ptr<Data> x = r->getData("time");
+        DataPtr x = r->getData("time");
         if (x->size() == 0) {
             cerr << "error after " << i << ". connection";
             exit(1);

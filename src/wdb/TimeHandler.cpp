@@ -73,9 +73,9 @@ std::time_t secondsSinceEpoch(const GridData::Time & time)
 }
 }
 
-boost::shared_ptr<Data> TimeHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
+DataPtr TimeHandler::getData(const CDMVariable & variable, size_t unLimDimPos) const
 {
-	boost::shared_ptr<Data> ret;
+	DataPtr ret;
 
 
 	const GridData::Time & refTime = getReferenceTime(unLimDimPos);

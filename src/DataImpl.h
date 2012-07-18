@@ -135,9 +135,9 @@ namespace MetNoFimex
 		virtual void setValue(long pos, double val) {theData[pos] = static_cast<C>(val);}
 		virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
 		virtual void setAllValues(double val) {C v = static_cast<C>(val); for (C* pos = &theData[0]; pos != (&theData[0])+length; ++pos) *pos = v;}
-        virtual boost::shared_ptr<Data> clone() const {return boost::shared_ptr<Data>(new DataImpl<C>(*this));}
-		virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
-		virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
+        virtual DataPtr clone() const {return DataPtr(new DataImpl<C>(*this));}
+		virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
+		virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);
 		// specialized for each known type in Data.cc
 		virtual CDMDataType getDataType() const {return CDM_NAT;}
 
@@ -260,7 +260,7 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	boost::shared_ptr<Data> DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) {
+	DataPtr DataImpl<C>::slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) {
 	    // handle scalar data
 	    if (orgDimSize.size() == 0) {
 	        return clone();
@@ -309,20 +309,20 @@ namespace MetNoFimex
 	}
 
 	template<typename C>
-	boost::shared_ptr<Data> DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
+	DataPtr DataImpl<C>::convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset)
 	{
-		boost::shared_ptr<Data> data(new DataImpl<char>(0)); // dummy default
+		DataPtr data(new DataImpl<char>(0)); // dummy default
 		switch (newType) {
-		case CDM_CHAR: data = boost::shared_ptr<Data>(new DataImpl<char>(convertArrayType<char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-		case CDM_SHORT: data = boost::shared_ptr<Data>(new DataImpl<short>(convertArrayType<short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-		case CDM_INT: data = boost::shared_ptr<Data>(new DataImpl<int>(convertArrayType<int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_UCHAR: data = boost::shared_ptr<Data>(new DataImpl<unsigned char>(convertArrayType<unsigned char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_USHORT: data = boost::shared_ptr<Data>(new DataImpl<unsigned short>(convertArrayType<unsigned short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_UINT: data = boost::shared_ptr<Data>(new DataImpl<unsigned int>(convertArrayType<unsigned int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_INT64: data = boost::shared_ptr<Data>(new DataImpl<long long>(convertArrayType<long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-        case CDM_UINT64: data = boost::shared_ptr<Data>(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-		case CDM_FLOAT: data = boost::shared_ptr<Data>(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
-		case CDM_DOUBLE: data = boost::shared_ptr<Data>(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_CHAR: data = DataPtr(new DataImpl<char>(convertArrayType<char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_SHORT: data = DataPtr(new DataImpl<short>(convertArrayType<short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_INT: data = DataPtr(new DataImpl<int>(convertArrayType<int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_UCHAR: data = DataPtr(new DataImpl<unsigned char>(convertArrayType<unsigned char>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_USHORT: data = DataPtr(new DataImpl<unsigned short>(convertArrayType<unsigned short>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_UINT: data = DataPtr(new DataImpl<unsigned int>(convertArrayType<unsigned int>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_INT64: data = DataPtr(new DataImpl<long long>(convertArrayType<long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+        case CDM_UINT64: data = DataPtr(new DataImpl<unsigned long long>(convertArrayType<unsigned long long>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_FLOAT: data = DataPtr(new DataImpl<float>(convertArrayType<float>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
+		case CDM_DOUBLE: data = DataPtr(new DataImpl<double>(convertArrayType<double>(theData, size(), oldFill, oldScale, oldOffset, newFill, newScale, newOffset), size())); break;
 		case CDM_STRING: throw CDMException("cannot convert string datatype"); break;
 		case CDM_NAT: throw CDMException("cannot convert CDM_NAT datatype"); break;
 		}

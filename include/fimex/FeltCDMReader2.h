@@ -65,7 +65,7 @@ public:
     FeltCDMReader2(std::string filename, std::string configFilename);
     virtual ~FeltCDMReader2();
 
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:
     const std::string filename;

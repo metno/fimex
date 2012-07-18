@@ -67,7 +67,7 @@ public:
     /**
      * Read and manipulate the data
      */
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
      * Read the internals of statusVariable. This code is mainly thought for testing/debugging.
      */

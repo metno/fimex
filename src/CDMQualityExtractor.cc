@@ -200,15 +200,15 @@ static double findDefinedExtreme(double* begin, double* end, const double& (*min
     return extreme;
 }
 
-boost::shared_ptr<Data> CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     // no change in cdm-data in CDMQualityExtractor, so no need to check for in-memory data
 
-    boost::shared_ptr<Data> data = dataReader->getDataSlice(varName, unLimDimPos);
+    DataPtr data = dataReader->getDataSlice(varName, unLimDimPos);
     // test if variable has quality assignment
     if (statusVariable.find(varName) != statusVariable.end()) {
         string statusVar = statusVariable[varName];
-        boost::shared_ptr<Data> statusData;
+        DataPtr statusData;
         if (statusVar == varName) {
             // reuse data in case of own status data
             statusData = data;

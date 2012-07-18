@@ -57,7 +57,7 @@ namespace MetNoFimex {
 
                 XTag = boost::shared_ptr<MetGmXTag>(new MetGmXTag);
 
-                boost::shared_ptr<Data> data = pCdmReader->getScaledDataInUnit(xAxis->getName(), "degree");
+                DataPtr data = pCdmReader->getScaledDataInUnit(xAxis->getName(), "degree");
 
                 XTag->numberOfPoints_ = data->size();
 
@@ -101,7 +101,7 @@ namespace MetNoFimex {
 
                 YTag = boost::shared_ptr<MetGmYTag>(new MetGmYTag);
 
-                boost::shared_ptr<Data> data = pCdmReader->getScaledDataInUnit(yAxis->getName(), "degree");
+                DataPtr data = pCdmReader->getScaledDataInUnit(yAxis->getName(), "degree");
 
                 YTag->numberOfPoints_ = data->size();
 

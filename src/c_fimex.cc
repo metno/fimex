@@ -215,7 +215,7 @@ const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos)
 int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size)
 {
     try {
-        boost::shared_ptr<Data> vData = reader->get()->getScaledDataSlice(varName, unLimDimPos);
+        DataPtr vData = reader->get()->getScaledDataSlice(varName, unLimDimPos);
         *size = vData->size();
         *data = (double*) malloc(*size * sizeof(double));
         if (*data == 0) {
@@ -235,7 +235,7 @@ int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size
 int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** data, size_t* size)
 {
     try {
-        boost::shared_ptr<Data> vData = reader->get()->getScaledData(varName);
+        DataPtr vData = reader->get()->getScaledData(varName);
         *size = vData->size();
         *data = (double*) malloc(*size * sizeof(double));
         if (*data == 0) {

@@ -52,7 +52,7 @@ getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
     for (vector<string>::iterator varname = refVarnames.begin(); varname != refVarnames.end(); ++varname) {
         string units = cdm.getUnits(*varname);
         TimeUnit tu(units);
-        boost::shared_ptr<Data> timeData = reader->getData(*varname);
+        DataPtr timeData = reader->getData(*varname);
         boost::shared_array<double> times = timeData->asDouble();
         const double* tPtr = &times[0];
         const double* end = tPtr + timeData->size();

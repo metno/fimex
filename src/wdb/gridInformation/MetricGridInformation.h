@@ -49,7 +49,7 @@ public:
 
 	virtual void addToCdm(CDM & cdm) const;
 	virtual std::string getCoordinatesAttribute() const;
-	virtual boost::shared_ptr<Data> getField(const CDMVariable & variable) const;
+	virtual DataPtr getField(const CDMVariable & variable) const;
 	bool canHandle(const std::string & name) const;
 
 	virtual void addSpatialDimensions(std::vector<std::string> & out) const;

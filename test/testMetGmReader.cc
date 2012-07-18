@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
     BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "latitude");
     BOOST_CHECK(sb.getUnsetDimensionNames()[2] == "longitude");
 
-    boost::shared_ptr<Data> data = metgmReaderEd1->getDataSlice("air_temperature_GND", sb.getTimeVariableSliceBuilder());
+    DataPtr data = metgmReaderEd1->getDataSlice("air_temperature_GND", sb.getTimeVariableSliceBuilder());
 //    BOOST_CHECK(data->size() == 2);
 }
 

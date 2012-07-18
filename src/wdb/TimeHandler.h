@@ -64,7 +64,7 @@ public:
 	/**
 	 * Get data for the given variable name and unlimited dimension
 	 */
-	virtual boost::shared_ptr<Data> getData(const CDMVariable & variable, size_t unLimDimPos) const;
+	virtual DataPtr getData(const CDMVariable & variable, size_t unLimDimPos) const;
 
 	/**
 	 * Does the given cdm variable name refer to anything that this object can

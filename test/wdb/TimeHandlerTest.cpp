@@ -54,7 +54,7 @@ public:
 
 namespace
 {
-GridData::Time timeFromData(const boost::shared_ptr<Data> & data, int index = 0)
+GridData::Time timeFromData(const DataPtr & data, int index = 0)
 {
 	double time = data->asDouble()[index];
 	return boost::posix_time::from_time_t(time);
@@ -195,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimes, TimeHandlerFixture)
 	BOOST_CHECK_EQUAL(referenceTime1, timeFromData(timeHandler.getData(refTimeVar, 0)));
 
 	const CDMVariable & timeVar = cdm.getVariable(TimeHandler::validTimeName);
-	boost::shared_ptr<Data> times = timeHandler.getData(timeVar, 0);
+	DataPtr times = timeHandler.getData(timeVar, 0);
 
 
 	GridData::Time validTime1 = boost::posix_time::time_from_string("2011-05-29 00:00:00");
@@ -218,7 +218,7 @@ BOOST_FIXTURE_TEST_CASE(manyReferenceTimesAndValidTimesCreatesTimeOffsetVariable
 	timeHandler.addToCdm(cdm);
 
 	const CDMVariable & offsetVar = cdm.getVariable(TimeHandler::timeOffsetName);
-	boost::shared_ptr<Data> d = timeHandler.getData(offsetVar, 0);
+	DataPtr d = timeHandler.getData(offsetVar, 0);
 	BOOST_REQUIRE_EQUAL(2, d->size());
 	boost::shared_array<double> array = d->asDouble();
 	BOOST_CHECK_EQUAL(0, array[0]);

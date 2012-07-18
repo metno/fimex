@@ -137,7 +137,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                 // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
                 if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
                     CoordinateSystem::ConstAxisPtr rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
-                    boost::shared_ptr<Data> refTimesD = cdmReader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
+                    DataPtr refTimesD = cdmReader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
                     boost::shared_array<unsigned long long> refs = refTimesD->asUInt64();
                     /* do something with the refTimes and select the wanted Position */
                     size_t refTimePos = 0; /* or whatever you select between 0 (default) and refTimes->size()-1 */
@@ -162,7 +162,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                     ss.imbue(locale(ss.getloc(), facet));
                     ss << "seconds since " << refTimes[0];
                 }
-                boost::shared_ptr<Data> times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
+                DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
                 boost::shared_array<long long> timesA = times->asInt64();
                 TimeUnit tu(ss.str());
                 transform(&timesA[0],
@@ -211,7 +211,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                     time_facet* facet (new time_facet("%Y-%m-%d %H:%M:%S"));
                     ss.imbue(locale(ss.getloc(), facet));
                     ss << "seconds since " << *rTime;
-                    boost::shared_ptr<Data> times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
+                    DataPtr times = cdmReader->getScaledDataSliceInUnit(tAxis->getName(), ss.str(), sb.getTimeVariableSliceBuilder());
                     boost::shared_array<long long> timesA = times->asInt64();
                     TimeUnit tu(ss.str());
                     transform(&timesA[0],
@@ -238,7 +238,7 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
                                 // level and var are dependent due to splitting possibilities
                                 setLevel(*var, levelVal);
                                 setParameter(*var, levelVal);
-                                boost::shared_ptr<Data> data = cdmReader->getDataSlice(*var, sb);
+                                DataPtr data = cdmReader->getDataSlice(*var, sb);
                                 if (data->size() != 0) {
                                     boost::shared_array<double> da = data->asDouble();
                                     size_t countMissing = count(&da[0], &da[0] + data->size(), cdm.getFillValue(*var));
@@ -298,7 +298,7 @@ void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
         }
     }
 }
-void GribApiCDMWriter_ImplAbstract::setData(const boost::shared_ptr<Data>& data)
+void GribApiCDMWriter_ImplAbstract::setData(const DataPtr& data)
 {
     GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");
 }
@@ -341,7 +341,7 @@ std::vector<double> GribApiCDMWriter_ImplAbstract::getLevels(const std::string& 
     std::string verticalAxisXPath("/cdm_gribwriter_config/axes/vertical_axis");
     std::string unit;
     if (verticalAxis != ""){
-        boost::shared_ptr<Data> myLevelData = cdmReader->getData(verticalAxis);
+        DataPtr myLevelData = cdmReader->getData(verticalAxis);
         const boost::shared_array<double> levelDataArray = myLevelData->asDouble();
         levelData= std::vector<double>(&levelDataArray[0], &levelDataArray[myLevelData->size()]);
         CDMAttribute attr;

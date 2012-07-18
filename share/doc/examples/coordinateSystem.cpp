@@ -28,12 +28,12 @@ int main(int argc, char* args[]) {
                 // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
                 if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
                     CoordinateSystem::ConstAxisPtr rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
-                    boost::shared_ptr<Data> refTimes = reader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
+                    DataPtr refTimes = reader->getScaledDataInUnit(rtAxis->getName(),"seconds since 1970-01-01 00:00:00");
                     /* do something with the refTimes and select the wanted Position */
                     size_t refTimePos = 3; /* or whatever you select between 0 (default) and refTimes->size()-1 */
                     sb.setReferenceTimePos(refTimePos);
                 }
-                boost::shared_ptr<Data> times = reader->getDataSlice(tAxis->getName(), sb.getTimeVariableSliceBuilder());
+                DataPtr times = reader->getDataSlice(tAxis->getName(), sb.getTimeVariableSliceBuilder());
                 /* select the desired startTime and the sice for the time-slices */
                 // fetch the 2nd and 3rd time-step of the 4th run
                 sb.setTimeStartAndSize(1, 2); // default is all of ReferenceTimePos
@@ -53,7 +53,7 @@ int main(int argc, char* args[]) {
             }
 
             // fetch the data
-            boost::shared_ptr<Data> data = reader->getDataSlice(varName, sb);
+            DataPtr data = reader->getDataSlice(varName, sb);
             /* do something with the data */
         }
     }

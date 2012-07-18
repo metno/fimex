@@ -24,8 +24,8 @@
 #ifndef DATA_H_
 #define DATA_H_
 
+#include "fimex/DataDecl.h"
 #include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -135,7 +135,7 @@ namespace MetNoFimex
          * The clone operation generates a real duplicate
          * of the data. The internal array-data will be copied.
          */
-        virtual boost::shared_ptr<Data> clone() const = 0;
+        virtual DataPtr clone() const = 0;
         /**
          * @brief get a multi-dimensional slice of the data
          *
@@ -150,11 +150,11 @@ namespace MetNoFimex
          *
          * @throw CDMException on dimension mismatch: (start+size > orgDimSize) or (Product(orgDimSize) != size)
          */
-        virtual boost::shared_ptr<Data> slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) = 0;
+        virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize) = 0;
         /**
          * @brief convert the datatype from one type,fill,scale,offset to another
          */
-        virtual boost::shared_ptr<Data> convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
+        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
         /**
          * return the CDMDataType of this data
          */
@@ -169,7 +169,7 @@ namespace MetNoFimex
      * @param val default value for data elements, 0 by default
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(CDMDataType datatype, size_t length, double val = 0);
+    DataPtr createData(CDMDataType datatype, size_t length, double val = 0);
 
     /**
      * @brief create a Data-pointer of type CDM_DOUBLE
@@ -178,7 +178,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<double> array);
+    DataPtr createData(size_t length, boost::shared_array<double> array);
     /**
      * @brief create a Data-pointer of type CDM_FLOAT
      *
@@ -186,7 +186,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<float> array);
+    DataPtr createData(size_t length, boost::shared_array<float> array);
     /**
      * @brief create a Data-pointer of type CDM_INT
      *
@@ -194,7 +194,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<int> array);
+    DataPtr createData(size_t length, boost::shared_array<int> array);
     /**
      * @brief create a Data-pointer of type CDM_SHORT
      *
@@ -202,7 +202,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<short> array);
+    DataPtr createData(size_t length, boost::shared_array<short> array);
     /**
      * @brief create a Data-pointer of type CDM_CHAR
      *
@@ -210,7 +210,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<char> array);
+    DataPtr createData(size_t length, boost::shared_array<char> array);
     /**
      * @brief create a Data-pointer of type CDM_UINT
      *
@@ -218,7 +218,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned int> array);
+    DataPtr createData(size_t length, boost::shared_array<unsigned int> array);
     /**
      * @brief create a Data-pointer of type CDM_INT64
      *
@@ -226,7 +226,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<long long> array);
+    DataPtr createData(size_t length, boost::shared_array<long long> array);
     /**
      * @brief create a Data-pointer of type CDM_UINT64
      *
@@ -234,7 +234,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned long long> array);
+    DataPtr createData(size_t length, boost::shared_array<unsigned long long> array);
     /**
      * @brief create a Data-pointer of type CDM_USHORT
      *
@@ -242,7 +242,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned short> array);
+    DataPtr createData(size_t length, boost::shared_array<unsigned short> array);
     /**
      * @brief create a Data-pointer of type CDM_UCHAR
      *
@@ -250,7 +250,7 @@ namespace MetNoFimex
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
-    boost::shared_ptr<Data> createData(size_t length, boost::shared_array<unsigned char> array);
+    DataPtr createData(size_t length, boost::shared_array<unsigned char> array);
 
     /**
      * @brief create a Data-pointer of the datatype and fill with the data from the iterator
@@ -261,7 +261,7 @@ namespace MetNoFimex
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
     template<class InputIterator>
-    boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last);
+    DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last);
 
     /**
      * @brief create a one-dimensional dataslice from another Data object
@@ -271,11 +271,11 @@ namespace MetNoFimex
      * @param dataStartPos the first element of data to fetch
      * @param dataSize the size of the data
      */
-    boost::shared_ptr<Data> createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t dataSize);
+    DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t dataSize);
 
     /* BELOW follow template implementations */
     template<class InputIterator>
-    boost::shared_ptr<Data> createData(CDMDataType datatype, InputIterator first, InputIterator last)
+    DataPtr createData(CDMDataType datatype, InputIterator first, InputIterator last)
     {
         size_t length = std::distance(first, last);
         switch (datatype) {

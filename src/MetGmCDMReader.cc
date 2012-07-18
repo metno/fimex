@@ -47,13 +47,13 @@ namespace MetNoFimex {
 
     MetGmCDMReader::~MetGmCDMReader() { }
 
-    boost::shared_ptr<Data> MetGmCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
+    DataPtr MetGmCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
     {
         ScopedCritical lock(mutex);
         return d_ptr->getDataSlice(varName, unLimDimPos);
     }
 
-    boost::shared_ptr<Data> MetGmCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+    DataPtr MetGmCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
         ScopedCritical lock(mutex);
         return d_ptr->getDataSlice(varName, sb);

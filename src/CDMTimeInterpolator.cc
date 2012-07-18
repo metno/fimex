@@ -76,7 +76,7 @@ CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader
     for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
         std::string timeDimName = getTimeAxis(coordSystems_, getCDM(), it->getName());
         if (timeDimName != "") {
-            cdm_->getVariable(it->getName()).setData(boost::shared_ptr<Data>());
+            cdm_->getVariable(it->getName()).setData(DataPtr());
         }
     }
 }
@@ -86,7 +86,7 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 }
 
 MutexType staticMutex;
-boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
+DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     std::string timeAxis = getTimeAxis(coordSystems_, getCDM(), varName);
     LOG4FIMEX(logger, Logger::DEBUG, "getting time-interpolated data-slice for " << varName << " with time-axis: " << timeAxis);
@@ -102,7 +102,7 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
     }
 
     // interpolate the data
-    boost::shared_ptr<Data> data;
+    DataPtr data;
 
     // if unlimdim = time-axis, fetch all needed original slices
     CDMDimension timeDim = cdm_->getDimension(timeAxis);
@@ -112,8 +112,8 @@ boost::shared_ptr<Data> CDMTimeInterpolator::getDataSlice(const std::string& var
         pair<size_t, size_t> orgTimes = timeChangeMap_.find(timeAxis)->second.at(unLimDimPos);
         double d1Time = dataReaderTimesInNewUnits_.find(timeDim.getName())->second.at(orgTimes.first);
         double d2Time = dataReaderTimesInNewUnits_.find(timeDim.getName())->second.at(orgTimes.second);
-        boost::shared_ptr<Data> d1 = dataReader_->getDataSlice(varName, orgTimes.first);
-        boost::shared_ptr<Data> d2 = dataReader_->getDataSlice(varName, orgTimes.second);
+        DataPtr d1 = dataReader_->getDataSlice(varName, orgTimes.first);
+        DataPtr d2 = dataReader_->getDataSlice(varName, orgTimes.second);
         LOG4FIMEX(logger, Logger::DEBUG, "interpolation between " << d1Time << " and " << d2Time << " at " << currentTime);
         // convert if both slices are defined, otherwise, simply use the defined one or return undefined
         if (d1->size() == 0) {
@@ -147,7 +147,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
         std::string timeDimName = orgCDM.getTimeAxis(varIt->getName());
         if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
             changedTimes.insert(timeDimName); // avoid double changes
-            boost::shared_ptr<Data> times = dataReader_->getScaledData(timeDimName);
+            DataPtr times = dataReader_->getScaledData(timeDimName);
             string unit = cdm_->getAttribute(timeDimName, "units").getStringValue();
             TimeUnit tu(unit);
             vector<FimexTime> oldTimes;

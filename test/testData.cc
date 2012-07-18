@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( test_slicing )
 	std::vector<size_t> newDimStart(1, start);
 	size_t newSize = 2;
 	std::vector<size_t> newDimSize(1, newSize);
-	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
+	DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
 	BOOST_CHECK(slice->size() == newSize);
 	BOOST_CHECK((slice->asInt())[0] == start);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( test_slicing )
 	// test_slicing of a scalar (size 0 or size 1)
 	DataImpl<double> scalar(1);
 	scalar.setValue(0, 3.);
-    boost::shared_ptr<Data> scalarSlice = scalar.slice(vector<size_t>(0), vector<size_t>(0), vector<size_t>(0));
+    DataPtr scalarSlice = scalar.slice(vector<size_t>(0), vector<size_t>(0), vector<size_t>(0));
     BOOST_CHECK(scalar.size() == scalarSlice->size());
     BOOST_CHECK(scalar.asDouble()[0] == scalarSlice->asDouble()[0]);
 }
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE( test_slicing2D )
 	std::vector<size_t> newDimStart(2, start);
 	size_t newSize = 2;
 	std::vector<size_t> newDimSize(2, newSize);
-	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
+	DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
 	BOOST_CHECK(slice->size() == newSize*newSize);
 	BOOST_CHECK((slice->asInt())[0] == static_cast<int>(newDimStart[1]*10 + start)); // 44
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( test_slicing3D )
 	std::vector<size_t> newDimStart(3, start);
 	size_t newSize = 2;
 	std::vector<size_t> newDimSize(3, newSize);
-	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
+	DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 
 	BOOST_CHECK(slice->size() == newSize*newSize*newSize);
 	BOOST_CHECK((slice->asInt())[0] == (start*100 + start*10 + start)); // 444
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( test_slice_asym )
 	newDimSize[0] = x;
 	newDimSize[1] = 2;
 	newDimSize[2] = sigma;
-	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
+	DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 	BOOST_CHECK(slice->size() == newDimSize[0]*newDimSize[1]*newDimSize[2]);
 	boost::shared_array<int> intSlice = slice->asInt();
 	for (size_t i = 0; i < newDimSize[2]; i++)
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE( test_slice_segfault )
 	newDimSize[0] = sigma;
 	newDimSize[1] = 100;
 	newDimSize[2] = x;
-	boost::shared_ptr<Data> slice = data.slice(orgDimSize, newDimStart, newDimSize);
+	DataPtr slice = data.slice(orgDimSize, newDimStart, newDimSize);
 	BOOST_CHECK(slice->size() == newDimSize[0]*newDimSize[1]*newDimSize[2]);
 
 }

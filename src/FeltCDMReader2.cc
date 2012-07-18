@@ -234,7 +234,7 @@ void FeltCDMReader2::init(const XMLInput& configInput) {
         cdm_->addDimension(ensembleDim);
         vector<string> varShape(1, "ensemble_member");
         CDMVariable ensembleVar("ensemble_member", CDM_SHORT, varShape);
-        boost::shared_ptr<Data> eData = createData(CDM_SHORT, eMembers.begin(), eMembers.end());
+        DataPtr eData = createData(CDM_SHORT, eMembers.begin(), eMembers.end());
         ensembleVar.setData(eData);
         cdm_->addVariable(ensembleVar);
         cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
@@ -370,7 +370,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
     transform(timeVec.begin(), timeVec.end(),
               back_inserter(timeUnitVec),
               bind1st(mem_fun(&TimeUnit::posixTime2unitTime), &tu));
-    boost::shared_ptr<Data> timeData = createData(timeDataType, timeUnitVec.begin(), timeUnitVec.end());
+    DataPtr timeData = createData(timeDataType, timeUnitVec.begin(), timeUnitVec.end());
     timeVar.setData(timeData);
     cdm_->addVariable(timeVar);
     vector<CDMAttribute> timeAttributes;
@@ -387,7 +387,7 @@ CDMDimension FeltCDMReader2::initAddTimeDimensionFromXML(const XMLDoc& doc)
             string referenceTime = "forecast_reference_time";
             vector<string> nullShape;
             CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
-            boost::shared_ptr<Data> timeData = createData(timeDataType, 1);
+            DataPtr timeData = createData(timeDataType, 1);
             timeData->setValue(0, tu.posixTime2unitTime(*refTime));
             refTimeVar.setData(timeData);
             cdm_->addVariable(refTimeVar);
@@ -445,7 +445,7 @@ map<short, CDMDimension> FeltCDMReader2::initAddLevelDimensionsFromXML(const XML
         // read level data after! additional axis variables since additional axis variable might contain
         // data needed from level data (i.e. for hybrid_sigma levels)
         vector<double> lv = readValuesFromXPath(doc, xpathLevelString);
-        boost::shared_ptr<Data> data;
+        DataPtr data;
         if (lv.size() > 0) {
             // use values from xml-file
             data = createData(levelDataType, lv.begin(), lv.end());
@@ -665,7 +665,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
     }
 }
 
-boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) {
+DataPtr FeltCDMReader2::getDataSlice(const string& varName, size_t unLimDimPos) {
     LOG4FIMEX(logger, Logger::DEBUG, "reading var: "<< varName << " slice: " << unLimDimPos);
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
@@ -697,7 +697,7 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
             xy_size *= dim.getLength();
         }
     }
-    boost::shared_ptr<Data> data = createData(variable.getDataType(), xy_size);
+    DataPtr data = createData(variable.getDataType(), xy_size);
     try {
         map<string, string>::const_iterator foundId = varNameFeltIdMap.find(variable.getName());
         if (foundId != varNameFeltIdMap.end()) {
@@ -761,7 +761,7 @@ boost::shared_ptr<Data> FeltCDMReader2::getDataSlice(const string& varName, size
                     t = timeVec[unLimDimPos];
                 }
                 // read the slice
-                boost::shared_ptr<Data> levelData;
+                DataPtr levelData;
                 {
                     ScopedCritical lock(mutex_);
                     // level-data might be undefined, create a undefined slice then

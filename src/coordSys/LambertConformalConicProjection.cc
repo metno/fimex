@@ -55,7 +55,7 @@ std::vector<CDMAttribute> LambertConformalConicProjection::parametersFromProj4(c
         if (boost::regex_search(proj4Str, what, boost::regex("\\+lat_2=(\\S+)"))) {
             double lat2 = string2type<double>(what[1].str());
 
-            boost::shared_ptr<Data> stdParallels = createData(CDM_DOUBLE, 2);
+            DataPtr stdParallels = createData(CDM_DOUBLE, 2);
             stdParallels->setValue(0, lat1);
             stdParallels->setValue(1, lat2);
             attrs.push_back(CDMAttribute("standard_parallel", CDM_DOUBLE, stdParallels));
@@ -87,7 +87,7 @@ std::ostream& LambertConformalConicProjection::getProj4ProjectionPart(std::ostre
     std::vector<CDMAttribute>::const_iterator foundAttr = std::find_if(params_.begin(), params_.end(), CDMNameEqual("standard_parallel"));
     if (foundAttr != params_.end()) {
         // standard_parallel - There may be 1 or 2 values.
-        boost::shared_ptr<Data> spData = foundAttr->getData();
+        DataPtr spData = foundAttr->getData();
         oproj << " +lat_1=" << spData->asDouble()[0];
         if (spData->size() > 2) {
             oproj << " +lat_2=" << spData->asDouble()[1];

@@ -26,6 +26,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMDataType.h"
+#include "fimex/DataDecl.h"
 #include "MutexLock.h"
 extern "C" {
 #include "netcdf.h"
@@ -34,8 +35,6 @@ extern "C" {
 
 namespace MetNoFimex
 {
-// forward decl
-class Data;
 
 /// storage class for netcdf-file pointer
 class Nc {
@@ -78,7 +77,7 @@ void ncCheck(int status);
  * @param attName attribute name
  * @param type attribute datatype (in netcdf-notation)
  */
-boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type type);
+DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type type);
 /**
  * read value-slices from a variable to a data
  * @param ncId netcdf file id
@@ -88,7 +87,7 @@ boost::shared_ptr<Data> ncGetAttValues(int ncId, int varId, const std::string& a
  * @param start start-point for each dimension
  * @param count size in each dimension
  */
-boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
+DataPtr ncGetValues(int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
 
 /**
  * write value-slices from a variable to disk
@@ -100,7 +99,7 @@ boost::shared_ptr<Data> ncGetValues(int ncId, int varId, nc_type type, size_t di
  * @param start start-point for each dimension
  * @param count size in each dimension
  */
-void ncPutValues(boost::shared_ptr<Data> data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
+void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
 
 
 }
