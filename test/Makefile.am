@@ -4,6 +4,7 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
+             verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc
 
@@ -56,7 +57,7 @@ if HAVE_NETCDF
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
               testInterpolatorFill.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
-              testVerticalInterpolatorHeight.sh
+              testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}

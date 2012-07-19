@@ -41,7 +41,7 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@am__append_3 = ${NETCDF_MI_SH_TESTS} testCharNc.sh \
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh \
 @HAVE_NETCDF_TRUE@              testVerticalInterpolator.sh testVerticalInterpolator2.sh \
-@HAVE_NETCDF_TRUE@              testVerticalInterpolatorHeight.sh
+@HAVE_NETCDF_TRUE@              testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh
 
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_METGM_TRUE@am__append_5 = testMetGmReader ${METGM_NC_TESTS}
@@ -49,6 +49,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testVerticalInterpolator.sh.in \
 	$(srcdir)/testVerticalInterpolator2.sh.in \
 	$(srcdir)/testVerticalInterpolatorHeight.sh.in \
+	$(srcdir)/testVerticalInterpolatorOceanSG2ToDepth.sh.in \
 	$(srcdir)/wdb/make.mk
 @HAVE_LIBPQ_TRUE@am__append_6 = wdbTest
 @HAVE_LIBPQ_TRUE@am__append_7 = @BOOST_PROGRAM_OPTIONS_LIB@
@@ -79,7 +80,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = testVerticalInterpolator.sh \
-	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh
+	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh \
+	testVerticalInterpolatorOceanSG2ToDepth.sh
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_FELT_TRUE@am__EXEEXT_1 = testQualityExtractor$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_2 = testNetcdfWriter$(EXEEXT) \
@@ -335,7 +337,8 @@ red=; grn=; lgn=; blu=; std=
 @HAVE_NETCDF_TRUE@	testInterpolatorFill.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolator.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolator2.sh \
-@HAVE_NETCDF_TRUE@	testVerticalInterpolatorHeight.sh
+@HAVE_NETCDF_TRUE@	testVerticalInterpolatorHeight.sh \
+@HAVE_NETCDF_TRUE@	testVerticalInterpolatorOceanSG2ToDepth.sh
 am__EXEEXT_12 = $(am__EXEEXT_11)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -497,6 +500,7 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
+             verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc
 
@@ -609,6 +613,8 @@ testVerticalInterpolator.sh: $(top_builddir)/config.status $(srcdir)/testVertica
 testVerticalInterpolator2.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolator2.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testVerticalInterpolatorHeight.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorHeight.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testVerticalInterpolatorOceanSG2ToDepth.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorOceanSG2ToDepth.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:

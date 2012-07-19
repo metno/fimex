@@ -20059,6 +20059,8 @@ ac_config_files="$ac_config_files test/testVerticalInterpolator2.sh"
 
 ac_config_files="$ac_config_files test/testVerticalInterpolatorHeight.sh"
 
+ac_config_files="$ac_config_files test/testVerticalInterpolatorOceanSG2ToDepth.sh"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -21187,6 +21189,7 @@ do
     "test/testVerticalInterpolator.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator.sh" ;;
     "test/testVerticalInterpolator2.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator2.sh" ;;
     "test/testVerticalInterpolatorHeight.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorHeight.sh" ;;
+    "test/testVerticalInterpolatorOceanSG2ToDepth.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorOceanSG2ToDepth.sh" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -22666,6 +22669,7 @@ _LT_EOF
     "test/testVerticalInterpolator.sh":F) chmod +x test/testVerticalInterpolator.sh ;;
     "test/testVerticalInterpolator2.sh":F) chmod +x test/testVerticalInterpolator2.sh ;;
     "test/testVerticalInterpolatorHeight.sh":F) chmod +x test/testVerticalInterpolatorHeight.sh ;;
+    "test/testVerticalInterpolatorOceanSG2ToDepth.sh":F) chmod +x test/testVerticalInterpolatorOceanSG2ToDepth.sh ;;
 
   esac
 done # for ac_tag
