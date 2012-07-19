@@ -117,7 +117,8 @@ sub parseFile {
     require XML::LibXML::XPathContext;
 
     eval {
-        my $doc = XML::LibXML->load_xml(location => $file);
+        my $doc = XML::LibXML->load_xml(location => $file,
+                                        no_blanks => 1);
         my $xpc = XML::LibXML::XPathContext->new($doc);
         while (my ($prefix, $uri) = each %{NAMESPACES()}) {
             $xpc->registerNs($prefix, $uri);
