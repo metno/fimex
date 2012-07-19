@@ -33,6 +33,8 @@ extern "C" {
 #include <iostream>
 #include <boost/shared_array.hpp>
 #include <boost/scoped_array.hpp>
+#include <numeric>
+#include <functional>
 #include "fimex/mifi_constants.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataTypeChanger.h"
@@ -117,16 +119,23 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
 
     ncCheck(nc_inq_format(ncFile->ncId, &ncFile->format));
 #ifdef NC_NETCDF4
-    if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC))
+    if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC)) {
         if ((ncVersion & NC_CLASSIC_MODEL) != 0) {
             LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format, classic mode");
         } else {
             LOG4FIMEX(logger, Logger::DEBUG, "netcdf4 format");
         }
-    else
+    } else
 #endif
     LOG4FIMEX(logger, Logger::DEBUG, "netcdf3 format");
-
+    if (ncFile->format < 3) {
+        /*
+         *  using nofill for netcdf3 (2times io)
+         *  doesn't effect netcdf4
+         */
+        int oldFill;
+        nc_set_fill(ncFile->ncId, NC_NOFILL, &oldFill);
+    }
     initNcmlReader(doc);
     initRemove(doc);
     // variable needs to be called before dimension!!!
@@ -463,10 +472,10 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
         DataTypeChanger dtc(cdmVar.getDataType());
         if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
             (variableTypeChanges[varName] != CDM_NAT)) {
-            double oldFill = getOldAttribute(varName, "_FillValue", MIFI_UNDEFINED_D);
+            double oldFill = cdmReader->getCDM().getFillValue(varName);
             double oldScale = getOldAttribute(varName, "scale_factor", 1.);
             double oldOffset = getOldAttribute(varName, "add_offset", 0.);
-            double newFill = getNewAttribute(varName, "_FillValue", MIFI_UNDEFINED_D);
+            double newFill = cdm.getFillValue(varName);
             double newScale = getNewAttribute(varName, "scale_factor", 1.);
             double newOffset = getNewAttribute(varName, "add_offset", 0.);
 
@@ -512,6 +521,13 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
             } catch (CDMException& e) {
                 throw CDMException("problems converting data of var " + varName + ": " + e.what());
             }
+            if (data->size() == 0 && ncFile->format < 3) {
+                // need to write data with _FillValue,
+                // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
+                size_t size = (dimLen > 0) ? std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>()) : 1;
+                data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
+            }
+
             if (data->size() > 0) {
                 try {
                     ScopedCritical lock(writerMutex);
@@ -536,6 +552,12 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     data = dtc.convertData(data);
                 } catch (CDMException& e) {
                     throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
+                }
+                if (data->size() == 0 && ncFile->format < 3) {
+                    // need to write data with _FillValue,
+                    // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
+                    size_t size = (dimLen > 0) ? std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>()) : 1;
+                    data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
                 }
                 // unlim-dim is in position 0
                 if (data->size() > 0) {
