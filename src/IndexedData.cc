@@ -26,7 +26,7 @@
 
 #include "fimex/IndexedData.h"
 #include "fimex/Data.h"
-#include "fimex/Index.h"
+#include "fimex/DataIndex.h"
 #include <numeric>
 #include <functional>
 #include "fimex/CDMDataType.h"
@@ -37,7 +37,7 @@ namespace MetNoFimex
 class IndexedDataImpl {
 public:
     DataPtr data;
-    Index idx;
+    DataIndex idx;
 };
 
 IndexedData::IndexedData()
@@ -64,9 +64,9 @@ void IndexedData::setDims(std::vector<std::size_t> dims)
 {
     std::size_t size = std::accumulate(&dims[0], &dims[dims.size()], 1, std::multiplies<size_t>());
     if (size == p_->data->size()) {
-        p_->idx = Index(dims);
+        p_->idx = DataIndex(dims);
     } else if (p_->data->size() == 0) {
-        p_->idx = Index(std::vector<size_t>(0));
+        p_->idx = DataIndex(std::vector<size_t>(0));
     } else {
         throw std::runtime_error("setDims error: dims.size != data.size: " + type2string(size) + " != " + type2string(p_->data->size()));
     }
@@ -77,7 +77,7 @@ DataPtr IndexedData::getDataPtr() const
     return p_->data;
 }
 
-const Index& IndexedData::idx() const
+const DataIndex& IndexedData::idx() const
 {
     return p_->idx;
 }

@@ -29,7 +29,7 @@
 
 #include <vector>
 #include "fimex/DataDecl.h"
-#include "fimex/Index.h"
+#include "fimex/DataIndex.h"
 
 namespace MetNoFimex
 {
@@ -62,7 +62,7 @@ public:
      *
      *  @return a Index belonging to the data
      */
-    const Index& idx() const;
+    const DataIndex& idx() const;
     /**
      * @return the internal data
      */

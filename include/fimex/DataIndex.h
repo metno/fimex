@@ -1,5 +1,5 @@
 /*
- * Fimex, Index.h
+ * Fimex, DataIndex.h
  *
  * (C) Copyright 2012, met.no
  *
@@ -24,27 +24,29 @@
  *      Author: Heiko Klein
  */
 
-#ifndef INDEX_H_
-#define INDEX_H_
+#ifndef DATAINDEX_H_
+#define DATAINDEX_H_
 
 #include <vector>
 
 namespace MetNoFimex
 {
 
-class Index
+
+class DataIndex
 {
 private:
+    static const size_t MIN_DIMS = 10;
     std::vector<std::size_t> dims_;
     std::vector<std::size_t> slices_;
 public:
-    Index() : dims_(0), slices_(5, 0) {}
+    DataIndex() : dims_(0), slices_(MIN_DIMS, 0) {}
     /**
      *  Creates an index for an array with applied dimSizes. The first
      *  dimension is the fastest moving (fortran-array style).
      */
-    explicit Index(std::vector<std::size_t> dimSizes);
-    ~Index();
+    explicit DataIndex(std::vector<std::size_t> dimSizes);
+    ~DataIndex();
     /**
      * @return a vector with all dimension sizes
      */
@@ -53,7 +55,7 @@ public:
      * The position named by pos. Uses 0 for all dimensions >= pos.size()
      * @param pos
      * @return position within the array
-     * @throws out_of_range Exception if pos.size() > getDims().size()
+     * @throws out_of_range Exception if pos.size() > max(getDims().size(), 10)
      */
     size_t getPos(std::vector<size_t> pos) const {size_t p = 0; for (size_t i = 0; i < pos.size(); ++i) {p += pos.at(i) * slices_.at(i);} return p;}
     size_t getPos(size_t a) const {return a;}
@@ -64,4 +66,4 @@ public:
 };
 
 } /* namespace MetNoFimex */
-#endif /* INDEX_H_ */
+#endif /* DATAINDEX_H_ */

@@ -207,9 +207,9 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
-	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
-	FeltParameters.h FeltParameters.cc GridDefinition.cc Index.cc \
+	FeltParameters.h FeltParameters.cc GridDefinition.cc \
 	IndexedData.cc Logger.cc MutexLock.h NcmlCDMReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
@@ -321,15 +321,15 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	RotatedLatitudeLongitudeProjection.lo \
 	StereographicProjection.lo TransverseMercatorProjection.lo \
 	VerticalPerspectiveProjection.lo UnknownToFgdcProjection.lo \
-	Data.lo DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
-	Felt_File2.lo FeltParameters.lo GridDefinition.lo Index.lo \
-	IndexedData.lo Logger.lo NcmlCDMReader.lo Null_CDMWriter.lo \
-	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
-	SpatialAxisSpec.lo SliceBuilder.lo ThreadPool.lo TimeUnit.lo \
-	TimeSpec.lo ToVLevelConverter.lo Units.lo Utils.lo \
-	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
+	Data.lo DataIndex.lo DataTypeChanger.lo Felt_Array2.lo \
+	FeltCDMReader2.lo Felt_File2.lo FeltParameters.lo \
+	GridDefinition.lo IndexedData.lo Logger.lo NcmlCDMReader.lo \
+	Null_CDMWriter.lo ReplaceStringObject.lo \
+	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
+	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
+	Units.lo Utils.lo vertical_coordinate_transformations.lo \
+	XMLDoc.lo XMLInput.lo $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) $(am__objects_4)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -597,9 +597,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
-	DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
-	FeltParameters.h FeltParameters.cc GridDefinition.cc Index.cc \
+	FeltParameters.h FeltParameters.cc GridDefinition.cc \
 	IndexedData.cc Logger.cc MutexLock.h NcmlCDMReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
@@ -711,6 +711,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystemSliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataSanitizer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataSummary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Plo@am__quote@
@@ -730,7 +731,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridInformation.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Index.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IndexedData.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
