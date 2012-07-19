@@ -144,6 +144,7 @@ AC_CONFIG_FILES([fimex.pc
                  include/fimex/coordSys/Makefile
                  include/felt/Makefile
                  include/nanoflann/Makefile])
+AC_CONFIG_FILES([test/testCharNc.sh],[chmod +x test/testCharNc.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolator.sh],[chmod +x test/testVerticalInterpolator.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolator2.sh],[chmod +x test/testVerticalInterpolator2.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolatorHeight.sh],[chmod +x test/testVerticalInterpolatorHeight.sh])

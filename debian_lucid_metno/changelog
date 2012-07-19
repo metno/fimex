@@ -1,3 +1,9 @@
+fimex (0.38-1) lucid; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Thu, 19 Jul 2012 13:53:00 +0200
+
 fimex (0.37.3-1) lucid; urgency=low
 
   * initial upload

@@ -20053,6 +20053,8 @@ ac_config_headers="$ac_config_headers config.h"
 
 ac_config_files="$ac_config_files fimex.pc Doxyfile Makefile src/Makefile src/felt/Makefile src/binSrc/Makefile test/Makefile share/etc/Makefile include/Makefile include/fimex/Makefile include/fimex/coordSys/Makefile include/felt/Makefile include/nanoflann/Makefile"
 
+ac_config_files="$ac_config_files test/testCharNc.sh"
+
 ac_config_files="$ac_config_files test/testVerticalInterpolator.sh"
 
 ac_config_files="$ac_config_files test/testVerticalInterpolator2.sh"
@@ -21186,6 +21188,7 @@ do
     "include/fimex/coordSys/Makefile") CONFIG_FILES="$CONFIG_FILES include/fimex/coordSys/Makefile" ;;
     "include/felt/Makefile") CONFIG_FILES="$CONFIG_FILES include/felt/Makefile" ;;
     "include/nanoflann/Makefile") CONFIG_FILES="$CONFIG_FILES include/nanoflann/Makefile" ;;
+    "test/testCharNc.sh") CONFIG_FILES="$CONFIG_FILES test/testCharNc.sh" ;;
     "test/testVerticalInterpolator.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator.sh" ;;
     "test/testVerticalInterpolator2.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolator2.sh" ;;
     "test/testVerticalInterpolatorHeight.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorHeight.sh" ;;
@@ -22666,6 +22669,7 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 _LT_EOF
 
  ;;
+    "test/testCharNc.sh":F) chmod +x test/testCharNc.sh ;;
     "test/testVerticalInterpolator.sh":F) chmod +x test/testVerticalInterpolator.sh ;;
     "test/testVerticalInterpolator2.sh":F) chmod +x test/testVerticalInterpolator2.sh ;;
     "test/testVerticalInterpolatorHeight.sh":F) chmod +x test/testVerticalInterpolatorHeight.sh ;;
