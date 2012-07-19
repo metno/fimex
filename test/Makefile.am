@@ -1,6 +1,6 @@
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              felt2nc_variables_level1000.xml \
-             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc\
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \

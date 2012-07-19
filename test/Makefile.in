@@ -46,6 +46,7 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_METGM_TRUE@am__append_5 = testMetGmReader ${METGM_NC_TESTS}
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/testCharNc.sh.in \
 	$(srcdir)/testVerticalInterpolator.sh.in \
 	$(srcdir)/testVerticalInterpolator2.sh.in \
 	$(srcdir)/testVerticalInterpolatorHeight.sh.in \
@@ -79,7 +80,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = testVerticalInterpolator.sh \
+CONFIG_CLEAN_FILES = testCharNc.sh testVerticalInterpolator.sh \
 	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh \
 	testVerticalInterpolatorOceanSG2ToDepth.sh
 CONFIG_CLEAN_VPATH_FILES =
@@ -496,7 +497,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              felt2nc_variables_level1000.xml \
-             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc\
+             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
@@ -608,6 +609,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+testCharNc.sh: $(top_builddir)/config.status $(srcdir)/testCharNc.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testVerticalInterpolator.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolator.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testVerticalInterpolator2.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolator2.sh.in
