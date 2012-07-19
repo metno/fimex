@@ -556,7 +556,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                 if (data->size() == 0 && ncFile->format < 3) {
                     // need to write data with _FillValue,
                     // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
-                    size_t size = (dimLen > 0) ? std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>()) : 1;
+                    count[0] = 1; // just one slice
+                    size_t size = (dimLen == 0) ? 1 : std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
                     data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
                 }
                 // unlim-dim is in position 0

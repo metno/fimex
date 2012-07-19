@@ -1,3 +1,9 @@
+  * 2012-07-19 fimex-0.38
+    * 2x improved output-performance to netcdf3 files
+    * support for ocean_s_coordinate_g1 and *_g2
+    * adding IndexedData for convenience
+    * introducing DataPtr typedef instead of boost::shared_ptr<Data>
+    * adding fiConfigOverview.pl script to simplify configuration
   * 2012-07-05 fimex-0.37.4
     * fixing netcdf-files with 0-terminated strings
     * felt: using undefined-values for undefined levels
