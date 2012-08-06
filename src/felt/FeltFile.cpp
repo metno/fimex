@@ -26,6 +26,7 @@
  MA  02110-1301, USA
  */
 
+#include "../../config.h"
 #include "felt/FeltFile.h"
 #include "felt/FeltTypeConversion.h"
 #include "felt/FeltField.h"
@@ -33,8 +34,16 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <stdexcept>
 #include <iostream>
+#if 0
+// TODO this does not work on 32bit with files larger 2GB (size_type = int?)
+// TODO test with 64bit OS
+//#ifdef HAVE_BOOST_IOSTREAMS
+#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/stream.hpp>
+#endif
+#include <stdexcept>
 #include <iterator>
 #include <sstream>
 
@@ -46,41 +55,52 @@ namespace felt
 {
 
 FeltFile::FeltFile(const path & file)
-	: fileName_(file), changeEndianness_(false)
+    : fileName_(file), changeEndianness_(false)
 {
-	if ( ! exists(file) )
-		throw runtime_error("Cannot find file " + file.native_file_string() );
-	if ( is_directory(file) )
-		throw runtime_error(file.native_directory_string() + " is a directory, not a file");
+    if ( ! exists(file) )
+        throw runtime_error("Cannot find file " + file.native_file_string() );
+    if ( is_directory(file) )
+        throw runtime_error(file.native_directory_string() + " is a directory, not a file");
 
-	string fileName = file.native_file_string();
-	feltFile_ = new boost::filesystem::ifstream(file, std::ios::binary);
+    string fileName = file.native_file_string();
+#if 0
+// fails on large files, maybe due to 32bit restrictions?
+//#ifdef HAVE_BOOST_IOSTREAMS
+    {
+        using namespace boost::iostreams;
+        typedef stream<mapped_file_source> mmStream;
+        mmStream* mmistream = new mmStream();
+        mmistream->open(mapped_file_source(fileName));
+        feltFile_ = mmistream;
+    }
+#else
+    feltFile_ = new boost::filesystem::ifstream(file, std::ios::binary);
+#endif
+    word head;
+    feltFile_->read(reinterpret_cast<char*>(& head), sizeof(word));
+    if ( head < 997 or 999 < head )
+        changeEndianness_ = true;
 
-	word head;
-	feltFile_->read(reinterpret_cast<char*>(& head), sizeof(word));
-	if ( head < 997 or 999 < head )
-		changeEndianness_ = true;
+    // Block 1
+    block1_ = getBlock_(0);
 
-	// Block 1
-	block1_ = getBlock_(0);
+    if ( not complete() )
+        throw std::runtime_error("File update is not complete yet");
 
-	if ( not complete() )
-		throw std::runtime_error("File update is not complete yet");
-
-	const size_t fieldCount = block1_[9];
-	fields_.reserve(fieldCount);
-	int i = 0;
-	while ( fields_.size() < fieldCount )
-	{
-		boost::shared_ptr<FeltField> f(new FeltField(*this, i ++));
-		if ( f->valid() )
-			fields_.push_back(f);
-	}
+    const size_t fieldCount = block1_[9];
+    fields_.reserve(fieldCount);
+    int i = 0;
+    while ( fields_.size() < fieldCount )
+    {
+        boost::shared_ptr<FeltField> f(new FeltField(*this, i ++));
+        if ( f->valid() )
+            fields_.push_back(f);
+    }
 }
 
 FeltFile::~FeltFile()
 {
-	delete feltFile_;
+    delete feltFile_;
 }
 
 // simple logging
@@ -108,121 +128,121 @@ void FeltFile::log(const std::string& message)
 
 FeltFile::size_type FeltFile::size() const
 {
-	return fields_.size();
+    return fields_.size();
 }
 
 
 std::string FeltFile::information() const
 {
-	std::ostringstream cont;
-	cont << "File type\t\t" << block1_[0] << "\n";
-	cont << "Time a\t\t\t" << lastUpdateTime() << "\n";
-	cont << "Time b\t\t\t" << referenceTime() << "\n";
-	cont << "M\t\t\t" << block1_[7] << "\n";
-	cont << "N\t\t\t" << block1_[8] << "\n";
-	cont << "K\t\t\t" << block1_[9] << "\n";
-	cont << "L\t\t\t" << block1_[10] << "\n";
-	cont << "MX\t\t\t" << block1_[11] << "\n";
-	cont << "Last word last block\t" << block1_[12] << "\n";
-	cont << "storage type\t\t" << block1_[13] << "\n";
-	cont << "Update status\t\t" << block1_[14] << "\n";
-	cont << "Arch time a\t\t" << firstTime() << "\n";
-	cont << "Arch time b\t\t" << lastTime() << "\n";
-	cont << "Termins\t\t\t" << block1_[25] << "\n";
-	cont << "Indexes/term\t\t" << block1_[26] << "\n";
-	cont << "Producer\t\t" << block1_[27] << "\n";
-	cont << "Time unit\t\t" << block1_[28] << "\n";
-	cont << "Time resolution\t\t" << block1_[29] << "\n";
+    std::ostringstream cont;
+    cont << "File type\t\t" << block1_[0] << "\n";
+    cont << "Time a\t\t\t" << lastUpdateTime() << "\n";
+    cont << "Time b\t\t\t" << referenceTime() << "\n";
+    cont << "M\t\t\t" << block1_[7] << "\n";
+    cont << "N\t\t\t" << block1_[8] << "\n";
+    cont << "K\t\t\t" << block1_[9] << "\n";
+    cont << "L\t\t\t" << block1_[10] << "\n";
+    cont << "MX\t\t\t" << block1_[11] << "\n";
+    cont << "Last word last block\t" << block1_[12] << "\n";
+    cont << "storage type\t\t" << block1_[13] << "\n";
+    cont << "Update status\t\t" << block1_[14] << "\n";
+    cont << "Arch time a\t\t" << firstTime() << "\n";
+    cont << "Arch time b\t\t" << lastTime() << "\n";
+    cont << "Termins\t\t\t" << block1_[25] << "\n";
+    cont << "Indexes/term\t\t" << block1_[26] << "\n";
+    cont << "Producer\t\t" << block1_[27] << "\n";
+    cont << "Time unit\t\t" << block1_[28] << "\n";
+    cont << "Time resolution\t\t" << block1_[29] << "\n";
 
-	return cont.str();
+    return cont.str();
 }
 
 boost::posix_time::ptime FeltFile::lastUpdateTime() const
 {
-	return parseTimeNoThrow(block1_.get() +1);
+    return parseTimeNoThrow(block1_.get() +1);
 }
 
 boost::posix_time::ptime FeltFile::referenceTime() const
 {
-	return parseTimeNoThrow(block1_.get() +4);
+    return parseTimeNoThrow(block1_.get() +4);
 }
 
 boost::posix_time::ptime FeltFile::firstTime() const
 {
-	return parseTimeNoThrow(block1_.get() +19);
+    return parseTimeNoThrow(block1_.get() +19);
 }
 
 boost::posix_time::ptime FeltFile::lastTime() const
 {
-	return parseTimeNoThrow(block1_.get() +22);
+    return parseTimeNoThrow(block1_.get() +22);
 }
 
 FeltFile::iterator FeltFile::begin()
 {
-	return fields_.begin();
+    return fields_.begin();
 }
 
 FeltFile::iterator FeltFile::end()
 {
-	return fields_.end();
+    return fields_.end();
 }
 
 FeltFile::const_iterator FeltFile::begin() const
 {
-	return fields_.begin();
+    return fields_.begin();
 }
 
 FeltFile::const_iterator FeltFile::end() const
 {
-	return fields_.end();
+    return fields_.end();
 }
 
 bool FeltFile::complete() const
 {
-	felt::word updateInProgress = block1_[14];
-	// expected value is 0 or 1
-	return not updateInProgress;
+    felt::word updateInProgress = block1_[14];
+    // expected value is 0 or 1
+    return not updateInProgress;
 }
 
 namespace
 {
 void swapByteOrder(word & w)
 {
-	char * wBytes = (char*) & w;
-	std::swap(wBytes[0], wBytes[1]);
+    char * wBytes = (char*) & w;
+    std::swap(wBytes[0], wBytes[1]);
 }
 
 }
 
 FeltFile::Block FeltFile::getBlock_(size_type blockNo) const
 {
-	Block ret(new word[blockWords]);
+    Block ret(new word[blockWords]);
 
-	long long pos = static_cast<long long>(blockNo) * blockWords * sizeof(word);
-	feltFile_->seekg(pos, ios_base::beg);
-	feltFile_->read((char*) ret.get(), blockWords * sizeof(word));
-	if ( changeEndianness_ )
-		for_each(ret.get(), ret.get() + blockWords, swapByteOrder);
+    long long pos = static_cast<long long>(blockNo) * blockWords * sizeof(word);
+    feltFile_->seekg(pos, ios_base::beg);
+    feltFile_->read((char*) ret.get(), blockWords * sizeof(word));
+    if ( changeEndianness_ )
+        for_each(ret.get(), ret.get() + blockWords, swapByteOrder);
 
-	return ret;
+    return ret;
 
 }
 
 void FeltFile::get_(std::vector<word> & out, size_type fromWord, size_type noOfWords) const
 {
-	out.resize(noOfWords);
-	// this will allow up to 8.4GB (size_t = 4.2G * word=2)
+    out.resize(noOfWords);
+    // this will allow up to 8.4GB (size_t = 4.2G * word=2)
     unsigned long long pos = static_cast<unsigned long long>(fromWord) * sizeof(word);
-	feltFile_->seekg(pos, ios_base::beg);
-	feltFile_->read((char*) & out[0], noOfWords * sizeof(word));
-	if ( changeEndianness_ )
-		for_each(out.begin(), out.end(), swapByteOrder);
+    feltFile_->seekg(pos, ios_base::beg);
+    feltFile_->read((char*) & out[0], noOfWords * sizeof(word));
+    if ( changeEndianness_ )
+        for_each(out.begin(), out.end(), swapByteOrder);
 }
 
 
 const FeltField & FeltFile::at(size_t idx) const
 {
-	return * fields_.at(idx);
+    return * fields_.at(idx);
 }
 
 }
