@@ -51,77 +51,77 @@ namespace felt
 class FeltFile : boost::noncopyable
 {
 public:
-	explicit FeltFile(const boost::filesystem::path & file);
-	~FeltFile();
+    explicit FeltFile(const boost::filesystem::path & file);
+    ~FeltFile();
 
-	typedef size_t size_type;
-	size_type size() const;
-	bool empty() const { return size() == 0; }
+    typedef size_t size_type;
+    size_type size() const;
+    bool empty() const { return size() == 0; }
 
-	const boost::filesystem::path & fileName() const { return fileName_; }
+    const boost::filesystem::path & fileName() const { return fileName_; }
 
-	std::string information() const;
+    std::string information() const;
 
-	boost::posix_time::ptime lastUpdateTime() const;
-	boost::posix_time::ptime referenceTime() const;
-	boost::posix_time::ptime firstTime() const;
-	boost::posix_time::ptime lastTime() const;
+    boost::posix_time::ptime lastUpdateTime() const;
+    boost::posix_time::ptime referenceTime() const;
+    boost::posix_time::ptime firstTime() const;
+    boost::posix_time::ptime lastTime() const;
 
-	typedef boost::shared_ptr<FeltField> FeltFieldPtr;
+    typedef boost::shared_ptr<FeltField> FeltFieldPtr;
 
-	typedef std::vector<FeltFieldPtr>::const_iterator iterator;
+    typedef std::vector<FeltFieldPtr>::const_iterator iterator;
 //	class iterator;
-	iterator begin();
-	iterator end();
+    iterator begin();
+    iterator end();
 
-	typedef iterator const_iterator;
-	const_iterator begin() const;
-	const_iterator end() const;
+    typedef iterator const_iterator;
+    const_iterator begin() const;
+    const_iterator end() const;
 
     /// throws std::out_of_range if idx is too large.
-	const FeltField & at(size_t idx) const;
+    const FeltField & at(size_t idx) const;
 
 
 
-	// simple log facility
-	static void log(const std::string& msg);
-	static void setLogStream(std::ostream& o);
-	static void setLogging(bool enableLogging);
-	static bool isLogging();
+    // simple log facility
+    static void log(const std::string& msg);
+    static void setLogStream(std::ostream& o);
+    static void setLogging(bool enableLogging);
+    static bool isLogging();
 private:
 
-	/// Is the "not ready yet" flag set to false?
-	bool complete() const;
+    /// Is the "not ready yet" flag set to false?
+    bool complete() const;
 
-	typedef boost::shared_array<word> Block;
+    typedef boost::shared_array<word> Block;
 
-	Block getBlock_(size_type blockNo) const;
+    Block getBlock_(size_type blockNo) const;
 
-	/**
-	 * Read data from file
-	 *
-	 * @param out storage for returned data
-	 * @param fromWord index of the word to be read, as a number of words (not bytes)
-	 * @param noOfWords how much to read
-	 */
-	void get_(std::vector<word> & out, size_type fromWord, size_type noOfWords) const;
+    /**
+     * Read data from file
+     *
+     * @param out storage for returned data
+     * @param fromWord index of the word to be read, as a number of words (not bytes)
+     * @param noOfWords how much to read
+     */
+    void get_(std::vector<word> & out, size_type fromWord, size_type noOfWords) const;
 
-	const boost::filesystem::path fileName_;
+    const boost::filesystem::path fileName_;
 
-	/**
-	 * Should we swap the two bytes that make up a word before trying to
-	 * interpret them?
-	 */
-	bool changeEndianness_;
+    /**
+     * Should we swap the two bytes that make up a word before trying to
+     * interpret them?
+     */
+    bool changeEndianness_;
 
-	Block block1_;
+    Block block1_;
 
-	typedef std::vector<FeltFieldPtr> Fields;
-	mutable Fields fields_;
+    typedef std::vector<FeltFieldPtr> Fields;
+    mutable Fields fields_;
 
-	mutable std::istream * feltFile_;
+    mutable std::istream * feltFile_;
 
-	friend class FeltField;
+    friend class FeltField;
 //	friend class iterator;
 };
 

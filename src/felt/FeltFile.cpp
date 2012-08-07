@@ -35,14 +35,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <iostream>
-#if 0
-// TODO this does not work on 32bit with files larger 2GB (size_type = int?)
-// TODO test with 64bit OS
-//#ifdef HAVE_BOOST_IOSTREAMS
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
-#endif
 #include <stdexcept>
 #include <iterator>
 #include <sstream>
@@ -63,19 +55,7 @@ FeltFile::FeltFile(const path & file)
         throw runtime_error(file.native_directory_string() + " is a directory, not a file");
 
     string fileName = file.native_file_string();
-#if 0
-// fails on large files, maybe due to 32bit restrictions?
-//#ifdef HAVE_BOOST_IOSTREAMS
-    {
-        using namespace boost::iostreams;
-        typedef stream<mapped_file_source> mmStream;
-        mmStream* mmistream = new mmStream();
-        mmistream->open(mapped_file_source(fileName));
-        feltFile_ = mmistream;
-    }
-#else
     feltFile_ = new boost::filesystem::ifstream(file, std::ios::binary);
-#endif
     word head;
     feltFile_->read(reinterpret_cast<char*>(& head), sizeof(word));
     if ( head < 997 or 999 < head )
