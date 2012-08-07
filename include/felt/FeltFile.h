@@ -29,8 +29,6 @@
 #ifndef FELTFILE_H_
 #define FELTFILE_H_
 
-#define BOOST_FILESYSTEM_VERSION 2
-
 #include "FeltConstants.h"
 #include "FeltTypes.h"
 #include <boost/shared_ptr.hpp>

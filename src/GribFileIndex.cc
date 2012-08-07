@@ -51,7 +51,11 @@ namespace boost {
 }
 std::string file_string(boost::filesystem::path p) { return p.native_file_string(); }
 #else
+#if BOOST_FILESYSTEM_VERSION == 3
+std::string file_string(boost::filesystem::path p) { return p.string(); }
+#else
 std::string file_string(boost::filesystem::path p) { return p.file_string(); }
+#endif
 #endif
 
 namespace MetNoFimex

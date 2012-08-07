@@ -30,7 +30,6 @@
 #define WDBCONFIGURATION_H_
 
 #include "../database_access/WciReadQuerySpecification.h"
-#define BOOST_FILESYSTEM_VERSION 2
 #include <boost/filesystem/path.hpp>
 #include <iosfwd>
 
@@ -47,42 +46,42 @@ namespace wdb
 class WdbConfiguration
 {
 public:
-	/**
-	 * Initialize with data read from the given file.
-	 *
-	 * @throws CDMException on error
-	 */
-	explicit WdbConfiguration(const std::string & configFile);
+    /**
+     * Initialize with data read from the given file.
+     *
+     * @throws CDMException on error
+     */
+    explicit WdbConfiguration(const std::string & configFile);
 
-	~WdbConfiguration();
+    ~WdbConfiguration();
 
-	/**
-	 * Get a libpq-compatible string for connecting to a wdb database
-	 */
-	std::string pqDatabaseConnectString() const;
+    /**
+     * Get a libpq-compatible string for connecting to a wdb database
+     */
+    std::string pqDatabaseConnectString() const;
 
-	/**
-	 * username for wci call
-	 */
-	const std::string & wciUser() const;
+    /**
+     * username for wci call
+     */
+    const std::string & wciUser() const;
 
-	/**
-	 * Get a specification for what wci.read query to perform on the database.
-	 */
-	const WciReadQuerySpecification & query() const { return querySpec_; }
+    /**
+     * Get a specification for what wci.read query to perform on the database.
+     */
+    const WciReadQuerySpecification & query() const { return querySpec_; }
 
 private:
-	void init_(const boost::filesystem::path & configFile);
-	void init_(const std::string & configSpec);
+    void init_(const boost::filesystem::path & configFile);
+    void init_(const std::string & configSpec);
 
-	std::string database_;
-	std::string host_;
-	int port_;
-	std::string user_;
+    std::string database_;
+    std::string host_;
+    int port_;
+    std::string user_;
 
-	std::string wciUser_;
+    std::string wciUser_;
 
-	WciReadQuerySpecification querySpec_;
+    WciReadQuerySpecification querySpec_;
 };
 
 }

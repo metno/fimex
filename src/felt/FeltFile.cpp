@@ -49,12 +49,25 @@ namespace felt
 FeltFile::FeltFile(const path & file)
     : fileName_(file), changeEndianness_(false)
 {
-    if ( ! exists(file) )
-        throw runtime_error("Cannot find file " + file.native_file_string() );
-    if ( is_directory(file) )
-        throw runtime_error(file.native_directory_string() + " is a directory, not a file");
+    string fileName;
+#if BOOST_FILESYSTEM_VERSION == 3
+        fileName = file.string();
+#else
+        fileName = file.native_file_string();
+#endif
+    if ( ! exists(file) ) {
+        throw runtime_error("Cannot find file " + fileName );
+    }
+    if ( is_directory(file) ) {
+        string dirName;
+#if BOOST_FILESYSTEM_VERSION == 3
+        dirName = file.string();
+#else
+        dirName = file.native_directory_string();
+#endif
+        throw runtime_error(dirName + " is a directory, not a file");
+    }
 
-    string fileName = file.native_file_string();
     feltFile_ = new boost::filesystem::ifstream(file, std::ios::binary);
     word head;
     feltFile_->read(reinterpret_cast<char*>(& head), sizeof(word));

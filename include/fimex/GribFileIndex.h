@@ -27,8 +27,6 @@
 #ifndef GRIBFILEINDEX_H_
 #define GRIBFILEINDEX_H_
 
-#define BOOST_FILESYSTEM_VERSION 2
-
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <vector>
