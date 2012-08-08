@@ -103,7 +103,12 @@ main(int argc, char* args[])
             return 1;
         }
     }
-    std::string filename = fullInput.leaf();
+    std::string filename;
+#if BOOST_FILESYSTEM_VERSION == 3
+    filename = fullInput.filename().string();
+#else
+    filename = fullInput.leaf();
+#endif
     fs::path outFile = outDir / (filename + ".grbml");
 
     bool forceUpdate = false;

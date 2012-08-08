@@ -183,7 +183,13 @@ std::vector<T> values(const XMLDoc & document, const std::string & path)
 
 void WdbConfiguration::init_(const boost::filesystem::path & configFile)
 {
-    XMLDoc document(configFile.file_string());
+    std::string fileName;
+#if BOOST_FILESYSTEM_VERSION == 3
+    fileName = configFile.string();
+#else
+    fileName = configFile.file_string();
+#endif
+    XMLDoc document(fileName);
 
     std::string connection = "//wdb_query/connection/";
 

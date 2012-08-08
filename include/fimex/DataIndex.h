@@ -36,7 +36,7 @@ namespace MetNoFimex
 class DataIndex
 {
 private:
-    static const size_t MIN_DIMS = 10;
+    static const std::size_t MIN_DIMS = 10;
     std::vector<std::size_t> dims_;
     std::vector<std::size_t> slices_;
 public:
@@ -57,11 +57,11 @@ public:
      * @return position within the array
      * @throws out_of_range Exception if pos.size() > max(getDims().size(), 10)
      */
-    size_t getPos(std::vector<size_t> pos) const {size_t p = 0; for (size_t i = 0; i < pos.size(); ++i) {p += pos.at(i) * slices_.at(i);} return p;}
-    size_t getPos(size_t a) const {return a;}
-    size_t getPos(size_t a, size_t b) const {return a + b*slices_.at(1);}
-    size_t getPos(size_t a, size_t b, size_t c) const {return a + b*slices_.at(1) + c*slices_.at(2);}
-    size_t getPos(size_t a, size_t b, size_t c, size_t d) const {return a + b*slices_.at(1) + c*slices_.at(2) + d*slices_.at(3);}
+    std::size_t getPos(std::vector<std::size_t> pos) const {std::size_t p = 0; for (std::size_t i = 0; i < pos.size(); ++i) {p += pos.at(i) * slices_.at(i);} return p;}
+    std::size_t getPos(std::size_t a) const {return a;}
+    std::size_t getPos(std::size_t a, std::size_t b) const {return a + b*slices_.at(1);}
+    std::size_t getPos(std::size_t a, std::size_t b, std::size_t c) const {return a + b*slices_.at(1) + c*slices_.at(2);}
+    std::size_t getPos(std::size_t a, std::size_t b, std::size_t c, std::size_t d) const {return a + b*slices_.at(1) + c*slices_.at(2) + d*slices_.at(3);}
 
 };
 

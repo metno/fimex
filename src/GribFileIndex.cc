@@ -815,7 +815,11 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
         initByGrib(gribFilePath);
     } else {
         // find gribml-file younger than original file
+#if BOOST_FILESYSTEM_VERSION == 3
+        std::string filename = gribFilePath.filename().string();
+#else
         std::string filename = gribFilePath.leaf();
+#endif
         fs::path xmlDir = gribFilePath.branch_path();
         fs::path xmlFile = xmlDir / (filename + ".grbml");
         if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
