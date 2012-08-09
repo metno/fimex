@@ -25,7 +25,7 @@ Description: library for geo-spatial gridded data
 Package: fimex-bin
 Section: science
 Architecture: i386 amd64 ia64 powerpc
-Depends: ${shlibs:Depends}${misc:Depends}, libfimex-0.25.1-0 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfimex-0.25.1-0 (= ${binary:Version})
 Description: command line utility for geo-spatial gridded data
  The program fimex is a program for File Interpolations, Manipulations and
  EXtraction of gridded geo-spatial data.
