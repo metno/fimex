@@ -80,7 +80,7 @@ build-stamp:  config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
-
+	
 	touch $@
 
 clean:
@@ -102,6 +102,8 @@ install: build
 
 	# Add here commands to install the package into debian/tmp
 	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+	# remove dependencies in .la files, required by lintian
+	sed -i "/dependency_libs/ s/'.*'/''/" `find $(CURDIR)/debian/tmp -name '*.la'`
 
 
 # Build architecture-independent files here.

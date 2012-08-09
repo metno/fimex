@@ -6,12 +6,12 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DDATADIR="\"$(d
 
 bin_PROGRAMS = fimex
 fimex_SOURCES = fimex.cc
-fimex_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@
+fimex_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@
 
 if HAVE_GRIBAPI
   bin_PROGRAMS += fiIndexGribs fiGribCut
   fiIndexGribs_SOURCES = fiIndexGribs.cc
-  fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@
+  fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
   fiGribCut_SOURCES = fiGribCut.cc
-  fiGribCut_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@
+  fiGribCut_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @MIFI_GRIB_API_LIBS@
 endif
