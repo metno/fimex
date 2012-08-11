@@ -17,7 +17,7 @@ Description: library for geo-spatial gridded data
 Package: libfimex-0.25.1-0
 Section: libs
 Architecture: i386 amd64 ia64 powerpc
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt-0.25.1-0 (= ${binary:Version}), libgrib-api-0d-0
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfelt-0.25.1-0 (= ${binary:Version})
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
