@@ -1,5 +1,6 @@
-  * 2012-XX-XX fimex-0.39
-    * compatibility with boost 1.50 / filesystem V3
+  * 2012-08-11 fimex-0.38.1
+    * compatibility with boost filesystem V3 / boost 1.50
+    * adapting to gcc-4.6 / Ubuntu 12.04
   * 2012-07-19 fimex-0.38
     * 2x improved output-performance to netcdf3 files
     * support for ocean_s_coordinate_g1 and *_g2
