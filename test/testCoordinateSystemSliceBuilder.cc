@@ -73,8 +73,10 @@ BOOST_AUTO_TEST_CASE( test_cs_slicebuilder_reftime )
 {
     string topSrcDir(TOP_SRCDIR);
     boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/coordRefTimeTest.nc");
+    BOOST_CHECK(reader.get() != 0);
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    BOOST_CHECK(coordSys.size() > 0);
     const CDM& cdm = reader->getCDM();
     // find an appropriate coordinate system for a variable
     string varName = "air_temperature";

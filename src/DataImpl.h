@@ -136,7 +136,7 @@ namespace MetNoFimex
         virtual long long getLongLong(size_t pos) {return static_cast<long long>(theData[pos]);}
         virtual void setValue(size_t pos, double val) {theData[pos] = static_cast<C>(val);}
         virtual void setValues(size_t startPos, const Data& data, size_t first = 0, size_t last = -1);
-        virtual void setAllValues(double val) {C v = static_cast<C>(val); for (C* pos = &theData[0]; pos != (&theData[0])+length; ++pos) *pos = v;}
+        virtual void setAllValues(double val) {std::fill(&theData[0], (&theData[0])+length, static_cast<C>(val));}
         virtual DataPtr clone() const {return DataPtr(new DataImpl<C>(*this));}
         virtual DataPtr slice(std::vector<size_t> orgDimSize, std::vector<size_t> startDims, std::vector<size_t> outputDimSize);
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset);

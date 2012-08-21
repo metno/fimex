@@ -30,13 +30,6 @@ namespace MetNoFimex
 // pure abstract class, impl. required for linker
 Data::~Data() {}
 
-DataPtr createData(CDMDataType datatype, size_t length, double val) {
-    std::vector<char> v(length);
-    DataPtr data = createData(datatype, v.begin(), v.end());
-    data->setAllValues(val);
-    return data;
-}
-
 template<typename T>
 DataPtr createDataT(size_t length, boost::shared_array<T> array)
 {
@@ -73,6 +66,32 @@ DataPtr createData(size_t length, boost::shared_array<long long> array)
 DataPtr createData(size_t length, boost::shared_array<unsigned long long> array)
 { return createDataT(length, array); }
 
+
+DataPtr createDataPtr_(CDMDataType datatype, size_t length)
+{
+    switch (datatype) {
+        case CDM_DOUBLE: return boost::shared_ptr<DataImpl<double> >(new DataImpl<double>(length));
+        case CDM_FLOAT:  return boost::shared_ptr<DataImpl<float> >(new DataImpl<float>(length));
+        case CDM_INT64:  return boost::shared_ptr<DataImpl<long long> >(new DataImpl<long long>(length));
+        case CDM_INT:    return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(length));
+        case CDM_SHORT:  return boost::shared_ptr<DataImpl<short> >(new DataImpl<short>(length));
+        case CDM_CHAR:   return boost::shared_ptr<DataImpl<char> >(new DataImpl<char>(length));
+        case CDM_UINT64: return boost::shared_ptr<DataImpl<unsigned long long> >(new DataImpl<unsigned long long>(length));
+        case CDM_UINT:   return boost::shared_ptr<DataImpl<unsigned int> >(new DataImpl<unsigned int>(length));
+        case CDM_USHORT: return boost::shared_ptr<DataImpl<unsigned short> >(new DataImpl<unsigned short>(length));
+        case CDM_UCHAR:  return boost::shared_ptr<DataImpl<unsigned char> >(new DataImpl<unsigned char>(length));
+        case CDM_NAT: return DataPtr(new DataImpl<char>(0));
+        default: break;
+    }
+    throw(CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype)));
+
+}
+
+DataPtr createData(CDMDataType datatype, size_t length, double val) {
+    DataPtr data = createDataPtr_(datatype, length);
+    data->setAllValues(val);
+    return data;
+}
 
 DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStartPos, size_t length)  {
     switch (datatype) {
