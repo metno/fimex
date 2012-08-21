@@ -556,7 +556,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
             //std::cerr << "vOut(" << longitudeAxis[i] << "," << latitudeAxis[j] << ") = " << vOut[j*4+i] << std::endl;
             // check equal length
             double diff2 = (uOut[j*4+i]*uOut[j*4+i] + vOut[j*4+i]*vOut[j*4+i] - uRot[j*4+i]*uRot[j*4+i] - vRot[j*4+i]*vRot[j*4+i]);
-            if (!isnan(diff2)) {
+            if (!mifi_isnand(diff2)) {
                 //std::cerr << diff2  << std::endl;
                 BOOST_CHECK(fabs(diff2) < 1e-3);
             }
