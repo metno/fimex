@@ -481,6 +481,7 @@ int mifi_get_vector_reproject_matrix(const char* proj_input,
     free(in_xproj_axis);
     free(out_yproj_axis);
     free(out_xproj_axis);
+    free(pointsZ);
     return retVal;
 }
 
