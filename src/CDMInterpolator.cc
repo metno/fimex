@@ -84,7 +84,6 @@ const std::string LAT_LON_PROJSTR = MIFI_WGS84_LATLON_PROJ4;
 
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 
-const bool DEBUG = false;
 static LoggerPtr logger = getLogger("fimex.CDMInterpolator");
 
 CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
@@ -164,6 +163,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
         processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
         size_t newSize = 0;
+        LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(" << unLimDimPos << ")");
         boost::shared_array<float> iArray = ci->interpolateValues(array, data->size(), newSize);
         if (variable.isSpatialVector()) {
             if (p_->cachedVectorReprojection.find(horizontalId) != p_->cachedVectorReprojection.end()) {
@@ -172,6 +172,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 // transposing needed once for each direction (or caching, but that needs to much memory)
                 const std::string& counterpart = variable.getSpatialVectorCounterpart();
                 boost::shared_array<float> counterPartArray = data2InterpolationArray(p_->dataReader->getDataSlice(counterpart, unLimDimPos), cdm_->getFillValue(counterpart));
+                LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(" << unLimDimPos << ")");
                 boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
                 const std::string& direction = variable.getSpatialVectorDirection();
                 if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
