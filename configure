@@ -650,12 +650,12 @@ BOOST_CPPFLAGS
 XML_LIBS
 XML_CPPFLAGS
 XML2_CONFIG
-MIFI_UDUNITS2_LDFLAGS
-MIFI_UDUNITS2_CPPFLAGS
-MIFI_UDUNITS2_LIBS
 MIFI_UDUNITS_LDFLAGS
 MIFI_UDUNITS_CPPFLAGS
 MIFI_UDUNITS_LIBS
+MIFI_UDUNITS2_LDFLAGS
+MIFI_UDUNITS2_CPPFLAGS
+MIFI_UDUNITS2_LIBS
 MIFI_PROJ_LDFLAGS
 MIFI_PROJ_CPPFLAGS
 MIFI_PROJ_LIBS
@@ -787,8 +787,8 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 with_proj
-with_udunits
 with_udunits2
+with_udunits
 with_xml_prefix
 with_xml_exec_prefix
 enable_xmltest
@@ -1467,9 +1467,9 @@ Optional Packages:
                         (or the compiler's sysroot if not specified).
   --with-proj=DIR         the location of mandatory libproj files and library
                           either as DIR or INC,LIB
-  --with-udunits=DIR      the location of optional libudunits files and
-                          library either as DIR or INC,LIB
   --with-udunits2=DIR     the location of optional libudunits2 files and
+                          library either as DIR or INC,LIB
+  --with-udunits=DIR      the location of optional libudunits files and
                           library either as DIR or INC,LIB
   --with-udunits2=DIR     the location of mandatory libudunits2 files and
                           library either as DIR or INC,LIB
@@ -16656,139 +16656,6 @@ saved_LDFLAGS="$LDFLAGS"
 saved_LIBS="$LIBS"
 mifi_LIBS=""
 
-# Check whether --with-udunits was given.
-if test "${with_udunits+set}" = set; then :
-  withval=$with_udunits;
-else
-  with_udunits=check
-fi
-
-case $with_udunits in
-    yes)
-     { $as_echo "$as_me:${as_lineno-$LINENO}: Using system implementation of libudunits" >&5
-$as_echo "$as_me: Using system implementation of libudunits" >&6;}
-     ;;
-    check)
-     { $as_echo "$as_me:${as_lineno-$LINENO}: Checking system implementation of libudunits" >&5
-$as_echo "$as_me: Checking system implementation of libudunits" >&6;}
-     ;;
-    no)
-     { $as_echo "$as_me:${as_lineno-$LINENO}: Building library with libudunits dependent functions disabled" >&5
-$as_echo "$as_me: Building library with libudunits dependent functions disabled" >&6;}
-     ;;
-    *,*)
-      addincdir="`echo $with_udunits | cut -f1 -d,`"
-      addlibdir="`echo $with_udunits | cut -f2 -d,`"
-      mifi_CPPFLAGS="-I$addincdir"
-      mifi_LDFLAGS="-L$addlibdir"
-      ;;
-    *)
-      addincdir="$with_udunits/include"
-      addlibdir="$with_udunits/lib"
-      mifi_CPPFLAGS="-I$addincdir"
-      mifi_LDFLAGS="-L$addlibdir"
-      ;;
-esac
-mifi_have_feat=MIFI_HAVE_LIBUDUNITS
-LIBS="$LIBS $mifi_LIBS"
-CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
-LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
-if test  x$with_udunits != xno; then
-    for ac_header in udunits.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "udunits.h" "ac_cv_header_udunits_h" "$ac_includes_default"
-if test "x$ac_cv_header_udunits_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_UDUNITS_H 1
-_ACEOF
-
-else
-
-         if test  x$with_udunits == xcheck ; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: disabling libudunits: udunits.h not found" >&5
-$as_echo "$as_me: disabling libudunits: udunits.h not found" >&6;};
-            with_udunits=no;
-         else
-            as_fn_error $? "udunits.h not found, please fix or disable -with-udunits" "$LINENO" 5;
-         fi
-
-fi
-
-done
-
-fi
-if test  x$with_udunits != xno; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utInit in -ludunits" >&5
-$as_echo_n "checking for utInit in -ludunits... " >&6; }
-if ${ac_cv_lib_udunits_utInit+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ludunits  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char utInit ();
-int
-main ()
-{
-return utInit ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_udunits_utInit=yes
-else
-  ac_cv_lib_udunits_utInit=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits_utInit" >&5
-$as_echo "$ac_cv_lib_udunits_utInit" >&6; }
-if test "x$ac_cv_lib_udunits_utInit" = xyes; then :
-  with_udunits=yes;
-         MIFI_UDUNITS_LIBS="-ludunits $mifi_LIBS";
-         MIFI_UDUNITS_CPPFLAGS=$mifi_CPPFLAGS;
-         MIFI_UDUNITS_LDFLAGS=$mifi_LDFLAGS;
-
-
-
-
-else
-
-         if test  x$with_udunits == xcheck ; then
-            { $as_echo "$as_me:${as_lineno-$LINENO}: disabling libudunits: not found" >&5
-$as_echo "$as_me: disabling libudunits: not found" >&6;};
-            with_udunits=no;
-         else
-            as_fn_error $? "libudunits not found, please fix or disable --with-udunits" "$LINENO" 5;
-         fi
-
-fi
-
-fi
-CPPFLAGS="$saved_CPPFLAGS";
-LDFLAGS="$saved_LDFLAGS";
-LIBS="$saved_LIBS";
-
-if test  "x$with_udunits" != "xyes" ; then
-    # check older udunits, at least one is required
-
-# Checks for libraries that can be dropped
-saved_CPPFLAGS="$CPPFLAGS"
-saved_LDFLAGS="$LDFLAGS"
-saved_LIBS="$LIBS"
-mifi_LIBS=""
-
 # Check whether --with-udunits2 was given.
 if test "${with_udunits2+set}" = set; then :
   withval=$with_udunits2;
@@ -16913,7 +16780,140 @@ CPPFLAGS="$saved_CPPFLAGS";
 LDFLAGS="$saved_LDFLAGS";
 LIBS="$saved_LIBS";
 
-    if test  "x$with_udunits2" != "xyes" ; then
+if test  "x$with_udunits2" != "xyes" ; then
+    # check older udunits, at least one is required
+
+# Checks for libraries that can be dropped
+saved_CPPFLAGS="$CPPFLAGS"
+saved_LDFLAGS="$LDFLAGS"
+saved_LIBS="$LIBS"
+mifi_LIBS=""
+
+# Check whether --with-udunits was given.
+if test "${with_udunits+set}" = set; then :
+  withval=$with_udunits;
+else
+  with_udunits=check
+fi
+
+case $with_udunits in
+    yes)
+     { $as_echo "$as_me:${as_lineno-$LINENO}: Using system implementation of libudunits" >&5
+$as_echo "$as_me: Using system implementation of libudunits" >&6;}
+     ;;
+    check)
+     { $as_echo "$as_me:${as_lineno-$LINENO}: Checking system implementation of libudunits" >&5
+$as_echo "$as_me: Checking system implementation of libudunits" >&6;}
+     ;;
+    no)
+     { $as_echo "$as_me:${as_lineno-$LINENO}: Building library with libudunits dependent functions disabled" >&5
+$as_echo "$as_me: Building library with libudunits dependent functions disabled" >&6;}
+     ;;
+    *,*)
+      addincdir="`echo $with_udunits | cut -f1 -d,`"
+      addlibdir="`echo $with_udunits | cut -f2 -d,`"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+    *)
+      addincdir="$with_udunits/include"
+      addlibdir="$with_udunits/lib"
+      mifi_CPPFLAGS="-I$addincdir"
+      mifi_LDFLAGS="-L$addlibdir"
+      ;;
+esac
+mifi_have_feat=MIFI_HAVE_LIBUDUNITS
+LIBS="$LIBS $mifi_LIBS"
+CPPFLAGS="$CPPFLAGS $mifi_CPPFLAGS"
+LDFLAGS="$LDFLAGS $mifi_LDFLAGS"
+if test  x$with_udunits != xno; then
+    for ac_header in udunits.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "udunits.h" "ac_cv_header_udunits_h" "$ac_includes_default"
+if test "x$ac_cv_header_udunits_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UDUNITS_H 1
+_ACEOF
+
+else
+
+         if test  x$with_udunits == xcheck ; then
+            { $as_echo "$as_me:${as_lineno-$LINENO}: disabling libudunits: udunits.h not found" >&5
+$as_echo "$as_me: disabling libudunits: udunits.h not found" >&6;};
+            with_udunits=no;
+         else
+            as_fn_error $? "udunits.h not found, please fix or disable -with-udunits" "$LINENO" 5;
+         fi
+
+fi
+
+done
+
+fi
+if test  x$with_udunits != xno; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for utInit in -ludunits" >&5
+$as_echo_n "checking for utInit in -ludunits... " >&6; }
+if ${ac_cv_lib_udunits_utInit+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ludunits  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char utInit ();
+int
+main ()
+{
+return utInit ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_udunits_utInit=yes
+else
+  ac_cv_lib_udunits_utInit=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_udunits_utInit" >&5
+$as_echo "$ac_cv_lib_udunits_utInit" >&6; }
+if test "x$ac_cv_lib_udunits_utInit" = xyes; then :
+  with_udunits=yes;
+         MIFI_UDUNITS_LIBS="-ludunits $mifi_LIBS";
+         MIFI_UDUNITS_CPPFLAGS=$mifi_CPPFLAGS;
+         MIFI_UDUNITS_LDFLAGS=$mifi_LDFLAGS;
+
+
+
+
+else
+
+         if test  x$with_udunits == xcheck ; then
+            { $as_echo "$as_me:${as_lineno-$LINENO}: disabling libudunits: not found" >&5
+$as_echo "$as_me: disabling libudunits: not found" >&6;};
+            with_udunits=no;
+         else
+            as_fn_error $? "libudunits not found, please fix or disable --with-udunits" "$LINENO" 5;
+         fi
+
+fi
+
+fi
+CPPFLAGS="$saved_CPPFLAGS";
+LDFLAGS="$saved_LDFLAGS";
+LIBS="$saved_LIBS";
+
+    if test  "x$with_udunits" != "xyes" ; then
         # check for udunits2 with external expat
 
 # Checks for libraries that are required.

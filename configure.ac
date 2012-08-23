@@ -47,11 +47,11 @@ AC_CHECK_LIB([m],[cos])
 # proj is a strong requirements
 MIFI_REQLIB([proj], [proj_api.h], [pj_init])
 
-MIFI_USELIB([udunits], [udunits.h], [utInit])
-if test [ "x$with_udunits" != "xyes" ]; then
+MIFI_USELIB([udunits2], [udunits2.h], [ut_new_system])
+if test [ "x$with_udunits2" != "xyes" ]; then
     # check older udunits, at least one is required
-    MIFI_USELIB([udunits2], [udunits2.h], [ut_new_system])
-    if test [ "x$with_udunits2" != "xyes" ]; then
+    MIFI_USELIB([udunits], [udunits.h], [utInit])
+    if test [ "x$with_udunits" != "xyes" ]; then
         # check for udunits2 with external expat
         MIFI_REQLIB([udunits2], [ut_new_system], [-lexpat])
     fi
