@@ -48,7 +48,7 @@ using namespace MetNoFimex;
 BOOST_AUTO_TEST_CASE( test_merger )
 {
     string topSrcDir(TOP_SRCDIR);
-    string fileNameInner(topSrcDir+"/test/test_merge_inner.nc4"), fileNameOuter(topSrcDir+"/test/test_merge_outer.nc4");
+    string fileNameInner(topSrcDir+"/test/test_merge_inner.nc"), fileNameOuter(topSrcDir+"/test/test_merge_outer.nc");
     if( not ifstream(fileNameInner.c_str()) or not ifstream(fileNameOuter.c_str()) ) {
         // no testfile, skip test
         return;
