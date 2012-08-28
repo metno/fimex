@@ -1,4 +1,4 @@
-ompiled source #
+# compiled source #
 ###################
 *.com
 *.class
@@ -6,6 +6,10 @@ ompiled source #
 *.exe
 *.o
 *.so
+
+/src/binSrc/fimex
+/src/binSrc/fiGribCut
+/src/binSrc/fiIndexGribs
 
 # Packages #
 ############
@@ -37,9 +41,14 @@ config.h
 config.status
 fimex.pc
 libtool
-src/.deps/
-src/binSrc/.deps/
-src/felt/.deps/
 stamp-h1
-test/.deps/
-
+.deps/
+.libs/
+*.lo
+*.la
+/Doxyfile
+/test/testCharNc.sh
+/test/testVerticalInterpolator.sh
+/test/testVerticalInterpolator2.sh
+/test/testVerticalInterpolatorHeight.sh
+/test/testVerticalInterpolatorOceanSG2ToDepth.sh

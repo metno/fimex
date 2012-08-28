@@ -36,7 +36,7 @@ host_triplet = @host@
 @HAVE_FELT_TRUE@am__append_1 = testQualityExtractor
 @HAVE_NETCDF_TRUE@am__append_2 = ${NETCDF_MI_TESTS} testCoordSys \
 @HAVE_NETCDF_TRUE@              testCoordinateSystemSliceBuilder  testNcmlReader \
-@HAVE_NETCDF_TRUE@              testProcessor
+@HAVE_NETCDF_TRUE@              testProcessor testMerger
 
 @HAVE_NETCDF_TRUE@am__append_3 = ${NETCDF_MI_SH_TESTS} testCharNc.sh \
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh \
@@ -93,7 +93,7 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_NETCDF_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2) testCoordSys$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testCoordinateSystemSliceBuilder$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testNcmlReader$(EXEEXT) \
-@HAVE_NETCDF_TRUE@	testProcessor$(EXEEXT)
+@HAVE_NETCDF_TRUE@	testProcessor$(EXEEXT) testMerger$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_4 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = testGribReader$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_4) $(am__EXEEXT_5)
@@ -174,6 +174,11 @@ testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
 testInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_testMerger_OBJECTS = testMerger.$(OBJEXT)
+testMerger_OBJECTS = $(am_testMerger_OBJECTS)
+testMerger_LDADD = $(LDADD)
+testMerger_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_testMetGmReader_OBJECTS = testMetGmReader.$(OBJEXT)
 testMetGmReader_OBJECTS = $(am_testMetGmReader_OBJECTS)
 testMetGmReader_LDADD = $(LDADD)
@@ -305,15 +310,15 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testFeltReader_SOURCES) $(testFileReaderFactory_SOURCES) \
 	$(testGribReader_SOURCES) $(testGribWriter_SOURCES) \
 	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testMetGmReader_SOURCES) $(testMetGmWriter_SOURCES) \
-	$(testNcmlReader_SOURCES) $(testNetcdfWriter_SOURCES) \
-	$(testProcessor_SOURCES) $(testProjections_SOURCES) \
-	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
-	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
-	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
-	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
-	$(wdbTest_SOURCES)
+	$(testMerger_SOURCES) $(testMetGmReader_SOURCES) \
+	$(testMetGmWriter_SOURCES) $(testNcmlReader_SOURCES) \
+	$(testNetcdfWriter_SOURCES) $(testProcessor_SOURCES) \
+	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
+	$(testSliceBuilder_SOURCES) $(testSpatialAxisSpec_SOURCES) \
+	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
+	$(testUnits_SOURCES) $(testUtils_SOURCES) \
+	$(testVerticalCoordinates_SOURCES) $(testXMLDoc_SOURCES) \
+	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
@@ -321,15 +326,15 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testFeltReader_SOURCES) $(testFileReaderFactory_SOURCES) \
 	$(testGribReader_SOURCES) $(testGribWriter_SOURCES) \
 	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
-	$(testMetGmReader_SOURCES) $(testMetGmWriter_SOURCES) \
-	$(testNcmlReader_SOURCES) $(testNetcdfWriter_SOURCES) \
-	$(testProcessor_SOURCES) $(testProjections_SOURCES) \
-	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
-	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
-	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
-	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
-	$(am__wdbTest_SOURCES_DIST)
+	$(testMerger_SOURCES) $(testMetGmReader_SOURCES) \
+	$(testMetGmWriter_SOURCES) $(testNcmlReader_SOURCES) \
+	$(testNetcdfWriter_SOURCES) $(testProcessor_SOURCES) \
+	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
+	$(testSliceBuilder_SOURCES) $(testSpatialAxisSpec_SOURCES) \
+	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
+	$(testUnits_SOURCES) $(testUtils_SOURCES) \
+	$(testVerticalCoordinates_SOURCES) $(testXMLDoc_SOURCES) \
+	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -503,7 +508,8 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
-             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc
+             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
+             test_merge_inner.nc4 test_merge_outer.nc4
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
@@ -564,6 +570,7 @@ testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
+testMerger_SOURCES = testMerger.cc
 testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testFileReaderFactory_SOURCES = testFileReaderFactory.cc
@@ -665,6 +672,9 @@ testInterpolation$(EXEEXT): $(testInterpolation_OBJECTS) $(testInterpolation_DEP
 testInterpolator$(EXEEXT): $(testInterpolator_OBJECTS) $(testInterpolator_DEPENDENCIES) $(EXTRA_testInterpolator_DEPENDENCIES) 
 	@rm -f testInterpolator$(EXEEXT)
 	$(CXXLINK) $(testInterpolator_OBJECTS) $(testInterpolator_LDADD) $(LIBS)
+testMerger$(EXEEXT): $(testMerger_OBJECTS) $(testMerger_DEPENDENCIES) $(EXTRA_testMerger_DEPENDENCIES) 
+	@rm -f testMerger$(EXEEXT)
+	$(CXXLINK) $(testMerger_OBJECTS) $(testMerger_LDADD) $(LIBS)
 testMetGmReader$(EXEEXT): $(testMetGmReader_OBJECTS) $(testMetGmReader_DEPENDENCIES) $(EXTRA_testMetGmReader_DEPENDENCIES) 
 	@rm -f testMetGmReader$(EXEEXT)
 	$(CXXLINK) $(testMetGmReader_OBJECTS) $(testMetGmReader_LDADD) $(LIBS)
@@ -735,6 +745,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testGribWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testInterpolator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testMerger.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testMetGmReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testMetGmWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNcmlReader.Po@am__quote@

@@ -25,11 +25,13 @@
 #include <iostream>
 #include <fstream>
 #include <cctype>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/version.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMExtractor.h"
@@ -39,6 +41,8 @@
 #include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/CDMPressureConversions.h"
 #include "fimex/CDMProcessor.h"
+#include "fimex/CDMMerger.h"
+#include "fimex/CDMMerger_LinearSmoothing.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
@@ -235,40 +239,40 @@ static string getType(const string& io, po::variables_map& vm) {
     return type;
 }
 
-static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
-    string type = getType("input", vm);
+static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, const string& io="input") {
+    string type = getType(io, vm);
     boost::shared_ptr<CDMReader> returnPtr;
     if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2") {
         string config(DATADIR);
         config += "/flt2nc_variables.xml";
-        if (vm.count("input.config")) {
-            config = vm["input.config"].as<string>();
+        if (vm.count(io+".config")) {
+            config = vm[io+".config"].as<string>();
         }
         // use FELT library for all flt2 files, and for flt files if LIBMIC not available
-        LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm["input.file"].as<string>() << " with config " << config);
-        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, vm["input.file"].as<string>(), config);
+        LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm[io+".file"].as<string>() << " with config " << config);
+        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, vm[io+".file"].as<string>(), config);
     }
 #ifdef HAVE_GRIB_API_H
     if (type == "grb" || type == "grib" ||
             type == "grb1" || type == "grib1" ||
                 type == "grb2" || type == "grib2") {
         std::string config;
-        if (vm.count("input.config")) {
-            config = vm["input.config"].as<string>();
+        if (vm.count(io+".config")) {
+            config = vm[io+".config"].as<string>();
         }
-        LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile " << vm["input.file"].as<string>() << " with config " << config);
-        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_GRIB, vm["input.file"].as<string>(), config);
+        LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile " << vm[io+".file"].as<string>() << " with config " << config);
+        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_GRIB, vm[io+".file"].as<string>(), config);
     }
 #endif
 #ifdef HAVE_NETCDF_H
     if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
-        if (vm.count("input.config")) {
-            std::string config = vm["input.config"].as<string>();
-            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config and applying ncml config");
-            returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm["input.file"].as<string>(), config);
+        if (vm.count(io+".config")) {
+            std::string config = vm[io+".config"].as<string>();
+            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm[io+".file"].as<string>() << " without config and applying ncml config");
+            returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm[io+".file"].as<string>(), config);
         } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm["input.file"].as<string>() << " without config");
-            returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm["input.file"].as<string>());
+            LOG4FIMEX(logger, Logger::DEBUG, "reading Netcdf-File " << vm[io+".file"].as<string>() << " without config");
+            returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm[io+".file"].as<string>());
         }
     }
 #endif
@@ -280,11 +284,11 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
             const char* iType= mifi_get_filetype_name(i);
             if (type == iType) {
                 string config;
-                if (vm.count("input.config")) {
-                    config = vm["input.config"].as<string>();
+                if (vm.count(io+".config")) {
+                    config = vm[io+".config"].as<string>();
                 }
-                LOG4FIMEX(logger, Logger::DEBUG, "reading file via "<<type<<" file '" << vm["input.file"].as<string>() << "' with config '" << config << "'");
-                returnPtr = CDMFileReaderFactory::create(type, vm["input.file"].as<string>(), config);
+                LOG4FIMEX(logger, Logger::DEBUG, "reading file via "<<type<<" file '" << vm[io+".file"].as<string>() << "' with config '" << config << "'");
+                returnPtr = CDMFileReaderFactory::create(type, vm[io+".file"].as<string>(), config);
             }
         }
     }
@@ -293,10 +297,41 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         LOG4FIMEX(logger, Logger::FATAL, "unable to read type: " << type);
         exit(1);
     } else {
-        printReaderStatements("input", vm, returnPtr);
+        printReaderStatements(io, vm, returnPtr);
     }
 
     return returnPtr;
+}
+
+static int getInterpolationMethod(po::variables_map& vm, const string& key) {
+    int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
+    if( vm.count(key) ) {
+        const string& m = vm[key].as<string>();
+        if (m == "bilinear") {
+            method = MIFI_INTERPOL_BILINEAR;
+        } else if (m == "nearestneighbor") {
+            method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
+        } else if (m == "bicubic") {
+            method = MIFI_INTERPOL_BICUBIC;
+        } else if (m == "coord_nearestneighbor") {
+            method = MIFI_INTERPOL_COORD_NN;
+        } else if (m == "coord_kdtree") {
+            method = MIFI_INTERPOL_COORD_NN_KD;
+        } else if (m == "forward_sum") {
+            method = MIFI_INTERPOL_FORWARD_SUM;
+        } else if (m == "forward_mean") {
+            method = MIFI_INTERPOL_FORWARD_MEAN;
+        } else if (m == "forward_median") {
+            method = MIFI_INTERPOL_FORWARD_MEDIAN;
+        } else if (m == "forward_max") {
+            method = MIFI_INTERPOL_FORWARD_MAX;
+        } else if (m == "forward_min") {
+            method = MIFI_INTERPOL_FORWARD_MIN;
+        } else {
+            cerr << "WARNING: unknown " << key << ": " << m << " using nearestneighbor" << endl;
+        }
+    }
+    return method;
 }
 
 static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
@@ -520,33 +555,8 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
         }
     }
 
-    int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-    if (vm.count("interpolate.method")) {
-        string m = vm["interpolate.method"].as<string>();
-        if (m == "bilinear") {
-            method = MIFI_INTERPOL_BILINEAR;
-        } else if (m == "nearestneighbor") {
-            method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-        } else if (m == "bicubic") {
-            method = MIFI_INTERPOL_BICUBIC;
-        } else if (m == "coord_nearestneighbor") {
-            method = MIFI_INTERPOL_COORD_NN;
-        } else if (m == "coord_kdtree") {
-            method = MIFI_INTERPOL_COORD_NN_KD;
-        } else if (m == "forward_sum") {
-            method = MIFI_INTERPOL_FORWARD_SUM;
-        } else if (m == "forward_mean") {
-            method = MIFI_INTERPOL_FORWARD_MEAN;
-        } else if (m == "forward_median") {
-            method = MIFI_INTERPOL_FORWARD_MEDIAN;
-        } else if (m == "forward_max") {
-            method = MIFI_INTERPOL_FORWARD_MAX;
-        } else if (m == "forward_min") {
-            method = MIFI_INTERPOL_FORWARD_MIN;
-        } else {
-            cerr << "WARNING: unknown interpolate.method: " << m << " using nearestneighbor" << endl;
-        }
-    }
+    int method = getInterpolationMethod(vm, "interpolate.method");
+
     if (vm.count("interpolate.projString")) {
 
         if (!(vm.count("interpolate.xAxisUnit") && vm.count("interpolate.yAxisUnit"))) {
@@ -585,6 +595,57 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
     printReaderStatements("interpolate", vm, interpolator);
 
     return boost::shared_ptr<CDMReader>(interpolator);
+}
+
+static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+
+    if (not (vm.count("merge.variables.outer") or vm.count("merge.variables.inner")
+             or vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
+             or vm.count("merge.smoothing") or vm.count("merge.method.outer")) )
+        return dataReader;
+
+    if (not vm.count("merge.variables.outer"))
+        throw CDMException("no variables for merge");
+    if (vm.count("merge.variables.outer") != vm.count("merge.variables.inner"))
+        throw CDMException("different number of variables for inner and outer in merge");
+
+    boost::shared_ptr<CDMReader> readerI = getCDMFileReader(vm, "merge.inner");
+    if( not readerI )
+        throw CDMException("could not create reader for inner in merge");
+
+    boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerI, dataReader);
+
+    if( vm.count("merge.smoothing") ) {
+        const string& v = vm["merge.smoothing"].as<string>();
+        if (boost::starts_with(v, "LINEAR")) {
+            boost::smatch what;
+            if (boost::regex_match(v, what, boost::regex("^LINEAR\\(([^,]+),([^,]+)\\)$"))) {
+                try {
+                    int transition = boost::lexical_cast<int>(what[1]);
+                    int border     = boost::lexical_cast<int>(what[2]);
+                    merger->setSmoothing(boost::make_shared<CDMMerger_LinearSmoothingFactory>(transition, border));
+                } catch (boost::bad_lexical_cast&) {
+                    throw CDMException("problem parsing parameters for linear smoothing: " + vm["merge.smoothing"].as<string>());
+                }
+            } else {
+                throw CDMException("malformed linear smoothing specification: " + vm["merge.smoothing"].as<string>());
+            }
+        } else {
+            throw CDMException("unknown smoothing: " + vm["merge.smoothing"].as<string>());
+        }
+    } else {
+        LOG4FIMEX(logger, Logger::DEBUG, "no merge.smoothing given, using default as defined by CDMMerger");
+    }
+
+    int methodO = getInterpolationMethod(vm, "merge.method.outer");
+    int methodI = MIFI_INTERPOL_NEAREST_NEIGHBOR; // not used
+    merger->setGridInterpolationMethod(methodI, methodO);
+
+    const vector<string> varI = vm["merge.variables.inner"].as<vector<string> >(), varO = vm["merge.variables.outer"].as<vector<string> >();
+    for(size_t v=0; v<varI.size(); ++v)
+        merger->addMergedVariable(varI[v], varO[v]);
+
+    return merger;
 }
 
 static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
@@ -742,6 +803,16 @@ int run(int argc, char* args[])
         ("interpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
+
+        ("merge.inner.file", po::value<string>(), "inner file for merge")
+        ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
+        ("merge.inner.config", po::value<string>(), "non-standard configuration for inner merge file")
+        ("merge.smoothing", po::value<string>(), "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border")
+        ("merge.method.outer", po::value<string>(), "interpolation method for refining outer grid, one of nearestneighbor, bilinear, bicubic,"
+                                                    " coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
+        ("merge.variables.inner", po::value< vector<string> >(), "names of inner grid variables to merge; must appear exactly as often as merge.variables.outer")
+        ("merge.variables.outer", po::value< vector<string> >(), "names of outer grid variables to merge; these names will appear in the output")
+
         ("verticalInterpolate.type", po::value<string>(), "pressure, height or depth")
         ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
@@ -824,6 +895,7 @@ int run(int argc, char* args[])
     dataReader = getCDMTimeInterpolator(vm, dataReader);
     dataReader = getCDMInterpolator(vm, dataReader);
     dataReader = getCDMVerticalInterpolator(vm, dataReader);
+    dataReader = getCDMMerger(vm, dataReader);
     dataReader = getNcmlCDMReader(vm, dataReader);
     writeCDM(dataReader, vm);
 

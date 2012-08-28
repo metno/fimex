@@ -6,7 +6,8 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
-             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc
+             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
+             test_merge_inner.nc4 test_merge_outer.nc4
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
@@ -15,7 +16,7 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              bicubicOutData.txt bilinearOutData.txt \
              testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc
-             
+
 CC_TESTS = testInterpolation \
            testVerticalCoordinates \
            testBinaryConstants \
@@ -51,7 +52,7 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys \
               testCoordinateSystemSliceBuilder  testNcmlReader \
-              testProcessor
+              testProcessor testMerger
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
@@ -89,6 +90,7 @@ testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
+testMerger_SOURCES = testMerger.cc
 testGribReader_SOURCES = testGribReader.cc
 testGribWriter_SOURCES = testGribWriter.cc
 testFileReaderFactory_SOURCES = testFileReaderFactory.cc
