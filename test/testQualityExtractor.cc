@@ -30,6 +30,9 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
+#include <boost/make_shared.hpp>
+#include <boost/shared_array.hpp>
+
 #include <iostream>
 #include <fstream>
 #ifdef HAVE_FELT
@@ -39,10 +42,13 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMQualityExtractor.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/NetCDF_CDMReader.h"
 #else
 #include "fimex/Null_CDMWriter.h"
 #endif
 #include "fimex/Logger.h"
+#include "fimex/Data.h"
+#include "fimex/mifi_constants.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -112,6 +118,36 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
     BOOST_CHECK(true);
 #endif /* NETCDF */
     BOOST_CHECK(true);
+}
+
+
+
+BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
+{
+#ifdef HAVE_NETCDF_H
+    const string topSrcDir(TOP_SRCDIR);
+    const string fileNameD = topSrcDir+"/test/testQEmask_data.nc", fileNameX = topSrcDir+"/test/testQEmask.xml";
+    const string fileNameM = "../test/testQEmask_mask.nc"; // must match xml file
+    if (not ifstream(fileNameD.c_str()) or not ifstream(fileNameM.c_str()) or not ifstream(fileNameX.c_str())) {
+        // no testfile, skip test
+        cerr << "input files not found, skipping test (" << fileNameD << ',' << fileNameM << ',' << fileNameX << ')' << endl;
+        return;
+    }
+    boost::shared_ptr<CDMReader> readerD = boost::make_shared<NetCDF_CDMReader>(fileNameD);
+    boost::shared_ptr<CDMQualityExtractor> mask = boost::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
+
+    DataPtr sliceM = mask->getDataSlice("salt", 0);
+    BOOST_CHECK( sliceM.get() != 0 );
+    
+    const int NXSI = 21, NETA = 16, N_SRHO=35;
+    BOOST_CHECK( sliceM->size() == N_SRHO*NXSI*NETA );
+    boost::shared_array<double> valuesM = sliceM->asDouble();
+    const int offset0 = 0, offset1 = 12+NXSI*12;
+    BOOST_CHECK( valuesM[offset0] > 1e36 );
+    BOOST_CHECK( fabs(valuesM[offset1] - 35.114) < 0.001 );
+#else
+    BOOST_CHECK(true);
+#endif /* HAVE_NETCDF_H */
 }
 #else
 // no boost testframework

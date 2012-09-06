@@ -25,6 +25,7 @@
  */
 
 #include "fimex/CDMQualityExtractor.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDM.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
@@ -41,6 +42,25 @@ using namespace std;
 
 namespace MetNoFimex
 {
+
+namespace { // anonymous
+
+boost::shared_ptr<CDMReader> getCDMFileReader(const string& file, string type, const string& config) {
+    if (type == "") {
+        const int typeNo = CDMFileReaderFactory::detectFileType(file);
+        if( config == "" )
+            return CDMFileReaderFactory::create(typeNo, file);
+        else
+            return CDMFileReaderFactory::create(typeNo, file, config);
+    } else {
+        if( config == "" )
+            return CDMFileReaderFactory::create(type, file);
+        else
+            return CDMFileReaderFactory::create(type, file, config);
+    }
+}
+
+} // anonymous namespace
 
 static LoggerPtr logger = getLogger("fimex.CDMQualityExtractor");
 
@@ -150,6 +170,7 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
             string statusVarName;
             string statusVarUse;
             string statusVarValues;
+            string statusVarFile, statusVarType, statusVarConfig;
             if (statusVarNr == 1) {
                 statusVarName = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "name");
                 XPathObjPtr allowedXPath = doc.getXPathObject("allowed_values", statusVarXPath->nodesetval->nodeTab[0]);
@@ -161,10 +182,38 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
                         statusVarValues = reinterpret_cast<char *>(valNode->content);
                     }
                 }
+                statusVarFile = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "file");
+                statusVarType = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "type");
+                statusVarConfig = getXmlProp(statusVarXPath->nodesetval->nodeTab[0], "config");
             }
             if (statusVarName == "") throw CDMException("could not find status_flag_variable for var: " + varName);
+            if (statusVarFile == "" && (statusVarConfig != "" || statusVarType != ""))
+                throw CDMException("could not find status_flag_variable has type/config but no filename: " + varName);
             LOG4FIMEX(logger,Logger::DEBUG, "adding (variable,statusVar,use,vals): ("<<varName<<","<<statusVarName<<","<<statusVarUse<<","<<statusVarValues<<")");
             statusVariable[varName] = statusVarName;
+            boost::shared_ptr<CDMReader> sr = dataReader;
+            if (statusVarFile != "") {
+                // status var from a different reader
+                sr = getCDMFileReader(statusVarFile, statusVarType, statusVarConfig);
+                statusReaders[varName] = sr;
+            }
+            // simple check if shapes are compatible
+            // TODO improve shape compatibility check
+            LOG4FIMEX(logger,Logger::DEBUG, "getting shape for variable '" << varName << "'");
+            const vector<string> &shapeVar = cdm_->getVariable(varName).getShape();
+            LOG4FIMEX(logger,Logger::DEBUG, "getting shape for status variable '" << statusVarName << "'");
+            const vector<string> &shapeStatus = sr->getCDM().getVariable(statusVarName).getShape();
+            if( shapeVar != shapeStatus ) {
+                if( shapeVar.size() < shapeStatus.size() )
+                    throw CDMException("external status variable '" + statusVarName + "' has more dimensions than variable '" + varName + "'");
+                for(size_t i=0; i<shapeStatus.size(); ++i) {
+                    if (shapeVar[i] != shapeStatus[i])
+                        throw CDMException("external status variable '" + statusVarName + "' and variable '"
+                                           + varName + "' have different shape (names), quality extract not implemented");
+                }
+                LOG4FIMEX(logger,Logger::INFO, "shapes of variable '" << varName << "' and statusVar '" << statusVarName
+                          << "' are different but hopefully compatible");
+            }
             variableFill[varName] = (fillValStr == "") ? cdm.getFillValue(varName) : string2type<double>(fillValStr);
             vector<double> statusVarVals = tokenizeDotted<double>(statusVarValues);
             if (statusVarVals.size() > 0) {
@@ -209,7 +258,15 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
     if (statusVariable.find(varName) != statusVariable.end()) {
         string statusVar = statusVariable[varName];
         DataPtr statusData;
-        if (statusVar == varName) {
+        const std::map<std::string, boost::shared_ptr<CDMReader> >::iterator sit = statusReaders.find(varName);
+        boost::shared_ptr<CDMReader> readerS = dataReader;
+        if( sit != statusReaders.end() ) {
+            readerS = sit->second;
+            statusData = readerS->getDataSlice(statusVar, unLimDimPos);
+            if (statusData->size() == 0) {
+                statusData = readerS->getDataSlice(statusVar, 0); // get the default slice
+            }
+        } else if (statusVar == varName) {
             // reuse data in case of own status data
             statusData = data;
         } else {
@@ -219,8 +276,10 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
             }
         }
 
-        if (data->size() == statusData->size()) {
-            size_t size = data->size();
+        const CDM& cdmS = readerS->getCDM();
+        const size_t sizeD = data->size(), sizeS = statusData->size();
+        const double sizeRatio = double(sizeD)/sizeS;
+        if (sizeRatio == int(sizeRatio) && sizeRatio >= 1) {
             boost::shared_array<double> sd = statusData->asDouble();
             vector<double> useVals;
             if (variableValues.find(varName) != variableValues.end()) {
@@ -228,23 +287,23 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                 sort(useVals.begin(), useVals.end());
             } else if (variableFlags.find(varName) != variableFlags.end()) {
                 string flag = variableFlags[varName];
-                double statusFill = cdm_->getFillValue(statusVar);
+                double statusFill = cdmS.getFillValue(statusVar);
                 double minFlag = MIFI_UNDEFINED_D;
                 double maxFlag = MIFI_UNDEFINED_D;
                 CDMAttribute attr;
-                if (cdm_->getAttribute(statusVar, "valid_min", attr)) {
+                if (cdmS.getAttribute(statusVar, "valid_min", attr)) {
                     minFlag = attr.getData()->asDouble()[0];
                 }
-                if (cdm_->getAttribute(statusVar, "valid_max", attr)) {
+                if (cdmS.getAttribute(statusVar, "valid_max", attr)) {
                     maxFlag = attr.getData()->asDouble()[0];
                 }
-                if (cdm_->getAttribute(statusVar, "valid_range", attr)) {
+                if (cdmS.getAttribute(statusVar, "valid_range", attr)) {
                     minFlag = attr.getData()->asDouble()[0];
                     maxFlag = attr.getData()->asDouble()[1];
                 }
                 if (!isnan(minFlag)) {
                     double* sdIt = &sd[0];
-                    while (sdIt != &sd[size]) {
+                    while (sdIt != &sd[sizeS]) {
                         if (*sdIt < minFlag) {
                             *sdIt = MIFI_UNDEFINED_D;
                         }
@@ -253,7 +312,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                 }
                 if (!isnan(maxFlag)) {
                     double* sdIt = &sd[0];
-                    while (sdIt != &sd[size]) {
+                    while (sdIt != &sd[sizeS]) {
                         if (*sdIt > maxFlag) {
                             *sdIt = MIFI_UNDEFINED_D;
                         }
@@ -262,7 +321,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                 }
                 if (!isnan(statusFill)) {
                     double* sdIt = &sd[0];
-                    while (sdIt != &sd[size]) {
+                    while (sdIt != &sd[sizeS]) {
                         if (*sdIt == statusFill) {
                             *sdIt = MIFI_UNDEFINED_D;
                         }
@@ -276,7 +335,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                     double max = string2type<double>(match[1]);
                     LOG4FIMEX(logger, Logger::DEBUG, "using max="<<max<<" for statusVar "<<statusVar<< " on var "<< varName);
                     double* sdIt = &sd[0];
-                    while (sdIt != &sd[size]) {
+                    while (sdIt != &sd[sizeS]) {
                         if (*sdIt > max) {
                             *sdIt = MIFI_UNDEFINED_D;
                         }
@@ -286,7 +345,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                     double min = string2type<double>(match[1]);
                     double* sdIt = &sd[0];
                     size_t count = 0;
-                    while (sdIt != &sd[size]) {
+                    while (sdIt != &sd[sizeS]) {
                         if (*sdIt < min) {
                             *sdIt = MIFI_UNDEFINED_D;
                             ++count;
@@ -295,10 +354,10 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                     }
                     LOG4FIMEX(logger, Logger::DEBUG, "using min="<<min<<" for statusVar "<<statusVar<< " on var "<< varName << ": removed points: " << count);
                 } else if (flag == "highest") {
-                    double testVal = findDefinedExtreme(&sd[0], &sd[size], &max<double>);
+                    double testVal = findDefinedExtreme(&sd[0], &sd[sizeS], &max<double>);
                     if (!isnan(testVal)) useVals.push_back(testVal);
                 } else if (flag == "lowest") {
-                    double testVal = findDefinedExtreme(&sd[0], &sd[size], &min<double>);
+                    double testVal = findDefinedExtreme(&sd[0], &sd[sizeS], &min<double>);
                     if (!isnan(testVal)) useVals.push_back(testVal);
                 } else {
                     throw CDMException("undefined quality-flag: "+flag+" for variable: "+varName);
@@ -307,7 +366,7 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
             if (useVals.size() > 0) {
                 // useVals are externally given flag-values or internally derived min/max
                 double* sdIt = &sd[0];
-                while (sdIt != &sd[size]) {
+                while (sdIt != &sd[sizeS]) {
                     if (!binary_search(useVals.begin(), useVals.end(), *sdIt)) {
                         *sdIt = MIFI_UNDEFINED_D;
                     }
@@ -315,15 +374,17 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
                 }
             }
             double fillValue = variableFill[varName];
-            double *sdIt = &sd[0];
-            for (size_t i = 0; i < size; ++i) {
-                if (isnan(*sdIt)) {
-                    data->setValue(i, fillValue);
+            for(size_t iD = 0; iD < sizeD; ) {
+                double *sdIt = &sd[0];
+                for (size_t iS = 0; iS < sizeS; ++iS, ++iD) {
+                    if (isnan(*sdIt)) {
+                        data->setValue(iD, fillValue);
+                    }
+                    ++sdIt;
                 }
-                ++sdIt;
             }
         } else {
-            LOG4FIMEX(logger, Logger::WARN, "different size in data of variable and statusVariable at slice "<< unLimDimPos << ": "<<varName << ","<<statusVar<<": "<< data->size() << "<>" << statusData->size());
+            LOG4FIMEX(logger, Logger::WARN, "incompatible size in data of variable and statusVariable at slice "<< unLimDimPos << ": "<<varName << ","<<statusVar<<": "<< data->size() << "<>" << statusData->size());
         }
     }
     return data;

@@ -71,15 +71,15 @@ public:
     /**
      * Read the internals of statusVariable. This code is mainly thought for testing/debugging.
      */
-    const std::map<std::string, std::string> getStatusVariable() const {return statusVariable;}
+    const std::map<std::string, std::string>& getStatusVariable() const {return statusVariable;}
     /**
      * Read the internals of variableFlags, for testing/debugging.
      */
-    const std::map<std::string, std::string> getVariableFlags() const {return variableFlags;}
+    const std::map<std::string, std::string>& getVariableFlags() const {return variableFlags;}
     /**
      * Read the internals of variableValues, for testing/debugging.
      */
-    const std::map<std::string, std::vector<double> > getVariableValues() const {return variableValues;}
+    const std::map<std::string, std::vector<double> >& getVariableValues() const {return variableValues;}
 private:
     const boost::shared_ptr<CDMReader> dataReader;
     /* map of variableName to the variable which contains the flags */
@@ -94,10 +94,14 @@ private:
      */
     std::map<std::string, double> variableFill;
     /*
-     * map ofthe variableName to the valid values in the statusVariable.
+     * map of the variableName to the valid values in the statusVariable.
      * statusVariable needs to be set!
      */
     std::map<std::string, std::vector<double> > variableValues;
+    /*
+     * map of the variableName to the reader used for getting values of the statusVariable.
+     */
+    std::map<std::string, boost::shared_ptr<CDMReader> > statusReaders;
 };
 
 }
