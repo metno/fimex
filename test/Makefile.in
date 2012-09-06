@@ -46,7 +46,7 @@ host_triplet = @host@
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_METGM_TRUE@am__append_5 = testMetGmReader ${METGM_NC_TESTS}
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testCharNc.sh.in \
+	$(srcdir)/testCharNc.sh.in $(srcdir)/testQEmask.xml.in \
 	$(srcdir)/testVerticalInterpolator.sh.in \
 	$(srcdir)/testVerticalInterpolator2.sh.in \
 	$(srcdir)/testVerticalInterpolatorHeight.sh.in \
@@ -82,7 +82,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = testCharNc.sh testVerticalInterpolator.sh \
 	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh \
-	testVerticalInterpolatorOceanSG2ToDepth.sh
+	testVerticalInterpolatorOceanSG2ToDepth.sh testQEmask.xml
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_FELT_TRUE@am__EXEEXT_1 = testQualityExtractor$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_2 = testNetcdfWriter$(EXEEXT) \
@@ -626,6 +626,8 @@ testVerticalInterpolator2.sh: $(top_builddir)/config.status $(srcdir)/testVertic
 testVerticalInterpolatorHeight.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorHeight.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testVerticalInterpolatorOceanSG2ToDepth.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolatorOceanSG2ToDepth.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testQEmask.xml: $(top_builddir)/config.status $(srcdir)/testQEmask.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:

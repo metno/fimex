@@ -52,3 +52,5 @@ stamp-h1
 /test/testVerticalInterpolator2.sh
 /test/testVerticalInterpolatorHeight.sh
 /test/testVerticalInterpolatorOceanSG2ToDepth.sh
+/test/testQEmask.xml
+/test/testMerger

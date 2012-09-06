@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
 #ifdef HAVE_NETCDF_H
     const string topSrcDir(TOP_SRCDIR);
     const string fileNameD = topSrcDir+"/test/testQEmask_data.nc", fileNameX = topSrcDir+"/test/testQEmask.xml";
-    const string fileNameM = "../test/testQEmask_mask.nc"; // must match xml file
+    const string fileNameM = topSrcDir+"/test/testQEmask_mask.nc";
     if (not ifstream(fileNameD.c_str()) or not ifstream(fileNameM.c_str()) or not ifstream(fileNameX.c_str())) {
         // no testfile, skip test
         cerr << "input files not found, skipping test (" << fileNameD << ',' << fileNameM << ',' << fileNameX << ')' << endl;
