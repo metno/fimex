@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract )
 #ifdef TEST_DEBUG
 	defaultLogLevel(Logger::DEBUG);
 #endif
-	boost::shared_ptr<CDMQualityExtractor> extract(new CDMQualityExtractor(feltReader, "", topSrcDir + "/share/etc/cdmQualityConfig.xml"));
+	boost::shared_ptr<CDMQualityExtractor> extract(new CDMQualityExtractor(feltReader, "", topSrcDir + "/test/testQualityConfig.xml"));
 
 	map<string, string> statusVariables = extract->getStatusVariable();
 	map<string, string> variableFlags = extract->getVariableFlags();
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_convert )
         return;
     }
     boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-    boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/share/etc/cdmQualityConfig.xml"));
+    boost::shared_ptr<CDMQualityExtractor> qe(new CDMQualityExtractor(feltReader, "", topSrcDir + "/test/testQualityConfig.xml"));
 
 #ifdef HAVE_NETCDF_H
     string outputFile("testQualityExtractor.nc");

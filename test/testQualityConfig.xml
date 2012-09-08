@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdmQualityConfig>
+
+<variable name="bla">
+   <status_flag_variable name="blub">
+      <allowed_values>1,2,...,6</allowed_values>
+      <!-- or config by highest valid or lowest valid or all valid values  -->
+      <!-- highest and lowest will be retrieved per data-slice, not for the whole variable -->
+      <!-- <allowed_values use="(highest|lowest|all|min:xxx.x|max:xxx.x)" /> -->
+   </status_flag_variable>
+</variable>
+
+<!-- set air_temperature to explicit fillValue -999 (default: implicit fillValue) -->
+<variable name="air_temperature" fillValue="-999">
+   <status_flag_variable name="altitude">
+      <allowed_values use="min:1000" />
+   </status_flag_variable>
+</variable>
+
+<!-- apply an external land-mask to sea_surface_temperature -->
+<!-- 
+<variable name="sea_surface_temperature" fillValue="-999">
+   <status_flag_variable name="land_mask" file="land.dat" type="felt" config="felt2nc.xml" >
+      <allowed_values use="all" />
+   </status_flag_variable>
+</variable>
+ -->
+
+</cdmQualityConfig>

@@ -1,5 +1,8 @@
-  * 2012-XX-XX fimex-0.39
+  * 2012-09-08 fimex-0.39
     * merging of grids with different resolution (A. Bürger)
+    * allow quality-flags and land-masks from external sources (A. Bürger)
+    * successfully build on MacOS X/gcc
+    * successfully testet with felt-archive files
   * 2012-08-11 fimex-0.38.1
     * compatibility with boost filesystem V3 / boost 1.50
     * adapting to gcc-4.6 / Ubuntu 12.04
