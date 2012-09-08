@@ -200,13 +200,19 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
             // simple check if shapes are compatible
             // TODO improve shape compatibility check
             LOG4FIMEX(logger,Logger::DEBUG, "getting shape for variable '" << varName << "'");
-            const vector<string> &shapeVar = cdm_->getVariable(varName).getShape();
+            vector<string> shapeVar;
+            if (cdm.hasVariable(varName)) {
+            	shapeVar = cdm_->getVariable(varName).getShape();
+            }
             LOG4FIMEX(logger,Logger::DEBUG, "getting shape for status variable '" << statusVarName << "'");
-            const vector<string> &shapeStatus = sr->getCDM().getVariable(statusVarName).getShape();
-            if( shapeVar != shapeStatus ) {
-                if( shapeVar.size() < shapeStatus.size() )
+            vector<string> shapeStatus;
+            if (sr->getCDM().hasVariable(statusVarName)) {
+                shapeStatus = sr->getCDM().getVariable(statusVarName).getShape();
+            }
+            if (cdm.hasVariable(varName) && (shapeVar != shapeStatus)) {
+                if (shapeVar.size() < shapeStatus.size())
                     throw CDMException("external status variable '" + statusVarName + "' has more dimensions than variable '" + varName + "'");
-                for(size_t i=0; i<shapeStatus.size(); ++i) {
+                for (size_t i=0; i<shapeStatus.size(); ++i) {
                     if (shapeVar[i] != shapeStatus[i])
                         throw CDMException("external status variable '" + statusVarName + "' and variable '"
                                            + varName + "' have different shape (names), quality extract not implemented");

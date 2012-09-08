@@ -15,6 +15,10 @@
         <xs:element name="allowed_values" type="allowed_values_type" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required" />
+    <!-- below attributes configure external file -->
+    <xs:attribute name="file" type="xs:string" />
+    <xs:attribute name="type" type="xs:string" />
+    <xs:attribute name="config" type="xs:string" />
   </xs:complexType>
 
   <xs:complexType name="variable_type">
