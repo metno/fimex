@@ -332,6 +332,8 @@ file as shown above gives an example of such an configuration.
   - The variable "bla" will only be set, if "blub" has integer-values between 1 and 6.
   - The variable "air_temperature" will only be extracted for an "altitude" above 1000. The value
 1000 is the actual data value in the variable "altitude" without any scaling or unit-conversion applied.
+  - The variable "sea_surface_temperature" will set the fill-values from the "land_mask" found in "land.dat", which is an
+    external felt file and configured by "felt2nc.xml".
 
 The following use-values can be selected:
   - @c all select all valid values (within valid_max, valid_min or valid_range, without _FillValue)
