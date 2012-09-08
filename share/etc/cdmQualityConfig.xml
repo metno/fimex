@@ -17,4 +17,12 @@
    </status_flag_variable>
 </variable>
 
+<!-- apply an external land-mask to sea_surface_temperature -->
+<variable name="sea_surface_temperature" fillValue="-999">
+   <status_flag_variable name="land_mask" file="land.dat" type="felt" config="felt2nc.xml" >
+      <allowed_values use="all" />
+   </status_flag_variable>
+</variable>
+
+
 </cdmQualityConfig>
