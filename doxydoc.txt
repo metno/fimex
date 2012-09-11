@@ -22,6 +22,7 @@ contact me.
 @section toc Table of Contents
 
   -# @ref programDoc
+    -# @ref mergerDoc
   -# @ref setup
     -# @ref feltConfigDoc
     -# @ref ncmlConfiguration
@@ -124,6 +125,42 @@ Configurational options:
                                           interpolator
   --interpolate.printCS                   print CoordinateSystems of
                                           interpolator
+  --merge.inner.file arg                  inner file for merge
+  --merge.inner.type arg                  filetype of inner merge file, e.g. nc,
+                                          nc4, ncml, felt, grib1, grib2, wdb
+  --merge.inner.config arg                non-standard configuration for inner
+                                          merge file
+  --merge.smoothing arg                   smoothing function for merge, e.g.
+                                          "LINEAR(5,2)" for linear smoothing, 5
+                                          grid points transition, 2 grid points
+                                          border
+  --merge.method.outer arg                interpolation method for refining outer
+                                          grid, one of nearestneighbor, bilinear,
+                                          bicubic, coord_nearestneighbor,
+                                          coord_kdtree, forward_max,
+                                          forward_mean, forward_median or
+                                          forward_sum
+  --merge.variables.inner arg             names of inner grid variables to merge;
+                                          must appear exactly as often as
+                                          merge.variables.outer
+  --merge.variables.outer arg             names of outer grid variables to merge;
+                                          these names will appear in the output
+  --verticalInterpolate.type arg          pressure, height or depth
+  --verticalInterpolate.method arg        linear, log or loglog interpolation
+  --verticalInterpolate.level1 arg        specification of first level, see
+                                          Fimex::CDMVerticalInterpolator for a
+                                          full definition
+  --verticalInterpolate.level2 arg        specification of second level, only
+                                          required for hybrid levels, see
+                                          Fimex::CDMVerticalInterpolator for a
+                                          full definition
+  --verticalInterpolate.dataConversion arg
+                                          vertical data-conversion: theta2T,
+                                          omega2vwind or add4Dpressure
+  --verticalInterpolate.printNcML [=arg(=-)]
+                                          print NcML description of extractor
+  --verticalInterpolate.printCS           print CoordinateSystems of vertical
+                                          interpolator
   --timeInterpolate.timeSpec arg          specification of times to interpolate
                                           to, see Fimex::TimeSpec for a full
                                           definition
@@ -211,7 +248,7 @@ is valid, e.g. with
 xmllint --valid --noout felt2nc_config.xml
 @endcode
 
-Unfortuneatly, xinclude and validation don't play well together, since
+Unfortunately, xinclude and validation don't play well together, since
 usual validation happens before the inclusion of external parts. xmllint
 uses special options to fix those problem:
 @code
@@ -346,6 +383,32 @@ All values which do not match the quality-criteria will be set to the _FillValue
 variable.
 
 @see MetNoFimex::CDMQualityExtractor
+
+@page mergerDoc field merging Options
+@section mergerDoc field merging Options
+
+@warning The merging functionality is in a early stage of
+development. The merging procedure and configuration might change in
+the future. Any feedback is strongly welcome.
+
+The purpose of the merging functionaltiy is to surround a
+high-resolution "inner" field with an "outer" field of initially lower
+resolution.
+
+When using the fimex program, input.file/type/config specify the outer
+file while merge.inner.file/type/config specify the inner
+file. Variables specified with merge.variables.inner/outer will be
+merged (the name will be as in the outer file) and the first such pair
+defines the output coordinate system. This coordinate system is
+constructed by extending the inner grid to cover the outer grid. All
+variables of the outer grid are interpolated to this grid using the
+interpolation method specified with merge.method.outer. For merged
+variables, inside the inner grid, the values from the inner grid will
+be used with a transition between outer and inner specified using
+merge.smoothing.
+
+@see MetNoFimex::CDMMerger
+@ref programDoc
 
 @page gribReaderDoc gribReader Configuration
 @section gribReaderConfig gribReader Configuration

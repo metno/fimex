@@ -54,3 +54,5 @@ stamp-h1
 /test/testVerticalInterpolatorOceanSG2ToDepth.sh
 /test/testQEmask.xml
 /test/testMerger
+/share/doc/html
+/share/doc/latex
