@@ -60,7 +60,7 @@ if HAVE_NETCDF
               testInterpolatorFill.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
               testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh \
-              testQualityExtractorFimex.sh
+              testQualityExtractorFimex.sh testMerger.sh
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
