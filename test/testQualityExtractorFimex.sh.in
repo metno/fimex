@@ -1,0 +1,19 @@
+#! /bin/sh
+# @configure_input@
+echo "test quality extractor / masking via fimex command-line"
+
+DATA="@top_srcdir@/test/testQEmask_data.nc"
+MASK="@top_srcdir@/test/testQEmask_mask.nc"
+CONF="@top_srcdir@/test/testQEmask.xml"
+
+if [ ! -f "$DATA" -o ! -f "$MASK" -o ! -f "$CONF" ]; then
+   echo "no input data/mask/config: $DATA / $MASK / $CONF, skipping test..."
+   exit 0;
+fi
+../src/binSrc/fimex --input.file="$DATA" --qualityExtract.config="$CONF" --output.file=out.nc
+if [ $? != 0 ]; then
+  echo "failed masking via fimex command-line"
+  exit 1
+fi
+echo "success"
+exit 0

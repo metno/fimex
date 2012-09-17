@@ -20043,6 +20043,8 @@ ac_config_files="$ac_config_files test/testVerticalInterpolatorOceanSG2ToDepth.s
 
 ac_config_files="$ac_config_files test/testQEmask.xml"
 
+ac_config_files="$ac_config_files test/testQualityExtractorFimex.sh"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -21193,6 +21195,7 @@ do
     "test/testVerticalInterpolatorHeight.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorHeight.sh" ;;
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh") CONFIG_FILES="$CONFIG_FILES test/testVerticalInterpolatorOceanSG2ToDepth.sh" ;;
     "test/testQEmask.xml") CONFIG_FILES="$CONFIG_FILES test/testQEmask.xml" ;;
+    "test/testQualityExtractorFimex.sh") CONFIG_FILES="$CONFIG_FILES test/testQualityExtractorFimex.sh" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -22685,6 +22688,7 @@ _LT_EOF
     "test/testVerticalInterpolator2.sh":F) chmod +x test/testVerticalInterpolator2.sh ;;
     "test/testVerticalInterpolatorHeight.sh":F) chmod +x test/testVerticalInterpolatorHeight.sh ;;
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh":F) chmod +x test/testVerticalInterpolatorOceanSG2ToDepth.sh ;;
+    "test/testQualityExtractorFimex.sh":F) chmod +x test/testQualityExtractorFimex.sh ;;
 
   esac
 done # for ac_tag
