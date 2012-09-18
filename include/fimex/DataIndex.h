@@ -36,11 +36,11 @@ namespace MetNoFimex
 class DataIndex
 {
 private:
-    static const std::size_t MIN_DIMS = 10;
+    static const std::size_t MIN_DIMS() {return 10;}
     std::vector<std::size_t> dims_;
     std::vector<std::size_t> slices_;
 public:
-    DataIndex() : dims_(0), slices_(MIN_DIMS, 0) {}
+    DataIndex() : dims_(0), slices_(MIN_DIMS(), 0) {}
     /**
      *  Creates an index for an array with applied dimSizes. The first
      *  dimension is the fastest moving (fortran-array style).

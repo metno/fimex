@@ -178,16 +178,39 @@ public:
 	T operator()(short val) {
 		return (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
 	}
+	// Scale.transform is faster than transform(...,Scale) by ~10%
+	void transform(const short* begin, const short* end, T* out) {
+        size_t dist = distance(begin, end);
+        size_t n = dist;
+        T* outP = out;
+        const short* inP = begin;
+        while (n--) {
+            *outP++ = static_cast<T>(*inP++);
+        }
+        n = dist;
+        outP = out;
+        while (n--) {
+            *outP++ *= scalingFactor;
+        }
+        n = dist;
+        outP = out;
+        inP = begin;
+        while (n--) {
+            if (*inP++ == ANY_VALUE()) {
+                *outP++ = newFill;
+            }
+        }
+    }
 private:
 	const T newFill;
-	const double scalingFactor;
+	const float scalingFactor;
 };
 
 // convert felt short to a scaled Data
 template<typename T>
 boost::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata, double newFillValue, double scalingFactor) {
 	boost::shared_array<T> data(new T[indata.size()]);
-	transform(indata.begin(), indata.end(), &data[0], Scale<T>(newFillValue, scalingFactor));
+	Scale<T>(newFillValue, scalingFactor).transform(&indata[0], &indata[0]+indata.size(), &data[0]);
 	return MetNoFimex::createData(indata.size(), data);
 }
 

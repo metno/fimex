@@ -21,12 +21,10 @@ DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_BUILD_OPTIONS ?= parallel=2
 
 CFLAGS = -Wall
-#LD_LIBRARY_PATH += :/opt/udunits2.1.20/lib:/opt/grib-api1.9.9
-#LDFLAGS = -lexpat
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
-	CFLAGS += -O2
+	CFLAGS += -O2 -ftree-vectorize -fno-math-errno
 endif
 ifeq ($(DEB_HOST_ARCH),i386)
 	# require SSE2 on i386(in preinst)

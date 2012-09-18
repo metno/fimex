@@ -33,7 +33,7 @@ namespace MetNoFimex
 DataIndex::DataIndex(std::vector<std::size_t> dimSizes)
 : dims_(dimSizes)
 {
-    slices_= std::vector<std::size_t>(std::max(dims_.size(),MIN_DIMS), 0);
+    slices_= std::vector<std::size_t>(std::max<size_t>(dims_.size(),MIN_DIMS()), 0);
     if (dims_.size() > 0)
         slices_[0] = 1;
     for (size_t i = 1; i < dims_.size(); ++i ) {

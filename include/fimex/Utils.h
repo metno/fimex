@@ -315,20 +315,22 @@ class ScaleValue : public std::unary_function<IN, OUT>
 {
 private:
     IN oldFill_;
-    double oldScale_;
-    double oldOffset_;
+    double oldScaleNewScaleInv_;
+    double oldOffsetMinusNewOffsetNewScaleInv_;
     OUT newFill_;
-    double newScale_;
-    double newOffset_;
 public:
     ScaleValue(double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) :
-        oldFill_(static_cast<IN>(oldFill)), oldScale_(oldScale), oldOffset_(oldOffset),
-        newFill_(static_cast<OUT>(newFill)), newScale_(newScale), newOffset_(newOffset) {}
+        oldFill_(static_cast<IN>(oldFill)), oldScaleNewScaleInv_(oldScale/newScale),
+        oldOffsetMinusNewOffsetNewScaleInv_((oldOffset-newOffset)/newScale),
+        newFill_(static_cast<OUT>(newFill)) {}
     OUT operator()(const IN& in) const {
         if (in == oldFill_ || mifi_isnand(static_cast<double>(in))) {
             return newFill_;
         } else {
-            return static_cast<OUT>(((oldScale_*in + oldOffset_)-newOffset_)/newScale_);
+            //(((oldScale_*in + oldOffset_)-newOffset_)/newScale_);
+            // => ((oldScale_*in + oldOffsetMinusNewOffset_)*newScaleInv_);
+            // => oldScaleNewScale_ * in + oldOffsetMinusNewOffsetNewScale_
+            return static_cast<OUT>(oldScaleNewScaleInv_*in + oldOffsetMinusNewOffsetNewScaleInv_);
         }
     }
 };
