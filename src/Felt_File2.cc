@@ -178,9 +178,24 @@ public:
 	T operator()(short val) {
 		return (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
 	}
-	// Scale.transform is faster than transform(...,Scale) by ~10%
+    /**
+     *  transform should use some optimizations, e.g. vectorization
+     *  but code was never faster than std::transform
+     *  @deprecated use std::transform
+     */
 	void transform(const short* begin, const short* end, T* out) {
-        size_t dist = distance(begin, end);
+	    long long n = std::distance(begin, end);
+	    const long long slice = 32768;
+	    while ((n - slice) > 0) {
+	        transform_(&begin[0], &out[0], slice);
+	        n -= slice;
+	        begin += slice;
+	        out += slice;
+	    }
+	    transform_(&begin[0], &out[0], n);
+	}
+private:
+	void transform_(const short* begin, T* out, size_t dist) {
         size_t n = dist;
         T* outP = out;
         const short* inP = begin;
@@ -201,7 +216,6 @@ public:
             }
         }
     }
-private:
 	const T newFill;
 	const float scalingFactor;
 };
@@ -210,7 +224,9 @@ private:
 template<typename T>
 boost::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata, double newFillValue, double scalingFactor) {
 	boost::shared_array<T> data(new T[indata.size()]);
-	Scale<T>(newFillValue, scalingFactor).transform(&indata[0], &indata[0]+indata.size(), &data[0]);
+	Scale<T> scale(newFillValue, scalingFactor);
+	//scale.transform(&indata[0], &indata[0]+indata.size(), &data[0]);
+	std::transform(&indata[0], &indata[0]+indata.size(), &data[0], scale);
 	return MetNoFimex::createData(indata.size(), data);
 }
 

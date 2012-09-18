@@ -63,6 +63,21 @@ std::string type2string<double>(double in)
     return buffer.str();
 }
 
+/**
+ * speicalizations for functionality of real isnan
+ * @param x
+ * @return
+ */
+template<>
+int mifi_isnan<double>(double x) {
+    return mifi_isnand(x);
+}
+
+template<>
+int mifi_isnan<float>(float x) {
+    return false;//mifi_isnanf(x);
+}
+
 
 std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters)
 {
