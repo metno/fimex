@@ -28,7 +28,7 @@
  * @headerfile "fimex/interpolation.h"
  */
 
-
+#include "fimex/deprecated.h"
 #include "fimex/mifi_constants.h"
 
 #ifdef __cplusplus
@@ -416,8 +416,9 @@ extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
  * @return 0 on false, otherwise true
  * @warning this function should only be used in C++, which doesn't define
  *          the isnan macro defined in C99
+ * @deprecated use mifi_isnan() template from fimex/Utils.h
  */
-extern int mifi_isnanf(float val);
+extern DEPRECATED(int mifi_isnanf(float val));
 /**
  * check if the value is a nan
  *
@@ -425,8 +426,9 @@ extern int mifi_isnanf(float val);
  * @return 0 on false, otherwise true
  * @warning this function should only be used in C++, which doesn't define
  *          the isnan macro defined in C99
+ * @deprecated use mifi_isnan() template from fimex/Utils.h
  */
-extern int mifi_isnand(double val);
+extern DEPRECATED(int mifi_isnand(double val));
 
 
 #ifdef __cplusplus
