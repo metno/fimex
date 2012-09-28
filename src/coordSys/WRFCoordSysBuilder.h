@@ -53,6 +53,7 @@ public:
      * change the cdm and require some data from the reader.
      * @param reader
      * @return
+     * @warning listCoordinateSystems can currently not be called several times on the same reader
      */
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);

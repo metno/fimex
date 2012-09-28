@@ -33,6 +33,7 @@
 #include "fimex/mifi_constants.h"
 #include "fimex/Logger.h"
 #include "fimex/interpolation.h"
+#include "fimex/Utils.h"
 #include "proj_api.h"
 #include <cmath>
 #include <vector>
@@ -76,6 +77,7 @@ static double findAttributeDouble(const CDM& cdm, std::string attName)
 // function for compatibility between the old (only CDM) and new (only CDMReader) interface
 static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinateSystems(CDM& cdm, boost::shared_ptr<CDMReader> reader)
 {
+    assert(reader.get() != 0);
     // reader might be 0
     using namespace std;
     LoggerPtr logger = getLogger("fimex.coordSys.WRFCoordSysBuilder");
@@ -105,8 +107,8 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     case 2:
         proj4 << "+proj=stere";
         {
-            double lon0 = (mifi_isnand(standardLon)) ? centralLon : standardLon;
-            double lat0 = (mifi_isnand(centralLat)) ? lat2 : centralLat;
+            double lon0 = (mifi_isnan(standardLon)) ? centralLon : standardLon;
+            double lat0 = (mifi_isnan(centralLat)) ? lat2 : centralLat;
             double k = (1+fabs(sin(DEG_TO_RAD*lat1)))/2.;
             proj4 << " +lon_0="<<lon0<<" +lat_0="<<lat0<<" +k="<<k;
         }
@@ -123,6 +125,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     double centerX = centralLon * DEG_TO_RAD;
     double centerY = centralLat * DEG_TO_RAD;
     mifi_project_values(MIFI_WGS84_LATLON_PROJ4, proj4.str().c_str(), &centerX, &centerY, 1);
+
+    // TODO: the following variables might be called uninitialized when the coordinate-system
+    //       is build twice
+
     // build axes and staggered coordinate system
     CoordinateSystem::AxisPtr timeAxis, westAxis, stagWestAxis, northAxis, stagNorthAxis, bottomAxis, stagBottomAxis;
     if (cdm.hasDimension("west_east")) {
@@ -245,12 +251,13 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     }
 
     // determine the Time
-    if (cdm.hasDimension("Time") && !cdm.hasVariable("Time")) {
+    const string Time("Time");
+    if (cdm.hasDimension(Time) && !cdm.hasVariable(Time)) {
         vector<string> shape;
-        shape.push_back("Time");
-        if (!cdm.hasVariable(shape.at(0))) {
+        shape.push_back(Time);
+        if (!cdm.hasVariable(Time)) {
             string units;
-            size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
+            size_t dimSize = cdm.getDimension(Time).getLength();
             boost::shared_array<float> vals(new float[dimSize]);
             if (reader.get() == 0) {
                 // try to guess the time-steps
@@ -301,14 +308,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                     vals[i] = td.hours() + td.minutes()/60. + td.seconds()/3600.;
                 }
             }
-            cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
-            cdm.addAttribute(shape.at(0), CDMAttribute("units", units));
-            cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
+            cdm.addVariable(CDMVariable(Time, CDM_FLOAT, shape));
+            cdm.addAttribute(Time, CDMAttribute("units", units));
+            cdm.getVariable(Time).setData(createData(dimSize, vals));
         }
-        timeAxis = CoordinateSystem::AxisPtr(
-                new CoordinateAxis(cdm.getVariable(shape.at(0))));
-        timeAxis->setAxisType(CoordinateAxis::Time);
-        timeAxis->setExplicit(true);
         // ref-time
         string reftime = "forecast_reference_time";
         if (!cdm.hasVariable(reftime)) {
@@ -325,6 +328,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.getVariable(reftime).setData(createData(1, refvals));
         }
     }
+    timeAxis = CoordinateSystem::AxisPtr(
+            new CoordinateAxis(cdm.getVariable(Time)));
+    timeAxis->setAxisType(CoordinateAxis::Time);
+    timeAxis->setExplicit(true);
 
     // now, create the coordinate-systems depending on the variables shape
     map<string, boost::shared_ptr<CoordinateSystem> > cs;

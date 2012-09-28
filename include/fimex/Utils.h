@@ -30,6 +30,7 @@
 #include <sstream>
 #include <cmath>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <limits>
 #include "fimex/CDMException.h"
 #include <boost/shared_array.hpp>
@@ -303,25 +304,15 @@ struct staticCast {
     OUT operator()(const IN& in) { return static_cast<OUT>(in); }
 };
 
-// this is usually declared in interpolation.h,
-// but no need to include the complete header here
-extern "C" int mifi_isnand(double);
-extern "C" int mifi_isnanf(float);
-
 /**
  * template to declare isnan function in c++
  * @param x
- * @return true for all dataypes != double or float
+ * @return same as C99 isnan pragma
  */
 template<typename C>
 int mifi_isnan(C x) {
-    return false;
+    return boost::math::isnan(x);
 }
-template<>
-int mifi_isnan<double>(double x);
-template<>
-int mifi_isnan<float>(float x);
-
 
 /**
  * Scale a value using fill, offset and scale
@@ -349,39 +340,6 @@ public:
             return static_cast<OUT>(oldScaleNewScaleInv_*in + oldOffsetMinusNewOffsetNewScaleInv_);
         }
     }
-    /**
-     *  transform should use some optimizations, e.g. vectorization
-     *  but code was never faster than std::transform
-     *  @deprecated use std::transform
-     */
-    void transform(IN* begin, IN* end, OUT* out) {
-        long long n = std::distance(begin, end);
-        const long long slice = 16384;
-        while ((n - slice) > 0) {
-            transform_(&begin[0], &out[0], slice);
-            n -= slice;
-            begin += slice;
-            out += slice;
-        }
-        transform_(&begin[0], &out[0], n);
-    }
-private:
-    void transform_(IN* begin, OUT* out, size_t dist) {
-        OUT* outP = out;
-        OUT* last = out + dist;
-        IN* inP = begin;
-        for (;outP != last; outP++, inP++) {
-            *outP = (*inP * oldScaleNewScaleInv_) + oldOffsetMinusNewOffsetNewScaleInv_;
-        }
-        outP = out;
-        inP = begin;
-        for (;outP != last; outP++, inP++) {
-            IN in = *inP;
-            if (in == oldFill_ || mifi_isnan(in)) {
-                *outP = newFill_;
-            }
-        }
-    }
 };
 
 /**
@@ -397,7 +355,7 @@ public:
     ChangeMissingValue(double oldFill, double newFill) :
         oldFill_(static_cast<IN>(oldFill)), newFill_(static_cast<OUT>(newFill)) {}
     OUT operator()(const IN& in) const {
-        if (in == oldFill_ || mifi_isnand(static_cast<double>(in))) {
+        if (in == oldFill_ || mifi_isnan(in)) {
             return newFill_;
         } else {
             return static_cast<OUT>(in);

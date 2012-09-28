@@ -308,7 +308,6 @@ namespace MetNoFimex
     boost::shared_array<OUT> convertArrayType(const boost::shared_array<IN>& inData, size_t length, double oldFill, double oldScale, double oldOffset, double newFill, double newScale, double newOffset) {
         boost::shared_array<OUT> outData(new OUT[length]);
         ScaleValue<IN, OUT> sv(oldFill, oldScale, oldOffset, newFill, newScale, newOffset);
-//        sv.transform(&inData[0], &inData[length], &outData[0]);
         std::transform(&inData[0], &inData[length], &outData[0], sv);
         return outData;
     }
