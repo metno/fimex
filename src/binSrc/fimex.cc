@@ -31,7 +31,6 @@
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMExtractor.h"
@@ -613,7 +612,7 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
     if( not readerI )
         throw CDMException("could not create reader for inner in merge");
 
-    boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerI, dataReader);
+    boost::shared_ptr<CDMMerger> merger = boost::shared_ptr<CDMMerger>(new CDMMerger(readerI, dataReader));
 
     if( vm.count("merge.smoothing") ) {
         const string& v = vm["merge.smoothing"].as<string>();
@@ -623,7 +622,7 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
                 try {
                     int transition = boost::lexical_cast<int>(what[1]);
                     int border     = boost::lexical_cast<int>(what[2]);
-                    merger->setSmoothing(boost::make_shared<CDMMerger_LinearSmoothingFactory>(transition, border));
+                    merger->setSmoothing(boost::shared_ptr<CDMMerger::SmoothingFactory>(new CDMMerger_LinearSmoothingFactory(transition, border)));
                 } catch (boost::bad_lexical_cast&) {
                     throw CDMException("problem parsing parameters for linear smoothing: " + vm["merge.smoothing"].as<string>());
                 }

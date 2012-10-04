@@ -36,8 +36,6 @@
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
 
-#include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <sstream>
@@ -120,12 +118,12 @@ CDMMerger::CDMMerger(CDMReaderPtr inner, CDMReaderPtr outer)
 
     p->gridInterpolationI = p->gridInterpolationO = MIFI_INTERPOL_BILINEAR;
 
-    p->smoothingFactory = boost::make_shared<CDMMerger_LinearSmoothingFactory>();
+    p->smoothingFactory = SmoothingFactoryPtr(new CDMMerger_LinearSmoothingFactory());
 
     p->allInnerCS = listCoordinateSystems(p->readerI);
     p->allOuterCS = listCoordinateSystems(p->readerO);
 
-    p->interpolatedO = boost::make_shared<CDMInterpolator>(p->readerO);
+    p->interpolatedO = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(p->readerO));
 
     *cdm_ = p->interpolatedO->getCDM();
 }
