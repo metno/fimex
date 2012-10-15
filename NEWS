@@ -1,3 +1,7 @@
+  * 2012-10-15 fimex-0.39.1
+    * backport to boost-0.32
+    * avoid problems with older gcc or icc when using constant class members
+    * improve performance of scaling (use nan-macro rather than function)
   * 2012-09-08 fimex-0.39
     * merging of grids with different resolution (A. Bürger)
     * allow quality-flags and land-masks from external sources (A. Bürger)

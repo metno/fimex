@@ -4,7 +4,8 @@ echo "test quality extractor / masking via fimex command-line"
 
 DATA="@top_srcdir@/test/testQEmask_data.nc"
 MASK="@top_srcdir@/test/testQEmask_mask.nc"
-CONF="@top_srcdir@/test/testQEmask.xml"
+# conf file from local directory: that file is also auto-generated
+CONF="testQEmask.xml"
 
 if [ ! -f "$DATA" -o ! -f "$MASK" -o ! -f "$CONF" ]; then
    echo "no input data/mask/config: $DATA / $MASK / $CONF, skipping test..."
