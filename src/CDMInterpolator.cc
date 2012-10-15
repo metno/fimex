@@ -37,6 +37,7 @@
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
 #include "nanoflann/nanoflann.hpp"
+#include "fimex/Utils.h"
 #include "../config.h"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -722,7 +723,7 @@ void flannTranslatePointsToClosestInputCell(double maxDist, vector<double>& poin
     for (size_t ix = 0; ix < orgXDimSize; ix++) {
         for (size_t iy = 0; iy < orgYDimSize; iy++) {
             size_t pos = ix+iy*orgXDimSize;
-            if (!(mifi_isnanf(latVals[pos]) || mifi_isnanf(lonVals[pos]))) {
+            if (!(mifi_isnan(latVals[pos]) || mifi_isnan(lonVals[pos]))) {
                 double sinLat = sin(latVals[pos]);
                 double cosLat = cos(latVals[pos]);
                 double sinLon = sin(lonVals[pos]);

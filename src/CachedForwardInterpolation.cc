@@ -86,7 +86,7 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
         for (size_t y = 0; y < inY; ++y) {
             for (size_t x = 0; x < inX; ++x) {
                 float val = *inDataIt++;
-                if (!mifi_isnanf(val)) {
+                if (!mifi_isnan(val)) {
                     int xOutPos = MetNoFimex::round(pointsOnXAxis[y*inX+x]);
                     if (xOutPos >= 0 && xOutPos < static_cast<int>(outX)) {
                         int yOutPos = MetNoFimex::round(pointsOnYAxis[y*inX+x]);
