@@ -707,6 +707,12 @@ int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const doub
     return MIFI_OK;
 }
 
+int mifi_get_values_nearest_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+{
+    memcpy(outfield, infieldA, n * sizeof(float));
+    return MIFI_OK;
+}
+
 //o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
 //b = o(a)
 int mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)

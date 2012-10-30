@@ -228,6 +228,20 @@ extern int mifi_get_values_bilinear_f(const float* infield, float* outvalues, co
 extern int mifi_get_values_bicubic_f(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 
 /**
+ * NearestNeighbor "interpolation"/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x
+ *
+ * @param infieldA array of size n with values of input at position a
+ * @param infieldB array of size n with values of input at position b
+ * @param outfield array of size n with values of input at position x, output
+ * @param n size of arrays
+ * @param a position of infieldA
+ * @param b position of infieldB
+ * @param x position of outfield
+ * @return MIFI_OK return-value set for compatibility with mifi_get_values_log_f()
+ */
+extern int mifi_get_values_nearest_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+
+/**
  * Linear interpolation/extrapolation of values in the arrays infieldA and infieldB at position a and b to a field at outfield at position x
  * with o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
  * (that describes a linear function o(x) = m*x + c )

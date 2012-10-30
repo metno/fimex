@@ -72,6 +72,21 @@ string findUniqueDimVarName(const CDM& cdm, string baseVar)
     throw CDMException("unable to generate new dimension/variable name starting with "+ baseVar);
 }
 
+
+/* TODO: see CDMInterpolator.cc, deduplicate */
+static boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue) {
+    boost::shared_array<float> array = inData->asFloat();
+    mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
+    return array;
+}
+
+// for performance reasons, the iData-reference will be modified and used within the return data
+static DataPtr interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
+    mifi_nanf2bad(&iData[0], &iData[size], badValue);
+    return createData(size, iData);
+}
+
+
 CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, string verticalType, string verticalInterpolationMethod, const std::vector<double> level1, const std::vector<double> level2)
 : dataReader_(dataReader), pimpl_(new VIntPimpl())
 {
@@ -102,6 +117,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LOG;
     } else if (verticalInterpolationMethod == "loglog") {
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LOGLOG;
+    } else if (verticalInterpolationMethod == "nearestneighbor") {
+        pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_NN;
     } else {
         throw CDMException("unknown vertical interpolation method: " +verticalInterpolationMethod);
     }
@@ -297,9 +314,9 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
     case MIFI_VINT_METHOD_LIN: intFunc = &mifi_get_values_linear_f; break;
     case MIFI_VINT_METHOD_LOG: intFunc = &mifi_get_values_log_f; break;
     case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
+    case MIFI_VINT_METHOD_NN: intFunc = &mifi_get_values_nearest_f; break;
     default: assert(false); break;
     }
-
 
     vector<double>& pOut = pimpl_->level1;
     DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
@@ -308,7 +325,8 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
                            type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+
                            ") != " + type2string(data->size()));
     }
-    boost::shared_array<float> iData = data->asFloat();
+    double badValue = cdm_->getFillValue(varName);
+    boost::shared_array<float> iData = data2InterpolationArray(data, badValue);
     size_t oSize = nx*ny*pOut.size()*(nt-startT);
     boost::shared_array<float> oData(new float[oSize]);
 
@@ -357,7 +375,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
         replace_if(&oData[0], &oData[0]+oSize, bind2nd(greater<float>(), maxVal), maxVal);
     }
 
-    return createData(nx*ny*pOut.size()*(nt-startT), oData);
+    return interpolationArray2Data(oData, nx*ny*pOut.size()*(nt-startT), badValue);
 }
 
 

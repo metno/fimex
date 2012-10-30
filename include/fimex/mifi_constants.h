@@ -205,6 +205,15 @@
  */
 #define MIFI_VINT_METHOD_LOGLOG 2
 
+/**
+ * @brief vertical interpolation method
+ *
+ * nearest neighbor "interpolation", e.g. mifi_get_values_f()
+ */
+#define MIFI_VINT_METHOD_NN 3
+
+
+
 #ifdef __cplusplus
 #include <limits>
 /** @brief undefined value for floats */

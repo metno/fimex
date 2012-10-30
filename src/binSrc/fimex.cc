@@ -813,7 +813,7 @@ int run(int argc, char* args[])
         ("merge.variables.outer", po::value< vector<string> >(), "names of outer grid variables to merge; these names will appear in the output")
 
         ("verticalInterpolate.type", po::value<string>(), "pressure, height or depth")
-        ("verticalInterpolate.method", po::value<string>(), "linear, log or loglog interpolation")
+        ("verticalInterpolate.method", po::value<string>(), "linear, log, loglog or nearestneighbor interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T, omega2vwind or add4Dpressure")
