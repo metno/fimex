@@ -26,6 +26,8 @@
 
 #include "ToVLevelConverter.h"
 #include <map>
+#include <functional>
+#include <algorithm>
 #include <boost/regex.hpp>
 #include "fimex/CDMReader.h"
 #include "fimex/Data.h"
@@ -317,6 +319,8 @@ const vector<double> OceanSCoordinateGToDepthConverter::operator()(size_t x, siz
     }
     eta = eta_.getDouble(x,y,t);
     func_(nz_, depth, depth_c_, eta, &s_[0], &C_[0], &z[0]);
+    /* z as calculated by formulars is negative down, but we want positive down */
+    transform(z.begin(), z.end(), z.begin(), bind1st(multiplies<double>(),-1.));
     return z;
 }
 
