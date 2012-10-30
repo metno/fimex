@@ -344,12 +344,16 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
                             + type2string(pIn.size()) + " must be " + type2string(nz));
                 }
                 for (size_t k = 0; k < pOut.size(); k++) {
-                    pair<size_t, size_t> pos = find_closest_neighbor_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
-                    size_t inPos1 = mifi_3d_array_position(x, y, pos.first, nx, ny, nz);
-                    size_t inPos2 = mifi_3d_array_position(x, y, pos.second, nx, ny, nz);
                     size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
-                    intFunc(&inData[inPos1], &inData[inPos2], &outData[outPos],
-                            1, pIn.at(pos.first), pIn.at(pos.second), pOut.at(k));
+                    if (levConv->isValid(pOut[k], x, y, t)) {
+                        pair<size_t, size_t> pos = find_closest_neighbor_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
+                        size_t inPos1 = mifi_3d_array_position(x, y, pos.first, nx, ny, nz);
+                        size_t inPos2 = mifi_3d_array_position(x, y, pos.second, nx, ny, nz);
+                        intFunc(&inData[inPos1], &inData[inPos2], &outData[outPos],
+                                1, pIn.at(pos.first), pIn.at(pos.second), pOut.at(k));
+                    } else {
+                        outData[outPos] = MIFI_UNDEFINED_D;
+                    }
 #if 0
                     // bad input or extrapolation
                     if (varName == "relative_humidity" && outData[outPos] > 100) {
