@@ -637,7 +637,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
     ProjectionInfo pi = p_->gridProjection[varGridDef];
     assert(pi.xDim != "");
 
-    // grib data can be (x,y,level,time) or (x,y,level) or just (x,y)
+    // grib data can be (x,y,[ensemble,]level,time) or (x,y,[ensemble,]level) or just (x,y[,ensemble])
     // TODO: ensembles?
     const vector<string>& dims = variable.getShape();
     const CDMDimension* layerDim = 0;
