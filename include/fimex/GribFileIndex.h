@@ -66,11 +66,11 @@ public:
     /**
      * give the total number of ensembles for this parameter
      */
-    long getTotalNumberOfEnsembles() { return totalNumberOfEnsembles_; }
+    size_t getTotalNumberOfEnsembles() const { return static_cast<size_t>(totalNumberOfEnsembles_); }
     /**
      * get the current perturbation/ensemble number
      */
-    long getPerturbationNumber() { return perturbationNo_; }
+    size_t getPerturbationNumber() const { return static_cast<size_t>(perturbationNo_); }
     /**
      * Get the parameter ids as list with the following meanings:
      * @li ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;

@@ -65,8 +65,21 @@ struct GribCDMReaderImpl {
     MutexType mutex;
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
+    string ensembleDimName;
+    string maxEnsembles;
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
+
+    // varName -> time (unlimDimPos) -> level (val) -> ensemble (val) -> GFI (index)
+    map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
+    // varName -> vector of levelValues
+    map<string, vector<long> > varLevels;
+    // varName -> has Ensemble
+    map<string, bool> varHasEnsemble;
+
+    // list of different vectors per typeOfLevel
+    map<long, vector<vector<long> > > levelValsOfType;
+
     // store level parameters of level-ids: edition, level-type, level-no
     map<string, vector<vector<long> > > levels;
     /**
@@ -164,8 +177,11 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
         }
 
         initAddGlobalAttributes();
+        initCreateGFIBoxes();
+
         map<string, CDMDimension> levelDims = initAddLevelDimensions();
         initAddProjection();
+        initAddEnsembles();
         initAddVariables(levelDims);
     }
 }
@@ -401,6 +417,45 @@ void GribCDMReader::initAddTimeDimension()
 
 }
 
+void GribCDMReader::initCreateGFIBoxes()
+{
+    // go through all indices and create a box for each variable
+    // with time,level,ensemble -> GribFileIndex
+    // create also lists with total levels and ensembles per variable
+
+
+}
+
+void GribCDMReader::initAddEnsembles()
+{
+    size_t maxEnsembles = 0;
+    for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
+        if (gfmIt->getTotalNumberOfEnsembles() > 0) {
+            maxEnsembles = std::max(maxEnsembles, gfmIt->getTotalNumberOfEnsembles());
+            // perturbation number start at 0
+            if (gfmIt->getPerturbationNumber() >= maxEnsembles) {
+                throw CDMException("grib-perturbation number " + type2string(gfmIt->getPerturbationNumber() + " larger than max-ensembles: " + type2string(maxEnsembles)));
+            }
+        }
+    }
+    if (maxEnsembles > 1) {
+        // TODO: read those from config?
+        p_->ensembleDimName = "ensemble_member";
+        CDMDimension ensembleDim(p_->ensembleDimName, maxEnsembles);
+        cdm_->addDimension(ensembleDim);
+        vector<string> varShape(1, p_->ensembleDimName);
+        CDMVariable ensembleVar(p_->ensembleDimName, CDM_SHORT, varShape);
+        vector<short> eMembers(maxEnsembles);
+        for (size_t i = 0; i < maxEnsembles; ++i) eMembers.at(i) = i;
+        DataPtr eData = createData(CDM_SHORT, eMembers.begin(), eMembers.end());
+        ensembleVar.setData(eData);
+        cdm_->addVariable(ensembleVar);
+        cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
+        cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("standard_name", "realization"));
+    }
+
+}
+
 void GribCDMReader::initAddProjection()
 {
     // get the overruled earthform
@@ -580,6 +635,9 @@ void GribCDMReader::initAddVariables(const map<string, CDMDimension>& levelDimsO
              vector<string> shape;
              shape.push_back(pi.xDim);
              shape.push_back(pi.yDim);
+             if (gfmIt->getTotalNumberOfEnsembles() > 1) {
+                 shape.push_back(p_->ensembleDimName);
+             }
              string levelDimName = type2string(gfmIt->getEdition()) + "_" + type2string(gfmIt->getLevelType());
              map<string, CDMDimension>::const_iterator levelIt = levelDimsOfType.find(levelDimName);
              if (levelIt != levelDimsOfType.end()) {
@@ -646,6 +704,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         CDMDimension& dim = cdm_->getDimension(*it);
         if (dim.getName() != pi.xDim &&
             dim.getName() != pi.yDim &&
+            dim.getName() != p_->ensembleDimName &&
             !dim.isUnlimited())
         {
             // level
