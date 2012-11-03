@@ -66,7 +66,7 @@ struct GribCDMReaderImpl {
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
     string ensembleDimName;
-    string maxEnsembles;
+    size_t maxEnsembles;
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
 
@@ -178,10 +178,10 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
 
         initAddGlobalAttributes();
         initCreateGFIBoxes();
+        initAddEnsembles();
 
         map<string, CDMDimension> levelDims = initAddLevelDimensions();
         initAddProjection();
-        initAddEnsembles();
         initAddVariables(levelDims);
     }
 }
@@ -417,36 +417,73 @@ void GribCDMReader::initAddTimeDimension()
 
 }
 
+string GribCDMReader::getVariableName(const GribFileMessage& gfm) const
+{
+    xmlNodePtr node = findVariableXMLNode(gfm);
+    string varName;
+    if (node == 0) {
+        // prepend names from grib-api with 'ga_'
+        // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
+        varName = "ga_" + gfm.getShortName() + "_" + type2string(gfm.getLevelType());
+    } else {
+        varName = getXmlProp(node, "name");
+    }
+    return varName;
+}
+
 void GribCDMReader::initCreateGFIBoxes()
 {
     // go through all indices and create a box for each variable
     // with time,level,ensemble -> GribFileIndex
     // create also lists with total levels and ensembles per variable
+    map<string, set<long> > varLevels;
+    p_->maxEnsembles = 0;
+    int pos = 0;
+    for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt, ++pos) {
+        string varName = getVariableName(*gfmIt);
+        vector<boost::posix_time::ptime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), gfmIt->getValidTime());
+        assert(pTimesIt != p_->times.end());
+        size_t unlimDimPos = distance(p_->times.begin(), pTimesIt);
 
+        bool hasEnsemble;
+        if (gfmIt->getTotalNumberOfEnsembles() > 1) {
+            hasEnsemble = true;
+            p_->maxEnsembles = std::max(p_->maxEnsembles, gfmIt->getTotalNumberOfEnsembles());
+            // perturbation number start at 0
+            if (gfmIt->getPerturbationNumber() >= p_->maxEnsembles) {
+                throw CDMException("grib-perturbation number " + type2string(gfmIt->getPerturbationNumber()) + " larger than max-ensembles: " + type2string(p_->maxEnsembles));
+            }
+        } else {
+            hasEnsemble = false;
+        }
+        if (p_->varHasEnsemble.find(varName) != p_->varHasEnsemble.end() && p_->varHasEnsemble[varName] != hasEnsemble) {
+            throw CDMException("grib-variable " + varName + " has messages within ensembles, and outside: fimex can't proceed");
+        }
+        p_->varHasEnsemble[varName] = hasEnsemble;
+
+        // varName -> time (unlimDimPos) -> level (val) -> ensemble (val) -> GFI (index)
+        //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
+        p_->varTimeLevelEnsembleGFIBox[varName][unlimDimPos][gfmIt->getLevelNumber()][gfmIt->getPerturbationNumber()] = pos;
+        varLevels[varName].insert(gfmIt->getLevelNumber());
+    }
+
+    for (map<string, map<size_t, map<long, map<size_t, size_t> > > >::iterator varIt = p_->varTimeLevelEnsembleGFIBox.begin(); varIt != p_->varTimeLevelEnsembleGFIBox.end(); ++varIt) {
+        p_->varLevels[varIt->first].assign(varLevels[varIt->first].begin(), varLevels[varIt->first].end());
+    }
 
 }
 
 void GribCDMReader::initAddEnsembles()
 {
-    size_t maxEnsembles = 0;
-    for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
-        if (gfmIt->getTotalNumberOfEnsembles() > 0) {
-            maxEnsembles = std::max(maxEnsembles, gfmIt->getTotalNumberOfEnsembles());
-            // perturbation number start at 0
-            if (gfmIt->getPerturbationNumber() >= maxEnsembles) {
-                throw CDMException("grib-perturbation number " + type2string(gfmIt->getPerturbationNumber() + " larger than max-ensembles: " + type2string(maxEnsembles)));
-            }
-        }
-    }
-    if (maxEnsembles > 1) {
+    if (p_->maxEnsembles > 1) {
         // TODO: read those from config?
         p_->ensembleDimName = "ensemble_member";
-        CDMDimension ensembleDim(p_->ensembleDimName, maxEnsembles);
+        CDMDimension ensembleDim(p_->ensembleDimName, p_->maxEnsembles);
         cdm_->addDimension(ensembleDim);
         vector<string> varShape(1, p_->ensembleDimName);
         CDMVariable ensembleVar(p_->ensembleDimName, CDM_SHORT, varShape);
-        vector<short> eMembers(maxEnsembles);
-        for (size_t i = 0; i < maxEnsembles; ++i) eMembers.at(i) = i;
+        vector<short> eMembers(p_->maxEnsembles);
+        for (size_t i = 0; i < p_->maxEnsembles; ++i) eMembers.at(i) = i;
         DataPtr eData = createData(CDM_SHORT, eMembers.begin(), eMembers.end());
         ensembleVar.setData(eData);
         cdm_->addVariable(ensembleVar);
@@ -588,16 +625,9 @@ void GribCDMReader::initAddVariables(const map<string, CDMDimension>& levelDimsO
         const ProjectionInfo pi = p_->gridProjection[gfmIt->getGridDefinition()];
         assert(pi.xDim != "");
         CDMDataType type = CDM_DOUBLE;
-        xmlNodePtr node = findVariableXMLNode(*gfmIt);
-        string varName;
-        if (node == 0) {
-            // prepend names from grib-api with 'ga_'
-            // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
-            varName = "ga_" + gfmIt->getShortName() + "_" + type2string(gfmIt->getLevelType());
-        } else {
-            varName = getXmlProp(node, "name");
-        }
+        string varName = getVariableName(*gfmIt);
         if (p_->varName2gribMessages.find(varName) == p_->varName2gribMessages.end()) {
+            xmlNodePtr node = findVariableXMLNode(*gfmIt);
             vector<CDMAttribute> attributes;
             if (node != 0) {
                 fillAttributeListFromXMLNode(attributes, node->children, p_->templateReplacementAttributes);
