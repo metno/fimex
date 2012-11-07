@@ -187,6 +187,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     const vector<long>& pars = msg.getParameterIds();
     map<string, long> optionals;
     optionals["typeOfLevel"] = msg.getLevelType();
+    optionals["levelNo"] = msg.getLevelNumber();
     if (msg.getEdition() == 1) {
         xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"']");
         optionals["gribTablesVersionNo"] = pars.at(1);
