@@ -358,7 +358,7 @@
         <attribute name="units" value="kg m^-2" type="string" />
     </parameter>
 
-<!-- fra metcoop -->
+<!-- from metcoop -->
     <parameter name="u_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
@@ -494,6 +494,89 @@
         <attribute name="standard_name" value="air_pressure" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
+
+<!-- from MEE ensembles (ec) -->
+    <parameter name="geopotential" type="float">
+        <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="geopotential" type="string" />
+        <attribute name="standard_name" value="geopotential" type="string" />
+        <attribute name="units" value="m2/s2" type="string" />
+    </parameter>
+    <parameter name="lwe_thickness_of_percipitation_amount" type="float">
+        <grib1 indicatorOfParameter="228" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="lwe_thickness_of_percipitation_amount" type="string" />
+        <attribute name="units" value="kg/m2" type="string" />
+    </parameter>
+    <parameter name="lwe_thickness_of_snowfall_amount" type="float">
+        <grib1 indicatorOfParameter="144" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
+        <attribute name="units" value="kg/m2" type="string" />
+    </parameter>
+    <parameter name="cloud_area_fraction" type="short">
+        <grib1 indicatorOfParameter="164" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="-32767" type="short" />
+        <attribute name="scale_factor" value="0.0001" type="float" />
+        <attribute name="standard_name" value="cloud_area_fraction" type="string" />
+        <attribute name="units" value="1" type="string" />
+    </parameter>
+    <parameter name="air_temperature" type="float">
+        <grib1 indicatorOfParameter="130" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="units" value="K" type="string" />
+    </parameter>
+    <parameter name="dewpoint_2m" type="float">
+        <grib1 indicatorOfParameter="168" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="units" value="K" type="string" />
+    </parameter>
+    <parameter name="air_temperature_2m" type="float">
+        <grib1 indicatorOfParameter="167" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="units" value="K" type="string" />
+    </parameter>
+    <parameter name="max_air_temperature_2m" type="float">
+        <grib1 indicatorOfParameter="121" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="units" value="K" type="string" />
+    </parameter>
+    <parameter name="min_air_temperature_2m" type="float">
+        <grib1 indicatorOfParameter="122" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="units" value="K" type="string" />
+    </parameter>
+    <parameter name="x_wind_10m" type="float">
+        <grib1 indicatorOfParameter="165" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="x_wind" type="string" />
+        <attribute name="units" value="m/s" type="string" />
+    </parameter>
+    <parameter name="y_wind_10m" type="float">
+        <grib1 indicatorOfParameter="166" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="y_wind" type="string" />
+        <attribute name="units" value="m/s" type="string" />
+    </parameter>
+    <parameter name="max_wind_speed_of_gust_10m" type="float">
+        <grib1 indicatorOfParameter="123" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="max_wind_speed_of_gust" type="string" />
+        <attribute name="units" value="m/s" type="string" />
+    </parameter>
+    <parameter name="sea_level_pressure" type="float">
+        <grib1 indicatorOfParameter="151" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+        <attribute name="units" value="Pa" type="string" />
+    </parameter>
+    
+
 
 
 </variables>
