@@ -383,8 +383,14 @@
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
-    <parameter name="T0M/T2M" type="float">
-        <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105"/>
+    <parameter name="T0M" type="float">
+        <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105" levelNo="0"/>
+        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="units" value="K" type="string" />
+    </parameter>
+    <parameter name="T2M" type="float">
+        <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="105" levelNo="2"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
