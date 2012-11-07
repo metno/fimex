@@ -1,3 +1,6 @@
+  * 2012-11-07 fimex-0.40
+    * splitting of vertical axes in grib-files
+    * support for ensemble products in grib-files
   * 2012-10-30 fimex-0.39.2
     * vertical-interpolation invalidating data below ocean floor
     * vertical interpolation fixing axis (positive down) of depth 
