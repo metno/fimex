@@ -65,10 +65,23 @@ struct GribCDMReaderImpl {
     MutexType mutex;
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
+    string ensembleDimName;
+    size_t maxEnsembles;
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
-    // store level parameters of level-ids: edition, level-type, level-no
-    map<string, vector<vector<long> > > levels;
+
+    // varName -> time (unlimDimPos) -> level (val) -> ensemble (val) -> GFI (index)
+    map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
+    // varName -> has Ensemble
+    map<string, bool> varHasEnsemble;
+
+    // list of different vectors per edition _ typeOfLevel
+    map<string, vector<vector<long> > > levelValsOfType;
+    // edition_typeOfLevel -> [ dimensionName ]
+    map<string, vector<string> > levelDimNames;
+    // varName -> (edition_levelType, position n levelValsOfType
+    map<string, pair<string, size_t> > varLevelTypePos;
+
     /**
      * config attributes may contain template parameters marked with %PARAM%
      * which should be replaced by dynamic values from the grib-file and stored
@@ -77,10 +90,6 @@ struct GribCDMReaderImpl {
      * Currently implemented parameters are: %MIN_DATETIME%, %MAX_DATETIME%: earliest and latest time in felt-file as ISO string
      */
     map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacementAttributes;
-    /**
-     * map from cdm variable names to list of gribMessages
-     */
-    map<string, vector<GribFileMessage> > varName2gribMessages;
 };
 
 /**
@@ -164,9 +173,11 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
         }
 
         initAddGlobalAttributes();
-        map<string, CDMDimension> levelDims = initAddLevelDimensions();
+        initCreateGFIBoxes();
+        initAddEnsembles();
+        initLevels();
         initAddProjection();
-        initAddVariables(levelDims);
+        initAddVariables();
     }
 }
 
@@ -176,6 +187,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     const vector<long>& pars = msg.getParameterIds();
     map<string, long> optionals;
     optionals["typeOfLevel"] = msg.getLevelType();
+    optionals["levelNo"] = msg.getLevelNumber();
     if (msg.getEdition() == 1) {
         xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"']");
         optionals["gribTablesVersionNo"] = pars.at(1);
@@ -261,15 +273,18 @@ void GribCDMReader::initAddGlobalAttributes()
 }
 
 /// add the levelOfType for grib-edition edition to the levelDimsOfType, and the levels to the CDM
-void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levelsOfType, map<string, CDMDimension>& levelDimsOfType)
+void GribCDMReader::initLevels()
 {
-    for (map<long, set<long> >::const_iterator lit = levelsOfType.begin(); lit != levelsOfType.end(); ++lit) {
-        string xpathLevelString("/gr:cdmGribReaderConfig/gr:axes/gr:vertical_axis[@grib"+type2string(edition)+"_id='"+type2string(lit->first)+"']");
+    for (map<string, vector<vector<long> > >::const_iterator lit = p_->levelValsOfType.begin(); lit != p_->levelValsOfType.end(); ++lit) {
+        vector<string> editionType = tokenize(lit->first, "_");
+        long edition = string2type<long>(editionType.at(0));
+        long typeId = string2type<long>(editionType.at(1));
+        string xpathLevelString("/gr:cdmGribReaderConfig/gr:axes/gr:vertical_axis[@grib"+type2string(edition)+"_id='"+type2string(typeId)+"']");
         XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathLevelString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
         if (size != 1) {
-            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(lit->first)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
+            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
         }
         xmlNodePtr node = nodes->nodeTab[0];
         assert(node->type == XML_ELEMENT_NODE);
@@ -277,70 +292,46 @@ void GribCDMReader::initLevels(long edition, const map<long, set<long> >& levels
         string levelId = getXmlProp(node, "id");
         string levelType = getXmlProp(node, "type");
         CDMDataType levelDataType = string2datatype(levelType);
-        set<long>::size_type levelSize = lit->second.size();
-        CDMDimension levelDim(levelId, levelSize);
-        levelDimsOfType.insert(pair<string, CDMDimension>(type2string(edition)+"_"+type2string(lit->first), levelDim));
-        cdm_->addDimension(levelDim);
+        vector<string> dimNames(lit->second.size());
+        for (size_t i = 0; i < lit->second.size(); ++i) {
+            string myLevelId = levelId + (lit->second.size() > 1  ? type2string(i) : "");
+            dimNames.at(i) = myLevelId;
+            LOG4FIMEX(logger, Logger::DEBUG, "declaring level: " << myLevelId);
+            set<long>::size_type levelSize = lit->second.at(i).size();
+            CDMDimension levelDim(myLevelId, levelSize);
+            cdm_->addDimension(levelDim);
 
-        // create level variable
-        vector<string> levelShape;
-        levelShape.push_back(levelDim.getName());
-        CDMVariable levelVar(levelId, levelDataType, levelShape);
-        cdm_->addVariable(levelVar);
+            // create level variable
+            vector<string> levelShape;
+            levelShape.push_back(levelDim.getName());
+            CDMVariable levelVar(levelDim.getName(), levelDataType, levelShape);
+            cdm_->addVariable(levelVar);
 
-        // add level variable data
-        cdm_->getVariable(levelVar.getName()).setData(createData(CDM_INT, lit->second.begin(), lit->second.end()));
-        // enable search of level-information by level-name required by getDataSlice
-        for (set<long>::const_iterator lnit = lit->second.begin(); lnit != lit->second.end(); ++lnit) {
-            // add a vector with editon, levelType and levelNumber
-            vector<long> v(0,3);
-            v.push_back(edition);
-            v.push_back(lit->first);
-            v.push_back(*lnit);
-            p_->levels[levelVar.getName()].push_back(v);
-        }
+            // add level variable data
+            cdm_->getVariable(levelVar.getName()).setData(createData(CDM_INT, lit->second.at(i).begin(), lit->second.at(i).end()));
 
+            // add attributes
+            vector<CDMAttribute> levelAttributes;
+            fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
 
-        // add attributes
-        vector<CDMAttribute> levelAttributes;
-        fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+            // add special attributes for grib1 / grib2
+            {
+                string xpathGribLevelString("gr:grib"+type2string(edition));
+                XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
+                xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
+                int size = (gribNodes) ? gribNodes->nodeNr : 0;
+                if (size == 1) {
+                    fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+                }
+            }
 
-        // add special attributes for grib1 / grib2
-        {
-            string xpathGribLevelString("gr:grib"+type2string(edition));
-            XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
-            xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
-            int size = (gribNodes) ? gribNodes->nodeNr : 0;
-            if (size == 1) {
-                fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+            // add the attributes to the CDM
+            for (vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
+                cdm_->addAttribute(levelVar.getName(), *ait);
             }
         }
-
-        // add the attributes to the CDM
-        for (vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
-            cdm_->addAttribute(levelVar.getName(), *ait);
-        }
+        p_->levelDimNames[lit->first] = dimNames;
     }
-}
-
-/// string is gribEdition_levelType, i.e. 2_100
-map<string, CDMDimension> GribCDMReader::initAddLevelDimensions()
-{
-    // level-type mapping, only allow one set of levels per levelType
-    map<long, set<long> > levelsOfType1, levelsOfType2;
-    for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
-        if (gfmIt->getEdition() == 1) {
-            levelsOfType1[gfmIt->getLevelType()].insert(gfmIt->getLevelNumber());
-        } else {
-            levelsOfType2[gfmIt->getLevelType()].insert(gfmIt->getLevelNumber());
-        }
-    }
-
-    map<string, CDMDimension> levelDimsOfType;
-    initLevels(1, levelsOfType1, levelDimsOfType);
-    initLevels(2, levelsOfType2, levelDimsOfType);
-
-    return levelDimsOfType;
 }
 
 void GribCDMReader::initAddTimeDimension()
@@ -399,6 +390,127 @@ void GribCDMReader::initAddTimeDimension()
     cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "forecast_reference_time"));
 
 
+}
+
+string GribCDMReader::getVariableName(const GribFileMessage& gfm) const
+{
+    xmlNodePtr node = findVariableXMLNode(gfm);
+    string varName;
+    if (node == 0) {
+        // prepend names from grib-api with 'ga_'
+        // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
+        varName = "ga_" + gfm.getShortName() + "_" + type2string(gfm.getLevelType());
+    } else {
+        varName = getXmlProp(node, "name");
+    }
+    return varName;
+}
+
+// IN1 and IN2 should both be collections
+template<typename IN1, typename IN2>
+class EqualFunctor : public unary_function<IN2, bool> {
+private:
+    IN1 in1_;
+public:
+    EqualFunctor(IN1 in1) : in1_(in1) {}
+    bool operator()(IN2 in2) {
+        if (in1_.size() == in2.size()) {
+            return std::equal(in1_.begin(), in1_.end(), in2.begin());
+        } else {
+            return false;
+        }
+    }
+};
+
+void GribCDMReader::initCreateGFIBoxes()
+{
+    // go through all indices and create a box for each variable
+    // with time,level,ensemble -> GribFileIndex
+    // create also lists with total levels and ensembles per variable
+    map<string, set<long> > varLevels;
+    map<string, string> varLevelType;
+    p_->maxEnsembles = 0;
+    int pos = 0;
+    for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt, ++pos) {
+        string varName = getVariableName(*gfmIt);
+        vector<boost::posix_time::ptime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), gfmIt->getValidTime());
+        assert(pTimesIt != p_->times.end());
+        size_t unlimDimPos = distance(p_->times.begin(), pTimesIt);
+
+        bool hasEnsemble;
+        if (gfmIt->getTotalNumberOfEnsembles() > 1) {
+            hasEnsemble = true;
+            p_->maxEnsembles = std::max(p_->maxEnsembles, gfmIt->getPerturbationNumber()+1); // gfmIt->getTotalNumberOfEnsembles() is often wrong
+            // perturbation number start at 0
+            if (gfmIt->getPerturbationNumber() >= p_->maxEnsembles) {
+                throw CDMException("grib-perturbation number " + type2string(gfmIt->getPerturbationNumber()) + " larger than max-ensembles: " + type2string(p_->maxEnsembles));
+            }
+        } else {
+            hasEnsemble = false;
+        }
+        if (p_->varHasEnsemble.find(varName) != p_->varHasEnsemble.end() && p_->varHasEnsemble[varName] != hasEnsemble) {
+            throw CDMException("grib-variable " + varName + " has messages within ensembles, and outside: fimex can't proceed");
+        }
+        p_->varHasEnsemble[varName] = hasEnsemble;
+
+        // varName -> time (unlimDimPos) -> level (val) -> ensemble (val) -> GFI (index)
+        //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
+        p_->varTimeLevelEnsembleGFIBox[varName][unlimDimPos][gfmIt->getLevelNumber()][gfmIt->getPerturbationNumber()] = pos;
+
+        // remember level and levelType
+        varLevels[varName].insert(gfmIt->getLevelNumber());
+        string levelType = type2string(gfmIt->getEdition()) + "_" + type2string(gfmIt->getLevelType());
+        if (varLevelType.find(varName) == varLevelType.end()) {
+            varLevelType[varName] = levelType;
+        } else if (varLevelType[varName] != levelType){
+            throw CDMException("typeOfLevel change for variable " + varName + " from " + varLevelType[varName] + " to " + levelType);
+        }
+    }
+
+    // map from variableName to levelType and position in levelValsOfType
+    for (map<string, string>::iterator varTypeIt = varLevelType.begin(); varTypeIt != varLevelType.end(); ++varTypeIt) {
+        const string& varName = varTypeIt->first;
+        const string& levelType = varTypeIt->second;
+        const set<long>& levels = varLevels[varName];
+
+
+        // addLevelForType
+        vector<vector<long> > levelForType;
+        if (p_->levelValsOfType.find(levelType) != p_->levelValsOfType.end()) {
+            levelForType = p_->levelValsOfType[levelType];
+        }
+        vector<vector<long> >::iterator posIt =
+                find_if(levelForType.begin(), levelForType.end(), EqualFunctor<set<long>, vector<long> >(levels));
+        size_t pos;
+        if (posIt == levelForType.end()) {
+            pos = levelForType.size();
+            levelForType.push_back(vector<long>(levels.begin(), levels.end()));
+        } else {
+            pos = distance(levelForType.begin(), posIt);
+        }
+        p_->levelValsOfType[levelType] = levelForType;
+
+        p_->varLevelTypePos[varName] = make_pair(levelType, pos);
+    }
+}
+
+void GribCDMReader::initAddEnsembles()
+{
+    if (p_->maxEnsembles > 1) {
+        // TODO: read those from config?
+        p_->ensembleDimName = "ensemble_member";
+        CDMDimension ensembleDim(p_->ensembleDimName, p_->maxEnsembles);
+        cdm_->addDimension(ensembleDim);
+        vector<string> varShape(1, p_->ensembleDimName);
+        CDMVariable ensembleVar(p_->ensembleDimName, CDM_SHORT, varShape);
+        vector<short> eMembers(p_->maxEnsembles);
+        for (size_t i = 0; i < p_->maxEnsembles; ++i) eMembers.at(i) = i;
+        DataPtr eData = createData(CDM_SHORT, eMembers.begin(), eMembers.end());
+        ensembleVar.setData(eData);
+        cdm_->addVariable(ensembleVar);
+        cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
+        cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("standard_name", "realization"));
+    }
 }
 
 void GribCDMReader::initAddProjection()
@@ -527,22 +639,17 @@ void GribCDMReader::initAddProjection()
     }
 }
 
-void GribCDMReader::initAddVariables(const map<string, CDMDimension>& levelDimsOfType)
+void GribCDMReader::initAddVariables()
 {
+    set<string> initializedVariables;
     for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
         const ProjectionInfo pi = p_->gridProjection[gfmIt->getGridDefinition()];
         assert(pi.xDim != "");
         CDMDataType type = CDM_DOUBLE;
-        xmlNodePtr node = findVariableXMLNode(*gfmIt);
-        string varName;
-        if (node == 0) {
-            // prepend names from grib-api with 'ga_'
-            // since they might otherwise start numerical, which is against CF, and buggy in netcdf 3.6.3, 4.0.*
-            varName = "ga_" + gfmIt->getShortName() + "_" + type2string(gfmIt->getLevelType());
-        } else {
-            varName = getXmlProp(node, "name");
-        }
-        if (p_->varName2gribMessages.find(varName) == p_->varName2gribMessages.end()) {
+        string varName = getVariableName(*gfmIt);
+        if (initializedVariables.find(varName) == initializedVariables.end()) {
+            initializedVariables.insert(varName);
+            xmlNodePtr node = findVariableXMLNode(*gfmIt);
             vector<CDMAttribute> attributes;
             if (node != 0) {
                 fillAttributeListFromXMLNode(attributes, node->children, p_->templateReplacementAttributes);
@@ -580,11 +687,14 @@ void GribCDMReader::initAddVariables(const map<string, CDMDimension>& levelDimsO
              vector<string> shape;
              shape.push_back(pi.xDim);
              shape.push_back(pi.yDim);
-             string levelDimName = type2string(gfmIt->getEdition()) + "_" + type2string(gfmIt->getLevelType());
-             map<string, CDMDimension>::const_iterator levelIt = levelDimsOfType.find(levelDimName);
-             if (levelIt != levelDimsOfType.end()) {
-                 shape.push_back(levelIt->second.getName());
+             if (gfmIt->getTotalNumberOfEnsembles() > 1) {
+                 shape.push_back(p_->ensembleDimName);
              }
+             assert(p_->varLevelTypePos.find(varName) != p_->varLevelTypePos.end());
+             pair<string, size_t> levelTypePos = p_->varLevelTypePos[varName];
+
+             string levelDimName = p_->levelDimNames[levelTypePos.first].at(levelTypePos.second);
+             shape.push_back(levelDimName);
              shape.push_back(p_->timeDimName);
 
              CDMVariable var(varName, type, shape);
@@ -595,21 +705,28 @@ void GribCDMReader::initAddVariables(const map<string, CDMDimension>& levelDimsO
              for (vector<CDMAttribute>::const_iterator attrIt = attributes.begin(); attrIt != attributes.end(); ++attrIt) {
                  cdm_->addAttribute(varName, *attrIt);
              }
-
-
         }
-        // add the index
-        p_->varName2gribMessages[varName].push_back(*gfmIt);
     }
-}
+ }
 
 
 GribCDMReader::~GribCDMReader()
 {
 }
 
+size_t GribCDMReader::getVariableMaxEnsembles(string varName) const {
+    size_t ensembles;
+    if (p_->varHasEnsemble.at(varName)) {
+        ensembles = p_->maxEnsembles;
+    } else {
+        ensembles = 1;
+    }
+    return ensembles;
+}
+
 DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "fetching unlim-slice " << unLimDimPos << " for variable " << varName);
     const CDMVariable& variable = cdm_->getVariable(varName);
 
     if (variable.getDataType() == CDM_NAT) {
@@ -623,55 +740,45 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         throw CDMException("requested time outside data-region");
     }
 
-    vector<GribFileMessage> slices;
-    map<string, vector<GribFileMessage> >::const_iterator gribMessagesIt = p_->varName2gribMessages.find(varName);
-    if (gribMessagesIt == p_->varName2gribMessages.end()) {
+    //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
+
+    map<string, map<size_t, map<long, map<size_t, size_t> > > >::const_iterator gmIt = p_->varTimeLevelEnsembleGFIBox.find(varName);
+    if (gmIt == p_->varTimeLevelEnsembleGFIBox.end()) {
         throw CDMException("no grib message found for variable '" + varName + "'");
     }
 
 
-    const vector<GribFileMessage>& gfmVec = gribMessagesIt->second;
-    // fetch the xy-slices from the grib
-    const GridDefinition varGridDef = gribMessagesIt->second.begin()->getGridDefinition();
-    assert(gribMessagesIt->second.begin() != gribMessagesIt->second.end());
-    ProjectionInfo pi = p_->gridProjection[varGridDef];
-    assert(pi.xDim != "");
-
-    // grib data can be (x,y,level,time) or (x,y,level) or just (x,y)
-    // TODO: ensembles?
+    // grib data can be (x,y,[ensemble,]level,time) or (x,y,[ensemble,]level) or just (x,y[,ensemble])
     const vector<string>& dims = variable.getShape();
-    const CDMDimension* layerDim = 0;
-    size_t xy_size = 1;
+    size_t slice_size = 1;
     for (vector<string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
         CDMDimension& dim = cdm_->getDimension(*it);
-        if (dim.getName() != pi.xDim &&
-            dim.getName() != pi.yDim &&
-            !dim.isUnlimited())
-        {
-            // level
-            layerDim = &dim;
-        }
         if (! dim.isUnlimited()) {
-            xy_size *= dim.getLength();
+            slice_size *= dim.getLength();
         }
     }
 
-    GribFileMessageEqualTime gfmet(p_->times.at(unLimDimPos));
-    vector<GribFileMessage>::const_iterator gfmIt = find_if(gfmVec.begin(), gfmVec.end(), gfmet);
-    if (gfmIt != gfmVec.end()) {
-        if (layerDim == 0) {
-            // add one xy slice
-            slices.push_back(*gfmIt);
-        } else {
-            // add slice for all levels, search time x
-            vector< vector<long> >& levels = p_->levels[layerDim->getName()];
-            for (vector<vector<long> >::iterator lit = levels.begin(); lit != levels.end(); ++lit) {
-                GribFileMessageEqualLevelTime gfmelt(lit->at(0), lit->at(1), lit->at(2), p_->times.at(unLimDimPos));
-                vector<GribFileMessage>::const_iterator gfmLevelIt = find_if(gfmVec.begin(), gfmVec.end(), gfmelt);
-                if (gfmLevelIt != gfmVec.end()) {
-                    slices.push_back(*gfmLevelIt);
-                } else {
-                    slices.push_back(GribFileMessage()); // dummy
+    LOG4FIMEX(logger, Logger::DEBUG, "building unlim-slice " << unLimDimPos << " for variable " << varName << ": size: " << slice_size);
+    vector<GribFileMessage> slices;
+    map<size_t, map<long, map<size_t, size_t> > >::const_iterator gmt = gmIt->second.find(unLimDimPos);
+    if (gmt != gmIt->second.end()) {
+        pair<string, size_t> typePos = p_->varLevelTypePos.at(varName);
+        vector<long> levels = p_->levelValsOfType.at(typePos.first).at(typePos.second);
+        for (size_t l = 0; l < levels.size(); ++l) {
+            map<long, map<size_t, size_t> >::const_iterator gmtl = gmt->second.find(levels[l]);
+            if (gmtl != gmt->second.end()) {
+                for (size_t e = 0; e < getVariableMaxEnsembles(varName); ++e) {
+                    map<size_t, size_t>::const_iterator gmtle = gmtl->second.find(e);
+                    if (gmtle != gmtl->second.end()) {
+                        slices.push_back(p_->indices.at(gmtle->second));
+                    } else {
+                        slices.push_back(GribFileMessage()); // add empty slice
+                    }
+                }
+            } else {
+                // layer not found, add empty slices
+                for (size_t e = 0; e < getVariableMaxEnsembles(varName); ++e) {
+                    slices.push_back(GribFileMessage()); // add empty slices
                 }
             }
         }
@@ -681,13 +788,13 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
     if (slices.size() == 0) return createData(variable.getDataType(), 0);
 
     // storage for complete data
-    boost::shared_array<double> doubleArray(new double[xy_size]);
+    boost::shared_array<double> doubleArray(new double[slice_size]);
     // prefill with missing values
     double missingValue = cdm_->getFillValue(varName);
-    fill(&doubleArray[0], &doubleArray[xy_size], missingValue);
-    DataPtr data = createData(xy_size, doubleArray);
+    fill(&doubleArray[0], &doubleArray[slice_size], missingValue);
+    DataPtr data = createData(slice_size, doubleArray);
     // storage for one layer
-    vector<double> gridData(xy_size/slices.size());
+    vector<double> gridData(slice_size/slices.size());
     size_t dataCurrentPos = 0;
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels

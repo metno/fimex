@@ -323,6 +323,16 @@ const vector<double> OceanSCoordinateGToDepthConverter::operator()(size_t x, siz
     transform(z.begin(), z.end(), z.begin(), bind1st(multiplies<double>(),-1.));
     return z;
 }
+bool OceanSCoordinateGToDepthConverter::isValid(double vVal, size_t x, size_t y, size_t t) {
+    float depth;
+    if (timeDependentDepth_) {
+        depth = depth_.getDouble(x,y,t);
+    } else {
+        depth = depth_.getDouble(x,y);
+    }
+    return (depth >= vVal);
+}
 
 
 }
+

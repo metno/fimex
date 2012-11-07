@@ -76,13 +76,20 @@ private:
      * @return 0 if not found, otherwise a valid node
      */
     xmlNodePtr findVariableXMLNode(const GribFileMessage& msg) const;
-    void initAddGlobalAttributes();
-    /// key of the levelDimensions is gribEdition_levelType, i.e. 2_100
-    void initLevels(long edition, const std::map<long, std::set<long> >& levelsOfType, std::map<std::string, CDMDimension>& levelDimsOfType);
-    std::map<std::string, CDMDimension> initAddLevelDimensions();
+    std::string getVariableName(const GribFileMessage& gfm) const;
+    size_t getVariableMaxEnsembles(std::string varName) const;
+
     void initAddTimeDimension();
+    void initAddGlobalAttributes();
+    void initCreateGFIBoxes();
+    void initLevels();
+
+    /// key of the levelDimensions is gribEdition_levelType, i.e. 2_100
+//    void initLevels(long edition, const std::map<long, std::set<long> >& levelsOfType, std::map<std::string, CDMDimension>& levelDimsOfType);
+//    std::map<std::string, CDMDimension> initAddLevelDimensions();
+    void initAddEnsembles();
     void initAddProjection();
-    void initAddVariables(const std::map<std::string, CDMDimension>& levelDims);
+    void initAddVariables();
 
 };
 

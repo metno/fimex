@@ -58,6 +58,16 @@ public:
      * @return pressure-levels in hPa at position (x,y,t)
      */
     virtual const vector<double> operator()(size_t x, size_t y, size_t t) = 0;
+    /**
+     * The VLevelConverter usually knows about validity of vertical values at a certain position.
+     *
+     * @param vVal value to interpolate to, e.g. height, depth, pressure
+     * @param x
+     * @param y
+     * @param t
+     * @return physically correct value
+     */
+    virtual bool isValid(double val, size_t x, size_t y, size_t t) {return true;}
     static boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt);
     static boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nt);
     static boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt);
@@ -251,6 +261,7 @@ public:
             func_ = func;
     }
     virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual bool isValid(double vVal, size_t x, size_t y, size_t t);
 };
 
 } // namespace

@@ -64,6 +64,14 @@ public:
     long getLevelNumber() const;
     long getLevelType() const;
     /**
+     * give the total number of ensembles for this parameter
+     */
+    size_t getTotalNumberOfEnsembles() const { return static_cast<size_t>(totalNumberOfEnsembles_); }
+    /**
+     * get the current perturbation/ensemble number
+     */
+    size_t getPerturbationNumber() const { return static_cast<size_t>(perturbationNo_); }
+    /**
      * Get the parameter ids as list with the following meanings:
      * @li ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
      * @li ed2: parameterNumber, paramterCategory, discipline
@@ -98,6 +106,8 @@ private:
     long stepRange_;
     long levelType_;
     long levelNo_;
+    long perturbationNo_;
+    long totalNumberOfEnsembles_;
     std::string typeOfGrid_;
     GridDefinition gridDefinition_;
 };

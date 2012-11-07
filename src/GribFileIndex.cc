@@ -394,7 +394,20 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "stepRange", &stepRange_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
-
+    // ensemble
+    int gribError = grib_get_long(gh.get(), "numberOfForecastsInEnsemble", &totalNumberOfEnsembles_);
+    switch (gribError) {
+    case GRIB_SUCCESS: {
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "perturbationNumber", &perturbationNo_), 0);
+        break;
+    }
+    case GRIB_NOT_FOUND: {
+        totalNumberOfEnsembles_ = 0;
+        perturbationNo_ = 0;
+        break;
+    }
+    default: MIFI_GRIB_CHECK(gribError, 0); break;
+    }
 
     // TODO: more definitions, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
     msgLength = 1024;
@@ -497,6 +510,19 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
             typeOfGrid_ = getXmlProp(lNode, "name");
+        }
+    }
+    {
+        // ensemble
+        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":ensemble", node);
+        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
+        if (size > 0) {
+            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+            totalNumberOfEnsembles_ = string2type<long>(getXmlProp(lNode, "total"));
+            perturbationNo_ = string2type<long>(getXmlProp(lNode, "no"));
+        } else {
+            perturbationNo_ = 0;
+            totalNumberOfEnsembles_ = 0;
         }
     }
 
@@ -704,6 +730,16 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("no"), xmlCast(
                 type2string(levelNo_))));
         checkLXML(xmlTextWriterEndElement(writer.get()));
+
+        // ensemble
+        if (totalNumberOfEnsembles_ > 0) {
+            checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("ensemble")));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("no"), xmlCast(
+                    type2string(perturbationNo_))));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("total"), xmlCast(
+                    type2string(totalNumberOfEnsembles_))));
+            checkLXML(xmlTextWriterEndElement(writer.get()));
+        }
 
         // time
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("time")));
