@@ -80,6 +80,9 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
     string s = (*varSysIt)->getProjection()->getProj4String();
     BOOST_CHECK(s.find("+towgs84=") != string::npos);
 
+
+    BOOST_CHECK(reader->getCDM().hasDimension("Sigma"));
+    BOOST_CHECK(reader->getCDM().hasVariable("Sigma"));
 }
 
 #else
