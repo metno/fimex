@@ -82,7 +82,6 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
 
 
     BOOST_CHECK(reader->getCDM().hasDimension("Sigma"));
-    BOOST_CHECK(reader->getCDM().hasVariable("Sigma"));
 }
 
 #else

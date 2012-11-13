@@ -332,7 +332,7 @@ void NcmlCDMReader::initDimensionNameChange()
     int size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string orgName = getXmlProp(nodes->nodeTab[i], "orgName");
-        if (cdm_->hasVariable(orgName)) {
+        if (cdm_->hasDimension(orgName)) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configId + " has no name for dimension with orgName: "+ orgName);
             cdm_->renameDimension(orgName, name);
