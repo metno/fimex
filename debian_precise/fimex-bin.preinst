@@ -14,15 +14,12 @@ set -e
 # the debian-policy package
 
 check_sse2() {
-    arch=`dpkg-architecture -qDEB_HOST_ARCH`
-    if [ $arch = "i386" ]
-    then
-        if ! grep ^"flags" /proc/cpuinfo | grep -q sse2; then
-            echo "i386-sse2 support missing, cannot install"
-            exit 1;
-        fi
+    if ! grep ^"flags" /proc/cpuinfo | grep -q sse2; then
+        echo "i386-sse2 support missing, cannot install"
+        exit 1;
     fi
 }
+
 
 
 case "$1" in
