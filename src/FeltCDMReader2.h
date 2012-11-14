@@ -24,7 +24,8 @@
 #ifndef FELTCDMREADER2_H_
 #define FELTCDMREADER2_H_
 
-#ifndef MIFI_IO_READER_SUPPRESS_DEPRECATED
+//#ifndef MIFI_IO_READER_SUPPRESS_DEPRECATED
+#if 0
 #warning \
   This header-file is deprecated and \
   may be removed without further notice at a future date. Please use a \

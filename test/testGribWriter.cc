@@ -32,7 +32,7 @@
 #include <fstream>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "src/FeltCDMReader2.h"
+#include "FeltCDMReader2.h"
 #include "fimex/GribApiCDMWriter.h"
 
 #define BOOST_TEST_MAIN

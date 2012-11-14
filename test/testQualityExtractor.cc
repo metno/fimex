@@ -36,7 +36,7 @@ using boost::unit_test_framework::test_suite;
 #include <iostream>
 #include <fstream>
 #ifdef HAVE_FELT
-#include "src/FeltCDMReader2.h"
+#include "FeltCDMReader2.h"
 #endif
 
 #include "fimex/CDMQualityExtractor.h"

@@ -32,7 +32,7 @@ using boost::unit_test_framework::test_suite;
 
 #include <iostream>
 #include <fstream>
-#include "src/FeltCDMReader2.h"
+#include "FeltCDMReader2.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/CDMExtractor.h"
 #include "fimex/Logger.h"
