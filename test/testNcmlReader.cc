@@ -82,6 +82,11 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
 
 
     BOOST_CHECK(reader->getCDM().hasDimension("Sigma"));
+
+    // check attributes of renamed variable
+    CDMAttribute attr;
+    BOOST_CHECK(reader->getCDM().getAttribute("snow_thickness", "metno_name", attr));
+    BOOST_CHECK(!reader->getCDM().getAttribute("snow_thickness", "long_name", attr));
 }
 
 #else

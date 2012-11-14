@@ -166,7 +166,10 @@ void NcmlCDMReader::initRemove() {
         if (name == "") throw CDMException("name attribute required for /nc:netcdf/nc:remove element in "+configId);
         std::string type = getXmlProp(nodes->nodeTab[i], "type");
         if (type != "attribute") throw CDMException("type attribute required = 'attribute' for /nc:netcdf/nc:variable/nc:remove element in "+configId);
-        std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
+        std::string varName = getXmlProp(nodes->nodeTab[i]->parent, "orgName");
+        if (varName == "") {
+            varName = getXmlProp(nodes->nodeTab[i]->parent, "name");
+        }
         if (varName == "") throw CDMException("name attribute required for all variable element in "+configId);
         cdm_->removeAttribute(varName, name);
     }
@@ -425,6 +428,7 @@ void NcmlCDMReader::initAttributeNameChange()
                 CDMAttribute& attr = cdm_->getAttribute(varName, orgName);
                 cdm_->removeAttribute(varName, name); // remove other attributes with same name
                 attr.setName(name);
+
             } catch (CDMException& ex) {
                 // no such attribute, don't care
             }

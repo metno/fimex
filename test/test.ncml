@@ -30,5 +30,10 @@
   <attribute name="towgs84" type="double" value="0 0 0"/>
 </variable>
 
+<variable name="snow_thickness" orgName="surface_snow_thickness">
+  <remove type="attribute" name="long_name" />
+  <attribute name="metno_name" orgName="standard_name" />
+</variable>
+
 </netcdf>
 
