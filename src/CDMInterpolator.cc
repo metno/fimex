@@ -240,6 +240,8 @@ static string getProjectionName(const string& proj_input) {
     } else {
         throw CDMException("cannot find +proj=... in proj-string: " + proj_input);
     }
+    // unify name for geographic coordinates
+    if (newProj == "latlon" || newProj == "latlong" || newProj == "lonlat" || newProj == "longlat") return "latlong";
     return newProj;
 }
 
@@ -599,9 +601,17 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
     cdm.removeAttribute(newYAxis, "long_name");
     std::string xStandardName;
     std::string yStandardName;
+    std::string xUnit = out_x_axis_unit;
+    std::string yUnit = out_y_axis_unit;
     if (newProj == "latlong") {
         xStandardName = "longitude";
         yStandardName = "latitude";
+        if (xUnit == "degree") {
+            xUnit = "degrees_east";
+        }
+        if (yUnit == "degree") {
+            yUnit = "degrees_north";
+        }
     } else if (newProjection == "projection_rotated_latitude_longitude") {
         xStandardName = "grid_longitude";
         yStandardName = "grid_latitude";
@@ -627,8 +637,8 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
     }
     cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("standard_name", xStandardName));
     cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("standard_name", yStandardName));
-    cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", out_x_axis_unit));
-    cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", out_y_axis_unit));
+    cdm.addOrReplaceAttribute(newXAxis, CDMAttribute("units", xUnit));
+    cdm.addOrReplaceAttribute(newYAxis, CDMAttribute("units", yUnit));
     cdm.getVariable(newXAxis).setData(createData(CDM_DOUBLE, out_x_axis.begin(), out_x_axis.end()));
     cdm.getVariable(newYAxis).setData(createData(CDM_DOUBLE, out_y_axis.begin(), out_y_axis.end()));
 
