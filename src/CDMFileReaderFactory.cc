@@ -37,7 +37,7 @@
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/NcmlCDMReader.h"
 #ifdef HAVE_FELT
-#include "fimex/FeltCDMReader2.h"
+#include "FeltCDMReader2.h"
 #endif
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMReader.h"

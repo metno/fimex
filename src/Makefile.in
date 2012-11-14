@@ -215,10 +215,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
-	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
-	FeltParameters.h FeltParameters.cc GridDefinition.cc \
-	IndexedData.cc Logger.cc MutexLock.h NcmlCDMReader.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
+	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
+	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
+	GridDefinition.cc IndexedData.cc Logger.cc MutexLock.h \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
 	ToVLevelConverter.cc Units.cc Utils.cc \
@@ -607,10 +607,10 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
-	FeltCDMReader2.cc Felt_File_Error.h Felt_File2.h Felt_File2.cc \
-	FeltParameters.h FeltParameters.cc GridDefinition.cc \
-	IndexedData.cc Logger.cc MutexLock.h NcmlCDMReader.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
+	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
+	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
+	GridDefinition.cc IndexedData.cc Logger.cc MutexLock.h \
+	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
 	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
 	ToVLevelConverter.cc Units.cc Utils.cc \

@@ -23,7 +23,7 @@
 
 #include "fimex/CDM.h"
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
-#include "fimex/FeltCDMReader2.h"
+#include "FeltCDMReader2.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "Felt_File2.h"
 #include "fimex/Utils.h"

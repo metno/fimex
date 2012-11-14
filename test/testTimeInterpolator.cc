@@ -35,7 +35,7 @@ using boost::unit_test_framework::test_suite;
 
 #include <iostream>
 #include <fstream>
-#include "fimex/FeltCDMReader2.h"
+#include "src/FeltCDMReader2.h"
 #include "fimex/Data.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NetCDF_CDMReader.h"

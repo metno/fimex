@@ -67,6 +67,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 DataTypeChanger.cc \
 					 Felt_Array2.h \
 					 Felt_Array2.cc \
+					 FeltCDMReader2.h \
                      FeltCDMReader2.cc \
                      Felt_File_Error.h \
                      Felt_File2.h \

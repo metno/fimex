@@ -28,7 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/shared_ptr.hpp>
-#include "fimex/FeltCDMReader2.h"
+#include "src/FeltCDMReader2.h"
 
 #include "fimex/NetCDF_CDMWriter.h"
 
