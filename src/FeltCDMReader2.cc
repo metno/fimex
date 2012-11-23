@@ -559,7 +559,7 @@ void FeltCDMReader2::initAddProjectionFromXML(const XMLDoc& doc, string& projNam
     }
 
     // add projection axes 'coordinates = "lon lat";
-    if (xDim.getName() != longName && yDim.getName() != latName) {
+    if (gridType != 2 && xDim.getName() != longName && yDim.getName() != latName) {
         coordinates = longName + " " + latName;
         try {
             cdm_->generateProjectionCoordinates(projName, xDim.getName(), yDim.getName(), longName, latName);
