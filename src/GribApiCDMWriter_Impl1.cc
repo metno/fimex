@@ -163,12 +163,24 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "Ni", ni),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "Nj", nj),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", di),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", dj),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", fabs(di)),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", fabs(dj)),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", lat0),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", lon0),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", latX),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", lonX),"");
+            if (dj < 0) {
+                // reading north -> south
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+            } else {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+            }
+            if (di < 0) {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1),"");
+            } else {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0),"");
+            }
+
         } else if (projection == "rotated_latitude_longitude") {
             LOG4FIMEX(logger, Logger::INFO, "rotated latlong projection for " << varName);
             const std::string rotLon = cdm.getHorizontalXAxis(varName);
@@ -218,14 +230,25 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAParallel", ni),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "numberOfPointsAlongAMeridian", nj),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", di),"");
-            GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", dj),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "iDirectionIncrementInDegrees", fabs(di)),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "jDirectionIncrementInDegrees", fabs(dj)),"");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "latitudeOfSouthernPoleInDegrees", static_cast<long>(southPoleLat)), "");
             GRIB_CHECK(grib_set_long(gribHandle.get(), "longitudeOfSouthernPoleInDegrees", static_cast<long>(southPoleLon)), "");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", rlat0),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", rlon0),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfLastGridPointInDegrees", rlatX),"");
             GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfLastGridPointInDegrees", rlonX),"");
+            if (dj < 0) {
+                // reading north -> south
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+            } else {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+            }
+            if (di < 0) {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1),"");
+            } else {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0),"");
+            }
         } else if (projection == "transverse_mercator") {
             throw CDMException("projection " + projection + " not supported yet by GribApiCDMWriter");
         } else {
