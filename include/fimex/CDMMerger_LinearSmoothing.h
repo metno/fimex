@@ -53,7 +53,7 @@ public:
 
     CDMMerger_LinearSmoothingFactory(size_t transitionWidth = DEFAULT_TRANSITIONWIDTH, size_t borderWidth = DEFAULT_BORDERWIDTH);
 
-    CDMMerger::SmoothingPtr operator()(std::string varName);
+    CDMMerger::SmoothingPtr operator()(const std::string& varName);
 
 private:
     size_t transitionWidth_, borderWidth_;

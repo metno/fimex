@@ -73,7 +73,7 @@ public:
         
         virtual double operator()(size_t curX, size_t curY, double valueI, double valueO) = 0;
         
-        virtual ~Smoothing() { }
+        virtual ~Smoothing() {}
         
     protected:
         size_t sizeX_, sizeY_;
@@ -87,8 +87,8 @@ public:
      */
     class SmoothingFactory {
     public:
-        ~SmoothingFactory()  { }
-        virtual SmoothingPtr operator()(std::string varName) = 0;
+        virtual ~SmoothingFactory() {}
+        virtual SmoothingPtr operator()(const std::string& varName) = 0;
     };
     
     typedef boost::shared_ptr<SmoothingFactory> SmoothingFactoryPtr;

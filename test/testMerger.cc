@@ -32,7 +32,8 @@
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
-#include "fimex/NetCDF_CDMReader.h"
+#include "fimex/CDMconstants.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMMerger.h"
 #include "fimex/Data.h"
 
@@ -53,8 +54,8 @@ BOOST_AUTO_TEST_CASE( test_merger )
         // no testfile, skip test
         return;
     }
-    boost::shared_ptr<CDMReader> readerI = boost::make_shared<NetCDF_CDMReader>(fileNameInner),
-        readerO = boost::make_shared<NetCDF_CDMReader>(fileNameOuter);
+    boost::shared_ptr<CDMReader> readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
+        readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
 
     boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerI, readerO);
     merger->addMergedVariable("ga_2t_1");

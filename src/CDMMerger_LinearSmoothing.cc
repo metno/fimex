@@ -91,7 +91,7 @@ CDMMerger_LinearSmoothingFactory::CDMMerger_LinearSmoothingFactory(size_t transi
         throw CDMException("invalid parameter values for linear smoothing");
 }
 
-CDMMerger::SmoothingPtr CDMMerger_LinearSmoothingFactory::operator()(std::string /*varName*/)
+CDMMerger::SmoothingPtr CDMMerger_LinearSmoothingFactory::operator()(const std::string& /*varName*/)
 {
     return boost::make_shared<CDMMerger_LinearSmoothing>(transitionWidth_, borderWidth_);
 }

@@ -39,10 +39,11 @@ using boost::unit_test_framework::test_suite;
 #include "FeltCDMReader2.h"
 #endif
 
+#include "fimex/CDMconstants.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMQualityExtractor.h"
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
-#include "fimex/NetCDF_CDMReader.h"
 #else
 #include "fimex/Null_CDMWriter.h"
 #endif
@@ -133,7 +134,7 @@ BOOST_AUTO_TEST_CASE( test_qualityExtract_mask )
         cerr << "input files not found, skipping test (" << fileNameD << ',' << fileNameM << ',' << fileNameX << ')' << endl;
         return;
     }
-    boost::shared_ptr<CDMReader> readerD = boost::make_shared<NetCDF_CDMReader>(fileNameD);
+    boost::shared_ptr<CDMReader> readerD = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameD);
     boost::shared_ptr<CDMQualityExtractor> mask = boost::make_shared<CDMQualityExtractor>(readerD, "", fileNameX);
 
     DataPtr sliceM = mask->getDataSlice("salt", 0);
