@@ -66,6 +66,23 @@ bool CF1_xCoordSysBuilder::isMine(const CDM& cdm)
 }
 
 /**
+ * get the coordinates for a variable var
+ *
+ * @param cdm data model
+ * @param var variable
+ * @return all (auxiliary) coordinate axes used for the variable
+ */
+set<string> getCoordinateNamesCF1_x(const CDM& cdm, const CDMVariable& var) {
+    set<string> coords;
+    CDMAttribute attr;
+    if (cdm.getAttribute(var.getName(), "coordinates", attr)) {
+        vector<string> coord = tokenize(attr.getStringValue(), " ");
+        coords.insert(coord.begin(), coord.end());
+    }
+    return coords;
+}
+
+/**
  * get the coordinateAxis for a variable var
  *
  * @param cdm data model
@@ -76,13 +93,13 @@ set<string> getCoordinateAxesNamesCF1_x(const CDM& cdm, const CDMVariable& var)
 {
     vector<string> dims = var.getShape();
     set<string> axes(dims.begin(), dims.end());
-    CDMAttribute attr;
-    if (cdm.getAttribute(var.getName(), "coordinates", attr)) {
-        vector<string> coords = tokenize(attr.getStringValue(), " ");
-        axes.insert(coords.begin(), coords.end());
-    }
+
+    set<string> coords = getCoordinateNamesCF1_x(cdm, var);
+    axes.insert(coords.begin(), coords.end());
+
     return axes;
 }
+
 
 static CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& varName)
 {
@@ -254,13 +271,20 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                 // variable is coordinateAxis, i.e. it doesn't need a coordinateSystem
             } else {
                 set<string> axes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
+                set<string> coords = getCoordinateAxesNamesCF1_x(cdm, *varIt);
                 if (axes.size()) {
                     CoordinateSystem cs("CF-1.X");
                     for (set<string>::iterator axis = axes.begin(); axis != axes.end(); ++axis) {
                         map<string, AxisPtr >::iterator foundAxis = coordinateAxes.find(*axis);
                         if (foundAxis != coordinateAxes.end()) {
                             // only dims with variable can be coordinate axis
-                            cs.setAxis(foundAxis->second);
+                            if (coords.find(foundAxis->second->getName()) == coords.end()) {
+                                // dimension
+                                cs.setAxis(foundAxis->second);
+                            } else {
+                                // coordinates
+                                cs.setAuxiliaryAxis(foundAxis->second);
+                            }
                         }
                     }
                     coordSystems.insert(make_pair(cs.id(), cs));

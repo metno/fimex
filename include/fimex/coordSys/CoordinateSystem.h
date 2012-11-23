@@ -177,7 +177,7 @@ public:
      */
     virtual ConstAxisPtr getTimeAxis() const;
     /**
-     * get all axes
+     * get all axes, which are not duplicated (i.e. twice in auxiliary)
      */
     virtual ConstAxisList getAxes() const;
     /**
@@ -185,6 +185,11 @@ public:
      * @throw CDMException if an axis with the same axistype (except undefined) exists
      */
     virtual void setAxis(ConstAxisPtr axis);
+    /**
+     * Set an auxiliary axis. An auxiliary axis may be dropped silently if
+     * another axis with the axistype exists.
+     */
+    virtual void setAuxiliaryAxis(ConstAxisPtr axis);
 private:
     boost::shared_ptr<CoordSysImpl> pimpl_;
 };

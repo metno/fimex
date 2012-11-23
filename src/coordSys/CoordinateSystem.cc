@@ -185,22 +185,34 @@ struct TypeCheck : public std::unary_function <CoordinateSystem::ConstAxisPtr, b
     bool operator() (const CoordinateSystem::ConstAxisPtr& ca) const { return ca->isAxisType(type_); }
 };
 
-bool CoordinateSystem::hasAxisType(CoordinateAxis::AxisType type) const
+static bool hasTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
 {
-    ConstAxisList& v = pimpl_->axes_;
-    ConstAxisList::const_iterator found = find_if(v.begin(), v.end(), TypeCheck(type));
-    return found != v.end();
+    CoordinateSystem::ConstAxisList::const_iterator found = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    return found != axes.end();
 }
 
-CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
+bool CoordinateSystem::hasAxisType(CoordinateAxis::AxisType type) const
 {
-    ConstAxisList& axes = pimpl_->axes_;
-    ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    return hasTypeInAxes(type, pimpl_->axes_) || hasTypeInAxes(type, pimpl_->auxiliaryAxes_);
+}
+
+static CoordinateSystem::ConstAxisPtr findTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
+{
+    CoordinateSystem::ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
     if (axis != axes.end()) {
         return *axis;
     }
     // return 0/NULL Ptr
-    return ConstAxisPtr();
+    return CoordinateSystem::ConstAxisPtr();
+}
+
+CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
+{
+    CoordinateSystem::ConstAxisPtr axis = findTypeInAxes(type, pimpl_->axes_);
+    if (axis.get() == 0) {
+        axis = findTypeInAxes(type, pimpl_->auxiliaryAxes_);
+    }
+    return axis;
 }
 CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
 {
@@ -211,6 +223,7 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<Coo
     // return 0/NULL Ptr
     return ConstAxisPtr();
 }
+
 CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoXAxis() const
 {
     vector<CoordinateAxis::AxisType> types;
@@ -246,13 +259,14 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::getTimeAxis() const
 
 CoordinateSystem::ConstAxisList CoordinateSystem::getAxes() const
 {
-    return pimpl_->axes_;
+    ConstAxisList axes(pimpl_->axes_.begin(), pimpl_->axes_.end());
+    axes.insert(axes.end(), pimpl_->auxiliaryAxes_.begin(), pimpl_->auxiliaryAxes_.end());
+    return axes;
 }
 
 void CoordinateSystem::setAxis(ConstAxisPtr axis)
 {
     assert(axis.get() != 0);
-
     ConstAxisList& v = pimpl_->axes_;
     // remove axis with same name
     ConstAxisList::iterator found = find_if(v.begin(), v.end(), CDMNameEqualPtr(axis->getName()));
@@ -262,11 +276,46 @@ void CoordinateSystem::setAxis(ConstAxisPtr axis)
     }
     // add new axis
     if (axis->getAxisType() != CoordinateAxis::Undefined &&
-        hasAxisType(axis->getAxisType())) {
-        ConstAxisPtr otherAxis = findAxisOfType(axis->getAxisType());
+        hasTypeInAxes(axis->getAxisType(), v)) {
+        ConstAxisPtr otherAxis = findTypeInAxes(axis->getAxisType(), v);
         throw CDMException("adding axis "+axis->getName()+" to CS: type already exists: " + CoordinateAxis::type2string(axis->getAxisType()) + " in " + otherAxis->getName());
     }
     v.push_back(axis);
+
+    // remove auxiliary axes
+    ConstAxisList& va = pimpl_->auxiliaryAxes_;
+    // remove axis with same name
+    ConstAxisList::iterator f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
+    while (f != va.end()) {
+        va.erase(f);
+        f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
+    }
+}
+
+void CoordinateSystem::setAuxiliaryAxis(ConstAxisPtr axis)
+{
+    assert(axis.get() != 0);
+    CoordinateSystem::ConstAxisList& v = pimpl_->axes_;
+    CoordinateSystem::ConstAxisList::iterator foundInAxes = find_if(v.begin(), v.end(), CDMNameEqualPtr(axis->getName()));
+    if (foundInAxes != v.end()) {
+        return; // ignore, existing true axis with same name
+    }
+
+    if (axis->getAxisType() != CoordinateAxis::Undefined) {
+        ConstAxisPtr otherAxis = findTypeInAxes(axis->getAxisType(), v);
+        if (otherAxis.get() != 0) {
+            return; // ignore, axisType already in use
+        }
+    }
+
+    ConstAxisList& va = pimpl_->auxiliaryAxes_;
+    // remove axis with same name
+    ConstAxisList::iterator f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
+    while (f != va.end()) {
+        va.erase(f);
+        f = find_if(va.begin(), va.end(), CDMNameEqualPtr(axis->getName()));
+    }
+    va.push_back(axis);
 }
 
 int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)

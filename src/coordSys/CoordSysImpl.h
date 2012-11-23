@@ -40,6 +40,7 @@ struct CoordSysImpl {
     std::vector<std::string> isCSForVec_;
     std::vector<std::string> isCompleteVec_;
     std::vector<boost::shared_ptr<const CoordinateAxis> > axes_;
+    std::vector<boost::shared_ptr<const CoordinateAxis> > auxiliaryAxes_;
     boost::shared_ptr<const Projection> proj_;
 };
 
