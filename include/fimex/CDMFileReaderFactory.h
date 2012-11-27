@@ -61,14 +61,14 @@ public:
     /**
      * @brief Factory for CDMReader of input-files
      *
-     * The function create reader tries to create a reader by filetype MIFI_FILETYPE_*.
+     * This function tries to create a reader by filetype MIFI_FILETYPE_*.
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
      * @param fileNype, one of MIFI_FILETYPE_*, possibly read by detectFileType()
      * @param fileName, name of input type
      * @param configFile
-     * @param options optional options for the CDMReader
+     * @param options optional options for the CDMReader, e.g. for grib: additional message files
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
      * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
@@ -82,7 +82,7 @@ public:
     /**
      * @brief Factory for CDMReader of input-files
      *
-     * The function create reader tries to create a reader by filetype MIFI_FILETYPE_*.
+     * This function tries to create a reader by filetype MIFI_FILETYPE_*.
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
