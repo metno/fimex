@@ -72,6 +72,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
     out << "             [--output.file FILENAME [--output.type OUTPUT_TYPE]]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
+    out << "             [--input.optional OPT1 --input.optional OPT2 ...]" << endl;
     out << "             [--num_threads ...]" << endl;
     out << "             [--process....]" << endl;
     out << "             [--extract....]" << endl;
@@ -165,6 +166,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "input.file", vm);
     writeOption<string>(out, "input.type", vm);
     writeOption<string>(out, "input.config", vm);
+    writeVectorOptionString(out, "input.optional", vm);
     writeOption<string>(out, "input.printNcML", vm);
     writeOptionAny(out, "input.printCS", vm);
     writeOption<string>(out, "output.file", vm);
@@ -251,7 +253,6 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, cons
         LOG4FIMEX(logger, Logger::DEBUG, "reading Felt-File2 " << vm[io+".file"].as<string>() << " with config " << config);
         returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_FELT, vm[io+".file"].as<string>(), config);
     }
-#ifdef HAVE_GRIB_API_H
     if (type == "grb" || type == "grib" ||
             type == "grb1" || type == "grib1" ||
                 type == "grb2" || type == "grib2") {
@@ -259,11 +260,13 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, cons
         if (vm.count(io+".config")) {
             config = vm[io+".config"].as<string>();
         }
+        std::vector<std::string> optional;
+        if (vm.count(io+".optional")) {
+            optional = vm[io+".optional"].as<vector<string> >();
+        }
         LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile " << vm[io+".file"].as<string>() << " with config " << config);
-        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_GRIB, vm[io+".file"].as<string>(), config);
+        returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_GRIB, vm[io+".file"].as<string>(), config, optional);
     }
-#endif
-#ifdef HAVE_NETCDF_H
     if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
         if (vm.count(io+".config")) {
             std::string config = vm[io+".config"].as<string>();
@@ -274,7 +277,6 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, cons
             returnPtr = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, vm[io+".file"].as<string>());
         }
     }
-#endif
 
     if (returnPtr.get() == 0) {
         // cover all other types as defined in CDMConstants/CDMFileReaderFactory
@@ -735,6 +737,7 @@ int run(int argc, char* args[])
         ("input.file", po::value<string>(), "input file")
         ("input.type", po::value<string>(), "filetype of input file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
         ("input.config", po::value<string>(), "non-standard input configuration")
+        ("input.optional", po::value<vector<string> >()->composing(), "additional options, e.g. multiple files for grib")
 #if BOOST_VERSION >= 104000
         ("input.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input")
 #else
