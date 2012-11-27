@@ -1,3 +1,12 @@
+  * 2012-11-27 fimex-0.40.1
+    * read multiple grib-files
+    * allow writing of latlon grib-files from north to south
+    * allow duplicated coordinates
+    * remove duplicated coordinates for felt-files in latlon
+    * allow different names for latlong (e.g. longlat) projections
+    * remove long deprecated FeltCDMReader2.h
+    * allow change of dimensions without variables in ncml
+    * allow variable name-change and attribute-change in one step in ncml
   * 2012-11-07 fimex-0.40
     * splitting of vertical axes in grib-files
     * support for ensemble products in grib-files
