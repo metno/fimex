@@ -63,6 +63,11 @@ void mifi_free_cdm_reader(mifi_cdm_reader* reader)
     delete(reader);
 }
 
+void mifi_free_slicebuilder(mifi_slicebuilder* sb)
+{
+    delete(sb);
+}
+
 mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile)
 {
     try {
@@ -73,24 +78,21 @@ mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const c
         }
         return 0;
 }
+
 mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile)
 {
     return mifi_new_io_reader(MIFI_FILETYPE_FELT, filename, configFile);
 }
 
-#ifdef HAVE_NETCDF_H
 mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename)
 {
     return mifi_new_io_reader(MIFI_FILETYPE_NETCDF, filename, "");
 }
-#endif
 
-#ifdef HAVE_GRIB_API_H
 mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile)
 {
     return mifi_new_io_reader(MIFI_FILETYPE_GRIB, filename, configFile);
 }
-#endif
 
 
 mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile)
@@ -211,6 +213,19 @@ const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos)
     }
     return 0;
 }
+
+mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName)
+{
+    try {
+        SliceBuilder sb(reader->get()->getCDM(), std::string(varName));
+        return new mifi_slicebuilder(sb);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error getting slicebuilder for " << varName << ": " << ex.what());
+    }
+    return 0;
+}
+
+
 
 int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size)
 {

@@ -40,6 +40,7 @@ extern "C" {
 #endif
 
 typedef struct mifi_cdm_reader mifi_cdm_reader;
+typedef struct mifi_slicebuilder mifi_slicebuilder;
 
 /**
  * Function pointer as used for the get_double_dataslice callback function
@@ -183,6 +184,12 @@ size_t mifi_get_variable_number(mifi_cdm_reader* reader);
  * @return the variable name, or NULL on failure
  */
 const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
+
+
+mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName);
+void mifi_free_slicebuilder(mifi_slicebuilder* sb);
+
+
 
 /**
  * get a slice of data from the dataReader

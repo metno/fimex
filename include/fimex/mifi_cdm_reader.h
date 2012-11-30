@@ -42,5 +42,15 @@ private:
     boost::shared_ptr<MetNoFimex::CDMReader> reader_;
 };
 
+/**
+ * wrapper class for a SliceBuilder, mainly for usage by
+ * C/C++ wrapper
+ */
+class mifi_slicebuilder {
+public:
+    mifi_slicebuilder(MetNoFimex::SliceBuilder sb) : sb_(sb) {}
+    MetNoFimex::SliceBuilder sb_;
+};
+
 
 #endif /* MIFI_CDM_READER_H_ */
