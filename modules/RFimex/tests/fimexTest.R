@@ -1,7 +1,7 @@
 #! /usr/bin/R
 library(RFimex)
 
-reader <- CDMFileReaderFactory_create("felt", "../../test/flth00.dat", "../../share/etc/felt2nc_variables.xml")
+reader <- CDMFileReaderFactory_create("felt", "../../../test/flth00.dat", "../../../share/etc/felt2nc_variables.xml")
 #reader <- CDMFileReaderFactory_create("netcdf", "out.nc", "")
 #reader <- CDMFileReaderFactory_create("netcdf", "http://thredds.met.no/thredds/dodsC/metno/proff4km/default/Proff_Default_4km_best.ncd", "")
 
@@ -31,7 +31,7 @@ altitude <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader, "altitude", sb,
 
 #out <- array(0, c(229, 196))
 #out <- altitude[1:44884]
-out <- vector2R(altitude);
+out <- mifi.vec.2R(altitude);
 out$status
 out$errmsg
 length(out$data)

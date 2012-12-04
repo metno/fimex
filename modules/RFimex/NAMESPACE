@@ -6,7 +6,7 @@ export(CDMFileReaderFactory_create,
        boost__shared_ptrCDMReader_getSliceVecInUnit,
        SliceBuilder,
        boost__shared_ptrCDMReader_getCDM,
-       vector2R,
+       mifi.vec.2R,
        NetCDF_CDMWriter,
        delete_NetCDF_CDMWriter
 )
