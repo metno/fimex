@@ -5,7 +5,7 @@
 # the SWIG interface file instead.
 
 ##   Generated via the command line invocation:
-##	 swig -I/usr/include -c++ -r -module RFimex -o fimex_wrap.cpp ../fimex.i
+##	 swig -I/usr/include -c++ -r -module RFimex -o RFimex/src/fimex_wrap.cpp fimex.i
 
 
 #                         srun.swg                            #
@@ -163,6 +163,7 @@ function(fun, userData = NULL)
 setClass('C++Reference', contains = 'ExternalReference')
 setClass('_p_std__vectorT_size_t_std__allocatorT_size_t_t_t', contains = 'C++Reference')
 setClass('_p_std__vectorT_double_std__allocatorT_double_t_t', contains = 'C++Reference')
+setClass('_p_mifi_cdm_reader', contains = 'C++Reference')
 setClass('_p_MetNoFimex__SliceBuilder', contains = 'C++Reference')
 setClass('_p_MetNoFimex__CDM', contains = 'C++Reference')
 setClass('_p_MetNoFimex__CDMReader', contains = 'C++Reference')
@@ -190,24 +191,6 @@ function(from) {if (!is.null(from$"__str__")) from$"__str__"()})
 
 setMethod('print', 'ExternalReference',
 function(x) {print(as(x, "character"))})
-
-# Start of callAry
-
-`callAry` = function(ary, .copy = FALSE)
-{
-  if(is.list(ary))
-  assert(all(sapply(ary, class) == "_p_float"));
-  
-  
-#  assert(length(ary) >= 10)
-  
-  ;.Call('R_swig_callAry', ary, as.logical(.copy), PACKAGE='RFimex');
-  
-}
-
-attr(`callAry`, 'returnType') = 'integer'
-attr(`callAry`, "inputTypes") = c('_p_float')
-class(`callAry`) = c("SWIGFunction", class('callAry'))
 
 # Start of IntVector___nonzero__
 
@@ -1243,6 +1226,98 @@ setMethod('$', '_p_std__vectorT_double_std__allocatorT_double_t_t', function(x, 
 );
 # end of accessor method for std::vector<(double)>
 setMethod('delete', '_p_std__vectorT_double_std__allocatorT_double_t_t', function(obj) {delete_std__vectorT_double_std__allocatorT_double_t_t(obj)})
+# Start of new_mifi_cdm_reader
+
+`mifi_cdm_reader` = function(reader)
+{
+  ;ans = .Call('R_swig_new_mifi_cdm_reader', reader, PACKAGE='RFimex');
+  class(ans) <- "_p_mifi_cdm_reader";
+  
+  reg.finalizer(ans, delete_mifi_cdm_reader)
+  ans
+  
+}
+
+attr(`mifi_cdm_reader`, 'returnType') = '_p_mifi_cdm_reader'
+attr(`mifi_cdm_reader`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t')
+class(`mifi_cdm_reader`) = c("SWIGFunction", class('mifi_cdm_reader'))
+
+# Start of mifi_cdm_reader_get
+
+`mifi_cdm_reader_get` = function(self, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_mifi_cdm_reader_get', self, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
+  
+  ans
+  
+}
+
+attr(`mifi_cdm_reader_get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
+attr(`mifi_cdm_reader_get`, "inputTypes") = c('_p_mifi_cdm_reader')
+class(`mifi_cdm_reader_get`) = c("SWIGFunction", class('mifi_cdm_reader_get'))
+
+# Start of delete_mifi_cdm_reader
+
+`delete_mifi_cdm_reader` = function(self)
+{
+  ;.Call('R_swig_delete_mifi_cdm_reader', self, PACKAGE='RFimex');
+  
+}
+
+attr(`delete_mifi_cdm_reader`, 'returnType') = 'void'
+attr(`delete_mifi_cdm_reader`, "inputTypes") = c('_p_mifi_cdm_reader')
+class(`delete_mifi_cdm_reader`) = c("SWIGFunction", class('delete_mifi_cdm_reader'))
+
+# Start of accessor method for mifi_cdm_reader
+setMethod('$', '_p_mifi_cdm_reader', function(x, name)
+
+{
+  accessorFuns = list('get' = mifi_cdm_reader_get);
+  vaccessors = c('get');
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name));
+  f = accessorFuns[[idx]];
+  formals(f)[[1]] = x;
+  if (is.na(match(name, vaccessors))) f else f(x);
+}
+
+
+);
+# end of accessor method for mifi_cdm_reader
+setMethod('delete', '_p_mifi_cdm_reader', function(obj) {delete_mifi_cdm_reader(obj)})
+# Start of mifi_get_variable_number
+
+`mifi_get_variable_number` = function(reader, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_mifi_get_variable_number', reader, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_size_t";
+  
+  ans
+  
+}
+
+attr(`mifi_get_variable_number`, 'returnType') = 'integer'
+attr(`mifi_get_variable_number`, "inputTypes") = c('_p_mifi_cdm_reader')
+class(`mifi_get_variable_number`) = c("SWIGFunction", class('mifi_get_variable_number'))
+
+# Start of mifi_get_variable_name
+
+`mifi_get_variable_name` = function(reader, pos)
+{
+  if(length(pos) > 1) {
+    warning("using only the first element of pos");
+  };
+  
+  ;.Call('R_swig_mifi_get_variable_name', reader, pos, PACKAGE='RFimex');
+  
+}
+
+attr(`mifi_get_variable_name`, 'returnType') = 'character'
+attr(`mifi_get_variable_name`, "inputTypes") = c('_p_mifi_cdm_reader', 'integer')
+class(`mifi_get_variable_name`) = c("SWIGFunction", class('mifi_get_variable_name'))
+
 # Start of new_SliceBuilder
 
 `SliceBuilder__SWIG_0` = function(cdm, varName)
@@ -1820,7 +1895,7 @@ setMethod('delete', '_p_MetNoFimex__CDMFileReaderFactory', function(obj) {delete
   ;ans = .Call('R_swig_new_NetCDF_CDMWriter__SWIG_0', reader, filename, configFile, version, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__NetCDF_CDMWriter";
   
-  reg.finalizer(ans, delete_NetCDF_CDMWriter, onexit = TRUE)
+  reg.finalizer(ans, delete_NetCDF_CDMWriter)
   ans
   
 }
@@ -1838,7 +1913,7 @@ class(`NetCDF_CDMWriter__SWIG_0`) = c("SWIGFunction", class('NetCDF_CDMWriter__S
   ;ans = .Call('R_swig_new_NetCDF_CDMWriter__SWIG_1', reader, filename, configFile, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__NetCDF_CDMWriter";
   
-  reg.finalizer(ans, delete_NetCDF_CDMWriter, onexit = TRUE)
+  reg.finalizer(ans, delete_NetCDF_CDMWriter)
   ans
   
 }
@@ -1855,7 +1930,7 @@ class(`NetCDF_CDMWriter__SWIG_1`) = c("SWIGFunction", class('NetCDF_CDMWriter__S
   ;ans = .Call('R_swig_new_NetCDF_CDMWriter__SWIG_2', reader, filename, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__NetCDF_CDMWriter";
   
-  reg.finalizer(ans, delete_NetCDF_CDMWriter, onexit = TRUE)
+  reg.finalizer(ans, delete_NetCDF_CDMWriter)
   ans
   
 }

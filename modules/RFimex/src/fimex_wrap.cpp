@@ -1119,7 +1119,7 @@ SWIG_R_ConvertPacked(SEXP obj, void *ptr, size_t sz, swig_type_info *ty) {
 #define SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t swig_types[7]
 #define SWIGTYPE_p_char swig_types[8]
 #define SWIGTYPE_p_difference_type swig_types[9]
-#define SWIGTYPE_p_float swig_types[10]
+#define SWIGTYPE_p_mifi_cdm_reader swig_types[10]
 #define SWIGTYPE_p_size_type swig_types[11]
 #define SWIGTYPE_p_std__allocatorT_double_t swig_types[12]
 #define SWIGTYPE_p_std__allocatorT_size_t_t swig_types[13]
@@ -1287,12 +1287,10 @@ static swig_module_info swig_module = {swig_types, 18, 0, 0, 0, 0};
 #include "fimex/SliceBuilder.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMException.h"
+#include "fimex/c_fimex.h"
+#include "fimex/mifi_cdm_reader.h"
 
-int callAry(float ary[10]) {
-    for (int i = 0; i < 10; i++) {
-        ary[i] = i;
-    }
-}
 
 
 
@@ -1878,6 +1876,38 @@ SWIGINTERN void std_vector_Sl_double_Sg__append(std::vector< double > *self,std:
       self->push_back(x);
     }
 
+SWIGINTERN SEXP
+SWIG_FromCharPtrAndSize(const char* carray, size_t size) 
+{
+  SEXP t, c;
+  if (!carray) return R_NilValue;
+/* See R internals document 1.10.  
+   MkCharLen was introduced in 2.7.0.  Use that instead of hand
+   creating vector.
+
+   Starting in 2.8.0 creating strings via vectors was deprecated in
+   order to allow for use of CHARSXP caches. */
+
+  Rf_protect(t = Rf_allocVector(STRSXP, 1));
+#if R_VERSION >=  R_Version(2,7,0)
+  c = Rf_mkCharLen(carray, size);
+#else
+  c = Rf_allocVector(CHARSXP, size);
+  strncpy((char *)CHAR(c), carray, size);
+#endif
+  SET_STRING_ELT(t, 0, c);
+  Rf_unprotect(1);
+  return t;
+}
+
+
+SWIGINTERNINLINE SEXP 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+}
+
+
 SWIGINTERN int
 SWIG_AsCharPtrAndSize(SEXP obj, char** cptr, size_t* psize, int *alloc)
 {
@@ -1951,37 +1981,6 @@ SWIGINTERN std::vector< double,std::allocator< double > > *MetNoFimex_CDMReader_
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-SWIGEXPORT SEXP
-R_swig_callAry ( SEXP ary, SEXP s_swig_copy)
-{
-  int result;
-  float *arg1 ;
-  unsigned int r_nprotect = 0;
-  SEXP r_ans = R_NilValue ;
-  VMAXTYPE r_vmax = vmaxget() ;
-  
-  {
-    {
-      int _rswigi;
-      int _rswiglen = LENGTH(ary);
-      arg1 = static_cast< float * >(calloc(sizeof(float), _rswiglen));
-      for (_rswigi=0; _rswigi<_rswiglen; _rswigi++) {
-        arg1[_rswigi] = REAL(ary)[_rswigi];
-      }
-    }
-  }
-  result = (int)callAry(arg1);
-  r_ans = Rf_ScalarInteger(result);
-  
-  free(arg1);
-  
-  vmaxset(r_vmax);
-  if(r_nprotect)  Rf_unprotect(r_nprotect);
-  
-  return r_ans;
-}
-
 
 SWIGEXPORT SEXP
 R_swig_IntVector___nonzero__ ( SEXP self, SEXP s_swig_copy)
@@ -3998,6 +3997,150 @@ R_swig_delete_DoubleVector ( SEXP self)
 
 
 SWIGEXPORT SEXP
+R_swig_new_mifi_cdm_reader ( SEXP reader)
+{
+  mifi_cdm_reader *result = 0 ;
+  boost::shared_ptr< MetNoFimex::CDMReader > arg1 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(reader, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_mifi_cdm_reader" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_mifi_cdm_reader" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp1));
+    }
+  }
+  result = (mifi_cdm_reader *)new mifi_cdm_reader(arg1);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_mifi_cdm_reader, R_SWIG_OWNER |  0 );
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_cdm_reader_get ( SEXP self, SEXP s_swig_copy)
+{
+  boost::shared_ptr< MetNoFimex::CDMReader > result;
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_cdm_reader_get" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  result = (arg1)->get();
+  r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_delete_mifi_cdm_reader ( SEXP self)
+{
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_cdm_reader, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_mifi_cdm_reader" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  delete arg1;
+  r_ans = R_NilValue;
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  R_ClearExternalPtr(self);
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_get_variable_number ( SEXP reader, SEXP s_swig_copy)
+{
+  size_t result;
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(reader, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_get_variable_number" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  result = mifi_get_variable_number(arg1);
+  r_ans = SWIG_From_int(static_cast< int >(result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_get_variable_name ( SEXP reader, SEXP pos)
+{
+  char *result = 0 ;
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  size_t arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(reader, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_get_variable_name" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  ecode2 = SWIG_AsVal_int(pos, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "mifi_get_variable_name" "', argument " "2"" of type '" "size_t""'");
+  } 
+  arg2 = static_cast< size_t >(val2);
+  result = (char *)mifi_get_variable_name(arg1,arg2);
+  r_ans = SWIG_FromCharPtr((const char *)result);
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
 R_swig_new_SliceBuilder__SWIG_0 ( SEXP cdm, SEXP varName)
 {
   MetNoFimex::SliceBuilder *result = 0 ;
@@ -4858,7 +5001,15 @@ R_swig_CDMFileReaderFactory_create__SWIG_0 ( SEXP fileType, SEXP filename, SEXP 
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "CDMFileReaderFactory_create" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
   }
   arg4 = reinterpret_cast< std::vector< std::string,std::allocator< std::string > > * >(argp4);
-  result = MetNoFimex::CDMFileReaderFactory::create(arg1,arg2,arg3,(std::vector< std::string,std::allocator< std::string > > const &)*arg4);
+  try {
+    result = MetNoFimex::CDMFileReaderFactory::create(arg1,arg2,arg3,(std::vector< std::string,std::allocator< std::string > > const &)*arg4);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
   
   
@@ -4909,7 +5060,15 @@ R_swig_CDMFileReaderFactory_create__SWIG_1 ( SEXP fileType, SEXP filename, SEXP 
     arg3 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  result = MetNoFimex::CDMFileReaderFactory::create(arg1,arg2,arg3);
+  try {
+    result = MetNoFimex::CDMFileReaderFactory::create(arg1,arg2,arg3);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
   
   
@@ -4994,7 +5153,15 @@ R_swig_new_NetCDF_CDMWriter__SWIG_0 ( SEXP reader, SEXP filename, SEXP configFil
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   arg4 = static_cast< int >(INTEGER(version)[0]);
-  result = (MetNoFimex::NetCDF_CDMWriter *)new MetNoFimex::NetCDF_CDMWriter(arg1,(std::string const &)*arg2,arg3,arg4);
+  try {
+    result = (MetNoFimex::NetCDF_CDMWriter *)new MetNoFimex::NetCDF_CDMWriter(arg1,(std::string const &)*arg2,arg3,arg4);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MetNoFimex__NetCDF_CDMWriter, R_SWIG_OWNER |  0 );
   if (SWIG_IsNewObj(res2)) delete arg2;
   
@@ -5051,7 +5218,15 @@ R_swig_new_NetCDF_CDMWriter__SWIG_1 ( SEXP reader, SEXP filename, SEXP configFil
     arg3 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  result = (MetNoFimex::NetCDF_CDMWriter *)new MetNoFimex::NetCDF_CDMWriter(arg1,(std::string const &)*arg2,arg3);
+  try {
+    result = (MetNoFimex::NetCDF_CDMWriter *)new MetNoFimex::NetCDF_CDMWriter(arg1,(std::string const &)*arg2,arg3);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MetNoFimex__NetCDF_CDMWriter, R_SWIG_OWNER |  0 );
   if (SWIG_IsNewObj(res2)) delete arg2;
   
@@ -5097,7 +5272,15 @@ R_swig_new_NetCDF_CDMWriter__SWIG_2 ( SEXP reader, SEXP filename)
     }
     arg2 = ptr;
   }
-  result = (MetNoFimex::NetCDF_CDMWriter *)new MetNoFimex::NetCDF_CDMWriter(arg1,(std::string const &)*arg2);
+  try {
+    result = (MetNoFimex::NetCDF_CDMWriter *)new MetNoFimex::NetCDF_CDMWriter(arg1,(std::string const &)*arg2);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MetNoFimex__NetCDF_CDMWriter, R_SWIG_OWNER |  0 );
   if (SWIG_IsNewObj(res2)) delete arg2;
   vmaxset(r_vmax);
@@ -5149,7 +5332,7 @@ static swig_type_info _swigt__p_boost__shared_ptrT_MetNoFimex__CDMReader_t = {"_
 static swig_type_info _swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t = {"_p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t", "boost::shared_ptr< MetNoFimex::CoordinateAxis const > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_difference_type = {"_p_difference_type", "difference_type *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_float = {"_p_float", "float *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_mifi_cdm_reader = {"_p_mifi_cdm_reader", "mifi_cdm_reader *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_double_t = {"_p_std__allocatorT_double_t", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_size_t_t = {"_p_std__allocatorT_size_t_t", "std::vector< size_t >::allocator_type *|std::allocator< size_t > *", 0, 0, (void*)0, 0};
@@ -5169,7 +5352,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t,
   &_swigt__p_char,
   &_swigt__p_difference_type,
-  &_swigt__p_float,
+  &_swigt__p_mifi_cdm_reader,
   &_swigt__p_size_type,
   &_swigt__p_std__allocatorT_double_t,
   &_swigt__p_std__allocatorT_size_t_t,
@@ -5189,7 +5372,7 @@ static swig_cast_info _swigc__p_boost__shared_ptrT_MetNoFimex__CDMReader_t[] = {
 static swig_cast_info _swigc__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t[] = {  {&_swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_difference_type[] = {  {&_swigt__p_difference_type, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_float[] = {  {&_swigt__p_float, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_mifi_cdm_reader[] = {  {&_swigt__p_mifi_cdm_reader, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_size_t_t[] = {  {&_swigt__p_std__allocatorT_size_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -5209,7 +5392,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t,
   _swigc__p_char,
   _swigc__p_difference_type,
-  _swigc__p_float,
+  _swigc__p_mifi_cdm_reader,
   _swigc__p_size_type,
   _swigc__p_std__allocatorT_double_t,
   _swigc__p_std__allocatorT_size_t_t,
@@ -5491,11 +5674,11 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0, 4},
    {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1, 3},
    {"R_swig_DoubleVector___delslice__", (DL_FUNC) &R_swig_DoubleVector___delslice__, 3},
-   {"R_swig_DoubleVector___setslice__", (DL_FUNC) &R_swig_DoubleVector___setslice__, 4},
    {"R_swig_IntVector___delslice__", (DL_FUNC) &R_swig_IntVector___delslice__, 3},
    {"R_swig_IntVector___setslice__", (DL_FUNC) &R_swig_IntVector___setslice__, 4},
    {"R_swig_IntVector___getslice__", (DL_FUNC) &R_swig_IntVector___getslice__, 3},
    {"R_swig_DoubleVector___getslice__", (DL_FUNC) &R_swig_DoubleVector___getslice__, 3},
+   {"R_swig_DoubleVector___setslice__", (DL_FUNC) &R_swig_DoubleVector___setslice__, 4},
    {"R_swig_SliceBuilder_getUnsetDimensionNames", (DL_FUNC) &R_swig_SliceBuilder_getUnsetDimensionNames, 2},
    {"R_swig_SliceBuilder_getDimensionNames", (DL_FUNC) &R_swig_SliceBuilder_getDimensionNames, 2},
    {"R_swig_DoubleVector_append", (DL_FUNC) &R_swig_DoubleVector_append, 2},
@@ -5516,7 +5699,6 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_IntVector___getitem__", (DL_FUNC) &R_swig_IntVector___getitem__, 3},
    {"R_swig_IntVector___delitem__", (DL_FUNC) &R_swig_IntVector___delitem__, 2},
    {"R_swig_delete_SliceBuilder", (DL_FUNC) &R_swig_delete_SliceBuilder, 1},
-   {"R_swig_CDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_0, 4},
    {"R_swig_SliceBuilder_setAll__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_0, 2},
    {"R_swig_SliceBuilder_setStartAndSize__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_0, 4},
    {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 2},
@@ -5524,6 +5706,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_DoubleVector__SWIG_0", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_0, 0},
    {"R_swig_new_IntVector__SWIG_0", (DL_FUNC) &R_swig_new_IntVector__SWIG_0, 0},
    {"R_swig_IntVector_resize__SWIG_0", (DL_FUNC) &R_swig_IntVector_resize__SWIG_0, 2},
+   {"R_swig_CDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_0, 4},
    {"R_swig_CDMFileReaderFactory_create__SWIG_0", (DL_FUNC) &R_swig_CDMFileReaderFactory_create__SWIG_0, 5},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_0", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_0, 4},
    {"R_swig_SliceBuilder_setAll__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_1, 2},
@@ -5536,6 +5719,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_CDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_1, 3},
    {"R_swig_CDMFileReaderFactory_create__SWIG_1", (DL_FUNC) &R_swig_CDMFileReaderFactory_create__SWIG_1, 4},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_1", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_1, 3},
+   {"R_swig_mifi_get_variable_number", (DL_FUNC) &R_swig_mifi_get_variable_number, 2},
    {"R_swig_new_DoubleVector__SWIG_2", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_2, 1},
    {"R_swig_new_IntVector__SWIG_2", (DL_FUNC) &R_swig_new_IntVector__SWIG_2, 1},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_2", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_2, 2},
@@ -5543,12 +5727,15 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_IntVector__SWIG_3", (DL_FUNC) &R_swig_new_IntVector__SWIG_3, 2},
    {"R_swig_DoubleVector_capacity", (DL_FUNC) &R_swig_DoubleVector_capacity, 2},
    {"R_swig_IntVector_capacity", (DL_FUNC) &R_swig_IntVector_capacity, 2},
-   {"R_swig_SliceBuilder_getMaxDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getMaxDimensionSizes, 2},
    {"R_swig_SliceBuilder_getDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getDimensionSizes, 2},
+   {"R_swig_SliceBuilder_getMaxDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getMaxDimensionSizes, 2},
    {"R_swig_DoubleVector_push_back", (DL_FUNC) &R_swig_DoubleVector_push_back, 2},
    {"R_swig_IntVector_push_back", (DL_FUNC) &R_swig_IntVector_push_back, 2},
    {"R_swig_DoubleVector_get_allocator", (DL_FUNC) &R_swig_DoubleVector_get_allocator, 2},
    {"R_swig_IntVector_get_allocator", (DL_FUNC) &R_swig_IntVector_get_allocator, 2},
+   {"R_swig_mifi_get_variable_name", (DL_FUNC) &R_swig_mifi_get_variable_name, 2},
+   {"R_swig_delete_mifi_cdm_reader", (DL_FUNC) &R_swig_delete_mifi_cdm_reader, 1},
+   {"R_swig_new_mifi_cdm_reader", (DL_FUNC) &R_swig_new_mifi_cdm_reader, 1},
    {"R_swig_DoubleVector_pop_back", (DL_FUNC) &R_swig_DoubleVector_pop_back, 1},
    {"R_swig_IntVector_pop_back", (DL_FUNC) &R_swig_IntVector_pop_back, 1},
    {"R_swig_delete_NetCDF_CDMWriter", (DL_FUNC) &R_swig_delete_NetCDF_CDMWriter, 1},
@@ -5556,9 +5743,9 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_IntVector_swap", (DL_FUNC) &R_swig_IntVector_swap, 2},
    {"R_swig_IntVector___nonzero__", (DL_FUNC) &R_swig_IntVector___nonzero__, 2},
    {"R_swig_DoubleVector___nonzero__", (DL_FUNC) &R_swig_DoubleVector___nonzero__, 2},
+   {"R_swig_mifi_cdm_reader_get", (DL_FUNC) &R_swig_mifi_cdm_reader_get, 2},
    {"R_swig_DoubleVector_front", (DL_FUNC) &R_swig_DoubleVector_front, 2},
    {"R_swig_IntVector_front", (DL_FUNC) &R_swig_IntVector_front, 2},
-   {"R_swig_callAry", (DL_FUNC) &R_swig_callAry, 2},
    {"R_swig_DoubleVector_clear", (DL_FUNC) &R_swig_DoubleVector_clear, 1},
    {"R_swig_IntVector_clear", (DL_FUNC) &R_swig_IntVector_clear, 1},
    {"R_swig_delete_CDM", (DL_FUNC) &R_swig_delete_CDM, 1},

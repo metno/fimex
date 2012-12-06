@@ -24,18 +24,13 @@
 #include "fimex/SliceBuilder.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMFileReaderFactory.h"
+#include "fimex/CDMException.h"
+#include "fimex/c_fimex.h"
+#include "fimex/mifi_cdm_reader.h"
 
-int callAry(float ary[10]) {
-    for (int i = 0; i < 10; i++) {
-        ary[i] = i;
-    }
-}
 
 %}
 
-#ifdef SWIGR
-int callAry(float ary[10]);
-#endif
 
 %include "typemaps.i"
 %include "std_string.i"
@@ -44,6 +39,11 @@ namespace std {
     %template(IntVector) vector<size_t>;
     %template(DoubleVector) vector<double>;
 };
+
+%include "fimex/mifi_cdm_reader.h"
+
+size_t mifi_get_variable_number(mifi_cdm_reader* reader);
+const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
 
 %include "fimex/SliceBuilder.h"
 
@@ -70,6 +70,7 @@ class CDMReader {
 public:
     const MetNoFimex::CDM& getCDM() const;
     %extend {
+      // need a vector<double>* (ptr) back, otherwise, R-Swig fails on compiled-in libarary with type_info<Type>() with segfault
       std::vector<double>* getSliceVecInUnit(std::string varName, SliceBuilder sb, std::string units = "") {
          MetNoFimex::DataPtr d;
          if (units != "") {
@@ -95,12 +96,12 @@ namespace MetNoFimex {
 
 class CDMFileReaderFactory {
   public:
-    static boost::shared_ptr<MetNoFimex::CDMReader> create(std::string fileType, std::string filename, std::string configFile, const std::vector<std::string>& args = std::vector<std::string>());
+    static boost::shared_ptr<MetNoFimex::CDMReader> create(std::string fileType, std::string filename, std::string configFile, const std::vector<std::string>& args = std::vector<std::string>()) throw(MetNoFimex::CDMException);
 };
 
 class NetCDF_CDMWriter {
   public:
-    NetCDF_CDMWriter(boost::shared_ptr<MetNoFimex::CDMReader> reader, const std::string& filename, std::string configFile = "", int version = 3); 
+    NetCDF_CDMWriter(boost::shared_ptr<MetNoFimex::CDMReader> reader, const std::string& filename, std::string configFile = "", int version = 3) throw(MetNoFimex::CDMException); 
 };
 
 }

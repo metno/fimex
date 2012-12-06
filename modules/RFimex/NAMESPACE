@@ -7,6 +7,7 @@ export(CDMFileReaderFactory_create,
        SliceBuilder,
        boost__shared_ptrCDMReader_getCDM,
        mifi.vec.2R,
-       NetCDF_CDMWriter,
-       delete_NetCDF_CDMWriter
+       mifi.reader.new,
+       mifi.reader.write,
+       mifi.reader.variables
 )
