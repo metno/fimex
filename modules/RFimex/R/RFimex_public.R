@@ -30,9 +30,38 @@ mifi.reader.variables <- function(reader) {
     ans
 }
 
-#mifi.reader.getSliceVecInUnit(reader, "time", sb, "seconds since 2007-05-16 00:00:00 +0000")
-#mifi.sb.new(reader, varName)
-#mifi.sb.setStartAndSize(varName, start, size)
+#mifi.reader.getCoordinates(varName) {
+    # will give logical coordinates, like time, x(lon), y(lat), z, refTime, offsetTime, other1, other2, ...
+#}
+
+mifi.sb.new <- function(reader, varName) {
+    SliceBuilder(boost__shared_ptrCDMReader_getCDM(reader), varName);
+}
+mifi.sb.getDimensions <- function(sb) {
+    dimNames <- SliceBuilder_getDimensionNames(sb);
+    dimSizes <- SliceBuilder_getDimensionSizes(sb);
+    dims <- c();
+    for (i in 1:StringVector___len__(dimNames)) {
+        dims[dimNames[i]] <- dimSizes[i];
+    }
+    dims
+}
+
+mifi.sb.setStartAndSize <- function(sb, dimName, start, size) {
+    SliceBuilder_setStartAndSize(sb, dimName, start,size)
+}
+
+mifi.reader.getSliceVecInUnit <- function(reader, varName, sb, units) {
+    out <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader, varName, sb, units);
+    if (is.null(out)) {
+        stop("unable to get data for mifi.reader.getSliceVecInUnit(reader, ",varName,",sb, ",units,")");
+    }
+    outVec <- mifi.vec.2R(out);
+    if (outVec$status != 0) {
+        stop("unable to convert vector: ", outVec$errmsg);
+    }
+    outVec$data
+}
 
 mifi.reader.write <- function(reader, type, filename, configname = "") {
     if (type == "netcdf" || type == "netcdf3") {

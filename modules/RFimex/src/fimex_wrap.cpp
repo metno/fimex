@@ -1123,12 +1123,13 @@ SWIG_R_ConvertPacked(SEXP obj, void *ptr, size_t sz, swig_type_info *ty) {
 #define SWIGTYPE_p_size_type swig_types[11]
 #define SWIGTYPE_p_std__allocatorT_double_t swig_types[12]
 #define SWIGTYPE_p_std__allocatorT_size_t_t swig_types[13]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[14]
-#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[15]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[16]
-#define SWIGTYPE_p_value_type swig_types[17]
-static swig_type_info *swig_types[19];
-static swig_module_info swig_module = {swig_types, 18, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[14]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[15]
+#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[16]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[17]
+#define SWIGTYPE_p_value_type swig_types[18]
+static swig_type_info *swig_types[20];
+static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1876,6 +1877,37 @@ SWIGINTERN void std_vector_Sl_double_Sg__append(std::vector< double > *self,std:
       self->push_back(x);
     }
 
+  namespace swig {
+    template <>  struct traits<std::string > {
+      typedef pointer_category category;
+      static const char* type_name() { return"std::string"; }
+    };
+  }
+
+
+      namespace swig {
+	template <>  struct traits<std::vector<std::string, std::allocator< std::string > > > {
+	  typedef pointer_category category;
+	  static const char* type_name() {
+	    return "std::vector<" "std::string" "," "std::allocator< std::string >" " >";
+	  }
+	};
+      }
+    
+SWIGINTERN bool std_vector_Sl_std_string_Sg____nonzero__(std::vector< std::string > const *self){
+      return !(self->empty());
+    }
+SWIGINTERN std::vector< std::string >::size_type std_vector_Sl_std_string_Sg____len__(std::vector< std::string > const *self){
+      return self->size();
+    }
+SWIGINTERN std::vector< std::string >::value_type std_vector_Sl_std_string_Sg__pop(std::vector< std::string > *self){
+      if (self->size() == 0)
+	throw std::out_of_range("pop from empty container");
+      std::vector<std::string,std::allocator< std::string > >::value_type x = self->back();
+      self->pop_back();
+      return x;
+    }
+
 SWIGINTERN SEXP
 SWIG_FromCharPtrAndSize(const char* carray, size_t size) 
 {
@@ -1901,12 +1933,27 @@ SWIG_FromCharPtrAndSize(const char* carray, size_t size)
 }
 
 
-SWIGINTERNINLINE SEXP 
-SWIG_FromCharPtr(const char *cptr)
-{ 
-  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
+SWIGINTERNINLINE SEXP
+SWIG_From_std_string  (const std::string& s)
+{
+  return SWIG_FromCharPtrAndSize(s.data(), s.size());
 }
 
+SWIGINTERN std::vector< std::string,std::allocator< std::string > > *std_vector_Sl_std_string_Sg____getslice__(std::vector< std::string > *self,std::vector< std::string >::difference_type i,std::vector< std::string >::difference_type j){
+      return swig::getslice(self, i, j);
+    }
+SWIGINTERN void std_vector_Sl_std_string_Sg____setslice__(std::vector< std::string > *self,std::vector< std::string >::difference_type i,std::vector< std::string >::difference_type j,std::vector< std::string,std::allocator< std::string > > const &v){
+      swig::setslice(self, i, j, v);
+    }
+SWIGINTERN void std_vector_Sl_std_string_Sg____delslice__(std::vector< std::string > *self,std::vector< std::string >::difference_type i,std::vector< std::string >::difference_type j){
+      swig::delslice(self, i, j);
+    }
+SWIGINTERN void std_vector_Sl_std_string_Sg____delitem__(std::vector< std::string > *self,std::vector< std::string >::difference_type i){
+      self->erase(swig::getpos(self,i));
+    }
+SWIGINTERN std::vector< std::string >::value_type const &std_vector_Sl_std_string_Sg____getitem__(std::vector< std::string > const *self,std::vector< std::string >::difference_type i){
+      return *(swig::cgetpos(self, i));
+    }
 
 SWIGINTERN int
 SWIG_AsCharPtrAndSize(SEXP obj, char** cptr, size_t* psize, int *alloc)
@@ -1961,6 +2008,19 @@ SWIG_AsPtr_std_string (SEXP obj, std::string **val)
     }
   }
   return SWIG_ERROR;
+}
+
+SWIGINTERN void std_vector_Sl_std_string_Sg____setitem__(std::vector< std::string > *self,std::vector< std::string >::difference_type i,std::vector< std::string >::value_type const &x){
+      *(swig::getpos(self,i)) = x;
+    }
+SWIGINTERN void std_vector_Sl_std_string_Sg__append(std::vector< std::string > *self,std::vector< std::string >::value_type const &x){
+      self->push_back(x);
+    }
+
+SWIGINTERNINLINE SEXP 
+SWIG_FromCharPtr(const char *cptr)
+{ 
+  return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
 }
 
 SWIGINTERN std::vector< double,std::allocator< double > > *MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(MetNoFimex::CDMReader *self,std::string varName,MetNoFimex::SliceBuilder sb,std::string units=""){
@@ -3997,6 +4057,1031 @@ R_swig_delete_DoubleVector ( SEXP self)
 
 
 SWIGEXPORT SEXP
+R_swig_StringVector___nonzero__ ( SEXP self, SEXP s_swig_copy)
+{
+  bool result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___nonzero__" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = (bool)std_vector_Sl_std_string_Sg____nonzero__((std::vector< std::string > const *)arg1);
+  r_ans = Rf_ScalarLogical(result);
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___len__ ( SEXP self, SEXP s_swig_copy)
+{
+  std::vector< std::string >::size_type result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___len__" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = std_vector_Sl_std_string_Sg____len__((std::vector< std::string > const *)arg1);
+  r_ans = SWIG_From_int(static_cast< int >(result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_pop ( SEXP self, SEXP s_swig_copy)
+{
+  std::vector< std::string >::value_type result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_pop" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  try {
+    result = std_vector_Sl_std_string_Sg__pop(arg1);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = SWIG_From_std_string(static_cast< std::string >(result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___getslice__ ( SEXP self, SEXP i, SEXP j)
+{
+  std::vector< std::string,std::allocator< std::string > > *result = 0 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::difference_type arg2 ;
+  std::vector< std::string >::difference_type arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___getslice__" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(i, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector___getslice__" "', argument " "2"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::difference_type >(val2);
+  ecode3 = SWIG_AsVal_int(j, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "StringVector___getslice__" "', argument " "3"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg3 = static_cast< std::vector< std::string >::difference_type >(val3);
+  try {
+    result = (std::vector< std::string,std::allocator< std::string > > *)std_vector_Sl_std_string_Sg____getslice__(arg1,arg2,arg3);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, R_SWIG_OWNER |  0 );
+  
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___setslice__ ( SEXP self, SEXP i, SEXP j, SEXP v)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::difference_type arg2 ;
+  std::vector< std::string >::difference_type arg3 ;
+  std::vector< std::string,std::allocator< std::string > > *arg4 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  int res4 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___setslice__" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(i, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector___setslice__" "', argument " "2"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::difference_type >(val2);
+  ecode3 = SWIG_AsVal_int(j, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "StringVector___setslice__" "', argument " "3"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg3 = static_cast< std::vector< std::string >::difference_type >(val3);
+  {
+    std::vector<std::string,std::allocator< std::string > > *ptr = (std::vector<std::string,std::allocator< std::string > > *)0;
+    res4 = swig::asptr(v, &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "StringVector___setslice__" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector___setslice__" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+    }
+    arg4 = ptr;
+  }
+  try {
+    std_vector_Sl_std_string_Sg____setslice__(arg1,arg2,arg3,(std::vector< std::string,std::allocator< std::string > > const &)*arg4);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  catch(std::invalid_argument &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = R_NilValue;
+  
+  
+  
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___delslice__ ( SEXP self, SEXP i, SEXP j)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::difference_type arg2 ;
+  std::vector< std::string >::difference_type arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___delslice__" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(i, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector___delslice__" "', argument " "2"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::difference_type >(val2);
+  ecode3 = SWIG_AsVal_int(j, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "StringVector___delslice__" "', argument " "3"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg3 = static_cast< std::vector< std::string >::difference_type >(val3);
+  try {
+    std_vector_Sl_std_string_Sg____delslice__(arg1,arg2,arg3);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = R_NilValue;
+  
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___delitem__ ( SEXP self, SEXP i)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::difference_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___delitem__" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(i, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector___delitem__" "', argument " "2"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::difference_type >(val2);
+  try {
+    std_vector_Sl_std_string_Sg____delitem__(arg1,arg2);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___getitem__ ( SEXP self, SEXP i, SEXP s_swig_copy)
+{
+  std::vector< std::string >::value_type *result = 0 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::difference_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___getitem__" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(i, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector___getitem__" "', argument " "2"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::difference_type >(val2);
+  try {
+    result = (std::vector< std::string >::value_type *) &std_vector_Sl_std_string_Sg____getitem__((std::vector< std::string > const *)arg1,arg2);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = SWIG_From_std_string(static_cast< std::string >(*result));
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector___setitem__ ( SEXP self, SEXP i, SEXP x)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::difference_type arg2 ;
+  std::vector< std::string >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector___setitem__" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(i, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector___setitem__" "', argument " "2"" of type '" "std::vector< std::string >::difference_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::difference_type >(val2);
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(x, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "StringVector___setitem__" "', argument " "3"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector___setitem__" "', argument " "3"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  try {
+    std_vector_Sl_std_string_Sg____setitem__(arg1,arg2,(std::string const &)*arg3);
+  }
+  catch(std::out_of_range &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = R_NilValue;
+  
+  
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_append ( SEXP self, SEXP x)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::value_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_append" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(x, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StringVector_append" "', argument " "2"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector_append" "', argument " "2"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  std_vector_Sl_std_string_Sg__append(arg1,(std::string const &)*arg2);
+  r_ans = R_NilValue;
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_new_StringVector__SWIG_0 ( )
+{
+  std::vector< std::string > *result = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  result = (std::vector< std::string > *)new std::vector< std::string >();
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, R_SWIG_OWNER |  0 );
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_new_StringVector__SWIG_1 ( SEXP s_arg1)
+{
+  std::vector< std::string > *result = 0 ;
+  std::vector< std::string > *arg1 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    std::vector<std::string,std::allocator< std::string > > *ptr = (std::vector<std::string,std::allocator< std::string > > *)0;
+    res1 = swig::asptr(s_arg1, &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_StringVector" "', argument " "1"" of type '" "std::vector< std::string > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_StringVector" "', argument " "1"" of type '" "std::vector< std::string > const &""'"); 
+    }
+    arg1 = ptr;
+  }
+  result = (std::vector< std::string > *)new std::vector< std::string >((std::vector< std::string > const &)*arg1);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, R_SWIG_OWNER |  0 );
+  if (SWIG_IsNewObj(res1)) delete arg1;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_empty ( SEXP self, SEXP s_swig_copy)
+{
+  bool result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_empty" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = (bool)((std::vector< std::string > const *)arg1)->empty();
+  r_ans = Rf_ScalarLogical(result);
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_size ( SEXP self, SEXP s_swig_copy)
+{
+  std::vector< std::string >::size_type result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_size" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = ((std::vector< std::string > const *)arg1)->size();
+  r_ans = SWIG_From_int(static_cast< int >(result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_clear ( SEXP self)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_clear" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  (arg1)->clear();
+  r_ans = R_NilValue;
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_swap ( SEXP self, SEXP v)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string > *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_swap" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  res2 = SWIG_R_ConvertPtr(v, &argp2, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StringVector_swap" "', argument " "2"" of type '" "std::vector< std::string > &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector_swap" "', argument " "2"" of type '" "std::vector< std::string > &""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< std::string > * >(argp2);
+  (arg1)->swap(*arg2);
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_get_allocator ( SEXP self, SEXP s_swig_copy)
+{
+  SwigValueWrapper< std::allocator< std::string > > result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_get_allocator" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = ((std::vector< std::string > const *)arg1)->get_allocator();
+  r_ans = SWIG_R_NewPointerObj((new std::vector< std::string >::allocator_type(static_cast< const std::vector< std::string >::allocator_type& >(result))), SWIGTYPE_p_std__allocatorT_std__string_t, SWIG_POINTER_OWN |  0 );
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_new_StringVector__SWIG_2 ( SEXP size)
+{
+  std::vector< std::string > *result = 0 ;
+  std::vector< std::string >::size_type arg1 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  ecode1 = SWIG_AsVal_int(size, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_StringVector" "', argument " "1"" of type '" "std::vector< std::string >::size_type""'");
+  } 
+  arg1 = static_cast< std::vector< std::string >::size_type >(val1);
+  result = (std::vector< std::string > *)new std::vector< std::string >(arg1);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, R_SWIG_OWNER |  0 );
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_pop_back ( SEXP self)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_pop_back" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  (arg1)->pop_back();
+  r_ans = R_NilValue;
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_resize__SWIG_0 ( SEXP self, SEXP new_size)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_resize" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(new_size, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector_resize" "', argument " "2"" of type '" "std::vector< std::string >::size_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::size_type >(val2);
+  (arg1)->resize(arg2);
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_new_StringVector__SWIG_3 ( SEXP size, SEXP value)
+{
+  std::vector< std::string > *result = 0 ;
+  std::vector< std::string >::size_type arg1 ;
+  std::vector< std::string >::value_type *arg2 = 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  ecode1 = SWIG_AsVal_int(size, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "new_StringVector" "', argument " "1"" of type '" "std::vector< std::string >::size_type""'");
+  } 
+  arg1 = static_cast< std::vector< std::string >::size_type >(val1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(value, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_StringVector" "', argument " "2"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_StringVector" "', argument " "2"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  result = (std::vector< std::string > *)new std::vector< std::string >(arg1,(std::vector< std::string >::value_type const &)*arg2);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, R_SWIG_OWNER |  0 );
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_push_back ( SEXP self, SEXP x)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::value_type *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_push_back" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(x, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "StringVector_push_back" "', argument " "2"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector_push_back" "', argument " "2"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  (arg1)->push_back((std::vector< std::string >::value_type const &)*arg2);
+  r_ans = R_NilValue;
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_front ( SEXP self, SEXP s_swig_copy)
+{
+  std::vector< std::string >::value_type *result = 0 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_front" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = (std::vector< std::string >::value_type *) &((std::vector< std::string > const *)arg1)->front();
+  r_ans = SWIG_From_std_string(static_cast< std::string >(*result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_back ( SEXP self, SEXP s_swig_copy)
+{
+  std::vector< std::string >::value_type *result = 0 ;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_back" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = (std::vector< std::string >::value_type *) &((std::vector< std::string > const *)arg1)->back();
+  r_ans = SWIG_From_std_string(static_cast< std::string >(*result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_assign ( SEXP self, SEXP n, SEXP x)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type arg2 ;
+  std::vector< std::string >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_assign" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(n, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector_assign" "', argument " "2"" of type '" "std::vector< std::string >::size_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::size_type >(val2);
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(x, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "StringVector_assign" "', argument " "3"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector_assign" "', argument " "3"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  (arg1)->assign(arg2,(std::vector< std::string >::value_type const &)*arg3);
+  r_ans = R_NilValue;
+  
+  
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_resize__SWIG_1 ( SEXP self, SEXP new_size, SEXP x)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type arg2 ;
+  std::vector< std::string >::value_type *arg3 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_resize" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(new_size, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector_resize" "', argument " "2"" of type '" "std::vector< std::string >::size_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::size_type >(val2);
+  {
+    std::string *ptr = (std::string *)0;
+    res3 = SWIG_AsPtr_std_string(x, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "StringVector_resize" "', argument " "3"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "StringVector_resize" "', argument " "3"" of type '" "std::vector< std::string >::value_type const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  (arg1)->resize(arg2,(std::vector< std::string >::value_type const &)*arg3);
+  r_ans = R_NilValue;
+  
+  
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_reserve ( SEXP self, SEXP n)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  std::vector< std::string >::size_type arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_reserve" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  ecode2 = SWIG_AsVal_int(n, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "StringVector_reserve" "', argument " "2"" of type '" "std::vector< std::string >::size_type""'");
+  } 
+  arg2 = static_cast< std::vector< std::string >::size_type >(val2);
+  (arg1)->reserve(arg2);
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_StringVector_capacity ( SEXP self, SEXP s_swig_copy)
+{
+  std::vector< std::string >::size_type result;
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "StringVector_capacity" "', argument " "1"" of type '" "std::vector< std::string > const *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  result = ((std::vector< std::string > const *)arg1)->capacity();
+  r_ans = SWIG_From_int(static_cast< int >(result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_delete_StringVector ( SEXP self)
+{
+  std::vector< std::string > *arg1 = (std::vector< std::string > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_StringVector" "', argument " "1"" of type '" "std::vector< std::string > *""'"); 
+  }
+  arg1 = reinterpret_cast< std::vector< std::string > * >(argp1);
+  delete arg1;
+  r_ans = R_NilValue;
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  R_ClearExternalPtr(self);
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
 R_swig_new_mifi_cdm_reader ( SEXP reader)
 {
   mifi_cdm_reader *result = 0 ;
@@ -4189,21 +5274,23 @@ R_swig_new_SliceBuilder__SWIG_1 ( SEXP dimNames, SEXP dimSize)
   MetNoFimex::SliceBuilder *result = 0 ;
   std::vector< std::string,std::allocator< std::string > > *arg1 = 0 ;
   std::vector< size_t,std::allocator< size_t > > *arg2 = 0 ;
-  void *argp1 ;
-  int res1 = 0 ;
+  int res1 = SWIG_OLDOBJ ;
   int res2 = SWIG_OLDOBJ ;
   unsigned int r_nprotect = 0;
   SEXP r_ans = R_NilValue ;
   VMAXTYPE r_vmax = vmaxget() ;
   
-  res1 = SWIG_R_ConvertPtr(dimNames, &argp1, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t,  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SliceBuilder" "', argument " "1"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+  {
+    std::vector<std::string,std::allocator< std::string > > *ptr = (std::vector<std::string,std::allocator< std::string > > *)0;
+    res1 = swig::asptr(dimNames, &ptr);
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SliceBuilder" "', argument " "1"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SliceBuilder" "', argument " "1"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+    }
+    arg1 = ptr;
   }
-  if (!argp1) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SliceBuilder" "', argument " "1"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
-  }
-  arg1 = reinterpret_cast< std::vector< std::string,std::allocator< std::string > > * >(argp1);
   {
     std::vector<size_t,std::allocator< size_t > > *ptr = (std::vector<size_t,std::allocator< size_t > > *)0;
     res2 = swig::asptr(dimSize, &ptr);
@@ -4217,7 +5304,7 @@ R_swig_new_SliceBuilder__SWIG_1 ( SEXP dimNames, SEXP dimSize)
   }
   result = (MetNoFimex::SliceBuilder *)new MetNoFimex::SliceBuilder((std::vector< std::string,std::allocator< std::string > > const &)*arg1,(std::vector< size_t,std::allocator< size_t > > const &)*arg2);
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MetNoFimex__SliceBuilder, R_SWIG_OWNER |  0 );
-  
+  if (SWIG_IsNewObj(res1)) delete arg1;
   if (SWIG_IsNewObj(res2)) delete arg2;
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
@@ -4495,7 +5582,7 @@ R_swig_SliceBuilder_getDimensionSizes ( SEXP self, SEXP s_swig_copy)
 SWIGEXPORT SEXP
 R_swig_SliceBuilder_getDimensionNames ( SEXP self, SEXP s_swig_copy)
 {
-  SwigValueWrapper< std::vector< std::string,std::allocator< std::string > > > result;
+  std::vector< std::string,std::allocator< std::string > > result;
   MetNoFimex::SliceBuilder *arg1 = (MetNoFimex::SliceBuilder *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -4509,7 +5596,7 @@ R_swig_SliceBuilder_getDimensionNames ( SEXP self, SEXP s_swig_copy)
   }
   arg1 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp1);
   result = ((MetNoFimex::SliceBuilder const *)arg1)->getDimensionNames();
-  r_ans = SWIG_R_NewPointerObj((new std::vector< std::string,std::allocator< std::string > >(static_cast< const std::vector< std::string,std::allocator< std::string > >& >(result))), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, SWIG_POINTER_OWN |  0 );
+  r_ans = swig::from(static_cast< std::vector<std::string,std::allocator< std::string > > >(result));
   
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
@@ -4521,7 +5608,7 @@ R_swig_SliceBuilder_getDimensionNames ( SEXP self, SEXP s_swig_copy)
 SWIGEXPORT SEXP
 R_swig_SliceBuilder_getUnsetDimensionNames ( SEXP self, SEXP s_swig_copy)
 {
-  SwigValueWrapper< std::vector< std::string,std::allocator< std::string > > > result;
+  std::vector< std::string,std::allocator< std::string > > result;
   MetNoFimex::SliceBuilder *arg1 = (MetNoFimex::SliceBuilder *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -4535,7 +5622,7 @@ R_swig_SliceBuilder_getUnsetDimensionNames ( SEXP self, SEXP s_swig_copy)
   }
   arg1 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp1);
   result = ((MetNoFimex::SliceBuilder const *)arg1)->getUnsetDimensionNames();
-  r_ans = SWIG_R_NewPointerObj((new std::vector< std::string,std::allocator< std::string > >(static_cast< const std::vector< std::string,std::allocator< std::string > >& >(result))), SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t, SWIG_POINTER_OWN |  0 );
+  r_ans = swig::from(static_cast< std::vector<std::string,std::allocator< std::string > > >(result));
   
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
@@ -4672,7 +5759,15 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, S
     arg4 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3,arg4);
+  try {
+    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3,arg4);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
   
   
@@ -4724,7 +5819,15 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb)
       arg3 = *(reinterpret_cast< MetNoFimex::SliceBuilder * >(argp3));
     }
   }
-  result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3);
+  try {
+    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
   
   
@@ -4889,7 +5992,15 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP va
     arg4 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3,arg4);
+  try {
+    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3,arg4);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
   
   
@@ -4941,7 +6052,15 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP va
       arg3 = *(reinterpret_cast< MetNoFimex::SliceBuilder * >(argp3));
     }
   }
-  result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3);
+  try {
+    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
   r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
   
   
@@ -4960,8 +6079,7 @@ R_swig_CDMFileReaderFactory_create__SWIG_0 ( SEXP fileType, SEXP filename, SEXP 
   std::string arg2 ;
   std::string arg3 ;
   std::vector< std::string,std::allocator< std::string > > *arg4 = 0 ;
-  void *argp4 ;
-  int res4 = 0 ;
+  int res4 = SWIG_OLDOBJ ;
   unsigned int r_nprotect = 0;
   SEXP r_ans = R_NilValue ;
   VMAXTYPE r_vmax = vmaxget() ;
@@ -4993,14 +6111,17 @@ R_swig_CDMFileReaderFactory_create__SWIG_0 ( SEXP fileType, SEXP filename, SEXP 
     arg3 = *ptr;
     if (SWIG_IsNewObj(res)) delete ptr;
   }
-  res4 = SWIG_R_ConvertPtr(s_args, &argp4, SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t,  0 );
-  if (!SWIG_IsOK(res4)) {
-    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "CDMFileReaderFactory_create" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+  {
+    std::vector<std::string,std::allocator< std::string > > *ptr = (std::vector<std::string,std::allocator< std::string > > *)0;
+    res4 = swig::asptr(s_args, &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "CDMFileReaderFactory_create" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "CDMFileReaderFactory_create" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
+    }
+    arg4 = ptr;
   }
-  if (!argp4) {
-    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "CDMFileReaderFactory_create" "', argument " "4"" of type '" "std::vector< std::string,std::allocator< std::string > > const &""'"); 
-  }
-  arg4 = reinterpret_cast< std::vector< std::string,std::allocator< std::string > > * >(argp4);
   try {
     result = MetNoFimex::CDMFileReaderFactory::create(arg1,arg2,arg3,(std::vector< std::string,std::allocator< std::string > > const &)*arg4);
   }
@@ -5014,7 +6135,7 @@ R_swig_CDMFileReaderFactory_create__SWIG_0 ( SEXP fileType, SEXP filename, SEXP 
   
   
   
-  
+  if (SWIG_IsNewObj(res4)) delete arg4;
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
   
@@ -5336,9 +6457,10 @@ static swig_type_info _swigt__p_mifi_cdm_reader = {"_p_mifi_cdm_reader", "mifi_c
 static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_double_t = {"_p_std__allocatorT_double_t", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_size_t_t = {"_p_std__allocatorT_size_t_t", "std::vector< size_t >::allocator_type *|std::allocator< size_t > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__allocatorT_std__string_t = {"_p_std__allocatorT_std__string_t", "std::vector< std::string >::allocator_type *|std::allocator< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t = {"_p_std__vectorT_double_std__allocatorT_double_t_t", "std::vector< double,std::allocator< double > > *|std::vector< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t = {"_p_std__vectorT_size_t_std__allocatorT_size_t_t_t", "std::vector< size_t,std::allocator< size_t > > *|std::vector< size_t > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t", "std::vector< std::string,std::allocator< std::string > > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t", "std::vector< std::string,std::allocator< std::string > > *|std::vector< std::string > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_value_type = {"_p_value_type", "value_type *", 0, 0, (void*)0, 0};
 
 static swig_type_info *swig_type_initial[] = {
@@ -5356,6 +6478,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_size_type,
   &_swigt__p_std__allocatorT_double_t,
   &_swigt__p_std__allocatorT_size_t_t,
+  &_swigt__p_std__allocatorT_std__string_t,
   &_swigt__p_std__vectorT_double_std__allocatorT_double_t_t,
   &_swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t,
   &_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
@@ -5376,6 +6499,7 @@ static swig_cast_info _swigc__p_mifi_cdm_reader[] = {  {&_swigt__p_mifi_cdm_read
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_size_t_t[] = {  {&_swigt__p_std__allocatorT_size_t_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__allocatorT_std__string_t[] = {  {&_swigt__p_std__allocatorT_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_size_t_std__allocatorT_size_t_t_t[] = {  {&_swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t[] = {  {&_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -5396,6 +6520,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_size_type,
   _swigc__p_std__allocatorT_double_t,
   _swigc__p_std__allocatorT_size_t_t,
+  _swigc__p_std__allocatorT_std__string_t,
   _swigc__p_std__vectorT_double_std__allocatorT_double_t_t,
   _swigc__p_std__vectorT_size_t_std__allocatorT_size_t_t_t,
   _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
@@ -5660,38 +6785,53 @@ extern "C" {
 SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_DoubleVector_reserve", (DL_FUNC) &R_swig_DoubleVector_reserve, 2},
    {"R_swig_IntVector_reserve", (DL_FUNC) &R_swig_IntVector_reserve, 2},
+   {"R_swig_StringVector_reserve", (DL_FUNC) &R_swig_StringVector_reserve, 2},
+   {"R_swig_StringVector_pop", (DL_FUNC) &R_swig_StringVector_pop, 2},
    {"R_swig_IntVector_pop", (DL_FUNC) &R_swig_IntVector_pop, 2},
    {"R_swig_DoubleVector_pop", (DL_FUNC) &R_swig_DoubleVector_pop, 2},
    {"R_swig_CDMReader_getCDM", (DL_FUNC) &R_swig_CDMReader_getCDM, 2},
    {"R_swig_boost__shared_ptrCDMReader_getCDM", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getCDM, 2},
    {"R_swig_delete_DoubleVector", (DL_FUNC) &R_swig_delete_DoubleVector, 1},
+   {"R_swig_delete_StringVector", (DL_FUNC) &R_swig_delete_StringVector, 1},
    {"R_swig_delete_CDMFileReaderFactory", (DL_FUNC) &R_swig_delete_CDMFileReaderFactory, 1},
    {"R_swig_DoubleVector_assign", (DL_FUNC) &R_swig_DoubleVector_assign, 3},
    {"R_swig_IntVector_assign", (DL_FUNC) &R_swig_IntVector_assign, 3},
    {"R_swig_DoubleVector_back", (DL_FUNC) &R_swig_DoubleVector_back, 2},
    {"R_swig_IntVector_back", (DL_FUNC) &R_swig_IntVector_back, 2},
+   {"R_swig_StringVector_back", (DL_FUNC) &R_swig_StringVector_back, 2},
+   {"R_swig_StringVector_assign", (DL_FUNC) &R_swig_StringVector_assign, 3},
    {"R_swig_SliceBuilder_getDimensionStartPositions", (DL_FUNC) &R_swig_SliceBuilder_getDimensionStartPositions, 2},
    {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0, 4},
    {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1, 3},
+   {"R_swig_StringVector___delslice__", (DL_FUNC) &R_swig_StringVector___delslice__, 3},
+   {"R_swig_StringVector___setslice__", (DL_FUNC) &R_swig_StringVector___setslice__, 4},
+   {"R_swig_StringVector___getslice__", (DL_FUNC) &R_swig_StringVector___getslice__, 3},
    {"R_swig_DoubleVector___delslice__", (DL_FUNC) &R_swig_DoubleVector___delslice__, 3},
    {"R_swig_IntVector___delslice__", (DL_FUNC) &R_swig_IntVector___delslice__, 3},
    {"R_swig_IntVector___setslice__", (DL_FUNC) &R_swig_IntVector___setslice__, 4},
    {"R_swig_IntVector___getslice__", (DL_FUNC) &R_swig_IntVector___getslice__, 3},
    {"R_swig_DoubleVector___getslice__", (DL_FUNC) &R_swig_DoubleVector___getslice__, 3},
    {"R_swig_DoubleVector___setslice__", (DL_FUNC) &R_swig_DoubleVector___setslice__, 4},
-   {"R_swig_SliceBuilder_getUnsetDimensionNames", (DL_FUNC) &R_swig_SliceBuilder_getUnsetDimensionNames, 2},
    {"R_swig_SliceBuilder_getDimensionNames", (DL_FUNC) &R_swig_SliceBuilder_getDimensionNames, 2},
+   {"R_swig_SliceBuilder_getUnsetDimensionNames", (DL_FUNC) &R_swig_SliceBuilder_getUnsetDimensionNames, 2},
+   {"R_swig_StringVector_append", (DL_FUNC) &R_swig_StringVector_append, 2},
    {"R_swig_DoubleVector_append", (DL_FUNC) &R_swig_DoubleVector_append, 2},
    {"R_swig_IntVector_append", (DL_FUNC) &R_swig_IntVector_append, 2},
+   {"R_swig_StringVector_empty", (DL_FUNC) &R_swig_StringVector_empty, 2},
    {"R_swig_DoubleVector_empty", (DL_FUNC) &R_swig_DoubleVector_empty, 2},
    {"R_swig_IntVector_empty", (DL_FUNC) &R_swig_IntVector_empty, 2},
    {"R_swig_delete_IntVector", (DL_FUNC) &R_swig_delete_IntVector, 1},
+   {"R_swig_StringVector_size", (DL_FUNC) &R_swig_StringVector_size, 2},
    {"R_swig_DoubleVector_size", (DL_FUNC) &R_swig_DoubleVector_size, 2},
    {"R_swig_IntVector_size", (DL_FUNC) &R_swig_IntVector_size, 2},
+   {"R_swig_StringVector___len__", (DL_FUNC) &R_swig_StringVector___len__, 2},
    {"R_swig_IntVector___len__", (DL_FUNC) &R_swig_IntVector___len__, 2},
    {"R_swig_DoubleVector___len__", (DL_FUNC) &R_swig_DoubleVector___len__, 2},
    {"R_swig_delete_CDMReader", (DL_FUNC) &R_swig_delete_CDMReader, 1},
    {"R_swig_delete_boost__shared_ptrCDMReader", (DL_FUNC) &R_swig_delete_boost__shared_ptrCDMReader, 1},
+   {"R_swig_StringVector___setitem__", (DL_FUNC) &R_swig_StringVector___setitem__, 3},
+   {"R_swig_StringVector___getitem__", (DL_FUNC) &R_swig_StringVector___getitem__, 3},
+   {"R_swig_StringVector___delitem__", (DL_FUNC) &R_swig_StringVector___delitem__, 2},
    {"R_swig_DoubleVector___setitem__", (DL_FUNC) &R_swig_DoubleVector___setitem__, 3},
    {"R_swig_DoubleVector___getitem__", (DL_FUNC) &R_swig_DoubleVector___getitem__, 3},
    {"R_swig_DoubleVector___delitem__", (DL_FUNC) &R_swig_DoubleVector___delitem__, 2},
@@ -5699,53 +6839,67 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_IntVector___getitem__", (DL_FUNC) &R_swig_IntVector___getitem__, 3},
    {"R_swig_IntVector___delitem__", (DL_FUNC) &R_swig_IntVector___delitem__, 2},
    {"R_swig_delete_SliceBuilder", (DL_FUNC) &R_swig_delete_SliceBuilder, 1},
-   {"R_swig_SliceBuilder_setAll__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_0, 2},
-   {"R_swig_SliceBuilder_setStartAndSize__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_0, 4},
-   {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 2},
+   {"R_swig_new_StringVector__SWIG_0", (DL_FUNC) &R_swig_new_StringVector__SWIG_0, 0},
    {"R_swig_DoubleVector_resize__SWIG_0", (DL_FUNC) &R_swig_DoubleVector_resize__SWIG_0, 2},
    {"R_swig_new_DoubleVector__SWIG_0", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_0, 0},
    {"R_swig_new_IntVector__SWIG_0", (DL_FUNC) &R_swig_new_IntVector__SWIG_0, 0},
    {"R_swig_IntVector_resize__SWIG_0", (DL_FUNC) &R_swig_IntVector_resize__SWIG_0, 2},
+   {"R_swig_StringVector_resize__SWIG_0", (DL_FUNC) &R_swig_StringVector_resize__SWIG_0, 2},
+   {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 2},
+   {"R_swig_SliceBuilder_setStartAndSize__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_0, 4},
+   {"R_swig_SliceBuilder_setAll__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_0, 2},
    {"R_swig_CDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_0, 4},
    {"R_swig_CDMFileReaderFactory_create__SWIG_0", (DL_FUNC) &R_swig_CDMFileReaderFactory_create__SWIG_0, 5},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_0", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_0, 4},
-   {"R_swig_SliceBuilder_setAll__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_1, 2},
-   {"R_swig_SliceBuilder_setStartAndSize__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_1, 4},
-   {"R_swig_new_SliceBuilder__SWIG_1", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_1, 2},
+   {"R_swig_new_StringVector__SWIG_1", (DL_FUNC) &R_swig_new_StringVector__SWIG_1, 1},
    {"R_swig_DoubleVector_resize__SWIG_1", (DL_FUNC) &R_swig_DoubleVector_resize__SWIG_1, 3},
    {"R_swig_new_DoubleVector__SWIG_1", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_1, 1},
    {"R_swig_new_IntVector__SWIG_1", (DL_FUNC) &R_swig_new_IntVector__SWIG_1, 1},
    {"R_swig_IntVector_resize__SWIG_1", (DL_FUNC) &R_swig_IntVector_resize__SWIG_1, 3},
+   {"R_swig_StringVector_resize__SWIG_1", (DL_FUNC) &R_swig_StringVector_resize__SWIG_1, 3},
+   {"R_swig_new_SliceBuilder__SWIG_1", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_1, 2},
+   {"R_swig_SliceBuilder_setStartAndSize__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_1, 4},
+   {"R_swig_SliceBuilder_setAll__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_1, 2},
    {"R_swig_CDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_1, 3},
    {"R_swig_CDMFileReaderFactory_create__SWIG_1", (DL_FUNC) &R_swig_CDMFileReaderFactory_create__SWIG_1, 4},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_1", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_1, 3},
-   {"R_swig_mifi_get_variable_number", (DL_FUNC) &R_swig_mifi_get_variable_number, 2},
    {"R_swig_new_DoubleVector__SWIG_2", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_2, 1},
    {"R_swig_new_IntVector__SWIG_2", (DL_FUNC) &R_swig_new_IntVector__SWIG_2, 1},
+   {"R_swig_new_StringVector__SWIG_2", (DL_FUNC) &R_swig_new_StringVector__SWIG_2, 1},
+   {"R_swig_mifi_get_variable_number", (DL_FUNC) &R_swig_mifi_get_variable_number, 2},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_2", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_2, 2},
    {"R_swig_new_DoubleVector__SWIG_3", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_3, 2},
    {"R_swig_new_IntVector__SWIG_3", (DL_FUNC) &R_swig_new_IntVector__SWIG_3, 2},
+   {"R_swig_new_StringVector__SWIG_3", (DL_FUNC) &R_swig_new_StringVector__SWIG_3, 2},
    {"R_swig_DoubleVector_capacity", (DL_FUNC) &R_swig_DoubleVector_capacity, 2},
    {"R_swig_IntVector_capacity", (DL_FUNC) &R_swig_IntVector_capacity, 2},
+   {"R_swig_StringVector_capacity", (DL_FUNC) &R_swig_StringVector_capacity, 2},
    {"R_swig_SliceBuilder_getDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getDimensionSizes, 2},
    {"R_swig_SliceBuilder_getMaxDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getMaxDimensionSizes, 2},
    {"R_swig_DoubleVector_push_back", (DL_FUNC) &R_swig_DoubleVector_push_back, 2},
    {"R_swig_IntVector_push_back", (DL_FUNC) &R_swig_IntVector_push_back, 2},
+   {"R_swig_StringVector_push_back", (DL_FUNC) &R_swig_StringVector_push_back, 2},
    {"R_swig_DoubleVector_get_allocator", (DL_FUNC) &R_swig_DoubleVector_get_allocator, 2},
    {"R_swig_IntVector_get_allocator", (DL_FUNC) &R_swig_IntVector_get_allocator, 2},
+   {"R_swig_StringVector_get_allocator", (DL_FUNC) &R_swig_StringVector_get_allocator, 2},
    {"R_swig_mifi_get_variable_name", (DL_FUNC) &R_swig_mifi_get_variable_name, 2},
-   {"R_swig_delete_mifi_cdm_reader", (DL_FUNC) &R_swig_delete_mifi_cdm_reader, 1},
    {"R_swig_new_mifi_cdm_reader", (DL_FUNC) &R_swig_new_mifi_cdm_reader, 1},
+   {"R_swig_delete_mifi_cdm_reader", (DL_FUNC) &R_swig_delete_mifi_cdm_reader, 1},
    {"R_swig_DoubleVector_pop_back", (DL_FUNC) &R_swig_DoubleVector_pop_back, 1},
    {"R_swig_IntVector_pop_back", (DL_FUNC) &R_swig_IntVector_pop_back, 1},
+   {"R_swig_StringVector_pop_back", (DL_FUNC) &R_swig_StringVector_pop_back, 1},
    {"R_swig_delete_NetCDF_CDMWriter", (DL_FUNC) &R_swig_delete_NetCDF_CDMWriter, 1},
+   {"R_swig_StringVector_swap", (DL_FUNC) &R_swig_StringVector_swap, 2},
    {"R_swig_DoubleVector_swap", (DL_FUNC) &R_swig_DoubleVector_swap, 2},
    {"R_swig_IntVector_swap", (DL_FUNC) &R_swig_IntVector_swap, 2},
+   {"R_swig_StringVector___nonzero__", (DL_FUNC) &R_swig_StringVector___nonzero__, 2},
    {"R_swig_IntVector___nonzero__", (DL_FUNC) &R_swig_IntVector___nonzero__, 2},
    {"R_swig_DoubleVector___nonzero__", (DL_FUNC) &R_swig_DoubleVector___nonzero__, 2},
    {"R_swig_mifi_cdm_reader_get", (DL_FUNC) &R_swig_mifi_cdm_reader_get, 2},
    {"R_swig_DoubleVector_front", (DL_FUNC) &R_swig_DoubleVector_front, 2},
    {"R_swig_IntVector_front", (DL_FUNC) &R_swig_IntVector_front, 2},
+   {"R_swig_StringVector_front", (DL_FUNC) &R_swig_StringVector_front, 2},
+   {"R_swig_StringVector_clear", (DL_FUNC) &R_swig_StringVector_clear, 1},
    {"R_swig_DoubleVector_clear", (DL_FUNC) &R_swig_DoubleVector_clear, 1},
    {"R_swig_IntVector_clear", (DL_FUNC) &R_swig_IntVector_clear, 1},
    {"R_swig_delete_CDM", (DL_FUNC) &R_swig_delete_CDM, 1},

@@ -19,6 +19,8 @@ extern "C" SEXP mifi_Rdoublevector(SEXP args)
     SET_STRING_ELT(retlistnames, 2, mkChar("data")); 
     setAttrib(retlist, R_NamesSymbol, retlistnames); 
 
+    REAL(VECTOR_ELT(retlist, 0))[0] = 0; // status 0 = OK
+
     arg1 = reinterpret_cast<std::vector<double>* >(R_ExternalPtrAddr(args));
     if (arg1 == 0) {
         SET_VECTOR_ELT (retlist, 1, mkChar("wrong input, no vector<double>*"));

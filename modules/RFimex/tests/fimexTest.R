@@ -23,39 +23,27 @@ if (length(vars) != 21) {
     stop("didn't get all variables, just ",vars);
 } 
 
-sb <- SliceBuilder(boost__shared_ptrCDMReader_getCDM(reader),"time")
+sb <- mifi.sb.new(reader,"time")
 cat(class(sb))
-SliceBuilder_setStartAndSize(sb, "time", 0, 3)
+dims <- mifi.sb.getDimensions(sb)
+dims
+mifi.sb.setStartAndSize(sb, "time", 0, 3)
 # TODO: throws exception: SliceBuilder_setStartAndSize(sb, "x", 0, 3)
 #out <- array(0, dim=c(3))
 #out <- double(length = 3)
-time <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader, "time", sb, "seconds since 2007-05-16 00:00:00 +0000")
-#time
-time[1]
-time[2]
-time[3]
-cat(length(time))
-cat(time$"__len__"())
-out = array(0, c(3))
-out[1:3] <- time[1:time$"__len__"()]
-cat(length(out))
-out
+time <- mifi.reader.getSliceVecInUnit(reader, "time", sb, "seconds since 2007-05-16 00:00:00 +0000")
+if (length(time) != 3) {
+    stop("didn't get all data, just ",length(time));
+}
 
 
-sb <- SliceBuilder(boost__shared_ptrCDMReader_getCDM(reader),"altitude")
-#SliceBuilder_setStartAndSize(sb, "x", 0, 3)
-#SliceBuilder_setStartAndSize(sb, "y", 5, 3)
-altitude <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader, "altitude", sb, "m")
-
-#out <- array(0, c(229, 196))
-#out <- altitude[1:44884]
-out <- mifi.vec.2R(altitude);
-out$status
-out$errmsg
-length(out$data)
-#altitude[1]
-#out
-
+sb <- mifi.sb.new(reader,"altitude")
+#mifi.sb.setStartAndSize(sb, "x", 0, 3)
+#mifi.sb.setStartAndSize(sb, "y", 5, 3)
+altitude <- mifi.reader.getSliceVecInUnit(reader, "altitude", sb, "m")
+if (length(altitude) != 44884) {
+    stop("didn't get all data, just ",length(altitude));
+}
 
 status <- try(mifi.reader.write(reader, "netcdf", "outTest.nc"))
 if (inherits(status, "try-error")) {

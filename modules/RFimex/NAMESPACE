@@ -1,13 +1,11 @@
 useDynLib(RFimex)
 #exportPattern("^[[:alpha:]]+")
-export(CDMFileReaderFactory_create,
-       boost__shared_ptrCDMReader_getCDM,
-       SliceBuilder_setStartAndSize,
-       boost__shared_ptrCDMReader_getSliceVecInUnit,
-       SliceBuilder,
-       boost__shared_ptrCDMReader_getCDM,
-       mifi.vec.2R,
+export(
        mifi.reader.new,
        mifi.reader.write,
-       mifi.reader.variables
+       mifi.reader.variables,
+       mifi.reader.getSliceVecInUnit,
+       mifi.sb.new,
+       mifi.sb.getDimensions,
+       mifi.sb.setStartAndSize
 )

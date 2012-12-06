@@ -163,6 +163,7 @@ function(fun, userData = NULL)
 setClass('C++Reference', contains = 'ExternalReference')
 setClass('_p_std__vectorT_size_t_std__allocatorT_size_t_t_t', contains = 'C++Reference')
 setClass('_p_std__vectorT_double_std__allocatorT_double_t_t', contains = 'C++Reference')
+setClass('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', contains = 'C++Reference')
 setClass('_p_mifi_cdm_reader', contains = 'C++Reference')
 setClass('_p_MetNoFimex__SliceBuilder', contains = 'C++Reference')
 setClass('_p_MetNoFimex__CDM', contains = 'C++Reference')
@@ -1226,6 +1227,519 @@ setMethod('$', '_p_std__vectorT_double_std__allocatorT_double_t_t', function(x, 
 );
 # end of accessor method for std::vector<(double)>
 setMethod('delete', '_p_std__vectorT_double_std__allocatorT_double_t_t', function(obj) {delete_std__vectorT_double_std__allocatorT_double_t_t(obj)})
+# Start of StringVector___nonzero__
+
+`StringVector___nonzero__` = function(self, .copy = FALSE)
+{
+  ;.Call('R_swig_StringVector___nonzero__', self, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector___nonzero__`, 'returnType') = 'logical'
+attr(`StringVector___nonzero__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector___nonzero__`) = c("SWIGFunction", class('StringVector___nonzero__'))
+
+# Start of StringVector___len__
+
+`StringVector___len__` = function(self, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_StringVector___len__', self, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_size_t";
+  
+  ans
+  
+}
+
+attr(`StringVector___len__`, 'returnType') = 'integer'
+attr(`StringVector___len__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector___len__`) = c("SWIGFunction", class('StringVector___len__'))
+
+# Start of StringVector_pop
+
+`StringVector_pop` = function(self, .copy = FALSE)
+{
+  ;.Call('R_swig_StringVector_pop', self, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_pop`, 'returnType') = 'character'
+attr(`StringVector_pop`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_pop`) = c("SWIGFunction", class('StringVector_pop'))
+
+# Start of StringVector___getslice__
+
+`StringVector___getslice__` = function(self, i, j)
+{
+  if(length(i) > 1) {
+    warning("using only the first element of i");
+  };
+  
+  
+  
+  if(length(j) > 1) {
+    warning("using only the first element of j");
+  };
+  
+  ;ans = .Call('R_swig_StringVector___getslice__', self, i, j, PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
+  
+  ans
+  
+}
+
+attr(`StringVector___getslice__`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
+attr(`StringVector___getslice__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer', 'integer')
+class(`StringVector___getslice__`) = c("SWIGFunction", class('StringVector___getslice__'))
+
+# Start of StringVector___setslice__
+
+`StringVector___setslice__` = function(self, i, j, v)
+{
+  if(length(i) > 1) {
+    warning("using only the first element of i");
+  };
+  
+  
+  
+  if(length(j) > 1) {
+    warning("using only the first element of j");
+  };
+  
+  
+  ;.Call('R_swig_StringVector___setslice__', self, i, j, v, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector___setslice__`, 'returnType') = 'void'
+attr(`StringVector___setslice__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer', 'integer', '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector___setslice__`) = c("SWIGFunction", class('StringVector___setslice__'))
+
+# Start of StringVector___delslice__
+
+`StringVector___delslice__` = function(self, i, j)
+{
+  if(length(i) > 1) {
+    warning("using only the first element of i");
+  };
+  
+  
+  
+  if(length(j) > 1) {
+    warning("using only the first element of j");
+  };
+  
+  ;.Call('R_swig_StringVector___delslice__', self, i, j, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector___delslice__`, 'returnType') = 'void'
+attr(`StringVector___delslice__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer', 'integer')
+class(`StringVector___delslice__`) = c("SWIGFunction", class('StringVector___delslice__'))
+
+# Start of StringVector___delitem__
+
+`StringVector___delitem__` = function(self, i)
+{
+  if(length(i) > 1) {
+    warning("using only the first element of i");
+  };
+  
+  ;.Call('R_swig_StringVector___delitem__', self, i, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector___delitem__`, 'returnType') = 'void'
+attr(`StringVector___delitem__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer')
+class(`StringVector___delitem__`) = c("SWIGFunction", class('StringVector___delitem__'))
+
+# Start of StringVector___getitem__
+
+`StringVector___getitem__` = function(self, i, .copy = FALSE)
+{
+  if(length(i) > 1) {
+    warning("using only the first element of i");
+  };
+  
+  ;.Call('R_swig_StringVector___getitem__', self, i, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector___getitem__`, 'returnType') = 'character'
+attr(`StringVector___getitem__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer')
+class(`StringVector___getitem__`) = c("SWIGFunction", class('StringVector___getitem__'))
+
+# Start of StringVector___setitem__
+
+`StringVector___setitem__` = function(self, i, x)
+{
+  if(length(i) > 1) {
+    warning("using only the first element of i");
+  };
+  
+  x = as(x, "character"); 
+  ;.Call('R_swig_StringVector___setitem__', self, i, x, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector___setitem__`, 'returnType') = 'void'
+attr(`StringVector___setitem__`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer', 'character')
+class(`StringVector___setitem__`) = c("SWIGFunction", class('StringVector___setitem__'))
+
+# Start of StringVector_append
+
+`StringVector_append` = function(self, x)
+{
+  x = as(x, "character"); 
+  ;.Call('R_swig_StringVector_append', self, x, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_append`, 'returnType') = 'void'
+attr(`StringVector_append`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'character')
+class(`StringVector_append`) = c("SWIGFunction", class('StringVector_append'))
+
+# Start of new_StringVector
+
+`StringVector__SWIG_0` = function()
+{
+  ;ans = .Call('R_swig_new_StringVector__SWIG_0', PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
+  
+  reg.finalizer(ans, delete_StringVector)
+  ans
+  
+}
+
+attr(`StringVector__SWIG_0`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
+class(`StringVector__SWIG_0`) = c("SWIGFunction", class('StringVector__SWIG_0'))
+
+# Start of new_StringVector
+
+`StringVector__SWIG_1` = function(s_arg1)
+{
+  ;ans = .Call('R_swig_new_StringVector__SWIG_1', s_arg1, PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
+  
+  reg.finalizer(ans, delete_StringVector)
+  ans
+  
+}
+
+attr(`StringVector__SWIG_1`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
+attr(`StringVector__SWIG_1`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector__SWIG_1`) = c("SWIGFunction", class('StringVector__SWIG_1'))
+
+# Start of StringVector_empty
+
+`StringVector_empty` = function(self, .copy = FALSE)
+{
+  ;.Call('R_swig_StringVector_empty', self, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_empty`, 'returnType') = 'logical'
+attr(`StringVector_empty`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_empty`) = c("SWIGFunction", class('StringVector_empty'))
+
+# Start of StringVector_size
+
+`StringVector_size` = function(self, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_StringVector_size', self, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_size_t";
+  
+  ans
+  
+}
+
+attr(`StringVector_size`, 'returnType') = 'integer'
+attr(`StringVector_size`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_size`) = c("SWIGFunction", class('StringVector_size'))
+
+# Start of StringVector_clear
+
+`StringVector_clear` = function(self)
+{
+  ;.Call('R_swig_StringVector_clear', self, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_clear`, 'returnType') = 'void'
+attr(`StringVector_clear`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_clear`) = c("SWIGFunction", class('StringVector_clear'))
+
+# Start of StringVector_swap
+
+`StringVector_swap` = function(self, v)
+{
+  ;.Call('R_swig_StringVector_swap', self, v, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_swap`, 'returnType') = 'void'
+attr(`StringVector_swap`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_swap`) = c("SWIGFunction", class('StringVector_swap'))
+
+# Start of StringVector_get_allocator
+
+`StringVector_get_allocator` = function(self, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_StringVector_get_allocator', self, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_std__allocatorT_std__string_t";
+  
+  ans
+  
+}
+
+attr(`StringVector_get_allocator`, 'returnType') = '_p_std__allocatorT_std__string_t'
+attr(`StringVector_get_allocator`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_get_allocator`) = c("SWIGFunction", class('StringVector_get_allocator'))
+
+# Start of new_StringVector
+
+`StringVector__SWIG_2` = function(size)
+{
+  if(length(size) > 1) {
+    warning("using only the first element of size");
+  };
+  
+  ;ans = .Call('R_swig_new_StringVector__SWIG_2', size, PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
+  
+  reg.finalizer(ans, delete_StringVector)
+  ans
+  
+}
+
+attr(`StringVector__SWIG_2`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
+attr(`StringVector__SWIG_2`, "inputTypes") = c('integer')
+class(`StringVector__SWIG_2`) = c("SWIGFunction", class('StringVector__SWIG_2'))
+
+# Start of StringVector_pop_back
+
+`StringVector_pop_back` = function(self)
+{
+  ;.Call('R_swig_StringVector_pop_back', self, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_pop_back`, 'returnType') = 'void'
+attr(`StringVector_pop_back`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_pop_back`) = c("SWIGFunction", class('StringVector_pop_back'))
+
+# Start of StringVector_resize
+
+`StringVector_resize__SWIG_0` = function(self, new_size)
+{
+  if(length(new_size) > 1) {
+    warning("using only the first element of new_size");
+  };
+  
+  ;.Call('R_swig_StringVector_resize__SWIG_0', self, new_size, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_resize__SWIG_0`, 'returnType') = 'void'
+attr(`StringVector_resize__SWIG_0`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer')
+class(`StringVector_resize__SWIG_0`) = c("SWIGFunction", class('StringVector_resize__SWIG_0'))
+
+# Start of new_StringVector
+
+`StringVector__SWIG_3` = function(size, value)
+{
+  if(length(size) > 1) {
+    warning("using only the first element of size");
+  };
+  
+  value = as(value, "character"); 
+  ;ans = .Call('R_swig_new_StringVector__SWIG_3', size, value, PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
+  
+  reg.finalizer(ans, delete_StringVector)
+  ans
+  
+}
+
+attr(`StringVector__SWIG_3`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
+attr(`StringVector__SWIG_3`, "inputTypes") = c('integer', 'character')
+class(`StringVector__SWIG_3`) = c("SWIGFunction", class('StringVector__SWIG_3'))
+
+`StringVector` <- function(...) {
+  argtypes <- mapply(class, list(...));
+  argv <- list(...);
+  argc <- length(argtypes);
+# dispatch functions 4
+  if (argc == 0) {
+    f <- StringVector__SWIG_0; 
+  } else if (argc == 1) {
+    if ((is.integer(argv[[1]]) || is.numeric(argv[[1]]))) {
+      f <- StringVector__SWIG_2; 
+    }
+    else if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')) {
+      f <- StringVector__SWIG_1; 
+    }
+  } else if (argc == 2) {
+    if ((is.integer(argv[[1]]) || is.numeric(argv[[1]])) && is.character(argv[[2]])) {
+      f <- StringVector__SWIG_3; 
+    }
+  } else {
+    stop("cannot find overloaded function for StringVector with argtypes (",toString(argtypes),")");
+  };
+  f(...);
+}
+
+# Dispatch function
+# Start of StringVector_push_back
+
+`StringVector_push_back` = function(self, x)
+{
+  x = as(x, "character"); 
+  ;.Call('R_swig_StringVector_push_back', self, x, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_push_back`, 'returnType') = 'void'
+attr(`StringVector_push_back`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'character')
+class(`StringVector_push_back`) = c("SWIGFunction", class('StringVector_push_back'))
+
+# Start of StringVector_front
+
+`StringVector_front` = function(self, .copy = FALSE)
+{
+  ;.Call('R_swig_StringVector_front', self, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_front`, 'returnType') = 'character'
+attr(`StringVector_front`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_front`) = c("SWIGFunction", class('StringVector_front'))
+
+# Start of StringVector_back
+
+`StringVector_back` = function(self, .copy = FALSE)
+{
+  ;.Call('R_swig_StringVector_back', self, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_back`, 'returnType') = 'character'
+attr(`StringVector_back`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_back`) = c("SWIGFunction", class('StringVector_back'))
+
+# Start of StringVector_assign
+
+`StringVector_assign` = function(self, n, x)
+{
+  if(length(n) > 1) {
+    warning("using only the first element of n");
+  };
+  
+  x = as(x, "character"); 
+  ;.Call('R_swig_StringVector_assign', self, n, x, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_assign`, 'returnType') = 'void'
+attr(`StringVector_assign`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer', 'character')
+class(`StringVector_assign`) = c("SWIGFunction", class('StringVector_assign'))
+
+# Start of StringVector_resize
+
+`StringVector_resize__SWIG_1` = function(self, new_size, x)
+{
+  if(length(new_size) > 1) {
+    warning("using only the first element of new_size");
+  };
+  
+  x = as(x, "character"); 
+  ;.Call('R_swig_StringVector_resize__SWIG_1', self, new_size, x, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_resize__SWIG_1`, 'returnType') = 'void'
+attr(`StringVector_resize__SWIG_1`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer', 'character')
+class(`StringVector_resize__SWIG_1`) = c("SWIGFunction", class('StringVector_resize__SWIG_1'))
+
+`StringVector_resize` <- function(...) {
+  argtypes <- mapply(class, list(...));
+  argv <- list(...);
+  argc <- length(argtypes);
+# dispatch functions 2
+  if (argc == 2) {
+    if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]]))) {
+      f <- StringVector_resize__SWIG_0; 
+    }
+  } else if (argc == 3) {
+    if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]])) && is.character(argv[[3]])) {
+      f <- StringVector_resize__SWIG_1; 
+    }
+  } else {
+    stop("cannot find overloaded function for StringVector_resize with argtypes (",toString(argtypes),")");
+  };
+  f(...);
+}
+
+# Dispatch function
+# Start of StringVector_reserve
+
+`StringVector_reserve` = function(self, n)
+{
+  if(length(n) > 1) {
+    warning("using only the first element of n");
+  };
+  
+  ;.Call('R_swig_StringVector_reserve', self, n, PACKAGE='RFimex');
+  
+}
+
+attr(`StringVector_reserve`, 'returnType') = 'void'
+attr(`StringVector_reserve`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', 'integer')
+class(`StringVector_reserve`) = c("SWIGFunction", class('StringVector_reserve'))
+
+# Start of StringVector_capacity
+
+`StringVector_capacity` = function(self, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_StringVector_capacity', self, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_size_t";
+  
+  ans
+  
+}
+
+attr(`StringVector_capacity`, 'returnType') = 'integer'
+attr(`StringVector_capacity`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`StringVector_capacity`) = c("SWIGFunction", class('StringVector_capacity'))
+
+# Start of delete_StringVector
+
+`delete_StringVector` = function(self)
+{
+  ;.Call('R_swig_delete_StringVector', self, PACKAGE='RFimex');
+  
+}
+
+attr(`delete_StringVector`, 'returnType') = 'void'
+attr(`delete_StringVector`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')
+class(`delete_StringVector`) = c("SWIGFunction", class('delete_StringVector'))
+
+# Start of accessor method for std::vector<(std::string)>
+setMethod('$', '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', function(x, name)
+
+{
+  accessorFuns = list('__nonzero__' = StringVector___nonzero__, '__len__' = StringVector___len__, 'pop' = StringVector_pop, '__getslice__' = StringVector___getslice__, '__setslice__' = StringVector___setslice__, '__delslice__' = StringVector___delslice__, '__delitem__' = StringVector___delitem__, '__getitem__' = StringVector___getitem__, '__setitem__' = StringVector___setitem__, 'append' = StringVector_append, 'empty' = StringVector_empty, 'size' = StringVector_size, 'clear' = StringVector_clear, 'swap' = StringVector_swap, 'get_allocator' = StringVector_get_allocator, 'pop_back' = StringVector_pop_back, 'resize' = StringVector_resize, 'push_back' = StringVector_push_back, 'front' = StringVector_front, 'back' = StringVector_back, 'assign' = StringVector_assign, 'reserve' = StringVector_reserve, 'capacity' = StringVector_capacity);
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name));
+  f = accessorFuns[[idx]];
+  formals(f)[[1]] = x;
+  f;
+}
+
+
+);
+# end of accessor method for std::vector<(std::string)>
+setMethod('delete', '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', function(obj) {delete_std__vectorT_std__string_std__allocatorT_std__string_t_t(obj)})
 # Start of new_mifi_cdm_reader
 
 `mifi_cdm_reader` = function(reader)

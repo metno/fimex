@@ -38,6 +38,7 @@
 namespace std {
     %template(IntVector) vector<size_t>;
     %template(DoubleVector) vector<double>;
+    %template(StringVector) vector<string>;
 };
 
 %include "fimex/mifi_cdm_reader.h"
@@ -71,7 +72,7 @@ public:
     const MetNoFimex::CDM& getCDM() const;
     %extend {
       // need a vector<double>* (ptr) back, otherwise, R-Swig fails on compiled-in libarary with type_info<Type>() with segfault
-      std::vector<double>* getSliceVecInUnit(std::string varName, SliceBuilder sb, std::string units = "") {
+      std::vector<double>* getSliceVecInUnit(std::string varName, SliceBuilder sb, std::string units = "") throw(MetNoFimex::CDMException) {
          MetNoFimex::DataPtr d;
          if (units != "") {
            d = $self->getScaledDataSliceInUnit(varName, units, sb);
