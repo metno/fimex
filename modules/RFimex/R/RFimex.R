@@ -2128,12 +2128,12 @@ class(`CDMReader_getCDM`) = c("SWIGFunction", class('CDMReader_getCDM'))
 
 # Start of CDMReader_getSliceVecInUnit
 
-`CDMReader_getSliceVecInUnit__SWIG_0` = function(self, varName, sb, units)
+`CDMReader_getSliceVecInUnit__SWIG_0` = function(self, varName, sb, units, .copy = FALSE)
 {
   varName = as(varName, "character"); 
   
   units = as(units, "character"); 
-  ;ans = .Call('R_swig_CDMReader_getSliceVecInUnit__SWIG_0', self, varName, sb, units, PACKAGE='RFimex');
+  ;ans = .Call('R_swig_CDMReader_getSliceVecInUnit__SWIG_0', self, varName, sb, units, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
   
   ans
@@ -2146,11 +2146,11 @@ class(`CDMReader_getSliceVecInUnit__SWIG_0`) = c("SWIGFunction", class('CDMReade
 
 # Start of CDMReader_getSliceVecInUnit
 
-`CDMReader_getSliceVecInUnit__SWIG_1` = function(self, varName, sb)
+`CDMReader_getSliceVecInUnit__SWIG_1` = function(self, varName, sb, .copy = FALSE)
 {
   varName = as(varName, "character"); 
   
-  ;ans = .Call('R_swig_CDMReader_getSliceVecInUnit__SWIG_1', self, varName, sb, PACKAGE='RFimex');
+  ;ans = .Call('R_swig_CDMReader_getSliceVecInUnit__SWIG_1', self, varName, sb, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
   
   ans
@@ -2254,12 +2254,12 @@ class(`boost__shared_ptrCDMReader_getCDM`) = c("SWIGFunction", class('boost__sha
 
 # Start of boost__shared_ptrCDMReader_getSliceVecInUnit
 
-`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0` = function(self, varName, sb, units)
+`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0` = function(self, varName, sb, units, .copy = FALSE)
 {
   varName = as(varName, "character"); 
   
   units = as(units, "character"); 
-  ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0', self, varName, sb, units, PACKAGE='RFimex');
+  ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0', self, varName, sb, units, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
   
   ans
@@ -2272,11 +2272,11 @@ class(`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0`) = c("SWIGFunction"
 
 # Start of boost__shared_ptrCDMReader_getSliceVecInUnit
 
-`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1` = function(self, varName, sb)
+`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1` = function(self, varName, sb, .copy = FALSE)
 {
   varName = as(varName, "character"); 
   
-  ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1', self, varName, sb, PACKAGE='RFimex');
+  ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1', self, varName, sb, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
   
   ans

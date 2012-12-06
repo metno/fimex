@@ -72,17 +72,18 @@ public:
     const MetNoFimex::CDM& getCDM() const;
     %extend {
       // need a vector<double>* (ptr) back, otherwise, R-Swig fails on compiled-in libarary with type_info<Type>() with segfault
-      std::vector<double>* getSliceVecInUnit(std::string varName, SliceBuilder sb, std::string units = "") throw(MetNoFimex::CDMException) {
+      // could now switch back to non-pointer version?
+      std::vector<double> getSliceVecInUnit(std::string varName, SliceBuilder sb, std::string units = "") throw(MetNoFimex::CDMException) {
          MetNoFimex::DataPtr d;
          if (units != "") {
            d = $self->getScaledDataSliceInUnit(varName, units, sb);
          } else {
            d = $self->getScaledDataSlice(varName, sb);
          }
-         std::vector<double>* out = new std::vector<double>();
+         std::vector<double> out; // = new std::vector<double>();
          if (d.get() != 0) {
             boost::shared_array<double> dAry = d->asDouble();
-            out->assign(&dAry[0], &dAry[0]+d->size());
+            out.assign(&dAry[0], &dAry[0]+d->size());
          }
          return out;
       }

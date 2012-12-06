@@ -2023,17 +2023,17 @@ SWIG_FromCharPtr(const char *cptr)
   return SWIG_FromCharPtrAndSize(cptr, (cptr ? strlen(cptr) : 0));
 }
 
-SWIGINTERN std::vector< double,std::allocator< double > > *MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(MetNoFimex::CDMReader *self,std::string varName,MetNoFimex::SliceBuilder sb,std::string units=""){
+SWIGINTERN std::vector< double,std::allocator< double > > MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(MetNoFimex::CDMReader *self,std::string varName,MetNoFimex::SliceBuilder sb,std::string units=""){
          MetNoFimex::DataPtr d;
          if (units != "") {
            d = self->getScaledDataSliceInUnit(varName, units, sb);
          } else {
            d = self->getScaledDataSlice(varName, sb);
          }
-         std::vector<double>* out = new std::vector<double>();
+         std::vector<double> out; // = new std::vector<double>();
          if (d.get() != 0) {
             boost::shared_array<double> dAry = d->asDouble();
-            out->assign(&dAry[0], &dAry[0]+d->size());
+            out.assign(&dAry[0], &dAry[0]+d->size());
          }
          return out;
       }
@@ -5710,9 +5710,9 @@ R_swig_CDMReader_getCDM ( SEXP self, SEXP s_swig_copy)
 
 
 SWIGEXPORT SEXP
-R_swig_CDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, SEXP units)
+R_swig_CDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, SEXP units, SEXP s_swig_copy)
 {
-  std::vector< double,std::allocator< double > > *result = 0 ;
+  std::vector< double,std::allocator< double > > result;
   MetNoFimex::CDMReader *arg1 = (MetNoFimex::CDMReader *) 0 ;
   std::string arg2 ;
   SwigValueWrapper< MetNoFimex::SliceBuilder > arg3 ;
@@ -5760,7 +5760,7 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, S
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   try {
-    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3,arg4);
+    result = MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3,arg4);
   }
   catch(MetNoFimex::CDMException &_e) {
     /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
@@ -5768,7 +5768,7 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, S
     /*@SWIG@*/;
   }
   
-  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
+  r_ans = swig::from(static_cast< std::vector<double,std::allocator< double > > >(result));
   
   
   
@@ -5780,9 +5780,9 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, S
 
 
 SWIGEXPORT SEXP
-R_swig_CDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb)
+R_swig_CDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb, SEXP s_swig_copy)
 {
-  std::vector< double,std::allocator< double > > *result = 0 ;
+  std::vector< double,std::allocator< double > > result;
   MetNoFimex::CDMReader *arg1 = (MetNoFimex::CDMReader *) 0 ;
   std::string arg2 ;
   SwigValueWrapper< MetNoFimex::SliceBuilder > arg3 ;
@@ -5820,7 +5820,7 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb)
     }
   }
   try {
-    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3);
+    result = MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(arg1,arg2,arg3);
   }
   catch(MetNoFimex::CDMException &_e) {
     /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
@@ -5828,7 +5828,7 @@ R_swig_CDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb)
     /*@SWIG@*/;
   }
   
-  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
+  r_ans = swig::from(static_cast< std::vector<double,std::allocator< double > > >(result));
   
   
   vmaxset(r_vmax);
@@ -5943,9 +5943,9 @@ R_swig_boost__shared_ptrCDMReader_getCDM ( SEXP self, SEXP s_swig_copy)
 
 
 SWIGEXPORT SEXP
-R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, SEXP units)
+R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP varName, SEXP sb, SEXP units, SEXP s_swig_copy)
 {
-  std::vector< double,std::allocator< double > > *result = 0 ;
+  std::vector< double,std::allocator< double > > result;
   boost::shared_ptr< MetNoFimex::CDMReader > *arg1 = (boost::shared_ptr< MetNoFimex::CDMReader > *) 0 ;
   std::string arg2 ;
   SwigValueWrapper< MetNoFimex::SliceBuilder > arg3 ;
@@ -5993,7 +5993,7 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP va
     if (SWIG_IsNewObj(res)) delete ptr;
   }
   try {
-    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3,arg4);
+    result = MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3,arg4);
   }
   catch(MetNoFimex::CDMException &_e) {
     /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
@@ -6001,7 +6001,7 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP va
     /*@SWIG@*/;
   }
   
-  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
+  r_ans = swig::from(static_cast< std::vector<double,std::allocator< double > > >(result));
   
   
   
@@ -6013,9 +6013,9 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0 ( SEXP self, SEXP va
 
 
 SWIGEXPORT SEXP
-R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb)
+R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP varName, SEXP sb, SEXP s_swig_copy)
 {
-  std::vector< double,std::allocator< double > > *result = 0 ;
+  std::vector< double,std::allocator< double > > result;
   boost::shared_ptr< MetNoFimex::CDMReader > *arg1 = (boost::shared_ptr< MetNoFimex::CDMReader > *) 0 ;
   std::string arg2 ;
   SwigValueWrapper< MetNoFimex::SliceBuilder > arg3 ;
@@ -6053,7 +6053,7 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP va
     }
   }
   try {
-    result = (std::vector< double,std::allocator< double > > *)MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3);
+    result = MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0((MetNoFimex::CDMReader*)(arg1)->operator ->(),arg2,arg3);
   }
   catch(MetNoFimex::CDMException &_e) {
     /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
@@ -6061,7 +6061,7 @@ R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1 ( SEXP self, SEXP va
     /*@SWIG@*/;
   }
   
-  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t, R_SWIG_EXTERNAL |  0 );
+  r_ans = swig::from(static_cast< std::vector<double,std::allocator< double > > >(result));
   
   
   vmaxset(r_vmax);
@@ -6801,8 +6801,8 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_StringVector_back", (DL_FUNC) &R_swig_StringVector_back, 2},
    {"R_swig_StringVector_assign", (DL_FUNC) &R_swig_StringVector_assign, 3},
    {"R_swig_SliceBuilder_getDimensionStartPositions", (DL_FUNC) &R_swig_SliceBuilder_getDimensionStartPositions, 2},
-   {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0, 4},
-   {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1, 3},
+   {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0, 5},
+   {"R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1, 4},
    {"R_swig_StringVector___delslice__", (DL_FUNC) &R_swig_StringVector___delslice__, 3},
    {"R_swig_StringVector___setslice__", (DL_FUNC) &R_swig_StringVector___setslice__, 4},
    {"R_swig_StringVector___getslice__", (DL_FUNC) &R_swig_StringVector___getslice__, 3},
@@ -6848,7 +6848,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 2},
    {"R_swig_SliceBuilder_setStartAndSize__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_0, 4},
    {"R_swig_SliceBuilder_setAll__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_0, 2},
-   {"R_swig_CDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_0, 4},
+   {"R_swig_CDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_0, 5},
    {"R_swig_CDMFileReaderFactory_create__SWIG_0", (DL_FUNC) &R_swig_CDMFileReaderFactory_create__SWIG_0, 5},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_0", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_0, 4},
    {"R_swig_new_StringVector__SWIG_1", (DL_FUNC) &R_swig_new_StringVector__SWIG_1, 1},
@@ -6860,7 +6860,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_SliceBuilder__SWIG_1", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_1, 2},
    {"R_swig_SliceBuilder_setStartAndSize__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_1, 4},
    {"R_swig_SliceBuilder_setAll__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_1, 2},
-   {"R_swig_CDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_1, 3},
+   {"R_swig_CDMReader_getSliceVecInUnit__SWIG_1", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_1, 4},
    {"R_swig_CDMFileReaderFactory_create__SWIG_1", (DL_FUNC) &R_swig_CDMFileReaderFactory_create__SWIG_1, 4},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_1", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_1, 3},
    {"R_swig_new_DoubleVector__SWIG_2", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_2, 1},
