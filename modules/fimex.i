@@ -27,7 +27,50 @@
 #include "fimex/CDMException.h"
 #include "fimex/c_fimex.h"
 #include "fimex/mifi_cdm_reader.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 
+namespace MetNoFimex {
+/*
+ * lists (in that order) time, x, y, z, forecastRefTime, other1, other2, ... dimensions
+ * empty string means missing; doesn't allow for compound axes
+ */
+std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName)
+{
+    std::vector<std::string> coords;
+    std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(csList->begin(), csList->end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt != csList->end()) {
+        if ((*varSysIt)->isSimpleSpatialGridded()) {
+            std::vector<CoordinateSystem::ConstAxisPtr> axes;
+            axes.push_back((*varSysIt)->getTimeAxis());
+            axes.push_back((*varSysIt)->getGeoXAxis());
+            axes.push_back((*varSysIt)->getGeoYAxis());
+            axes.push_back((*varSysIt)->getGeoZAxis());
+            axes.push_back((*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime));
+        
+            std::vector<std::string> shape = reader->getCDM().getVariable(varName).getShape();
+            std::set<std::string> shapeSet(shape.begin(), shape.end());
+            for (int i = 0; i < axes.size(); i++) {
+                if (axes.at(i).get() != 0) {
+                    std::string dimName = axes.at(i)->getName();
+                    size_t hasAxis = shapeSet.erase(dimName);
+                    if (hasAxis) {
+                        coords.push_back(dimName);
+                    } else {
+                        coords.push_back("");
+                    }
+                } else {
+                    coords.push_back("");
+                }
+            }
+            for (std::set<std::string>::iterator shapeIt = shapeSet.begin(); shapeIt != shapeSet.end(); ++shapeIt) {
+                coords.push_back(*shapeIt);
+            }
+        }
+    }
+    return coords;
+}
+}
 
 %}
 
@@ -57,9 +100,13 @@ class shared_ptr
 };
 }
 
+
 %nodefaultctor;
 
 namespace MetNoFimex {
+std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<MetNoFimex::CDMReader> reader);
+std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName);
+
 class CDM {
 };
 }

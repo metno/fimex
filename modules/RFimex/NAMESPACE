@@ -4,6 +4,7 @@ export(
        mifi.reader.new,
        mifi.reader.write,
        mifi.reader.variables,
+       mifi.reader.getCoordinates,
        mifi.reader.getSliceVecInUnit,
        mifi.sb.new,
        mifi.sb.getDimensions,

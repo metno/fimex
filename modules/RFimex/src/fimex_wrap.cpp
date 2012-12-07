@@ -1124,12 +1124,13 @@ SWIG_R_ConvertPacked(SEXP obj, void *ptr, size_t sz, swig_type_info *ty) {
 #define SWIGTYPE_p_std__allocatorT_double_t swig_types[12]
 #define SWIGTYPE_p_std__allocatorT_size_t_t swig_types[13]
 #define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[14]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[15]
-#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[16]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[17]
-#define SWIGTYPE_p_value_type swig_types[18]
-static swig_type_info *swig_types[20];
-static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t swig_types[15]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[16]
+#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[17]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[18]
+#define SWIGTYPE_p_value_type swig_types[19]
+static swig_type_info *swig_types[21];
+static swig_module_info swig_module = {swig_types, 20, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1291,7 +1292,50 @@ static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
 #include "fimex/CDMException.h"
 #include "fimex/c_fimex.h"
 #include "fimex/mifi_cdm_reader.h"
+#include "fimex/coordSys/CoordinateSystem.h"
 
+namespace MetNoFimex {
+/*
+ * lists (in that order) time, x, y, z, forecastRefTime, other1, other2, ... dimensions
+ * empty string means missing; doesn't allow for compound axes
+ */
+std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName)
+{
+    std::vector<std::string> coords;
+    std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(csList->begin(), csList->end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt != csList->end()) {
+        //if ((*varSysIt)->isSimpleSpatialGridded()) {
+            std::vector<CoordinateSystem::ConstAxisPtr> axes;
+            axes.push_back((*varSysIt)->getTimeAxis());
+            axes.push_back((*varSysIt)->getGeoXAxis());
+            axes.push_back((*varSysIt)->getGeoYAxis());
+            axes.push_back((*varSysIt)->getGeoZAxis());
+            axes.push_back((*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime));
+        
+            std::vector<std::string> shape = reader->getCDM().getVariable(varName).getShape();
+            std::set<std::string> shapeSet(shape.begin(), shape.end());
+            for (int i = 0; i < axes.size(); i++) {
+                if (axes.at(i).get() != 0) {
+                    std::string dimName = axes.at(i)->getName();
+                    size_t hasAxis = shapeSet.erase(dimName);
+                    if (hasAxis) {
+                        coords.push_back(dimName);
+                    } else {
+                        coords.push_back("");
+                    }
+                } else {
+                    coords.push_back("");
+                }
+            }
+            for (std::set<std::string>::iterator shapeIt = shapeSet.begin(); shapeIt != shapeSet.end(); ++shapeIt) {
+                coords.push_back(*shapeIt);
+            }
+        //}
+    }
+    return coords;
+}
+}
 
 
 
@@ -5658,6 +5702,88 @@ R_swig_SliceBuilder_getMaxDimensionSizes ( SEXP self, SEXP s_swig_copy)
 
 
 SWIGEXPORT SEXP
+R_swig_listCoordinateSystems ( SEXP reader, SEXP s_swig_copy)
+{
+  SwigValueWrapper< std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > > result;
+  boost::shared_ptr< MetNoFimex::CDMReader > arg1 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(reader, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "listCoordinateSystems" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "listCoordinateSystems" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp1));
+    }
+  }
+  result = MetNoFimex::listCoordinateSystems(arg1);
+  r_ans = SWIG_R_NewPointerObj((new std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > >(static_cast< const std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > >& >(result))), SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, SWIG_POINTER_OWN |  0 );
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_listCoordinates ( SEXP reader, SEXP csList, SEXP varName, SEXP s_swig_copy)
+{
+  std::vector< std::string,std::allocator< std::string > > result;
+  boost::shared_ptr< MetNoFimex::CDMReader > arg1 ;
+  std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *arg2 = (std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *) 0 ;
+  std::string arg3 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(reader, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "listCoordinates" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "listCoordinates" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp1));
+    }
+  }
+  res2 = SWIG_R_ConvertPtr(csList, &argp2, SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "listCoordinates" "', argument " "2"" of type '" "std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > * >(argp2);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(varName, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "listCoordinates" "', argument " "3"" of type '" "std::string""'"); 
+    }
+    arg3 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  result = MetNoFimex::listCoordinates(arg1,arg2,arg3);
+  r_ans = swig::from(static_cast< std::vector<std::string,std::allocator< std::string > > >(result));
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
 R_swig_delete_CDM ( SEXP self)
 {
   MetNoFimex::CDM *arg1 = (MetNoFimex::CDM *) 0 ;
@@ -6458,6 +6584,7 @@ static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0
 static swig_type_info _swigt__p_std__allocatorT_double_t = {"_p_std__allocatorT_double_t", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_size_t_t = {"_p_std__allocatorT_size_t_t", "std::vector< size_t >::allocator_type *|std::allocator< size_t > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_std__string_t = {"_p_std__allocatorT_std__string_t", "std::vector< std::string >::allocator_type *|std::allocator< std::string > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t = {"_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t", "std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t = {"_p_std__vectorT_double_std__allocatorT_double_t_t", "std::vector< double,std::allocator< double > > *|std::vector< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t = {"_p_std__vectorT_size_t_std__allocatorT_size_t_t_t", "std::vector< size_t,std::allocator< size_t > > *|std::vector< size_t > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t = {"_p_std__vectorT_std__string_std__allocatorT_std__string_t_t", "std::vector< std::string,std::allocator< std::string > > *|std::vector< std::string > *", 0, 0, (void*)0, 0};
@@ -6479,6 +6606,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__allocatorT_double_t,
   &_swigt__p_std__allocatorT_size_t_t,
   &_swigt__p_std__allocatorT_std__string_t,
+  &_swigt__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t,
   &_swigt__p_std__vectorT_double_std__allocatorT_double_t_t,
   &_swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t,
   &_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
@@ -6500,6 +6628,7 @@ static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0}
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_size_t_t[] = {  {&_swigt__p_std__allocatorT_size_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_std__string_t[] = {  {&_swigt__p_std__allocatorT_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t[] = {  {&_swigt__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_size_t_std__allocatorT_size_t_t_t[] = {  {&_swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t[] = {  {&_swigt__p_std__vectorT_std__string_std__allocatorT_std__string_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -6521,6 +6650,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__allocatorT_double_t,
   _swigc__p_std__allocatorT_size_t_t,
   _swigc__p_std__allocatorT_std__string_t,
+  _swigc__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t,
   _swigc__p_std__vectorT_double_std__allocatorT_double_t_t,
   _swigc__p_std__vectorT_size_t_std__allocatorT_size_t_t_t,
   _swigc__p_std__vectorT_std__string_std__allocatorT_std__string_t_t,
@@ -6791,8 +6921,10 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_DoubleVector_pop", (DL_FUNC) &R_swig_DoubleVector_pop, 2},
    {"R_swig_CDMReader_getCDM", (DL_FUNC) &R_swig_CDMReader_getCDM, 2},
    {"R_swig_boost__shared_ptrCDMReader_getCDM", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getCDM, 2},
+   {"R_swig_listCoordinateSystems", (DL_FUNC) &R_swig_listCoordinateSystems, 2},
    {"R_swig_delete_DoubleVector", (DL_FUNC) &R_swig_delete_DoubleVector, 1},
    {"R_swig_delete_StringVector", (DL_FUNC) &R_swig_delete_StringVector, 1},
+   {"R_swig_listCoordinates", (DL_FUNC) &R_swig_listCoordinates, 4},
    {"R_swig_delete_CDMFileReaderFactory", (DL_FUNC) &R_swig_delete_CDMFileReaderFactory, 1},
    {"R_swig_DoubleVector_assign", (DL_FUNC) &R_swig_DoubleVector_assign, 3},
    {"R_swig_IntVector_assign", (DL_FUNC) &R_swig_IntVector_assign, 3},

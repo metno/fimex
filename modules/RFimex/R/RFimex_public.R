@@ -10,15 +10,21 @@ mifi.vec.2R <- function(vec) {
 }
 
 mifi.reader.new <- function(type, filename, config = "") {
-    ans <- CDMFileReaderFactory_create(type, filename, config);
-    if (is.null(ans)) {
+    r <- CDMFileReaderFactory_create(type, filename, config);
+    if (is.null(r)) {
         stop("unable to create reader with mifi.reader.create(",type,",",filename,",",config,")");
     }
-    ans 
+    # create a dummy object to store attributes
+    ans <- c("");
+    class(ans) <- "CDMReader";
+    ans$p_ <- r;
+    # enhance the reader with coordinate-systems
+    ans$csList_ <- listCoordinateSystems(ans$p_);
+    ans
 }
 
 mifi.reader.variables <- function(reader) {
-    mifiRead <- mifi_cdm_reader(reader);
+    mifiRead <- mifi_cdm_reader(reader$p_);
     count <- mifi_get_variable_number(mifiRead);
     if (count == 0) {
         stop ("no variables found in reader");
@@ -30,12 +36,36 @@ mifi.reader.variables <- function(reader) {
     ans
 }
 
-#mifi.reader.getCoordinates(varName) {
+mifi.reader.getCoordinates <- function(reader, varName) {
     # will give logical coordinates, like time, x(lon), y(lat), z, refTime, offsetTime, other1, other2, ...
-#}
+    coordVec <- listCoordinates(reader$p_, reader$csList_, varName);
+    ans = c();
+    if (coordVec$"__len__"() > 0) {
+        for (i in 1:(coordVec$"__len__"())) {
+            if (coordVec[i] != "") {
+                if (i == 1) {
+                    ans["time"] = coordVec[i];
+                } else if (i == 2) {
+                    ans["x"] = coordVec[i];
+                } else if (i == 3) {
+                    ans["y"] = coordVec[i];
+                } else if (i == 4) {
+                    ans["z"] = coordVec[i];
+                } else if (i == 5) {
+                    ans["refTime"] = coordVec[i];
+                } else {
+                    otherI = as.character(i-5);
+                    other = paste(c("other",otherI), collapse='');
+                    ans[other] = coordVec[i];
+                }
+            }
+        }
+    }
+    ans
+}
 
 mifi.sb.new <- function(reader, varName) {
-    SliceBuilder(boost__shared_ptrCDMReader_getCDM(reader), varName);
+    SliceBuilder(boost__shared_ptrCDMReader_getCDM(reader$p_), varName);
 }
 mifi.sb.getDimensions <- function(sb) {
     dimNames <- SliceBuilder_getDimensionNames(sb);
@@ -52,7 +82,7 @@ mifi.sb.setStartAndSize <- function(sb, dimName, start, size) {
 }
 
 mifi.reader.getSliceVecInUnit <- function(reader, varName, sb, units) {
-    out <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader, varName, sb, units);
+    out <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader$p_, varName, sb, units);
     if (is.null(out)) {
         stop("unable to get data for mifi.reader.getSliceVecInUnit(reader, ",varName,",sb, ",units,")");
     }
@@ -65,14 +95,14 @@ mifi.reader.getSliceVecInUnit <- function(reader, varName, sb, units) {
 
 mifi.reader.write <- function(reader, type, filename, configname = "") {
     if (type == "netcdf" || type == "netcdf3") {
-        out <- NetCDF_CDMWriter(reader, filename, configname, 3);
+        out <- NetCDF_CDMWriter(reader$p_, filename, configname, 3);
         if (is.null(out)) {
-            stop("NetCDF_CDMWriter(",reader,",", filename,",", configname,", 3) failed");
+            stop("NetCDF_CDMWriter(",reader$p_,",", filename,",", configname,", 3) failed");
         } else {
             delete_NetCDF_CDMWriter(out);
         }
     } else if (type == "netcdf4") {
-        out <- NetCDF_CDMWriter(reader, filename, configname, 3);
+        out <- NetCDF_CDMWriter(reader$p_, filename, configname, 3);
         if (is.null(out)) {
             stop("NetCDF_CDMWriter(",reader,",", filename,",", configname,", 3) failed");
         } else {

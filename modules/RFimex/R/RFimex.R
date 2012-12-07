@@ -2098,6 +2098,37 @@ setMethod('$', '_p_MetNoFimex__SliceBuilder', function(x, name)
 );
 # end of accessor method for MetNoFimex::SliceBuilder
 setMethod('delete', '_p_MetNoFimex__SliceBuilder', function(obj) {delete_MetNoFimex__SliceBuilder(obj)})
+# Start of listCoordinateSystems
+
+`listCoordinateSystems` = function(reader, .copy = FALSE)
+{
+  ;ans = .Call('R_swig_listCoordinateSystems', reader, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t";
+  
+  ans
+  
+}
+
+attr(`listCoordinateSystems`, 'returnType') = '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t'
+attr(`listCoordinateSystems`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t')
+class(`listCoordinateSystems`) = c("SWIGFunction", class('listCoordinateSystems'))
+
+# Start of listCoordinates
+
+`listCoordinates` = function(reader, csList, varName, .copy = FALSE)
+{
+  varName = as(varName, "character"); 
+  ;ans = .Call('R_swig_listCoordinates', reader, csList, varName, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
+  
+  ans
+  
+}
+
+attr(`listCoordinates`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
+attr(`listCoordinates`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t', 'character')
+class(`listCoordinates`) = c("SWIGFunction", class('listCoordinates'))
+
 # Start of delete_CDM
 
 `delete_CDM` = function(self)

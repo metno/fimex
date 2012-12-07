@@ -23,12 +23,31 @@ if (length(vars) != 21) {
     stop("didn't get all variables, just ",vars);
 } 
 
+coords <- mifi.reader.getCoordinates(reader, "altitude")
+coords
+if (length(coords) != 2) {
+    stop("wrong coordinates for altitude: ", coords);
+}
+if (coords["x"] != "x") {
+    stop("wrong coordinates for altitude: ", coords);
+}
+coords <- mifi.reader.getCoordinates(reader, "precipitation_amount")
+if (length(coords) != 3) {
+    stop("wrong coordinates for precipitation_amount: ", coords);
+}
+coords <- mifi.reader.getCoordinates(reader, "time")
+if (! is.null(coords)) {
+    stop("time is coordinate axes, and should not have a coordinate system")
+}
+
+
+
 sb <- mifi.sb.new(reader,"time")
 cat(class(sb))
 dims <- mifi.sb.getDimensions(sb)
 dims
 mifi.sb.setStartAndSize(sb, "time", 0, 3)
-# TODO: throws exception: SliceBuilder_setStartAndSize(sb, "x", 0, 3)
+# TODO: throws exception: mifi.sb.setStartAndSize(sb, "x", 0, 3)
 #out <- array(0, dim=c(3))
 #out <- double(length = 3)
 time <- mifi.reader.getSliceVecInUnit(reader, "time", sb, "seconds since 2007-05-16 00:00:00 +0000")
