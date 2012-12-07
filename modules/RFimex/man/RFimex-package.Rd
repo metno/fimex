@@ -3,40 +3,37 @@
 \alias{RFimex}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+Access to gridded data via Fimex
 }
+
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+The RFimex package exposes some of the Fimex library functionality
+to access gridded data, eventually interpolated gridded data.
 }
+
 \details{
 \tabular{ll}{
 Package: \tab RFimex\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab 0.01\cr
 Date: \tab 2012-12-03\cr
-License: \tab What license is it under?\cr
+License: \tab LGPL-2 \cr
 }
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
-}
-\author{
-Who wrote it
 
-Maintainer: Who to complain to <yourfault@somewhere.net>
-~~ The author and/or maintainer of the package ~~
+}
+
+\author{
+Heiko Klein
+Maintainer: Heiko Klein <heiko.klein@met.no>
 }
 \references{
-~~ Literature or other references for background information ~~
+http://fimex.met.no
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
-~~ the R documentation directory ~~
+
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
+
 \examples{
 library(RFimex)
 
