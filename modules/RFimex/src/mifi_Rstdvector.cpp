@@ -2,6 +2,7 @@
 #include <Rinternals.h>
 #include <vector>
 
+/* convert a std::vector to an R-vector */
 extern "C" SEXP mifi_Rdoublevector(SEXP args)
 {
     SEXP retlist, retlistnames;
@@ -40,4 +41,3 @@ extern "C" SEXP mifi_Rdoublevector(SEXP args)
     UNPROTECT(2);
     return(retlist);
 }
-

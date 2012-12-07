@@ -2,6 +2,7 @@ useDynLib(RFimex)
 #exportPattern("^[[:alpha:]]+")
 export(
        mifi.reader.new,
+       mifi.reader.lonLatInterpolated,
        mifi.reader.write,
        mifi.reader.variables,
        mifi.reader.getCoordinates,

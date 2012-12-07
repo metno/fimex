@@ -2129,6 +2129,29 @@ attr(`listCoordinates`, 'returnType') = '_p_std__vectorT_std__string_std__alloca
 attr(`listCoordinates`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t', 'character')
 class(`listCoordinates`) = c("SWIGFunction", class('listCoordinates'))
 
+# Start of latLonInterpolatedReader
+
+`latLonInterpolatedReader` = function(s_arg1, method, lonVals, latVals, .copy = FALSE)
+{
+  method = as.integer(method); 
+  
+  if(length(method) > 1) {
+    warning("using only the first element of method");
+  };
+  
+  
+  
+  ;ans = .Call('R_swig_latLonInterpolatedReader', s_arg1, method, lonVals, latVals, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
+  
+  ans
+  
+}
+
+attr(`latLonInterpolatedReader`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
+attr(`latLonInterpolatedReader`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', 'integer', '_p_std__vectorT_double_std__allocatorT_double_t_t', '_p_std__vectorT_double_std__allocatorT_double_t_t')
+class(`latLonInterpolatedReader`) = c("SWIGFunction", class('latLonInterpolatedReader'))
+
 # Start of delete_CDM
 
 `delete_CDM` = function(self)

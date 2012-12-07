@@ -1305,7 +1305,7 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
     std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
             find_if(csList->begin(), csList->end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt != csList->end()) {
-        //if ((*varSysIt)->isSimpleSpatialGridded()) {
+        if ((*varSysIt)->isSimpleSpatialGridded()) {
             std::vector<CoordinateSystem::ConstAxisPtr> axes;
             axes.push_back((*varSysIt)->getTimeAxis());
             axes.push_back((*varSysIt)->getGeoXAxis());
@@ -1331,11 +1331,19 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
             for (std::set<std::string>::iterator shapeIt = shapeSet.begin(); shapeIt != shapeSet.end(); ++shapeIt) {
                 coords.push_back(*shapeIt);
             }
-        //}
+        }
     }
     return coords;
 }
+
+boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReader> in, int method, const std::vector<double>& lonVals, const std::vector<double>& latVals) {
+    CDMInterpolator* read = new CDMInterpolator(in);
+    boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(read);
+    read->changeProjection(method, lonVals, latVals);
+    return r;
 }
+
+}  // namespace MetNoFimex
 
 
 
@@ -5784,6 +5792,76 @@ R_swig_listCoordinates ( SEXP reader, SEXP csList, SEXP varName, SEXP s_swig_cop
 
 
 SWIGEXPORT SEXP
+R_swig_latLonInterpolatedReader ( SEXP s_arg1, SEXP method, SEXP lonVals, SEXP latVals, SEXP s_swig_copy)
+{
+  boost::shared_ptr< MetNoFimex::CDMReader > result;
+  boost::shared_ptr< MetNoFimex::CDMReader > arg1 ;
+  int arg2 ;
+  std::vector< double,std::allocator< double > > *arg3 = 0 ;
+  std::vector< double,std::allocator< double > > *arg4 = 0 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  int res3 = SWIG_OLDOBJ ;
+  int res4 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(s_arg1, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "latLonInterpolatedReader" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "latLonInterpolatedReader" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp1));
+    }
+  }
+  arg2 = static_cast< int >(INTEGER(method)[0]);
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res3 = swig::asptr(lonVals, &ptr);
+    if (!SWIG_IsOK(res3)) {
+      SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "latLonInterpolatedReader" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "latLonInterpolatedReader" "', argument " "3"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg3 = ptr;
+  }
+  {
+    std::vector<double,std::allocator< double > > *ptr = (std::vector<double,std::allocator< double > > *)0;
+    res4 = swig::asptr(latVals, &ptr);
+    if (!SWIG_IsOK(res4)) {
+      SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "latLonInterpolatedReader" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "latLonInterpolatedReader" "', argument " "4"" of type '" "std::vector< double,std::allocator< double > > const &""'"); 
+    }
+    arg4 = ptr;
+  }
+  try {
+    result = MetNoFimex::latLonInterpolatedReader(arg1,arg2,(std::vector< double,std::allocator< double > > const &)*arg3,(std::vector< double,std::allocator< double > > const &)*arg4);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
+  
+  if (SWIG_IsNewObj(res3)) delete arg3;
+  if (SWIG_IsNewObj(res4)) delete arg4;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
 R_swig_delete_CDM ( SEXP self)
 {
   MetNoFimex::CDM *arg1 = (MetNoFimex::CDM *) 0 ;
@@ -7017,6 +7095,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_mifi_get_variable_name", (DL_FUNC) &R_swig_mifi_get_variable_name, 2},
    {"R_swig_new_mifi_cdm_reader", (DL_FUNC) &R_swig_new_mifi_cdm_reader, 1},
    {"R_swig_delete_mifi_cdm_reader", (DL_FUNC) &R_swig_delete_mifi_cdm_reader, 1},
+   {"R_swig_latLonInterpolatedReader", (DL_FUNC) &R_swig_latLonInterpolatedReader, 5},
    {"R_swig_DoubleVector_pop_back", (DL_FUNC) &R_swig_DoubleVector_pop_back, 1},
    {"R_swig_IntVector_pop_back", (DL_FUNC) &R_swig_IntVector_pop_back, 1},
    {"R_swig_StringVector_pop_back", (DL_FUNC) &R_swig_StringVector_pop_back, 1},

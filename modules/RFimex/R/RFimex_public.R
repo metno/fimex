@@ -9,19 +9,38 @@ mifi.vec.2R <- function(vec) {
     ans
 }
 
+mifi.createCDMReader_ <- function(r) {
+    # enhance the reader with coordinate-systems
+    ans <- c( p_ = r, csList_ = listCoordinateSystems(r) );
+    class(ans) <- c("CDMReader");
+    ans
+}
+
 mifi.reader.new <- function(type, filename, config = "") {
     r <- CDMFileReaderFactory_create(type, filename, config);
     if (is.null(r)) {
         stop("unable to create reader with mifi.reader.create(",type,",",filename,",",config,")");
     }
-    # create a dummy object to store attributes
-    ans <- c("");
-    class(ans) <- "CDMReader";
-    ans$p_ <- r;
-    # enhance the reader with coordinate-systems
-    ans$csList_ <- listCoordinateSystems(ans$p_);
-    ans
+    mifi.createCDMReader_(r)
 }
+
+mifi.reader.lonLatInterpolated <- function(reader, method, lons, lats) {
+    if (length(lats) != length(lons)) {
+        stop("lats size must be == lons size");
+    }
+    latV <- DoubleVector(length(lats));
+    lonV <- DoubleVector(length(lons));
+    for (i in 1:length(lats)) {
+        DoubleVector___setitem__(latV, i-1, lats[i]);
+        DoubleVector___setitem__(lonV, i-1, lons[i]);
+    }
+    r <- latLonInterpolatedReader(reader$p_, method, lonV, latV);
+    if (is.null(r)) {
+        stop("interpolation to latlon values failed");
+    }
+    mifi.createCDMReader_(r)    
+}
+
 
 mifi.reader.variables <- function(reader) {
     mifiRead <- mifi_cdm_reader(reader$p_);
@@ -81,7 +100,7 @@ mifi.sb.setStartAndSize <- function(sb, dimName, start, size) {
     SliceBuilder_setStartAndSize(sb, dimName, start,size)
 }
 
-mifi.reader.getSliceVecInUnit <- function(reader, varName, sb, units) {
+mifi.reader.getSliceVecInUnit <- function(reader, varName, sb, units = "") {
     out <- boost__shared_ptrCDMReader_getSliceVecInUnit(reader$p_, varName, sb, units);
     if (is.null(out)) {
         stop("unable to get data for mifi.reader.getSliceVecInUnit(reader, ",varName,",sb, ",units,")");

@@ -68,3 +68,19 @@ status <- try(mifi.reader.write(reader, "netcdf", "outTest.nc"))
 if (inherits(status, "try-error")) {
     stop("mifi.reader.write failed")
 }
+
+lats <- c(70:90);
+lons <- c(-10:10);
+iread <- mifi.reader.lonLatInterpolated(reader, 1, lons, lats);
+sb <- mifi.sb.new(iread,"x");
+x <- mifi.reader.getSliceVecInUnit(iread, "x", sb);
+if (length(x) != length(lats)) {
+    stop("failed to get all x-elements in interpolation");
+}
+sb <- mifi.sb.new(iread,"altitude");
+
+mifi.sb.getDimensions(sb)
+altitude <- mifi.reader.getSliceVecInUnit(iread, "altitude", sb, "m")
+if (length(altitude) != length(lats)) {
+    stop("interpolation failed, got length ", length(altitude));
+}
