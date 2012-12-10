@@ -1,0 +1,5 @@
+r-metno-rfimex (0.1-1) unstable; urgency=low
+
+  * Release as debian package
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 10 Dec 2012 14:52:40 +0200

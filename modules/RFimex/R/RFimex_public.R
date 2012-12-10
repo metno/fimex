@@ -1,5 +1,21 @@
 # public functions of the RFimex module
 
+mifi.interpolTypes <- function(type) {
+    switch (type,
+    NEAREST_NEIGHBOR = 0,
+    BILINEAR         = 1,
+    BICUBIC          = 2,
+    COORD_NN         = 3,
+    COORD_NN_KD      = 4,
+    FORWARD_SUM      = 5,
+    FORWARD_MEAN     = 6,
+    FORWARD_MEDIAN   = 7,
+    FORWARD_MAX      = 8,
+    FORWARD_MIN      = 9,
+    stop("unknown interpolType: ", type)
+    )
+}
+
 mifi.vec.2R <- function(vec) {
     if ( extends(class(vec), '_p_std__vectorT_double_std__allocatorT_double_t_t' ) ) {
        ; ans <- .Call("mifi_Rdoublevector", vec, PACKAGE='RFimex');
@@ -34,7 +50,8 @@ mifi.reader.lonLatInterpolated <- function(reader, method, lons, lats) {
         DoubleVector___setitem__(latV, i-1, lats[i]);
         DoubleVector___setitem__(lonV, i-1, lons[i]);
     }
-    r <- latLonInterpolatedReader(reader$p_, method, lonV, latV);
+    methodId <- mifi.interpolTypes(method);
+    r <- latLonInterpolatedReader(reader$p_, methodId, lonV, latV);
     if (is.null(r)) {
         stop("interpolation to latlon values failed");
     }

@@ -1,0 +1,12 @@
+This is the Debian GNU/Linux r-metno-rfimex package of fimex, a set
+of R functions used at the norwegian meteorological institute for
+reading data/field files in R.
+
+This package was created by Heiko Klein <heiko.klein@met.no>.
+The sources are available at
+	https://fimex.met.no
+
+
+Copyright (C) met.no (Heiko Klein <heiko.klein@met.no>)
+
+License: LGPL-2

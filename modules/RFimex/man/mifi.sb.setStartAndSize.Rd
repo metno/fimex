@@ -1,56 +1,57 @@
 \name{mifi.sb.setStartAndSize}
 \alias{mifi.sb.setStartAndSize}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 mifi.sb.setStartAndSize-internals
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Prepare data-fetching to slice data along a dimension.
 }
 \usage{
-mifi.sb.setStartAndSize(x)
+mifi.sb.setStartAndSize(sb, dimName, start, size)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
-%%     ~~Describe \code{x} here~~
+  \item{sb}{
+a slicebuilder as retrieved from mifi.sb.new
+}
+  \item{dimName}{
+dimension name of the variable of the slicebuilder
+}
+  \item{start}{
+start-position of the slice, starting at 0
+}
+  \item{size}{
+size of the new slice
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 }
 \references{
-%% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Heiko Klein
 }
 \note{
-%%  ~~further notes~~
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{mifi.sb.new}},
+\code{\link{mifi.reader.getSliceVecInUnit}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# R example for RFimex
+library(RFimex)
 
-## The function is currently defined as
-function (x) 
-gamma(x + 1)
+
+reader <- try(mifi.reader.new("felt", "../../test/flth00.dat", "../../share/etc/felt2nc_variables.xml"))
+if (inherits(reader, "try-error")) {
+    stop("mifi.reader.new failed")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+sb <- mifi.sb.new(reader,"time")
+mifi.sb.setStartAndSize(sb,"time", 3, 5)
+
+time <- mifi.reader.getSliceVecInUnit(reader, "time", sb, "seconds since 2007-05-16 00:00:00 +0000")
+# time has now size 5 and starts from the 4th position in the file
+
+}

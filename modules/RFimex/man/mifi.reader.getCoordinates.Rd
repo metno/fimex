@@ -1,56 +1,65 @@
 \name{mifi.reader.getCoordinates}
 \alias{mifi.reader.getCoordinates}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 mifi.reader.getCoordinates-internals
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Get the identified coordinate-dimensions from a variable. 
 }
 \usage{
-mifi.reader.getCoordinates(x)
+mifi.reader.getCoordinates(reader, varName)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
-%%     ~~Describe \code{x} here~~
+  \item{reader}{
+  a reader as retrieved from mifi.reader.new
+}
+  \item{varName}{
+    a variable name as retrieved from mifi.reader.variables
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+This will try to identify the coordinate-system with the variable, and return all dimensions.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+\item{time}{Name of the time-dimension}
+\item{x}{Name of the x-dimension (or longitude)}
+\item{y}{Name of the y-dimension (or latitude)}
+\item{z}{Name of the vertical-dimension (height, sigma, ...)}
+\item{refTime}{Name of the reference-time dimension}
+\item{other1}{Name of the first unknown dimensions}
+\item{other2}{Name of the 2. unknown dimensions}
+\item{other3}{Name of the 3. unknown dimensions}
+\item{other4}{Name of the 4. unknown dimensions}
+...
 }
 \references{
-%% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Heiko Klein
 }
 \note{
-%%  ~~further notes~~
+
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\section{Warning }{
+If no dimensions are return, this does not mean, that the variable is dimension-less. It just means, that no
+coordinate-system could be found.
+}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{mifi.reader.new}}, 
+\code{\link{mifi.reader.variables}},
+\code{\link{mifi.sb.getDimensions}}  
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# R example for RFimex
+library(RFimex)
 
-## The function is currently defined as
-function (x) 
-gamma(x + 1)
+reader <- try(mifi.reader.new("felt", "../../test/flth00.dat", "../../share/etc/felt2nc_variables.xml"))
+if (inherits(reader, "try-error")) {
+    stop("mifi.reader.new failed")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+coords <- mifi.reader.getCoordinates(reader, "altitude")
+# coords = c(x = x, y = y) 
+
+}

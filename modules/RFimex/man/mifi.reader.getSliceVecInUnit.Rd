@@ -1,56 +1,58 @@
 \name{mifi.reader.getSliceVecInUnit}
 \alias{mifi.reader.getSliceVecInUnit}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 mifi.reader.getSliceVecInUnit-internals
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Fetch a data, or a data-slice from the data-source.
 }
 \usage{
-mifi.reader.getSliceVecInUnit(x)
+mifi.reader.getSliceVecInUnit(reader, varName, sb, units)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
-%%     ~~Describe \code{x} here~~
+  \item{reader}{
+    a reader, e.g. from mifi.reader.new
+}
+  \item{varName}{
+    a variable name
+}
+  \item{sb}{
+    a slice-builder, belonging to the variable name, eventually redused by mifi.sb.setStartAndSize
+}
+  \item{units}{
+    units to fetch the data from. units will be automatically converted. If the original data does not
+    have units, fetching will fail.
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+A data-array.
 }
 \references{
-%% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Heiko Klein
 }
 \note{
-%%  ~~further notes~~
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{mifi.reader.new}}, \code{\link{mifi.sb.new}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# R example for RFimex
+library(RFimex)
 
-## The function is currently defined as
-function (x) 
-gamma(x + 1)
+
+reader <- try(mifi.reader.new("felt", "../../test/flth00.dat", "../../share/etc/felt2nc_variables.xml"))
+if (inherits(reader, "try-error")) {
+    stop("mifi.reader.new failed")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
+sb <- mifi.sb.new(reader,"time")
+mifi.sb.setStartAndSize(sb,"time", 3, 5)
+
+time <- mifi.reader.getSliceVecInUnit(reader, "time", sb, "seconds since 2007-05-16 00:00:00 +0000")
+# time has now size 5 and starts from the 4th position in the file
+}

@@ -1,0 +1,14 @@
+Source: r-metno-rfimex
+Section: gnu-r
+Priority: optional
+Maintainer: Heiko Klein <Heiko.Klein@met.no>
+Build-Depends: debhelper (>= 7.0.0), r-base-dev (>= 2.14.0),libfimex-dev
+Standards-Version: 3.9.2
+Homepage: https://fimex.met.no
+
+Package: r-metno-rfimex
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, r-base-core (>= 2.14.0)
+Description: GNU R package for reading gridded field files in R
+ The RFimex package provides a R library for reading data/field files
+ at met.no.

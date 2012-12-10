@@ -1,56 +1,48 @@
 \name{mifi.sb.new}
 \alias{mifi.sb.new}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 mifi.sb.new-internals
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Prepare an SliceBuilder for fetching a data-slice from a variable.
 }
 \usage{
-mifi.sb.new(x)
+mifi.sb.new(reader, varName)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
-%%     ~~Describe \code{x} here~~
+  \item{reader}{
+    a reader, e.g. fetched from mifi.reader.new
+}
+  \item{varName}{
+    a variable name, e.g. one of those given in mifi.reader.variables
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+Returns a slicebuilder object.
 }
 \references{
-%% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Heiko Klein
 }
 \note{
-%%  ~~further notes~~
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{mifi.reader.new}},\code{\link{mifi.reader.variables}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+# R example for RFimex
+library(RFimex)
 
-## The function is currently defined as
-function (x) 
-gamma(x + 1)
+
+reader <- try(mifi.reader.new("felt", "../../test/flth00.dat", "../../share/etc/felt2nc_variables.xml"))
+if (inherits(reader, "try-error")) {
+    stop("mifi.reader.new failed")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
+sb <- mifi.sb.new(reader,"time")
+
+}

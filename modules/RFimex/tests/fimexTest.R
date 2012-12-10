@@ -71,7 +71,7 @@ if (inherits(status, "try-error")) {
 
 lats <- c(70:90);
 lons <- c(-10:10);
-iread <- mifi.reader.lonLatInterpolated(reader, 1, lons, lats);
+iread <- mifi.reader.lonLatInterpolated(reader, "BILINEAR", lons, lats);
 sb <- mifi.sb.new(iread,"x");
 x <- mifi.reader.getSliceVecInUnit(iread, "x", sb);
 if (length(x) != length(lats)) {

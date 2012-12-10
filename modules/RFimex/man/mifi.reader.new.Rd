@@ -8,17 +8,17 @@ mifi.reader.new-internals
     create a new reader object, e.g. a file-handle
 }
 \usage{
-mifi.reader.new(type, dataFile, configFile)
+mifi.reader.new(type, filename, config)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{type}{
     file-type, e.g. felt, netcdf, grib
   }
-  \item{dataFile}{
+  \item{filename}{
     source of data, e.g. filename or file-URL (in the case of opendap)
   }
-  \item{configFile}{
+  \item{config}{
     configuration of dataFile, required for felt and grib-files, optional for netcdf
   }
 }

@@ -1,56 +1,44 @@
 \name{mifi.reader.variables}
 \alias{mifi.reader.variables}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 mifi.reader.variables-internals
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+    fetch a vector of available variables from a reader
 }
 \usage{
-mifi.reader.variables(x)
+mifi.reader.variables(reader)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{
-%%     ~~Describe \code{x} here~~
+  \item{reader}{
+  a reader as retrieved from mifi.reader.new, or a derivated reader like mifi.reader.lonLatInterpolated
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+    Lists all, also auxiliary variable-names of a source.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
 }
 \references{
-%% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Heiko Klein
 }
 \note{
-%%  ~~further notes~~
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{mifi.reader.new}}, \code{\link{mifi.reader.lonLatInterpolated}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+library(RFimex)
 
 ## The function is currently defined as
-function (x) 
-gamma(x + 1)
+reader <- try(mifi.reader.new("felt", "../../test/flth00.dat", "../../share/etc/felt2nc_variables.xml"))
+if (inherits(reader, "try-error")) {
+    stop("mifi.reader.new failed")
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+
+vars <- mifi.reader.variables(reader)
+
+}

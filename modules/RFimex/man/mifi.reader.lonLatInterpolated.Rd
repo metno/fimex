@@ -16,9 +16,8 @@ mifi.reader.lonLatInterpolated(reader, method, lons, lats)
   }
   \item{method}{
     interpolation method, see http://fimex.met.no/doc/mifi__constants_8h_source.html MIFI_INTERPOL_* constants, e.g.
-    0 = next-neighbour
-    1 = bilinear
-    2 = bicubuc
+     NEAREST_NEIGHBOR, BILINEAR, BICUBIC, COORD_NN, COORD_NN_KD, FORWARD_SUM, FORWARD_MEAN, FORWARD_MEDIAN, FORWARD_MAX,
+     FORWARD_MIN
   }
   \item{lons}{
   vector of longitude values in degree
