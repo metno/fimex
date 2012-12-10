@@ -1,7 +1,7 @@
 Package: RFimex
 Type: Package
 Title: R interface for Fimex
-Version: 1.0
+Version: 0.02
 Date: 2012-12-03
 Author: Heiko Klein
 Maintainer: Heiko Klein <Heiko.Klein@met.no>

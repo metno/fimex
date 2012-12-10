@@ -1,4 +1,4 @@
-AC_INIT([RFimex], 0.01) dnl package name, version, check man/RFimex.RD version
+AC_INIT([RFimex], 0.02) dnl package name, version, check man/RFimex.RD version
          
 dnl A user-specifiable option
          
