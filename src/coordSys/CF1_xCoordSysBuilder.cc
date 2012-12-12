@@ -358,6 +358,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                         if (cdm.hasVariable(varName)) {
                             boost::shared_ptr<Projection> proj = Projection::create(cdm.getAttributes(varName));
                             cs.setProjection(proj);
+                            cs.addDependencyVariable(varName);
                         }
                     } else {
                         // LON/LAT systems don't need  grid_mapping, detect by lat/lon axes

@@ -30,6 +30,7 @@
 #include <functional>
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <iostream>
@@ -190,6 +191,16 @@ public:
      * another axis with the axistype exists.
      */
     virtual void setAuxiliaryAxis(ConstAxisPtr axis);
+    /**
+     * Get all dependency-variables for this Coordinate-System, i.e.
+     * axes, grid-mapping-variable, formular-terms, ...
+     */
+    virtual std::set<std::string> getDependencyVariables() const;
+    /**
+     * add a variable to the dependencies
+     * @param varName
+     */
+    virtual void addDependencyVariable(std::string varName);
 private:
     boost::shared_ptr<CoordSysImpl> pimpl_;
 };

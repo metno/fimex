@@ -318,6 +318,21 @@ void CoordinateSystem::setAuxiliaryAxis(ConstAxisPtr axis)
     va.push_back(axis);
 }
 
+std::set<std::string> CoordinateSystem::getDependencyVariables() const
+{
+    std::set<std::string> retVal = pimpl_->dependencyVars_;
+    ConstAxisList axes = getAxes();
+    for (ConstAxisList::iterator axIt = axes.begin(); axIt != axes.end(); ++axIt) {
+        retVal.insert((*axIt)->getName());
+    }
+    return retVal;
+}
+void CoordinateSystem::addDependencyVariable(std::string varName)
+{
+    pimpl_->dependencyVars_.insert(varName);
+}
+
+
 int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
 {
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;

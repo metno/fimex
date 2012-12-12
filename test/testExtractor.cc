@@ -96,10 +96,12 @@ BOOST_AUTO_TEST_CASE( test_extract )
     variables.insert("time");
     variables.insert("altitude");
     variables.insert("relative_humidity");
-    extract->selectVariables(variables);
+    extract->selectVariables(variables, true);
     BOOST_CHECK(extract->getCDM().hasVariable("time"));
     BOOST_CHECK(extract->getCDM().hasVariable("altitude"));
     BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));
+    BOOST_CHECK(extract->getCDM().hasVariable("x")); // auxiliary
+    BOOST_CHECK(extract->getCDM().hasVariable("y")); // auxiliary
     BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
 
     // test reduceLatLonBoundingBox

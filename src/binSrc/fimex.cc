@@ -181,6 +181,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "qualityExtract.printCS", vm);
     writeVectorOptionString(out, "extract.removeVariable", vm);
     writeVectorOptionString(out, "extract.selectVariables", vm);
+    writeOptionAny(out, "extract.selectVariables.noAuxiliary", vm);
     writeVectorOptionString(out, "extract.reduceDimension.name", vm);
     writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
     writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
@@ -454,7 +455,11 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
     }
     if (vm.count("extract.selectVariables")) {
         vector<string> vars = vm["extract.selectVariables"].as<vector<string> >();
-        extractor->selectVariables(set<string>(vars.begin(), vars.end()));
+        if (vm.count("extract.selectVariables.noAuxiliary")) {
+            extractor->selectVariables(set<string>(vars.begin(), vars.end()), false);
+        } else {
+            extractor->selectVariables(set<string>(vars.begin(), vars.end()), true);
+        }
     }
     if (vm.count("extract.removeVariable")) {
         vector<string> vars = vm["extract.removeVariable"].as<vector<string> >();
@@ -758,6 +763,7 @@ int run(int argc, char* args[])
         ("process.printCS", "print CoordinateSystems of process")
         ("extract.removeVariable", po::value<vector<string> >()->composing(), "remove variables")
         ("extract.selectVariables", po::value<vector<string> >()->composing(), "select only those variables")
+        ("extract.selectVariables.noAuxiliary", "don't add auxiliary variables")
         ("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
