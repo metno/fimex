@@ -32,6 +32,7 @@
 #include "fimex/Utils.h"
 #include "fimex/Units.h"
 #include <set>
+#include <boost/regex.hpp>
 
 namespace MetNoFimex
 {
@@ -344,7 +345,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         }
     }
 
-    // transformations
+    // horizontal transformations
     {
         const CDM::VarVec& vars = cdm.getVariables();
         for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
@@ -379,6 +380,28 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         }
     }
 
+    // vertical transformations
+    for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+        CoordinateSystem& cs = cit->second;
+        CoordinateSystem::ConstAxisPtr zAxis = cs.getGeoZAxis();
+        if (zAxis.get() != 0) {
+            if (cdm.hasVariable(zAxis->getName())) {
+                CDMAttribute formula;
+                if (cdm.getAttribute(zAxis->getName(), "formula_terms", formula)) {
+                    string term = formula.getStringValue();
+                    string::const_iterator  begin = term.begin(), end = term.end();
+                    boost::match_results<string::const_iterator> what;
+                    while (boost::regex_search(begin, end, what, boost::regex("\\S+\\s*:\\s*(\\S+)"))) {
+                        string var(what[1].first, what[1].second);
+                        if (cdm.hasVariable(var)) {
+                            cs.addDependencyVariable(var);
+                        }
+                        begin = what[0].second;
+                    }
+                }
+            }
+        }
+    }
 
     // return a const casted version of the coordSystems
     vector<boost::shared_ptr<const CoordinateSystem> > outCSs;
