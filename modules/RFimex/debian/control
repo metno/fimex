@@ -2,7 +2,7 @@ Source: r-metno-rfimex
 Section: gnu-r
 Priority: optional
 Maintainer: Heiko Klein <Heiko.Klein@met.no>
-Build-Depends: debhelper (>= 7.0.0), r-base-dev,cdbs, libfimex-dev
+Build-Depends: debhelper (>= 7.0.0), r-base-dev,cdbs, libfimex-dev, libxml2-dev, libboost-dev, libboost-date-time-dev
 Standards-Version: 3.9.2
 Homepage: https://fimex.met.no
 
