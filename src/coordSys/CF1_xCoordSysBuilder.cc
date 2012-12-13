@@ -403,6 +403,22 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         }
     }
 
+    // axis-bounds
+    for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
+        CoordinateSystem& cs = cit->second;
+        CoordinateSystem::ConstAxisList axes = cs.getAxes();
+        for (CoordinateSystem::ConstAxisList::iterator aIt = axes.begin(); aIt != axes.end(); ++aIt) {
+            string axis = (*aIt)->getName();
+            if (cdm.hasVariable(axis)) {
+                CDMAttribute bound;
+                if (cdm.getAttribute(axis, "bounds", bound)) {
+                    if (cdm.hasVariable(bound.getStringValue())) {
+                        cs.addDependencyVariable(bound.getStringValue());
+                    }
+                }
+            }
+        }
+    }
     // return a const casted version of the coordSystems
     vector<boost::shared_ptr<const CoordinateSystem> > outCSs;
     for (map<string,CoordinateSystem>::iterator cit = coordSystems.begin(); cit != coordSystems.end(); ++cit) {
