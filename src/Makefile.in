@@ -217,14 +217,14 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
-	GridDefinition.cc IndexedData.cc Logger.cc MutexLock.h \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
-	ToVLevelConverter.cc Units.cc Utils.cc \
-	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
-	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
-	NetCDF_Utils.h GribApiCDMWriter.cc \
+	GridDefinition.cc IndexedData.cc Logger.cc Log4cppLogger.cc \
+	Log4cppLogger.h MutexLock.h NcmlCDMReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
+	TimeSpec.cc ToVLevelConverter.h ToVLevelConverter.cc Units.cc \
+	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	XMLInput.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
+	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.h \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.h \
 	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
@@ -331,8 +331,8 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	VerticalPerspectiveProjection.lo UnknownToFgdcProjection.lo \
 	Data.lo DataIndex.lo DataTypeChanger.lo Felt_Array2.lo \
 	FeltCDMReader2.lo Felt_File2.lo FeltParameters.lo \
-	GridDefinition.lo IndexedData.lo Logger.lo NcmlCDMReader.lo \
-	Null_CDMWriter.lo ReplaceStringObject.lo \
+	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
+	NcmlCDMReader.lo Null_CDMWriter.lo ReplaceStringObject.lo \
 	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
 	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
 	Units.lo Utils.lo vertical_coordinate_transformations.lo \
@@ -457,6 +457,8 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
+LOG4CPP_CFLAGS = @LOG4CPP_CFLAGS@
+LOG4CPP_LIBS = @LOG4CPP_LIBS@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -568,14 +570,15 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
 	@MIFI_UDUNITS2_CPPFLAGS@ @MIFI_PROJ_CPPFLAGS@ \
 	@MIFI_GRIB_API_CPPFLAGS@ @MIFI_PQ_CPPFLAGS@ \
 	@MIFI_METGM_CPPFLAGS@ @XML_CPPFLAGS@ @BOOST_CPPFLAGS@ \
-	$(am__append_6)
+	@LOG4CPP_CFLAGS@ $(am__append_6)
 lib_LTLIBRARIES = libfimex.la
 libfimex_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @MIFI_UDUNITS2_LDFLAGS@ @MIFI_UDUNITS_LDFLAGS@ @MIFI_PROJ_LDFLAGS@ @MIFI_NETCDF_LDFLAGS@ @MIFI_GRIB_API_LDFLAGS@ @MIFI_PQ_LDFLAGS@ @MIFI_METGM_LDFLAGS@ ${XML_LDFLAGS} @BOOST_LDFLAGS@
 libfimex_la_LIBADD = felt/libfelt.la @MIFI_UDUNITS_LIBS@ \
 	@MIFI_UDUNITS2_LIBS@ @MIFI_PROJ_LIBS@ @MIFI_NETCDF_LIBS@ \
 	@MIFI_GRIB_API_LIBS@ @MIFI_PQ_LIBS@ @MIFI_METGM_LIBS@ \
 	@XML_LIBS@ @BOOST_REGEX_LIB@ @BOOST_DATE_TIME_LIB@ \
-	@BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@ $(am__append_4)
+	@BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@ @LOG4CPP_LIBS@ \
+	$(am__append_4)
 libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedInterpolation.cc CachedForwardInterpolation.h \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
@@ -609,13 +612,13 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
-	GridDefinition.cc IndexedData.cc Logger.cc MutexLock.h \
-	NcmlCDMReader.cc Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
-	ToVLevelConverter.cc Units.cc Utils.cc \
-	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
-	$(am__append_1) $(am__append_2) $(am__append_3) \
+	GridDefinition.cc IndexedData.cc Logger.cc Log4cppLogger.cc \
+	Log4cppLogger.h MutexLock.h NcmlCDMReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
+	TimeSpec.cc ToVLevelConverter.h ToVLevelConverter.cc Units.cc \
+	Utils.cc vertical_coordinate_transformations.c XMLDoc.cc \
+	XMLInput.cc $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_5)
 all: all-recursive
 
@@ -751,6 +754,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LevelHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Log4cppLogger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReader.Plo@am__quote@

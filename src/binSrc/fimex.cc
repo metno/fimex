@@ -61,6 +61,9 @@
 #ifdef HAVE_METGM_H
 #include "fimex/MetGmCDMWriter.h"
 #endif
+#ifdef HAVE_LOG4CPP
+#include "log4cpp/PropertyConfigurator.hh"
+#endif
 
 namespace po = boost::program_options;
 using namespace std;
@@ -159,6 +162,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     out << "Currently active options: " << endl;
     writeOptionAny(out, "help", vm);
     writeOptionAny(out, "version", vm);
+    writeOption<string>(out, "log4cpp", vm);
     writeOptionAny(out, "debug", vm);
     writeOptionAny(out, "print-options", vm);
     writeOption<string>(out, "config", vm);
@@ -729,6 +733,7 @@ int run(int argc, char* args[])
         ("help,h", "help message")
         ("version", "program version")
         ("debug", "debug program")
+        ("log4cpp", po::value<string>(), "log4cpp property file (- = log4cpp without prop-file)")
         ("print-options", "print all options")
         ("config,c", po::value<string>(&configFile)->default_value(configFile), "configuration file")
         ("num_threads,n", po::value<int>(&num_threads)->default_value(num_threads), "number of threads")
@@ -876,6 +881,19 @@ int run(int argc, char* args[])
     if (vm.count("version")) {
         cout << "fimex version " << VERSION << endl;
         return 0;
+    }
+
+    defaultLogLevel(Logger::INFO);
+    if (vm.count("log4cpp")) {
+#ifdef HAVE_LOG4CPP
+        Logger::setClass(Logger::LOG4CPP);
+        std::string propFile = vm["log4cpp"].as<string>();
+        if (propFile != "-") {
+            log4cpp::PropertyConfigurator::configure(propFile);
+        }
+#else
+        defaultLogLevel(Logger::DEBUG);
+#endif
     }
     if (vm.count("debug") >= 1) {
         // TODO allow for multiple occurances and use INFO as == 1

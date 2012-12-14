@@ -636,6 +636,8 @@ HAVE_NETCDF_TRUE
 MIFI_NETCDF_LDFLAGS
 MIFI_NETCDF_CPPFLAGS
 MIFI_NETCDF_LIBS
+LOG4CPP_LIBS
+LOG4CPP_CFLAGS
 OPENMP_CXXFLAGS
 PKG_CONFIG
 BOOST_UNIT_TEST_FRAMEWORK_LIB
@@ -802,6 +804,7 @@ with_boost_date_time
 with_boost_iostreams
 with_boost_unit_test_framework
 enable_openmp
+enable_log4cpp
 with_netcdf
 enable_felt
 with_grib_api
@@ -822,7 +825,9 @@ CXXFLAGS
 CCC
 CPP
 CXXCPP
-PKG_CONFIG'
+PKG_CONFIG
+LOG4CPP_CFLAGS
+LOG4CPP_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1452,6 +1457,7 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --disable-xmltest       Do not try to compile and run a test LIBXML program
   --enable-openmp         enable use of openmp [default=no]
+  --enable-log4cpp           enable logging via log4cpp [default=no]
   --enable-felt           enable the c++ felt-reader [default=yes]
   --enable-debug-mode     Compile program in debugging mode, using no
                           optimization, debugging flags, and removing
@@ -1538,6 +1544,10 @@ Some influential environment variables:
   CPP         C preprocessor
   CXXCPP      C++ preprocessor
   PKG_CONFIG  path to pkg-config utility
+  LOG4CPP_CFLAGS
+              C compiler flags for LOG4CPP, overriding pkg-config
+  LOG4CPP_LIBS
+              linker flags for LOG4CPP, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -19354,6 +19364,93 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
+#optional logging libraries
+# Check whether --enable-log4cpp was given.
+if test "${enable_log4cpp+set}" = set; then :
+  enableval=$enable_log4cpp;
+if test "$enableval" = no; then
+    use_log4cpp=no
+  else
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LOG4CPP" >&5
+$as_echo_n "checking for LOG4CPP... " >&6; }
+
+if test -n "$PKG_CONFIG"; then
+    if test -n "$LOG4CPP_CFLAGS"; then
+        pkg_cv_LOG4CPP_CFLAGS="$LOG4CPP_CFLAGS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"log4cpp\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "log4cpp") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LOG4CPP_CFLAGS=`$PKG_CONFIG --cflags "log4cpp" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+if test -n "$PKG_CONFIG"; then
+    if test -n "$LOG4CPP_LIBS"; then
+        pkg_cv_LOG4CPP_LIBS="$LOG4CPP_LIBS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"log4cpp\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "log4cpp") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LOG4CPP_LIBS=`$PKG_CONFIG --libs "log4cpp" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LOG4CPP_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "log4cpp"`
+        else
+	        LOG4CPP_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "log4cpp"`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LOG4CPP_PKG_ERRORS" >&5
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+                as_fn_error $? "\"unable to find requested log4cpp in pkg-config\"" "$LINENO" 5
+
+elif test $pkg_failed = untried; then
+	as_fn_error $? "\"unable to find requested log4cpp in pkg-config\"" "$LINENO" 5
+
+else
+	LOG4CPP_CFLAGS=$pkg_cv_LOG4CPP_CFLAGS
+	LOG4CPP_LIBS=$pkg_cv_LOG4CPP_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_LOG4CPP 1" >>confdefs.h
+
+fi
+  fi
+
+fi
+
+
 # optional io libraries
 
 # Checks for libraries that can be dropped
@@ -22764,12 +22861,12 @@ $as_echo "Data:             $datadir" >&6; }
 $as_echo "System Config:    $sysconfdir" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result:  " >&5
 $as_echo " " >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS" >&5
-$as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $LOG4CPP_CFLAGS" >&5
+$as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $LOG4CPP_CFLAGS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: LDFLAGS:          $OPENMP_CXXFLAGS $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&5
 $as_echo "LDFLAGS:          $OPENMP_CXXFLAGS $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&5
-$as_echo "LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $LOG4CPP_LIBS" >&5
+$as_echo "LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $LOG4CPP_LIBS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: DEFS:             $DEFS" >&5
 $as_echo "DEFS:             $DEFS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result:   " >&5

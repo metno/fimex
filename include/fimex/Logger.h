@@ -34,9 +34,17 @@ namespace MetNoFimex {
  * Interface and default (dummy) implementation for a logger.
  * Don't use this class directly, but retrieve a pointer to it
  * via the #getLogger function and log with the #LOG4FIMEX macro.
+ *
+ * To switch to another logger-implementation, e.g. log4cpp, use setClass()
+ * and eventually implement the Logger-initialization (e.g. for log4cpp via filename)
+ *
  */
 class Logger
 {
+private:
+    std::string className_;
+    std::auto_ptr<Logger> pimpl_; // lazy initialized member
+    Logger* getImpl();
 public:
     /**
      * different log levels
@@ -63,6 +71,20 @@ public:
 	 * @param lineNumber best retrieved with __LINE__
 	 */
     virtual void forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber);
+    /**
+     * different logger eventually enabled in fimex
+     */
+    enum LogClass {
+        LOG2STDERR = 0,
+        LOG4CPP = 1
+    };
+    /**
+     * choose a loggerclass in fimex (default is STDERR)
+     *
+     * @param logClass
+     * @return false if the logClass is not compiled into fimex
+     */
+    static bool setClass(LogClass logClass);
 };
 
 /**
@@ -86,6 +108,7 @@ extern void defaultLogLevel(Logger::LogLevel);
         logger->forcedLog(level, buffer.str(), __FILE__, __LINE__);}}
 
 typedef boost::shared_ptr<Logger> LoggerPtr;
+
 /**
  * Retrieve a logger for Fimex. It will use loggers in the following order, skipping
  * to the next one if the current one is not available:
