@@ -52,7 +52,8 @@ config_DATA = \
 	template4interpolation.cdl \
 	wdb_config.xml \
 	wdb_config.xsd \
-	wdb.example.wdbml
+	wdb.example.wdbml \
+	log4cpp.properties
 
 
 				
