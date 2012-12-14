@@ -48,6 +48,8 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
+#include "fimex/CDMReaderUtils.h"
+#include "fimex/TimeUnit.h"
 
 using namespace MetNoFimex;
 using namespace std;
@@ -227,7 +229,7 @@ mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* va
 
 
 
-int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size)
+int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size)
 {
     try {
         DataPtr vData = reader->get()->getScaledDataSlice(varName, unLimDimPos);
@@ -265,6 +267,18 @@ int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** 
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_double_dataslize: " << ex.what());
     }
     return -1;
+}
+
+double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const char* units)
+{
+    double retVal;
+    try {
+        TimeUnit tu(units);
+        retVal = tu.posixTime2unitTime(getUniqueForecastReferenceTime(reader->get()));
+    } catch (CDMException& ex) {
+        return MIFI_UNDEFINED_D;
+    }
+    return retVal;
 }
 
 

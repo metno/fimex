@@ -100,6 +100,14 @@ mifi.reader.getCoordinates <- function(reader, varName) {
     ans
 }
 
+mifi.reader.uniqueRefTime <- function(reader, units = "seconds since 1970-01-01 00:00:00 +0000") {
+    retVal <- mifi_get_unique_forecast_reference_time(reader$p_, units);
+    if (is.nan(retVal)) {
+        stop("error on mifi.reader.uniqueRefTime(reader, ",units,")");
+    }
+    retVal
+}
+
 mifi.sb.new <- function(reader, varName) {
     SliceBuilder(boost__shared_ptrCDMReader_getCDM(reader$p_), varName);
 }

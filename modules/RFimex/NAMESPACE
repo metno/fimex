@@ -7,6 +7,7 @@ export(
        mifi.reader.variables,
        mifi.reader.getCoordinates,
        mifi.reader.getSliceVecInUnit,
+       mifi.reader.uniqueRefTime,
        mifi.sb.new,
        mifi.sb.getDimensions,
        mifi.sb.setStartAndSize

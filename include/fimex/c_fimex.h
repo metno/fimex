@@ -200,7 +200,7 @@ void mifi_free_slicebuilder(mifi_slicebuilder* sb);
  * @param size: the size of the returned data.
  * @return 0 on success
  */
-int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size);
+int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size);
 
 /**
  * get all the data from the dataReader
@@ -212,6 +212,14 @@ int mifi_get_double_dataslize(mifi_cdm_reader* reader, const char* varName, size
  */
 int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** data, size_t* size);
 
+
+/**
+ * get the unique forecast reference time in a unit
+ * @param reader
+ * @param units a unit for point in time, e.g. "seconds since 1970-01-01"
+ * @return time in the given unit, or NaN
+ */
+double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const char* units);
 
 
 

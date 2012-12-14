@@ -5,7 +5,7 @@
 # the SWIG interface file instead.
 
 ##   Generated via the command line invocation:
-##	 swig -I/usr/include -c++ -r -module RFimex -o RFimex/src/fimex_wrap.cpp fimex.i
+##	 swig -I/usr/include -I../include -c++ -r -module RFimex -o RFimex/src/fimex_wrap.cpp fimex.i
 
 
 #                         srun.swg                            #
@@ -165,6 +165,7 @@ setClass('_p_std__vectorT_size_t_std__allocatorT_size_t_t_t', contains = 'C++Ref
 setClass('_p_std__vectorT_double_std__allocatorT_double_t_t', contains = 'C++Reference')
 setClass('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', contains = 'C++Reference')
 setClass('_p_mifi_cdm_reader', contains = 'C++Reference')
+setClass('_p_mifi_slicebuilder', contains = 'C++Reference')
 setClass('_p_MetNoFimex__SliceBuilder', contains = 'C++Reference')
 setClass('_p_MetNoFimex__CDM', contains = 'C++Reference')
 setClass('_p_MetNoFimex__CDMReader', contains = 'C++Reference')
@@ -1801,6 +1802,110 @@ setMethod('$', '_p_mifi_cdm_reader', function(x, name)
 );
 # end of accessor method for mifi_cdm_reader
 setMethod('delete', '_p_mifi_cdm_reader', function(obj) {delete_mifi_cdm_reader(obj)})
+# Start of new_mifi_slicebuilder
+
+`mifi_slicebuilder` = function(sb)
+{
+  ;ans = .Call('R_swig_new_mifi_slicebuilder', sb, PACKAGE='RFimex');
+  class(ans) <- "_p_mifi_slicebuilder";
+  
+  reg.finalizer(ans, delete_mifi_slicebuilder)
+  ans
+  
+}
+
+attr(`mifi_slicebuilder`, 'returnType') = '_p_mifi_slicebuilder'
+attr(`mifi_slicebuilder`, "inputTypes") = c('_p_MetNoFimex__SliceBuilder')
+class(`mifi_slicebuilder`) = c("SWIGFunction", class('mifi_slicebuilder'))
+
+# Start of mifi_slicebuilder_sb__set
+
+`mifi_slicebuilder_sb__set` = function(self, s_sb_)
+{
+  ;.Call('R_swig_mifi_slicebuilder_sb__set', self, s_sb_, PACKAGE='RFimex');
+  
+}
+
+attr(`mifi_slicebuilder_sb__set`, 'returnType') = 'void'
+attr(`mifi_slicebuilder_sb__set`, "inputTypes") = c('_p_mifi_slicebuilder', '_p_MetNoFimex__SliceBuilder')
+class(`mifi_slicebuilder_sb__set`) = c("SWIGFunction", class('mifi_slicebuilder_sb__set'))
+
+# Start of mifi_slicebuilder_sb__get
+
+`mifi_slicebuilder_sb__get` = function(self)
+{
+  ;ans = .Call('R_swig_mifi_slicebuilder_sb__get', self, PACKAGE='RFimex');
+  class(ans) <- "_p_MetNoFimex__SliceBuilder";
+  
+  ans
+  
+}
+
+attr(`mifi_slicebuilder_sb__get`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
+attr(`mifi_slicebuilder_sb__get`, "inputTypes") = c('_p_mifi_slicebuilder')
+class(`mifi_slicebuilder_sb__get`) = c("SWIGFunction", class('mifi_slicebuilder_sb__get'))
+
+# Start of delete_mifi_slicebuilder
+
+`delete_mifi_slicebuilder` = function(self)
+{
+  ;.Call('R_swig_delete_mifi_slicebuilder', self, PACKAGE='RFimex');
+  
+}
+
+attr(`delete_mifi_slicebuilder`, 'returnType') = 'void'
+attr(`delete_mifi_slicebuilder`, "inputTypes") = c('_p_mifi_slicebuilder')
+class(`delete_mifi_slicebuilder`) = c("SWIGFunction", class('delete_mifi_slicebuilder'))
+
+# Start of accessor method for mifi_slicebuilder
+setMethod('$', '_p_mifi_slicebuilder', function(x, name)
+
+{
+  accessorFuns = list('sb_' = mifi_slicebuilder_sb__get);
+  vaccessors = c('sb_');
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name));
+  f = accessorFuns[[idx]];
+  formals(f)[[1]] = x;
+  if (is.na(match(name, vaccessors))) f else f(x);
+}
+
+
+);
+# end of accessor method for mifi_slicebuilder
+# Start of accessor method for mifi_slicebuilder
+setMethod('$<-', '_p_mifi_slicebuilder', function(x, name, value)
+
+{
+  accessorFuns = list('sb_' = mifi_slicebuilder_sb__set);
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name, value));
+  f = accessorFuns[[idx]];
+  f(x, value);
+  x;
+}
+
+
+);
+setMethod('[[<-', c('_p_mifi_slicebuilder', 'character'),function(x, i, j, ..., value)
+
+{
+  name = i;
+  accessorFuns = list('sb_' = mifi_slicebuilder_sb__set);
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name, value));
+  f = accessorFuns[[idx]];
+  f(x, value);
+  x;
+}
+
+
+);
+# end of accessor method for mifi_slicebuilder
+setMethod('delete', '_p_mifi_slicebuilder', function(obj) {delete_mifi_slicebuilder(obj)})
 # Start of mifi_get_variable_number
 
 `mifi_get_variable_number` = function(reader, .copy = FALSE)
@@ -1831,6 +1936,19 @@ class(`mifi_get_variable_number`) = c("SWIGFunction", class('mifi_get_variable_n
 attr(`mifi_get_variable_name`, 'returnType') = 'character'
 attr(`mifi_get_variable_name`, "inputTypes") = c('_p_mifi_cdm_reader', 'integer')
 class(`mifi_get_variable_name`) = c("SWIGFunction", class('mifi_get_variable_name'))
+
+# Start of mifi_get_unique_forecast_reference_time
+
+`mifi_get_unique_forecast_reference_time` = function(reader, units, .copy = FALSE)
+{
+  units = as(units, "character"); 
+  ;.Call('R_swig_mifi_get_unique_forecast_reference_time', reader, units, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`mifi_get_unique_forecast_reference_time`, 'returnType') = 'numeric'
+attr(`mifi_get_unique_forecast_reference_time`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', 'character')
+class(`mifi_get_unique_forecast_reference_time`) = c("SWIGFunction", class('mifi_get_unique_forecast_reference_time'))
 
 # Start of new_SliceBuilder
 

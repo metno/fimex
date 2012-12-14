@@ -37,12 +37,13 @@ fi
 CC=`"${R_HOME}/bin/R" CMD config CC`
 CPP=`"${R_HOME}/bin/R" CMD config CPP`
 CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
-CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
+CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS` $FIMEX_CPPFLAGS
 AC_PROG_CC
 AC_PROG_CPP
  
 dnl Check the headers can be found
 AC_LANG_PUSH(C++)
+CPPFLAGS=$FIMEX_CPPFLAGS
 AC_CHECK_HEADERS(fimex/CDMReader.h)
 AC_LANG_POP(C++)
 if test "${ac_cv_header_CDMReader_h}" = no; then

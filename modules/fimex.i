@@ -78,6 +78,13 @@ boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReade
     return r;
 }
 
+double mifi_get_unique_forecast_reference_time(boost::shared_ptr<MetNoFimex::CDMReader> reader, const char* units)
+{
+    mifi_cdm_reader r(reader);
+    return mifi_get_unique_forecast_reference_time(&r, units);
+}
+
+
 }  // namespace MetNoFimex
 
 %}
@@ -96,6 +103,7 @@ namespace std {
 
 size_t mifi_get_variable_number(mifi_cdm_reader* reader);
 const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
+double mifi_get_unique_forecast_reference_time(boost::shared_ptr<MetNoFimex::CDMReader> reader, const char* units);
 
 %include "fimex/SliceBuilder.h"
 
