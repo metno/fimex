@@ -1,3 +1,7 @@
+  * 2012-12-17 fimex-0.41
+    * R interface to fimex for reading fields
+    * log4cpp support
+    * auxiliary variable support in extract.selectVariables
   * 2012-11-27 fimex-0.40.1
     * read multiple grib-files
     * allow writing of latlon grib-files from north to south
