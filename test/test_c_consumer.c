@@ -85,7 +85,7 @@ int testFeltData(const char* feltFile, const char* configFile) {
         // read dataslice
         double *data = NULL;
         size_t size = 0;
-        if (mifi_get_double_dataslize(feltReader, "sea_surface_temperature", 0,
+        if (mifi_get_double_dataslice(feltReader, "sea_surface_temperature", 0,
                 &data, &size) != 0) {
             retVal++;
             fprintf(stderr, "error reading data\n");
