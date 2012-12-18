@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.41beta],[heiko.klein@met.no])
+AC_INIT([fimex],[0.42beta],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 
@@ -128,7 +128,7 @@ fi
 # this might not be required for any build, but as long
 # as grib_api does not provide a list over required libraries (e.g. pkgconfig, libtool)
 # I will just try that
-MIFI_USELIB([grib_api], [grib_api.h], [grib_set_string], [-ljasper -lpng])
+MIFI_USELIB([grib_api], [grib_api.h], [grib_set_string], [])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"])
 
 MIFI_USELIB([pq], [libpq-fe.h], [PQconnectdb])

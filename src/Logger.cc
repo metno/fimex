@@ -106,7 +106,10 @@ Logger::~Logger()
 Logger* Logger::getImpl() {
     if (pimpl_.get() == 0) {
         switch (logClass_) {
-        case LOG4CPP: pimpl_ = std::auto_ptr<Logger>(new Log4cppLogger(className_)); break;
+        case LOG4CPP:
+#ifdef HAVE_LOG4CPP
+            pimpl_ = std::auto_ptr<Logger>(new Log4cppLogger(className_)); break;
+#endif
         case LOG2STDERR:
         default: pimpl_ = std::auto_ptr<Logger>(new Log2Stderr(className_)); break;
         }
