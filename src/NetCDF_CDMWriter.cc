@@ -456,16 +456,16 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 
 
 void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
-    Units units;
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
     MutexType writerMutex;
 #ifdef _OPENMP
-#pragma omp parallel default(shared)
+#pragma omp parallel default(none) shared(writerMutex, logger, cdmVars, ncVarMap)
     {
 #pragma omp single
     {
 #endif
+    Units units;
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
         CDMVariable cdmVar = cdmVars.at(vi);
         std::string varName = cdmVar.getName();
@@ -491,7 +491,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     units.convert(oldUnit, newUnit, unitSlope, unitOffset);
                 }
             } catch (UnitException& e) {
-                std::cerr << "Warning: unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what() << std::endl;
+                LOG4FIMEX(logger, Logger::WARN, "unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what());
             } catch (CDMException& e) {
                 // units not defined, do nothing
             }
