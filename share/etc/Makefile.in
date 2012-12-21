@@ -281,6 +281,7 @@ config_DATA = \
 	felt2nc_eps_yr.xml\
 	felt2nc_frohavet.xml\
 	felt2nc_proff.xml\
+	felt2nc_snap.xml\
 	felt2nc_variables_ec_mad_0_25.xml\
 	felt2nc_variables_ec_mad_0_5.xml\
 	felt2nc_variables_ec_mwp_0_25.xml\

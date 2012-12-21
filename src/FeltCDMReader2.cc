@@ -625,6 +625,8 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
                        ((*it)->getLevelType() == 8)
                       ||
                        ((*it)->getLevelType() == 3)
+                      ||
+                       ((*it)->getLevelType() == 0)
                       )
                    ) {
                     // no vertical axis for surface parameters 2,1000

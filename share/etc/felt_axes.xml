@@ -90,6 +90,12 @@
     <attribute name="standard_name" value="latitude" type="string" />
     <attribute name="units" value="degree_north" type="string" />
 </spatial_axis>
+<!-- used by snap -->
+<vertical_axis id="dummy" name="dummy" felt_id="0" type="short">
+    <attribute name="description" value="dummy" type="string" />
+    <attribute name="positive" value="up" type="string" />
+    <attribute name="units" value="" type="string" />
+</vertical_axis>
 <vertical_axis id="pressure" name="pressure" felt_id="1" type="short">
     <attribute name="description" value="pressure" type="string" />
     <attribute name="long_name" value="pressure" type="string" />
