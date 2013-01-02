@@ -35,19 +35,19 @@ extern "C" {
 #include <boost/scoped_array.hpp>
 #include <numeric>
 #include <functional>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 #include "fimex/mifi_constants.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/DataTypeChanger.h"
-#include "NetCDF_Utils.h"
 #include "fimex/Units.h"
 #include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
-#include <libxml/tree.h>
-#include <libxml/xpath.h>
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
+#include "MutexLock.h" // also includes omp.h
 
 namespace MetNoFimex
 {
@@ -459,12 +459,14 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
     MutexType writerMutex;
+#ifndef __INTEL_COMPILER // openmp gives currently segfaults with intel compilers
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(writerMutex, logger, cdmVars, ncVarMap)
     {
 #pragma omp single
     {
 #endif
+#endif //__INTEL_COMPILER
     Units units;
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
         CDMVariable cdmVar = cdmVars.at(vi);
@@ -511,9 +513,11 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
         }
 
         if (!cdm.hasUnlimitedDim(cdmVar)) {
+#ifndef __INTEL_COMPILER
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi)
             {
+#endif
 #endif
             DataPtr data = cdmReader->getData(varName);
             try {
@@ -536,16 +540,20 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
                 }
             }
+#ifndef __INTEL_COMPILER
 #ifdef _OPENMP
             }
+#endif
 #endif
         } else {
             // iterate over each unlimited dim (usually time)
             const CDMDimension* unLimDim = cdm.getUnlimitedDim();
             for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+#ifndef __INTEL_COMPILER
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi,i)
                 {
+#endif
 #endif
                 DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), i);
                 try {
@@ -573,14 +581,18 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 
                 }
             }
+#ifndef __INTEL_COMPILER
 #ifdef _OPENMP
             }
 #endif
+#endif
         }
     }
+#ifndef __INTEL_COMPILER
 #ifdef _OPENMP
     } // single
     } // parallel
+#endif
 #endif
 }
 
