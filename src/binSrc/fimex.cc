@@ -883,7 +883,7 @@ int run(int argc, char* args[])
         return 0;
     }
 
-    defaultLogLevel(Logger::INFO);
+    defaultLogLevel(Logger::WARN);
     if (vm.count("log4cpp")) {
 #ifdef HAVE_LOG4CPP
         Logger::setClass(Logger::LOG4CPP);
