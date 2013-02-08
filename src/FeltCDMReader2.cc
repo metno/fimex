@@ -620,7 +620,12 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
                 if ((*it)->getLevelPairs().size() == 1
                     &&
                       (((*it)->getLevelType() == 2 &&
-                        (*it)->getLevelPairs().at(0).first == 1000)
+                        (   ((*it)->getLevelPairs().at(0).first == 1000)
+                         || ((*it)->getLevelPairs().at(0).first == 850)
+                         || ((*it)->getLevelPairs().at(0).first == 500)
+                         || ((*it)->getLevelPairs().at(0).first == 300)
+                        )
+                       )
                       ||
                        ((*it)->getLevelType() == 8)
                       ||
@@ -629,7 +634,7 @@ void FeltCDMReader2::initAddVariablesFromXML(const XMLDoc& doc, const string& pr
                        ((*it)->getLevelType() == 0)
                       )
                    ) {
-                    // no vertical axis for surface parameters 2,1000
+                    // no vertical axis for surface parameters 2,1000, or clouds (500, 850, 300)
                     // no vertical axis for sea-surface parameter 8
                     // level 3 used as sea-surface for some wave-models
                 } else {
