@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdm_felt_config xmlns:xi="http://www.w3.org/2001/XInclude">
+<!-- optional processing options for felt-files -->
+<processOptions>
+    <!-- allowed deviation of gridParameter (6 values, see felt.doc) to still assumed to be the same grid, default: no deviation allowed -->
+    <!--  <option name="gridParameterDelta" value="0 0 0 0 0 0"/> -->
+</processOptions>
+<global_attributes>
+    <attribute name="Conventions" value="CF-1.6" type="string" />
+    <attribute name="institution" value="Norwegian Meteorological Institute, met.no" type="string" />
+    <attribute name="title" value="unknown" type="string" />
+    <!-- <attribute name="history" value="unknown" type="string" /> -->
+    <attribute name="comment" value="none" type="string" />
+</global_attributes>
+<xi:include href="damocles_felt_axes.xml" />
+<variables>
+<parameter id="402" name="significant_wave_heigh_over_2m" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="units" value="%" type="string" />
+</parameter>
+<parameter id="403" name="significant_wave_heigh_over_3m" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="units" value="%" type="string" />
+</parameter>
+<parameter id="404" name="significant_wave_heigh_over_4m" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="units" value="%" type="string" />
+</parameter>
+<parameter id="405" name="significant_wave_heigh_over_5m" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="units" value="%" type="string" />
+</parameter>
+<parameter id="406" name="significant_wave_heigh_over_6m" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="units" value="%" type="string" />
+</parameter>
+<!--  I dont use components in model-layer 59/60 (see hirlam12ml) -->
+<parameter id="14,2,1000" name="lwe_precipitation_rate" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="precipitation_rate" type="string" />
+    <attribute name="standard_name" value="lwe_precipitation_rate" type="string" />
+    <attribute name="units" value="m/s" type="string" />
+</parameter>
+<parameter id="17,2,1000" name="precipitation_amount" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="long_name" value="precipitation_amount" type="string" />
+	<attribute name="standard_name" value="precipitation_amount" type="string" />
+	<attribute name="units" value="kg/m2" type="string" />
+</parameter>
+<parameter id="25,2,1000" name="cloud_area_fraction">
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="cloud_area_fraction" type="string" />
+	<attribute name="standard_name" value="cloud_area_fraction" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="31,2,1000" name="air_temperature" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="cell_methods" value="time: point height: 2m" type="string" />
+	<attribute name="long_name" value="air_temperature_2m" type="string" />
+	<attribute name="standard_name" value="air_temperature" type="string" />
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="32,2,1000" name="relative_humidity">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="cell_methods" value="time: point height: 2m" type="string" />
+	<attribute name="long_name" value="relative_humidity" type="string" />
+	<attribute name="standard_name" value="relative_humidity" type="string" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="33,2,1000" name="x_wind" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
+	<attribute name="long_name" value="x_wind" type="string" />
+	<attribute name="standard_name" value="x_wind" type="string" />
+	<attribute name="height" value="10m" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+	<spatial_vector direction="x,longitude" counterpart="y_wind" />
+</parameter>
+<parameter id="34,2,1000" name="y_wind" type="float">
+	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+	<attribute name="cell_methods" value="time: point height: 10m" type="string" />
+	<attribute name="long_name" value="y_wind" type="string" />
+	<attribute name="standard_name" value="y_wind" type="string" />
+	<attribute name="height" value="10m" type="string" />
+	<attribute name="units" value="m s-1" type="string" />
+	<spatial_vector direction="y,latitude" counterpart="x_wind" />
+</parameter>
+<parameter id="39" name="cloud_area_fraction_in_atmosphere_layer">
+    <attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	<attribute name="standard_name" value="cloud_area_fraction_in_atmosphere_layer" type="string" />
+	<attribute name="scale_factor" value="0.01" type="float" />
+	<attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="58,2,1000" name="sea_level_pressure">
+	<attribute name="scale_factor" value="100." type="float" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="cell_methods" value="time: point" type="string" />
+	<attribute name="long_name" value="air_pressure_at_sea_level" type="string" />
+	<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+	<attribute name="units" value="Pa" type="string" />
+</parameter>
+<parameter id="131,2,1000" name="surface_temperature_where_land" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="long_name" value="surface_temperature_where_land" type="string" />
+	<attribute name="standard_name" value="surface_temperature_where_land" type="string" />
+	<attribute name="metno_info" value="height: 2m" type="string"/>
+	<attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="200,3,0" name="significant_wave_height" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wave_significant_height" type="string" />
+    <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string" />
+    <attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="1047,2,1000" name="visibility" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="cell_methods" value="height: 2m" type="string" />
+    <attribute name="long_name" value="x_wind" type="string" />
+    <attribute name="standard_name" value="visibility_in_air" type="string" />
+    <attribute name="height" value="2m" type="string" />
+    <attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="1103,2,1000" name="thunder_index" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="thunder_index" type="string" />
+    <attribute name="standard_name" value="thunderstorm_probability" type="string" />
+    <attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="1105,2,1000" name="air_temp2m_auto_corr" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="cell_methods" value="time: point height: 2m" type="string" />
+    <attribute name="long_name" value="air_temp2m_autocorr" type="string" />
+    <attribute name="standard_name" value="air_temperature" type="string" />
+    <attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="1106,2,1000" name="vessel_icing" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="vessel_icing" type="string" />
+    <attribute name="metno_name" value="vessel_icing" type="string" />
+    <attribute name="units" value="1" type="string" />
+</parameter>
+<!-- static fields -->
+<parameter id="101,2,1000" name="altitude">
+    <attribute name="long_name" value="altitude" type="string" />
+    <attribute name="standard_name" value="altitude" type="string" />
+    <attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="103,2,1000" name="sea_surface_temperature">
+    <attribute name="long_name" value="sea_surface_temperature" type="string" />
+    <attribute name="standard_name" value="sea_surface_temperature" type="string" />
+    <attribute name="scale_factor" value="100" type="float" />
+    <attribute name="units" value="K" type="string" />
+</parameter>
+<parameter id="181,2,1000" name="land_area_fraction">
+    <attribute name="long_name" value="land_area_fraction" type="string" />
+    <attribute name="metno_name" value="land_area_fraction" type="string" />
+    <attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="191,2,1000" name="sea_ice_area_fraction">
+    <attribute name="long_name" value="sea_ice_area_fraction" type="string" />
+    <attribute name="standard_name" value="sea_ice_area_fraction" type="string" />
+    <attribute name="units" value="1" type="string" />
+</parameter>
+<parameter id="351,8,0" name="bottom_topography">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="valid_min" value="0" type="short" />
+    <attribute name="long_name" value="sea_floor_depth_below_geoid" type="string" />
+    <attribute name="standard_name" value="sea_floor_depth_below_geoid" type="string" />
+    <attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="1101,2,1000" name="altitude_unsmoothed" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="altitude_unsmoothed" type="string" />
+    <attribute name="standard_name" value="altitude" type="string" />
+    <attribute name="units" value="m" type="string" />
+</parameter>
+<parameter id="1181" name="land_area_fraction_unsmoothed" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="scale_factor" value="0.01" type="float" />
+    <attribute name="long_name" value="land_area_fraction_unsmoothed" type="string" />
+    <attribute name="standard_name" value="land_area_fraction" type="string" />
+    <attribute name="units" value="1" type="string" />
+</parameter>
+</variables>
+</cdm_felt_config>
