@@ -1441,8 +1441,19 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         // and you will definitely save on debugging time
         CSGridDefinition def;
         def.key = csi->first;
-        def.xAxisData = getData(csi->second->getGeoXAxis()->getName());
-        def.yAxisData = getData(csi->second->getGeoYAxis()->getName());
+        try {
+            if (csi->second->getProjection()->isDegree()) {
+                def.xAxisData = getScaledDataInUnit(csi->second->getGeoXAxis()->getName(), "degree");
+                def.yAxisData = getScaledDataInUnit(csi->second->getGeoYAxis()->getName(), "degree");
+            } else {
+                def.xAxisData = getScaledDataInUnit(csi->second->getGeoXAxis()->getName(), "m");
+                def.yAxisData = getScaledDataInUnit(csi->second->getGeoYAxis()->getName(), "m");
+            }
+        } catch (CDMException& ex) {
+            LOG4FIMEX(logger, Logger::WARN, "couldn't retrieve axes in unit (degree/m), trying as is for " << csi->second->getGeoXAxis() << ":" << ex.what());
+            def.xAxisData = getData(csi->second->getGeoXAxis()->getName());
+            def.yAxisData = getData(csi->second->getGeoYAxis()->getName());
+        }
 
         orgGrids.insert(std::make_pair<string, CSGridDefinition>(def.key, def));
     }
