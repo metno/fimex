@@ -38,12 +38,12 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex.NetCDF_CDMReader");
 
-NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename)
+NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writable)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
 {
     ScopedCritical lock(ncFile->mutex);
     ncFile->filename = filename;
-    ncCheck(nc_open(ncFile->filename.c_str(), NC_NOWRITE, &ncFile->ncId));
+    ncCheck(nc_open(ncFile->filename.c_str(), writable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId));
     ncFile->isOpen = true;
 
     // investigate the dimensions
@@ -172,6 +172,64 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBu
 
     LOG4FIMEX(logger, Logger::DEBUG, "ncGetValues SB for " << varName << ": (" << join(start.begin(), start.end()) <<") size (" << join(count.begin(), count.end()) << ")");
     return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
+}
+
+void NetCDF_CDMReader::putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data)
+{
+    CDMVariable& var = cdm_->getVariable(varName);
+    if (var.hasData()) {
+        var.setData(DataPtr());
+    }
+
+    ScopedCritical lock(ncFile->mutex);
+    int varid;
+    ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
+    nc_type dtype;
+    ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
+    int dimLen;
+    ncCheck(nc_inq_varndims(ncFile->ncId, varid, &dimLen));
+    int dimIds[dimLen];
+    ncCheck(nc_inq_vardimid(ncFile->ncId, varid, &dimIds[0]));
+    size_t count[dimLen];
+    size_t start[dimLen];
+    for (int i = 0; i < dimLen; ++i) {
+        start[i] = 0;
+        ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
+    }
+    if (cdm_->hasUnlimitedDim(var)) {
+        // unlimited dim always at 0
+        start[0] = unLimDimPos;
+        count[0] = 1;
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "ncPutValues for " << varName << ": (" << join(start, start + dimLen) <<") size (" << join(count, count+dimLen) << ")");
+    return ncPutValues(data, ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), start, count);
+}
+
+void NetCDF_CDMReader::putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data)
+{
+    CDMVariable& var = cdm_->getVariable(varName);
+    if (var.hasData()) {
+        var.setData(DataPtr());
+    }
+
+    ScopedCritical lock(ncFile->mutex);
+    int varid;
+    ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
+    nc_type dtype;
+    ncCheck(nc_inq_vartype(ncFile->ncId, varid, &dtype));
+    int dimLen;
+    ncCheck(nc_inq_varndims(ncFile->ncId, varid, &dimLen));
+
+    // netcdf/c++ uses opposite dimension numbering => rbegin/rend
+    const vector<size_t> start(sb.getDimensionStartPositions().rbegin(), sb.getDimensionStartPositions().rend());
+    assert(start.size() == static_cast<size_t>(dimLen));
+
+    // netcdf/c++ uses opposite dimension numbering => rbegin/rend
+    const vector<size_t> count(sb.getDimensionSizes().rbegin(), sb.getDimensionSizes().rend());
+    assert(count.size() == static_cast<size_t>(dimLen));
+
+    LOG4FIMEX(logger, Logger::DEBUG, "ncPutValues SB for " << varName << ": (" << join(start.begin(), start.end()) <<") size (" << join(count.begin(), count.end()) << ")");
+    return ncPutValues(data, ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
 }
 
 void NetCDF_CDMReader::addAttribute(const std::string& varName, int varid, const string& attName)

@@ -1,4 +1,4 @@
-/*
+/* -*- c++ -*-
  * Fimex, CDMReaderWriter.h
  *
  * (C) Copyright 2013, met.no
@@ -27,21 +27,23 @@
 #ifndef CDMREADERWRITER_H_
 #define CDMREADERWRITER_H_
 
+#include "fimex/CDMReader.h"
+
 namespace MetNoFimex
 {
 /**
  * The CDMReaderWriter is an interface allowing to write data to an opened CDMReader.
  */
-class CDMReaderWriter : CDMReader
+class CDMReaderWriter : public MetNoFimex::CDMReader
 {
 public:
-    CDMReaderWriter();
+    CDMReaderWriter() {}
     virtual ~CDMReaderWriter() {}
 
     /**
      * @brief data-writing function
      *
-     * This methods needs to be implemented by the CDMBackWriter. It will write back the data
+     * This methods needs to be implemented by the CDMReaderWriter. It will write back the data
      * to a variable at unLimPos, without any changes (except eventually required change of datatypes).
      *
      * This function will write the whole data for a dataset without unlimited dimension if
@@ -64,7 +66,7 @@ public:
      */
     virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data) = 0;
 
-} /* class */
+}; /* class */
 
 } /* MetNoFimex */
 #endif /* CDMREADERWRITER_H_ */

@@ -36,7 +36,7 @@ host_triplet = @host@
 @HAVE_FELT_TRUE@am__append_1 = testQualityExtractor
 @HAVE_NETCDF_TRUE@am__append_2 = ${NETCDF_MI_TESTS} testCoordSys \
 @HAVE_NETCDF_TRUE@              testCoordinateSystemSliceBuilder  testNcmlReader \
-@HAVE_NETCDF_TRUE@              testProcessor testMerger
+@HAVE_NETCDF_TRUE@              testProcessor testMerger testNetCDFReaderWriter
 
 @HAVE_NETCDF_TRUE@am__append_3 = ${NETCDF_MI_SH_TESTS} testCharNc.sh \
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh \
@@ -97,7 +97,8 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_NETCDF_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2) testCoordSys$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testCoordinateSystemSliceBuilder$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testNcmlReader$(EXEEXT) \
-@HAVE_NETCDF_TRUE@	testProcessor$(EXEEXT) testMerger$(EXEEXT)
+@HAVE_NETCDF_TRUE@	testProcessor$(EXEEXT) testMerger$(EXEEXT) \
+@HAVE_NETCDF_TRUE@	testNetCDFReaderWriter$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_4 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = testGribReader$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_4) $(am__EXEEXT_5)
@@ -197,6 +198,11 @@ am_testNcmlReader_OBJECTS = testNcmlReader.$(OBJEXT)
 testNcmlReader_OBJECTS = $(am_testNcmlReader_OBJECTS)
 testNcmlReader_LDADD = $(LDADD)
 testNcmlReader_DEPENDENCIES = ../src/felt/libfelt.la \
+	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_testNetCDFReaderWriter_OBJECTS = testNetCDFReaderWriter.$(OBJEXT)
+testNetCDFReaderWriter_OBJECTS = $(am_testNetCDFReaderWriter_OBJECTS)
+testNetCDFReaderWriter_LDADD = $(LDADD)
+testNetCDFReaderWriter_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
@@ -316,13 +322,14 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
 	$(testMerger_SOURCES) $(testMetGmReader_SOURCES) \
 	$(testMetGmWriter_SOURCES) $(testNcmlReader_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testProcessor_SOURCES) \
-	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
-	$(testSliceBuilder_SOURCES) $(testSpatialAxisSpec_SOURCES) \
-	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
-	$(testUnits_SOURCES) $(testUtils_SOURCES) \
-	$(testVerticalCoordinates_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
+	$(testNetCDFReaderWriter_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testProcessor_SOURCES) $(testProjections_SOURCES) \
+	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
+	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
+	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
+	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
+	$(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
@@ -332,13 +339,14 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
 	$(testMerger_SOURCES) $(testMetGmReader_SOURCES) \
 	$(testMetGmWriter_SOURCES) $(testNcmlReader_SOURCES) \
-	$(testNetcdfWriter_SOURCES) $(testProcessor_SOURCES) \
-	$(testProjections_SOURCES) $(testQualityExtractor_SOURCES) \
-	$(testSliceBuilder_SOURCES) $(testSpatialAxisSpec_SOURCES) \
-	$(testTimeInterpolator_SOURCES) $(testTimeSpec_SOURCES) \
-	$(testUnits_SOURCES) $(testUtils_SOURCES) \
-	$(testVerticalCoordinates_SOURCES) $(testXMLDoc_SOURCES) \
-	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
+	$(testNetCDFReaderWriter_SOURCES) $(testNetcdfWriter_SOURCES) \
+	$(testProcessor_SOURCES) $(testProjections_SOURCES) \
+	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
+	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
+	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
+	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
+	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
+	$(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -575,6 +583,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testNetCDFReaderWriter_SOURCES = testNetCDFReaderWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
@@ -698,6 +707,9 @@ testMetGmWriter$(EXEEXT): $(testMetGmWriter_OBJECTS) $(testMetGmWriter_DEPENDENC
 testNcmlReader$(EXEEXT): $(testNcmlReader_OBJECTS) $(testNcmlReader_DEPENDENCIES) $(EXTRA_testNcmlReader_DEPENDENCIES) 
 	@rm -f testNcmlReader$(EXEEXT)
 	$(CXXLINK) $(testNcmlReader_OBJECTS) $(testNcmlReader_LDADD) $(LIBS)
+testNetCDFReaderWriter$(EXEEXT): $(testNetCDFReaderWriter_OBJECTS) $(testNetCDFReaderWriter_DEPENDENCIES) $(EXTRA_testNetCDFReaderWriter_DEPENDENCIES) 
+	@rm -f testNetCDFReaderWriter$(EXEEXT)
+	$(CXXLINK) $(testNetCDFReaderWriter_OBJECTS) $(testNetCDFReaderWriter_LDADD) $(LIBS)
 testNetcdfWriter$(EXEEXT): $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_DEPENDENCIES) $(EXTRA_testNetcdfWriter_DEPENDENCIES) 
 	@rm -f testNetcdfWriter$(EXEEXT)
 	$(CXXLINK) $(testNetcdfWriter_OBJECTS) $(testNetcdfWriter_LDADD) $(LIBS)
@@ -763,6 +775,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testMetGmReader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testMetGmWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNcmlReader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetCDFReaderWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testNetcdfWriter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testProcessor.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testProjections.Po@am__quote@

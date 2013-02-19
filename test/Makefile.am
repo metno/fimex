@@ -53,7 +53,7 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys \
               testCoordinateSystemSliceBuilder  testNcmlReader \
-              testProcessor testMerger
+              testProcessor testMerger testNetCDFReaderWriter
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
@@ -89,6 +89,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testNetCDFReaderWriter_SOURCES = testNetCDFReaderWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc

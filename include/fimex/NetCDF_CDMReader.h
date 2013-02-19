@@ -35,7 +35,7 @@
     CDMFileReaderFactory::create(MIFI_FILETYPE_*,file,config)
 #endif
 
-#include "fimex/CDMReader.h"
+#include "fimex/CDMReaderWriter.h"
 
 namespace MetNoFimex
 {
@@ -47,14 +47,16 @@ class Nc;
  */
 
 
-class NetCDF_CDMReader : public MetNoFimex::CDMReader
+class NetCDF_CDMReader : public MetNoFimex::CDMReaderWriter
 {
     const std::auto_ptr<Nc> ncFile;
 public:
-    NetCDF_CDMReader(const std::string& fileName);
+    NetCDF_CDMReader(const std::string& fileName, bool writable = false);
     virtual ~NetCDF_CDMReader();
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    virtual void putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data);
+    virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data);
 private:
     void addAttribute(const std::string& varName, int varid, const std::string& attName);
 };
