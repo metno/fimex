@@ -249,7 +249,7 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, cons
     string type = getType(io, vm);
     boost::shared_ptr<CDMReader> returnPtr;
     if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2") {
-        string config(DATADIR);
+        string config(PKGDATADIR);
         config += "/flt2nc_variables.xml";
         if (vm.count(io+".config")) {
             config = vm[io+".config"].as<string>();

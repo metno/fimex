@@ -2,7 +2,7 @@ SUBDIRS = .
 
 AM_CFLAGS = 
 AM_CXXFLAGS = $(BOOST_CPPFLAGS) @LOG4CPP_CFLAGS@
-AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DDATADIR="\"$(datadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS}  @MIFI_GRIB_API_CPPFLAGS@ ${XML_CPPFLAGS}
+AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DPKGDATADIR="\"$(pkgdatadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS}  @MIFI_GRIB_API_CPPFLAGS@ ${XML_CPPFLAGS}
 
 bin_PROGRAMS = fimex
 fimex_SOURCES = fimex.cc
