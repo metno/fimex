@@ -144,7 +144,8 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #endif
 #ifdef HAVE_NETCDF_H
     case MIFI_FILETYPE_NETCDF: {
-        boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+        const bool writeable = (std::find(args.begin(), args.end(), "writeable") != args.end());
+        boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName, writeable));
         if (!configXML.isEmpty()) {
             reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, configXML));
         }
