@@ -37,8 +37,8 @@ namespace MetNoFimex
 class CDMReaderWriter : public MetNoFimex::CDMReader
 {
 public:
-    CDMReaderWriter() {}
-    virtual ~CDMReaderWriter() {}
+    CDMReaderWriter();
+    virtual ~CDMReaderWriter();
 
     /**
      * @brief data-writing function
@@ -66,6 +66,14 @@ public:
      */
     virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data) = 0;
 
+    virtual void putScaledDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data);
+    virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos, const DataPtr data);
+    virtual void putScaledDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data);
+    virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb, const DataPtr data);
+
+private:
+    DataPtr unscaleDataOf(const std::string& varName, DataPtr data, double unitScale=1, double unitOffset=0);
+    DataPtr unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& newUnit);
 }; /* class */
 
 } /* MetNoFimex */

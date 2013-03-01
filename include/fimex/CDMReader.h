@@ -218,10 +218,12 @@ protected:
      * @param unLimDimPos (optional) the unlimited position
      */
     virtual DataPtr getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos = 0);
+
+    void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset);
+
 private:
     DataPtr scaleDataOf(const std::string& varName, DataPtr data, double unitScale = 1., double unitOffset = 0.);
     DataPtr scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& unit);
-    void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset);
 };
 
 }

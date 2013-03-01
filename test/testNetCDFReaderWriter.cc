@@ -68,29 +68,87 @@ BOOST_AUTO_TEST_CASE( test_update )
     {
         boost::shared_ptr<CDMReaderWriter> rw = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
         BOOST_CHECK(rw.get() != 0);
-        
+
         read1 = rw->getDataSlice("ga_2t_1", 0);
         BOOST_CHECK(read1.get() != 0);
-        
+
         DataPtr write1 = read1->clone();
         const size_t size1 = read1->size();
         for(size_t i=0; i<size1; ++i)
             write1->setValue(i, diff + scale * read1->getDouble(i));
-        
+
         rw->putDataSlice("ga_2t_1", 0, write1);
     }
     {
         boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
         BOOST_CHECK(r.get() != 0);
-        
+
         read2 = r->getDataSlice("ga_2t_1", 0);
         BOOST_CHECK(read2.get() != 0);
-        
+
         const size_t size2 = read2->size();
         BOOST_CHECK(size2 == read1->size());
         for(size_t i=0; i<size2; ++i) {
             const double actual = read2->getDouble(i);
             const double expect = diff + scale*read1->getDouble(i);
+            BOOST_CHECK(abs(actual - expect) < 1e-3);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE( test_scaled )
+{
+    if (not fimexHas(MIFI_FILETYPE_NETCDF)) {
+        // no netcdf support, skip test
+        return;
+    }
+
+    const string fileName("test_netcdfrw.nc");
+    {
+        const string topSrcDir(TOP_SRCDIR);
+        const string origFileName(topSrcDir+"/test/test_merge_inner.nc");
+        ifstream orig(origFileName.c_str());
+        if (not orig) {
+            // no testfile, skip test
+            return;
+        }
+        ofstream copy(fileName.c_str());
+        copy << orig.rdbuf();
+        BOOST_CHECK(copy);
+    }
+
+    const double addF = 1.0, addK = addF * 5.0/9.0;
+    DataPtr read1, read2;
+    {
+        boost::shared_ptr<CDMReaderWriter> rw = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(fileName, true));
+        BOOST_CHECK(rw.get() != 0);
+
+        read1 = rw->getScaledDataSlice("ga_2t_1", 0);
+        BOOST_CHECK(read1.get() != 0);
+
+        DataPtr write1 = rw->getScaledDataSliceInUnit("ga_2t_1", "Fahrenheit", 0);
+        BOOST_CHECK(write1.get() != 0);
+
+        const size_t size1 = write1->size();
+        for(size_t i=0; i<size1; ++i) {
+            const double newF = write1->getDouble(i) + addF;
+            write1->setValue(i, newF);
+        }
+
+        rw->putScaledDataSliceInUnit("ga_2t_1", "Fahrenheit", 0, write1);
+    }
+    {
+        boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
+        BOOST_CHECK(r.get() != 0);
+
+        read2 = r->getScaledDataSlice("ga_2t_1", 0);
+        BOOST_CHECK(read2.get() != 0);
+
+        const size_t size2 = read2->size();
+        BOOST_CHECK(size2 == read1->size());
+        for(size_t i=0; i<size2; ++i) {
+            const double actual = read2->getDouble(i);
+            const double expect = addK + read1->getDouble(i);
             BOOST_CHECK(abs(actual - expect) < 1e-3);
         }
     }

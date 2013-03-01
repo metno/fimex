@@ -192,7 +192,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMMerger.cc CDMMerger_LinearSmoothing.cc \
 	CDMPressureConversions.cc CDMProcessor.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
-	CDMTimeInterpolator.cc CDMVariable.cc \
+	CDMReaderWriter.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
@@ -314,7 +314,7 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMMerger.lo CDMMerger_LinearSmoothing.lo \
 	CDMPressureConversions.lo CDMProcessor.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
-	CDMTimeInterpolator.lo CDMVariable.lo \
+	CDMReaderWriter.lo CDMTimeInterpolator.lo CDMVariable.lo \
 	CDMVerticalInterpolator.lo CDM_XMLConfigHelper.lo \
 	CoordinateSystemSliceBuilder.lo CoordinateSystem.lo \
 	CoordinateAxis.lo CF1_xCoordSysBuilder.lo \
@@ -587,11 +587,12 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMInterpolator.cc CDMNamedEntity.cc CDMMerger.cc \
 	CDMMerger_LinearSmoothing.cc CDMPressureConversions.cc \
 	CDMProcessor.cc CDMQualityExtractor.cc CDMReader.cc \
-	CDMReaderUtils.cc CDMTimeInterpolator.cc CDMVariable.cc \
-	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
-	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
-	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
-	coordSys/CoordSysBuilder.h coordSys/CF1_xCoordSysBuilder.h \
+	CDMReaderUtils.cc CDMReaderWriter.cc CDMTimeInterpolator.cc \
+	CDMVariable.cc CDMVerticalInterpolator.cc \
+	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
+	CoordinateSystemSliceBuilder.cc coordSys/CoordinateSystem.cc \
+	coordSys/CoordinateAxis.cc coordSys/CoordSysBuilder.h \
+	coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
 	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
@@ -712,6 +713,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMQualityExtractor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReaderUtils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMReaderWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMTimeInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVariable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVerticalInterpolator.Plo@am__quote@
