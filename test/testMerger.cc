@@ -50,10 +50,9 @@ BOOST_AUTO_TEST_CASE( test_merger )
 {
     string topSrcDir(TOP_SRCDIR);
     string fileNameInner(topSrcDir+"/test/test_merge_inner.nc"), fileNameOuter(topSrcDir+"/test/test_merge_outer.nc");
-    if( not ifstream(fileNameInner.c_str()) or not ifstream(fileNameOuter.c_str()) ) {
-        // no testfile, skip test
-        return;
-    }
+    BOOST_CHECK(ifstream(fileNameInner.c_str()));
+    BOOST_CHECK(ifstream(fileNameOuter.c_str()));
+
     boost::shared_ptr<CDMReader> readerI = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameInner),
         readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
 

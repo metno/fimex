@@ -54,10 +54,7 @@ BOOST_AUTO_TEST_CASE( test_update )
         const string topSrcDir(TOP_SRCDIR);
         const string origFileName(topSrcDir+"/test/test_merge_inner.nc");
         ifstream orig(origFileName.c_str());
-        if (not orig) {
-            // no testfile, skip test
-            return;
-        }
+        BOOST_CHECK(orig);
         ofstream copy(fileName.c_str());
         copy << orig.rdbuf();
         BOOST_CHECK(copy);
@@ -108,10 +105,7 @@ BOOST_AUTO_TEST_CASE( test_scaled )
         const string topSrcDir(TOP_SRCDIR);
         const string origFileName(topSrcDir+"/test/test_merge_inner.nc");
         ifstream orig(origFileName.c_str());
-        if (not orig) {
-            // no testfile, skip test
-            return;
-        }
+        BOOST_CHECK(orig);
         ofstream copy(fileName.c_str());
         copy << orig.rdbuf();
         BOOST_CHECK(copy);
