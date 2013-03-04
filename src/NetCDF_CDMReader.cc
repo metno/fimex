@@ -38,12 +38,12 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex.NetCDF_CDMReader");
 
-NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writable)
+NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
 {
     ScopedCritical lock(ncFile->mutex);
     ncFile->filename = filename;
-    ncCheck(nc_open(ncFile->filename.c_str(), writable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId));
+    ncCheck(nc_open(ncFile->filename.c_str(), writeable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId));
     ncFile->isOpen = true;
 
     // investigate the dimensions

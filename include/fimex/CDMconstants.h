@@ -24,7 +24,8 @@
 #define MIFI_WGS84_LATLON_PROJ4 "+proj=latlong +datum=WGS84 +towgs84=0,0,0 +no_defs"
 
 /**
- * The MIFI_FILETYPE_* define the available input and output file-formats
+ * The MIFI_FILETYPE_* define the available input and output file-formats.
+ * Maximum 1023.
  */
 /* when changing, remember to update CDMconstants.cc#getFileTypeNames,
  * make sure that the maximum number is <= size of filetypes */
@@ -35,6 +36,12 @@
 #define MIFI_FILETYPE_GRIB   3
 #define MIFI_FILETYPE_WDB    4
 #define MIFI_FILETYPE_METGM  5
+
+/**
+ * MIFI_FILETYPE_RW is a flag to specify that files should be opened in read-write mode.
+ * Example: MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW
+ */
+#define MIFI_FILETYPE_RW 1024
 
 /**
  * default fill values taken from netcdf.h
