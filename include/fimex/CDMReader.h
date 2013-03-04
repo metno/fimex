@@ -140,27 +140,27 @@ public:
     /**
      * @brief read and scale a dataslice
      *
-     * This functions uses getDataSlice internally. It tries to read
+     * This function uses getDataSlice internally. It tries to read
      * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
      * to the read data. Output-datatype will be double, output _FillValue
      * will be MIFI_UNDEFINED_D
      *
      * @param varName name of the variable to read
-     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) a slice of this position is returned
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
     virtual DataPtr getScaledDataSlice(const std::string& varName, size_t unLimDimPos);
     /**
      * @brief read and scale a dataslice to a known unit
      *
-     * This functions uses getDataSlice internally. It tries to read
+     * This function uses getDataSlice internally. It tries to read
      * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
      * to the read data. Output-datatype will be double, output _FillValue
      * will be MIFI_UNDEFINED_D. The data will be converted to match unit.
      *
      * @param varName name of the variable to read
      * @param unit unit-string
-     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) an slice of this position is returned
+     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) a slice of this position is returned
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      */
     virtual DataPtr getScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos);
@@ -186,7 +186,7 @@ public:
     /**
      * @brief read and scale the complete data
      *
-     * This functions uses getData internally. It tries to read
+     * This function uses getData internally. It tries to read
      * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
      * to the read data. Output-datatype will be double, output _FillValue
      * will be MIFI_UNDEFINED_D.
@@ -198,7 +198,7 @@ public:
     /**
      * @brief read and scale the complete data to a set unit
      *
-     * This functions uses getData internally. It tries to read
+     * This function uses getData internally. It tries to read
      * "scale_factor" "add_offset" and "_FillValue" and apply the scaling
      * to the read data. Output-datatype will be double, output _FillValue
      * will be MIFI_UNDEFINED_D. The data will be converted to match unit.

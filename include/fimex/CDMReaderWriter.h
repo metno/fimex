@@ -66,9 +66,51 @@ public:
      */
     virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data) = 0;
 
+    /**
+     * @brief unscale and write a dataslice
+     *
+     * This un-scales (back to the in-file scaling) and writes a data slice; the inverse of getScaledDataSlice.
+     *
+     * @param varName name of the variable to write
+     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) a slice of this position is written
+     * @param data the data slice to write
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
+     * @see getScaledDataSlice(varName, unLimDimPos)
+     */
     virtual void putScaledDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data);
+    /**
+     * @brief unscale and write a dataslice from a known unit
+     *
+     * This un-scales (back to the in-file scaling and unit) and
+     * writes a data slice; the inverse of getScaledDataSliceInUnit.
+     * The data must be in unit 'unit'.
+     *
+     * @param varName name of the variable to read
+     * @param unit unit-string, the unit of the data passed in 'data'
+     * @param unLimDimPos (optional) if the variable contains a unlimited dimension (max one allowed) a slice of this position is written
+     * @param data the data slice to write, must be in unit 'unit'
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
+     * @see getScaledDataSliceInUnit(varName, unit, unLimDimPos)
+     */
     virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& unit, size_t unLimDimPos, const DataPtr data);
+    /**
+     * @brief unscale and write a dataslice
+     * @param varName name of the variable to read
+     * @param sb SliceBuilder to restrict the data
+     * @param data the data slice to write
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
+     * @see getScaledDataSlice(varName, sb)
+     */
     virtual void putScaledDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data);
+    /**
+     * @brief unscale and write a dataslice from a known unit
+     * @param varName name of the variable to read
+     * @param unit unit-string, the unit of the data passed in 'data'
+     * @param sb SliceBuilder to restrict the data
+     * @param data the data slice to write, must be in unit 'unit'
+     * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
+     * @see getScaledDataSliceInUnit(varName, unit, unLimDimPos)
+     */
     virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb, const DataPtr data);
 
 private:
