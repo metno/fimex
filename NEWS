@@ -1,4 +1,10 @@
-  * 2012-02-08 fimex-0.41.1
+  * 2013-03-04 fimex-0.42
+    * add API for CDMReaderWriter
+    * implement read-writing to netcdf-files
+    * finding example-configuration directory for xml-files as first-guess
+  * 2013-02-14 fimex-0.41.2
+    * fix for interpolation to values, if axes in km instead of m
+  * 2013-02-08 fimex-0.41.1
     * default log-level changed back to WARN
     * remove sigma-levels for clouds and dummy levels in felt-files
     * remove some openmp-flags for intel-compilers (segfault)
