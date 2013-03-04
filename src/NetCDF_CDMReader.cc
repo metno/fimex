@@ -174,6 +174,12 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBu
     return ncGetValues(ncFile->ncId, varid, dtype, static_cast<size_t>(dimLen), &start[0], &count[0]);
 }
 
+void NetCDF_CDMReader::sync()
+{
+    ScopedCritical lock(ncFile->mutex);
+    ncCheck(nc_sync(ncFile->ncId));
+}
+
 void NetCDF_CDMReader::putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data)
 {
     CDMVariable& var = cdm_->getVariable(varName);

@@ -55,6 +55,7 @@ public:
     virtual ~NetCDF_CDMReader();
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
+    virtual void sync();
     virtual void putDataSlice(const std::string& varName, size_t unLimDimPos, const DataPtr data);
     virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data);
 private:

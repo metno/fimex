@@ -40,6 +40,12 @@ public:
     CDMReaderWriter();
     virtual ~CDMReaderWriter();
 
+
+    /**
+     * @brief flush data to disc
+     */;
+    virtual void sync() = 0;
+
     /**
      * @brief data-writing function
      *
