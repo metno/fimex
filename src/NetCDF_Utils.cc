@@ -24,6 +24,7 @@
 #include "NetCDF_Utils.h"
 #include "fimex/Data.h"
 #include "fimex/CDMException.h"
+#include "fimex/Logger.h"
 #include <boost/scoped_array.hpp>
 #include <functional>
 #include <numeric>
@@ -38,6 +39,8 @@ extern "C" {
 namespace MetNoFimex
 {
 
+static LoggerPtr logger = getLogger("fimex.NetCDF_Utils");
+
 void ncCheck(int status) {
     if (status != NC_NOERR)
         throw CDMException(nc_strerror(status));
@@ -45,8 +48,10 @@ void ncCheck(int status) {
 
 Nc::~Nc()
 {
-   if (isOpen) {
-       ncCheck(nc_close(ncId));
+    if (isOpen) {
+       const int status = nc_close(ncId);
+       if (status != NC_NOERR)
+           LOG4FIMEX(logger, Logger::ERROR, "error while closing NetCDF file '" << filename << "': " << nc_strerror(status));
    }
 }
 
