@@ -111,6 +111,7 @@ void NcmlCDMReader::init()
     initRemove();
     initDimensionNameChange();
     initDimensionUnlimited();
+    initVariableShapeChange();
     initVariableNameChange();
     initVariableTypeChange();
     initVariableDataChange();
@@ -179,6 +180,28 @@ void NcmlCDMReader::initRemove() {
 void NcmlCDMReader::initWarnUnsupported() {
     warnUnsupported("/nc:netcdf/nc:aggregation", "aggregation not supported");
     warnUnsupported("/nc:netcdf/nc:group","groups not supported");
+}
+
+void NcmlCDMReader::initVariableShapeChange()
+{
+    XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf/nc:variable[@shape]");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        std::string shape = getXmlProp(nodes->nodeTab[i], "shape");
+        std::string name = getXmlProp(nodes->nodeTab[i], "orgName");
+        if (name == "") {
+            name = getXmlProp(nodes->nodeTab[i], "name");
+        }
+        if (name == "") throw CDMException("ncml-file "+ configId + " has no name or orgName for variable");
+        if (cdm_->hasVariable(name)) {
+            vector<string> vshape = tokenize(shape, " \t");
+            CDMVariable& var = cdm_->getVariable(name);
+            vector<string> oldShape = var.getShape();
+            var.setShape(vshape);
+            LOG4FIMEX(logger, Logger::DEBUG, "changing shape of variable: " << name << " from " << join(oldShape.begin(), oldShape.end(), ",") << " to " << shape);
+        }
+    }
 }
 
 void NcmlCDMReader::initVariableTypeChange()

@@ -1,8 +1,14 @@
+fimex (0.42-1) precise; urgency=low
+
+  * initial upload
+  
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 04 Mar 2013 16:20:00 +0100
+   
 fimex (0.41.2-1) precise; urgency=low
 
   * initial upload
   
- -- Heiko Klein <heiko.klein@met.no>  Mon, 08 Feb 2013 17:20:00 +0200
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 08 Feb 2013 17:20:00 +0100
    
 fimex (0.41.1-1) precise; urgency=low
 

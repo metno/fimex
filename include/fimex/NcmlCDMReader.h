@@ -86,6 +86,7 @@ private:
     void initRemove();
     void warnUnsupported(std::string xpath, std::string msg);
     void initWarnUnsupported();
+    void initVariableShapeChange();
     void initVariableNameChange();
     void initVariableTypeChange();
     void initVariableDataChange();
