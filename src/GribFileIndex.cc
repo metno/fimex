@@ -187,7 +187,7 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh);
 
     LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, orient);
+    return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
 GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> gh)
 {
@@ -224,7 +224,7 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
     oss << " " + getEarthsFigure(edition, gh);
     string proj =  oss.str();
 
-    return GridDefinition(proj, sizeX, sizeY, incrX, incrY, startX, startY, orient);
+    return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
 }
 
 struct GribMetricDef {
@@ -267,7 +267,7 @@ GridDefinition getGridDefMercator(long edition, boost::shared_ptr<grib_handle> g
     // calculate startX and startY from lat/lon
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
 
-    return GridDefinition(proj, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
 GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh)
@@ -294,7 +294,7 @@ GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh
     // calculate startX and startY from lat/lon
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
 
-    return GridDefinition(proj, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
 GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib_handle> gh)
@@ -328,7 +328,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     // calculate startX and startY from lat/lon
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
 
-    return GridDefinition(proj, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
+    return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
 GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos)
@@ -532,6 +532,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         if (size > 0) {
             xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
             string proj4 = getXmlProp(lNode, "proj4");
+            bool isDegree = string2type<bool>(getXmlProp(lNode, "isDegree"));
             double startX = string2type<double>(getXmlProp(lNode, "startX"));
             double startY = string2type<double>(getXmlProp(lNode, "startY"));
             double sizeX = string2type<double>(getXmlProp(lNode, "sizeX"));
@@ -539,7 +540,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             double incrX = string2type<double>(getXmlProp(lNode, "incrX"));
             double incrY = string2type<double>(getXmlProp(lNode, "incrY"));
             GridDefinition::Orientation scanMode = static_cast<GridDefinition::Orientation>(string2type<long>(getXmlProp(lNode, "scanMode")));
-            gridDefinition_ = GridDefinition(proj4, static_cast<size_t>(sizeX), static_cast<size_t>(sizeY), incrX, incrY, startX, startY, scanMode);
+            gridDefinition_ = GridDefinition(proj4, isDegree, static_cast<size_t>(sizeX), static_cast<size_t>(sizeY), incrX, incrY, startX, startY, scanMode);
         }
     }
 }
@@ -769,6 +770,8 @@ string GribFileMessage::toString() const
         checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("gridDefinition")));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("proj4"),
                         xmlCast(gridDefinition_.getProjDefinition())));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("isDegree"),
+                        xmlCast(type2string(gridDefinition_.isDegree()))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("startX"),
                         xmlCast(type2string(gridDefinition_.getXStart()))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("startY"),

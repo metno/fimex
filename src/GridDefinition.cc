@@ -33,6 +33,7 @@ namespace MetNoFimex
 
 struct GridDefImpl {
     std::string projDefinition;
+    bool isDegree;
     size_t xSize;
     size_t ySize;
     double xIncr;
@@ -48,6 +49,7 @@ GridDefinition::GridDefinition()
 : gridDef(new GridDefImpl())
 {
     gridDef->projDefinition = "";
+    gridDef->isDegree = true;
     gridDef->xSize = 0;
     gridDef->ySize = 0;
     gridDef->xIncr = 0.;
@@ -58,6 +60,7 @@ GridDefinition::GridDefinition()
 }
 GridDefinition::GridDefinition(
         std::string projDefinition,
+        bool isDegree,
         size_t xSize,
         size_t ySize,
         double xIncr,
@@ -68,6 +71,7 @@ GridDefinition::GridDefinition(
 : gridDef(new GridDefImpl())
 {
             gridDef->projDefinition = projDefinition;
+            gridDef->isDegree = isDegree;
             gridDef->xSize = xSize;
             gridDef->ySize = ySize;
             gridDef->xIncr = xIncr;
@@ -89,6 +93,14 @@ void GridDefinition::setProjDefinition(std::string proj)
     gridDef->projDefinition = proj;
 }
 
+bool GridDefinition::isDegree() const
+{
+    return gridDef->isDegree;
+}
+void GridDefinition::setDegree(bool isDegree)
+{
+    gridDef->isDegree = isDegree;
+}
 
 size_t GridDefinition::getXSize() const
 {
