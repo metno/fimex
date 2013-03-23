@@ -120,7 +120,7 @@ public:
 protected:
     size_t getDimPos(const std::string& dimName) const;
 private:
-    void init(const std::vector<std::string>& dimNames, const std::vector<std::size_t>& dimSize);
+    void init(const std::vector<std::string>& dimNames, const std::vector<std::size_t>& dimSize, const std::string& unLimDim = "");
     // position of the dimension
     std::map<std::string, size_t> dimPos_;
     std::set<std::string> setDims_;
@@ -130,6 +130,10 @@ private:
 
 };
 
+std::ostream& operator<<(std::ostream& os, const SliceBuilder& sb);
+
 }
+
+
 
 #endif /* SLICEBUILDER_H_ */

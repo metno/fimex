@@ -75,6 +75,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 Felt_File2.cc \
 					 FeltParameters.h \
 					 FeltParameters.cc \
+					 FillWriter.cc \
                      GridDefinition.cc \
                      IndexedData.cc \
 					 Logger.cc \

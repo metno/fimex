@@ -29,6 +29,7 @@
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
 #include "fimex/coordSys/CoordinateAxis.h"
+#include <limits>
 
 namespace MetNoFimex
 {
@@ -50,10 +51,16 @@ SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName)
         const CDMDimension& dim = cdm.getDimension(*dimIt);
         dimSizes.push_back(dim.getLength());
     }
-    init(shape, dimSizes);
+    const CDMDimension* unLim = cdm.getUnlimitedDim();
+    if (unLim == 0) {
+        init(shape, dimSizes);
+    } else {
+        init(shape, dimSizes, unLim->getName());
+    }
+
 }
 
-void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& dimSize)
+void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& dimSize, const std::string& unLimDim)
 {
     if (dimNames.size() != dimSize.size()) {
         throw CDMException("dimension mismatch in SliceBuilder::init");
@@ -65,7 +72,11 @@ void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& di
         dimPos_[dimNames.at(pos)] = pos;
         start_.at(pos) = 0;
         size_.at(pos) = dimSize[pos];
-        maxSize_.at(pos) = dimSize[pos];
+        if (dimNames.at(pos) == unLimDim) {
+            maxSize_.at(pos) = std::numeric_limits<std::size_t>::max();
+        } else {
+            maxSize_.at(pos) = dimSize[pos];
+        }
     }
 }
 
@@ -137,6 +148,16 @@ vector<string> SliceBuilder::getUnsetDimensionNames() const
     }
     return names;
 
+}
+std::ostream& operator<<(std::ostream& os, const SliceBuilder& sb)
+{
+    vector<string> dims = sb.getDimensionNames();
+    vector<size_t> start = sb.getDimensionStartPositions();
+    vector<size_t> size = sb.getDimensionSizes();
+    for (size_t i = 0; i < dims.size(); ++i) {
+        os << dims[i] << ": " << start[i] << ", " << size[i] << endl;
+    }
+    return os;
 }
 
 }

@@ -42,6 +42,7 @@
 #include "fimex/CDMProcessor.h"
 #include "fimex/CDMMerger.h"
 #include "fimex/CDMMerger_LinearSmoothing.h"
+#include "fimex/FillWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Logger.h"
@@ -54,6 +55,7 @@
 /* currently no factory for writer */
 #ifdef HAVE_NETCDF_H
 #include "fimex/NetCDF_CDMWriter.h"
+#include "fimex/NetCDF_CDMReader.h"
 #endif
 #ifdef HAVE_GRIB_API_H
 #include "fimex/GribApiCDMWriter.h"
@@ -73,7 +75,7 @@ static LoggerPtr logger = getLogger("fimex");
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
-    out << "             [--output.file FILENAME [--output.type OUTPUT_TYPE]]" << endl;
+    out << "             [--output.file FILENAME | --output.fillFile [--output.type OUTPUT_TYPE]]" << endl;
     out << "             [--input.config CFGFILENAME] [--output.config CFGFILENAME]" << endl;
     out << "             [--input.optional OPT1 --input.optional OPT2 ...]" << endl;
     out << "             [--num_threads ...]" << endl;
@@ -174,6 +176,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "input.printNcML", vm);
     writeOptionAny(out, "input.printCS", vm);
     writeOption<string>(out, "output.file", vm);
+    writeOption<string>(out, "output.fillFile", vm);
     writeOption<string>(out, "output.type", vm);
     writeOption<string>(out, "output.config", vm);
     writeVectorOptionString(out, "process.deaccumulateVariable", vm);
@@ -236,9 +239,17 @@ static string getType(const string& io, po::variables_map& vm) {
     if (vm.count(io+".type")) {
         type = vm[io+".type"].as<string>();
     } else {
-        boost::smatch what;
-        if (boost::regex_match(vm[io+".file"].as<string>(), what, boost::regex(".*\\.(\\w+)$"))) {
-            type = what[1].str();
+        string file;
+        if (vm.count(io+".file")) {
+            file = ".file";
+        } else if (vm.count(io+".fillFile")) {
+            file = ".fillFile";
+        }
+        if (file != "") {
+            boost::smatch what;
+            if (boost::regex_match(vm[io+file].as<string>(), what, boost::regex(".*\\.(\\w+)$"))) {
+                type = what[1].str();
+            }
         }
     }
     std::transform(type.begin(), type.end(), type.begin(), (int(*)(int)) tolower);
@@ -668,10 +679,29 @@ static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boos
     return boost::shared_ptr<CDMReader>(ncmlReader);
 }
 
+static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
+    if (!(vm.count("output.fillFile"))) {
+        return;
+    }
+    string type = getType("output", vm);
+    // boost::shared_ptr to shared_ptr
+    boost::shared_ptr<CDMReader> sharedDataReader(dataReader);
+#ifdef HAVE_NETCDF_H
+    if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
+        LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << vm["output.fillFile"].as<string>() << " without config");
+        boost::shared_ptr<CDMReaderWriter> readerWriter = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(vm["output.fillFile"].as<string>(), true));
+        FillWriter(sharedDataReader, readerWriter);
+        return;
+    }
+#endif
+    cerr << "unable to fill-write type: " << type << endl;
+    exit(1);
+}
+
 
 static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
-    if (!vm.count("output.file")) {
-        clog << "no output.file selected, only data-structure analysis possible" << endl;
+    if (!(vm.count("output.file"))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
         return;
     }
     string type = getType("output", vm);
@@ -723,6 +753,7 @@ static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map&
     exit(1);
 }
 
+
 int run(int argc, char* args[])
 {
     // Declare the supported options.
@@ -755,6 +786,7 @@ int run(int argc, char* args[])
 #endif
         ("input.printCS", "print CoordinateSystems of input file")
         ("output.file", po::value<string>(), "output file")
+        ("output.fillFile", po::value<string>(), "existing output file to be filled")
         ("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
         ("output.config", po::value<string>(), "non-standard output configuration")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
@@ -923,6 +955,7 @@ int run(int argc, char* args[])
     dataReader = getCDMVerticalInterpolator(vm, dataReader);
     dataReader = getCDMMerger(vm, dataReader);
     dataReader = getNcmlCDMReader(vm, dataReader);
+    fillWriteCDM(dataReader, vm);
     writeCDM(dataReader, vm);
 
     return 0;
