@@ -883,10 +883,11 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
 void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
 {
     url_ = "file:"+ file_string(gribFilePath);
-    boost::shared_ptr<FILE> fh(fopen(file_string(gribFilePath).c_str(), "r"), fclose);
-    if (fh.get() == 0) {
-        throw runtime_error("cannot open file: " + file_string(gribFilePath));
+    FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");
+    if (fileh == 0) {
+        throw runtime_error("cannot open file: " + url_);
     }
+    boost::shared_ptr<FILE> fh(fileh, fclose);
     // enable multi-messages
     grib_multi_support_on(0);
     size_t lastPos = static_cast<size_t>(-1);
