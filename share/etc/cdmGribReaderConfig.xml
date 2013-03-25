@@ -119,6 +119,13 @@
     <attribute name="long_name" value="nominal top of atmosphere" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
+<vertical_axis id="isotherm_percK_level" name="isotherm_percK_level" grib1_id="20" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="description" value="level of 1/100K isotherm" type="string" />
+    <attribute name="long_name" value="isotherm %K" type="string" />
+    <attribute name="units" value="1/100 K" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
 <vertical_axis id="mean_sea_level" name="mean_sea_level" grib2_id="101" grib1_id="102" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="description" value="mean sea level" type="string" />
