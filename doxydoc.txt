@@ -23,6 +23,7 @@ contact me.
 
   -# @ref programDoc
     -# @ref mergerDoc
+    -# @ref fillWriterDoc
   -# @ref setup
     -# @ref feltConfigDoc
     -# @ref ncmlConfiguration
@@ -40,7 +41,7 @@ contact me.
 
 @verbatim
 usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]
-             --output.file FILENAME [--output.type OUTPUT_TYPE]
+             [--output.file FILENAME | output.fillFile [--output.type OUTPUT_TYPE]]
              [--input.config CFGFILENAME] [--output.config CFGFILENAME]
              [--extract....]
              [--interpolate....]
@@ -61,6 +62,7 @@ Configurational options:
   --input.printNcML                       print NcML description of input file
   --input.printCS                         print CoordinateSystems of input file
   --output.file arg                       output file
+  --output.fillFile arg                   output file, which should be filled
   --output.type arg                       filetype of output file, e.g. nc,
                                           nc4, grib1, grib2
   --output.config arg                     non-standard output configuration
@@ -409,6 +411,82 @@ merge.smoothing.
 
 @see MetNoFimex::CDMMerger
 @ref programDoc
+
+
+
+@page fillWriterDoc fillWriter Options
+@section fillWriterDoc fillWriter Options
+
+The fillWriter enables the filling of an existing template-file with real data.
+It was developed to speed up creation of output-files of NWP-models. These models
+usually create output one timestep at a time and at the end, and the timesteps are
+then merged at another stage, often on another machine. Fimex fillWriter makes sure,
+that one can look at the final file even before the model is finished. It is even
+possible to restart the model at any state, replacing ony the newly created slices.
+
+@subsection howToUseFillWriter How to use the FillWriter
+
+The axes of the output should well-known before model-start and the output-template
+should be written by e.g. ncdump -s, cdl and ncgen:
+
+@verbatim
+
+@netcdf fillIn2 {
+dimensions:
+    time = UNLIMITED ; // (2 currently)
+    sigma = 5 ;
+    lon = 3 ;
+    lat = 4 ;
+variables:
+    short time(time) ;
+        time:standard_name = "time" ;
+        time:units = "hours since 2000-01-01 00:00:00 +00:00" ;
+        time:_Storage = "chunked" ;
+        time:_ChunkSizes = 1 ;
+    short sigma(sigma) ;
+        sigma:standard_name = "atmosphere_sigma_coordinate" ;
+        sigma:positive = "up" ;
+        sigma:scale_factor = 0.001f ;
+        time:_Storage = "chunked" ;
+        time:_ChunkSizes = 1 ;
+    short lon(lon) ;
+        lon:units = "degrees_east";
+    short lat(lat) ;
+        lat:units = "degrees_north";
+    short cloud_area_fraction(time, sigma, lat, lon);
+        cloud_area_fraction:units = "%";
+        cloud_area_fraction:_Storage = "chunked";
+        cloud_area_fraction:_ChunkSizes = 1, 1, 4, 3 ;
+        cloud_area_fraction:_Shuffle = "true" ;
+        cloud_area_fraction:_DeflateLevel = 3 ;
+// global attributes:
+        :Conventions = "CF-1.4" ;
+        :_Format = "netCDF-4 classic model" ;
+data:
+ time = 12, 24 ;
+ sigma = 200, 300, 500, 850, 1000 ;
+ lon = -10, 0, 10;
+ lat = 58, 59, 60, 61;
+}
+
+@endverbatim
+
+
+In particular when writing compressed netcdf-4 files, make sure to set the _ChunkSize to match the usual output-size, e.g.
+horizontal size when reading from grib-files.
+
+The usage of the program is then very simple:
+
+@verbatim
+  fimex --input.file=in.nc --output.fillFile=outFill.nc
+@endverbatim
+
+
+@see MetNoFimex::FillWriter
+@ref programDoc
+
+
+
 
 @page gribReaderDoc gribReader Configuration
 @section gribReaderConfig gribReader Configuration

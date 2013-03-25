@@ -91,6 +91,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testFillWriter_SOURCES = testFillWriter.cc
 testNetCDFReaderWriter_SOURCES = testNetCDFReaderWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc

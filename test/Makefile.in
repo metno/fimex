@@ -161,8 +161,8 @@ testFileReaderFactory_OBJECTS = $(am_testFileReaderFactory_OBJECTS)
 testFileReaderFactory_LDADD = $(LDADD)
 testFileReaderFactory_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-testFillWriter_SOURCES = testFillWriter.c
-testFillWriter_OBJECTS = testFillWriter.$(OBJEXT)
+am_testFillWriter_OBJECTS = testFillWriter.$(OBJEXT)
+testFillWriter_OBJECTS = $(am_testFillWriter_OBJECTS)
 testFillWriter_LDADD = $(LDADD)
 testFillWriter_DEPENDENCIES = ../src/felt/libfelt.la \
 	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -325,7 +325,7 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
 	$(testFeltReader_SOURCES) $(testFileReaderFactory_SOURCES) \
-	testFillWriter.c $(testGribReader_SOURCES) \
+	$(testFillWriter_SOURCES) $(testGribReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testMerger_SOURCES) \
 	$(testMetGmReader_SOURCES) $(testMetGmWriter_SOURCES) \
@@ -342,7 +342,7 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
 	$(testFeltReader_SOURCES) $(testFileReaderFactory_SOURCES) \
-	testFillWriter.c $(testGribReader_SOURCES) \
+	$(testFillWriter_SOURCES) $(testGribReader_SOURCES) \
 	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
 	$(testInterpolator_SOURCES) $(testMerger_SOURCES) \
 	$(testMetGmReader_SOURCES) $(testMetGmWriter_SOURCES) \
@@ -591,6 +591,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testFillWriter_SOURCES = testFillWriter.cc
 testNetCDFReaderWriter_SOURCES = testNetCDFReaderWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
@@ -693,7 +694,7 @@ testFileReaderFactory$(EXEEXT): $(testFileReaderFactory_OBJECTS) $(testFileReade
 	$(CXXLINK) $(testFileReaderFactory_OBJECTS) $(testFileReaderFactory_LDADD) $(LIBS)
 testFillWriter$(EXEEXT): $(testFillWriter_OBJECTS) $(testFillWriter_DEPENDENCIES) $(EXTRA_testFillWriter_DEPENDENCIES) 
 	@rm -f testFillWriter$(EXEEXT)
-	$(LINK) $(testFillWriter_OBJECTS) $(testFillWriter_LDADD) $(LIBS)
+	$(CXXLINK) $(testFillWriter_OBJECTS) $(testFillWriter_LDADD) $(LIBS)
 testGribReader$(EXEEXT): $(testGribReader_OBJECTS) $(testGribReader_DEPENDENCIES) $(EXTRA_testGribReader_DEPENDENCIES) 
 	@rm -f testGribReader$(EXEEXT)
 	$(CXXLINK) $(testGribReader_OBJECTS) $(testGribReader_LDADD) $(LIBS)
