@@ -230,13 +230,17 @@ DataPtr CDMReader::getScaledDataInUnit(const std::string& varName, const std::st
 DataPtr CDMReader::getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos)
 {
     if (variable.hasData()) {
-        if (cdm_->hasUnlimitedDim(variable)) {
-            // cut out the unlimited dim data
-            std::vector<size_t> dims = getDimsSlice(variable.getName());
-            size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
-            return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
+        if (variable.getData()->size() == 0) { // not possible to slice
+            return variable.getData();
         } else {
-            return variable.getData()->clone();
+            if (cdm_->hasUnlimitedDim(variable)) {
+                // cut out the unlimited dim data
+                std::vector<size_t> dims = getDimsSlice(variable.getName());
+                size_t sliceSize = accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+                return createDataSlice(variable.getDataType(), *(variable.getData()), unLimDimPos*sliceSize, sliceSize);
+            } else {
+                return variable.getData()->clone();
+            }
         }
     } else {
         return DataPtr();

@@ -35,5 +35,12 @@
   <attribute name="metno_name" orgName="standard_name" />
 </variable>
 
+<variable name="new_var" type="short"  shape="time" >
+  <attribute name="_FillValue" type="short" value="-32767" />
+  <attribute name="grid_mapping" type="String" value="projection_1" />
+  <attribute name="coordinates" type="String" value="longitude latitude" />
+</variable>
+
+
 </netcdf>
 

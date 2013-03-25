@@ -462,9 +462,11 @@ void NcmlCDMReader::initAttributeNameChange()
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,unlimDimPos): (" << varName << ", " << unLimDimPos << ")");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
 
@@ -518,18 +520,24 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
 
         data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
     }
-
     return data;
 }
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,sb): (" << varName << ", sb)");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
-        return variable.getData()->slice(sb.getMaxDimensionSizes(),
-                                         sb.getDimensionStartPositions(),
-                                         sb.getDimensionSizes());
+        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
+        DataPtr data = variable.getData();
+        if (data->size() == 0) {
+            return data;
+        } else {
+            return variable.getData()->slice(sb.getMaxDimensionSizes(),
+                                             sb.getDimensionStartPositions(),
+                                             sb.getDimensionSizes());
+        }
     }
 
     // find the original name, to fetch the data from the dataReader
