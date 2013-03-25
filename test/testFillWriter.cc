@@ -83,6 +83,10 @@ BOOST_AUTO_TEST_CASE( test_fillWriter )
     BOOST_CHECK(out->getData("refTime")->asInt()[0] ==  12);
     BOOST_CHECK(out->getData("refTime")->asInt()[2] == 36);
 
+    BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",0)->asInt()[11*11*2] == -32767); // first number, 3rd level
+    BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",2)->asInt()[11*11*4] == -32767); // last level, last number, first offsetTime
+    BOOST_CHECK(out->getDataSlice("cloud_area_fraction_in_atmosphere_layer",2)->asInt()[11*11*4*2 - 1] == -32767); // last level, last number
+
     BOOST_CHECK(true);
 }
 
