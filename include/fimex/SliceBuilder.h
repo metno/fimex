@@ -51,9 +51,10 @@ public:
      * give a slice of full size.
      * @param cdm
      * @param varName variable name
+     * @param setUnlimited enable enlarging of unlimited dimensions
      * @throw CDMException f varName doesn't exists
      */
-    SliceBuilder(const CDM& cdm, const std::string& varName);
+    SliceBuilder(const CDM& cdm, const std::string& varName, bool setUnlimited = false);
     /**
      * Simple interface to create a slicebuilder. No checks are made if
      * the created object is useful with any reader.
@@ -117,14 +118,20 @@ public:
      * in the order and size of the variables dimensions
      */
     const std::vector<size_t>& getMaxDimensionSizes() const {return maxSize_;}
+    /**
+     * Dimensions are usually restricted to their maximum size. For writing purposes it might be desired to
+     * exend the size. With setUnlimited, it is possible to disable the size-tests for a dimensions.
+     */
+    void setUnlimited(const std::string& dimName, bool isUnlimited);
 protected:
     size_t getDimPos(const std::string& dimName) const;
 private:
-    void init(const std::vector<std::string>& dimNames, const std::vector<std::size_t>& dimSize, const std::string& unLimDim = "");
+    void init(const std::vector<std::string>& dimNames, const std::vector<std::size_t>& dimSize, const std::vector<bool>& unlimited);
     // position of the dimension
     std::map<std::string, size_t> dimPos_;
     std::set<std::string> setDims_;
     std::vector<size_t> maxSize_;
+    std::vector<bool> unlimited_;
     std::vector<size_t> start_;
     std::vector<size_t> size_;
 

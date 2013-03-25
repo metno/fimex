@@ -38,29 +38,31 @@ using namespace std;
 
 SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>& dimSize)
 {
-    init(dimNames, dimSize);
+    vector<bool> unlimited(dimNames.size(), false);
+    init(dimNames, dimSize, unlimited);
 }
 
-SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName)
+SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setUnlimited)
 {
     const CDMVariable& var = cdm.getVariable(varName);
     vector<string> shape = var.getShape();
     vector<size_t> dimSizes;
+    vector<bool> unlimited;
     dimSizes.reserve(shape.size());
+    unlimited.reserve(shape.size());
     for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
         const CDMDimension& dim = cdm.getDimension(*dimIt);
         dimSizes.push_back(dim.getLength());
+        if (setUnlimited && dim.isUnlimited()) {
+            unlimited.push_back(true);
+        } else {
+            unlimited.push_back(false);
+        }
     }
-    const CDMDimension* unLim = cdm.getUnlimitedDim();
-    if (unLim == 0) {
-        init(shape, dimSizes);
-    } else {
-        init(shape, dimSizes, unLim->getName());
-    }
-
+    init(shape, dimSizes, unlimited);
 }
 
-void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& dimSize, const std::string& unLimDim)
+void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& dimSize, const vector<bool>& unlimited)
 {
     if (dimNames.size() != dimSize.size()) {
         throw CDMException("dimension mismatch in SliceBuilder::init");
@@ -68,15 +70,13 @@ void SliceBuilder::init(const vector<string>& dimNames, const vector<size_t>& di
     start_.resize(dimNames.size());
     size_.resize(dimNames.size());
     maxSize_.resize(dimNames.size());
+    unlimited_.resize(dimNames.size());
     for (size_t pos = 0; pos < dimNames.size(); ++pos) {
         dimPos_[dimNames.at(pos)] = pos;
         start_.at(pos) = 0;
-        size_.at(pos) = dimSize[pos];
-        if (dimNames.at(pos) == unLimDim) {
-            maxSize_.at(pos) = std::numeric_limits<std::size_t>::max();
-        } else {
-            maxSize_.at(pos) = dimSize[pos];
-        }
+        size_.at(pos) = dimSize.at(pos);
+        maxSize_.at(pos) = dimSize.at(pos);
+        unlimited_.at(pos) = unlimited.at(pos);
     }
 }
 
@@ -95,7 +95,7 @@ size_t SliceBuilder::getDimPos(const std::string& dimName) const
 void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, size_t size)
 {
     size_t pos = getDimPos(dimName);
-    if (maxSize_.at(pos) < (start + size)) {
+    if ((!unlimited_.at(pos)) && maxSize_.at(pos) < (start + size)) {
         throw out_of_range("slicebuilder: "+ dimName);
     }
     start_.at(pos) = start;

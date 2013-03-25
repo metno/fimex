@@ -694,13 +694,13 @@ static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_
         return;
     }
 #endif
-    cerr << "unable to fill-write type: " << type << endl;
-    exit(1);
+	LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
+	return;
 }
 
 
 static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
-    if (!(vm.count("output.file"))) {
+    if (!vm.count("output.file")) {
         LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
         return;
     }

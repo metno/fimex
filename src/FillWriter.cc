@@ -124,7 +124,7 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
 
         typedef vector<pair<SliceBuilder, SliceBuilder> > SlicePairs;
         SlicePairs slices;
-        slices.push_back(make_pair(SliceBuilder(iCdm, iv->getName()), SliceBuilder(oCdm, iv->getName())));
+        slices.push_back(make_pair(SliceBuilder(iCdm, iv->getName()), SliceBuilder(oCdm, iv->getName(), true)));
         for (vector<string>::const_iterator dimIt = iShape.begin(); dimIt != iShape.end(); ++dimIt) {
             if (dimSlices.find(*dimIt) != dimSlices.end()) {
                 SlicePairs newSlices;
