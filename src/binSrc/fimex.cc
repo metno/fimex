@@ -179,6 +179,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "output.fillFile", vm);
     writeOption<string>(out, "output.type", vm);
     writeOption<string>(out, "output.config", vm);
+    writeVectorOptionString(out, "process.accumulateVariable", vm);
     writeVectorOptionString(out, "process.deaccumulateVariable", vm);
     writeVectorOptionString(out, "process.rotateVectorToLatLonX", vm);
     writeVectorOptionString(out, "process.rotateVectorToLatLonY", vm);
@@ -352,8 +353,8 @@ static int getInterpolationMethod(po::variables_map& vm, const string& key) {
 }
 
 static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! (vm.count("process.deaccumulateVariable") || vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction"))) {
-        LOG4FIMEX(logger, Logger::DEBUG, "process.deaccumulateVariable or rotateVector.direction not found, no process used");
+    if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") || vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction"))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction not found, no process used");
         return dataReader;
     }
     boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(boost::shared_ptr<CDMReader>(dataReader)));
@@ -361,6 +362,12 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
         vector<string> vars = vm["process.deaccumulateVariable"].as<vector<string> >();
         for (size_t i = 0; i < vars.size(); i++) {
             processor->deAccumulate(vars.at(i));
+        }
+    }
+    if (vm.count("process.accumulateVariable")) {
+        vector<string> vars = vm["process.accumulateVariable"].as<vector<string> >();
+        for (size_t i = 0; i < vars.size(); i++) {
+            processor->accumulate(vars.at(i));
         }
     }
     if (vm.count("process.rotateVectorToLatLonX")) {
@@ -789,6 +796,7 @@ int run(int argc, char* args[])
         ("output.fillFile", po::value<string>(), "existing output file to be filled")
         ("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
         ("output.config", po::value<string>(), "non-standard output configuration")
+        ("process.accumulateVariable", po::value<vector<string> >()->composing(), "accumulate variable along unlimited dimension")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
         ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
         ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
