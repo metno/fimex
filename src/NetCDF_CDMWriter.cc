@@ -371,7 +371,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
             }
             if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
                 LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
-                ncCheck(nc_def_var_deflate(ncFile->ncId, varId, 0, 1, compression));
+                ncCheck(nc_def_var_deflate(ncFile->ncId, varId, 1, 1, compression));
             }
         }
 #endif
