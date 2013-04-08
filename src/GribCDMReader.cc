@@ -576,6 +576,9 @@ void GribCDMReader::initAddProjection()
             for (size_t i=0; i < gridDef.getXSize(); i++) {
                 xData.push_back(gridDef.getXStart() + i*gridDef.getXIncrement());
             }
+            if (gridDef.isDegree()) {
+                transform(xData.begin(), xData.end(), xData.begin(), &normalizeLongitude180<double>);
+            }
             xVar.setData(createData(xDataType, xData.begin(), xData.end()));
             cdm_->addDimension(xDim);
             cdm_->addVariable(xVar);
@@ -603,6 +606,7 @@ void GribCDMReader::initAddProjection()
             for (size_t i=0; i < gridDef.getYSize(); i++) {
                 yData.push_back(gridDef.getYStart() + i*gridDef.getYIncrement());
             }
+            // no normalization required for latitudes
             yVar.setData(createData(yDataType, yData.begin(), yData.end()));
             cdm_->addDimension(yDim);
             cdm_->addVariable(yVar);

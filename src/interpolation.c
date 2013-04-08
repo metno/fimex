@@ -902,7 +902,7 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
     // working field
     float* wField = malloc(totalSize*sizeof(float));
     if (wField == NULL) {
-        fprintf(stderr, "error allocating memory of float(%d*%d)", nx, ny);
+        fprintf(stderr, "error allocating memory of float(%zd*%zd)", nx, ny);
         exit(1);
     }
 
@@ -949,7 +949,7 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
     // error field
     float* eField = malloc(totalSize*sizeof(float));
     if (eField == NULL) {
-        fprintf(stderr, "error allocating memory of float(%d*%d)", nx, ny);
+        fprintf(stderr, "error allocating memory of float(%zd*%zd)", nx, ny);
         exit(1);
     }
     // start the iteration loop
@@ -1034,12 +1034,12 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
     // working field, 5: valid value, 0: invalid value, 1 number of valid neighbours
     char* wField = (char*) malloc(totalSize*sizeof(char));
     if (wField == NULL) {
-        fprintf(stderr, "error allocating memory of char(%d*%d)", nx, ny);
+        fprintf(stderr, "error allocating memory of char(%zd*%zd)", nx, ny);
         exit(1);
     }
     unsigned short* rField = (unsigned short*) malloc(totalSize*sizeof(unsigned short));
     if (rField == NULL) {
-        fprintf(stderr, "error allocating memory of short(%d*%d)", nx, ny);
+        fprintf(stderr, "error allocating memory of short(%zd*%zd)", nx, ny);
         exit(1);
     }
 

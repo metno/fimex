@@ -57,14 +57,15 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
-        throw CDMException("config "+configId+" does not contain location-attribute");
+        LOG4FIMEX(logger, Logger::INFO, "config " << configId << " does not contain location-attribute, only ncml initialization");
+    } else {
+        string ncFile = getXmlProp(nodes->nodeTab[0], "location");
+        // remove file: URL-prefix
+        ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
+        // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
+        ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
+        dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     }
-    string ncFile = getXmlProp(nodes->nodeTab[0], "location");
-    // remove file: URL-prefix
-    ncFile = boost::regex_replace(ncFile, boost::regex("^file:"), "", boost::format_first_only);
-    // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
-    ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
-    dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     init();
 #else
     string msg("cannot read data through ncml - no netcdf-support compiled in fimex");
@@ -105,7 +106,9 @@ void NcmlCDMReader::init()
         LOG4FIMEX(logger, Logger::WARN, "config " << configId << " not a ncml-file, ignoring");
         return;
     }
-    *cdm_.get() = dataReader->getCDM();
+    if (dataReader.get() != 0) {
+        *cdm_.get() = dataReader->getCDM();
+    }
     LOG4FIMEX(logger, Logger::DEBUG, "initializing");
 
     initRemove();
@@ -462,10 +465,15 @@ void NcmlCDMReader::initAttributeNameChange()
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,unlimDimPos): (" << varName << ", " << unLimDimPos << ")");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
         return getDataSliceFromMemory(variable, unLimDimPos);
+    }
+    if (dataReader.get() == 0) {
+        return createData(CDM_NAT, 0);
     }
 
     // find the original name, to fetch the data from the dataReader
@@ -518,18 +526,24 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
 
         data = data->convertDataType(orgFill, orgScale, orgOffset, dtIt->second, newFill, newScale, newOffset);
     }
-
     return data;
 }
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,sb): (" << varName << ", sb)");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
-        return variable.getData()->slice(sb.getMaxDimensionSizes(),
-                                         sb.getDimensionStartPositions(),
-                                         sb.getDimensionSizes());
+        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
+        DataPtr data = variable.getData();
+        if (data->size() == 0) {
+            return data;
+        } else {
+            return variable.getData()->slice(sb.getMaxDimensionSizes(),
+                                             sb.getDimensionStartPositions(),
+                                             sb.getDimensionSizes());
+        }
     }
 
     // find the original name, to fetch the data from the dataReader
