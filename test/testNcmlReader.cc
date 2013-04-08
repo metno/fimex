@@ -87,6 +87,16 @@ BOOST_AUTO_TEST_CASE( test_ncmlRead )
     CDMAttribute attr;
     BOOST_CHECK(reader->getCDM().getAttribute("snow_thickness", "metno_name", attr));
     BOOST_CHECK(!reader->getCDM().getAttribute("snow_thickness", "long_name", attr));
+
+    // check of new variable
+    BOOST_CHECK(reader->getCDM().hasVariable("new_var"));
+    data = reader->getDataSlice("new_var", 1);
+    BOOST_CHECK(data->size() == 0);
+    sb = SliceBuilder(reader->getCDM(), "new_var");
+    sb.setStartAndSize("time", 1, 1);
+    dataSlice = reader->getDataSlice("new_var", sb);
+    BOOST_CHECK(dataSlice->size() == 0);
+
 }
 
 #else

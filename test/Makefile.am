@@ -8,7 +8,7 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
-             test_merge_inner.nc test_merge_outer.nc
+             test_merge_inner.nc test_merge_outer.nc fillIn2.nc
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
@@ -17,7 +17,7 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              bicubicOutData.txt bilinearOutData.txt \
              testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc \
-             test_netcdfrw.nc
+             test_netcdfrw.nc fillOut.nc
 
 CC_TESTS = testInterpolation \
            testVerticalCoordinates \
@@ -54,7 +54,8 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys \
               testCoordinateSystemSliceBuilder  testNcmlReader \
-              testProcessor testMerger testNetCDFReaderWriter
+              testProcessor testMerger testNetCDFReaderWriter \
+              testFillWriter
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
@@ -90,6 +91,7 @@ testCoordSys_SOURCES = testCoordSys.cc
 testCoordinateSystemSliceBuilder_SOURCES = testCoordinateSystemSliceBuilder.cc
 testFeltReader_SOURCES = testFeltReader.cc
 testNetcdfWriter_SOURCES = testNetcdfWriter.cc
+testFillWriter_SOURCES = testFillWriter.cc
 testNetCDFReaderWriter_SOURCES = testNetCDFReaderWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc

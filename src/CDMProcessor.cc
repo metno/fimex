@@ -45,6 +45,7 @@ using namespace std;
 struct CDMProcessorImpl {
     boost::shared_ptr<CDMReader> dataReader;
     set<string> deaccumulateVars;
+    set<string> accumulateVars;
     // variable -> <counterPart, horizontalId>
     map<string, pair<string, string> > rotateLatLonVectorX;
     // variable -> <counterPart, horizontalId> (same as above but with Y as first component)
@@ -64,6 +65,16 @@ CDMProcessor::~CDMProcessor()
 {
 }
 
+void CDMProcessor::accumulate(const std::string& varName)
+{
+    const CDMVariable& variable = cdm_->getVariable(varName);
+    if (cdm_->hasUnlimitedDim(variable)) {
+        p_->accumulateVars.insert(varName);
+    } else {
+        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName <<  " is not unlimited, ignoring accumulate");
+    }
+
+}
 void CDMProcessor::deAccumulate(const std::string& varName)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -174,6 +185,25 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
 DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+    // accumulation
+    if (p_->accumulateVars.find(varName) != p_->accumulateVars.end()) {
+        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
+        if (unLimDimPos > 0) { // cannot accumulate first
+            for (size_t i = 0; i <= unLimDimPos-1; ++i) {
+                DataPtr dataP = p_->dataReader->getDataSlice(varName, i);
+                if ((data->size() != 0) && (dataP->size() != 0)) {
+                    assert(data->size() == dataP->size());
+                    boost::shared_array<double> d = data->asDouble();
+                    boost::shared_array<double> dp = dataP->asDouble();
+                    // this might modify the original data in the reader
+                    std::transform(&d[0], &d[0]+data->size(), &dp[0], &d[0], std::plus<double>());
+                    data = createData(data->size(), d);
+                } else if (dataP->size() != 0) {
+                    data = dataP; // data->size was 0
+                }
+            }
+        }
+    }
     // deaccumulation
     if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
         LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");

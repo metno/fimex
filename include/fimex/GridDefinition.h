@@ -76,6 +76,7 @@ public:
     GridDefinition();
     GridDefinition(
             std::string projDefinition,
+            bool isDegree,
             size_t xSize,
             size_t ySize,
             double xIncr,
@@ -87,6 +88,9 @@ public:
     /// return a proj4 string
     virtual std::string getProjDefinition() const;
     virtual void setProjDefinition(std::string proj);
+    // check if start and increment are degree or metric
+    virtual bool isDegree() const;
+    virtual void setDegree(bool isDegree);
     /// number of points in x or longitude direction
     virtual size_t getXSize() const;
     virtual void setXSize(size_t xSize);

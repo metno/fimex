@@ -370,6 +370,26 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                 compression = variableCompression[var.getName()];
             }
             if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
+                // create a chunk-strategy: continuous in last dimensions, max MAX_CHUNK
+                const size_t DEFAULT_CHUNK = 2 << 20; // good chunk up to 1MB *sizof(type)
+                boost::scoped_array<size_t> ncChunk(new size_t[shape.size()]);
+                size_t chunkSize = 1;
+                for (size_t i = 0; i < shape.size(); i++) {
+                    // revert order, cdm requires fastest moving first, netcdf-c requires fastest moving last
+                    CDMDimension& dim = cdm.getDimension(shape.at(i));
+                    size_t dimSize = dim.isUnlimited() ? 1 : dim.getLength();
+                    chunkSize *= dimSize;
+                    if (chunkSize < DEFAULT_CHUNK) {
+                        ncChunk[shape.size()-1 - i] = dimSize;
+                    } else {
+                        ncChunk[shape.size()-1 - i] = 1;
+                    }
+                }
+                if (chunkSize > DEFAULT_CHUNK) {
+                    LOG4FIMEX(logger, Logger::DEBUG, "chunk variable " << var.getName() << " to " << join(&ncChunk[0], &ncChunk[0] + shape.size(), "x"));
+                    ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get()));
+                }
+                // start compression without shuffling
                 LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
                 ncCheck(nc_def_var_deflate(ncFile->ncId, varId, 0, 1, compression));
             }
