@@ -427,7 +427,9 @@ possible to restart the model at any state, replacing ony the newly created slic
 @subsection howToUseFillWriter How to use the FillWriter
 
 The axes of the output should well-known before model-start and the output-template
-should be written by e.g. ncdump -s, cdl and ncgen:
+should be written by e.g. ncdump -s, cdl and ncgen 
+
+@warning ncgen 4.1.1 is known to be broken, please use a newer version, tests with 4.2.1 work well.
 
 @verbatim
 
