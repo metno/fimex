@@ -66,6 +66,16 @@ Configurational options:
   --output.type arg                       filetype of output file, e.g. nc,
                                           nc4, grib1, grib2
   --output.config arg                     non-standard output configuration
+  --process.accumulateVariable arg        accumulate variable along unlimited 
+                                          dimension
+  --process.deaccumulateVariable arg      deaccumulate variable along unlimited 
+                                          dimension
+  --process.rotateVectorToLatLonX arg     rotate this vector x component from 
+                                          grid-direction to latlon direction
+  --process.rotateVectorToLatLonY arg     rotate this vector x component from 
+                                          grid-direction to latlon direction
+  --process.printNcML [=arg(=-)]          print NcML description of process
+  --process.printCS                       print CoordinateSystems of process
   --extract.removeVariable arg            remove variables
   --extract.selectVariables arg           select only those variables
   --extract.reduceDimension.name arg      name of a dimension to reduce
@@ -427,9 +437,16 @@ possible to restart the model at any state, replacing ony the newly created slic
 @subsection howToUseFillWriter How to use the FillWriter
 
 The axes of the output should well-known before model-start and the output-template
-should be written by e.g. ncdump -s, cdl and ncgen 
+should be written by e.g. 
+@verbatim
+  fimex --input.file=example.nc input.printNcML=template.ncml
+  # eventually add axes values or similar to ncml-file
+  fimex --input.file=template.ncml --output.file=template.nc --output.type=nc4
+@endverbatim
 
-@warning ncgen 4.1.1 is known to be broken, please use a newer version, tests with 4.2.1 work well.
+
+This can also be achieved with more tuning possibilities with ncdump -s and ncgen -b.
+@warning ncgen until 4.2.1.1 has some bugs when using 'special' attributes. Please use ncgen >= 4.3.
 
 @verbatim
 
@@ -475,7 +492,7 @@ data:
 
 
 In particular when writing compressed netcdf-4 files, make sure to set the _ChunkSize to match the usual output-size, e.g.
-horizontal size when reading from grib-files.
+horizontal size when reading from grib-files. When creating the template with fimex from ncml, this is done automatically.
 
 The usage of the program is then very simple:
 

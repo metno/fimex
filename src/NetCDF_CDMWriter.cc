@@ -385,11 +385,11 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                         ncChunk[shape.size()-1 - i] = 1;
                     }
                 }
-                if (chunkSize > DEFAULT_CHUNK) {
+                if (chunkSize > 0) {
                     LOG4FIMEX(logger, Logger::DEBUG, "chunk variable " << var.getName() << " to " << join(&ncChunk[0], &ncChunk[0] + shape.size(), "x"));
                     ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get()));
                 }
-                // start compression with shuffling
+                // start compression without shuffling
                 LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
                 ncCheck(nc_def_var_deflate(ncFile->ncId, varId, 0, 1, compression));
             }

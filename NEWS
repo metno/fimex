@@ -1,3 +1,8 @@
+  * 2013-04-08 fimex-0.44.1
+    * allow file-generation from pure ncml
+  * 2013-04-08 fimex-0.44
+    * process.accumulate option to accumulate data along unlim (time)-dimension
+    * automatically create chunks 1-10MB for compressed netcdf-files
   * 2013-03-25 fimex-0.43
     * new FillWriter, allowing netcdf-files to be filled slice by slice
     * change longitude to be within -180/180 from grib-files
