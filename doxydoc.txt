@@ -431,7 +431,7 @@ should be written by e.g. ncdump -s, cdl and ncgen:
 
 @verbatim
 
-@netcdf fillIn2 {
+netcdf fillIn2 {
 dimensions:
     time = UNLIMITED ; // (2 currently)
     sigma = 5 ;
