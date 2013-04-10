@@ -187,6 +187,9 @@ void NetCDF_CDMReader::putDataSlice(const std::string& varName, size_t unLimDimP
         var.setData(DataPtr());
     }
 
+    // no data, no write
+    if (data.get() == 0 || data->size() == 0) return;
+
     ScopedCritical lock(ncFile->mutex);
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
@@ -217,6 +220,9 @@ void NetCDF_CDMReader::putDataSlice(const std::string& varName, const SliceBuild
     if (var.hasData()) {
         var.setData(DataPtr());
     }
+
+    // no data, no write
+    if (data.get() == 0 || data->size() == 0) return;
 
     ScopedCritical lock(ncFile->mutex);
     int varid;
