@@ -48,20 +48,34 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_function )
 {
-    //defaultLogLevel(Logger::DEBUG);
+    defaultLogLevel(Logger::DEBUG);
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/coordTest.nc");
 
     boost::shared_ptr<CDMReader> nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
-    boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
-    proc->deAccumulate("time");
+    double t0 = 1179309600.;
+    {
+        boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
+        proc->deAccumulate("time");
 
-    DataPtr data = proc->getData("time");
-    boost::shared_array<double> time = data->asDouble();
-    BOOST_CHECK_CLOSE(time[0], 1179309600., 1e-5); // unchanged
-    BOOST_CHECK_CLOSE(time[1], 3600., 1e-5);
-    BOOST_CHECK_CLOSE(time[2], 3600., 1e-5);
-    BOOST_CHECK_CLOSE(time[3], 3600., 1e-5);
+        DataPtr data = proc->getData("time");
+        boost::shared_array<double> time = data->asDouble();
+        BOOST_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
+        BOOST_CHECK_CLOSE(time[1], 3600., 1e-5);
+        BOOST_CHECK_CLOSE(time[2], 3600., 1e-5);
+        BOOST_CHECK_CLOSE(time[3], 3600., 1e-5);
+    }
+
+    {
+        boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
+        proc->accumulate("time");
+        DataPtr data = proc->getData("time");
+        boost::shared_array<double> time = data->asDouble();
+        BOOST_CHECK_CLOSE(time[0], t0, 1e-5); // unchanged
+        BOOST_CHECK_CLOSE(time[1], time[0] + t0+3600., 1e-5);
+        BOOST_CHECK_CLOSE(time[2], time[1] + t0+2*3600., 1e-5);
+        BOOST_CHECK_CLOSE(time[3], time[2] + t0+3*3600., 1e-5);
+    }
 
 }
 

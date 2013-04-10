@@ -253,6 +253,8 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
 
 void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count)
 {
+    if (data->size() == 0) return;
+
     size_t sliceLen;
     boost::scoped_array<size_t> mstart(new size_t[(dimLen == 0) ? 1 : dimLen]);
     boost::scoped_array<size_t> mcount(new size_t[(dimLen == 0) ? 1 : dimLen]);

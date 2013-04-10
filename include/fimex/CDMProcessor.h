@@ -49,9 +49,18 @@ public:
     CDMProcessor(boost::shared_ptr<CDMReader> dataReader);
     virtual ~CDMProcessor();
     /**
+     * mark a variable for accumulation along the unlimited dimension, i.e.
+     * vnew(0) = vold(0)
+     * vnew(n) = vold(n)+vold(n-1)
+     * @param varName name of the variable to de-accumulate
+     * @warning does not handle fill-values unless those are NaNs
+     */
+    void accumulate(const std::string& varName);
+    /**
      * mark a variable for de-accumulation along the unlimited dimension, i.e.
      * vnew(n) = vold(n)-vold(n-1)
      * @param varName name of the variable to de-accumulate
+     * @warning does not handle fill-values unless those are NaNs
      */
     void deAccumulate(const std::string& varName);
     /**
