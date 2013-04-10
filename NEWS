@@ -1,3 +1,6 @@
+  * 2013-04-11 fimex-0.44.2
+    * fix bug with netcdf-CDMReaderWriter and empty variables
+    * fix direction of vertical axes for pressure, sigma and sigma-hybrid
   * 2013-04-08 fimex-0.44.1
     * allow file-generation from pure ncml
   * 2013-04-08 fimex-0.44
