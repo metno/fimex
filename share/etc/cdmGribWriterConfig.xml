@@ -59,7 +59,7 @@
     <grib1 parameterNumber="132" codeTable="128" units="m/s"/>
 </parameter>
 <parameter name="x_wind_10m">
-    <grib1 parameterNumber="166" codeTable="128" units="m/s"/>
+    <grib1 parameterNumber="165" codeTable="128" units="m/s"/>
 </parameter>
 <parameter name="y_wind_10m">
     <grib1 parameterNumber="166" codeTable="128" units="m/s"/>

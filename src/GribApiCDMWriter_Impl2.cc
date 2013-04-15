@@ -260,6 +260,73 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0),"");
             }
 
+        } else if (projection == "lambert_conformal_conic") {
+            double lat0, lat1, lat2, lonV;
+            lat0 = 0.;
+            lat1 = 60.;
+            lat2 = 60.;
+            lonV = 0.;
+            CDM::AttrVec::iterator ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("standard_parallel"));
+            if (ait != projAttrs.end()) {
+                DataPtr d = ait->getData();
+                if (d->size() == 1) {
+                    lat1 = d->asDouble()[0];
+                    lat2 = lat1;
+                } else if (d->size() > 1) {
+                    lat1 = d->asDouble()[0];
+                    lat2 = d->asDouble()[1];
+                }
+            } else {
+                throw CDMException("standard_parallel not found for projection " + proj->toString());
+            }
+            ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("longitude_of_central_meridian"));
+            if (ait != projAttrs.end()) {
+                lonV = ait->getData()->asDouble()[0];
+            }
+            ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("latitude_of_projection_origin"));
+            if (ait != projAttrs.end()) {
+                LOG4FIMEX(logger, Logger::WARN, "lambert-projection: latitutde_of_projection_origin not usable in grib-api");
+                lat0 = ait->getData()->asDouble()[0];
+            }
+            const DataPtr xData = cdmReader->getScaledDataInUnit(cdm.getHorizontalXAxis(varName), "m");
+            const DataPtr yData = cdmReader->getScaledDataInUnit(cdm.getHorizontalYAxis(varName), "m");
+            if (xData->size() < 2 || yData->size() < 2) throw CDMException(varName + " variable has to small x-y dimensions, not a grid for GRIB");
+            boost::shared_array<double> xArray = xData->asDouble();
+            double dx = xArray[1] - xArray[0];
+            boost::shared_array<double> yArray = yData->asDouble();
+            double dy = yArray[1] - yArray[0];
+            std::string typeOfGrid("lambert");
+            size_t tog_size = typeOfGrid.size();
+            GRIB_CHECK(grib_set_string(gribHandle.get(), "typeOfGrid", typeOfGrid.c_str(), &tog_size), "");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "Nx", xData->size()),"");
+            GRIB_CHECK(grib_set_long(gribHandle.get(), "Ny", yData->size()),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "DxInMetres", fabs(dx)),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "DyInMetres", fabs(dy)),"");
+            //  this one does not work for reading or writing in grib-api
+            // GRIB_CHECK(grib_set_double(gribHandle.get(), "LaDInDegrees", lat0), "");
+            // avoid unused lat0 warning
+            lat0 *= 1.;
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "Latin1InDegrees", lat1),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "Latin2InDegrees", lat2),"");
+            GRIB_CHECK(grib_set_double(gribHandle.get(), "LoVInDegrees", lonV),"");
+            std::string latitude, longitude;
+            if (cdm.getLatitudeLongitude(varName, latitude, longitude)) {
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(latitude, "degree")->asDouble()[0]),"");
+                GRIB_CHECK(grib_set_double(gribHandle.get(), "longitudeOfFirstGridPointInDegrees", cdmReader->getScaledDataInUnit(longitude, "degree")->asDouble()[0]),"");
+            } else {
+                throw CDMException("unable to find latitude/longitude for variable " + varName);
+            }
+            if (dy < 0) {
+                // reading north -> south
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+            } else {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+            }
+            if (dx < 0) {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1),"");
+            } else {
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 0),"");
+            }
         } else if (projection == "transverse_mercator") {
             throw CDMException("grid_mapping_name " + projection + " not supported yet by GribApiCDMWriter" );
         } else {
