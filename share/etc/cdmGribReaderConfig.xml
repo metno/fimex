@@ -383,13 +383,13 @@
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
-    <parameter name="u" type="float">
+    <parameter name="u_wind" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m s^-1" type="string" />
     </parameter>
-    <parameter name="v" type="float">
+    <parameter name="v_wind" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="standard_name" value="y_wind" type="string" />
@@ -588,9 +588,42 @@
         <attribute name="units" value="Pa" type="string" />
     </parameter>
     
-
-
-
+    <!-- wave parameters -->
+    <parameter name="significant_wave_height" type="float">
+      <grib1 indicatorOfParameter="229" gribTablesVersionNo="140" />
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="units" value="m" type="string"/>
+      <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string"/>
+    </parameter>
+    <parameter name="wave_direction" type="float">
+      <grib1 indicatorOfParameter="230" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="units" value="degree" type="string"/>
+      <attribute name="standard_name" value="sea_surface_wave_to_direction" type="string"/>
+    </parameter>
+    <parameter name="peak_wave_period"  type="float">
+      <grib1 indicatorOfParameter="231" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="long_name" value="sea_surface_wave_peak_period" type="string"/>
+      <attribute name="units" value="s" type="string"/>
+    </parameter>
+    <parameter  name="significant_wave_period"  type="float">
+      <grib1 indicatorOfParameter="232" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" /> 
+      <attribute name="units" value="s" type="string"/>
+      <attribute name="long_name" value="sea_surface_wave_significant_period" type="string"/>
+    </parameter>
+    <parameter name="cdww"  type="float">
+      <grib1 indicatorOfParameter="233" gribTablesVersionNo="140"/>
+      <attribute name="units" value="" type="string"/>
+      <attribute name="long_name" value="sea_surface_wave_drag_coefficient" type="string"/>
+    </parameter>
+    <parameter name="wind_speed_10m"  type="float">
+      <grib1 indicatorOfParameter="245" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+      <attribute name="units" value="m/s" type="string"/>
+      <attribute name="standard_name" value="wind_speed" type="string"/>
+    </parameter>
 </variables>
 
 </cdmGribReaderConfig>
