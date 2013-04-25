@@ -97,6 +97,7 @@
     <attribute name="units" value="" type="string" />
 </vertical_axis>
 <vertical_axis id="pressure" name="pressure" felt_id="1" type="short">
+	<attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="description" value="pressure" type="string" />
     <attribute name="long_name" value="pressure" type="string" />
     <attribute name="standard_name" value="air_pressure" type="string" />
@@ -114,9 +115,18 @@
 <vertical_axis id="h" name="h" felt_id="3" type="short">
     <attribute name="description" value="vertical coordinate used for wave variables, value: 0" type="string" />
     <attribute name="long_name" value="vertical_wave_coordinate" type="string" />
+	<attribute name="standard_name" value="h" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="units" value="1" type="string" />
 </vertical_axis>
 <vertical_axis id="theta" name="theta" felt_id="4" type="short">
-    <attribute name="description" value="isentrop layer?" type="string" />
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="description" value="isentrop layer" type="string" />
+	<attribute name="long_name" value="isentropic_levels" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="standard_name" value="isentropic_levels" type="string" />
+	<attribute name="units" value="K" type="string" />
+	<attribute name="scale_factor" value="0.1" type="float" />
 </vertical_axis>
 <vertical_axis id="depth" name="depth" felt_id="5" type="short">
     <attribute name="description" value="geopotential level relative to equilibrium surface" type="string" />
@@ -131,6 +141,7 @@
     <attribute name="positive" value="down" type="string" />
 </vertical_axis>
 <vertical_axis id="sigma" name="sigma" felt_id="7" type="short">
+	<attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="description" value="ocean sigma coordinate, surface is 0, bottom is 1" type="string" />
     <attribute name="long_name" value="ocean_sigma_coordinate" type="string" />
     <attribute name="positive" value="down" type="string" />
@@ -143,9 +154,17 @@
     <attribute name="long_name" value="model_surface" type="string" />
     <attribute name="units" value="1" type="string" />
 </vertical_axis>
+<vertical_axis id="pv" name="pv" felt_id="9" type="short">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="description" value="PV Levels" type="string" />
+	<attribute name="long_name" value="pv" type="string" />
+	<attribute name="standard_name" value="pv" type="string" />
+	<attribute name="positive" value="up" type="string" />
+	<attribute name="scale_factor" value="0.1" type="float" />
+</vertical_axis>
 <vertical_axis id="k" name="k" felt_id="10" type="double">
     <attribute name="standard_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
-    <attribute name="formular" value="p(n,k,j,i) = ap(k) + b(k)*ps(n,j,i)" type="string" />
+    <attribute name="formula" value="p(n,k,j,i) = ap(k) + b(k)*ps(n,j,i)" type="string" />
     <attribute name="formula_terms" value="ap: ap b: b ps: ps p0: p0" type="string" />
     <attribute name="long_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
     <attribute name="positive" value="down" type="string" />
@@ -170,5 +189,19 @@
         <values>100000</values>
     </additional_axis_variable>
 -->
+</vertical_axis>
+<vertical_axis id="l" name="l" felt_id="12" type="double">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="standard_name" value="atmosphere_sigma_pressure_coordinate" type="string" />
+	<attribute name="long_name" value="atmosphere_sigma_pressure_coordinate" type="string" />
+	<attribute name="positive" value="up" type="string" />
+</vertical_axis>
+<vertical_axis id="temperature" name="temperature" felt_id="15" type="short">
+	<attribute name="_FillValue" value="-32767" type="short" />
+	<attribute name="description" value="isoterm surfaces" type="string" />
+	<attribute name="long_name" value="temperature_coordinate" type="string" />
+	<attribute name="positive" value="down" type="string" />
+	<attribute name="standard_name" value="air_temperature" type="string" />
+	<attribute name="scale_factor" value="0.1" type="float" />
 </vertical_axis>
 </axes>
