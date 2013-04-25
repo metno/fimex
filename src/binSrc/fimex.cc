@@ -799,7 +799,7 @@ int run(int argc, char* args[])
         ("process.accumulateVariable", po::value<vector<string> >()->composing(), "accumulate variable along unlimited dimension")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
         ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
-        ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
+        ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "rotate this vector y component from grid-direction to latlon direction")
 #if BOOST_VERSION >= 104000
         ("process.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of process")
 #else
