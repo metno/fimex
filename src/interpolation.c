@@ -285,7 +285,8 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             if (oy > 1) {
                 delta = xDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
             } else {
-                delta = xDelta; // no neighbors?
+                // no neighbors, e.g. rotation to single point
+                delta = (in_x_field[0] > 1) ? (in_x_field[0]*xDelta) : xDelta;
             }
         }
         for (int y = 0; y < oy; ++y) {
@@ -302,15 +303,17 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             free(out_x_delta_proj_axis);
             return MIFI_ERROR;
         }
+//        fprintf(stderr, "delta_x: %f, in_x_field0: %f, out_x_field0: %f, out_x_delt_proj_axis0: %f\n", delta, in_x_field[0], out_x_field[0], out_x_delta_proj_axis[0] );
 
-        // the deltaInv is rather important for sign than for magnitude
-        double deltaInv = 1/delta;
+        // direction of rotation
+        double sign = delta > 0 ? 1. : -1.;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-                matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
-                        - out_x_field[y*ox+x]) * deltaInv;
-                matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
-                        - out_y_field[y*ox+x]) * deltaInv;
+                double phi = atan2((out_y_delta_proj_axis[y*ox+x] - out_y_field[y*ox+x]),
+                      (out_x_delta_proj_axis[y*ox+x] - out_x_field[y*ox+x]));
+                //fprintf(stderr, "atan2-x: %f\n", phi/MIFI_PI*180);
+                matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = sign*cos(phi);
+                matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = sign*sin(phi);
             }
         }
     }
@@ -329,7 +332,8 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             if (oy > 1) {
                 delta = xDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
             } else {
-                delta = xDelta; // no neighbors?
+                // no neighbors, e.g. rotation to single point
+                delta = (in_x_field[0] > 1) ? (in_x_field[0]*xDelta) : xDelta;
             }
         }
         for (int y = 0; y < oy; ++y) {
@@ -348,15 +352,18 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             return MIFI_ERROR;
         }
 
-        // the deltaInv is rather important for sign than for magnitude
-        double deltaInv = 1/delta;
+        // direction of rotation
+        double sign = delta > 0 ? 1. : -1.;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-                matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_delta_proj_axis[y*ox+x]
-                        - out_x_field[y*ox+x]) * deltaInv;
-                matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_delta_proj_axis[y*ox+x]
-                        - out_y_field[y*ox+x]) * deltaInv;
-                //fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[mifi_3d_array_position(x,y,0,ox,oy,4)], matrix[mifi_3d_array_position(x,y,1,ox,oy,4)], matrix[mifi_3d_array_position(x,y,2,ox,oy,4)], matrix[mifi_3d_array_position(x,y,3,ox,oy,4)]);
+                // phi might be slightly different than phi for x, this will
+                // be corrected in post-processing
+                double phi = atan2((out_x_delta_proj_axis[y*ox+x] - out_x_field[y*ox+x]),
+                      (out_y_delta_proj_axis[y*ox+x] - out_y_field[y*ox+x]));
+                //fprintf(stderr, "atan2-y: %f\n", at/MIFI_PI*180);
+                matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = sign* sin(phi);
+                matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = sign* cos(phi);
+//                fprintf(stderr, "Proj matrix: %d %d: %e %e %e %e\n", x, y, matrix[mifi_3d_array_position(0,x,y,4,ox,oy)], matrix[mifi_3d_array_position(1,x,y,4,ox,oy)], matrix[mifi_3d_array_position(2,x,y,4,ox,oy)], matrix[mifi_3d_array_position(3,x,y,4,ox,oy)]);
             }
         }
     }
@@ -404,7 +411,11 @@ int mifi_get_vector_reproject_matrix_field(const char* proj_input,
         retVal = MIFI_ERROR;
     } else {
         // start real calc
+//        for (int i = 0; i < ox*oy; i++) {
+//           fprintf(stderr, "in: %f,%f out: %f,%f %d %d\n", in_x_field[i], in_y_field[i], out_x_field[i], out_y_field[i], ox, oy);
+//        }
         retVal = mifi_get_vector_reproject_matrix_proj(inputPJ, outputPJ, in_x_field, in_y_field, out_x_field, out_y_field, pointsZ, ox, oy, matrix);
+//        fprintf(stderr, "matrix: %e %e %e %e\n", matrix[0], matrix[1], matrix[2], matrix[3]);
     }
     pj_free(inputPJ);
     pj_free(outputPJ);
