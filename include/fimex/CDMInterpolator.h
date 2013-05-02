@@ -99,6 +99,7 @@ private:
 public:
     CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
     virtual ~CDMInterpolator();
+    using CDMReader::getDataSlice;
     /**
      * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
      *

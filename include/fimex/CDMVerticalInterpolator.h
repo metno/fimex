@@ -70,6 +70,7 @@ public:
      */
     CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, std::string verticalType, std::string verticalInterpolationMethod, const std::vector<double> level1, const std::vector<double> level2);
     virtual ~CDMVerticalInterpolator();
+    using CDMReader::getDataSlice;
     /**
      * retrieve data from the underlying dataReader and interpolate the values to the new vertical levels
      */

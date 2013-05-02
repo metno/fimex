@@ -58,6 +58,7 @@ public:
      */
     CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations);
     virtual ~CDMPressureConversions() {}
+    using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 private:
     boost::shared_ptr<CDMReader> dataReader_;

@@ -64,6 +64,7 @@ public:
      */
     CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader, std::string autoConfString="", std::string configFile="");
     virtual ~CDMQualityExtractor() {};
+    using CDMReader::getDataSlice;
     /**
      * Read and manipulate the data
      */

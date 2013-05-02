@@ -52,6 +52,7 @@ public:
 	CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
 	virtual ~CDMExtractor();
 
+	using CDMReader::getDataSlice;
 	virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 
 	/**

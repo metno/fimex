@@ -41,6 +41,7 @@ class CDMTimeInterpolator: public MetNoFimex::CDMReader
 public:
     CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader);
     virtual ~CDMTimeInterpolator();
+    using CDMReader::getDataSlice;
     /**
      * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
      *

@@ -119,6 +119,7 @@ public:
     void addMergedVariable(const std::string& name)
         { addMergedVariable(name, name); }
 
+    using CDMReader::getDataSlice;
     virtual boost::shared_ptr<Data> getDataSlice(const std::string &varName, std::size_t unLimDimPos);
 
 private:

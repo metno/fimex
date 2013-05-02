@@ -121,7 +121,8 @@ public:
      * @param sb a SliceBuilder generated from this CDMReaders CDM
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      * @warn This method has a default implementation depending on #getDataSlice(varName, unLimDimPos),
-     *       but should be implemented for performance reasons.
+     *       but should be implemented for performance reasons. If you want to fall back to the default implementation,
+     *       remember to use 'using CDMReader::getDataSlice;'
      */
     virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
