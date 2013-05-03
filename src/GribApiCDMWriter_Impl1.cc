@@ -173,7 +173,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 // reading north -> south
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
             } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 1),"");
             }
             if (di < 0) {
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1),"");
@@ -242,7 +242,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 // reading north -> south
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
             } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 1),"");
             }
             if (di < 0) {
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1),"");
@@ -317,7 +317,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 // reading north -> south
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
             } else {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 0),"");
+                GRIB_CHECK(grib_set_long(gribHandle.get(), "jScansPositively", 1),"");
             }
             if (dx < 0) {
                 GRIB_CHECK(grib_set_long(gribHandle.get(), "iScansNegatively", 1),"");
