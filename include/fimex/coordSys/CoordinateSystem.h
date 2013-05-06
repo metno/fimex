@@ -226,6 +226,12 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
  *          @endverbatim
  */
 std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
+/**
+ * set spatial-vector properties according to convention
+ * won't overwrite any existing spatial vector properties
+ * @param reader
+ */
+void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader);
 
 /**
  * fetch all coordinate system from a MetNoFimex::CDM

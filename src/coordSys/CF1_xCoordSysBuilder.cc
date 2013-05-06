@@ -29,6 +29,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDMAttribute.h"
+#include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Units.h"
 #include <set>
@@ -426,5 +427,41 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     }
     return outCSs;
 }
+
+void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+{
+    CDM& cdm = reader->getInternalCDM();
+    vector<pair<string, string> > xy_vectors;
+    xy_vectors.push_back(make_pair("x_wind", "y_wind"));
+    xy_vectors.push_back(make_pair("grid_eastward_wind", "grid_northward_wind"));
+    xy_vectors.push_back(make_pair("sea_water_x_velocity", "sea_water_y_velocity"));
+    xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
+    xy_vectors.push_back(make_pair("bolus_sea_water_x_velocity", "bolus_sea_water_y_velocity"));
+    xy_vectors.push_back(make_pair("surface_geostrophic_sea_water_x_velocity", "surface_geostrophic_sea_water_y_velocity"));
+    xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
+    for (size_t i = 0; i < xy_vectors.size(); i++) {
+        vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).first+"\\E");
+        vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).second+"\\E");
+        for (vector<string>::iterator xVar = xVars.begin(); xVar != xVars.end(); ++xVar) {
+            CDMVariable& xv = cdm.getVariable(*xVar);
+            if (xv.isSpatialVector()) continue;
+            const vector<string>& xSh = xv.getShape();
+            string xShape = join(xSh.begin(), xSh.end(), ",");
+            for (vector<string>::iterator yVar = yVars.begin(); yVar != yVars.end(); ++yVar) {
+                CDMVariable& yv = cdm.getVariable(*yVar);
+                if (yv.isSpatialVector()) continue;
+                const vector<string>& ySh = yv.getShape();
+                string yShape = join(ySh.begin(), ySh.end(), ",");
+                if (xShape == yShape) {
+                    xv.setAsSpatialVector(*yVar, "x");
+                    yv.setAsSpatialVector(*xVar, "y");
+                    LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "makeing "<< *xVar << "," << *yVar << " a vector");
+                    break;
+                }
+            }
+        }
+    }
+}
+
 
 } /* namespace MetNoFimex */

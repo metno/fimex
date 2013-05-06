@@ -44,6 +44,8 @@ public:
     virtual bool isMine(const CDM& cdm);
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm);
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
+    virtual void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader);
+
 };
 
 } /* namespace MetNoFimex */

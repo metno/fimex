@@ -482,4 +482,24 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
     return coordSystems;
 }
 
+void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+{
+    vector<boost::shared_ptr<CoordSysBuilder> > builders;
+    // support more conventions
+    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new CF1_xCoordSysBuilder()));
+    builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
+
+    string logCat = "fimex/coordSys/CoordinateSystem";
+    for (size_t i = 0; i < builders.size(); ++i) {
+        boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
+        if (builder->isMine(reader->getCDM())) {
+            builder->enhanceVectorProperties(reader);
+            LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "found convention: " << builder->getName() << ", enhancing vectors");
+        } else {
+            LOG4FIMEX(getLogger(logCat), Logger::DEBUG, "no convention found for convention: " << builder->getName());
+        }
+    }
+}
+
+
 }

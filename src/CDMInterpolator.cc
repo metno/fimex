@@ -94,6 +94,7 @@ CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
     p_->maxDistance = -1;
     p_->latitudeName = "lat";
     p_->longitudeName = "lon";
+    enhanceVectorProperties(p_->dataReader); // set spatial-vectors
     *cdm_ = p_->dataReader->getCDM();
 }
 
@@ -176,12 +177,12 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(" << unLimDimPos << ")");
                 boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
                 const std::string& direction = variable.getSpatialVectorDirection();
-                if (direction.find("x") != string::npos || direction.find("longitude") != string::npos) {
+                if (direction.find("x") != string::npos) {
                     cvr->reprojectValues(iArray, counterpartiArray, newSize);
-                } else if (direction.find("y") != string::npos || direction.find("latitude") != string::npos) {
+                } else if (direction.find("y") != string::npos) {
                     cvr->reprojectValues(counterpartiArray, iArray, newSize);
                 } else {
-                    throw CDMException("could not find x,longitude,y,latitude direction for vector: " + varName + ", direction: " + direction);
+                    throw CDMException("could not find x,y direction for vector: " + varName + ", direction: " + direction);
                 }
             } else {
                 LOG4FIMEX(logger, Logger::WARN, "Cannot reproject vector " << variable.getName());
