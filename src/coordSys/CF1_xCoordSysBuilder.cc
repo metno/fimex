@@ -435,6 +435,7 @@ void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> 
     xy_vectors.push_back(make_pair("x_wind", "y_wind"));
     xy_vectors.push_back(make_pair("grid_eastward_wind", "grid_northward_wind"));
     xy_vectors.push_back(make_pair("sea_water_x_velocity", "sea_water_y_velocity"));
+    xy_vectors.push_back(make_pair("x_sea_water_velocity", "y_sea_water_velocity"));
     xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
     xy_vectors.push_back(make_pair("bolus_sea_water_x_velocity", "bolus_sea_water_y_velocity"));
     xy_vectors.push_back(make_pair("surface_geostrophic_sea_water_x_velocity", "surface_geostrophic_sea_water_y_velocity"));
