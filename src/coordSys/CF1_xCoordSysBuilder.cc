@@ -439,6 +439,7 @@ void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> 
     xy_vectors.push_back(make_pair("bolus_sea_water_x_velocity", "bolus_sea_water_y_velocity"));
     xy_vectors.push_back(make_pair("surface_geostrophic_sea_water_x_velocity", "surface_geostrophic_sea_water_y_velocity"));
     xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
+    xy_vectors.push_back(make_pair("sea_ice_x_velocity", "sea_ice_y_velocity"));
     for (size_t i = 0; i < xy_vectors.size(); i++) {
         vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).first+"\\E");
         vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).second+"\\E");
