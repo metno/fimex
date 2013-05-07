@@ -167,7 +167,10 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         size_t newSize = 0;
         LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(" << unLimDimPos << ")");
         boost::shared_array<float> iArray = ci->interpolateValues(array, data->size(), newSize);
-        if (variable.isSpatialVector()) {
+        const std::string& direction = variable.getSpatialVectorDirection();
+        if (variable.isSpatialVector() &&
+             (!((direction.find("x") == string::npos) && (direction.find("y") == string::npos))))  {
+            // vector in x/y direction
             if (p_->cachedVectorReprojection.find(horizontalId) != p_->cachedVectorReprojection.end()) {
                 boost::shared_ptr<CachedVectorReprojection> cvr = p_->cachedVectorReprojection[horizontalId];
                 // fetch and transpose vector-data
@@ -176,7 +179,6 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 boost::shared_array<float> counterPartArray = data2InterpolationArray(p_->dataReader->getDataSlice(counterpart, unLimDimPos), cdm_->getFillValue(counterpart));
                 LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(" << unLimDimPos << ")");
                 boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
-                const std::string& direction = variable.getSpatialVectorDirection();
                 if (direction.find("x") != string::npos) {
                     cvr->reprojectValues(iArray, counterpartiArray, newSize);
                 } else if (direction.find("y") != string::npos) {
@@ -1054,7 +1056,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
         p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
     }
-    if (hasSpatialVectors()) {
+    if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible to interpolate with forward-interpolation");
     }
 
@@ -1143,7 +1145,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached coordinate interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
         p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
     }
-    if (hasSpatialVectors()) {
+    if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible? to interpolate with coordinate-interpolation");
     }
 }
@@ -1208,7 +1210,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
         LOG4FIMEX(logger, Logger::DEBUG, "...created");
 
-        if (hasSpatialVectors()) {
+        if (hasXYSpatialVectors()) {
 
             // prepare interpolation of vectors
             LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
@@ -1518,21 +1520,45 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
                                                                                                                                 def.yAxisData->size(),
                                                                                                                                 out_x_axis.size(),
                                                                                                                                 out_y_axis.size()));
+        if (hasXYSpatialVectors()) {
+            size_t xAxisSize = def.xAxisData->size();
+            size_t yAxisSize = def.yAxisData->size();
+            LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
+            boost::shared_array<double> matrix(new double[xAxisSize * yAxisSize * 4]);
+            // prepare interpolation of vectors
+            boost::shared_array<double> xAxisD = def.xAxisData->asDouble();
+            boost::shared_array<double> yAxisD = def.yAxisData->asDouble();
+            if (csi->second->getProjection()->isDegree()) {
+                transform(xAxisD.get(), xAxisD.get()+xAxisSize, xAxisD.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
+                transform(yAxisD.get(), yAxisD.get()+yAxisSize, yAxisD.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
+            }
+            boost::shared_array<double> inXField(new double[xAxisSize* yAxisSize]);
+            boost::shared_array<double> inYField(new double[xAxisSize* yAxisSize]);
+            for (size_t i = 0; i < xAxisSize; i++) {
+                for (size_t j = 0; j < yAxisSize; j++) {
+                    inXField[xAxisSize*j + i] = xAxisD[i];
+                    inYField[xAxisSize*j + i] = yAxisD[j];
+                }
+            }
+            // prepare interpolation of vectors
+            mifi_get_vector_reproject_matrix_field(csi->second->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4, &inXField[0], &inYField[0], xAxisSize, yAxisSize, matrix.get());
+            p_->cachedVectorReprojection[csMap.begin()->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
+
+        }
     }
 
-    if (hasSpatialVectors()) {
-        // prepare interpolation of vectors
-        LOG4FIMEX(logger, Logger::WARN, "spatial vectors not implemented for translation to lat-lon list");
-    }
 }
 
-bool CDMInterpolator::hasSpatialVectors() const
+bool CDMInterpolator::hasXYSpatialVectors() const
 {
     const CDM::VarVec& variables = getCDM().getVariables();
     for (CDM::VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
         if (p_->projectionVariables.find(varIt->getName()) != p_->projectionVariables.end()) {
             if (varIt->isSpatialVector()) {
-                return true;
+                const string& direction = varIt->getSpatialVectorDirection();
+                if (!((direction.find("x") == string::npos) && (direction.find("y") == string::npos))) {
+                    return true;
+                }
             }
         }
     }

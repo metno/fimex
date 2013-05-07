@@ -95,7 +95,7 @@ private:
      * map of CoordinateSystem::horizontalId() and the CoordinateSystem
      */
     std::map<std::string, boost::shared_ptr<const CoordinateSystem> > findBestCoordinateSystemsAndProjectionVars(bool withProjection);
-    bool hasSpatialVectors() const;
+    bool hasXYSpatialVectors() const;
 public:
     CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
     virtual ~CDMInterpolator();

@@ -441,9 +441,18 @@ void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> 
     xy_vectors.push_back(make_pair("surface_geostrophic_sea_water_x_velocity", "surface_geostrophic_sea_water_y_velocity"));
     xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
     xy_vectors.push_back(make_pair("sea_ice_x_velocity", "sea_ice_y_velocity"));
+    xy_vectors.push_back(make_pair("sea_ice_x_transport", "sea_ice_y_transport"));
+    xy_vectors.push_back(make_pair("sea_ice_x_displacement", "sea_ice_y_displacement"));
+    xy_vectors.push_back(make_pair("land_ice_x_velocity", "land_ice_y_velocity"));
+    xy_vectors.push_back(make_pair("land_ice_basal_x_velocity", "land_ice_basal_y_velocity"));
+    xy_vectors.push_back(make_pair("land_ice_vertical_mean_x_velocity", "land_ice_vertical_mean_y_velocity"));
+    xy_vectors.push_back(make_pair("ocean_heat_x_transport", "ocean_heat_y_transport"));
+    xy_vectors.push_back(make_pair("ocean_salt_x_transport", "ocean_salt_y_transport"));
+    xy_vectors.push_back(make_pair("ocean_volume_x_transport", "ocean_volume_y_transport"));
+
     for (size_t i = 0; i < xy_vectors.size(); i++) {
-        vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).first+"\\E");
-        vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).second+"\\E");
+        vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).first+"\\E.*");
+        vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).second+"\\E.*");
         for (vector<string>::iterator xVar = xVars.begin(); xVar != xVars.end(); ++xVar) {
             CDMVariable& xv = cdm.getVariable(*xVar);
             if (xv.isSpatialVector()) continue;
