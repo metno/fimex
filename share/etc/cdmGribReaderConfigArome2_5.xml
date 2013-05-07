@@ -98,23 +98,23 @@
     <attribute name="positive" value="up" type="string" />
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
-<vertical_axis id="isotherm_0C_level" name="isotherm_0C_level" grib2_id="4" type="short">
+<vertical_axis id="isotherm_0C_level" name="isotherm_0C_level" grib1_id="4" grib2_id="4" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="description" value="level of 0degreeC isotherm" type="string" />
     <attribute name="long_name" value="isotherm 0C" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
-<vertical_axis id="maximum_wind_level" name="maximum_wind_level" grib2_id="6" type="short">
+<vertical_axis id="maximum_wind_level" name="maximum_wind_level" grib1_id="6" grib2_id="6" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="long_name" value="max wind level" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
-<vertical_axis id="tropopause" name="tropopause" grib2_id="7" type="short">
+<vertical_axis id="tropopause" name="tropopause" grib1_id="7" grib2_id="7" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="long_name" value="Tropopause" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
-<vertical_axis id="top_of_atmosphere" name="top_of_atmosphere" grib2_id="8" type="short">
+<vertical_axis id="top_of_atmosphere" name="top_of_atmosphere" grib1_id="8" grib2_id="8" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="long_name" value="nominal top of atmosphere" type="string" />
     <attribute name="positive" value="up" type="string" />
