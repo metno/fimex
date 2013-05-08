@@ -1446,11 +1446,11 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         def.key = csi->first;
         if (csi->second->hasProjection()) {
             std::string orgUnit = csi->second->getProjection()->isDegree() ? "degree" : "m";
-            def.xAxisData = getScaledDataInUnit(csi->second->getGeoXAxis()->getName(), orgUnit);
-            def.yAxisData = getScaledDataInUnit(csi->second->getGeoYAxis()->getName(), orgUnit);
+            def.xAxisData = p_->dataReader->getScaledDataInUnit(csi->second->getGeoXAxis()->getName(), orgUnit);
+            def.yAxisData = p_->dataReader->getScaledDataInUnit(csi->second->getGeoYAxis()->getName(), orgUnit);
         } else {
-            def.xAxisData = getScaledData(csi->second->getGeoXAxis()->getName());
-            def.yAxisData = getScaledData(csi->second->getGeoYAxis()->getName());
+            def.xAxisData = p_->dataReader->getScaledData(csi->second->getGeoXAxis()->getName());
+            def.yAxisData = p_->dataReader->getScaledData(csi->second->getGeoYAxis()->getName());
         }
 
         orgGrids.insert(std::make_pair<string, CSGridDefinition>(def.key, def));
@@ -1520,29 +1520,24 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
                                                                                                                                 def.yAxisData->size(),
                                                                                                                                 out_x_axis.size(),
                                                                                                                                 out_y_axis.size()));
-        if (hasXYSpatialVectors()) {
-            size_t xAxisSize = def.xAxisData->size();
-            size_t yAxisSize = def.yAxisData->size();
+        if (csi->second->hasProjection() && hasXYSpatialVectors()) {
+            // as template data is in degrees we have to do deg2rad
+            boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
+            boost::shared_array<double> tmplLonArray = tmplLonVals->asDouble();
+            vector<double> latY(tmplLatArray.get(), tmplLatArray.get()+tmplLatVals->size());
+            vector<double> lonX(tmplLonArray.get(), tmplLonArray.get()+tmplLonVals->size());
+            transform(&latY[0], &latY[0]+tmplLatVals->size(), &latY[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+            transform(&lonX[0], &lonX[0]+tmplLonVals->size(), &lonX[0], bind1st(multiplies<double>(), DEG_TO_RAD));
+
+            std::string orgUnit = csi->second->getProjection()->isDegree() ? "rad" : "m";
             LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
-            boost::shared_array<double> matrix(new double[xAxisSize * yAxisSize * 4]);
+            size_t outSize = tmplLatVals->size();
+            boost::shared_array<double> matrix(new double[outSize * 4]);
             // prepare interpolation of vectors
-            boost::shared_array<double> xAxisD = def.xAxisData->asDouble();
-            boost::shared_array<double> yAxisD = def.yAxisData->asDouble();
-            if (csi->second->getProjection()->isDegree()) {
-                transform(xAxisD.get(), xAxisD.get()+xAxisSize, xAxisD.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
-                transform(yAxisD.get(), yAxisD.get()+yAxisSize, yAxisD.get(), bind1st(multiplies<double>(), DEG_TO_RAD));
-            }
-            boost::shared_array<double> inXField(new double[xAxisSize* yAxisSize]);
-            boost::shared_array<double> inYField(new double[xAxisSize* yAxisSize]);
-            for (size_t i = 0; i < xAxisSize; i++) {
-                for (size_t j = 0; j < yAxisSize; j++) {
-                    inXField[xAxisSize*j + i] = xAxisD[i];
-                    inYField[xAxisSize*j + i] = yAxisD[j];
-                }
-            }
-            // prepare interpolation of vectors
-            mifi_get_vector_reproject_matrix_field(csi->second->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4, &inXField[0], &inYField[0], xAxisSize, yAxisSize, matrix.get());
-            p_->cachedVectorReprojection[csMap.begin()->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
+            mifi_get_vector_reproject_matrix_points(csi->second->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4,
+                    csi->second->getProjection()->isDegree() ? 0 : 1,
+                    &lonX[0], &latY[0], outSize, matrix.get());
+            p_->cachedVectorReprojection[csMap.begin()->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1));
 
         }
     }

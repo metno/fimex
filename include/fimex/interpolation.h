@@ -180,6 +180,26 @@ int mifi_get_vector_reproject_matrix_field(const char* proj_input,
 
 
 /**
+ * calculate the vector reprojection matrix when projecting to a list of n-points
+ *
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
+ * @param proj_input proj4-string of projection of infield
+ * @param proj_output proj4-string of projection of outfield
+ * @param inputIsMetric 1 if projection, 0 if (rotated) latlon
+ * @param out_x_points output-points values in the output-projection out_x_points[on]. The values must be in radian or m.
+ * @param out_y_points output-points values in the output-projection out_y_points[on]. The values must be in radian or m.
+ * @param on number of output-points
+ * @param matrix preallocated matrix of size (4*on)
+ * @return MIFI_OK or error value
+ */
+int mifi_get_vector_reproject_matrix_points(const char* proj_input,
+        const char* proj_output,
+        int inputIsMetric,
+        const double* out_x_points, const double* out_y_points, // both size on, must be in m or rad
+        int on,
+        double* matrix
+        );
+/**
  * Get the nearest neighbor of a value. Values are rounded to array-position.
  *
  * @param infield 3d fortran array of size ix,iy,iz

@@ -196,63 +196,78 @@ int mifi_interpolate_f(const int method,
     return mifi_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
-// common implementation of mifi_get_vector_reproject_matrix_*
-static int mifi_get_vector_reproject_matrix_proj_new(projPJ inputPJ, projPJ outputPJ,
-                        const double* in_x_field, const double* in_y_field, // both ox*oy
-                        const double* out_x_field, const double* out_y_field, // both ox*oy
-                        double* pointsZ, // ox*oy, used within proj, but values not used
-                        int ox, int oy,
-                        double* matrix) // 4*ox*oy
+static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, projPJ outputPJ,
+        const double* in_x_field, const double* in_y_field, // both on
+        const double* out_x_field, const double* out_y_field, // both on
+        double* pointsZ, // on, used within proj, but values not used
+        double deltaX, double deltaY,
+        int on, // number of points in output
+        double* matrix) // 4*on
 {
+    // calculation of deltas: (x+d, y), (x, y+d) -> proj-values
+    double* out_x_delta_proj_axis = (double*) malloc(on*sizeof(double));
+    double* out_y_delta_proj_axis = (double*) malloc(on*sizeof(double));
 
     {
         // conversion along x axis
-        if (ox > 1) {
-            double delta = in_x_field[1] - in_x_field[0];
-
-            // the deltaInv is rather important for sign than for magnitude
-            double deltaInv = 1/delta;
-            for (int y = 0; y < oy; ++y) {
-                for (int x = 0; x < (ox-1); ++x) {
-                    matrix[mifi_3d_array_position(0,x,y,4,ox,oy)] = (out_x_field[y*ox+(x+1)]
-                                                                    - out_x_field[y*ox+x]) * deltaInv;
-                    matrix[mifi_3d_array_position(1,x,y,4,ox,oy)] = (out_y_field[y*ox+(x+1)]
-                                                                    - out_y_field[y*ox+x]) * deltaInv;
-                }
-            }
+        if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL
+                || pointsZ == NULL ) {
+            fprintf(stderr, "error allocating memory of double(%d)", on);
+            exit(1);
         }
-        // cover border (and ox = 1) case, no rotation
-        for (int y = 0; y < oy; ++y) {
-            matrix[mifi_3d_array_position(0,ox-1,y,4,ox,oy)] = 1;
-            matrix[mifi_3d_array_position(1,ox-1,y,4,ox,oy)] = 0;
+
+        for (int i = 0; i < on; ++i) {
+            out_x_delta_proj_axis[i] = in_x_field[i] + deltaX;
+            out_y_delta_proj_axis[i] = in_y_field[i];
+            pointsZ[i] = 0;
+        }
+        if (pj_transform(inputPJ, outputPJ, on, 0, out_x_delta_proj_axis, out_y_delta_proj_axis, pointsZ) != 0) {
+            fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+            free(out_y_delta_proj_axis);
+            free(out_x_delta_proj_axis);
+            return MIFI_ERROR;
+        }
+        double sign = deltaX > 0 ? 1. : -1.;
+        for (int i = 0; i < on; ++i) {
+            double phi = atan2((out_y_delta_proj_axis[i] - out_y_field[i]),
+                    (out_x_delta_proj_axis[i] - out_x_field[i]));
+            //fprintf(stderr, "atan2-x: %f\n", phi/MIFI_PI*180);
+            matrix[0 + 4 * i] = sign * cos(phi);
+            matrix[1 + 4 * i] = sign * sin(phi);
         }
     }
-
     {
         // conversion along y axis
-        if (oy > 1) {
-            double delta = in_y_field[(1)*ox +(0)] - in_y_field[0];
-            // the deltaInv is rather important for sign than for magnitude
-            double deltaInv = 1/delta;
-            for (int y = 0; y < (oy-1); ++y) {
-                for (int x = 0; x < ox; ++x) {
-                    matrix[mifi_3d_array_position(2,x,y,4,ox,oy)] = (out_x_field[(y+1)*ox+x]
-                                                                    - out_x_field[y*ox+x]) * deltaInv;
-                    matrix[mifi_3d_array_position(3,x,y,4,ox,oy)] = (out_y_field[(y+1)*ox+x]
-                                                                    - out_y_field[y*ox+x]) * deltaInv;
-                //fprintf(stderr, "Proj matrix: %d %d: %f %f %f %f\n", x, y, matrix[mifi_3d_array_position(x,y,0,ox,oy,4)], matrix[mifi_3d_array_position(x,y,1,ox,oy,4)], matrix[mifi_3d_array_position(x,y,2,ox,oy,4)], matrix[mifi_3d_array_position(x,y,3,ox,oy,4)]);
-                }
-            }
+        if (out_x_delta_proj_axis == NULL || out_y_delta_proj_axis == NULL
+                || pointsZ == NULL ) {
+            fprintf(stderr, "error allocating memory of double(%d)", on);
+            exit(1);
         }
-        // cover border (and oy = 1) case, no rotation
-        for (int x = 0; x < ox; ++x) {
-            matrix[mifi_3d_array_position(0,x,oy-1,4,ox,oy)] = 0;
-            matrix[mifi_3d_array_position(1,x,oy-1,4,ox,oy)] = 1;
+
+        for (int i = 0; i < on; ++i) {
+            out_x_delta_proj_axis[i] = in_x_field[i];
+            out_y_delta_proj_axis[i] = in_y_field[i] + deltaY;
+            pointsZ[i] = 0;
+        }
+        if (pj_transform(inputPJ, outputPJ, on, 0, out_x_delta_proj_axis, out_y_delta_proj_axis, pointsZ) != 0) {
+            fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+            free(out_y_delta_proj_axis);
+            free(out_x_delta_proj_axis);
+            return MIFI_ERROR;
+        }
+        double sign = deltaY > 0 ? 1. : -1.;
+        for (int i = 0; i < on; ++i) {
+            double phi = atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
+                  (out_y_delta_proj_axis[i] - out_y_field[i]));
+            //fprintf(stderr, "atan2-x: %f\n", phi/MIFI_PI*180);
+            matrix[2 + 4 * i] = sign * sin(phi);
+            matrix[3 + 4 * i] = sign * cos(phi);
         }
     }
+    free(out_y_delta_proj_axis);
+    free(out_x_delta_proj_axis);
     return MIFI_OK;
 }
-
 
 // common implementation of mifi_get_vector_reproject_matrix_*
 static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ,
@@ -263,6 +278,7 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
                         double* matrix) // 4*ox*oy
 {
     // calculation of deltas: (x+d, y), (x, y+d) -> proj-values
+#if 0
     double* out_x_delta_proj_axis = (double*) malloc(ox*oy*sizeof(double));
     double* out_y_delta_proj_axis = (double*) malloc(ox*oy*sizeof(double));
 
@@ -270,28 +286,60 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
         fprintf(stderr, "error allocating memory of double(%d*%d)", ox, oy);
         exit(1);
     }
+#endif
     // delta usually .1% of distance between neighboring cells
-    const double xDelta = 1e-3;
+    const double defaultDelta = 1e-3;
+    double deltaX;
     {
         // conversion along x axis
-        double delta;
         if (ox > 1) {
             if (oy > 1) {
-                delta = xDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+                deltaX = defaultDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
             } else {
-                delta = xDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
+                deltaX = defaultDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
             }
         } else {
             if (oy > 1) {
-                delta = xDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
+                deltaX = defaultDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
             } else {
                 // no neighbors, e.g. rotation to single point
-                delta = (in_x_field[0] > 1) ? (in_x_field[0]*xDelta) : xDelta;
+                deltaX = (in_x_field[0] > 1) ? (in_x_field[0]*defaultDelta) : defaultDelta;
             }
         }
+    }
+    double deltaY;
+    {
+        // conversion along y axis
+        // deltaY usually .1% of distance between neighboring cells
+        if (ox > 1) {
+            if (oy > 1) {
+                deltaY = defaultDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+            } else {
+                deltaY = defaultDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
+            }
+        } else {
+            if (oy > 1) {
+                deltaY = defaultDelta * (in_x_field[(1)*ox +(0)] - in_x_field[0]);
+            } else {
+                // no neighbors, e.g. rotation to single point
+                deltaY = (in_x_field[0] > 1) ? (in_x_field[0]*defaultDelta) : defaultDelta;
+            }
+        }
+    }
+
+    return mifi_get_vector_reproject_matrix_points_proj_delta(inputPJ, outputPJ,
+            in_x_field, in_y_field, // both on
+            out_x_field, out_y_field, // both on
+            pointsZ, // on, used within proj, but values not used
+            deltaX, deltaY,
+            ox*oy, // number of points in output
+            matrix); // 4*on
+}
+#if 0
+    {
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
-                out_x_delta_proj_axis[y*ox +x] = in_x_field[y*ox +x] + delta;
+                out_x_delta_proj_axis[y*ox +x] = in_x_field[y*ox +x] + deltaX;
                 out_y_delta_proj_axis[y*ox +x] = in_y_field[y*ox +x];
                 pointsZ[y*ox +x] = 0;
             }
@@ -303,10 +351,10 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             free(out_x_delta_proj_axis);
             return MIFI_ERROR;
         }
-//        fprintf(stderr, "delta_x: %f, in_x_field0: %f, out_x_field0: %f, out_x_delt_proj_axis0: %f\n", delta, in_x_field[0], out_x_field[0], out_x_delta_proj_axis[0] );
+//        fprintf(stderr, "delta_x: %f, in_x_field0: %f, out_x_field0: %f, out_x_delt_proj_axis0: %f\n", deltaX, in_x_field[0], out_x_field[0], out_x_delta_proj_axis[0] );
 
         // direction of rotation
-        double sign = delta > 0 ? 1. : -1.;
+        double sign = deltaX > 0 ? 1. : -1.;
         for (int y = 0; y < oy; ++y) {
             for (int x = 0; x < ox; ++x) {
                 double phi = atan2((out_y_delta_proj_axis[y*ox+x] - out_y_field[y*ox+x]),
@@ -348,7 +396,6 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
             free(out_y_delta_proj_axis);
             free(out_x_delta_proj_axis);
-            free(pointsZ);
             return MIFI_ERROR;
         }
 
@@ -371,7 +418,67 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
     free(out_x_delta_proj_axis);
     return MIFI_OK;
 }
+#endif
 
+int mifi_get_vector_reproject_matrix_points(const char* proj_input,
+        const char* proj_output,
+        int inputIsMetric,
+        const double* out_x_points, const double* out_y_points, // both size on, must be in m or rad
+        int on,
+        double* matrix
+        )
+{
+    // init projections
+    projPJ inputPJ;
+    projPJ outputPJ;
+    if (MIFI_DEBUG > 0) {
+        fprintf(stderr, "input proj: %s\n", proj_input);
+        fprintf(stderr, "output proj: %s\n", proj_output);
+    }
+
+    if (!(inputPJ = pj_init_plus(proj_input))) {
+        fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+        return MIFI_ERROR;
+    }
+    if (!(outputPJ = pj_init_plus(proj_output))) {
+        fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+        pj_free(inputPJ);
+        return MIFI_ERROR;
+    }
+
+    // calculate input-points corresponding to wanted points
+    double* in_x_points = (double*) malloc(on*sizeof(double));
+    double* in_y_points = (double*) malloc(on*sizeof(double));
+    double* pointsZ     = (double*) calloc(sizeof(double),on); // z currently of no interest, no height attached to values
+    if (in_x_points == NULL || in_y_points == NULL || pointsZ == NULL) {
+        fprintf(stderr, "error allocating memory of 3*double(%d)", on);
+        exit(1);
+    }
+    memcpy(in_x_points, out_x_points, on*sizeof(double));
+    memcpy(in_y_points, out_y_points, on*sizeof(double));
+    int retVal;
+    if (pj_transform(outputPJ, inputPJ, on, 0, in_x_points, in_y_points, pointsZ) != 0) {
+        fprintf(stderr, "Proj error:%d %s", pj_errno, pj_strerrno(pj_errno));
+        retVal = MIFI_ERROR;
+    } else {
+
+        double delta = (inputIsMetric) ? 100 : 0.00001; // use 100m or 0.00001 degree as delta
+        retVal = mifi_get_vector_reproject_matrix_points_proj_delta(inputPJ, outputPJ,
+                in_x_points, in_y_points, // both on
+                out_x_points, out_y_points, // both on
+                pointsZ, // on, used within proj, but values not used
+                delta, delta,
+                on, // number of points in output
+                matrix); // 4*on
+    }
+
+
+    free(in_x_points);
+    free(in_y_points);
+    free(pointsZ);
+
+    return retVal;
+}
 
 int mifi_get_vector_reproject_matrix_field(const char* proj_input,
                         const char* proj_output,

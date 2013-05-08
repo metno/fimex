@@ -175,6 +175,7 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
             }
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csXId] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
+
         }
         p_->rotateLatLonVectorX[varNameX[i]] = make_pair(varNameY[i], csXId);
         p_->rotateLatLonVectorY[varNameY[i]] = make_pair(varNameX[i], csXId);
