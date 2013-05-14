@@ -100,6 +100,16 @@ public:
     virtual std::string id() const {return url_;}
 };
 
+class XMLInputDoc : public XMLInput
+{
+private:
+    std::string id_;
+    boost::shared_ptr<XMLDoc> doc_;
+public:
+    XMLInputDoc(const std::string& id, boost::shared_ptr<XMLDoc> doc) : id_(id), doc_(doc) {}
+    virtual boost::shared_ptr<XMLDoc> getXMLDoc() const {return doc_;}
+    virtual std::string id() const {return id_;}
+};
 
 }
 

@@ -62,6 +62,14 @@ BOOST_AUTO_TEST_CASE( test_xmlDoc )
         xpathObj = doc.getXPathObject("/cdmQualityConfig/variable/status_flag_variable/allowed_values");
         std::string text = getXmlContent(xpathObj->nodesetval->nodeTab[0]);
         BOOST_CHECK("1,2,...,6" == text);
+
+        string nodeDoc = doc.toString(xpathObj->nodesetval->nodeTab[0]);
+        BOOST_CHECK(nodeDoc == "<allowed_values>1,2,...,6</allowed_values>");
+
+        boost::shared_ptr<XMLDoc> valueDoc = XMLDoc::fromString(nodeDoc, "");
+        xpathObj = valueDoc->getXPathObject("/allowed_values");
+        string values = getXmlContent(xpathObj->nodesetval->nodeTab[0]);
+        BOOST_CHECK("1,2,...,6" == values);
     }
 
 }

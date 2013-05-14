@@ -75,6 +75,15 @@ public:
 	 */
 	void registerNamespace(const std::string& prefix, const std::string& uri);
 
+	/**
+	 *
+	 * make a string representation of a node as full xml-document
+	 *
+	 * @param a node to print
+	 * @return string
+	 */
+	std::string toString(const xmlNodePtr node);
+
     static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
     static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer, const std::string& url = "");
     static boost::shared_ptr<XMLDoc> fromURL(const std::string& url);

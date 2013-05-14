@@ -72,6 +72,16 @@ void XMLDoc::setXPathCtx(xmlDoc* pdoc)
     }
 }
 
+std::string XMLDoc::toString(const xmlNodePtr node)
+{
+    xmlBufferPtr buf = xmlBufferCreate();
+    xmlNodeDump(buf, doc,  node, 0, 0);
+    std::string retVal(reinterpret_cast<const char *>(xmlBufferContent(buf)));
+    xmlBufferFree(buf);
+    return retVal;
+}
+
+
 boost::shared_ptr<XMLDoc> XMLDoc::fromFile(const std::string& filename)
 {
     return boost::shared_ptr<XMLDoc>(new XMLDoc(filename));
