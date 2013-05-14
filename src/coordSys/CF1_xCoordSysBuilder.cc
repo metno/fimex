@@ -443,6 +443,7 @@ void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> 
     xy_vectors.push_back(make_pair("sea_ice_x_velocity", "sea_ice_y_velocity"));
     xy_vectors.push_back(make_pair("sea_ice_x_transport", "sea_ice_y_transport"));
     xy_vectors.push_back(make_pair("sea_ice_x_displacement", "sea_ice_y_displacement"));
+    xy_vectors.push_back(make_pair("sea_surface_wave_stokes_drift_x_velocity", "sea_surface_wave_stokes_drift_y_velocity")); // preliminary from mailing-list
     xy_vectors.push_back(make_pair("land_ice_x_velocity", "land_ice_y_velocity"));
     xy_vectors.push_back(make_pair("land_ice_basal_x_velocity", "land_ice_basal_y_velocity"));
     xy_vectors.push_back(make_pair("land_ice_vertical_mean_x_velocity", "land_ice_vertical_mean_y_velocity"));
