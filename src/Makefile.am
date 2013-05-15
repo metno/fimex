@@ -83,6 +83,8 @@ libfimex_la_SOURCES = interpolation.c \
 					 Log4cppLogger.h \
 					 MutexLock.h \
 					 NcmlCDMReader.cc \
+					 NcmlAggregationReader.h \
+					 NcmlAggregationReader.cc \
 					 Null_CDMWriter.cc \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \

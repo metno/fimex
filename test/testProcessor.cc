@@ -48,7 +48,7 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_function )
 {
-    defaultLogLevel(Logger::DEBUG);
+//    defaultLogLevel(Logger::DEBUG);
     string topSrcDir(TOP_SRCDIR);
     string fileName(topSrcDir+"/test/coordTest.nc");
 
