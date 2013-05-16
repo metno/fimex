@@ -49,7 +49,8 @@ BOOST_AUTO_TEST_CASE( test_joinExisting )
 {
     defaultLogLevel(Logger::DEBUG);
     string topSrcDir(TOP_SRCDIR);
-    string ncmlName(topSrcDir+"/test/data/joinExistingAgg.ncml");
+    chdir((topSrcDir+"/test/data").c_str());
+    string ncmlName("joinExistingAgg.ncml");
     if (!ifstream(ncmlName.c_str())) {
         // no testfile, skip test
         return;
@@ -61,6 +62,26 @@ BOOST_AUTO_TEST_CASE( test_joinExisting )
     BOOST_CHECK(reader->getDataSlice("multi", 3)->asShort()[1] == -4);
 
 }
+
+BOOST_AUTO_TEST_CASE( test_joinExistingSuffix )
+{
+    defaultLogLevel(Logger::DEBUG);
+    string topSrcDir(TOP_SRCDIR);
+    chdir((topSrcDir+"/test/data").c_str());
+    string ncmlName("joinExistingAggSuffix.ncml");
+    if (!ifstream(ncmlName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    BOOST_CHECK(true);
+    BOOST_CHECK(reader->getCDM().getUnlimitedDim()->getLength() == 5);
+    BOOST_CHECK(reader->getDataSlice("unlim", 3)->asShort()[0] == 4);
+    BOOST_CHECK(reader->getDataSlice("multi", 3)->asShort()[1] == -4);
+
+}
+
+
 
 #else
 // no boost testframework

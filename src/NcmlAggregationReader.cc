@@ -145,7 +145,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
             string suffix = getXmlProp(nodesScan->nodeTab[i], "suffix");
             string regExp;
             if (suffix != "") {
-                regExp = "\\Q"+suffix+"\\E$";
+                regExp = ".*\\Q"+suffix+"\\E$";
             } else {
                 regExp = getXmlProp(nodesScan->nodeTab[i], "regExp");
             }
