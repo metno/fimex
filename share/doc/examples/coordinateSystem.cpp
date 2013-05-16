@@ -7,7 +7,7 @@ using namespace MetNoFimex;
 using namespace std;
 
 int main(int argc, char* args[]) {
-    boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("coordTest.nc", "netcdf");
+    boost::shared_ptr<CDMReader> reader = CDMFileReaderFactory::create("netcdf", "coordTest.nc");
     //boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader("coordRefTimeTest.nc"));
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
