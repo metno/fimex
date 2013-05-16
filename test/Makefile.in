@@ -546,7 +546,7 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
-             data/joinExistingAggSuffix.ncml
+             data/joinExistingAggSuffix.ncml data/aggNothing.ncml data/aggWrong.ncml
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \

@@ -106,7 +106,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
         } else {
             string file, type, config;
             getFileTypeConfig(getXmlProp(nodesL->nodeTab[0], "location"), file, type, config);
-            if (config == "") {
+            if (type == "" || type == "netcdf" || type == "nc" || type == "nc4") {
                 // remove file: URL-prefix
                 file = boost::regex_replace(file, boost::regex("^file:"), "", boost::format_first_only);
                 // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
@@ -129,7 +129,6 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
             // open <netcdf /> tags recursively
             string id = ncml.id() +":netcdf:" + type2string(i);
             string current = doc->toString(nodesNc->nodeTab[i]);
-            cerr << current << endl;
             readers_.push_back(make_pair(id, boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputString(current, id)))));
         }
 
@@ -141,7 +140,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
         for (int i = 0; i < sizeScan; i++) {
             string dir, type, config;
             getFileTypeConfig(getXmlProp(nodesScan->nodeTab[i], "location"), dir, type, config);
-            if (config == "") type = "netcdf";
+            if (type == "") type = "netcdf";
             string suffix = getXmlProp(nodesScan->nodeTab[i], "suffix");
             string regExp;
             if (suffix != "") {
@@ -158,7 +157,12 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
             scanFiles(files, boost::filesystem::path(dir), depth, boost::regex(regExp));
             for (size_t i = 0; i < files.size(); ++i) {
                 LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "scanned file: " << files.at(i));
-                readers_.push_back(make_pair(files.at(i), CDMFileReaderFactory::create(type, files.at(i), config)));
+                try {
+                    readers_.push_back(make_pair(files.at(i), CDMFileReaderFactory::create(type, files.at(i), config)));
+                } catch (CDMException& ex) {
+                    LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::ERROR, "cannot read scanned file '" << files.at(i) << "' type: " << type << ", config: " << files.at(i) );
+
+                }
             }
         }
 
