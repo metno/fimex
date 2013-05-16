@@ -100,7 +100,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
     if (size == 0) {
         LOG4FIMEX(getLogger("fimex/NcmlCDMReader"), Logger::DEBUG, "found no ncml-aggregations in "<< ncml.id());
         XPathObjPtr xpathObjL = doc->getXPathObject("/nc:netcdf[@location]");
-        xmlNodeSetPtr nodesL = xpathObj->nodesetval;
+        xmlNodeSetPtr nodesL = xpathObjL->nodesetval;
         if (nodesL->nodeNr != 1) {
             LOG4FIMEX(getLogger("fimex/NcmlCDMReader"), Logger::INFO, "config " << ncml.id() << " does not contain location-attribute, only ncml initialization");
         } else {
@@ -111,8 +111,10 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
                 file = boost::regex_replace(file, boost::regex("^file:"), "", boost::format_first_only);
                 // java-netcdf allows dods: prefix for dods-files while netcdf-C requires http:
                 file = boost::regex_replace(file, boost::regex("^dods:"), "http:", boost::format_first_only);
+                LOG4FIMEX(getLogger("fimex/NcmlCDMReader"), Logger::DEBUG, "reading netcdf-file:  ");
                 gDataReader_ = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(file));
             } else {
+                LOG4FIMEX(getLogger("fimex/NcmlCDMReader"), Logger::DEBUG, "reading file:  "<< file << ", " << type << ", " << config);
                 gDataReader_ = CDMFileReaderFactory::create(type, file, config);
             }
             *(this->cdm_) = gDataReader_->getCDM();
@@ -132,7 +134,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
             readers_.push_back(make_pair(id, boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputString(current, id)))));
         }
 
-        aggType = getXmlProp(nodes->nodeTab[0], "type");
+        aggType_ = getXmlProp(nodes->nodeTab[0], "type");
         // open reader by scan
         XPathObjPtr xpathObjScan = doc->getXPathObject("./nc:scan", nodes->nodeTab[0]);
         xmlNodeSetPtr nodesScan = xpathObjScan->nodesetval;
@@ -174,7 +176,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
         }
 
         if (readers_.size() > 1) { // aggregation only with more than 1 reader
-            if (aggType == "joinExisting") {
+            if (aggType_ == "joinExisting") {
                 // join unlimited from joinExisting, remember unlimdim->datasource map
                 *(this->cdm_) = gDataReader_->getCDM();
                 const CDMDimension* uDim = cdm_->getUnlimitedDim();
@@ -186,6 +188,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
                     const CDMDimension* readerUdim = readers_.at(i).second->getCDM().getUnlimitedDim();
                     if (readerUdim == 0 || (readerUdim->getName() != uDimName)) {
                         LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::INFO, "file '" << readers_.at(i).first << "' does not have matching unlimited dimension: " << uDimName);
+                        readers_.at(i).second.reset(); // no longer needed-
                     } else {
                         for (size_t j = 0; j < readerUdim->getLength(); ++j) {
                             readerUdimPos_.push_back(make_pair(i,j));
@@ -195,11 +198,69 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
                 // change size of unlimited dimension
                 CDMDimension& ulimDim = cdm_->getDimension(uDim->getName());
                 ulimDim.setLength(readerUdimPos_.size());
-            } else if (aggType != "union") {
+            } else if (aggType_ == "union") {
                 // join variables/dimensions from union, remember variable->datasource map
-                // TODO
+                *(this->cdm_) = gDataReader_->getCDM();
+                for (size_t ir = 0; ir < readers_.size(); ++ir) {
+                    const CDM::VarVec& knownVars = cdm_->getVariables();
+                    const CDM& rCdm = readers_.at(ir).second->getCDM();
+                    const CDM::VarVec& rVars = rCdm.getVariables();
+                    for (CDM::VarVec::const_iterator rv = rVars.begin(); rv != rVars.end(); ++rv) {
+                        if (find_if(knownVars.begin(), knownVars.end(), CDMNameEqual(rv->getName())) == knownVars.end()) {
+                            LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::INFO, "found new variable '" << rv->getName() << " in " << readers_.at(ir).first);
+                            // check dimensions
+                            vector<string> rshape = rv->getShape();
+                            bool dimsOk = true;
+                            for (size_t is = 0; is < rshape.size(); ++is) {
+                                const CDMDimension& rdim = rCdm.getDimension(rshape.at(is));
+                                if (cdm_->hasDimension(rshape.at(is))) {
+                                    CDMDimension& dim = cdm_->getDimension(rshape.at(is));
+                                    if (dim.isUnlimited()) {
+                                        if (!rdim.isUnlimited()) {
+                                            dimsOk = false;
+                                            LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::WARN, rv->getName() << " not unlimited in " << readers_.at(is).first);
+                                        } else {
+                                            if (rdim.getLength() > dim.getLength()) {
+                                                dim.setLength(rdim.getLength());
+                                            }
+                                        }
+                                    } else {
+                                        if (rdim.isUnlimited()) {
+                                            dimsOk = false;
+                                            LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::WARN, rv->getName() << " unlimited in " << readers_.at(is).first);
+                                        } else {
+                                            if (rdim.getLength() != dim.getLength()) {
+                                                dimsOk = false;
+                                                LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::WARN, rv->getName() << " changes size in dim "<< rdim.getName() << " at " << readers_.at(is).first);
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if (rdim.isUnlimited()) {
+                                        if (cdm_->getUnlimitedDim() == 0) {
+                                            cdm_->addDimension(rdim);
+                                        } else {
+                                            dimsOk = false;
+                                            LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::WARN, "two unlimited dimensions: "<< rdim.getName() << " at " << readers_.at(is).first);
+                                        }
+                                    } else {
+                                        cdm_->addDimension(CDMDimension(rdim));
+                                    }
+                                }
+                            }
+                            if (dimsOk) {
+                                varReader_[rv->getName()] = ir;
+                                cdm_->addVariable(CDMVariable(*rv));
+                                vector<CDMAttribute> atts = rCdm.getAttributes(rv->getName());
+                                for (vector<CDMAttribute>::iterator attIt = atts.begin(); attIt != atts.end(); ++attIt) {
+                                    cdm_->addAttribute(rv->getName(), *attIt);
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
-                throw CDMException("aggregation type " + aggType + " found in " + ncml.id() + ", but currently only union and joinExisting supported");
+                throw CDMException("aggregation type " + aggType_ + " found in " + ncml.id() + ", but currently only union and joinExisting supported");
             }
         }
     }
@@ -230,7 +291,7 @@ DataPtr NcmlArregationReader::getDataSlice(const std::string& varName, size_t un
         return createData(CDM_NAT, 0);
     }
 
-    if (aggType == "joinExisting") {
+    if (aggType_ == "joinExisting") {
         cdm_->hasUnlimitedDim(variable);
         if (cdm_->hasUnlimitedDim(variable) && (unLimDimPos < readerUdimPos_.size())) {
             LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "fetching data from " << readers_.at(readerUdimPos_.at(unLimDimPos).first).first << " at uDimPos " << readerUdimPos_.at(unLimDimPos).second);
@@ -238,9 +299,15 @@ DataPtr NcmlArregationReader::getDataSlice(const std::string& varName, size_t un
         }
         LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "fetching data from default reader");
         return gDataReader_->getDataSlice(varName, unLimDimPos);
-    } else if (aggType == "union") {
-        // TODO
-        throw CDMException("not implemented");
+    } else if (aggType_ == "union") {
+        if (varReader_.find(varName) == varReader_.end()) {
+            LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "fetching data from default reader");
+            return gDataReader_->getDataSlice(varName, unLimDimPos);
+        } else {
+            pair<string, boost::shared_ptr<CDMReader> >& r = readers_.at(varReader_[varName]);
+            LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "fetching data of " << varName << " from " << r.first);
+            return r.second->getDataSlice(varName, unLimDimPos);
+        }
     }
     return gDataReader_->getDataSlice(varName, unLimDimPos);
 }

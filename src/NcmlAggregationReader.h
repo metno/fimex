@@ -55,12 +55,13 @@ public:
 private:
     // main data-reader
     boost::shared_ptr<CDMReader> gDataReader_;
-    std::string aggType;
+    std::string aggType_;
     // the readers_ as ordered in the aggregation
     std::vector<std::pair<std::string, boost::shared_ptr<CDMReader> > > readers_;
-    // udim -> readerId,udimPos, mapping of this udim to the readers_(i) udim (j)
+    // udim -> readerId,udimPos, joinExiting mapping of this udim to the readers_(i) udim (j)
     std::vector<std::pair<std::size_t, std::size_t> > readerUdimPos_;
-
+    // varName -> readerId, union mapping of varName to readers_(i)
+    std::map<std::string, std::size_t> varReader_;
 
 };
 

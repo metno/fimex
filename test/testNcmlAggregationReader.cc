@@ -115,6 +115,28 @@ BOOST_AUTO_TEST_CASE( test_aggWrong )
 }
 
 
+BOOST_AUTO_TEST_CASE( test_union )
+{
+    //defaultLogLevel(Logger::DEBUG);
+    string topSrcDir(TOP_SRCDIR);
+    if (!chdir((topSrcDir+"/test/data").c_str())) return;
+    string ncmlName("unionAgg.ncml");
+    if (!ifstream(ncmlName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NCML, ncmlName));
+    BOOST_CHECK(true);
+    BOOST_CHECK(reader->getCDM().hasVariable("b"));
+    BOOST_CHECK(reader->getCDM().hasVariable("extra"));
+    BOOST_CHECK(reader->getCDM().hasVariable("multi"));
+    BOOST_CHECK(reader->getCDM().hasVariable("unlim"));
+    BOOST_CHECK(reader->getDataSlice("extra", 1)->asShort()[0] == -1);
+    BOOST_CHECK(reader->getDataSlice("multi", 1)->asShort()[1] == -2);
+
+}
+
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {
