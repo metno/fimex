@@ -42,8 +42,6 @@ namespace MetNoFimex
  * ncml-aggregations.
  *
  * This reader should usually be called from the NcmlCDMReader.
- *
- * joinNew aggregations are currently not implemented.
  */
 class NcmlArregationReader: public MetNoFimex::CDMReader
 {
