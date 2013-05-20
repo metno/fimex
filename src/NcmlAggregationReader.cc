@@ -71,9 +71,18 @@ void scanFiles(vector<string>& files, const boost::filesystem::path& dir, int de
                 scanFiles(files, *e, depth-1, regexp, depthCount+1);
             }
         } else if (lstat.type() == regular_file) {
-            string filename = e->filename().string();
+            string filename;
+#if BOOST_FILESYSTEM_VERSION == 3
+            filename = e->filename().string();
+#else
+            filename = e->leaf();
+#endif
             if (boost::regex_match(filename, regexp)) {
+#if BOOST_FILESYSTEM_VERSION == 3
                 files.push_back(e->string());
+#else
+                files.push_back(e->file_string());
+#endif
             }
         }
     }
