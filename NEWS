@@ -1,3 +1,10 @@
+  * 2013-05-20 fimex-0.45
+    * adding ncml-aggregation, union and joinExisting
+    * auto-detection of vectors by CF standard_names
+    * vector-reprojection when selecting lat/lon-points
+    * improved vector-rotation algorithm
+    * lambert-projection for grib-writer
+    * small improvements in example-input files 
   * 2013-04-11 fimex-0.44.2
     * fix bug with netcdf-CDMReaderWriter and empty variables
     * fix direction of vertical axes for pressure, sigma and sigma-hybrid

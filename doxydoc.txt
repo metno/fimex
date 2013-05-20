@@ -286,8 +286,35 @@ will be configured immediately after reading a file. It is also possilbe to read
 
 Input-files can and should be validated against the included ncml-2.2.xsd.
 
-@warning not all features are supported in the current implementation. Missing features are: aggregation,
-changing dimension sizes, unlimited dimensions, adding/changing values of variables, groups
+Fimex supports now also ncml-aggregation. Simple examples are:
+
+@code
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<!-- same as above, but with scan -->
+<aggregation type="joinExisting">    
+    <scan location="." regExp="joinExistingAgg\d+\.nc" />
+</aggregation>
+
+</netcdf>
+@endcode
+
+@code
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<aggregation type="union">    
+    <netcdf location="joinExistingAgg1.nc" />
+    <netcdf location="unionAgg2.nc3" />
+</aggregation>
+
+</netcdf>
+@endcode
+
+MetNoFimex::NcmlCDMReader contains the up-to-date list of features.
 
 @see MetNoFimex::NcmlCDMReader
 

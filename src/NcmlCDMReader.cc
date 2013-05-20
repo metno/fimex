@@ -25,6 +25,7 @@
  */
 
 #include "fimex/NcmlCDMReader.h"
+#include "NcmlAggregationReader.h"
 #include "fimex/XMLDoc.h"
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
@@ -54,6 +55,8 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 #ifdef HAVE_NETCDF_H
     setConfigDoc(configXML);
 
+    dataReader = boost::shared_ptr<CDMReader>(new NcmlArregationReader(configXML));
+#if 0
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     if (nodes->nodeNr != 1) {
@@ -66,6 +69,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
         ncFile = boost::regex_replace(ncFile, boost::regex("^dods:"), "http:", boost::format_first_only);
         dataReader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(ncFile));
     }
+#endif
     init();
 #else
     string msg("cannot read data through ncml - no netcdf-support compiled in fimex");
@@ -181,7 +185,7 @@ void NcmlCDMReader::initRemove() {
 
 /* warn about features not supported in this class */
 void NcmlCDMReader::initWarnUnsupported() {
-    warnUnsupported("/nc:netcdf/nc:aggregation", "aggregation not supported");
+    //warnUnsupported("/nc:netcdf/nc:aggregation", "aggregation not supported");
     warnUnsupported("/nc:netcdf/nc:group","groups not supported");
 }
 
