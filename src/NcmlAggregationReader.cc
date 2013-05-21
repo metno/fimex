@@ -192,6 +192,13 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
                 if (uDim == 0) {
                     throw CDMException("cannot aggregate files with joinExisting without unlimited dimension");
                 }
+                // disable all cached information about variable-data for variables with unlimited dimension
+                const CDM::VarVec& variables = cdm_->getVariables();
+                for (CDM::VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
+                    if (cdm_->hasUnlimitedDim(*varIt)) {
+                        cdm_->getVariable(varIt->getName()).setData(boost::shared_ptr<Data>(static_cast<Data*>(0)));
+                    }
+                }
                 string uDimName = uDim->getName();
                 for (size_t i = 0; i < readers_.size(); ++i) {
                     const CDMDimension* readerUdim = readers_.at(i).second->getCDM().getUnlimitedDim();
