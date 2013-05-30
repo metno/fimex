@@ -835,7 +835,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
                 }
             }
 #ifdef _OPENMP
-#pragma omp critical
+#pragma omp critical (cdminterpolator_getgriddistance)
             {
 #endif
             samples.push_back(min_cos_d);
