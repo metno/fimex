@@ -805,9 +805,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
         steps = orgXDimSize * orgYDimSize;
     }
 #ifdef _OPENMP
-    omp_lock_t my_lock;
-    omp_init_lock(&my_lock);
-#pragma omp parallel default(shared) if (steps > 4)
+#pragma omp parallel default(none) firstprivate(steps, stepSize, orgXDimSize, orgYDimSize) shared(samples, pointsOnXAxis, pointsOnYAxis, lonVals, latVals) if (steps > 4)
     {
 #pragma omp for nowait
 #endif
@@ -837,16 +835,16 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
                 }
             }
 #ifdef _OPENMP
-            omp_set_lock (&my_lock);
+#pragma omp critical
+            {
 #endif
             samples.push_back(min_cos_d);
 #ifdef _OPENMP
-            omp_unset_lock (&my_lock);
+            }
 #endif
         }
     }
 #ifdef _OPENMP
-    omp_destroy_lock(&my_lock);
     }
 #endif
     double max_grid_d = acos(*(min_element(samples.begin(), samples.end())));
@@ -893,7 +891,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
     // sort latlons by latitudes
     sort(latlons.begin(), latlons.end());
 #ifdef _OPENMP
-#pragma omp parallel default(shared)
+#pragma omp parallel default(none) shared(pointsOnXAxis,pointsOnYAxis,latlons, min_grid_cos_d)
     {
 #pragma omp for nowait
 #endif
