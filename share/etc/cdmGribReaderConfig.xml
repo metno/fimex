@@ -250,6 +250,25 @@
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
 
+<vertical_axis id="harmoniUnknown117" name="total_atmosphere" grib1_id="117" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+
+<vertical_axis id="harmoniUnknown5" name="total_atmosphere" grib1_id="5" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+
+<vertical_axis id="harmoniUnknown10" name="total_atmosphere" grib1_id="10" type="short">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
+
+
 <vertical_axis id="total_atmosphere" name="total_atmosphere" grib1_id="200" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="long_name" value="total atmosphere as single layer" type="string" />
