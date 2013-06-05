@@ -255,7 +255,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
             variableTypeChanges[name] = type;
         }
     }
-    unsigned int defaultCompression = 3;
+    unsigned int defaultCompression = 13; // shuffle + comp-level 3
     if (doc.get() != 0) {
         // set the default compression level for all variables
         XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@compressionLevel]");
@@ -365,9 +365,14 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
         // set compression
         if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC)) {
             int compression = 0;
+            int shuffle = 0;
             assert(variableCompression.find(var.getName()) != variableCompression.end());
             if (variableCompression.find(var.getName()) != variableCompression.end()) {
                 compression = variableCompression[var.getName()];
+                if (compression > 10) {
+                    compression -= 10;
+                    shuffle = 1;
+                }
             }
             if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
                 // create a chunk-strategy: continuous in last dimensions, max MAX_CHUNK
@@ -389,9 +394,9 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                     LOG4FIMEX(logger, Logger::DEBUG, "chunk variable " << var.getName() << " to " << join(&ncChunk[0], &ncChunk[0] + shape.size(), "x"));
                     ncCheck(nc_def_var_chunking(ncFile->ncId, varId, NC_CHUNKED, ncChunk.get()));
                 }
-                // start compression without shuffling
-                LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression);
-                ncCheck(nc_def_var_deflate(ncFile->ncId, varId, 1, 1, compression));
+                // start compression
+                LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression << " and shuffle="<< shuffle);
+                ncCheck(nc_def_var_deflate(ncFile->ncId, varId, shuffle, 1, compression));
             }
         }
 #endif
