@@ -415,7 +415,7 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                     retValues.push_back(apData[i]/p0Data[0] + bData[i]);
                 }
             } else {
-                throw CDMException("unkown mode to extract level-data for variable " + exampleVar);
+                throw CDMException("unkown mode '"+ mode +"' to extract level-data for variable " + exampleVar);
             }
             string sscale = getXmlProp(node, "scale_factor");
             if (sscale != "") {
