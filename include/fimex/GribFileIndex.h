@@ -87,6 +87,14 @@ public:
      * @return the actual amount of data read
      */
     size_t readData(std::vector<double>& data, double missingValue) const;
+    /**
+     * Read the level-data from the underlying source to the vector levelData. In contrast to readData(), the
+     * levelData does not need to be pre-allocated, since levelData usually are small (a few hundred (in grib1 limited to 256)).
+     * @param levelData the storage the data will be read to
+     * @param missingValue the missing- / fill-value the returned data will have
+     * @return the actual amount of data read
+     */
+    size_t readLevelData(std::vector<double>& levelData, double missingValue) const;
 private:
     std::string fileURL_;
     size_t filePos_;
