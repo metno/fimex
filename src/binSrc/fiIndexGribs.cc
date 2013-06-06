@@ -65,7 +65,7 @@ main(int argc, char* args[])
         ("help,h", "help message")
         ("version", "program version")
         ("force,f", "force update of index-file")
-        ("outputDir,o", po::value<string>(), "output directory")
+        ("outputDirectory,o", po::value<string>(), "output directory")
         ("inputFile,i", po::value<string>(), "input gribFile")
         ;
 
@@ -96,8 +96,8 @@ main(int argc, char* args[])
     }
 
     fs::path outDir = fullInput.branch_path().string();
-    if (vm.count("outputDir")) {
-        outDir = fs::path(vm["outputDir"].as<string>());
+    if (vm.count("outputDirectory")) {
+        outDir = fs::path(vm["outputDirectory"].as<string>());
         if (!fs::is_directory(outDir)) {
             cerr << "outputDir " << outDir << " is not a directory" << endl;
             return 1;
@@ -110,7 +110,6 @@ main(int argc, char* args[])
     filename = fullInput.leaf();
 #endif
     fs::path outFile = outDir / (filename + ".grbml");
-
     bool forceUpdate = false;
     if (vm.count("force")) forceUpdate = true;
     indexGrib(fullInput, outFile, forceUpdate);

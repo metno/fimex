@@ -255,21 +255,19 @@
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
 
-<vertical_axis id="harmoniUnknown117" name="total_atmosphere" grib1_id="117" type="short">
+<vertical_axis id="harmoniUnknown117" name="harmoniUnknown117" grib1_id="117" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
-    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
 
-<vertical_axis id="harmoniUnknown5" name="total_atmosphere" grib1_id="5" type="short">
+<vertical_axis id="adiabatic_condensation_level" name="adiabatic_condensation_level" grib1_id="5" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
-    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
+    <attribute name="long_name" value="adiabatic condensation level (parcel lifted from surface)" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
 
-<vertical_axis id="harmoniUnknown10" name="total_atmosphere" grib1_id="10" type="short">
+<vertical_axis id="harmoniUnknown10" name="harmoniUnknown10" grib1_id="10" type="short">
     <attribute name="_FillValue" value="-32767" type="short" />
-    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
 
@@ -360,7 +358,7 @@
 <variables>
     <parameter name="geopotential_height" type="float">
         <!-- multi-id for grib1 and grib2 -->
-        <grib1 indicatorOfParameter="156" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <grib1 indicatorOfParameter="156" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" timeRangeIndicator="0"/>
         <!-- wmo -->
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="1"/>
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="2"/>

@@ -61,6 +61,8 @@ public:
     const std::string& getShortName() const;
     boost::posix_time::ptime getValidTime() const;
     boost::posix_time::ptime getReferenceTime() const;
+    /// return gribs timeRangeIndicator (0=instant, 2,4=accumulated)
+    long getTimeRangeIndicator() const;
     long getLevelNumber() const;
     long getLevelType() const;
     /**
@@ -111,7 +113,7 @@ private:
     std::string stepType_;
     long stepStart_;
     long stepEnd_;
-    long stepRange_;
+    long timeRangeIndicator_;
     long levelType_;
     long levelNo_;
     long perturbationNo_;

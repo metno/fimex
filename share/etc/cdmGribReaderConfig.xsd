@@ -153,6 +153,7 @@
       <xs:attribute name="identificationOfOriginatingGeneratingCentre" use="optional" type="xs:integer"/>
       <xs:attribute name="typeOfLevel" use="optional" type="xs:integer"/>
       <xs:attribute name="levelNo" use="optional" type="xs:integer"/>
+      <xs:attribute name="timeRangeIndicator" use="optional" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="grib2">
@@ -161,6 +162,8 @@
       <xs:attribute name="discipline" use="required" type="xs:integer"/>
       <xs:attribute name="parameterCategory" use="optional" type="xs:integer"/>
       <xs:attribute name="typeOfLevel" use="optional" type="xs:integer"/>
+      <xs:attribute name="levelNo" use="optional" type="xs:integer"/>
+      <xs:attribute name="timeRangeIndicator" use="optional" type="xs:integer"/>
     </xs:complexType>
   </xs:element>
 </xs:schema>

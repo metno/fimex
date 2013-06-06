@@ -391,7 +391,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
     stepType_ = std::string(msg);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "stepRange", &stepRange_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
     // ensemble
@@ -498,7 +498,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
             stepUnits_ = getXmlProp(lNode, "stepUnits");
             stepType_ = getXmlProp(lNode, "stepType");
-            stepRange_ = string2type<long>(getXmlProp(lNode, "stepRange"));
+            timeRangeIndicator_ = string2type<long>(getXmlProp(lNode, "timeRangeIndicator"));
             stepStart_ = string2type<long>(getXmlProp(lNode, "stepStart"));
             stepEnd_ = string2type<long>(getXmlProp(lNode, "stepEnd"));
         }
@@ -645,6 +645,12 @@ boost::posix_time::ptime GribFileMessage::getValidTime() const
     }
     return reference + timeOffset + boost::gregorian::days(days) + boost::gregorian::months(months) + boost::gregorian::years(years);
 }
+
+long GribFileMessage::getTimeRangeIndicator() const
+{
+    return timeRangeIndicator_;
+}
+
 long GribFileMessage::getLevelNumber() const
 {
     return levelNo_;
@@ -752,8 +758,8 @@ string GribFileMessage::toString() const
                 xmlCast(stepUnits_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepType"),
                 xmlCast(stepType_)));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepRange"),
-                xmlCast(type2string(stepRange_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("timeRangeIndicator"),
+                xmlCast(type2string(timeRangeIndicator_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepStart"),
                 xmlCast(type2string(stepStart_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepEnd"),
