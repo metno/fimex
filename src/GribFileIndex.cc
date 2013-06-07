@@ -331,7 +331,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos)
+GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::string>& members)
 : fileURL_(fileURL), filePos_(filePos), msgPos_(msgPos)
 {
     if (gh.get() == 0)
@@ -404,6 +404,25 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     case GRIB_NOT_FOUND: {
         totalNumberOfEnsembles_ = 0;
         perturbationNo_ = 0;
+        std::cerr << "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size() << std::endl;
+        if (members.size()>0) {
+          int i=0;
+          bool found=false;
+          for (vector<std::string>::const_iterator it = members.begin(); it!=members.end()&&!found; ++it) {
+             if (fileURL.find(*it)!=std::string::npos) {
+               perturbationNo_=i;
+               totalNumberOfEnsembles_ = members.size();
+               found=true;
+            }
+            i++;
+          }
+          if (!found) {
+            std::cerr << "perturbationNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!" << std::endl;
+          }
+          else {
+            std::cerr << "perturbationNumber for " << fileURL.c_str() << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_ << std::endl;
+          }
+        }
         break;
     }
     default: MIFI_GRIB_CHECK(gribError, 0); break;
@@ -894,14 +913,15 @@ GribFileIndex::GribFileIndex()
     // dummy generator
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreExistingXml)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::string>& members, bool ignoreExistingXml)
 {
     namespace fs = boost::filesystem;
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
         throw runtime_error("no such file: " + gribFilePath.string());
     }
+    
     if (ignoreExistingXml) {
-        initByGrib(gribFilePath);
+        initByGrib(gribFilePath, members);
     } else {
         // find gribml-file younger than original file
 #if BOOST_FILESYSTEM_VERSION == 3
@@ -921,16 +941,16 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
                 if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
                     initByXML(xmlFile);
                 } else {
-                    initByGrib(gribFilePath);
+                    initByGrib(gribFilePath, members);
                 }
             } else {
-                initByGrib(gribFilePath);
+                initByGrib(gribFilePath, members);
             }
         }
     }
 }
 
-void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
+void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::string>& members)
 {
     url_ = "file:"+ file_string(gribFilePath);
     FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");
@@ -960,7 +980,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
                 // don't change lastPos
             }
             try {
-                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos));
+                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos, members));
             } catch (CDMException& ex) {
                 LOG4FIMEX(getLogger("fimex.GribFileIndex"), Logger::WARN, "ignoring grib-message at byte " << msgPos <<": " << ex.what());
             }

@@ -134,7 +134,7 @@ bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs)
 bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
 
 
-GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML)
+GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::string>& members)
     : p_(new GribCDMReaderImpl())
 {
     p_->configId = configXML.id();
@@ -149,7 +149,7 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
 
 
     for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
-        vector<GribFileMessage> messages = GribFileIndex(*fileIt).listMessages();
+        vector<GribFileMessage> messages = GribFileIndex(*fileIt, members).listMessages();
         copy(messages.begin(), messages.end(), back_inserter(p_->indices));
     }
 
