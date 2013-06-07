@@ -22,6 +22,8 @@
  */
 
 #include "fimex/Utils.h"
+#include "fimex/Logger.h"
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -30,7 +32,6 @@
 #include <iomanip>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem.hpp>
-#include "fimex/Logger.h"
 
 
 namespace MetNoFimex
@@ -116,6 +117,52 @@ void scanFiles(std::vector<std::string>& files, const std::string& dir, int dept
 {
     scanFiles_(files, boost::filesystem::path(dir), depth, regexp, matchFileOnly);
 }
+void globFiles(std::vector<std::string>& files, const std::string& glob)
+{
+    std::string reg = glob;
+
+    // get the initial directory = everything without (*,?) until /
+    boost::regex initialPathRegexp("^([^*?]*/)(.*)");
+    std::string dir = ".";
+    boost::smatch what;
+    if (boost::regex_match(glob, what, initialPathRegexp)) {
+        dir = std::string(what[1].first, what[1].second);
+        reg = std::string(what[2].first, what[2].second);
+    }
+
+    // ** might expand to multi-directories
+    int depth = -1;
+    if (reg.find("**") == std::string::npos) {
+        depth = std::count(reg.begin(), reg.end(), '/');
+    }
+
+    // replace ** to .*
+    // replace * to [^/]*
+    // replace ? to [^/]?
+    // and escaping everything else
+    std::stringstream output;
+    output << "\\Q";
+    for (size_t i = 0; i < reg.size(); i++) {
+        std::string charI = reg.substr(i,1);
+        if (charI == "?") {
+            output << "\\E[^/]?\\Q";
+        } else if (charI == "*") {
+            if (i < (reg.size()+1) && reg.substr(i+1,1) == "*") {
+                i++;
+                // two ** match also new directories
+                output << "\\E.*\\Q";
+            } else {
+                output << "\\E[^/]*\\Q";
+            }
+        } else {
+            output << charI;
+        }
+    }
+    output << "\\E";
+    boost::regex globReg(output.str());
+    scanFiles(files, dir, depth, globReg, false);
+}
+
 
 std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters)
 {

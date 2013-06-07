@@ -327,6 +327,14 @@ int mifi_isnan(C x) {
  *        the complete path (behind dir) will be matched.
  */
 void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const boost::regex& regexp, bool matchFileOnly);
+/**
+ * Similar to scanFiles, but uses glob instead, with * matches everything within a file or directory-name, ? matches exactly one character (not /),
+ * and ** match everything even across multiple directories.
+ *
+ * @param files output list of files
+ * @param glob the file/directory glob to match, glob-wildcards are *, ** and ?
+ */
+void globFiles(std::vector<std::string>& files, const std::string& glob);
 
 /**
  * Scale a value using fill, offset and scale
