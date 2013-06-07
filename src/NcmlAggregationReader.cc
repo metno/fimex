@@ -37,7 +37,6 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <boost/regex.hpp>
-#include <boost/filesystem.hpp>
 
 namespace MetNoFimex
 {
@@ -51,41 +50,6 @@ void getFileTypeConfig(const string& location, string& file, string& type, strin
     type = (locations.size() > 1) ? locations.at(1) : "";
     config = (locations.size() > 2) ? locations.at(2) : "";
     return;
-}
-
-void scanFiles(vector<string>& files, const boost::filesystem::path& dir, int depth, const boost::regex& regexp, int depthCount = 0)
-{
-    LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "scanning directory " + dir.string());
-    if (depthCount > 1000) {
-        throw CDMException("possible circular reference: more than 1000 subdirectories found at " + dir.string());
-    }
-    using namespace boost::filesystem;
-    vector<path> entries;
-    copy(directory_iterator(dir), directory_iterator(), back_inserter(entries));
-    sort(entries.begin(), entries.end());
-
-    for (vector<path>::iterator e = entries.begin(); e != entries.end(); ++e) {
-        file_status lstat(symlink_status(*e));
-        if (lstat.type() == directory_file) {
-            if (depth != 0) {
-                scanFiles(files, *e, depth-1, regexp, depthCount+1);
-            }
-        } else if (lstat.type() == regular_file) {
-            string filename;
-#if BOOST_FILESYSTEM_VERSION == 3
-            filename = e->filename().string();
-#else
-            filename = e->leaf();
-#endif
-            if (boost::regex_match(filename, regexp)) {
-#if BOOST_FILESYSTEM_VERSION == 3
-                files.push_back(e->string());
-#else
-                files.push_back(e->file_string());
-#endif
-            }
-        }
-    }
 }
 
 NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
@@ -165,7 +129,7 @@ NcmlArregationReader::NcmlArregationReader(const XMLInput& ncml)
                 depth = 0;
             }
             vector<string> files;
-            scanFiles(files, boost::filesystem::path(dir), depth, boost::regex(regExp));
+            scanFiles(files, dir, depth, boost::regex(regExp), true);
             for (size_t i = 0; i < files.size(); ++i) {
                 LOG4FIMEX(getLogger("fimex.NcmlCDMReader"), Logger::DEBUG, "scanned file: " << files.at(i));
                 try {

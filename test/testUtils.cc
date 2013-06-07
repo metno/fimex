@@ -134,6 +134,19 @@ BOOST_AUTO_TEST_CASE(test_find_closest_distinct_elements)
 
 }
 
+BOOST_AUTO_TEST_CASE(test_scanFiles)
+{
+    string topSrcDir(TOP_SRCDIR);
+    vector<string> files;
+    scanFiles(files, topSrcDir, -1, boost::regex(".*stUti.?.?\\.cc"), true);
+    BOOST_CHECK_EQUAL(files.size(), 1);
+    BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+    files.clear();
+    scanFiles(files, topSrcDir, -1, boost::regex(".*stUti.?.?\\.cc"), false);
+    BOOST_CHECK_EQUAL(files.size(), 1);
+    BOOST_CHECK(files.at(0).find("testUtils.cc") != string::npos);
+}
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

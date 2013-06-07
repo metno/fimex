@@ -31,6 +31,7 @@
 #include <cmath>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/regex.hpp>
 #include <limits>
 #include "fimex/CDMException.h"
 #include <boost/shared_array.hpp>
@@ -313,6 +314,19 @@ template<typename C>
 int mifi_isnan(C x) {
     return boost::math::isnan(x);
 }
+
+/**
+ * Scan the filesystem for files matching the regexp. Can be used similar to 'glob'
+ * or 'find' commands. The files will be sorted alphabetically.
+ *
+ * @param files output list of files
+ * @param dir the input directory
+ * @param depth the maximum number of directories to search (-1 is indefinite)
+ * @param regexp the regular expression to match the file or complete path
+ * @param matchFileOnly if true, the regexp will match the file-part only, if false,
+ *        the complete path (behind dir) will be matched.
+ */
+void scanFiles(std::vector<std::string>& files, const std::string& dir, int depth, const boost::regex& regexp, bool matchFileOnly);
 
 /**
  * Scale a value using fill, offset and scale
