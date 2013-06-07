@@ -153,7 +153,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
             if (argIt->find(memberRegex) == 0) {
                 members.push_back(argIt->substr(memberRegex.size()));
             } else if (argIt->find(memberName) == 0) {
-                members.push_back("\\Q" + argIt->substr(memberName.size()) + "\\E");
+                members.push_back(".*\\Q" + argIt->substr(memberName.size()) + "\\E.*");
             } else {
                 // additional file
                 files.push_back(*argIt);

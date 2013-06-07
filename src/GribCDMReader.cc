@@ -68,6 +68,7 @@ struct GribCDMReaderImpl {
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
     string ensembleDimName;
+    vector<string> ensembleMemberIds;
     size_t maxEnsembles;
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
@@ -137,6 +138,7 @@ bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lh
 GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::string>& members)
     : p_(new GribCDMReaderImpl())
 {
+    p_->ensembleMemberIds = members;
     p_->configId = configXML.id();
     p_->doc = configXML.getXMLDoc();
     p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
@@ -664,6 +666,29 @@ void GribCDMReader::initAddEnsembles()
         cdm_->addVariable(ensembleVar);
         cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
         cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("standard_name", "realization"));
+
+        if (p_->ensembleMemberIds.size() == p_->maxEnsembles) {
+            // add a character dimension, naming all ensemble members
+            size_t maxLen = 0;
+            for (vector<string>::iterator emi = p_->ensembleMemberIds.begin(); emi != p_->ensembleMemberIds.end(); ++emi) {
+                maxLen = std::max(maxLen, emi->size());
+            }
+            string charDim = p_->ensembleDimName + "_clen";
+            cdm_->addDimension(CDMDimension(charDim, maxLen));
+            vector<string> nameShape;
+            nameShape.push_back(p_->ensembleDimName);
+            nameShape.push_back(charDim);
+            CDMVariable names(p_->ensembleDimName + "_names", CDM_STRING, nameShape);
+            boost::shared_array<char> namesAry(new char[maxLen*p_->maxEnsembles]);
+            for (size_t i = 0; i < p_->ensembleMemberIds.size(); ++i) {
+                string id = p_->ensembleMemberIds.at(i);
+                std::copy(id.begin(), id.end(), &namesAry[i*maxLen]);
+            }
+            names.setData(createData(maxLen*p_->maxEnsembles, namesAry));
+            cdm_->addVariable(names);
+            cdm_->addAttribute(names.getName(), CDMAttribute("long_name", "names of ensemble members"));
+        }
+
     }
 }
 

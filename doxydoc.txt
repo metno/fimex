@@ -537,6 +537,53 @@ The usage of the program is then very simple:
 @page gribReaderDoc gribReader Configuration
 @section gribReaderConfig gribReader Configuration
 
+@subsection Concatenation of grib-messages
+
+Grib-data is often splitted across several files. These files might be
+combined by fimex or generally by CDMReaderFactory by a glob, e.g.
+
+@verbatim
+  fimex --input.file=glob:*.grb
+@endverbatim
+
+which will read all files ending with .grb. Wildcards are: * for zero or many
+characters, ? for exactly one character and ** for all subdirectories, e.g.
+/home/heikok/**/*.grb will match all grib-files somewhere in my home-directory,
+while /home/heikok/*/*.grb will only match all grib-files one directory below my
+home-directory.
+
+Files might also be concatenated by simply adding new files with input.optional, e.g.
+
+@verbatim
+  fimex --input.file=file1.grb --input.optional=file2.grib --input.optional=file3.grb
+@endverbatim
+
+input.ptionals does not accept glob:-syntax.
+
+@subsection Concatenation of grib-model output to combined ensembledata
+
+Grib data might come with a build-in ensemble axis. But in some cases, one wants
+to combine models to ensemble, though the ensemble axis is not included in the files,
+e.g. in GLAMEPS ( http://www.hirlam.org/index.php?option=com_content&view=article&id=61&Itemid=103 ).
+
+In this case, fimex allows to match the filenames by names or by regular expressions
+e.g.
+
+@verbatim
+  fimex --input.file=*.grb --input.optional=memberName:mbrABC --input.optional=memberName:mbr001 
+@endverbatim
+
+would add ensemble-id 0 to all files containing mbrABC and ensemble-id 1 to all files containing mbr001.
+It is also possible to match the members with regular expressions, e.g. 
+@verbatim
+  fimex --input.file=*.grb --input.optional="memberRegex:mbrABC.*" --input.optional="memberRegex:mbr001.*" 
+@endverbatim
+
+The order of 'memberName' or 'memberRegex' determines the position in the final file. memberNames are
+internally translated to a regex like '.*\QmemberName\E.*'
+
+
+
 @verbinclude share/etc/cdmGribReaderConfig.xml
 
 @see MetNoFimex::GribCDMReader

@@ -404,24 +404,23 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     case GRIB_NOT_FOUND: {
         totalNumberOfEnsembles_ = 0;
         perturbationNo_ = 0;
-        std::cerr << "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size() << std::endl;
+        LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size());
         if (members.size()>0) {
-          int i=0;
-          bool found=false;
-          for (vector<std::string>::const_iterator it = members.begin(); it!=members.end()&&!found; ++it) {
-             if (fileURL.find(*it)!=std::string::npos) {
-               perturbationNo_=i;
-               totalNumberOfEnsembles_ = members.size();
-               found=true;
+            int i=0;
+            bool found=false;
+            for (vector<std::string>::const_iterator it = members.begin(); it!=members.end()&&!found; ++it) {
+                if (fileURL.find(*it)!=std::string::npos) {
+                    perturbationNo_=i;
+                    totalNumberOfEnsembles_ = members.size();
+                    found=true;
+                }
+                i++;
             }
-            i++;
-          }
-          if (!found) {
-            std::cerr << "perturbationNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!" << std::endl;
-          }
-          else {
-            std::cerr << "perturbationNumber for " << fileURL.c_str() << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_ << std::endl;
-          }
+            if (!found) {
+                LOG4FIMEX(logger, Logger::WARN, "perturbationNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "perturbationNumber for " << fileURL.c_str() << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_);
+            }
         }
         break;
     }
