@@ -356,12 +356,14 @@
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="cell_methods" value="time: point" type="string" />
     <attribute name="long_name" value="x_sea_wave_stokes_drift" type="string" />
+    <attribute name="standard_name" value="sea_surface_wave_stokes_drift_x_velocity" />
     <attribute name="units" value="m s-1" type="string" />
 </parameter>
 <parameter id="292,3,0" name="y_stokes_drift">
     <attribute name="_FillValue" value="-32767" type="short" />
     <attribute name="cell_methods" value="time: point" type="string" />
     <attribute name="long_name" value="y_sea_wave_stokes_drift" type="string" />
+    <attribute name="standard_name" value="sea_surface_wave_stokes_drift_y_velocity" />
     <attribute name="units" value="m s-1" type="string" />
 </parameter>
 <parameter id="301,8,0" name="sea_surface_height">
