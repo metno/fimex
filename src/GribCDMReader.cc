@@ -288,14 +288,23 @@ void GribCDMReader::initLevels()
         XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathLevelString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
-        if (size != 1) {
-            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
+        if (size > 1) {
+            throw CDMException("more than one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
         }
-        xmlNodePtr node = nodes->nodeTab[0];
-        assert(node->type == XML_ELEMENT_NODE);
-        string levelName = getXmlProp(node, "name");
-        string levelId = getXmlProp(node, "id");
-        string levelType = getXmlProp(node, "type");
+        string levelName, levelId, levelType;
+        xmlNodePtr node;
+        if (size == 0) {
+            LOG4FIMEX(logger, Logger::INFO, "no definition for vertical axis " + type2string(typeId) + " found, using default");
+            levelName = "grib"+type2string(edition) +"_vLevel" + type2string(typeId);
+            levelId = levelName;
+            levelType = "float";
+        } else {
+            node = nodes->nodeTab[0];
+            assert(node->type == XML_ELEMENT_NODE);
+            levelName = getXmlProp(node, "name");
+            levelId = getXmlProp(node, "id");
+            levelType = getXmlProp(node, "type");
+        }
         CDMDataType levelDataType = string2datatype(levelType);
         vector<string> dimNames(lit->second.size());
         for (size_t i = 0; i < lit->second.size(); ++i) {
@@ -315,26 +324,32 @@ void GribCDMReader::initLevels()
 
             // add level variable data
             DataPtr levelData = createData(CDM_INT, lit->second.at(i).begin(), lit->second.at(i).end());
-            // TODO add special data for hybrid levels
-            initSpecialLevels_(node, myExtension, lit->first, i, levelShape, levelData);
+            // add special data for hybrid levels
+            if (node != 0) {
+                initSpecialLevels_(node, myExtension, lit->first, i, levelShape, levelData);
+            }
             cdm_->getVariable(levelVar.getName()).setData(levelData);
 
             // add attributes
             vector<CDMAttribute> levelAttributes;
-            map<string, boost::shared_ptr<ReplaceStringObject> > replacements;
-            replacements["EXT"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTemplateObject<string>(myExtension));
+            if (node != 0) {
+                map<string, boost::shared_ptr<ReplaceStringObject> > replacements;
+                replacements["EXT"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTemplateObject<string>(myExtension));
+                fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, replacements);
 
-            fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, replacements);
-
-            // add special attributes for grib1 / grib2
-            {
-                string xpathGribLevelString("gr:grib"+type2string(edition));
-                XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
-                xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
-                int size = (gribNodes) ? gribNodes->nodeNr : 0;
-                if (size == 1) {
-                    fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+                // add special attributes for grib1 / grib2
+                {
+                    string xpathGribLevelString("gr:grib"+type2string(edition));
+                    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
+                    xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
+                    int size = (gribNodes) ? gribNodes->nodeNr : 0;
+                    if (size == 1) {
+                        fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+                    }
                 }
+            } else {
+                levelAttributes.push_back(CDMAttribute("units", "1"));
+                levelAttributes.push_back(CDMAttribute("long_name", "grib"+type2string(edition)+ "-level " + type2string(typeId)));
             }
 
             // add the attributes to the CDM
