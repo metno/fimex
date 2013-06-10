@@ -282,6 +282,10 @@
     <attribute name="long_name" value="unknown vertical level 200" type="string" />
     <attribute name="positive" value="up" type="string" />
 </vertical_axis>
+<vertical_axis id="entire_ocean" name="entire_ocean" grib2_id="201" grib1_id="201" type="float">
+    <attribute name="long_name" value="entire ocean as single layer" type="string" />
+    <attribute name="positive" value="up" type="string" />
+</vertical_axis>
 <vertical_axis id="local_vertical_level_204" name="local_vertical_level_204" grib2_id="204" type="float">
     <attribute name="description" value="vertical level 204, defined locally, ask center" type="string" />
     <attribute name="long_name" value="unknown vertical level 204" type="string" />
