@@ -620,10 +620,15 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
                 const double* m = &matrixPos[4*i];
                 double u_new = uz[i] * m[0] + vz[i] * m[2];
                 double v_new = uz[i] * m[1] + vz[i] * m[3];
-                double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) /
-                                    (u_new*u_new + v_new*v_new) );
-                uz[i] = u_new * norm;
-                vz[i] = v_new * norm;
+                double uv_new2 = (u_new*u_new + v_new*v_new);
+                if (uv_new2 == 0) {
+                    uz[i] = 0.;
+                    vz[i] = 0.;
+                } else {
+                    double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) / uv_new2 );
+                    uz[i] = u_new * norm;
+                    vz[i] = v_new * norm;
+                }
             }
         } else {
             for (size_t i = 0; i < layerSize; i++) {
