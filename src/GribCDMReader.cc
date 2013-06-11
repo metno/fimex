@@ -691,10 +691,10 @@ void GribCDMReader::initAddEnsembles()
             string charDim = p_->ensembleDimName + "_clen";
             cdm_->addDimension(CDMDimension(charDim, maxLen));
             vector<string> nameShape;
-            nameShape.push_back(p_->ensembleDimName);
             nameShape.push_back(charDim);
+            nameShape.push_back(p_->ensembleDimName);
             CDMVariable names(p_->ensembleDimName + "_names", CDM_STRING, nameShape);
-            boost::shared_array<char> namesAry(new char[maxLen*p_->maxEnsembles]);
+            boost::shared_array<char> namesAry(new char[maxLen*p_->maxEnsembles]());
             for (size_t i = 0; i < p_->ensembleMemberIds.size(); ++i) {
                 string id = p_->ensembleMemberIds.at(i);
                 std::copy(id.begin(), id.end(), &namesAry[i*maxLen]);

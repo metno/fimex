@@ -406,15 +406,16 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
         perturbationNo_ = 0;
         LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size());
         if (members.size()>0) {
-            int i=0;
             bool found=false;
-            for (vector<std::string>::const_iterator it = members.begin(); it!=members.end()&&!found; ++it) {
-                if (fileURL.find(*it)!=std::string::npos) {
+            int i = 0;
+            for (vector<std::string>::const_iterator it = members.begin(); it != members.end(); ++it) {
+                if (boost::regex_match(fileURL, boost::regex(*it))) {
                     perturbationNo_=i;
                     totalNumberOfEnsembles_ = members.size();
                     found=true;
+                    break;
                 }
-                i++;
+                ++i;
             }
             if (!found) {
                 LOG4FIMEX(logger, Logger::WARN, "perturbationNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
