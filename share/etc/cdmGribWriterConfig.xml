@@ -93,5 +93,19 @@
 <!-- high clouds -->
     <grib1 parameterNumber="188" codeTable="128" units="1/100"/>
 </parameter>
+<!-- waves -->
+<parameter standard_name="sea_surface_wave_stokes_drift_x_velocity">
+    <grib1 parameterNumber="247" codeTable="128" units="m/s"/>
+</parameter>
+<parameter standard_name="sea_surface_wave_stokes_drift_y_velocity">
+    <grib1 parameterNumber="248" codeTable="128" units="m/s"/>
+</parameter>
+<parameter name="significant_wave_period">
+    <grib1 parameterNumber="232" codeTable="128" units="s"/>
+</parameter>
+<parameter standard_name="sea_surface_wave_significant_height">
+    <grib1 parameterNumber="100" codeTable="128" units="m"/>
+</parameter>
+
 </variables>
 </cdm_gribwriter_config>
