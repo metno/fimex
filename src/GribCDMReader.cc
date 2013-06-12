@@ -38,8 +38,10 @@
 #include "fimex/Data.h"
 #include "fimex/Data.h"
 #include "fimex/ReplaceStringTimeObject.h"
+#include "fimex/ReplaceStringTemplateObject.h"
 #include "fimex/coordSys/Projection.h"
 #include <set>
+#include <map>
 #include <algorithm>
 #include <stdexcept>
 #include <MutexLock.h>
@@ -66,6 +68,7 @@ struct GribCDMReaderImpl {
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
     string ensembleDimName;
+    vector<pair<string, boost::regex> > ensembleMemberIds;
     size_t maxEnsembles;
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
@@ -132,9 +135,12 @@ bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs)
 bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
 
 
-GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML)
+GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
     : p_(new GribCDMReaderImpl())
 {
+    for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
+        p_->ensembleMemberIds.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
+    }
     p_->configId = configXML.id();
     p_->doc = configXML.getXMLDoc();
     p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
@@ -147,7 +153,7 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
 
 
     for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
-        vector<GribFileMessage> messages = GribFileIndex(*fileIt).listMessages();
+        vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds).listMessages();
         copy(messages.begin(), messages.end(), back_inserter(p_->indices));
     }
 
@@ -188,6 +194,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     map<string, long> optionals;
     optionals["typeOfLevel"] = msg.getLevelType();
     optionals["levelNo"] = msg.getLevelNumber();
+    optionals["timeRangeIndicator"] = msg.getTimeRangeIndicator();
     if (msg.getEdition() == 1) {
         xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"']");
         optionals["gribTablesVersionNo"] = pars.at(1);
@@ -283,18 +290,28 @@ void GribCDMReader::initLevels()
         XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathLevelString);
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         int size = (nodes) ? nodes->nodeNr : 0;
-        if (size != 1) {
-            throw CDMException("unable to find exactly one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
+        if (size > 1) {
+            throw CDMException("more than one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
         }
-        xmlNodePtr node = nodes->nodeTab[0];
-        assert(node->type == XML_ELEMENT_NODE);
-        string levelName = getXmlProp(node, "name");
-        string levelId = getXmlProp(node, "id");
-        string levelType = getXmlProp(node, "type");
+        string levelName, levelId, levelType;
+        xmlNodePtr node;
+        if (size == 0) {
+            LOG4FIMEX(logger, Logger::INFO, "no definition for vertical axis " + type2string(typeId) + " found, using default");
+            levelName = "grib"+type2string(edition) +"_vLevel" + type2string(typeId);
+            levelId = levelName;
+            levelType = "float";
+        } else {
+            node = nodes->nodeTab[0];
+            assert(node->type == XML_ELEMENT_NODE);
+            levelName = getXmlProp(node, "name");
+            levelId = getXmlProp(node, "id");
+            levelType = getXmlProp(node, "type");
+        }
         CDMDataType levelDataType = string2datatype(levelType);
         vector<string> dimNames(lit->second.size());
         for (size_t i = 0; i < lit->second.size(); ++i) {
-            string myLevelId = levelId + (lit->second.size() > 1  ? type2string(i) : "");
+            string myExtension = (lit->second.size() > 1  ? type2string(i) : "");
+            string myLevelId = levelId + myExtension;
             dimNames.at(i) = myLevelId;
             LOG4FIMEX(logger, Logger::DEBUG, "declaring level: " << myLevelId);
             set<long>::size_type levelSize = lit->second.at(i).size();
@@ -308,21 +325,33 @@ void GribCDMReader::initLevels()
             cdm_->addVariable(levelVar);
 
             // add level variable data
-            cdm_->getVariable(levelVar.getName()).setData(createData(CDM_INT, lit->second.at(i).begin(), lit->second.at(i).end()));
+            DataPtr levelData = createData(CDM_INT, lit->second.at(i).begin(), lit->second.at(i).end());
+            // add special data for hybrid levels
+            if (node != 0) {
+                initSpecialLevels_(node, myExtension, lit->first, i, levelShape, levelData);
+            }
+            cdm_->getVariable(levelVar.getName()).setData(levelData);
 
             // add attributes
             vector<CDMAttribute> levelAttributes;
-            fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+            if (node != 0) {
+                map<string, boost::shared_ptr<ReplaceStringObject> > replacements;
+                replacements["EXT"] = boost::shared_ptr<ReplaceStringObject>(new ReplaceStringTemplateObject<string>(myExtension));
+                fillAttributeListFromXMLNode(levelAttributes, nodes->nodeTab[0]->children, replacements);
 
-            // add special attributes for grib1 / grib2
-            {
-                string xpathGribLevelString("gr:grib"+type2string(edition));
-                XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
-                xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
-                int size = (gribNodes) ? gribNodes->nodeNr : 0;
-                if (size == 1) {
-                    fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+                // add special attributes for grib1 / grib2
+                {
+                    string xpathGribLevelString("gr:grib"+type2string(edition));
+                    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathGribLevelString, nodes->nodeTab[0]);
+                    xmlNodeSetPtr gribNodes = xpathObj->nodesetval;
+                    int size = (gribNodes) ? gribNodes->nodeNr : 0;
+                    if (size == 1) {
+                        fillAttributeListFromXMLNode(levelAttributes, gribNodes->nodeTab[0]->children, p_->templateReplacementAttributes);
+                    }
                 }
+            } else {
+                levelAttributes.push_back(CDMAttribute("units", "1"));
+                levelAttributes.push_back(CDMAttribute("long_name", "grib"+type2string(edition)+ "-level " + type2string(typeId)));
             }
 
             // add the attributes to the CDM
@@ -331,6 +360,150 @@ void GribCDMReader::initLevels()
             }
         }
         p_->levelDimNames[lit->first] = dimNames;
+    }
+}
+
+
+vector<double> GribCDMReader::readVarPv_(string exampleVar)
+{
+    vector<double> pv;
+    // example gribFileMessage
+    size_t gfiPos = p_->varTimeLevelEnsembleGFIBox[exampleVar].begin()->second.begin()->second.begin()->second;
+    //
+    size_t count = p_->indices.at(gfiPos).readLevelData(pv, MIFI_FILL_DOUBLE);
+    if (count <= 0) {
+        LOG4FIMEX(logger, Logger::INFO, "could not find extra level data (PV)");
+    }
+    return pv;
+}
+
+vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr levelData, string exampleVar, string extension)
+{
+    vector<double> retValues;
+    string valuesXPath("./gr:values");
+    XPathObjPtr xpathObj = p_->doc->getXPathObject(valuesXPath, node);
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        xmlNodePtr node = nodes->nodeTab[i];
+        if (node->type == XML_ELEMENT_NODE) {
+            string mode = getXmlProp(node, "mode");
+            if (mode == "" || mode == "inline") {
+                // add all space delimited values to the retVal vector
+                xmlChar *valuePtr = xmlNodeGetContent(node);
+                string values(reinterpret_cast<const char *>(valuePtr));
+                xmlFree(valuePtr);
+                vector<string> tokens = tokenize(values, " ");
+                transform(tokens.begin(), tokens.end(),
+                        back_inserter(retValues), string2type<double>);
+            } else if (mode == "extraLevel1" || mode == "extraLevel2") {
+                vector<double> pv = readVarPv_(exampleVar);
+                size_t offset = (mode == "extraLevel1") ? 0 : pv.size()/2;
+                boost::shared_array<unsigned int> lv = levelData->asUInt();
+                for (size_t i = 0; i < levelData->size(); i++) {
+                    size_t pos = offset + lv[i];
+                    if (pos < pv.size()) {
+                        // using pos-1 due to fortran numbering in grib
+                        double value = (pos == 0) ? pv.at(0) : pv[pos-1];
+                        retValues.push_back(value);
+                    } else {
+                        throw CDMException("levelData (pv) of " + exampleVar + " has not enough elements, need " + type2string(pos+1));
+                    }
+                }
+            } else if (mode == "extraHalvLevel1" || mode == "extraHalvLevel2") {
+                vector<double> pv = readVarPv_(exampleVar);
+                size_t offset = (mode == "extraHalvLevel1") ? 0 : pv.size()/2;
+                boost::shared_array<unsigned int> lv = levelData->asUInt();
+                for (size_t i = 0; i < levelData->size(); i++) {
+                    size_t pos = offset + lv[i];
+                    if (pos < pv.size()) {
+                        double value = (pos == 0) ? pv.at(0) : (pv[pos] + pv[pos-1])/2;
+                        retValues.push_back(value);
+                    } else {
+                        throw CDMException("levelData (pv) of " + exampleVar + " has not enough elements, need " + type2string(pos+1));
+                    }
+                }
+            } else if (mode == "hybridSigmaCalc(ap,b,p0)") {
+                // fetch ap, b, and calc
+                const CDMVariable& p0 = getCDM().getVariable("p0"+ extension);
+                const CDMVariable& ap = getCDM().getVariable("ap" + extension);
+                const CDMVariable& b = getCDM().getVariable("b" + extension);
+                boost::shared_array<double> p0Data = p0.getData()->asDouble();
+                boost::shared_array<double> apData = ap.getData()->asDouble();
+                boost::shared_array<double> bData = b.getData()->asDouble();
+                for (size_t i = 0; i < ap.getData()->size(); ++i) {
+                    retValues.push_back(apData[i]/p0Data[0] + bData[i]);
+                }
+            } else {
+                throw CDMException("unkown mode '"+ mode +"' to extract level-data for variable " + exampleVar);
+            }
+            string sscale = getXmlProp(node, "scale_factor");
+            if (sscale != "") {
+                double scale = string2type<double>(sscale);
+                transform(retValues.begin(), retValues.end(),
+                        retValues.begin(), bind1st(multiplies<double>(), scale));
+            }
+        }
+    }
+    if (size == 0) {
+        boost::shared_array<double> d = levelData->asDouble();
+        retValues = vector<double>(&d[0], &d[0]+levelData->size());
+    }
+    return retValues;
+}
+
+void GribCDMReader::initSpecialLevels_(xmlNodePtr node, const string& extension, const string& levelType, size_t levelPos, const vector<string>& levelShape, DataPtr& levelData) {
+    string xpathAdditional = "gr:additional_axis_variable";
+    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathAdditional, node);
+    xmlNodeSetPtr addNodes = xpathObj->nodesetval;
+    int size = (addNodes) ? addNodes->nodeNr : 0;
+    if (size > 0) {
+        string exampleVar;
+        // find example variable
+        for (map<string, pair<string,size_t> >::iterator vltp = p_->varLevelTypePos.begin(); vltp != p_->varLevelTypePos.end(); vltp++) {
+            string vltype = vltp->second.first;
+            size_t vltpos = vltp->second.second;
+            if ((levelType == vltype) && (levelPos == vltpos)) {
+                exampleVar = vltp->first;
+                break;
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            xmlNodePtr inode = addNodes->nodeTab[i];
+            string name = getXmlProp(inode,"name") + extension;
+            string type = getXmlProp(inode, "type");
+            string axis = getXmlProp(inode, "axis");
+            CDMDataType dataType = string2datatype(type);
+            vector<string> shape;
+            if (axis != "" && axis != "1") {
+                shape = levelShape;
+            }
+            try {
+                CDMVariable var(name, dataType, shape);
+                // get data:
+                vector<double> lv = readValuesFromXPath_(inode, levelData, exampleVar, extension);
+                DataPtr lvData = createData(dataType, lv.begin(), lv.end());
+                var.setData(lvData);
+                cdm_->addVariable(var);
+            } catch (runtime_error& re) {
+                LOG4FIMEX(logger, Logger::WARN, "problem adding auxiliary level " << name << ": "  << re.what());
+            }
+
+            // add attributes
+            vector<CDMAttribute> levelAttributes;
+            fillAttributeListFromXMLNode(levelAttributes, inode->children, p_->templateReplacementAttributes);
+            // add the attributes to the CDM
+            for (vector<CDMAttribute>::iterator ait = levelAttributes.begin(); ait != levelAttributes.end(); ++ait) {
+                cdm_->addAttribute(name, *ait);
+            }
+        }
+        // levelData might change, too. Needs to be done after reading all auxiliary variables
+        try {
+            vector<double> lv = readValuesFromXPath_(node, levelData, exampleVar, extension);
+            levelData = createData(CDM_DOUBLE, lv.begin(), lv.end());
+        } catch (runtime_error& re) {
+            LOG4FIMEX(logger, Logger::WARN, "problem adding level-data for " << exampleVar << ": "  << re.what());
+        }
     }
 }
 
@@ -510,6 +683,36 @@ void GribCDMReader::initAddEnsembles()
         cdm_->addVariable(ensembleVar);
         cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("long_name", "ensemble run number"));
         cdm_->addAttribute(ensembleVar.getName(), CDMAttribute("standard_name", "realization"));
+
+        if (p_->ensembleMemberIds.size() == p_->maxEnsembles) {
+            // add a character dimension, naming all ensemble members
+            size_t maxLen = 0;
+            for (vector<pair<string, boost::regex> >::iterator emi = p_->ensembleMemberIds.begin(); emi != p_->ensembleMemberIds.end(); ++emi) {
+                maxLen = std::max(maxLen, emi->first.size());
+            }
+            string charDim = p_->ensembleDimName + "_strlen";
+            cdm_->addDimension(CDMDimension(charDim, maxLen));
+            vector<string> nameShape;
+            nameShape.push_back(charDim);
+            nameShape.push_back(p_->ensembleDimName);
+            CDMVariable names(p_->ensembleDimName + "_names", CDM_STRING, nameShape);
+            boost::shared_array<char> namesAry(new char[maxLen*p_->maxEnsembles]());
+            vector<string> members;
+            vector<int> memberFlags;
+            for (size_t i = 0; i < p_->ensembleMemberIds.size(); ++i) {
+                string id = p_->ensembleMemberIds.at(i).first;
+                std::copy(id.begin(), id.end(), &namesAry[i*maxLen]);
+                members.push_back(id);
+                memberFlags.push_back(i);
+            }
+            names.setData(createData(maxLen*p_->maxEnsembles, namesAry));
+            cdm_->addVariable(names);
+            cdm_->addAttribute(names.getName(), CDMAttribute("long_name", "names of ensemble members"));
+            // add the names as flags (needed by ADAGUC)
+            cdm_->addAttribute(p_->ensembleDimName, CDMAttribute("flag_values", CDM_INT, createData(CDM_INT, memberFlags.begin(), memberFlags.end())));
+            cdm_->addAttribute(p_->ensembleDimName, CDMAttribute("flag_meanings", join(members.begin(), members.end(), " ")));
+        }
+
     }
 }
 

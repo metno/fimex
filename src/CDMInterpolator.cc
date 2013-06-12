@@ -177,6 +177,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 // transposing needed once for each direction (or caching, but that needs to much memory)
                 const std::string& counterpart = variable.getSpatialVectorCounterpart();
                 boost::shared_array<float> counterPartArray = data2InterpolationArray(p_->dataReader->getDataSlice(counterpart, unLimDimPos), cdm_->getFillValue(counterpart));
+                processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
                 LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(" << unLimDimPos << ")");
                 boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
                 if (direction.find("x") != string::npos) {
@@ -805,9 +806,7 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
         steps = orgXDimSize * orgYDimSize;
     }
 #ifdef _OPENMP
-    omp_lock_t my_lock;
-    omp_init_lock(&my_lock);
-#pragma omp parallel default(shared) if (steps > 4)
+#pragma omp parallel default(none) firstprivate(steps, stepSize, orgXDimSize, orgYDimSize) shared(samples, pointsOnXAxis, pointsOnYAxis, lonVals, latVals) if (steps > 4)
     {
 #pragma omp for nowait
 #endif
@@ -837,16 +836,16 @@ double getGridDistance(vector<double>& pointsOnXAxis, vector<double>& pointsOnYA
                 }
             }
 #ifdef _OPENMP
-            omp_set_lock (&my_lock);
+#pragma omp critical (cdminterpolator_getgriddistance)
+            {
 #endif
             samples.push_back(min_cos_d);
 #ifdef _OPENMP
-            omp_unset_lock (&my_lock);
+            }
 #endif
         }
     }
 #ifdef _OPENMP
-    omp_destroy_lock(&my_lock);
     }
 #endif
     double max_grid_d = acos(*(min_element(samples.begin(), samples.end())));
@@ -893,7 +892,7 @@ void fastTranslatePointsToClosestInputCell(vector<double>& pointsOnXAxis, vector
     // sort latlons by latitudes
     sort(latlons.begin(), latlons.end());
 #ifdef _OPENMP
-#pragma omp parallel default(shared)
+#pragma omp parallel default(none) shared(pointsOnXAxis,pointsOnYAxis,latlons, min_grid_cos_d)
     {
 #pragma omp for nowait
 #endif

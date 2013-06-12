@@ -37,22 +37,30 @@ namespace MetNoFimex {
 
 static string replaceTemplateAttribute(string value, const map<string, boost::shared_ptr<ReplaceStringObject> > templateReplacements) {
     for (map<string, boost::shared_ptr<ReplaceStringObject> >::const_iterator it = templateReplacements.begin(); it != templateReplacements.end(); ++it) {
-        boost::smatch matches;
-        boost::regex rgx(boost::regex(".*%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%.*"));
-        if (boost::regex_match(value, matches, rgx)) {
+        stringstream outString;
+        boost::regex rgx(boost::regex("%" + it->first + "(\\(([^,]*),?(.*)?\\))?" + "%"));
+        string::const_iterator  begin = value.begin(), end = value.end();
+        boost::match_results<string::const_iterator> matches;
+        while (boost::regex_search(begin, end, matches, rgx)) {
+            outString << string(begin, matches[0].first);
             boost::shared_ptr<ReplaceStringObject> rso = it->second;
+            string var(matches[1].first, matches[1].second);
             if (matches.size() > 2) {
+                string match2(matches[2].first, matches[2].second);
                 std::vector<std::string> options;
                 if (matches.size() > 3) {
-                    options = tokenize(matches[3], ",");
+                    string match3(matches[3].first, matches[3].second);
+                    options = tokenize(match3, ",");
                 }
                 // values within the inner brackets
-                rso->setFormatStringAndOptions(matches[2], options);
+                rso->setFormatStringAndOptions(match2, options);
             }
-            stringstream ss;
-            rso->put(ss);
-            value = boost::regex_replace(value, rgx, ss.str());
+            rso->put(outString);
+            begin = matches[0].second;
         }
+        // add the last non-matching bit
+        outString << string(begin, end);
+        value = outString.str();
     }
     return value;
 }
@@ -81,7 +89,7 @@ void fillAttributeListFromXMLNode(vector<CDMAttribute>& attributes, const xmlNod
  * @param xpathString the string leading to the node
  * @param xmlAttributes returns all attributes of the first node matched
  * @param varAttributes returns all <attribute .../> sub elements of this node
- * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) wich are replaced by these values
+ * @param templateReplacements the CDMAttribute values may containt templates (%VAR%) which are replaced by these values
  * @return number of nodes matched (only the first has been read)
  */
 int readXPathNodeWithCDMAttributes(const XMLDoc& doc, const string& xpathString, std::map<string, string>& xmlAttributes, std::vector<CDMAttribute>& varAttributes, const map<string, boost::shared_ptr<ReplaceStringObject> >& templateReplacements) throw(CDMException)

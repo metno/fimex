@@ -8,7 +8,11 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
-             test_merge_inner.nc test_merge_outer.nc fillIn2.nc
+             test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
+             data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
+             data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
+             data/joinExistingAggSuffix.ncml data/aggNothing.ncml data/aggWrong.ncml \
+             data/unionAgg.ncml data/unionAgg2.nc3
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc\
              testQualityExtractor.nc test_0time.nc \
@@ -54,6 +58,7 @@ endif
 if HAVE_NETCDF
   CC_TESTS += ${NETCDF_MI_TESTS} testCoordSys \
               testCoordinateSystemSliceBuilder  testNcmlReader \
+              testNcmlAggregationReader \
               testProcessor testMerger testNetCDFReaderWriter \
               testFillWriter
   GRIBAPI_NC_TESTS = testGribReader
@@ -94,6 +99,7 @@ testNetcdfWriter_SOURCES = testNetcdfWriter.cc
 testFillWriter_SOURCES = testFillWriter.cc
 testNetCDFReaderWriter_SOURCES = testNetCDFReaderWriter.cc
 testNcmlReader_SOURCES = testNcmlReader.cc
+testNcmlAggregationReader_SOURCES = testNcmlAggregationReader.cc
 testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
 testMerger_SOURCES = testMerger.cc

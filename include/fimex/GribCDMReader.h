@@ -39,13 +39,12 @@
 #endif
 
 #include <vector>
-#include <map>
-#include <set>
 #include "boost/shared_ptr.hpp"
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMReader.h"
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/XMLInput.h"
+#include "fimex/XMLDoc.h"
 
 namespace MetNoFimex
 {
@@ -53,13 +52,12 @@ namespace MetNoFimex
 // forward decl.
 class CDM;
 class CDMDimension;
-class Data;
 struct GribCDMReaderImpl;
 
 class GribCDMReader: public MetNoFimex::CDMReader
 {
 public:
-    GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML);
+    GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
     virtual ~GribCDMReader();
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
@@ -92,6 +90,10 @@ private:
     void initAddProjection();
     void initAddVariables();
 
+    // read levels (pv) from a variable
+    std::vector<double> readVarPv_(std::string exampleVar);
+    std::vector<double> readValuesFromXPath_(xmlNodePtr node, DataPtr levelData, std::string exampleVar, std::string extension);
+    void initSpecialLevels_(xmlNodePtr node, const std::string& extension, const std::string& levelType, std::size_t levelPos, const std::vector<std::string>& levelShape, DataPtr& levelData);
 };
 
 

@@ -1,6 +1,7 @@
 configdir=$(pkgdatadir)
 config_DATA = \
     cdmGribReaderConfig.xml\
+    cdmGribReaderConfigGlameps.xml\
     cdmGribReaderConfig.xsd\
 	cdmGribWriterConfig.xml\
 	cdmGribWriterConfig.xsd\

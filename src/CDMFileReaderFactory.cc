@@ -137,9 +137,37 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #endif /* FELT */
 #ifdef HAVE_GRIB_API_H
     case MIFI_FILETYPE_GRIB: {
-        std::vector<std::string> files(args.begin(), args.end());
-        files.insert(files.begin(), fileName);
-        return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configXML));
+        std::vector<std::string> files;
+        // scanfiles by a glob
+        std::string globStr("glob:");
+        if (fileName.find(globStr) == 0) {
+            std::string glob = fileName.substr(globStr.size());
+            globFiles(files, glob);
+        } else {
+            files.push_back(fileName);
+        }
+        std::vector<std::pair<std::string, std::string> > members;
+        for (std::vector<std::string>::const_iterator argIt = args.begin(); argIt != args.end(); ++argIt) {
+            std::string memberRegex("memberRegex:");
+            std::string memberName("memberName:");
+            if (argIt->find(memberRegex) == 0) {
+                std::vector<std::string> memberRegexParts = tokenize(argIt->substr(memberRegex.size()), ":");
+                if (memberRegexParts.size() == 1) {
+                    memberRegexParts.push_back(memberRegexParts.at(0));
+                }
+                members.push_back(std::make_pair(memberRegexParts.at(1), memberRegexParts.at(0)));
+            } else if (argIt->find(memberName) == 0) {
+                std::vector<std::string> memberNameParts = tokenize(argIt->substr(memberName.size()), ":");
+                if (memberNameParts.size() == 1) {
+                    memberNameParts.push_back(memberNameParts.at(0));
+                }
+                members.push_back(std::make_pair(memberNameParts.at(1), ".*\\Q" + memberNameParts.at(0) + "\\E.*"));
+            } else {
+                // additional file
+                files.push_back(*argIt);
+            }
+        }
+        return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configXML, members));
     }
 #endif
 #ifdef HAVE_NETCDF_H

@@ -331,7 +331,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos)
+GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members)
 : fileURL_(fileURL), filePos_(filePos), msgPos_(msgPos)
 {
     if (gh.get() == 0)
@@ -391,7 +391,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
     stepType_ = std::string(msg);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "stepRange", &stepRange_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
     // ensemble
@@ -404,6 +404,25 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
     case GRIB_NOT_FOUND: {
         totalNumberOfEnsembles_ = 0;
         perturbationNo_ = 0;
+        LOG4FIMEX(logger, Logger::DEBUG, "Checking for ensemblenumber from " << fileURL.c_str() << " in list of " << members.size());
+        if (members.size()>0) {
+            bool found=false;
+            int i = 0;
+            for (vector<std::pair<std::string, boost::regex> >::const_iterator it = members.begin(); it != members.end(); ++it) {
+                if (boost::regex_match(fileURL, it->second)) {
+                    perturbationNo_=i;
+                    totalNumberOfEnsembles_ = members.size();
+                    found=true;
+                    break;
+                }
+                ++i;
+            }
+            if (!found) {
+                LOG4FIMEX(logger, Logger::WARN, "perturbationNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "perturbationNumber for " << fileURL.c_str() << " is " << perturbationNo_ << " of " << totalNumberOfEnsembles_);
+            }
+        }
         break;
     }
     default: MIFI_GRIB_CHECK(gribError, 0); break;
@@ -498,7 +517,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             dataTime_ = string2type<long>(getXmlProp(lNode, "dataTime"));
             stepUnits_ = getXmlProp(lNode, "stepUnits");
             stepType_ = getXmlProp(lNode, "stepType");
-            stepRange_ = string2type<long>(getXmlProp(lNode, "stepRange"));
+            timeRangeIndicator_ = string2type<long>(getXmlProp(lNode, "timeRangeIndicator"));
             stepStart_ = string2type<long>(getXmlProp(lNode, "stepStart"));
             stepEnd_ = string2type<long>(getXmlProp(lNode, "stepEnd"));
         }
@@ -645,6 +664,12 @@ boost::posix_time::ptime GribFileMessage::getValidTime() const
     }
     return reference + timeOffset + boost::gregorian::days(days) + boost::gregorian::months(months) + boost::gregorian::years(years);
 }
+
+long GribFileMessage::getTimeRangeIndicator() const
+{
+    return timeRangeIndicator_;
+}
+
 long GribFileMessage::getLevelNumber() const
 {
     return levelNo_;
@@ -752,8 +777,8 @@ string GribFileMessage::toString() const
                 xmlCast(stepUnits_)));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepType"),
                 xmlCast(stepType_)));
-        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepRange"),
-                xmlCast(type2string(stepRange_))));
+        checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("timeRangeIndicator"),
+                xmlCast(type2string(timeRangeIndicator_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepStart"),
                 xmlCast(type2string(stepStart_))));
         checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("stepEnd"),
@@ -838,20 +863,65 @@ size_t GribFileMessage::readData(std::vector<double>& data, double missingValue)
     return size;
 }
 
+size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double missingValue) const
+{
+    if (!isValid()) return 0;
+    string url = getFileURL();
+    // remove the 'file:' prefix, needs to be improved when streams are allowed
+    url = url.substr(5);
+    boost::shared_ptr<FILE> fh(fopen(url.c_str(), "rb"), fclose);
+    if (fh.get() == 0) {
+        throw runtime_error("cannot open file: " + getFileURL());
+    }
+    fseek(fh.get(), getFilePosition(), SEEK_SET);
+
+    // enable multi-messages
+    grib_multi_support_on(0);
+
+    int err = 0;
+    for (size_t i = 0; i < getMessageNumber(); i++) {
+        // forward to correct multimessage
+        boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    }
+    // read the message of interest
+    boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    size_t size = 0;
+    if (gh.get() != 0) {
+        if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
+        long pvpresent = 0;
+        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "PVPresent", &pvpresent), 0);
+        if (pvpresent) {
+            MIFI_GRIB_CHECK(grib_get_size(gh.get(), "pv", &size), 0);
+            levelData.resize(size);
+            MIFI_GRIB_CHECK(grib_get_double_array(gh.get(), "pv", &levelData[0], &size), 0);
+            double inputMissing;
+            MIFI_GRIB_CHECK(grib_get_double(gh.get(), "missingValue", &inputMissing), 0);
+            if (inputMissing != missingValue) {
+                transform(&levelData[0], &levelData[0]+size, &levelData[0], ChangeMissingValue<double, double>(inputMissing, missingValue));
+            }
+        }
+    } else {
+        throw CDMException("cannot find grib-handle at file: " + url + " pos: " + type2string(getFilePosition()) + " msg: " + type2string(getMessageNumber()));
+    }
+    return size;
+}
+
+
 
 GribFileIndex::GribFileIndex()
 {
     // dummy generator
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreExistingXml)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml)
 {
     namespace fs = boost::filesystem;
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
         throw runtime_error("no such file: " + gribFilePath.string());
     }
+    
     if (ignoreExistingXml) {
-        initByGrib(gribFilePath);
+        initByGrib(gribFilePath, members);
     } else {
         // find gribml-file younger than original file
 #if BOOST_FILESYSTEM_VERSION == 3
@@ -871,16 +941,16 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreEx
                 if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
                     initByXML(xmlFile);
                 } else {
-                    initByGrib(gribFilePath);
+                    initByGrib(gribFilePath, members);
                 }
             } else {
-                initByGrib(gribFilePath);
+                initByGrib(gribFilePath, members);
             }
         }
     }
 }
 
-void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
+void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members)
 {
     url_ = "file:"+ file_string(gribFilePath);
     FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");
@@ -910,7 +980,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath)
                 // don't change lastPos
             }
             try {
-                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos));
+                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos, members));
             } catch (CDMException& ex) {
                 LOG4FIMEX(getLogger("fimex.GribFileIndex"), Logger::WARN, "ignoring grib-message at byte " << msgPos <<": " << ex.what());
             }
