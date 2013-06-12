@@ -1,3 +1,12 @@
+  * 2013-06-12 fimex-0.46
+    * grib-reading automatically adds unknown levels
+    * grib-reading allows adding of ensemble dimension (glameps) (E. de Vreede)
+    * grib-reading using globs or regexp
+    * grib-reading read hybrid-values
+    * configurable shuffling in netcdf4 (default on)
+    * creepfillval to certain value instead of average
+    * fixing vector reprojection together with preprocessing
+    * fixing threading bug in forward-interpolation
   * 2013-05-20 fimex-0.45
     * adding ncml-aggregation, union and joinExisting
     * allow reading of other filetypes than netcdf in ncml
