@@ -146,14 +146,22 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         } else {
             files.push_back(fileName);
         }
-        std::vector<std::string> members;
+        std::vector<std::pair<std::string, std::string> > members;
         for (std::vector<std::string>::const_iterator argIt = args.begin(); argIt != args.end(); ++argIt) {
             std::string memberRegex("memberRegex:");
             std::string memberName("memberName:");
             if (argIt->find(memberRegex) == 0) {
-                members.push_back(argIt->substr(memberRegex.size()));
+                std::vector<std::string> memberRegexParts = tokenize(argIt->substr(memberRegex.size()), ":");
+                if (memberRegexParts.size() == 1) {
+                    memberRegexParts.push_back(memberRegexParts.at(0));
+                }
+                members.push_back(std::make_pair(memberRegexParts.at(1), memberRegexParts.at(0)));
             } else if (argIt->find(memberName) == 0) {
-                members.push_back(".*\\Q" + argIt->substr(memberName.size()) + "\\E.*");
+                std::vector<std::string> memberNameParts = tokenize(argIt->substr(memberName.size()), ":");
+                if (memberNameParts.size() == 1) {
+                    memberNameParts.push_back(memberNameParts.at(0));
+                }
+                members.push_back(std::make_pair(memberNameParts.at(1), ".*\\Q" + memberNameParts.at(0) + "\\E.*"));
             } else {
                 // additional file
                 files.push_back(*argIt);

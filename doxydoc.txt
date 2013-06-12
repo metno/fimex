@@ -580,7 +580,10 @@ It is also possible to match the members with regular expressions, e.g.
 @endverbatim
 
 The order of 'memberName' or 'memberRegex' determines the position in the final file. memberNames are
-internally translated to a regex like '.*\QmemberName\E.*'
+internally translated to a regex like '.*\QmemberName\E.*'.
+
+To have nicely formated names instead of the memberRegex, one can add another parameter to memberRegex and memberName,
+e.g. memberRegex:mbrABC.*:mbrABC or --input.optional=memberName:mbrABC:ensembleABC
 
 
 

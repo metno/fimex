@@ -331,7 +331,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::string>& members)
+GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members)
 : fileURL_(fileURL), filePos_(filePos), msgPos_(msgPos)
 {
     if (gh.get() == 0)
@@ -408,8 +408,8 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
         if (members.size()>0) {
             bool found=false;
             int i = 0;
-            for (vector<std::string>::const_iterator it = members.begin(); it != members.end(); ++it) {
-                if (boost::regex_match(fileURL, boost::regex(*it))) {
+            for (vector<std::pair<std::string, boost::regex> >::const_iterator it = members.begin(); it != members.end(); ++it) {
+                if (boost::regex_match(fileURL, it->second)) {
                     perturbationNo_=i;
                     totalNumberOfEnsembles_ = members.size();
                     found=true;
@@ -913,7 +913,7 @@ GribFileIndex::GribFileIndex()
     // dummy generator
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::string>& members, bool ignoreExistingXml)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml)
 {
     namespace fs = boost::filesystem;
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
@@ -950,7 +950,7 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
     }
 }
 
-void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::string>& members)
+void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members)
 {
     url_ = "file:"+ file_string(gribFilePath);
     FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");

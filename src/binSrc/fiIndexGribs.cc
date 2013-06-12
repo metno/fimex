@@ -48,7 +48,7 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 void
 indexGrib(const fs::path& input, const fs::path& output, bool force)
 {
-    std::vector<std::string> members; // empty members, doesn't make sense for single files
+    std::vector<std::pair<std::string, boost::regex> > members; // empty members, doesn't make sense for single files
     MetNoFimex::GribFileIndex gfi(input, members, force);
     fs::ofstream os(output);
     os << gfi;

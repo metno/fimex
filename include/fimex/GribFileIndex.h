@@ -33,6 +33,7 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/GridDefinition.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/regex.hpp>
 
 // forward decl of grib_api
 struct grib_handle;
@@ -43,7 +44,7 @@ class GribFileMessage
 {
 public:
     GribFileMessage();
-    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::string>& members=std::vector<std::string>());
+    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >());
     GribFileMessage(boost::shared_ptr<XMLDoc>, std::string nsPrefix, xmlNodePtr node);
     ~GribFileMessage();
 
@@ -163,14 +164,14 @@ public:
      * @li file completely in memory: 1.1s
      * @li xml-file: 0.1s
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::string>& members, bool ignoreExistingXml = false);
+    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false);
     virtual ~GribFileIndex();
     const std::vector<GribFileMessage>& listMessages() const {return messages_;}
     const std::string& getUrl() const {return url_;}
 private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
-    void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::string>& members);
+    void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members);
     void initByXML(boost::filesystem::path xmlFilePath);
 };
 
