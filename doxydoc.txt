@@ -537,7 +537,7 @@ The usage of the program is then very simple:
 @page gribReaderDoc gribReader Configuration
 @section gribReaderConfig gribReader Configuration
 
-@subsection Concatenation of grib-messages
+@subsection gribReaderConcat Concatenation of grib-messages
 
 Grib-data is often splitted across several files. These files might be
 combined by fimex or generally by CDMReaderFactory by a glob, e.g.
@@ -548,19 +548,19 @@ combined by fimex or generally by CDMReaderFactory by a glob, e.g.
 
 which will read all files ending with .grb. Wildcards are: * for zero or many
 characters, ? for exactly one character and ** for all subdirectories, e.g.
-/home/heikok/**/*.grb will match all grib-files somewhere in my home-directory,
-while /home/heikok/*/*.grb will only match all grib-files one directory below my
+@verbatim
+/home/heikok/**/*.grb
+@endverbatim will match all grib-files somewhere in my home-directory,
+while <tt>/home/heikok/*/*.grb</tt> will only match all grib-files one directory below my
 home-directory.
 
-Files might also be concatenated by simply adding new files with input.optional, e.g.
-
+Files might also be concatenated by simply adding new files with <tt>--input.optional</tt>, e.g.
 @verbatim
   fimex --input.file=file1.grb --input.optional=file2.grib --input.optional=file3.grb
 @endverbatim
+<tt>--input.optionals</tt> does not accept glob:-syntax.
 
-input.ptionals does not accept glob:-syntax.
-
-@subsection Concatenation of grib-model output to combined ensembledata
+@subsection gribReaderConcatEnsemble Concatenation of grib-model output to combined ensembledata
 
 Grib data might come with a build-in ensemble axis. But in some cases, one wants
 to combine models to ensemble, though the ensemble axis is not included in the files,
@@ -579,13 +579,19 @@ It is also possible to match the members with regular expressions, e.g.
   fimex --input.file=*.grb --input.optional="memberRegex:mbrABC.*" --input.optional="memberRegex:mbr001.*" 
 @endverbatim
 
-The order of 'memberName' or 'memberRegex' determines the position in the final file. memberNames are
-internally translated to a regex like '.*\QmemberName\E.*'.
+The order of @c memberName or @c memberRegex determines the position in the final file. memberNames are
+internally translated to a regex like <tt>.*\QmemberName\E.*</tt> .
 
-To have nicely formated names instead of the memberRegex, one can add another parameter to memberRegex and memberName,
-e.g. memberRegex:mbrABC.*:mbrABC or --input.optional=memberName:mbrABC:ensembleABC
+To have nicely formated names instead of the @c memberRegex, one can add another parameter to @c memberRegex and 
+@c memberName, e.g. <tt>memberRegex:mbrABC.*:mbrABC</tt> or <tt>--input.optional=memberName:mbrABC:ensembleABC</tt>
 
 
+
+@subsection gribReaderConfigXml Grib-Table to netcdf/CF translation
+
+Within fimex, the data-structure needs to conform to CF. Since grib is defined by external tables, these tables
+need to be translated to their netcdf/CF equivalents in the <tt>cdmGribReaderConfgig.xml</tt> which is required
+for all grib-files.
 
 @verbinclude share/etc/cdmGribReaderConfig.xml
 
