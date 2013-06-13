@@ -36,7 +36,7 @@ namespace MetNoFimex
 class DataIndex
 {
 private:
-    static const std::size_t MIN_DIMS() {return 10;}
+    static std::size_t MIN_DIMS() {return 10;}
     std::vector<std::size_t> dims_;
     std::vector<std::size_t> slices_;
 public:

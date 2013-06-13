@@ -50,7 +50,7 @@ public:
     /** get the projection name */
     virtual const std::string& getName() const = 0;
     /** check if the coordinates belonging to this projection are in degree (otherwise metrical) */
-    virtual const bool isDegree() const = 0;
+    virtual bool isDegree() const = 0;
     /** get a proj4 string */
     virtual std::string getProj4String() const = 0;
     /**

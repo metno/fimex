@@ -66,6 +66,7 @@ public:
     FeltCDMReader2(std::string filename, std::string configFilename);
     virtual ~FeltCDMReader2();
 
+    using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 
 private:

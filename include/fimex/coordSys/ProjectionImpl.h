@@ -54,7 +54,7 @@ public:
     virtual void removeParameter(std::string paramName);
     /** get the projection name */
     virtual const std::string& getName() const;
-    virtual const bool isDegree() const;
+    virtual bool isDegree() const;
 
     /**
      * get the proj4 string defined by the parameters. If a parameter
