@@ -17,7 +17,7 @@
     <attribute name="min_time" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string" />
     <attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string" />
     <attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string" />
-    <attribute name="references" value="http://www.hirlam.org/index.php?option=com_content&view=article&id=61&Itemid=103" type="string" />
+    <attribute name="references" value="http://www.hirlam.org/index.php?option=com_content&amp;view=article&amp;id=61&amp;Itemid=103" type="string" />
     <!-- <attribute name="history" value="unknown" type="string" /> -->
 </global_attributes>
 <axes>
