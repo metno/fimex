@@ -1,7 +1,7 @@
 Source: fimex
 Priority: extra
 Maintainer: Heiko Klein <heiko.klein@met.no>
-Build-Depends: debhelper (>= 5), devscripts, fakeroot, pkg-config, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-system-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, libproj-dev, libudunits2-dev, libnetcdf-dev, libgrib-api-dev, libjasper-dev, libpng12-dev, libjpeg-dev, libpq-dev, metgm-dev, liblog4cpp5-dev 
+Build-Depends: debhelper (>= 5), devscripts, fakeroot, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-system-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, libproj-dev, libudunits2-dev-metno, libnetcdf4-dev-metno, hdf5-dev-metno, libcurl4-gnutls-dev, libgrib-api-metno-1.9.9-dev, libjasper-dev, libpng12-dev, libjpeg62-dev, libpq-dev, metgm-dev (>= 0.93), liblog4cpp5-dev 
 Build-Conflicts: libfimex-dev, libfelt-dev
 Standards-Version: 3.7.2
 Section: libs
@@ -34,6 +34,7 @@ Package: fimex-share
 Section: science
 Architecture: i386 amd64 ia64 powerpc
 Depends: 
+Conflicts: fimex-bin (< 0.46)
 Description: shared files required for fimex-bin and libfimex
  The program fimex is a program for File Interpolations, Manipulations and
  EXtraction of gridded geo-spatial data.

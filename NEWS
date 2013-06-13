@@ -3,6 +3,7 @@
     * grib-reading allows adding of ensemble dimension (glameps) (E. de Vreede)
     * grib-reading using globs or regexp
     * grib-reading read hybrid-values
+    * grib-reading by timeRangeIndicator
     * configurable shuffling in netcdf4 (default on)
     * creepfillval to certain value instead of average
     * fixing vector reprojection together with preprocessing

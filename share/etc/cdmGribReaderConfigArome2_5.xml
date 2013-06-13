@@ -138,7 +138,7 @@
     <attribute name="description" value="pressure" type="string" />
     <attribute name="long_name" value="pressure" type="string" />
     <attribute name="standard_name" value="air_pressure" type="string" />
-    <attribute name="positive" value="up" type="string" />
+    <attribute name="positive" value="down" type="string" />
     <grib1>
         <attribute name="units" value="hPa" type="string" />
     </grib1>
@@ -168,12 +168,12 @@
     <attribute name="description" value="atmosphere sigma coordinate" type="string" />
     <attribute name="long_name" value="atmosphere_sigma_coordinate" type="string" />
     <attribute name="standard_name" value="atmosphere_sigma_coordinate" type="string" />
-    <attribute name="positive" value="up" type="string" />
+    <attribute name="positive" value="down" type="string" />
 </vertical_axis>
 <vertical_axis id="hybrid" name="k" grib2_id="105" grib1_id="109" type="double">
     <attribute name="standard_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
     <attribute name="formula" value="p(n,k,j,i) = ap(k) + b(k)*ps(n,j,i)" type="string" />
-    <attribute name="formula_terms" value="ap: ap%EXT% b: b%EXT% ps: ps p0: p0%EXT%" type="string" />
+    <attribute name="formula_terms" value="ap: ap%EXT% b: b%EXT% ps: surface_air_pressure p0: p0%EXT%" type="string" />
     <attribute name="long_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
     <attribute name="positive" value="down" type="string" />
     <values mode="hybridSigmaCalc(ap,b,p0)" />
@@ -194,11 +194,6 @@
         <values mode="extraHalvLevel2" scale_factor="1" />
         <!--  optional values, will otherwise be retrieved from ident19 -->
         <!--  <values>0 0 0.00011835 0.00057981 0.00158568 0.003314615 0.00592347 0.00954814 0.01430438 0.020288635 0.027578885 0.03623547 0.04630191 0.05780577 0.07075946 0.08516109 0.10099527 0.118233985 0.136837405 0.156754715 0.17792495 0.200277825 0.223734585 0.248208815 0.27360728 0.29983076 0.32677488 0.35433095 0.38238677 0.410827505 0.43953649 0.46839609 0.497288455 0.526096385 0.554704285 0.5829989 0.610870045 0.638211525 0.66492209 0.690906155 0.71607453 0.740345365 0.763645065 0.78590901 0.80708235 0.827120885 0.845992015 0.86367537 0.88016373 0.895463935 0.90959763 0.922602075 0.93453102 0.94545557 0.95546498 0.96466746 0.97319103 0.981184395 0.98881774 0.996283525</values> -->
-    </additional_axis_variable>
-    <additional_axis_variable name="p0" type="int" axis="">
-        <attribute name="long_name" value="reference pressure for hybrid sigma coordinate" type="string" />
-        <attribute name="units" value="Pa" type="string" />
-        <values>100000</values>
     </additional_axis_variable>
 </vertical_axis>
 
@@ -252,11 +247,7 @@
     <attribute name="standard_name" value="depth" type="string" />
     <attribute name="units" value="m" type="string" />
 </vertical_axis>
-<vertical_axis id="total_atmosphere" name="total_atmosphere" grib1_id="200" type="short">
-    <attribute name="_FillValue" value="-32767" type="short" />
-    <attribute name="long_name" value="total atmosphere as single layer" type="string" />
-    <attribute name="positive" value="up" type="string" />
-</vertical_axis>
+
 <vertical_axis id="local_vertical_level_200" name="local_vertical_level_200" grib2_id="200" type="float">
     <attribute name="description" value="vertical level 200, defined locally, ask center" type="string" />
     <attribute name="long_name" value="unknown vertical level 200" type="string" />
@@ -338,2219 +329,719 @@
 <variables>
 
     <!-- Pressure (1) -->
-    <parameter name="MSLP" type="float">
+    <parameter name="air_pressure_at_sea_level" type="float">
         <grib1 indicatorOfParameter="1" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="103" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Mean Sea Level Pressure (MSLP)" type="string" />
         <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
-    <parameter name="ps" type="float">
+    <parameter name="surface_air_pressure" type="float">
         <grib1 indicatorOfParameter="1" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="air_pressure" type="string" />
+        <attribute name="long_name" value="Surface air pressure" type="string" />
+        <attribute name="standard_name" value="surface_air_pressure" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
-    <parameter name="p_ml" type="float">
+    <parameter name="air_pressure_ml" type="float">
         <grib1 indicatorOfParameter="1" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Air pressure model levels" type="string" />
         <attribute name="standard_name" value="air_pressure" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
 
 
     <!-- Geopotential (6) -->
-    <parameter name="fi_pl" type="float">
+    <parameter name="geopotential_pl" type="float">
         <grib1 indicatorOfParameter="6" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Geopotential pressure levels" type="string" />
         <attribute name="standard_name" value="geopotential" type="string" />
-        <attribute name="units" value="m^2 s^-2" type="string" />
+        <attribute name="units" value="m^2/s^2" type="string" />
     </parameter>
-    <parameter name="fi_ml" type="float">
+    <parameter name="geopotential_ml" type="float">
         <grib1 indicatorOfParameter="6" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Geopotential model levels" type="string" />
         <attribute name="standard_name" value="geopotential" type="string" />
-        <attribute name="units" value="m^2 s^-2" type="string" />
+        <attribute name="units" value="m^2/s^2" type="string" />
     </parameter>
-    <parameter name="fis" type="float">
+    <parameter name="surface_geopotential" type="float">
         <grib1 indicatorOfParameter="6" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="geopotential" type="string" />
-        <attribute name="units" value="m^2 s^-2" type="string" />
+        <attribute name="long_name" value="Surface geopotential (fis)" type="string" />
+		<attribute name="standard_name" value="surface_geopotential" type="string" />
+        <attribute name="units" value="m^2/s^2" type="string" />
     </parameter>
 
     <!-- Geopotential height (7) -->
-    <parameter name="zs" type="float">
+    <parameter name="altitude" type="float">
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="long_name" value="geopotential_height" type="string" />
+        <attribute name="long_name" value="Orography (ZS)" type="string" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="z_pl" type="float">
+    <parameter name="geopotential_height_pl" type="float">
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
-        <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="long_name" value="geopotential_height" type="string" />
+        <attribute name="long_name" value="Geopotential Height pressure levels" type="string" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="z_ml" type="float">
+    <parameter name="geopotential_height_ml" type="float">
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <grib2 discipline="0" parameterCategory="3" parameterNumber="6"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="long_name" value="geopotential_height" type="string" />
+        <attribute name="long_name" value="Geopotential height model levels" type="string" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
 
 
     <!-- Temperature (11) -->
-    <parameter name="Tsoil_FA" type="float">
+    <parameter name="soil_temperature_sl" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="999"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil temperature from old ISBA" type="string" />
         <attribute name="standard_name" value="soil_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="T0M" type="float">
+    <parameter name="air_temperature_0m" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Surface temperature (T0M)" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="SST" type="float">
+    <parameter name="sea_surface_temperature" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="102" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="long_name" value="Sea Surface Temperature (SST)" type="string" />
+        <attribute name="standard_name" value="sea_surface_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="SST" type="float">
+    <parameter name="sea_surface_temperature" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="102" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="air_temperature" type="string" />
+        <attribute name="long_name" value="Sea Surface Temperature (SST)" type="string" />
+        <attribute name="standard_name" value="sea_surface_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="T2M" type="float">
+    <parameter name="air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Screen level temperature (T2M)" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="T2M" type="float">
+    <parameter name="air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Screen level temperature (T2M)" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="t_pl" type="float">
+    <parameter name="air_temperature_pl" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100" />
-        <grib2 discipline="0" parameterCategory="0" parameterNumber="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="Air temperature pressure levels" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="t_ml" type="float">
+    <parameter name="air_temperature_ml" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109" />
-        <grib2 discipline="0" parameterCategory="0" parameterNumber="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Air temperature model levels" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="TG1" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil temperature level 1" type="string" />
         <attribute name="standard_name" value="soil_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="TG2" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil temperature level 2" type="string" />
         <attribute name="standard_name" value="soil_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="TG3" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="803"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil temperature level 3" type="string" />
         <attribute name="standard_name" value="soil_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="TS_SEA" type="float">
+    <parameter name="sea_surface_temperature_sea" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="760"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="soil_temperature" type="string" />
+        <attribute name="long_name" value="Sea Surface Temperature (SST)" type="string" />
+        <attribute name="standard_name" value="sea_surface_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="TS_WATER" type="float">
+    <parameter name="air_temperature_0m_water" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="770"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="soil_temperature" type="string" />
+        <attribute name="long_name" value="Lake Surface Temperature (LST)" type="string" />
+        <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="T2M_WAT" type="float">
+    <parameter name="air_temperature_2m_water" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="772"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="soil_temperature" type="string" />   
+        <attribute name="long_name" value="Lake screen level temperature (LST)" type="string" />
+        <attribute name="standard_name" value="air_temperature" type="string" />   
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="T2M_ISBA" type="float">
+    <parameter name="air_temperature_2m_nature" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="802"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="soil_temperature" type="string" />   
+        <attribute name="long_name" value="Nature screen level temperature" type="string" />
+        <attribute name="standard_name" value="air_temperature" type="string" />   
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="T2M_TEB" type="float">
+    <parameter name="air_temperature_2m_town" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="950"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="soil_temperature" type="string" />   
+        <attribute name="long_name" value="Town screen level temperature" type="string" />
+        <attribute name="standard_name" value="air_temperature" type="string" />   
         <attribute name="units" value="K" type="string" />
     </parameter>
 
     <!-- Zonal wind (33) -->
-    <parameter name="u_10m" type="float">
+    <parameter name="x_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
         <attribute name="standard_name" value="x_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="x,longitude" counterpart="v_10m" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
     </parameter>
-    <parameter name="u_10m" type="float">
+    <parameter name="x_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
         <attribute name="standard_name" value="x_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="x,longitude" counterpart="v_10m" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
     </parameter>
-    <parameter name="u_pl" type="float">
+    <parameter name="x_wind_pl" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Zonal wind pressure levels" type="string" />
         <attribute name="standard_name" value="x_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="x,longitude" counterpart="v_pl" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="x,longitude" counterpart="y_wind_pl" />
     </parameter>
-    <parameter name="u_ml" type="float">
+    <parameter name="x_wind_ml" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Zonal wind model levels" type="string" />
         <attribute name="standard_name" value="x_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="x,longitude" counterpart="v_ml" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="x,longitude" counterpart="y_wind_ml" />
     </parameter>
 
     <!-- Meridional wind (34) -->
-    <parameter name="v_10m" type="float">
+    <parameter name="y_wind_10m" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string" />
         <attribute name="standard_name" value="y_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="y,latitude" counterpart="u_10m" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
     </parameter>
-    <parameter name="v_10m" type="float">
+    <parameter name="y_wind_10m" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string" />
         <attribute name="standard_name" value="y_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="y,latitude" counterpart="u_10m" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
     </parameter>
-    <parameter name="v_pl" type="float">
+    <parameter name="y_wind_pl" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Meridional wind pressure levels" type="string" />
         <attribute name="standard_name" value="y_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="y,latitude" counterpart="u_pl" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="y,latitude" counterpart="x_wind_pl" />
     </parameter>
-    <parameter name="v_ml" type="float">
+    <parameter name="y_wind_ml" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Meridional wind model levels" type="string" />
         <attribute name="standard_name" value="y_wind" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
-        <spatial_vector direction="y,latitude" counterpart="v_ml" />
+        <attribute name="units" value="m/s" type="string" />
+        <spatial_vector direction="y,latitude" counterpart="x_wind_ml" />
     </parameter>
 
     <!-- Vertical wind (40) -->
-    <parameter name="w_pl" type="float">
+    <parameter name="upward_air_velocity_pl" type="float">
         <grib1 indicatorOfParameter="40" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100" />
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Vertical vind pressure levels" type="string" />
         <attribute name="standard_name" value="upward_air_velocity" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
+        <attribute name="units" value="m/s" type="string" />
     </parameter>
-    <parameter name="w_ml" type="float">
+    <parameter name="upward_air_velocity_ml" type="float">
         <grib1 indicatorOfParameter="40" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109" />
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Vertical vind model levels" type="string" />
         <attribute name="standard_name" value="upward_air_velocity" type="string" />
-        <attribute name="units" value="m s^-1" type="string" />
+        <attribute name="units" value="m/s" type="string" />
     </parameter>
 
 
     <!-- Specific humidity (51) -->
-    <parameter name="q2m" type="float">
+    <parameter name="specific_humidity_2m" type="float">
         <grib1 indicatorOfParameter="51" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Screen level specific humidity" type="string" />
         <attribute name="standard_name" value="specific_humidity" type="string" />
-        <attribute name="units" value="1" type="string" />
+        <attribute name="units" value="kg/kg" type="string" />
     </parameter>
-    <parameter name="q_pl" type="float">
+    <parameter name="specific_humidity_pl" type="float">
         <grib1 indicatorOfParameter="51" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Specific humidity pressure levels" type="string" />
         <attribute name="standard_name" value="specific_humidity" type="string" />
-        <attribute name="units" value="1" type="string" />
+        <attribute name="units" value="kg/kg" type="string" />
     </parameter>
-    <parameter name="q_ml" type="float">
+    <parameter name="specific_humidity_ml" type="float">
         <grib1 indicatorOfParameter="51" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Specific humidity model levels" type="string" />
         <attribute name="standard_name" value="specific_humidity" type="string" />
-        <attribute name="units" value="1" type="string" />
+        <attribute name="units" value="kg/kg" type="string" />
     </parameter>
 
     <!-- Relative humidity (52) -->
-    <parameter name="rh2" type="float">
+    <parameter name="relative_humidity_2m" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Screen level relative humidity (RH2M)" type="string" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="rh2" type="float">
+    <parameter name="relative_humidity_2m" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="2"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Screen level relative humidity (RH2M)" type="string" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="rh_pl" type="float">
+    <parameter name="relative_humidity_pl" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Relative humidity pressure levels" type="string" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="rh_ml" type="float">
+    <parameter name="relative_humidity_ml" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Relative humidity model levels" type="string" />
         <attribute name="standard_name" value="relative_humidity" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
 
     <!-- Total precipitation  (61) -->
-    <parameter name="total_precipitation" type="float">
+    <parameter name="precipitation_amount_acc" type="float">
         <grib1 indicatorOfParameter="61" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="long_name" value="total_precipitation" type="string" />
-        <attribute name="units" value="kg m^-2" type="string" />
+        <attribute name="long_name" value="Accumulated total precipitation" type="string" />
+        <attribute name="standard_name" value="precipitation_amount" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
 
     <!-- Frontal precipitation  (62) -->
-    <parameter name="frontalprec" type="float">
+    <parameter name="lwe_thickness_of_stratiform_precipitation_amount" type="float">
         <grib1 indicatorOfParameter="62" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Frontal precipitation" type="string" />
         <attribute name="standard_name" value="lwe_thickness_of_stratiform_precipitation_amount" type="string" />
-        <attribute name="units" value="m" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
 
     <!-- Convective precipitation  (63) -->
-    <parameter name="convecprec" type="float">
+    <parameter name="lwe_thickness_of_convective_precipitation_amount" type="float">
         <grib1 indicatorOfParameter="63" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Convective precipitation" type="string" />
         <attribute name="standard_name" value="lwe_thickness_of_convective_precipitation_amount" type="string" />
-        <attribute name="units" value="m" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
 
-    <!-- Snow depth  (65) -->
-    <parameter name="SWE" type="float">
+    <!-- Water equivalent of accumulated snow depth  (65) -->
+    <parameter name="liquid_water_content_of_surface_snow" type="float">
         <grib1 indicatorOfParameter="65" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="snow_amount" type="string" />
-        <attribute name="units" value="mm" type="string" />
+        <attribute name="long_name" value="Snow Water Equivivalent (SWE)" type="string" />
+        <attribute name="standard_name" value="liquid_water_content_of_surface_snow" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
+    <parameter name="liquid_water_content_of_surface_snow" type="float">
+        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
+        <attribute name="long_name" value="Snow Water Equivivalent (SWE)" type="string" />
+        <attribute name="standard_name" value="liquid_water_content_of_surface_snow" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
+    </parameter>
+
+    <!-- For 3-LAYER snow scheme
+    <parameter name="WSNOW_VEG1" type="float">
+        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
+        <attribute name="standard" value="snow_amount" type="string" />
+        <attribute name="units" value="" type="string" />
+    </parameter>
+    <parameter name="WSNOW_VEG2" type="float">
+        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
+        <attribute name="standard" value="snow_amount" type="string" />
+        <attribute name="units" value="" type="string" />
+    </parameter>
+    <parameter name="WSNOW_VEG3" type="float">
+        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="802"/>
+        <attribute name="standard" value="snow_amount" type="string" />
+        <attribute name="units" value="" type="string" />
+    </parameter>
+    -->
 
     <!-- Total cloud cover  (71) -->
-    <parameter name="TCC" type="float">
+    <parameter name="cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Total cloud cover (TCC)" type="string" />
         <attribute name="standard_name" value="cloud_area_fraction" type="string" />
-        <attribute name="units" value="%" type="string" />
+        <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="fog" type="float">
+    <parameter name="fog_area_fraction" type="float">
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109" levelNo="65"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <!-- standard-name not ensured yet -->
+        <attribute name="long_name" value="Fog" type="string" />
         <attribute name="metno_name" value="fog_area_fraction" type="string" />
-        <attribute name="units" value="%" type="string" />
+        <attribute name="units" value="1" type="string" />
     </parameter>
 
     <!-- Low heigth cloud cover  (73) -->
-    <parameter name="LCC" type="float">
+    <parameter name="low_type_cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="73" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <!-- standard-name not ensured yet -->
+        <attribute name="long_name" value="Cloud cover of low clouds (LCC)" type="string" />
         <attribute name="standard_name" value="low_type_cloud_area_fraction" type="string" />
-        <attribute name="units" value="%" type="string" />
+        <attribute name="units" value="1" type="string" />
     </parameter>
  
     <!-- Medium height cloud cover  (74) -->
-    <parameter name="MCC" type="float">
+    <parameter name="medium_type_cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="74" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <!-- standard-name not ensured yet -->
+        <attribute name="long_name" value="Cloud cover of medium height clouds (MCC)" type="string" />
         <attribute name="standard_name" value="medium_type_cloud_area_fraction" type="string" />
-        <attribute name="units" value="%" type="string" />
+        <attribute name="units" value="1" type="string" />
     </parameter>
 
     <!-- High height cloud cover  (75) -->
-    <parameter name="HCC" type="float">
+    <parameter name="high_type_cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="75" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <!-- standard-name not ensured yet -->
+        <attribute name="long_name" value="Cloud cover of high clouds (HCC)" type="string" />
         <attribute name="standard_name" value="high_type_cloud_area_fraction" type="string" />
-        <attribute name="units" value="%" type="string" />
+        <attribute name="units" value="1" type="string" />
     </parameter>
 
 
     <!-- Fraction (81) -->
-    <parameter name="LSM" type="float">
+    <parameter name="land_area_fraction" type="float">
         <grib1 indicatorOfParameter="81" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Land-Sea Mask (LSM)" type="string" />
         <attribute name="standard_name" value="land_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="LSM" type="float">
+    <parameter name="land_area_fraction" type="float">
         <grib1 indicatorOfParameter="81" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Land-Sea Mask (LSM)" type="string" />
         <attribute name="standard_name" value="land_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="Frac_sea" type="float">
+    <parameter name="sea_area_fraction" type="float">
         <grib1 indicatorOfParameter="81" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="760"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="land_area_fraction" type="string" />
+        <attribute name="long_name" value="Fraction of sea" type="string" />
+        <attribute name="standard_name" value="sea_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="Frac_water" type="float">
+    <parameter name="inland_water_area_fraction" type="float">
         <grib1 indicatorOfParameter="81" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="770"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="land_area_fraction" type="string" />
+        <attribute name="long_name" value="Fraction of inland water" type="string" />
+        <attribute name="metno_name" value="inland_water_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="Frac_nature" type="float">
+    <parameter name="nature_area_fraction" type="float">
         <grib1 indicatorOfParameter="81" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="land_area_fraction" type="string" />
+        <attribute name="long_name" value="Fraction of nature" type="string" />
+        <attribute name="metno_name" value="nature_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    <parameter name="Frac_town" type="float">
+    <parameter name="town_area_fraction" type="float">
         <grib1 indicatorOfParameter="81" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="950"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="land_area_fraction" type="string" />
+        <attribute name="long_name" value="Fraction of urban areas (TOWN)" type="string" />
+        <attribute name="standard_name" value="town_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
 
     <!-- Surface roughness length (83) -->
-    <parameter name="Z0" type="float">
+    <parameter name="surface_roughness_length" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="810"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Surface roughness length" type="string" /> 
         <attribute name="standard_name" value="surface_roughness_length" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0H" type="float">
+    <parameter name="surface_roughness_length_for_heat_in_air" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="811"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface thermal roughness length" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_heat_in_air" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0SEA" type="float">
+    <parameter name="surface_roughness_length_sea" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="760"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Surface roughness length over sea" type="string" />
         <attribute name="standard_name" value="surface_roughness_length" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0_SEA" type="float">
+    <parameter name="surface_roughness_length_for_momentum_in_air_sea" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="761"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface orographic roughness length over sea" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_momentum_in_air" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0H_SEA" type="float">
+    <parameter name="surface_roughness_length_for_heat_in_air_sea" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="762"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface thermal roughness length over sea" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_heat_in_air" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0WATER" type="float">
+    <parameter name="surface_roughness_length_water" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="770"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface roughness length over water" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_sea" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0_WAT" type="float">
+    <parameter name="surface_roughness_length_for_momentum_in_air_water" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="771"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface orographic roughness length over water" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_momentum_in_air" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0H_WAT" type="float">
+    <parameter name="surface_roughness_length_for_heat_in_air_water" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="772"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface thermal roughness length over water" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_heat_in_air" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0_ISBA" type="float">
+    <parameter name="surface_roughness_length_nature" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Surface roughness length over nature" type="string" />
         <attribute name="standard_name" value="surface_roughness_length" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0H_ISBA" type="float">
+    <parameter name="surface_roughness_length_for_heat_in_air_nature" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface thermal roughness length over nature" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_heat_in_air" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0_TEB" type="float">
+    <parameter name="surface_roughness_length_town" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="950"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Surface roughness length over town" type="string" />
         <attribute name="standard_name" value="surface_roughness_length" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
-    <parameter name="Z0H_TEB" type="float">
+    <parameter name="surface_roughness_length_for_heat_in_air_town" type="float">
         <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="951"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="surface_roughness_length" type="string" />
+        <attribute name="long_name" value="Surface thermal roughness length over town" type="string" />
+        <attribute name="standard_name" value="surface_roughness_length_for_heat_in_air_nature" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
 
     <!-- Soil moisture content (86) -->
     <parameter name="WG1" type="float">
         <grib1 indicatorOfParameter="86" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil moisture content level 1" type="string" />
         <attribute name="standard_name" value="soil_moisture_content" type="string" />
-        <attribute name="units" value="kg m-2" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
     <parameter name="WG2" type="float">
         <grib1 indicatorOfParameter="86" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil moisture content level 2" type="string" />
         <attribute name="standard_name" value="soil_moisture_content" type="string" />
-        <attribute name="units" value="kg m-2" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
     <parameter name="WG3" type="float">
         <grib1 indicatorOfParameter="86" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="802"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Soil moisture content level 3" type="string" />
         <attribute name="standard_name" value="soil_moisture_content" type="string" />
-        <attribute name="units" value="kg m-2" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
 
     <!-- Vegetation (87) -->
-    <parameter name="Fraction_veg" type="float">
+    <parameter name="vegetation_area_fraction" type="float">
         <grib1 indicatorOfParameter="87" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Vegetation fraction" type="string" />
         <attribute name="standard_name" value="vegetation_area_fraction" type="string" />
         <attribute name="units" value="%" type="string" />
     </parameter>
 
     <!-- Net short-wave radiation (surface) (111) -->
-    <parameter name="accumulated_global_radiation" type="float">
+    <parameter name="surface_net_upward_shortwave_flux_acc" type="float">
         <grib1 indicatorOfParameter="111" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Acumulated net surface short wave radiation" type="string" />
         <attribute name="standard_name" value="surface_net_upward_shortwave_flux" type="string" />
-        <attribute name="units" value="W m-2" type="string" />
+        <attribute name="units" value="W/m^2" type="string" />
     </parameter>
 
     <!-- Net long wave radiation (surface) (112) -->
-    <parameter name="surface_radiation" type="float">
+    <parameter name="surface_net_upward_longwave_flux_acc" type="float">
         <grib1 indicatorOfParameter="112" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Acumulated net surface long wave radiation" type="string" />
         <attribute name="standard_name" value="surface_net_upward_longwave_flux" type="string" />
-        <attribute name="units" value="W m-2" type="string" />
+        <attribute name="units" value="W/m^2" type="string" />
     </parameter>
 
     <!-- Long wave radiation (115) -->
-    <parameter name="net_lw_rad" type="float">
+    <parameter name="net_upward_longwave_flux_in_air_acc" type="float">
         <grib1 indicatorOfParameter="115" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Net accumulated upward long-wave radiation flux" type="string" />
         <attribute name="standard_name" value="net_upward_longwave_flux_in_air" type="string" />
-        <attribute name="units" value="W m-2" type="string" />
+        <attribute name="units" value="W/m^2" type="string" />
     </parameter>
 
     <!-- Global radiation (117) -->
-    <parameter name="global_sw_rad" type="float">
+    <parameter name="surface_downwelling_shortwave_flux_in_air_acc" type="float">
         <grib1 indicatorOfParameter="117" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Global accumulated incoming radiation" type="string" />
         <attribute name="standard_name" value="surface_downwelling_shortwave_flux_in_air" type="string" />
-        <attribute name="units" value="W m-2" type="string" />
+        <attribute name="units" value="W/m^2" type="string" />
     </parameter>
 
     <!-- Latent heat net flux (121) -->
-    <parameter name="LHFlux" type="float">
+    <parameter name="surface_upward_latent_heat_flux_acc" type="float">
         <grib1 indicatorOfParameter="121" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Accumulated latent heat flux" type="string" />
         <attribute name="standard_name" value="surface_upward_latent_heat_flux" type="string" />
-        <attribute name="units" value="w m-2" type="string" />
+        <attribute name="units" value="w/m^2" type="string" />
     </parameter>
-    <parameter name="LHFlux" type="float">
+    <parameter name="surface_upward_latent_heat_flux_acc" type="float">
         <grib1 indicatorOfParameter="121" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Accumulated latent heat flux" type="string" />
         <attribute name="standard_name" value="surface_upward_latent_heat_flux" type="string" />
-        <attribute name="units" value="w m-2" type="string" />
+        <attribute name="units" value="w/m^2" type="string" />
     </parameter>
 
     <!-- Sensible heat net flux (122) -->
-    <parameter name="SHFlux" type="float">
+    <parameter name="surface_upward_sensible_heat_flux_acc" type="float">
         <grib1 indicatorOfParameter="122" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Accumulated sensible heat flux" type="string" />
         <attribute name="standard_name" value="surface_upward_sensible_heat_flux" type="string" />
-        <attribute name="units" value="W m-2" type="string" />
+        <attribute name="units" value="W/m^2" type="string" />
     </parameter>
-    <parameter name="SHFlux" type="float">
+    <parameter name="surface_upward_sensible_heat_flux_acc" type="float">
         <grib1 indicatorOfParameter="122" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Accumulated sensible heat flux" type="string" />
         <attribute name="standard_name" value="surface_upward_sensible_heat_flux" type="string" />
-        <attribute name="units" value="W m-2" type="string" />
+        <attribute name="units" value="W/m^2" type="string" />
     </parameter>
 
     <!-- Momentum flux x-direction (124) --> 
-    <parameter name="Mom_flux_x" type="float">
+    <parameter name="downward_eastward_momentum_flux_in_air" type="float">
         <grib1 indicatorOfParameter="124" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+       <attribute name="long_name" value="Momentum flux x-direction" type="string" />
         <attribute name="standard_name" value="downward_eastward_momentum_flux_in_air" type="string" />
-        <attribute name="units" value="N m-2" type="string" />
+        <attribute name="units" value="N/m^2" type="string" />
     </parameter>
 
     <!-- Momentum flux y-direction (125) --> 
-    <parameter name="Mom_flux_y" type="float">
+    <parameter name="downward_northward_momentum_flux_in_air" type="float">
         <grib1 indicatorOfParameter="125" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Momentum flux y-direction" type="string" />
         <attribute name="standard_name" value="downward_northward_momentum_flux_in_air" type="string" />
-        <attribute name="units" value="N m-2" type="string" />
+        <attribute name="units" value="N/m^2" type="string" />
     </parameter>
 
 
     <!-- Total solid precipitation (185) -->
-    <parameter name="total_solid_precipitation" type="float">
+    <parameter name="lwe_thickness_of_snowfall_amount_acc" type="float">
         <grib1 indicatorOfParameter="185" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="convective_snowfall_amount" type="string" />
-        <attribute name="units" value="kg m-2" type="string" />
+        <attribute name="long_name" value="Total accumulated solid precipitation" type="string" />
+        <attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
 
     <!-- Snow albedo (190) -->
-    <parameter name="ASNOW_VEG" type="float">
+    <parameter name="surface_albedo_assuming_deep_snow" type="float">
         <grib1 indicatorOfParameter="190" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="snow_density" type="string" />
-        <attribute name="units" value="kg m3" type="string" />
+        <attribute name="long_name" value="Snow albedo" type="string" />
+        <attribute name="standard_name" value="surface_albedo_assuming_deep_snow" type="string" />
+        <attribute name="units" value="1" type="string" />
     </parameter>
 
     <!-- Snow density (191) -->
+    <parameter name="snow_density_nature" type="float">
+        <grib1 indicatorOfParameter="191" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
+        <attribute name="long_name" value="Snow density 1-layer over nature" type="string" />
+        <attribute name="standard_name" value="snow_density" type="string" />
+        <attribute name="units" value="kg/m^3" type="string" />
+    </parameter>
+
+    <!-- 3-LAYER snow scheme
     <parameter name="RSNOW_VEG1" type="float">
         <grib1 indicatorOfParameter="191" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Snow density layer 1" type="string" />
         <attribute name="standard_name" value="snow_density" type="string" />
-        <attribute name="units" value="kg m3" type="string" />
+        <attribute name="units" value="kg/m^3" type="string" />
     </parameter>
     <parameter name="RSNOW_VEG2" type="float">
         <grib1 indicatorOfParameter="191" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Snow density layer 2" type="string" />
         <attribute name="standard_name" value="snow_density" type="string" />
-        <attribute name="units" value="kg m3" type="string" />
+        <attribute name="units" value="kg/m^3" type="string" />
     </parameter>
     <parameter name="RSNOW_VEG3" type="float">
         <grib1 indicatorOfParameter="191" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="802"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Snow density layer 3" type="string" />
         <attribute name="standard_name" value="snow_density" type="string" />
-        <attribute name="units" value="kg m3" type="string" />
+        <attribute name="units" value="kg/m^3" type="string" />
     </parameter>
-
+    -->
 
     <!-- Soil ice (193) -->
     <parameter name="WGI1" type="float">
         <grib1 indicatorOfParameter="193" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="" type="string" />
-        <attribute name="units" value="kg/m2" type="string" />
+        <attribute name="long_name" value="Soil ice content level 1" type="string" />
+        <attribute name="standard_name" value="frozen_water_content_of_soil_layer" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
     <parameter name="WGI2" type="float">
         <grib1 indicatorOfParameter="193" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="" type="string" />
-        <attribute name="units" value="kg/m2" type="string" />
+       <attribute name="long_name" value="Soil ice content level 2" type="string" />
+        <attribute name="standard_name" value="frozen_water_content_of_soil_layer" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
     <parameter name="WGI3" type="float">
         <grib1 indicatorOfParameter="193" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="802"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="" type="string" />
-        <attribute name="units" value="kg/m2" type="string" />
+       <attribute name="long_name" value="Soil ice content level 3" type="string" />
+        <attribute name="standard_name" value="frozen_water_content_of_soil_layer" type="string" />
+        <attribute name="units" value="kg/m^2" type="string" />
     </parameter>
 
     <!-- TKE (200) -->
-    <parameter name="TKE_ml" type="float">
+    <parameter name="turbulent_kinetic_energy_ml" type="float">
         <grib1 indicatorOfParameter="200" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109" />
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="" type="string" />
-        <attribute name="units" value="m2 s-2" type="string" />
+        <attribute name="long_name" value="Turbulent kinetic energy (TKE)" type="string" />
+        <attribute name="metno_name" value="turbulent_kinetic_energy" type="string" />
+        <attribute name="units" value="m^2/s^2" type="string" />
+    </parameter>
+    <parameter name="turbulent_kinetic_energy_pl" type="float">
+        <grib1 indicatorOfParameter="200" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100" />
+        <attribute name="long_name" value="Turbulent kinetic energy (TKE)" type="string" />
+        <attribute name="metno_name" value="turbulent_kinetic_energy" type="string" />
+        <attribute name="units" value="m^2/s^2" type="string" />
     </parameter>
 
     <!-- Wind gust (228) -->
-    <parameter name="wind_gust" type="float">
-        <grib1 indicatorOfParameter="228" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard_name" value="" type="string" />
-        <attribute name="units" value="m s-1" type="string" />
+    <parameter name="wind_speed_of_gust" type="float">
+        <grib1 indicatorOfParameter="228" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
+        <attribute name="long_name" value="Wind gust" type="string" />
+        <attribute name="standard_name" value="wind_speed_of_gust" type="string" />
+        <attribute name="units" value="m/s" type="string" />
     </parameter>
 
     <!-- Duration of total precipitation (243) -->
     <parameter name="dur_tot_prec" type="float">
         <grib1 indicatorOfParameter="243" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <attribute name="long_name" value="Duration of precipitation" type="string" />
         <attribute name="metno_name" value="duration_precipitation" type="string" />
         <attribute name="units" value="s" type="string" />
     </parameter>
 
 
-    <!-- SURFEX specific -->
-    <parameter name="LAI" type="float">
-        <grib1 indicatorOfParameter="1" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="VEG" type="float">
-        <grib1 indicatorOfParameter="2" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="VEGTYPE_P_1" type="float">
-        <grib1 indicatorOfParameter="3" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="VEGTYPE_P_2" type="float">
-        <grib1 indicatorOfParameter="4" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="VEGTYPE_P_3" type="float">
-        <grib1 indicatorOfParameter="5" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="VEGTYPE_P_4" type="float">
-        <grib1 indicatorOfParameter="6" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="VEGTYPE_P_5" type="float">
-        <grib1 indicatorOfParameter="7" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_6" type="float">
-        <grib1 indicatorOfParameter="8" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_7" type="float">
-        <grib1 indicatorOfParameter="9" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_8" type="float">
-        <grib1 indicatorOfParameter="10" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_9" type="float">
-        <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_10" type="float">
-        <grib1 indicatorOfParameter="12" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_11" type="float">
-        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="VEGTYPE_P_12" type="float">
-        <grib1 indicatorOfParameter="14" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="Z0REL" type="float">
-        <grib1 indicatorOfParameter="16" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>         
-    <parameter name="RSMIN" type="float">
-        <grib1 indicatorOfParameter="17" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />    
-        <attribute name="metno_name" value="ecoclimap" type="string" />  
-        <attribute name="units" value="" type="string" />   
-    </parameter>             
-    <parameter name="GAMMA" type="float">
-        <grib1 indicatorOfParameter="18" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="CV" type="float">
-        <grib1 indicatorOfParameter="19" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="RGL" type="float">
-        <grib1 indicatorOfParameter="20" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="EMIS_ISBA" type="float">
-        <grib1 indicatorOfParameter="21" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="WRMAX_CF" type="float">
-        <grib1 indicatorOfParameter="22" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="DG1" type="float">
-        <grib1 indicatorOfParameter="23" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="DG2" type="float">
-        <grib1 indicatorOfParameter="24" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="DG3" type="float">
-        <grib1 indicatorOfParameter="25" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="ALBNIR_SOIL" type="float">
-        <grib1 indicatorOfParameter="26" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="ALBVIS_SOIL" type="float">
-        <grib1 indicatorOfParameter="27" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="ALBUV_SOIL" type="float">
-        <grib1 indicatorOfParameter="28" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="ALBNIR_ISBA" type="float">
-        <grib1 indicatorOfParameter="29" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="ALBVIS_ISBA" type="float">
-        <grib1 indicatorOfParameter="30" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="ALBUV_ISBA" type="float">
-        <grib1 indicatorOfParameter="31" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="300"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-
-
-    <!-- Others -->
-    <parameter name="CD" type="float">
-        <grib1 indicatorOfParameter="6" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="810"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="WSNOW_VEG1" type="float">
-        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard" value="snow_amount" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="WSNOW_VEG2" type="float">
-        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard" value="snow_amount" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
-    <parameter name="WSNOW_VEG3" type="float">
-        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="802"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="standard" value="snow_amount" type="string" />
-        <attribute name="units" value="" type="string" />
-    </parameter>
+    <!-- Others to be decided
     <parameter name="RUNOFF" type="float">
         <grib1 indicatorOfParameter="128" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="810"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="" type="string" />
+        <attribute name="metno_group" value="surfex" type="string" />
         <attribute name="units" value="" type="string" />
     </parameter>
     <parameter name="RUNOFF_ISBA" type="float">
         <grib1 indicatorOfParameter="128" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="800"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="" type="string" />
+        <attribute name="metno_group" value="surfex" type="string" />
         <attribute name="units" value="" type="string" />
     </parameter>
     <parameter name="DRAIN" type="float">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="811"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="" type="string" />
+        <attribute name="metno_group" value="surfex" type="string" />
         <attribute name="units" value="" type="string" />
     </parameter>
     <parameter name="DRAIN_ISBA" type="float">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="801"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="" type="string" />
+        <attribute name="metno_group" value="surfex" type="string" />
         <attribute name="units" value="" type="string" />
      </parameter>
+     -->
 
-
-
-
-    <!-- COVERS -->
-    <parameter name="LAND_SEA_MASK" type="float">
-        <grib1 indicatorOfParameter="1" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="INLAND_WATERS" type="float">
-        <grib1 indicatorOfParameter="2" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="RIVERS" type="float">
-        <grib1 indicatorOfParameter="3" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BARE_LAND" type="float">
-        <grib1 indicatorOfParameter="4" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ROCKS" type="float">
-        <grib1 indicatorOfParameter="5" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PERMANENT_SNOW" type="float">
-        <grib1 indicatorOfParameter="6" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="URBAN" type="float">
-        <grib1 indicatorOfParameter="7" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TROPICAL_UNDEFINED" type="float">
-        <grib1 indicatorOfParameter="8" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_UNDEFINED" type="float">
-        <grib1 indicatorOfParameter="9" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PATAGONIA_CF" type="float">
-        <grib1 indicatorOfParameter="10" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TAIGA" type="float">
-        <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CHINESE_CF" type="float">
-        <grib1 indicatorOfParameter="12" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AM_CONT_CF" type="float">
-        <grib1 indicatorOfParameter="13" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBTROP_CF" type="float">
-        <grib1 indicatorOfParameter="14" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="RAIN_FOREST" type="float">
-        <grib1 indicatorOfParameter="15" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EQ_AFRICAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="16" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MADAGASCAR_FOREST" type="float">
-        <grib1 indicatorOfParameter="17" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EQ_OCEANIAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="18" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MONSOON_FOREST" type="float">
-        <grib1 indicatorOfParameter="19" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TROP_OCEANIAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="20" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AMAZONIAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="21" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="NEW_ZEALAND_FOREST" type="float">
-        <grib1 indicatorOfParameter="22" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PANAMERICAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="23" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="DECIDUOUS_TAIGA" type="float">
-        <grib1 indicatorOfParameter="24" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBAMAZONIAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="25" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AM_DECIDUOUS_FOREST" type="float">
-        <grib1 indicatorOfParameter="26" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="YUCATAN_FOREST" type="float">
-        <grib1 indicatorOfParameter="27" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BRAZIL_TROP_FOREST" type="float">
-        <grib1 indicatorOfParameter="28" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AF_DRY_MF" type="float">
-        <grib1 indicatorOfParameter="29" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PATAGONIA_MF" type="float">
-        <grib1 indicatorOfParameter="30" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_MF" type="float">
-        <grib1 indicatorOfParameter="31" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBTROP_MF" type="float">
-        <grib1 indicatorOfParameter="32" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CONT_MF" type="float">
-        <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SAHELIAN_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="34" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MER_AF_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="35" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EVERGREEN_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="36" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EQ_OCEANIAN_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="37" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MONSOON_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="38" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CERRADAO" type="float">
-        <grib1 indicatorOfParameter="39" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ARGENTINIAN_CERRADAO" type="float">
-        <grib1 indicatorOfParameter="40" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="POLAR_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="41" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CONTINENTAL_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="42" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CHINESE_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="43" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SEMI_ARID_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="44" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ROCKIES_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="45" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PATAGONIAN_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="46" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SOUTH_US_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="47" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUB_SAHARA_WG" type="float">
-        <grib1 indicatorOfParameter="48" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SAHELIAN_WG" type="float">
-        <grib1 indicatorOfParameter="49" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EQ_AFRICAN_WG" type="float">
-        <grib1 indicatorOfParameter="50" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBTROP_AF_WG" type="float">
-        <grib1 indicatorOfParameter="51" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AUSTRALIA_WG" type="float">
-        <grib1 indicatorOfParameter="52" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ARID_AUSTRALIAN_WG" type="float">
-        <grib1 indicatorOfParameter="53" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="NEW_ZEALAND_WG" type="float">
-        <grib1 indicatorOfParameter="54" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="FAR_EAST_WG" type="float">
-        <grib1 indicatorOfParameter="55" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CERRADO" type="float">
-        <grib1 indicatorOfParameter="56" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="COASTAL_CERRADO" type="float">
-        <grib1 indicatorOfParameter="57" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SERTAO" type="float">
-        <grib1 indicatorOfParameter="58" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="POLAR_WG" type="float">
-        <grib1 indicatorOfParameter="59" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CONTINENTAL_WG" type="float">
-        <grib1 indicatorOfParameter="60" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MONSOON_WG" type="float">
-        <grib1 indicatorOfParameter="61" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PANAMERICAN_WG" type="float">
-        <grib1 indicatorOfParameter="62" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SOUTH_US_WG" type="float">
-        <grib1 indicatorOfParameter="63" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CORDILLERA_WG" type="float">
-        <grib1 indicatorOfParameter="64" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AMAZONIAN_WG" type="float">
-        <grib1 indicatorOfParameter="65" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MAGHREBIAN_WG" type="float">
-        <grib1 indicatorOfParameter="66" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ETHIOPIAN_CS" type="float">
-        <grib1 indicatorOfParameter="67" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SAHELIAN_CS" type="float">
-        <grib1 indicatorOfParameter="68" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AFRICAN_CS" type="float">
-        <grib1 indicatorOfParameter="69" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AUSTRALIAN_CS" type="float">
-        <grib1 indicatorOfParameter="70" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SEMI_DESERTIC_CS" type="float">
-        <grib1 indicatorOfParameter="71" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="OCEANIAN_CS" type="float">
-        <grib1 indicatorOfParameter="72" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SOUTH_AUSTRALIA_CS" type="float">
-        <grib1 indicatorOfParameter="73" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ASIAN_POLAR_CS" type="float">
-        <grib1 indicatorOfParameter="74" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ASIAN_CONT_CS" type="float">
-        <grib1 indicatorOfParameter="75" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MONSOON_CS" type="float">
-        <grib1 indicatorOfParameter="76" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AM_POLAR_CS" type="float">
-        <grib1 indicatorOfParameter="77" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ROCKIES_CS" type="float">
-        <grib1 indicatorOfParameter="78" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MAGHREBIAN_CS" type="float">
-        <grib1 indicatorOfParameter="79" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="DESERTIC_OS" type="float">
-        <grib1 indicatorOfParameter="80" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SAHELIAN_SAVANNA" type="float">
-        <grib1 indicatorOfParameter="81" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BUSHLAND" type="float">
-        <grib1 indicatorOfParameter="82" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BUSH_AND_PAMPA" type="float">
-        <grib1 indicatorOfParameter="83" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MONSOON_OS" type="float">
-        <grib1 indicatorOfParameter="84" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="POLAR_OS" type="float">
-        <grib1 indicatorOfParameter="85" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_OS" type="float">
-        <grib1 indicatorOfParameter="86" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ROCKIES_OS" type="float">
-        <grib1 indicatorOfParameter="87" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TROP_AF_GR" type="float">
-        <grib1 indicatorOfParameter="88" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ARID_AF_GR" type="float">
-        <grib1 indicatorOfParameter="89" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MER_AF_GR" type="float">
-        <grib1 indicatorOfParameter="90" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="COAST_EQ_GR" type="float">
-        <grib1 indicatorOfParameter="91" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="DESERTIC_GR" type="float">
-        <grib1 indicatorOfParameter="92" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="NEW_ZEALAND_GR" type="float">
-        <grib1 indicatorOfParameter="93" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MONSOON_GR" type="float">
-        <grib1 indicatorOfParameter="94" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="VENEZUELIAN_GR" type="float">
-        <grib1 indicatorOfParameter="95" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUB_AMAZONIAN_GR" type="float">
-        <grib1 indicatorOfParameter="96" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PAMPA" type="float">
-        <grib1 indicatorOfParameter="97" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PATAGONIAN_GR" type="float">
-        <grib1 indicatorOfParameter="98" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CONTINENTAL_GR" type="float">
-        <grib1 indicatorOfParameter="99" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="GRASS_TUNDRA" type="float">
-        <grib1 indicatorOfParameter="100" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EAST_ASIAN_GR" type="float">
-        <grib1 indicatorOfParameter="101" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="INDIAN_GR" type="float">
-        <grib1 indicatorOfParameter="102" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ROCKIES_GR" type="float">
-        <grib1 indicatorOfParameter="103" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CHINESE_GR" type="float">
-        <grib1 indicatorOfParameter="104" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="NIL_VALLEY_CROPS" type="float">
-        <grib1 indicatorOfParameter="105" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TROP_SAHELIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="106" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TROP_AF_CROPS" type="float">
-        <grib1 indicatorOfParameter="107" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="COAST_AF_CROPS" type="float">
-        <grib1 indicatorOfParameter="108" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SOUTH_AUSTRALIA_CROPS" type="float">
-        <grib1 indicatorOfParameter="109" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PANAMERICAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="110" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PARANA_PLAIN_CROPS" type="float">
-        <grib1 indicatorOfParameter="111" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUB_AMAZONIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="112" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TRANS_SIBERIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="113" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MANDCHOURIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="114" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CHINESE_CROPS" type="float">
-        <grib1 indicatorOfParameter="115" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="COLD_CROPS" type="float">
-        <grib1 indicatorOfParameter="116" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUB_HIMALAYAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="117" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="GREAT_PLAINS_CROPS" type="float">
-        <grib1 indicatorOfParameter="118" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SOUTH_US_CROPS" type="float">
-        <grib1 indicatorOfParameter="119" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CALIFORNIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="120" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MAGHREBIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="121" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SOUTH_AFRICA_CROPS" type="float">
-        <grib1 indicatorOfParameter="122" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPARSE_TUNDRA" type="float">
-        <grib1 indicatorOfParameter="123" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="WARM_WETLANDS" type="float">
-        <grib1 indicatorOfParameter="124" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="POLAR_WETLANDS" type="float">
-        <grib1 indicatorOfParameter="125" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="URBAN" type="float">
-        <grib1 indicatorOfParameter="151" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="WARM_SUBURBAN" type="float">
-        <grib1 indicatorOfParameter="152" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_SUBURBAN" type="float">
-        <grib1 indicatorOfParameter="153" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="COLD_SUBURBAN" type="float">
-        <grib1 indicatorOfParameter="154" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="INDUSTRIES" type="float">
-        <grib1 indicatorOfParameter="155" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ROAD_AND_RAIL" type="float">
-        <grib1 indicatorOfParameter="156" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PORT_FACILITIES" type="float">
-        <grib1 indicatorOfParameter="157" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AIRPORTS" type="float">
-        <grib1 indicatorOfParameter="158" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MINES" type="float">
-        <grib1 indicatorOfParameter="159" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PARKS" type="float">
-        <grib1 indicatorOfParameter="160" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="LEISURE" type="float">
-        <grib1 indicatorOfParameter="161" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPANISH_CROPS" type="float">
-        <grib1 indicatorOfParameter="162" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ESTREMADURA_CROPS" type="float">
-        <grib1 indicatorOfParameter="163" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_CROPS" type="float">
-        <grib1 indicatorOfParameter="164" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ATLANTIC_CROPS" type="float">
-        <grib1 indicatorOfParameter="165" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_CROPS" type="float">
-        <grib1 indicatorOfParameter="166" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PO_PLAIN_CROPS" type="float">
-        <grib1 indicatorOfParameter="167" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="FRENCH_BALKAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="168" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="UKRAINIAN_CROPS" type="float">
-        <grib1 indicatorOfParameter="169" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_CROPS" type="float">
-        <grib1 indicatorOfParameter="170" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MOUNTAIN_CROPS" type="float">
-        <grib1 indicatorOfParameter="171" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="CENTRAL_EUROPE_CROPS" type="float">
-        <grib1 indicatorOfParameter="172" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TURKISH_CROPS" type="float">
-        <grib1 indicatorOfParameter="173" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_IRR_CROPS" type="float">
-        <grib1 indicatorOfParameter="174" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="IRRIGATED_CROPS" type="float">
-        <grib1 indicatorOfParameter="175" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="RICE_FIELDS" type="float">
-        <grib1 indicatorOfParameter="176" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_VINEYARDS" type="float">
-        <grib1 indicatorOfParameter="177" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_VINEYARDS" type="float">
-        <grib1 indicatorOfParameter="178" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_FRUIT_TREES" type="float">
-        <grib1 indicatorOfParameter="179" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_FRUIT_TREES" type="float">
-        <grib1 indicatorOfParameter="180" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="OLIVE_GROVES" type="float">
-        <grib1 indicatorOfParameter="181" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="NORTH_EUROPE_PASTURES" type="float">
-        <grib1 indicatorOfParameter="182" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ATLANTIC_PASTURES" type="float">
-        <grib1 indicatorOfParameter="183" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EAST_EUROPE_PASTURES" type="float">
-        <grib1 indicatorOfParameter="184" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="UKRAINIAN_PASTURES" type="float">
-        <grib1 indicatorOfParameter="185" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_PASTURES" type="float">
-        <grib1 indicatorOfParameter="186" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPANISH_COMPLEX" type="float">
-        <grib1 indicatorOfParameter="187" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_COMPLEX" type="float">
-        <grib1 indicatorOfParameter="188" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_COMPLEX" type="float">
-        <grib1 indicatorOfParameter="189" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="FRENCH_COMPLEX" type="float">
-        <grib1 indicatorOfParameter="190" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BALKAN_COMPLEX" type="float">
-        <grib1 indicatorOfParameter="191" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_CW" type="float">
-        <grib1 indicatorOfParameter="192" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_CW" type="float">
-        <grib1 indicatorOfParameter="193" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="FRENCH_CW" type="float">
-        <grib1 indicatorOfParameter="194" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BALKAN_CW" type="float">
-        <grib1 indicatorOfParameter="195" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPANISH_CW" type="float">
-        <grib1 indicatorOfParameter="196" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BALTIC_CW" type="float">
-        <grib1 indicatorOfParameter="197" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="AGRO_FORESTRY_AREAS" type="float">
-        <grib1 indicatorOfParameter="198" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPANISH_BF" type="float">
-        <grib1 indicatorOfParameter="199" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ESTREMADURA_BF" type="float">
-        <grib1 indicatorOfParameter="200" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_BF" type="float">
-        <grib1 indicatorOfParameter="201" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ATLANTIC_COAST_BF" type="float">
-        <grib1 indicatorOfParameter="202" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_BF" type="float">
-        <grib1 indicatorOfParameter="203" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MOUNTAIN_BF" type="float">
-        <grib1 indicatorOfParameter="204" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BALKAN_BF" type="float">
-        <grib1 indicatorOfParameter="205" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_BF" type="float">
-        <grib1 indicatorOfParameter="206" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BLACK_SEA_BF" type="float">
-        <grib1 indicatorOfParameter="207" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_PINES" type="float">
-        <grib1 indicatorOfParameter="208" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="LANDES_FOREST" type="float">
-        <grib1 indicatorOfParameter="209" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MOUNTAIN_CF" type="float">
-        <grib1 indicatorOfParameter="210" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_CF" type="float">
-        <grib1 indicatorOfParameter="211" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_TAIGA" type="float">
-        <grib1 indicatorOfParameter="212" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="RUSSIAN_TAIGA" type="float">
-        <grib1 indicatorOfParameter="213" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TURKISH_CF" type="float">
-        <grib1 indicatorOfParameter="214" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_MF" type="float">
-        <grib1 indicatorOfParameter="215" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ATLANTIC_MF" type="float">
-        <grib1 indicatorOfParameter="216" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_MF" type="float">
-        <grib1 indicatorOfParameter="217" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MOUNTAIN_MF" type="float">
-        <grib1 indicatorOfParameter="218" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="EAST_EUROPE_MF" type="float">
-        <grib1 indicatorOfParameter="219" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_GR" type="float">
-        <grib1 indicatorOfParameter="220" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ATLANTIC_GR" type="float">
-        <grib1 indicatorOfParameter="221" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BALKAN_GR" type="float">
-        <grib1 indicatorOfParameter="222" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ESTREMADURA_GR" type="float">
-        <grib1 indicatorOfParameter="223" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_GR" type="float">
-        <grib1 indicatorOfParameter="224" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TUNDRA" type="float">
-        <grib1 indicatorOfParameter="225" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TURKISH_MOORS" type="float">
-        <grib1 indicatorOfParameter="226" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_MOORS" type="float">
-        <grib1 indicatorOfParameter="227" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MOUNTAIN_MOORS" type="float">
-        <grib1 indicatorOfParameter="228" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="ATLANTIC_MOORS" type="float">
-        <grib1 indicatorOfParameter="229" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TURKISH_SHRUBLAND" type="float">
-        <grib1 indicatorOfParameter="230" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_MAQUIS" type="float">
-        <grib1 indicatorOfParameter="231" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MOUNTAIN_MAQUIS" type="float">
-        <grib1 indicatorOfParameter="232" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPANISH_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="233" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MEDITER_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="234" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_WOODLAND" type="float">
-        <grib1 indicatorOfParameter="235" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SPARSE_VEGETATION" type="float">
-        <grib1 indicatorOfParameter="236" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="BURNT_AREAS" type="float">
-        <grib1 indicatorOfParameter="237" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="TEMPERATE_WETLANDS" type="float">
-        <grib1 indicatorOfParameter="238" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SUBPOLAR_WETLANDS" type="float">
-        <grib1 indicatorOfParameter="239" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="PEAT_BOGS" type="float">
-        <grib1 indicatorOfParameter="240" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="SALT_MARSHES" type="float">
-        <grib1 indicatorOfParameter="241" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="INTERTIDAL_FLATS" type="float">
-        <grib1 indicatorOfParameter="242" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="COASTAL_LAGOONS" type="float">
-        <grib1 indicatorOfParameter="243" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
-    <parameter name="MY_COVER" type="float">
-        <grib1 indicatorOfParameter="255" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="113" levelNo="0"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-        <attribute name="metno_name" value="ecoclimap_cover" type="string" />
-        <attribute name="units" value="1" type="string" />
-    </parameter>
 </variables>
 
 </cdmGribReaderConfig>

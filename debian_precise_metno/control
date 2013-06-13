@@ -34,6 +34,7 @@ Package: fimex-share
 Section: science
 Architecture: i386 amd64 ia64 powerpc
 Depends: 
+Conflicts: fimex-bin (< 0.46)
 Description: shared files required for fimex-bin and libfimex
  The program fimex is a program for File Interpolations, Manipulations and
  EXtraction of gridded geo-spatial data.
