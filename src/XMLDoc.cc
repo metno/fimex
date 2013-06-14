@@ -74,10 +74,16 @@ void XMLDoc::setXPathCtx(xmlDoc* pdoc)
 
 std::string XMLDoc::toString(const xmlNodePtr node)
 {
-    xmlBufferPtr buf = xmlBufferCreate();
-    xmlNodeDump(buf, doc,  node, 0, 0);
-    std::string retVal(reinterpret_cast<const char *>(xmlBufferContent(buf)));
-    xmlBufferFree(buf);
+    xmlDocPtr ndoc = xmlNewDoc((const xmlChar*)"1.0");
+    xmlNodePtr retNode = xmlCopyNodeList(node);
+    xmlDocSetRootElement(ndoc, retNode);
+    xmlSetTreeDoc(retNode, doc);
+    xmlChar* str;
+    int size;
+    xmlDocDumpMemory(ndoc, &str, &size);
+    std::string retVal(reinterpret_cast<const char *>(str));
+    xmlFree(str);
+    xmlFreeDoc(ndoc);
     return retVal;
 }
 

@@ -286,8 +286,35 @@ will be configured immediately after reading a file. It is also possilbe to read
 
 Input-files can and should be validated against the included ncml-2.2.xsd.
 
-@warning not all features are supported in the current implementation. Missing features are: aggregation,
-changing dimension sizes, unlimited dimensions, adding/changing values of variables, groups
+Fimex supports now also ncml-aggregation. Simple examples are:
+
+@code
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<!-- same as above, but with scan -->
+<aggregation type="joinExisting">    
+    <scan location="." regExp="joinExistingAgg\d+\.nc" />
+</aggregation>
+
+</netcdf>
+@endcode
+
+@code
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<aggregation type="union">    
+    <netcdf location="joinExistingAgg1.nc" />
+    <netcdf location="unionAgg2.nc3" />
+</aggregation>
+
+</netcdf>
+@endcode
+
+MetNoFimex::NcmlCDMReader contains the up-to-date list of features.
 
 @see MetNoFimex::NcmlCDMReader
 
@@ -509,6 +536,62 @@ The usage of the program is then very simple:
 
 @page gribReaderDoc gribReader Configuration
 @section gribReaderConfig gribReader Configuration
+
+@subsection gribReaderConcat Concatenation of grib-messages
+
+Grib-data is often splitted across several files. These files might be
+combined by fimex or generally by CDMReaderFactory by a glob, e.g.
+
+@verbatim
+  fimex --input.file=glob:*.grb
+@endverbatim
+
+which will read all files ending with .grb. Wildcards are: * for zero or many
+characters, ? for exactly one character and ** for all subdirectories, e.g.
+@verbatim
+/home/heikok/**/*.grb
+@endverbatim will match all grib-files somewhere in my home-directory,
+while <tt>/home/heikok/*/*.grb</tt> will only match all grib-files one directory below my
+home-directory.
+
+Files might also be concatenated by simply adding new files with <tt>--input.optional</tt>, e.g.
+@verbatim
+  fimex --input.file=file1.grb --input.optional=file2.grib --input.optional=file3.grb
+@endverbatim
+<tt>--input.optionals</tt> does not accept glob:-syntax.
+
+@subsection gribReaderConcatEnsemble Concatenation of grib-model output to combined ensembledata
+
+Grib data might come with a build-in ensemble axis. But in some cases, one wants
+to combine models to ensemble, though the ensemble axis is not included in the files,
+e.g. in GLAMEPS ( http://www.hirlam.org/index.php?option=com_content&view=article&id=61&Itemid=103 ).
+
+In this case, fimex allows to match the filenames by names or by regular expressions
+e.g.
+
+@verbatim
+  fimex --input.file=*.grb --input.optional=memberName:mbrABC --input.optional=memberName:mbr001 
+@endverbatim
+
+would add ensemble-id 0 to all files containing mbrABC and ensemble-id 1 to all files containing mbr001.
+It is also possible to match the members with regular expressions, e.g. 
+@verbatim
+  fimex --input.file=*.grb --input.optional="memberRegex:mbrABC.*" --input.optional="memberRegex:mbr001.*" 
+@endverbatim
+
+The order of @c memberName or @c memberRegex determines the position in the final file. memberNames are
+internally translated to a regex like <tt>.*\QmemberName\E.*</tt> .
+
+To have nicely formated names instead of the @c memberRegex, one can add another parameter to @c memberRegex and 
+@c memberName, e.g. <tt>memberRegex:mbrABC.*:mbrABC</tt> or <tt>--input.optional=memberName:mbrABC:ensembleABC</tt>
+
+
+
+@subsection gribReaderConfigXml Grib-Table to netcdf/CF translation
+
+Within fimex, the data-structure needs to conform to CF. Since grib is defined by external tables, these tables
+need to be translated to their netcdf/CF equivalents in the <tt>cdmGribReaderConfgig.xml</tt> which is required
+for all grib-files.
 
 @verbinclude share/etc/cdmGribReaderConfig.xml
 

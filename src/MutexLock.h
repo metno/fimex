@@ -35,15 +35,13 @@ namespace MetNoFimex
 
 #ifdef _OPENMP
 # include <omp.h>
-struct MutexType
+struct MutexType : boost::noncopyable
 {
     MutexType() {omp_init_lock(&lock_);}
     ~MutexType() {omp_destroy_lock(&lock_);}
     void lock() {omp_set_lock(&lock_);}
     void unlock() {omp_unset_lock(&lock_);}
 
-    MutexType(const MutexType& ) {omp_init_lock(&lock_);}
-    MutexType& operator= (const MutexType& ) {return *this;}
 public:
     omp_lock_t lock_;
 };
@@ -73,7 +71,7 @@ public:
 #endif
         mut.unlock();
     }
-private :MutexType & mut;
+private: MutexType & mut;
 };
 
 } // namespace

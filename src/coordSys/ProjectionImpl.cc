@@ -105,7 +105,7 @@ const std::string& ProjectionImpl::getName() const
     return name_;
 }
 
-const bool ProjectionImpl::isDegree() const
+bool ProjectionImpl::isDegree() const
 {
     return isDegree_;
 }

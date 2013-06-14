@@ -33,6 +33,7 @@
 #include "fimex/XMLDoc.h"
 #include "fimex/GridDefinition.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/regex.hpp>
 
 // forward decl of grib_api
 struct grib_handle;
@@ -43,7 +44,7 @@ class GribFileMessage
 {
 public:
     GribFileMessage();
-    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos);
+    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >());
     GribFileMessage(boost::shared_ptr<XMLDoc>, std::string nsPrefix, xmlNodePtr node);
     ~GribFileMessage();
 
@@ -61,6 +62,8 @@ public:
     const std::string& getShortName() const;
     boost::posix_time::ptime getValidTime() const;
     boost::posix_time::ptime getReferenceTime() const;
+    /// return gribs timeRangeIndicator (0=instant, 2,4=accumulated)
+    long getTimeRangeIndicator() const;
     long getLevelNumber() const;
     long getLevelType() const;
     /**
@@ -87,6 +90,14 @@ public:
      * @return the actual amount of data read
      */
     size_t readData(std::vector<double>& data, double missingValue) const;
+    /**
+     * Read the level-data from the underlying source to the vector levelData. In contrast to readData(), the
+     * levelData does not need to be pre-allocated, since levelData usually are small (a few hundred (in grib1 limited to 256)).
+     * @param levelData the storage the data will be read to
+     * @param missingValue the missing- / fill-value the returned data will have
+     * @return the actual amount of data read
+     */
+    size_t readLevelData(std::vector<double>& levelData, double missingValue) const;
 private:
     std::string fileURL_;
     size_t filePos_;
@@ -103,7 +114,7 @@ private:
     std::string stepType_;
     long stepStart_;
     long stepEnd_;
-    long stepRange_;
+    long timeRangeIndicator_;
     long levelType_;
     long levelNo_;
     long perturbationNo_;
@@ -153,14 +164,14 @@ public:
      * @li file completely in memory: 1.1s
      * @li xml-file: 0.1s
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, bool ignoreExistingXml = false);
+    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false);
     virtual ~GribFileIndex();
     const std::vector<GribFileMessage>& listMessages() const {return messages_;}
     const std::string& getUrl() const {return url_;}
 private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
-    void initByGrib(boost::filesystem::path gribFilePath);
+    void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members);
     void initByXML(boost::filesystem::path xmlFilePath);
 };
 

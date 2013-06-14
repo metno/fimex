@@ -45,9 +45,51 @@ class XMLDoc;
  * 'location' field set, which must point to a netcdf-file readable by #NetCDF_CF10_CDMReader
  *
  * The configuration file must be a standard ncml-file (versionn 2.2) as defined by
- * http://www.unidata.ucar.edu/software/netcdf/ncml/.
+ * http://www.unidata.ucar.edu/software/netcdf/ncml/. The following changes have been
+ * made to the unidata-version to improve operability with the file-types supported by
+ * fimex:
  *
- * @warning The current version does not support aggregation.
+ * - location
+ *   The location of a file can be given as simple string, or as space-separated list
+ *   with "filename filetype configFile" to allow for reading of filetypes which
+ *   require external configurations. This is also try for location in scan-elements
+ *   where the filename is replaced by directory-name. filetype and configFile are then
+ *   valid for all found-files.
+ * - relative locations
+ *   All locations within ncml-files are currently relative to the current working
+ *   directory, not relative to the ncml-file. *This will change in the future!*
+ *   It is currently safest to start fimex in the same directory as the ncml-file.
+ * - spatial_vector
+ *   For horizontal reprojections, vectors like x-wind/y-wind need to be rotated. Not
+ *   all vectors can be detected from the CF standard. In fimex, it is possible to
+ *   add an variable-attribute like  @code<spatial_vector direction="x" counterpart="y_wind" />@endcode
+ *   To forbid auto-rotation, set the direction to longitude.
+ * - joinNew aggregations
+ *   are not implemented yet.
+ * - forecastModelRunCollection aggregations
+ *   are not implemented.
+ * - forecastModelRunSingleCollection aggregations
+ *   are not implemented.
+ * - olderThan scan-attribute
+ *   is not implemented.
+ *
+ * Examples:
+ *
+ * @code
+ *     <aggregation type="joinExisting">
+ *        <scan location="." regExp="\w{3}\.nc" />
+ *     </aggregation>
+ * @endcode
+ * @code
+ *     <aggregation type="union">
+ *       <netcdf location="cldc.mean.nc"/>
+ *       <netcdf location="lflx.mean.nc"/>
+ *     </aggregation>
+ * @endcode
+ *
+ *
+ * @warning Aggregation keep all files open. Don't try to aggregate more that
+ * your OS limit on open files per process, e.g. 1024 as default for Ubuntu 12.04.
  *
  */
 class NcmlCDMReader: public MetNoFimex::CDMReader

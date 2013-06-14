@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( test_xmlDoc )
         BOOST_CHECK("1,2,...,6" == text);
 
         string nodeDoc = doc.toString(xpathObj->nodesetval->nodeTab[0]);
-        BOOST_CHECK(nodeDoc == "<allowed_values>1,2,...,6</allowed_values>");
+        BOOST_CHECK(nodeDoc == "<?xml version=\"1.0\"?>\n<allowed_values>1,2,...,6</allowed_values>\n");
 
         boost::shared_ptr<XMLDoc> valueDoc = XMLDoc::fromString(nodeDoc, "");
         xpathObj = valueDoc->getXPathObject("/allowed_values");

@@ -620,10 +620,15 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
                 const double* m = &matrixPos[4*i];
                 double u_new = uz[i] * m[0] + vz[i] * m[2];
                 double v_new = uz[i] * m[1] + vz[i] * m[3];
-                double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) /
-                                    (u_new*u_new + v_new*v_new) );
-                uz[i] = u_new * norm;
-                vz[i] = v_new * norm;
+                double uv_new2 = (u_new*u_new + v_new*v_new);
+                if (uv_new2 == 0) {
+                    uz[i] = 0.;
+                    vz[i] = 0.;
+                } else {
+                    double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) / uv_new2 );
+                    uz[i] = u_new * norm;
+                    vz[i] = v_new * norm;
+                }
             }
         } else {
             for (size_t i = 0; i < layerSize; i++) {
@@ -1125,27 +1130,13 @@ int mifi_fill2d_f(size_t nx, size_t ny, float* field, float relaxCrit, float cor
     return MIFI_OK;
 }
 
-int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat, char setWeight, size_t* nChanged) {
+static int mifi_creepfillval2dImpl_f(size_t nx, size_t ny, float* field, float defaultVal, unsigned short repeat, char setWeight, size_t nChanged) {
     size_t totalSize = nx*ny;
     if (totalSize == 0) return MIFI_OK;
 
-    double sum = 0;
-    *nChanged = 0;
-
-    float* fieldPos = field;
-    int i = 0;
-    // calculate sum and number of valid values
-    while (i < totalSize) {
-        if (isnan(*fieldPos)) {
-            (*nChanged)++;
-        } else {
-            sum += *fieldPos;
-        }
-        fieldPos++;
-        i++;
-    }
-    size_t nUnchanged = totalSize - *nChanged;
-    if (nUnchanged == 0 || *nChanged == 0) {
+    size_t nUnchanged = totalSize - nChanged;
+    //fprintf(stderr, "defaultVal: %f, unchanged: %d\n", defaultVal, nUnchanged);
+    if (nUnchanged == 0 || nChanged == 0) {
         return MIFI_OK; // nothing to do
     }
 
@@ -1161,21 +1152,19 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
         exit(1);
     }
 
-    // The value of average ( i.e. the MEAN value of the array field ) is filled in
+    // The defaultValue (or mean) is filled in
     // the array field at all points with an undefined value.
-    // field(i,j) = average may be regarded as the "first guess" in the iterative
+    // field(i,j) = defaultVal may be regarded as the "first guess" in the iterative
     // method.
-    double average = sum / nUnchanged;
-    //fprintf(stderr, "sum: %f, average: %f, unchanged: %d\n", sum, average, nUnchanged);
-    fieldPos = field;
+    float* fieldPos = field;
     char *wFieldPos = wField;
     unsigned short *rFieldPos = rField;
-    i = 0;
+    int i = 0;
     while (i < totalSize) {
         if (isnan(*fieldPos)) {
             *wFieldPos = 0;
             *rFieldPos = 0;
-            *fieldPos = average;
+            *fieldPos = defaultVal;
         } else { // defined
             *wFieldPos = setWeight;
             *rFieldPos = repeat;
@@ -1186,7 +1175,7 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
         i++;
     }
 
-    // starting the iterative method, border-values are left at average, nx,ny >=1
+    // starting the iterative method, border-values are left at defaultVal, nx,ny >=1
     size_t nxm1 = (size_t)(nx - 1);
     size_t nym1 = (size_t)(ny - 1);
 
@@ -1212,8 +1201,8 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
                     if (wFieldSum != 0) {
                         // some neighbours defined
 
-                        // weight average of neigbouring cells, with double weight on original values
-                        // + 1 average "center"
+                        // weight defaultVal of neigbouring cells, with double weight on original values
+                        // + 1 defaultVal "center"
                         (*f) += *(w+1) * *(f+1) + *(w-1) * *(f-1) + *(w+nx) * *(f+nx) + *(w-nx) * *(f-nx);
                         (*f) /= (1+wFieldSum);
                         // field has been changed
@@ -1256,6 +1245,50 @@ int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat
     free(rField);
     free(wField);
     return MIFI_OK;
+}
+
+int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short repeat, char setWeight, size_t* nChanged) {
+    size_t totalSize = nx*ny;
+    if (totalSize == 0) return MIFI_OK;
+
+    double sum = 0;
+    *nChanged = 0;
+
+    float* fieldPos = field;
+    int i = 0;
+    // calculate sum and number of valid values
+    while (i < totalSize) {
+        if (isnan(*fieldPos)) {
+            (*nChanged)++;
+        } else {
+            sum += *fieldPos;
+        }
+        fieldPos++;
+        i++;
+    }
+    size_t nUnchanged = totalSize - *nChanged;
+    if (nUnchanged == 0) return MIFI_OK;
+    float average = sum/nUnchanged;
+
+    return mifi_creepfillval2dImpl_f(nx, ny, field, average , repeat, setWeight, *nChanged);
+}
+
+int mifi_creepfillval2d_f(size_t nx, size_t ny, float* field, float defaultVal, unsigned short repeat, char setWeight, size_t* nChanged) {
+    size_t totalSize = nx*ny;
+    if (totalSize == 0) return MIFI_OK;
+
+    *nChanged = 0;
+    float* fieldPos = field;
+    int i = 0;
+    // calculate sum and number of valid values
+    while (i < totalSize) {
+        if (isnan(*fieldPos++)) {
+            (*nChanged)++;
+        }
+        i++;
+    }
+    //fprintf(stderr, "defaultVal: %f, changed: %d\n", defaultVal, *nChanged);
+    return mifi_creepfillval2dImpl_f(nx, ny, field, defaultVal, repeat, setWeight, *nChanged);
 }
 
 size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal) {

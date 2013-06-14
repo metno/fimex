@@ -68,7 +68,27 @@ public:
     virtual void operator()(float* array, size_t nx, size_t ny) {size_t nChanged; mifi_creepfill2d_f(nx, ny, array, repeat_, setWeight_, &nChanged);};
 };
 
+class InterpolatorCreepFillVal2d : public InterpolatorProcess2d {
+private:
+    unsigned short repeat_;
+    char setWeight_;
+    float defVal_;
+public:
+    InterpolatorCreepFillVal2d(unsigned short repeat, char setWeight, float defaultValue)
+        : repeat_(repeat), setWeight_(setWeight), defVal_(defaultValue) {}
+    virtual void operator()(float* array, size_t nx, size_t ny) {size_t nChanged; mifi_creepfillval2d_f(nx, ny, array, defVal_, repeat_, setWeight_, &nChanged);};
+};
 
+
+/**
+ * This class is responsible for horizontal reprojections and selection
+ * of latitude longitude points.
+ *
+ * Vectors in the direction of x/y axes are automatically reprojected if:
+ *   - the vector is marked by <spatial_direction> markup
+ *   - the vector can be detected by the coordinate-system, e.g. CF standard-name
+ *   - the method allows detection of x and y axes, e.g. changeProjectionByProjectionParameters or changeProjectionByProjectionParametersToLatLonTemplate
+ */
 class CDMInterpolator : public MetNoFimex::CDMReader
 {
 private:

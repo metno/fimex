@@ -213,9 +213,9 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
                 if (shapeVar.size() < shapeStatus.size())
                     throw CDMException("external status variable '" + statusVarName + "' has more dimensions than variable '" + varName + "'");
                 for (size_t i=0; i<shapeStatus.size(); ++i) {
-                    if (shapeVar[i] != shapeStatus[i])
+                    if (cdm.getDimension(shapeVar[i]).getLength() != sr->getCDM().getDimension(shapeStatus[i]).getLength())
                         throw CDMException("external status variable '" + statusVarName + "' and variable '"
-                                           + varName + "' have different shape (names), quality extract not implemented");
+                                           + varName + "' have different shapes, quality extract not implemented");
                 }
                 LOG4FIMEX(logger,Logger::INFO, "shapes of variable '" << varName << "' and statusVar '" << statusVarName
                           << "' are different but hopefully compatible");
