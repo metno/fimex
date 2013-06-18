@@ -1,3 +1,5 @@
+  * 2013-06-12 fimex-0.46.1
+    * warning, not failing with old grib-config files
   * 2013-06-12 fimex-0.46
     * grib-reading automatically adds unknown levels
     * grib-reading allows adding of ensemble dimension (glameps) (E. de Vreede)

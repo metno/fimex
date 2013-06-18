@@ -294,7 +294,7 @@ void GribCDMReader::initLevels()
             throw CDMException("more than one 'vertical'-axis "+type2string(typeId)+" in config: " + p_->configId +" and xpath: " + xpathLevelString);
         }
         string levelName, levelId, levelType;
-        xmlNodePtr node;
+        xmlNodePtr node = 0;
         if (size == 0) {
             LOG4FIMEX(logger, Logger::INFO, "no definition for vertical axis " + type2string(typeId) + " found, using default");
             levelName = "grib"+type2string(edition) +"_vLevel" + type2string(typeId);
@@ -435,7 +435,9 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                     retValues.push_back(apData[i]/p0Data[0] + bData[i]);
                 }
             } else {
-                throw CDMException("unkown mode '"+ mode +"' to extract level-data for variable " + exampleVar);
+                LOG4FIMEX(logger, Logger::WARN, "unkown mode '"+ mode +"' to extract level-data for variable '" + exampleVar + "' using some dummy values");
+                boost::shared_array<double> d = levelData->asDouble();
+                retValues = vector<double>(&d[0], &d[0]+levelData->size());
             }
             string sscale = getXmlProp(node, "scale_factor");
             if (sscale != "") {
@@ -860,6 +862,9 @@ void GribCDMReader::initAddVariables()
             vector<CDMAttribute> attributes;
             if (node != 0) {
                 fillAttributeListFromXMLNode(attributes, node->children, p_->templateReplacementAttributes);
+            } else {
+                double fillVal = 9999; // grib default fill value
+                attributes.push_back(CDMAttribute("_FillValue", fillVal));
             }
 
             // add the projection

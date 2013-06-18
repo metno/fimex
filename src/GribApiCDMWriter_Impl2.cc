@@ -388,8 +388,9 @@ DataPtr GribApiCDMWriter_Impl2::handleTypeScaleAndMissingData(const std::string&
     const CDM& cdm = cdmReader->getCDM();
     double inFillValue = cdm.getFillValue(varName);
     double outFillValue = inFillValue;
+    // missingValue will not be encoded in message, but in a separate bitmap
     GRIB_CHECK(grib_set_double(gribHandle.get(), "missingValue", outFillValue), "setting missing value");
-    GRIB_CHECK(grib_set_long(gribHandle.get(), "bitMapIndicator", 0), "setting bitmap");
+    GRIB_CHECK(grib_set_long(gribHandle.get(), "bitMapIndicator", 1), "setting bitmap");
 
     CDMAttribute attr;
     double scale = 1.;

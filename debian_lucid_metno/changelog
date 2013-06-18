@@ -1,3 +1,9 @@
+fimex (0.46.1-1) lucid; urgency=low
+
+  * initial upload
+  
+ -- Heiko Klein <heiko.klein@met.no>  Wed, 14 Jun 2013 13:00:00 +0200
+
 fimex (0.46-2) precise; urgency=low
 
   * adding old fimex-bin versions as conflict to fimex-share
