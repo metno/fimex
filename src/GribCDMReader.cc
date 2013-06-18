@@ -862,9 +862,6 @@ void GribCDMReader::initAddVariables()
             vector<CDMAttribute> attributes;
             if (node != 0) {
                 fillAttributeListFromXMLNode(attributes, node->children, p_->templateReplacementAttributes);
-            } else {
-                double fillVal = 9999; // grib default fill value
-                attributes.push_back(CDMAttribute("_FillValue", fillVal));
             }
 
             // add the projection
