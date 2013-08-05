@@ -38,7 +38,6 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "fimex/Data.h"
 #include "fimex/CDM.h"
 #include <boost/regex.hpp>
 
@@ -377,10 +376,14 @@ void NcmlCDMReader::initDimensionNameChange()
     size = (nodes) ? nodes->nodeNr : 0;
     for (int i = 0; i < size; i++) {
         std::string name = getXmlProp(nodes->nodeTab[i], "name");
+        int length = string2type<int>(getXmlProp(nodes->nodeTab[i], "length"));
         if (!cdm_->hasDimension(name)) {
-            int length = string2type<int>(getXmlProp(nodes->nodeTab[i], "length"));
             CDMDimension dim(name,length);
             cdm_->addDimension(dim);
+        } else {
+            // very dangerous to change existing length, might fail...
+            // but might be used in some unlimited cases
+            cdm_->getDimension(name).setLength(length);
         }
     }
 }
@@ -488,6 +491,7 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
     }
 
     DataPtr data;
+    const CDM& orgCDM = dataReader->getCDM();
     // check if the first new unlimited dimension is part of the variable
     // (for simplicity check only first)
     if ( (unlimitedDimensionChanges.size() > 0) &&
@@ -501,13 +505,22 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
         sb.setStartAndSize(unlimDim, unLimDimPos, 1);
         data = dataReader->getDataSlice(orgVarName, sb);
     } else {
-        data = dataReader->getDataSlice(orgVarName, unLimDimPos);
+	// check if extended unlimited dimension slice
+        const CDMDimension* unlimDim = orgCDM.getUnlimitedDim();
+	if ((unlimDim != 0) &&
+            (orgCDM.getVariable(varName).checkDimension(unlimDim->getName())) &&
+	    (unlimDim->getLength() <= unLimDimPos)) {
+	    LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << varName << " and slice " << unLimDimPos << " outside original data, using undef");
+            data = createData(cdm_->getVariable(varName).getDataType(), 0);
+        } else {
+	    // get data as usual
+            data = dataReader->getDataSlice(orgVarName, unLimDimPos);
+	}
     }
 
     // eventually, change the type from the old type to the new type
     map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);
     if (dtIt != variableTypeChanges.end()) {
-        const CDM& orgCDM = dataReader->getCDM();
         double orgFill = orgCDM.getFillValue(orgVarName);
         CDMAttribute attr;
         double orgScale = 1.;
