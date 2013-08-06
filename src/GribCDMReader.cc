@@ -36,7 +36,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "fimex/Data.h"
+#include "fimex/TimeUnit.h"
 #include "fimex/ReplaceStringTimeObject.h"
 #include "fimex/ReplaceStringTemplateObject.h"
 #include "fimex/coordSys/Projection.h"
@@ -538,17 +538,26 @@ void GribCDMReader::initAddTimeDimension()
     vector<string> timeShape;
     timeShape.push_back(timeDim.getName());
     CDMVariable timeVar(p_->timeDimName, timeDataType, timeShape);
-    vector<double> timeVecLong;
-    // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
-    transform(p_->times.begin(), p_->times.end(), back_inserter(timeVecLong), posixTime2epochTime);
-    DataPtr timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
-    timeVar.setData(timeData);
     cdm_->addVariable(timeVar);
     vector<CDMAttribute> timeAttributes;
     fillAttributeListFromXMLNode(timeAttributes, nodes->nodeTab[0]->children, p_->templateReplacementAttributes);
     for (vector<CDMAttribute>::iterator it = timeAttributes.begin(); it != timeAttributes.end(); ++it) {
         cdm_->addAttribute(timeVar.getName(), *it);
     }
+    CDMAttribute tunit;
+    if (! cdm_->getAttribute(timeVar.getName(), "units", tunit)) {
+        // use seconds since 1970 as default
+        tunit = CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00");
+        cdm_->addAttribute(timeVar.getName(), tunit);
+    }
+    TimeUnit tu(tunit.getStringValue());
+    vector<double> timeVecLong;
+    transform(p_->times.begin(),
+              p_->times.end(),
+              back_inserter(timeVecLong),
+              bind1st(mem_fun(&TimeUnit::posixTime2unitTime), &tu));
+    DataPtr timeData = createData(timeDataType, timeVecLong.begin(), timeVecLong.end());
+    cdm_->getVariable(timeVar.getName()).setData(timeData);
 
     // TODO check if reference time changes, assuming they are all alike
     boost::posix_time::ptime refTime = p_->indices.begin()->getReferenceTime();

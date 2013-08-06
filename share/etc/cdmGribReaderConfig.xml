@@ -26,6 +26,8 @@
 <time id="time" name="time" type="double">
     <attribute name="long_name" value="time" type="string" />
     <attribute name="standard_name" value="time" type="string" />
+<!-- adapt the time-unit as needed, i.e. -->
+<!-- <attribute name="units" value="hours since 2007-05-16 00:00:00 +00:00" type="string" /> -->
     <attribute name="units" value="seconds since 1970-01-01 00:00:00 +00:00" type="string" />
 </time>
 <spatial_axis typeOfGrid="lambert" id="x" name="x" type="float">
@@ -605,7 +607,7 @@
         <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
-    
+
     <!-- wave parameters -->
     <parameter name="significant_wave_height" type="float">
       <grib1 indicatorOfParameter="229" gribTablesVersionNo="140" />
@@ -627,7 +629,7 @@
     </parameter>
     <parameter  name="significant_wave_period"  type="float">
       <grib1 indicatorOfParameter="232" gribTablesVersionNo="140"/>
-      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" /> 
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
       <attribute name="units" value="s" type="string"/>
       <attribute name="long_name" value="sea_surface_wave_significant_period" type="string"/>
     </parameter>
