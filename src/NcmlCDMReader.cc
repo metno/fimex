@@ -505,17 +505,17 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
         sb.setStartAndSize(unlimDim, unLimDimPos, 1);
         data = dataReader->getDataSlice(orgVarName, sb);
     } else {
-	// check if extended unlimited dimension slice
+        // check if extended unlimited dimension slice
         const CDMDimension* unlimDim = orgCDM.getUnlimitedDim();
-	if ((unlimDim != 0) &&
-            (orgCDM.getVariable(varName).checkDimension(unlimDim->getName())) &&
-	    (unlimDim->getLength() <= unLimDimPos)) {
-	    LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << varName << " and slice " << unLimDimPos << " outside original data, using undef");
-            data = createData(cdm_->getVariable(varName).getDataType(), 0);
+        if ((unlimDim != 0) &&
+                (orgCDM.getVariable(orgVarName).checkDimension(unlimDim->getName())) &&
+                (unlimDim->getLength() <= unLimDimPos)) {
+            LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << varName << " and slice " << unLimDimPos << " outside original data, using undef");
+            data = createData(cdm_->getVariable(orgVarName).getDataType(), 0);
         } else {
-	    // get data as usual
+            // get data as usual
             data = dataReader->getDataSlice(orgVarName, unLimDimPos);
-	}
+        }
     }
 
     // eventually, change the type from the old type to the new type
