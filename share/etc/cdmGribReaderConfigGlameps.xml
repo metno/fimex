@@ -144,7 +144,7 @@
         <attribute name="units" value="Pa" type="string" />
     </grib2>
 </vertical_axis>
-<vertical_axis id="altitude" name="altitude" grib2_id="102" grib1_id="103" type="float">
+<vertical_axis id="height_above_msl" name="height_above_msl" grib2_id="102" grib1_id="103" type="float">
     <attribute name="description" value="height above MSL" type="string" />
     <attribute name="long_name" value="height" type="string" />
     <attribute name="positive" value="up" type="string" />
@@ -390,7 +390,7 @@
         <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
         <attribute name="units" value="Pa" type="string" />
     </parameter>
-  
+
     <parameter name="x_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="105" levelNo="10"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />

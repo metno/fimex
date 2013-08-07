@@ -148,8 +148,8 @@
         <attribute name="units" value="Pa" type="string" />
     </grib2>
 </vertical_axis>
-<vertical_axis id="altitude" name="altitude" grib2_id="102" grib1_id="103" type="float">
-    <attribute name="description" value="height above MSL" type="string" />
+<vertical_axis id="height_above_msl" name="height_above_msl" grib2_id="102" grib1_id="103" type="float">
+    <attribute name="description" value="height above MSL, altitude" type="string" />
     <attribute name="long_name" value="height" type="string" />
     <attribute name="positive" value="up" type="string" />
     <attribute name="units" value="m" type="string" />
