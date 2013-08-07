@@ -43,13 +43,17 @@ namespace MetNoFimex
  *
  * This reader should usually be called from the NcmlCDMReader.
  */
-class NcmlArregationReader: public MetNoFimex::CDMReader
+class NcmlAggregationReader: public MetNoFimex::CDMReader
 {
 public:
-    NcmlArregationReader(const XMLInput& ncml);
-    virtual ~NcmlArregationReader();
+    NcmlAggregationReader(const XMLInput& ncml);
+    virtual ~NcmlAggregationReader();
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    /**
+     * reading the data from the required source with SliceBuilder
+     */
+    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 private:
     // main data-reader
     boost::shared_ptr<CDMReader> gDataReader_;

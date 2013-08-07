@@ -54,7 +54,7 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 #ifdef HAVE_NETCDF_H
     setConfigDoc(configXML);
 
-    dataReader = boost::shared_ptr<CDMReader>(new NcmlArregationReader(configXML));
+    dataReader = boost::shared_ptr<CDMReader>(new NcmlAggregationReader(configXML));
 #if 0
     XPathObjPtr xpathObj = doc->getXPathObject("/nc:netcdf[@location]");
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
