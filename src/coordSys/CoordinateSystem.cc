@@ -67,6 +67,9 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
     if (cs.hasProjection()) {
         out << ";" << *(cs.getProjection());
     }
+    if (cs.hasVerticalTransformation()) {
+         out << ";" << *(cs.getVerticalTransformation());
+     }
     return out;
 }
 
@@ -176,6 +179,19 @@ boost::shared_ptr<const Projection> CoordinateSystem::getProjection() const
 void CoordinateSystem::setProjection(boost::shared_ptr<const Projection> proj)
 {
     pimpl_->proj_ = proj;
+}
+
+bool CoordinateSystem::hasVerticalTransformation() const
+{
+    return pimpl_->vtran_.get() != 0;
+}
+boost::shared_ptr<const VerticalTransformation> CoordinateSystem::getVerticalTransformation() const
+{
+    return pimpl_->vtran_;
+}
+void CoordinateSystem::setVerticalTransformation(boost::shared_ptr<const VerticalTransformation> vtran)
+{
+    pimpl_->vtran_ = vtran;
 }
 
 

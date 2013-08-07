@@ -61,6 +61,7 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/StereographicProjection.cc \
                      coordSys/TransverseMercatorProjection.cc \
                      coordSys/VerticalPerspectiveProjection.cc \
+                     coordSys/VerticalTransformation.cc \
                      coordSys/UnknownToFgdcProjection.cc \
 					 Data.cc \
 					 DataImpl.h \

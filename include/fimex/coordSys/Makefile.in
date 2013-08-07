@@ -35,7 +35,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = include/fimex/coordSys
-DIST_COMMON = $(fimexcoordsysinc_HEADERS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(fimexcoordsysinc_HEADERS) \
+	$(fimexcoordsysvertinc_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
@@ -91,8 +92,9 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(fimexcoordsysincdir)"
-HEADERS = $(fimexcoordsysinc_HEADERS)
+am__installdirs = "$(DESTDIR)$(fimexcoordsysincdir)" \
+	"$(DESTDIR)$(fimexcoordsysvertincdir)"
+HEADERS = $(fimexcoordsysinc_HEADERS) $(fimexcoordsysvertinc_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -253,6 +255,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 fimexcoordsysincdir = $(includedir)/fimex/coordSys
 fimexcoordsysinc_HEADERS = $(top_srcdir)/include/fimex/coordSys/*.h
+fimexcoordsysvertincdir = $(includedir)/fimex/coordSys/verticalTransform
+fimexcoordsysvertinc_HEADERS = $(top_srcdir)/include/fimex/coordSys/verticalTransform/*.h
 all: all-am
 
 .SUFFIXES:
@@ -310,6 +314,24 @@ uninstall-fimexcoordsysincHEADERS:
 	@list='$(fimexcoordsysinc_HEADERS)'; test -n "$(fimexcoordsysincdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(fimexcoordsysincdir)'; $(am__uninstall_files_from_dir)
+install-fimexcoordsysvertincHEADERS: $(fimexcoordsysvertinc_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(fimexcoordsysvertincdir)" || $(MKDIR_P) "$(DESTDIR)$(fimexcoordsysvertincdir)"
+	@list='$(fimexcoordsysvertinc_HEADERS)'; test -n "$(fimexcoordsysvertincdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(fimexcoordsysvertincdir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(fimexcoordsysvertincdir)" || exit $$?; \
+	done
+
+uninstall-fimexcoordsysvertincHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(fimexcoordsysvertinc_HEADERS)'; test -n "$(fimexcoordsysvertincdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(fimexcoordsysvertincdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -397,7 +419,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(fimexcoordsysincdir)"; do \
+	for dir in "$(DESTDIR)$(fimexcoordsysincdir)" "$(DESTDIR)$(fimexcoordsysvertincdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -450,7 +472,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-fimexcoordsysincHEADERS
+install-data-am: install-fimexcoordsysincHEADERS \
+	install-fimexcoordsysvertincHEADERS
 
 install-dvi: install-dvi-am
 
@@ -494,7 +517,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-fimexcoordsysincHEADERS
+uninstall-am: uninstall-fimexcoordsysincHEADERS \
+	uninstall-fimexcoordsysvertincHEADERS
 
 .MAKE: install-am install-strip
 
@@ -503,13 +527,15 @@ uninstall-am: uninstall-fimexcoordsysincHEADERS
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-fimexcoordsysincHEADERS install-html \
+	install-exec-am install-fimexcoordsysincHEADERS \
+	install-fimexcoordsysvertincHEADERS install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-fimexcoordsysincHEADERS
+	tags uninstall uninstall-am uninstall-fimexcoordsysincHEADERS \
+	uninstall-fimexcoordsysvertincHEADERS
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

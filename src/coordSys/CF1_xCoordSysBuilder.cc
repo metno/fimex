@@ -34,6 +34,15 @@
 #include "fimex/Units.h"
 #include <set>
 #include <boost/regex.hpp>
+#include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>
+#include <fimex/coordSys/verticalTransform/Height.h>
+#include <fimex/coordSys/verticalTransform/HybridSigmaPressure1.h>
+#include <fimex/coordSys/verticalTransform/HybridSigmaPressure2.h>
+#include <fimex/coordSys/verticalTransform/LnPressure.h>
+#include <fimex/coordSys/verticalTransform/OceanSG1.h>
+#include <fimex/coordSys/verticalTransform/OceanSG2.h>
+#include <fimex/coordSys/verticalTransform/Pressure.h>
+
 
 namespace MetNoFimex
 {
@@ -387,18 +396,59 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
         CoordinateSystem::ConstAxisPtr zAxis = cs.getGeoZAxis();
         if (zAxis.get() != 0) {
             if (cdm.hasVariable(zAxis->getName())) {
-                CDMAttribute formula;
-                if (cdm.getAttribute(zAxis->getName(), "formula_terms", formula)) {
-                    string term = formula.getStringValue();
-                    string::const_iterator  begin = term.begin(), end = term.end();
-                    boost::match_results<string::const_iterator> what;
-                    while (boost::regex_search(begin, end, what, boost::regex("\\S+\\s*:\\s*(\\S+)"))) {
-                        string var(what[1].first, what[1].second);
-                        if (cdm.hasVariable(var)) {
-                            cs.addDependencyVariable(var);
+                switch (zAxis->getAxisType()) {
+                case CoordinateAxis::Height:
+                    cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                        new Height(zAxis->getName())));
+                    break;
+                case CoordinateAxis::Pressure:
+                    cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                        new Pressure(zAxis->getName())));
+                    break;
+                default:
+                    CDMAttribute formula;
+                    map<string, string> terms;
+                    if (cdm.getAttribute(zAxis->getName(), "formula_terms", formula)) {
+                        string term = formula.getStringValue();
+                        string::const_iterator begin = term.begin(), end = term.end();
+                        boost::match_results<string::const_iterator> what;
+                        while (boost::regex_search(begin, end, what, boost::regex("(\\S+)\\s*:\\s*(\\S+)"))) {
+                            string term(what[1].first, what[1].second);
+                            string var(what[2].first, what[2].second);
+                            if (cdm.hasVariable(var)) {
+                                cs.addDependencyVariable(var);
+                                terms[term] = var;
+                            }
+                            begin = what[0].second;
                         }
-                        begin = what[0].second;
                     }
+                    CDMAttribute standardName;
+                    if (cdm.getAttribute(zAxis->getName(), "standard_name", standardName)) {
+                        if (standardName.getStringValue() == "atmosphere_hybrid_sigma_pressure_coordinate") {
+                            if (terms["ap"] == "") {
+                                cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                                        new HybridSigmaPressure2(terms["a"], terms["b"],terms["ps"],terms["p0"])));
+                            } else {
+                                cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                                        new HybridSigmaPressure1(terms["ap"], terms["b"],terms["ps"],terms["p0"])));
+                            }
+                        } else if (standardName.getStringValue() == "atmosphere_ln_pressure_coordinate") {
+                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                                    new LnPressure(terms["lev"], terms["p0"])));
+                        } else if (standardName.getStringValue() == "atmosphere_sigma_coordinate") {
+                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                                    new AtmosphereSigma(terms["sigma"],terms["ptop"],terms["ps"])));
+                        } else if (standardName.getStringValue() == "ocean_s_coordinate_g1") {
+                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                                    new OceanSG1(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
+                        } else if (standardName.getStringValue() == "ocean_s_coordinate_g2") {
+                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
+                                    new OceanSG2(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
+                        } else {
+                            LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "Vertical transformation for " << standardName.getStringValue() << "not implemented yet");
+                        }
+                    }
+                    break;
                 }
             }
         }

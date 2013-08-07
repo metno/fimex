@@ -1,7 +1,7 @@
 /*
- * Fimex, CoordSysImpl.h
+ * Fimex, VerticalTransformation.cc
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2013, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -20,32 +20,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- *  Created on: Mar 18, 2010
- *      Author: Heiko Klein
+ *  Created on: Aug 7, 2013
+ *      Author: heikok
  */
 
-#ifndef COORDSYSIMPL_H_
-#define COORDSYSIMPL_H_
-
-#include <vector>
-#include <string>
-#include "fimex/coordSys/CoordinateAxis.h"
-#include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
 namespace MetNoFimex {
 
-struct CoordSysImpl {
-    std::string conventionName_;
-    bool isSimpleSpatialGridded_;
-    std::vector<std::string> isCSForVec_;
-    std::vector<std::string> isCompleteVec_;
-    std::vector<boost::shared_ptr<const CoordinateAxis> > axes_;
-    std::vector<boost::shared_ptr<const CoordinateAxis> > auxiliaryAxes_;
-    std::set<std::string> dependencyVars_;
-    boost::shared_ptr<const Projection> proj_;
-    boost::shared_ptr<const VerticalTransformation> vtran_;
-};
-
+std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransformation& vt)
+{
+    out << vt.getName() << "(" << vt.getParamterString() << ")";
+    return out;
 }
-#endif /* COORDSYSIMPL_H_ */
+
+} // namespace MetNoFimex

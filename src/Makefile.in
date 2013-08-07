@@ -213,6 +213,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
+	coordSys/VerticalTransformation.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
@@ -330,17 +331,18 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	OrthographicProjection.lo PolarStereographicProjection.lo \
 	RotatedLatitudeLongitudeProjection.lo \
 	StereographicProjection.lo TransverseMercatorProjection.lo \
-	VerticalPerspectiveProjection.lo UnknownToFgdcProjection.lo \
-	Data.lo DataIndex.lo DataTypeChanger.lo Felt_Array2.lo \
-	FeltCDMReader2.lo Felt_File2.lo FeltParameters.lo \
-	FillWriter.lo GridDefinition.lo IndexedData.lo Logger.lo \
-	Log4cppLogger.lo NcmlCDMReader.lo NcmlAggregationReader.lo \
-	Null_CDMWriter.lo ReplaceStringObject.lo \
-	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
-	Units.lo Utils.lo vertical_coordinate_transformations.lo \
-	XMLDoc.lo XMLInput.lo $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4)
+	VerticalPerspectiveProjection.lo VerticalTransformation.lo \
+	UnknownToFgdcProjection.lo Data.lo DataIndex.lo \
+	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
+	Felt_File2.lo FeltParameters.lo FillWriter.lo \
+	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
+	NcmlCDMReader.lo NcmlAggregationReader.lo Null_CDMWriter.lo \
+	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
+	SpatialAxisSpec.lo SliceBuilder.lo ThreadPool.lo TimeUnit.lo \
+	TimeSpec.lo ToVLevelConverter.lo Units.lo Utils.lo \
+	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -612,6 +614,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
+	coordSys/VerticalTransformation.cc \
 	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
@@ -813,6 +816,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VersionHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalTransformation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WRFCoordSysBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WciReadQuerySpecification.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Wdb2CdmBuilder.Plo@am__quote@
@@ -1000,6 +1004,13 @@ VerticalPerspectiveProjection.lo: coordSys/VerticalPerspectiveProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/VerticalPerspectiveProjection.cc' object='VerticalPerspectiveProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
+
+VerticalTransformation.lo: coordSys/VerticalTransformation.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VerticalTransformation.lo -MD -MP -MF $(DEPDIR)/VerticalTransformation.Tpo -c -o VerticalTransformation.lo `test -f 'coordSys/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/VerticalTransformation.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VerticalTransformation.Tpo $(DEPDIR)/VerticalTransformation.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/VerticalTransformation.cc' object='VerticalTransformation.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalTransformation.lo `test -f 'coordSys/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/VerticalTransformation.cc
 
 UnknownToFgdcProjection.lo: coordSys/UnknownToFgdcProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT UnknownToFgdcProjection.lo -MD -MP -MF $(DEPDIR)/UnknownToFgdcProjection.Tpo -c -o UnknownToFgdcProjection.lo `test -f 'coordSys/UnknownToFgdcProjection.cc' || echo '$(srcdir)/'`coordSys/UnknownToFgdcProjection.cc

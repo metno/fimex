@@ -1,7 +1,7 @@
 /*
- * Fimex, CoordSysImpl.h
+ * Fimex, Pressure.h
  *
- * (C) Copyright 2009, met.no
+ * (C) Copyright 2013, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -20,32 +20,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- *  Created on: Mar 18, 2010
- *      Author: Heiko Klein
+ *  Created on: Aug 6, 2013
+ *      Author: heikok
  */
 
-#ifndef COORDSYSIMPL_H_
-#define COORDSYSIMPL_H_
+#ifndef PRESSURE_H_
+#define PRESSURE_H_
 
-#include <vector>
-#include <string>
-#include "fimex/coordSys/CoordinateAxis.h"
-#include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-namespace MetNoFimex {
+/**
+ * @headerfile "fimex/coordSys/verticalTransform/Pressure.h"
+ */
 
-struct CoordSysImpl {
-    std::string conventionName_;
-    bool isSimpleSpatialGridded_;
-    std::vector<std::string> isCSForVec_;
-    std::vector<std::string> isCompleteVec_;
-    std::vector<boost::shared_ptr<const CoordinateAxis> > axes_;
-    std::vector<boost::shared_ptr<const CoordinateAxis> > auxiliaryAxes_;
-    std::set<std::string> dependencyVars_;
-    boost::shared_ptr<const Projection> proj_;
-    boost::shared_ptr<const VerticalTransformation> vtran_;
+
+namespace MetNoFimex
+{
+
+/// Pressure class for vertical transformation
+class Pressure : public VerticalTransformation
+{
+public:
+    /// name of the pressure variable
+    const std::string pressure;
+    Pressure(std::string pressure) : pressure(pressure) {}
+    virtual ~Pressure() {}
+    /**
+     * @return pressure
+     */
+    virtual std::string getName() const { return "pressure"; }
+    virtual std::string getParamterString() const { return "p="+pressure; }
+    virtual bool isComplete() const {return pressure != "";}
 };
 
-}
-#endif /* COORDSYSIMPL_H_ */
+} /* namespace MetNoFimex */
+#endif /* PRESSURE_H_ */

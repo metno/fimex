@@ -36,6 +36,7 @@
 #include <iostream>
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/Projection.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 #include "fimex/deprecated.h"
 
 
@@ -138,6 +139,21 @@ public:
      * Set the projection of the coordinate-system (projection of GeoX, GeoY and optionally GeoZ)
      */
     virtual void setProjection(boost::shared_ptr<const Projection> proj);
+    /**
+     * Check if the coordinate-system has a vertical transformation (of GeoZ)
+     * This includes also coordinate-systems in pressure or height.
+     */
+    virtual bool hasVerticalTransformation() const;
+    /**
+     * Get the vertical transformation of the coordinate-system (GeoZ)
+     * This includes also height or pressure 'transformations'
+     * @return vtrans, or null ptr
+     */
+    virtual boost::shared_ptr<const VerticalTransformation> getVerticalTransformation() const;
+    /**
+     * Set the vertical transformation of the coordinate-system (transformation of GeoZ)
+     */
+    virtual void setVerticalTransformation(boost::shared_ptr<const VerticalTransformation> vtran);
     /**
      * Check if the CoordinateSystem contains exactly the axis type
      * @param type axis type to check against
