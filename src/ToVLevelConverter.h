@@ -34,6 +34,8 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/mifi_constants.h"
 #include "fimex/IndexedData.h"
+#include "fimex/deprecated.h"
+
 
 namespace MetNoFimex
 {
@@ -68,9 +70,9 @@ public:
      * @return physically correct value
      */
     virtual bool isValid(double val, size_t x, size_t y, size_t t) {return true;}
-    static boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt);
-    static boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nt);
-    static boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt);
+    static boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt);
+    static boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt);
+    static boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt);
 
 };
 

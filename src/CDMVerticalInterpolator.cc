@@ -307,7 +307,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
         nt = unLimDimPos + 1;
         startT = unLimDimPos;
     }
-    boost::shared_ptr<ToVLevelConverter> levConv = ToVLevelConverter::getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, (nt-startT));
+    boost::shared_ptr<ToVLevelConverter> levConv = ToVLevelConverter::getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
     switch (pimpl_->verticalInterpolationMethod) {

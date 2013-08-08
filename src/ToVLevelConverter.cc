@@ -35,6 +35,15 @@
 #include "fimex/Logger.h"
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
+#include <fimex/coordSys/verticalTransform/VerticalTransformation.h>
+#include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>
+#include <fimex/coordSys/verticalTransform/Height.h>
+#include <fimex/coordSys/verticalTransform/HybridSigmaPressure1.h>
+#include <fimex/coordSys/verticalTransform/HybridSigmaPressure2.h>
+#include <fimex/coordSys/verticalTransform/LnPressure.h>
+#include <fimex/coordSys/verticalTransform/OceanSG1.h>
+#include <fimex/coordSys/verticalTransform/OceanSG2.h>
+#include <fimex/coordSys/verticalTransform/Pressure.h>
 
 namespace MetNoFimex {
 
@@ -61,166 +70,163 @@ static const vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader
 
 
 
-boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nt)
+boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt)
 {
     boost::shared_ptr<ToVLevelConverter> presConv;
-    switch (zAxis->getAxisType()) {
-    case CoordinateAxis::Pressure: {
-        DataPtr p = reader->getScaledDataSliceInUnit(zAxis->getName(), "hPa", unLimDimPos);
+    assert(cs.get() != 0);
+    if (!cs->hasVerticalTransformation()) {
+        throw CDMException("undefined vertical coordinate transformation for " + type2string(cs));
+    }
+    boost::shared_ptr<const VerticalTransformation> vtran = cs->getVerticalTransformation();
+    assert(vtran.get() != 0);
+    if (!vtran->isComplete()) {
+        throw CDMException(type2string(cs) + " not complete for transformation");
+    }
+    if (vtran->getName() == "pressure") {
+        const Pressure* pres = dynamic_cast<const Pressure*>(vtran.get());
+        assert(pres != 0);
+        DataPtr p = reader->getScaledDataSliceInUnit(pres->pressure, "hPa", unLimDimPos);
         boost::shared_array<double> pa = p->asDouble();
         presConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&pa[0], &pa[0] + p->size())));
-    }
-        break;
-    case CoordinateAxis::Height: {
-        DataPtr h = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
+    } else if (vtran->getName() == "height") {
+        const Height* height = dynamic_cast<const Height*>(vtran.get());
+        assert(height != 0);
+        DataPtr h = reader->getScaledDataSliceInUnit(height->height, "m", unLimDimPos);
         boost::shared_array<double> ha = h->asDouble();
         presConv = boost::shared_ptr<ToVLevelConverter>(new HeightStandardToPressureConverter(vector<double> (&ha[0],&ha[0] + h->size())));
-    }
-        break;
-    case CoordinateAxis::GeoZ: {
-        CDMAttribute standardName, formulaTerms;
-        if (reader->getCDM().getAttribute(zAxis->getName(), "standard_name", standardName)
-                && reader->getCDM().getAttribute(zAxis->getName(), "formula_terms", formulaTerms)) {
-            if (standardName.getStringValue() == "atmosphere_hybrid_sigma_pressure_coordinate") {
-                // require ap, b, ps(x,y,t)
-                string ap = getTerm(formulaTerms, "ap");
-                string a = getTerm(formulaTerms, "a");
-                string b = getTerm(formulaTerms, "b");
-                string ps = getTerm(formulaTerms, "ps");
-                if (ap != "") {
-                    // formular with ap,b,ps
-                    if (b == "" || ps == "")
-                        throw CDMException("atmosphere_hybrid_sigma_pressure formula_terms (ap,b,ps) not found in " + formulaTerms.getStringValue());
-                    const vector<double> apVec = getDataSliceInUnit(reader, ap, "hPa", unLimDimPos);
-                    const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
-                    DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
-                    if (nx * ny * nt != psData->size()) {
-                        throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
+    } else if (vtran->getName() == "atmosphere_hybrid_sigma_pressure_coordinate_1") {
+        const HybridSigmaPressure1* hyb1 = dynamic_cast<const HybridSigmaPressure1*>(vtran.get());
+        assert(hyb1 != 0);
+        const vector<double> apVec = getDataSliceInUnit(reader, hyb1->ap, "hPa", unLimDimPos);
+        const vector<double> bVec = getDataSliceInUnit(reader, hyb1->b, "", unLimDimPos);
+        DataPtr psData = reader->getScaledDataSliceInUnit(hyb1->ps, "hPa", unLimDimPos);
+        if (nx * ny * nt != psData->size()) {
+            throw CDMException("unexpected size of pressure " + hyb1->ps + "(" + type2string(unLimDimPos) +
                                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
-                    }
-                    presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asDouble(), nx, ny, nt));
-                } else if (a != "") {
-                    //formular with a,p0,b,ps
-                    string p0 = getTerm(formulaTerms, "p0");
-                    if (b == "" || ps == "" || p0 == "")
-                        throw CDMException("atmosphere_hybrid_sigma_pressure formula_terms (a,b,p0,ps) not found in " + formulaTerms.getStringValue());
-                    const vector<double> aVec = getDataSliceInUnit(reader, a, "", unLimDimPos);
-                    const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
-                    const vector<double> p0Vec = getDataSliceInUnit(reader, p0, "hPa", unLimDimPos);
-                    DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
-                    if (nx * ny * nt != psData->size()) {
-                        throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
-                                           "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
-                    }
-                    presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaToPressureConverter(aVec, bVec, p0Vec.at(0), psData->asDouble(), nx, ny, nt));
-                } else {
-                    throw CDMException("atmosphere_hybrid_sigma_pressure formular-term with 'a' or 'ap' not found in " + formulaTerms.getStringValue());
-                }
-            } else if (standardName.getStringValue() == "atmosphere_ln_pressure_coordinate") {
-                string p0 = getTerm(formulaTerms, "p0");
-                string lev = getTerm(formulaTerms, "lev");
-                if (p0 == "" || lev == "")
-                    throw CDMException("atmosphere_ln_pressure_coordinate formula_term (p0,lev) not found in " + formulaTerms.getStringValue());
-                const vector<double> levVec = getDataSliceInUnit(reader, lev, "", unLimDimPos);
-                const vector<double> p0Vec = getDataSliceInUnit(reader, p0, "hPa", unLimDimPos);
-                presConv = boost::shared_ptr<ToVLevelConverter>(new LnPressureToPressureConverter(p0Vec.at(0), levVec));
-            } else if (standardName.getStringValue() == "atmosphere_sigma_coordinate") {
-                string sigma = getTerm(formulaTerms, "sigma");
-                string ptop = getTerm(formulaTerms, "ptop");
-                string ps = getTerm(formulaTerms, "ps");
-                if (ptop == "" || sigma == "" || ps == "")
-                    throw CDMException("atmosphere_sigma_coordinate formula_terms (ptop,sigma,ps) not all found in " + formulaTerms.getStringValue());
-                const vector<double> sigmaVec = getDataSliceInUnit(reader, sigma, "", unLimDimPos);
-                const vector<double> ptopVec = getDataSliceInUnit(reader, ptop, "hPa", unLimDimPos);
-                DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
-                if (nx * ny * nt != psData->size()) {
-                    throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
-                                       "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
-                }
-                presConv = boost::shared_ptr<ToVLevelConverter>(new SigmaToPressureConverter(sigmaVec, ptopVec[0], psData->asDouble(), nx, ny, nt));
-            } else {
-                throw CDMException("unimplemented vertical axis with standard_name: " + standardName.getStringValue());
-            }
-
-        } else {
-            throw CDMException("no standard_name or formular_terms for vertical axis: " + zAxis->getName());
+         }
+         presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asDouble(), nx, ny, nt));
+    } else if (vtran->getName() == "atmosphere_hybrid_sigma_pressure_coordinate_2") {
+        const HybridSigmaPressure2* hyb2 = dynamic_cast<const HybridSigmaPressure2*>(vtran.get());
+        assert(hyb2 != 0);
+        const vector<double> aVec = getDataSliceInUnit(reader, hyb2->a, "", unLimDimPos);
+        const vector<double> bVec = getDataSliceInUnit(reader, hyb2->b, "", unLimDimPos);
+        const vector<double> p0Vec = getDataSliceInUnit(reader, hyb2->p0, "hPa", unLimDimPos);
+        DataPtr psData = reader->getScaledDataSliceInUnit(hyb2->ps, "hPa", unLimDimPos);
+        if (nx * ny * nt != psData->size()) {
+            throw CDMException("unexpected size of pressure " + hyb2->ps + "(" + type2string(unLimDimPos) +
+                               "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
         }
-    }
-        break;
-    default:
-        throw CDMException("unknown vertical coordinate type:" + type2string(zAxis->getAxisType()));
+        presConv = boost::shared_ptr<ToVLevelConverter>(new HybridSigmaToPressureConverter(aVec, bVec, p0Vec.at(0), psData->asDouble(), nx, ny, nt));
+    } else if (vtran->getName() == "atmosphere_ln_pressure_coordinate") {
+        const LnPressure* lnpres = dynamic_cast<const LnPressure*>(vtran.get());
+        assert(lnpres != 0);
+        const vector<double> levVec = getDataSliceInUnit(reader, lnpres->lev, "", unLimDimPos);
+        const vector<double> p0Vec = getDataSliceInUnit(reader, lnpres->p0, "hPa", unLimDimPos);
+        presConv = boost::shared_ptr<ToVLevelConverter>(new LnPressureToPressureConverter(p0Vec.at(0), levVec));
+    } else if (vtran->getName() == "atmosphere_sigma_coordinate") {
+        const AtmosphereSigma* asigma = dynamic_cast<const AtmosphereSigma*>(vtran.get());
+        assert(asigma != 0);
+        const vector<double> sigmaVec = getDataSliceInUnit(reader, asigma->sigma, "", unLimDimPos);
+        const vector<double> ptopVec = getDataSliceInUnit(reader, asigma->ptop, "hPa", unLimDimPos);
+        DataPtr psData = reader->getScaledDataSliceInUnit(asigma->ps, "hPa", unLimDimPos);
+        if (nx * ny * nt != psData->size()) {
+            throw CDMException("unexpected size of pressure " + asigma->ps + "(" + type2string(unLimDimPos) +
+                    "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
+        }
+        presConv = boost::shared_ptr<ToVLevelConverter>(new SigmaToPressureConverter(sigmaVec, ptopVec[0], psData->asDouble(), nx, ny, nt));
+    } else {
+        throw CDMException("unimplemented vertical axis with standard_name: " + vtran->getName());
     }
     return presConv;
 }
 
 boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
         const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
-        const CoordinateSystem::ConstAxisPtr xAxis,
-        const CoordinateSystem::ConstAxisPtr yAxis,
-        const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny,
-        size_t nz, size_t nt)
+        const boost::shared_ptr<const CoordinateSystem> cs,
+        size_t nx, size_t ny, size_t nz, size_t nt)
 {
     boost::shared_ptr<ToVLevelConverter> heightConv;
-    switch (zAxis->getAxisType()) {
-        case CoordinateAxis::Height:
-        {
-            DataPtr hd = reader->getScaledDataSliceInUnit(zAxis->getName(), "m", unLimDimPos);
-            const boost::shared_array<double> ha = hd->asDouble();
-            heightConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
-        }
-        break;
-        case CoordinateAxis::GeoZ: {
-            CDMAttribute standardName, formulaTerms;
-            if (reader->getCDM().getAttribute(zAxis->getName(), "standard_name", standardName)
-                    && reader->getCDM().getAttribute(zAxis->getName(), "formula_terms", formulaTerms)) {
-                if (standardName.getStringValue() == "ocean_s_coordinate_g1" || standardName.getStringValue() == "ocean_s_coordinate_g2") {
-                    string s = getTerm(formulaTerms, "s");
-                    string C = getTerm(formulaTerms, "C");
-                    string eta = getTerm(formulaTerms, "eta");
-                    string depth = getTerm(formulaTerms, "depth");
-                    string depth_c = getTerm(formulaTerms, "depth_c");
-                    if (s == "" || C == "" || depth == "" || depth_c == "")
-                        throw CDMException("ocean_s_coordinate_g? formula_terms (s,C,depth,depth_c) not all found in " + formulaTerms.getStringValue());
-                    vector<double> sVec = getDataSliceInUnit(reader, s, "", unLimDimPos); // size k
-                    vector<double> CVec = getDataSliceInUnit(reader, C, "", unLimDimPos); // size k
-                    vector<double> depth_cVec = getDataSliceInUnit(reader, depth_c, "m", unLimDimPos); // size 1
-                    DataPtr depthD = reader->getScaledDataSliceInUnit(depth, "m", unLimDimPos);
-                    IndexedData depthDI(depthD, reader->getDimsSlice(depth));
-                    size_t dSize = (depthDI.idx().getDims().size() == 3) ? (nx*ny*nt) : (nx*ny);
-                    if (depthD->size() < dSize) {
-                        throw CDMException("unexpected size of depth " + depth + "(" + type2string(unLimDimPos) +
-                                "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
-                        // I allow depthD to be larger than dSize for staggered grids (grids with +-1 cell)
-                    }
-                    // default eta: single value, 0
-                    IndexedData etaDI(createData(CDM_DOUBLE, 1, 0.), vector<size_t>(1,1));
-                    if (eta != "") {
-                        DataPtr etaD = reader->getScaledDataSliceInUnit(eta, "m", unLimDimPos);
-                        if (etaD->size() < (nx * ny * nt)) {
-                            throw CDMException("unexpected size of eta " + eta + "(" + type2string(unLimDimPos) +
-                                               "), should be " + type2string(nx * ny * nt) + " != " + type2string(etaD->size()));
-                        }
-                        etaDI = IndexedData(etaD, reader->getDimsSlice(eta));
-                    }
-                    if (standardName.getStringValue() == "ocean_s_coordinate_g1") {
-                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaDI, depthDI,
-                                    nx, ny, nz, nt, mifi_ocean_s_g1_z));
-                    } else {
-                        heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaDI, depthDI,
-                                    nx, ny, nz, nt, mifi_ocean_s_g2_z));
-                    }
-                } else {
-                    throw CDMException("unimplemented vertical axis with standard_name: " + standardName.getStringValue());
-                }
-            } else {
-                throw CDMException("no standard_name or formular_terms for vertical axis: " + zAxis->getName());
+    assert(cs.get() != 0);
+    if (!cs->hasVerticalTransformation()) {
+        throw CDMException("undefined vertical coordinate transformation for " + type2string(cs));
+    }
+    boost::shared_ptr<const VerticalTransformation> vtran = cs->getVerticalTransformation();
+    assert(vtran.get() != 0);
+    if (!vtran->isComplete()) {
+        throw CDMException(type2string(cs) + " not complete for transformation");
+    }
+    if (vtran->getName() == "height") {
+        const Height* h = dynamic_cast<const Height*>(vtran.get());
+        assert(h != 0);
+        DataPtr hd = reader->getScaledDataSliceInUnit(h->height, "m", unLimDimPos);
+        const boost::shared_array<double> ha = hd->asDouble();
+        heightConv = boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
+    } else if (vtran->getName() == "pressure") {
+        heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt)));
+    } else if (vtran->getName() == "ocean_s_coordinate_g1" || vtran->getName() == "ocean_s_coordinate_g2") {
+        vector<double> sVec;
+        vector<double> CVec;
+        vector<double> depth_cVec;
+        IndexedData depthDI;
+        // default eta: single value, 0
+        IndexedData etaDI(createData(CDM_DOUBLE, 1, 0.), vector<size_t>(1,1));
+        if (vtran->getName() == "ocean_s_coordinate_g1") {
+            const OceanSG1* osg = dynamic_cast<const OceanSG1*>(vtran.get());
+            assert(osg != 0);
+            sVec = getDataSliceInUnit(reader, osg->s, "", unLimDimPos); // size k
+            CVec = getDataSliceInUnit(reader, osg->C, "", unLimDimPos); // size k
+            depth_cVec = getDataSliceInUnit(reader, osg->depth_c, "m", unLimDimPos); // size 1
+            DataPtr depthD = reader->getScaledDataSliceInUnit(osg->depth, "m", unLimDimPos);
+            depthDI = IndexedData(depthD, reader->getDimsSlice(osg->depth));
+            size_t dSize = (depthDI.idx().getDims().size() == 3) ? (nx*ny*nt) : (nx*ny);
+            if (depthD->size() < dSize) {
+                throw CDMException("unexpected size of depth " + osg->depth + "(" + type2string(unLimDimPos) +
+                        "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
+                // I allow depthD to be larger than dSize for staggered grids (grids with +-1 cell)
             }
+            if (osg->eta != "") {
+                DataPtr etaD = reader->getScaledDataSliceInUnit(osg->eta, "m", unLimDimPos);
+                if (etaD->size() < (nx * ny * nt)) {
+                    throw CDMException("unexpected size of eta " + osg->eta + "(" + type2string(unLimDimPos) +
+                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(etaD->size()));
+                }
+                etaDI = IndexedData(etaD, reader->getDimsSlice(osg->eta));
+            }
+            heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaDI, depthDI,
+                    nx, ny, nz, nt, mifi_ocean_s_g1_z));
+        } else { // "ocean_s_coordinate_g2") {
+            const OceanSG2* osg = dynamic_cast<const OceanSG2*>(vtran.get());
+            assert(osg != 0);
+            sVec = getDataSliceInUnit(reader, osg->s, "", unLimDimPos); // size k
+            CVec = getDataSliceInUnit(reader, osg->C, "", unLimDimPos); // size k
+            depth_cVec = getDataSliceInUnit(reader, osg->depth_c, "m", unLimDimPos); // size 1
+            DataPtr depthD = reader->getScaledDataSliceInUnit(osg->depth, "m", unLimDimPos);
+            depthDI = IndexedData(depthD, reader->getDimsSlice(osg->depth));
+            size_t dSize = (depthDI.idx().getDims().size() == 3) ? (nx*ny*nt) : (nx*ny);
+            if (depthD->size() < dSize) {
+                throw CDMException("unexpected size of depth " + osg->depth + "(" + type2string(unLimDimPos) +
+                        "), should be " + type2string(nx * ny * nt) + " != " + type2string(depthD->size()));
+                // I allow depthD to be larger than dSize for staggered grids (grids with +-1 cell)
+            }
+            if (osg->eta != "") {
+                DataPtr etaD = reader->getScaledDataSliceInUnit(osg->eta, "m", unLimDimPos);
+                if (etaD->size() < (nx * ny * nt)) {
+                    throw CDMException("unexpected size of eta " + osg->eta + "(" + type2string(unLimDimPos) +
+                            "), should be " + type2string(nx * ny * nt) + " != " + type2string(etaD->size()));
+                }
+                etaDI = IndexedData(etaD, reader->getDimsSlice(osg->eta));
+            }
+            heightConv = boost::shared_ptr<ToVLevelConverter>(new OceanSCoordinateGToDepthConverter(sVec, CVec, depth_cVec[0], etaDI, depthDI,
+                        nx, ny, nz, nt, mifi_ocean_s_g2_z));
         }
-        break;
-    default:
-        { // try geopotential_height or fall back to pressure
-            map<string, string> attrs;
-            vector<string> dims;
+    } else {
+        // try geopotential_height or fall back to pressure
+        map<string, string> attrs;
+        vector<string> dims;
+        const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
+        const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+        const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+        if (xAxis.get() != 0 && yAxis.get() != 0 && zAxis.get() != 0) {
             dims.push_back(xAxis->getShape()[0]);
             dims.push_back(yAxis->getShape()[0]);
             dims.push_back(zAxis->getShape()[0]);
@@ -234,20 +240,25 @@ boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getHeightConverter(
             if (geoVars.size() > 0 && altVars.size() > 0) {
                 LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
                 DataPtr geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
-                if (geoPotData->size() != (nx * ny * nz * nt))
+                if (geoPotData->size() != (nx * ny * nz * nt)) {
                     throw CDMException("geopotential height '" + geoVars[0] + "' has strange size: " + type2string(geoPotData->size()) + " != " + type2string(nx * ny * nz * nt));
-                    LOG4FIMEX(logger, Logger::INFO, "using altitude "<<altVars[0]<<" to retrieve height");
-                    DataPtr altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
-                if (altData->size() != (nx * ny))
+                }
+                LOG4FIMEX(logger, Logger::INFO, "using altitude "<<altVars[0]<<" to retrieve height");
+                DataPtr altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
+                if (altData->size() != (nx * ny)) {
                     throw CDMException("altitude '" + altVars[0] + "' has strange size: " + type2string(altData->size()) + " != " + type2string(nx * ny));
+                }
                 heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asFloat(), altData->asFloat(), nx, ny, nz, nt));
                 vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
             } else {
                 LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
-                boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
+                boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
                 heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
             }
-            break;
+        } else {
+            LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
+            boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
+            heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
         }
     }
     return heightConv;
@@ -263,12 +274,12 @@ HeightStandardToPressureConverter::HeightStandardToPressureConverter(const vecto
     mifi_barometric_standard_pressure(h.size(), &h[0], &pres_[0]);
 }
 
-boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, const CoordinateSystem::ConstAxisPtr xAxis, const CoordinateSystem::ConstAxisPtr yAxis, const CoordinateSystem::ConstAxisPtr zAxis, size_t nx, size_t ny, size_t nz, size_t nt)
+boost::shared_ptr<ToVLevelConverter> ToVLevelConverter::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt)
 {
     switch (verticalType) {
-    case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, zAxis, nx, ny, nt);
-    case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, nt);
-    case MIFI_VINT_DEPTH: return getHeightConverter(reader, unLimDimPos, xAxis, yAxis, zAxis, nx, ny, nz, nt);
+    case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
+    case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+    case MIFI_VINT_DEPTH: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     default: throw CDMException("unknown vertical type");
     }
 }

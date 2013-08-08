@@ -55,9 +55,9 @@ public:
     HybridSigmaPressure1(std::string ap, std::string b, std::string ps, std::string p0 = "") : ap(ap), b(b), ps(ps), p0(p0) {}
     virtual ~HybridSigmaPressure1() {}
     /*
-     * @return atmosphere_hybrid_sigma_pressure_1
+     * @return atmosphere_hybrid_sigma_pressure_coordinate_1
      */
-    virtual std::string getName() const { return "atmosphere_hybrid_sigma_pressure_1"; }
+    virtual std::string getName() const { return "atmosphere_hybrid_sigma_pressure_coordinate_1"; }
     virtual std::string getParamterString() const { return "ap="+ap+",b="+b+",ps="+ps+",p0="+p0; }
     virtual bool isComplete() const {return ap != "" && b != "" && ps != "";}
 };

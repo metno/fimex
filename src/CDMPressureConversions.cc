@@ -183,7 +183,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         startT = unLimDimPos;
     }
 
-    boost::shared_ptr<ToVLevelConverter> pConv = ToVLevelConverter::getPressureConverter(dataReader_, unLimDimPos, zAxis, nx, ny, (nt-startT));
+    boost::shared_ptr<ToVLevelConverter> pConv = ToVLevelConverter::getPressureConverter(dataReader_, unLimDimPos, p_->cs, nx, ny, (nt-startT));
     if (varName == "air_temperature") {
         const float cp = 1004.; // J/kgK
         const float R = 287.; // J/K
