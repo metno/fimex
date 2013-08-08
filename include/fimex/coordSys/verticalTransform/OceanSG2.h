@@ -27,7 +27,7 @@
 #ifndef OCEANSG2_H_
 #define OCEANSG2_H_
 
-#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/coordSys/verticalTransform/OceanSG1.h"
 
 /**
  * @headerfile "fimex/coordSys/verticalTransform/OceanSG2.h"
@@ -35,16 +35,14 @@
 
 namespace MetNoFimex
 {
-/// ocean_s_coordinate_g2
-class OceanSG2 : public VerticalTransformation
+/**
+ * ocean_s_coordinate_g2 is defined by the same set of parameters, just
+ * the conversion function is different.
+ */
+// for all implementations, see OceanSG1.h or OceanSG1.cc
+class OceanSG2 : public OceanSG1
 {
 public:
-    const std::string s;
-    const std::string C;
-    const std::string depth;
-    const std::string depth_c;
-    /* optional */
-    const std::string eta;
     /**
      * Initialize OceanSG2 with formular as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
      *
@@ -54,14 +52,13 @@ public:
      * @param depth_c critical depth, usually min(depth(x,y))
      * @param eta optional time-varying free surface eta(x,y,z) (often also called zeta)
      */
-    OceanSG2(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "") : s(s), C(C), depth(depth), depth_c(depth_c), eta(eta) {}
+    // unconventionally defined in OceanSG1.cc
+    OceanSG2(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "");
     virtual ~OceanSG2() {}
-    /*
+    /**
      * @return ocean_s_coordinate_g2
      */
     virtual std::string getName() const { return "ocean_s_coordinate_g2"; }
-    virtual std::string getParamterString() const { return "s="+s+",C="+C+",depth="+depth+",depth_c="+depth_c+",eta="+eta; }
-    virtual bool isComplete() const {return s != "" && C != "" && depth != "" && depth_c != "";}
 };
 
 } /* namespace MetNoFimex */

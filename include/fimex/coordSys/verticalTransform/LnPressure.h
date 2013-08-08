@@ -50,12 +50,14 @@ public:
      */
     LnPressure(std::string lev, std::string p0) : lev(lev), p0(p0) {}
     virtual ~LnPressure() {}
-    /*
+    /**
      * @return atmosphere_ln_pressure_coordinate
      */
     virtual std::string getName() const { return "atmosphere_ln_pressure_coordinate"; }
     virtual std::string getParamterString() const { return "lev="+lev+",p0="+p0; }
     virtual bool isComplete() const {return lev != "" && p0 != "";}
+protected:
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
 };
 
 } /* namespace MetNoFimex */

@@ -35,9 +35,14 @@
 
 namespace MetNoFimex
 {
-/// ocean_s_coordinate_g1
+/**
+ * ocean_s_coordinate_g2 is defined by the same set of parameters, just
+ * the conversion function is different.
+ */
 class OceanSG1 : public VerticalTransformation
 {
+protected:
+    int (*heightConversionFunction)(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z);
 public:
     const std::string s;
     const std::string C;
@@ -54,14 +59,17 @@ public:
      * @param depth_c critical depth, usually min(depth(x,y))
      * @param eta time-varying free surface eta(x,y,z) (often also called zeta)
      */
-    OceanSG1(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "") : s(s), C(C), depth(depth), depth_c(depth_c), eta(eta) {}
+    OceanSG1(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "");
     virtual ~OceanSG1() {}
-    /*
+    /**
      * @return ocean_s_coordinate_g1
      */
     virtual std::string getName() const { return "ocean_s_coordinate_g1"; }
     virtual std::string getParamterString() const { return "s="+s+",C="+C+",depth="+depth+",depth_c="+depth_c+",eta="+eta; }
     virtual bool isComplete() const {return s != "" && C != "" && depth != "" && depth_c != "";}
+protected:
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    virtual boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
 };
 
 } /* namespace MetNoFimex */

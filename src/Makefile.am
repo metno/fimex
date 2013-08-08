@@ -61,8 +61,15 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/StereographicProjection.cc \
                      coordSys/TransverseMercatorProjection.cc \
                      coordSys/VerticalPerspectiveProjection.cc \
-                     coordSys/VerticalTransformation.cc \
                      coordSys/UnknownToFgdcProjection.cc \
+                     coordSys/verticalTransform/VerticalTransformation.cc \
+                     coordSys/verticalTransform/AtmosphereSigma.cc \
+                     coordSys/verticalTransform/Height.cc \
+                     coordSys/verticalTransform/HybridSigmaPressure1.cc \
+                     coordSys/verticalTransform/HybridSigmaPressure2.cc \
+                     coordSys/verticalTransform/LnPressure.cc \
+                     coordSys/verticalTransform/Pressure.cc \
+                     coordSys/verticalTransform/OceanSG1.cc \
 					 Data.cc \
 					 DataImpl.h \
                      DataIndex.cc \
@@ -94,7 +101,6 @@ libfimex_la_SOURCES = interpolation.c \
                      ThreadPool.c \
 					 TimeUnit.cc \
 					 TimeSpec.cc \
-					 ToVLevelConverter.h \
 					 ToVLevelConverter.cc \
 					 Units.cc \
 					 Utils.cc \

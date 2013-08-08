@@ -213,8 +213,15 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
-	coordSys/VerticalTransformation.cc \
-	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
+	coordSys/UnknownToFgdcProjection.cc \
+	coordSys/verticalTransform/VerticalTransformation.cc \
+	coordSys/verticalTransform/AtmosphereSigma.cc \
+	coordSys/verticalTransform/Height.cc \
+	coordSys/verticalTransform/HybridSigmaPressure1.cc \
+	coordSys/verticalTransform/HybridSigmaPressure2.cc \
+	coordSys/verticalTransform/LnPressure.cc \
+	coordSys/verticalTransform/Pressure.cc \
+	coordSys/verticalTransform/OceanSG1.cc Data.cc DataImpl.h \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
@@ -223,11 +230,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NcmlAggregationReader.h NcmlAggregationReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
-	ToVLevelConverter.cc Units.cc Utils.cc \
-	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
-	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
-	NetCDF_Utils.h GribApiCDMWriter.cc \
+	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.cc \
+	Units.cc Utils.cc vertical_coordinate_transformations.c \
+	XMLDoc.cc XMLInput.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
+	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.h \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.h \
 	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
@@ -331,8 +337,10 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	OrthographicProjection.lo PolarStereographicProjection.lo \
 	RotatedLatitudeLongitudeProjection.lo \
 	StereographicProjection.lo TransverseMercatorProjection.lo \
-	VerticalPerspectiveProjection.lo VerticalTransformation.lo \
-	UnknownToFgdcProjection.lo Data.lo DataIndex.lo \
+	VerticalPerspectiveProjection.lo UnknownToFgdcProjection.lo \
+	VerticalTransformation.lo AtmosphereSigma.lo Height.lo \
+	HybridSigmaPressure1.lo HybridSigmaPressure2.lo LnPressure.lo \
+	Pressure.lo OceanSG1.lo Data.lo DataIndex.lo \
 	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
 	Felt_File2.lo FeltParameters.lo FillWriter.lo \
 	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
@@ -614,8 +622,15 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/StereographicProjection.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
-	coordSys/VerticalTransformation.cc \
-	coordSys/UnknownToFgdcProjection.cc Data.cc DataImpl.h \
+	coordSys/UnknownToFgdcProjection.cc \
+	coordSys/verticalTransform/VerticalTransformation.cc \
+	coordSys/verticalTransform/AtmosphereSigma.cc \
+	coordSys/verticalTransform/Height.cc \
+	coordSys/verticalTransform/HybridSigmaPressure1.cc \
+	coordSys/verticalTransform/HybridSigmaPressure2.cc \
+	coordSys/verticalTransform/LnPressure.cc \
+	coordSys/verticalTransform/Pressure.cc \
+	coordSys/verticalTransform/OceanSG1.cc Data.cc DataImpl.h \
 	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
@@ -624,11 +639,10 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	NcmlAggregationReader.h NcmlAggregationReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.h \
-	ToVLevelConverter.cc Units.cc Utils.cc \
-	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
-	$(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_5)
+	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.cc \
+	Units.cc Utils.cc vertical_coordinate_transformations.c \
+	XMLDoc.cc XMLInput.cc $(am__append_1) $(am__append_2) \
+	$(am__append_3) $(am__append_5)
 all: all-recursive
 
 .SUFFIXES:
@@ -705,6 +719,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AlbersConicalEqualAreaProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AtmosphereSigma.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMAttribute.Plo@am__quote@
@@ -757,6 +772,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridInformation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Height.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HybridSigmaPressure1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HybridSigmaPressure2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IndexedData.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
@@ -765,6 +783,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LevelHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LnPressure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Log4cppLogger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
@@ -792,10 +811,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OceanSG1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OrthographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parameter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ParameterData.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PolarStereographicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pressure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Projection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProjectionImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Plo@am__quote@
@@ -1005,19 +1026,68 @@ VerticalPerspectiveProjection.lo: coordSys/VerticalPerspectiveProjection.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
 
-VerticalTransformation.lo: coordSys/VerticalTransformation.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VerticalTransformation.lo -MD -MP -MF $(DEPDIR)/VerticalTransformation.Tpo -c -o VerticalTransformation.lo `test -f 'coordSys/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/VerticalTransformation.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VerticalTransformation.Tpo $(DEPDIR)/VerticalTransformation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/VerticalTransformation.cc' object='VerticalTransformation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalTransformation.lo `test -f 'coordSys/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/VerticalTransformation.cc
-
 UnknownToFgdcProjection.lo: coordSys/UnknownToFgdcProjection.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT UnknownToFgdcProjection.lo -MD -MP -MF $(DEPDIR)/UnknownToFgdcProjection.Tpo -c -o UnknownToFgdcProjection.lo `test -f 'coordSys/UnknownToFgdcProjection.cc' || echo '$(srcdir)/'`coordSys/UnknownToFgdcProjection.cc
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/UnknownToFgdcProjection.Tpo $(DEPDIR)/UnknownToFgdcProjection.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/UnknownToFgdcProjection.cc' object='UnknownToFgdcProjection.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o UnknownToFgdcProjection.lo `test -f 'coordSys/UnknownToFgdcProjection.cc' || echo '$(srcdir)/'`coordSys/UnknownToFgdcProjection.cc
+
+VerticalTransformation.lo: coordSys/verticalTransform/VerticalTransformation.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VerticalTransformation.lo -MD -MP -MF $(DEPDIR)/VerticalTransformation.Tpo -c -o VerticalTransformation.lo `test -f 'coordSys/verticalTransform/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/VerticalTransformation.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VerticalTransformation.Tpo $(DEPDIR)/VerticalTransformation.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/VerticalTransformation.cc' object='VerticalTransformation.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalTransformation.lo `test -f 'coordSys/verticalTransform/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/VerticalTransformation.cc
+
+AtmosphereSigma.lo: coordSys/verticalTransform/AtmosphereSigma.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT AtmosphereSigma.lo -MD -MP -MF $(DEPDIR)/AtmosphereSigma.Tpo -c -o AtmosphereSigma.lo `test -f 'coordSys/verticalTransform/AtmosphereSigma.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/AtmosphereSigma.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AtmosphereSigma.Tpo $(DEPDIR)/AtmosphereSigma.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/AtmosphereSigma.cc' object='AtmosphereSigma.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AtmosphereSigma.lo `test -f 'coordSys/verticalTransform/AtmosphereSigma.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/AtmosphereSigma.cc
+
+Height.lo: coordSys/verticalTransform/Height.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Height.lo -MD -MP -MF $(DEPDIR)/Height.Tpo -c -o Height.lo `test -f 'coordSys/verticalTransform/Height.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Height.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Height.Tpo $(DEPDIR)/Height.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/Height.cc' object='Height.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Height.lo `test -f 'coordSys/verticalTransform/Height.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Height.cc
+
+HybridSigmaPressure1.lo: coordSys/verticalTransform/HybridSigmaPressure1.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT HybridSigmaPressure1.lo -MD -MP -MF $(DEPDIR)/HybridSigmaPressure1.Tpo -c -o HybridSigmaPressure1.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure1.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/HybridSigmaPressure1.Tpo $(DEPDIR)/HybridSigmaPressure1.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/HybridSigmaPressure1.cc' object='HybridSigmaPressure1.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o HybridSigmaPressure1.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure1.cc
+
+HybridSigmaPressure2.lo: coordSys/verticalTransform/HybridSigmaPressure2.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT HybridSigmaPressure2.lo -MD -MP -MF $(DEPDIR)/HybridSigmaPressure2.Tpo -c -o HybridSigmaPressure2.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure2.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure2.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/HybridSigmaPressure2.Tpo $(DEPDIR)/HybridSigmaPressure2.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/HybridSigmaPressure2.cc' object='HybridSigmaPressure2.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o HybridSigmaPressure2.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure2.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure2.cc
+
+LnPressure.lo: coordSys/verticalTransform/LnPressure.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LnPressure.lo -MD -MP -MF $(DEPDIR)/LnPressure.Tpo -c -o LnPressure.lo `test -f 'coordSys/verticalTransform/LnPressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/LnPressure.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LnPressure.Tpo $(DEPDIR)/LnPressure.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/LnPressure.cc' object='LnPressure.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LnPressure.lo `test -f 'coordSys/verticalTransform/LnPressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/LnPressure.cc
+
+Pressure.lo: coordSys/verticalTransform/Pressure.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Pressure.lo -MD -MP -MF $(DEPDIR)/Pressure.Tpo -c -o Pressure.lo `test -f 'coordSys/verticalTransform/Pressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Pressure.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Pressure.Tpo $(DEPDIR)/Pressure.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/Pressure.cc' object='Pressure.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Pressure.lo `test -f 'coordSys/verticalTransform/Pressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Pressure.cc
+
+OceanSG1.lo: coordSys/verticalTransform/OceanSG1.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OceanSG1.lo -MD -MP -MF $(DEPDIR)/OceanSG1.Tpo -c -o OceanSG1.lo `test -f 'coordSys/verticalTransform/OceanSG1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/OceanSG1.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OceanSG1.Tpo $(DEPDIR)/OceanSG1.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/OceanSG1.cc' object='OceanSG1.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OceanSG1.lo `test -f 'coordSys/verticalTransform/OceanSG1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/OceanSG1.cc
 
 MetGmCDMReaderImpl.lo: metgm/MetGmCDMReaderImpl.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMReaderImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMReaderImpl.Tpo -c -o MetGmCDMReaderImpl.lo `test -f 'metgm/MetGmCDMReaderImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderImpl.cc

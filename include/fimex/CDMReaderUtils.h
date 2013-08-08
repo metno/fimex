@@ -30,6 +30,7 @@
 #include "fimex/CDMReader.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace MetNoFimex
 {
@@ -47,6 +48,18 @@ namespace MetNoFimex
  *        times have been found
  */
 boost::posix_time::ptime getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader);
+
+/**
+ * This is the same function as CDMReader::getScaledDataSliceInUnit, but it converts
+ * the data to a vector<double>.
+ *
+ * @param reader
+ * @param var
+ * @param unit
+ * @param unLimDimPos
+ * @return
+ */
+std::vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const std::string& var, const std::string& unit, int unLimDimPos);
 
 }
 #endif /* CDMREADERUTILS_H_ */

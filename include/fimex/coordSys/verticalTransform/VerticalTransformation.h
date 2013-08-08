@@ -27,9 +27,11 @@
 #ifndef VERTICALTRANSFORMATION_H_
 #define VERTICALTRANSFORMATION_H_
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 #include <iostream>
+#include "fimex/mifi_constants.h"
 
 /**
  * @headerfile "fimex/coordSys/verticalTransform/VerticalTransformation.h"
@@ -39,7 +41,40 @@
 namespace MetNoFimex
 {
 
-/// base class for vertical transformations
+// forward declarations
+class CDMReader;
+class CoordinateSystem;
+class ToVLevelConverter;
+
+/**
+ *  Base class for vertical transformations like AtmosphereSigma coordinate or
+ *  OceanSG1 coordinate, and for completeness also Pressure and Height.
+ *  Vertical-transformation are usually accessed by CoordinateSystem::getVerticalTransformation:
+ *
+ @code
+    string varName = "air_temperature";
+    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt != coordSys.end()) {
+        if ((*varSysIt)->hasVerticalTransformation()) {
+            boost::shared_ptr<VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
+            if (vtran->getName() == "atmosphere_hybrid_sigma_pressure_coordinate_1") {
+                const HybridSigmaPressure1* hyb1 = dynamic_cast<const HybridSigmaPressure1*>(vtran.get());
+                string apVar = hyb1->ap;
+                string bVar = hyb1->b;
+                string psVar = hyb1->ps
+                ...
+            }
+        }
+    }
+ @endcode
+ *
+ * The qualified names of the VerticalTransformation classes can be found in the
+ * respectiv classes inheriting from VerticalTransformation, found in
+ * fimex/coordSys/verticalTransform/ *.h . The member-names of the sub-classes describe
+ * the parametrization of the VerticalTransformation, and their values reflect the
+ * variable-names.
+ */
 class VerticalTransformation
 {
 public:
@@ -55,8 +90,33 @@ public:
      *  possible.
      */
     virtual bool isComplete() const = 0;
-    // TODO: add a function to get a ToVLevelConverter, e.g.
-    // virtual boost::shared_ptr<ToVLevelConvert> getConverter(const boost::shared_ptr<CDMReader>& reader, boost::shared_ptr<const CoordinateSystem> cs, int verticalType) const
+    /**
+     * get a converter
+     * @param reader a reader to fetch the data from
+     * @param verticalType one of the MIFI_VINT_* in fimex/mifi_constants.h
+     * @param unLimDimPos the unlimited position to start at
+     * @param cs the coordinate system one is interested in
+     * @param nx x-size of the resulting data
+     * @param ny y-size of the resulting data
+     * @param nz z-size of the resulting data
+     * @param nt The final t-size will be nt-unLimDimPos.
+     * @return
+     */
+    virtual boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+protected:
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const = 0;
+    /**
+     * Default implementation: Convert to height with pressure(-converter) and standard atmosphere.
+     * @param reader
+     * @param unLimDimPos
+     * @param cs
+     * @param nx
+     * @param ny
+     * @param nz
+     * @param nt
+     * @return
+     */
+    virtual boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const VerticalTransformation& vt);

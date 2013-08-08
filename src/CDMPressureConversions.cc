@@ -26,7 +26,8 @@
 
 #include "fimex/CDMPressureConversions.h"
 #include "fimex/CDMVerticalInterpolator.h"
-#include "ToVLevelConverter.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
@@ -183,7 +184,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         startT = unLimDimPos;
     }
 
-    boost::shared_ptr<ToVLevelConverter> pConv = ToVLevelConverter::getPressureConverter(dataReader_, unLimDimPos, p_->cs, nx, ny, (nt-startT));
+    boost::shared_ptr<ToVLevelConverter> pConv = p_->cs->getVerticalTransformation()->getConverter(dataReader_, MIFI_VINT_PRESSURE, unLimDimPos, p_->cs, nx, ny, nz, (nt-startT));
     if (varName == "air_temperature") {
         const float cp = 1004.; // J/kgK
         const float R = 287.; // J/K

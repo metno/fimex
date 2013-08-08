@@ -54,12 +54,14 @@ public:
      */
     HybridSigmaPressure1(std::string ap, std::string b, std::string ps, std::string p0 = "") : ap(ap), b(b), ps(ps), p0(p0) {}
     virtual ~HybridSigmaPressure1() {}
-    /*
+    /**
      * @return atmosphere_hybrid_sigma_pressure_coordinate_1
      */
     virtual std::string getName() const { return "atmosphere_hybrid_sigma_pressure_coordinate_1"; }
     virtual std::string getParamterString() const { return "ap="+ap+",b="+b+",ps="+ps+",p0="+p0; }
     virtual bool isComplete() const {return ap != "" && b != "" && ps != "";}
+protected:
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
 };
 
 } /* namespace MetNoFimex */

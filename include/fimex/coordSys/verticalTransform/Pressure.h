@@ -37,6 +37,10 @@
 namespace MetNoFimex
 {
 
+// forward decl
+class ToVLevelConverter;
+
+
 /// Pressure class for vertical transformation
 class Pressure : public VerticalTransformation
 {
@@ -51,6 +55,8 @@ public:
     virtual std::string getName() const { return "pressure"; }
     virtual std::string getParamterString() const { return "p="+pressure; }
     virtual bool isComplete() const {return pressure != "";}
+protected:
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
 };
 
 } /* namespace MetNoFimex */

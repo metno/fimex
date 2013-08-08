@@ -68,4 +68,12 @@ getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
     return *(refTimes.begin());
 }
 
+vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const string& var, const string& unit, int unLimDimPos)
+{
+    DataPtr data = reader->getScaledDataSliceInUnit(var, unit, unLimDimPos);
+    boost::shared_array<double> array = data->asDouble();
+    return vector<double>(&array[0], &array[0] + data->size());
+}
+
+
 }

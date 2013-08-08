@@ -52,12 +52,14 @@ public:
      */
     AtmosphereSigma(std::string sigma, std::string ptop, std::string ps) : sigma(sigma), ps(ps), ptop(ptop) {}
     virtual ~AtmosphereSigma() {}
-    /*
-     * @return atmosphere_hybrid_sigma_pressure_2
+    /**
+     * @return atmosphere_sigma_coordinate
      */
-    virtual std::string getName() const { return "atmosphere_hybrid_sigma_pressure_2"; }
+    virtual std::string getName() const { return "atmosphere_sigma_coordinate"; }
     virtual std::string getParamterString() const { return "sigma="+sigma+",ps="+ps+",ptop="+ptop; }
     virtual bool isComplete() const {return sigma != "" && ptop != "" && ps != "";}
+protected:
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
 };
 
 } /* namespace MetNoFimex */

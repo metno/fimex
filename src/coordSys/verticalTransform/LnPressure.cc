@@ -1,5 +1,5 @@
 /*
- * Fimex, VerticalTransformation.cc
+ * Fimex, LnPressure.cc
  *
  * (C) Copyright 2013, met.no
  *
@@ -20,18 +20,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- *  Created on: Aug 7, 2013
+ *  Created on: Aug 8, 2013
  *      Author: heikok
  */
 
-#include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/coordSys/verticalTransform/LnPressure.h"
+#include "fimex/CDMReader.h"
+#include "fimex/Data.h"
+#include "fimex/CDMReaderUtils.h"
+#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
+
 
 namespace MetNoFimex {
 
-std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransformation& vt)
+boost::shared_ptr<ToVLevelConverter> LnPressure::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const
 {
-    out << vt.getName() << "(" << vt.getParamterString() << ")";
-    return out;
+    const vector<double> levVec = getDataSliceInUnit(reader, lev, "", unLimDimPos);
+    const vector<double> p0Vec = getDataSliceInUnit(reader, p0, "hPa", unLimDimPos);
+    return boost::shared_ptr<ToVLevelConverter>(new LnPressureToPressureConverter(p0Vec.at(0), levVec));
 }
 
-} // namespace MetNoFimex
+}
+
+
+

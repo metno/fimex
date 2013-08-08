@@ -31,7 +31,7 @@
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "ToVLevelConverter.h"
+#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include <boost/regex.hpp>
 #include <iterator>
 #include <algorithm>
@@ -294,6 +294,9 @@ CDMVerticalInterpolator::getSimpleAxes(
 DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)
 {
     assert(cs->isCSFor(varName) && cs->isComplete(varName));
+    if (! cs->hasVerticalTransformation()) {
+        throw CDMException(varName + " has no vertical transformation");
+    }
     // get all axes
     CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
     size_t nx, ny, nz, nt;
@@ -307,7 +310,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
         nt = unLimDimPos + 1;
         startT = unLimDimPos;
     }
-    boost::shared_ptr<ToVLevelConverter> levConv = ToVLevelConverter::getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
+    boost::shared_ptr<ToVLevelConverter> levConv = cs->getVerticalTransformation()->getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
     switch (pimpl_->verticalInterpolationMethod) {
