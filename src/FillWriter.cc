@@ -109,7 +109,7 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
     for (CDM::VarVec::iterator iv = iVars.begin(); iv != iVars.end(); ++iv) {
         LOG4FIMEX(logger, Logger::DEBUG, "processing variable  " << iv->getName());
         if (!oCdm.hasVariable(iv->getName())) {
-            LOG4FIMEX(logger, Logger::ERROR, "new variable " << iv->getName() << ": omitting");
+            LOG4FIMEX(logger, Logger::WARN, "new variable " << iv->getName() << ": omitting");
             continue;
         }
         const CDMVariable& iVar = *iv;
@@ -118,7 +118,7 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
         const vector<string>& oShape = oVar.getShape();
 
         if (!equal(iShape.begin(), iShape.end(), oShape.begin())) {
-            LOG4FIMEX(logger, Logger::ERROR, "variable " << iv->getName() << "has different shape: omitting");
+            LOG4FIMEX(logger, Logger::WARN, "variable " << iv->getName() << "has different shape: omitting");
             continue;
         }
 
