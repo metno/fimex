@@ -27,14 +27,14 @@
 #ifndef ALBERSCONICALEQUALAREAPROJECTION_H_
 #define ALBERSCONICALEQUALAREAPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/AlbersConicalEqualAreaProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/AlbersConicalEqualAreaProjection.h
+ */
 class AlbersConicalEqualAreaProjection: public MetNoFimex::ProjectionImpl
 {
 

@@ -35,6 +35,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/CDMQualityExtractor.h
+ */
+/**
  * @brief Extract data with defined quality status
  *
  * The CDMQualityExtractor will select data from data-sources

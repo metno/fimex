@@ -27,14 +27,14 @@
 #ifndef ORTHOGRAPHICPROJECTION_H_
 #define ORTHOGRAPHICPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/OrthographicProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/OrthographicProjection.h
+ */
 class OrthographicProjection: public MetNoFimex::ProjectionImpl
 {
 

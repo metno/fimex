@@ -36,11 +36,6 @@
 #include "fimex/IndexedData.h"
 #include "fimex/deprecated.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/VerticalTransformation.h"
- */
-
-
 namespace MetNoFimex
 {
 // forward decl.
@@ -48,6 +43,9 @@ class CDMReader;
 
 using namespace std;
 
+/**
+ * @headerfile fimex/coordSys/verticalTransform/VerticalTransformation.h
+ */
 /**
  * Interface class for a functor describing how to get the
  * pressure levels at a certain point in time and space.
@@ -67,7 +65,7 @@ public:
     /**
      * The VLevelConverter usually knows about validity of vertical values at a certain position.
      *
-     * @param vVal value to interpolate to, e.g. height, depth, pressure
+     * @param val value to interpolate to, e.g. height, depth, pressure
      * @param x
      * @param y
      * @param t
@@ -83,7 +81,7 @@ class IdentityToVLevelConverter : public ToVLevelConverter {
     const vector<double> vlevel_;
 public:
     /**
-     * @param pressure The constant pressure levels in hPa
+     * @param vlevel The constant level.
      */
     IdentityToVLevelConverter(const vector<double>& vlevel) : vlevel_(vlevel) {}
     virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return vlevel_;}
@@ -129,8 +127,8 @@ class SigmaToPressureConverter : public ToVLevelConverter {
     size_t nt_;
 public:
     /**
-     * @param ap vector of size n containing the ap-parameters in hPa of sigma-hybrid
-     * @param b vector of size n containing the b parameters (dimensionless) of sigma-hybrid
+     * @param sigma vector of size n containing the sigma parameters (dimensionless) of sigma-hybrid
+     * @param ptop top of atmosphere in hPa
      * @param ps array of size nx*ny*nt containing the surface-pressure
      * @param nx x-size of ps
      * @param ny y-size of ps
@@ -202,7 +200,7 @@ class PressureToStandardHeightConverter : public ToVLevelConverter {
     const boost::shared_ptr<ToVLevelConverter> presConv_;
 public:
     /**
-     * @param h given in m
+     * @param presConv another ToVLevelConverter converting to pressure
      */
     PressureToStandardHeightConverter(boost::shared_ptr<ToVLevelConverter> presConv) : presConv_(presConv) {}
     virtual const vector<double> operator()(size_t x, size_t y, size_t t);
@@ -250,6 +248,7 @@ public:
      * @param depth_c critical depth (~ min(h(x,y)))
      * @param eta time-varying free surface, might be 0
      * @param depth ocean-depth, might be time-varying for sediment applications
+     * @param nx,ny,nk,nt array sizes
      * @param func either mifi_ocean_s_g1_z() or mifi_ocean_s_g2_z()
      */
     OceanSCoordinateGToDepthConverter(const vector<double>& s, const vector<double>& C, double depth_c,
@@ -263,7 +262,7 @@ public:
             func_ = func;
     }
     virtual const vector<double> operator()(size_t x, size_t y, size_t t);
-    virtual bool isValid(double vVal, size_t x, size_t y, size_t t);
+    virtual bool isValid(double val, size_t x, size_t y, size_t t);
 };
 
 } // namespace

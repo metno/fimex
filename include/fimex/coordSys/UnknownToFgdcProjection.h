@@ -27,14 +27,14 @@
 #ifndef UNKNOWNTOFGDCPROJECTION_H_
 #define UNKNOWNTOFGDCPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/UnknownToFgdcProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/UnknownToFgdcProjection.h
+ */
 class UnknownToFgdcProjection: public MetNoFimex::ProjectionImpl
 {
 

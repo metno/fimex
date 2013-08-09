@@ -37,6 +37,9 @@ namespace MetNoFimex
 class CoordinateSystem;
 
 /**
+ * @headerfile fimex/CoordinateSystemSliceBuilder.h
+ */
+/**
  * SliceBuilder with knowledge about the coordinate-system. It is therefore
  * possible to set some variable on the basis that they are i.e. time-axes.
  */

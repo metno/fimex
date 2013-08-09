@@ -36,6 +36,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/coordSys/Projection.h
+ */
+/**
  * A projection describes a projection of the earth surface from one system
  * to another. If not mentioned otherwise, all parameters should follow CF-1.x
  */

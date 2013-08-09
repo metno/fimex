@@ -33,6 +33,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/ReplaceStringTemplateObject.h
+ */
+/**
  * Template implementation or ReplaceStringObject, for all Objects having
  * a default serialization.
  */

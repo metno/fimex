@@ -39,7 +39,7 @@ namespace MetNoFimex
 class CDM;
 class CoordinateAxis;
 /**
- * @headerfile "fimex/SliceBuilder.h"
+ * @headerfile fimex/SliceBuilder.h
  */
 
 
@@ -85,7 +85,7 @@ public:
      * Set the start to 0 and the size to the maximum size. Though this is the default
      * this function will reset prevous reduced dimensions and it will mark the dimension as 'set'
      * and not return it in getUnsetDimensionNames.
-     * @param axis name of the dimension to restrict
+     * @param dimName axis name of the dimension to restrict
      */
     void setAll(const std::string& dimName);
     /**

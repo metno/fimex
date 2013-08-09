@@ -76,7 +76,7 @@ protected:
     /**
      * add the attributes describing the earth from a proj4-string to the outAttrs
      * @param proj4String string as used for proj4
-     * @param output list of CDMAttributes
+     * @param attrList output list of CDMAttributes
      */
     static void proj4GetEarthAttributes(const std::string& proj4String, std::vector<CDMAttribute>& attrList);
     // set the name of the projection and assign the isDegree parameter

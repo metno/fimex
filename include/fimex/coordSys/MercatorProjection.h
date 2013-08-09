@@ -27,13 +27,13 @@
 #ifndef MERCATORPROJECTION_H_
 #define MERCATORPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/MercatorProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
+/**
+ * @headerfile fimex/coordSys/MercatorProjection.h
+ */
 
 class MercatorProjection: public MetNoFimex::ProjectionImpl
 {

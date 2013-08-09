@@ -42,7 +42,7 @@ class XMLDoc;
  * as a manipulator for an existing CDM provided by a CDMReader.
  *
  * In the case of a real reader, the ncml-configuration file needs to have the
- * 'location' field set, which must point to a netcdf-file readable by #NetCDF_CF10_CDMReader
+ * 'location' field set, which must point to a file readable by CDMReader
  *
  * The configuration file must be a standard ncml-file (versionn 2.2) as defined by
  * http://www.unidata.ucar.edu/software/netcdf/ncml/. The following changes have been
@@ -102,8 +102,8 @@ public:
      */
     NcmlCDMReader(const XMLInput& configXML);
     /**
-     * @param cdmReader a file reader opened elsewhere
-     * @param configFile ncml-file with location set
+     * @param dataReader a file reader opened elsewhere
+     * @param configXML ncml-file with location set
      * @throw CDMException
      */
     NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, const XMLInput& configXML);

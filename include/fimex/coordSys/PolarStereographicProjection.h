@@ -28,13 +28,13 @@
 #define POLARSTEREOGRAPHICPROJECTION_H_
 
 #include "fimex/coordSys/StereographicProjection.h"
-/**
- * @headerfile "fimex/coordSys/PolarStereographicProjection.h"
- */
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/PolarStereographicProjection.h
+ */
 class PolarStereographicProjection: public MetNoFimex::StereographicProjection
 {
 

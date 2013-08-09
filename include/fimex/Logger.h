@@ -31,6 +31,9 @@
 namespace MetNoFimex {
 
 /**
+ * @headerfile fimex/Logger.h
+ */
+/**
  * Interface and default (dummy) implementation for a logger.
  * Don't use this class directly, but retrieve a pointer to it
  * via the #getLogger function and log with the #LOG4FIMEX macro.
@@ -50,26 +53,26 @@ public:
      * different log levels
      */
     enum LogLevel {
-    	OFF = 1000,
-    	FATAL = 900,
-    	ERROR = 800,
-    	WARN = 700,
-    	INFO = 600,
-    	DEBUG = 500
+        OFF = 1000,
+        FATAL = 900,
+        ERROR = 800,
+        WARN = 700,
+        INFO = 600,
+        DEBUG = 500
     };
-	Logger(const std::string& className);
-	virtual ~Logger();
-	/**
-	 * check if the loglevel of this logger is active
-	 */
-	virtual bool isEnabledFor(LogLevel level);
-	/**
-	 * log (without checking) for this loglevel
-	 * @param level log-level to log
-	 * @param message log-message
-	 * @param filename best retrieved with __FILE__
-	 * @param lineNumber best retrieved with __LINE__
-	 */
+    Logger(const std::string& className);
+    virtual ~Logger();
+    /**
+     * check if the loglevel of this logger is active
+     */
+    virtual bool isEnabledFor(LogLevel level);
+    /**
+     * log (without checking) for this loglevel
+     * @param level log-level to log
+     * @param message log-message
+     * @param filename best retrieved with __FILE__
+     * @param lineNumber best retrieved with __LINE__
+     */
     virtual void forcedLog(LogLevel level, const std::string& message, const char* filename, unsigned int lineNumber);
     /**
      * different logger eventually enabled in fimex
@@ -103,8 +106,8 @@ extern void defaultLogLevel(Logger::LogLevel);
  */
 #define LOG4FIMEX(logger, level, message) { \
     if (logger->isEnabledFor(level)) {\
-    	std::ostringstream buffer; \
-    	buffer << message; \
+        std::ostringstream buffer; \
+        buffer << message; \
         logger->forcedLog(level, buffer.str(), __FILE__, __LINE__);}}
 
 typedef boost::shared_ptr<Logger> LoggerPtr;

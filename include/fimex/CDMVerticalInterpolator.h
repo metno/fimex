@@ -27,9 +27,6 @@
 #ifndef CDMVERTICALINTERPOLATOR_H_
 #define CDMVERTICALINTERPOLATOR_H_
 
-/**
- * @headerfile "fimex/CDMVerticalInterpolator.h"
- */
 
 #include <vector>
 #include "fimex/mifi_constants.h"
@@ -44,6 +41,9 @@ namespace MetNoFimex
 struct VIntPimpl;
 class CoordinateSystem;
 
+/**
+ * @headerfile fimex/CDMVerticalInterpolator.h
+ */
 /**
  * @brief Interpolation of vertical layers
  *
@@ -64,7 +64,7 @@ public:
      *
      * @param dataReader the data-source
      * @param verticalType must be 'pressure' (hPa), 'height' (m) or 'depth' (m)
-     * @param interpolationMethod one of 'linear', 'log', 'loglog'
+     * @param verticalInterpolationMethod one of 'linear', 'log', 'loglog'
      * @param level1 the new vertical levels, for 'pressure', that is pressure in hPa
      * @param level2 only required for hybrid levels, not yet supported
      */
@@ -81,7 +81,9 @@ public:
      *
      * @param cs the coordinate system
      * @param cdm the corresponding data model
-     * @param tIsUnlmited indicate if t-axis is unlimited axes
+     * @param xAxis,yAxis,zAxis,tAxis output axes
+     * @param nx,ny,nz,nt output sizes
+     * @param tIsUnlimited indicate if t-axis is unlimited axes
      */
     static void getSimpleAxes(const boost::shared_ptr<const CoordinateSystem>& cs, const CDM& cdm,
             CoordinateSystem::ConstAxisPtr& xAxis,

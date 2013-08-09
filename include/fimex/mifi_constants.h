@@ -33,13 +33,16 @@
 #include <stddef.h>
 
 /**
- * @headerfile "fimex/mifi_constants.h"
+ * @headerfile fimex/mifi_constants.h
  */
 
 /**
  * Integral version of the fimex api version, that is
  * the last date of change as YYYYMMDD. This should
- * be used for preprocessor conditionals: #ifdef FIMEX_API_VERSION > 20110931
+ * be used for preprocessor conditionals:
+@code
+#ifdef FIMEX_API_VERSION > 20110931
+@endcode
  */
 #define MIFI_API_VERSION 20120104
 

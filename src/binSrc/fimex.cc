@@ -712,8 +712,8 @@ static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_
         return;
     }
 #endif
-	LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
-	return;
+    LOG4FIMEX(logger, Logger::ERROR, "output.fillFile with type " << type << " not possible");
+    return;
 }
 
 
@@ -888,7 +888,7 @@ int run(int argc, char* args[])
         ("verticalInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
-        ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see Fimex::TimeSpec for a full definition")
+        ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see MetNoFimex::TimeSpec for a full definition")
 #if BOOST_VERSION >= 104000
         ("timeInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
 #else

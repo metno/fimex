@@ -27,10 +27,6 @@
 #ifndef CDMPRESSURECONVERSIONS_H_
 #define CDMPRESSURECONVERSIONS_H_
 
-/**
- * @headerfile "fimex/CDMVerticalInterpolator.h"
- */
-
 #include "fimex/CDMReader.h"
 
 namespace MetNoFimex
@@ -39,6 +35,9 @@ namespace MetNoFimex
 // forward declaration
 struct CDMPressureConversionsImpl;
 
+/**
+ * @headerfile fimex/CDMPressureConversions.h
+ */
 /**
  * CDMReader to convert pressure related variables, i.e. Theta or pressure
  * to other fields.

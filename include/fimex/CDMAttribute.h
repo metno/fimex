@@ -37,6 +37,9 @@
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/CDMAttribute.h
+ */
 class CDMAttribute : public CDMNamedEntity
 {
 

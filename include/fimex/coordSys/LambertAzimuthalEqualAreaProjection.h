@@ -27,14 +27,14 @@
 #ifndef LAMBERTAZIMUTHALEQUALAREAPROJECTION_H_
 #define LAMBERTAZIMUTHALEQUALAREAPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/LambertAzimuthalEqualAreaProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/LambertAzimuthalEqualAreaProjection.h
+ */
 class LambertAzimuthalEqualAreaProjection: public MetNoFimex::ProjectionImpl
 {
 

@@ -27,15 +27,15 @@
 #ifndef ROTATEDLATITUDELONGITUDEPROJECTION_H_
 #define ROTATEDLATITUDELONGITUDEPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 #include "fimex/Data.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/RotatedLatitudeLongitudeProjection.h
+ */
 class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
 {
 

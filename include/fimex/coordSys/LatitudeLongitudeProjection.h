@@ -28,13 +28,13 @@
 #define LATITUDELONGITUDEPROJECTION_H_
 
 #include "fimex/coordSys/ProjectionImpl.h"
-/**
- * @headerfile "fimex/coordSys/LatitudeLongitudeProjection.h"
- */
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/LatitudeLongitudeProjection.h
+ */
 class LatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
 {
 

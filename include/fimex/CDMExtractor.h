@@ -37,60 +37,64 @@
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/CDMExtractor.h
+ */
 class CDMExtractor : public MetNoFimex::CDMReader
 {
 private:
-	boost::shared_ptr<CDMReader> dataReader;
-	typedef std::map<std::string, boost::array<size_t, 2> > DimChangeMap;
-	DimChangeMap dimChanges;
-	/**
-	 * all extractors need to have another Reader with input-data
-	 */
-	CDMExtractor();
+    boost::shared_ptr<CDMReader> dataReader;
+    typedef std::map<std::string, boost::array<size_t, 2> > DimChangeMap;
+    DimChangeMap dimChanges;
+    /**
+     * all extractors need to have another Reader with input-data
+     */
+    CDMExtractor();
 
 public:
-	CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
-	virtual ~CDMExtractor();
+    CDMExtractor(boost::shared_ptr<CDMReader> dataReader);
+    virtual ~CDMExtractor();
 
-	using CDMReader::getDataSlice;
-	virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
+    using CDMReader::getDataSlice;
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 
-	/**
-	 * @brief Remove a variable from the CDM
-	 *
-	 * @param varName name of the variable
+    /**
+     * @brief Remove a variable from the CDM
+     *
+     * @param varName name of the variable
      * @warning ignores removal of non-existing variable
-	 */
-	virtual void removeVariable(std::string variable);
-	/**
-	 * @brief select only a set of variables
-	 *
-	 * This function will remove all variables except the ones selected plus
-	 * eventually some auxiliary variables needed by the selected variables
-	 * (not decided yet)
-	 *
-	 * @param variables list of variables-names
+     */
+    virtual void removeVariable(std::string varName);
+    /**
+     * @brief select only a set of variables
+     *
+     * This function will remove all variables except the ones selected plus
+     * eventually some auxiliary variables needed by the selected variables
+     * (if keepLogical is true)
+     *
+     * @param variables list of variables-names
+     * @param keepLogical keep logical auxiliary variables, i.e. coordinates or formula_terms
      * @warning ignores selection of non-existing variable
-	 */
+     */
     virtual void selectVariables(std::set<std::string> variables, bool keepLogical = false);
-	/**
-	 * @brief Reduce a dimension of the file
-	 *
-	 * @param name  dimension to change
-	 * @param start start-position corresponding to the original dimension
-	 * @param size  size of the new dimension
-	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
-	 */
-	virtual void reduceDimension(std::string dimName, size_t start, size_t length);
-	/**
-	 * @brief Reduce a dimension of the file
-	 *
-	 * @param name  dimension to change
-	 * @param start start-position corresponding to the original dimension, defaults to 0
-	 * @param end end-position of dimension, 0 means full size, negative values start from end
-	 * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
-	 */
-	virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0);
+    /**
+     * @brief Reduce a dimension of the file
+     *
+     * @param dimName  dimension to change
+     * @param start start-position corresponding to the original dimension
+     * @param length  size of the new dimension
+     * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
+     */
+    virtual void reduceDimension(std::string dimName, size_t start, size_t length);
+    /**
+     * @brief Reduce a dimension of the file
+     *
+     * @param dimName  dimension to change
+     * @param start start-position corresponding to the original dimension, defaults to 0
+     * @param end end-position of dimension, 0 means full size, negative values start from end
+     * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
+     */
+    virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0);
     /**
      * @brief reduce the axes of a file with an explicit unit
      *
@@ -104,16 +108,16 @@ public:
      *
      */
     virtual void reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal);
-	/**
-	 * @brief reduce the time explicitly by a timestamp
-	 *
-	 * In contrast to #reduceDimension, this method allows the usage of
-	 * absolute times. It will try to detect the reduction of dimensions as needed
-	 *
+    /**
+     * @brief reduce the time explicitly by a timestamp
+     *
+     * In contrast to #reduceDimension, this method allows the usage of
+     * absolute times. It will try to detect the reduction of dimensions as needed
+     *
      * This is implemented using reduceAxes() and the TimeAxis type.
      * @warning see warnings in reduceAxes()
-	 */
-	virtual void reduceTime(const FimexTime& startTime, const FimexTime& endTime);
+     */
+    virtual void reduceTime(const FimexTime& startTime, const FimexTime& endTime);
 
     /**
      * @brief reduce a vertical axis by value
@@ -146,15 +150,15 @@ public:
     virtual void reduceLatLonBoundingBox(double south, double north, double west, double east);
 
     /**
-	 * @brief change the datatype of the variable
-	 *
-	 * a change of the variable will also change the datatype of the _FillValue attribute
-	 *
-	 * @param variable name of the variable
-	 * @param datatype new datatype
-	 * @throw CDMException if variable doesn't exist or conversion to datatype is not supported
-	 */
-	virtual void changeDataType(std::string variable, CDMDataType datatype);
+     * @brief change the datatype of the variable
+     *
+     * a change of the variable will also change the datatype of the _FillValue attribute
+     *
+     * @param variable name of the variable
+     * @param datatype new datatype
+     * @throw CDMException if variable doesn't exist or conversion to datatype is not supported
+     */
+    virtual void changeDataType(std::string variable, CDMDataType datatype);
 
 };
 

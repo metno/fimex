@@ -33,9 +33,6 @@
 #include <iostream>
 #include "fimex/mifi_constants.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/VerticalTransformation.h"
- */
 
 
 namespace MetNoFimex
@@ -47,6 +44,9 @@ class CoordinateSystem;
 class ToVLevelConverter;
 
 /**
+ * @headerfile fimex/coordSys/verticalTransform/VerticalTransformation.h
+ */
+/**
  *  Base class for vertical transformations like AtmosphereSigma coordinate or
  *  OceanSG1 coordinate, and for completeness also Pressure and Height.
  *  Vertical-transformation are usually accessed by CoordinateSystem::getVerticalTransformation:
@@ -57,9 +57,10 @@ class ToVLevelConverter;
             find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (varSysIt != coordSys.end()) {
         if ((*varSysIt)->hasVerticalTransformation()) {
-            boost::shared_ptr<VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
+            boost::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
             if (vtran->getName() == "atmosphere_hybrid_sigma_pressure_coordinate_1") {
                 const HybridSigmaPressure1* hyb1 = dynamic_cast<const HybridSigmaPressure1*>(vtran.get());
+                assert(hyb1 != 0);
                 string apVar = hyb1->ap;
                 string bVar = hyb1->b;
                 string psVar = hyb1->ps

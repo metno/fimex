@@ -66,13 +66,13 @@ Configurational options:
   --output.type arg                       filetype of output file, e.g. nc,
                                           nc4, grib1, grib2
   --output.config arg                     non-standard output configuration
-  --process.accumulateVariable arg        accumulate variable along unlimited 
+  --process.accumulateVariable arg        accumulate variable along unlimited
                                           dimension
-  --process.deaccumulateVariable arg      deaccumulate variable along unlimited 
+  --process.deaccumulateVariable arg      deaccumulate variable along unlimited
                                           dimension
-  --process.rotateVectorToLatLonX arg     rotate this vector x component from 
+  --process.rotateVectorToLatLonX arg     rotate this vector x component from
                                           grid-direction to latlon direction
-  --process.rotateVectorToLatLonY arg     rotate this vector x component from 
+  --process.rotateVectorToLatLonY arg     rotate this vector x component from
                                           grid-direction to latlon direction
   --process.printNcML [=arg(=-)]          print NcML description of process
   --process.printCS                       print CoordinateSystems of process
@@ -174,7 +174,7 @@ Configurational options:
   --verticalInterpolate.printCS           print CoordinateSystems of vertical
                                           interpolator
   --timeInterpolate.timeSpec arg          specification of times to interpolate
-                                          to, see Fimex::TimeSpec for a full
+                                          to, see MetNoFimex::TimeSpec for a full
                                           definition
   --timeInterpolate.printNcML             print NcML description of
                                           timeInterpolator
@@ -294,7 +294,7 @@ Fimex supports now also ncml-aggregation. Simple examples are:
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
 <!-- same as above, but with scan -->
-<aggregation type="joinExisting">    
+<aggregation type="joinExisting">
     <scan location="." regExp="joinExistingAgg\d+\.nc" />
 </aggregation>
 
@@ -306,7 +306,7 @@ Fimex supports now also ncml-aggregation. Simple examples are:
 <netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-<aggregation type="union">    
+<aggregation type="union">
     <netcdf location="joinExistingAgg1.nc" />
     <netcdf location="unionAgg2.nc3" />
 </aggregation>
@@ -464,7 +464,7 @@ possible to restart the model at any state, replacing ony the newly created slic
 @subsection howToUseFillWriter How to use the FillWriter
 
 The axes of the output should well-known before model-start and the output-template
-should be written by e.g. 
+should be written by e.g.
 @verbatim
   fimex --input.file=example.nc input.printNcML=template.ncml
   # eventually add axes values or similar to ncml-file
@@ -570,19 +570,22 @@ In this case, fimex allows to match the filenames by names or by regular express
 e.g.
 
 @verbatim
-  fimex --input.file=*.grb --input.optional=memberName:mbrABC --input.optional=memberName:mbr001 
+  fimex --input.file=*.grb --input.optional=memberName:mbrABC --input.optional=memberName:mbr001
 @endverbatim
 
 would add ensemble-id 0 to all files containing mbrABC and ensemble-id 1 to all files containing mbr001.
-It is also possible to match the members with regular expressions, e.g. 
+It is also possible to match the members with regular expressions, e.g.
 @verbatim
-  fimex --input.file=*.grb --input.optional="memberRegex:mbrABC.*" --input.optional="memberRegex:mbr001.*" 
+  fimex --input.file=*.grb --input.optional="memberRegex:mbrABC.*" --input.optional="memberRegex:mbr001.*"
 @endverbatim
 
 The order of @c memberName or @c memberRegex determines the position in the final file. memberNames are
-internally translated to a regex like <tt>.*\QmemberName\E.*</tt> .
+internally translated to a regex like
+@code
+.*\QmemberName\E.*
+@endcode
 
-To have nicely formated names instead of the @c memberRegex, one can add another parameter to @c memberRegex and 
+To have nicely formated names instead of the @c memberRegex, one can add another parameter to @c memberRegex and
 @c memberName, e.g. <tt>memberRegex:mbrABC.*:mbrABC</tt> or <tt>--input.optional=memberName:mbrABC:ensembleABC</tt>
 
 

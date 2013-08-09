@@ -39,6 +39,9 @@ class CoordinateSystem;
 struct CDMInterpolatorInternals;
 
 /**
+ * @headerfile fimex/CDMInterpolator.h
+ */
+/**
  * operator interface to work on 2d arrays of size nx*ny
  */
 class InterpolatorProcess2d {
@@ -85,7 +88,7 @@ public:
  * of latitude longitude points.
  *
  * Vectors in the direction of x/y axes are automatically reprojected if:
- *   - the vector is marked by <spatial_direction> markup
+ *   - the vector is marked by ''spatial_direction'' markup
  *   - the vector can be detected by the coordinate-system, e.g. CF standard-name
  *   - the method allows detection of x and y axes, e.g. changeProjectionByProjectionParameters or changeProjectionByProjectionParametersToLatLonTemplate
  */
@@ -126,7 +129,7 @@ public:
      */
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
-     * @ brief change the (main) projection of the dataReaders cdm to this new projection
+     * @brief change the (main) projection of the dataReaders cdm to this new projection
      *
      * @param method Interpolation method
      * @param proj_input input-string for proj4, used as output projection
@@ -139,7 +142,7 @@ public:
      */
     virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
     /**
-     * @ brief change the (main) projection of the dataReaders cdm to this new projection
+     * @brief change the (main) projection of the dataReaders cdm to this new projection
      *
      * @param method Interpolation method
      * @param proj_input input-string for proj4, used as output projection
@@ -152,7 +155,7 @@ public:
      */
     DEPRECATED(virtual void changeProjection(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit));
     /**
-     * @ brief change the (main) projection of the dataReaders cdm to this new projection
+     * @brief change the (main) projection of the dataReaders cdm to this new projection
      *
      * @param method Interpolation method
      * @param proj_input input-string for proj4, used as output projection
@@ -169,7 +172,7 @@ public:
      * @brief change the (main) projection of the dataReaders cdm to this new projection
      *
      * Interpolate/extract latitude/longitude values from regularly gridded
-     * input to latitude/longitude values given from a netcdf-CF-template. The
+     * input to latitude/longitude values given from a netcdf CF-template . The
      * template must at least contain the information given in this example:
      *
      * @verbinclude ../share/etc/template4interpolation.cdl
@@ -198,7 +201,7 @@ public:
     virtual const std::string& getLatitudeName() const;
     /**
      * set the name for the automatically generated longitude coordinate axis. This must be set before changeProjection is called.
-     * @param latName name for longitude
+     * @param lonName name for longitude
      */
     virtual void setLongitudeName(const std::string& lonName);
     /**

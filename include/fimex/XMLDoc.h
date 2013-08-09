@@ -45,44 +45,48 @@ namespace MetNoFimex
 typedef boost::shared_ptr<xmlXPathObject> XPathObjPtr;
 
 /**
+ * @headerfile fimex/XMLDoc.h
+ */
+/**
  * a tiny wrapper around libxml dom and xpath reader with xml::include
  */
 class XMLDoc : boost::noncopyable
 {
 public:
-	/**
-	 * initialization of libxml and the xml config file
-	 *
-	 * @param filename xml input-file
-	 * @throw CDMException if problems with libxml or problems with input-file
-	 */
-	explicit XMLDoc(const std::string& filename);
-	virtual ~XMLDoc();
-	/**
-	 * get a ptr to the node defined by xpath
-	 *
-	 * @param xpath xpath string for the node
-	 * @return an xpathobj, which is != 0, but might have 0 elements, i.e. nodesetval == 0 or nodesetval->nodeNr == 0
-	 * @throw CDMException if xpath is not parsable
-	 */
-	XPathObjPtr getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const;
-	/**
-	 * @brief register a namespace for later xpath
-	 *
-	 * register a namespace with a prefix for later xpath retrievals
-	 * @param prefix short name for namespace
-	 * @param uri full namespace name
-	 */
-	void registerNamespace(const std::string& prefix, const std::string& uri);
+    /**
+     * initialization of libxml and the xml config file
+     *
+     * @param filename xml input-file
+     * @throw CDMException if problems with libxml or problems with input-file
+     */
+    explicit XMLDoc(const std::string& filename);
+    virtual ~XMLDoc();
+    /**
+     * get a ptr to the node defined by xpath
+     *
+     * @param xpath xpath string for the node
+     * @param node the node to search within
+     * @return node a xpathobj, which is != 0, but might have 0 elements, i.e. nodesetval == 0 or nodesetval->nodeNr == 0
+     * @throw CDMException if xpath is not parsable
+     */
+    XPathObjPtr getXPathObject(const std::string& xpath, xmlNodePtr node = 0) const;
+    /**
+     * @brief register a namespace for later xpath
+     *
+     * register a namespace with a prefix for later xpath retrievals
+     * @param prefix short name for namespace
+     * @param uri full namespace name
+     */
+    void registerNamespace(const std::string& prefix, const std::string& uri);
 
-	/**
-	 *
-	 * make a string representation of a node as full xml-document
-	 *
-	 * @param a node to print
-	 * @return string
-	 */
-	std::string toString(const xmlNodePtr node);
+    /**
+     *
+     * make a string representation of a node as full xml-document
+     *
+     * @param node a node to print
+     * @return string
+     */
+    std::string toString(const xmlNodePtr node);
 
     static boost::shared_ptr<XMLDoc> fromFile(const std::string& filename);
     static boost::shared_ptr<XMLDoc> fromString(const std::string& buffer, const std::string& url = "");
@@ -99,9 +103,9 @@ private:
         /**
           * some helper functions
           */
-	xmlDoc* doc;
-	xmlXPathContext* xpathCtx;
-	void cleanup();
+    xmlDoc* doc;
+    xmlXPathContext* xpathCtx;
+    void cleanup();
 };
 
 /**

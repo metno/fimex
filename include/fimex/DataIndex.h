@@ -33,6 +33,9 @@ namespace MetNoFimex
 {
 
 
+/**
+ * @headerfile fimex/DataIndex.h
+ */
 class DataIndex
 {
 private:

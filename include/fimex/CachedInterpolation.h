@@ -32,6 +32,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/CachedInterpolation.h
+ */
+/**
  * Interface for new cached spatial interpolation as used in #MetNoFimex::CDMInterpolator
  */
 class CachedInterpolationInterface {
@@ -74,7 +77,7 @@ public:
      * Actually interpolate the data. The data will be interpolated as floats internally.
      *
      * @param inData the input data
-     * @param the size of the input data array
+     * @param size the size of the input data array
      * @param newSize return the size of the output-array
      */
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;

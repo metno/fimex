@@ -37,7 +37,7 @@
 namespace MetNoFimex
 {
     /**
-     * @headerfile "fimex/Data.h"
+     * @headerfile fimex/Data.h
      */
 
     /**
@@ -180,7 +180,7 @@ namespace MetNoFimex
      * @brief create a Data-pointer of the datatype
      *
      * @param datatype
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param val default value for data elements, 0 by default
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -189,7 +189,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_DOUBLE
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -197,7 +197,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_FLOAT
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -205,7 +205,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_INT
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -213,7 +213,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_SHORT
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -221,7 +221,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_CHAR
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -229,7 +229,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_UINT
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -237,7 +237,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_INT64
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -245,7 +245,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_UINT64
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -253,7 +253,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_USHORT
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */
@@ -261,7 +261,7 @@ namespace MetNoFimex
     /**
      * @brief create a Data-pointer of type CDM_UCHAR
      *
-     * @param size_t length of the data array
+     * @param length of the data array
      * @param array the data array
      * @return Base-Class ptr of the DataImpl belonging to the datatype
      */

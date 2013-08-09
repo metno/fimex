@@ -32,7 +32,7 @@
 namespace MetNoFimex
 {
     /**
-     * @headerfile "fimex/DataDecl.h"
+     * @headerfile fimex/DataDecl.h
      */
 
     // forward decl

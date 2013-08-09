@@ -29,13 +29,13 @@
 
 #include "fimex/coordSys/ProjectionImpl.h"
 #include "fimex/Data.h"
-/**
- * @headerfile "fimex/coordSys/LambertConformalConicProjection.h"
- */
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/LambertConformalConicProjection.h
+ */
 class LambertConformalConicProjection: public MetNoFimex::ProjectionImpl
 {
 

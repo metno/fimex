@@ -27,7 +27,9 @@
 #ifndef BINARYCONSTANTS_H_
 #define BINARYCONSTANTS_H_
 
-
+/**
+ * @headerfile fimex/binaryConstants.h
+ */
 /**
  *  use binary<01001001>::value as constant, works with up to 10 bits
  *  use binary<01001001ULL>::value as constant, works with up to 22 bits

@@ -27,14 +27,14 @@
 #ifndef VERTICALPERSPECTIVEPROJECTION_H_
 #define VERTICALPERSPECTIVEPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/VerticalPerspectiveProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/VerticalPerspectiveProjection.h
+ */
 class VerticalPerspectiveProjection: public MetNoFimex::ProjectionImpl
 {
 

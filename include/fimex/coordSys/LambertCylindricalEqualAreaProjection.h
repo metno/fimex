@@ -27,14 +27,14 @@
 #ifndef LAMBERTCYLINDRICALEQUALAREAPROJECTION_H_
 #define LAMBERTCYLINDRICALEQUALAREAPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/LambertCylindricalEqualAreaProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/LambertCylindricalEqualAreaProjection.h
+ */
 class LambertCylindricalEqualAreaProjection: public MetNoFimex::ProjectionImpl
 {
 

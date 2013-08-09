@@ -40,6 +40,9 @@ namespace MetNoFimex
 class CDMReader;
 
 /**
+ * @headerfile fimex/CDMFileReaderFactory.h
+ */
+/**
  * helper class to simplify file-reader detection and creation
  */
 class CDMFileReaderFactory
@@ -65,10 +68,10 @@ public:
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
-     * @param fileNype, one of MIFI_FILETYPE_*, possibly read by detectFileType()
-     * @param fileName, name of input type
+     * @param fileType one of MIFI_FILETYPE_*, possibly read by detectFileType()
+     * @param fileName name of input type
      * @param configFile
-     * @param options optional options for the CDMReader, e.g. for grib: additional message files
+     * @param args optional options for the CDMReader, e.g. for grib: additional message files
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
      * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())
@@ -86,10 +89,10 @@ public:
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
-     * @param fileNype, one of MIFI_FILETYPE_*, possibly read by detectFileType()
-     * @param fileName, name of input type
+     * @param fileType one of MIFI_FILETYPE_*, possibly read by detectFileType()
+     * @param fileName name of input type
      * @param configXML config source
-     * @param options optional options for the CDMReader
+     * @param args optional options for the CDMReader
      * @return pointer to CDMReader
      * @throws CDMException if type not compiled in, or creation fails
      * @deprecated use create(int fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>())

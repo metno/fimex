@@ -27,14 +27,14 @@
 #ifndef TRANSVERSEMERCATORPROJECTION_H_
 #define TRANSVERSEMERCATORPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/TransverseMercatorProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/TransverseMercatorProjection.h
+ */
 class TransverseMercatorProjection: public MetNoFimex::ProjectionImpl
 {
 public:

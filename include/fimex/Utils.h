@@ -78,6 +78,7 @@ std::string join(InputIterator start, InputIterator end, std::string delim = ","
 
  * @param start
  * @param end
+ * @param x
  * @return pair of the positions of a and b, with a closer than b
  */
 template<typename InputIterator>
@@ -124,6 +125,7 @@ find_closest_distinct_elements(InputIterator start, InputIterator end, double x)
 
  * @param start
  * @param end
+ * @param x
  * @return pair of the positions of a and b, with a closer than b
  */
 template<typename InputIterator>

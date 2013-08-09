@@ -33,7 +33,7 @@ namespace MetNoFimex
 {
 
 /**
- * @headerfile "fimex/FillWriter.h"
+ * @headerfile fimex/FillWriter.h
  */
 
 

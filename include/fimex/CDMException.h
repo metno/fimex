@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -30,6 +30,9 @@
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/CDMException.h
+ */
 class CDMException : public std::runtime_error
 {
 public:

@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -31,23 +31,26 @@
 namespace MetNoFimex {
 
 /**
- * Interface for objects which might be converted to 
+ * @headerfile fimex/ReplaceStringObject.h
+ */
+/**
+ * Interface for objects which might be converted to
  * different strings
  */
 class ReplaceStringObject
 {
 public:
-	virtual ~ReplaceStringObject() = 0;
-	/**
-	 *  put the formatted string to the stream
-	 * 
-	 * implementors are asked to implement operator<<
-	 */
-	virtual std::ostream& put(std::ostream& s) const = 0;
-	/// set the formatting string for this object
-	virtual void setFormatString(const std::string& format) = 0;
-	/// set the formatting string and additional options for this object 
-	virtual void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options) = 0;
+    virtual ~ReplaceStringObject() = 0;
+    /**
+     *  put the formatted string to the stream
+     *
+     * implementors are asked to implement operator<<
+     */
+    virtual std::ostream& put(std::ostream& s) const = 0;
+    /// set the formatting string for this object
+    virtual void setFormatString(const std::string& format) = 0;
+    /// set the formatting string and additional options for this object
+    virtual void setFormatStringAndOptions(const std::string& format, const std::vector<std::string>& options) = 0;
 };
 
 }

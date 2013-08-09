@@ -29,12 +29,11 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/LnPressure.h"
- */
-
 namespace MetNoFimex
 {
+/**
+ * @headerfile fimex/coordSys/verticalTransform/LnPressure.h
+ */
 /// Hybrid sigma pressure vertical coordinate, expressed with ap andb
 class LnPressure : public VerticalTransformation
 {

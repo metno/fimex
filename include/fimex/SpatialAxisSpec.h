@@ -36,6 +36,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/SpatialAxisSpec.h
+ */
+/**
  * This class can be used to describe a list of spatial units in an efficient textual way.
  *
  *
@@ -79,34 +82,34 @@ public:
      */
     SpatialAxisSpec(const std::string& axisSpec) throw(CDMException) :
         axisSpec(axisSpec), startEndInitialized(false), axisInitialized(false) {}
-	/**
-	 * Define a spatialAxisSpec
-	 * @param axisSpec string representation as explained above
-	 * @param start place of data start, in degree or m
-	 * @param end place to end, in degree or m
-	 */
-	SpatialAxisSpec(const std::string& axisSpec, double start, double end) throw(CDMException) :
-	    axisSpec(axisSpec), start(start), end(end), startEndInitialized(true), axisInitialized(false) {}
-	virtual ~SpatialAxisSpec() {};
-	/**
-	 * Check if axisSpec still requires start and end place. This returns false if
-	 * a) start and end have been given already
-	 * b) the axisSpec is independant of start and end
-	 */
-	bool requireStartEnd();
-	void setStartEnd(double start, double end) {this->start = start; this->end = end; this->startEndInitialized = true;}
-	/**
-	 * @return steps on the axis in degree or m
-	 */
-	const std::vector<double>& getAxisSteps() {if (!axisInitialized) init(); return axisSteps;}
+    /**
+     * Define a spatialAxisSpec
+     * @param axisSpec string representation as explained above
+     * @param start place of data start, in degree or m
+     * @param end place to end, in degree or m
+     */
+    SpatialAxisSpec(const std::string& axisSpec, double start, double end) throw(CDMException) :
+        axisSpec(axisSpec), start(start), end(end), startEndInitialized(true), axisInitialized(false) {}
+    virtual ~SpatialAxisSpec() {};
+    /**
+     * Check if axisSpec still requires start and end place. This returns false if
+     * a) start and end have been given already
+     * b) the axisSpec is independant of start and end
+     */
+    bool requireStartEnd();
+    void setStartEnd(double start, double end) {this->start = start; this->end = end; this->startEndInitialized = true;}
+    /**
+     * @return steps on the axis in degree or m
+     */
+    const std::vector<double>& getAxisSteps() {if (!axisInitialized) init(); return axisSteps;}
 
 private:
     std::string axisSpec;
-	double start;
-	double end;
-	bool startEndInitialized;
-	bool axisInitialized;
-	std::vector<double> axisSteps;
+    double start;
+    double end;
+    bool startEndInitialized;
+    bool axisInitialized;
+    std::vector<double> axisSteps;
 };
 
 } /* MetNoFimex */

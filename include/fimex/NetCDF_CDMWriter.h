@@ -37,61 +37,61 @@ class Nc;
 
 class NetCDF_CDMWriter : public CDMWriter
 {
-	typedef std::map<std::string, int> NcDimIdMap;
-	typedef std::map<std::string, int> NcVarIdMap;
+    typedef std::map<std::string, int> NcDimIdMap;
+    typedef std::map<std::string, int> NcVarIdMap;
 
 public:
-	/**
-	 * @param cdmReader dataSource
-	 * @param outputFile file-name to write to
-	 * @param configFile xml-configuration
-	 * @param netcdf version, can be 3 or 4; 4 requires compilation against netcdf-4.0 or higher
-	 */
-	NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile = "", int version = 3);
-	virtual ~NetCDF_CDMWriter();
-	/**
-	 * @warning only public for testing
-	 * @return the new name of a variable, eventually changed by the writers config
-	 */
-	const std::string& getVariableName(const std::string& varName) const;
-	/**
-	 * @warning only public for testing
-	 * @return the new name of a dimension, eventually changed by the writers config
-	 */
-	const std::string& getDimensionName(const std::string& dimName) const;
-	/**
+    /**
+     * @param cdmReader dataSource
+     * @param outputFile file-name to write to
+     * @param configFile xml-configuration
+     * @param version netcdf version, can be 3 or 4; 4 requires compilation against netcdf-4.0 or higher
+     */
+    NetCDF_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile = "", int version = 3);
+    virtual ~NetCDF_CDMWriter();
+    /**
      * @warning only public for testing
-	 * @param varName original variable name  (before config: newname)
-	 * @param attName original attribute name (before config: newname)
-	 * @return an attribute contained in the writers attribute, possibly added by config
-	 */
-	const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
+     * @return the new name of a variable, eventually changed by the writers config
+     */
+    const std::string& getVariableName(const std::string& varName) const;
+    /**
+     * @warning only public for testing
+     * @return the new name of a dimension, eventually changed by the writers config
+     */
+    const std::string& getDimensionName(const std::string& dimName) const;
+    /**
+     * @warning only public for testing
+     * @param varName original variable name  (before config: newname)
+     * @param attName original attribute name (before config: newname)
+     * @return an attribute contained in the writers attribute, possibly added by config
+     */
+    const CDMAttribute& getAttribute(const std::string& varName, const std::string& attName) const;
 
 
 
 private:
-	void init();
-	void initNcmlReader(std::auto_ptr<XMLDoc>& doc);
-	void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc);
-	void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc);
-	void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc);
-	/** clear all fields to remove */
-	void initRemove(std::auto_ptr<XMLDoc>& doc);
-	/** test if the variable exists in the cdmReader or throw an CDMException */
-	void testVariableExists(const std::string& varName);
+    void init();
+    void initNcmlReader(std::auto_ptr<XMLDoc>& doc);
+    void initFillRenameDimension(std::auto_ptr<XMLDoc>& doc);
+    void initFillRenameVariable(std::auto_ptr<XMLDoc>& doc);
+    void initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc);
+    /** clear all fields to remove */
+    void initRemove(std::auto_ptr<XMLDoc>& doc);
+    /** test if the variable exists in the cdmReader or throw an CDMException */
+    void testVariableExists(const std::string& varName);
 
-	NcDimIdMap defineDimensions();
-	NcVarIdMap defineVariables(const NcDimIdMap& dimMap);
-	void writeAttributes(const NcVarIdMap& varMap);
-	void writeData(const NcVarIdMap& varMap);
-	double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
-	double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
-	CDM cdm; /* local storage of the changed cdm-outline, except variable name changes */
-	std::auto_ptr<Nc> ncFile;
-	std::map<std::string, std::string> variableNameChanges;
-	std::map<std::string, CDMDataType> variableTypeChanges;
-	std::map<std::string, unsigned int> variableCompression;
-	std::map<std::string, std::string> dimensionNameChanges;
+    NcDimIdMap defineDimensions();
+    NcVarIdMap defineVariables(const NcDimIdMap& dimMap);
+    void writeAttributes(const NcVarIdMap& varMap);
+    void writeData(const NcVarIdMap& varMap);
+    double getOldAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
+    double getNewAttribute(const std::string& varName, const std::string& attName, double defaultValue) const;
+    CDM cdm; /* local storage of the changed cdm-outline, except variable name changes */
+    std::auto_ptr<Nc> ncFile;
+    std::map<std::string, std::string> variableNameChanges;
+    std::map<std::string, CDMDataType> variableTypeChanges;
+    std::map<std::string, unsigned int> variableCompression;
+    std::map<std::string, std::string> dimensionNameChanges;
 };
 
 }

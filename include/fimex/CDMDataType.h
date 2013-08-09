@@ -24,18 +24,22 @@
 #ifndef CDMDATATYPE_H_
 #define CDMDATATYPE_H_
 #include <string>
+
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/CDMDataType.h
+ */
 /** Be aware that the CDM_CHAR datatype maps to NC_BYTE, while the CDM_SHORT maps to NC_CHAR */
 enum CDMDataType {
-	CDM_NAT = 0,
-	CDM_CHAR,
-	CDM_SHORT,
-	CDM_INT,
-	CDM_FLOAT,
-	CDM_DOUBLE,
-	CDM_STRING,
+    CDM_NAT = 0,
+    CDM_CHAR,
+    CDM_SHORT,
+    CDM_INT,
+    CDM_FLOAT,
+    CDM_DOUBLE,
+    CDM_STRING,
     CDM_UCHAR,
     CDM_USHORT,
     CDM_UINT,

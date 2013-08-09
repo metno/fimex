@@ -37,6 +37,9 @@ namespace MetNoFimex
 // forward decl
 class IndexedDataImpl;
 
+/**
+ * @headerfile fimex/IndexedData.h
+ */
 class IndexedData
 {
 public:

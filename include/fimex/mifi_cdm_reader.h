@@ -31,6 +31,9 @@
 #include "fimex/CDMReader.h"
 
 /**
+  * @headerfile fimex/mifi_cdm_reader.h
+  */
+/**
  * wrapper class for boost::shared_ptr<CDMReader>, mainly for usage by
  * C/C++ wrapper
  */

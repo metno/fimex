@@ -32,6 +32,9 @@
 namespace MetNoFimex {
 
 /**
+ * @headerfile fimex/CDMMerger_LinearSmoothing.h
+ */
+/**
  * Defines a linear smooth transition between inner and outer grid for
  * CDMMerger.
  */

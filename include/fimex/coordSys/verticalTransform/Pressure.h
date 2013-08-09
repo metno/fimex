@@ -29,17 +29,16 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/Pressure.h"
- */
-
-
 namespace MetNoFimex
 {
 
 // forward decl
 class ToVLevelConverter;
 
+
+/**
+ * @headerfile fimex/coordSys/verticalTransform/Pressure.h
+ */
 
 /// Pressure class for vertical transformation
 class Pressure : public VerticalTransformation

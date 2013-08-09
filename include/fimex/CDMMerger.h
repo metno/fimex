@@ -36,6 +36,9 @@ namespace MetNoFimex {
 class CDMMergerPrivate;
 
 /**
+ * @headerfile fimex/CDMMerger.h
+ */
+/**
  * Allows merge data from an inner, "fine" grid onto data from an outer, "rough" grid.
  *
  * The resulting grid will be defined by extending the inner grid of
@@ -67,19 +70,19 @@ public:
     public:
         void setFillValues(double fillI, double fillO)
             { fillI_ = fillI; fillO_ = fillO; }
-        
+
         void setHorizontalSizes(size_t sizeX, size_t sizeY)
             { sizeX_ = sizeX; sizeY_ = sizeY; }
-        
+
         virtual double operator()(size_t curX, size_t curY, double valueI, double valueO) = 0;
-        
+
         virtual ~Smoothing() {}
-        
+
     protected:
         size_t sizeX_, sizeY_;
         double fillI_, fillO_;
     };
-    
+
     typedef boost::shared_ptr<Smoothing> SmoothingPtr;
 
     /**
@@ -90,9 +93,9 @@ public:
         virtual ~SmoothingFactory() {}
         virtual SmoothingPtr operator()(const std::string& varName) = 0;
     };
-    
+
     typedef boost::shared_ptr<SmoothingFactory> SmoothingFactoryPtr;
-    
+
 public:
     /**
      * Merge data from inner grid onto refined outer grid.

@@ -31,6 +31,9 @@
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/DataTypeChanger.h
+ */
 /** brief wrapper class around data->convertType */
 class DataTypeChanger
 {

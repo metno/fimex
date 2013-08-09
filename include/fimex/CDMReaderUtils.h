@@ -36,7 +36,7 @@ namespace MetNoFimex
 {
 
 /**
- * @headerfile "fimex/CDMReaderUtils.h"
+ * @headerfile fimex/CDMReaderUtils.h
  */
 
 /**

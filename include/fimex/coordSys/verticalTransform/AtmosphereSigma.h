@@ -29,13 +29,12 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/AtmosphereSigma.h"
- */
-
 namespace MetNoFimex
 {
-/// Hybrid sigma pressure vertical coordinate, expressed with ap andb
+/**
+ * @headerfile fimex/coordSys/verticalTransform/AtmosphereSigma.h
+ */
+/// Sigma pressure vertical coordinate
 class AtmosphereSigma : public VerticalTransformation
 {
 public:

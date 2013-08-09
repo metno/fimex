@@ -31,16 +31,19 @@
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/CDMWriter.h
+ */
 class CDMWriter
 {
 public:
-	CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
-	: cdmReader(cdmReader), outputFile(outputFile) {}
-	virtual ~CDMWriter() {}
+    CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
+    : cdmReader(cdmReader), outputFile(outputFile) {}
+    virtual ~CDMWriter() {}
 
 protected:
-	boost::shared_ptr<CDMReader> cdmReader;
-	const std::string outputFile;
+    boost::shared_ptr<CDMReader> cdmReader;
+    const std::string outputFile;
 };
 
 } // namespace

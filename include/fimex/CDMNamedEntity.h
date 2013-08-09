@@ -1,6 +1,6 @@
 /*
  * Fimex
- * 
+ *
  * (C) Copyright 2008, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
@@ -33,14 +33,17 @@ namespace MetNoFimex
 
 
 /**
+ * @headerfile fimex/CDMNamedEntity.h
+ */
+/**
  * interface for all CDM Entities (variable, attribute, dimension)
  * which support the 'getName' method
  */
 class CDMNamedEntity
 {
 public:
-	virtual ~CDMNamedEntity() = 0;
-	virtual const std::string& getName() const = 0;
+    virtual ~CDMNamedEntity() = 0;
+    virtual const std::string& getName() const = 0;
 };
 
 /**
@@ -49,7 +52,7 @@ public:
 struct CDMNameCompare : public std::binary_function<CDMNamedEntity, CDMNamedEntity, int>
 {
 public:
-	int operator()(const CDMNamedEntity& e1, const CDMNamedEntity& e2) {return e1.getName().compare(e2.getName());}
+    int operator()(const CDMNamedEntity& e1, const CDMNamedEntity& e2) {return e1.getName().compare(e2.getName());}
 };
 
 /**
@@ -58,12 +61,12 @@ public:
 class CDMNameEqual : public std::unary_function<CDMNamedEntity, bool>
 {
 public:
-	explicit CDMNameEqual(std::string name) : name(name) {}
-	explicit CDMNameEqual(const CDMNamedEntity& entity) : name(entity.getName()) {}
-	~CDMNameEqual() {}
-	bool operator()(const CDMNamedEntity& e) {return name == e.getName();} 
+    explicit CDMNameEqual(std::string name) : name(name) {}
+    explicit CDMNameEqual(const CDMNamedEntity& entity) : name(entity.getName()) {}
+    ~CDMNameEqual() {}
+    bool operator()(const CDMNamedEntity& e) {return name == e.getName();}
 private:
-	std::string name;
+    std::string name;
 };
 
 /**

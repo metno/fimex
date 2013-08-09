@@ -29,12 +29,12 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/OceanSG1.h"
- */
-
 namespace MetNoFimex
 {
+/**
+ * @headerfile fimex/coordSys/verticalTransform/OceanSG1.h
+ */
+
 /**
  * ocean_s_coordinate_g2 is defined by the same set of parameters, just
  * the conversion function is different.

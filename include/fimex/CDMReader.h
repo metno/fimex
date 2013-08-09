@@ -37,6 +37,9 @@ class CDM;
 class CDMVariable;
 
 /**
+ * @headerfile fimex/CDMReader.h
+ */
+/**
  * @brief Basic interface for CDM reading and manipulation classes
  *
  * The CDMReader is the basic interface for reading and manipulation of
@@ -120,7 +123,7 @@ public:
      * @param varName name of the variable to read
      * @param sb a SliceBuilder generated from this CDMReaders CDM
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
-     * @warn This method has a default implementation depending on #getDataSlice(varName, unLimDimPos),
+     * @warning This method has a default implementation depending on getDataSlice(const std::string&, size_t),
      *       but should be implemented for performance reasons. If you want to fall back to the default implementation,
      *       remember to use 'using CDMReader::getDataSlice;'
      */

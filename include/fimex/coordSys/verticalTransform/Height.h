@@ -30,14 +30,12 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-/**
- * @headerfile "fimex/coordSys/verticalTransform/Height.h"
- */
-
-
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/verticalTransform/Height.h
+ */
 class Height : public VerticalTransformation
 {
 public:

@@ -31,6 +31,10 @@
 
 namespace MetNoFimex
 {
+
+/**
+ * @headerfile fimex/CDMReaderWriter.h
+ */
 /**
  * The CDMReaderWriter is an interface allowing to write data to an opened CDMReader.
  */
@@ -68,7 +72,7 @@ public:
      * @param sb a SliceBuilder generated from this CDMReaders CDM
      * @param data Data to be written at the slicePositions
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
-     * @warn This method must be implemented for performance reasons.
+     * @warning This method must be implemented for performance reasons.
      */
     virtual void putDataSlice(const std::string& varName, const SliceBuilder& sb, const DataPtr data) = 0;
 

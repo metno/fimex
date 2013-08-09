@@ -36,6 +36,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/TimeSpec.h
+ */
+/**
  * This class can be used to describe a list of times in an efficient textual way.
  *
  * Unless otherwise mentioned, i.e. with <em>bounds</em> a value v(time)
@@ -74,20 +77,20 @@ namespace MetNoFimex
 class TimeSpec
 {
 public:
-	/**
-	 * Define a timeSpec
-	 * @param timeSpec string representation as explained above
-	 * @param startTime time to start in case of a relativeStart timeSpec
-	 * @param endTime time to end in case of a relativeStart timeSpec
-	 */
-	TimeSpec(const std::string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException);
-	virtual ~TimeSpec() {};
-	const std::vector<FimexTime>& getTimeSteps() const {return timeSteps;}
-	const std::string& getUnitString() const {return outputUnit;}
+    /**
+     * Define a timeSpec
+     * @param timeSpec string representation as explained above
+     * @param startTime time to start in case of a relativeStart timeSpec
+     * @param endTime time to end in case of a relativeStart timeSpec
+     */
+    TimeSpec(const std::string& timeSpec, const FimexTime& startTime, const FimexTime& endTime) throw(CDMException);
+    virtual ~TimeSpec() {};
+    const std::vector<FimexTime>& getTimeSteps() const {return timeSteps;}
+    const std::string& getUnitString() const {return outputUnit;}
 
 private:
-	std::string outputUnit;
-	std::vector<FimexTime> timeSteps;
+    std::string outputUnit;
+    std::vector<FimexTime> timeSteps;
 };
 
 } /* MetNoFimex */

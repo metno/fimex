@@ -36,6 +36,9 @@ namespace MetNoFimex
 {
 
 /**
+ * @headerfile fimex/C_CDMReader.h
+ */
+/**
  * This class should be used by people who want write an implementation of a CDMReader in C. They should set
  * a callback-function to retrieve a variable with the getDataSlice functions.
  *

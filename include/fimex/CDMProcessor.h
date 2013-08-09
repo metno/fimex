@@ -32,13 +32,13 @@
 
 namespace MetNoFimex
 {
-/**
- * @headerfile "fimex/SliceBuilder.h"
- */
 
 // forward decl
 class CDMProcessorImpl;
 
+/**
+ * @headerfile fimex/CDMProcessor.h
+ */
 /**
  * The CDMProcessor is a class for various smaller data-manipulations.
  * Examples are deaccumulation along the time-axis, ...

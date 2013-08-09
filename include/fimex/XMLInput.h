@@ -41,6 +41,9 @@ namespace MetNoFimex
 class XMLDoc;
 
 /**
+ * @headerfile fimex/XMLInput.h
+ */
+/**
  * Interface for different XML sources like URL, file or string
  */
 class XMLInput

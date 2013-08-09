@@ -42,7 +42,7 @@ namespace MetNoFimex
 struct CDMImpl;
 
 /**
- * @headerfile "fimex/CDM.h"
+ * @headerfile fimex/CDM.h
  */
 
 /**
@@ -79,7 +79,7 @@ public:
     /**
      * @brief get a reference of a variable
      *
-     * this is a constant version of @link{CDMVariable::getVariable}
+     * this is a constant version of getVariable(const std::string&)
      *
      * @param varName name of the variable
      * @throw CDMException if varName doesn't exist
@@ -214,7 +214,7 @@ public:
      * remove an attribute from the cdm
      *
      * @param varName name of variable the attribute belongs to
-     * @param attr the CDMAttribute
+     * @param attrName the CDMAttribute
      */
     void removeAttribute(const std::string& varName, const std::string& attrName);
 
@@ -309,8 +309,8 @@ public:
      * @param projectionName output of the projection variables name
      * @param xAxis output of the spatial x axis
      * @param yAxis output of the spation y axis
-     * @param xAxisUnit output of unit for x axis
-     * @param yAxisUnit output of unit for y axis
+     * @param xAxisUnits output of unit for x axis
+     * @param yAxisUnits output of unit for y axis
      * @return true if unique result, false (and print warning) if results are not unique
      * @throw CDMException if no projection with corresponding axes can be found
      */

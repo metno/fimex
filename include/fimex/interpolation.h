@@ -139,7 +139,6 @@ extern int mifi_vector_reproject_values_by_matrix_f(int method,
 /**
  * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f
  *
- * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
  * @param out_x_axis field of size ox. Axis needs to be strong monotonous and if longitude/latitude in degree
@@ -162,7 +161,6 @@ extern int mifi_get_vector_reproject_matrix(const char* proj_input,
  * calculate the vector reprojection matrix used in #mifi_vector_reproject_values_f without changing the axes, just the
  * direction of the vectors.
  *
- * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
  * @param in_x_field field of size ox*oy with the values in the input-projection in_x_field[x+oy*y] = inXAxis[x]. The values must be in radian or m.
@@ -182,7 +180,6 @@ int mifi_get_vector_reproject_matrix_field(const char* proj_input,
 /**
  * calculate the vector reprojection matrix when projecting to a list of n-points
  *
- * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
  * @param proj_output proj4-string of projection of outfield
  * @param inputIsMetric 1 if projection, 0 if (rotated) latlon
@@ -204,6 +201,8 @@ int mifi_get_vector_reproject_matrix_points(const char* proj_input,
  *
  * @param infield 3d fortran array of size ix,iy,iz
  * @param outfield 1d array of size iz containing the values
+ * @param x,y
+ * @param ix,iy,iz
  */
 extern int mifi_get_values_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
 
@@ -469,7 +468,7 @@ extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
 /**
  * check if the value is a nan
  *
- * @param the value to test
+ * @param val the value to test
  * @return 0 on false, otherwise true
  * @warning this function should only be used in C++, which doesn't define
  *          the isnan macro defined in C99
@@ -479,7 +478,7 @@ extern DEPRECATED(int mifi_isnanf(float val));
 /**
  * check if the value is a nan
  *
- * @param the value to test
+ * @param val the value to test
  * @return 0 on false, otherwise true
  * @warning this function should only be used in C++, which doesn't define
  *          the isnan macro defined in C99

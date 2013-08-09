@@ -49,10 +49,10 @@ class CDMReader;
 struct CoordSysImpl;
 
 /**
- * @headerfile "fimex/coordSys/CoordinateSystem.h"
+ * @headerfile fimex/coordSys/CoordinateSystem.h
  */
 /**
- * CoordinateSystems are usually created using the listCoordinateSystems(const CDM& cdm) function, see example there.
+ * CoordinateSystems are usually created using the listCoordinateSystems(boost::shared_ptr<CDMReader>) function, see example there.
  *
  * To investigate the coordinate systems of a file, use {\em fimex --printCS}.
  */
@@ -73,7 +73,7 @@ public:
     typedef std::vector<ConstAxisPtr> ConstAxisList;
 
     /**
-     * CoordinateSystems are usually created within the listCoordinateSystems(const CDM& cdm) funcion.
+     * CoordinateSystems are usually created within the listCoordinateSystems(boost::shared_ptr<CDMReader>) funcion.
      */
     CoordinateSystem();
     explicit CoordinateSystem(const std::string& conventionName);
@@ -236,10 +236,10 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& p);
  *        the source might be manipulated, i.e. the WRF-system is missing several variables.
  * @warning since this function might change the CDM of the reader, it is usually a good idea to
  *          run this function before copying the readers CDM, e.g.
- *          @verbatim
+ * @code
      vector<boost::shared_ptr<const CoordinateSystem> > css = listCoordinateSystems(reader);
      CDM cdm = reader.getCDM();
- *          @endverbatim
+   @endcode
  */
 std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader);
 /**

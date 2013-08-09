@@ -27,14 +27,14 @@
 #ifndef STEREOGRAPHICPROJECTION_H_
 #define STEREOGRAPHICPROJECTION_H_
 
-/**
- * @headerfile "fimex/coordSys/StereographicProjection.h"
- */
 #include "fimex/coordSys/ProjectionImpl.h"
 
 namespace MetNoFimex
 {
 
+/**
+ * @headerfile fimex/coordSys/StereographicProjection.h
+ */
 class StereographicProjection: public MetNoFimex::ProjectionImpl
 {
 

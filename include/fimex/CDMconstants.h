@@ -1,11 +1,11 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
-/**
- * @headerfile "fimex/CDMconstants.h"
- */
 #include "fimex/deprecated.h"
 
+/**
+ * @headerfile fimex/CDMconstants.h
+ */
 /**
  * @brief constants used through-out fimex
  *
@@ -75,7 +75,7 @@ int mifi_get_filetype(const char* filetypeName);
 
 /**
  * @brief get the filetype-name of a filetype
- * @param one of MIFI_FILETYPE_*
+ * @param filetype one of MIFI_FILETYPE_*
  */
 const char* mifi_get_filetype_name(int filetype);
 

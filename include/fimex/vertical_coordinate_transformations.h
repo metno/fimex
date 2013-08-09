@@ -56,7 +56,7 @@ extern int mifi_atmosphere_ln_pressure(size_t n, double p0, const double* lev, d
  * @param n size of arrays sigma and pressure
  * @param ptop pressure on model top layer (constant for a model)
  * @param ps surface pressure - usually varying in time,x,y
- * @param lev sigma level values
+ * @param level sigma level values
  * @param pressure output values in the same unit as ptop and ps and at the same place as ps
  * @return MIFI_OK on success or MIFI_ERROR on failure
  */
@@ -173,13 +173,13 @@ extern int mifi_barometric_standard_height(size_t n, const double* p, double* he
  * @param h unperturbed water column thickness - varying in x,y (might be varying in time for sediment applications)
  * @param h_c critical depth, usually min(h(x,y))
  * @param zeta time-varying free surface - varying in time,x,y
- * @param sigma(k) dimensionless s coordinate
- * @param C(k) streching function
+ * @param s s(k) dimensionless s coordinate
+ * @param C zeta(k) streching function
  * @param z output values in the same unit as h and h_c and at the same place as h
  * @return MIFI_OK on success or MIFI_ERROR on failure
  * @see https://www.myroms.org/wiki/index.php?title=Vertical_S-coordinate
  */
-extern int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z);
+extern int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const double* s, const double* C, double* z);
 
 /**
  * convert a standard_name="ocean_s_coordinate_g1" to z using the
@@ -189,13 +189,13 @@ extern int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const 
  * @param h unperturbed water column thickness - varying in x,y (might be varying in time for sediment applications)
  * @param h_c critical depth, usually min(h(x,y))
  * @param zeta time-varying free surface - varying in time,x,y
- * @param s(k) dimensionless s coordinate
- * @param C(k) streching function
+ * @param s s(k) dimensionless s coordinate
+ * @param C zeta(k) streching function
  * @param z output values in the same unit as h and h_c and at the same place as h
  * @return MIFI_OK on success or MIFI_ERROR on failure
  * @see https://www.myroms.org/wiki/index.php?title=Vertical_S-coordinate
  */
-extern int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z);
+extern int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const double* s, const double* C, double* z);
 
 
 /**
