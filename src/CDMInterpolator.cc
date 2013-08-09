@@ -32,6 +32,7 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/coordSys/Projection.h"
+#include "fimex/coordSys/CoordinateAxis.h"
 #include "CachedForwardInterpolation.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Logger.h"
@@ -384,6 +385,123 @@ void CDMInterpolator::changeProjection(int method,
         throw CDMException("unknown projection method: " + type2string(method));
     }
 }
+
+void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vector<CrossSectionDefinition>& crossSections)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "changing projection to crossSections");
+
+    // find the used original projection
+    map<string, CoordSysPtr> css = findBestCoordinateSystemsAndProjectionVars(true);
+    assert(css.size() > 0);
+    boost::shared_ptr<const Projection> proj = css.begin()->second->getProjection();
+    CoordinateSystem::ConstAxisPtr xAxis = css.begin()->second->getGeoXAxis();
+    assert(xAxis.get() != 0);
+    CoordinateSystem::ConstAxisPtr yAxis = css.begin()->second->getGeoYAxis();
+    assert(yAxis.get() != 0);
+
+    DataPtr xData, yData;
+    if (proj->isDegree()) {
+        xData = p_->dataReader->getScaledDataInUnit(xAxis->getName(), "degree");
+        yData = p_->dataReader->getScaledDataInUnit(yAxis->getName(), "degree");
+    } else {
+        xData = p_->dataReader->getScaledDataInUnit(xAxis->getName(), "m");
+        yData = p_->dataReader->getScaledDataInUnit(yAxis->getName(), "m");
+    }
+    if (xData->size() < 2 || yData->size() < 2) {
+        throw CDMException("x- or y-axis sizes < 2 elements, not possible to interpolate");
+    }
+    boost::shared_array<double> d = xData->asDouble();
+    double dx = d[1] - d[0];
+    d = yData->asDouble();
+    double dy = d[1] - d[0];
+    if (dx == 0 || dy == 0) {
+        throw CDMException("cross-section calculation: dx or dy derived from first two elements == 0");
+    }
+
+    vector<double> lonVals, latVals;
+    vector<size_t> startPositions;
+    vector<string> csNames;
+    for (vector<CrossSectionDefinition>::const_iterator csIt = crossSections.begin(); csIt != crossSections.end(); ++csIt) {
+        if (csIt->lonLatCoordinates.size() > 0) {
+            csNames.push_back(csIt->name);
+            startPositions.push_back(lonVals.size());
+            if (csIt->lonLatCoordinates.size() == 1) {
+                lonVals.push_back(csIt->lonLatCoordinates.at(0).first);
+                latVals.push_back(csIt->lonLatCoordinates.at(0).second);
+            } else {
+                vector<double> xLon(2);
+                vector<double> yLat(2);
+                for (size_t i = 1; i < csIt->lonLatCoordinates.size(); ++i) {
+                    xLon.at(0) = csIt->lonLatCoordinates.at(i-i).first;
+                    yLat.at(0) = csIt->lonLatCoordinates.at(i-i).second;
+                    xLon.at(1) = csIt->lonLatCoordinates.at(i).first;
+                    yLat.at(1) = csIt->lonLatCoordinates.at(i).second;
+                    proj->convertFromLonLat(xLon, yLat);
+                    double xLonD = xLon.at(1) - xLon.at(0);
+                    double yLatD = yLat.at(1) - yLat.at(0);
+                    // number of gridpoints to select between two coordinates
+                    size_t num = static_cast<size_t>(floor(max(fabs(xLonD/dx), fabs(yLatD/dy))));
+                    // first and last point will always be part
+                    vector<double> xLonPart, yLatPart;
+                    xLonPart.push_back(xLon.at(0));
+                    yLatPart.push_back(yLat.at(0));
+                    for (size_t j = 1; j < num; ++j) {
+                        xLonPart.push_back(xLon.at(0) + j*xLonD/num);
+                        yLatPart.push_back(yLat.at(0) + j*yLatD/num);
+                    }
+                    xLonPart.push_back(xLon.at(1));
+                    yLatPart.push_back(yLat.at(1));
+                    proj->convertToLonLat(xLonPart, yLatPart);
+                    assert(xLonPart.size() == yLatPart.size());
+                    // add all points to the lat/lonVals vectors
+                    copy(xLonPart.begin(), xLonPart.end(), back_inserter(lonVals));
+                    copy(yLatPart.begin(), yLatPart.end(), back_inserter(latVals));
+                }
+            }
+        }
+    }
+    // add the additional information to separate the different cross-sections
+    size_t nvcross = csNames.size();
+    cdm_->addDimension(CDMDimension("two", 2));
+    cdm_->addDimension(CDMDimension("nvcross", nvcross));
+    size_t strlen = 80;
+    cdm_->addDimension(CDMDimension("nvcross_strlen", strlen));
+    // vcross-names
+    vector<string> shape;
+    shape.push_back("nvcross_strlen");
+    shape.push_back("nvcross");
+    CDMVariable vcross("vcross_name", CDM_STRING, shape);
+    boost::shared_array<char> vcrossNamesAry(new char[strlen*nvcross]());
+    for (size_t i = 0; i < nvcross; ++i) {
+        const char* name = csNames.at(i).c_str();
+        size_t strLen = csNames.at(i).size();
+        copy(name, name+strLen, vcrossNamesAry.get()+(i*strlen));
+    }
+    vcross.setData(createData(strlen*nvcross, vcrossNamesAry));
+    cdm_->addVariable(vcross);
+    cdm_->addAttribute(vcross.getName(), CDMAttribute("bounds", "vcross_bnds"));
+
+    // vcross_bnds
+    shape.clear();
+    shape.push_back("two");
+    shape.push_back("nvcross");
+    CDMVariable vcrossBnds("vcross_bnds", CDM_INT, shape);
+    assert(nvcross == startPositions.size());
+    boost::shared_array<int> vcrossBndsAry(new int[2*nvcross]);
+    for (size_t i = 0; i < (nvcross-1); ++i) {
+        vcrossBndsAry[i*2] = startPositions.at(i);
+        vcrossBndsAry[i*2+1] = startPositions.at(i+1)-1;
+    }
+    vcrossBndsAry[(nvcross-1)*2] = startPositions.at(nvcross-1);
+    vcrossBndsAry[(nvcross-1)*2+1] = lonVals.size()-1;
+    vcrossBnds.setData(createData(2*nvcross, vcrossBndsAry));
+    cdm_->addVariable(vcrossBnds);
+    cdm_->addAttribute(vcrossBnds.getName(), CDMAttribute("description", "start- and end-position (included) in lat- and lon-dimensions for each vert. cross-section"));
+
+    // do the real work of reprojection
+    changeProjection(method, lonVals, latVals);
+}
+
 
 void CDMInterpolator::changeProjection(int method, const std::string& netcdf_template_file)
 {

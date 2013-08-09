@@ -29,6 +29,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CachedInterpolation.h"
 #include "fimex/CachedVectorReprojection.h"
+#include "fimex/CrossSectionDefinition.h"
 #include "fimex/deprecated.h"
 
 
@@ -190,6 +191,20 @@ public:
      * @param latVals latitude values in degree (lonVals.size() == latVals.size())
      */
     virtual void changeProjection(int method, const std::vector<double>& lonVals, const std::vector<double>& latVals);
+    /**
+     * Change the projection to latitude-longitude points defined by the
+     * points in the CrossSections. In between the CrossSection points,
+     * latitude/longitude points will be added on a straight line (in the
+     * original projection plane). The distance of the points will be in the
+     * magnitude of the grid-distance.
+     *
+     * In addition, the cross-section names and the cross-section position in
+     * the output-latitude/longitude will be added to the resulting file.
+     *
+     * @param method one of the MIFI_INTERPOL_* methods defined in mifi_constants.h
+     * @param crossSections
+     */
+    virtual void changeProjectionToCrossSections(int method, const std::vector<CrossSectionDefinition>& crossSections);
     /**
      * set the name for the automatically generated latitude coordinate axis. This must be set before changeProjection is called.
      * @param latName name for latitude

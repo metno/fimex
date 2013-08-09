@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <cctype>
+#include <numeric>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/version.hpp>
 #include <boost/program_options.hpp>
@@ -208,6 +209,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "interpolate.method", vm);
     writeOption<string>(out, "interpolate.latitudeValues", vm);
     writeOption<string>(out, "interpolate.longitudeValues", vm);
+    writeOption<string>(out, "interpolate.vcrossNames", vm);
+    writeOption<string>(out, "interpolate.vcrossNoPoints", vm);
     writeOption<string>(out, "interpolate.xAxisValues", vm);
     writeOption<string>(out, "interpolate.yAxisValues", vm);
     writeOption<string>(out, "interpolate.xAxisUnit", vm);
@@ -617,6 +620,48 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
                                                vm["interpolate.xAxisType"].as<string>(), vm["interpolate.yAxisType"].as<string>());
     } else if (vm.count("interpolate.template")) {
         interpolator->changeProjection(method, vm["interpolate.template"].as<string>());
+    } else if (vm.count("interpolate.vcrossNames")) {
+        if (!vm.count("interpolate.vcrossNoPoints")) {
+            cerr << "ERROR: interpolate.vcrossNames requires vcrossNoPoints, too" << endl;
+            exit(1);
+        }
+        if (!vm.count("interpolate.longitudeValues")) {
+            cerr << "ERROR: interpolate.vcrossNames requires longitudeValues, too" << endl;
+            exit(1);
+        }
+        if (!vm.count("interpolate.latitudeValues")) {
+            cerr << "ERROR: interpolate.vcrossNames requires latitudeValues, too" << endl;
+            exit(1);
+        }
+        vector<string> vNames = tokenize(vm["interpolate.vcrossNames"].as<string>(), ",");
+        vector<size_t> pointNo = tokenizeDotted<size_t>(vm["interpolate.vcrossNoPoints"].as<string>());
+        vector<double> latVals = tokenizeDotted<double>(vm["interpolate.latitudeValues"].as<string>());
+        vector<double> lonVals = tokenizeDotted<double>(vm["interpolate.longitudeValues"].as<string>());
+        if (vNames.size() != pointNo.size()) {
+            cerr << "ERROR: interpolate.vcrossNames and vcrossNoPoints need same size: " << vNames.size() << "!=" << pointNo.size() << endl;
+            exit(1);
+        }
+        size_t pointSum = std::accumulate(pointNo.begin(),pointNo.end(),0);
+        if (pointSum != latVals.size()) {
+            cerr << "ERROR: interpolate.latitudeValues size does not match the sum of vcrossNoPoints: " << latVals.size() << "!=" << pointSum << endl;
+            exit(1);
+        }
+        if (latVals.size() != lonVals.size()) {
+            cerr << "ERROR: interpolate.latitudeValues size does not match longitudeVals size: " << latVals.size() << "!=" << lonVals.size() << endl;
+            exit(1);
+        }
+        vector<CrossSectionDefinition> csd;
+        size_t llPos = 0;
+        for (size_t i = 0; i < vNames.size(); i++) {
+            vector<pair<double, double> > lonLatVals;
+            size_t points = pointNo.at(i);
+            for (size_t j = 0; j < points; ++j) {
+                lonLatVals.push_back(make_pair(lonVals.at(llPos+j), latVals.at(llPos+j)));
+            }
+            csd.push_back(CrossSectionDefinition(vNames.at(i), lonLatVals));
+            llPos += points;
+        }
+        interpolator->changeProjectionToCrossSections(method, csd);
     } else if (vm.count("interpolate.latitudeValues")) {
         if (!vm.count("interpolate.longitudeValues")) {
             cerr << "ERROR: interpolate.latitudeValues requires longitudeValues, too" << endl;
@@ -860,6 +905,8 @@ int run(int argc, char* args[])
         ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
         ("interpolate.latitudeValues", po::value<string>(), "string with latitude values in degree, i.e. 60.5,70,90")
         ("interpolate.longitudeValues", po::value<string>(), "string with longitude values in degree, i.e. -10.5,-10.5,29.5")
+        ("interpolate.vcrossNames", po::value<string>(), "string with comma-separated names for vertical cross sections")
+        ("interpolate.vcrossNoPoints", po::value<string>(), "string with comma-separated number of lat/lon values for each vertical cross sections")
         ("interpolate.template", po::value<string>(), "netcdf file containing lat/lon list used in interpolation")
 #if BOOST_VERSION >= 104000
         ("interpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
