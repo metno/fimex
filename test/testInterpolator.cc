@@ -53,24 +53,24 @@ static int DEBUG = 0;
 BOOST_AUTO_TEST_CASE(test_interpolator)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
-	string topSrcDir(TOP_SRCDIR);
-	string fileName(topSrcDir+"/test/flth00.dat");
-	if (!ifstream(fileName.c_str())) {
-		// no testfile, skip test
-		return;
-	}
-	boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
-	boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
-	vector<double> xAxis, yAxis;
-	for (int i = -100; i < 10; i++) {
-		xAxis.push_back(i * 50000);
-		yAxis.push_back(i * 50000);
-	}
-	interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-	//interpolator->changeProjection(MIFI_INTERPOL_COORD_NN, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/flth00.dat");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(feltReader));
+    vector<double> xAxis, yAxis;
+    for (int i = -100; i < 10; i++) {
+        xAxis.push_back(i * 50000);
+        yAxis.push_back(i * 50000);
+    }
+    interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+    //interpolator->changeProjection(MIFI_INTERPOL_COORD_NN, "+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m");
     //NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
-	//interpolator->getCDM().toXMLStream(cerr);
-	BOOST_CHECK(true);
+    //interpolator->getCDM().toXMLStream(cerr);
+    BOOST_CHECK(true);
     DataPtr altitudeData = interpolator->getDataSlice("altitude");
     boost::shared_array<double> altArray = altitudeData->asDouble();
     int found = 0;
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(test_interpolator)
     }
     BOOST_CHECK(found > 100); // at least 100 cells above 2000m
 
-	NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
-	BOOST_CHECK(true);
+    NetCDF_CDMWriter(interpolator, "testInterpolator.nc");
+    BOOST_CHECK(true);
 }
 
 BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
@@ -176,27 +176,27 @@ BOOST_AUTO_TEST_CASE(test_interpolator2coords)
 
 BOOST_AUTO_TEST_CASE(test_interpolator2)
 {
-	string topSrcDir(TOP_SRCDIR);
-	string grdFile("/disk1/opdata/hirlam20/grdn06.dat");
-	ifstream inputFile(grdFile.c_str());
-	if (inputFile.is_open()) {
-		inputFile.close();
-		boost::shared_ptr<CDMReader> feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader2(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
-		boost::shared_ptr<CDMInterpolator> interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
-		vector<double> xAxis, yAxis;
-		xAxis = vector<double>();
-		yAxis = vector<double>();
-		for (int i = -114; i < 114; i++) {
-			xAxis.push_back(i * 50000);
-		}
-		for (int i = -147; i < 48; i++) {
-			yAxis.push_back(i * 50000);
-		}
-		interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
-		BOOST_CHECK(true);
-		NetCDF_CDMWriter(interpolator, "testInterpolator2.nc");
-		BOOST_CHECK(true);
-	}
+    string topSrcDir(TOP_SRCDIR);
+    string grdFile("/disk1/opdata/hirlam20/grdn06.dat");
+    ifstream inputFile(grdFile.c_str());
+    if (inputFile.is_open()) {
+        inputFile.close();
+        boost::shared_ptr<CDMReader> feltReader = boost::shared_ptr<CDMReader>(new FeltCDMReader2(grdFile, topSrcDir+"/share/etc/felt2nc_variables_hirlam20.xml"));
+        boost::shared_ptr<CDMInterpolator> interpolator = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(feltReader));
+        vector<double> xAxis, yAxis;
+        xAxis = vector<double>();
+        yAxis = vector<double>();
+        for (int i = -114; i < 114; i++) {
+            xAxis.push_back(i * 50000);
+        }
+        for (int i = -147; i < 48; i++) {
+            yAxis.push_back(i * 50000);
+        }
+        interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, "+proj=stere +lat_0=90 +lon_0=0 +lat_ts=60 +ellps=sphere +a="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "m", "m", CDM_INT, CDM_INT);
+        BOOST_CHECK(true);
+        NetCDF_CDMWriter(interpolator, "testInterpolator2.nc");
+        BOOST_CHECK(true);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(test_interpolatorRelative)
@@ -379,6 +379,36 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
             BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], -1*(xDataRot->asFloat())[i], error);
         }
     }
+}
+
+BOOST_AUTO_TEST_CASE(test_interpolator_vcross)
+{
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    string topSrcDir(TOP_SRCDIR);
+    string ncFileName(topSrcDir+"/test/erai.sfc.40N.0.75d.200301011200.nc");
+    if (!ifstream(ncFileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
+
+    vector<CrossSectionDefinition> vc;
+    vector<pair<double, double> > lonLat;
+    lonLat.push_back(make_pair<double,double>(10.74,59.9)); // Oslo
+    lonLat.push_back(make_pair<double,double>(10.3951,63.4305)); // Tronheim
+    lonLat.push_back(make_pair<double,double>(18.9551,69.6489)); // Tromso
+    vc.push_back(CrossSectionDefinition("OsloTrondheimTromso", lonLat));
+    lonLat.clear();
+    lonLat.push_back(make_pair<double,double>(5.3290, 60.3983)); // Bergen
+    lonLat.push_back(make_pair<double,double>(10.74,59.9)); // Oslo
+    vc.push_back(CrossSectionDefinition("BergenOslo", lonLat));
+    interpolator->changeProjectionToCrossSections(MIFI_INTERPOL_BILINEAR, vc);
+    BOOST_CHECK(true);
+    BOOST_CHECK(interpolator->getCDM().hasVariable("vcross_name"));
+    BOOST_CHECK(interpolator->getCDM().hasDimension("nvcross"));
+    BOOST_CHECK_EQUAL(interpolator->getCDM().getDimension("nvcross").getLength(), 2);
+    BOOST_CHECK(interpolator->getCDM().getDimension("x").getLength() >  5);
 }
 
 #else
