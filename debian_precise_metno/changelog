@@ -1,48 +1,54 @@
+fimex (0.47-1) precise; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 12 Aug 2013 16:30:00 +0200
+
 fimex (0.46.1-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Wed, 14 Jun 2013 13:00:00 +0200
 
 fimex (0.46-2) precise; urgency=low
 
   * adding old fimex-bin versions as conflict to fimex-share
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Thu, 13 Jun 2013 11:30:00 +0200
 
 fimex (0.46-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Wed, 12 Jun 2013 15:00:00 +0200
 
 fimex (0.45-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Mon, 20 May 2013 21:00:00 +0200
 
 fimex (0.44.2-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Mon, 11 Apr 2013 16:00:00 +0200
-   
+
 fimex (0.44.1-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Mon, 08 Apr 2013 22:00:00 +0100
-   
+
 fimex (0.43-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Mon, 25 Mar 2013 14:00:00 +0100
-   
+
 fimex (0.42-1) precise; urgency=low
 
   * initial upload
-  
+
  -- Heiko Klein <heiko.klein@met.no>  Mon, 04 Mar 2013 16:20:00 +0100
-   
+
