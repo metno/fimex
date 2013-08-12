@@ -123,7 +123,7 @@ my $lonVals = join ",", @lons;
 my $latVals = join ",", @lats;
 my $points = join ",", @points;
 
-my $method = "--interpolate.method=bilinear";
+my $method = "--interpolate.method=nearestneighbor";
 foreach my $arg (@ARGV) {
     if ($arg =~ /-interpolate.method/) {
         $method = "";
@@ -146,7 +146,7 @@ system(@command) == 0
 sub type2val {
     my ($type, $val) = @_;
     if ($type == 3) {
-        return $val;
+        return 0+$val;
     } elsif ($type == 4) {
         my $v = int ($val / 100);
         my $min = $val % 100;
