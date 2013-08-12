@@ -77,6 +77,8 @@ if (@ARGV < 2) {
     pod2usage(-exitval => 2,-verbose => 2);
 }
 
+my $fimex = $ENV{FIMEX} || "fimex";
+
 my (@points, @lats, @lons, @names);
 
 my $vcrossFile = shift @ARGV;
@@ -121,10 +123,19 @@ my $lonVals = join ",", @lons;
 my $latVals = join ",", @lats;
 my $points = join ",", @points;
 
-my @command = ("fimex", "--interpolate.method=bilinear", "--interpolate.vcrossNames=$names",
-               "--interpolate.vcrossNoPoints=$points",
-               "--interpolate.longitudeValues=$lonVals",
-               "--interpolate.latitudeValues=$latVals",
+my $method = "--interpolate.method=bilinear";
+foreach my $arg (@ARGV) {
+    if ($arg =~ /-interpolate.method/) {
+        $method = "";
+    }
+}
+
+my @command = ($fimex);
+push @command, $method if $method;
+push @command, ("--interpolate.vcrossNames=$names",
+                "--interpolate.vcrossNoPoints=$points",
+                "--interpolate.longitudeValues=$lonVals",
+                "--interpolate.latitudeValues=$latVals",
                 @ARGV);
 print STDERR "@command\n";
 system(@command) == 0
