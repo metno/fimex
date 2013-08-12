@@ -105,8 +105,8 @@ LINES: while (defined (my $line = <$fh>)) {
 
     push @points, $points;
     for (my $i = 0; $i < $points; ++$i) {
-        my $lon = type2val($type, shift @vals);
         my $lat = type2val($type, shift @vals);
+        my $lon = type2val($type, shift @vals);
         push @lats, $lat;
         push @lons, $lon;
     }
