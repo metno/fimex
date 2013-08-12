@@ -121,7 +121,7 @@ my $lonVals = join ",", @lons;
 my $latVals = join ",", @lats;
 my $points = join ",", @points;
 
-my @command = ("fimex", "--interpolate.method=bilinear", "--interpolate.vcrossNames='$names'",
+my @command = ("fimex", "--interpolate.method=bilinear", "--interpolate.vcrossNames=$names",
                "--interpolate.vcrossNoPoints=$points",
                "--interpolate.longitudeValues=$lonVals",
                "--interpolate.latitudeValues=$latVals",
