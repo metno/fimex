@@ -100,9 +100,9 @@ Units::Units()
         handleUdUnitError(ut_get_status());
     }
 #else
-	if (!utIsInit()) {
-		handleUdUnitError(utInit(0));
-	}
+    if (!utIsInit()) {
+        handleUdUnitError(utInit(0));
+    }
 #endif
 }
 
@@ -111,7 +111,7 @@ Units::Units(const Units& u)
 
 Units& Units::operator=(const Units& rhs)
 {
-	return *this; // no state! no increase/decrease to counter required
+    return *this; // no state! no increase/decrease to counter required
 }
 
 Units::~Units()
@@ -137,26 +137,26 @@ bool Units::unload(bool force) throw(UnitException)
 void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "convert from " << from << " to " << to);
-	if (from == to) {
-		slope = 1.;
-		offset = 0.;
-		return;
-	}
-	ScopedCritical lock(unitsMutex);
+    if (from == to) {
+        slope = 1.;
+        offset = 0.;
+        return;
+    }
+    ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
-	boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
-	handleUdUnitError(ut_get_status(), from);
-	boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
-	handleUdUnitError(ut_get_status(), to);
-	boost::shared_ptr<cv_converter> conv(ut_get_converter(fromUnit.get(), toUnit.get()), cv_free);
+    boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
+    handleUdUnitError(ut_get_status(), from);
+    boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
+    handleUdUnitError(ut_get_status(), to);
+    boost::shared_ptr<cv_converter> conv(ut_get_converter(fromUnit.get(), toUnit.get()), cv_free);
     handleUdUnitError(ut_get_status(), from + " -> " + to);
     offset = cv_convert_double(conv.get(), 0.0);
     slope = cv_convert_double(conv.get(), 1.0) - offset;
 #else
-	utUnit fromUnit, toUnit;
-	handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
-	handleUdUnitError(utScan(to.c_str(), &toUnit), to);
-	handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
+    utUnit fromUnit, toUnit;
+    handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
+    handleUdUnitError(utScan(to.c_str(), &toUnit), to);
+    handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
 #endif
 }
 
@@ -176,19 +176,19 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
         LOG4FIMEX(logger, Logger::WARN, ue.what());
     }
 #else
-	utUnit fromUnit, toUnit;
-	double slope, offset;
-	handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
-	handleUdUnitError(utScan(unit2.c_str(), &toUnit), unit2);
-	int error = utConvert(&fromUnit, &toUnit, &slope, &offset);
-	switch (error) {
-	case 0: areConv = 1; break;
-	case UT_ECONVERT: areConv = 0; break;
-	default: handleUdUnitError(error);
-	}
+    utUnit fromUnit, toUnit;
+    double slope, offset;
+    handleUdUnitError(utScan(unit1.c_str(), &fromUnit), unit1);
+    handleUdUnitError(utScan(unit2.c_str(), &toUnit), unit2);
+    int error = utConvert(&fromUnit, &toUnit, &slope, &offset);
+    switch (error) {
+    case 0: areConv = 1; break;
+    case UT_ECONVERT: areConv = 0; break;
+    default: handleUdUnitError(error);
+    }
 #endif
 
-	return areConv;
+    return areConv;
 }
 bool Units::isTime(const std::string& timeUnit) const
 {
@@ -197,9 +197,9 @@ bool Units::isTime(const std::string& timeUnit) const
 #else
     bool isTime = false;
     ScopedCritical lock(unitsMutex);
-	utUnit unit;
-	handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
-	isTime = (utIsTime(&unit) != 0);
+    utUnit unit;
+    handleUdUnitError(utScan(timeUnit.c_str(), &unit), timeUnit);
+    isTime = (utIsTime(&unit) != 0);
     return isTime;
 #endif
 }
