@@ -191,7 +191,7 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
     }
 }
 
-void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long end)
+void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long long end)
 {
     size_t length = 0;
     if (end > 0) {
