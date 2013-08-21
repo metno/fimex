@@ -104,6 +104,10 @@ Logger::~Logger()
 }
 
 Logger* Logger::getImpl() {
+#ifdef _OPENMP
+#pragma omp critical (MIFI_LOGGER)
+    {
+#endif
     if (pimpl_.get() == 0) {
         switch (logClass_) {
         case LOG4CPP:
@@ -114,6 +118,10 @@ Logger* Logger::getImpl() {
         default: pimpl_ = std::auto_ptr<Logger>(new Log2Stderr(className_)); break;
         }
     }
+#ifdef _OPENMP
+    }
+#endif
+
     return pimpl_.get();
 }
 
