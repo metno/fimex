@@ -58,7 +58,7 @@ class ToVLevelConverter;
     if (varSysIt != coordSys.end()) {
         if ((*varSysIt)->hasVerticalTransformation()) {
             boost::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
-            if (vtran->getName() == "atmosphere_hybrid_sigma_pressure_coordinate_1") {
+            if (vtran->getName() == HybridSigmaPressure1::NAME()) {
                 const HybridSigmaPressure1* hyb1 = dynamic_cast<const HybridSigmaPressure1*>(vtran.get());
                 assert(hyb1 != 0);
                 string apVar = hyb1->ap;
@@ -82,8 +82,8 @@ public:
     virtual ~VerticalTransformation() {}
     /// the indentifier of the vertical transformation
     virtual std::string getName() const = 0;
-    /// list the paramters
-    virtual std::string getParamterString() const = 0;
+    /// list the parameters
+    virtual std::string getParameterString() const = 0;
     /**
      *  Indicate if all parameters are given. In some cases
      *  a transformation might be used as indicator, even if

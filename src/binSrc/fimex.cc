@@ -422,19 +422,24 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
         if (vm.count("extract.reduceDimension.start")) {
             startPos = vm["extract.reduceDimension.start"].as<vector<int> >();
         }
-        if (vm.count("extract.reduceDimension.end")) {
-            endPos = vm["extract.reduceDimension.end"].as<vector<int> >();
-        }
         if (startPos.size() != vars.size()) {
             cerr << "extract.reduceDimension.start has not same no. of elements than extract.reduceDimension.name" << endl;
             cerr << "use start = 0 if you don't want to reduce the start-position" << endl;
         }
+        if (vm.count("extract.reduceDimension.end")) {
+            endPos = vm["extract.reduceDimension.end"].as<vector<int> >();
+        }
         if (endPos.size() != vars.size()) {
-            cerr << "extract.reduceDimension.start has not same no. of elements than extract.reduceDimension.name" << endl;
-            cerr << "use end = 0 if you don't want to reduce the end-position" << endl;
+            cerr << "extract.reduceDimension.end has not same no. of elements than extract.reduceDimension.name" << endl;
+            cerr << "use end = 0 (with start != 0) if you don't want to reduce the end-position" << endl;
         }
         for (size_t i = 0; i < vars.size(); ++i) {
-            extractor->reduceDimensionStartEnd(vars[i], startPos[i], endPos[i]);
+            if (startPos.at(i) == 0 && endPos.at(i) == 0) {
+                // exception to be able to extract only first element
+                extractor->reduceDimension(vars.at(i), 0, 1);
+            } else {
+                extractor->reduceDimensionStartEnd(vars[i], startPos[i], endPos[i]);
+            }
         }
     }
     if (vm.count("extract.reduceTime.start") || vm.count("extract.reduceTime.end")) {

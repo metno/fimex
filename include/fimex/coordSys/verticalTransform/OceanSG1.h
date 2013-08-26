@@ -51,7 +51,7 @@ public:
     /* optional */
     const std::string eta;
     /**
-     * Initialize OceanSG1 with formular as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
+     * Initialize OceanSG1 with formula as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
      *
      * @param s fractional vertical stretching coordinate sigma(k)
      * @param C free surface C(x,y,t)
@@ -62,10 +62,15 @@ public:
     OceanSG1(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "");
     virtual ~OceanSG1() {}
     /**
+     * static NAME constant
      * @return ocean_s_coordinate_g1
      */
-    virtual std::string getName() const { return "ocean_s_coordinate_g1"; }
-    virtual std::string getParamterString() const { return "s="+s+",C="+C+",depth="+depth+",depth_c="+depth_c+",eta="+eta; }
+    static const std::string NAME() {return "ocean_s_coordinate_g1";}
+    /**
+     * @return same as static NAME()
+     */
+    virtual std::string getName() const { return NAME(); }
+    virtual std::string getParameterString() const { return "s="+s+",C="+C+",depth="+depth+",depth_c="+depth_c+",eta="+eta; }
     virtual bool isComplete() const {return s != "" && C != "" && depth != "" && depth_c != "";}
 protected:
     virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;

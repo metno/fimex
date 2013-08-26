@@ -40,7 +40,7 @@ static LoggerPtr logger = getLogger("fimex.VerticalTransformation.h");
 
 std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransformation& vt)
 {
-    out << vt.getName() << "(" << vt.getParamterString() << ")";
+    out << vt.getName() << "(" << vt.getParameterString() << ")";
     return out;
 }
 

@@ -184,7 +184,7 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
         }
     }
 
-    string proj = "+proj=longlat " + getEarthsFigure(edition, gh);
+    string proj = "+proj=longlat " + getEarthsFigure(edition, gh) + " +no_defs";
 
     LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
     return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
@@ -221,7 +221,7 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
 
     ostringstream oss;
     oss << "+proj=ob_tran +o_proj=longlat +lon_0=" << normalizeLongitude180(lonRot) << " +o_lat_p=" << (-1 * latRot);
-    oss << " " + getEarthsFigure(edition, gh);
+    oss << " " << getEarthsFigure(edition, gh) <<  " +no_defs";
     string proj =  oss.str();
 
     return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
@@ -261,7 +261,7 @@ GridDefinition getGridDefMercator(long edition, boost::shared_ptr<grib_handle> g
 
     ostringstream oss;
     oss << "+proj=merc +lon_0="<<orientationOfGrid  << " +lat_ts=" << lat_ts << " ";
-    oss << getEarthsFigure(edition, gh);
+    oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
@@ -288,7 +288,7 @@ GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh
 
     ostringstream oss;
     oss << "+proj=lcc +lat_0="<<lat1 << " +lon_0="<< lonV << " +lat_1=" << lat1 << " " << " +lat_2=" << lat2 << " ";
-    oss << getEarthsFigure(edition, gh);
+    oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
@@ -322,7 +322,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     }
     ostringstream oss;
     oss << "+proj=stere +lat_0="<<lat0 << " +lon_0="<< orientationOfGrid << " +lat_ts=" << lat_ts << " ";
-    oss << getEarthsFigure(edition, gh);
+    oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
@@ -917,7 +917,7 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
         throw runtime_error("no such file: " + gribFilePath.string());
     }
-    
+
     if (ignoreExistingXml) {
         initByGrib(gribFilePath, members);
     } else {

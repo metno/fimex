@@ -38,7 +38,7 @@ extern "C" {
 
 /**
  * convert a standard_name="atmosphere_ln_pressure_coordinate" to pressure using the
- * formular  p(k) = p0 * exp(-lev(k))
+ * formula  p(k) = p0 * exp(-lev(k))
  *
  * @param n size of arrays lev and pressure
  * @param p0 base pressure
@@ -50,7 +50,7 @@ extern int mifi_atmosphere_ln_pressure(size_t n, double p0, const double* lev, d
 
 /**
  * convert a standard_name="atmosphere_sigma_coordinate" to pressure using the
- * formular  p(k) = ptop + sigma(k)*(ps-ptop)
+ * formula  p(k) = ptop + sigma(k)*(ps-ptop)
  *
  *
  * @param n size of arrays sigma and pressure
@@ -64,7 +64,7 @@ extern int mifi_atmosphere_sigma_pressure(size_t n, double ptop, double ps, cons
 
 /**
  * convert a pressure to standard_name="atmosphere_sigma_coordinate" using the
- * formular  p(k) = ptop + sigma(k)*(ps-ptop) ->
+ * formula  p(k) = ptop + sigma(k)*(ps-ptop) ->
  *       sigma(k) = (p(k) - ptop)/(ps-ptop)
  *
  *
@@ -79,7 +79,7 @@ extern int mifi_atmosphere_pressure_sigma(size_t n, double ptop, double ps, cons
 
 /**
  * convert a standard_name="atmosphere_hybrid_sigma_pressure_coordinate" to pressure using the
- * formular  p(k) = a(k)*p0 + b(k)*ps
+ * formula  p(k) = a(k)*p0 + b(k)*ps
  *
  *
  * @param n size of arrays a, b and pressure
@@ -94,7 +94,7 @@ extern int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps,
 
 /**
  * convert a standard_name="atmosphere_hybrid_sigma_pressure_coordinate" to pressure using the
- * formular  p(k) = ap(k) + b(k)*ps
+ * formula  p(k) = ap(k) + b(k)*ps
  *
  * This is the same as mifi_atmosphere_hybrid_sigma_pressure(), but with the reference pressure
  * and a joined already. Choice depends on the model, i.e. available input values.
@@ -109,7 +109,7 @@ extern int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps,
 extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const double* ap, const double* b, double* pressure);
 
 /**
- * convert height to pressure using the formular http://en.wikipedia.org/wiki/Barometric_formula
+ * convert height to pressure using the formula http://en.wikipedia.org/wiki/Barometric_formula
  *
  * P(h) = P_b exp[ -gM/R * h/T_b  ]
  *
@@ -131,14 +131,14 @@ extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const d
 extern int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, double* pressure);
 
 /**
- * convert height to pressure using the formular http://en.wikipedia.org/wiki/Barometric_formula
+ * convert height to pressure using the formula http://en.wikipedia.org/wiki/Barometric_formula
  * and using the international standard atmosphere http://en.wikimedia.org/wiki/International_Standard_Atmosphere
  */
 extern int mifi_barometric_standard_pressure(size_t n, const double* h, double* pressure);
 
 
 /**
- * convert pressure to height using the inverse formular http://en.wikipedia.org/wiki/Barometric_formula
+ * convert pressure to height using the inverse formula http://en.wikipedia.org/wiki/Barometric_formula
  *
  * h(k) = -R*T_b/g*M * log(p(k)/P_b);
  *
@@ -160,14 +160,14 @@ extern int mifi_barometric_standard_pressure(size_t n, const double* h, double* 
 extern int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, double* height);
 
 /**
- * convert pressure to height using the formular http://en.wikipedia.org/wiki/Barometric_formula
+ * convert pressure to height using the formula http://en.wikipedia.org/wiki/Barometric_formula
  * and using the international standard atmosphere http://en.wikimedia.org/wiki/International_Standard_Atmosphere
  */
 extern int mifi_barometric_standard_height(size_t n, const double* p, double* height);
 
 /**
  * convert a standard_name="ocean_s_coordinate_g1" to z using the
- * formular  z(k) = h_c*sigma(k) + C(k)*(h - h_c) + zeta*(1+(h_c*sigma(k)+C(k)*(h-h_c)/h))
+ * formula  z(k) = h_c*sigma(k) + C(k)*(h - h_c) + zeta*(1+(h_c*sigma(k)+C(k)*(h-h_c)/h))
  *
  * @param n size of arrays s and C pressure
  * @param h unperturbed water column thickness - varying in x,y (might be varying in time for sediment applications)
@@ -183,7 +183,7 @@ extern int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const 
 
 /**
  * convert a standard_name="ocean_s_coordinate_g1" to z using the
- * formular  z(k) = zeta + (zeta +h)*(h_c*sigma + h*C(k))/(h_c+h)
+ * formula  z(k) = zeta + (zeta +h)*(h_c*sigma + h*C(k))/(h_c+h)
  *
  * @param n size of arrays s and C pressure
  * @param h unperturbed water column thickness - varying in x,y (might be varying in time for sediment applications)

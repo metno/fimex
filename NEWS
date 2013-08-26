@@ -1,3 +1,16 @@
+  * 2013-08-26 fimex-0.47.1
+    * allowing to extract only first dimension element (start=end=0)
+    * fixing lambert-projection parameters in felt
+    * fixing typo's in VerticalTransformation API
+    * fixing time-interpolation when units-change
+    * makeing Logger thread-safe
+  * 2013-08-12 fimex-0.47
+    * adding vertical cross-section interpolation
+    * exposing vertical-transformations
+    * (re-)adding SliceBuilder interface to NcML aggregation (reduce memory-consumption)
+      * was dropped in 0.45
+    * allow ncml to add values to unlimited dimensions
+    * grib-reader allows time-unit change
   * 2013-06-12 fimex-0.46.1
     * warning, not failing with old grib-config files
   * 2013-06-12 fimex-0.46
@@ -17,7 +30,7 @@
     * vector-reprojection when selecting lat/lon-points
     * improved vector-rotation algorithm
     * lambert-projection for grib-writer
-    * small improvements in example-input files 
+    * small improvements in example-input files
   * 2013-04-11 fimex-0.44.2
     * fix bug with netcdf-CDMReaderWriter and empty variables
     * fix direction of vertical axes for pressure, sigma and sigma-hybrid
@@ -60,7 +73,7 @@
     * support for ensemble products in grib-files
   * 2012-10-30 fimex-0.39.2
     * vertical-interpolation invalidating data below ocean floor
-    * vertical interpolation fixing axis (positive down) of depth 
+    * vertical interpolation fixing axis (positive down) of depth
   * 2012-10-15 fimex-0.39.1
     * backport to boost-0.32
     * avoid problems with older gcc or icc when using constant class members

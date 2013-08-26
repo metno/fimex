@@ -148,7 +148,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
         if (timeDimName != "" && changedTimes.find(timeDimName) == changedTimes.end()) {
             changedTimes.insert(timeDimName); // avoid double changes
             DataPtr times = dataReader_->getScaledData(timeDimName);
-            string unit = cdm_->getAttribute(timeDimName, "units").getStringValue();
+            string unit = cdm_->getUnits(timeDimName);
             TimeUnit tu(unit);
             vector<FimexTime> oldTimes;
             boost::shared_array<double> oldTimesPtr = times->asDouble();
@@ -201,7 +201,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
             // store old times with new unit as oldTimesNewUnits-vector
             Units u;
             double slope, offset;
-            u.convert(unit, ts.getUnitString(), slope, offset);
+            u.convert(ts.getUnitString(), unit, slope, offset);
             dataReaderTimesInNewUnits_[timeDimName].clear();
             transform(oldTimesPtr.get(),
                       oldTimesPtr.get() + nEl,

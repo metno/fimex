@@ -149,7 +149,7 @@
 </vertical_axis>
 <vertical_axis id="k" name="k" felt_id="10" type="double">
     <attribute name="standard_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
-    <attribute name="formular" value="p(n,k,j,i) = ap(k) + b(k)*ps(n,j,i)" type="string" />
+    <attribute name="formula" value="p(n,k,j,i) = ap(k) + b(k)*ps(n,j,i)" type="string" />
     <attribute name="formula_terms" value="ap: ap b: b ps: ps p0: p0" type="string" />
     <attribute name="long_name" value="atmosphere_hybrid_sigma_pressure_coordinate" type="string" />
     <attribute name="positive" value="down" type="string" />

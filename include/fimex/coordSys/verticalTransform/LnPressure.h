@@ -41,7 +41,7 @@ public:
     const std::string lev;
     const std::string p0;
     /**
-     * Initialize LnPressure with formular (for all x, y, t)
+     * Initialize LnPressure with formula (for all x, y, t)
      *   p(k) = p0 * exp(-lev(k))
      *
      * @param lev dimensionless parameter
@@ -50,10 +50,15 @@ public:
     LnPressure(std::string lev, std::string p0) : lev(lev), p0(p0) {}
     virtual ~LnPressure() {}
     /**
+     * static NAME constant
      * @return atmosphere_ln_pressure_coordinate
      */
-    virtual std::string getName() const { return "atmosphere_ln_pressure_coordinate"; }
-    virtual std::string getParamterString() const { return "lev="+lev+",p0="+p0; }
+    static const std::string NAME() {return "atmosphere_ln_pressure_coordinate";}
+    /**
+     * @return same as static NAME()
+     */
+    virtual std::string getName() const { return NAME(); }
+    virtual std::string getParameterString() const { return "lev="+lev+",p0="+p0; }
     virtual bool isComplete() const {return lev != "" && p0 != "";}
 protected:
     virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
