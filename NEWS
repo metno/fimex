@@ -1,3 +1,9 @@
+  * 2013-08-26 fimex-0.47.1
+    * allowing to extract only first dimension element (start=end=0)
+    * fixing lambert-projection parameters in felt
+    * fixing typo's in VerticalTransformation API
+    * fixing time-interpolation when units-change
+    * makeing Logger thread-safe
   * 2013-08-12 fimex-0.47
     * adding vertical cross-section interpolation
     * exposing vertical-transformations
