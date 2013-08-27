@@ -64,7 +64,7 @@ void Felt_Array2::addField_(const boost::shared_ptr<felt::FeltField> field)
     } else {
         level = make_pair(field->level1(), field->level2());
     }
-    LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG, "adding field to param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second);
+    LOG4FIMEX(logger, MetNoFimex::Logger::DEBUG, "adding field to param "<< getName() << " vtime: " << boost::posix_time::to_simple_string(time) << " level: " << level.first << "," << level.second << "," << field->miscField());
 
     TimeLevelFieldMap::iterator timeSliceIt = feltFields_.find(time);
     if (timeSliceIt != feltFields_.end()) {
