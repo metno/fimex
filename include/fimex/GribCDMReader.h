@@ -77,6 +77,11 @@ private:
     xmlNodePtr findVariableXMLNode(const GribFileMessage& msg) const;
     std::string getVariableName(const GribFileMessage& gfm) const;
     size_t getVariableMaxEnsembles(std::string varName) const;
+    /**
+     * read the earth-figure from the xml-file
+     * @return "" or proj4-string as in xml-file
+     */
+    std::string xmlGetEarthFigure() const;
 
     void initAddTimeDimension();
     void initAddGlobalAttributes();

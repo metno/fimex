@@ -151,9 +151,13 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
         if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
     }
 
+    std::map<std::string, std::string> options;
+    if (xmlGetEarthFigure() != "") {
+        options["earthfigure"] = xmlGetEarthFigure();
+    }
 
     for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
-        vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds).listMessages();
+        vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds, false, options).listMessages();
         copy(messages.begin(), messages.end(), back_inserter(p_->indices));
     }
 
@@ -727,7 +731,7 @@ void GribCDMReader::initAddEnsembles()
     }
 }
 
-void GribCDMReader::initAddProjection()
+std::string GribCDMReader::xmlGetEarthFigure() const
 {
     // get the overruled earthform
     XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
@@ -736,6 +740,15 @@ void GribCDMReader::initAddProjection()
     string replaceEarthString = "";
     if (size == 1) {
         replaceEarthString = getXmlProp(nodes->nodeTab[0], "proj4");
+    }
+    return replaceEarthString;
+}
+
+void GribCDMReader::initAddProjection()
+{
+    // get the overruled earthform
+    string replaceEarthString = xmlGetEarthFigure();
+    if (replaceEarthString != "") {
         LOG4FIMEX(logger, Logger::DEBUG,"overruling earth-parametes with " << replaceEarthString);
     }
 
