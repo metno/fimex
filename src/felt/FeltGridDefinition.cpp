@@ -283,9 +283,8 @@ std::string gridParametersToProjDefinition(int gridType, const boost::array<floa
         projStr << "+proj=merc +lat_ts=" << (gs[4]);
         break;
     case 6:
-        // libmi supports only lat_0=0 = non-oblique (pole) lcc
-        // TODO: untested, missing test case
-        projStr << "+proj=lcc +lon_0="<< (gs[4]) << " +lat_1="<< (gs[5]) << " +lat_2=" << (gs[5]);
+        // libmi supports only lat_0=lat_1 = non-oblique (pole) lcc
+        projStr << "+proj=lcc +lon_0="<< (gs[4]) << " +lat_0="<<(gs[5]) << " +lat_1="<< (gs[5]) << " +lat_2=" << (gs[5]);
         break;
     default: throw std::invalid_argument("Unknown grid specification");
 

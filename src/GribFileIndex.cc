@@ -62,6 +62,11 @@ namespace MetNoFimex
 {
 using namespace std;
 static LoggerPtr logger = getLogger("fimex.GribFileIndex");
+/**
+ * @warn This variable is only for functions inside the GribFileIndex initialization.
+ *       Don't use otherwise.
+ */
+static std::string earthFigure_ = "";
 
 /**
  * converts a point on earth to a projection plane
@@ -127,6 +132,9 @@ std::string getEarthsSphericalFigure(boost::shared_ptr<grib_handle> gh)
 
 std::string getEarthsFigure(long edition, boost::shared_ptr<grib_handle> gh)
 {
+    if (earthFigure_ != "") {
+        return earthFigure_;
+    }
     // earth specific parameters, depending on grib-edition
     string earth;
     if (edition == 1) {
@@ -184,7 +192,7 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
         }
     }
 
-    string proj = "+proj=longlat " + getEarthsFigure(edition, gh);
+    string proj = "+proj=longlat " + getEarthsFigure(edition, gh) + " +no_defs";
 
     LOG4FIMEX(logger, Logger::DEBUG, "getting griddefinition: " << proj << ": (" << startX << "," << startY << "), (" << incrX << "," << incrY << ")");
     return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
@@ -221,7 +229,7 @@ GridDefinition getGridDefRotatedLL(long edition, boost::shared_ptr<grib_handle> 
 
     ostringstream oss;
     oss << "+proj=ob_tran +o_proj=longlat +lon_0=" << normalizeLongitude180(lonRot) << " +o_lat_p=" << (-1 * latRot);
-    oss << " " + getEarthsFigure(edition, gh);
+    oss << " " << getEarthsFigure(edition, gh) <<  " +no_defs";
     string proj =  oss.str();
 
     return GridDefinition(proj, true, sizeX, sizeY, incrX, incrY, startX, startY, orient);
@@ -261,7 +269,7 @@ GridDefinition getGridDefMercator(long edition, boost::shared_ptr<grib_handle> g
 
     ostringstream oss;
     oss << "+proj=merc +lon_0="<<orientationOfGrid  << " +lat_ts=" << lat_ts << " ";
-    oss << getEarthsFigure(edition, gh);
+    oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
@@ -288,12 +296,12 @@ GridDefinition getGridDefLambert(long edition, boost::shared_ptr<grib_handle> gh
 
     ostringstream oss;
     oss << "+proj=lcc +lat_0="<<lat1 << " +lon_0="<< lonV << " +lat_1=" << lat1 << " " << " +lat_2=" << lat2 << " ";
-    oss << getEarthsFigure(edition, gh);
+    oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
     projConvert(proj, gmd.startLon, gmd.startLat, startX, startY);
-
+    LOG4FIMEX(logger, Logger::DEBUG, "startpos: (lon,lat) " << gmd.startLon  << ", " << gmd.startLat << "  (x,y)= " << startX << "," << startY << " projStr" << proj);
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
@@ -322,7 +330,7 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     }
     ostringstream oss;
     oss << "+proj=stere +lat_0="<<lat0 << " +lon_0="<< orientationOfGrid << " +lat_ts=" << lat_ts << " ";
-    oss << getEarthsFigure(edition, gh);
+    oss << getEarthsFigure(edition, gh) << " +no_defs";
     string proj = oss.str();
 
     // calculate startX and startY from lat/lon
@@ -911,13 +919,19 @@ GribFileIndex::GribFileIndex()
     // dummy generator
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml, std::map<std::string, std::string> options)
+: options_(options)
 {
+    if (options_.find("earthfigure") != options.end()) {
+        earthFigure_ = options_["earthfigure"];
+        LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure " << earthFigure_);
+    }
+
     namespace fs = boost::filesystem;
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
         throw runtime_error("no such file: " + gribFilePath.string());
     }
-    
+
     if (ignoreExistingXml) {
         initByGrib(gribFilePath, members);
     } else {
@@ -946,6 +960,7 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
             }
         }
     }
+    earthFigure_ = ""; // remember to reset!
 }
 
 void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members)
@@ -980,7 +995,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::
             try {
                 messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos, members));
             } catch (CDMException& ex) {
-                LOG4FIMEX(getLogger("fimex.GribFileIndex"), Logger::WARN, "ignoring grib-message at byte " << msgPos <<": " << ex.what());
+                LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << msgPos <<": " << ex.what());
             }
         }
     }

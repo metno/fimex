@@ -209,7 +209,7 @@ public:
     virtual void setAuxiliaryAxis(ConstAxisPtr axis);
     /**
      * Get all dependency-variables for this Coordinate-System, i.e.
-     * axes, grid-mapping-variable, formular-terms, ...
+     * axes, grid-mapping-variable, formula-terms, ...
      */
     virtual std::set<std::string> getDependencyVariables() const;
     /**

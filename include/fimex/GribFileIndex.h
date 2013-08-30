@@ -163,14 +163,20 @@ public:
      * @li remote NFS file, first time: 16s
      * @li file completely in memory: 1.1s
      * @li xml-file: 0.1s
+     *
+     * @param gribFilePath path to first filename
+     * @param members translation of members to filenames
+     * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
+     * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
-    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false);
+    GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
     virtual ~GribFileIndex();
     const std::vector<GribFileMessage>& listMessages() const {return messages_;}
     const std::string& getUrl() const {return url_;}
 private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
+    std::map<std::string, std::string> options_;
     void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members);
     void initByXML(boost::filesystem::path xmlFilePath);
 };

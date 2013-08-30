@@ -38,6 +38,7 @@ using boost::unit_test_framework::test_suite;
 
 #include "fimex/NetCDF_CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/OceanSG2.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
@@ -225,6 +226,30 @@ BOOST_AUTO_TEST_CASE( test_coordSys )
     boost::posix_time::ptime refTime = getUniqueForecastReferenceTime(reader);
     BOOST_CHECK(refTime == boost::posix_time::ptime(boost::gregorian::date(2000,1,1), boost::posix_time::time_duration(10,0,0)));
 
+}
+
+BOOST_AUTO_TEST_CASE( test_vTrans )
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/verticalOceanSG2.nc");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName));
+
+    // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
+    string varName = "temp";
+    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    BOOST_CHECK(varSysIt != coordSys.end());
+    BOOST_CHECK((*varSysIt)->hasVerticalTransformation());
+    boost::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
+    BOOST_CHECK(vtran.get() != 0);
+    BOOST_CHECK_EQUAL(vtran->getName(), OceanSG2::NAME());
+    const OceanSG2* osg2 = dynamic_cast<const OceanSG2*>(vtran.get());
+    BOOST_CHECK(osg2 != 0);
 }
 
 #else

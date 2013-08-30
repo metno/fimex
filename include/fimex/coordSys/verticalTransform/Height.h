@@ -44,10 +44,15 @@ public:
     Height(std::string height) : height(height) {}
     virtual ~Height() {}
     /**
+     * static NAME constant
      * @return height
      */
-    virtual std::string getName() const { return "height"; }
-    virtual std::string getParamterString() const { return "h="+height; }
+    static const std::string NAME() {return "height";}
+    /**
+     * @return same as static NAME()
+     */
+    virtual std::string getName() const { return NAME(); }
+    virtual std::string getParameterString() const { return "h="+height; }
     virtual bool isComplete() const {return height != "";}
 protected:
     virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;

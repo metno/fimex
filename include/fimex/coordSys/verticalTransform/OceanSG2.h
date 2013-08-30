@@ -44,7 +44,7 @@ class OceanSG2 : public OceanSG1
 {
 public:
     /**
-     * Initialize OceanSG2 with formular as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
+     * Initialize OceanSG2 with formula as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
      *
      * @param s fractional vertical stretching coordinate sigma(k)
      * @param C free surface C(x,y,t)
@@ -56,9 +56,14 @@ public:
     OceanSG2(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "");
     virtual ~OceanSG2() {}
     /**
+     * static NAME constant
      * @return ocean_s_coordinate_g2
      */
-    virtual std::string getName() const { return "ocean_s_coordinate_g2"; }
+    static const std::string NAME() {return "ocean_s_coordinate_g2";}
+    /**
+     * @return same as static NAME()
+     */
+    virtual std::string getName() const { return NAME(); }
 };
 
 } /* namespace MetNoFimex */

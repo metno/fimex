@@ -94,7 +94,7 @@ public:
      * @param end end-position of dimension, 0 means full size, negative values start from end
      * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
      */
-    virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long end = 0);
+    virtual void reduceDimensionStartEnd(std::string dimName, size_t start = 0, long long end = 0);
     /**
      * @brief reduce the axes of a file with an explicit unit
      *

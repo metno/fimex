@@ -43,7 +43,7 @@ public:
     const std::string ps;
     const std::string p0;
     /**
-     * Initialize HybridSigmaPressure with formular
+     * Initialize HybridSigmaPressure with formula
      *   p(k, x,y,t) = a(k)*p0 + b(k)*ps(x,y,t)
      *
      * @param a parameter in pressure unit
@@ -54,10 +54,15 @@ public:
     HybridSigmaPressure2(std::string a, std::string b, std::string ps, std::string p0 = "") : a(a), b(b), ps(ps), p0(p0) {}
     virtual ~HybridSigmaPressure2() {}
     /**
+     * static NAME constant
      * @return atmosphere_hybrid_sigma_pressure_coordinate_2
      */
-    virtual std::string getName() const { return "atmosphere_hybrid_sigma_pressure_coordinate_2"; }
-    virtual std::string getParamterString() const { return "a="+a+",b="+b+",ps="+ps+",p0="+p0; }
+    static const std::string NAME() {return "atmosphere_hybrid_sigma_pressure_coordinate_2";}
+    /**
+     * @return same as static NAME()
+     */
+    virtual std::string getName() const { return NAME(); }
+    virtual std::string getParameterString() const { return "a="+a+",b="+b+",ps="+ps+",p0="+p0; }
     virtual bool isComplete() const {return a != "" && b != "" && ps != "" && p0 != "";}
 protected:
     virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;

@@ -97,7 +97,7 @@ extern int mifi_interpolate_d(int method,
  * proj(x,y)_x' = a11*x+a21*y
  * proj(x,y)_y' = a12*x+a22*y
  * @endcode
- * and the same formulars for (x+delta, y) and (x, y+delta) (with delta a small value against the x or y)
+ * and the same formulas for (x+delta, y) and (x, y+delta) (with delta a small value against the x or y)
  *
  * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE)
  * @param proj_input proj4-string of projection of infield
