@@ -7,7 +7,7 @@
 	<attribute name="cell_methods" value="time: point" type="string" />
 	<attribute name="long_name" value="air_pressure_at_sea_level" type="string" />
 	<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
-	<attribute name="scale_factor" value="10" type="float" />
+	<!--<attribute name="scale_factor" value="10" type="float" />-->
 	<attribute name="units" value="hPa" type="string" />
 </parameter>
 <parameter id="19" name="lwe_thickness_of_large_scale_precipitation_amount" type="float">
