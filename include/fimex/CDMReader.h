@@ -223,7 +223,7 @@ protected:
      */
     virtual DataPtr getDataSliceFromMemory(const CDMVariable& variable, size_t unLimDimPos = 0);
 
-    void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset);
+    void getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset) const;
 
 private:
     DataPtr scaleDataOf(const std::string& varName, DataPtr data, double unitScale = 1., double unitOffset = 0.);

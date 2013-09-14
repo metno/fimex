@@ -151,7 +151,7 @@ DataPtr CDMReader::getData(const std::string& varName)
     }
 }
 
-void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset)
+void CDMReader::getScaleAndOffsetOf(const std::string& varName, double& scale, double& offset) const
 {
     // init
     scale = 1.;

@@ -1335,6 +1335,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
             mifi_get_vector_reproject_matrix(orgProjStr.c_str(), proj_input.c_str(), &out_x_axis[0], &out_y_axis[0], outXAxisType, outYAxisType, out_x_axis.size(), out_y_axis.size(), matrix.get());
             LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection");
             p_->cachedVectorReprojection[csIt->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, out_x_axis.size(), out_y_axis.size()));
+
         }
     }
 }
@@ -1663,18 +1664,32 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
 
 bool CDMInterpolator::hasXYSpatialVectors() const
 {
+    bool retVal = false;
     const CDM::VarVec& variables = getCDM().getVariables();
     for (CDM::VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
         if (p_->projectionVariables.find(varIt->getName()) != p_->projectionVariables.end()) {
             if (varIt->isSpatialVector()) {
                 const string& direction = varIt->getSpatialVectorDirection();
                 if (!((direction.find("x") == string::npos) && (direction.find("y") == string::npos))) {
-                    return true;
+                    retVal = true;
+
+                    // check that all vectors have same unit, scale_factor and add_offset
+                    double scale1, scale2, offset1, offset2;
+                    getScaleAndOffsetOf(varIt->getName(), scale1, offset1);
+                    getScaleAndOffsetOf(varIt->getSpatialVectorCounterpart(), scale2, offset2);
+
+                    string unit1 = getCDM().getUnits(varIt->getName());
+                    string unit2 = getCDM().getUnits(varIt->getSpatialVectorCounterpart());
+
+                    if ((scale1 != scale2) || (offset1 != offset2) || (unit1 != unit2)) {
+                        LOG4FIMEX(logger, Logger::ERROR, "vector (" << varIt->getName() << "," << varIt->getSpatialVectorCounterpart() << ") have different unit,scale_factor or add_offset - rot. vectors might be wrong");
+                    }
                 }
             }
         }
     }
-    return false;
+
+    return retVal;
 }
 
 void CDMInterpolator::addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process)
