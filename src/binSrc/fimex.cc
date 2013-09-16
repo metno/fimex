@@ -1046,6 +1046,9 @@ int main(int argc, char* args[])
         return run(argc, args);
 
 #ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
+    } catch (const boost::program_options::error& ex) {
+        clog << "invalid options: " << ex.what() << endl;
+        return 1;
     } catch (exception& ex) {
         clog << "exception occured: " << ex.what() << endl;
         return 1;
