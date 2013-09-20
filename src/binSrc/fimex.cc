@@ -119,7 +119,7 @@ static void printReaderStatements(const string& readerName, const po::variables_
         cout << endl;
     }
     if (vm.count(readerName+".printSize")) {
-        cout << readerName << " size: ~" << (estimateCDMDataSize(reader->getCDM())/1024/1024) << "MB";
+        cout << readerName << " size: ~" << ceil(estimateCDMDataSize(reader->getCDM())/1024./1024.) << "MB";
         cout << endl;
     }
 }
