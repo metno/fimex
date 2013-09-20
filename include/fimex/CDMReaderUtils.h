@@ -61,5 +61,9 @@ boost::posix_time::ptime getUniqueForecastReferenceTime(boost::shared_ptr<CDMRea
  */
 std::vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const std::string& var, const std::string& unit, int unLimDimPos);
 
+/**
+ * return estimated size of CDM-data in bytes
+ */
+std::size_t estimateCDMDataSize(const CDM& cdm);
 }
 #endif /* CDMREADERUTILS_H_ */

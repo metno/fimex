@@ -50,6 +50,7 @@
 #include "fimex/TimeUnit.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/NcmlCDMReader.h"
@@ -117,6 +118,10 @@ static void printReaderStatements(const string& readerName, const po::variables_
         cout << joinPtr(csVec.begin(), csVec.end(), " | ");
         cout << endl;
     }
+    if (vm.count(readerName+".printSize")) {
+        cout << readerName << " size: ~" << (estimateCDMDataSize(reader->getCDM())/1024/1024) << "MB";
+        cout << endl;
+    }
 }
 
 template<typename T>
@@ -176,18 +181,26 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeVectorOptionString(out, "input.optional", vm);
     writeOption<string>(out, "input.printNcML", vm);
     writeOptionAny(out, "input.printCS", vm);
+    writeOptionAny(out, "input.printSize", vm);
     writeOption<string>(out, "output.file", vm);
     writeOption<string>(out, "output.fillFile", vm);
     writeOption<string>(out, "output.type", vm);
     writeOption<string>(out, "output.config", vm);
+    writeOption<string>(out, "output.printNcML", vm);
+    writeOptionAny(out, "output.printCS", vm);
+    writeOptionAny(out, "output.printSize", vm);
     writeVectorOptionString(out, "process.accumulateVariable", vm);
     writeVectorOptionString(out, "process.deaccumulateVariable", vm);
     writeVectorOptionString(out, "process.rotateVectorToLatLonX", vm);
     writeVectorOptionString(out, "process.rotateVectorToLatLonY", vm);
+    writeOption<string>(out, "process.printNcML", vm);
+    writeOption<string>(out, "process.printCS", vm);
+    writeOption<string>(out, "process.printSize", vm);
     writeOption<string>(out, "qualityExtract.autoConfigString", vm);
     writeOption<string>(out, "qualityExtract.config", vm);
     writeOption<string>(out, "qualityExtract.printNcML", vm);
     writeOption<string>(out, "qualityExtract.printCS", vm);
+    writeOption<string>(out, "qualityExtract.printSize", vm);
     writeVectorOptionString(out, "extract.removeVariable", vm);
     writeVectorOptionString(out, "extract.selectVariables", vm);
     writeOptionAny(out, "extract.selectVariables.noAuxiliary", vm);
@@ -205,6 +218,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<double>(out, "extract.reduceToBoundingBox.east", vm);
     writeOption<string>(out, "extract.printNcML", vm);
     writeOptionAny(out, "extract.printCS", vm);
+    writeOptionAny(out, "extract.printSize", vm);
     writeOption<string>(out, "interpolate.projString", vm);
     writeOption<string>(out, "interpolate.method", vm);
     writeOption<string>(out, "interpolate.latitudeValues", vm);
@@ -223,6 +237,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "interpolate.preprocess", vm);
     writeOption<string>(out, "interpolate.printNcML", vm);
     writeOptionAny(out, "interpolate.printCS", vm);
+    writeOptionAny(out, "interpolate.printSize", vm);
     writeOption<string>(out, "verticalInterpolate.method", vm);
     writeOption<string>(out, "verticalInterpolate.type", vm);
     writeOption<string>(out, "verticalInterpolate.level1", vm);
@@ -230,12 +245,25 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeVectorOptionString(out, "verticalInterpolate.dataConversion", vm);
     writeOption<string>(out, "verticalInterpolate.printNcML", vm);
     writeOptionAny(out, "verticalInterpolate.printCS", vm);
+    writeOptionAny(out, "verticalInterpolate.printSize", vm);
     writeOption<string>(out, "timeInterpolate.timeSpec", vm);
     writeOption<string>(out, "timeInterpolate.printNcML", vm);
     writeOptionAny(out, "timeInterpolate.printCS", vm);
+    writeOptionAny(out, "timeInterpolate.printSize", vm);
+    writeOption<string>(out, "merge.inner.file", vm);
+    writeOption<string>(out, "merge.inner.type", vm);
+    writeOption<string>(out, "merge.inner.config", vm);
+    writeOption<string>(out, "merge.smoothing", vm);
+    writeOption<string>(out, "merge.method.outer", vm);
+    writeVectorOptionString(out, "merge.variables.inner", vm);
+    writeVectorOptionString(out,"merge.variables.outer", vm);
+    writeOption<string>(out,"merge.printNcML", vm);
+    writeOptionAny(out, "merge.printCS", vm);
+    writeOptionAny(out, "merge.printSize", vm);
     writeOption<string>(out, "ncml.config", vm);
     writeOption<string>(out, "ncml.printNcML", vm);
     writeOptionAny(out, "ncml.printCS", vm);
+    writeOptionAny(out, "ncml.printSize", vm);
 }
 
 static string getType(const string& io, po::variables_map& vm) {
@@ -734,6 +762,7 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
     for(size_t v=0; v<varI.size(); ++v)
         merger->addMergedVariable(varI[v], varO[v]);
 
+    printReaderStatements("merge", vm, merger);
     return merger;
 }
 
@@ -768,6 +797,7 @@ static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_
 
 
 static void writeCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
+    printReaderStatements("output", vm, dataReader);
     if (!vm.count("output.file")) {
         LOG4FIMEX(logger, Logger::DEBUG, "no output.file selected");
         return;
@@ -853,10 +883,18 @@ int run(int argc, char* args[])
         ("input.printNcML", po::value<string>(), "print NcML description of input (use - for command-line")
 #endif
         ("input.printCS", "print CoordinateSystems of input file")
+        ("input.printSize", "print size estimate")
         ("output.file", po::value<string>(), "output file")
         ("output.fillFile", po::value<string>(), "existing output file to be filled")
         ("output.type", po::value<string>(), "filetype of output file, e.g. nc, nc4, grib1, grib2")
         ("output.config", po::value<string>(), "non-standard output configuration")
+#if BOOST_VERSION >= 104000
+        ("output.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of input")
+#else
+        ("output.printNcML", po::value<string>(), "print NcML description of input (use - for command-line")
+#endif
+        ("output.printCS", "print CoordinateSystems of input file")
+        ("output.printSize", "print size estimate")
         ("process.accumulateVariable", po::value<vector<string> >()->composing(), "accumulate variable along unlimited dimension")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
         ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
@@ -867,6 +905,7 @@ int run(int argc, char* args[])
         ("process.printNcML", po::value<string>(), "print NcML description of process (use - for command-line")
 #endif
         ("process.printCS", "print CoordinateSystems of process")
+        ("process.printSize", "print size estimate")
         ("extract.removeVariable", po::value<vector<string> >()->composing(), "remove variables")
         ("extract.selectVariables", po::value<vector<string> >()->composing(), "select only those variables")
         ("extract.selectVariables.noAuxiliary", "don't add auxiliary variables")
@@ -888,6 +927,7 @@ int run(int argc, char* args[])
         ("extract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("extract.printCS", "print CoordinateSystems of extractor")
+        ("extract.printSize", "print size estimate")
         ("qualityExtract.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
         ("qualityExtract.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
 #if BOOST_VERSION >= 104000
@@ -896,6 +936,7 @@ int run(int argc, char* args[])
         ("qualityExtract.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("qualityExtract.printCS", "print CoordinateSystems of extractor")
+        ("qualityExtract.printSize", "print size estimate")
         ("interpolate.projString", po::value<string>(), "proj4 input string describing the new projection")
         ("interpolate.method", po::value<string>(), "interpolation method, one of nearestneighbor, bilinear, bicubic, coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
         ("interpolate.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
@@ -919,6 +960,7 @@ int run(int argc, char* args[])
         ("interpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("interpolate.printCS", "print CoordinateSystems of interpolator")
+        ("interpolate.printSize", "print size estimate")
 
         ("merge.inner.file", po::value<string>(), "inner file for merge")
         ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
@@ -928,6 +970,13 @@ int run(int argc, char* args[])
                                                     " coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
         ("merge.variables.inner", po::value< vector<string> >(), "names of inner grid variables to merge; must appear exactly as often as merge.variables.outer")
         ("merge.variables.outer", po::value< vector<string> >(), "names of outer grid variables to merge; these names will appear in the output")
+#if BOOST_VERSION >= 104000
+        ("merge.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("merge.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
+        ("merge.printCS", "print CoordinateSystems of interpolator")
+        ("merge.printSize", "print size estimate")
 
         ("verticalInterpolate.type", po::value<string>(), "pressure, height or depth")
         ("verticalInterpolate.method", po::value<string>(), "linear, log, loglog or nearestneighbor interpolation")
@@ -940,6 +989,7 @@ int run(int argc, char* args[])
         ("verticalInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("verticalInterpolate.printCS", "print CoordinateSystems of vertical interpolator")
+        ("verticalInterpolate.printSize", "print size estimate")
         ("timeInterpolate.timeSpec", po::value<string>(), "specification of times to interpolate to, see MetNoFimex::TimeSpec for a full definition")
 #if BOOST_VERSION >= 104000
         ("timeInterpolate.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
@@ -947,6 +997,7 @@ int run(int argc, char* args[])
         ("timeInterpolate.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
+        ("timeInterpolate.printSize", "print size estimate")
         ("ncml.config", po::value<string>(), "modify/configure with ncml-file")
 #if BOOST_VERSION >= 104000
         ("ncml.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
@@ -954,6 +1005,7 @@ int run(int argc, char* args[])
         ("ncml.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
 #endif
         ("ncml.printCS", "print CoordinateSystems after ncml-configuration")
+        ("ncml.printSize", "print size estimate")
         ;
 
 

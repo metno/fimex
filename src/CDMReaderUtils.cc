@@ -75,5 +75,27 @@ vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, co
     return vector<double>(&array[0], &array[0] + data->size());
 }
 
+std::size_t estimateCDMDataSize(const CDM& cdm)
+{
+    size_t retVal = 0;
+    map<string, size_t> dimSizes;
+    const CDM::DimVec& dims = cdm.getDimensions();
+    for (CDM::DimVec::const_iterator dit = dims.begin(); dit != dims.end(); ++dit) {
+        dimSizes[dit->getName()] = dit->getLength();
+    }
+    const CDM::VarVec& vars = cdm.getVariables();
+    for (CDM::VarVec::const_iterator vit = vars.begin(); vit != vars.end(); ++vit) {
+        DataPtr d = createData(vit->getDataType(), 0u);
+        const vector<string>& shape = vit->getShape();
+        size_t size = 1;
+        for (size_t i = 0; i < shape.size(); ++i) {
+            size *= dimSizes[shape.at(i)];
+        }
+        retVal += d->bytes_for_one()*size;
+    }
+    return retVal;
+}
+
+
 
 }
