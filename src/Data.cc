@@ -75,6 +75,7 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
         case CDM_INT64:  return boost::shared_ptr<DataImpl<long long> >(new DataImpl<long long>(length));
         case CDM_INT:    return boost::shared_ptr<DataImpl<int> >(new DataImpl<int>(length));
         case CDM_SHORT:  return boost::shared_ptr<DataImpl<short> >(new DataImpl<short>(length));
+        case CDM_STRING:
         case CDM_CHAR:   return boost::shared_ptr<DataImpl<char> >(new DataImpl<char>(length));
         case CDM_UINT64: return boost::shared_ptr<DataImpl<unsigned long long> >(new DataImpl<unsigned long long>(length));
         case CDM_UINT:   return boost::shared_ptr<DataImpl<unsigned int> >(new DataImpl<unsigned int>(length));
@@ -100,6 +101,7 @@ DataPtr createDataSlice(CDMDataType datatype, const Data& data, size_t dataStart
         case CDM_INT64:    { boost::shared_ptr<DataImpl<long long> > mydata(new DataImpl<long long>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_INT:    { boost::shared_ptr<DataImpl<int> > mydata(new DataImpl<int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_SHORT:  { boost::shared_ptr<DataImpl<short> > mydata(new DataImpl<short>(length));   mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
+        case CDM_STRING:
         case CDM_CHAR:   { boost::shared_ptr<DataImpl<char> > mydata(new DataImpl<char>(length));     mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_UINT64:    { boost::shared_ptr<DataImpl<unsigned long long> > mydata(new DataImpl<unsigned long long>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
         case CDM_UINT:    { boost::shared_ptr<DataImpl<unsigned int> > mydata(new DataImpl<unsigned int>(length));       mydata->setValues(0, data, dataStartPos, dataStartPos+length); return mydata; }
