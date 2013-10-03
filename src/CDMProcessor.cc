@@ -29,6 +29,7 @@
 #include "fimex/Logger.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/CachedVectorReprojection.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
@@ -85,6 +86,34 @@ void CDMProcessor::deAccumulate(const std::string& varName)
     }
 
 }
+
+void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
+    // find all vectors and rotate them to lat/lon (or x/y)
+    enhanceVectorProperties(boost::shared_ptr<CDMReader>(this, noDelete));
+    vector<string> varNameX, varNameY, standardNameX, standardNameY;
+    string type = toLatLon ? "x" : "lon";
+    string rot = toLatLon ? "LATLON_ROTATED_" : "GRID_ROTATED_";
+    const CDM::VarVec& vars = getCDM().getVariables();
+    for (CDM::VarVec::const_iterator vit = vars.begin(); vit != vars.end(); ++vit) {
+       if (vit->isSpatialVector() && vit->getSpatialVectorDirection().find(type) != string::npos) {
+           varNameX.push_back(vit->getName());
+           CDMAttribute attr;
+           if (getCDM().getAttribute(vit->getName(), "standard_name", attr)) {
+               standardNameX.push_back(rot + attr.getStringValue());
+           } else {
+               standardNameX.push_back(rot + vit->getName());
+           }
+           varNameY.push_back(vit->getSpatialVectorCounterpart());
+           if (getCDM().getAttribute(vit->getSpatialVectorCounterpart(), "standard_name", attr)) {
+               standardNameY.push_back(rot + attr.getStringValue());
+           } else {
+               standardNameY.push_back(rot + vit->getSpatialVectorCounterpart());
+           }
+       }
+    }
+    rotateVectorToLatLon(toLatLon, varNameX, varNameY, standardNameX, standardNameY);
+}
+
 void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY, const std::vector<std::string>& stdNameX, const std::vector<std::string>& stdNameY)
 {
     LoggerPtr logger = getLogger("fimex.CDMProcessor");

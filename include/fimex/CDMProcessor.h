@@ -72,6 +72,11 @@ public:
      * @param stdNameY optional new standard_name for y
      */
     void rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY, const std::vector<std::string>& stdNameX = std::vector<std::string>(0), const std::vector<std::string>& stdNameY = std::vector<std::string>(0));
+    /**
+     * rotate all the vectors from direction in x/y axes to direction in lat/lon axes vectors are detected automatically
+     * @param toLatLon convert to latLon if true, otherwise, convert latLon to grid-axes
+     */
+    void rotateAllVectorsToLatLon(bool toLatLon);
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 private:

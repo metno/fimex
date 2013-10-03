@@ -39,7 +39,11 @@ The data-fetching is only prepared in this step. Data is interpolated during dat
 Heiko Klein
 }
 \note{
-Vector properties, like wind or current are currently kept in grid-direction. This might change without notice in the future.
+Vector properties, like wind or current are rotated if the spatial_direction property is set
+in the setup file, or if the standard_name is known, e.g. x_wind, *_x_velocity, *_x_transport,
+*_x_displacement. The complete list can be seen in https://svn.met.no/viewvc/fimex/trunk/src/coordSys/CF1_xCoordSysBuilder.cc?view=markup
+(enhanceVectorProperties)
+
 The output will be of size: x=length(lons), y=1
 }
 

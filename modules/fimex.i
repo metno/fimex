@@ -1,4 +1,4 @@
-/* 
+/*
  * PERL
  * swig -I/usr/include -Wall -c++ -module Geo::Fimex -outdir lib/Geo -perl fimex.i
  */
@@ -17,6 +17,7 @@
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/CDMInterpolator.h"
+#include "fimex/CDMProcessor.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -47,7 +48,7 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
             axes.push_back((*varSysIt)->getGeoYAxis());
             axes.push_back((*varSysIt)->getGeoZAxis());
             axes.push_back((*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime));
-        
+
             std::vector<std::string> shape = reader->getCDM().getVariable(varName).getShape();
             std::set<std::string> shapeSet(shape.begin(), shape.end());
             for (int i = 0; i < axes.size(); i++) {
@@ -77,6 +78,13 @@ boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReade
     read->changeProjection(method, lonVals, latVals);
     return r;
 }
+
+boost::shared_ptr<CDMReader> vectorAutoRotatedReader(boost::shared_ptr<CDMReader> in, int toLatLon) {
+    boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new CDMProcessor(in));
+    r->rotateAllVectorsToLatLon(toLatLon != 0);
+    return r;
+}
+
 
 double mifi_get_unique_forecast_reference_time(boost::shared_ptr<MetNoFimex::CDMReader> reader, const char* units)
 {
@@ -167,7 +175,7 @@ class CDMFileReaderFactory {
 
 class NetCDF_CDMWriter {
   public:
-    NetCDF_CDMWriter(boost::shared_ptr<MetNoFimex::CDMReader> reader, const std::string& filename, std::string configFile = "", int version = 3) throw(MetNoFimex::CDMException); 
+    NetCDF_CDMWriter(boost::shared_ptr<MetNoFimex::CDMReader> reader, const std::string& filename, std::string configFile = "", int version = 3) throw(MetNoFimex::CDMException);
 };
 
 }

@@ -26,6 +26,7 @@
 #include "fimex/CDM.h"
 #include "fimex/SliceBuilder.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/Logger.h"
 #include <vector>
 #include <set>
@@ -203,10 +204,6 @@ void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, lo
         length += end;
     }
     reduceDimension(dimName, start, length);
-}
-
-void noDelete(CDMReader* r) {
-    // don't delete this reader from a shared_ptr
 }
 
 void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types, const std::string& aUnits, double startVal, double endVal)

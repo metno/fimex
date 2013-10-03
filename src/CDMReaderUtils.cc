@@ -39,6 +39,8 @@ namespace MetNoFimex
 
 using namespace std;
 
+void noDelete(CDMReader* r) {}
+
 boost::posix_time::ptime
 getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
 {

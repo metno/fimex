@@ -46,7 +46,7 @@ using boost::unit_test_framework::test_suite;
 using namespace std;
 using namespace MetNoFimex;
 
-BOOST_AUTO_TEST_CASE( test_function )
+BOOST_AUTO_TEST_CASE( test_accumulate )
 {
 //    defaultLogLevel(Logger::DEBUG);
     string topSrcDir(TOP_SRCDIR);
@@ -77,6 +77,31 @@ BOOST_AUTO_TEST_CASE( test_function )
         BOOST_CHECK_CLOSE(time[3], time[2] + t0+3*3600., 1e-5);
     }
 
+}
+
+BOOST_AUTO_TEST_CASE( test_rotate )
+{
+    //    defaultLogLevel(Logger::DEBUG);
+        string topSrcDir(TOP_SRCDIR);
+        string fileName(topSrcDir+"/test/coordTest.nc");
+
+        boost::shared_ptr<CDMReader> nc = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName);
+        boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(nc));
+        proc->rotateAllVectorsToLatLon(true);
+        const CDMAttribute& attrx = proc->getCDM().getAttribute("x_wind_10m", "standard_name");
+        BOOST_CHECK_EQUAL(attrx.getStringValue(), "LATLON_ROTATED_x_wind");
+        const CDMAttribute& attry = proc->getCDM().getAttribute("y_wind_10m", "standard_name");
+        BOOST_CHECK_EQUAL(attry.getStringValue(), "LATLON_ROTATED_y_wind");
+
+        float xn = proc->getDataSlice("x_wind_10m", 0)->asFloat()[3];
+        float yn = proc->getDataSlice("y_wind_10m", 0)->asFloat()[3];
+
+        float xo = nc->getDataSlice("x_wind_10m", 0)->asFloat()[3];
+        float yo = nc->getDataSlice("y_wind_10m", 0)->asFloat()[3];
+
+        BOOST_CHECK_NE(xn, xo);
+        BOOST_CHECK_NE(yn, yo);
+        BOOST_CHECK_CLOSE(xn*xn+yn*yn, xo*xo+yo*yo, 1e-5);
 }
 
 #else

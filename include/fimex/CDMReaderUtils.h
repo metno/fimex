@@ -40,6 +40,13 @@ namespace MetNoFimex
  */
 
 /**
+ * avoid deletion of the CDMReader* when used as
+ * boost::shared_ptr<CDMReader>(this, noDelete)
+ * @param r
+ */
+void noDelete(CDMReader* r);
+
+/**
  * Try to find the forecast reference time of the reader. This has currently
  * only be implemented for CF-1.x.
  * @param reader the CDMReader to check for the reference time
