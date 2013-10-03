@@ -87,6 +87,7 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             [--interpolate....]" << endl;
     out << "             [--verticalInterpolate....]" << endl;
     out << "             [--timeInterpolate....]" << endl;
+    out << "             [--merge....]" << endl;
     out << "             [--ncml.config NCMLFILE]" << endl;
     out << endl;
     out << generic << endl;
@@ -191,8 +192,11 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOptionAny(out, "output.printSize", vm);
     writeVectorOptionString(out, "process.accumulateVariable", vm);
     writeVectorOptionString(out, "process.deaccumulateVariable", vm);
-    writeVectorOptionString(out, "process.rotateVectorToLatLonX", vm);
-    writeVectorOptionString(out, "process.rotateVectorToLatLonY", vm);
+    writeVectorOptionString(out, "process.rotateVector.x", vm);
+    writeVectorOptionString(out, "process.rotateVector.y", vm);
+    writeOptionAny(out, "process.rotateVector.all", vm);
+    writeVectorOptionString(out, "process.rotateVector.stdNameX", vm);
+    writeVectorOptionString(out, "process.rotateVector.stdNameY", vm);
     writeOption<string>(out, "process.printNcML", vm);
     writeOption<string>(out, "process.printCS", vm);
     writeOption<string>(out, "process.printSize", vm);
@@ -384,7 +388,8 @@ static int getInterpolationMethod(po::variables_map& vm, const string& key) {
 }
 
 static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") || vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction"))) {
+    if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") ||
+            vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction"))) {
         LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction not found, no process used");
         return dataReader;
     }
@@ -425,6 +430,8 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
             if (vm.count("process.rotateVector.stdNameY"))
                 stdX = vm["process.rotateVector.stdNameY"].as<vector<string> >();
             processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
+        } else if (vm.count("process.rotateVector.all")) {
+            processor->rotateAllVectorsToLatLon(toLatLon);
         } else {
             cerr << "process.rotateVector.x or process.rotateVector.y not found" << endl;
             exit(1);
@@ -897,8 +904,12 @@ int run(int argc, char* args[])
         ("output.printSize", "print size estimate")
         ("process.accumulateVariable", po::value<vector<string> >()->composing(), "accumulate variable along unlimited dimension")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
-        ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "rotate this vector x component from grid-direction to latlon direction")
-        ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "rotate this vector y component from grid-direction to latlon direction")
+        ("process.rotateVector.direction", po::value<vector<string> >()->composing(), "set direction: to latlon or grid")
+        ("process.rotateVector.x", po::value<vector<string> >()->composing(), "rotate this vector x component to direction")
+        ("process.rotateVector.stdNameX", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
+        ("process.rotateVector.y", po::value<vector<string> >()->composing(), "rotate this vector y component from grid-direction to latlon direction")
+        ("process.rotateVector.stdNameY", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
+        ("process.rotateVector.all", "rotate all known vectors (e.g. standard_name) to given direction")
 #if BOOST_VERSION >= 104000
         ("process.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of process")
 #else

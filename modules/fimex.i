@@ -1,11 +1,12 @@
-/* 
+/*
  * PERL
  * swig -I/usr/include -Wall -c++ -module Geo::Fimex -outdir lib/Geo -perl fimex.i
  */
 
 /* R
- * cd R
- * swig -I/usr/include -c++ -r --module=RFimex -o fimex_wrap.cpp ../fimex.i
+ * cd RFimex
+ * swig -Isrc -I/usr/include -c++ -r -module RFimex -o fimex_wrap.cpp ../fimex.i
+ * mv src/RFimex.R R
  * R CMD SHLIB -o fimex.so fimex_wrap.cpp -lfimex
  */
 %module fimex
@@ -17,11 +18,12 @@
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/CDMInterpolator.h"
+#include "fimex/CDMProcessor.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
-#include "fimex/SliceBuilder.h"
+#include "rfimexSliceBuilder.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMException.h"
@@ -47,7 +49,7 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
             axes.push_back((*varSysIt)->getGeoYAxis());
             axes.push_back((*varSysIt)->getGeoZAxis());
             axes.push_back((*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime));
-        
+
             std::vector<std::string> shape = reader->getCDM().getVariable(varName).getShape();
             std::set<std::string> shapeSet(shape.begin(), shape.end());
             for (int i = 0; i < axes.size(); i++) {
@@ -78,6 +80,14 @@ boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReade
     return r;
 }
 
+boost::shared_ptr<CDMReader> vectorAutoRotatedReader(boost::shared_ptr<CDMReader> in, int toLatLon) {
+    CDMProcessor* read = new CDMProcessor(in);
+    boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(read);
+    read->rotateAllVectorsToLatLon(toLatLon != 0);
+    return r;
+}
+
+
 double mifi_get_unique_forecast_reference_time(boost::shared_ptr<MetNoFimex::CDMReader> reader, const char* units)
 {
     mifi_cdm_reader r(reader);
@@ -105,7 +115,8 @@ size_t mifi_get_variable_number(mifi_cdm_reader* reader);
 const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
 double mifi_get_unique_forecast_reference_time(boost::shared_ptr<MetNoFimex::CDMReader> reader, const char* units);
 
-%include "fimex/SliceBuilder.h"
+// SliceBuilder.h broken in fimex-0.48, using therefore own Slicebuilder setup ... %include "fimex/SliceBuilder.h"
+%include "rfimexSliceBuilder.h"
 
 namespace boost {
 template<class T>
@@ -123,6 +134,7 @@ namespace MetNoFimex {
 std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<MetNoFimex::CDMReader> reader);
 std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName);
 boost::shared_ptr<MetNoFimex::CDMReader> latLonInterpolatedReader(boost::shared_ptr<MetNoFimex::CDMReader> in, int method, const std::vector<double>& lonVals, const std::vector<double>& latVals) throw(MetNoFimex::CDMException);
+boost::shared_ptr<MetNoFimex::CDMReader> vectorAutoRotatedReader(boost::shared_ptr<MetNoFimex::CDMReader> in, int toLatLon) throw(MetNoFimex::CDMException);
 
 class CDM {
 };
@@ -167,7 +179,7 @@ class CDMFileReaderFactory {
 
 class NetCDF_CDMWriter {
   public:
-    NetCDF_CDMWriter(boost::shared_ptr<MetNoFimex::CDMReader> reader, const std::string& filename, std::string configFile = "", int version = 3) throw(MetNoFimex::CDMException); 
+    NetCDF_CDMWriter(boost::shared_ptr<MetNoFimex::CDMReader> reader, const std::string& filename, std::string configFile = "", int version = 3) throw(MetNoFimex::CDMException);
 };
 
 }

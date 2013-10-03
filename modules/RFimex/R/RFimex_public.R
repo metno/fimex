@@ -55,7 +55,15 @@ mifi.reader.lonLatInterpolated <- function(reader, method, lons, lats) {
     if (is.null(r)) {
         stop("interpolation to latlon values failed");
     }
-    mifi.createCDMReader_(r)    
+    mifi.createCDMReader_(r)
+}
+
+mifi.reader.vectorAutoRotated <- function(reader, toLatLon) {
+    r <- vectorAutoRotatedReader(reader$p_, toLatLon);
+    if (is.null(r)) {
+        stop("interpolation to latlon values failed");
+    }
+    mifi.createCDMReader_(r)
 }
 
 
@@ -153,7 +161,7 @@ mifi.reader.write <- function(reader, type, filename, configname = "") {
             delete_NetCDF_CDMWriter(out);
         }
     } else {
-        stop("cannot write unknown type: ", type); 
+        stop("cannot write unknown type: ", type);
     }
     1
-} 
+}

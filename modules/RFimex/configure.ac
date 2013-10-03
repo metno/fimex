@@ -1,7 +1,7 @@
-AC_INIT([RFimex], 0.02) dnl package name, version, check man/RFimex.RD version
-         
+AC_INIT([RFimex], 0.03) dnl package name, version, check man/RFimex.RD version and DESCRIPTION
+
 dnl A user-specifiable option
-         
+
 dnl Select an optional include path, from a configure option
 dnl or from an environment variable.
 dnl TODO: use package-config
@@ -12,7 +12,7 @@ AC_ARG_WITH([fimex-include],
 FIMEX_CPPFLAGS="-I."
 if test [ -n "$fimex_include_path" ] ; then
     FIMEX_CPPFLAGS="-I. -I${fimex_include_path}"
-else 
+else
     FIMEX_CPPFLAGS="-I. "`pkg-config fimex --cflags`
 fi
 
@@ -26,7 +26,7 @@ if test [ -n "$fimex_lib_path" ] ; then
 else
     LIBS=`pkg-config fimex --libs`
 fi
-         
+
 dnl Now find the compiler and compiler flags to use
 : ${R_HOME=`R RHOME`}
 if test -z "${R_HOME}"; then
@@ -40,7 +40,7 @@ CFLAGS=`"${R_HOME}/bin/R" CMD config CFLAGS`
 CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS` $FIMEX_CPPFLAGS
 AC_PROG_CC
 AC_PROG_CPP
- 
+
 dnl Check the headers can be found
 AC_LANG_PUSH(C++)
 CPPFLAGS=$FIMEX_CPPFLAGS
