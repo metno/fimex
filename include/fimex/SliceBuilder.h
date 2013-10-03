@@ -118,11 +118,6 @@ public:
      * in the order and size of the variables dimensions
      */
     const std::vector<size_t>& getMaxDimensionSizes() const {return maxSize_;}
-    /**
-     * Dimensions are usually restricted to their maximum size. For writing purposes it might be desired to
-     * exend the size. With setUnlimited, it is possible to disable the size-tests for a dimensions.
-     */
-    void setUnlimited(const std::string& dimName, bool isUnlimited);
 protected:
     size_t getDimPos(const std::string& dimName) const;
 private:
