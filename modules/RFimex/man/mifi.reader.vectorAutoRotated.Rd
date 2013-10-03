@@ -48,6 +48,6 @@ reader <- try(mifi.reader.new("felt", "../../test/flth00.dat", "../../share/etc/
 if (inherits(reader, "try-error")) {
     stop("mifi.reader.new failed")
 }
-iread <- mifi.reader.vectorAutoRotated(1);
+iread <- mifi.reader.vectorAutoRotated(reader, 1);
 
 }

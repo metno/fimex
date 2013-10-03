@@ -1289,7 +1289,7 @@ static swig_module_info swig_module = {swig_types, 22, 0, 0, 0, 0};
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/NcmlCDMReader.h"
-#include "fimex/SliceBuilder.h"
+#include "rfimexSliceBuilder.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMException.h"
@@ -1347,8 +1347,9 @@ boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReade
 }
 
 boost::shared_ptr<CDMReader> vectorAutoRotatedReader(boost::shared_ptr<CDMReader> in, int toLatLon) {
-    boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new CDMProcessor(in));
-    r->rotateAllVectorsToLatLon(toLatLon != 0);
+    CDMProcessor* read = new CDMProcessor(in);
+    boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(read);
+    read->rotateAllVectorsToLatLon(toLatLon != 0);
     return r;
 }
 
@@ -5947,48 +5948,6 @@ R_swig_SliceBuilder_getMaxDimensionSizes ( SEXP self, SEXP s_swig_copy)
 
 
 SWIGEXPORT SEXP
-R_swig_SliceBuilder_setUnlimited ( SEXP self, SEXP dimName, SEXP isUnlimited)
-{
-  MetNoFimex::SliceBuilder *arg1 = (MetNoFimex::SliceBuilder *) 0 ;
-  std::string *arg2 = 0 ;
-  bool arg3 ;
-  void *argp1 = 0 ;
-  int res1 = 0 ;
-  int res2 = SWIG_OLDOBJ ;
-  unsigned int r_nprotect = 0;
-  SEXP r_ans = R_NilValue ;
-  VMAXTYPE r_vmax = vmaxget() ;
-  
-  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_MetNoFimex__SliceBuilder, 0 |  0 );
-  if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SliceBuilder_setUnlimited" "', argument " "1"" of type '" "MetNoFimex::SliceBuilder *""'"); 
-  }
-  arg1 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp1);
-  {
-    std::string *ptr = (std::string *)0;
-    res2 = SWIG_AsPtr_std_string(dimName, &ptr);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SliceBuilder_setUnlimited" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    if (!ptr) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SliceBuilder_setUnlimited" "', argument " "2"" of type '" "std::string const &""'"); 
-    }
-    arg2 = ptr;
-  }
-  arg3 = LOGICAL(isUnlimited)[0] ? true : false;
-  (arg1)->setUnlimited((std::string const &)*arg2,arg3);
-  r_ans = R_NilValue;
-  
-  if (SWIG_IsNewObj(res2)) delete arg2;
-  
-  vmaxset(r_vmax);
-  if(r_nprotect)  Rf_unprotect(r_nprotect);
-  
-  return r_ans;
-}
-
-
-SWIGEXPORT SEXP
 R_swig___lshift__ ( SEXP os, SEXP sb, SEXP s_swig_copy)
 {
   std::ostream *result = 0 ;
@@ -6174,6 +6133,48 @@ R_swig_latLonInterpolatedReader ( SEXP s_arg1, SEXP method, SEXP lonVals, SEXP l
   
   if (SWIG_IsNewObj(res3)) delete arg3;
   if (SWIG_IsNewObj(res4)) delete arg4;
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_vectorAutoRotatedReader ( SEXP s_arg1, SEXP toLatLon, SEXP s_swig_copy)
+{
+  boost::shared_ptr< MetNoFimex::CDMReader > result;
+  boost::shared_ptr< MetNoFimex::CDMReader > arg1 ;
+  int arg2 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(s_arg1, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "vectorAutoRotatedReader" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "vectorAutoRotatedReader" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp1));
+    }
+  }
+  arg2 = static_cast< int >(INTEGER(toLatLon)[0]);
+  try {
+    result = MetNoFimex::vectorAutoRotatedReader(arg1,arg2);
+  }
+  catch(MetNoFimex::CDMException &_e) {
+    /*@SWIG:/usr/share/swig2.0/r/r.swg,29,%raise@*/ 
+    return R_NilValue;
+    /*@SWIG@*/;
+  }
+  
+  r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
+  
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
   
@@ -7330,7 +7331,6 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_listCoordinateSystems", (DL_FUNC) &R_swig_listCoordinateSystems, 2},
    {"R_swig_delete_DoubleVector", (DL_FUNC) &R_swig_delete_DoubleVector, 1},
    {"R_swig_delete_StringVector", (DL_FUNC) &R_swig_delete_StringVector, 1},
-   {"R_swig_SliceBuilder_setUnlimited", (DL_FUNC) &R_swig_SliceBuilder_setUnlimited, 3},
    {"R_swig_listCoordinates", (DL_FUNC) &R_swig_listCoordinates, 4},
    {"R_swig_delete_CDMFileReaderFactory", (DL_FUNC) &R_swig_delete_CDMFileReaderFactory, 1},
    {"R_swig_DoubleVector_assign", (DL_FUNC) &R_swig_DoubleVector_assign, 3},
@@ -7432,6 +7432,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_mifi_cdm_reader", (DL_FUNC) &R_swig_new_mifi_cdm_reader, 1},
    {"R_swig_delete_mifi_cdm_reader", (DL_FUNC) &R_swig_delete_mifi_cdm_reader, 1},
    {"R_swig_latLonInterpolatedReader", (DL_FUNC) &R_swig_latLonInterpolatedReader, 5},
+   {"R_swig_vectorAutoRotatedReader", (DL_FUNC) &R_swig_vectorAutoRotatedReader, 3},
    {"R_swig_DoubleVector_pop_back", (DL_FUNC) &R_swig_DoubleVector_pop_back, 1},
    {"R_swig_IntVector_pop_back", (DL_FUNC) &R_swig_IntVector_pop_back, 1},
    {"R_swig_StringVector_pop_back", (DL_FUNC) &R_swig_StringVector_pop_back, 1},

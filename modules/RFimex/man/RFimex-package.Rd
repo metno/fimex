@@ -34,6 +34,7 @@ http://fimex.met.no
 \seealso{
 \code{\link{mifi.reader.new}},
 \code{\link{mifi.reader.lonLatInterpolated}},
+\code{\link{mifi.reader.vectorAutoRotated}},
 \code{\link{mifi.reader.variables}},
 \code{\link{mifi.reader.getCoordinates}},
 \code{\link{mifi.reader.getSliceVecInUnit}},

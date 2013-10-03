@@ -5,7 +5,7 @@
 # the SWIG interface file instead.
 
 ##   Generated via the command line invocation:
-##	 swig -I/usr/include -c++ -r -module RFimex -o src/fimex_wrap.cpp ../fimex.i
+##	 swig -Isrc -I/usr/include -c++ -r -module RFimex -o src/fimex_wrap.cpp ../fimex.i
 
 
 #                         srun.swg                            #
@@ -2221,25 +2221,11 @@ attr(`SliceBuilder_getMaxDimensionSizes`, 'returnType') = '_p_std__vectorT_size_
 attr(`SliceBuilder_getMaxDimensionSizes`, "inputTypes") = c('_p_MetNoFimex__SliceBuilder')
 class(`SliceBuilder_getMaxDimensionSizes`) = c("SWIGFunction", class('SliceBuilder_getMaxDimensionSizes'))
 
-# Start of SliceBuilder_setUnlimited
-
-`SliceBuilder_setUnlimited` = function(self, dimName, isUnlimited)
-{
-  dimName = as(dimName, "character"); 
-  isUnlimited = as.logical(isUnlimited);
-  ;.Call('R_swig_SliceBuilder_setUnlimited', self, dimName, isUnlimited, PACKAGE='RFimex');
-  
-}
-
-attr(`SliceBuilder_setUnlimited`, 'returnType') = 'void'
-attr(`SliceBuilder_setUnlimited`, "inputTypes") = c('_p_MetNoFimex__SliceBuilder', 'character', 'logical')
-class(`SliceBuilder_setUnlimited`) = c("SWIGFunction", class('SliceBuilder_setUnlimited'))
-
 # Start of accessor method for MetNoFimex::SliceBuilder
 setMethod('$', '_p_MetNoFimex__SliceBuilder', function(x, name)
 
 {
-  accessorFuns = list('setStartAndSize' = SliceBuilder_setStartAndSize, 'setAll' = SliceBuilder_setAll, 'getDimensionStartPositions' = SliceBuilder_getDimensionStartPositions, 'getDimensionSizes' = SliceBuilder_getDimensionSizes, 'getDimensionNames' = SliceBuilder_getDimensionNames, 'getUnsetDimensionNames' = SliceBuilder_getUnsetDimensionNames, 'getMaxDimensionSizes' = SliceBuilder_getMaxDimensionSizes, 'setUnlimited' = SliceBuilder_setUnlimited);
+  accessorFuns = list('setStartAndSize' = SliceBuilder_setStartAndSize, 'setAll' = SliceBuilder_setAll, 'getDimensionStartPositions' = SliceBuilder_getDimensionStartPositions, 'getDimensionSizes' = SliceBuilder_getDimensionSizes, 'getDimensionNames' = SliceBuilder_getDimensionNames, 'getUnsetDimensionNames' = SliceBuilder_getUnsetDimensionNames, 'getMaxDimensionSizes' = SliceBuilder_getMaxDimensionSizes);
   ;        idx = pmatch(name, names(accessorFuns));
   if(is.na(idx)) 
   return(callNextMethod(x, name));
@@ -2320,6 +2306,27 @@ class(`listCoordinates`) = c("SWIGFunction", class('listCoordinates'))
 attr(`latLonInterpolatedReader`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
 attr(`latLonInterpolatedReader`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', 'integer', '_p_std__vectorT_double_std__allocatorT_double_t_t', '_p_std__vectorT_double_std__allocatorT_double_t_t')
 class(`latLonInterpolatedReader`) = c("SWIGFunction", class('latLonInterpolatedReader'))
+
+# Start of vectorAutoRotatedReader
+
+`vectorAutoRotatedReader` = function(s_arg1, toLatLon, .copy = FALSE)
+{
+  toLatLon = as.integer(toLatLon); 
+  
+  if(length(toLatLon) > 1) {
+    warning("using only the first element of toLatLon");
+  };
+  
+  ;ans = .Call('R_swig_vectorAutoRotatedReader', s_arg1, toLatLon, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
+  
+  ans
+  
+}
+
+attr(`vectorAutoRotatedReader`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
+attr(`vectorAutoRotatedReader`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', 'integer')
+class(`vectorAutoRotatedReader`) = c("SWIGFunction", class('vectorAutoRotatedReader'))
 
 # Start of delete_CDM
 

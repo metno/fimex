@@ -3,6 +3,7 @@ useDynLib(RFimex)
 export(
        mifi.reader.new,
        mifi.reader.lonLatInterpolated,
+       mifi.reader.vectorAutoRotated,
        mifi.reader.write,
        mifi.reader.variables,
        mifi.reader.getCoordinates,
