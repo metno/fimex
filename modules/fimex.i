@@ -4,8 +4,8 @@
  */
 
 /* R
- * cd R
- * swig -I/usr/include -c++ -r --module=RFimex -o fimex_wrap.cpp ../fimex.i
+ * cd RFimex
+ * swig -I/usr/include -c++ -r -module RFimex -o fimex_wrap.cpp ../fimex.i
  * R CMD SHLIB -o fimex.so fimex_wrap.cpp -lfimex
  */
 %module fimex

@@ -15,8 +15,8 @@ to access gridded data, eventually interpolated gridded data.
 \tabular{ll}{
 Package: \tab RFimex\cr
 Type: \tab Package\cr
-Version: \tab 0.01\cr
-Date: \tab 2012-12-03\cr
+Version: \tab 0.03\cr
+Date: \tab 2013-10-03\cr
 License: \tab LGPL-2 \cr
 }
 
@@ -73,6 +73,6 @@ if (!is.na(altCoords["y"])) {
 # altitude data in cm
 altData <- mifi.reader.getSliceVecInUnit(reader, "altitude", sb, "cm")
 if (length(altData) != 15) {
-    stop("didn't get all data; got ", length(altData)) 
+    stop("didn't get all data; got ", length(altData))
 }
 }

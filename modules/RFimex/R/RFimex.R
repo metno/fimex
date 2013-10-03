@@ -5,7 +5,7 @@
 # the SWIG interface file instead.
 
 ##   Generated via the command line invocation:
-##	 swig -I/usr/include -I../include -c++ -r -module RFimex -o RFimex/src/fimex_wrap.cpp fimex.i
+##	 swig -I/usr/include -c++ -r -module RFimex -o src/fimex_wrap.cpp ../fimex.i
 
 
 #                         srun.swg                            #
@@ -1952,10 +1952,11 @@ class(`mifi_get_unique_forecast_reference_time`) = c("SWIGFunction", class('mifi
 
 # Start of new_SliceBuilder
 
-`SliceBuilder__SWIG_0` = function(cdm, varName)
+`SliceBuilder__SWIG_0` = function(cdm, varName, setUnlimited)
 {
   varName = as(varName, "character"); 
-  ;ans = .Call('R_swig_new_SliceBuilder__SWIG_0', cdm, varName, PACKAGE='RFimex');
+  setUnlimited = as.logical(setUnlimited);
+  ;ans = .Call('R_swig_new_SliceBuilder__SWIG_0', cdm, varName, setUnlimited, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__SliceBuilder";
   
   reg.finalizer(ans, delete_SliceBuilder)
@@ -1964,14 +1965,15 @@ class(`mifi_get_unique_forecast_reference_time`) = c("SWIGFunction", class('mifi
 }
 
 attr(`SliceBuilder__SWIG_0`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
-attr(`SliceBuilder__SWIG_0`, "inputTypes") = c('_p_MetNoFimex__CDM', 'character')
+attr(`SliceBuilder__SWIG_0`, "inputTypes") = c('_p_MetNoFimex__CDM', 'character', 'logical')
 class(`SliceBuilder__SWIG_0`) = c("SWIGFunction", class('SliceBuilder__SWIG_0'))
 
 # Start of new_SliceBuilder
 
-`SliceBuilder__SWIG_1` = function(dimNames, dimSize)
+`SliceBuilder__SWIG_1` = function(cdm, varName)
 {
-  ;ans = .Call('R_swig_new_SliceBuilder__SWIG_1', dimNames, dimSize, PACKAGE='RFimex');
+  varName = as(varName, "character"); 
+  ;ans = .Call('R_swig_new_SliceBuilder__SWIG_1', cdm, varName, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__SliceBuilder";
   
   reg.finalizer(ans, delete_SliceBuilder)
@@ -1980,20 +1982,40 @@ class(`SliceBuilder__SWIG_0`) = c("SWIGFunction", class('SliceBuilder__SWIG_0'))
 }
 
 attr(`SliceBuilder__SWIG_1`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
-attr(`SliceBuilder__SWIG_1`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t')
+attr(`SliceBuilder__SWIG_1`, "inputTypes") = c('_p_MetNoFimex__CDM', 'character')
 class(`SliceBuilder__SWIG_1`) = c("SWIGFunction", class('SliceBuilder__SWIG_1'))
+
+# Start of new_SliceBuilder
+
+`SliceBuilder__SWIG_2` = function(dimNames, dimSize)
+{
+  ;ans = .Call('R_swig_new_SliceBuilder__SWIG_2', dimNames, dimSize, PACKAGE='RFimex');
+  class(ans) <- "_p_MetNoFimex__SliceBuilder";
+  
+  reg.finalizer(ans, delete_SliceBuilder)
+  ans
+  
+}
+
+attr(`SliceBuilder__SWIG_2`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
+attr(`SliceBuilder__SWIG_2`, "inputTypes") = c('_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t')
+class(`SliceBuilder__SWIG_2`) = c("SWIGFunction", class('SliceBuilder__SWIG_2'))
 
 `SliceBuilder` <- function(...) {
   argtypes <- mapply(class, list(...));
   argv <- list(...);
   argc <- length(argtypes);
-# dispatch functions 2
+# dispatch functions 3
   if (argc == 2) {
     if (extends(argtypes[1], '_p_MetNoFimex__CDM') && is.character(argv[[2]])) {
-      f <- SliceBuilder__SWIG_0; 
+      f <- SliceBuilder__SWIG_1; 
     }
     else if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t') && extends(argtypes[2], '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t')) {
-      f <- SliceBuilder__SWIG_1; 
+      f <- SliceBuilder__SWIG_2; 
+    }
+  } else if (argc == 3) {
+    if (extends(argtypes[1], '_p_MetNoFimex__CDM') && is.character(argv[[2]]) && extends(argtypes[3], 'logical')) {
+      f <- SliceBuilder__SWIG_0; 
     }
   } else {
     stop("cannot find overloaded function for SliceBuilder with argtypes (",toString(argtypes),")");
@@ -2199,11 +2221,25 @@ attr(`SliceBuilder_getMaxDimensionSizes`, 'returnType') = '_p_std__vectorT_size_
 attr(`SliceBuilder_getMaxDimensionSizes`, "inputTypes") = c('_p_MetNoFimex__SliceBuilder')
 class(`SliceBuilder_getMaxDimensionSizes`) = c("SWIGFunction", class('SliceBuilder_getMaxDimensionSizes'))
 
+# Start of SliceBuilder_setUnlimited
+
+`SliceBuilder_setUnlimited` = function(self, dimName, isUnlimited)
+{
+  dimName = as(dimName, "character"); 
+  isUnlimited = as.logical(isUnlimited);
+  ;.Call('R_swig_SliceBuilder_setUnlimited', self, dimName, isUnlimited, PACKAGE='RFimex');
+  
+}
+
+attr(`SliceBuilder_setUnlimited`, 'returnType') = 'void'
+attr(`SliceBuilder_setUnlimited`, "inputTypes") = c('_p_MetNoFimex__SliceBuilder', 'character', 'logical')
+class(`SliceBuilder_setUnlimited`) = c("SWIGFunction", class('SliceBuilder_setUnlimited'))
+
 # Start of accessor method for MetNoFimex::SliceBuilder
 setMethod('$', '_p_MetNoFimex__SliceBuilder', function(x, name)
 
 {
-  accessorFuns = list('setStartAndSize' = SliceBuilder_setStartAndSize, 'setAll' = SliceBuilder_setAll, 'getDimensionStartPositions' = SliceBuilder_getDimensionStartPositions, 'getDimensionSizes' = SliceBuilder_getDimensionSizes, 'getDimensionNames' = SliceBuilder_getDimensionNames, 'getUnsetDimensionNames' = SliceBuilder_getUnsetDimensionNames, 'getMaxDimensionSizes' = SliceBuilder_getMaxDimensionSizes);
+  accessorFuns = list('setStartAndSize' = SliceBuilder_setStartAndSize, 'setAll' = SliceBuilder_setAll, 'getDimensionStartPositions' = SliceBuilder_getDimensionStartPositions, 'getDimensionSizes' = SliceBuilder_getDimensionSizes, 'getDimensionNames' = SliceBuilder_getDimensionNames, 'getUnsetDimensionNames' = SliceBuilder_getUnsetDimensionNames, 'getMaxDimensionSizes' = SliceBuilder_getMaxDimensionSizes, 'setUnlimited' = SliceBuilder_setUnlimited);
   ;        idx = pmatch(name, names(accessorFuns));
   if(is.na(idx)) 
   return(callNextMethod(x, name));
@@ -2216,6 +2252,21 @@ setMethod('$', '_p_MetNoFimex__SliceBuilder', function(x, name)
 );
 # end of accessor method for MetNoFimex::SliceBuilder
 setMethod('delete', '_p_MetNoFimex__SliceBuilder', function(obj) {delete_MetNoFimex__SliceBuilder(obj)})
+# Start of __lshift__
+
+`__lshift__` = function(os, sb, .copy = FALSE)
+{
+  ;ans = .Call('R_swig___lshift__', os, sb, as.logical(.copy), PACKAGE='RFimex');
+  class(ans) <- "_p_std__ostream";
+  
+  ans
+  
+}
+
+attr(`__lshift__`, 'returnType') = '_p_std__ostream'
+attr(`__lshift__`, "inputTypes") = c('_p_std__ostream', '_p_MetNoFimex__SliceBuilder')
+class(`__lshift__`) = c("SWIGFunction", class('__lshift__'))
+
 # Start of listCoordinateSystems
 
 `listCoordinateSystems` = function(reader, .copy = FALSE)

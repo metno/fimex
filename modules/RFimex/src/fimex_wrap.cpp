@@ -1125,13 +1125,14 @@ SWIG_R_ConvertPacked(SEXP obj, void *ptr, size_t sz, swig_type_info *ty) {
 #define SWIGTYPE_p_std__allocatorT_double_t swig_types[13]
 #define SWIGTYPE_p_std__allocatorT_size_t_t swig_types[14]
 #define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[15]
-#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t swig_types[16]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[17]
-#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[18]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[19]
-#define SWIGTYPE_p_value_type swig_types[20]
-static swig_type_info *swig_types[22];
-static swig_module_info swig_module = {swig_types, 21, 0, 0, 0, 0};
+#define SWIGTYPE_p_std__ostream swig_types[16]
+#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t swig_types[17]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[18]
+#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[19]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[20]
+#define SWIGTYPE_p_value_type swig_types[21]
+static swig_type_info *swig_types[23];
+static swig_module_info swig_module = {swig_types, 22, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1283,6 +1284,7 @@ static swig_module_info swig_module = {swig_types, 21, 0, 0, 0, 0};
 #include "fimex/CDMExtractor.h"
 #include "fimex/CDMQualityExtractor.h"
 #include "fimex/CDMInterpolator.h"
+#include "fimex/CDMProcessor.h"
 #include "fimex/CDMTimeInterpolator.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/NetCDF_CDMWriter.h"
@@ -1313,7 +1315,7 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
             axes.push_back((*varSysIt)->getGeoYAxis());
             axes.push_back((*varSysIt)->getGeoZAxis());
             axes.push_back((*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime));
-        
+
             std::vector<std::string> shape = reader->getCDM().getVariable(varName).getShape();
             std::set<std::string> shapeSet(shape.begin(), shape.end());
             for (int i = 0; i < axes.size(); i++) {
@@ -1343,6 +1345,13 @@ boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReade
     read->changeProjection(method, lonVals, latVals);
     return r;
 }
+
+boost::shared_ptr<CDMReader> vectorAutoRotatedReader(boost::shared_ptr<CDMReader> in, int toLatLon) {
+    boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(new CDMProcessor(in));
+    r->rotateAllVectorsToLatLon(toLatLon != 0);
+    return r;
+}
+
 
 double mifi_get_unique_forecast_reference_time(boost::shared_ptr<MetNoFimex::CDMReader> reader, const char* units)
 {
@@ -2085,6 +2094,19 @@ SWIG_FromCharPtr(const char *cptr)
 
 
 
+
+
+SWIGINTERN int
+SWIG_AsVal_bool (SEXP obj, bool *val)
+{
+  long v;
+  int res = SWIG_AsVal_long (obj, val ? &v : 0);
+  if (SWIG_IsOK(res)) {    
+    if (val) *val = v ? true : false;
+    return res;
+  }  
+  return SWIG_TypeError;
+}
 
 SWIGINTERN std::vector< double,std::allocator< double > > MetNoFimex_CDMReader_getSliceVecInUnit__SWIG_0(MetNoFimex::CDMReader *self,std::string varName,MetNoFimex::SliceBuilder sb,std::string units=""){
          MetNoFimex::DataPtr d;
@@ -5447,7 +5469,53 @@ R_swig_mifi_get_unique_forecast_reference_time ( SEXP reader, SEXP units, SEXP s
 
 
 SWIGEXPORT SEXP
-R_swig_new_SliceBuilder__SWIG_0 ( SEXP cdm, SEXP varName)
+R_swig_new_SliceBuilder__SWIG_0 ( SEXP cdm, SEXP varName, SEXP setUnlimited)
+{
+  MetNoFimex::SliceBuilder *result = 0 ;
+  MetNoFimex::CDM *arg1 = 0 ;
+  std::string *arg2 = 0 ;
+  bool arg3 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(cdm, &argp1, SWIGTYPE_p_MetNoFimex__CDM,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_SliceBuilder" "', argument " "1"" of type '" "MetNoFimex::CDM const &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SliceBuilder" "', argument " "1"" of type '" "MetNoFimex::CDM const &""'"); 
+  }
+  arg1 = reinterpret_cast< MetNoFimex::CDM * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(varName, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_SliceBuilder" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_SliceBuilder" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  arg3 = LOGICAL(setUnlimited)[0] ? true : false;
+  result = (MetNoFimex::SliceBuilder *)new MetNoFimex::SliceBuilder((MetNoFimex::CDM const &)*arg1,(std::string const &)*arg2,arg3);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MetNoFimex__SliceBuilder, R_SWIG_OWNER |  0 );
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_new_SliceBuilder__SWIG_1 ( SEXP cdm, SEXP varName)
 {
   MetNoFimex::SliceBuilder *result = 0 ;
   MetNoFimex::CDM *arg1 = 0 ;
@@ -5490,7 +5558,7 @@ R_swig_new_SliceBuilder__SWIG_0 ( SEXP cdm, SEXP varName)
 
 
 SWIGEXPORT SEXP
-R_swig_new_SliceBuilder__SWIG_1 ( SEXP dimNames, SEXP dimSize)
+R_swig_new_SliceBuilder__SWIG_2 ( SEXP dimNames, SEXP dimSize)
 {
   MetNoFimex::SliceBuilder *result = 0 ;
   std::vector< std::string,std::allocator< std::string > > *arg1 = 0 ;
@@ -5870,6 +5938,89 @@ R_swig_SliceBuilder_getMaxDimensionSizes ( SEXP self, SEXP s_swig_copy)
   arg1 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp1);
   result = (std::vector< size_t,std::allocator< size_t > > *) &((MetNoFimex::SliceBuilder const *)arg1)->getMaxDimensionSizes();
   r_ans = swig::from(static_cast< std::vector<size_t,std::allocator< size_t > > >(*result));
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_SliceBuilder_setUnlimited ( SEXP self, SEXP dimName, SEXP isUnlimited)
+{
+  MetNoFimex::SliceBuilder *arg1 = (MetNoFimex::SliceBuilder *) 0 ;
+  std::string *arg2 = 0 ;
+  bool arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 = SWIG_OLDOBJ ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_MetNoFimex__SliceBuilder, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "SliceBuilder_setUnlimited" "', argument " "1"" of type '" "MetNoFimex::SliceBuilder *""'"); 
+  }
+  arg1 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp1);
+  {
+    std::string *ptr = (std::string *)0;
+    res2 = SWIG_AsPtr_std_string(dimName, &ptr);
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "SliceBuilder_setUnlimited" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    if (!ptr) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "SliceBuilder_setUnlimited" "', argument " "2"" of type '" "std::string const &""'"); 
+    }
+    arg2 = ptr;
+  }
+  arg3 = LOGICAL(isUnlimited)[0] ? true : false;
+  (arg1)->setUnlimited((std::string const &)*arg2,arg3);
+  r_ans = R_NilValue;
+  
+  if (SWIG_IsNewObj(res2)) delete arg2;
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig___lshift__ ( SEXP os, SEXP sb, SEXP s_swig_copy)
+{
+  std::ostream *result = 0 ;
+  std::ostream *arg1 = 0 ;
+  MetNoFimex::SliceBuilder *arg2 = 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(os, &argp1, SWIGTYPE_p_std__ostream,  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "__lshift__" "', argument " "1"" of type '" "std::ostream &""'"); 
+  }
+  if (!argp1) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "__lshift__" "', argument " "1"" of type '" "std::ostream &""'"); 
+  }
+  arg1 = reinterpret_cast< std::ostream * >(argp1);
+  res2 = SWIG_R_ConvertPtr(sb, &argp2, SWIGTYPE_p_MetNoFimex__SliceBuilder,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "__lshift__" "', argument " "2"" of type '" "MetNoFimex::SliceBuilder const &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "__lshift__" "', argument " "2"" of type '" "MetNoFimex::SliceBuilder const &""'"); 
+  }
+  arg2 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp2);
+  result = (std::ostream *) &MetNoFimex::operator <<(*arg1,(MetNoFimex::SliceBuilder const &)*arg2);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__ostream, R_SWIG_EXTERNAL |  0 );
+  
   
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
@@ -6832,6 +6983,7 @@ static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0
 static swig_type_info _swigt__p_std__allocatorT_double_t = {"_p_std__allocatorT_double_t", "std::vector< double >::allocator_type *|std::allocator< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_size_t_t = {"_p_std__allocatorT_size_t_t", "std::vector< size_t >::allocator_type *|std::allocator< size_t > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__allocatorT_std__string_t = {"_p_std__allocatorT_std__string_t", "std::vector< std::string >::allocator_type *|std::allocator< std::string > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_std__ostream = {"_p_std__ostream", "std::ostream *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t = {"_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t", "std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_double_std__allocatorT_double_t_t = {"_p_std__vectorT_double_std__allocatorT_double_t_t", "std::vector< double,std::allocator< double > > *|std::vector< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t = {"_p_std__vectorT_size_t_std__allocatorT_size_t_t_t", "std::vector< size_t,std::allocator< size_t > > *|std::vector< size_t > *", 0, 0, (void*)0, 0};
@@ -6855,6 +7007,7 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_std__allocatorT_double_t,
   &_swigt__p_std__allocatorT_size_t_t,
   &_swigt__p_std__allocatorT_std__string_t,
+  &_swigt__p_std__ostream,
   &_swigt__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t,
   &_swigt__p_std__vectorT_double_std__allocatorT_double_t_t,
   &_swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t,
@@ -6878,6 +7031,7 @@ static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0}
 static swig_cast_info _swigc__p_std__allocatorT_double_t[] = {  {&_swigt__p_std__allocatorT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_size_t_t[] = {  {&_swigt__p_std__allocatorT_size_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__allocatorT_std__string_t[] = {  {&_swigt__p_std__allocatorT_std__string_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_std__ostream[] = {  {&_swigt__p_std__ostream, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t[] = {  {&_swigt__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_double_std__allocatorT_double_t_t[] = {  {&_swigt__p_std__vectorT_double_std__allocatorT_double_t_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_std__vectorT_size_t_std__allocatorT_size_t_t_t[] = {  {&_swigt__p_std__vectorT_size_t_std__allocatorT_size_t_t_t, 0, 0, 0},{0, 0, 0, 0}};
@@ -6901,6 +7055,7 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_std__allocatorT_double_t,
   _swigc__p_std__allocatorT_size_t_t,
   _swigc__p_std__allocatorT_std__string_t,
+  _swigc__p_std__ostream,
   _swigc__p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t,
   _swigc__p_std__vectorT_double_std__allocatorT_double_t_t,
   _swigc__p_std__vectorT_size_t_std__allocatorT_size_t_t_t,
@@ -7175,6 +7330,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_listCoordinateSystems", (DL_FUNC) &R_swig_listCoordinateSystems, 2},
    {"R_swig_delete_DoubleVector", (DL_FUNC) &R_swig_delete_DoubleVector, 1},
    {"R_swig_delete_StringVector", (DL_FUNC) &R_swig_delete_StringVector, 1},
+   {"R_swig_SliceBuilder_setUnlimited", (DL_FUNC) &R_swig_SliceBuilder_setUnlimited, 3},
    {"R_swig_listCoordinates", (DL_FUNC) &R_swig_listCoordinates, 4},
    {"R_swig_delete_CDMFileReaderFactory", (DL_FUNC) &R_swig_delete_CDMFileReaderFactory, 1},
    {"R_swig_DoubleVector_assign", (DL_FUNC) &R_swig_DoubleVector_assign, 3},
@@ -7211,6 +7367,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_StringVector___len__", (DL_FUNC) &R_swig_StringVector___len__, 2},
    {"R_swig_IntVector___len__", (DL_FUNC) &R_swig_IntVector___len__, 2},
    {"R_swig_DoubleVector___len__", (DL_FUNC) &R_swig_DoubleVector___len__, 2},
+   {"R_swig___lshift__", (DL_FUNC) &R_swig___lshift__, 3},
    {"R_swig_delete_CDMReader", (DL_FUNC) &R_swig_delete_CDMReader, 1},
    {"R_swig_delete_boost__shared_ptrCDMReader", (DL_FUNC) &R_swig_delete_boost__shared_ptrCDMReader, 1},
    {"R_swig_StringVector___setitem__", (DL_FUNC) &R_swig_StringVector___setitem__, 3},
@@ -7231,7 +7388,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_IntVector__SWIG_0", (DL_FUNC) &R_swig_new_IntVector__SWIG_0, 0},
    {"R_swig_IntVector_resize__SWIG_0", (DL_FUNC) &R_swig_IntVector_resize__SWIG_0, 2},
    {"R_swig_StringVector_resize__SWIG_0", (DL_FUNC) &R_swig_StringVector_resize__SWIG_0, 2},
-   {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 2},
+   {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 3},
    {"R_swig_SliceBuilder_setStartAndSize__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_0, 4},
    {"R_swig_SliceBuilder_setAll__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_0, 2},
    {"R_swig_CDMReader_getSliceVecInUnit__SWIG_0", (DL_FUNC) &R_swig_CDMReader_getSliceVecInUnit__SWIG_0, 5},
@@ -7254,6 +7411,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_IntVector__SWIG_2", (DL_FUNC) &R_swig_new_IntVector__SWIG_2, 1},
    {"R_swig_new_StringVector__SWIG_2", (DL_FUNC) &R_swig_new_StringVector__SWIG_2, 1},
    {"R_swig_mifi_get_variable_number", (DL_FUNC) &R_swig_mifi_get_variable_number, 2},
+   {"R_swig_new_SliceBuilder__SWIG_2", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_2, 2},
    {"R_swig_new_NetCDF_CDMWriter__SWIG_2", (DL_FUNC) &R_swig_new_NetCDF_CDMWriter__SWIG_2, 2},
    {"R_swig_new_DoubleVector__SWIG_3", (DL_FUNC) &R_swig_new_DoubleVector__SWIG_3, 2},
    {"R_swig_new_IntVector__SWIG_3", (DL_FUNC) &R_swig_new_IntVector__SWIG_3, 2},
