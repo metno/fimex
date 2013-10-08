@@ -196,7 +196,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
 	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
 	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
-	coordSys/CoordSysBuilder.h coordSys/CF1_xCoordSysBuilder.h \
+	coordSys/CoordSysBuilder.h coordSys/CoordSysUtils.cc \
+	coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
 	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
@@ -326,7 +327,7 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMReaderWriter.lo CDMTimeInterpolator.lo CDMVariable.lo \
 	CDMVerticalInterpolator.lo CDM_XMLConfigHelper.lo \
 	CoordinateSystemSliceBuilder.lo CoordinateSystem.lo \
-	CoordinateAxis.lo CF1_xCoordSysBuilder.lo \
+	CoordinateAxis.lo CoordSysUtils.lo CF1_xCoordSysBuilder.lo \
 	WRFCoordSysBuilder.lo Projection.lo ProjectionImpl.lo \
 	AlbersConicalEqualAreaProjection.lo \
 	AzimuthalEquidistantProjection.lo \
@@ -605,7 +606,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDM_XMLConfigHelper.cc CDM_XMLConfigHelper.h \
 	CoordinateSystemSliceBuilder.cc coordSys/CoordinateSystem.cc \
 	coordSys/CoordinateAxis.cc coordSys/CoordSysBuilder.h \
-	coordSys/CF1_xCoordSysBuilder.h \
+	coordSys/CoordSysUtils.cc coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
 	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
@@ -747,6 +748,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedForwardInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordSysUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateAxis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystemSliceBuilder.Plo@am__quote@
@@ -906,6 +908,13 @@ CoordinateAxis.lo: coordSys/CoordinateAxis.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordinateAxis.cc' object='CoordinateAxis.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordinateAxis.lo `test -f 'coordSys/CoordinateAxis.cc' || echo '$(srcdir)/'`coordSys/CoordinateAxis.cc
+
+CoordSysUtils.lo: coordSys/CoordSysUtils.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CoordSysUtils.lo -MD -MP -MF $(DEPDIR)/CoordSysUtils.Tpo -c -o CoordSysUtils.lo `test -f 'coordSys/CoordSysUtils.cc' || echo '$(srcdir)/'`coordSys/CoordSysUtils.cc
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/CoordSysUtils.Tpo $(DEPDIR)/CoordSysUtils.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordSysUtils.cc' object='CoordSysUtils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordSysUtils.lo `test -f 'coordSys/CoordSysUtils.cc' || echo '$(srcdir)/'`coordSys/CoordSysUtils.cc
 
 CF1_xCoordSysBuilder.lo: coordSys/CF1_xCoordSysBuilder.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CF1_xCoordSysBuilder.lo -MD -MP -MF $(DEPDIR)/CF1_xCoordSysBuilder.Tpo -c -o CF1_xCoordSysBuilder.lo `test -f 'coordSys/CF1_xCoordSysBuilder.cc' || echo '$(srcdir)/'`coordSys/CF1_xCoordSysBuilder.cc

@@ -75,23 +75,6 @@ public:
      * retrieve data from the underlying dataReader and interpolate the values to the new vertical levels
      */
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
-    /**
-     * Get the axes of a simple (1-dim x,y,z,t) coordinate-system. The t-axis might be omitted or unlimited,
-     * the order of the axes must be as written above (x,y order might be reversed).
-     *
-     * @param cs the coordinate system
-     * @param cdm the corresponding data model
-     * @param xAxis,yAxis,zAxis,tAxis output axes
-     * @param nx,ny,nz,nt output sizes
-     * @param tIsUnlimited indicate if t-axis is unlimited axes
-     */
-    static void getSimpleAxes(const boost::shared_ptr<const CoordinateSystem>& cs, const CDM& cdm,
-            CoordinateSystem::ConstAxisPtr& xAxis,
-            CoordinateSystem::ConstAxisPtr& yAxis,
-            CoordinateSystem::ConstAxisPtr& zAxis,
-            CoordinateSystem::ConstAxisPtr& tAxis,
-            size_t& nx, size_t& ny, size_t& nz, size_t& nt,
-            bool& tIsUnlimited);
 
 private:
     boost::shared_ptr<CDMReader> dataReader_;

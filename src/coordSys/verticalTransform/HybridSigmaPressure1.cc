@@ -38,7 +38,7 @@ boost::shared_ptr<ToVLevelConverter> HybridSigmaPressure1::getPressureConverter(
     const vector<double> apVec = getDataSliceInUnit(reader, ap, "hPa", unLimDimPos);
     const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
     DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
-    if (nx * ny * nt != psData->size()) {
+    if ((not psData) or (nx * ny * nt != psData->size())) {
         throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
                                        "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
     }

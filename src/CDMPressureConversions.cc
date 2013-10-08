@@ -37,6 +37,7 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
+#include "coordSys/CoordSysUtils.h"
 
 namespace MetNoFimex
 {
@@ -147,7 +148,7 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
             CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
             size_t nx, ny, nz, nt;
             bool tIsUnlimited;
-            CDMVerticalInterpolator::getSimpleAxes(p_->cs, dataReader_->getCDM(),
+            MetNoFimex::getSimpleAxes(p_->cs, dataReader_->getCDM(),
                     xAxis, yAxis, zAxis, tAxis,
                     nx, ny, nz, nt, tIsUnlimited);
             vector<string> shape;
@@ -172,17 +173,10 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
     }
     // get all axes
     CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
-    size_t nx, ny, nz, nt;
-    bool tIsUnlimited;
-    CDMVerticalInterpolator::getSimpleAxes(p_->cs, dataReader_->getCDM(),
+    size_t nx, ny, nz, nt, startT;
+    MetNoFimex::getSimpleAxes(p_->cs, dataReader_->getCDM(),
             xAxis, yAxis, zAxis, tAxis,
-            nx, ny, nz, nt, tIsUnlimited);
-    // changing t-loop if unlimited to a 1-time loop at correct position
-    size_t startT = 0;
-    if (tIsUnlimited) {
-        nt = unLimDimPos + 1;
-        startT = unLimDimPos;
-    }
+            nx, ny, nz, startT, nt, unLimDimPos);
 
     boost::shared_ptr<ToVLevelConverter> pConv = p_->cs->getVerticalTransformation()->getConverter(dataReader_, MIFI_VINT_PRESSURE, unLimDimPos, p_->cs, nx, ny, nz, (nt-startT));
     if (varName == "air_temperature") {

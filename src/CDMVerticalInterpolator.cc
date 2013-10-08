@@ -32,6 +32,7 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
+#include "coordSys/CoordSysUtils.h"
 #include <boost/regex.hpp>
 #include <iterator>
 #include <algorithm>
@@ -229,68 +230,6 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
     return getLevelDataSlice(*varSysIt, varName, unLimDimPos);
 }
 
-void
-CDMVerticalInterpolator::getSimpleAxes(
-        const CoordSysPtr& cs,
-        const CDM& cdm,
-        CoordinateSystem::ConstAxisPtr& xAxis,
-        CoordinateSystem::ConstAxisPtr& yAxis,
-        CoordinateSystem::ConstAxisPtr& zAxis,
-        CoordinateSystem::ConstAxisPtr& tAxis,
-        size_t& nx, size_t& ny, size_t& nz, size_t& nt,
-        bool& tIsUnlimited)
-{
-    zAxis = cs->getGeoZAxis();
-    assert(zAxis.get() != 0); // defined by construction of cs
-    nz = 1;
-    {
-        const vector<string>& shape = zAxis->getShape();
-        if (shape.size() == 1) {
-            nz = cdm.getDimension(shape.at(0)).getLength();
-        } else {
-            throw CDMException("vertical interpolation not possible with 2d z-Axis: "+zAxis->getName());
-        }
-    }
-
-    // detect x and y axis
-    xAxis = cs->getGeoXAxis();
-    nx = 1;
-    if (xAxis.get() != 0) {
-        const vector<string>& shape = xAxis->getShape();
-        if (shape.size() == 1) {
-            nx = cdm.getDimension(shape.at(0)).getLength();
-        } else {
-            throw CDMException("vertical interpolation not possible with 2d x-Axis: "+xAxis->getName());
-        }
-    }
-
-    yAxis = cs->getGeoYAxis();
-    ny = 1;
-    if (yAxis.get() != 0) {
-        const vector<string>& shape = yAxis->getShape();
-        if (shape.size() == 1) {
-            ny = cdm.getDimension(shape.at(0)).getLength();
-        } else {
-            throw CDMException("vertical interpolation not possible with 2d y-Axis: "+yAxis->getName());
-        }
-    }
-
-    // detect time axis
-    tAxis = cs->getTimeAxis();
-    nt = 1;
-    if (tAxis.get() != 0) {
-        const vector<string>& shape = tAxis->getShape();
-        if (shape.size() == 1) {
-            const CDMDimension& tDim = cdm.getDimension(shape.at(0));
-            nt = tDim.getLength();
-            tIsUnlimited = tDim.isUnlimited();
-        } else {
-            throw CDMException(
-                    "vertical interpolation not possible with 2d time-axis");
-        }
-    }
-}
-
 DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)
 {
     assert(cs->isCSFor(varName) && cs->isComplete(varName));
@@ -299,17 +238,10 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
     }
     // get all axes
     CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
-    size_t nx, ny, nz, nt;
-    bool tIsUnlimited;
+    size_t nx, ny, nz, nt, startT;
     getSimpleAxes(cs, dataReader_->getCDM(),
             xAxis, yAxis, zAxis, tAxis,
-            nx, ny, nz, nt, tIsUnlimited);
-    // changing t-loop if unlimited to a 1-time loop at correct position
-    size_t startT = 0;
-    if (tIsUnlimited) {
-        nt = unLimDimPos + 1;
-        startT = unLimDimPos;
-    }
+            nx, ny, nz, startT, nt, unLimDimPos);
     boost::shared_ptr<ToVLevelConverter> levConv = cs->getVerticalTransformation()->getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;

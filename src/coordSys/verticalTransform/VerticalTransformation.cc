@@ -31,6 +31,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
+#include "coordSys/CoordSysUtils.h"
 #include <map>
 
 namespace MetNoFimex {
@@ -46,12 +47,24 @@ std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransforma
 
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
+    if (not isComplete())
+        throw CDMException("incomplete vertical transformation");
     switch (verticalType) {
     case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
     case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     case MIFI_VINT_DEPTH: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     default: throw CDMException("unknown vertical type");
     }
+}
+
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs) const
+{
+    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
+    size_t nx, ny, nz, t0, t1;
+    MetNoFimex::getSimpleAxes(cs, reader->getCDM(),
+            xAxis, yAxis, zAxis, tAxis,
+            nx, ny, nz, t0, t1, unLimDimPos);
+    return getConverter(reader, verticalType, unLimDimPos, cs, nx, ny, nz, t1-t0);
 }
 
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
