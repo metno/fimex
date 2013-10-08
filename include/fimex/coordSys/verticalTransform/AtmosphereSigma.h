@@ -49,17 +49,18 @@ public:
      * @param ptop top of model
      * @param ps surface pressure
      */
-    AtmosphereSigma(std::string sigma, std::string ptop, std::string ps) : sigma(sigma), ps(ps), ptop(ptop) {}
+    AtmosphereSigma(const std::string& sigma, const std::string& ptop, const std::string& ps) : sigma(sigma), ps(ps), ptop(ptop) {}
     virtual ~AtmosphereSigma() {}
     /**
      * static NAME constant
      * @return atmosphere_sigma_coordinate
      */
-    static const std::string NAME() {return "atmosphere_hybrid_sigma_pressure_coordinate_2";}
+    static const std::string NAME() { return "atmosphere_hybrid_sigma_pressure_coordinate_2"; }
     /**
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
+    virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "sigma="+sigma+",ps="+ps+",ptop="+ptop; }
     virtual bool isComplete() const {return sigma != "" && ptop != "" && ps != "";}
 protected:

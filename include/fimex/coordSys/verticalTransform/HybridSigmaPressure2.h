@@ -51,7 +51,7 @@ public:
      * @param ps surface pressure variable name
      * @param p0 p0 base-pressure
      */
-    HybridSigmaPressure2(std::string a, std::string b, std::string ps, std::string p0 = "") : a(a), b(b), ps(ps), p0(p0) {}
+    HybridSigmaPressure2(const std::string& a, const std::string& b, const std::string& ps, const std::string& p0 = "") : a(a), b(b), ps(ps), p0(p0) {}
     virtual ~HybridSigmaPressure2() {}
     /**
      * static NAME constant
@@ -62,6 +62,7 @@ public:
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
+    virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "a="+a+",b="+b+",ps="+ps+",p0="+p0; }
     virtual bool isComplete() const {return a != "" && b != "" && ps != "" && p0 != "";}
 protected:

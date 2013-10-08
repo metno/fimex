@@ -87,7 +87,7 @@ static DataPtr interpolationArray2Data(boost::shared_array<float> iData, size_t 
 }
 
 
-CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, string verticalType, string verticalInterpolationMethod, const std::vector<double> level1, const std::vector<double> level2)
+CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, const string& verticalType, const string& verticalInterpolationMethod, const std::vector<double>& level1, const std::vector<double>& level2)
 : dataReader_(dataReader), pimpl_(new VIntPimpl())
 {
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;

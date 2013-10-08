@@ -59,7 +59,7 @@ public:
      * @param depth_c critical depth, usually min(depth(x,y))
      * @param eta time-varying free surface eta(x,y,z) (often also called zeta)
      */
-    OceanSG1(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "");
+    OceanSG1(const std::string& s, const std::string& C, const std::string& depth, const std::string& depth_c, const std::string& eta = "");
     virtual ~OceanSG1() {}
     /**
      * static NAME constant
@@ -70,6 +70,7 @@ public:
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
+    virtual int getPreferredVerticalType() const { return MIFI_VINT_DEPTH; }
     virtual std::string getParameterString() const { return "s="+s+",C="+C+",depth="+depth+",depth_c="+depth_c+",eta="+eta; }
     virtual bool isComplete() const {return s != "" && C != "" && depth != "" && depth_c != "";}
 protected:

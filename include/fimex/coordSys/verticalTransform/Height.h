@@ -41,7 +41,7 @@ class Height : public VerticalTransformation
 public:
     /// name of the height variable
     const std::string height;
-    Height(std::string height) : height(height) {}
+    Height(const std::string& height) : height(height) {}
     virtual ~Height() {}
     /**
      * static NAME constant
@@ -52,6 +52,7 @@ public:
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
+    virtual int getPreferredVerticalType() const { return MIFI_VINT_HEIGHT; }
     virtual std::string getParameterString() const { return "h="+height; }
     virtual bool isComplete() const {return height != "";}
 protected:

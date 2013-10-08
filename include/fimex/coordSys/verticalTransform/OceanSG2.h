@@ -53,7 +53,7 @@ public:
      * @param eta optional time-varying free surface eta(x,y,z) (often also called zeta)
      */
     // unconventionally defined in OceanSG1.cc
-    OceanSG2(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta = "");
+    OceanSG2(const std::string& s, const std::string& C, const std::string& depth, const std::string& depth_c, const std::string& eta = "");
     virtual ~OceanSG2() {}
     /**
      * static NAME constant

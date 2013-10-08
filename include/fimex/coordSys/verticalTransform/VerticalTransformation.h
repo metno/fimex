@@ -84,6 +84,8 @@ public:
     virtual std::string getName() const = 0;
     /// list the parameters
     virtual std::string getParameterString() const = 0;
+    /// the most natural vertical type, one of the MIFI_VINT_* in fimex/mifi_constants.h
+    virtual int getPreferredVerticalType() const = 0;
     /**
      *  Indicate if all parameters are given. In some cases
      *  a transformation might be used as indicator, even if
@@ -92,7 +94,7 @@ public:
      */
     virtual bool isComplete() const = 0;
     /**
-     * get a converter
+     * get a converter. Pressure will be in unit hPa, height/depth in unit m.
      * @param reader a reader to fetch the data from
      * @param verticalType one of the MIFI_VINT_* in fimex/mifi_constants.h
      * @param unLimDimPos the unlimited position to start at

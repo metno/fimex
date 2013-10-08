@@ -35,14 +35,14 @@
 
 namespace MetNoFimex {
 
-OceanSG2::OceanSG2(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta)
+OceanSG2::OceanSG2(const std::string& s, const std::string& C, const std::string& depth, const std::string& depth_c, const std::string& eta)
         : OceanSG1(s, C, depth, depth_c, eta)
 {
     heightConversionFunction = mifi_ocean_s_g2_z;
 }
 
 
-OceanSG1::OceanSG1(std::string s, std::string C, std::string depth, std::string depth_c, std::string eta)
+OceanSG1::OceanSG1(const std::string& s, const std::string& C, const std::string& depth, const std::string& depth_c, const std::string& eta)
     : heightConversionFunction(mifi_ocean_s_g1_z),
       s(s), C(C), depth(depth), depth_c(depth_c), eta(eta)
 {}

@@ -61,7 +61,12 @@ public:
      * @param t
      * @return pressure-levels in hPa at position (x,y,t)
      */
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) = 0;
+    virtual vector<double> operator()(size_t x, size_t y, size_t t) = 0;
+
+    //! same as operator()
+    inline vector<double> values(size_t x, size_t y, size_t t)
+        { return operator()(x, y, t); }
+
     /**
      * The VLevelConverter usually knows about validity of vertical values at a certain position.
      *
@@ -84,7 +89,7 @@ public:
      * @param vlevel The constant level.
      */
     IdentityToVLevelConverter(const vector<double>& vlevel) : vlevel_(vlevel) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return vlevel_;}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t) {return vlevel_;}
 };
 
 /**
@@ -98,7 +103,7 @@ public:
      * @param lnP The constant pressure levels given as ln(P/P0)
      */
     LnPressureToPressureConverter(double p0, const vector<double>& lnP);
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
 };
 
 /**
@@ -111,7 +116,7 @@ public:
      * @param h given in m
      */
     HeightStandardToPressureConverter(const vector<double>& h);
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
 };
 
 /**
@@ -136,7 +141,7 @@ public:
      */
     SigmaToPressureConverter(const vector<double>& sigma, double ptop, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
     : sigma_(sigma), ptop_(ptop), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 
@@ -162,7 +167,7 @@ public:
      */
     HybridSigmaApToPressureConverter(const vector<double>& ap, const vector<double>& b, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
     : ap_(ap), b_(b), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -189,7 +194,7 @@ public:
      */
     HybridSigmaToPressureConverter(const vector<double>& a, const vector<double>& b, double p0, const boost::shared_array<double> ps, size_t nx, size_t ny, size_t nt)
     : a_(a), b_(b), p0_(p0), ps_(ps), nx_(nx), ny_(ny), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -203,7 +208,7 @@ public:
      * @param presConv another ToVLevelConverter converting to pressure
      */
     PressureToStandardHeightConverter(boost::shared_ptr<ToVLevelConverter> presConv) : presConv_(presConv) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -220,7 +225,7 @@ class GeopotentialToHeightConverter : public ToVLevelConverter {
 public:
     GeopotentialToHeightConverter(const boost::shared_array<float> geopotential, const boost::shared_array<float> altitude, size_t nx, size_t ny, size_t nk, size_t nt)
     : geopot_(geopotential), alti_(altitude), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 
@@ -261,7 +266,7 @@ public:
             timeDependentDepth_ = (depth_.idx().getDims().size() == 3);
             func_ = func;
     }
-    virtual const vector<double> operator()(size_t x, size_t y, size_t t);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
     virtual bool isValid(double val, size_t x, size_t y, size_t t);
 };
 

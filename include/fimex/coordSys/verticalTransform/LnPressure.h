@@ -47,7 +47,7 @@ public:
      * @param lev dimensionless parameter
      * @param p0 p0 base-pressure
      */
-    LnPressure(std::string lev, std::string p0) : lev(lev), p0(p0) {}
+    LnPressure(const std::string& lev, const std::string& p0) : lev(lev), p0(p0) {}
     virtual ~LnPressure() {}
     /**
      * static NAME constant
@@ -58,6 +58,7 @@ public:
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
+    virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "lev="+lev+",p0="+p0; }
     virtual bool isComplete() const {return lev != "" && p0 != "";}
 protected:

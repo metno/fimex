@@ -46,7 +46,7 @@ class Pressure : public VerticalTransformation
 public:
     /// name of the pressure variable
     const std::string pressure;
-    Pressure(std::string pressure) : pressure(pressure) {}
+    Pressure(const std::string& pressure) : pressure(pressure) {}
     virtual ~Pressure() {}
     /**
      * static NAME constant
@@ -57,6 +57,7 @@ public:
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
+    virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "p="+pressure; }
     virtual bool isComplete() const {return pressure != "";}
 protected:
