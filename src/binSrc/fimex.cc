@@ -1046,7 +1046,7 @@ int run(int argc, char* args[])
         return 0;
     }
     if (vm.count("version")) {
-        cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "_" << mifi_version_minor() << "_" << mifi_version_patch() << "_" << mifi_version_status() << ")" << endl;
+        cout << "fimex version " << fimexVersion() <<" (" << mifi_version_major() << "." << mifi_version_minor() << "." << mifi_version_patch() << "." << mifi_version_status() << ")" << endl;
         return 0;
     }
 

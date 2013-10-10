@@ -17,9 +17,9 @@
  * The following numbers are used by configure.ac
  * - make sure the line-number is correct
  */
-#define MIFI_VERSION_MAJOR 0x00
-#define MIFI_VERSION_MINOR 0x49
-#define MIFI_VERSION_PATCH 0x00
+#define MIFI_VERSION_MAJOR  0
+#define MIFI_VERSION_MINOR 49
+#define MIFI_VERSION_PATCH  0
 #define MIFI_VERSION_STATUS 0xB0
 #define MIFI_VERSION_STRING "0.49beta"
 
