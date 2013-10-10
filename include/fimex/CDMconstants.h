@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H_
-#define CONSTANTS_H_
+#ifndef CDMCONSTANTS_H_
+#define CDMCONSTANTS_H_
 
 #include "fimex/deprecated.h"
 
@@ -12,6 +12,17 @@
  * CDMConstants stores several constants used in fimex, accessible from
  * C and C++. Constants are either available as macro, or as function.
  */
+
+/*
+ * The following numbers are used by configure.ac
+ * - make sure the line-number is correct
+ */
+#define MIFI_VERSION_MAJOR 0x00
+#define MIFI_VERSION_MINOR 0x49
+#define MIFI_VERSION_PATCH 0x00
+#define MIFI_VERSION_STATUS 0xB0
+#define MIFI_VERSION_STRING "0.49beta"
+
 
 /**
  * the default radius of a spherical earth in meter
@@ -65,31 +76,53 @@ extern "C" {
 /**
  * version of fimex
  */
-const char* fimexVersion();
+extern const char* fimexVersion();
+
+/**
+ * major version of fimex
+ */
+extern const unsigned int mifi_version_major();
+
+/**
+ * minor version of fimex
+ */
+extern const unsigned int mifi_version_minor();
+
+/**
+ * patch version of fimex
+ */
+extern const unsigned int mifi_version_patch();
+
+/**
+ * fimex version status, e.g >=0xF0 = final, 0xAX = alphaX,
+ * 0xBX = betaX, 0xCX= releaseCandidateX
+ */
+extern const unsigned int mifi_version_status();
+
 
 /**
  * @brief get the filetype of a filetype name
  * @return one of MIFI_FILETYPE_*
  */
-int mifi_get_filetype(const char* filetypeName);
+extern int mifi_get_filetype(const char* filetypeName);
 
 /**
  * @brief get the filetype-name of a filetype
  * @param filetype one of MIFI_FILETYPE_*
  */
-const char* mifi_get_filetype_name(int filetype);
+extern const char* mifi_get_filetype_name(int filetype);
 
 /**
  * get the maximum number of filetypes, that is , the largest number
  * of valid filetype you can get.
  */
-int mifi_get_max_filetype_number();
+extern int mifi_get_max_filetype_number();
 
 /**
  * check if fimex is configured with the filetype
  * @param fileType one of the MIFI_FILETYPE_* define constants
  */
-int fimexHas(int fileType);
+extern int fimexHas(int fileType);
 /**
  * check if fimex is configured with netcdf-support
  * @deprecated use fimexHas(fileType)
@@ -111,4 +144,4 @@ DEPRECATED(int fimexHasFelt());
 #endif
 
 
-#endif /*CONSTANTS_H_*/
+#endif /*CDMCONSTANTS_H_*/

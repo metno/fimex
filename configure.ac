@@ -1,4 +1,4 @@
-AC_INIT([fimex],[0.49beta],[heiko.klein@met.no])
+AC_INIT([fimex],[m4_esyscmd([grep MIFI_VERSION_STRING include/fimex/CDMconstants.h | head -1 | cut -d ' ' -f 3 | tr -d '"\n'])],[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
 AM_INIT_AUTOMAKE([1.9 tar-pax -Wall foreign])
 

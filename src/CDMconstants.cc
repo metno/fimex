@@ -81,7 +81,24 @@ int mifi_get_max_filetype_number()
 
 const char* fimexVersion()
 {
-    return VERSION;
+    return MIFI_VERSION_STRING;
+}
+
+const unsigned int mifi_version_major()
+{
+    return MIFI_VERSION_MAJOR;
+}
+const unsigned int mifi_version_minor()
+{
+    return MIFI_VERSION_MINOR;
+}
+const unsigned int mifi_version_patch()
+{
+    return MIFI_VERSION_PATCH;
+}
+const unsigned int mifi_version_status()
+{
+    return MIFI_VERSION_STATUS;
 }
 
 int fimexHas(int fileType)
