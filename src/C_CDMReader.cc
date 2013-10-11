@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 
-#include "fimex/mifi_cdm_reader.h"
+#include "mifi_cdm_reader.h"
 #include "fimex/C_CDMReader.h"
 #include "fimex/Data.h"
 #include "fimex/CDMVariable.h"

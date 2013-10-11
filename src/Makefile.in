@@ -227,14 +227,15 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
-	Log4cppLogger.cc Log4cppLogger.h MutexLock.h NcmlCDMReader.cc \
-	NcmlAggregationReader.h NcmlAggregationReader.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.cc \
-	Units.cc Utils.cc vertical_coordinate_transformations.c \
-	XMLDoc.cc XMLInput.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
-	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
+	Log4cppLogger.cc Log4cppLogger.h MutexLock.h mifi_cdm_reader.h \
+	NcmlCDMReader.cc NcmlAggregationReader.h \
+	NcmlAggregationReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
+	TimeSpec.cc ToVLevelConverter.cc Units.cc Utils.cc \
+	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
+	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
+	NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.h \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.h \
 	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
@@ -636,14 +637,15 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
-	Log4cppLogger.cc Log4cppLogger.h MutexLock.h NcmlCDMReader.cc \
-	NcmlAggregationReader.h NcmlAggregationReader.cc \
-	Null_CDMWriter.cc ReplaceStringObject.cc \
-	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.cc \
-	Units.cc Utils.cc vertical_coordinate_transformations.c \
-	XMLDoc.cc XMLInput.cc $(am__append_1) $(am__append_2) \
-	$(am__append_3) $(am__append_5)
+	Log4cppLogger.cc Log4cppLogger.h MutexLock.h mifi_cdm_reader.h \
+	NcmlCDMReader.cc NcmlAggregationReader.h \
+	NcmlAggregationReader.cc Null_CDMWriter.cc \
+	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
+	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
+	TimeSpec.cc ToVLevelConverter.cc Units.cc Utils.cc \
+	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
+	$(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_5)
 all: all-recursive
 
 .SUFFIXES:

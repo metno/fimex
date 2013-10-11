@@ -1,19 +1,20 @@
 PROGRAM fortran_test
   USE mifi, ONLY                   : mifi_open_file,mifi_get_dimensions,&
-                                     mifi_set_dimensions,mifi_read_field,&
+                                     mifi_read_data, mifi_get_dimname, &
                                      mifi_close_file
   IMPLICIT NONE
-  INTEGER                         :: ierr
+  INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
   INTEGER                         :: filetype
   CHARACTER(LEN=80)               :: varName
-  REAL(KIND=8),DIMENSION(:,:,:,:,:,:),ALLOCATABLE :: field
+  REAL(KIND=8),DIMENSION(:,:,:,:),ALLOCATABLE :: field
   INTEGER                         :: dataRead
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
   INTEGER, ALLOCATABLE, DIMENSION(:) :: start, vsize
   CHARACTER(LEN=10)               :: cunit
+  CHARACTER(LEN=1024)             :: dimname
 
   input_file="/opdata/arome_norway25/AROME_Norway25_00.nc"
   filetype=1
@@ -32,15 +33,25 @@ PROGRAM fortran_test
   IF ( ndims <= 0 ) CALL error("Can't make slicebuilder")
   write(0,*) "mifi_get_dimensions: ", ndims
 
-  ALLOCATE(field(1,1,1,1,1,1))
+  do i = 1, ndims
+    write(*,*) "dimname ", i, ": ", trim(mifi_get_dimname(i)), vsize(i)
+  end do
 
-  ! Set dimensions
-  ierr=mifi_set_dimensions()
-  IF ( ierr /= 0 ) CALL error("Can't set dimensions")
 
-  ! Read variable
-  ierr=mifi_read_field(cunit,field,dataRead)
-  IF ( ierr /= 0 ) CALL error("Can't read field")
+
+  ALLOCATE(field(vsize(1),vsize(2),1,1))
+  do i = 3, ndims
+    ! reduce the slice
+    vsize(i) = 1
+  end do
+  ierr=mifi_read_data(varName,cunit,field,start,vsize)
+  IF ( ierr /= 0 ) THEN
+    CALL error("Can't read field")
+  ELSE
+    do i = 1, 10
+      write(*,*) field(i,1,1,1)
+    end do
+  ENDIF
   DEALLOCATE(field)
 
   ! Close file (free memory)

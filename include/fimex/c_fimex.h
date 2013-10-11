@@ -55,7 +55,7 @@ typedef int (*doubleDatasliceCallbackPtr)(mifi_cdm_reader* reader, const char* v
  * Free the reader. This won't free the resources immediately, but reduce the reference counter.
  * It is therefore possible to free a reader, while it still is used within another part of the fimex-chain.
  */
-void mifi_free_cdm_reader(mifi_cdm_reader* reader);
+extern void mifi_free_cdm_reader(mifi_cdm_reader* reader);
 
 /**
  * Get a new reader from a file.
@@ -64,7 +64,7 @@ void mifi_free_cdm_reader(mifi_cdm_reader* reader);
  * @param configFile configuration file for the felt-file
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  */
-mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile);
+extern mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, const char* configFile);
 
 /**
  * Get a new reader from a felt file.
@@ -107,7 +107,7 @@ DEPRECATED(mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile));
  * @param ncmlFile name of the ncml config file
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  */
-mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile);
+extern mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncmlFile);
 
 
 
@@ -119,7 +119,7 @@ mifi_cdm_reader* mifi_new_ncml_modifier(mifi_cdm_reader* reader, const char* ncm
  * @param version the version of the netcdf-file. Implemented are 3 or 4.
  * @return 0 on success.
  */
-int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
+extern int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
 
 /**
  * Write the content of the reader to the filename as gribfile.
@@ -129,7 +129,7 @@ int mifi_netcdf_writer(mifi_cdm_reader* reader, const char* filename, const char
  * @param version the version of the grib-edition. Implemented are 1 or 2.
  * @return 0 on success.
  */
-int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
+extern int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* configFile, int version);
 
 
 /**
@@ -137,7 +137,7 @@ int mifi_grib_writer(mifi_cdm_reader* reader, const char* filename, const char* 
  * @param reader the data source
  * @return 0 on success.
  */
-int mifi_nullcdm_writer(mifi_cdm_reader* reader);
+extern int mifi_nullcdm_writer(mifi_cdm_reader* reader);
 
 /**
  * @brief change the projection of the reader to this new projection
@@ -151,14 +151,14 @@ int mifi_nullcdm_writer(mifi_cdm_reader* reader);
  * @param out_y_axis_unit unit of the output y-axis
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  */
-mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, const char* proj_input, const char* out_x_axis, const char* out_y_axis, const char* out_x_axis_unit, const char* out_y_axis_unit);
+extern mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, const char* proj_input, const char* out_x_axis, const char* out_y_axis, const char* out_x_axis_unit, const char* out_y_axis_unit);
 
 /**
  * Get a new reader which allows setting c-callback functions.
  * @param reader the original data-source
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  */
-mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader);
+extern mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader);
 
 /**
  * Add a callback for a variable. The variable will be converted to datatype double.
@@ -171,7 +171,7 @@ mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader);
  * in the reader. It cannot change any information the writer request, but the reader doesn't
  * now about. This data will continue to be undefined!
  */
-int mifi_set_callback_double(mifi_cdm_reader* c_reader, const char* varName, doubleDatasliceCallbackPtr callback);
+extern int mifi_set_callback_double(mifi_cdm_reader* c_reader, const char* varName, doubleDatasliceCallbackPtr callback);
 
 
 /**
@@ -179,18 +179,21 @@ int mifi_set_callback_double(mifi_cdm_reader* c_reader, const char* varName, dou
  * @param reader the data source
  * @return the number of variables
  */
-size_t mifi_get_variable_number(mifi_cdm_reader* reader);
+extern size_t mifi_get_variable_number(mifi_cdm_reader* reader);
 /**
  * Get the name of a variable from the reader.
  * @param reader the data source
  * @param pos the position number of the variable, should be between 0 and size-1
  * @return the variable name, or NULL on failure
  */
-const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
+extern const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
 
-
-mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName);
-void mifi_free_slicebuilder(mifi_slicebuilder* sb);
+extern mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName);
+extern int mifi_slicebuilder_ndims(mifi_slicebuilder* sb);
+extern const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos);
+extern int mifi_slicebuilder_get_start_size(mifi_slicebuilder* sb, unsigned int* start, unsigned int* size);
+extern int mifi_slicebuilder_set_dim_start_size(mifi_slicebuilder* sb, const char* dimName, unsigned int start, unsigned int size);
+extern void mifi_free_slicebuilder(mifi_slicebuilder* sb);
 
 
 
@@ -215,6 +218,19 @@ int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size
  */
 int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** data, size_t* size);
 
+/**
+ * Write information from the readers variable to the pre-allocated
+ * data-variable.
+ *
+ * @param reader the data-source
+ * @param varName variable-name to read
+ * @param sb The slicebuilder to restrict dimensions. It is possible to reuse a slicebuilder for several variables with the same dimensions.
+ * @param units Units of the data. Scaling and unit-conversion will be done automatically. Use units = "" if you don't want any units-conversion. Units need to be udunits-compatible.
+ * @param data Preallocated data. The total size must be identical to the slicebuilders total size.
+ * @param size The actually read data. This might be <= the requested data if data not available.
+ * @return 0 on success
+ */
+int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varName, mifi_slicebuilder* sb, const char* units, double* data, size_t* size);
 
 /**
  * get the unique forecast reference time in a unit

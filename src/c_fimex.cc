@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <vector>
 #include "fimex/c_fimex.h"
-#include "fimex/mifi_cdm_reader.h"
+#include "mifi_cdm_reader.h"
 #include "../config.h"
 #include "fimex/CDM.h"
 #include "boost/shared_ptr.hpp"
@@ -227,6 +227,43 @@ mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* va
     return 0;
 }
 
+int mifi_slicebuilder_ndims(mifi_slicebuilder* sb)
+{
+    if (sb != 0) {
+        return sb->sb_.getDimensionSizes().size();
+    }
+    return 0;
+}
+
+const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos)
+{
+    if (sb != 0) {
+        return sb->sb_.getDimensionNames().at(pos).c_str();
+    }
+    return "";
+}
+
+int mifi_slicebuilder_get_start_size(mifi_slicebuilder* sb, unsigned int* start, unsigned int* size)
+{
+    if (sb != 0) {
+        const vector<size_t>& startV = sb->sb_.getDimensionStartPositions();
+        copy(startV.begin(), startV.end(), start);
+        const vector<size_t>& sizeV = sb->sb_.getDimensionSizes();
+        copy(sizeV.begin(), sizeV.end(), size);
+        return 0;
+    }
+    return -1;
+}
+
+int mifi_slicebuilder_set_dim_start_size(mifi_slicebuilder* sb, const char* dimName, unsigned int start, unsigned int size)
+{
+    if (sb != 0) {
+        sb->sb_.setStartAndSize(dimName, start, size);
+        return 0;
+    }
+    return -1;
+}
+
 
 
 int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size)
@@ -268,6 +305,32 @@ int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** 
     }
     return -1;
 }
+
+int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varName, mifi_slicebuilder* sb, const char* units, double* data, size_t* size)
+{
+    if (data == 0) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_fill_scaled_double_dataslice: data not pre-allocated");
+        *size = 0;
+        return -1;
+    }
+    try {
+        DataPtr vData;
+        string unitStr(units);
+        if (unitStr != "") {
+            vData = reader->get()->getScaledDataSliceInUnit(varName, unitStr, sb->sb_);
+        } else {
+            vData = reader->get()->getScaledDataSlice(varName, sb->sb_);
+        }
+        *size = vData->size();
+        boost::shared_array<double> vArray = vData->asDouble();
+        copy(&vArray[0], &vArray[*size], data);
+        return 0;
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_fill_scaled_double_dataslice: " << ex.what());
+    }
+    return -1;
+}
+
 
 double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const char* units)
 {
