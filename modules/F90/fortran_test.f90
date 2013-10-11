@@ -12,6 +12,7 @@ PROGRAM fortran_test
   INTEGER                         :: dataRead
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
+  INTEGER, ALLOCATABLE, DIMENSION(:) :: start, vsize
   CHARACTER(LEN=10)               :: cunit
 
   input_file="/opdata/arome_norway25/AROME_Norway25_00.nc"
@@ -27,7 +28,7 @@ PROGRAM fortran_test
   write(0,*) "mifi_open_file: success"
 
   ! Get dimensions
-  ndims=mifi_get_dimensions(varName)
+  ndims=mifi_get_dimensions(varName, start, vsize)
   IF ( ndims <= 0 ) CALL error("Can't make slicebuilder")
   write(0,*) "mifi_get_dimensions: ", ndims
 

@@ -20,14 +20,27 @@ MODULE MIFI
       TYPE(C_PTR), VALUE                 :: io
       CHARACTER(KIND=C_CHAR),INTENT(IN)  :: varName(*)
       TYPE(C_PTR)                        :: mifi_new_slicebuilder
-    END FUNCTION
+    END FUNCTION mifi_new_slicebuilder
 
     FUNCTION mifi_slicebuilder_ndims(sb) BIND(C,NAME="mifi_slicebuilder_ndims")
       USE iso_c_binding, ONLY: C_PTR,C_INT
       IMPLICIT NONE
       TYPE(C_PTR), INTENT(IN), VALUE                 :: sb
       INTEGER(KIND=C_INT)                            :: mifi_slicebuilder_ndims
-    END FUNCTION
+    END FUNCTION mifi_slicebuilder_ndims
+
+    FUNCTION mifi_slicebuilder_get_start_size(sb, start, sbsize) BIND(C,NAME="mifi_slicebuilder_get_start_size")
+      USE iso_c_binding, ONLY: C_PTR,C_INT
+      IMPLICIT NONE
+      TYPE(C_PTR), INTENT(IN), VALUE                 :: sb
+      TYPE(C_PTR), VALUE                             :: start
+      TYPE(C_PTR), VALUE                             :: sbsize
+      INTEGER(KIND=C_INT)                            :: mifi_slicebuilder_get_start_size
+    END FUNCTION mifi_slicebuilder_get_start_size
+
+
+!extern int mifi_slicebuilder_get_start_size(mifi_slicebuilder* sb, unsigned int* start, unsigned int* size);
+!extern int mifi_slicebuilder_set_start_size(mifi_slicebuilder* sb, const char* dimName, unsigned int start, unsigned int size);
 
 
     FUNCTION c_mifi_set_dimensions(sb) BIND(C,NAME="set_dimensions")
@@ -35,7 +48,7 @@ MODULE MIFI
       IMPLICIT NONE
       TYPE(C_PTR),INTENT(IN),VALUE       :: sb
       INTEGER(KIND=C_INT)                :: c_mifi_set_dimensions
-    END FUNCTION
+    END FUNCTION c_mifi_set_dimensions
 
     FUNCTION c_mifi_read_field(io,cunit,fieldptr,dataRead) BIND(C,NAME="mifi_get_double_dataslice")
       USE iso_c_binding, ONLY: C_INT,C_PTR,C_CHAR,C_DOUBLE
@@ -47,18 +60,20 @@ MODULE MIFI
       INTEGER(KIND=C_INT)                                :: c_mifi_read_field
     END FUNCTION c_mifi_read_field
 
-    SUBROUTINE c_mifi_free_slicebuilder(sb) BIND(C,NAME="mifi_free_slicebuilder")
+    SUBROUTINE mifi_free_slicebuilder(sb) BIND(C,NAME="mifi_free_slicebuilder")
       USE iso_c_binding,     ONLY: C_PTR
       IMPLICIT NONE
       TYPE(C_PTR),INTENT(IN),VALUE    :: sb
     END SUBROUTINE
 
-    SUBROUTINE c_mifi_free_cdm_reader(io) BIND(C,NAME="mifi_free_cdm_reader")
+    SUBROUTINE mifi_free_cdm_reader(io) BIND(C,NAME="mifi_free_cdm_reader")
       USE iso_c_binding,     ONLY: C_PTR
       IMPLICIT NONE
       TYPE(C_PTR),INTENT(IN),VALUE    :: io
     END SUBROUTINE
   END INTERFACE
+
+
   INTERFACE mifi_read_field
     MODULE PROCEDURE mifi_read_field_6d
     !MODULE PROCEDURE mifi_read_field_5d
@@ -77,30 +92,38 @@ MODULE MIFI
     CHARACTER(LEN=*),INTENT(IN)          :: config
     INTEGER,         INTENT(IN)          :: filetype
     CHARACTER(LEN=*),INTENT(IN),OPTIONAL :: varName
+    INTEGER, DIMENSION(:), ALLOCATABLE :: start
+    INTEGER, DIMENSION(:), ALLOCATABLE :: vsize
     INTEGER                              :: mifi_open_file
 
     io=mifi_new_io_reader(filetype, TRIM(infile)//C_NULL_CHAR,TRIM(config)//C_NULL_CHAR)
     IF ( C_ASSOCIATED(io) ) THEN
       mifi_open_file=0
       IF ( PRESENT(varName)) THEN
-        mifi_open_file=mifi_get_dimensions(varName)
+        mifi_open_file=mifi_get_dimensions(varName, start, vsize)
       ENDIF
     ELSE
       mifi_open_file=-1
     ENDIF
   END FUNCTION mifi_open_file
 
-  FUNCTION mifi_get_dimensions(varName)
-    USE iso_c_binding,    ONLY: C_NULL_CHAR,C_ASSOCIATED
+  FUNCTION mifi_get_dimensions(varName, start, vsize)
+    USE iso_c_binding,    ONLY: C_NULL_CHAR,C_INT,C_ASSOCIATED,C_LOC
     IMPLICIT NONE
     INTEGER                  :: mifi_get_dimensions
+    INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET, INTENT(OUT) :: start
+    INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET, INTENT(OUT) :: vsize
+    INTEGER :: i, ierr
+
     CHARACTER(LEN=*)         :: varName
 
     IF ( C_ASSOCIATED(io) ) THEN
       sb=mifi_new_slicebuilder(io,TRIM(varName)//C_NULL_CHAR)
       IF ( C_ASSOCIATED(sb) ) THEN
         mifi_get_dimensions=mifi_slicebuilder_ndims(sb)
-        write (0,*) mifi_get_dimensions
+        ALLOCATE(start(mifi_get_dimensions))
+        ALLOCATE(vsize(mifi_get_dimensions))
+        ierr = mifi_slicebuilder_get_start_size(sb, C_LOC(start), C_LOC(vsize))
       ELSE
         mifi_get_dimensions=-1
       ENDIF
@@ -151,8 +174,8 @@ MODULE MIFI
     IMPLICIT NONE
     INTEGER                 :: mifi_close_file
 
-    IF ( C_ASSOCIATED(sb) ) CALL c_mifi_free_slicebuilder(sb)
-    IF ( C_ASSOCIATED(io) ) CALL c_mifi_free_cdm_reader(io)
+    IF ( C_ASSOCIATED(sb) ) CALL mifi_free_slicebuilder(sb)
+    IF ( C_ASSOCIATED(io) ) CALL mifi_free_cdm_reader(io)
     mifi_close_file=0
   END FUNCTION mifi_close_file
 
