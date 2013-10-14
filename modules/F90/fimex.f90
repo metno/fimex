@@ -234,7 +234,7 @@ MODULE Fimex
 
     c_pos = pos - 1
     slen = 0
-    IF ( C_ASSOCIATED(sb) ) THEN
+    IF ( C_ASSOCIATED(sb) .AND. pos <= c_mifi_slicebuilder_ndims(sb) ) THEN
       str_ptr = c_mifi_slicebuilder_dimname(sb, c_pos)
       call C_F_POINTER(str_ptr,tmp_name)
       slen = INDEX(tmp_name,C_NULL_CHAR) - 1
