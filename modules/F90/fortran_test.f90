@@ -9,8 +9,9 @@ PROGRAM fortran_test
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
   CHARACTER(LEN=80)               :: varName
-  REAL(KIND=8),DIMENSION(:,:,:,:),ALLOCATABLE :: field
-  REAL(KIND=8),DIMENSION(:,:,:),ALLOCATABLE :: field3d
+  REAL(KIND=8),DIMENSION(:),ALLOCATABLE,TARGET :: field
+  REAL(KIND=8),DIMENSION(:,:,:,:),POINTER :: field4d
+  REAL(KIND=8),DIMENSION(:,:,:),POINTER :: field3d
   INTEGER                         :: dataRead
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
@@ -52,29 +53,32 @@ PROGRAM fortran_test
       WRITE(*,*) "dimname ", i, ": ", trim(get_dimname(i)), vsize(i)
     END DO
 
-    ierr=reduce_dimension(get_dimname(3), 0, 1)
-    ierr=reduce_dimension(get_dimname(4), 0, 1)
-    ALLOCATE(field(vsize(1),vsize(2),1,1))
+    DO i = 3, ndims
+      ierr=reduce_dimension(get_dimname(i), 0, 1)
+    END DO
+    ALLOCATE(field(vsize(1)*vsize(2)))
+    ierr=read_data(varName,cunit,field)
+    field4d(1:vsize(1),1:vsize(2),1:1,1:1) => field
+    IF ( ierr /= 0 ) THEN
+      CALL error("Can't read field")
+    ELSE
+      DO i = 1, 10
+        WRITE(*,*) field4d(i,1,1,1)
+      END DO
+    ENDIF
+    DEALLOCATE(field)
+
+    ALLOCATE(field(vsize(1)*vsize(2)))
+    field3d(1:vsize(1),1:vsize(2),1:1) => field
     ierr=read_data(varName,cunit,field)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
       DO i = 1, 10
-        WRITE(*,*) field(i,1,1,1)
+        WRITE(*,*) field3d(i,1,1)
       END DO
     ENDIF
     DEALLOCATE(field)
-
-!    ALLOCATE(field3d(vsize(1),vsize(2),1))
-!    ierr=read_data(varName,cunit,field3d)
-!    IF ( ierr /= 0 ) THEN
-!      CALL error("Can't read field")
-!    ELSE
-!      DO i = 1, 10
-!        WRITE(*,*) field3d(i,1,1)
-!      END DO
-!    ENDIF
-!    DEALLOCATE(field3d)
 
 
     ! Close file (free memory)

@@ -131,8 +131,7 @@ MODULE Fimex
   !> Interface to read data with different dimension-sizes.
   !! This will use internally the read_data_4d and similar functions
   INTERFACE read_data
-    MODULE PROCEDURE read_data_4d
-!    MODULE PROCEDURE read_data_3d
+    MODULE PROCEDURE read_data
   END INTERFACE read_data
 
   CONTAINS
@@ -286,19 +285,29 @@ MODULE Fimex
     ENDIF
   END FUNCTION reduce_dimension
 
-  !> Read data for a 4d-field
-  !! This function can also be called from the read-data interface.
+  !> Read data to a 1-d field.
+  !! To work with n-d arrays, use the fortran rank remapping feature
+  !! of fortran2003:
+  !! @code
+  !! REAL(KIND=8),DIMENSION(:),ALLOCATABLE,TARGET :: target
+  !! REAL(KIND=8),DIMENSION(:,:,:,:),ALLOCATABLE,POINTER :: field4d
+  !!
+  !! ALLOCATE(target(PRODUCT(vsize))
+  !! ierr=read_data_1d(varName,cunit,target)
+  !! ! remap to 4-d
+  !! field4d(1:vsize(1),1:vsize(2),1:vsize(3),1:vsize(4)) => target
+  !! @endcode
   !! @param varName the variable name to read, must be similar or equal to the one set in get_dimensions()
   !! @param cunit the unit to read the variable in. Use "" to ignore units.
   !! @param field the preallocated multi-dimensional field
   !! @return 0 on success
-  FUNCTION read_data_4d(varname, cunit, field)
+  FUNCTION read_data(varname, cunit, field)
     USE iso_c_binding,    ONLY: C_PTR,C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_INT,C_LONG_LONG,C_LOC
     IMPLICIT NONE
     CHARACTER(LEN=*)                                        :: varname
     CHARACTER(LEN=*)                                        :: cunit
-    REAL(KIND=C_DOUBLE),DIMENSION(:,:,:,:), INTENT(INOUT), ALLOCATABLE, TARGET :: field
-    INTEGER                                                 :: read_data_4d
+    REAL(KIND=C_DOUBLE),DIMENSION(:), INTENT(INOUT), ALLOCATABLE, TARGET :: field
+    INTEGER                                                 :: read_data
 
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: start
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: vsize
@@ -311,47 +320,30 @@ MODULE Fimex
       ALLOCATE(start(ndims))
       ALLOCATE(vsize(ndims))
       ierr = get_dimension_start_size(start, vsize)
-      expSize = 1
-      DO i = 1, size(vsize)
-        expSize = expSize * vsize(i)
-      END DO
+      expSize = PRODUCT(vsize)
       IF (expSize /= size(field, KIND=C_LONG_LONG)) THEN
-        read_data_4d = -1
+        read_data = -1
         WRITE(*,*) "read_data, allocated field-size != expected size: ", size(field), "!=", expSize
         RETURN
       END IF
 
-      read_data_4d = c_mifi_fill_scaled_double_dataslice(io, trim(varName)//C_NULL_CHAR, sb, &
+      read_data = c_mifi_fill_scaled_double_dataslice(io, trim(varName)//C_NULL_CHAR, sb, &
                                                  trim(cunit)//C_NULL_CHAR, C_LOC(field), outSize)
-      IF (read_data_4d /= 0) THEN
-        WRITE(*,*) "error filling scaled_double_dataslice ", read_data_4d
+      IF (read_data /= 0) THEN
+        WRITE(*,*) "error filling scaled_double_dataslice ", read_data
         RETURN
       END IF
       IF (outSize /= expSize) THEN
         WRITE(*,*) "unexpected output size ", outSize, ", expected ",expSize
-        read_data_4d = -2
+        read_data = -2
         RETURN
       END IF
     ELSE
-      read_data_4d = -99
+      read_data = -99
       WRITE(*,*) "read_data, io or sb not initialized"
     END IF
     RETURN
-  END FUNCTION read_data_4d
-
-!  FUNCTION read_data_3d(varname, cunit, field)
-!    USE iso_c_binding,    ONLY: C_PTR,C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_INT,C_LONG_LONG,C_LOC
-!    IMPLICIT NONE
-!    CHARACTER(LEN=*)                                        :: varname
-!    CHARACTER(LEN=*)                                        :: cunit
-!    REAL(KIND=C_DOUBLE),DIMENSION(:,:,:), INTENT(INOUT), POINTER, TARGET :: field
-!    REAL(KIND=C_DOUBLE),DIMENSION(:,:,:,:), POINTER, TARGET :: field4d
-!    INTEGER                                                 :: read_data_3d
-
-!    field4d(:,:,:,1) => field,1,1)
-!    read_data_3d = read_data_4d(varname, cunit, field4d)
-!  END FUNCTION read_data_3d
-
+  END FUNCTION read_data
 
   FUNCTION close_file()
     USE iso_c_binding,   ONLY: C_ASSOCIATED
