@@ -1,13 +1,16 @@
 PROGRAM fortran_test
-  USE mifi, ONLY                   : mifi_open_file,mifi_get_dimensions,&
-                                     mifi_read_data, mifi_get_dimname, &
-                                     mifi_close_file,set_filetype
+  USE Fimex, ONLY                   : open_file,get_dimensions,&
+                                     get_dimension_start_size,&
+                                     reduce_dimension,&
+                                     read_data, get_dimname, &
+                                     close_file,set_filetype
   IMPLICIT NONE
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
   CHARACTER(LEN=80)               :: varName
   REAL(KIND=8),DIMENSION(:,:,:,:),ALLOCATABLE :: field
+  REAL(KIND=8),DIMENSION(:,:,:),ALLOCATABLE :: field3d
   INTEGER                         :: dataRead
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
@@ -15,7 +18,7 @@ PROGRAM fortran_test
   CHARACTER(LEN=10)               :: cunit,cfiletype
   CHARACTER(LEN=1024)             :: dimname
   INTEGER,EXTERNAL                :: iargc
- 
+
 
   IF (( iargc() /= 4 ) .AND. ( iargc() /= 5 )) THEN
     WRITE(*,*) "Usage: ./fortran_test input-file file-type variable unit [config]"
@@ -32,27 +35,27 @@ PROGRAM fortran_test
     ENDIF
 
     ! Open file
-    ierr=mifi_open_file(input_file,config_file,set_filetype(cfiletype))
+    ierr=open_file(input_file,config_file,set_filetype(cfiletype))
     IF ( ierr /= 0 ) CALL error("Can't make io-object with file:"//trim(input_file)//" config: "//config_file)
-    WRITE(0,*) "mifi_open_file: success"
+    WRITE(0,*) "open_file: success"
 
     ! Get dimensions
-    ndims=mifi_get_dimensions(varName, start, vsize)
+    ndims=get_dimensions(varName)
     IF ( ndims <= 0 ) CALL error("Can't make slicebuilder")
-    WRITE(0,*) "mifi_get_dimensions: ", ndims
+    WRITE(0,*) "get_dimensions: ", ndims
+
+    ALLOCATE(start(ndims))
+    ALLOCATE(vsize(ndims))
+    ierr = get_dimension_start_size(start, vsize)
 
     DO i = 1, ndims
-      WRITE(*,*) "dimname ", i, ": ", trim(mifi_get_dimname(i)), vsize(i)
+      WRITE(*,*) "dimname ", i, ": ", trim(get_dimname(i)), vsize(i)
     END DO
 
-
-
+    ierr=reduce_dimension(get_dimname(3), 0, 1)
+    ierr=reduce_dimension(get_dimname(4), 0, 1)
     ALLOCATE(field(vsize(1),vsize(2),1,1))
-    DO i = 3, ndims
-      ! reduce the slice
-      vsize(i) = 1
-    END DO
-    ierr=mifi_read_data(varName,cunit,field,start,vsize)
+    ierr=read_data(varName,cunit,field)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
@@ -62,8 +65,20 @@ PROGRAM fortran_test
     ENDIF
     DEALLOCATE(field)
 
+!    ALLOCATE(field3d(vsize(1),vsize(2),1))
+!    ierr=read_data(varName,cunit,field3d)
+!    IF ( ierr /= 0 ) THEN
+!      CALL error("Can't read field")
+!    ELSE
+!      DO i = 1, 10
+!        WRITE(*,*) field3d(i,1,1)
+!      END DO
+!    ENDIF
+!    DEALLOCATE(field3d)
+
+
     ! Close file (free memory)
-    ierr=mifi_close_file()
+    ierr=close_file()
     IF ( ierr /= 0 ) CALL error("Can't free memory")
 
   END IF
