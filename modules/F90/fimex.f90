@@ -8,25 +8,20 @@
 !! are wrapper functions against the Fimex C-interface c_fimex.h . Functions without
 !! prefix define a high level F90 interface, which should generally be used
 !!
-!! @warning The fimex.f90 interface is currently not precompiled with building fimex. Please
+!! The fimex.f90 interface is currently not precompiled with building fimex. Please
 !! copy the fimex.f90 file to your f90-project and compile it from there, and link with ''-lfimex''.
 !!
-!! @warning The module stores internally two refernces to file and data-handles. It is
-!!          therefore not save to use in parallel.
+!!
+!!
 !!
 !! @see https://svn.met.no/viewvc/fimex/trunk/modules/F90/fimex.f90?view=co
 MODULE Fimex
   USE iso_c_binding, ONLY : C_PTR
   IMPLICIT NONE
 
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_felt=0
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_netcdf=1
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_ncml=2
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_grib=3
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_wdb=4
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_metgm=5
-  INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_rw=1024
-
+  !> Class to store file-handles for the high-level API.
+  !! @warning The class FimexIO stores internally two refernces to file and data-handles.
+  !!    It should therefore not be accessed from two parallel threads
   TYPE, PUBLIC :: FimexIO
     TYPE(C_PTR),PRIVATE    :: io
     TYPE(C_PTR),PRIVATE    :: sb
@@ -136,34 +131,29 @@ MODULE Fimex
       IMPLICIT NONE
       TYPE(C_PTR),INTENT(IN),VALUE    :: io
     END SUBROUTINE c_mifi_free_cdm_reader
+
+    FUNCTION c_mifi_get_filetype(typename) BIND(C,NAME="mifi_get_filetype")
+      USE iso_c_binding, ONLY: C_INT,C_CHAR
+      CHARACTER(KIND=C_CHAR), INTENT(IN)  :: typename(*)
+      INTEGER(KIND=C_INT)                 :: c_mifi_get_filetype
+    END FUNCTION c_mifi_get_filetype
   END INTERFACE
 
   CONTAINS
 
   !> translate the filetype from string to internal number
-  FUNCTION set_filetype(cfiletype)
+  !! @param filetype_name filetype as "fimex", "netcdf", "grib", ...
+  !! @return integer filetype
+  FUNCTION set_filetype(filetype_name)
+    USE iso_c_binding, ONLY: C_NULL_CHAR
     IMPLICIT NONE
-    CHARACTER(LEN=10), INTENT(IN) :: cfiletype
+    CHARACTER(LEN=10), INTENT(IN) :: filetype_name
     INTEGER                       :: set_filetype
-    SELECT CASE (TRIM(cfiletype))
-      CASE ("felt","FELT")
-         set_filetype=mifi_filetype_felt
-      CASE ("netcdf","NETCDF","nc","NC")
-         set_filetype=mifi_filetype_netcdf
-      CASE ("grib","GRIB","grb","GRB")
-         set_filetype=mifi_filetype_grib
-      CASE ("ncml","NCML")
-         set_filetype=mifi_filetype_ncml
-      CASE ("wdb","WDB")
-         set_filetype=mifi_filetype_wdb
-      CASE ("metgm","METGM")
-         set_filetype=mifi_filetype_metgm
-      CASE ("rw","RW")
-         set_filetype=mifi_filetype_rw
-      CASE DEFAULT
-        WRITE(*,*) "Filetype not defined: "//TRIM(cfiletype)
-        CALL abort()
-    END SELECT
+    set_filetype = c_mifi_get_filetype(TRIM(filetype_name)//C_NULL_CHAR);
+    IF (set_filetype < 0) THEN
+      WRITE(*,*) "Filetype not defined: "//TRIM(filetype_name)
+      CALL abort()
+    ENDIF
   END FUNCTION set_filetype
 
   !> Open a new data-soure.
