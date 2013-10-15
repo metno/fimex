@@ -1,5 +1,5 @@
 PROGRAM fortran_test
-  USE Fimex, ONLY                   : FimexIO, set_filetype
+  USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat
   IMPLICIT NONE
   TYPE(FimexIO)                   :: fio
   INTEGER                         :: ierr,i
@@ -12,7 +12,7 @@ PROGRAM fortran_test
   INTEGER                         :: dataRead
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
-  INTEGER, ALLOCATABLE, DIMENSION(:) :: start, vsize
+  INTEGER(KIND=4), ALLOCATABLE, DIMENSION(:) :: start, vsize, atypes
   CHARACTER(LEN=10)               :: cunit,cfiletype
   CHARACTER(LEN=1024)             :: dimname
   INTEGER,EXTERNAL                :: iargc
@@ -45,14 +45,21 @@ PROGRAM fortran_test
     ALLOCATE(start(ndims))
     ALLOCATE(vsize(ndims))
     ierr = fio%get_dimension_start_size(start, vsize)
-
     DO i = 1, ndims
       WRITE(*,*) "dimname ", i, ": ", trim(fio%get_dimname(i)), vsize(i)
     END DO
+    ALLOCATE(atypes(ndims))
+    ierr = fio%get_axistypes(atypes)
 
-    DO i = 3, ndims
-      ierr=fio%reduce_dimension(fio%get_dimname(i), 0, 1)
+    DO i = 1, ndims
+      !WRITE (*,*) i, " axistype: ", atypes(i)
+      !WRITE (*,*) AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat
+      IF (.not.(atypes(i)==AXIS_GeoX .or. atypes(i) == AXIS_GeoY .or. atypes(i) == AXIS_Lon .or. atypes(i) == AXIS_Lat)) THEN
+         WRITE(*,*) "reducind dimension ", i, " ",TRIM(fio%get_dimname(i))
+         ierr=fio%reduce_dimension(fio%get_dimname(i), 0, 1)
+      ENDIF
     END DO
+    WRITE(*,*) "end reduce"
     ALLOCATE(field(vsize(1)*vsize(2)))
     ierr=fio%read_data(varName,cunit,field)
     field4d(1:vsize(1),1:vsize(2),1:1,1:1) => field

@@ -111,5 +111,45 @@ SliceBuilder CoordinateSystemSliceBuilder::getTimeVariableSliceBuilder()
     return sb;
 }
 
+void CoordinateSystemSliceBuilder::setAxisStartAndSize(CoordinateAxis::AxisType axis, size_t start, size_t size)
+{
+    switch (axis) {
+        case CoordinateAxis::ReferenceTime : setReferenceTimePos(start); break;
+        case CoordinateAxis::Time : setTimeStartAndSize(start, size); break;
+        default: {
+            if (cs_->hasAxisType(axis)) {
+                typedef CoordinateSystem::ConstAxisList Csal;
+                Csal axes = cs_->getAxes();
+                for (Csal::const_iterator axIt = axes.begin(); axIt != axes.end(); ++axIt) {
+                    if ((*axIt)->getAxisType() == axis) {
+                        if ((*axIt)->isExplicit()) {
+                            setStartAndSize(*axIt, start, size);
+                        }
+                    }
+                }
+            }
+            break;
+        }
+    }
+}
+
+vector<CoordinateAxis::AxisType> CoordinateSystemSliceBuilder::getAxisTypes()
+{
+    vector<string> dimNames = getDimensionNames();
+    vector<CoordinateAxis::AxisType> retVal;
+    typedef CoordinateSystem::ConstAxisList Csal;
+    Csal axes = cs_->getAxes();
+    for (vector<string>::iterator it = dimNames.begin(); it != dimNames.end(); ++it) {
+        Csal::const_iterator axIt = find_if(axes.begin(), axes.end(), CDMNameEqualPtr(*it));
+        if (axIt != axes.end()) {
+            cerr << (*axIt)->getAxisType() << CoordinateAxis::type2int((*axIt)->getAxisType()) << endl;
+            retVal.push_back((*axIt)->getAxisType());
+        } else {
+            // this should not happen
+            throw CDMException("cannot find axis-type for dimension: " + *it);
+        }
+    }
+    return retVal;
+}
 
 }

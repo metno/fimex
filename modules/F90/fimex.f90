@@ -19,6 +19,11 @@ MODULE Fimex
   USE iso_c_binding, ONLY : C_PTR
   IMPLICIT NONE
 
+  ENUM, BIND(C)
+    ENUMERATOR :: AXIS_Undefined = 0, AXIS_GeoX, AXIS_GeoY, AXIS_GeoZ, AXIS_Time, AXIS_Lon, AXIS_Lat,&
+     AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime
+  END ENUM
+
   !> Class to store file-handles for the high-level API.
   !! @warning The class FimexIO stores internally two refernces to file and data-handles.
   !!    It should therefore not be accessed from two parallel threads
@@ -31,6 +36,7 @@ MODULE Fimex
     procedure :: get_dimensions
     procedure :: get_dimname
     procedure :: get_dimension_start_size
+    procedure :: get_axistypes
     procedure :: reduce_dimension
     procedure :: read_data
   END TYPE
@@ -71,6 +77,16 @@ MODULE Fimex
       TYPE(C_PTR), VALUE                             :: sbsize
       INTEGER(KIND=C_INT)                            :: c_mifi_slicebuilder_get_start_size
     END FUNCTION c_mifi_slicebuilder_get_start_size
+
+    !> F90-wrapper for mifi_slicebuilder_get_axistype()
+    FUNCTION c_mifi_slicebuilder_get_axistype(sb, atypes) BIND(C,NAME="mifi_slicebuilder_get_axistype")
+      USE iso_c_binding, ONLY: C_PTR,C_INT
+      IMPLICIT NONE
+      TYPE(C_PTR), INTENT(IN), VALUE                 :: sb
+      TYPE(C_PTR), VALUE                             :: atypes
+      INTEGER(KIND=C_INT)                            :: c_mifi_slicebuilder_get_axistype
+    END FUNCTION c_mifi_slicebuilder_get_axistype
+
 
     !> F90-wrapper for mifi_slicebuilder_set_dim_start_size()
     FUNCTION c_mifi_slicebuilder_set_dim_start_size(sb, dimName, start, sbsize)&
@@ -165,7 +181,7 @@ MODULE Fimex
   FUNCTION open_file(this, infile,config,filetype,varName)
     USE iso_c_binding,                ONLY: C_NULL_CHAR,C_ASSOCIATED
     IMPLICIT NONE
-    CLASS(FimexIO), INTENT(INOUT)           :: this
+    CLASS(FimexIO), INTENT(OUT)           :: this
     CHARACTER(LEN=*),INTENT(IN)          :: infile
     CHARACTER(LEN=*),INTENT(IN)          :: config
     INTEGER,         INTENT(IN)          :: filetype
@@ -264,6 +280,24 @@ MODULE Fimex
        get_dimension_start_size = -1
     END IF
   END FUNCTION get_dimension_start_size
+
+  !> Get the types of the axes.
+  !!
+  !! @param atypes pre-allocated integer array of size ndims
+  !! @return 0 on success, negative on error
+  FUNCTION get_axistypes(this, atypes)
+    USE iso_c_binding,    ONLY: C_INT, C_ASSOCIATED, C_LOC
+    INTEGER :: get_axistypes
+    CLASS(FimexIO), INTENT(IN)    :: this
+    INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET, INTENT(INOUT) :: atypes
+
+    IF ( C_ASSOCIATED(this%sb) ) THEN
+       get_axistypes = c_mifi_slicebuilder_get_axistype(this%sb, C_LOC(atypes))
+    ELSE
+       get_axistypes = -1
+    END IF
+  END FUNCTION get_axistypes
+
 
   !> Reduce the dimension by setting a start and size.
   !! @param dimName dimension name, e.g. retrieved by get_dimname()

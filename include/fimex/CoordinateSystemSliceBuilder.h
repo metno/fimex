@@ -29,6 +29,7 @@
 
 
 #include "SliceBuilder.h"
+#include "fimex/coordSys/CoordinateAxis.h"
 
 namespace MetNoFimex
 {
@@ -48,6 +49,13 @@ class CoordinateSystemSliceBuilder: public MetNoFimex::SliceBuilder
 public:
     CoordinateSystemSliceBuilder(const CDM& cdm, boost::shared_ptr<const CoordinateSystem> cs);
     virtual ~CoordinateSystemSliceBuilder() {};
+
+    /**
+     * Get the types of the dimensions.
+     * @return vector of size of dimensions
+     */
+    std::vector<CoordinateAxis::AxisType> getAxisTypes();
+
     /**
      * Set a single reference-time. The CoordinateSystemSliceBuilder
      * will only fetch a single reference-time, by default the first one.
@@ -58,6 +66,22 @@ public:
      * even be a 2-dimensional time-dimension, i.e. (refTime,offset)
      */
     void setTimeStartAndSize(size_t start, size_t size);
+    /**
+     * Set start and size for all axes of the axisType. If axisType
+     * is ReferenceTime, only the start-position but not the size is
+     * used.
+     *
+     * @param axisType
+     * @param start
+     * @param size
+     *
+     * @warning When having duplicated axis, this function might return
+     * strange results. This happens most likely when having more than
+     * 6 dimensions (multiple 'Other' axes). The author didn't see such
+     * files yet.
+     */
+    void setAxisStartAndSize(CoordinateAxis::AxisType axisType, size_t start, size_t size);
+
     /**
      * Get a slice-builder to fetch data for the time-variable
      * with the same reference-time as set for the current slice. It should be

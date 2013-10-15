@@ -188,11 +188,59 @@ extern size_t mifi_get_variable_number(mifi_cdm_reader* reader);
  */
 extern const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
 
+/**
+ * Create a new slice_builder for the reader and the variable. It
+ * will try to attach a coordinate-system if possible
+ * @param reader
+ * @param varName
+ * @return a slicebuilder handle
+ */
 extern mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName);
+/**
+ * Check if the slicebuilder is connected to a coordinate-system.
+ * @param sb
+ * @return 1 on success, 0 on failure
+ */
+extern int mifi_slicebuilder_has_CS(mifi_slicebuilder* sb);
+/**
+ * Get the number of dimensions (i.e. the rank) of the slicebuilder.
+ * @param sb
+ * @return rank
+ */
 extern int mifi_slicebuilder_ndims(mifi_slicebuilder* sb);
+/**
+ * Get the name of the dimension of the slicebuilder at a certain
+ * position.
+ * @param sb
+ * @param pos
+ * @return "" on failure
+ */
 extern const char* mifi_slicebuilder_dimname(mifi_slicebuilder* sb, int pos);
+/**
+ * Get the current start positions and dimension-sizes for all dimensions.
+ * @param sb
+ * @param start pre-allocated array of size ndims
+ * @param size pre-allocated array of size ndims
+ * @return 0 on success, < 0 on failure
+ */
 extern int mifi_slicebuilder_get_start_size(mifi_slicebuilder* sb, unsigned int* start, unsigned int* size);
+
+extern int mifi_slicebuilder_get_axistype(mifi_slicebuilder* sb, int* axistype);
+
+
+/**
+ * Set the start-position (starting with 0) and size of a named dimension.
+ * @param sb
+ * @param dimName
+ * @param start
+ * @param size
+ * @return 0 on success, < 0 on failure
+ */
 extern int mifi_slicebuilder_set_dim_start_size(mifi_slicebuilder* sb, const char* dimName, unsigned int start, unsigned int size);
+/**
+ * Free the memory allocated for the slicebuilder.
+ * @param sb
+ */
 extern void mifi_free_slicebuilder(mifi_slicebuilder* sb);
 
 

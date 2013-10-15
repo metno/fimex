@@ -28,7 +28,14 @@
 #define MIFI_CDM_READER_H_
 
 #include <boost/shared_ptr.hpp>
-#include "fimex/CDMReader.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/SliceBuilder.h"
+
+namespace MetNoFimex {
+    class CDMReader;
+    class CoordinateSystem;
+//    class SliceBuilder;
+}
 
 /**
   * @headerfile fimex/mifi_cdm_reader.h
@@ -39,10 +46,11 @@
  */
 class mifi_cdm_reader {
 public:
-    mifi_cdm_reader(boost::shared_ptr<MetNoFimex::CDMReader> reader) : reader_(reader) {}
-    boost::shared_ptr<MetNoFimex::CDMReader> get() {return reader_;}
-private:
+    mifi_cdm_reader(boost::shared_ptr<MetNoFimex::CDMReader> reader) : reader_(reader) {
+        csVec_ = MetNoFimex::listCoordinateSystems(reader_);
+    }
     boost::shared_ptr<MetNoFimex::CDMReader> reader_;
+    std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> > csVec_;
 };
 
 /**
@@ -51,8 +59,10 @@ private:
  */
 class mifi_slicebuilder {
 public:
-    mifi_slicebuilder(MetNoFimex::SliceBuilder sb) : sb_(sb) {}
-    MetNoFimex::SliceBuilder sb_;
+    mifi_slicebuilder(boost::shared_ptr<MetNoFimex::SliceBuilder> sb, boost::shared_ptr<const MetNoFimex::CoordinateSystem> cs) : sb_(sb), cs_(cs) {}
+    mifi_slicebuilder(boost::shared_ptr<MetNoFimex::SliceBuilder> sb) : sb_(sb) {}
+    boost::shared_ptr<MetNoFimex::SliceBuilder> sb_;
+    boost::shared_ptr<const MetNoFimex::CoordinateSystem> cs_;
 };
 
 

@@ -64,7 +64,13 @@ public:
         default: return "Undefined";
         }
     }
-    explicit CoordinateAxis(const CDMVariable& var) : CDMVariable(var) {}
+    static AxisType int2type(int type) {
+        return static_cast<AxisType>(type);
+    }
+    static int type2int(AxisType type) {
+        return static_cast<int>(type);
+    }
+    explicit CoordinateAxis(const CDMVariable& var) : CDMVariable(var), type_(Undefined) {}
     virtual ~CoordinateAxis() {}
 
     bool operator<(const CoordinateAxis& ca) {return this->getName() < ca.getName();}

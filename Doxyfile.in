@@ -449,7 +449,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = "@srcdir@/doxydoc.txt" "@srcdir@/include/"
+INPUT                  = "@srcdir@/doxydoc.txt" "@srcdir@/include/" "@srcdir@/modules/F90/"
 
 # If the value of the INPUT tag contains directories, you can use the
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp
@@ -458,7 +458,7 @@ INPUT                  = "@srcdir@/doxydoc.txt" "@srcdir@/include/"
 # *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx
 # *.hpp *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.py
 
-FILE_PATTERNS          =
+FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.h *.hpp *.inc *.f90
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
 # should be searched for input files as well. Possible values are YES and NO.
@@ -484,7 +484,7 @@ EXCLUDE_SYMLINKS       = NO
 # against the file with absolute path, so to exclude all test directories
 # for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */fortran_test.f90 */_gfortran_iargc.c
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or
 # directories that contain example code fragments that are included (see
