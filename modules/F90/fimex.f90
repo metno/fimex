@@ -20,6 +20,8 @@ MODULE Fimex
   IMPLICIT NONE
 
   ENUM, BIND(C)
+  !> Axis-definitions
+  !! These are the same definitions as in CoordinateAxis::AxisType
     ENUMERATOR :: AXIS_Undefined = 0, AXIS_GeoX, AXIS_GeoY, AXIS_GeoZ, AXIS_Time, AXIS_Lon, AXIS_Lat,&
      AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime
   END ENUM
@@ -282,7 +284,8 @@ MODULE Fimex
   END FUNCTION get_dimension_start_size
 
   !> Get the types of the axes.
-  !!
+  !! The types are the same as in MetNoFimex::CoordinateAxis::AxisType. Compare against
+  !! AXIS_Time, AXIS_GeoX, ... enumerated constants.
   !! @param atypes pre-allocated integer array of size ndims
   !! @return 0 on success, negative on error
   FUNCTION get_axistypes(this, atypes)
