@@ -26,9 +26,19 @@ MODULE Fimex
   INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_wdb=4
   INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_metgm=5
   INTEGER,PARAMETER,PRIVATE   :: mifi_filetype_rw=1024
-  TYPE(C_PTR),PRIVATE,SAVE    :: io
-  TYPE(C_PTR),PRIVATE,SAVE    :: sb
 
+  TYPE, PUBLIC :: FimexIO
+    TYPE(C_PTR),PRIVATE    :: io
+    TYPE(C_PTR),PRIVATE    :: sb
+  CONTAINS
+    procedure :: open => open_file
+    procedure :: close => close_file
+    procedure :: get_dimensions
+    procedure :: get_dimname
+    procedure :: get_dimension_start_size
+    procedure :: reduce_dimension
+    procedure :: read_data
+  END TYPE
   INTERFACE
     !> F90-wrapper for mifi_new_io_reader()
     FUNCTION c_mifi_new_io_reader(filetype,infile,config) BIND(C,NAME="mifi_new_io_reader")
@@ -128,12 +138,6 @@ MODULE Fimex
     END SUBROUTINE c_mifi_free_cdm_reader
   END INTERFACE
 
-  !> Interface to read data with different dimension-sizes.
-  !! This will use internally the read_data_4d and similar functions
-  INTERFACE read_data
-    MODULE PROCEDURE read_data
-  END INTERFACE read_data
-
   CONTAINS
 
   !> translate the filetype from string to internal number
@@ -162,53 +166,58 @@ MODULE Fimex
     END SELECT
   END FUNCTION set_filetype
 
-  !> open a new file
+  !> Open a new data-soure.
   !! @param infile filename (or URL) of input
   !! @param config configuration-file, use "" if not applicable
   !! @param filetype see set_filetype()
   !! @param varName optional varname, if used, will call get_dimensions() and return the number of dimensions
   !! @return negative value on error, >= 0 on success, positive number indicate dimensions of varName
-  FUNCTION open_file(infile,config,filetype,varName)
+  FUNCTION open_file(this, infile,config,filetype,varName)
     USE iso_c_binding,                ONLY: C_NULL_CHAR,C_ASSOCIATED
     IMPLICIT NONE
+    CLASS(FimexIO), INTENT(INOUT)           :: this
     CHARACTER(LEN=*),INTENT(IN)          :: infile
     CHARACTER(LEN=*),INTENT(IN)          :: config
     INTEGER,         INTENT(IN)          :: filetype
     CHARACTER(LEN=*),INTENT(IN),OPTIONAL :: varName
     INTEGER                              :: open_file
-    INTEGER                              :: ierr
 
-    IF ( C_ASSOCIATED(io) ) CALL c_mifi_free_cdm_reader(io)
+    INTEGER                              :: ierr
+    TYPE(C_PTR)                          :: io
+
+    IF ( C_ASSOCIATED(this%io) ) CALL c_mifi_free_cdm_reader(this%io)
     io=c_mifi_new_io_reader(filetype, TRIM(infile)//C_NULL_CHAR,TRIM(config)//C_NULL_CHAR)
     IF ( C_ASSOCIATED(io) ) THEN
       open_file=0
+      this%io = io
       IF ( PRESENT(varName)) THEN
-        open_file=get_dimensions(varName)
+        open_file=this%get_dimensions(varName)
       ENDIF
     ELSE
       open_file=-1
     ENDIF
   END FUNCTION open_file
 
-  !> get the number of dimensions of a variable
-  !! Read the number of dimensions of a variable. This function
+  !> Get the number of dimensions of a variable.
+  !! This function
   !! will internally initialize a slicebuilder, too, so all data
   !! and dimension-fetching will be against this variable.
   !! @param varName variable name
   !! @return number of dimensions, negative on error
-  FUNCTION get_dimensions(varName)
+  FUNCTION get_dimensions(this, varName)
     USE iso_c_binding,    ONLY: C_NULL_CHAR,C_INT,C_ASSOCIATED,C_LOC
     IMPLICIT NONE
     INTEGER                  :: get_dimensions
     INTEGER :: i, ierr
 
-    CHARACTER(LEN=*)         :: varName
+    CLASS(FimexIO), INTENT(INOUT)       :: this
+    CHARACTER(LEN=*), INTENT(IN)     :: varName
 
-    IF ( C_ASSOCIATED(io) ) THEN
-      IF (C_ASSOCIATED(sb)) CALL c_mifi_free_slicebuilder(sb)
-      sb=c_mifi_new_slicebuilder(io,TRIM(varName)//C_NULL_CHAR)
-      IF ( C_ASSOCIATED(sb) ) THEN
-        get_dimensions=c_mifi_slicebuilder_ndims(sb)
+    IF ( C_ASSOCIATED(this%io) ) THEN
+      IF (C_ASSOCIATED(this%sb)) CALL c_mifi_free_slicebuilder(this%sb)
+      this%sb=c_mifi_new_slicebuilder(this%io,TRIM(varName)//C_NULL_CHAR)
+      IF ( C_ASSOCIATED(this%sb) ) THEN
+        get_dimensions=c_mifi_slicebuilder_ndims(this%sb)
       ELSE
         get_dimensions=-1
       ENDIF
@@ -217,14 +226,15 @@ MODULE Fimex
     ENDIF
   END FUNCTION get_dimensions
 
-  !> get the dimension-name at a position
+  !> Get the dimension-name at a position
   !! Get the dimension at a position between 1 and get_dimensions() The position is directly related
   !! to the position in the return arrays of get_dimension_start_size()
   !! @param pos Position in the dimensions-array, 1 <= pos <= get_dimensions()
   !! @return string, or "" on error
-  FUNCTION get_dimname(pos)
+  FUNCTION get_dimname(this, pos)
     USE iso_c_binding,    ONLY: C_NULL_CHAR,C_CHAR,C_INT,C_PTR,C_ASSOCIATED,C_F_POINTER
     IMPLICIT NONE
+    CLASS(FimexIO), INTENT(IN)    :: this
     INTEGER, INTENT(IN)           :: pos
     CHARACTER(LEN=1024)           :: get_dimname
     INTEGER(KIND=C_INT)           :: c_pos
@@ -234,8 +244,8 @@ MODULE Fimex
 
     c_pos = pos - 1
     slen = 0
-    IF ( C_ASSOCIATED(sb) .AND. pos <= c_mifi_slicebuilder_ndims(sb) ) THEN
-      str_ptr = c_mifi_slicebuilder_dimname(sb, c_pos)
+    IF ( C_ASSOCIATED(this%sb) .AND. pos <= c_mifi_slicebuilder_ndims(this%sb) ) THEN
+      str_ptr = c_mifi_slicebuilder_dimname(this%sb, c_pos)
       call C_F_POINTER(str_ptr,tmp_name)
       slen = INDEX(tmp_name,C_NULL_CHAR) - 1
       get_dimname = tmp_name(1:slen)
@@ -244,41 +254,43 @@ MODULE Fimex
     ENDIF
   END FUNCTION get_dimname
 
-  !> get the current start-position and current size for the current variable dimensions
+  !> Get the current start-position and current size for the current variable dimensions.
   !! Get the start-position and size for each dimension of the variable set with the last
   !! get_dimensions() call. Initially, start is 0 for each dimension and size is the full
   !! dimension size. This can be changed with reduce_dimension().
   !! @param start pre-allocated array of size get_dimensions(), returns usually 0,0,0,...
   !! @param vsize pre-allocated array of size get_dimensions(), returns the sizes of the dimension
   !! @return 0 on success, negative on error
-  FUNCTION get_dimension_start_size(start, vsize)
+  FUNCTION get_dimension_start_size(this, start, vsize)
     USE iso_c_binding,    ONLY: C_INT, C_ASSOCIATED, C_LOC
     INTEGER :: get_dimension_start_size
+    CLASS(FimexIO), INTENT(IN)    :: this
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET, INTENT(INOUT) :: start
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET, INTENT(INOUT) :: vsize
 
-    IF ( C_ASSOCIATED(sb) ) THEN
-       get_dimension_start_size = c_mifi_slicebuilder_get_start_size(sb, C_LOC(start), C_LOC(vsize))
+    IF ( C_ASSOCIATED(this%sb) ) THEN
+       get_dimension_start_size = c_mifi_slicebuilder_get_start_size(this%sb, C_LOC(start), C_LOC(vsize))
     ELSE
        get_dimension_start_size = -1
     END IF
   END FUNCTION get_dimension_start_size
 
-  !> reduce the dimension by setting a start and size
+  !> Reduce the dimension by setting a start and size.
   !! @param dimName dimension name, e.g. retrieved by get_dimname()
   !! @param start start-position in the dimension to retrieve the data, first position is 0!
   !! @param dsize size of the dimension. This may not be too large, e.g. start+size must be < total dimension size
   !! @return 0 on success, otherwise error
-  FUNCTION reduce_dimension(dimName, start, dsize)
+  FUNCTION reduce_dimension(this, dimName, start, dsize)
     USE iso_c_binding,    ONLY: C_ASSOCIATED,C_INT,C_NULL_CHAR
     IMPLICIT NONE
     INTEGER :: reduce_dimension
+    CLASS(FimexIO), INTENT(IN)                              :: this
     CHARACTER(LEN=1024), INTENT(IN)                         :: dimName
     INTEGER(KIND=C_INT), INTENT(IN)                         :: start
     INTEGER(KIND=C_INT), INTENT(IN)                         :: dsize
     INTEGER :: i
-    IF ( C_ASSOCIATED(sb) ) THEN
-      reduce_dimension = c_mifi_slicebuilder_set_dim_start_size(sb, &
+    IF ( C_ASSOCIATED(this%sb) ) THEN
+      reduce_dimension = c_mifi_slicebuilder_set_dim_start_size(this%sb, &
               TRIM(dimName)//C_NULL_CHAR,start, dsize)
     ELSE
       reduce_dimension = -99
@@ -301,11 +313,12 @@ MODULE Fimex
   !! @param cunit the unit to read the variable in. Use "" to ignore units.
   !! @param field the preallocated multi-dimensional field
   !! @return 0 on success
-  FUNCTION read_data(varname, cunit, field)
+  FUNCTION read_data(this, varname, cunit, field)
     USE iso_c_binding,    ONLY: C_PTR,C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_INT,C_LONG_LONG,C_LOC
     IMPLICIT NONE
-    CHARACTER(LEN=*)                                        :: varname
-    CHARACTER(LEN=*)                                        :: cunit
+    CLASS(FimexIO), INTENT(IN)                              :: this
+    CHARACTER(LEN=*), INTENT(IN)                            :: varname
+    CHARACTER(LEN=*), INTENT(IN)                            :: cunit
     REAL(KIND=C_DOUBLE),DIMENSION(:), INTENT(INOUT), ALLOCATABLE, TARGET :: field
     INTEGER                                                 :: read_data
 
@@ -315,11 +328,11 @@ MODULE Fimex
     INTEGER(KIND=C_LONG_LONG)                               :: expSize, outSize
     INTEGER :: i,ierr, ndims
 
-    IF (C_ASSOCIATED(sb) .AND. C_ASSOCIATED(io)) THEN
-      ndims = c_mifi_slicebuilder_ndims(sb)
+    IF (C_ASSOCIATED(this%sb) .AND. C_ASSOCIATED(this%io)) THEN
+      ndims = c_mifi_slicebuilder_ndims(this%sb)
       ALLOCATE(start(ndims))
       ALLOCATE(vsize(ndims))
-      ierr = get_dimension_start_size(start, vsize)
+      ierr = this%get_dimension_start_size(start, vsize)
       expSize = PRODUCT(vsize)
       IF (expSize /= size(field, KIND=C_LONG_LONG)) THEN
         read_data = -1
@@ -327,7 +340,7 @@ MODULE Fimex
         RETURN
       END IF
 
-      read_data = c_mifi_fill_scaled_double_dataslice(io, trim(varName)//C_NULL_CHAR, sb, &
+      read_data = c_mifi_fill_scaled_double_dataslice(this%io, trim(varName)//C_NULL_CHAR, this%sb, &
                                                  trim(cunit)//C_NULL_CHAR, C_LOC(field), outSize)
       IF (read_data /= 0) THEN
         WRITE(*,*) "error filling scaled_double_dataslice ", read_data
@@ -345,13 +358,15 @@ MODULE Fimex
     RETURN
   END FUNCTION read_data
 
-  FUNCTION close_file()
+  !> Cleanup internally kept handles and close the file.
+  FUNCTION close_file(this)
     USE iso_c_binding,   ONLY: C_ASSOCIATED
     IMPLICIT NONE
-    INTEGER                 :: close_file
+    CLASS(FimexIO), INTENT(IN)    :: this
+    INTEGER                       :: close_file
 
-    IF ( C_ASSOCIATED(sb) ) CALL c_mifi_free_slicebuilder(sb)
-    IF ( C_ASSOCIATED(io) ) CALL c_mifi_free_cdm_reader(io)
+    IF ( C_ASSOCIATED(this%sb) ) CALL c_mifi_free_slicebuilder(this%sb)
+    IF ( C_ASSOCIATED(this%io) ) CALL c_mifi_free_cdm_reader(this%io)
     close_file=0
   END FUNCTION close_file
 

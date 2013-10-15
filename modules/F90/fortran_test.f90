@@ -1,10 +1,7 @@
 PROGRAM fortran_test
-  USE Fimex, ONLY                   : open_file,get_dimensions,&
-                                     get_dimension_start_size,&
-                                     reduce_dimension,&
-                                     read_data, get_dimname, &
-                                     close_file,set_filetype
+  USE Fimex, ONLY                   : FimexIO, set_filetype
   IMPLICIT NONE
+  TYPE(FimexIO)                   :: fio
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
@@ -36,28 +33,28 @@ PROGRAM fortran_test
     ENDIF
 
     ! Open file
-    ierr=open_file(input_file,config_file,set_filetype(cfiletype))
+    ierr=fio%open(input_file,config_file,set_filetype(cfiletype))
     IF ( ierr /= 0 ) CALL error("Can't make io-object with file:"//trim(input_file)//" config: "//config_file)
     WRITE(0,*) "open_file: success"
 
     ! Get dimensions
-    ndims=get_dimensions(varName)
+    ndims=fio%get_dimensions(varName)
     IF ( ndims <= 0 ) CALL error("Can't make slicebuilder")
     WRITE(0,*) "get_dimensions: ", ndims
 
     ALLOCATE(start(ndims))
     ALLOCATE(vsize(ndims))
-    ierr = get_dimension_start_size(start, vsize)
+    ierr = fio%get_dimension_start_size(start, vsize)
 
     DO i = 1, ndims
-      WRITE(*,*) "dimname ", i, ": ", trim(get_dimname(i)), vsize(i)
+      WRITE(*,*) "dimname ", i, ": ", trim(fio%get_dimname(i)), vsize(i)
     END DO
 
     DO i = 3, ndims
-      ierr=reduce_dimension(get_dimname(i), 0, 1)
+      ierr=fio%reduce_dimension(fio%get_dimname(i), 0, 1)
     END DO
     ALLOCATE(field(vsize(1)*vsize(2)))
-    ierr=read_data(varName,cunit,field)
+    ierr=fio%read_data(varName,cunit,field)
     field4d(1:vsize(1),1:vsize(2),1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -70,7 +67,7 @@ PROGRAM fortran_test
 
     ALLOCATE(field(vsize(1)*vsize(2)))
     field3d(1:vsize(1),1:vsize(2),1:1) => field
-    ierr=read_data(varName,cunit,field)
+    ierr=fio%read_data(varName,cunit,field)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
@@ -82,7 +79,7 @@ PROGRAM fortran_test
 
 
     ! Close file (free memory)
-    ierr=close_file()
+    ierr=fio%close()
     IF ( ierr /= 0 ) CALL error("Can't free memory")
 
   END IF
