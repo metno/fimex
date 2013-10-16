@@ -54,15 +54,20 @@ PROGRAM fortran_test
     DO i = 1, ndims
       !WRITE (*,*) i, " axistype: ", atypes(i)
       !WRITE (*,*) AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat
-      IF (.not.(atypes(i)==AXIS_GeoX .or. atypes(i) == AXIS_GeoY .or. atypes(i) == AXIS_Lon .or. atypes(i) == AXIS_Lat)) THEN
+      SELECT CASE (atypes(i))
+        CASE(AXIS_GeoX, AXIS_Lon)
+          nx = vsize(i)
+        CASE(AXIS_GeoY, AXIS_Lat)
+          ny = vsize(i)
+        CASE DEFAULT
          WRITE(*,*) "reducind dimension ", i, " ",TRIM(fio%get_dimname(i))
          ierr=fio%reduce_dimension(fio%get_dimname(i), 0, 1)
-      ENDIF
+      END SELECT
     END DO
     WRITE(*,*) "end reduce"
-    ALLOCATE(field(vsize(1)*vsize(2)))
+    ALLOCATE(field(nx*ny))
     ierr=fio%read_data(varName,cunit,field)
-    field4d(1:vsize(1),1:vsize(2),1:1,1:1) => field
+    field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
