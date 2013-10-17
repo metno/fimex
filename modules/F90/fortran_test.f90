@@ -9,6 +9,8 @@ PROGRAM fortran_test
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE,TARGET :: field
   REAL(KIND=8),DIMENSION(:,:,:,:),POINTER :: field4d
   REAL(KIND=8),DIMENSION(:,:,:),POINTER :: field3d
+  REAL(KIND=8), DIMENSION(:),TARGET,ALLOCATABLE :: lonvals
+  REAL(KIND=8), DIMENSION(:),TARGET,ALLOCATABLE :: latvals
   INTEGER                         :: dataRead
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
@@ -97,6 +99,57 @@ PROGRAM fortran_test
     ierr = finter%interpolate(fio, INTERPOL_BILINEAR, "+proj=latlon +datum=WGS84", "8,9,...,12", "58,59,...,62", .true.)
     IF ( ierr /= 0 ) THEN
        CALL error("Can't interpolate file")
+    END IF
+    ! Get dimensions
+    ndims=finter%get_dimensions(varName)
+    IF ( ndims <= 0 ) CALL error("Can't make slicebuilder for interpol")
+    WRITE(0,*) "inter-get_dimensions: ", ndims
+
+    ALLOCATE(start(ndims))
+    ALLOCATE(vsize(ndims))
+    ierr = finter%get_dimension_start_size(start, vsize)
+    ALLOCATE(atypes(ndims))
+    ierr = finter%get_axistypes(atypes)
+
+    DO i = 1, ndims
+      !WRITE (*,*) i, " axistype: ", atypes(i)
+      !WRITE (*,*) AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat
+      SELECT CASE (atypes(i))
+        CASE(AXIS_GeoX, AXIS_Lon)
+          nx = vsize(i)
+        CASE(AXIS_GeoY, AXIS_Lat)
+          ny = vsize(i)
+        CASE DEFAULT
+         WRITE(*,*) "reducind dimension ", i, " ",TRIM(fio%get_dimname(i))
+         ierr=finter%reduce_dimension(fio%get_dimname(i), 0, 1)
+      END SELECT
+    END DO
+    WRITE(*,*) "end reduce"
+    ALLOCATE(field(nx*ny))
+    ierr=finter%read_data(varName,cunit,field)
+    field4d(1:nx,1:ny,1:1,1:1) => field
+    IF ( ierr /= 0 ) THEN
+      CALL error("Can't read field")
+    ELSE
+        WRITE(*,*) field4d
+    ENDIF
+    DEALLOCATE(field)
+    DEALLOCATE(start)
+    DEALLOCATE(vsize)
+    DEALLOCATE(atypes)
+    ierr=finter%close()
+
+    ! interpolate to lat lon values
+    ALLOCATE(lonvals(2))
+    ALLOCATE(latvals(2))
+    lonvals(1) = 10
+    latvals(1) = 60
+    lonvals(2) = 10
+    latvals(2) = 55
+    WRITE(*,*) "method ", INTERPOL_BILINEAR
+    ierr = finter%interpolate_lonlat(fio, INTERPOL_BILINEAR, lonvals, latvals)
+    IF ( ierr /= 0 ) THEN
+       CALL error("Can't interpolate file to lonlat")
     END IF
     ! Get dimensions
     ndims=finter%get_dimensions(varName)

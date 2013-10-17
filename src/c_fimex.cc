@@ -168,6 +168,21 @@ mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, c
     return 0;
 }
 
+mifi_cdm_reader* mifi_new_lonlat_interpolator(mifi_cdm_reader* reader, int method, int n, const double* lonVals, const double* latVals)
+{
+    try {
+        boost::shared_ptr<CDMInterpolator> interpol(new CDMInterpolator(reader->reader_));
+        std::vector<double> lons(lonVals, lonVals+n);
+        std::vector<double> lats(latVals, latVals+n);
+        interpol->changeProjection(method, lons, lats);
+        return new mifi_cdm_reader(interpol);
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_new_cdminterpolator: " << ex.what());
+    }
+    return 0;
+}
+
+
 
 mifi_cdm_reader* mifi_new_c_reader(mifi_cdm_reader* reader)
 {

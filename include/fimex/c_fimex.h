@@ -154,6 +154,19 @@ extern int mifi_nullcdm_writer(mifi_cdm_reader* reader);
 extern mifi_cdm_reader* mifi_new_cdminterpolator(mifi_cdm_reader* reader, int method, const char* proj_input, const char* out_x_axis, const char* out_y_axis, const char* out_x_axis_unit, const char* out_y_axis_unit);
 
 /**
+ * @brief change the projection of the reader to this new projection
+ *
+ * @param reader the original data-source
+ * @param method Interpolation method
+ * @param n number of latitude-longitude points
+ * @param lonVals array of size n with longitude positions
+ * @param latVals array of size n with latitude positions
+ * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
+ */
+extern mifi_cdm_reader* mifi_new_lonlat_interpolator(mifi_cdm_reader* reader, int method, int n, const double* lonVals, const double* latVals);
+
+
+/**
  * Get a new reader which allows setting c-callback functions.
  * @param reader the original data-source
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.

@@ -46,6 +46,7 @@ MODULE Fimex
   CONTAINS
     procedure :: open => open_file
     procedure :: interpolate => new_interpolator
+    procedure :: interpolate_lonlat => new_lonlat_interpolator
     procedure :: close => close_file
     procedure :: get_dimensions
     procedure :: get_dimname
@@ -78,6 +79,19 @@ MODULE Fimex
       CHARACTER(KIND=C_CHAR),INTENT(IN)       :: out_x_axis_unit(*)
       CHARACTER(KIND=C_CHAR),INTENT(IN)       :: out_y_axis_unit(*)
       TYPE(C_PTR)                             :: c_mifi_new_cdminterpolator
+    END FUNCTION
+
+    !> F90-wrapper for mifi_new_cdminterpolator()
+    FUNCTION c_mifi_new_lonlat_interpolator(io, method, n, lonvals, latvals)&
+           BIND(C,NAME="mifi_new_lonlat_interpolator")
+      USE iso_c_binding, ONLY: C_INT,C_PTR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_INT), VALUE              :: method
+      INTEGER(KIND=C_INT), VALUE              :: n
+      TYPE(C_PTR),VALUE                       :: lonvals
+      TYPE(C_PTR),VALUE                       :: latvals
+      TYPE(C_PTR)                             :: c_mifi_new_lonlat_interpolator
     END FUNCTION
 
 
@@ -235,7 +249,7 @@ MODULE Fimex
     ENDIF
   END FUNCTION open_file
 
-  !> Creat a new interpolated data-soure from an existing FimexIO.
+  !> Create a new interpolated data-soure from an existing FimexIO.
   !! @param this the new FimexIO object. It must be closed with close_file.
   !! @param fio the input data-source
   !! @param method one of INTERPOL_bilinear, INTERPOL_.... methods
@@ -259,7 +273,6 @@ MODULE Fimex
     TYPE(C_PTR)                          :: interpol
     CHARACTER(LEN=10)                    :: deg_or_m
 
-    write(*,*) "before interpol ", fio%io, " method ", method
     IF ( .not. C_ASSOCIATED(fio%io) ) THEN
       new_interpolator = -99
       RETURN
@@ -277,6 +290,45 @@ MODULE Fimex
     ELSE
       this%io = interpol
       new_interpolator = 0
+    ENDIF
+  END FUNCTION
+
+
+  !> Create a new interpolated data-soure from an existing FimexIO.
+  !! @param this the new FimexIO object. It must be closed with close_file.
+  !! @param fio the input data-source
+  !! @param method one of INTERPOL_bilinear, INTERPOL_.... methods
+  !! @param lonvals longitude positions
+  !! @param latvals longitude positions
+  !! @return negative value on error, >= 0 on success
+  FUNCTION new_lonlat_interpolator(this, fio, method, lonvals, latvals)
+    USE iso_c_binding,                ONLY: C_ASSOCIATED,C_INT,C_DOUBLE,C_LOC
+    IMPLICIT NONE
+    CLASS(FimexIO), INTENT(OUT)          :: this
+    CLASS(FimexIO), INTENT(IN)           :: fio
+    INTEGER, INTENT(IN)                  :: method
+    REAL(KIND=C_DOUBLE), DIMENSION(:), TARGET, INTENT(IN), ALLOCATABLE :: lonvals
+    REAL(KIND=C_DOUBLE), DIMENSION(:), TARGET, INTENT(IN), ALLOCATABLE :: latvals
+    INTEGER                              :: new_lonlat_interpolator
+
+    TYPE(C_PTR)                          :: interpol
+    INTEGER(KIND=C_INT)                  :: n
+
+    IF ( .not. C_ASSOCIATED(fio%io) ) THEN
+      new_lonlat_interpolator = -99
+      RETURN
+    ENDIF
+    IF ( SIZE(latvals) /= SIZE(lonvals)) THEN
+      new_lonlat_interpolator = -2
+      RETURN
+    ENDIF
+    n = SIZE(latvals)
+    interpol = c_mifi_new_lonlat_interpolator(fio%io, method, n, C_LOC(lonvals), C_LOC(latvals))
+    IF (.not. C_ASSOCIATED(interpol) ) THEN
+      new_lonlat_interpolator = -1
+    ELSE
+      this%io = interpol
+      new_lonlat_interpolator = 0
     ENDIF
   END FUNCTION
 
