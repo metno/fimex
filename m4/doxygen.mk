@@ -139,7 +139,7 @@ doc: doxygen-run $(DX_HTML_GOAL)
 doxygen-doc: doxygen-run $(DX_HTML_GOAL) $(DX_PDF_GOAL)
 
 @DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
-	rm -rf @DX_DOCDIR@
+	rm -rf @DX_DOCDIR@/@PACKAGE@.tag
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
 DX_CLEANFILES = \

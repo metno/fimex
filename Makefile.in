@@ -982,7 +982,7 @@ $(pkgconfig_DATA): config.status
 @DX_COND_doc_TRUE@doxygen-doc: doxygen-run $(DX_HTML_GOAL) $(DX_PDF_GOAL)
 
 @DX_COND_doc_TRUE@@DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
-@DX_COND_doc_TRUE@	rm -rf @DX_DOCDIR@
+@DX_COND_doc_TRUE@	rm -rf @DX_DOCDIR@/@PACKAGE@.tag
 @DX_COND_doc_TRUE@	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 prepare-debian: dist clean-debian
 	tar xvzf $(PKG_DIR).tar.gz
