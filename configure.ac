@@ -141,7 +141,10 @@ AC_LANG_POP(C++)
 
 DEBUG_MODE
 
-#DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
+DX_HTML_FEATURE(ON)
+DX_PDF_FEATURE(ON)
+DX_PS_FEATURE(OFF)
+DX_INIT_DOXYGEN('Fimex', 'Doxyfile', 'share/doc')
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([fimex.pc

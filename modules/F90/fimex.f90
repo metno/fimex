@@ -53,6 +53,8 @@ MODULE Fimex
       TYPE(C_PTR)                             :: c_mifi_new_io_reader
     END FUNCTION c_mifi_new_io_reader
 
+    FUNCTION c_mifi_new_cdminterpolator(io, method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit) BIND(C,NAME="mifi_new_cdminterpolator")
+    END FUNCTION
     !> F90-wrapper for mifi_new_slicebuilder()
     FUNCTION c_mifi_new_slicebuilder(io,varName) BIND(C,NAME="mifi_new_slicebuilder")
       USE iso_c_binding, ONLY: C_PTR,C_CHAR
