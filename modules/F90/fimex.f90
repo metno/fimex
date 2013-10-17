@@ -8,22 +8,33 @@
 !! are wrapper functions against the Fimex C-interface c_fimex.h . Functions without
 !! prefix define a high level F90 interface, which should generally be used
 !!
+!! Besides the documented functions, the following constants can be used:
+!!     AXIS_Undefined = 0, AXIS_GeoX, AXIS_GeoY, AXIS_GeoZ, AXIS_Time, AXIS_Lon, AXIS_Lat,
+!!     AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime
+!!     INTERPOL_NEAREST_NEIGHBOR = 0, INTERPOL_BILINEAR, INTERPOL_BICUBIC, INTERPOL_COORD_NN,
+!!      INTERPOL_COORD_NN_KD, INTERPOL_FORWARD_SUM, INTERPOL_FORWARD_MEAN, INTERPOL_FORWARD_MEDIAN,
+!!      INTERPOL_FORWARD_MAX, INTERPOL_FORWARD_MIN
+!!
 !! The fimex.f90 interface is currently not precompiled with building fimex. Please
 !! copy the fimex.f90 file to your f90-project and compile it from there, and link with ''-lfimex''.
-!!
-!!
-!!
 !!
 !! @see https://svn.met.no/viewvc/fimex/trunk/modules/F90/fimex.f90?view=co
 MODULE Fimex
   USE iso_c_binding, ONLY : C_PTR
   IMPLICIT NONE
 
-  ENUM, BIND(C)
   !> Axis-definitions
   !! These are the same definitions as in CoordinateAxis::AxisType
+  ENUM, BIND(C)
     ENUMERATOR :: AXIS_Undefined = 0, AXIS_GeoX, AXIS_GeoY, AXIS_GeoZ, AXIS_Time, AXIS_Lon, AXIS_Lat,&
      AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime
+  END ENUM
+  !> @enum Interpolation methods
+  !! These are the same definintions as #mifi_interpol_method in mifi_constants.h
+  ENUM, BIND(C)
+    ENUMERATOR :: INTERPOL_NEAREST_NEIGHBOR = 0, INTERPOL_BILINEAR, INTERPOL_BICUBIC, INTERPOL_COORD_NN,&
+      INTERPOL_COORD_NN_KD, INTERPOL_FORWARD_SUM, INTERPOL_FORWARD_MEAN, INTERPOL_FORWARD_MEDIAN,&
+      INTERPOL_FORWARD_MAX, INTERPOL_FORWARD_MIN
   END ENUM
 
   !> Class to store file-handles for the high-level API.
@@ -34,6 +45,7 @@ MODULE Fimex
     TYPE(C_PTR),PRIVATE    :: sb
   CONTAINS
     procedure :: open => open_file
+    procedure :: interpolate => new_interpolator
     procedure :: close => close_file
     procedure :: get_dimensions
     procedure :: get_dimname
@@ -53,8 +65,22 @@ MODULE Fimex
       TYPE(C_PTR)                             :: c_mifi_new_io_reader
     END FUNCTION c_mifi_new_io_reader
 
-    FUNCTION c_mifi_new_cdminterpolator(io, method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit) BIND(C,NAME="mifi_new_cdminterpolator")
+    !> F90-wrapper for mifi_new_cdminterpolator()
+    FUNCTION c_mifi_new_cdminterpolator(io, method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit)&
+           BIND(C,NAME="mifi_new_cdminterpolator")
+      USE iso_c_binding, ONLY: C_INT,C_PTR,C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_INT), VALUE              :: method
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: proj_input(*)
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: out_x_axis(*)
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: out_y_axis(*)
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: out_x_axis_unit(*)
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: out_y_axis_unit(*)
+      TYPE(C_PTR)                             :: c_mifi_new_cdminterpolator
     END FUNCTION
+
+
     !> F90-wrapper for mifi_new_slicebuilder()
     FUNCTION c_mifi_new_slicebuilder(io,varName) BIND(C,NAME="mifi_new_slicebuilder")
       USE iso_c_binding, ONLY: C_PTR,C_CHAR
@@ -177,6 +203,7 @@ MODULE Fimex
   END FUNCTION set_filetype
 
   !> Open a new data-soure.
+  !! @param this the new FimexIO object.
   !! @param infile filename (or URL) of input
   !! @param config configuration-file, use "" if not applicable
   !! @param filetype see set_filetype()
@@ -207,6 +234,51 @@ MODULE Fimex
       open_file=-1
     ENDIF
   END FUNCTION open_file
+
+  !> Creat a new interpolated data-soure from an existing FimexIO.
+  !! @param this the new FimexIO object. It must be closed with close_file.
+  !! @param fio the input data-source
+  !! @param method one of INTERPOL_bilinear, INTERPOL_.... methods
+  !! @param proj_input a proj4 text string
+  !! @param out_x_axis a description string of the x-axis, e.g. "10,20,...,1000", see MetNoFimex::SpatialAxisSpec
+  !! @param out_y_axis a description string of the y-axis, e.g. "10,20,...,1000", see MetNoFimex::SpatialAxisSpec
+  !! @param out_is_degree output-axis are in degree (true) or meter (false)
+  !! @return negative value on error, >= 0 on success
+  FUNCTION new_interpolator(this, fio, method, proj_input, out_x_axis, out_y_axis, out_is_degree)
+    USE iso_c_binding,                ONLY: C_CHAR,C_NULL_CHAR,C_ASSOCIATED,C_INT
+    IMPLICIT NONE
+    CLASS(FimexIO), INTENT(OUT)          :: this
+    CLASS(FimexIO), INTENT(IN)           :: fio
+    INTEGER, INTENT(IN)                  :: method
+    CHARACTER(LEN=*),INTENT(IN)          :: proj_input
+    CHARACTER(LEN=*),INTENT(IN)          :: out_x_axis
+    CHARACTER(LEN=*),INTENT(IN)          :: out_y_axis
+    LOGICAL, INTENT(IN)                  :: out_is_degree
+    INTEGER                              :: new_interpolator
+
+    TYPE(C_PTR)                          :: interpol
+    CHARACTER(LEN=10)                    :: deg_or_m
+
+    write(*,*) "before interpol ", fio%io, " method ", method
+    IF ( .not. C_ASSOCIATED(fio%io) ) THEN
+      new_interpolator = -99
+      RETURN
+    ENDIF
+    IF (out_is_degree) THEN
+      deg_or_m = "degree"
+    ELSE
+      deg_or_m = "m"
+    ENDIF
+    interpol = c_mifi_new_cdminterpolator(fio%io, method, TRIM(proj_input)//C_NULL_CHAR,&
+                                          TRIM(out_x_axis)//C_NULL_CHAR, TRIM(out_y_axis)//C_NULL_CHAR,&
+                                          TRIM(deg_or_m)//C_NULL_CHAR, TRIM(deg_or_m)//C_NULL_CHAR);
+    IF (.not. C_ASSOCIATED(interpol) ) THEN
+      new_interpolator = -1
+    ELSE
+      this%io = interpol
+      new_interpolator = 0
+    ENDIF
+  END FUNCTION
 
   !> Get the number of dimensions of a variable.
   !! This function

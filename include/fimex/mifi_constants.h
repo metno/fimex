@@ -37,16 +37,6 @@
  */
 
 /**
- * Integral version of the fimex api version, that is
- * the last date of change as YYYYMMDD. This should
- * be used for preprocessor conditionals:
-@code
-#ifdef FIMEX_API_VERSION > 20110931
-@endcode
- */
-#define MIFI_API_VERSION 20120104
-
-/**
  * M_PI is no longer part of C99, so it needs to be declared for fimex
  */
 #define MIFI_PI 3.1415926535897932384626433832795
@@ -59,90 +49,73 @@
  * that the original data comes with a properly defined projection,
  * i.e. implicit as latlon or explicit with projection-string
  */
-#define MIFI_INTERPOL_NEAREST_NEIGHBOR 0
-/**
- * @brief interpolation method
- *
- * Flag for bilinear interpolation. This requires,
- * that the original data comes with a properly defined projection,
- * i.e. implicit as latlon or explicit with projection-string
- */
-#define MIFI_INTERPOL_BILINEAR         1
-/**
- * @brief interpolation method
- *
- * Flag for bicubic interpolation. This requires,
- * that the original data comes with a properly defined projection,
- * i.e. implicit as latlon or explicit with projection-string
- */
-#define MIFI_INTERPOL_BICUBIC          2
-/**
- * @brief interpolation method
- *
- * Flag for nearest neighbor interpolation
- * using lon/lat coordinates rather than the input
- * projection. This is largely a brute force method
- * which may take long time.
- *
- * Vector projection is not implemented (not defined?)
- *
- * @warning this works only from CDMInterpolator
- */
-#define MIFI_INTERPOL_COORD_NN         3
-/**
- * @brief interpolation method
- *
- * Flag for nearest neighbor interpolation
- * using coordinates with KD-tree. This works
- * as nearest neighbor in the output-projection
- * and has therefore numerical problems in some points,
- * i.e. near southpole when using northpole-polarstereographic.
- *
- * It doesn't work with output projections in degree, i.e.
- * rotated latitude longitude, since distances are calculated as outX^2*outY^2
- *
- * Vector projection is not implemented (not defined?)
- *
- * @warning this works only from CDMInterpolator
- *
- */
-#define MIFI_INTERPOL_COORD_NN_KD      4
-
-/**
- * @brief interpolation method
- *
- * forward interpolation, summing over all matching input-cells
- */
-#define MIFI_INTERPOL_FORWARD_SUM      5
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, averaging (mean) over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MEAN      6
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, median over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MEDIAN      7
-
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, maximum over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MAX      8
-
-/**
-  * @brief interpolation method
-  *
-  * forward interpolation, minimum over all matching defined input-cells
-  */
-#define MIFI_INTERPOL_FORWARD_MIN      9
+enum mifi_interpol_method {
+   /**
+    * Flag for bilinear interpolation. This requires,
+    * that the original data comes with a properly defined projection,
+    * i.e. implicit as latlon or explicit with projection-string
+    */
+    MIFI_INTERPOL_NEAREST_NEIGHBOR = 0,
+   /**
+    * Flag for bicubic interpolation. This requires,
+    * that the original data comes with a properly defined projection,
+    * i.e. implicit as latlon or explicit with projection-string
+    */
+    MIFI_INTERPOL_BILINEAR,
+   /**
+    * Flag for bicubic interpolation. This requires,
+    * that the original data comes with a properly defined projection,
+    * i.e. implicit as latlon or explicit with projection-string
+    */
+    MIFI_INTERPOL_BICUBIC,
+   /**
+    * Flag for nearest neighbor interpolation
+    * using lon/lat coordinates rather than the input
+    * projection. This is largely a brute force method
+    * which may take long time.
+    *
+    * Vector projection is not implemented (not defined?)
+    *
+    * @warning this works only from CDMInterpolator
+    */
+    MIFI_INTERPOL_COORD_NN,
+   /**
+    * Flag for nearest neighbor interpolation
+    * using coordinates with KD-tree. This works
+    * as nearest neighbor in the output-projection
+    * and has therefore numerical problems in some points,
+    * i.e. near southpole when using northpole-polarstereographic.
+    *
+    * It doesn't work with output projections in degree, i.e.
+    * rotated latitude longitude, since distances are calculated as outX^2*outY^2
+    *
+    * Vector projection is not implemented (not defined?)
+    *
+    * @warning this works only from CDMInterpolator
+    *
+    */
+    MIFI_INTERPOL_COORD_NN_KD,
+   /**
+    * forward interpolation, summing over all matching input-cells
+    */
+    MIFI_INTERPOL_FORWARD_SUM,
+   /**
+    * forward interpolation, averaging (mean) over all matching defined input-cells
+    */
+    MIFI_INTERPOL_FORWARD_MEAN,
+    /**
+     * forward interpolation, median over all matching defined input-cells
+     */
+    MIFI_INTERPOL_FORWARD_MEDIAN,
+    /**
+     * forward interpolation, max over all matching defined input-cells
+     */
+    MIFI_INTERPOL_FORWARD_MAX,
+    /**
+     * forward interpolation, min over all matching defined input-cells
+     */
+    MIFI_INTERPOL_FORWARD_MIN
+};
 
 /**
  * @brief vector projection flag
