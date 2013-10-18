@@ -89,7 +89,7 @@ void CDMProcessor::deAccumulate(const std::string& varName)
 
 void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
     // find all vectors and rotate them to lat/lon (or x/y)
-    enhanceVectorProperties(boost::shared_ptr<CDMReader>(this, noDelete));
+    enhanceVectorProperties(boost::shared_ptr<CDMReader>(this, null_deleter()));
     vector<string> varNameX, varNameY, standardNameX, standardNameY;
     string type = toLatLon ? "x" : "lon";
     string rot = toLatLon ? "LATLON_ROTATED_" : "GRID_ROTATED_";

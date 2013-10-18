@@ -46,6 +46,7 @@
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/C_CDMReader.h"
+#include "fimex/CDMReaderWriter.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
@@ -380,6 +381,28 @@ int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varNa
     return -1;
 }
 
+int mifi_write_scaled_double_dataslice(mifi_cdm_reader* rwreader, const char* varName, mifi_slicebuilder* sb, const char* units, double* data, size_t size)
+{
+    if (size == 0) return 0;
+    if (data == 0) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_fill_scaled_double_dataslice: data not pre-allocated");
+        size = 0;
+        return -99;
+    }
+    CDMReaderWriter* rw = dynamic_cast<CDMReaderWriter*>(rwreader->reader_.get());
+    if (rw == 0) {
+        return -98; // not a readerwriter
+    }
+    try {
+        boost::shared_array<double> dptr(data, null_deleter());
+        DataPtr d = createData(size, dptr);
+        rw->putScaledDataSliceInUnit(varName, units, *(sb->sb_), d);
+        return 0;
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_write_scaled_double_dataslice: " << ex.what());
+    }
+    return -1;
+}
 
 double mifi_get_unique_forecast_reference_time(mifi_cdm_reader* reader, const char* units)
 {

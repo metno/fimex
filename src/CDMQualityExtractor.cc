@@ -47,7 +47,7 @@ namespace { // anonymous
 
 boost::shared_ptr<CDMReader> getCDMFileReader(const string& file, string type, const string& config) {
     if (type == "") {
-        const int typeNo = CDMFileReaderFactory::detectFileType(file);
+        const mifi_filetype typeNo = CDMFileReaderFactory::detectFileType(file);
         if( config == "" )
             return CDMFileReaderFactory::create(typeNo, file);
         else
@@ -202,7 +202,7 @@ CDMQualityExtractor::CDMQualityExtractor(boost::shared_ptr<CDMReader> dataReader
             LOG4FIMEX(logger,Logger::DEBUG, "getting shape for variable '" << varName << "'");
             vector<string> shapeVar;
             if (cdm.hasVariable(varName)) {
-            	shapeVar = cdm_->getVariable(varName).getShape();
+                shapeVar = cdm_->getVariable(varName).getShape();
             }
             LOG4FIMEX(logger,Logger::DEBUG, "getting shape for status variable '" << statusVarName << "'");
             vector<string> shapeStatus;

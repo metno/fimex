@@ -59,7 +59,7 @@ extern void mifi_free_cdm_reader(mifi_cdm_reader* reader);
 
 /**
  * Get a new reader from a file.
- * @param file_type MIFI_FILETYPE_* constant
+ * @param file_type #mifi_filetype constant. To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW.
  * @param filename name of the felt-file
  * @param configFile configuration file for the felt-file
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
@@ -267,7 +267,7 @@ extern void mifi_free_slicebuilder(mifi_slicebuilder* sb);
  * @param size: the size of the returned data.
  * @return 0 on success
  */
-int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size);
+extern int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size_t unLimDimPos, double** data, size_t* size);
 
 /**
  * get all the data from the dataReader
@@ -277,10 +277,10 @@ int mifi_get_double_dataslice(mifi_cdm_reader* reader, const char* varName, size
  * @param size: the size of the returned data.
  * @return 0 on success
  */
-int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** data, size_t* size);
+extern int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** data, size_t* size);
 
 /**
- * Write information from the readers variable to the pre-allocated
+ * Read information from the readers variable to the pre-allocated
  * data-variable.
  *
  * @param reader the data-source
@@ -291,7 +291,21 @@ int mifi_get_double_data(mifi_cdm_reader* reader, const char* varName, double** 
  * @param size The actually read data. This might be <= the requested data if data not available.
  * @return 0 on success
  */
-int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varName, mifi_slicebuilder* sb, const char* units, double* data, size_t* size);
+extern int mifi_fill_scaled_double_dataslice(mifi_cdm_reader* reader, const char* varName, mifi_slicebuilder* sb, const char* units, double* data, size_t* size);
+
+/**
+ * Write data to the variable on disk
+ *
+ * @param rwreader the data-sink, should be opened with mifi_new_io_reader() with MIFI_FILETYPE_RW|MIFI_FILETYPE_NETCDF
+ * @param varName variable-name to read
+ * @param sb The slicebuilder to restrict dimensions. It is possible to reuse a slicebuilder for several variables with the same dimensions.
+ * @param units Units of the data. Scaling and unit-conversion will be done automatically. Use units = "" if you don't want any units-conversion. Units need to be udunits-compatible.
+ * @param data Preallocated data. The total size must be identical to the slicebuilders total size.
+ * @param size The size of data.
+ * @return 0 on success
+ */
+extern int mifi_write_scaled_double_dataslice(mifi_cdm_reader* rwreader, const char* varName, mifi_slicebuilder* sb, const char* units, double* data, size_t size);
+
 
 /**
  * get the unique forecast reference time in a unit

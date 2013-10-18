@@ -32,6 +32,7 @@
 #include <string>
 #include "fimex/XMLInput.h"
 #include "fimex/deprecated.h"
+#include "fimex/CDMconstants.h"
 
 namespace MetNoFimex
 {
@@ -55,20 +56,20 @@ public:
      * to detect the filetype
      *
      * @param fileName input file
-     * @return one of the MIFI_FILETYPE_* flags
+     * @return one of the #mifi_filetype flags
      *
      * @throw if file not found
      */
-    static int detectFileType(const std::string& fileName);
+    static mifi_filetype detectFileType(const std::string& fileName);
 
     /**
      * @brief Factory for CDMReader of input-files
      *
-     * This function tries to create a reader by filetype MIFI_FILETYPE_*.
+     * This function tries to create a reader by filetype #mifi_filetype.
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
-     * @param fileType one of MIFI_FILETYPE_*, possibly read by detectFileType()
+     * @param fileType one of #mifi_filetype, possibly read by detectFileType(). To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW.
      * @param fileName name of input type
      * @param configFile
      * @param args optional options for the CDMReader, e.g. for grib: additional message files
@@ -85,11 +86,11 @@ public:
     /**
      * @brief Factory for CDMReader of input-files
      *
-     * This function tries to create a reader by filetype MIFI_FILETYPE_*.
+     * This function tries to create a reader by filetype #mifi_filetype.
      * The optional arguments are defined by the different readers. Use default objects (empty string, empty vector)
      * if arguments are not desired.
      *
-     * @param fileType one of MIFI_FILETYPE_*, possibly read by detectFileType()
+     * @param fileType one of #mifi_filetype, possibly read by detectFileType(). To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW
      * @param fileName name of input type
      * @param configXML config source
      * @param args optional options for the CDMReader

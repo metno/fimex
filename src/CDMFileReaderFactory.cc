@@ -77,7 +77,7 @@ static bool detectXML(const char* magic) {
     return boost::regex_match(magic, boost::regex("\\s*<\\?xml\\s.*"));
 }
 
-int CDMFileReaderFactory::detectFileType(const std::string & fileName)
+mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
 {
     std::ifstream fs(fileName.c_str());
     if (!fs.is_open()) {
