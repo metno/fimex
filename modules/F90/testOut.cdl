@@ -1,0 +1,14 @@
+netcdf testOut {
+dimensions:
+  time = UNLIMITED ;
+  x = 2 ;
+variables:
+  short pressure(time,x) ;
+     pressure:units = "Pa" ;
+     pressure:scale_factor = 10.f ;
+  short time(time);
+     time:units = "hours since 2013-10-18 00:00:00 +0000" ;
+
+data:
+  time = 1, 2 ;
+}

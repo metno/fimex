@@ -14,6 +14,9 @@
 !!     INTERPOL_NEAREST_NEIGHBOR = 0, INTERPOL_BILINEAR, INTERPOL_BICUBIC, INTERPOL_COORD_NN,
 !!      INTERPOL_COORD_NN_KD, INTERPOL_FORWARD_SUM, INTERPOL_FORWARD_MEAN, INTERPOL_FORWARD_MEDIAN,
 !!      INTERPOL_FORWARD_MAX, INTERPOL_FORWARD_MIN
+!! FILETYPE_UNKNOWN=-1, FILETYPE_FELT, FILETYPE_NETCDF,&
+!!      FILETYPE_NCML, FILETYPE_GRIB, FILETYPE_WDB, FILETYPE_METGM,&
+!!      FILETYPE_RW=1024
 !!
 !! The fimex.f90 interface is currently not precompiled with building fimex. Please
 !! copy the fimex.f90 file to your f90-project and compile it from there, and link with ''-lfimex''.
@@ -36,6 +39,13 @@ MODULE Fimex
       INTERPOL_COORD_NN_KD, INTERPOL_FORWARD_SUM, INTERPOL_FORWARD_MEAN, INTERPOL_FORWARD_MEDIAN,&
       INTERPOL_FORWARD_MAX, INTERPOL_FORWARD_MIN
   END ENUM
+  !> @enum Filetypes
+  !! These are the same definintions as #mifi_filetype in CDMconstants.h
+  ENUM, BIND(C)
+    ENUMERATOR ::     FILETYPE_UNKNOWN=-1, FILETYPE_FELT, FILETYPE_NETCDF,&
+      FILETYPE_NCML, FILETYPE_GRIB, FILETYPE_WDB, FILETYPE_METGM,&
+      FILETYPE_RW=1024
+  END ENUM
 
   !> Class to store file-handles for the high-level API.
   !! @warning The class FimexIO stores internally two refernces to file and data-handles.
@@ -54,6 +64,7 @@ MODULE Fimex
     procedure :: get_axistypes
     procedure :: reduce_dimension
     procedure :: read_data
+    procedure :: write_data
   END TYPE
   INTERFACE
     !> F90-wrapper for mifi_new_io_reader()
@@ -167,6 +178,20 @@ MODULE Fimex
       INTEGER(KIND=C_INT)                :: c_mifi_fill_scaled_double_dataslice
     END FUNCTION c_mifi_fill_scaled_double_dataslice
 
+    !> F90-wrapper for mifi_write_scaled_double_dataslice()
+    FUNCTION c_mifi_write_scaled_double_dataslice(io, varName, sb, units, data, dsize) &
+          BIND(C,NAME="mifi_write_scaled_double_dataslice")
+      USE iso_c_binding, ONLY: C_PTR,C_CHAR,C_LONG_LONG, C_INT
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                 :: io
+      CHARACTER(KIND=C_CHAR),INTENT(IN)  :: varName(*)
+      TYPE(C_PTR), VALUE                 :: sb
+      CHARACTER(KIND=C_CHAR),INTENT(IN)  :: units(*)
+      TYPE(C_PTR), VALUE                 :: data
+      INTEGER(KIND=C_LONG_LONG),VALUE    :: dsize
+      INTEGER(KIND=C_INT)                :: c_mifi_write_scaled_double_dataslice
+    END FUNCTION c_mifi_write_scaled_double_dataslice
+
     !> F90-wrapper for mifi_read_field()
     FUNCTION c_mifi_read_field(io,cunit,fieldptr,dataRead) BIND(C,NAME="mifi_get_double_dataslice")
       USE iso_c_binding, ONLY: C_INT,C_PTR,C_CHAR,C_DOUBLE
@@ -192,6 +217,7 @@ MODULE Fimex
       TYPE(C_PTR),INTENT(IN),VALUE    :: io
     END SUBROUTINE c_mifi_free_cdm_reader
 
+    !> F90-wrapper for mifi_get_filetype()
     FUNCTION c_mifi_get_filetype(typename) BIND(C,NAME="mifi_get_filetype")
       USE iso_c_binding, ONLY: C_INT,C_CHAR
       CHARACTER(KIND=C_CHAR), INTENT(IN)  :: typename(*)
@@ -220,7 +246,7 @@ MODULE Fimex
   !! @param this the new FimexIO object.
   !! @param infile filename (or URL) of input
   !! @param config configuration-file, use "" if not applicable
-  !! @param filetype see set_filetype()
+  !! @param filetype see set_filetype(), to open a file read-writable use IOR(FILETYPE_NETCDF,FILETYPE_RW)
   !! @param varName optional varname, if used, will call get_dimensions() and return the number of dimensions
   !! @return negative value on error, >= 0 on success, positive number indicate dimensions of varName
   FUNCTION open_file(this, infile,config,filetype,varName)
@@ -458,7 +484,7 @@ MODULE Fimex
   !! REAL(KIND=8),DIMENSION(:,:,:,:),ALLOCATABLE,POINTER :: field4d
   !!
   !! ALLOCATE(target(PRODUCT(vsize))
-  !! ierr=read_data_1d(varName,cunit,target)
+  !! ierr=read_data(varName,cunit,target)
   !! ! remap to 4-d
   !! field4d(1:vsize(1),1:vsize(2),1:vsize(3),1:vsize(4)) => target
   !! @endcode
@@ -510,6 +536,53 @@ MODULE Fimex
     END IF
     RETURN
   END FUNCTION read_data
+
+  !> Write data to a file
+  !! @param varName the variable name to write, must be similar or equal to the one set in get_dimensions()
+  !! @param cunit the unit the variable is currently in. Use "" to ignore units.
+  !! @param field the data, which must be 1d-allocatable
+  !! @return 0 on success
+  FUNCTION write_data(this, varname, cunit, field)
+    USE iso_c_binding,    ONLY: C_PTR,C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_INT,C_LONG_LONG,C_LOC
+    IMPLICIT NONE
+    CLASS(FimexIO), INTENT(IN)                              :: this
+    CHARACTER(LEN=*), INTENT(IN)                            :: varname
+    CHARACTER(LEN=*), INTENT(IN)                            :: cunit
+    REAL(KIND=C_DOUBLE),DIMENSION(:), INTENT(INOUT), ALLOCATABLE, TARGET :: field
+    INTEGER                                                 :: write_data
+
+    INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: start
+    INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: vsize
+    CHARACTER(LEN=1024)                                     :: dimName
+    INTEGER(KIND=C_LONG_LONG)                               :: expSize, outSize
+    INTEGER :: i,ierr, ndims
+
+    IF (C_ASSOCIATED(this%sb) .AND. C_ASSOCIATED(this%io)) THEN
+      ndims = c_mifi_slicebuilder_ndims(this%sb)
+      ALLOCATE(start(ndims))
+      ALLOCATE(vsize(ndims))
+      ierr = this%get_dimension_start_size(start, vsize)
+      expSize = PRODUCT(vsize)
+      !write(*,*) "output-size: ", expSize
+      IF (expSize /= size(field, KIND=C_LONG_LONG)) THEN
+        write_data = -1
+        WRITE(*,*) "write_data, allocated field-size != expected size: ", size(field), "!=", expSize
+        RETURN
+      END IF
+
+      write_data = c_mifi_write_scaled_double_dataslice(this%io, trim(varName)//C_NULL_CHAR, this%sb, &
+                                                 trim(cunit)//C_NULL_CHAR, C_LOC(field), expSize)
+      IF (write_data /= 0) THEN
+        WRITE(*,*) "error filling scaled_double_dataslice ", write_data
+        RETURN
+      END IF
+    ELSE
+      write_data = -99
+      WRITE(*,*) "write_data, io or sb not initialized"
+    END IF
+    RETURN
+  END FUNCTION write_data
+
 
   !> Cleanup internally kept handles and close the file.
   FUNCTION close_file(this)

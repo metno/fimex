@@ -1,7 +1,8 @@
 PROGRAM fortran_test
-  USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR
+  USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
+                                      FILETYPE_NETCDF, FILETYPE_RW
   IMPLICIT NONE
-  TYPE(FimexIO)                   :: fio, finter
+  TYPE(FimexIO)                   :: fio, finter, frw
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
@@ -184,6 +185,38 @@ PROGRAM fortran_test
     ELSE
         WRITE(*,*) field4d
     ENDIF
+
+
+    ! write the data to testOut.nc
+    ! Open file
+    ierr=frw%open("testOut.nc","",IOR(FILETYPE_NETCDF,FILETYPE_RW))
+    IF ( ierr /= 0 ) CALL error("Can't make rw-object with file: testOut.nc")
+    ndims=frw%get_dimensions("pressure")
+    IF ( ndims <= 0 ) CALL error("Can't make slicebuilder for pressure in testOut.nc")
+    WRITE(0,*) "frw-get_dimensions: ", ndims
+    !
+    ! resize the slicebuilder as above, not really needed here since output-size known
+    dimname = "time"
+    ierr=frw%reduce_dimension(dimname, 0, 1)
+    ! write the 1-d field at time 0
+    write(*,*) "writing data in cunit to t=0: ", cunit
+    ierr=frw%write_data("pressure", cunit, field)
+    IF ( ierr /= 0 ) THEN
+      CALL error("Can't write field at t=0")
+    ENDIF
+
+    ! write the 1-d field at time-position 1 with 10hPa more
+    ierr=frw%reduce_dimension(dimname, 1, 1)
+    field = field + 10
+    write(*,*) "writing data in cunit to t=1: ", cunit
+    ierr=frw%write_data("pressure", cunit, field)
+    IF ( ierr /= 0 ) THEN
+      CALL error("Can't write field at t=1")
+    ENDIF
+
+    ierr = frw%close()
+
+
     DEALLOCATE(field)
 
     ierr=finter%close()
