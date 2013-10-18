@@ -63,34 +63,20 @@ DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data,
     // retrieve scale and offset
     double scale, offset;
     getScaleAndOffsetOf(varName, scale, offset);
-
-    const double totalScale = scale * unitScale;
-    const double totalOffset = unitScale*offset + unitOffset;
-
-    // v_cdm = scale*x + offset
-    // v_data = unitScale*v_cdm + unitOffset = unitScale*(scale*x + offset) + unitOffset
-    //        = totalScale * x + totalOffset
-    // => x = (v_data - totalOffset) / totalScale
-    //      = (1/totalScale) * v_data + (-1*totalOffset/totalScale)
-
-    const double totalUnscale = 1/totalScale; // ignore division-by-zero
-    const double totalUnoffset = -(totalOffset / totalScale);
-
-    // fillValue
-    const double inFillValue = cdm_->getFillValue(varName);
-
-    return data->convertDataType(inFillValue, totalUnscale, totalUnoffset, CDM_DOUBLE, MIFI_UNDEFINED_D, 1, 0);
+    const double outFillValue = cdm_->getFillValue(varName);
+    return data->convertDataType(MIFI_UNDEFINED_D, unitScale, unitOffset, cdm_->getVariable(varName).getDataType(), outFillValue, scale, offset);
 }
 
-DataPtr CDMReaderWriter::unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& newUnit)
+DataPtr CDMReaderWriter::unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& dataUnit)
 {
     const std::string myUnit = cdm_->getUnits(varName);
     double unitOffset = 0.;
     double unitScale = 1.;
-    if (newUnit != myUnit) {
+    if (dataUnit != myUnit) {
         Units u;
-        u.convert(myUnit, newUnit, unitScale, unitOffset);
+        u.convert(dataUnit, myUnit, unitScale, unitOffset);
     }
+
     return unscaleDataOf(varName, data, unitScale, unitOffset);
 }
 

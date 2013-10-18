@@ -115,17 +115,17 @@ public:
     /**
      * @brief unscale and write a dataslice from a known unit
      * @param varName name of the variable to read
-     * @param unit unit-string, the unit of the data passed in 'data'
+     * @param dataUnit unit-string, the unit of the data passed in 'data'
      * @param sb SliceBuilder to restrict the data
      * @param data the data slice to write, must be in unit 'unit'
      * @throw CDMException on errors related to the CDM in combination with the underlying data-structure. It might also throw other (IO-)exceptions.
      * @see getScaledDataSliceInUnit(varName, unit, unLimDimPos)
      */
-    virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& unit, const SliceBuilder& sb, const DataPtr data);
+    virtual void putScaledDataSliceInUnit(const std::string& varName, const std::string& dataUnit, const SliceBuilder& sb, const DataPtr data);
 
 private:
     DataPtr unscaleDataOf(const std::string& varName, DataPtr data, double unitScale=1, double unitOffset=0);
-    DataPtr unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& newUnit);
+    DataPtr unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& dataUnit);
 }; /* class */
 
 } /* MetNoFimex */
