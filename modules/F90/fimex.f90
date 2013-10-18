@@ -58,13 +58,13 @@ MODULE Fimex
     procedure :: interpolate => new_interpolator
     procedure :: interpolate_lonlat => new_lonlat_interpolator
     procedure :: close => close_file
-    procedure :: get_dimensions
-    procedure :: get_dimname
-    procedure :: get_dimension_start_size
-    procedure :: get_axistypes
-    procedure :: reduce_dimension
-    procedure :: read_data
-    procedure :: write_data
+    procedure :: get_dimensions => get_dimensions
+    procedure :: get_dimname => get_dimname
+    procedure :: get_dimension_start_size => get_dimension_start_size
+    procedure :: get_axistypes => get_axistypes
+    procedure :: reduce_dimension => reduce_dimension
+    procedure :: read_data => read_data
+    procedure :: write_data => write_data
   END TYPE
   INTERFACE
     !> F90-wrapper for mifi_new_io_reader()
