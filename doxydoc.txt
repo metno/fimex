@@ -1,20 +1,20 @@
-/*! @mainpage Fimex User Documentation
+/*! @mainpage %Fimex User Documentation
 
-Fimex is a the File Interpolation, Manipulation and EXtraction library for
+%Fimex is a the File Interpolation, Manipulation and EXtraction library for
 gridded geospatial data. It converts between different, extensible dataformats
 (currently netcdf, grib1/2 and felt). It enables you to change the projection
 and interpolation of scalar and vector grids. It makes it possible subset the
 gridded data and to extract only parts of the files.
 
-Fimex can be used as library called @em Fimex and a command-line program
+%Fimex can be used as library called @em %Fimex and a command-line program
 called @em fimex, which gives access to most but not all functions of the
 library.
 
-Fimex is build around the Common Data Model version 1 developped by Unidata
+%Fimex is build around the Common Data Model version 1 developped by Unidata
 and uses a describes data using the CF-Convention http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.0/cf-conventions.html .
 Knowledge of that convention is not required, but will help understanding the config files needed for conversion.
 
-The API of Fimex as included in this document is not stable yet and can
+The API of %Fimex as included in this document is not stable yet and can
 change without warning. The setup-files are considered to be mostly stable.
 The fimex-program can thus savely be used. If you want to use the API, please
 contact me.
@@ -33,6 +33,7 @@ contact me.
     -# @ref gribWriterDoc
     -# @ref netcdfWriterDoc
   -# @ref parallelization
+  -# @ref fortran90
 
 @page programDoc fimex Program Options
 @section fimex fimex Program Options
@@ -286,7 +287,7 @@ will be configured immediately after reading a file. It is also possilbe to read
 
 Input-files can and should be validated against the included ncml-2.2.xsd.
 
-Fimex supports now also ncml-aggregation. Simple examples are:
+%Fimex supports now also ncml-aggregation. Simple examples are:
 
 @code
 <?xml version="1.0" encoding="UTF-8"?>
@@ -457,7 +458,7 @@ merge.smoothing.
 The fillWriter enables the filling of an existing template-file with real data.
 It was developed to speed up creation of output-files of NWP-models. These models
 usually create output one timestep at a time and at the end, and the timesteps are
-then merged at another stage, often on another machine. Fimex fillWriter makes sure,
+then merged at another stage, often on another machine. %Fimex fillWriter makes sure,
 that one can look at the final file even before the model is finished. It is even
 possible to restart the model at any state, replacing ony the newly created slices.
 
@@ -636,7 +637,7 @@ in the following cases:
 @page parallelization
 @section parallelization Parallelization and Threads
 
-Fimex can be build with parallelization support with OpenMP with the --enable-openmp
+%Fimex can be build with parallelization support with OpenMP with the --enable-openmp
 flag of @c configure. The following code-parts are currently (0.35) parallelized:
 
   - NetCDF-writer/Null-writer: fetches each data-slice in a thread of it's own
@@ -669,9 +670,9 @@ if (MIFI_OK == mifi_setNumThreads(2)) {
 
 @subsection Thread-safety
 
-The Fimex library can be used in threaded environments. Fimex objects are
+The %Fimex library can be used in threaded environments. %Fimex objects are
 generally not thread-safe, so every object should only be used from a single
-thread. But several threads can create their own Fimex objects.
+thread. But several threads can create their own %Fimex objects.
 
 In addition, all CDMReader::get*Data*() operations are thread-safe and the following
 code will work nicely:
@@ -687,6 +688,17 @@ size_t unlimSlices = unLimDim->getLength();
     }
 }
 @endverbatim
+
+@page fortran90
+@section fortran90 Fortran90 interface
+
+The fimex-source comes with a fimex.f90 fortran interface in modules/f90/fimex.f90.
+This files should be added to your fortran program, compiled with a fortran:2003
+aware compiler and linked with fimex-library ''-lfimex''. Documentatation of the
+interface can be found in fimex.f90. Of most interest are the methods belonging to
+the high-level interface Fimex::FimexIO. An example can be found in modules/f90/fortran_test.f90.
+
+
 
 
 */
