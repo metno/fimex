@@ -1,3 +1,12 @@
+  * 2013-10-21 fimex-0.49
+    * adding fortran90 interface
+    * improved C interface
+    * fix scaling of CDMReaderWriter
+    * fix parsing of process.rotateVector.direction
+    * using enums instead of #define for several constants
+    * exposing getSimpleAxes in CoordSysUtils
+    * adding getPreferredVerticalType
+    * better API for fimex-versions (see CDMconstants.h)
   * 2013-10-03 fimex-0.48
     * vector-autorotation from command-line
     * printSize estimates
