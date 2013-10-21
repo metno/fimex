@@ -1,6 +1,6 @@
 PROGRAM fortran_test
   USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
-                                      FILETYPE_NETCDF, FILETYPE_RW
+                                      FILETYPE_RW
   IMPLICIT NONE
   TYPE(FimexIO)                   :: fio, finter, frw
   INTEGER                         :: ierr,i
@@ -69,7 +69,7 @@ PROGRAM fortran_test
     END DO
     WRITE(*,*) "end reduce"
     ALLOCATE(field(nx*ny))
-    ierr=fio%read_data(varName,cunit,field)
+    ierr=fio%read(varName,cunit,field)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -82,7 +82,7 @@ PROGRAM fortran_test
 
     ALLOCATE(field(vsize(1)*vsize(2)))
     field3d(1:vsize(1),1:vsize(2),1:1) => field
-    ierr=fio%read_data(varName,cunit,field)
+    ierr=fio%read(varName,cunit,field)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
@@ -127,7 +127,7 @@ PROGRAM fortran_test
     END DO
     WRITE(*,*) "end reduce"
     ALLOCATE(field(nx*ny))
-    ierr=finter%read_data(varName,cunit,field)
+    ierr=finter%read(varName,cunit,field)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -178,7 +178,7 @@ PROGRAM fortran_test
     END DO
     WRITE(*,*) "end reduce"
     ALLOCATE(field(nx*ny))
-    ierr=finter%read_data(varName,cunit,field)
+    ierr=finter%read(varName,cunit,field)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -189,7 +189,7 @@ PROGRAM fortran_test
 
     ! write the data to testOut.nc
     ! Open file
-    ierr=frw%open("testOut.nc","",IOR(FILETYPE_NETCDF,FILETYPE_RW))
+    ierr=frw%open("testOut.nc","",set_filetype("netcdf",FILETYPE_RW))
     IF ( ierr /= 0 ) CALL error("Can't make rw-object with file: testOut.nc")
     ndims=frw%get_dimensions("pressure")
     IF ( ndims <= 0 ) CALL error("Can't make slicebuilder for pressure in testOut.nc")
@@ -200,7 +200,7 @@ PROGRAM fortran_test
     ierr=frw%reduce_dimension(dimname, 0, 1)
     ! write the 1-d field at time 0
     write(*,*) "writing data in cunit to t=0: ", cunit
-    ierr=frw%write_data("pressure", cunit, field)
+    ierr=frw%write("pressure", cunit, field)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't write field at t=0")
     ENDIF
@@ -209,7 +209,7 @@ PROGRAM fortran_test
     ierr=frw%reduce_dimension(dimname, 1, 1)
     field = field + 10
     write(*,*) "writing data in cunit to t=1: ", cunit
-    ierr=frw%write_data("pressure", cunit, field)
+    ierr=frw%write("pressure", cunit, field)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't write field at t=1")
     ENDIF

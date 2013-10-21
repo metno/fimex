@@ -65,8 +65,8 @@ MODULE Fimex
     procedure :: get_dimension_start_size => get_dimension_start_size
     procedure :: get_axistypes => get_axistypes
     procedure :: reduce_dimension => reduce_dimension
-    procedure :: read_data => read_data
-    procedure :: write_data => write_data
+    procedure :: read => read_data
+    procedure :: write => write_data
   END TYPE
   INTERFACE
     !> F90-wrapper for mifi_new_io_reader()
@@ -232,16 +232,18 @@ MODULE Fimex
   !> translate the filetype from string to internal number
   !! @param filetype_name filetype as "fimex", "netcdf", "grib", ...
   !! @return integer filetype
-  FUNCTION set_filetype(filetype_name)
+  FUNCTION set_filetype(filetype_name, flag)
     USE iso_c_binding, ONLY: C_NULL_CHAR
     IMPLICIT NONE
-    CHARACTER(LEN=10), INTENT(IN) :: filetype_name
+    CHARACTER(LEN=*), INTENT(IN) :: filetype_name
     INTEGER                       :: set_filetype
+    INTEGER, OPTIONAL, INTENT(IN) :: flag
     set_filetype = c_mifi_get_filetype(TRIM(filetype_name)//C_NULL_CHAR);
     IF (set_filetype < 0) THEN
       WRITE(*,*) "Filetype not defined: "//TRIM(filetype_name)
       CALL abort()
     ENDIF
+    IF (PRESENT(flag)) set_filetype = IOR(set_filetype,flag)
   END FUNCTION set_filetype
 
   !> Open a new data-soure.
