@@ -16,6 +16,7 @@ PROGRAM fortran_test
   INTEGER                         :: nx,ny
   INTEGER                         :: ndims
   INTEGER(KIND=4), ALLOCATABLE, DIMENSION(:) :: start, vsize, atypes
+  INTEGER(KIND=8)          :: vars
   CHARACTER(LEN=10)               :: cunit,cfiletype
   CHARACTER(LEN=1024)             :: dimname
   INTEGER,EXTERNAL                :: iargc
@@ -33,12 +34,18 @@ PROGRAM fortran_test
     CALL getarg(4,cunit)
     IF ( iargc() == 5 ) THEN
       CALL getarg(5,config_file)
+    ELSE
+      config_file = ""
     ENDIF
 
     ! Open file
     ierr=fio%open(input_file,config_file,set_filetype(cfiletype))
     IF ( ierr /= 0 ) CALL error("Can't make io-object with file:"//trim(input_file)//" config: "//config_file)
     WRITE(0,*) "open_file: success"
+
+    DO i = 1, fio%variables_size()
+      write(*,*) i, " ", TRIM(fio%get_varname(i))
+    END DO
 
     ! Get dimensions
     ndims=fio%get_dimensions(varName)

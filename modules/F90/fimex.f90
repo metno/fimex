@@ -60,6 +60,8 @@ MODULE Fimex
     procedure :: interpolate => new_interpolator
     procedure :: interpolate_lonlat => new_lonlat_interpolator
     procedure :: close => close_file
+    procedure :: variables_size => get_variables_size
+    procedure :: get_varname => get_variable_name
     procedure :: get_dimensions => get_dimensions
     procedure :: get_dimname => get_dimname
     procedure :: get_dimension_start_size => get_dimension_start_size
@@ -106,6 +108,21 @@ MODULE Fimex
       TYPE(C_PTR),VALUE                       :: latvals
       TYPE(C_PTR)                             :: c_mifi_new_lonlat_interpolator
     END FUNCTION
+
+    FUNCTION c_mifi_get_variable_number(io) BIND(C,NAME="mifi_get_variable_number")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_LONG_LONG)                  :: c_mifi_get_variable_number
+    END FUNCTION c_mifi_get_variable_number
+
+    FUNCTION c_mifi_get_variable_name(io, pos) BIND(C,NAME="mifi_get_variable_name")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_LONG_LONG),VALUE            :: pos
+      TYPE(C_PTR)                             :: c_mifi_get_variable_name
+    END FUNCTION c_mifi_get_variable_name
 
 
     !> F90-wrapper for mifi_new_slicebuilder()
@@ -361,6 +378,53 @@ MODULE Fimex
       new_lonlat_interpolator = 0
     ENDIF
   END FUNCTION
+
+  !> Get the number of variables in the file.
+  !! @return number of variables
+  FUNCTION get_variables_size(this)
+    USE iso_c_binding,    ONLY: C_LONG_LONG, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)             :: this
+    INTEGER(KIND=C_LONG_LONG)              :: get_variables_size
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      get_variables_size = 0
+      RETURN
+    ENDIF
+    get_variables_size = c_mifi_get_variable_number(this%io)
+    RETURN
+  END FUNCTION get_variables_size
+
+
+  !> Get the name of the variable at position pos
+  !! @param pos position of variable 1 <= pos <= variable_number()
+  !! @return name of variable
+  FUNCTION get_variable_name(this, pos)
+    USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)     :: this
+    INTEGER, VALUE                 :: pos
+    CHARACTER(LEN=1024)            :: get_variable_name
+
+    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
+    INTEGER                          :: i
+    INTEGER(KIND=C_LONG_LONG)           :: posT
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      RETURN
+    ENDIF
+    ! fortran -> c position
+    posT = pos - 1
+    CALL C_F_POINTER(c_mifi_get_variable_name(this%io, posT), var_array, (/1024/))
+    get_variable_name = ""
+    DO i = 1, 1024
+      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      get_variable_name(i:i+1) = var_array(i)
+    END DO
+10  CONTINUE
+
+    RETURN
+  END FUNCTION get_variable_name
+
 
   !> Get the number of dimensions of a variable.
   !! This function
