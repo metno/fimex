@@ -20,8 +20,12 @@
 #define MIFI_VERSION_MAJOR  0
 #define MIFI_VERSION_MINOR 49
 #define MIFI_VERSION_PATCH  0
-#define MIFI_VERSION_STATUS 0xB0
-#define MIFI_VERSION_STRING "0.49beta"
+/**
+ * fimex version status, e.g >=0xF0 = final, 0xAX = alphaX,
+ * 0xBX = betaX, 0xCX= releaseCandidateX
+ */
+#define MIFI_VERSION_STATUS 0xF0
+#define MIFI_VERSION_STRING "0.49"
 
 
 /**

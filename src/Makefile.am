@@ -47,6 +47,7 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/WRFCoordSysBuilder.h \
                      coordSys/WRFCoordSysBuilder.cc \
                      coordSys/CoordSysImpl.h \
+                     coordSys/CoordSysUtils.h \
                      coordSys/Projection.cc \
                      coordSys/ProjectionImpl.cc \
                      coordSys/AlbersConicalEqualAreaProjection.cc \

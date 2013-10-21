@@ -201,7 +201,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
-	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
+	coordSys/CoordSysUtils.h coordSys/Projection.cc \
+	coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \
@@ -635,7 +636,8 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/CoordSysUtils.cc coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
-	coordSys/Projection.cc coordSys/ProjectionImpl.cc \
+	coordSys/CoordSysUtils.h coordSys/Projection.cc \
+	coordSys/ProjectionImpl.cc \
 	coordSys/AlbersConicalEqualAreaProjection.cc \
 	coordSys/AzimuthalEquidistantProjection.cc \
 	coordSys/LambertAzimuthalEqualAreaProjection.cc \

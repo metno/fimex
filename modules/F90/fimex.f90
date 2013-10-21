@@ -21,6 +21,8 @@
 !! The fimex.f90 interface is currently not precompiled with building fimex. Please
 !! copy the fimex.f90 file to your f90-project and compile it from there, and link with ''-lfimex''.
 !!
+!! An example to run against this module can be found in modules/F90/fortran_test.f90
+!!
 !! @see https://svn.met.no/viewvc/fimex/trunk/modules/F90/fimex.f90?view=co
 MODULE Fimex
   USE iso_c_binding, ONLY : C_PTR
@@ -58,13 +60,15 @@ MODULE Fimex
     procedure :: interpolate => new_interpolator
     procedure :: interpolate_lonlat => new_lonlat_interpolator
     procedure :: close => close_file
-    procedure :: get_dimensions
-    procedure :: get_dimname
-    procedure :: get_dimension_start_size
-    procedure :: get_axistypes
-    procedure :: reduce_dimension
-    procedure :: read_data
-    procedure :: write_data
+    procedure :: variables_size => get_variables_size
+    procedure :: get_varname => get_variable_name
+    procedure :: get_dimensions => get_dimensions
+    procedure :: get_dimname => get_dimname
+    procedure :: get_dimension_start_size => get_dimension_start_size
+    procedure :: get_axistypes => get_axistypes
+    procedure :: reduce_dimension => reduce_dimension
+    procedure :: read => read_data
+    procedure :: write => write_data
   END TYPE
   INTERFACE
     !> F90-wrapper for mifi_new_io_reader()
@@ -104,6 +108,21 @@ MODULE Fimex
       TYPE(C_PTR),VALUE                       :: latvals
       TYPE(C_PTR)                             :: c_mifi_new_lonlat_interpolator
     END FUNCTION
+
+    FUNCTION c_mifi_get_variable_number(io) BIND(C,NAME="mifi_get_variable_number")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_LONG_LONG)                  :: c_mifi_get_variable_number
+    END FUNCTION c_mifi_get_variable_number
+
+    FUNCTION c_mifi_get_variable_name(io, pos) BIND(C,NAME="mifi_get_variable_name")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_LONG_LONG),VALUE            :: pos
+      TYPE(C_PTR)                             :: c_mifi_get_variable_name
+    END FUNCTION c_mifi_get_variable_name
 
 
     !> F90-wrapper for mifi_new_slicebuilder()
@@ -230,16 +249,18 @@ MODULE Fimex
   !> translate the filetype from string to internal number
   !! @param filetype_name filetype as "fimex", "netcdf", "grib", ...
   !! @return integer filetype
-  FUNCTION set_filetype(filetype_name)
+  FUNCTION set_filetype(filetype_name, flag)
     USE iso_c_binding, ONLY: C_NULL_CHAR
     IMPLICIT NONE
-    CHARACTER(LEN=10), INTENT(IN) :: filetype_name
+    CHARACTER(LEN=*), INTENT(IN) :: filetype_name
     INTEGER                       :: set_filetype
+    INTEGER, OPTIONAL, INTENT(IN) :: flag
     set_filetype = c_mifi_get_filetype(TRIM(filetype_name)//C_NULL_CHAR);
     IF (set_filetype < 0) THEN
       WRITE(*,*) "Filetype not defined: "//TRIM(filetype_name)
       CALL abort()
     ENDIF
+    IF (PRESENT(flag)) set_filetype = IOR(set_filetype,flag)
   END FUNCTION set_filetype
 
   !> Open a new data-soure.
@@ -357,6 +378,53 @@ MODULE Fimex
       new_lonlat_interpolator = 0
     ENDIF
   END FUNCTION
+
+  !> Get the number of variables in the file.
+  !! @return number of variables
+  FUNCTION get_variables_size(this)
+    USE iso_c_binding,    ONLY: C_LONG_LONG, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)             :: this
+    INTEGER(KIND=C_LONG_LONG)              :: get_variables_size
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      get_variables_size = 0
+      RETURN
+    ENDIF
+    get_variables_size = c_mifi_get_variable_number(this%io)
+    RETURN
+  END FUNCTION get_variables_size
+
+
+  !> Get the name of the variable at position pos
+  !! @param pos position of variable 1 <= pos <= variable_number()
+  !! @return name of variable
+  FUNCTION get_variable_name(this, pos)
+    USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)     :: this
+    INTEGER, VALUE                 :: pos
+    CHARACTER(LEN=1024)            :: get_variable_name
+
+    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
+    INTEGER                          :: i
+    INTEGER(KIND=C_LONG_LONG)           :: posT
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      RETURN
+    ENDIF
+    ! fortran -> c position
+    posT = pos - 1
+    CALL C_F_POINTER(c_mifi_get_variable_name(this%io, posT), var_array, (/1024/))
+    get_variable_name = ""
+    DO i = 1, 1024
+      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      get_variable_name(i:i+1) = var_array(i)
+    END DO
+10  CONTINUE
+
+    RETURN
+  END FUNCTION get_variable_name
+
 
   !> Get the number of dimensions of a variable.
   !! This function
