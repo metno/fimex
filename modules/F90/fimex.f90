@@ -21,6 +21,8 @@
 !! The fimex.f90 interface is currently not precompiled with building fimex. Please
 !! copy the fimex.f90 file to your f90-project and compile it from there, and link with ''-lfimex''.
 !!
+!! An example to run against this module can be found in modules/F90/fortran_test.f90
+!!
 !! @see https://svn.met.no/viewvc/fimex/trunk/modules/F90/fimex.f90?view=co
 MODULE Fimex
   USE iso_c_binding, ONLY : C_PTR
