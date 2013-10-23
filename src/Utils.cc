@@ -42,18 +42,18 @@ int round(double num) {
 }
 
 std::string trim(const std::string& str) {
-	int pos1 = str.find_first_not_of(" ");
-	int pos2 = str.find_last_not_of(" ");
-	return str.substr(pos1, pos2+1);
+    int pos1 = str.find_first_not_of(" ");
+    int pos2 = str.find_last_not_of(" ");
+    return str.substr(pos1, pos2+1);
 }
 
 std::string string2lowerCase(const std::string& str)
 {
-	std::string s(str);
-	for (unsigned int i = 0; i < s.length(); i++) {
-		s[i] = std::tolower(s[i]);
-	}
-	return s;
+    std::string s(str);
+    for (unsigned int i = 0; i < s.length(); i++) {
+        s[i] = std::tolower(s[i]);
+    }
+    return s;
 }
 
 /**
@@ -82,7 +82,19 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
     sort(entries.begin(), entries.end());
 
     for (vector<path>::iterator e = entries.begin(); e != entries.end(); ++e) {
-        file_status lstat(symlink_status(*e));
+        file_status lstat;
+        try {
+            lstat = file_status(symlink_status(*e));
+        } catch (exception& ex) {
+            // catch filesystem problems in case file has been deleted while transversing
+#if BOOST_FILESYSTEM_VERSION == 3
+            string ename = e->filename().string();
+#else
+            string ename = e->leaf();
+#endif
+            LOG4FIMEX(getLogger("Fimex.scanFiles"), Logger::WARN, "skipping "<< ename << ": " << ex.what());
+            continue;
+        }
         if (lstat.type() == directory_file) {
             if (depth != 0) {
                 if (!matchFileOnly) {
@@ -166,8 +178,8 @@ void globFiles(std::vector<std::string>& files, const std::string& glob)
 
 std::vector<std::string> tokenize(const std::string& str, const std::string& delimiters)
 {
-	std::vector<std::string> tokens;
-	// skip delimiters at beginning.
+    std::vector<std::string> tokens;
+    // skip delimiters at beginning.
     std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
     // find first "non-delimiter".
     std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
