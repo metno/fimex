@@ -1,13 +1,21 @@
 netcdf testOut {
 dimensions:
   time = UNLIMITED ;
-  x = 2 ;
+  lon = 1 ;
+  lat = 2 ;
 variables:
-  short pressure(time,x) ;
+  short pressure(time, lat, lon) ;
      pressure:units = "Pa" ;
      pressure:scale_factor = 10.f ;
   short time(time);
      time:units = "hours since 2013-10-18 00:00:00 +0000" ;
+  float lat(lat);
+     lat:units = "degrees_north";
+  float lon(lon);
+     lon:units = "degrees_east";
+
+// global attributes
+  :Conventions = "CF-1.6" ;
 
 data:
   time = 1, 2 ;

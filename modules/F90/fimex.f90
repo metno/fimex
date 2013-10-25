@@ -557,23 +557,27 @@ MODULE Fimex
   !! field4d(1:vsize(1),1:vsize(2),1:vsize(3),1:vsize(4)) => target
   !! @endcode
   !! @param varName the variable name to read, must be similar or equal to the one set in get_dimensions()
-  !! @param cunit the unit to read the variable in. Use "" to ignore units.
   !! @param field the preallocated multi-dimensional field
+  !! @param cunit the unit to read the variable in. "" or unset ignore units.
   !! @return 0 on success
-  FUNCTION read_data(this, varname, cunit, field)
+  FUNCTION read_data(this, varname, field, cunit)
     USE iso_c_binding,    ONLY: C_PTR,C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_INT,C_LONG_LONG,C_LOC
     IMPLICIT NONE
     CLASS(FimexIO), INTENT(IN)                              :: this
     CHARACTER(LEN=*), INTENT(IN)                            :: varname
-    CHARACTER(LEN=*), INTENT(IN)                            :: cunit
     REAL(KIND=C_DOUBLE),DIMENSION(:), INTENT(INOUT), ALLOCATABLE, TARGET :: field
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL                  :: cunit
     INTEGER                                                 :: read_data
 
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: start
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: vsize
+    CHARACTER(LEN=1024)                                     :: myUnit
     CHARACTER(LEN=1024)                                     :: dimName
     INTEGER(KIND=C_LONG_LONG)                               :: expSize, outSize
     INTEGER :: i,ierr, ndims
+
+    myUnit = ""
+    IF (PRESENT(cunit)) myUnit = cunit
 
     IF (C_ASSOCIATED(this%sb) .AND. C_ASSOCIATED(this%io)) THEN
       ndims = c_mifi_slicebuilder_ndims(this%sb)
@@ -588,7 +592,7 @@ MODULE Fimex
       END IF
 
       read_data = c_mifi_fill_scaled_double_dataslice(this%io, trim(varName)//C_NULL_CHAR, this%sb, &
-                                                 trim(cunit)//C_NULL_CHAR, C_LOC(field), outSize)
+                                                 trim(myUnit)//C_NULL_CHAR, C_LOC(field), outSize)
       IF (read_data /= 0) THEN
         WRITE(*,*) "error filling scaled_double_dataslice ", read_data
         RETURN
@@ -607,23 +611,28 @@ MODULE Fimex
 
   !> Write data to a file
   !! @param varName the variable name to write, must be similar or equal to the one set in get_dimensions()
-  !! @param cunit the unit the variable is currently in. Use "" to ignore units.
   !! @param field the data, which must be 1d-allocatable
+  !! @param cunit the unit the variable is currently in. "" or unset ignores units.
   !! @return 0 on success
-  FUNCTION write_data(this, varname, cunit, field)
+  FUNCTION write_data(this, varname, field, cunit)
     USE iso_c_binding,    ONLY: C_PTR,C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_INT,C_LONG_LONG,C_LOC
     IMPLICIT NONE
     CLASS(FimexIO), INTENT(IN)                              :: this
     CHARACTER(LEN=*), INTENT(IN)                            :: varname
-    CHARACTER(LEN=*), INTENT(IN)                            :: cunit
     REAL(KIND=C_DOUBLE),DIMENSION(:), INTENT(INOUT), ALLOCATABLE, TARGET :: field
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL                  :: cunit
     INTEGER                                                 :: write_data
 
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: start
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: vsize
     CHARACTER(LEN=1024)                                     :: dimName
+    CHARACTER(LEN=1024)                                     :: myUnit
     INTEGER(KIND=C_LONG_LONG)                               :: expSize, outSize
     INTEGER :: i,ierr, ndims
+
+
+    myUnit = ""
+    IF (PRESENT(cunit)) myUnit = cunit
 
     IF (C_ASSOCIATED(this%sb) .AND. C_ASSOCIATED(this%io)) THEN
       ndims = c_mifi_slicebuilder_ndims(this%sb)
@@ -639,7 +648,7 @@ MODULE Fimex
       END IF
 
       write_data = c_mifi_write_scaled_double_dataslice(this%io, trim(varName)//C_NULL_CHAR, this%sb, &
-                                                 trim(cunit)//C_NULL_CHAR, C_LOC(field), expSize)
+                                                 trim(myUnit)//C_NULL_CHAR, C_LOC(field), expSize)
       IF (write_data /= 0) THEN
         WRITE(*,*) "error filling scaled_double_dataslice ", write_data
         RETURN

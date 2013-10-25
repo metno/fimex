@@ -76,7 +76,7 @@ PROGRAM fortran_test
     END DO
     WRITE(*,*) "end reduce"
     ALLOCATE(field(nx*ny))
-    ierr=fio%read(varName,cunit,field)
+    ierr=fio%read(varName,field,cunit)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -89,7 +89,7 @@ PROGRAM fortran_test
 
     ALLOCATE(field(vsize(1)*vsize(2)))
     field3d(1:vsize(1),1:vsize(2),1:1) => field
-    ierr=fio%read(varName,cunit,field)
+    ierr=fio%read(varName,field,cunit)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
@@ -134,7 +134,7 @@ PROGRAM fortran_test
     END DO
     WRITE(*,*) "end reduce"
     ALLOCATE(field(nx*ny))
-    ierr=finter%read(varName,cunit,field)
+    ierr=finter%read(varName,field,cunit)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -185,7 +185,7 @@ PROGRAM fortran_test
     END DO
     WRITE(*,*) "end reduce"
     ALLOCATE(field(nx*ny))
-    ierr=finter%read(varName,cunit,field)
+    ierr=finter%read(varName,field,cunit)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
@@ -207,7 +207,7 @@ PROGRAM fortran_test
     ierr=frw%reduce_dimension(dimname, 0, 1)
     ! write the 1-d field at time 0
     write(*,*) "writing data in cunit to t=0: ", cunit
-    ierr=frw%write("pressure", cunit, field)
+    ierr=frw%write("pressure", field, cunit)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't write field at t=0")
     ENDIF
@@ -216,10 +216,23 @@ PROGRAM fortran_test
     ierr=frw%reduce_dimension(dimname, 1, 1)
     field = field + 10
     write(*,*) "writing data in cunit to t=1: ", cunit
-    ierr=frw%write("pressure", cunit, field)
+    ierr=frw%write("pressure", field, cunit)
     IF ( ierr /= 0 ) THEN
       CALL error("Can't write field at t=1")
     ENDIF
+
+    ! write lat/lon axes
+    ndims=frw%get_dimensions("lon")
+    ! both lonvals are 10, so I can make a 1x2 matrix, but need to reallocate
+    ! lonvals
+    DEALLOCATE(lonvals)
+    ALLOCATE(lonvals(1))
+    lonvals(1) = 10
+    ierr=frw%write("lon", lonvals, "degrees_east")
+    IF ( ierr /= 0 )  CALL error("Can't write lon")
+    ndims=frw%get_dimensions("lat")
+    ierr=frw%write("lat", latvals, "degrees_north")
+    IF ( ierr /= 0 )  CALL error("Can't write lat")
 
     ierr = frw%close()
 
