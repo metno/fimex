@@ -251,8 +251,15 @@ GribMetricDef getGridDefMetric(long edition, boost::shared_ptr<grib_handle> gh)
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "Nj", &gmd.sizeY), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfFirstGridPointInDegrees", &gmd.startLon), 0);
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &gmd.startLat), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DxInMetres", &gmd.incrX), 0);
-    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DyInMetres", &gmd.incrY), 0);
+
+    if (grib_get_double(gh.get(), "DxInMetres", &gmd.incrX)) {
+        // = DxInMetres, DiInMetres, Di
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DiInMetres", &gmd.incrY), 0);
+    }
+    if (grib_get_double(gh.get(), "DyInMetres", &gmd.incrY)) {
+        // = DyInMetres, DjInMetres, Dj
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DjInMetres", &gmd.incrY), 0);
+    }
 
     return gmd;
 }
