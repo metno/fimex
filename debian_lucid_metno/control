@@ -1,7 +1,7 @@
 Source: fimex
 Priority: extra
 Maintainer: Heiko Klein <heiko.klein@met.no>
-Build-Depends: debhelper (>= 5), devscripts, pkg-config, fakeroot, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-system-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, libproj-dev, libudunits2-dev-metno, libnetcdf4-dev-metno, libgrib-api-metno-1.9.9-dev, libjasper-dev, libpng12-dev, libjpeg62-dev, libpq-dev, metgm-dev (>= 0.93), liblog4cpp5-dev
+Build-Depends: debhelper (>= 5), quilt, devscripts, pkg-config, fakeroot, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-system-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, libproj-dev, libudunits2-dev-metno, libnetcdf4-dev-metno, libgrib-api-metno-1.9.9-dev, libjasper-dev, libpng12-dev, libjpeg62-dev, libpq-dev, metgm-dev (>= 0.93), liblog4cpp5-dev
 Build-Conflicts: libfimex-dev, libfelt-dev
 Standards-Version: 3.7.2
 Section: libs
