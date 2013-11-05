@@ -48,6 +48,7 @@ public:
  */
 class Units
 {
+    friend class TimeUnit;
 public:
     /**
      * initialization of unit handling, i.e. parsing of unit file etc if required
@@ -87,6 +88,7 @@ public:
      * internal data-structure.
      */
     static bool unload(bool force = false) throw(UnitException);
+private:
     /**
      * expose the internals of the implementation as a void*
      * you need to be sure that you know the internals!
