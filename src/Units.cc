@@ -21,6 +21,8 @@
  * USA.
  */
 
+#include <cmath>
+#include "fimex/Utils.h"
 #include "fimex/Units.h"
 #include "fimex/Logger.h"
 
@@ -90,6 +92,63 @@ void handleUdUnitError(int unitErrCode, const std::string& message) throw(UnitEx
     }
 }
 
+class LinearUnitsConverter : public UnitsConverter{
+    double scale_;
+    double offset_;
+public:
+    LinearUnitsConverter(double scale, double offset) : scale_(scale), offset_(offset) {}
+    virtual ~LinearUnitsConverter() {}
+    virtual double convert(double from) {return scale_*from + offset_;}
+    virtual bool isLinear() {return true;}
+    virtual void getScaleOffset(double& scale, double& offset) {
+        scale = scale_; offset = offset_;
+    }
+};
+
+#ifdef HAVE_UDUNITS2_H
+class Ud2UnitsConverter : public UnitsConverter {
+    cv_converter* conv_;
+public:
+    Ud2UnitsConverter(cv_converter* conv) : conv_(conv) {}
+    virtual ~Ud2UnitsConverter() {cv_free(conv_);}
+    virtual double convert(double from) {
+        double retval;
+#pragma omp critical(cv_converter)
+        {
+            retval = cv_convert_double(conv_, from);
+        }
+        return retval;
+    }
+    virtual bool isLinear() {
+        // check some points
+        double offset = convert(0.0);
+        if (!std::isfinite(offset)) return false;
+        double slope = convert(1.0) - offset;
+        if (!std::isfinite(slope)) return false;
+
+        double val = 10.;
+        double cval = convert(val);
+        if ((!std::isfinite(cval)) || (std::fabs(cval - (val*slope+offset)) > 1e-5)) return false;
+        val = 100.;
+        cval = convert(val);
+        if ((!std::isfinite(cval)) || (std::fabs(cval - (val*slope+offset)) > 1e-5)) return false;
+        val = 1000.;
+        cval = convert(val);
+        if ((!std::isfinite(cval)) || (std::fabs(cval - (val*slope+offset)) > 1e-5)) return false;
+        val = -1000.;
+        cval = convert(val);
+        if ((!std::isfinite(cval)) || (std::fabs(cval - (val*slope+offset)) > 1e-5)) return false;
+
+        return true;
+    }
+    virtual void getScaleOffset(double& scale, double& offset) {
+        if (! isLinear()) throw UnitException("cannot get scale and offset of non-linear function");
+        offset = convert(0.0);
+        scale = convert(1.0) - offset;
+    }
+};
+#endif
+
 Units::Units()
 {
     ScopedCritical lock(unitsMutex);
@@ -134,13 +193,18 @@ bool Units::unload(bool force) throw(UnitException)
 }
 
 
-void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException)
+void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "convert from " << from << " to " << to);
+    boost::shared_ptr<UnitsConverter> conv = getConverter(from, to);
+    conv->getScaleOffset(slope, offset);
+}
+
+boost::shared_ptr<UnitsConverter> Units::getConverter(const std::string& from, const std::string& to)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "getConverter from " << from << " to " << to);
     if (from == to) {
-        slope = 1.;
-        offset = 0.;
-        return;
+        return boost::shared_ptr<UnitsConverter>(new LinearUnitsConverter(1.,0.));
     }
     ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
@@ -148,16 +212,18 @@ void Units::convert(const std::string& from, const std::string& to, double& slop
     handleUdUnitError(ut_get_status(), from);
     boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
     handleUdUnitError(ut_get_status(), to);
-    boost::shared_ptr<cv_converter> conv(ut_get_converter(fromUnit.get(), toUnit.get()), cv_free);
-    handleUdUnitError(ut_get_status(), from + " -> " + to);
-    offset = cv_convert_double(conv.get(), 0.0);
-    slope = cv_convert_double(conv.get(), 1.0) - offset;
+    cv_converter* conv = ut_get_converter(fromUnit.get(), toUnit.get());
+    handleUdUnitError(ut_get_status(), from + " converted to " +to);
+    return boost::shared_ptr<UnitsConverter>(new Ud2UnitsConverter(conv));
 #else
+    double slope, offset;
     utUnit fromUnit, toUnit;
     handleUdUnitError(utScan(from.c_str(), &fromUnit), from);
     handleUdUnitError(utScan(to.c_str(), &toUnit), to);
     handleUdUnitError(utConvert(&fromUnit, &toUnit, &slope, &offset));
+    return boost::shared_ptr<UnitsConverter>(new LinearUnitsConverter(slope, offset));
 #endif
+
 }
 
 bool Units::areConvertible(const std::string& unit1, const std::string& unit2) const

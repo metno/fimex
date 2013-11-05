@@ -26,6 +26,8 @@
 
 #include <string>
 #include "fimex/CDMException.h"
+#include <boost/shared_ptr.hpp>
+
 namespace MetNoFimex
 {
 
@@ -42,6 +44,34 @@ public:
 /**
  * @headerfile fimex/Units.h
  */
+/**
+ * The UnitsConverter is used to convert values from one unit
+ * to another.
+ */
+class UnitsConverter {
+public:
+    virtual ~UnitsConverter() {}
+    /**
+     * convert a value from the input unit to an output-unit
+     * @param from value in the 'from' unit
+     * @return value in the 'to' unit
+     */
+    virtual double convert(double from) = 0;
+    /**
+     * check if the converter is linear (representable by scale & offset)
+     */
+    virtual bool isLinear() = 0;
+    /**
+     * get the scale and offset
+     * @throw UnitException if not linear
+     */
+    virtual void getScaleOffset(double& scale, double& offset) = 0;
+    /**
+     * convert() as functor.
+     */
+    double operator()(double from) {return convert(from);};
+};
+
 /**
  * The class Units describes a units-system, not a single unit. Different units
  * can be compared and converted if comparable within the system.
@@ -65,8 +95,18 @@ public:
      * @param to unit
      * @param slope return value of the slope
      * @param offset return value of the offset
+     * @throw UnitException
+     * @warning The slope and offset are only useful when the units are linearly convertible.
      */
-    void convert(const std::string& from, const std::string& to, double& slope, double& offset) throw(UnitException);
+    void convert(const std::string& from, const std::string& to, double& slope, double& offset);
+    /**
+     * Get a UnitsConverter which translates from 'from' unit to 'to' unit.
+     * @param from
+     * @param to
+     * @return a UnitsConverter object
+     * @throw  UnitException
+     */
+    boost::shared_ptr<UnitsConverter> getConverter(const std::string& from, const std::string& to);
     /**
      * @brief test if two units are convertible to each others
      * @param unit1 first unit

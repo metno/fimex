@@ -50,6 +50,10 @@ BOOST_AUTO_TEST_CASE( test_Units )
     units.convert("K", "Celsius", slope, offset);
     BOOST_CHECK_CLOSE(slope, 1, 1e6);
     BOOST_CHECK_CLOSE(offset, 273.15, 1e6);
+
+    boost::shared_ptr<UnitsConverter> conv = units.getConverter("K", "Celsius");
+    BOOST_CHECK(conv->isLinear());
+    BOOST_CHECK_CLOSE(conv->convert(273.15), 0, 1e6);
 }
 
 BOOST_AUTO_TEST_CASE( test_UnitsError )
@@ -78,6 +82,14 @@ BOOST_AUTO_TEST_CASE( test_UnitsTime )
     BOOST_CHECK(units.isTime("hours since 2000-01-01 19:30:00"));
 }
 
+BOOST_AUTO_TEST_CASE( test_LogUnit )
+{
+    Units units;
+    BOOST_CHECK(units.areConvertible("hPa", "ln(re 1Pa)"));
+    boost::shared_ptr<UnitsConverter> conv = units.getConverter("hPa", "ln(re 1Pa)");
+    BOOST_CHECK(!conv->isLinear());
+    BOOST_CHECK_CLOSE(conv->convert(1000.), 11.512925, 1e-5);
+}
 
 BOOST_AUTO_TEST_CASE( test_TimeUnit )
 {
