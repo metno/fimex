@@ -34,6 +34,7 @@
 #include <boost/regex.hpp>
 #include <limits>
 #include "fimex/CDMException.h"
+#include "fimex/UnitsConverter.h"
 #include <boost/shared_array.hpp>
 
 namespace MetNoFimex
@@ -365,6 +366,35 @@ public:
         }
     }
 };
+
+/**
+ * Scale a value using fill, offset and scale, and a units-converter
+ */
+template<typename IN, typename OUT>
+class ScaleValueUnits : public std::unary_function<IN, OUT>
+{
+private:
+    IN oldFill_;
+    double oldScale_;
+    double oldOffset_;
+    boost::shared_ptr<UnitsConverter> uconv_;
+    OUT newFill_;
+    double newScaleInv_;
+    double newOffset_;
+public:
+    ScaleValueUnits(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> uconv, double newFill, double newScale, double newOffset) :
+        oldFill_(static_cast<IN>(oldFill)), oldScale_(oldScale), oldOffset_(oldOffset),
+        uconv_(uconv),
+        newFill_(static_cast<OUT>(newFill)), newScaleInv_(1/newScale), newOffset_(newOffset) {}
+    OUT operator()(const IN& in) const {
+        if (in == oldFill_ || mifi_isnan<IN>(in)) {
+            return newFill_;
+        } else {
+            return static_cast<OUT>((uconv_->convert(oldScale_*in + oldOffset_)-newOffset_)*newScaleInv_);
+        }
+    }
+};
+
 
 /**
  * Change the missing value

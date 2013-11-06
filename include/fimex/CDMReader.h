@@ -35,6 +35,7 @@ namespace MetNoFimex
 /* forward declarations */
 class CDM;
 class CDMVariable;
+class UnitsConverter;
 
 /**
  * @headerfile fimex/CDMReader.h
@@ -227,6 +228,7 @@ protected:
 
 private:
     DataPtr scaleDataOf(const std::string& varName, DataPtr data, double unitScale = 1., double unitOffset = 0.);
+    DataPtr scaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc);
     DataPtr scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& unit);
 };
 

@@ -67,17 +67,28 @@ DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data,
     return data->convertDataType(MIFI_UNDEFINED_D, unitScale, unitOffset, cdm_->getVariable(varName).getDataType(), outFillValue, scale, offset);
 }
 
+DataPtr CDMReaderWriter::unscaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc)
+{
+    // retrieve scale and offset
+    double scale, offset;
+    getScaleAndOffsetOf(varName, scale, offset);
+    const double outFillValue = cdm_->getFillValue(varName);
+    return data->convertDataType(MIFI_UNDEFINED_D, 1., 0., uc, cdm_->getVariable(varName).getDataType(), outFillValue, scale, offset);
+}
+
+
 DataPtr CDMReaderWriter::unscaleDataFromUnitOf(const std::string& varName, DataPtr data, const std::string& dataUnit)
 {
-    const std::string myUnit = cdm_->getUnits(varName);
-    double unitOffset = 0.;
-    double unitScale = 1.;
-    if (dataUnit != myUnit) {
-        Units u;
-        u.convert(dataUnit, myUnit, unitScale, unitOffset);
+    const std::string newUnit = cdm_->getUnits(varName);
+    boost::shared_ptr<UnitsConverter> uc = Units().getConverter(dataUnit, newUnit);
+    if (uc->isLinear()) {
+        // performance optimization, >3x faster
+        double unitOffset = 0.;
+        double unitScale = 1.;
+        uc->getScaleOffset(unitScale, unitOffset);
+        return unscaleDataOf(varName, data, unitScale, unitOffset);
     }
-
-    return unscaleDataOf(varName, data, unitScale, unitOffset);
+    return unscaleDataOf(varName, data, uc);
 }
 
 } // namespace MetnoFimex

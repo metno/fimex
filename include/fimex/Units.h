@@ -26,6 +26,7 @@
 
 #include <string>
 #include "fimex/CDMException.h"
+#include "fimex/UnitsConverter.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MetNoFimex
@@ -44,33 +45,6 @@ public:
 /**
  * @headerfile fimex/Units.h
  */
-/**
- * The UnitsConverter is used to convert values from one unit
- * to another.
- */
-class UnitsConverter {
-public:
-    virtual ~UnitsConverter() {}
-    /**
-     * convert a value from the input unit to an output-unit
-     * @param from value in the 'from' unit
-     * @return value in the 'to' unit
-     */
-    virtual double convert(double from) = 0;
-    /**
-     * check if the converter is linear (representable by scale & offset)
-     */
-    virtual bool isLinear() = 0;
-    /**
-     * get the scale and offset
-     * @throw UnitException if not linear
-     */
-    virtual void getScaleOffset(double& scale, double& offset) = 0;
-    /**
-     * convert() as functor.
-     */
-    double operator()(double from) {return convert(from);};
-};
 
 /**
  * The class Units describes a units-system, not a single unit. Different units

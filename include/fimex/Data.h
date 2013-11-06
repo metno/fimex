@@ -39,6 +39,8 @@ namespace MetNoFimex
     /**
      * @headerfile fimex/Data.h
      */
+    // forward decl.
+    class UnitsConverter;
 
     /**
      * General class for storing different basic array pointers plus length
@@ -170,6 +172,8 @@ namespace MetNoFimex
          * @brief convert the datatype from one type,fill,scale,offset to another
          */
         virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
+
+        virtual DataPtr convertDataType(double oldFill, double oldScale, double oldOffset, boost::shared_ptr<UnitsConverter> unitConverter, CDMDataType newType, double newFill, double newScale, double newOffset) = 0;
         /**
          * return the CDMDataType of this data
          */

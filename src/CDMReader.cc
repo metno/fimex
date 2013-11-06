@@ -183,16 +183,29 @@ DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, double 
 
     return data->convertDataType(inFillValue, totalScale, totalOffset, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
 }
+
+DataPtr CDMReader::scaleDataOf(const std::string& varName, DataPtr data, boost::shared_ptr<UnitsConverter> uc)
+{
+    // retrieve scale and offset
+    double scale, offset;
+    getScaleAndOffsetOf(varName, scale, offset);
+    // fillValue
+    double inFillValue = cdm_->getFillValue(varName);
+    return data->convertDataType(inFillValue, scale, offset, uc, CDM_DOUBLE, MIFI_UNDEFINED_D,1,0);
+}
+
 DataPtr CDMReader::scaleDataToUnitOf(const std::string& varName, DataPtr data, const std::string& newUnit)
 {
     std::string myUnit = cdm_->getUnits(varName);
-    double unitOffset = 0.;
-    double unitScale = 1.;
-    if (newUnit != myUnit) {
-        Units u;
-        u.convert(myUnit, newUnit, unitScale, unitOffset);
+    boost::shared_ptr<UnitsConverter> uc = Units().getConverter(myUnit, newUnit);
+    if (uc->isLinear()) {
+        // performance optimization, >3x faster
+        double unitOffset = 0.;
+        double unitScale = 1.;
+        uc->getScaleOffset(unitScale, unitOffset);
+        return scaleDataOf(varName, data, unitScale, unitOffset);
     }
-    return scaleDataOf(varName, data, unitScale, unitOffset);
+    return scaleDataOf(varName, data, uc);
 }
 
 
