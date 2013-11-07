@@ -64,6 +64,25 @@ bool WRFCoordSysBuilder::isMine(const CDM& cdm)
     return true;
 }
 
+void WRFCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+{
+    CDM& cdm = reader->getInternalCDM();
+    std::vector<std::pair<std::string, std::string> > xy_vectors;
+    xy_vectors.push_back(std::make_pair("U", "V"));
+    xy_vectors.push_back(std::make_pair("UAH", "VAH"));
+    for (size_t i = 0; i < xy_vectors.size(); i++) {
+        if (cdm.hasVariable(xy_vectors.at(i).first) && cdm.hasVariable(xy_vectors.at(i).second)) {
+            CDMVariable& xv = cdm.getVariable(xy_vectors.at(i).first);
+            CDMVariable& yv = cdm.getVariable(xy_vectors.at(i).second);
+            if (xv.isSpatialVector()) continue;
+            if (yv.isSpatialVector()) continue;
+            xv.setAsSpatialVector(yv.getName(), "x");
+            yv.setAsSpatialVector(xv.getName(), "y");
+            LOG4FIMEX(getLogger("fimex.WRFCoordSysBuilder"), Logger::INFO, "makeing "<< xv.getName() << "," << yv.getName() << " a vector");
+        }
+    }
+}
+
 static double findAttributeDouble(const CDM& cdm, std::string attName)
 {
     CDMAttribute attr;

@@ -1536,7 +1536,6 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
     if(xTemplAxis != "latitude") {
         cdm.removeDimension("latitude");
     }
-
 }
 
 struct CSGridDefinition {
@@ -1660,7 +1659,7 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
             mifi_get_vector_reproject_matrix_points(csi->second->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4,
                     csi->second->getProjection()->isDegree() ? 0 : 1,
                     &lonX[0], &latY[0], outSize, matrix.get());
-            p_->cachedVectorReprojection[csMap.begin()->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1));
+            p_->cachedVectorReprojection[csi->first] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, outSize, 1));
 
         }
     }
