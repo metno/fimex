@@ -96,6 +96,7 @@ CDMInterpolator::CDMInterpolator(boost::shared_ptr<CDMReader> dataReader)
     p_->latitudeName = "lat";
     p_->longitudeName = "lon";
     enhanceVectorProperties(p_->dataReader); // set spatial-vectors
+    listCoordinateSystems(p_->dataReader); // add eventually needed information to cdm (e.g. Time-axis in WRF)
     *cdm_ = p_->dataReader->getCDM();
 }
 
