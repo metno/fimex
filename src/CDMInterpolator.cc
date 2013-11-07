@@ -163,6 +163,9 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
+        if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
+            throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
+        }
         boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
         processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
         size_t newSize = 0;
@@ -1630,14 +1633,16 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         mifi_points2position(&latY[0], tmplLatVals->size(), orgYAxisArray.get(), def.yAxisData->size(), miupYAxis);
         mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), def.xAxisData->size(), miupXAxis);
 
-        LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << def.xAxisData->size() << "x" << def.yAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csMap.begin()->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method,
-                                                                                                                                lonX,
-                                                                                                                                latY,
-                                                                                                                                def.xAxisData->size(),
-                                                                                                                                def.yAxisData->size(),
-                                                                                                                                out_x_axis.size(),
-                                                                                                                                out_y_axis.size()));
+        LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") " << def.xAxisData->size() << "x" << def.yAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
+        p_->cachedInterpolation[csi->first] =
+                boost::shared_ptr<CachedInterpolationInterface>(
+                        new CachedInterpolation(method,
+                                                lonX,
+                                                latY,
+                                                def.xAxisData->size(),
+                                                def.yAxisData->size(),
+                                                out_x_axis.size(),
+                                                out_y_axis.size()));
         if (csi->second->hasProjection() && hasXYSpatialVectors()) {
             // as template data is in degrees we have to do deg2rad
             boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();
