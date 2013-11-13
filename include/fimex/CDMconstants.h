@@ -136,17 +136,17 @@ extern int fimexHas(int fileType);
  * check if fimex is configured with netcdf-support
  * @deprecated use fimexHas(fileType)
  */
-DEPRECATED(int fimexHasNetcdf());
+MIFI_DEPRECATED(int fimexHasNetcdf());
 /**
  * check if fimex is configured with grib_api-support
  * @deprecated use fimexHas(fileType)
  */
-DEPRECATED(int fimexHasGribApi());
+MIFI_DEPRECATED(int fimexHasGribApi());
 /**
  * check if fimex is configured with felt-support
  * @deprecated use fimexHas(fileType)
  */
-DEPRECATED(int fimexHasFelt());
+MIFI_DEPRECATED(int fimexHasFelt());
 
 #ifdef __cplusplus
 }

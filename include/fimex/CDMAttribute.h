@@ -94,7 +94,7 @@ private:
  * currently, projStrings of the form +proj=[stere] +lat_0=? +lon_0=? +lat_ts=?
  * @deprecated use Projection::createByProj4() and Projection::getParameters()
  */
-DEPRECATED(std::vector<CDMAttribute> projStringToAttributes(std::string projStr));
+MIFI_DEPRECATED(std::vector<CDMAttribute> projStringToAttributes(std::string projStr));
 /**
  * @brief convert attributes of a projection-variable to a projString
  *
@@ -102,7 +102,7 @@ DEPRECATED(std::vector<CDMAttribute> projStringToAttributes(std::string projStr)
  * @param attrs attributes of the projection variable
  * @return proj4 string
  */
-DEPRECATED(std::string attributesToProjString(const std::vector<CDMAttribute>& attrs));
+MIFI_DEPRECATED(std::string attributesToProjString(const std::vector<CDMAttribute>& attrs));
 
 
 }

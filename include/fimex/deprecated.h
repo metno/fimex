@@ -24,19 +24,19 @@
  *      Author: Heiko Klein
  */
 
-#ifndef DEPRECATED_H_
-#define DEPRECATED_H_
+#ifndef MIFI_DEPRECATED_H_
+#define MIFI_DEPRECATED_H_
 
 #ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
+#define MIFI_DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
+#define MIFI_DEPRECATED(func) __declspec(deprecated) func
 #elif defined(__IBMC__) || defined(__IBMCPP__)
 /* "DEPRECATED not implemented for IBM compilers" */
-#define DEPRECATED(func) func
+#define MIFI_DEPRECATED(func) func
 #else
 #pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
+#define MIFI_DEPRECATED(func) func
 #endif
 
-#endif /* DEPRECATED_H_ */
+#endif /* MIFI_DEPRECATED_H_ */

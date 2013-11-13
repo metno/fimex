@@ -49,7 +49,7 @@ public:
     virtual std::string getName() = 0;
     virtual bool isMine(const CDM& cdm) = 0;
     virtual std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader) = 0;
-    virtual DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm)) = 0;
+    virtual MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm)) = 0;
     virtual void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader) = 0;
 };
 

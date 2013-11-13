@@ -73,7 +73,7 @@ extern mifi_cdm_reader* mifi_new_io_reader(int file_type, const char* filename, 
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  * @deprecated use mifi_new_io_reader()
  */
-DEPRECATED(mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile));
+MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const char* configFile));
 
 /**
  * Get a new reader from a netcdf file.
@@ -81,7 +81,7 @@ DEPRECATED(mifi_cdm_reader* mifi_new_felt_reader(const char* filename, const cha
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  * @deprecated use mifi_new_io_reader()
  */
-DEPRECATED(mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename));
+MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename));
 
 /**
  * Get a new reader from a grib1/2 file.
@@ -90,7 +90,7 @@ DEPRECATED(mifi_cdm_reader* mifi_new_netcdf_reader(const char* filename));
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  * @deprecated use mifi_new_io_reader()
  */
-DEPRECATED(mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile));
+MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const char* configFile));
 
 
 /**
@@ -99,7 +99,7 @@ DEPRECATED(mifi_cdm_reader* mifi_new_grib_reader(const char* filename, const cha
  * @return the reader object-pointer, use #mifi_free_cdm_reader to free, or NULL on error.
  * @deprecated use mifi_new_io_reader()
  */
-DEPRECATED(mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile));
+MIFI_DEPRECATED(mifi_cdm_reader* mifi_new_ncml_reader(const char* ncmlFile));
 
 /**
  * Modify a reader using a ncml file.

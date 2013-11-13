@@ -314,7 +314,7 @@ public:
      * @return true if unique result, false (and print warning) if results are not unique
      * @throw CDMException if no projection with corresponding axes can be found
      */
-    DEPRECATED(bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException));
+    MIFI_DEPRECATED(bool getProjectionAndAxesUnits(std::string& projectionName, std::string& xAxis, std::string& yAxis, std::string& xAxisUnits, std::string& yAxisUnits) const throw(CDMException));
 
 
     /**
@@ -324,7 +324,7 @@ public:
      * @return vector of attributes of the projection, an empty vector if no projection found
      * @deprecated use the getProjectionOf() method
      */
-    DEPRECATED(AttrVec getProjection(std::string varName) const);
+    MIFI_DEPRECATED(AttrVec getProjection(std::string varName) const);
     /**
      * @brief get the projection of a variable
      *

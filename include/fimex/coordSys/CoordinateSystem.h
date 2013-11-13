@@ -253,12 +253,12 @@ void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader);
  * fetch all coordinate system from a MetNoFimex::CDM
  * @deprecated call listCoordinateSystems(boost::shared_ptr<CDMReader> reader) instead
  */
-DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm));
+MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CDM& cdm));
 /**
  * fetch all coordinate system from a MetNoFimex::CDM
  * @deprecated call listCoordinateSystems(boost::shared_ptr<CDMReader> reader) instead
  */
-DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm));
+MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm));
 
 /**
  * find all horizontal coordinate systems, either with or without projections, list
