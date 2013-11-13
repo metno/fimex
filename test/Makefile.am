@@ -8,6 +8,7 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
+             merge_target_base.nc merge_target_top.nc \
              test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
@@ -67,7 +68,7 @@ if HAVE_NETCDF
               testInterpolatorFill.sh \
               testVerticalInterpolator.sh testVerticalInterpolator2.sh \
               testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh \
-              testQualityExtractorFimex.sh testMerger.sh
+              testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}

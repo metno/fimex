@@ -168,6 +168,7 @@ AC_CONFIG_FILES([test/testVerticalInterpolatorOceanSG2ToDepth.sh],[chmod +x test
 AC_CONFIG_FILES([test/testQEmask.xml])
 AC_CONFIG_FILES([test/testQualityExtractorFimex.sh],[chmod +x test/testQualityExtractorFimex.sh])
 AC_CONFIG_FILES([test/testMerger.sh],[chmod +x test/testMerger.sh])
+AC_CONFIG_FILES([test/testMergerTarget.sh],[chmod +x test/testMergerTarget.sh])
 AC_OUTPUT
 
 

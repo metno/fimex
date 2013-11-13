@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( test_merger )
         readerO = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameOuter);
 
     boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerI, readerO);
-    merger->addMergedVariable("ga_2t_1");
+    merger->setTargetGridFromInner();
 
     DataPtr sliceM = merger->getDataSlice("ga_2t_1", 0);
     BOOST_CHECK( sliceM.get() != 0 );
@@ -79,6 +79,43 @@ BOOST_AUTO_TEST_CASE( test_merger )
              << " actual=" << valuesM[offset] << endl;
 #endif
         BOOST_CHECK( fabs(valuesM[offset] - expected[i]) < 0.001 );
+    }
+}
+
+BOOST_AUTO_TEST_CASE( test_merge_target )
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileNameB(topSrcDir+"/test/merge_target_base.nc"), fileNameT(topSrcDir+"/test/merge_target_top.nc");
+    BOOST_CHECK(ifstream(fileNameB.c_str()));
+    BOOST_CHECK(ifstream(fileNameT.c_str()));
+
+    boost::shared_ptr<CDMReader> readerB = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameB),
+        readerT = CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileNameT);
+
+    boost::shared_ptr<CDMMerger> merger = boost::make_shared<CDMMerger>(readerB, readerT);
+    merger->setTargetGrid("+proj=stere +lat_0=90 +lon_0=70 +lat_ts=60 +units=m +a=6.371e+06 +e=0 +no_defs",
+            "-1192800,-1192000,...,-1112800", "-1304000,-1303200,...,-1224000", "m", "m", "double", "double");
+
+    DataPtr sliceM = merger->getDataSlice("air_temperature_2m", 0);
+    BOOST_CHECK( sliceM.get() != 0 );
+
+    const int NX = 101, NY = 101;
+    BOOST_CHECK( sliceM->size() == NX*NY );
+
+    // test values: middle, transition, outer
+    const int ix[] = { 19, 22, -1 };
+    const int iy[] = { 65, 21, -1 };
+    const double expected[] = { 275.69, 276.35, -1 };
+
+    boost::shared_array<double> valuesM = sliceM->asDouble();
+    for(int i=0; ix[i] >= 0; ++i) {
+        const int offset = ix[i] + iy[i]*NX;
+#if 0
+        cout << "ix=" << ix[i] << " iy=" << iy[i]
+             << " expected=" << expected[i]
+             << " actual=" << valuesM[offset] << endl;
+#endif
+        BOOST_CHECK( fabs(valuesM[offset] - expected[i]) < 0.01 );
     }
 }
 

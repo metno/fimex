@@ -1,5 +1,5 @@
 /* -*- c++ -*-
- * Fimex, CDMMerger_LinearSmoothing.h
+ * Fimex, CDMBorderSmoothing_Linear.h
  *
  * (C) Copyright 2012, met.no
  *
@@ -24,23 +24,23 @@
  *      Author: Alexander Bürger
  */
 
-#ifndef fimex_CDMMerger_LinearSmoothing_H
-#define fimex_CDMMerger_LinearSmoothing_H 1
+#ifndef fimex_CDMBorderSmoothing_Linear_H
+#define fimex_CDMBorderSmoothing_Linear_H 1
 
-#include "CDMMerger.h"
+#include "CDMBorderSmoothing.h"
 
 namespace MetNoFimex {
 
 /**
- * @headerfile fimex/CDMMerger_LinearSmoothing.h
+ * @headerfile fimex/CDMBorderSmoothing_Linear.h
  */
 /**
  * Defines a linear smooth transition between inner and outer grid for
- * CDMMerger.
+ * CDMBorderSmoothing.
  */
-class CDMMerger_LinearSmoothing : public CDMMerger::Smoothing {
+class CDMBorderSmoothing_Linear : public CDMBorderSmoothing::Smoothing {
 public:
-    CDMMerger_LinearSmoothing(size_t transitionWidth, size_t borderWidth)
+    CDMBorderSmoothing_Linear(size_t transitionWidth, size_t borderWidth)
         : transitionWidth_(transitionWidth), borderWidth_(borderWidth) { }
     virtual double operator()(size_t curX, size_t curY, double valueI, double valueO);
 
@@ -50,13 +50,13 @@ private:
 
 // ------------------------------------------------------------------------
 
-class CDMMerger_LinearSmoothingFactory : public CDMMerger::SmoothingFactory {
+class CDMBorderSmoothing_LinearFactory : public CDMBorderSmoothing::SmoothingFactory {
 public:
     enum { DEFAULT_TRANSITIONWIDTH = 5, DEFAULT_BORDERWIDTH = 2 };
 
-    CDMMerger_LinearSmoothingFactory(size_t transitionWidth = DEFAULT_TRANSITIONWIDTH, size_t borderWidth = DEFAULT_BORDERWIDTH);
+    CDMBorderSmoothing_LinearFactory(size_t transitionWidth = DEFAULT_TRANSITIONWIDTH, size_t borderWidth = DEFAULT_BORDERWIDTH);
 
-    CDMMerger::SmoothingPtr operator()(const std::string& varName);
+    CDMBorderSmoothing::SmoothingPtr operator()(const std::string& varName);
 
 private:
     size_t transitionWidth_, borderWidth_;
@@ -64,4 +64,4 @@ private:
 
 } // namespace MetNoFimex
 
-#endif /* fimex_CDMMerger_LinearSmoothing_H */
+#endif /* fimex_CDMBorderSmoothing_Linear_H */

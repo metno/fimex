@@ -1,7 +1,7 @@
 /*
  * Fimex, CDMMerger.cc
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2013, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -25,7 +25,8 @@
  */
 
 #include "fimex/CDMMerger.h"
-#include "fimex/CDMMerger_LinearSmoothing.h"
+#include "fimex/CDMBorderSmoothing_Linear.h"
+#include "fimex/CDMOverlay.h"
 
 #define THROW(x) do { std::ostringstream t; t << x; throw CDMException(t.str()); } while(false)
 
@@ -35,10 +36,11 @@
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
+#include "fimex/SpatialAxisSpec.h"
 
-#include <boost/shared_ptr.hpp>
+#include <boost/foreach.hpp>
 
-#include <sstream>
+#include "CDMMergeUtils.h"
 
 using namespace MetNoFimex;
 using namespace std;
@@ -49,64 +51,26 @@ namespace MetNoFimex {
 
 static LoggerPtr logger(getLogger("fimex.CDMMerger"));
 
-typedef boost::shared_ptr<CDMInterpolator> CDMInterpolatorPtr;
-typedef boost::shared_ptr<Data> DataPtr;
-typedef boost::shared_ptr<CDMReader> CDMReaderPtr;
-typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystemPtr;
-typedef boost::shared_ptr<const Projection> ProjectionPtr;
-
 // ========================================================================
 
 struct CDMMergerPrivate {
     CDMReaderPtr readerI;
     CDMReaderPtr readerO;
 
-    int gridInterpolationI, gridInterpolationO;
+    CDMInterpolatorPtr interpolatedOT;  //! outer interpolated to target grid
+    CDMBorderSmoothingPtr readerSmooth; //! smoothed (inner+outer) on inner grid
+    CDMInterpolatorPtr interpolatedST;  //! smoothed (inner+outer), interpolated to target grid
+    CDMOverlayPtr readerOverlay;        //! final result, we forward getDataSlice there
 
-    CDMMerger::SmoothingFactoryPtr smoothingFactory;
+    int gridInterpolationMethod;
+    bool useOuterIfInnerUndefined;
+    CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory;
 
-    CDMInterpolatorPtr interpolatedO;
-
-    vector<CoordinateSystemPtr> allInnerCS, allOuterCS;
-
-    struct MergedVariable {
-        string nameI;
-        string nameO;
-        CDMReaderPtr interpolatedI;
-        MergedVariable(string nI, string nO, CDMReaderPtr iI)
-            : nameI(nI), nameO(nO), interpolatedI(iI) { }
-    };
-    
-    vector<MergedVariable> mergedVariables;
-
-    size_t beginIX, endIX, beginIY, endIY;
-    string nameIX, nameIY, nameOX, nameOY;
-
-
-    void checkAxesCompatibility(CoordinateSystemPtr csI, CoordinateSystemPtr csO);
-    void checkSingleAxisCompatibility(CoordinateSystem::ConstAxisPtr axI, CoordinateSystem::ConstAxisPtr axO, const char* messageLabel);
-
-    std::vector<double> mergeAxis(const CDM& cdmI, const CDM& cdmO, CoordinateSystem::ConstAxisPtr axisI, CoordinateSystem::ConstAxisPtr axisO,
-                                  std::size_t& beginI, std::size_t& endI, bool& distinct, const char* unit);
+    CDM makeCDM(const string& tproj, const values_v& tx, const values_v& ty,
+            const std::string& tx_unit, const std::string& ty_unit,
+            const CDMDataType& tx_type, const CDMDataType& ty_type);
+    values_v extendInnerAxis(CoordinateSystem::ConstAxisPtr axisI, CoordinateSystem::ConstAxisPtr axisO, const char* unit);
 };
-
-// ========================================================================
-
-namespace { // anonymous
-
-inline bool equal(double a, double b)
-{
-    return fabs(a-b) < 1e-6;
-}
-
-struct FindOuterName {
-    string nameO;
-    FindOuterName(const string& nO) : nameO(nO) { }
-    bool operator()(const CDMMergerPrivate::MergedVariable& mv) const
-        { return nameO == mv.nameO; }
-};
-
-} // anonymous namespace
 
 // ========================================================================
 
@@ -115,177 +79,154 @@ CDMMerger::CDMMerger(CDMReaderPtr inner, CDMReaderPtr outer)
 {
     p->readerI = inner;
     p->readerO = outer;
-
-    p->gridInterpolationI = p->gridInterpolationO = MIFI_INTERPOL_BILINEAR;
-
-    p->smoothingFactory = SmoothingFactoryPtr(new CDMMerger_LinearSmoothingFactory());
-
-    p->allInnerCS = listCoordinateSystems(p->readerI);
-    p->allOuterCS = listCoordinateSystems(p->readerO);
-
-    p->interpolatedO = boost::shared_ptr<CDMInterpolator>(new CDMInterpolator(p->readerO));
-
-    *cdm_ = p->interpolatedO->getCDM();
+    p->gridInterpolationMethod = MIFI_INTERPOL_BILINEAR;
+    p->smoothingFactory = CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory());
+    p->useOuterIfInnerUndefined = true;
 }
 
 // ------------------------------------------------------------------------
 
-void CDMMerger:: setSmoothing(SmoothingFactoryPtr smoothingFactory)
+void CDMMerger::setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory)
 {
-    // TODO throw if already running
     p->smoothingFactory = smoothingFactory;
+    if (p->readerSmooth.get() != 0)
+        p->readerSmooth->setSmoothing(smoothingFactory);
 }
 
 // ------------------------------------------------------------------------
 
-void CDMMerger::setGridInterpolationMethod(int methodI, int methodO)
+void CDMMerger::setUseOuterIfInnerUndefined(bool useOuter)
 {
-    // TODO throw if already running
-    p->gridInterpolationI = methodI;
-    p->gridInterpolationO = methodO;
+    p->useOuterIfInnerUndefined = useOuter;
+    if (p->readerSmooth.get() != 0)
+        p->readerSmooth->setUseOuterIfInnerUndefined(useOuter);
+}
+// ------------------------------------------------------------------------
+
+void CDMMerger::setGridInterpolationMethod(int method)
+{
+    if (p->readerOverlay.get() != 0)
+        LOG4FIMEX(logger, Logger::WARN, "setting grid interpolation method after setting target grid has"
+                " no effect on the already defined target grid");
+    p->gridInterpolationMethod = method;
 }
 
 // ------------------------------------------------------------------------
 
-void CDMMerger::addMergedVariable(const std::string& nameI, const std::string& nameO)
+void CDMMerger::setTargetGrid(const string& proj, const string& tx_axis, const string& ty_axis,
+        const string& tx_unit, const string& ty_unit, const string& tx_type, const string& ty_type)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "adding merged variable '" << nameI << "' in inner and '" << nameO << "' in outer");
+    SpatialAxisSpec xAxisSpec(tx_axis);
+    SpatialAxisSpec yAxisSpec(ty_axis);
+    if (xAxisSpec.requireStartEnd() or yAxisSpec.requireStartEnd())
+        throw CDMException("setTargetGrid without axis start/end not implemented");
+
+    const CDMDataType xType = string2datatype(tx_type),
+            yType = string2datatype(ty_type);
+    const vector<double> tx_values = xAxisSpec.getAxisSteps(),
+            ty_values = yAxisSpec.getAxisSteps();
+    setTargetGrid(proj, tx_values, ty_values, tx_unit, ty_unit, xType, yType);
+}
+
+// ------------------------------------------------------------------------
+
+void CDMMerger::setTargetGrid(const string& proj, const values_v& tx, const values_v& ty,
+        const std::string& tx_unit, const std::string& ty_unit,
+        const CDMDataType& tx_type, const CDMDataType& ty_type)
+{
+    *cdm_ = p->makeCDM(proj, tx, ty, tx_unit, ty_unit, tx_type, ty_type);
+}
+
+// ------------------------------------------------------------------------
+
+void CDMMerger::setTargetGridFromInner()
+{
     const CDM &cdmI = p->readerI->getCDM(), &cdmO = p->readerO->getCDM();
-    if( not cdmI.hasVariable(nameI) )
-        THROW("inner does not have a variable named '" << nameI << "'");
-    if( not cdmO.hasVariable(nameO) )
-        THROW("outer does not have a variable named '" << nameO << "'");
 
-    if( cdmI.hasDimension(nameI) )
-        THROW("variable '" << nameI << "' is a dimension in inner, cannot merge");
-    if( cdmO.hasDimension(nameO) )
-        THROW("variable '" << nameO << "' is a dimension in outer, cannot merge");
+    const vector<CoordinateSystemPtr> allCsI = listCoordinateSystems(p->readerI),
+            allCsO = listCoordinateSystems(p->readerO);
 
-    const CDMVariable& varI = cdmI.getVariable(nameI), varO = cdmO.getVariable(nameO);
+    const CDM::VarVec& varsI = cdmI.getVariables();
+    BOOST_FOREACH(const CDMVariable& varI, varsI) {
+        const string& varName = varI.getName();
+        if (not cdmO.hasVariable(varName))
+            continue;
+        if (cdmI.hasDimension(varName) or cdmO.hasDimension(varName))
+            continue;
 
-    const vector<string>& shapeI = varI.getShape(), &shapeO = varO.getShape();
-    if( shapeI.size() != shapeO.size() )
-        THROW("variables '" << nameI << "' in inner and '" << nameO << "' in outer have different shape size, cannot merge");
-    if( shapeI != shapeO ) {
-        LOG4FIMEX(logger, Logger::WARN, "variables '" << nameI << "' in inner and '" << nameO
-                  << "' in outer seem to have different shapes, merge outcome is unclear (crash possible)");
-    }
+        const CoordinateSystemPtr_cit itCsI = findCS(allCsI, varName),
+                itCsO = findCS(allCsO, varName);
+        if (itCsI == allCsI.end() or itCsO == allCsO.end())
+            continue;
+        
+        const CoordinateSystemPtr csI = *itCsI, csO = *itCsO;
+        if (not (csI->isSimpleSpatialGridded() and csO->isSimpleSpatialGridded()))
+            continue;
+        if (not (csI->hasProjection() and csO->hasProjection()))
+            continue;
 
-#if 0
-    const vector<CDMAttribute>& attributesI = cdmI.getAttributes(nameI);
-    if( attributesI.size() != cdmO.getAttributes(nameO).size() )
-        THROW("variable '" << nameI << "' in inner and '" << nameO << "' in outer have different attribute count, cannot merge");
-    BOOST_FOREACH(const CDMAttribute& aI, attributesI) {
-        try {
-            const CDMAttribute& aO = cdmO.getAttribute(nameO, aI.getName());
-            if( aI.getStringValue() != aO.getStringValue() )
-                THROW("attibute '" << aI.getName() << "' has different values for variable '"
-                      << nameI << "' in inner and '" << nameO << "' in outer, cannot merge");
-        } catch(CDMException& e) {
-            THROW("attribute '" << aI.getName() << "' of variable '" << nameI << "' in inner is not present for variable '"
-                  << nameO << "' in outer, cannot merge");
-        }
-    }
-#endif
+        ProjectionPtr projI = csI->getProjection(), projO = csO->getProjection();
+        if (projI->isDegree() != projO->isDegree())
+            continue;
 
-    const vector<CoordinateSystemPtr>::iterator itI =
-        find_if(p->allInnerCS.begin(), p->allInnerCS.end(), CompleteCoordinateSystemForComparator(nameI));
-    const vector<CoordinateSystemPtr>::iterator itO =
-        find_if(p->allOuterCS.begin(), p->allOuterCS.end(), CompleteCoordinateSystemForComparator(nameO));
-    const bool hasInnerCS = (itI != p->allInnerCS.end()), hasOuterCS = (itO != p->allOuterCS.end());
-    if( not hasInnerCS )
-        THROW("no coordinate system for variable '" << nameI << "' in inner, cannot merge");
-    if( not hasOuterCS )
-        THROW("no coordinate system for variable '" << nameO << "' in outer, cannot merge");
+        CoordinateSystem::ConstAxisPtr xAxisI = csI->getGeoXAxis(),
+                yAxisI = csI->getGeoYAxis();
+            
+        const char* unit = projI->isDegree() ? "degree" : "m";
+        const values_v vx = p->extendInnerAxis(xAxisI, csO->getGeoXAxis(), unit);
+        const values_v vy = p->extendInnerAxis(yAxisI, csO->getGeoYAxis(), unit);
 
-    const CoordinateSystemPtr csI = *itI, csO = *itO;
-    if( not (csI->isSimpleSpatialGridded() and csO->isSimpleSpatialGridded()) )
-        THROW("coordinate systems for variable '" << nameO << "' in outer or '"
-              << nameI << "' in inner is not a simple spatial grid, merge not implemented");
-    p->checkAxesCompatibility(csI, csO);
-
-    if( not (csI->hasProjection() and csO->hasProjection()) )
-        THROW("coordinate systems for variable '" << nameO << "' in outer or '"
-              << nameI << "' in inner have no projection, merge not implemented");
-    ProjectionPtr projI = csI->getProjection(), projO = csO->getProjection();
-    if( projI->isDegree() != projO->isDegree() )
-        THROW("coordinate systems for variable '" << nameO << "' in outer or '"
-              << nameI << "' are not both in degree/m, merge not implemented");
-
-    if( p->mergedVariables.empty() ) {
-        const char* unit = projO->isDegree() ? "degree" : "m";
-        bool distinctX = true, distinctY = true;
-        const vector<double> valuesX = p->mergeAxis(cdmI, cdmO, csI->getGeoXAxis(), csO->getGeoXAxis(), p->beginIX, p->endIX, distinctX, unit);
-        const vector<double> valuesY = p->mergeAxis(cdmI, cdmO, csI->getGeoYAxis(), csO->getGeoYAxis(), p->beginIY, p->endIY, distinctY, unit);
-        p->nameIX = csI->getGeoXAxis()->getName();
-        p->nameIY = csI->getGeoYAxis()->getName();
-        p->nameOX = csO->getGeoXAxis()->getName();
-        p->nameOY = csO->getGeoYAxis()->getName();
-
-        if( distinctX or distinctY ) {
-            p->interpolatedO->changeProjection(p->gridInterpolationO, projO->getProj4String(),
-                                               valuesX, valuesY, unit, unit, CDM_DOUBLE, CDM_DOUBLE);
-            *cdm_ = p->interpolatedO->getCDM();
-        }
-    } else {
-        // TODO if inner has different grid than first mapped variable, also interpolate inner for this variable
-        if( p->nameIX != csI->getGeoXAxis()->getName() or p->nameIY != csI->getGeoYAxis()->getName() )
-            THROW("variable '" << nameI << "' in inner has other horizontal axes than"
-                  << " the first merged variable, merge not implemented");
-    }
-    p->mergedVariables.push_back(CDMMergerPrivate::MergedVariable(nameI, nameO, p->readerI));
-}
-
-// ------------------------------------------------------------------------
-
-void CDMMergerPrivate::checkAxesCompatibility(CoordinateSystemPtr csI, CoordinateSystemPtr csO)
-{
-    const int N = 5;
-    const CoordinateAxis::AxisType types[N] = {
-        CoordinateAxis::GeoZ,
-        CoordinateAxis::Time,
-        CoordinateAxis::Pressure,
-        CoordinateAxis::Height,
-        CoordinateAxis::ReferenceTime
-    };
-    const char* labels[N] = {
-        "z", "time", "pressure", "height", "reference time"
-    };
-    for(int i=0; i<N; ++i)
-        checkSingleAxisCompatibility(csI->findAxisOfType(types[i]), csO->findAxisOfType(types[i]), labels[i]);
-}
-
-// ------------------------------------------------------------------------
-
-void CDMMergerPrivate::checkSingleAxisCompatibility(CoordinateSystem::ConstAxisPtr axI, CoordinateSystem::ConstAxisPtr axO, const char* messageLabel)
-{
-    const bool hasAxisI = (axI.get() != 0), hasAxisO = (axO.get() != 0);
-    if( hasAxisI != hasAxisO )
-        THROW("only one of inner and outer has a '" << messageLabel << "' axis, cannot merge");
-    if( !hasAxisI )
+        LOG4FIMEX(logger, Logger::INFO, "extending grid for inner variable '" << varName << "'");
+        setTargetGrid(projI->getProj4String(), vx, vy,
+                cdmI.getUnits(xAxisI->getName()), cdmI.getUnits(yAxisI->getName()),
+                xAxisI->getDataType(), yAxisI->getDataType());
         return;
-    const CDM& cdmI = readerI->getCDM(), &cdmO = readerO->getCDM();
-    if( not (cdmI.hasDimension(axI->getName()) and cdmO.hasDimension(axO->getName())) )
-        THROW(messageLabel << " axis in inner or outer is not a dimension, giving up");
-    const CDMDimension& dimI = cdmI.getDimension(axI->getName()), &dimO = cdmO.getDimension(axO->getName());
-    if( dimI.isUnlimited() != dimO.isUnlimited() )
-        THROW(messageLabel << " axis is not unlimited in both inner and outer, cannot merge");
-    DataPtr dataI = axI->getData(), dataO = axO->getData();
-    if( (not dataI) != (not dataO) )
-        THROW(messageLabel << " axis has data only for one of inner and outer, cannot merge");
-    if( dataI.get() != 0 and dataI->size() != dataO->size() )
-        THROW(messageLabel << " axis has different size in inner and outer, cannot merge");
+    }
+    
+    LOG4FIMEX(logger, Logger::WARN, "extending grid failed, no inner variable with CS found");
 }
 
 // ------------------------------------------------------------------------
 
-vector<double> CDMMergerPrivate::mergeAxis(const CDM& cdmI, const CDM& cdmO,
-                                           CoordinateSystem::ConstAxisPtr axisI, CoordinateSystem::ConstAxisPtr axisO,
-                                           size_t& beginI, size_t& endI, bool& distinct, const char* unit)
+DataPtr CDMMerger::getDataSlice(const std::string &varName, size_t unLimDimPos)
+{
+    if (not p->readerOverlay)
+        THROW("must call setTargetGrid or setTargetGridFromInner before getDataSlice");
+
+    return p->readerOverlay->getDataSlice(varName, unLimDimPos);
+}
+
+// ========================================================================
+
+CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const values_v& ty,
+        const std::string& tx_unit, const std::string& ty_unit,
+        const CDMDataType& tx_type, const CDMDataType& ty_type)
+{
+    interpolatedOT = CDMInterpolatorPtr(new CDMInterpolator(readerO));
+    interpolatedOT->changeProjection(gridInterpolationMethod, proj,
+            tx, ty, tx_unit, ty_unit, tx_type, ty_type);
+
+    readerSmooth = CDMBorderSmoothingPtr(new CDMBorderSmoothing(readerI, readerO));
+    readerSmooth->setSmoothing(smoothingFactory);
+    readerSmooth->setUseOuterIfInnerUndefined(useOuterIfInnerUndefined);
+
+    interpolatedST = CDMInterpolatorPtr(new CDMInterpolator(readerSmooth));
+    interpolatedST->changeProjection(gridInterpolationMethod, proj,
+            tx, ty, tx_unit, ty_unit, tx_type, ty_type);
+
+    readerOverlay = CDMOverlayPtr(new CDMOverlay(interpolatedOT, interpolatedST, gridInterpolationMethod));
+    
+    return readerOverlay->getCDM();
+}
+
+// ------------------------------------------------------------------------
+
+values_v CDMMergerPrivate::extendInnerAxis(CoordinateSystem::ConstAxisPtr axisI, CoordinateSystem::ConstAxisPtr axisO, const char* unit)
 {
     const string &nameI = axisI->getName(), &nameO = axisO->getName();
 
-    if( not (cdmI.hasDimension(nameI) and cdmO.hasDimension(nameO)) )
+    const CDM &cdmI = readerI->getCDM(), &cdmO = readerO->getCDM();
+    if (not (cdmI.hasDimension(nameI) and cdmO.hasDimension(nameO)))
         THROW("found an axis that is not a dimension, cannot merge");
 
     const CDMDimension& dimI = cdmI.getDimension(nameI), &dimO = cdmO.getDimension(nameO);
@@ -320,103 +261,10 @@ vector<double> CDMMergerPrivate::mergeAxis(const CDM& cdmI, const CDM& cdmO,
     for(double nO = valuesI[0] - stepI; nO >= minO && nO <= maxO; nO -= stepI)
         reverse.push_back(nO);
     vector<double> extended(reverse.rbegin(), reverse.rend());
-    beginI = extended.size();
     extended.insert(extended.end(), &valuesI[0], &valuesI[axisDataI->size()]);
-    endI = extended.size();
     for(double nO = valuesI[axisDataI->size()-1] + stepI; nO >= minO && nO <= maxO; nO += stepI)
         extended.push_back(nO);
-    distinct = (extended[0] != valuesO[0] or extended[1] != valuesO[1] or extended.size() != axisDataO->size());
     return extended;
-}
-
-// ------------------------------------------------------------------------
-
-DataPtr CDMMerger::getDataSlice(const std::string &varName, size_t unLimDimPos)
-{
-    vector<CDMMergerPrivate::MergedVariable>::const_iterator it
-        = find_if(p->mergedVariables.begin(), p->mergedVariables.end(), FindOuterName(varName));
-    if( it == p->mergedVariables.end() )
-        return p->interpolatedO->getDataSlice(varName, unLimDimPos);
-
-    const CDMMergerPrivate::MergedVariable& mv = *it;
-    const CDM& cdmI = mv.interpolatedI->getCDM();
-
-    const vector<string> &shapeO = cdm_->getVariable(varName).getShape(), &shapeI = cdmI.getVariable(mv.nameI).getShape();
-    vector<size_t> dimSizesI, dimSizesO;
-    int shapeIdxXI = -1, shapeIdxYI = -1, shapeIdxXO = -1, shapeIdxYO = -1;
-    for(size_t i=0; i<shapeO.size(); ++i) {
-        if( p->nameOX == shapeO[i] )
-            shapeIdxXO = i;
-        else if( p->nameOY == shapeO[i] )
-            shapeIdxYO = i;
-
-        if( p->nameIX == shapeI[i] )
-            shapeIdxXI = i;
-        else if( p->nameIY == shapeI[i] )
-            shapeIdxYI = i;
-
-        const CDMDimension& dimO = cdm_->getDimension(shapeO[i]);
-        if( !dimO.isUnlimited() ) {
-            dimSizesI.push_back(cdmI.getDimension(shapeI[i]).getLength());
-            dimSizesO.push_back(dimO.getLength());
-        }
-    }
-
-    DataPtr sliceO = p->interpolatedO->getDataSlice(varName, unLimDimPos);
-    if( dimSizesI.empty() )
-        return sliceO;
-
-    SmoothingPtr smoothing = (*p->smoothingFactory)(varName);
-    const double fillI = cdmI.getFillValue(mv.nameI), fillO = cdm_->getFillValue(varName);
-    smoothing->setFillValues(cdmI.getFillValue(mv.nameI), cdm_->getFillValue(varName));
-    smoothing->setHorizontalSizes(dimSizesI[shapeIdxXI], dimSizesI[shapeIdxYI]);
-
-    DataPtr sliceI = p->readerI->getDataSlice(varName, unLimDimPos);
-
-    const DataIndex idxI(dimSizesI), idxO(dimSizesO);
-    
-    vector<size_t> currentI(dimSizesI.size(), 0), currentO(dimSizesI.size(), 0);
-    if( shapeIdxXO >= 0 )
-        currentO[shapeIdxXO] = p->beginIX;
-    if( shapeIdxYO >= 0 )
-        currentO[shapeIdxYO] = p->beginIY;
-    while( currentI.at(0) < dimSizesI.at(0) ) {
-        const size_t posI = idxI.getPos(currentI);
-        const size_t posO = idxO.getPos(currentO);
-        const double valueI = sliceI->getDouble(posI);
-        const double valueO = sliceO->getDouble(posO);
-        double merged;
-        if( valueI == fillI ) {
-            merged = valueO;
-        } else if( valueO == fillO or (not smoothing.get()) ) {
-            merged = valueI;
-        } else {
-            merged = (*smoothing)(currentI[shapeIdxXI], currentI[shapeIdxYI], valueI, valueO);
-        }
-        sliceO->setValue(posO, merged);
-        
-        size_t incIdx = 0;
-        while(incIdx < currentI.size()) {
-            currentI[incIdx] += 1;
-            currentO[incIdx] += 1;
-            if( currentI[incIdx] >= dimSizesI[incIdx] ) {
-                currentI[incIdx] = 0;
-                // FIXME merging of different dimension names/ordering is not implemented, it will just be chaos
-                if( static_cast<int>(incIdx) == shapeIdxXI )
-                    currentO[incIdx] = p->beginIX;
-                else if( static_cast<int>(incIdx) == shapeIdxYI )
-                    currentO[incIdx] = p->beginIY;
-                else
-                    currentO[incIdx] = 0;
-                incIdx += 1;
-            } else {
-                break;
-            }
-        }
-        if( incIdx >= currentI.size() )
-            break;
-    }
-    return sliceO;
 }
 
 } // namespace MetNoFimex

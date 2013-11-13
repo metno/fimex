@@ -1,5 +1,5 @@
 /*
- * Fimex, CDMMerger_LinearSmoothing.cc
+ * Fimex, CDMBorderSmoothing_Linear.cc
  *
  * (C) Copyright 2012, met.no
  *
@@ -24,7 +24,7 @@
  *      Author: Alexander Bürger
  */
 
-#include "fimex/CDMMerger_LinearSmoothing.h"
+#include "fimex/CDMBorderSmoothing_Linear.h"
 
 #include <boost/make_shared.hpp>
 
@@ -39,7 +39,7 @@ inline double dist(int x1, int x2, int y1, int y2) {
 
 namespace MetNoFimex {
 
-double CDMMerger_LinearSmoothing::operator()(size_t curX, size_t curY, double valueI, double valueO)
+double CDMBorderSmoothing_Linear::operator()(size_t curX, size_t curY, double valueI, double valueO)
 {
     if( sizeX_ == 0 or sizeY_ == 0 )
         return valueO;
@@ -83,7 +83,7 @@ double CDMMerger_LinearSmoothing::operator()(size_t curX, size_t curY, double va
 
 // ========================================================================
 
-CDMMerger_LinearSmoothingFactory::CDMMerger_LinearSmoothingFactory(size_t transitionWidth, size_t borderWidth)
+CDMBorderSmoothing_LinearFactory::CDMBorderSmoothing_LinearFactory(size_t transitionWidth, size_t borderWidth)
     : transitionWidth_(transitionWidth)
     , borderWidth_(borderWidth)
 {
@@ -91,9 +91,9 @@ CDMMerger_LinearSmoothingFactory::CDMMerger_LinearSmoothingFactory(size_t transi
         throw CDMException("invalid parameter values for linear smoothing");
 }
 
-CDMMerger::SmoothingPtr CDMMerger_LinearSmoothingFactory::operator()(const std::string& /*varName*/)
+CDMBorderSmoothing::SmoothingPtr CDMBorderSmoothing_LinearFactory::operator()(const std::string& /*varName*/)
 {
-    return boost::make_shared<CDMMerger_LinearSmoothing>(transitionWidth_, borderWidth_);
+    return CDMBorderSmoothing::SmoothingPtr(new CDMBorderSmoothing_Linear(transitionWidth_, borderWidth_));
 }
 
 } // namespace MetNoFimex

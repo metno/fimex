@@ -1,7 +1,7 @@
 /* -*- c++ -*-
  * Fimex, CDMMerger.h
  *
- * (C) Copyright 2012, met.no
+ * (C) Copyright 2012-2013, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -27,6 +27,7 @@
 #ifndef fimex_CDMMerger_H
 #define fimex_CDMMerger_H 1
 
+#include "fimex/CDMBorderSmoothing.h"
 #include "fimex/CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/Data.h"
@@ -39,88 +40,58 @@ class CDMMergerPrivate;
  * @headerfile fimex/CDMMerger.h
  */
 /**
- * Allows merge data from an inner, "fine" grid onto data from an outer, "rough" grid.
+ * Allows merging data from an inner, "fine" grid onto data from an outer, "rough" grid.
  *
- * The resulting grid will be defined by extending the inner grid of
- * the first variable merged with "addMergedVariable" with the inner
- * grid's step size until the limits of the outer grid for this
- * variable are reached. If necessary, the outer reader is
- * interpolated to this grid. In the area of the inner grid, the
- * values are replaced with those from the inner grid, by default with
- * a linear transition (fill values are handled specially).
+ * The resulting grid can either be an automatic extension of the
+ * inner grid, or defined manually. A smoothing function is applied at
+ * the outer border of the inner grid, by default a linear transition.
  *
  * Present limitations:
- *
- * - all variables added for merging later must have the same
- *   horizontal axes as the first variable.
- *
- * - there is no check whether the shapes of a merged variables is
- *   compatible in inner and outer readers, only a warning if they are
- *   not equal
  *
  * - there is no check at all if other dimensions are compatible
  */
 class CDMMerger : public CDMReader {
 public:
     /**
-     * Defines a smoothing function for the transition between
-     * (interpolated) data from the outer to the inner grid.
-     */
-    class Smoothing {
-    public:
-        void setFillValues(double fillI, double fillO)
-            { fillI_ = fillI; fillO_ = fillO; }
-
-        void setHorizontalSizes(size_t sizeX, size_t sizeY)
-            { sizeX_ = sizeX; sizeY_ = sizeY; }
-
-        virtual double operator()(size_t curX, size_t curY, double valueI, double valueO) = 0;
-
-        virtual ~Smoothing() {}
-
-    protected:
-        size_t sizeX_, sizeY_;
-        double fillI_, fillO_;
-    };
-
-    typedef boost::shared_ptr<Smoothing> SmoothingPtr;
-
-    /**
-     * A factory for creating smoothing function objects.
-     */
-    class SmoothingFactory {
-    public:
-        virtual ~SmoothingFactory() {}
-        virtual SmoothingPtr operator()(const std::string& varName) = 0;
-    };
-
-    typedef boost::shared_ptr<SmoothingFactory> SmoothingFactoryPtr;
-
-public:
-    /**
      * Merge data from inner grid onto refined outer grid.
      */
     CDMMerger(boost::shared_ptr<CDMReader> inner, boost::shared_ptr<CDMReader> outer);
 
-    /** Change the smooting function factory. */
-    void setSmoothing(SmoothingFactoryPtr smoothingFactory);
+    /** Set the smooting function factory to be used.
+     * Must be called before setting target grid.
+     * \parameter smoothingFactory a factory for smoothing functors
+     */    
+    void setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory);
 
-    /** Set the interpolation method for outer and inner grid interpolations.
+    /** Decide if the outer value shall be used if the inner value is undefined. Default: true.
+     * Forwarded to CDMOverlay::setUseOuterIfInnerUndefined
+     */
+    void setUseOuterIfInnerUndefined(bool useOuter);
+
+    /** Set grid interpolation method.
+     * Must be called before setting target grid.
+     * \parameter method one of MIFI_INTERPOL_*
+     */
+    void setGridInterpolationMethod(int method);
+
+    /** Set target grid from string values, same as in CDMInterpolator.
+     * Units must be either "m" (not "km", "cm", or so) or degrees. */
+    void setTargetGrid(const std::string& proj, const std::string& tx_axis, const std::string& ty_axis,
+            const std::string& tx_unit, const std::string& ty_unit,
+            const std::string& tx_type, const std::string& ty_type);
+
+    /** Set target grid from values, same as in CDMInterpolator.
+     * Units must be either "m" (not "km", "cm", or so) or degrees. */
+    void setTargetGrid(const std::string& proj, const std::vector<double>& tx, const std::vector<double>& ty,
+            const std::string& tx_unit, const std::string& ty_unit,
+            const CDMDataType& tx_type, const CDMDataType& ty_type);
+
+    /** Set target grid as inner grid expanded to cover outer grid.
      *
-     * At present, interpolation of inner grids is not implemented.
+     * The resulting grid will be an extension of the first simple spatial grid found in the inner reader.
+     * It is constructed by extending the inner grid until it covers the outer grid.
      */
-    void setGridInterpolationMethod(int methodI, int methodO);
-
-    /**
-     * Request to merge variable nameI from inner into nameO from outer.
-     */
-    void addMergedVariable(const std::string& nameI, const std::string& nameO);
-
-    /**
-     * Convenience function for merging variables with the same name in inner and outer.
-     */
-    void addMergedVariable(const std::string& name)
-        { addMergedVariable(name, name); }
+    void setTargetGridFromInner();
 
     using CDMReader::getDataSlice;
     virtual boost::shared_ptr<Data> getDataSlice(const std::string &varName, std::size_t unLimDimPos);

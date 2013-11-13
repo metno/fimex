@@ -44,13 +44,13 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh \
 @HAVE_NETCDF_TRUE@              testVerticalInterpolator.sh testVerticalInterpolator2.sh \
 @HAVE_NETCDF_TRUE@              testVerticalInterpolatorHeight.sh testVerticalInterpolatorOceanSG2ToDepth.sh \
-@HAVE_NETCDF_TRUE@              testQualityExtractorFimex.sh testMerger.sh
+@HAVE_NETCDF_TRUE@              testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
 @HAVE_METGM_TRUE@am__append_5 = testMetGmReader ${METGM_NC_TESTS}
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testCharNc.sh.in $(srcdir)/testMerger.sh.in \
-	$(srcdir)/testQEmask.xml.in \
+	$(srcdir)/testMergerTarget.sh.in $(srcdir)/testQEmask.xml.in \
 	$(srcdir)/testQualityExtractorFimex.sh.in \
 	$(srcdir)/testVerticalInterpolator.sh.in \
 	$(srcdir)/testVerticalInterpolator2.sh.in \
@@ -89,7 +89,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = testCharNc.sh testVerticalInterpolator.sh \
 	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh \
 	testVerticalInterpolatorOceanSG2ToDepth.sh testQEmask.xml \
-	testQualityExtractorFimex.sh testMerger.sh
+	testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_FELT_TRUE@am__EXEEXT_1 = testQualityExtractor$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_2 = testNetcdfWriter$(EXEEXT) \
@@ -376,7 +376,8 @@ red=; grn=; lgn=; blu=; std=
 @HAVE_NETCDF_TRUE@	testVerticalInterpolator2.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolatorHeight.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolatorOceanSG2ToDepth.sh \
-@HAVE_NETCDF_TRUE@	testQualityExtractorFimex.sh testMerger.sh
+@HAVE_NETCDF_TRUE@	testQualityExtractorFimex.sh testMerger.sh \
+@HAVE_NETCDF_TRUE@	testMergerTarget.sh
 am__EXEEXT_12 = $(am__EXEEXT_11)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -568,6 +569,7 @@ EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
+             merge_target_base.nc merge_target_top.nc \
              test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
@@ -699,6 +701,8 @@ testQEmask.xml: $(top_builddir)/config.status $(srcdir)/testQEmask.xml.in
 testQualityExtractorFimex.sh: $(top_builddir)/config.status $(srcdir)/testQualityExtractorFimex.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testMerger.sh: $(top_builddir)/config.status $(srcdir)/testMerger.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testMergerTarget.sh: $(top_builddir)/config.status $(srcdir)/testMergerTarget.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-checkPROGRAMS:

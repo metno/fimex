@@ -43,7 +43,7 @@
 #include "fimex/CDMPressureConversions.h"
 #include "fimex/CDMProcessor.h"
 #include "fimex/CDMMerger.h"
-#include "fimex/CDMMerger_LinearSmoothing.h"
+#include "fimex/CDMBorderSmoothing_Linear.h"
 #include "fimex/FillWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/coordSys/CoordinateSystem.h"
@@ -259,10 +259,15 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "merge.inner.type", vm);
     writeOption<string>(out, "merge.inner.config", vm);
     writeOption<string>(out, "merge.smoothing", vm);
-    writeOption<string>(out, "merge.method.outer", vm);
-    writeVectorOptionString(out, "merge.variables.inner", vm);
-    writeVectorOptionString(out,"merge.variables.outer", vm);
-    writeOption<string>(out,"merge.printNcML", vm);
+    writeOption<string>(out, "merge.method", vm);
+    writeOption<string>(out, "merge.projString", vm);
+    writeOption<string>(out, "merge.xAxisValues", vm);
+    writeOption<string>(out, "merge.yAxisValues", vm);
+    writeOption<string>(out, "merge.xAxisUnit", vm);
+    writeOption<string>(out, "merge.yAxisUnit", vm);
+    writeOption<string>(out, "merge.xAxisType", vm);
+    writeOption<string>(out, "merge.yAxisType", vm);
+    writeOption<string>(out, "merge.printNcML", vm);
     writeOptionAny(out, "merge.printCS", vm);
     writeOptionAny(out, "merge.printSize", vm);
     writeOption<string>(out, "ncml.config", vm);
@@ -724,15 +729,10 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
 
 static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
 
-    if (not (vm.count("merge.variables.outer") or vm.count("merge.variables.inner")
-             or vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
-             or vm.count("merge.smoothing") or vm.count("merge.method.outer")) )
+    const size_t nProj = vm.count("merge.projString"), nXValues = vm.count("merge.xAxisValues"), nYValues = vm.count("merge.yAxisValues");
+    if (not (vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
+                    or vm.count("merge.smoothing") or vm.count("merge.method")))
         return dataReader;
-
-    if (not vm.count("merge.variables.outer"))
-        throw CDMException("no variables for merge");
-    if (vm.count("merge.variables.outer") != vm.count("merge.variables.inner"))
-        throw CDMException("different number of variables for inner and outer in merge");
 
     boost::shared_ptr<CDMReader> readerI = getCDMFileReader(vm, "merge.inner");
     if( not readerI )
@@ -748,7 +748,7 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
                 try {
                     int transition = boost::lexical_cast<int>(what[1]);
                     int border     = boost::lexical_cast<int>(what[2]);
-                    merger->setSmoothing(boost::shared_ptr<CDMMerger::SmoothingFactory>(new CDMMerger_LinearSmoothingFactory(transition, border)));
+                    merger->setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory(transition, border)));
                 } catch (boost::bad_lexical_cast&) {
                     throw CDMException("problem parsing parameters for linear smoothing: " + vm["merge.smoothing"].as<string>());
                 }
@@ -762,13 +762,23 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
         LOG4FIMEX(logger, Logger::DEBUG, "no merge.smoothing given, using default as defined by CDMMerger");
     }
 
-    int methodO = getInterpolationMethod(vm, "merge.method.outer");
-    int methodI = MIFI_INTERPOL_NEAREST_NEIGHBOR; // not used
-    merger->setGridInterpolationMethod(methodI, methodO);
+    int method = getInterpolationMethod(vm, "merge.method");
+    merger->setGridInterpolationMethod(method);
 
-    const vector<string> varI = vm["merge.variables.inner"].as<vector<string> >(), varO = vm["merge.variables.outer"].as<vector<string> >();
-    for(size_t v=0; v<varI.size(); ++v)
-        merger->addMergedVariable(varI[v], varO[v]);
+    if (vm.count("merge.projString")) {
+        if (not (vm.count("merge.xAxisUnit") && vm.count("merge.yAxisUnit")))
+            throw CDMException("merge.xAxisUnit and merge.yAxisUnit required");
+
+        if (not (vm.count("merge.xAxisValues") && vm.count("merge.yAxisValues")))
+            throw CDMException("merge.xAxisValues and merge.yAxisValues required");
+
+        merger->setTargetGrid(vm["merge.projString"].as<string>(),
+                vm["merge.xAxisValues"].as<string>(), vm["merge.yAxisValues"].as<string>(),
+                vm["merge.xAxisUnit"].as<string>(), vm["merge.yAxisUnit"].as<string>(),
+                vm["merge.xAxisType"].as<string>(), vm["merge.yAxisType"].as<string>());
+    } else {
+        merger->setTargetGridFromInner();
+    }
 
     printReaderStatements("merge", vm, merger);
     return merger;
@@ -978,10 +988,15 @@ int run(int argc, char* args[])
         ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
         ("merge.inner.config", po::value<string>(), "non-standard configuration for inner merge file")
         ("merge.smoothing", po::value<string>(), "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border")
-        ("merge.method.outer", po::value<string>(), "interpolation method for refining outer grid, one of nearestneighbor, bilinear, bicubic,"
-                                                    " coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
-        ("merge.variables.inner", po::value< vector<string> >(), "names of inner grid variables to merge; must appear exactly as often as merge.variables.outer")
-        ("merge.variables.outer", po::value< vector<string> >(), "names of outer grid variables to merge; these names will appear in the output")
+        ("merge.method", po::value<string>(), "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
+                " coord_nearestneighbor, coord_kdtree, forward_max, forward_mean, forward_median or forward_sum")
+        ("merge.projString", po::value<string>(), "proj4 input string describing the new projection")
+        ("merge.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
+        ("merge.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
+        ("merge.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")
+        ("merge.yAxisUnit", po::value<string>(), "unit of y-Axis given as udunits string, i.e. m or degrees_north")
+        ("merge.xAxisType", po::value<string>()->default_value("double"), "datatype of x-axis (double,float,int,short)")
+        ("merge.yAxisType", po::value<string>()->default_value("double"), "datatype of y-axis")
 #if BOOST_VERSION >= 104000
         ("merge.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
 #else

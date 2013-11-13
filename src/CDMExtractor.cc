@@ -28,6 +28,7 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Logger.h"
+#include "CDMMergeUtils.h"
 #include <vector>
 #include <set>
 #include <algorithm>
@@ -95,50 +96,6 @@ void CDMExtractor::removeVariable(std::string variable)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "removing variable "<< variable);
     cdm_->removeVariable(variable);
-}
-
-void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys)
-{
-    using namespace std;
-    // add all dimension variables
-    set<string> dimsVars;
-    for (set<string>::iterator sit = variables.begin(); sit != variables.end(); ++sit) {
-        if (cdm.hasVariable(*sit)) {
-            vector<string> shape = cdm.getVariable(*sit).getShape();
-            for (vector<string>::iterator shapeIt = shape.begin(); shapeIt != shape.end(); ++shapeIt) {
-                if (cdm.hasVariable(*shapeIt)) {
-                    dimsVars.insert(*shapeIt);
-                }
-            }
-        }
-    }
-    size_t count = 0;
-    for (set<string>::iterator dIt = dimsVars.begin(); dIt != dimsVars.end(); ++dIt) {
-        if (variables.find(*dIt) == variables.end()) {
-            variables.insert(*dIt);
-            count++;
-        }
-    }
-
-
-    // add coordinate-system variables
-    set<string> varsCopy = variables;
-    for (set<string>::iterator sit = varsCopy.begin(); sit != varsCopy.end(); ++sit) {
-        vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(*sit));
-        if (varSysIt != coordSys.end()) {
-            set<string> csDepVars = (*varSysIt)->getDependencyVariables();
-            for (set<string>::iterator dIt = csDepVars.begin(); dIt != csDepVars.end(); ++dIt) {
-                if (variables.find(*dIt) == variables.end()) {
-                    variables.insert(*dIt);
-                    count++;
-                }
-            }
-        }
-    }
-    if (count > 0) {
-        addAuxiliary(variables, cdm, coordSys);
-    }
 }
 
 void CDMExtractor::selectVariables(std::set<std::string> variables, bool addAuxiliaryVariables)

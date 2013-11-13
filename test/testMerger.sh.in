@@ -11,8 +11,7 @@ if [ ! -f "$INNER" -o ! -f "$OUTER" ]; then
    exit 0;
 fi
 ../src/binSrc/fimex --input.file="$OUTER" --merge.inner.file="$INNER" \
-    --merge.method.outer=bilinear \
-    --merge.variables.inner "$VAR" --merge.variables.outer "$VAR" \
+    --merge.method=bilinear \
     --output.file=out.nc
 if [ $? != 0 ]; then
   echo "failed merge via fimex command-line"

@@ -190,7 +190,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CachedVectorReprojection.cc CDM.cc CDMAttribute.cc \
 	CDMconstants.cc CDMDimension.cc CDMDataType.cc CDMExtractor.cc \
 	CDMFileReaderFactory.cc CDMInterpolator.cc CDMNamedEntity.cc \
-	CDMMerger.cc CDMMerger_LinearSmoothing.cc \
+	CDMMergeUtils.cc CDMBorderSmoothing.cc \
+	CDMBorderSmoothing_Linear.cc CDMOverlay.cc CDMMerger.cc \
 	CDMPressureConversions.cc CDMProcessor.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMReaderWriter.cc CDMTimeInterpolator.cc CDMVariable.cc \
@@ -324,7 +325,8 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
 	CDMconstants.lo CDMDimension.lo CDMDataType.lo CDMExtractor.lo \
 	CDMFileReaderFactory.lo CDMInterpolator.lo CDMNamedEntity.lo \
-	CDMMerger.lo CDMMerger_LinearSmoothing.lo \
+	CDMMergeUtils.lo CDMBorderSmoothing.lo \
+	CDMBorderSmoothing_Linear.lo CDMOverlay.lo CDMMerger.lo \
 	CDMPressureConversions.lo CDMProcessor.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
 	CDMReaderWriter.lo CDMTimeInterpolator.lo CDMVariable.lo \
@@ -625,8 +627,9 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CachedForwardInterpolation.cc CachedVectorReprojection.cc \
 	CDM.cc CDMAttribute.cc CDMconstants.cc CDMDimension.cc \
 	CDMDataType.cc CDMExtractor.cc CDMFileReaderFactory.cc \
-	CDMInterpolator.cc CDMNamedEntity.cc CDMMerger.cc \
-	CDMMerger_LinearSmoothing.cc CDMPressureConversions.cc \
+	CDMInterpolator.cc CDMNamedEntity.cc CDMMergeUtils.cc \
+	CDMBorderSmoothing.cc CDMBorderSmoothing_Linear.cc \
+	CDMOverlay.cc CDMMerger.cc CDMPressureConversions.cc \
 	CDMProcessor.cc CDMQualityExtractor.cc CDMReader.cc \
 	CDMReaderUtils.cc CDMReaderWriter.cc CDMTimeInterpolator.cc \
 	CDMVariable.cc CDMVerticalInterpolator.cc \
@@ -753,14 +756,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMAttribute.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMBorderSmoothing.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMBorderSmoothing_Linear.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMDataType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMDimension.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMExtractor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMFileReaderFactory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMInterpolator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMMergeUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMMerger.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMMerger_LinearSmoothing.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMNamedEntity.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMOverlay.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMPressureConversions.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMProcessor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMQualityExtractor.Plo@am__quote@

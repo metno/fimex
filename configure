@@ -22045,6 +22045,8 @@ ac_config_files="$ac_config_files test/testQualityExtractorFimex.sh"
 
 ac_config_files="$ac_config_files test/testMerger.sh"
 
+ac_config_files="$ac_config_files test/testMergerTarget.sh"
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -23241,6 +23243,7 @@ do
     "test/testQEmask.xml") CONFIG_FILES="$CONFIG_FILES test/testQEmask.xml" ;;
     "test/testQualityExtractorFimex.sh") CONFIG_FILES="$CONFIG_FILES test/testQualityExtractorFimex.sh" ;;
     "test/testMerger.sh") CONFIG_FILES="$CONFIG_FILES test/testMerger.sh" ;;
+    "test/testMergerTarget.sh") CONFIG_FILES="$CONFIG_FILES test/testMergerTarget.sh" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -24735,6 +24738,7 @@ _LT_EOF
     "test/testVerticalInterpolatorOceanSG2ToDepth.sh":F) chmod +x test/testVerticalInterpolatorOceanSG2ToDepth.sh ;;
     "test/testQualityExtractorFimex.sh":F) chmod +x test/testQualityExtractorFimex.sh ;;
     "test/testMerger.sh":F) chmod +x test/testMerger.sh ;;
+    "test/testMergerTarget.sh":F) chmod +x test/testMergerTarget.sh ;;
 
   esac
 done # for ac_tag
