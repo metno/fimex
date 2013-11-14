@@ -24,6 +24,7 @@ libfimex_la_SOURCES = interpolation.c \
                      CDMFileReaderFactory.cc \
 					 CDMInterpolator.cc \
 					 CDMNamedEntity.cc \
+                     CDMMergeUtils.h \
                      CDMMergeUtils.cc \
                      CDMBorderSmoothing.cc \
                      CDMBorderSmoothing_Linear.cc \
