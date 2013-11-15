@@ -82,9 +82,9 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
     sort(entries.begin(), entries.end());
 
     for (vector<path>::iterator e = entries.begin(); e != entries.end(); ++e) {
-        file_status lstat;
+        file_status stat;
         try {
-            lstat = file_status(symlink_status(*e));
+            stat = file_status(status(*e));
         } catch (exception& ex) {
             // catch filesystem problems in case file has been deleted while transversing
 #if BOOST_FILESYSTEM_VERSION == 3
@@ -95,7 +95,7 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
             LOG4FIMEX(getLogger("Fimex.scanFiles"), Logger::WARN, "skipping "<< ename << ": " << ex.what());
             continue;
         }
-        if (lstat.type() == directory_file) {
+        if (stat.type() == directory_file) {
             if (depth != 0) {
                 if (!matchFileOnly) {
                     // remember the directory behind start-directory
@@ -108,7 +108,7 @@ static void scanFiles_(std::vector<std::string>& files, const boost::filesystem:
                 }
                 scanFiles_(files, *e, depth-1, regexp, matchFileOnly, currentRelDir, depthCount+1);
             }
-        } else if (lstat.type() == regular_file) {
+        } else if (stat.type() == regular_file) {
             string filename = matchFileOnly ? "" : currentRelDir;
 #if BOOST_FILESYSTEM_VERSION == 3
             filename += e->filename().string();
