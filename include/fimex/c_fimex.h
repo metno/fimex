@@ -197,9 +197,48 @@ extern size_t mifi_get_variable_number(mifi_cdm_reader* reader);
  * Get the name of a variable from the reader.
  * @param reader the data source
  * @param pos the position number of the variable, should be between 0 and size-1
- * @return the variable name, or NULL on failure
+ * @return the variable name, or "" on failure
  */
 extern const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
+
+/**
+ * Get the number of the dimensions from the reader.
+ * @param reader the data source
+ * @return the number of dimension
+ */
+extern size_t mifi_get_dimension_number(mifi_cdm_reader* reader);
+/**
+ * Get the name of a dimension from the reader.
+ * @param reader the data source
+ * @param pos the position number of the dimensin, should be between 0 and size-1
+ * @return the dimension name, or "" on failure
+ */
+extern const char* mifi_get_dimension_name(mifi_cdm_reader* reader, size_t pos);
+
+/**
+ * Get the name of the unlimited dimension
+ * @param reader
+ * @return name of unlimited dimension, or ""
+ */
+extern const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader);
+
+/**
+ * Get the name of the longitude variable belonging to a parameter. The longitude
+ * variable might be a dimension (1D), or an 2D field.
+ * @param reader
+ * @param varName The name of a parameter.
+ * @return longitude-variable name or ""
+ */
+extern const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName);
+/**
+ * Get the name of the latitude variable belonging to a parameter. The latitude
+ * variable might be a dimension (1D), or an 2D field.
+ * @param reader
+ * @param varName The name of a parameter.
+ * @return latitude-variable name or ""
+ */
+extern const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName);
+
 
 /**
  * Create a new slice_builder for the reader and the variable. It

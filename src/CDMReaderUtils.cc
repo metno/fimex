@@ -45,10 +45,7 @@ boost::posix_time::ptime
 getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
 {
     const CDM& cdm = reader->getCDM();
-//    const CDM::VarVec vars = cdm.getVariables();
-//    for (int i = 0; i < vars.size(); i++) {
-//        cerr << "var: " << vars.at(i).getName() << endl;
-//    }
+    // try CF-1.x forecast_reference_time
     vector<string> refVarnames = cdm.findVariables("standard_name", "forecast_reference_time");
     set<boost::posix_time::ptime> refTimes;
     for (vector<string>::iterator varname = refVarnames.begin(); varname != refVarnames.end(); ++varname) {
@@ -60,6 +57,19 @@ getUniqueForecastReferenceTime(boost::shared_ptr<CDMReader> reader)
         const double* end = tPtr + timeData->size();
         while (tPtr != end) {
             refTimes.insert(tu.unitTime2posixTime(*tPtr++));
+        }
+    }
+    if (refTimes.size() == 0) {
+        // try WRF-Convention SIMULATION_START_DATE attribute
+        CDMAttribute attr;
+        if (cdm.getAttribute(cdm.globalAttributeNS(), "SIMULATION_START_DATE", attr)) {
+            string sd = attr.getStringValue();
+            // replace _ with space
+            if (sd.find("_") != string::npos) {
+                sd = sd.replace(sd.find("_"), 1, " ");
+            }
+            boost::posix_time::ptime pt(boost::posix_time::time_from_string(sd));
+            refTimes.insert(pt);
         }
     }
     if (refTimes.size() == 0) {

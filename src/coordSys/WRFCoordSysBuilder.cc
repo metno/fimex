@@ -421,26 +421,4 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > WRFCoordSysBuilder::list
     return wrfListCoordinateSystems(reader->getInternalCDM(), reader);
 }
 
-#if 0
-    // do the tasks which don't require the reader (compatibility with older interface
-    std::vector<boost::shared_ptr<const CoordinateSystem> > cs = listCoordinateSystems(reader->getInternalCDM());
-
-    // read the Time information (ASCII times) and add them to the dimension-variable 'Time'
-    CDM& cdm = reader->getInternalCDM();
-    if (cdm.hasDimension("Time") && (!cdm.hasVariable("Time")) && cdm.hasVariable("Times")) {
-        std::cerr << "I am here now";
-        // Times is usually given as 'YYYY-MM-DD_HH:MM:SS' in UTM as string
-        SliceBuilder sb(cdm, "Times");
-        size_t timeSize = cdm.getDimension("Time").getLength();
-        for (size_t i = 0; i < timeSize; ++i) {
-            sb.setStartAndSize("Time", i, 1);
-            DataPtr data = reader->getDataSlice("Times", sb);
-            std::cerr << data->asString() << std::endl;
-        }
-    }
-
-    return cs;
-}
-
-#endif
 } /* namespace MetNoFimex */

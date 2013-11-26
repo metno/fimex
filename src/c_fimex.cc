@@ -233,6 +233,52 @@ const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos)
     return 0;
 }
 
+size_t mifi_get_dimension_number(mifi_cdm_reader* reader)
+{
+    try {
+        return reader->reader_->getCDM().getDimensions().size();
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_dimension_number: " << ex.what());
+    }
+    return 0;
+}
+
+const char* mifi_get_dimension_name(mifi_cdm_reader* reader, size_t pos)
+{
+    try {
+        return reader->reader_->getCDM().getDimensions().at(pos).getName().c_str();
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_dimension_name: " << ex.what());
+    }
+    return 0;
+}
+
+const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader)
+{
+    const CDMDimension* udim = reader->reader_->getCDM().getUnlimitedDim();
+    if (udim != 0) {
+        return udim->getName().c_str();
+    }
+    return "";
+}
+
+const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName) {
+    std::string lon,lat;
+    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
+        return lon.c_str();
+    }
+    return "";
+}
+
+const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName) {
+    std::string lon,lat;
+    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
+        return lat.c_str();
+    }
+    return "";
+}
+
+
 mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName)
 {
     try {

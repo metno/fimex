@@ -142,7 +142,7 @@ vector<CoordinateAxis::AxisType> CoordinateSystemSliceBuilder::getAxisTypes()
     for (vector<string>::iterator it = dimNames.begin(); it != dimNames.end(); ++it) {
         Csal::const_iterator axIt = find_if(axes.begin(), axes.end(), CDMNameEqualPtr(*it));
         if (axIt != axes.end()) {
-            cerr << (*axIt)->getAxisType() << CoordinateAxis::type2int((*axIt)->getAxisType()) << endl;
+            LOG4FIMEX(logger, Logger::DEBUG, (*axIt)->getAxisType() << CoordinateAxis::type2int((*axIt)->getAxisType()));
             retVal.push_back((*axIt)->getAxisType());
         } else {
             // this should not happen

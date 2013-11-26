@@ -236,6 +236,39 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
         retVal++;
         fprintf(stderr, "wrong number of ndims, 2 != %d", ndims);
     }
+
+    int totDims = mifi_get_dimension_number(feltReader);
+    if (totDims != 4) {
+        retVal++;
+        fprintf(stderr, "wrong number of totDims, 4 != %d\n", totDims);
+    }
+
+    const char* dimName = mifi_get_dimension_name(feltReader, 2);
+    if (strcmp("x", dimName)) {
+        retVal++;
+        fprintf(stderr, "dimension 2 not named right, x != %s\n", dimName);
+    }
+
+    const char* undimName = mifi_get_unlimited_dimension_name(feltReader);
+    if (strcmp("time", undimName)) {
+        retVal++;
+        fprintf(stderr, "unlimited not named right, time != %s\n", undimName);
+    }
+
+
+    const char* lonName = mifi_get_var_longitude(feltReader, "altitude");
+    if (strcmp("longitude", lonName)) {
+        retVal++;
+        fprintf(stderr, "longitude not named right, longitude != %s\n", lonName);
+    }
+
+    const char* latName = mifi_get_var_latitude(feltReader, "altitude");
+    if (strcmp("latitude", latName)) {
+        retVal++;
+        fprintf(stderr, "latitude not named right, latitude != %s\n", latName);
+    }
+
+
     return retVal;
 }
 
