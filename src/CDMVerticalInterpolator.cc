@@ -270,6 +270,9 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
         size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
         const float* inData = &iData[timePos*(nx*ny*nz)];
         float* outData = &oData[timePos*(nx*ny*pOut.size())];
+#ifdef _OPENMP
+#pragma omp parallel for default(shared)
+#endif
         for (size_t y = 0; y < ny; ++y) {
             for (size_t x = 0; x < nx; ++x) {
                 // interpolate in between the pressure values
@@ -289,16 +292,6 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
                     } else {
                         outData[outPos] = MIFI_UNDEFINED_D;
                     }
-#if 0
-                    // bad input or extrapolation
-                    if (varName == "relative_humidity" && outData[outPos] > 100) {
-                        cerr << pIn.at(pos.first) << "," << pIn.at(pos.second) << ": " << pOut.at(k) << endl;
-                        cerr << inData[inPos1] << "," << inData[inPos2] << ": " << outData[outPos] << endl;
-                        if (pos.first > 0) {
-                            cerr << pIn.at(pos.first - 1) << endl;
-                        }
-                    }
-#endif
                 }
             }
         }

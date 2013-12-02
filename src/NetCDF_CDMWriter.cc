@@ -558,6 +558,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 
             if (data->size() > 0) {
                 try {
+                    ScopedCritical ncLock(Nc::getMutex());
+                    LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
                     ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
                 } catch (CDMException& ex) {
                     throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
@@ -596,6 +598,8 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     count[0] = 1;
                     start[0] = i;
                     try {
+                        ScopedCritical ncLock(Nc::getMutex());
+                        LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName << "("<< i << ")");
                         ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
                     } catch (CDMException& ex) {
                         throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );

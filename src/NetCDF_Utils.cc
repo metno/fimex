@@ -199,7 +199,6 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
         std::copy(&count[0], &count[0]+dimLen, &mcount[0]);
     }
 
-    ScopedCritical ncLock(Nc::getMutex());
     switch (dt) {
     case NC_BYTE:
 #ifdef NC_NETCDF4
@@ -286,7 +285,6 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
         throw CDMException(msg.str());
     }
 
-    ScopedCritical ncLock(Nc::getMutex());
     switch (type) {
     case NC_BYTE:
 #ifdef NC_NETCDF4

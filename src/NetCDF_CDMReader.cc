@@ -41,7 +41,7 @@ static LoggerPtr logger = getLogger("fimex.NetCDF_CDMReader");
 NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
 {
-    ScopedCritical lock(ncFile->mutex);
+    ScopedCritical lock(Nc::getMutex());
     ncFile->filename = filename;
     ncCheck(nc_open(ncFile->filename.c_str(), writeable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId));
     ncFile->isOpen = true;
@@ -118,7 +118,7 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimD
     }
 
     DataPtr data;
-    ScopedCritical lock(ncFile->mutex);
+    ScopedCritical lock(Nc::getMutex());
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;
@@ -152,7 +152,7 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBu
     }
 
     DataPtr data;
-    ScopedCritical lock(ncFile->mutex);
+    ScopedCritical lock(Nc::getMutex());
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;
@@ -176,7 +176,7 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBu
 
 void NetCDF_CDMReader::sync()
 {
-    ScopedCritical lock(ncFile->mutex);
+    ScopedCritical lock(Nc::getMutex());
     ncCheck(nc_sync(ncFile->ncId));
 }
 
@@ -190,7 +190,7 @@ void NetCDF_CDMReader::putDataSlice(const std::string& varName, size_t unLimDimP
     // no data, no write
     if (data.get() == 0 || data->size() == 0) return;
 
-    ScopedCritical lock(ncFile->mutex);
+    ScopedCritical lock(Nc::getMutex());
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;
@@ -224,7 +224,7 @@ void NetCDF_CDMReader::putDataSlice(const std::string& varName, const SliceBuild
     // no data, no write
     if (data.get() == 0 || data->size() == 0) return;
 
-    ScopedCritical lock(ncFile->mutex);
+    ScopedCritical lock(Nc::getMutex());
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;

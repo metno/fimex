@@ -43,7 +43,6 @@ public:
     ~Nc();
     static MutexType& getMutex(); // lock against common reading/writing in nc4
     std::string filename;
-    MutexType mutex; // used for reading
     int ncId;
     int format;
     bool isOpen;
