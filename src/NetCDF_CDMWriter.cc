@@ -275,7 +275,7 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
         int size = (nodes) ? nodes->nodeNr : 0;
         for (int i = 0; i < size; i++) {
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
-            unsigned int compression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[0], "compressionLevel"));
+            unsigned int compression = string2type<unsigned int>(getXmlProp(nodes->nodeTab[i], "compressionLevel"));
             variableCompression[name] = compression;
         }
     }
