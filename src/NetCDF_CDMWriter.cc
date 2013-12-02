@@ -47,7 +47,7 @@ extern "C" {
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
-#include "MutexLock.h" // also includes omp.h
+#include "fimex/MutexLock.h" // also includes omp.h
 
 namespace MetNoFimex
 {
@@ -483,10 +483,9 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
-    MutexType writerMutex;
 #ifndef __INTEL_COMPILER // openmp gives currently segfaults with intel compilers
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(writerMutex, logger, cdmVars, ncVarMap)
+#pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap)
     {
 #pragma omp single
     {
@@ -559,7 +558,6 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 
             if (data->size() > 0) {
                 try {
-                    ScopedCritical lock(writerMutex);
                     ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
                 } catch (CDMException& ex) {
                     throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
@@ -598,7 +596,6 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     count[0] = 1;
                     start[0] = i;
                     try {
-                        ScopedCritical lock(writerMutex);
                         ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
                     } catch (CDMException& ex) {
                         throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );

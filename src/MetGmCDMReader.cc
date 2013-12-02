@@ -25,7 +25,7 @@
 #include "fimex/MetGmCDMReader.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include <fimex/CDM.h>
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 
 // private implementation details
 #include "./metgm/MetGmCDMReaderImpl.h"

@@ -40,7 +40,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/Logger.h"
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 #include "wdb/Wdb2CdmBuilder.h"
 #include "wdb/WdbIndex.h"
 #include "wdb/config/GlobalWdbConfiguration.h"

@@ -34,7 +34,7 @@
 #include "fimex/Data.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 
 namespace MetNoFimex
 {

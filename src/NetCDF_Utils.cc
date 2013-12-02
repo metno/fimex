@@ -25,6 +25,7 @@
 #include "fimex/Data.h"
 #include "fimex/CDMException.h"
 #include "fimex/Logger.h"
+#include "fimex/MutexLock.h"
 #include <boost/scoped_array.hpp>
 #include <functional>
 #include <numeric>
@@ -40,6 +41,8 @@ namespace MetNoFimex
 {
 
 static LoggerPtr logger = getLogger("fimex.NetCDF_Utils");
+// hdf5 lib is usually not thread-safe, so reading from one file and writing to another fails
+static MutexType ncMutex;
 
 void ncCheck(int status) {
     if (status != NC_NOERR)
@@ -53,6 +56,11 @@ Nc::~Nc()
        if (status != NC_NOERR)
            LOG4FIMEX(logger, Logger::ERROR, "error while closing NetCDF file '" << filename << "': " << nc_strerror(status));
    }
+}
+
+static MutexType mt;
+MutexType& Nc::getMutex() {
+    return mt;
 }
 
 nc_type cdmDataType2ncType(CDMDataType dt) {
@@ -173,6 +181,8 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
     }
 }
 
+
+
 DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t* start, const size_t* count)
 {
     size_t sliceLen;
@@ -189,6 +199,7 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
         std::copy(&count[0], &count[0]+dimLen, &mcount[0]);
     }
 
+    ScopedCritical ncLock(Nc::getMutex());
     switch (dt) {
     case NC_BYTE:
 #ifdef NC_NETCDF4
@@ -275,6 +286,7 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
         throw CDMException(msg.str());
     }
 
+    ScopedCritical ncLock(Nc::getMutex());
     switch (type) {
     case NC_BYTE:
 #ifdef NC_NETCDF4

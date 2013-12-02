@@ -23,7 +23,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "fimex/TimeUnit.h"
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 #include "fimex/Utils.h"
 #include <limits>
 
@@ -45,12 +45,12 @@ namespace MetNoFimex
 extern MutexType& getUnitsMutex();
 
 static std::string twoDigits(int i) {
-	std::string s = type2string(i);
-	if (s.length() < 2) {
-		return "0" + s;
-	} else {
-		return s;
-	}
+    std::string s = type2string(i);
+    if (s.length() < 2) {
+        return "0" + s;
+    } else {
+        return s;
+    }
 }
 
 void FimexTime::setTime(unsigned short year, char month, char mday, char hour, char minute, char second, unsigned short msecond)
@@ -137,38 +137,38 @@ boost::posix_time::ptime FimexTime::asPosixTime() const
 
 bool FimexTime::operator==(const FimexTime &rhs) const
 {
-	return year == rhs.year &&
-		month == rhs.month &&
-		mday == rhs.mday &&
-		hour == rhs.hour &&
-		minute == rhs.minute &&
-		second == rhs.second &&
-		msecond == rhs.msecond;
+    return year == rhs.year &&
+        month == rhs.month &&
+        mday == rhs.mday &&
+        hour == rhs.hour &&
+        minute == rhs.minute &&
+        second == rhs.second &&
+        msecond == rhs.msecond;
 }
 
 std::ostream& operator<< (std::ostream& out, const FimexTime& fTime)
 {
-	out << fTime.getYear() << "-" << twoDigits(fTime.getMonth()) << "-" << twoDigits(fTime.getMDay()) << " ";
-	out << twoDigits(fTime.getHour()) << ":" << twoDigits(fTime.getMinute()) << ":" << twoDigits(fTime.getSecond());
-	if (fTime.getMSecond() > 0) {
-		out << ".";
-		if (fTime.getMSecond() < 10) {
-			out << "00";
-		} else if (fTime.getMSecond() < 100) {
-			out << "0";
-		}
-		out << fTime.getMSecond();
-	}
-	return out;
+    out << fTime.getYear() << "-" << twoDigits(fTime.getMonth()) << "-" << twoDigits(fTime.getMDay()) << " ";
+    out << twoDigits(fTime.getHour()) << ":" << twoDigits(fTime.getMinute()) << ":" << twoDigits(fTime.getSecond());
+    if (fTime.getMSecond() > 0) {
+        out << ".";
+        if (fTime.getMSecond() < 10) {
+            out << "00";
+        } else if (fTime.getMSecond() < 100) {
+            out << "0";
+        }
+        out << fTime.getMSecond();
+    }
+    return out;
 }
 
 FimexTime string2FimexTime(const std::string& str) throw(CDMException)
 {
-	FimexTime ft;
-	if (!ft.parseISO8601(str)) {
-	    throw CDMException("string2FimexTime: date and time not found:" + str);
-	}
-	return ft;
+    FimexTime ft;
+    if (!ft.parseISO8601(str)) {
+        throw CDMException("string2FimexTime: date and time not found:" + str);
+    }
+    return ft;
 }
 
 void void_ut_free(void* ptr) {
@@ -183,28 +183,28 @@ void void_ut_free(void* ptr) {
 
 void TimeUnit::init(const std::string& timeUnitString) throw(CDMException)
 {
-	if (!units.isTime(timeUnitString)) {
-		throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
-	} else {
-		units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
-		ScopedCritical lock(getUnitsMutex());
+    if (!units.isTime(timeUnitString)) {
+        throw CDMException("trying to initialize time with wrong unit: "+timeUnitString);
+    } else {
+        units.convert(timeUnitString, "seconds since 1970-01-01 00:00:00 +00:00", epochSlope, epochOffset);
+        ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
-		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
-		handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
+        pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(ut_parse(reinterpret_cast<const ut_system*>(units.exposeInternals()), timeUnitString.c_str(), UT_UTF8)), void_ut_free);
+        handleUdUnitError(ut_get_status(), "parsing " + timeUnitString);
 #else
-		pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
+        pUnit = boost::shared_ptr<void>(reinterpret_cast<void*>(new utUnit()), void_ut_free);
         utScan(timeUnitString.c_str(), reinterpret_cast<utUnit*>(pUnit.get()));
 #endif
-	}
+    }
 }
 
 TimeUnit::TimeUnit() throw(CDMException)
 {
-	init();
+    init();
 }
 TimeUnit::TimeUnit(const std::string& timeUnit) throw(CDMException)
 {
-	init(timeUnit);
+    init(timeUnit);
 }
 
 TimeUnit::~TimeUnit()
@@ -213,17 +213,17 @@ TimeUnit::~TimeUnit()
 
 double TimeUnit::unitTime2epochSeconds(double unitTime) const
 {
-	return unitTime * epochSlope + epochOffset;
+    return unitTime * epochSlope + epochOffset;
 }
 double TimeUnit::epochSeconds2unitTime(double epochSeconds) const
 {
-	return (epochSeconds - epochOffset) / epochSlope;
+    return (epochSeconds - epochOffset) / epochSlope;
 }
 FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException)
 {
-	FimexTime fiTime;
-	float second;
-	int year, month, mday, hour, minute;
+    FimexTime fiTime;
+    float second;
+    int year, month, mday, hour, minute;
     ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()),"second"),
@@ -237,17 +237,17 @@ FimexTime TimeUnit::unitTime2fimexTime(double unitTime) const throw(CDMException
     ut_decode_time(encodedTime, &year, &month, &mday, &hour, &minute, &sec, &res);
     second = static_cast<float>(sec);
 #else
-	handleUdUnitError(utCalendar(unitTime, reinterpret_cast<utUnit*>(pUnit.get()), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
+    handleUdUnitError(utCalendar(unitTime, reinterpret_cast<utUnit*>(pUnit.get()), &year, &month, &mday, &hour, &minute, &second), "converting double to calendar");
 #endif
-	fiTime.setYear(static_cast<unsigned int>(year));
-	fiTime.setMonth(static_cast<char>(month));
-	fiTime.setMDay(static_cast<char>(mday));
-	fiTime.setHour(static_cast<char>(hour));
-	fiTime.setMinute(static_cast<char>(minute));
-	fiTime.setSecond(static_cast<char>(second));
-	fiTime.setMSecond(static_cast<unsigned int>((second - fiTime.getSecond())*1000));
+    fiTime.setYear(static_cast<unsigned int>(year));
+    fiTime.setMonth(static_cast<char>(month));
+    fiTime.setMDay(static_cast<char>(mday));
+    fiTime.setHour(static_cast<char>(hour));
+    fiTime.setMinute(static_cast<char>(minute));
+    fiTime.setSecond(static_cast<char>(second));
+    fiTime.setMSecond(static_cast<unsigned int>((second - fiTime.getSecond())*1000));
 
-	return fiTime;
+    return fiTime;
 }
 boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 {
@@ -274,8 +274,8 @@ boost::posix_time::ptime TimeUnit::unitTime2posixTime(double unitTime) const
 
 double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMException)
 {
-	float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
-	double unitTime;
+    float second = fiTime.getSecond() + (fiTime.getMSecond()/1000.);
+    double unitTime;
     ScopedCritical lock(getUnitsMutex());
 #ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> baseTime(ut_get_unit_by_name(reinterpret_cast<const ut_system*>(units.exposeInternals()), "second"),
@@ -288,9 +288,9 @@ double TimeUnit::fimexTime2unitTime(const FimexTime& fiTime) const throw(CDMExce
     unitTime = cv_convert_double(conv.get(), encodedTime);
     handleUdUnitError(ut_get_status(), "converting calendar to double");
 #else
-	handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, reinterpret_cast<utUnit*>(pUnit.get()), &unitTime), "converting calendar to double");
+    handleUdUnitError(utInvCalendar(fiTime.getYear(), fiTime.getMonth(), fiTime.getMDay(), fiTime.getHour(), fiTime.getMinute(), second, reinterpret_cast<utUnit*>(pUnit.get()), &unitTime), "converting calendar to double");
 #endif
-	return unitTime;
+    return unitTime;
 }
 
 double TimeUnit::posixTime2unitTime(boost::posix_time::ptime pTime) const throw(CDMException)

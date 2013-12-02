@@ -27,7 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMDataType.h"
 #include "fimex/DataDecl.h"
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 extern "C" {
 #include "netcdf.h"
 }
@@ -41,11 +41,13 @@ class Nc {
 public:
     Nc() : isOpen(false) {}
     ~Nc();
+    static MutexType& getMutex(); // lock against common reading/writing in nc4
     std::string filename;
-    MutexType mutex;
+    MutexType mutex; // used for reading
     int ncId;
     int format;
     bool isOpen;
+
 };
 
 

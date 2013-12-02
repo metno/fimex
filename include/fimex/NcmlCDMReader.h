@@ -30,6 +30,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/XMLInput.h"
+#include "fimex/MutexLock.h"
 #include <map>
 
 namespace MetNoFimex
@@ -140,6 +141,7 @@ private:
 
     std::string configId;
     boost::shared_ptr<XMLDoc> doc;
+    MutexType mutex_;
     boost::shared_ptr<CDMReader> dataReader;
     /*
      * maps containing the changes. The key will reflect

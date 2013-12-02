@@ -27,7 +27,7 @@
 #include "fimex/Logger.h"
 
 #include "boost/shared_ptr.hpp"
-#include <MutexLock.h>
+#include "fimex/MutexLock.h"
 #include "../config.h"
 #ifdef HAVE_UDUNITS2_H
 #include "udunits2.h"

@@ -27,7 +27,7 @@
 #include "fimex/CDMDataType.h"
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
-#include "MutexLock.h"
+#include "fimex/MutexLock.h"
 
 namespace MetNoFimex
 {

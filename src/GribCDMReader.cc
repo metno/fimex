@@ -44,7 +44,7 @@
 #include <map>
 #include <algorithm>
 #include <stdexcept>
-#include <MutexLock.h>
+#include "fimex/MutexLock.h"
 
 namespace MetNoFimex
 {
