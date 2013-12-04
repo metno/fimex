@@ -43,14 +43,34 @@ using namespace std;
 
 static LoggerPtr logger = getLogger("fimex.ToVLevelConverter");
 
+bool ToVLevelConverter::isValid(double, size_t, size_t, size_t)
+{
+    return true;
+}
+
+vector<double> IdentityToVLevelConverter::operator()(size_t, size_t, size_t)
+{
+    return vlevel_;
+}
+
 LnPressureToPressureConverter::LnPressureToPressureConverter(double p0, const vector<double>& lnP) : pres_(lnP.size())
 {
     mifi_atmosphere_ln_pressure(lnP.size(), p0, &lnP[0], &pres_[0]);
 }
 
+vector<double> LnPressureToPressureConverter::operator()(size_t, size_t, size_t)
+{
+    return pres_;
+}
+
 HeightStandardToPressureConverter::HeightStandardToPressureConverter(const vector<double>& h) : pres_(h.size())
 {
     mifi_barometric_standard_pressure(h.size(), &h[0], &pres_[0]);
+}
+
+vector<double> HeightStandardToPressureConverter::operator()(size_t, size_t, size_t)
+{
+    return pres_;
 }
 
 vector<double> SigmaToPressureConverter::operator()(size_t x, size_t y, size_t t) {

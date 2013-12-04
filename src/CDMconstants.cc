@@ -84,19 +84,19 @@ const char* fimexVersion()
     return MIFI_VERSION_STRING;
 }
 
-const unsigned int mifi_version_major()
+unsigned int mifi_version_major()
 {
     return MIFI_VERSION_MAJOR;
 }
-const unsigned int mifi_version_minor()
+unsigned int mifi_version_minor()
 {
     return MIFI_VERSION_MINOR;
 }
-const unsigned int mifi_version_patch()
+unsigned int mifi_version_patch()
 {
     return MIFI_VERSION_PATCH;
 }
-const unsigned int mifi_version_status()
+unsigned int mifi_version_status()
 {
     return MIFI_VERSION_STATUS;
 }

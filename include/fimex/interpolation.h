@@ -339,6 +339,7 @@ extern int mifi_points2position(double* points, const int n, const double* axis,
  *  @return the position of x, y, z
  */
 static inline int mifi_3d_array_position(int x, int y, int z, int ix, int iy, int iz) {
+    (void)iz; // suppress compiler warning
     return (z*iy + y)*ix + x;
 }
 

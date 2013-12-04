@@ -90,23 +90,23 @@ extern const char* fimexVersion();
 /**
  * major version of fimex
  */
-extern const unsigned int mifi_version_major();
+extern unsigned int mifi_version_major();
 
 /**
  * minor version of fimex
  */
-extern const unsigned int mifi_version_minor();
+extern unsigned int mifi_version_minor();
 
 /**
  * patch version of fimex
  */
-extern const unsigned int mifi_version_patch();
+extern unsigned int mifi_version_patch();
 
 /**
  * fimex version status, e.g >=0xF0 = final, 0xAX = alphaX,
  * 0xBX = betaX, 0xCX= releaseCandidateX
  */
-extern const unsigned int mifi_version_status();
+extern unsigned int mifi_version_status();
 
 
 /**

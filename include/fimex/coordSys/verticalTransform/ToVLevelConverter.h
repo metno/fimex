@@ -76,7 +76,7 @@ public:
      * @param t
      * @return physically correct value
      */
-    virtual bool isValid(double val, size_t x, size_t y, size_t t) {return true;}
+    virtual bool isValid(double val, size_t x, size_t y, size_t t);
 };
 
 /**
@@ -89,7 +89,7 @@ public:
      * @param vlevel The constant level.
      */
     IdentityToVLevelConverter(const vector<double>& vlevel) : vlevel_(vlevel) {}
-    virtual vector<double> operator()(size_t x, size_t y, size_t t) {return vlevel_;}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -103,7 +103,7 @@ public:
      * @param lnP The constant pressure levels given as ln(P/P0)
      */
     LnPressureToPressureConverter(double p0, const vector<double>& lnP);
-    virtual vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
@@ -116,7 +116,7 @@ public:
      * @param h given in m
      */
     HeightStandardToPressureConverter(const vector<double>& h);
-    virtual vector<double> operator()(size_t x, size_t y, size_t t) {return pres_;}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
