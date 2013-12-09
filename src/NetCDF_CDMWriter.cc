@@ -483,7 +483,7 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
-#ifndef __INTEL_COMPILER // openmp gives currently segfaults with intel compilers
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1400)) // openmp gives currently segfaults with intel compilers < 14.
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap)
     {
@@ -537,7 +537,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
         }
 
         if (!cdm.hasUnlimitedDim(cdmVar)) {
-#ifndef __INTEL_COMPILER
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1400))
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi)
             {
@@ -565,7 +565,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
                 }
             }
-#ifndef __INTEL_COMPILER
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1400))
 #ifdef _OPENMP
             }
 #endif
@@ -574,7 +574,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
             // iterate over each unlimited dim (usually time)
             const CDMDimension* unLimDim = cdm.getUnlimitedDim();
             for (size_t i = 0; i < unLimDim->getLength(); ++i) {
-#ifndef __INTEL_COMPILER
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1400))
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi,i)
                 {
@@ -607,14 +607,14 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 
                 }
             }
-#ifndef __INTEL_COMPILER
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1400))
 #ifdef _OPENMP
             }
 #endif
 #endif
         }
     }
-#ifndef __INTEL_COMPILER
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1400))
 #ifdef _OPENMP
     } // single
     } // parallel
