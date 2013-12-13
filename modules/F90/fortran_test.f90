@@ -43,6 +43,14 @@ PROGRAM fortran_test
     IF ( ierr /= 0 ) CALL error("Can't make io-object with file:"//trim(input_file)//" config: "//config_file)
     WRITE(0,*) "open_file: success"
 
+    write(*,*) "unlimited dimension = ", TRIM(fio%file_ulim_dimname())
+
+    write(*,*) "dimensions"
+    DO i = 1, fio%dimensions_size()
+      write(*,*) i, " ", TRIM(fio%file_dimname(i))
+    END DO
+
+    write(*,*) "variables"
     DO i = 1, fio%variables_size()
       write(*,*) i, " ", TRIM(fio%get_varname(i))
     END DO
@@ -128,8 +136,8 @@ PROGRAM fortran_test
         CASE(AXIS_GeoY, AXIS_Lat)
           ny = vsize(i)
         CASE DEFAULT
-         WRITE(*,*) "reducind dimension ", i, " ",TRIM(fio%get_dimname(i))
-         ierr=finter%reduce_dimension(fio%get_dimname(i), 0, 1)
+         WRITE(*,*) "reducind dimension ", i, " ",TRIM(finter%get_dimname(i))
+         ierr=finter%reduce_dimension(finter%get_dimname(i), 0, 1)
       END SELECT
     END DO
     WRITE(*,*) "end reduce"
@@ -141,6 +149,17 @@ PROGRAM fortran_test
     ELSE
         WRITE(*,*) field4d
     ENDIF
+
+    DEALLOCATE(field)
+    ndims=finter%get_dimensions('x')
+    ALLOCATE(field(5))
+    ierr=finter%read('x',field)
+    IF ( ierr /= 0 ) THEN
+      CALL error("Can't read field x/latitude")
+    ELSE
+        WRITE(*,*) field
+    ENDIF
+
     DEALLOCATE(field)
     DEALLOCATE(start)
     DEALLOCATE(vsize)
@@ -179,8 +198,8 @@ PROGRAM fortran_test
         CASE(AXIS_GeoY, AXIS_Lat)
           ny = vsize(i)
         CASE DEFAULT
-         WRITE(*,*) "reducind dimension ", i, " ",TRIM(fio%get_dimname(i))
-         ierr=finter%reduce_dimension(fio%get_dimname(i), 0, 1)
+         WRITE(*,*) "reducind dimension ", i, " ",TRIM(finter%get_dimname(i))
+         ierr=finter%reduce_dimension(finter%get_dimname(i), 0, 1)
       END SELECT
     END DO
     WRITE(*,*) "end reduce"
@@ -193,6 +212,14 @@ PROGRAM fortran_test
         WRITE(*,*) field4d
     ENDIF
 
+    ndims=finter%get_dimensions('longitude')
+    ierr=finter%read('longitude',field)
+    field4d(1:nx,1:ny,1:1,1:1) => field
+    IF ( ierr /= 0 ) THEN
+      CALL error("Can't read field longitude")
+    ELSE
+        WRITE(*,*) field4d
+    ENDIF
 
     ! write the data to testOut.nc
     ! Open file

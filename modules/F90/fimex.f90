@@ -60,6 +60,9 @@ MODULE Fimex
     procedure :: interpolate => new_interpolator
     procedure :: interpolate_lonlat => new_lonlat_interpolator
     procedure :: close => close_file
+    procedure :: dimensions_size => get_file_dimensions_size
+    procedure :: file_dimname => get_file_dimension_name
+    procedure :: file_ulim_dimname => get_file_ulim_dimension_name
     procedure :: variables_size => get_variables_size
     procedure :: get_varname => get_variable_name
     procedure :: get_dimensions => get_dimensions
@@ -123,6 +126,28 @@ MODULE Fimex
       INTEGER(KIND=C_LONG_LONG),VALUE            :: pos
       TYPE(C_PTR)                             :: c_mifi_get_variable_name
     END FUNCTION c_mifi_get_variable_name
+
+    FUNCTION c_mifi_get_dimension_number(io) BIND(C,NAME="mifi_get_dimension_number")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_LONG_LONG)                  :: c_mifi_get_dimension_number
+    END FUNCTION c_mifi_get_dimension_number
+
+    FUNCTION c_mifi_get_dimension_name(io, pos) BIND(C,NAME="mifi_get_dimension_name")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      INTEGER(KIND=C_LONG_LONG),VALUE            :: pos
+      TYPE(C_PTR)                             :: c_mifi_get_dimension_name
+    END FUNCTION c_mifi_get_dimension_name
+
+    FUNCTION c_mifi_get_unlimited_dimension_name(io) BIND(C,NAME="mifi_get_unlimited_dimension_name")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      TYPE(C_PTR)                             :: c_mifi_get_unlimited_dimension_name
+    END FUNCTION c_mifi_get_unlimited_dimension_name
 
 
     !> F90-wrapper for mifi_new_slicebuilder()
@@ -379,6 +404,82 @@ MODULE Fimex
     ENDIF
   END FUNCTION
 
+
+  !> Get the name of the unlimited dimension (in most cases, time-dimension)
+  !! @return name of dimension
+  FUNCTION get_file_ulim_dimension_name(this)
+    USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)     :: this
+    CHARACTER(LEN=1024)            :: get_file_ulim_dimension_name
+
+    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
+    INTEGER                          :: i
+    INTEGER(KIND=C_LONG_LONG)           :: posT
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      RETURN
+    ENDIF
+    CALL C_F_POINTER(c_mifi_get_unlimited_dimension_name(this%io), var_array, (/1024/))
+    get_file_ulim_dimension_name = ""
+    DO i = 1, 1024
+      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      get_file_ulim_dimension_name(i:i+1) = var_array(i)
+    END DO
+10  CONTINUE
+
+    RETURN
+  END FUNCTION get_file_ulim_dimension_name
+
+
+  !> Get the number of dimensions in the file.
+  !! @return number of dimensions
+  FUNCTION get_file_dimensions_size(this)
+    USE iso_c_binding,    ONLY: C_LONG_LONG, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)             :: this
+    INTEGER(KIND=C_LONG_LONG)              :: get_file_dimensions_size
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      get_file_dimensions_size = 0
+      RETURN
+    ENDIF
+    get_file_dimensions_size = c_mifi_get_dimension_number(this%io)
+    RETURN
+  END FUNCTION get_file_dimensions_size
+
+
+  !> Get the name of the dimension at position pos
+  !! @param pos position of dimension 1 <= pos <= dimension_number()
+  !! @return name of dimension
+  FUNCTION get_file_dimension_name(this, pos)
+    USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)     :: this
+    INTEGER, VALUE                 :: pos
+    CHARACTER(LEN=1024)            :: get_file_dimension_name
+
+    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
+    INTEGER                          :: i
+    INTEGER(KIND=C_LONG_LONG)           :: posT
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      RETURN
+    ENDIF
+    ! fortran -> c position
+    posT = pos - 1
+    CALL C_F_POINTER(c_mifi_get_dimension_name(this%io, posT), var_array, (/1024/))
+    get_file_dimension_name = ""
+    DO i = 1, 1024
+      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      get_file_dimension_name(i:i+1) = var_array(i)
+    END DO
+10  CONTINUE
+
+    RETURN
+  END FUNCTION get_file_dimension_name
+
+
+
   !> Get the number of variables in the file.
   !! @return number of variables
   FUNCTION get_variables_size(this)
@@ -424,7 +525,6 @@ MODULE Fimex
 
     RETURN
   END FUNCTION get_variable_name
-
 
   !> Get the number of dimensions of a variable.
   !! This function
