@@ -63,6 +63,7 @@ MODULE Fimex
     procedure :: dimensions_size => get_file_dimensions_size
     procedure :: file_dimname => get_file_dimension_name
     procedure :: file_ulim_dimname => get_file_ulim_dimension_name
+    procedure :: get_refTime => get_unique_forecast_reference_time
     procedure :: variables_size => get_variables_size
     procedure :: get_varname => get_variable_name
     procedure :: get_dimensions => get_dimensions
@@ -150,6 +151,15 @@ MODULE Fimex
       TYPE(C_PTR), VALUE                      :: io
       TYPE(C_PTR)                             :: c_mifi_get_unlimited_dimension_name
     END FUNCTION c_mifi_get_unlimited_dimension_name
+
+    !> F90-wrapper for mifi_get_unique_forecast_reference_time()
+    FUNCTION c_mifi_get_unique_forecast_reference_time(io, unit) BIND(C,NAME="mifi_get_unique_forecast_reference_time")
+      USE iso_c_binding, ONLY: C_DOUBLE, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: unit(*)
+      REAL(KIND=C_DOUBLE)                     :: c_mifi_get_unique_forecast_reference_time
+    END FUNCTION c_mifi_get_unique_forecast_reference_time
 
     !> F90-wrapper for mifi_get_var_longitude()
     FUNCTION c_mifi_get_var_longitude(io, varName) BIND(C,NAME="mifi_get_var_longitude")
@@ -422,7 +432,30 @@ MODULE Fimex
       this%io = interpol
       new_lonlat_interpolator = 0
     ENDIF
-  END FUNCTION
+  END FUNCTION new_lonlat_interpolator
+
+
+  !> Get the files unique forecast_reference_time
+  !! @param unit optional time-unite, defaults to 'seconds since 1970-01-01 +0000'
+  !! @return double in units, nan on error
+  FUNCTION get_unique_forecast_reference_time(this, unit)
+    USE iso_c_binding,    ONLY: C_NULL_CHAR,C_DOUBLE,C_ASSOCIATED,C_LOC
+    IMPLICIT NONE
+    CLASS(FimexIO), INTENT(INOUT)            :: this
+    CHARACTER(LEN=*),INTENT(IN),OPTIONAL     :: unit
+    REAL(KIND=C_DOUBLE)                      :: get_unique_forecast_reference_time
+    CHARACTER(LEN=1024)                      :: myUnit
+
+    myUnit = "seconds since 1970-01-01 00:00:00 +0000";
+    IF(PRESENT(unit)) myUnit = unit
+
+    IF ( C_ASSOCIATED(this%io) ) THEN
+      get_unique_forecast_reference_time=c_mifi_get_unique_forecast_reference_time(this%io, TRIM(myUnit)//C_NULL_CHAR)
+    ELSE
+      get_unique_forecast_reference_time=-1.
+      get_unique_forecast_reference_time = SQRT(get_unique_forecast_reference_time) ! nan
+    ENDIF
+  END FUNCTION get_unique_forecast_reference_time
 
 
   !> Get the name of the unlimited dimension (in most cases, time-dimension)

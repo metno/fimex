@@ -43,6 +43,8 @@ PROGRAM fortran_test
     IF ( ierr /= 0 ) CALL error("Can't make io-object with file:"//trim(input_file)//" config: "//config_file)
     WRITE(0,*) "open_file: success"
 
+    write(*,*) "refTime = ", fio%get_refTime('days since 2013-01-01 00:00:00 +0000'), " days since 2013-01-01"
+
     write(*,*) "unlimited dimension = ", TRIM(fio%file_ulim_dimname())
 
     write(*,*) "dimensions"
