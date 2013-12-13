@@ -139,6 +139,19 @@ AM_CONDITIONAL([HAVE_METGM], [test "x$with_metgm" = "xyes"])
 
 AC_LANG_POP(C++)
 
+# Check for fortran
+AC_ARG_ENABLE(fortran, [  --enable-fortran         enable use of fortran-interface [[default=no]]],[
+  if test "$enableval" = yes; then
+    enable_fortran=yes
+  else
+    enable_fortran=no
+  fi
+], [])
+AM_CONDITIONAL([ENABLE_FORTRAN], [test x$enable_fortran = xyes])
+if test x$enable_fortran = xyes; then
+AC_PROG_FC()
+fi
+
 DEBUG_MODE
 
 DX_HTML_FEATURE(ON)
@@ -159,7 +172,8 @@ AC_CONFIG_FILES([fimex.pc
                  include/fimex/Makefile
                  include/fimex/coordSys/Makefile
                  include/felt/Makefile
-                 include/nanoflann/Makefile])
+                 include/nanoflann/Makefile
+                 modules/F90/Makefile])
 AC_CONFIG_FILES([test/testCharNc.sh],[chmod +x test/testCharNc.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolator.sh],[chmod +x test/testVerticalInterpolator.sh])
 AC_CONFIG_FILES([test/testVerticalInterpolator2.sh],[chmod +x test/testVerticalInterpolator2.sh])
@@ -189,6 +203,7 @@ AC_MSG_RESULT([Manuals:          $mandir])
 AC_MSG_RESULT([Data:             $datadir])
 AC_MSG_RESULT([System Config:    $sysconfdir])
 AC_MSG_RESULT([ ])
+AC_MSG_RESULT([FORTRAN:          $FC])
 AC_MSG_RESULT([CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $LOG4CPP_CFLAGS])
 AC_MSG_RESULT([LDFLAGS:          $OPENMP_CXXFLAGS $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS])
 AC_MSG_RESULT([LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $LOG4CPP_LIBS])
