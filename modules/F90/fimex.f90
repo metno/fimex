@@ -67,6 +67,8 @@ MODULE Fimex
     procedure :: get_varname => get_variable_name
     procedure :: get_dimensions => get_dimensions
     procedure :: get_dimname => get_dimname
+    procedure :: get_var_longitude => get_var_longitude
+    procedure :: get_var_latitude => get_var_latitude
     procedure :: get_dimension_start_size => get_dimension_start_size
     procedure :: get_axistypes => get_axistypes
     procedure :: reduce_dimension => reduce_dimension
@@ -148,6 +150,24 @@ MODULE Fimex
       TYPE(C_PTR), VALUE                      :: io
       TYPE(C_PTR)                             :: c_mifi_get_unlimited_dimension_name
     END FUNCTION c_mifi_get_unlimited_dimension_name
+
+    !> F90-wrapper for mifi_get_var_longitude()
+    FUNCTION c_mifi_get_var_longitude(io, varName) BIND(C,NAME="mifi_get_var_longitude")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: varName(*)
+      TYPE(C_PTR)                             :: c_mifi_get_var_longitude
+    END FUNCTION c_mifi_get_var_longitude
+
+    !> F90-wrapper for mifi_get_var_latitude()
+    FUNCTION c_mifi_get_var_latitude(io, varName) BIND(C,NAME="mifi_get_var_latitude")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: varName(*)
+      TYPE(C_PTR)                             :: c_mifi_get_var_latitude
+    END FUNCTION c_mifi_get_var_latitude
 
 
     !> F90-wrapper for mifi_new_slicebuilder()
@@ -423,11 +443,9 @@ MODULE Fimex
     CALL C_F_POINTER(c_mifi_get_unlimited_dimension_name(this%io), var_array, (/1024/))
     get_file_ulim_dimension_name = ""
     DO i = 1, 1024
-      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      if (var_array(i) == C_NULL_CHAR) EXIT
       get_file_ulim_dimension_name(i:i+1) = var_array(i)
     END DO
-10  CONTINUE
-
     RETURN
   END FUNCTION get_file_ulim_dimension_name
 
@@ -470,11 +488,9 @@ MODULE Fimex
     CALL C_F_POINTER(c_mifi_get_dimension_name(this%io, posT), var_array, (/1024/))
     get_file_dimension_name = ""
     DO i = 1, 1024
-      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      if (var_array(i) == C_NULL_CHAR) EXIT
       get_file_dimension_name(i:i+1) = var_array(i)
     END DO
-10  CONTINUE
-
     RETURN
   END FUNCTION get_file_dimension_name
 
@@ -518,11 +534,9 @@ MODULE Fimex
     CALL C_F_POINTER(c_mifi_get_variable_name(this%io, posT), var_array, (/1024/))
     get_variable_name = ""
     DO i = 1, 1024
-      if (var_array(i) == C_NULL_CHAR) GOTO 10
+      if (var_array(i) == C_NULL_CHAR) EXIT
       get_variable_name(i:i+1) = var_array(i)
     END DO
-10  CONTINUE
-
     RETURN
   END FUNCTION get_variable_name
 
@@ -620,6 +634,65 @@ MODULE Fimex
        get_axistypes = -1
     END IF
   END FUNCTION get_axistypes
+
+ !> Get the name of the variable with longitude values for the variable
+  !! varName
+  !! @varName the data-variable
+  !! @param pos position of variable 1 <= pos <= variable_number()
+  !! @return name of variable with longitude values, this might be 1d or 2d
+  !!         depending on projection (even more for e.g. sattelite-swath (3d))
+  FUNCTION get_var_longitude(this, varName)
+    USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)     :: this
+    CHARACTER(LEN=1024), INTENT(IN):: varName
+    CHARACTER(LEN=1024)            :: get_var_longitude
+
+    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    INTEGER                          :: i
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      RETURN
+    ENDIF
+    CALL C_F_POINTER(c_mifi_get_var_longitude(this%io, TRIM(varName)//C_NULL_CHAR), var_array, (/1024/))
+    get_var_longitude = ""
+    !write(*,*) TRIM(varName)
+    DO i = 1, 1024
+      if (var_array(i) == C_NULL_CHAR) EXIT
+      get_var_longitude(i:i+1) = var_array(i)
+    END DO
+    !write(*,*) TRIM(get_var_longitude)
+    RETURN
+  END FUNCTION get_var_longitude
+
+
+ !> Get the name of the variable with latitude values for the variable
+  !! varName
+  !! @varName the data-variable
+  !! @param pos position of variable 1 <= pos <= variable_number()
+  !! @return name of variable with latitude values, this might be 1d or 2d
+  !!         depending on projection (even more for e.g. sattelite-swath (3d))
+  FUNCTION get_var_latitude(this, varName)
+    USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
+    CLASS(FimexIO), INTENT(IN)     :: this
+    CHARACTER(LEN=1024), INTENT(IN):: varName
+    CHARACTER(LEN=1024)            :: get_var_latitude
+
+    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    INTEGER                          :: i
+
+    IF ( .not. C_ASSOCIATED(this%io) ) THEN
+      RETURN
+    ENDIF
+    CALL C_F_POINTER(c_mifi_get_var_latitude(this%io, TRIM(varName)//C_NULL_CHAR), var_array, (/1024/))
+    get_var_latitude = ""
+    !write(*,*) TRIM(varName)
+    DO i = 1, 1024
+      if (var_array(i) == C_NULL_CHAR) EXIT
+      get_var_latitude(i:i+1) = var_array(i)
+    END DO
+    !write(*,*) TRIM(get_var_latitude)
+    RETURN
+  END FUNCTION get_var_latitude
 
 
   !> Reduce the dimension by setting a start and size.

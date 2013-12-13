@@ -6,7 +6,7 @@ PROGRAM fortran_test
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
-  CHARACTER(LEN=80)               :: varName
+  CHARACTER(LEN=1024)               :: varName
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE,TARGET :: field
   REAL(KIND=8),DIMENSION(:,:,:,:),POINTER :: field4d
   REAL(KIND=8),DIMENSION(:,:,:),POINTER :: field3d
@@ -52,7 +52,8 @@ PROGRAM fortran_test
 
     write(*,*) "variables"
     DO i = 1, fio%variables_size()
-      write(*,*) i, " ", TRIM(fio%get_varname(i))
+      write(*,*) i, " ", TRIM(fio%get_varname(i))," (", TRIM(fio%get_var_longitude(fio%get_varname(i))), ",",&
+                                                        TRIM(fio%get_var_latitude(fio%get_varname(i))), ")"
     END DO
 
     ! Get dimensions
@@ -209,18 +210,22 @@ PROGRAM fortran_test
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field")
     ELSE
-        WRITE(*,*) field4d
+      WRITE(*,*) field4d
     ENDIF
 
-    ndims=finter%get_dimensions('longitude')
-    ierr=finter%read('longitude',field)
-    field4d(1:nx,1:ny,1:1,1:1) => field
-    IF ( ierr /= 0 ) THEN
-      CALL error("Can't read field longitude")
+    ndims=finter%get_dimensions(finter%get_var_longitude(varName))
+    IF ( ndims == 1 ) then
+      WRITE(*,*) TRIM(varName), " has longitude as dimension"
     ELSE
+      WRITE(*,*) TRIM(varName), " has longitude as coordinates"
+      ierr=finter%read(finter%get_var_longitude(varName),field)
+      field4d(1:nx,1:ny,1:1,1:1) => field
+      IF ( ierr /= 0 ) THEN
+        CALL error("Can't read field longitude")
+      ELSE
         WRITE(*,*) field4d
+      ENDIF
     ENDIF
-
     ! write the data to testOut.nc
     ! Open file
     ierr=frw%open("testOut.nc","",set_filetype("netcdf",FILETYPE_RW))
