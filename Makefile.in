@@ -363,7 +363,7 @@ EXTRA_DIST = doxydoc.txt libstdc++.tag share/doc/examples \
              share/scripts/newProjection.pl \
              share/scripts/fiConfigOverview.pl
 
-DISTCHECK_CONFIGURE_FLAGS = --enable-openmp --with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.3.0 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2'
+DISTCHECK_CONFIGURE_FLAGS = --enable-openmp --enable-fortran --with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.3.0 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2'
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = @PACKAGE_TARNAME@.pc
 @DX_COND_doc_TRUE@@DX_COND_html_TRUE@DX_CLEAN_HTML = @DX_DOCDIR@/html

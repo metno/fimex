@@ -17,7 +17,7 @@ dist-hook:
 	rm -rf `find $(distdir)/share/doc/examples -type d -name .svn`
 	rm -rf `find $(distdir)/modules -type d -name .svn`
 
-DISTCHECK_CONFIGURE_FLAGS=--enable-openmp --with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.3.0 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2'
+DISTCHECK_CONFIGURE_FLAGS=--enable-openmp --enable-fortran --with-udunits2=/opt/udunits2.1.20/ --with-netcdf=/opt/netcdf4.3.0 CFLAGS='-O2 -mfpmath=sse -msse2' CXXFLAGS='-O2 -mfpmath=sse -msse2'
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = @PACKAGE_TARNAME@.pc
