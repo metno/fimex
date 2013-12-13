@@ -6,7 +6,7 @@ PROGRAM fortran_test
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
-  CHARACTER(LEN=1024)               :: varName
+  CHARACTER(LEN=80)               :: varName
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE,TARGET :: field
   REAL(KIND=8),DIMENSION(:,:,:,:),POINTER :: field4d
   REAL(KIND=8),DIMENSION(:,:,:),POINTER :: field3d

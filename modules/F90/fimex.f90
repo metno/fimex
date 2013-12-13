@@ -433,7 +433,6 @@ MODULE Fimex
     CHARACTER(LEN=1024)            :: get_file_ulim_dimension_name
 
     CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
-    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
     INTEGER                          :: i
     INTEGER(KIND=C_LONG_LONG)           :: posT
 
@@ -476,7 +475,6 @@ MODULE Fimex
     CHARACTER(LEN=1024)            :: get_file_dimension_name
 
     CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
-    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
     INTEGER                          :: i
     INTEGER(KIND=C_LONG_LONG)           :: posT
 
@@ -522,7 +520,6 @@ MODULE Fimex
     CHARACTER(LEN=1024)            :: get_variable_name
 
     CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
-    CHARACTER(LEN=1024,KIND=C_CHAR)  :: varname
     INTEGER                          :: i
     INTEGER(KIND=C_LONG_LONG)           :: posT
 
@@ -644,7 +641,7 @@ MODULE Fimex
   FUNCTION get_var_longitude(this, varName)
     USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
     CLASS(FimexIO), INTENT(IN)     :: this
-    CHARACTER(LEN=1024), INTENT(IN):: varName
+    CHARACTER(LEN=*), INTENT(IN)   :: varName
     CHARACTER(LEN=1024)            :: get_var_longitude
 
     CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
@@ -674,7 +671,7 @@ MODULE Fimex
   FUNCTION get_var_latitude(this, varName)
     USE iso_c_binding,    ONLY: C_CHAR, C_NULL_CHAR,C_LONG_LONG, C_PTR, C_F_POINTER, C_ASSOCIATED
     CLASS(FimexIO), INTENT(IN)     :: this
-    CHARACTER(LEN=1024), INTENT(IN):: varName
+    CHARACTER(LEN=*), INTENT(IN)   :: varName
     CHARACTER(LEN=1024)            :: get_var_latitude
 
     CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
@@ -705,7 +702,7 @@ MODULE Fimex
     IMPLICIT NONE
     INTEGER :: reduce_dimension
     CLASS(FimexIO), INTENT(IN)                              :: this
-    CHARACTER(LEN=1024), INTENT(IN)                         :: dimName
+    CHARACTER(LEN=*),    INTENT(IN)                         :: dimName
     INTEGER(KIND=C_INT), INTENT(IN)                         :: start
     INTEGER(KIND=C_INT), INTENT(IN)                         :: dsize
     INTEGER :: i
@@ -745,7 +742,6 @@ MODULE Fimex
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: start
     INTEGER(KIND=C_INT), DIMENSION(:), ALLOCATABLE, TARGET  :: vsize
     CHARACTER(LEN=1024)                                     :: myUnit
-    CHARACTER(LEN=1024)                                     :: dimName
     INTEGER(KIND=C_LONG_LONG)                               :: expSize, outSize
     INTEGER :: i,ierr, ndims
 
