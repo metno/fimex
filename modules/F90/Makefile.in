@@ -36,7 +36,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = modules/F90
-DIST_COMMON = $(fimexfinc_HEADERS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__fimexfinc_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
@@ -94,11 +94,13 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(fimexfincdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfimexf_la_DEPENDENCIES =
-am_libfimexf_la_OBJECTS = fimex.lo
+am__libfimexf_la_SOURCES_DIST = fimex.f90
+@ENABLE_FORTRAN_TRUE@am_libfimexf_la_OBJECTS = fimex.lo
 libfimexf_la_OBJECTS = $(am_libfimexf_la_OBJECTS)
 libfimexf_la_LINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
 	$(libfimexf_la_LDFLAGS) $(LDFLAGS) -o $@
+@ENABLE_FORTRAN_TRUE@am_libfimexf_la_rpath = -rpath $(libdir)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 LTFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -108,7 +110,8 @@ FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libfimexf_la_SOURCES)
-DIST_SOURCES = $(libfimexf_la_SOURCES)
+DIST_SOURCES = $(am__libfimexf_la_SOURCES_DIST)
+am__fimexfinc_HEADERS_DIST = $(top_srcdir)/modules/F90/fimex.mod
 HEADERS = $(fimexfinc_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -296,12 +299,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_FCFLAGS = 
-lib_LTLIBRARIES = libfimexf.la
-libfimexf_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @BOOST_LDFLAGS@ @MIFI_PROJ_LDFLAGS@
-libfimexf_la_LIBADD = 
-libfimexf_la_SOURCES = fimex.f90
-fimexfincdir = $(includedir)
-fimexfinc_HEADERS = $(top_srcdir)/modules/F90/fimex.mod
+@ENABLE_FORTRAN_TRUE@lib_LTLIBRARIES = libfimexf.la
+@ENABLE_FORTRAN_TRUE@libfimexf_la_LDFLAGS = -version-info 0:0:0 -release $(VERSION) @BOOST_LDFLAGS@ @MIFI_PROJ_LDFLAGS@
+@ENABLE_FORTRAN_TRUE@libfimexf_la_LIBADD = 
+@ENABLE_FORTRAN_TRUE@libfimexf_la_SOURCES = fimex.f90
+@ENABLE_FORTRAN_TRUE@fimexfincdir = $(includedir)
+@ENABLE_FORTRAN_TRUE@fimexfinc_HEADERS = $(top_srcdir)/modules/F90/fimex.mod
 all: all-am
 
 .SUFFIXES:
@@ -368,7 +371,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libfimexf.la: $(libfimexf_la_OBJECTS) $(libfimexf_la_DEPENDENCIES) $(EXTRA_libfimexf_la_DEPENDENCIES) 
-	$(libfimexf_la_LINK) -rpath $(libdir) $(libfimexf_la_OBJECTS) $(libfimexf_la_LIBADD) $(LIBS)
+	$(libfimexf_la_LINK) $(am_libfimexf_la_rpath) $(libfimexf_la_OBJECTS) $(libfimexf_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
