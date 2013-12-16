@@ -305,6 +305,7 @@ AM_FCFLAGS =
 @ENABLE_FORTRAN_TRUE@libfimexf_la_SOURCES = fimex.f90
 @ENABLE_FORTRAN_TRUE@fimexfincdir = $(includedir)
 @ENABLE_FORTRAN_TRUE@fimexfinc_HEADERS = $(top_builddir)/modules/F90/fimex.mod
+@ENABLE_FORTRAN_TRUE@CLEANFILES = fimex.mod
 all: all-am
 
 .SUFFIXES:
@@ -523,6 +524,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
