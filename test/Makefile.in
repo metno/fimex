@@ -133,7 +133,7 @@ am__DEPENDENCIES_1 =
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testBinaryConstants_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -145,7 +145,7 @@ testCDM_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testCDM_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -157,7 +157,7 @@ testCoordSys_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testCoordSys_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -172,7 +172,7 @@ testCoordinateSystemSliceBuilder_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testCoordinateSystemSliceBuilder_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -184,7 +184,7 @@ testData_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testData_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -196,7 +196,7 @@ testExtractor_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testExtractor_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -209,7 +209,7 @@ testFeltReader_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testFeltReader_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -222,7 +222,7 @@ testFileReaderFactory_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testFileReaderFactory_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -235,7 +235,7 @@ testFillWriter_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testFillWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -247,7 +247,7 @@ testFortran_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testFortran_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -260,7 +260,7 @@ testGribReader_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testGribReader_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -273,7 +273,7 @@ testGribWriter_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testGribWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -286,7 +286,7 @@ testInterpolation_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testInterpolation_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -299,7 +299,7 @@ testInterpolator_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testInterpolator_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -311,7 +311,7 @@ testMerger_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testMerger_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -324,7 +324,7 @@ testMetGmReader_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testMetGmReader_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -337,7 +337,7 @@ testMetGmWriter_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testMetGmWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -352,7 +352,7 @@ testNcmlAggregationReader_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testNcmlAggregationReader_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -365,7 +365,7 @@ testNcmlReader_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testNcmlReader_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -378,7 +378,7 @@ testNetCDFReaderWriter_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testNetCDFReaderWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -391,7 +391,7 @@ testNetcdfWriter_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testNetcdfWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -403,7 +403,7 @@ testProcessor_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testProcessor_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -416,7 +416,7 @@ testProjections_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testProjections_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -429,7 +429,7 @@ testQualityExtractor_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testQualityExtractor_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -442,7 +442,7 @@ testSliceBuilder_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testSliceBuilder_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -455,7 +455,7 @@ testSpatialAxisSpec_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testSpatialAxisSpec_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -468,7 +468,7 @@ testTimeInterpolator_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testTimeInterpolator_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -480,7 +480,7 @@ testTimeSpec_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testTimeSpec_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -492,7 +492,7 @@ testUnits_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testUnits_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -504,7 +504,7 @@ testUtils_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testUtils_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -519,7 +519,7 @@ testVerticalCoordinates_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testVerticalCoordinates_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -531,7 +531,7 @@ testXMLDoc_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@testXMLDoc_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -544,7 +544,7 @@ test_c_consumer_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@test_c_consumer_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -568,7 +568,7 @@ wdbTest_LDADD = $(LDADD)
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
 @ENABLE_FORTRAN_TRUE@wdbTest_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
@@ -877,7 +877,7 @@ SH_TESTS = $(am__append_3)
 @ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
 @ENABLE_FORTRAN_FALSE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
 @ENABLE_FORTRAN_FALSE@	$(am__append_7)
-@ENABLE_FORTRAN_TRUE@LDADD = ../modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@LDADD = $(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
 @ENABLE_FORTRAN_TRUE@	$(am__append_7)
@@ -889,7 +889,7 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_src
 
 AM_CXXFLAGS = 
 AM_CFLAGS = 
-AM_FCFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/modules/F90/
+AM_FCFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I../modules/F90/
 @HAVE_FELT_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh
 @HAVE_FELT_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_TRUE@GRIBAPI_MI_TESTS = testGribWriter

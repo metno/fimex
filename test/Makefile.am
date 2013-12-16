@@ -41,7 +41,7 @@ CC_TESTS = testInterpolation \
 
 SH_TESTS = 
 if ENABLE_FORTRAN
-LDADD = ../modules/F90/libfimexf.la
+LDADD = $(top_builddir)/modules/F90/libfimexf.la
 else
 LDADD =
 endif
@@ -54,7 +54,7 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_src
               @BOOST_CPPFLAGS@
 AM_CXXFLAGS = 
 AM_CFLAGS =
-AM_FCFLAGS =  -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/modules/F90/
+AM_FCFLAGS =  -DTOP_SRCDIR=\"$(top_srcdir)\" -I../modules/F90/
 
 if HAVE_FELT
   CC_TESTS += testQualityExtractor
