@@ -1,3 +1,14 @@
+  * 2013-12-16 fimex-0.50
+    * extending f90-interface, including --enable-fortran target
+    * extending c-interface
+    * improving parallelization, in particular with Intel Compiler >= 14
+    * fix setting of netcdf-compression per variable
+    * improve scanning of grib-files
+    * re-implement merging of files to allow for new target-grid
+    * improve reading of WRF-files; better coordinate-support and vector-detection
+    * fix latlon-interpolation with staggered grids
+    * add support for logarithmic units
+    * fix mercator-axes from grib-files
   * 2013-10-21 fimex-0.49
     * adding fortran90 interface
     * improved C interface

@@ -111,7 +111,7 @@ FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libfimexf_la_SOURCES)
 DIST_SOURCES = $(am__libfimexf_la_SOURCES_DIST)
-am__fimexfinc_HEADERS_DIST = $(top_srcdir)/modules/F90/fimex.mod
+am__fimexfinc_HEADERS_DIST = $(top_builddir)/modules/F90/fimex.mod
 HEADERS = $(fimexfinc_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -304,7 +304,8 @@ AM_FCFLAGS =
 @ENABLE_FORTRAN_TRUE@libfimexf_la_LIBADD = 
 @ENABLE_FORTRAN_TRUE@libfimexf_la_SOURCES = fimex.f90
 @ENABLE_FORTRAN_TRUE@fimexfincdir = $(includedir)
-@ENABLE_FORTRAN_TRUE@fimexfinc_HEADERS = $(top_srcdir)/modules/F90/fimex.mod
+@ENABLE_FORTRAN_TRUE@fimexfinc_HEADERS = $(top_builddir)/modules/F90/fimex.mod
+@ENABLE_FORTRAN_TRUE@CLEANFILES = fimex.mod
 all: all-am
 
 .SUFFIXES:
@@ -523,6 +524,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -618,6 +620,8 @@ uninstall-am: uninstall-fimexfincHEADERS uninstall-libLTLIBRARIES
 	uninstall-am uninstall-fimexfincHEADERS \
 	uninstall-libLTLIBRARIES
 
+
+@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex.mod: fimex.o
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -40,7 +40,12 @@ CC_TESTS = testInterpolation \
            testFeltReader
 
 SH_TESTS = 
-LDADD = ../src/felt/libfelt.la ../src/libfimex.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
+if ENABLE_FORTRAN
+LDADD = $(top_builddir)/modules/F90/libfimexf.la
+else
+LDADD =
+endif
+LDADD += ../src/libfimex.la ../src/felt/libfelt.la $(BOOST_UNIT_TEST_FRAMEWORK_LIB)
 
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_srcdir)/src \
               ${milib_CFLAGS} \
@@ -48,7 +53,8 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_src
               @MIFI_PROJ_CPPFLAGS@ @XML_CPPFLAGS@ \
               @BOOST_CPPFLAGS@
 AM_CXXFLAGS = 
-AM_CFLAGS = 
+AM_CFLAGS =
+AM_FCFLAGS =  -DTOP_SRCDIR=\"$(top_srcdir)\" -I../modules/F90/
 
 if HAVE_FELT
   CC_TESTS += testQualityExtractor
@@ -77,7 +83,13 @@ if HAVE_METGM
   CC_TESTS += testMetGmReader ${METGM_NC_TESTS}
 endif
 include wdb/make.mk
-
+if ENABLE_FORTRAN
+if HAVE_FELT
+if HAVE_NETCDF
+  CC_TESTS += testFortran
+endif
+endif
+endif
 
 check_SCRIPTS = $(SH_TESTS)
 TESTS = $(CC_TESTS) $(SH_TESTS)
@@ -115,3 +127,4 @@ testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
 test_c_consumer_SOURCES = test_c_consumer.c
+testFortran_SOURCES = testFortran.F90

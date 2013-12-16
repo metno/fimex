@@ -59,8 +59,9 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/wdb/make.mk
 @HAVE_LIBPQ_TRUE@am__append_6 = wdbTest
 @HAVE_LIBPQ_TRUE@am__append_7 = @BOOST_PROGRAM_OPTIONS_LIB@
-TESTS = $(am__EXEEXT_10) $(am__EXEEXT_12)
-check_PROGRAMS = $(am__EXEEXT_10)
+@ENABLE_FORTRAN_TRUE@@HAVE_FELT_TRUE@@HAVE_NETCDF_TRUE@am__append_8 = testFortran
+TESTS = $(am__EXEEXT_11) $(am__EXEEXT_13)
+check_PROGRAMS = $(am__EXEEXT_11)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
@@ -111,7 +112,8 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_METGM_TRUE@am__EXEEXT_8 = testMetGmReader$(EXEEXT) \
 @HAVE_METGM_TRUE@	$(am__EXEEXT_7)
 @HAVE_LIBPQ_TRUE@am__EXEEXT_9 = wdbTest$(EXEEXT)
-am__EXEEXT_10 = testInterpolation$(EXEEXT) \
+@ENABLE_FORTRAN_TRUE@@HAVE_FELT_TRUE@@HAVE_NETCDF_TRUE@am__EXEEXT_10 = testFortran$(EXEEXT)
+am__EXEEXT_11 = testInterpolation$(EXEEXT) \
 	testVerticalCoordinates$(EXEEXT) testBinaryConstants$(EXEEXT) \
 	testUtils$(EXEEXT) testTimeSpec$(EXEEXT) \
 	testSpatialAxisSpec$(EXEEXT) testData$(EXEEXT) \
@@ -119,175 +121,433 @@ am__EXEEXT_10 = testInterpolation$(EXEEXT) \
 	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
 	testSliceBuilder$(EXEEXT) testXMLDoc$(EXEEXT) \
 	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) \
-	$(am__EXEEXT_6) $(am__EXEEXT_8) $(am__EXEEXT_9)
+	$(am__EXEEXT_6) $(am__EXEEXT_8) $(am__EXEEXT_9) \
+	$(am__EXEEXT_10)
 am_testBinaryConstants_OBJECTS = testBinaryConstants.$(OBJEXT)
 testBinaryConstants_OBJECTS = $(am_testBinaryConstants_OBJECTS)
 testBinaryConstants_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-testBinaryConstants_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testBinaryConstants_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testBinaryConstants_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testCDM_OBJECTS = testCDM.$(OBJEXT)
 testCDM_OBJECTS = $(am_testCDM_OBJECTS)
 testCDM_LDADD = $(LDADD)
-testCDM_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testCDM_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testCDM_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testCoordSys_OBJECTS = testCoordSys.$(OBJEXT)
 testCoordSys_OBJECTS = $(am_testCoordSys_OBJECTS)
 testCoordSys_LDADD = $(LDADD)
-testCoordSys_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testCoordSys_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testCoordSys_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testCoordinateSystemSliceBuilder_OBJECTS =  \
 	testCoordinateSystemSliceBuilder.$(OBJEXT)
 testCoordinateSystemSliceBuilder_OBJECTS =  \
 	$(am_testCoordinateSystemSliceBuilder_OBJECTS)
 testCoordinateSystemSliceBuilder_LDADD = $(LDADD)
-testCoordinateSystemSliceBuilder_DEPENDENCIES =  \
-	../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testCoordinateSystemSliceBuilder_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testCoordinateSystemSliceBuilder_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testData_OBJECTS = testData.$(OBJEXT)
 testData_OBJECTS = $(am_testData_OBJECTS)
 testData_LDADD = $(LDADD)
-testData_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testData_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testData_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testExtractor_OBJECTS = testExtractor.$(OBJEXT)
 testExtractor_OBJECTS = $(am_testExtractor_OBJECTS)
 testExtractor_LDADD = $(LDADD)
-testExtractor_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testExtractor_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testExtractor_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testFeltReader_OBJECTS = testFeltReader.$(OBJEXT)
 testFeltReader_OBJECTS = $(am_testFeltReader_OBJECTS)
 testFeltReader_LDADD = $(LDADD)
-testFeltReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testFeltReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testFeltReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testFileReaderFactory_OBJECTS = testFileReaderFactory.$(OBJEXT)
 testFileReaderFactory_OBJECTS = $(am_testFileReaderFactory_OBJECTS)
 testFileReaderFactory_LDADD = $(LDADD)
-testFileReaderFactory_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testFileReaderFactory_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testFileReaderFactory_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testFillWriter_OBJECTS = testFillWriter.$(OBJEXT)
 testFillWriter_OBJECTS = $(am_testFillWriter_OBJECTS)
 testFillWriter_LDADD = $(LDADD)
-testFillWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testFillWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testFillWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
+am_testFortran_OBJECTS = testFortran.$(OBJEXT)
+testFortran_OBJECTS = $(am_testFortran_OBJECTS)
+testFortran_LDADD = $(LDADD)
+@ENABLE_FORTRAN_FALSE@testFortran_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testFortran_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testGribReader_OBJECTS = testGribReader.$(OBJEXT)
 testGribReader_OBJECTS = $(am_testGribReader_OBJECTS)
 testGribReader_LDADD = $(LDADD)
-testGribReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testGribReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testGribReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testGribWriter_OBJECTS = testGribWriter.$(OBJEXT)
 testGribWriter_OBJECTS = $(am_testGribWriter_OBJECTS)
 testGribWriter_LDADD = $(LDADD)
-testGribWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testGribWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testGribWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
-testInterpolation_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testInterpolation_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testInterpolation_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testInterpolator_OBJECTS = testInterpolator.$(OBJEXT)
 testInterpolator_OBJECTS = $(am_testInterpolator_OBJECTS)
 testInterpolator_LDADD = $(LDADD)
-testInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testInterpolator_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testInterpolator_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testMerger_OBJECTS = testMerger.$(OBJEXT)
 testMerger_OBJECTS = $(am_testMerger_OBJECTS)
 testMerger_LDADD = $(LDADD)
-testMerger_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testMerger_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testMerger_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testMetGmReader_OBJECTS = testMetGmReader.$(OBJEXT)
 testMetGmReader_OBJECTS = $(am_testMetGmReader_OBJECTS)
 testMetGmReader_LDADD = $(LDADD)
-testMetGmReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testMetGmReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testMetGmReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testMetGmWriter_OBJECTS = testMetGmWriter.$(OBJEXT)
 testMetGmWriter_OBJECTS = $(am_testMetGmWriter_OBJECTS)
 testMetGmWriter_LDADD = $(LDADD)
-testMetGmWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testMetGmWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testMetGmWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testNcmlAggregationReader_OBJECTS =  \
 	testNcmlAggregationReader.$(OBJEXT)
 testNcmlAggregationReader_OBJECTS =  \
 	$(am_testNcmlAggregationReader_OBJECTS)
 testNcmlAggregationReader_LDADD = $(LDADD)
-testNcmlAggregationReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testNcmlAggregationReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testNcmlAggregationReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testNcmlReader_OBJECTS = testNcmlReader.$(OBJEXT)
 testNcmlReader_OBJECTS = $(am_testNcmlReader_OBJECTS)
 testNcmlReader_LDADD = $(LDADD)
-testNcmlReader_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testNcmlReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testNcmlReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testNetCDFReaderWriter_OBJECTS = testNetCDFReaderWriter.$(OBJEXT)
 testNetCDFReaderWriter_OBJECTS = $(am_testNetCDFReaderWriter_OBJECTS)
 testNetCDFReaderWriter_LDADD = $(LDADD)
-testNetCDFReaderWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testNetCDFReaderWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testNetCDFReaderWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testNetcdfWriter_OBJECTS = testNetcdfWriter.$(OBJEXT)
 testNetcdfWriter_OBJECTS = $(am_testNetcdfWriter_OBJECTS)
 testNetcdfWriter_LDADD = $(LDADD)
-testNetcdfWriter_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testNetcdfWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testNetcdfWriter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testProcessor_OBJECTS = testProcessor.$(OBJEXT)
 testProcessor_OBJECTS = $(am_testProcessor_OBJECTS)
 testProcessor_LDADD = $(LDADD)
-testProcessor_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testProcessor_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testProcessor_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testProjections_OBJECTS = testProjections.$(OBJEXT)
 testProjections_OBJECTS = $(am_testProjections_OBJECTS)
 testProjections_LDADD = $(LDADD)
-testProjections_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testProjections_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testProjections_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testQualityExtractor_OBJECTS = testQualityExtractor.$(OBJEXT)
 testQualityExtractor_OBJECTS = $(am_testQualityExtractor_OBJECTS)
 testQualityExtractor_LDADD = $(LDADD)
-testQualityExtractor_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testQualityExtractor_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testQualityExtractor_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testSliceBuilder_OBJECTS = testSliceBuilder.$(OBJEXT)
 testSliceBuilder_OBJECTS = $(am_testSliceBuilder_OBJECTS)
 testSliceBuilder_LDADD = $(LDADD)
-testSliceBuilder_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testSliceBuilder_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testSliceBuilder_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testSpatialAxisSpec_OBJECTS = testSpatialAxisSpec.$(OBJEXT)
 testSpatialAxisSpec_OBJECTS = $(am_testSpatialAxisSpec_OBJECTS)
 testSpatialAxisSpec_LDADD = $(LDADD)
-testSpatialAxisSpec_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testSpatialAxisSpec_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testSpatialAxisSpec_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testTimeInterpolator_OBJECTS = testTimeInterpolator.$(OBJEXT)
 testTimeInterpolator_OBJECTS = $(am_testTimeInterpolator_OBJECTS)
 testTimeInterpolator_LDADD = $(LDADD)
-testTimeInterpolator_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testTimeInterpolator_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testTimeInterpolator_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testTimeSpec_OBJECTS = testTimeSpec.$(OBJEXT)
 testTimeSpec_OBJECTS = $(am_testTimeSpec_OBJECTS)
 testTimeSpec_LDADD = $(LDADD)
-testTimeSpec_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testTimeSpec_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testTimeSpec_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testUnits_OBJECTS = testUnits.$(OBJEXT)
 testUnits_OBJECTS = $(am_testUnits_OBJECTS)
 testUnits_LDADD = $(LDADD)
-testUnits_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testUnits_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testUnits_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testUtils_OBJECTS = testUtils.$(OBJEXT)
 testUtils_OBJECTS = $(am_testUtils_OBJECTS)
 testUtils_LDADD = $(LDADD)
-testUtils_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testUtils_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testUtils_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testVerticalCoordinates_OBJECTS =  \
 	testVerticalCoordinates.$(OBJEXT)
 testVerticalCoordinates_OBJECTS =  \
 	$(am_testVerticalCoordinates_OBJECTS)
 testVerticalCoordinates_LDADD = $(LDADD)
-testVerticalCoordinates_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testVerticalCoordinates_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testVerticalCoordinates_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
 testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
 testXMLDoc_LDADD = $(LDADD)
-testXMLDoc_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@testXMLDoc_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testXMLDoc_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_test_c_consumer_OBJECTS = test_c_consumer.$(OBJEXT)
 test_c_consumer_OBJECTS = $(am_test_c_consumer_OBJECTS)
 test_c_consumer_LDADD = $(LDADD)
-test_c_consumer_DEPENDENCIES = ../src/felt/libfelt.la \
-	../src/libfimex.la $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@test_c_consumer_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@test_c_consumer_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am__wdbTest_SOURCES_DIST = wdb/TestingGridData.h \
 	wdb/TestingGridData.cpp wdb/GridDataFactory.h \
 	wdb/GridDataFactory.cpp wdb/Wdb2CdmBuilderTest.cc \
@@ -303,8 +563,15 @@ am__wdbTest_SOURCES_DIST = wdb/TestingGridData.h \
 @HAVE_LIBPQ_TRUE@	wdbTest-TimeHandlerTest.$(OBJEXT)
 wdbTest_OBJECTS = $(am_wdbTest_OBJECTS)
 wdbTest_LDADD = $(LDADD)
-wdbTest_DEPENDENCIES = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_FALSE@wdbTest_DEPENDENCIES = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@wdbTest_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 wdbTest_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(wdbTest_LDFLAGS) $(LDFLAGS) -o $@
@@ -312,6 +579,15 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+PPFCCOMPILE = $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
+LTPPFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
+FCLD = $(FC)
+FCLINK = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -335,10 +611,11 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
 	$(testFeltReader_SOURCES) $(testFileReaderFactory_SOURCES) \
-	$(testFillWriter_SOURCES) $(testGribReader_SOURCES) \
-	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
-	$(testInterpolator_SOURCES) $(testMerger_SOURCES) \
-	$(testMetGmReader_SOURCES) $(testMetGmWriter_SOURCES) \
+	$(testFillWriter_SOURCES) $(testFortran_SOURCES) \
+	$(testGribReader_SOURCES) $(testGribWriter_SOURCES) \
+	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
+	$(testMerger_SOURCES) $(testMetGmReader_SOURCES) \
+	$(testMetGmWriter_SOURCES) \
 	$(testNcmlAggregationReader_SOURCES) $(testNcmlReader_SOURCES) \
 	$(testNetCDFReaderWriter_SOURCES) $(testNetcdfWriter_SOURCES) \
 	$(testProcessor_SOURCES) $(testProjections_SOURCES) \
@@ -353,10 +630,11 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
 	$(testData_SOURCES) $(testExtractor_SOURCES) \
 	$(testFeltReader_SOURCES) $(testFileReaderFactory_SOURCES) \
-	$(testFillWriter_SOURCES) $(testGribReader_SOURCES) \
-	$(testGribWriter_SOURCES) $(testInterpolation_SOURCES) \
-	$(testInterpolator_SOURCES) $(testMerger_SOURCES) \
-	$(testMetGmReader_SOURCES) $(testMetGmWriter_SOURCES) \
+	$(testFillWriter_SOURCES) $(testFortran_SOURCES) \
+	$(testGribReader_SOURCES) $(testGribWriter_SOURCES) \
+	$(testInterpolation_SOURCES) $(testInterpolator_SOURCES) \
+	$(testMerger_SOURCES) $(testMetGmReader_SOURCES) \
+	$(testMetGmWriter_SOURCES) \
 	$(testNcmlAggregationReader_SOURCES) $(testNcmlReader_SOURCES) \
 	$(testNetCDFReaderWriter_SOURCES) $(testNetcdfWriter_SOURCES) \
 	$(testProcessor_SOURCES) $(testProjections_SOURCES) \
@@ -370,7 +648,7 @@ ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
-@HAVE_NETCDF_TRUE@am__EXEEXT_11 = $(NETCDF_MI_SH_TESTS) testCharNc.sh \
+@HAVE_NETCDF_TRUE@am__EXEEXT_12 = $(NETCDF_MI_SH_TESTS) testCharNc.sh \
 @HAVE_NETCDF_TRUE@	testInterpolatorFill.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolator.sh \
 @HAVE_NETCDF_TRUE@	testVerticalInterpolator2.sh \
@@ -378,7 +656,7 @@ red=; grn=; lgn=; blu=; std=
 @HAVE_NETCDF_TRUE@	testVerticalInterpolatorOceanSG2ToDepth.sh \
 @HAVE_NETCDF_TRUE@	testQualityExtractorFimex.sh testMerger.sh \
 @HAVE_NETCDF_TRUE@	testMergerTarget.sh
-am__EXEEXT_12 = $(am__EXEEXT_11)
+am__EXEEXT_13 = $(am__EXEEXT_12)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -593,10 +871,16 @@ CC_TESTS = testInterpolation testVerticalCoordinates \
 	testData testProjections testUnits testFileReaderFactory \
 	testCDM testSliceBuilder testXMLDoc testFeltReader \
 	$(am__append_1) $(am__append_2) $(am__append_4) \
-	$(am__append_5) $(am__append_6)
+	$(am__append_5) $(am__append_6) $(am__append_8)
 SH_TESTS = $(am__append_3)
-LDADD = ../src/felt/libfelt.la ../src/libfimex.la \
-	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(am__append_7)
+@ENABLE_FORTRAN_FALSE@LDADD = ../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
+@ENABLE_FORTRAN_FALSE@	$(am__append_7)
+@ENABLE_FORTRAN_TRUE@LDADD = $(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
+@ENABLE_FORTRAN_TRUE@	$(am__append_7)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_srcdir)/src \
               ${milib_CFLAGS} \
               @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ \
@@ -605,6 +889,7 @@ AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_src
 
 AM_CXXFLAGS = 
 AM_CFLAGS = 
+AM_FCFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I../modules/F90/
 @HAVE_FELT_TRUE@NETCDF_MI_SH_TESTS = testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh
 @HAVE_FELT_TRUE@NETCDF_MI_TESTS = testNetcdfWriter testExtractor testInterpolator testTimeInterpolator test_c_consumer
 @HAVE_FELT_TRUE@GRIBAPI_MI_TESTS = testGribWriter
@@ -654,10 +939,11 @@ testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
 test_c_consumer_SOURCES = test_c_consumer.c
+testFortran_SOURCES = testFortran.F90
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .cc .cpp .lo .o .obj
+.SUFFIXES: .F90 .c .cc .cpp .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/wdb/make.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -743,6 +1029,9 @@ testFileReaderFactory$(EXEEXT): $(testFileReaderFactory_OBJECTS) $(testFileReade
 testFillWriter$(EXEEXT): $(testFillWriter_OBJECTS) $(testFillWriter_DEPENDENCIES) $(EXTRA_testFillWriter_DEPENDENCIES) 
 	@rm -f testFillWriter$(EXEEXT)
 	$(CXXLINK) $(testFillWriter_OBJECTS) $(testFillWriter_LDADD) $(LIBS)
+testFortran$(EXEEXT): $(testFortran_OBJECTS) $(testFortran_DEPENDENCIES) $(EXTRA_testFortran_DEPENDENCIES) 
+	@rm -f testFortran$(EXEEXT)
+	$(FCLINK) $(testFortran_OBJECTS) $(testFortran_LDADD) $(LIBS)
 testGribReader$(EXEEXT): $(testGribReader_OBJECTS) $(testGribReader_DEPENDENCIES) $(EXTRA_testGribReader_DEPENDENCIES) 
 	@rm -f testGribReader$(EXEEXT)
 	$(CXXLINK) $(testGribReader_OBJECTS) $(testGribReader_LDADD) $(LIBS)
@@ -861,6 +1150,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-TimeHandlerTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-Wdb2CdmBuilderTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wdbTest-WdbIndexTest.Po@am__quote@
+
+.F90.o:
+	$(PPFCCOMPILE) -c -o $@ $<
+
+.F90.obj:
+	$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.F90.lo:
+	$(LTPPFCCOMPILE) -c -o $@ $<
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
