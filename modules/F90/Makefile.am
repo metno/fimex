@@ -8,8 +8,8 @@ libfimexf_la_LIBADD =
 libfimexf_la_SOURCES = fimex.f90
 
 fimexfincdir = $(includedir)
-fimexfinc_HEADERS= fimex.mod
+fimexfinc_HEADERS= $(top_builddir)/modules/F90/fimex.mod
 
-fimex.mod: fimex.o
+$(top_builddir)/modules/F90/fimex.mod: fimex.o
 
 endif
