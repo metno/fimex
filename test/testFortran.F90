@@ -2,7 +2,7 @@ PROGRAM fortran_test
   USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
                                       FILETYPE_RW
   IMPLICIT NONE
-  TYPE(FimexIO)                   :: fio, finter, frw
+  TYPE(FimexIO)                   :: fio, finter, finter2, frw
   INTEGER                         :: ierr,i
   CHARACTER(LEN=80)               :: input_file
   CHARACTER(LEN=80)               :: config_file
@@ -172,20 +172,20 @@ PROGRAM fortran_test
   lonvals(2) = 10
   latvals(2) = 55
   WRITE(*,*) "method ", INTERPOL_BILINEAR
-  ierr = finter%interpolate_lonlat(fio, INTERPOL_BILINEAR, lonvals, latvals)
+  ierr = finter2%interpolate_lonlat(fio, INTERPOL_BILINEAR, lonvals, latvals)
   IF ( ierr /= 0 ) THEN
      CALL error("Can't interpolate file to lonlat")
   END IF
   ! Get dimensions
-  ndims=finter%get_dimensions(varName)
+  ndims=finter2%get_dimensions(varName)
   IF ( ndims <= 0 ) CALL error("Can't make slicebuilder for interpol")
   WRITE(0,*) "inter-get_dimensions: ", ndims
 
   ALLOCATE(start(ndims))
   ALLOCATE(vsize(ndims))
-  ierr = finter%get_dimension_start_size(start, vsize)
+  ierr = finter2%get_dimension_start_size(start, vsize)
   ALLOCATE(atypes(ndims))
-  ierr = finter%get_axistypes(atypes)
+  ierr = finter2%get_axistypes(atypes)
 
   DO i = 1, ndims
     !WRITE (*,*) i, " axistype: ", atypes(i)
@@ -196,13 +196,13 @@ PROGRAM fortran_test
       CASE(AXIS_GeoY, AXIS_Lat)
         ny = vsize(i)
       CASE DEFAULT
-       WRITE(*,*) "reducind dimension ", i, " ",TRIM(finter%get_dimname(i))
-       ierr=finter%reduce_dimension(finter%get_dimname(i), 0, 1)
+       WRITE(*,*) "reducind dimension ", i, " ",TRIM(finter2%get_dimname(i))
+       ierr=finter2%reduce_dimension(finter2%get_dimname(i), 0, 1)
     END SELECT
   END DO
   WRITE(*,*) "end reduce"
   ALLOCATE(field(nx*ny))
-  ierr=finter%read(varName,field,cunit)
+  ierr=finter2%read(varName,field,cunit)
   field4d(1:nx,1:ny,1:1,1:1) => field
   IF ( ierr /= 0 ) THEN
     CALL error("Can't read field")
@@ -210,12 +210,12 @@ PROGRAM fortran_test
     WRITE(*,*) field4d
   ENDIF
 
-  ndims=finter%get_dimensions(finter%get_var_longitude(varName))
+  ndims=finter2%get_dimensions(finter2%get_var_longitude(varName))
   IF ( ndims == 1 ) then
     WRITE(*,*) TRIM(varName), " has longitude as dimension"
   ELSE
     WRITE(*,*) TRIM(varName), " has longitude as coordinates"
-    ierr=finter%read(finter%get_var_longitude(varName),field)
+    ierr=finter2%read(finter2%get_var_longitude(varName),field)
     field4d(1:nx,1:ny,1:1,1:1) => field
     IF ( ierr /= 0 ) THEN
       CALL error("Can't read field longitude")
@@ -268,7 +268,7 @@ PROGRAM fortran_test
 !
 !  DEALLOCATE(field)
 
-  ierr=finter%close()
+  ierr=finter2%close()
   ! Close file (free memory)
   ierr=fio%close()
   IF ( ierr /= 0 ) CALL error("Can't free memory")

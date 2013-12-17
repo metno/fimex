@@ -55,3 +55,21 @@ Depends: libfelt-0.25.1-0 (= ${binary:Version}), ${misc:Depends}
 Description: A c++ library for reading met.no's felt-files
  Dev-library for reading the internal file-format of the
  Norwegian Meteorological Institute
+
+Package: libfimexf-0.25.1-0
+Section: libs
+Architecture: i386 amd64 ia64 powerpc
+Depends: libfimex-0.25.1-0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}, fimex-share
+Description: library for geo-spatial gridded data
+ Library for File Interpolations, Manipulations and EXtraction
+ of gridded geo-spatial data.
+
+Package: libfimexf-dev
+Section: libdevel
+Architecture: i386 amd64 ia64 powerpc
+Depends: libfimexf-0.25.1-0 (= ${binary:Version}), ${misc:Depends}, libfimex-dev
+Description: library for geo-spatial gridded data
+ Development library for File Interpolations, Manipulations and EXtraction
+ of gridded geo-spatial data.
+
+
