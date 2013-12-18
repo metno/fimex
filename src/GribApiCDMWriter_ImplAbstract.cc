@@ -321,6 +321,10 @@ void GribApiCDMWriter_ImplAbstract::setTime(const std::string& varName, const bo
         // TODO: step length should be determined by bounds
         endStep = steps;
     }
+    if (vTime == FimexTime(FimexTime::min_date_time)) {
+        date = 10101; // seems to be the minimum date for grib 0001-01-01
+        time = 0;
+    }
     GRIB_CHECK(grib_set_long(gribHandle.get(), "dataDate", date), "setting dataDate");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "dataTime", time), "setting dataTime");
     size_t sSize = stepUnits.size();
