@@ -193,6 +193,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOptionAny(out, "output.printSize", vm);
     writeVectorOptionString(out, "process.accumulateVariable", vm);
     writeVectorOptionString(out, "process.deaccumulateVariable", vm);
+    writeVectorOptionString(out, "process.rotateVectorToLatLonX", vm);
+    writeVectorOptionString(out, "process.rotateVectorToLatLonY", vm);
     writeVectorOptionString(out, "process.rotateVector.x", vm);
     writeVectorOptionString(out, "process.rotateVector.y", vm);
     writeOptionAny(out, "process.rotateVector.all", vm);
@@ -915,6 +917,8 @@ int run(int argc, char* args[])
         ("output.printSize", "print size estimate")
         ("process.accumulateVariable", po::value<vector<string> >()->composing(), "accumulate variable along unlimited dimension")
         ("process.deaccumulateVariable", po::value<vector<string> >()->composing(), "deaccumulate variable along unlimited dimension")
+        ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "deprecated: rotate this vector x component from grid-direction to latlon direction")
+        ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "deprecated: rotate this vector y component from grid-direction to latlon direction")
         ("process.rotateVector.direction", po::value<string>(), "set direction: to latlon or grid")
         ("process.rotateVector.x", po::value<vector<string> >()->composing(), "rotate this vector x component to direction")
         ("process.rotateVector.stdNameX", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
