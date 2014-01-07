@@ -259,6 +259,7 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
         for (int i = 0; i < on; ++i) {
             double phi = atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
                   (out_y_delta_proj_axis[i] - out_y_field[i]));
+            //fprintf(stderr, "%f-%f / %f-%f", out_x_delta_proj_axis[i], out_x_field[i], out_y_delta_proj_axis[i], out_y_field[i]);
             //fprintf(stderr, "atan2-x: %f\n", phi/MIFI_PI*180);
             matrix[2 + 4 * i] = sign * sin(phi);
             matrix[3 + 4 * i] = sign * cos(phi);
@@ -295,6 +296,12 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
         if (ox > 1) {
             if (oy > 1) {
                 deltaX = defaultDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+                // and test another place in case of singularities
+                size_t ox_2 = ox/2;
+                size_t oy_2 = oy/2;
+                double deltaX2 = defaultDelta * (in_x_field[(oy_2+1)*ox +(ox_2+1)] - in_x_field[(oy_2)*ox + ox_2]);
+                deltaX += deltaX2;
+                deltaX /= 2;
             } else {
                 deltaX = defaultDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
             }
@@ -314,6 +321,12 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
         if (ox > 1) {
             if (oy > 1) {
                 deltaY = defaultDelta * (in_x_field[(1)*ox +(1)] - in_x_field[0]);
+                // and test another place in case of singularities
+                size_t ox_2 = ox/2;
+                size_t oy_2 = oy/2;
+                double deltaY2 = defaultDelta * (in_x_field[(oy_2+1)*ox +(ox_2+1)] - in_x_field[(oy_2)*ox + ox_2]);
+                deltaY += deltaY2;
+                deltaY /= 2;
             } else {
                 deltaY = defaultDelta * (in_x_field[(0)*ox +(1)] - in_x_field[0]);
             }
@@ -326,7 +339,9 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
             }
         }
     }
-
+    if (fabs(deltaX) < 1e-9 || fabs(deltaY) < 1e-9 ) {
+        fprintf(stderr, "WARNING, tiny deltaX/Y: %f %f possible singularity in vector-reprojection\n", deltaX, deltaY);
+    }
     return mifi_get_vector_reproject_matrix_points_proj_delta(inputPJ, outputPJ,
             in_x_field, in_y_field, // both on
             out_x_field, out_y_field, // both on
