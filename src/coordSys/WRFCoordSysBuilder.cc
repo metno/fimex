@@ -140,7 +140,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
         break;
     case 6:
         // rotert sperical
-        proj4 << "+proj=ob_tran +o_proj=longlat +lon_0=" << normalizeLongitude180(poleLon) << " +o_lat_p=" << (-1 * poleLat);
+        proj4 << "+proj=ob_tran +o_proj=longlat +lon_0="<<(-1*standardLon) << " +o_lon_p=" << (180-poleLon) << "d +o_lat_p=" << poleLat << "d";
         isLatLon = true;
         break;
     default:
@@ -149,10 +149,15 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     }
     const int R0 = 6370000; // WRF earth radius = 6370km
     proj4 << " +R=" << R0 << " +no_defs";
+    cerr << proj4.str() << endl;
     boost::shared_ptr<Projection> proj = Projection::createByProj4(proj4.str());
     double centerX = centralLon * DEG_TO_RAD;
     double centerY = centralLat * DEG_TO_RAD;
     mifi_project_values(MIFI_WGS84_LATLON_PROJ4, proj4.str().c_str(), &centerX, &centerY, 1);
+    if (isLatLon) {
+        centerX /= DEG_TO_RAD;
+        centerY /= DEG_TO_RAD;
+    }
 
     // TODO: the following variables might be called uninitialized when the coordinate-system
     //       is build twice
