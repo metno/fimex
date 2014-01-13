@@ -116,8 +116,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     double centralLon = findAttributeDouble(cdm, "CEN_LON");  // center of grid
     double standardLon = findAttributeDouble(cdm, "STAND_LON"); // true longitude
     double standardLat = findAttributeDouble(cdm, "MOAD_CEN_LAT");
+    double poleLat = findAttributeDouble(cdm, "POLE_LAT");
+    double poleLon = findAttributeDouble(cdm, "POLE_LON");
 
     std::stringstream proj4;
+    bool isLatLon = false;
     int map_proj = cdm.getAttribute(cdm.globalAttributeNS(), "MAP_PROJ").getData()->asInt()[0];
     switch (map_proj) {
     case 1:
@@ -135,11 +138,17 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     case 3:
         proj4 << "+proj=merc +lon_0="<<standardLon<<" +lat_0="<<standardLat;
         break;
+    case 6:
+        // rotert sperical
+        proj4 << "+proj=ob_tran +o_proj=longlat +lon_0=" << normalizeLongitude180(poleLon) << " +o_lat_p=" << (-1 * poleLat);
+        isLatLon = true;
+        break;
     default:
         LOG4FIMEX(logger, Logger::WARN, "unknown projection-id: " << map_proj);
         return coordSys;
     }
-    proj4 << " +R=6370000 +no_defs"; // WRF earth radius = 6370km
+    const int R0 = 6370000; // WRF earth radius = 6370km
+    proj4 << " +R=" << R0 << " +no_defs";
     boost::shared_ptr<Projection> proj = Projection::createByProj4(proj4.str());
     double centerX = centralLon * DEG_TO_RAD;
     double centerY = centralLat * DEG_TO_RAD;
@@ -154,7 +163,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
         vector<string> shape;
         shape.push_back("west_east");
         if (!cdm.hasVariable(shape.at(0))) {
-            int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asInt()[0];
+            float dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asFloat()[0];
+            if (isLatLon) {
+                dx /= (R0 * DEG_TO_RAD);
+            }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startX = centerX - dx * (dimSize - 1) / 2;
             boost::shared_array<float> vals(new float[dimSize]);
@@ -162,7 +174,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                 vals[i] = startX + i * dx;
             }
             cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            if (isLatLon) {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+            } else {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            }
             cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
@@ -174,7 +190,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
         vector<string> shape;
         shape.push_back("west_east_stag");
         if (!cdm.hasVariable(shape.at(0))) {
-            int dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asInt()[0];
+            float dx = cdm.getAttribute(cdm.globalAttributeNS(), "DX").getData()->asFloat()[0];
+            if (isLatLon) {
+                dx /= (R0 * DEG_TO_RAD);
+            }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startX = centerX - dx * (dimSize - 1) / 2;
             boost::shared_array<float> vals(new float[dimSize]);
@@ -182,7 +201,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                 vals[i] = startX + i * dx;
             }
             cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
-            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            if (isLatLon) {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+            } else {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            }
             cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
@@ -194,8 +217,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
         vector<string> shape;
         shape.push_back("south_north");
         if (!cdm.hasVariable(shape.at(0))) {
-            int dy =
-                    cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asInt()[0];
+            float dy = cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asFloat()[0];
+            if (isLatLon) {
+                dy /= (R0 * DEG_TO_RAD);
+            }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startY = centerY - dy * (dimSize - 1) / 2;
             boost::shared_array<float> vals(new float[dimSize]);
@@ -203,7 +228,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                 vals[i] = startY + i * dy;
             }
             cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
-            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            if (isLatLon) {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+            } else {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            }
             cdm.addAttribute(shape.at(0),
                     CDMAttribute("standard_name", "projection_y_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
@@ -216,8 +245,10 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
         vector<string> shape;
         shape.push_back("south_north_stag");
         if (!cdm.hasVariable(shape.at(0))) {
-            int dy =
-                    cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asInt()[0];
+            float dy = cdm.getAttribute(cdm.globalAttributeNS(), "DY").getData()->asFloat()[0];
+            if (isLatLon) {
+                dy /= (R0 * DEG_TO_RAD);
+            }
             size_t dimSize = cdm.getDimension(shape.at(0)).getLength();
             double startY = centerY - dy * (dimSize - 1) / 2;
             boost::shared_array<float> vals(new float[dimSize]);
@@ -225,7 +256,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                 vals[i] = startY + i * dy;
             }
             cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
-            cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            if (isLatLon) {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+            } else {
+                cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+            }
             cdm.addAttribute(shape.at(0),
                     CDMAttribute("standard_name", "projection_y_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
