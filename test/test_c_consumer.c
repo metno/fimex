@@ -249,10 +249,41 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
         fprintf(stderr, "dimension 2 not named right, x != %s\n", dimName);
     }
 
+    size_t dSize = mifi_get_dimension_size(feltReader, dimName);
+    if (dSize != 229) {
+        retVal++;
+        fprintf(stderr, "dimension %s has size %d != 229\n", dimName, dSize);
+    }
+
     const char* undimName = mifi_get_unlimited_dimension_name(feltReader);
     if (strcmp("time", undimName)) {
         retVal++;
         fprintf(stderr, "unlimited not named right, time != %s\n", undimName);
+    }
+
+    dSize = mifi_get_dimension_size(feltReader, undimName);
+    if (dSize != 61) {
+        retVal++;
+        fprintf(stderr, "unlimited dimension %s has size %d != 61\n", undimName, dSize);
+    }
+
+
+    unsigned int type = mifi_get_variable_type(feltReader, "precipitation_amount");
+    if (type != 4) { // 4=CDM_FLOAT
+        retVal++;
+        fprintf(stderr, "variable type of precipitation_amount is %d != 4\n", type);
+    }
+
+    type = mifi_get_variable_type(feltReader, "altitude");
+    if (type != 2) { // 2=CDM_SHORT
+        retVal++;
+        fprintf(stderr, "variable type of altitude is %d != 2\n", type);
+    }
+
+    type = mifi_get_variable_type(feltReader, "lasdfj");
+    if (type != 0) { // 0=CDM_NAN
+        retVal++;
+        fprintf(stderr, "variable type of unknown variable is %d != 0\n", type);
     }
 
 

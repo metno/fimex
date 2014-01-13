@@ -31,7 +31,7 @@ namespace MetNoFimex
 /**
  * @headerfile fimex/CDMDataType.h
  */
-/** Be aware that the CDM_CHAR datatype maps to NC_BYTE, while the CDM_SHORT maps to NC_CHAR */
+/** Be aware that the CDM_CHAR datatype maps to NC_BYTE, while the CDM_STRING maps to NC_CHAR */
 enum CDMDataType {
     CDM_NAT = 0,
     CDM_CHAR,

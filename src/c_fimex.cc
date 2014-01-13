@@ -50,6 +50,7 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
+#include "fimex/CDMDataType.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/TimeUnit.h"
 
@@ -233,6 +234,17 @@ const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos)
     return 0;
 }
 
+unsigned int mifi_get_variable_type(mifi_cdm_reader* reader, const char* varName)
+{
+    try {
+        return reader->reader_->getCDM().getVariable(varName).getDataType();
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_variable_type: " << ex.what());
+    }
+    return CDM_NAT;
+}
+
+
 size_t mifi_get_dimension_number(mifi_cdm_reader* reader)
 {
     try {
@@ -249,6 +261,18 @@ const char* mifi_get_dimension_name(mifi_cdm_reader* reader, size_t pos)
         return reader->reader_->getCDM().getDimensions().at(pos).getName().c_str();
     } catch (exception& ex) {
         LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_dimension_name: " << ex.what());
+    }
+    return 0;
+}
+
+size_t mifi_get_dimension_size(mifi_cdm_reader* reader, const char* dimName)
+{
+    if (reader->reader_->getCDM().hasDimension(dimName)) {
+        try {
+            return reader->reader_->getCDM().getDimension(dimName).getLength();
+        } catch (exception& ex) {
+            LOG4FIMEX(logger, Logger::WARN, "error in mifi_get_dimension_size: " << ex.what());
+        }
     }
     return 0;
 }

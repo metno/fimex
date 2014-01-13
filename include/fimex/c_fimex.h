@@ -202,6 +202,14 @@ extern size_t mifi_get_variable_number(mifi_cdm_reader* reader);
 extern const char* mifi_get_variable_name(mifi_cdm_reader* reader, size_t pos);
 
 /**
+ * Get the MetNoFimex::CDMDataType datatype for a variable.
+ * @param reader the data source
+ * @param varName name of the variable
+ * @return datatype, or CDM_NAT=0 on error
+ */
+extern unsigned int mifi_get_variable_type(mifi_cdm_reader* reader, const char* varName);
+
+/**
  * Get the number of the dimensions from the reader.
  * @param reader the data source
  * @return the number of dimension
@@ -214,6 +222,13 @@ extern size_t mifi_get_dimension_number(mifi_cdm_reader* reader);
  * @return the dimension name, or "" on failure
  */
 extern const char* mifi_get_dimension_name(mifi_cdm_reader* reader, size_t pos);
+/**
+ * Get the size of a dimension
+ * @param reader the data source
+ * @param dimName the name of the dimension
+ * @return the size of the dimension, or 0 if dimension does not exist
+ */
+extern size_t mifi_get_dimension_size(mifi_cdm_reader* reader, const char* dimName);
 
 /**
  * Get the name of the unlimited dimension
