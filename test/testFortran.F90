@@ -44,13 +44,14 @@ PROGRAM fortran_test
 
   write(*,*) "dimensions"
   DO i = 1, fio%dimensions_size()
-    write(*,*) i, " ", TRIM(fio%file_dimname(i))
+    write(*,*) i, " ", TRIM(fio%file_dimname(i)), fio%get_dimsize(fio%file_dimname(i))
   END DO
 
   write(*,*) "variables"
   DO i = 1, fio%variables_size()
     write(*,*) i, " ", TRIM(fio%get_varname(i))," (", TRIM(fio%get_var_longitude(fio%get_varname(i))), ",",&
-                                                      TRIM(fio%get_var_latitude(fio%get_varname(i))), ")"
+                                                      TRIM(fio%get_var_latitude(fio%get_varname(i))), ")", &
+                                                      fio%get_vartype(fio%get_varname(i))
   END DO
 
   ! Get dimensions

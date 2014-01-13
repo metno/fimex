@@ -48,6 +48,23 @@ MODULE Fimex
       FILETYPE_NCML, FILETYPE_GRIB, FILETYPE_WDB, FILETYPE_METGM,&
       FILETYPE_RW=1024
   END ENUM
+  !> @enum Variable data-type methods
+  !! These are the same definintions as #CDMDataType in CDMDataType.h
+  !! @warning The datatype-numbers are different from the NC_* constants of netcdf.h, both in number and interpretation
+  ENUM, BIND(C)
+    ENUMERATOR ::     CDM_NAT = 0,&
+    CDM_CHAR,&
+    CDM_SHORT,&
+    CDM_INT,&
+    CDM_FLOAT,&
+    CDM_DOUBLE,&
+    CDM_STRING,&
+    CDM_UCHAR,&
+    CDM_USHORT,&
+    CDM_UINT,&
+    CDM_INT64,&
+    CDM_UINT64
+  END ENUM
 
   !> Class to store file-handles for the high-level API.
   !! @warning The class FimexIO stores internally two refernces to file and data-handles.
@@ -62,10 +79,12 @@ MODULE Fimex
     procedure :: close => close_file
     procedure :: dimensions_size => get_file_dimensions_size
     procedure :: file_dimname => get_file_dimension_name
+    procedure :: get_dimsize => get_dimension_size
     procedure :: file_ulim_dimname => get_file_ulim_dimension_name
     procedure :: get_refTime => get_unique_forecast_reference_time
     procedure :: variables_size => get_variables_size
     procedure :: get_varname => get_variable_name
+    procedure :: get_vartype => get_variable_type
     procedure :: get_dimensions => get_dimensions
     procedure :: get_dimname => get_dimname
     procedure :: get_var_longitude => get_var_longitude
@@ -130,6 +149,16 @@ MODULE Fimex
       TYPE(C_PTR)                             :: c_mifi_get_variable_name
     END FUNCTION c_mifi_get_variable_name
 
+    !> F90-wrapper for mifi_get_variable_type()
+    FUNCTION c_mifi_get_variable_type(io, varName) BIND(C,NAME="mifi_get_variable_type")
+      USE iso_c_binding, ONLY: C_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: varName(*)
+      INTEGER(KIND=C_LONG)                    :: c_mifi_get_variable_type
+    END FUNCTION c_mifi_get_variable_type
+
+
     FUNCTION c_mifi_get_dimension_number(io) BIND(C,NAME="mifi_get_dimension_number")
       USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR
       IMPLICIT NONE
@@ -151,6 +180,17 @@ MODULE Fimex
       TYPE(C_PTR), VALUE                      :: io
       TYPE(C_PTR)                             :: c_mifi_get_unlimited_dimension_name
     END FUNCTION c_mifi_get_unlimited_dimension_name
+
+    !> F90-wrapper for mifi_get_variable_type()
+    FUNCTION c_mifi_get_dimension_size(io, varName) BIND(C,NAME="mifi_get_dimension_size")
+      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+      IMPLICIT NONE
+      TYPE(C_PTR), VALUE                      :: io
+      CHARACTER(KIND=C_CHAR),INTENT(IN)       :: varName(*)
+      ! should be C_SIZE_T but doesn't work with 4.6.3
+      INTEGER(KIND=C_LONG_LONG)                       :: c_mifi_get_dimension_size
+    END FUNCTION c_mifi_get_dimension_size
+
 
     !> F90-wrapper for mifi_get_unique_forecast_reference_time()
     FUNCTION c_mifi_get_unique_forecast_reference_time(io, unit) BIND(C,NAME="mifi_get_unique_forecast_reference_time")
@@ -248,7 +288,7 @@ MODULE Fimex
       TYPE(C_PTR), VALUE                 :: sb
       CHARACTER(KIND=C_CHAR),INTENT(IN)  :: units(*)
       TYPE(C_PTR), VALUE                 :: data
-      INTEGER(KIND=C_LONG_LONG),INTENT(OUT) :: dsize
+      INTEGER(KIND=C_LONG_LONG),INTENT(OUT) :: dsize  ! should be C_SIZE_T but doesn't work with 4.6.3
       INTEGER(KIND=C_INT)                :: c_mifi_fill_scaled_double_dataslice
     END FUNCTION c_mifi_fill_scaled_double_dataslice
 
@@ -262,7 +302,7 @@ MODULE Fimex
       TYPE(C_PTR), VALUE                 :: sb
       CHARACTER(KIND=C_CHAR),INTENT(IN)  :: units(*)
       TYPE(C_PTR), VALUE                 :: data
-      INTEGER(KIND=C_LONG_LONG),VALUE    :: dsize
+      INTEGER(KIND=C_LONG_LONG),VALUE    :: dsize ! should be C_SIZE_T but doesn't work with 4.6.3
       INTEGER(KIND=C_INT)                :: c_mifi_write_scaled_double_dataslice
     END FUNCTION c_mifi_write_scaled_double_dataslice
 
@@ -570,6 +610,25 @@ MODULE Fimex
     RETURN
   END FUNCTION get_variable_name
 
+  !> Get the type of a variable
+  !! This function will read the type of a variable as the CDM_* enum
+  !! @param varName variable name
+  !! @return type, on of CDM_* constants, CDM_NAT (Not A Type) in case something goes wrong
+  FUNCTION get_variable_type(this, varName)
+    USE iso_c_binding,    ONLY: C_NULL_CHAR,C_LONG,C_ASSOCIATED
+    IMPLICIT NONE
+    INTEGER(KIND=C_LONG)                :: get_variable_type
+    CLASS(FimexIO), INTENT(IN)          :: this
+    CHARACTER(LEN=*), INTENT(IN)        :: varName
+
+    IF ( C_ASSOCIATED(this%io) ) THEN
+      get_variable_type = c_mifi_get_variable_type(this%io, TRIM(varName)//C_NULL_CHAR)
+    ELSE
+      get_variable_type = 0
+    END IF
+    RETURN
+  END FUNCTION get_variable_type
+
   !> Get the number of dimensions of a variable.
   !! This function
   !! will internally initialize a slicebuilder, too, so all data
@@ -625,6 +684,25 @@ MODULE Fimex
       get_dimname = ""
     ENDIF
   END FUNCTION get_dimname
+
+  !> Get the global size of a file's dimension
+  !! Get the dimension-size of a dimension of the file
+  !! @param dimName the dimensions name
+  !! @return the size of the dimension, or 0
+  FUNCTION get_dimension_size(this, dimName)
+    USE iso_c_binding,    ONLY: C_NULL_CHAR,C_CHAR,C_LONG,C_PTR,C_ASSOCIATED
+    IMPLICIT NONE
+    CLASS(FimexIO), INTENT(IN)    :: this
+    CHARACTER(LEN=*), INTENT(IN)  :: dimName
+    INTEGER(KIND=C_LONG)          :: get_dimension_size
+    IF (C_ASSOCIATED(this%io)) THEN
+      get_dimension_size = c_mifi_get_dimension_size(this%io, TRIM(dimName)//C_NULL_CHAR)
+    ELSE
+      get_dimension_size = CDM_NAT
+    END IF
+    RETURN
+  END FUNCTION get_dimension_size
+
 
   !> Get the current start-position and current size for the current variable dimensions.
   !! Get the start-position and size for each dimension of the variable set with the last
