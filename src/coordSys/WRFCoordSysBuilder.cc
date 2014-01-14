@@ -181,10 +181,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
             if (isLatLon) {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+                cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "grid_longitude"));
             } else {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+                cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
             }
-            cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
         westAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
@@ -208,10 +209,11 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.addVariable(CDMVariable(shape.at(0),CDM_FLOAT, shape));
             if (isLatLon) {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+                cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "grid_longitude"));
             } else {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+                cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
             }
-            cdm.addAttribute(shape.at(0), CDMAttribute("standard_name", "projection_x_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
         stagWestAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
@@ -235,11 +237,13 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
             if (isLatLon) {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+                cdm.addAttribute(shape.at(0),
+                        CDMAttribute("standard_name", "grid_latitude"));
             } else {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+                cdm.addAttribute(shape.at(0),
+                        CDMAttribute("standard_name", "projection_y_axis"));
             }
-            cdm.addAttribute(shape.at(0),
-                    CDMAttribute("standard_name", "projection_y_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
         northAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));
@@ -263,11 +267,13 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             cdm.addVariable(CDMVariable(shape.at(0), CDM_FLOAT, shape));
             if (isLatLon) {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "degree"));
+                cdm.addAttribute(shape.at(0),
+                        CDMAttribute("standard_name", "grid_latitude"));
             } else {
                 cdm.addAttribute(shape.at(0), CDMAttribute("units", "m"));
+                cdm.addAttribute(shape.at(0),
+                        CDMAttribute("standard_name", "projection_y_axis"));
             }
-            cdm.addAttribute(shape.at(0),
-                    CDMAttribute("standard_name", "projection_y_axis"));
             cdm.getVariable(shape.at(0)).setData(createData(dimSize, vals));
         }
         stagNorthAxis = CoordinateSystem::AxisPtr(new CoordinateAxis(cdm.getVariable(shape.at(0))));

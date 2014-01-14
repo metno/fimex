@@ -252,8 +252,7 @@ std::string getProjString(int gridType, const boost::array<float, 6>& gridParame
                 break;
         case 2: tempProj << "+proj=latlong " << earth; // geographic
                 break;
-        case 3: tempProj << "+proj=ob_tran +o_proj=latlong +o_lat_p="<< (90-gridParameters[5]) << " +o_lon_b=0 +lon_0=" << gridParameters[4] <<  " " << earth; // rotated geographic
-//		case 3: tempProj << "+proj=latlong" <<  " " << earth; // rotated geographic ??
+        case 3: tempProj << "+proj=ob_tran +o_proj=latlong +o_lat_p="<< (90-gridParameters[5]) << " +o_lon_p=0 +lon_0=" << gridParameters[4] <<  " " << earth; // rotated geographic
                 break;
         case 5: tempProj << "+proj=gstmerc +lat_1=" << gridParameters[4] << " " << earth; // mercator ???
                 break;

@@ -60,19 +60,22 @@ std::vector<CDMAttribute> RotatedLatitudeLongitudeProjection::parametersFromProj
     attrs.push_back(CDMAttribute("grid_mapping_name", "rotated_latitude_longitude"));
     double north_pole_lat = 90;
     double north_pole_lon = 0;
+    double north_pole_grid_lon = 0;
     boost::smatch what;
     if (boost::regex_search(proj4Str, what, boost::regex("\\+o_lat_p=(\\S+)"))) {
         north_pole_lat = string2type<double>(what[1].str());
     }
-    // ignore optional o_lon_b (rotation after lat rotation)
-    // since it doesn't match with FGDC parameters
-    // just use lon_0 (lon rotation in the original system)
+    if (boost::regex_search(proj4Str, what, boost::regex("\\+o_lon_p=(\\S+)"))) {
+        north_pole_grid_lon = string2type<double>(what[1].str());
+    }
     if (boost::regex_search(proj4Str, what, boost::regex("\\+lon_0=(\\S+)"))) {
         north_pole_lon = string2type<double>(what[1].str());
     }
     attrs.push_back(CDMAttribute("grid_north_pole_longitude", normalizeLongitude180(180+north_pole_lon)));
     attrs.push_back(CDMAttribute("grid_north_pole_latitude", north_pole_lat));
-
+    if (north_pole_grid_lon > 1e-4) { //optional
+        attrs.push_back(CDMAttribute("north_pole_grid_longitude", north_pole_grid_lon));
+    }
 
     proj4GetEarthAttributes(proj4Str, attrs);
     attrs.push_back(CDMAttribute("proj4", proj4Str));
@@ -89,7 +92,7 @@ std::ostream& RotatedLatitudeLongitudeProjection::getProj4ProjectionPart(std::os
         }
     }
     addParameterToStream(oproj, "grid_north_pole_latitude", " +o_lat_p=");
-    addParameterToStream(oproj, "north_pole_grid_longitude", " +o_lon_b=");
+    addParameterToStream(oproj, "north_pole_grid_longitude", " +o_lon_p=");
     return oproj;
 }
 
