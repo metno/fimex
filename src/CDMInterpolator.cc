@@ -797,7 +797,18 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
             }
         }
     }
-
+    // add Conventions unless exists
+    CDMAttribute convAttr;
+    if (cdm.getAttribute(CDM::globalAttributeNS(), "Conventions", convAttr)) {
+        string conv = convAttr.getStringValue();
+        if (conv.find("CF-") == string::npos) {
+            conv += " CF-1.4";
+            convAttr = CDMAttribute("Conventions", conv);
+        }
+    } else {
+        convAttr = CDMAttribute("Conventions", "CF-1.4");
+    }
+    cdm.addOrReplaceAttribute(CDM::globalAttributeNS(), convAttr);
 }
 
 // internal setup for nanoflann kd-tree

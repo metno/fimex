@@ -149,7 +149,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
     }
     const int R0 = 6370000; // WRF earth radius = 6370km
     proj4 << " +R=" << R0 << " +no_defs";
-    cerr << proj4.str() << endl;
+    //cerr << proj4.str() << endl;
     boost::shared_ptr<Projection> proj = Projection::createByProj4(proj4.str());
     double centerX = centralLon * DEG_TO_RAD;
     double centerY = centralLat * DEG_TO_RAD;
