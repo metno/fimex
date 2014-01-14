@@ -140,7 +140,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
         break;
     case 6:
         // rotert sperical
-        proj4 << "+proj=ob_tran +o_proj=longlat +lon_0="<<(-1*standardLon) << " +o_lon_p=" << (180-poleLon) << "d +o_lat_p=" << poleLat << "d";
+        proj4 << "+proj=ob_tran +o_proj=longlat +lon_0="<<(-1*standardLon) << " +o_lon_p=" << (180-poleLon) << " +o_lat_p=" << poleLat;
         isLatLon = true;
         break;
     default:
