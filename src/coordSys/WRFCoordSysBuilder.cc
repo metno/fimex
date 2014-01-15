@@ -421,6 +421,7 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
                         coord->setAxis(stagNorthAxis);
                     } else if (*dimIt == "Time") {
                         coord->setAxis(timeAxis);
+                        coord->addDependencyVariable("Times"); // Times required for Time-Axis in WRF
                     } else if (*dimIt == "bottom_top") {
                         coord->setAxis(bottomAxis);
                     } else if (*dimIt == "bottom_top_stag") {
