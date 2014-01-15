@@ -809,6 +809,11 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
         convAttr = CDMAttribute("Conventions", "CF-1.4");
     }
     cdm.addOrReplaceAttribute(CDM::globalAttributeNS(), convAttr);
+    // remove old (WRF) grid_mapping attribute MAP_PROJ
+    CDMAttribute mapProjAttr;
+    if (cdm.getAttribute(CDM::globalAttributeNS(), "MAP_PROJ", mapProjAttr)) {
+        cdm.removeAttribute(CDM::globalAttributeNS(), "MAP_PROJ");
+    }
 }
 
 // internal setup for nanoflann kd-tree
