@@ -254,6 +254,7 @@ CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpola
                 valuesX, valuesY, unitIX, unitIX, CDM_DOUBLE, CDM_DOUBLE);
 
         LOG4FIMEX(logger, Logger::INFO, "interpolating top grid");
+        break;
     }
     if (not interpolatedO)
         THROW("CDMBorderSmoothing: could not find CS for interpolation");

@@ -202,10 +202,6 @@ CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const valu
         const std::string& tx_unit, const std::string& ty_unit,
         const CDMDataType& tx_type, const CDMDataType& ty_type)
 {
-    interpolatedOT = CDMInterpolatorPtr(new CDMInterpolator(readerO));
-    interpolatedOT->changeProjection(gridInterpolationMethod, proj,
-            tx, ty, tx_unit, ty_unit, tx_type, ty_type);
-
     readerSmooth = CDMBorderSmoothingPtr(new CDMBorderSmoothing(readerI, readerO));
     readerSmooth->setSmoothing(smoothingFactory);
     readerSmooth->setUseOuterIfInnerUndefined(useOuterIfInnerUndefined);
@@ -214,7 +210,7 @@ CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const valu
     interpolatedST->changeProjection(gridInterpolationMethod, proj,
             tx, ty, tx_unit, ty_unit, tx_type, ty_type);
 
-    readerOverlay = CDMOverlayPtr(new CDMOverlay(interpolatedOT, interpolatedST, gridInterpolationMethod));
+    readerOverlay = CDMOverlayPtr(new CDMOverlay(readerO, interpolatedST, gridInterpolationMethod));
     
     return readerOverlay->getCDM();
 }

@@ -90,15 +90,14 @@ void CDMBorderSmoothing::setUseOuterIfInnerUndefined(bool useOuter)
 DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLimDimPos)
 {
     if (not cdm_->hasVariable(varName))
-        THROW("variable '" << varName << "' unknown");
-
-    DataPtr sliceI = p->readerI->getDataSlice(varName, unLimDimPos);
+        THROW("variable '" << varName << "' unknown in border smoothing");
 
     const CDM& cdmO = p->interpolatedO->getCDM();
     if (cdm_->hasDimension(varName) or not cdmO.hasVariable(varName))
-        return sliceI;
+        return p->readerI->getDataSlice(varName, unLimDimPos); // not scaled
 
-    DataPtr sliceO = p->interpolatedO->getDataSlice(varName, unLimDimPos);
+    DataPtr sliceI = p->readerI->getScaledDataSlice(varName, unLimDimPos);
+    DataPtr sliceO = p->interpolatedO->getScaledDataSlice(varName, unLimDimPos);
 
     const vector<string> &shape = cdm_->getVariable(varName).getShape();
     vector<size_t> dimSizes;
@@ -118,8 +117,6 @@ DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLi
         return sliceI;
     
     SmoothingPtr smoothing = (*p->smoothingFactory)(varName);
-    const double fillI = cdm_->getFillValue(varName), fillO = cdmO.getFillValue(varName);
-    smoothing->setFillValues(fillI, fillO);
     smoothing->setHorizontalSizes(dimSizes[shapeIdxX], dimSizes[shapeIdxY]);
 
     const DataIndex idx(dimSizes);
@@ -130,9 +127,9 @@ DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLi
         const double valueI = sliceI->getDouble(pos);
         const double valueO = sliceO->getDouble(pos);
         double merged;
-        if (valueI == fillI) {
-            merged = p->useOuterIfInnerUndefined ? valueO : fillO;
-        } else if (valueO == fillO or (not smoothing.get())) {
+        if (mifi_isnan(valueI)) {
+            merged = p->useOuterIfInnerUndefined ? valueO : MIFI_UNDEFINED_D;
+        } else if (mifi_isnan(valueO) or (not smoothing.get())) {
             merged = valueI;
         } else {
             merged = (*smoothing)(current[shapeIdxX], current[shapeIdxY], valueI, valueO);
@@ -152,7 +149,12 @@ DataPtr CDMBorderSmoothing::getDataSlice(const std::string &varName, size_t unLi
         if (incIdx >= current.size())
             break;
     }
-    return sliceO;
+
+    double scale=1, offset=0;
+    getScaleAndOffsetOf(varName, scale, offset);
+    return sliceO->convertDataType(MIFI_UNDEFINED_D, 1, 0,
+        cdm_->getVariable(varName).getDataType(),
+        cdm_->getFillValue(varName), scale, offset);
 }
 
 // ########################################################################

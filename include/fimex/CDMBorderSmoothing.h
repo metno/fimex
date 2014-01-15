@@ -55,9 +55,6 @@ public:
      */
     class Smoothing {
     public:
-        void setFillValues(double fillI, double fillO)
-            { fillI_ = fillI; fillO_ = fillO; }
-
         void setHorizontalSizes(size_t sizeX, size_t sizeY)
             { sizeX_ = sizeX; sizeY_ = sizeY; }
 
@@ -67,7 +64,6 @@ public:
 
     protected:
         size_t sizeX_, sizeY_;
-        double fillI_, fillO_;
     };
 
     typedef boost::shared_ptr<Smoothing> SmoothingPtr;
