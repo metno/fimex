@@ -43,6 +43,7 @@ public:
     virtual ~LatitudeLongitudeProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+    static std::string NAME();
 protected:
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
         return oproj << "+proj=latlong";

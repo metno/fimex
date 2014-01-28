@@ -665,6 +665,8 @@ FCFLAGS
 FC
 ENABLE_FORTRAN_FALSE
 ENABLE_FORTRAN_TRUE
+proradxml_LIBS
+proradxml_CFLAGS
 HAVE_METGM_FALSE
 HAVE_METGM_TRUE
 MIFI_METGM_LDFLAGS
@@ -861,6 +863,7 @@ enable_felt
 with_grib_api
 with_pq
 with_metgm
+enable_proradxml
 enable_fortran
 enable_debug_mode
 enable_doxygen_doc
@@ -890,6 +893,8 @@ CXXCPP
 PKG_CONFIG
 LOG4CPP_CFLAGS
 LOG4CPP_LIBS
+proradxml_CFLAGS
+proradxml_LIBS
 FC
 FCFLAGS
 DOXYGEN_PAPER_SIZE'
@@ -1524,6 +1529,7 @@ Optional Features:
   --enable-openmp         enable use of openmp [default=no]
   --enable-log4cpp           enable logging via log4cpp [default=no]
   --enable-felt           enable the c++ felt-reader [default=yes]
+  --enable-proradxml           enable reading prorad xml files [default=no]
   --enable-fortran         enable use of fortran-interface [default=no]
   --enable-debug-mode     Compile program in debugging mode, using no
                           optimization, debugging flags, and removing
@@ -1625,6 +1631,10 @@ Some influential environment variables:
               C compiler flags for LOG4CPP, overriding pkg-config
   LOG4CPP_LIBS
               linker flags for LOG4CPP, overriding pkg-config
+  proradxml_CFLAGS
+              C compiler flags for proradxml, overriding pkg-config
+  proradxml_LIBS
+              linker flags for proradxml, overriding pkg-config
   FC          Fortran compiler command
   FCFLAGS     Fortran compiler flags
   DOXYGEN_PAPER_SIZE
@@ -20260,6 +20270,94 @@ else
 fi
 
 
+#optional proradxml library
+# Check whether --enable-proradxml was given.
+if test "${enable_proradxml+set}" = set; then :
+  enableval=$enable_proradxml;
+if test "$enableval" = no; then
+    use_proradxml=no
+  else
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for proradxml" >&5
+$as_echo_n "checking for proradxml... " >&6; }
+
+if test -n "$PKG_CONFIG"; then
+    if test -n "$proradxml_CFLAGS"; then
+        pkg_cv_proradxml_CFLAGS="$proradxml_CFLAGS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libproradxmlrw\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libproradxmlrw") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_proradxml_CFLAGS=`$PKG_CONFIG --cflags "libproradxmlrw" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+if test -n "$PKG_CONFIG"; then
+    if test -n "$proradxml_LIBS"; then
+        pkg_cv_proradxml_LIBS="$proradxml_LIBS"
+    else
+        if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libproradxmlrw\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libproradxmlrw") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_proradxml_LIBS=`$PKG_CONFIG --libs "libproradxmlrw" 2>/dev/null`
+else
+  pkg_failed=yes
+fi
+    fi
+else
+	pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        proradxml_PKG_ERRORS=`$PKG_CONFIG --short-errors --errors-to-stdout --print-errors "libproradxmlrw"`
+        else
+	        proradxml_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "libproradxmlrw"`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$proradxml_PKG_ERRORS" >&5
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+                as_fn_error $? "\"unable to find requested libproradxmlrw in pkg-config\"" "$LINENO" 5
+
+elif test $pkg_failed = untried; then
+	as_fn_error $? "\"unable to find requested libproradxmlrw in pkg-config\"" "$LINENO" 5
+
+else
+	proradxml_CFLAGS=$pkg_cv_proradxml_CFLAGS
+	proradxml_LIBS=$pkg_cv_proradxml_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_PRORADXML 1" >>confdefs.h
+
+fi
+  fi
+
+fi
+
+
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -28246,12 +28344,12 @@ $as_echo "System Config:    $sysconfdir" >&6; }
 $as_echo " " >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: FORTRAN:          $FC" >&5
 $as_echo "FORTRAN:          $FC" >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $LOG4CPP_CFLAGS" >&5
-$as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $LOG4CPP_CFLAGS" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $proradxml_CLAGS $LOG4CPP_CFLAGS" >&5
+$as_echo "CPPFLAGS:         $CPPFLAGS $XML_CPPFLAGS $MIFI_UDUNITS_CPPFLAGS $MIFI_UDUNITS2_CPPFLAGS $MIFI_METGM_CPPFLAGS $MIFI_PQ_CPPFLAGS $MIFI_PROJ_CPPFLAGS $BOOST_CPPFLAGS $proradxml_CLAGS $LOG4CPP_CFLAGS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: LDFLAGS:          $OPENMP_CXXFLAGS $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&5
 $as_echo "LDFLAGS:          $OPENMP_CXXFLAGS $LDFLAGS $XML_LDFLAGS $MIFI_UDUNITS_LDFLAGS $MIFI_UDUNITS2_LDFLAGS $MIFI_METGM_LDFLAGS $MIFI_PQ_LDFLAGS $MIFI_PROJ_LDFLAGS $MIFI_NETCDF_LDFLAGS $MIFI_GRIB_API_LDFLAGS $BOOST_LDFLAGS" >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $LOG4CPP_LIBS" >&5
-$as_echo "LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $LOG4CPP_LIBS" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $proradxml_LIBS $LOG4CPP_LIBS" >&5
+$as_echo "LIBS:             $LIBS $XML_LIBS $MIFI_UDUNITS_LIBS $MIFI_UDUNITS2_LIBS $MIFI_METGM_LIBS $MIFI_PQ_LIBS $MIFI_PROJ_LIBS $MIFI_NETCDF_LIBS $MIFI_GRIB_API_LIBS $MIFI_GRIB_API_CPPFLAGS $BOOST_REGEX_LIB $BOOST_FILESYSTEM_LIB $BOOST_SYSTEM_LIB $BOOST_DATE_TIME_LIB $BOOST_IOSTREAMS_LIB $BOOST_PROGRAM_OPTIONS_LIB $pgsql_LIB $proradxml_LIBS $LOG4CPP_LIBS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: DEFS:             $DEFS" >&5
 $as_echo "DEFS:             $DEFS" >&6; }
 { $as_echo "$as_me:${as_lineno-$LINENO}: result:   " >&5

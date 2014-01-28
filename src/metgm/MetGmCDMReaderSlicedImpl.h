@@ -20,7 +20,7 @@ namespace MetNoFimex {
     {
     public:
         explicit MetGmCDMReaderSlicedImpl(const std::string& metgmsource, const XMLInput& configXML, const boost::shared_ptr<CDM>& cdm);
-        ~MetGmCDMReaderSlicedImpl();
+        virtual ~MetGmCDMReaderSlicedImpl();
 
         virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
         virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);

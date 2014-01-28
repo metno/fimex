@@ -51,6 +51,9 @@
 #ifdef HAVE_METGM_H
 #include "fimex/MetGmCDMReader.h"
 #endif
+#ifdef HAVE_PRORADXML
+#include "ProradXMLCDMReader.h"
+#endif
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 
 
@@ -117,6 +120,8 @@ mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
             return MIFI_FILETYPE_GRIB;
         if (type == "metgm")
             return MIFI_FILETYPE_METGM;
+        if (type == "prorad")
+            return MIFI_FILETYPE_PRORAD;
     }
     return MIFI_FILETYPE_UNKNOWN;
 }
@@ -188,6 +193,11 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #ifdef HAVE_METGM_H
     case MIFI_FILETYPE_METGM: {
         return boost::shared_ptr<CDMReader>(new MetGmCDMReader(fileName, configXML));
+    }
+#endif
+#ifdef HAVE_PRORADXML
+    case MIFI_FILETYPE_PRORAD: {
+        return boost::shared_ptr<CDMReader>(new ProradXMLCDMReader(fileName));
     }
 #endif
 #ifdef HAVE_LIBPQ_FE_H

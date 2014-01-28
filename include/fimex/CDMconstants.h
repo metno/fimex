@@ -56,6 +56,7 @@ enum mifi_filetype {
     MIFI_FILETYPE_GRIB,
     MIFI_FILETYPE_WDB,
     MIFI_FILETYPE_METGM,
+    MIFI_FILETYPE_PRORAD,
     /**
      * MIFI_FILETYPE_RW is a flag to specify that files should be opened in read-write mode.
      * Example: MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW

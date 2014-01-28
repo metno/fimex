@@ -76,6 +76,9 @@
 /* Define to 1 if you have the <proj_api.h> header file. */
 #undef HAVE_PROJ_API_H
 
+/* define if libproradxmlrw is available */
+#undef HAVE_PRORADXML
+
 /* Define to 1 if you have the `sqrt' function. */
 #undef HAVE_SQRT
 

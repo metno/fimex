@@ -1,7 +1,7 @@
 /*
- * Fimex, RotatedLatitudeLongitudeProjection.h
+ * Fimex, ProradXMLCDMReader.h
  *
- * (C) Copyright 2010, met.no
+ * (C) Copyright 2014, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -20,37 +20,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  *
- *  Created on: Apr 28, 2010
+ *  Created on: Jan 27, 2014
  *      Author: Heiko Klein
  */
+#ifndef PRORADXMLCDMREADER_H_
+#define PRORADXMLCDMREADER_H_
 
-#ifndef ROTATEDLATITUDELONGITUDEPROJECTION_H_
-#define ROTATEDLATITUDELONGITUDEPROJECTION_H_
-
-#include "fimex/coordSys/ProjectionImpl.h"
-#include "fimex/Data.h"
+#include <fimex/CDMReader.h>
 
 namespace MetNoFimex
 {
 
-/**
- * @headerfile fimex/coordSys/RotatedLatitudeLongitudeProjection.h
- */
-class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
+class ProradXMLCDMReader: public MetNoFimex::CDMReader
 {
-
 public:
-    RotatedLatitudeLongitudeProjection();
-    virtual ~RotatedLatitudeLongitudeProjection() {}
-    static bool acceptsProj4(const std::string& proj4Str);
-    static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
-    static std::string NAME();
-protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
-
+    /**
+     * Reader for cartesian prorad-xml files with the proradxml-rw library.
+     *
+     * @param source file-source, readable by libxml2
+     */
+    ProradXMLCDMReader(const std::string& source);
+    virtual ~ProradXMLCDMReader() {}
+    virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 };
 
-}
+} /* namespace MetNoFimex */
 
-
-#endif /* ROTATEDLATITUDELONGITUDEPROJECTION_H_ */
+#endif /* PRORADXMLCDMREADER_H_ */

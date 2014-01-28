@@ -33,8 +33,13 @@ namespace MetNoFimex
 
 using namespace std;
 
+string RotatedLatitudeLongitudeProjection::NAME()
+{
+    return "rotated_latitude_longitude";
+}
+
 RotatedLatitudeLongitudeProjection::RotatedLatitudeLongitudeProjection()
-: ProjectionImpl("rotated_latitude_longitude", true)
+: ProjectionImpl(RotatedLatitudeLongitudeProjection::NAME(), true)
 {
 }
 
