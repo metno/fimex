@@ -665,6 +665,8 @@ FCFLAGS
 FC
 ENABLE_FORTRAN_FALSE
 ENABLE_FORTRAN_TRUE
+HAVE_PRORADXML_FALSE
+HAVE_PRORADXML_TRUE
 proradxml_LIBS
 proradxml_CFLAGS
 HAVE_METGM_FALSE
@@ -20274,9 +20276,8 @@ fi
 # Check whether --enable-proradxml was given.
 if test "${enable_proradxml+set}" = set; then :
   enableval=$enable_proradxml;
-if test "$enableval" = no; then
-    use_proradxml=no
-  else
+   if test "$enableval" = yes; then
+     enable_proradxml=yes
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proradxml" >&5
@@ -20352,8 +20353,20 @@ $as_echo "yes" >&6; }
 $as_echo "#define HAVE_PRORADXML 1" >>confdefs.h
 
 fi
-  fi
+    else
+     enable_proradxml=no
+    fi
 
+else
+  enable_proradxml=no
+fi
+
+ if test "x$enable_proradxml" = "xyes"; then
+  HAVE_PRORADXML_TRUE=
+  HAVE_PRORADXML_FALSE='#'
+else
+  HAVE_PRORADXML_TRUE='#'
+  HAVE_PRORADXML_FALSE=
 fi
 
 
@@ -25482,6 +25495,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_METGM_TRUE}" && test -z "${HAVE_METGM_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_METGM\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PRORADXML_TRUE}" && test -z "${HAVE_PRORADXML_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_PRORADXML\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ENABLE_FORTRAN_TRUE}" && test -z "${ENABLE_FORTRAN_FALSE}"; then

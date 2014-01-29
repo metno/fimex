@@ -139,16 +139,18 @@ AM_CONDITIONAL([HAVE_METGM], [test "x$with_metgm" = "xyes"])
 
 #optional proradxml library
 AC_ARG_ENABLE(proradxml, [  --enable-proradxml           enable reading prorad xml files [[default=no]]],[
-if test "$enableval" = no; then
-    use_proradxml=no
-  else
-PKG_CHECK_MODULES([proradxml],
+   if test "$enableval" = yes; then
+     enable_proradxml=yes
+     PKG_CHECK_MODULES([proradxml],
                   [libproradxmlrw],
                   AC_DEFINE([HAVE_PRORADXML], [1], [define if libproradxmlrw is available]),
                   AC_MSG_ERROR("unable to find requested libproradxmlrw in pkg-config")
                  )
-  fi
-  ])
+    else
+     enable_proradxml=no
+    fi
+  ],[enable_proradxml=no])
+AM_CONDITIONAL([HAVE_PRORADXML], [test "x$enable_proradxml" = "xyes"])
 
 
 AC_LANG_POP(C++)

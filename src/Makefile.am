@@ -100,8 +100,6 @@ libfimex_la_SOURCES = interpolation.c \
 					 NcmlAggregationReader.h \
 					 NcmlAggregationReader.cc \
 					 Null_CDMWriter.cc \
-					 ProradXMLCDMReader.cc \
-					 ProradXMLCDMReader.h \
 					 ReplaceStringObject.cc \
 					 ReplaceStringTimeObject.cc \
 					 SpatialAxisSpec.cc \
@@ -174,8 +172,11 @@ if HAVE_METGM
                          metgm/MetGmCDMVariableProfile.h \
                          metgm/MetGmFileHandlePtr.h \
                          metgm/MetGmDimensionsTag.h
-                         
+endif
 
+if HAVE_PRORADXML
+					 ProradXMLCDMReader.cc \
+					 ProradXMLCDMReader.h
 endif
 
 include wdb/make.mk

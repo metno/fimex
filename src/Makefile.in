@@ -233,7 +233,6 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	Log4cppLogger.cc Log4cppLogger.h mifi_cdm_reader.h \
 	NcmlCDMReader.cc NcmlAggregationReader.h \
 	NcmlAggregationReader.cc Null_CDMWriter.cc \
-	ProradXMLCDMReader.cc ProradXMLCDMReader.h \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
 	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
 	TimeSpec.cc ToVLevelConverter.cc Units.cc Utils.cc \
@@ -352,12 +351,12 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	Felt_File2.lo FeltParameters.lo FillWriter.lo \
 	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
 	NcmlCDMReader.lo NcmlAggregationReader.lo Null_CDMWriter.lo \
-	ProradXMLCDMReader.lo ReplaceStringObject.lo \
-	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
-	Units.lo Utils.lo vertical_coordinate_transformations.lo \
-	XMLDoc.lo XMLInput.lo $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4)
+	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
+	SpatialAxisSpec.lo SliceBuilder.lo ThreadPool.lo TimeUnit.lo \
+	TimeSpec.lo ToVLevelConverter.lo Units.lo Utils.lo \
+	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -677,7 +676,6 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	Log4cppLogger.cc Log4cppLogger.h mifi_cdm_reader.h \
 	NcmlCDMReader.cc NcmlAggregationReader.h \
 	NcmlAggregationReader.cc Null_CDMWriter.cc \
-	ProradXMLCDMReader.cc ProradXMLCDMReader.h \
 	ReplaceStringObject.cc ReplaceStringTimeObject.cc \
 	SpatialAxisSpec.cc SliceBuilder.cc ThreadPool.c TimeUnit.cc \
 	TimeSpec.cc ToVLevelConverter.cc Units.cc Utils.cc \
@@ -864,7 +862,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pressure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Projection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProjectionImpl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProradXMLCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RotatedLatLonGridInformation.Plo@am__quote@
@@ -1735,6 +1732,9 @@ uninstall-am: uninstall-libLTLIBRARIES
 	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
 	uninstall-libLTLIBRARIES
 
+
+@HAVE_PRORADXML_TRUE@					 ProradXMLCDMReader.cc \
+@HAVE_PRORADXML_TRUE@					 ProradXMLCDMReader.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
