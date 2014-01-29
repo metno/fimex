@@ -136,7 +136,17 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
         //coordinates
         string coordinates;
         if (proj->getName() != LatitudeLongitudeProjection::NAME()) {
-            cdm_->generateProjectionCoordinates(proj->getName(), xname, yname, "lon", "lat");
+            //
+            // data will be added to only on request in getDataSlice
+            vector<string> shape(2);
+            shape[0] = xname;
+            shape[1] = yname;
+            cdm_->addVariable(CDMVariable("lat", CDM_DOUBLE, shape));
+            cdm_->addVariable(CDMVariable("lon", CDM_DOUBLE, shape));
+            cdm_->addAttribute("lat", CDMAttribute("units", "degrees_north"));
+            cdm_->addAttribute("lon", CDMAttribute("units", "degrees_east"));
+            cdm_->addAttribute("lat", CDMAttribute("standard_name", "latitude"));
+            cdm_->addAttribute("lon", CDMAttribute("standard_name", "longitude"));
             coordinates = "lon lat";
         }
 
@@ -194,6 +204,19 @@ DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLi
     const CDMVariable& variable = cdm_->getVariable(varName);
     if (variable.hasData()) {
         LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
+        return getDataSliceFromMemory(variable, unLimDimPos);
+    }
+    if (varName == "lat" || varName == "lon") {
+        // generate lat/lon data
+        std::vector<std::string> shape = variable.getShape();
+        CDM newCdm(*cdm_);
+        newCdm.removeVariable("lat");
+        newCdm.removeVariable("lon");
+        std::vector<std::string> projections = newCdm.findVariables("grid_mapping_name", ".*");
+        LOG4FIMEX(logger, Logger::DEBUG, "generating coordinates with " << projections.at(0) << ", " << shape.at(0) << ", " << shape.at(1));
+        newCdm.generateProjectionCoordinates(projections.at(0), shape.at(0), shape.at(1), "lon", "lat");
+        cdm_->getVariable("lat").setData(newCdm.getVariable("lat").getData());
+        cdm_->getVariable("lon").setData(newCdm.getVariable("lon").getData());
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
     return createData(CDM_NAT, 0);

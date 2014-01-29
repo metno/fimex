@@ -20276,8 +20276,10 @@ fi
 # Check whether --enable-proradxml was given.
 if test "${enable_proradxml+set}" = set; then :
   enableval=$enable_proradxml;
-   if test "$enableval" = yes; then
-     enable_proradxml=yes
+   if test "$enableval" = "no"; then
+     enable_proradxml="no"
+   else
+     enable_proradxml="yes"
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proradxml" >&5
@@ -20353,13 +20355,12 @@ $as_echo "yes" >&6; }
 $as_echo "#define HAVE_PRORADXML 1" >>confdefs.h
 
 fi
-    else
-     enable_proradxml=no
     fi
 
 else
-  enable_proradxml=no
+  enable_proradxml="no"
 fi
+echo "enable_proradxml: $enable_proradxml"
 
  if test "x$enable_proradxml" = "xyes"; then
   HAVE_PRORADXML_TRUE=

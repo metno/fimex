@@ -175,8 +175,8 @@ if HAVE_METGM
 endif
 
 if HAVE_PRORADXML
-					 ProradXMLCDMReader.cc \
-					 ProradXMLCDMReader.h
+  libfimex_la_SOURCES +=  ProradXMLCDMReader.cc \
+	   				      ProradXMLCDMReader.h
 endif
 
 include wdb/make.mk
