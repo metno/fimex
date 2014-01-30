@@ -254,7 +254,7 @@ GribMetricDef getGridDefMetric(long edition, boost::shared_ptr<grib_handle> gh)
 
     if (grib_get_double(gh.get(), "DxInMetres", &gmd.incrX)) {
         // = DxInMetres, DiInMetres, Di
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DiInMetres", &gmd.incrY), 0);
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "DiInMetres", &gmd.incrX), 0);
     }
     if (grib_get_double(gh.get(), "DyInMetres", &gmd.incrY)) {
         // = DyInMetres, DjInMetres, Dj
