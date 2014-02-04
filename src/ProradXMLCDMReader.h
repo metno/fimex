@@ -31,6 +31,9 @@
 namespace MetNoFimex
 {
 
+// forward decl.
+class ProradXMLImpl;
+
 class ProradXMLCDMReader: public MetNoFimex::CDMReader
 {
 public:
@@ -42,6 +45,8 @@ public:
     ProradXMLCDMReader(const std::string& source);
     virtual ~ProradXMLCDMReader() {}
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+private:
+   boost::shared_ptr<ProradXMLImpl> pimpl_;
 };
 
 } /* namespace MetNoFimex */

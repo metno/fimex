@@ -44,8 +44,19 @@ namespace MetNoFimex
 static MutexType mutex;
 static LoggerPtr logger = getLogger("Fimex::ProradXMLCDMReader");
 
+class ProradXMLImpl {
+public:
+    ProradXMLImpl() : meta(boost::shared_ptr<td_radarprod_meta_st>(new td_radarprod_meta_st, free_td_radarprod_meta_st)) {}
+    boost::shared_ptr<td_radarprod_meta_st> meta;
+    std::string varNm;
+    std::string xname;
+    std::string yname;
+    std::string time;
+};
+
+
 ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
-: CDMReader()
+: CDMReader(), pimpl_(new ProradXMLImpl())
 {
     using namespace std;
     LOG4FIMEX(logger, Logger::DEBUG, "reading file "+ source );
@@ -55,49 +66,46 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
     LIBXML_TEST_VERSION
     xmlInitParser();
 
-    td_radarprod_meta_st meta;
-    init_td_radarprod_meta_st(&meta);
-    if ( !prorad_xmlprod_read(&meta, const_cast<char*>(source.c_str())) ) {
-        if (meta.cartesian_st == 0) {
-            free_td_radarprod_meta_st(&meta);
+    init_td_radarprod_meta_st(pimpl_->meta.get());
+    if ( !prorad_xmlprod_read(pimpl_->meta.get(), const_cast<char*>(source.c_str())) ) {
+        if (pimpl_->meta->cartesian_st == 0) {
             throw CDMException("Unable to read prorad-xml file: " + source + ": not a cartesian product");
         }
-        td_cartesian_st* cartesian = meta.cartesian_st;
-        string time = "time";
+        td_cartesian_st* cartesian = pimpl_->meta->cartesian_st;
+        pimpl_->time = "time";
         {   // time
-            CDMDimension tDim(time, 1);
+            CDMDimension tDim(pimpl_->time, 1);
             tDim.setUnlimited(1);
             cdm_->addDimension(tDim);
             vector<string> tshape;
-            tshape.push_back(time);
-            CDMVariable tVar(time, CDM_INT, tshape);
+            tshape.push_back(pimpl_->time);
+            CDMVariable tVar(pimpl_->time, CDM_INT, tshape);
             boost::shared_array<int> t(new int[1]());
-            t[0] = meta.product_epoch;
+            t[0] = pimpl_->meta->product_epoch;
             tVar.setData(createData(1, t));
             cdm_->addVariable(tVar);
-            cdm_->addAttribute(time, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
+            cdm_->addAttribute(pimpl_->time, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
         }
         boost::shared_ptr<Projection> proj = Projection::createByProj4(cartesian->projdef);
-        string xname, yname;
         if (proj->getName() == LatitudeLongitudeProjection::NAME()) {
-            xname = "lon";
-            yname = "lat";
+            pimpl_->xname = "lon";
+            pimpl_->yname = "lat";
         } else if (proj->getName() == RotatedLatitudeLongitudeProjection::NAME()) {
-            xname = "rlon";
-            yname = "rlat";
+            pimpl_->xname = "rlon";
+            pimpl_->yname = "rlat";
 
         } else {
-            xname = "x";
-            yname = "y";
+            pimpl_->xname = "x";
+            pimpl_->yname = "y";
         }
         {
-            cdm_->addDimension(CDMDimension(xname, cartesian->x_size));
-            cdm_->addDimension(CDMDimension(yname, cartesian->y_size));
+            cdm_->addDimension(CDMDimension(pimpl_->xname, cartesian->x_size));
+            cdm_->addDimension(CDMDimension(pimpl_->yname, cartesian->y_size));
             vector<string> shape(1);
-            shape[0] = xname;
-            cdm_->addVariable(CDMVariable(xname, CDM_DOUBLE, shape));
-            shape[0] = yname;
-            cdm_->addVariable(CDMVariable(yname, CDM_DOUBLE, shape));
+            shape[0] = pimpl_->xname;
+            cdm_->addVariable(CDMVariable(pimpl_->xname, CDM_DOUBLE, shape));
+            shape[0] = pimpl_->yname;
+            cdm_->addVariable(CDMVariable(pimpl_->yname, CDM_DOUBLE, shape));
             // Projection
             shape.resize(0);
             cdm_->addVariable(CDMVariable(proj->getName(), CDM_SHORT, shape));
@@ -107,18 +115,18 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             }
         }
         if (proj->getName() == LatitudeLongitudeProjection::NAME()) {
-            cdm_->addAttribute(xname, CDMAttribute("units", "degrees_east"));
-            cdm_->addAttribute(yname, CDMAttribute("units", "degrees_north"));
+            cdm_->addAttribute(pimpl_->xname, CDMAttribute("units", "degrees_east"));
+            cdm_->addAttribute(pimpl_->yname, CDMAttribute("units", "degrees_north"));
         } else if (proj->getName() == RotatedLatitudeLongitudeProjection::NAME()) {
-            cdm_->addAttribute(xname, CDMAttribute("units", "degrees"));
-            cdm_->addAttribute(yname, CDMAttribute("units", "degrees"));
-            cdm_->addAttribute(xname, CDMAttribute("standard_name", "grid_longitude"));
-            cdm_->addAttribute(yname, CDMAttribute("standard_name", "grid_latitude"));
+            cdm_->addAttribute(pimpl_->xname, CDMAttribute("units", "degrees"));
+            cdm_->addAttribute(pimpl_->yname, CDMAttribute("units", "degrees"));
+            cdm_->addAttribute(pimpl_->xname, CDMAttribute("standard_name", "grid_longitude"));
+            cdm_->addAttribute(pimpl_->yname, CDMAttribute("standard_name", "grid_latitude"));
         } else {
-            cdm_->addAttribute(xname, CDMAttribute("units", "m"));
-            cdm_->addAttribute(yname, CDMAttribute("units", "m"));
-            cdm_->addAttribute(xname, CDMAttribute("standard_name", "projection_x_axis"));
-            cdm_->addAttribute(yname, CDMAttribute("standard_name", "projection_y_axis"));
+            cdm_->addAttribute(pimpl_->xname, CDMAttribute("units", "m"));
+            cdm_->addAttribute(pimpl_->yname, CDMAttribute("units", "m"));
+            cdm_->addAttribute(pimpl_->xname, CDMAttribute("standard_name", "projection_x_axis"));
+            cdm_->addAttribute(pimpl_->yname, CDMAttribute("standard_name", "projection_y_axis"));
         }
         {
             // axes values
@@ -130,8 +138,8 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             for (size_t i = 0; i < cartesian->y_size; ++i) {
                 yvals[i] = cartesian->north_ucs - i*cartesian->y_pix_size;
             }
-            cdm_->getVariable(xname).setData(createData(cartesian->x_size, xvals));
-            cdm_->getVariable(yname).setData(createData(cartesian->y_size, yvals));
+            cdm_->getVariable(pimpl_->xname).setData(createData(cartesian->x_size, xvals));
+            cdm_->getVariable(pimpl_->yname).setData(createData(cartesian->y_size, yvals));
         }
         //coordinates
         string coordinates;
@@ -139,8 +147,8 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             //
             // data will be added to only on request in getDataSlice
             vector<string> shape(2);
-            shape[0] = xname;
-            shape[1] = yname;
+            shape[0] = pimpl_->xname;
+            shape[1] = pimpl_->yname;
             cdm_->addVariable(CDMVariable("lat", CDM_DOUBLE, shape));
             cdm_->addVariable(CDMVariable("lon", CDM_DOUBLE, shape));
             cdm_->addAttribute("lat", CDMAttribute("units", "degrees_north"));
@@ -154,46 +162,74 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
         assert(cartesian->buffer_size == (cartesian->x_size * cartesian->y_size));
         { // flags and values
             vector<string> shape(3);
-            shape[0] = xname;
-            shape[1] = yname;
-            shape[2] = time;
-            string varNm = cartesian->datatype;
-            cdm_->addVariable(CDMVariable(varNm, CDM_SHORT, shape));
-            cdm_->addAttribute(varNm, CDMAttribute("_FillValue", static_cast<short>(0)));
+            shape[0] = pimpl_->xname;
+            shape[1] = pimpl_->yname;
+            shape[2] = pimpl_->time;
+            pimpl_->varNm = string(cartesian->datatype) + "_radar";
+            cdm_->addVariable(CDMVariable(pimpl_->varNm, CDM_SHORT, shape));
+            cdm_->addAttribute(pimpl_->varNm, CDMAttribute("_FillValue", static_cast<short>(-32767)));
             //cdm_->addAttribute(varNm, CDMAttribute("units", cartesian->))
-            cdm_->addAttribute(varNm, CDMAttribute("scale_factor", cartesian->alfa));
-            cdm_->addAttribute(varNm, CDMAttribute("add_offset", cartesian->beta));
+            cdm_->addAttribute(pimpl_->varNm, CDMAttribute("scale_factor", cartesian->alfa));
+            cdm_->addAttribute(pimpl_->varNm, CDMAttribute("add_offset", cartesian->beta));
             if (coordinates != "") {
-                cdm_->addAttribute(varNm, CDMAttribute("coordinates", coordinates));
+                cdm_->addAttribute(pimpl_->varNm, CDMAttribute("coordinates", coordinates));
             }
-            cdm_->addAttribute(varNm, CDMAttribute("grid_mapping", proj->getName()));
+            cdm_->addAttribute(pimpl_->varNm, CDMAttribute("grid_mapping", proj->getName()));
             boost::shared_array<short> d(new short[cartesian->buffer_size]());
-            copy(cartesian->buffer, cartesian->buffer + cartesian->buffer_size, &d[0]);
+            for (size_t i = 0; i < cartesian->buffer_size; ++i) {
+                if (cartesian->flags[i].is_nodata) {
+                    d[i] = -32767;
+                } else {
+                    d[i] = cartesian->buffer[i];
+                }
+            }
             DataPtr dp = createData(cartesian->buffer_size, d);
-            cdm_->getVariable(varNm).setData(dp);
+            cdm_->getVariable(pimpl_->varNm).setData(dp);
 
-            if (cartesian->packed_flags_size > 0) { // packed_flags_size == 0 in all examples?
-                assert(cartesian->packed_flags_size == cartesian->buffer_size);
-                string flgNm = varNm + "_flags";
-                cdm_->addVariable(CDMVariable(flgNm, CDM_SHORT, shape));
-                cdm_->addAttribute(flgNm, CDMAttribute("standard_name", varNm + " status_flag")); // should link to standard_name, not varNm
+            string extraVars[] = {"nodata", "lowele", "highele", "blocked",
+                                  "seaclutter", "groundclutter", "otherclutter", "status_flag",
+                                  "classification", "block_percent", "clutter_probability"};
+            for (size_t i = 0; i < 11; ++i) {
+                string flgNm = string(cartesian->datatype) + "_" + extraVars[i] + "_radar";
+                cdm_->addVariable(CDMVariable(flgNm, CDM_CHAR, shape));
                 if (coordinates != "") {
                     cdm_->addAttribute(flgNm, CDMAttribute("coordinates", coordinates));
                 }
-                boost::shared_array<short> d(new short[cartesian->packed_flags_size]());
-                copy(cartesian->buffer, cartesian->packed_flags + cartesian->packed_flags_size, &d[0]);
-                DataPtr dp = createData(cartesian->packed_flags_size, d);
-                cdm_->getVariable(flgNm).setData(dp);
+            }
+            string stFlgNm = string(cartesian->datatype) + "_status_flag_radar";
+            cdm_->addAttribute(stFlgNm, CDMAttribute("standard_name", pimpl_->varNm + " status_flag")); // should link to standard_name, not varNm
+            boost::shared_array<char> mask(new char[7]);
+            for (size_t i = 0; i < 7; i++) {
+                mask[i] = 1 << i;
+            }
+            cdm_->addAttribute(stFlgNm, CDMAttribute("flag_masks", CDM_CHAR, createData(7, mask)));
+            cdm_->addAttribute(stFlgNm, CDMAttribute("flag_meanings", "no_data low_elevation high_elevation blocked sea_clutter ground_clutter other_clutter"));
+            string percFlgNm = string(cartesian->datatype) + "_block_percent_radar";
+            cdm_->addAttribute(percFlgNm, CDMAttribute("units", "%"));
+            string probFlgNm = string(cartesian->datatype) + "_clutter_probability_radar";
+            cdm_->addAttribute(probFlgNm, CDMAttribute("units", "%"));
+
+            if (pimpl_->varNm == "dbz") {
+                cdm_->addAttribute(pimpl_->varNm + "_radar", CDMAttribute("standard_name", "equivalent_reflectivity_factor"));
+                // following unit allowed in CF, but not in udunits2:
+                cdm_->addAttribute(pimpl_->varNm + "_radar", CDMAttribute("units", "dBZ"));
+                cdm_->addOrReplaceAttribute(stFlgNm, CDMAttribute("standard_name", "equivalent_reflectivity_factor status_flag"));
             }
 
         }
-
-
     } else {
-        free_td_radarprod_meta_st(&meta);
         throw CDMException("Unable to read prorad-xml file: " + source);
     }
-    free_td_radarprod_meta_st(&meta);
+}
+
+
+#define PRGETDATAFLAG(XXX, YYY) if (varName.find(std::string("_") + XXX +"_radar") != std::string::npos) { \
+    td_cartesian_st* cartesian = pimpl_->meta->cartesian_st; \
+    boost::shared_array<char> d(new char[cartesian->buffer_size]()); \
+    for (size_t i = 0; i < cartesian->buffer_size; ++i) { \
+        d[i] = cartesian->flags[i].YYY ; \
+    } \
+    return createData(cartesian->buffer_size, d); \
 }
 
 DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
@@ -219,6 +255,29 @@ DataPtr ProradXMLCDMReader::getDataSlice(const std::string& varName, size_t unLi
         cdm_->getVariable("lon").setData(newCdm.getVariable("lon").getData());
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
+
+    PRGETDATAFLAG("nodata", is_nodata)
+    PRGETDATAFLAG("lowele", is_lowele)
+    PRGETDATAFLAG("highele", is_highele)
+    PRGETDATAFLAG("blocked", is_blocked)
+    PRGETDATAFLAG("seaclutter", is_seaclutter)
+    PRGETDATAFLAG("groundclutter", is_groundclutter)
+    PRGETDATAFLAG("otherclutter", is_otherclutter)
+    PRGETDATAFLAG("classification", classification)
+    PRGETDATAFLAG("block_percent", block_percent)
+    PRGETDATAFLAG("clutter_probability", clutter_probability)
+    if (varName.find("status_flag_radar") != std::string::npos) {
+        td_cartesian_st* cartesian = pimpl_->meta->cartesian_st;
+        boost::shared_array<char> d(new char[cartesian->buffer_size]());
+        for (size_t i = 0; i < cartesian->buffer_size; ++i) {
+            td_flags_st flag = cartesian->flags[i];
+            d[i] = flag.is_nodata | (flag.is_lowele << 1) | (flag.is_highele << 2) |
+                    (flag.is_blocked << 3) |
+                    (flag.is_seaclutter << 4) | (flag.is_groundclutter << 5) | (flag.is_otherclutter << 6);
+        }
+        return createData(cartesian->buffer_size, d);
+    }
+
     return createData(CDM_NAT, 0);
 }
 
