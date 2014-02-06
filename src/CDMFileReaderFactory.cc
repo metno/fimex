@@ -138,6 +138,9 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
     switch (fileType) {
 #ifdef HAVE_FELT
     case MIFI_FILETYPE_FELT:
+        if (configXML.isEmpty()) {
+            throw CDMException("config file required for felt-files");
+        }
         return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configXML));
 #endif /* FELT */
 #ifdef HAVE_GRIB_API_H
@@ -171,6 +174,9 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
                 // additional file
                 files.push_back(*argIt);
             }
+        }
+        if (configXML.isEmpty()) {
+            throw CDMException("config file required for grib-files");
         }
         return boost::shared_ptr<CDMReader>(new GribCDMReader(files, configXML, members));
     }
