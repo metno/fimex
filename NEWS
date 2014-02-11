@@ -1,3 +1,13 @@
+  * 2014-02-11 fimex-0.51
+    * adding support for Prorad xml-files
+    * avoiding singularities in interpolation
+    * adding variable_type and dimension_size in Fortran
+    * improving WRF-convention support (rot lat/lon, auxiliary axes)
+    * using CF after horizontal transformation of WRF-files
+    * bugfixes in merge (still in beta)
+    * fixing grib-reader for mercator-files
+    * adding qualityExtract2 command-line option,
+      convenient for land-masking after interpolation
   * 2013-12-16 fimex-0.50
     * extending f90-interface, including --enable-fortran target
     * extending c-interface
