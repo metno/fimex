@@ -15,8 +15,8 @@ to access gridded data, eventually interpolated gridded data.
 \tabular{ll}{
 Package: \tab RFimex\cr
 Type: \tab Package\cr
-Version: \tab 0.03\cr
-Date: \tab 2013-10-03\cr
+Version: \tab 0.04\cr
+Date: \tab 2014-02-11\cr
 License: \tab LGPL-2 \cr
 }
 
@@ -37,6 +37,7 @@ http://fimex.met.no
 \code{\link{mifi.reader.vectorAutoRotated}},
 \code{\link{mifi.reader.variables}},
 \code{\link{mifi.reader.getCoordinates}},
+\code{\link{mifi.reader.getProj4}},
 \code{\link{mifi.reader.getSliceVecInUnit}},
 \code{\link{mifi.reader.write}},
 \code{\link{mifi.sb.new}},
@@ -76,4 +77,11 @@ altData <- mifi.reader.getSliceVecInUnit(reader, "altitude", sb, "cm")
 if (length(altData) != 15) {
     stop("didn't get all data; got ", length(altData))
 }
+
+altProj4 <- mifi.reader.getProj4(reader, "altitude")
+if (altProj4 == "") {
+    stop("unable to read proj4-string for altitude; got ", altProj4)
+}
+
+
 }

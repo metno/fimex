@@ -269,6 +269,15 @@ extern mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const c
  * @return 1 on success, 0 on failure
  */
 extern int mifi_slicebuilder_has_CS(mifi_slicebuilder* sb);
+
+/**
+ * Get the projection of the slicebuilder, if it belongs to a
+ * coordinate-system with projection.
+ * @param sb
+ * @return proj4 string or empty string
+ */
+extern const char* mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb);
+
 /**
  * Get the number of dimensions (i.e. the rank) of the slicebuilder.
  * @param sb

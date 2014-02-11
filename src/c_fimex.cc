@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <vector>
 #include "fimex/c_fimex.h"
-#include "mifi_cdm_reader.h"
+#include "fimex/mifi_cdm_reader.h"
 #include "../config.h"
 #include "fimex/CDM.h"
 #include "boost/shared_ptr.hpp"
@@ -373,6 +373,20 @@ int mifi_slicebuilder_get_axistype(mifi_slicebuilder* sb, int* axistype)
         }
     }
     return -1;
+}
+
+const char* mifi_slicebuilder_get_proj4(mifi_slicebuilder* sb)
+{
+    string retVal = "";
+    if (mifi_slicebuilder_has_CS(sb) == 1) {
+        CoordinateSystemSliceBuilder* csb = dynamic_cast<CoordinateSystemSliceBuilder*>(sb->sb_.get());
+        assert(csb != 0);
+        boost::shared_ptr<const Projection> pr = csb->getCoordinateSystem()->getProjection();
+        if (pr.get() != 0) {
+            retVal = pr->getProj4String();
+        }
+    }
+    return retVal.c_str();
 }
 
 int mifi_slicebuilder_set_dim_start_size(mifi_slicebuilder* sb, const char* dimName, unsigned int start, unsigned int size)

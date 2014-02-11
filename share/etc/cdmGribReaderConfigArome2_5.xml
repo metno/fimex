@@ -147,6 +147,7 @@
     </grib2>
 </vertical_axis>
 <vertical_axis id="height_above_msl" name="height_above_msl" grib2_id="102" grib1_id="103" type="float">
+    <attribute name="standard_name" value="height_above_reference_ellipsoid" type="string" />
     <attribute name="description" value="height above MSL" type="string" />
     <attribute name="long_name" value="height" type="string" />
     <attribute name="positive" value="up" type="string" />

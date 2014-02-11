@@ -1,8 +1,8 @@
 Package: RFimex
 Type: Package
 Title: R interface for Fimex
-Version: 0.03
-Date: 2013-10-03
+Version: 0.04
+Date: 2014-02-11
 Author: Heiko Klein
 Maintainer: Heiko Klein <Heiko.Klein@met.no>
 Description: R interface for Fimex, a library to read and manipulate gridded data

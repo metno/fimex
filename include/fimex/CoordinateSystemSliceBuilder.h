@@ -91,6 +91,13 @@ public:
      * @endcode
      */
     SliceBuilder getTimeVariableSliceBuilder();
+
+    /**
+     * Return the Coordinate-System of the SliceBuilder.
+     * @return coordinateSystem, same as used for initialization
+     */
+    boost::shared_ptr<const CoordinateSystem> getCoordinateSystem() {return cs_;}
+
 private:
     boost::shared_ptr<const CoordinateSystem> cs_;
     std::vector<std::string> tShape_;

@@ -73,6 +73,23 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
     return coords;
 }
 
+/*
+ * get the proj4-string of the variable
+ * empty string means missing
+ */
+std::string getProj4(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName)
+{
+    std::vector<std::string> coords;
+    std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(csList->begin(), csList->end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt != csList->end()) {
+        if ((*varSysIt)->hasProjection()) {
+            return (*varSysIt)->getProjection()->getProj4String();
+        }
+    }
+    return "";
+}
+
 boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReader> in, int method, const std::vector<double>& lonVals, const std::vector<double>& latVals) {
     CDMInterpolator* read = new CDMInterpolator(in);
     boost::shared_ptr<CDMReader> r = boost::shared_ptr<CDMReader>(read);
