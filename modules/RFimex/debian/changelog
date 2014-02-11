@@ -1,8 +1,8 @@
-r-metno-rfimex (0.3-1) unstable; urgency=low
+r-metno-rfimex (0.4-1) unstable; urgency=low
 
-  * release with fimex-0.48
+  * release with fimex-0.51
 
- -- Heiko Klein <heiko.klein@met.no>  Mon, 03 Oct 2013 14:52:40 +0200
+ -- Heiko Klein <heiko.klein@met.no>  Tue, 11 Feb 2014 12:04:12 +0100
 
 r-metno-rfimex (0.1-1) unstable; urgency=low
 

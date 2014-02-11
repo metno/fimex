@@ -1117,22 +1117,24 @@ SWIG_R_ConvertPacked(SEXP obj, void *ptr, size_t sz, swig_type_info *ty) {
 #define SWIGTYPE_p_allocator_type swig_types[5]
 #define SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t swig_types[6]
 #define SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t swig_types[7]
-#define SWIGTYPE_p_char swig_types[8]
-#define SWIGTYPE_p_difference_type swig_types[9]
-#define SWIGTYPE_p_mifi_cdm_reader swig_types[10]
-#define SWIGTYPE_p_mifi_slicebuilder swig_types[11]
-#define SWIGTYPE_p_size_type swig_types[12]
-#define SWIGTYPE_p_std__allocatorT_double_t swig_types[13]
-#define SWIGTYPE_p_std__allocatorT_size_t_t swig_types[14]
-#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[15]
-#define SWIGTYPE_p_std__ostream swig_types[16]
-#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t swig_types[17]
-#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[18]
-#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[19]
-#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[20]
-#define SWIGTYPE_p_value_type swig_types[21]
-static swig_type_info *swig_types[23];
-static swig_module_info swig_module = {swig_types, 22, 0, 0, 0, 0};
+#define SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t swig_types[8]
+#define SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t swig_types[9]
+#define SWIGTYPE_p_char swig_types[10]
+#define SWIGTYPE_p_difference_type swig_types[11]
+#define SWIGTYPE_p_mifi_cdm_reader swig_types[12]
+#define SWIGTYPE_p_mifi_slicebuilder swig_types[13]
+#define SWIGTYPE_p_size_type swig_types[14]
+#define SWIGTYPE_p_std__allocatorT_double_t swig_types[15]
+#define SWIGTYPE_p_std__allocatorT_size_t_t swig_types[16]
+#define SWIGTYPE_p_std__allocatorT_std__string_t swig_types[17]
+#define SWIGTYPE_p_std__ostream swig_types[18]
+#define SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t swig_types[19]
+#define SWIGTYPE_p_std__vectorT_double_std__allocatorT_double_t_t swig_types[20]
+#define SWIGTYPE_p_std__vectorT_size_t_std__allocatorT_size_t_t_t swig_types[21]
+#define SWIGTYPE_p_std__vectorT_std__string_std__allocatorT_std__string_t_t swig_types[22]
+#define SWIGTYPE_p_value_type swig_types[23]
+static swig_type_info *swig_types[25];
+static swig_module_info swig_module = {swig_types, 24, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -1337,6 +1339,23 @@ std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader
         }
     }
     return coords;
+}
+
+/*
+ * get the proj4-string of the variable
+ * empty string means missing
+ */
+std::string getProj4(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName)
+{
+    std::vector<std::string> coords;
+    std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(csList->begin(), csList->end(), CompleteCoordinateSystemForComparator(varName));
+    if (varSysIt != csList->end()) {
+        if ((*varSysIt)->hasProjection()) {
+            return (*varSysIt)->getProjection()->getProj4String();
+        }
+    }
+    return "";
 }
 
 boost::shared_ptr<CDMReader> latLonInterpolatedReader(boost::shared_ptr<CDMReader> in, int method, const std::vector<double>& lonVals, const std::vector<double>& latVals) {
@@ -5199,9 +5218,43 @@ R_swig_new_mifi_cdm_reader ( SEXP reader)
 
 
 SWIGEXPORT SEXP
-R_swig_mifi_cdm_reader_get ( SEXP self, SEXP s_swig_copy)
+R_swig_mifi_cdm_reader_reader__set ( SEXP self, SEXP s_reader_)
 {
-  boost::shared_ptr< MetNoFimex::CDMReader > result;
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  boost::shared_ptr< MetNoFimex::CDMReader > *arg2 = (boost::shared_ptr< MetNoFimex::CDMReader > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_cdm_reader_reader__set" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  res2 = SWIG_R_ConvertPtr(s_reader_, &argp2, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "mifi_cdm_reader_reader__set" "', argument " "2"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader > *""'"); 
+  }
+  arg2 = reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp2);
+  if (arg1) (arg1)->reader_ = *arg2;
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_cdm_reader_reader__get ( SEXP self)
+{
+  boost::shared_ptr< MetNoFimex::CDMReader > *result = 0 ;
   mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -5211,11 +5264,71 @@ R_swig_mifi_cdm_reader_get ( SEXP self, SEXP s_swig_copy)
   
   res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
-    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_cdm_reader_get" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_cdm_reader_reader__get" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
   }
   arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
-  result = (arg1)->get();
-  r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
+  result = (boost::shared_ptr< MetNoFimex::CDMReader > *)& ((arg1)->reader_);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, R_SWIG_EXTERNAL |  0 );
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_cdm_reader_csVec__set ( SEXP self, SEXP s_csVec_)
+{
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *arg2 = (std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_cdm_reader_csVec__set" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  res2 = SWIG_R_ConvertPtr(s_csVec_, &argp2, SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "mifi_cdm_reader_csVec__set" "', argument " "2"" of type '" "std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > * >(argp2);
+  if (arg1) (arg1)->csVec_ = *arg2;
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_cdm_reader_csVec__get ( SEXP self)
+{
+  std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *result = 0 ;
+  mifi_cdm_reader *arg1 = (mifi_cdm_reader *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_cdm_reader, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_cdm_reader_csVec__get" "', argument " "1"" of type '" "mifi_cdm_reader *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_cdm_reader * >(argp1);
+  result = (std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *)& ((arg1)->csVec_);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, R_SWIG_EXTERNAL |  0 );
   
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
@@ -5251,10 +5364,55 @@ R_swig_delete_mifi_cdm_reader ( SEXP self)
 
 
 SWIGEXPORT SEXP
-R_swig_new_mifi_slicebuilder ( SEXP sb)
+R_swig_new_mifi_slicebuilder__SWIG_0 ( SEXP sb, SEXP cs)
 {
   mifi_slicebuilder *result = 0 ;
-  SwigValueWrapper< MetNoFimex::SliceBuilder > arg1 ;
+  SwigValueWrapper< boost::shared_ptr< MetNoFimex::SliceBuilder > > arg1 ;
+  SwigValueWrapper< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > arg2 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  void *argp2 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(sb, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_mifi_slicebuilder" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::SliceBuilder >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_mifi_slicebuilder" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::SliceBuilder >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::SliceBuilder > * >(argp1));
+    }
+  }
+  {
+    res2 = SWIG_R_ConvertPtr(cs, &argp2, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t,  0 );
+    if (!SWIG_IsOK(res2)) {
+      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "new_mifi_slicebuilder" "', argument " "2"" of type '" "boost::shared_ptr< MetNoFimex::CoordinateSystem const >""'"); 
+    }  
+    if (!argp2) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_mifi_slicebuilder" "', argument " "2"" of type '" "boost::shared_ptr< MetNoFimex::CoordinateSystem const >""'");
+    } else {
+      arg2 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CoordinateSystem const > * >(argp2));
+    }
+  }
+  result = (mifi_slicebuilder *)new mifi_slicebuilder(arg1,arg2);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_mifi_slicebuilder, R_SWIG_OWNER |  0 );
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_new_mifi_slicebuilder__SWIG_1 ( SEXP sb)
+{
+  mifi_slicebuilder *result = 0 ;
+  SwigValueWrapper< boost::shared_ptr< MetNoFimex::SliceBuilder > > arg1 ;
   void *argp1 ;
   int res1 = 0 ;
   unsigned int r_nprotect = 0;
@@ -5262,14 +5420,14 @@ R_swig_new_mifi_slicebuilder ( SEXP sb)
   VMAXTYPE r_vmax = vmaxget() ;
   
   {
-    res1 = SWIG_R_ConvertPtr(sb, &argp1, SWIGTYPE_p_MetNoFimex__SliceBuilder,  0 );
+    res1 = SWIG_R_ConvertPtr(sb, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t,  0 );
     if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_mifi_slicebuilder" "', argument " "1"" of type '" "MetNoFimex::SliceBuilder""'"); 
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "new_mifi_slicebuilder" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::SliceBuilder >""'"); 
     }  
     if (!argp1) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_mifi_slicebuilder" "', argument " "1"" of type '" "MetNoFimex::SliceBuilder""'");
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "new_mifi_slicebuilder" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::SliceBuilder >""'");
     } else {
-      arg1 = *(reinterpret_cast< MetNoFimex::SliceBuilder * >(argp1));
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::SliceBuilder > * >(argp1));
     }
   }
   result = (mifi_slicebuilder *)new mifi_slicebuilder(arg1);
@@ -5285,7 +5443,7 @@ SWIGEXPORT SEXP
 R_swig_mifi_slicebuilder_sb__set ( SEXP self, SEXP s_sb_)
 {
   mifi_slicebuilder *arg1 = (mifi_slicebuilder *) 0 ;
-  MetNoFimex::SliceBuilder *arg2 = (MetNoFimex::SliceBuilder *) 0 ;
+  boost::shared_ptr< MetNoFimex::SliceBuilder > *arg2 = (boost::shared_ptr< MetNoFimex::SliceBuilder > *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -5299,11 +5457,11 @@ R_swig_mifi_slicebuilder_sb__set ( SEXP self, SEXP s_sb_)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_slicebuilder_sb__set" "', argument " "1"" of type '" "mifi_slicebuilder *""'"); 
   }
   arg1 = reinterpret_cast< mifi_slicebuilder * >(argp1);
-  res2 = SWIG_R_ConvertPtr(s_sb_, &argp2, SWIGTYPE_p_MetNoFimex__SliceBuilder, 0 |  0 );
+  res2 = SWIG_R_ConvertPtr(s_sb_, &argp2, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t, 0 |  0 );
   if (!SWIG_IsOK(res2)) {
-    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "mifi_slicebuilder_sb__set" "', argument " "2"" of type '" "MetNoFimex::SliceBuilder *""'"); 
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "mifi_slicebuilder_sb__set" "', argument " "2"" of type '" "boost::shared_ptr< MetNoFimex::SliceBuilder > *""'"); 
   }
-  arg2 = reinterpret_cast< MetNoFimex::SliceBuilder * >(argp2);
+  arg2 = reinterpret_cast< boost::shared_ptr< MetNoFimex::SliceBuilder > * >(argp2);
   if (arg1) (arg1)->sb_ = *arg2;
   r_ans = R_NilValue;
   
@@ -5318,7 +5476,7 @@ R_swig_mifi_slicebuilder_sb__set ( SEXP self, SEXP s_sb_)
 SWIGEXPORT SEXP
 R_swig_mifi_slicebuilder_sb__get ( SEXP self)
 {
-  MetNoFimex::SliceBuilder *result = 0 ;
+  boost::shared_ptr< MetNoFimex::SliceBuilder > *result = 0 ;
   mifi_slicebuilder *arg1 = (mifi_slicebuilder *) 0 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
@@ -5331,8 +5489,68 @@ R_swig_mifi_slicebuilder_sb__get ( SEXP self)
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_slicebuilder_sb__get" "', argument " "1"" of type '" "mifi_slicebuilder *""'"); 
   }
   arg1 = reinterpret_cast< mifi_slicebuilder * >(argp1);
-  result = (MetNoFimex::SliceBuilder *)& ((arg1)->sb_);
-  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_MetNoFimex__SliceBuilder, R_SWIG_EXTERNAL |  0 );
+  result = (boost::shared_ptr< MetNoFimex::SliceBuilder > *)& ((arg1)->sb_);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t, R_SWIG_EXTERNAL |  0 );
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_slicebuilder_cs__set ( SEXP self, SEXP s_cs_)
+{
+  mifi_slicebuilder *arg1 = (mifi_slicebuilder *) 0 ;
+  boost::shared_ptr< MetNoFimex::CoordinateSystem const > *arg2 = (boost::shared_ptr< MetNoFimex::CoordinateSystem const > *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_slicebuilder, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_slicebuilder_cs__set" "', argument " "1"" of type '" "mifi_slicebuilder *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_slicebuilder * >(argp1);
+  res2 = SWIG_R_ConvertPtr(s_cs_, &argp2, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "mifi_slicebuilder_cs__set" "', argument " "2"" of type '" "boost::shared_ptr< MetNoFimex::CoordinateSystem const > *""'"); 
+  }
+  arg2 = reinterpret_cast< boost::shared_ptr< MetNoFimex::CoordinateSystem const > * >(argp2);
+  if (arg1) (arg1)->cs_ = *arg2;
+  r_ans = R_NilValue;
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_mifi_slicebuilder_cs__get ( SEXP self)
+{
+  boost::shared_ptr< MetNoFimex::CoordinateSystem const > *result = 0 ;
+  mifi_slicebuilder *arg1 = (mifi_slicebuilder *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  res1 = SWIG_R_ConvertPtr(self, &argp1, SWIGTYPE_p_mifi_slicebuilder, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "mifi_slicebuilder_cs__get" "', argument " "1"" of type '" "mifi_slicebuilder *""'"); 
+  }
+  arg1 = reinterpret_cast< mifi_slicebuilder * >(argp1);
+  result = (boost::shared_ptr< MetNoFimex::CoordinateSystem const > *)& ((arg1)->cs_);
+  r_ans = SWIG_R_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t, R_SWIG_EXTERNAL |  0 );
   
   vmaxset(r_vmax);
   if(r_nprotect)  Rf_unprotect(r_nprotect);
@@ -6061,6 +6279,57 @@ R_swig_listCoordinates ( SEXP reader, SEXP csList, SEXP varName, SEXP s_swig_cop
   }
   result = MetNoFimex::listCoordinates(arg1,arg2,arg3);
   r_ans = swig::from(static_cast< std::vector<std::string,std::allocator< std::string > > >(result));
+  
+  
+  vmaxset(r_vmax);
+  if(r_nprotect)  Rf_unprotect(r_nprotect);
+  
+  return r_ans;
+}
+
+
+SWIGEXPORT SEXP
+R_swig_getProj4 ( SEXP reader, SEXP csList, SEXP varName, SEXP s_swig_copy)
+{
+  std::string result;
+  boost::shared_ptr< MetNoFimex::CDMReader > arg1 ;
+  std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *arg2 = (std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *) 0 ;
+  std::string arg3 ;
+  void *argp1 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  unsigned int r_nprotect = 0;
+  SEXP r_ans = R_NilValue ;
+  VMAXTYPE r_vmax = vmaxget() ;
+  
+  {
+    res1 = SWIG_R_ConvertPtr(reader, &argp1, SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t,  0 );
+    if (!SWIG_IsOK(res1)) {
+      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "getProj4" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'"); 
+    }  
+    if (!argp1) {
+      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "getProj4" "', argument " "1"" of type '" "boost::shared_ptr< MetNoFimex::CDMReader >""'");
+    } else {
+      arg1 = *(reinterpret_cast< boost::shared_ptr< MetNoFimex::CDMReader > * >(argp1));
+    }
+  }
+  res2 = SWIG_R_ConvertPtr(csList, &argp2, SWIGTYPE_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "getProj4" "', argument " "2"" of type '" "std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > *""'"); 
+  }
+  arg2 = reinterpret_cast< std::vector< boost::shared_ptr< MetNoFimex::CoordinateSystem const >,std::allocator< boost::shared_ptr< MetNoFimex::CoordinateSystem const > > > * >(argp2);
+  {
+    std::string *ptr = (std::string *)0;
+    int res = SWIG_AsPtr_std_string(varName, &ptr);
+    if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "getProj4" "', argument " "3"" of type '" "std::string""'"); 
+    }
+    arg3 = *ptr;
+    if (SWIG_IsNewObj(res)) delete ptr;
+  }
+  result = MetNoFimex::getProj4(arg1,arg2,arg3);
+  r_ans = SWIG_From_std_string(static_cast< std::string >(result));
   
   
   vmaxset(r_vmax);
@@ -6976,6 +7245,8 @@ static swig_type_info _swigt__p_MetNoFimex__SliceBuilder = {"_p_MetNoFimex__Slic
 static swig_type_info _swigt__p_allocator_type = {"_p_allocator_type", "allocator_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_MetNoFimex__CDMReader_t = {"_p_boost__shared_ptrT_MetNoFimex__CDMReader_t", "boost::shared_ptr< MetNoFimex::CDMReader > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t = {"_p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t", "boost::shared_ptr< MetNoFimex::CoordinateAxis const > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t = {"_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t", "boost::shared_ptr< MetNoFimex::CoordinateSystem const > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t = {"_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t", "boost::shared_ptr< MetNoFimex::SliceBuilder > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_difference_type = {"_p_difference_type", "difference_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_mifi_cdm_reader = {"_p_mifi_cdm_reader", "mifi_cdm_reader *", 0, 0, (void*)0, 0};
@@ -7000,6 +7271,8 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_allocator_type,
   &_swigt__p_boost__shared_ptrT_MetNoFimex__CDMReader_t,
   &_swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t,
+  &_swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t,
+  &_swigt__p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t,
   &_swigt__p_char,
   &_swigt__p_difference_type,
   &_swigt__p_mifi_cdm_reader,
@@ -7024,6 +7297,8 @@ static swig_cast_info _swigc__p_MetNoFimex__SliceBuilder[] = {  {&_swigt__p_MetN
 static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_MetNoFimex__CDMReader_t[] = {  {&_swigt__p_boost__shared_ptrT_MetNoFimex__CDMReader_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t[] = {  {&_swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t[] = {  {&_swigt__p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t[] = {  {&_swigt__p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_difference_type[] = {  {&_swigt__p_difference_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_mifi_cdm_reader[] = {  {&_swigt__p_mifi_cdm_reader, 0, 0, 0},{0, 0, 0, 0}};
@@ -7048,6 +7323,8 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_allocator_type,
   _swigc__p_boost__shared_ptrT_MetNoFimex__CDMReader_t,
   _swigc__p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t,
+  _swigc__p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t,
+  _swigc__p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t,
   _swigc__p_char,
   _swigc__p_difference_type,
   _swigc__p_mifi_cdm_reader,
@@ -7326,12 +7603,14 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_StringVector_pop", (DL_FUNC) &R_swig_StringVector_pop, 2},
    {"R_swig_IntVector_pop", (DL_FUNC) &R_swig_IntVector_pop, 2},
    {"R_swig_DoubleVector_pop", (DL_FUNC) &R_swig_DoubleVector_pop, 2},
+   {"R_swig_mifi_cdm_reader_reader__set", (DL_FUNC) &R_swig_mifi_cdm_reader_reader__set, 2},
    {"R_swig_CDMReader_getCDM", (DL_FUNC) &R_swig_CDMReader_getCDM, 2},
    {"R_swig_boost__shared_ptrCDMReader_getCDM", (DL_FUNC) &R_swig_boost__shared_ptrCDMReader_getCDM, 2},
    {"R_swig_listCoordinateSystems", (DL_FUNC) &R_swig_listCoordinateSystems, 2},
    {"R_swig_delete_DoubleVector", (DL_FUNC) &R_swig_delete_DoubleVector, 1},
    {"R_swig_delete_StringVector", (DL_FUNC) &R_swig_delete_StringVector, 1},
    {"R_swig_listCoordinates", (DL_FUNC) &R_swig_listCoordinates, 4},
+   {"R_swig_mifi_slicebuilder_cs__get", (DL_FUNC) &R_swig_mifi_slicebuilder_cs__get, 1},
    {"R_swig_delete_CDMFileReaderFactory", (DL_FUNC) &R_swig_delete_CDMFileReaderFactory, 1},
    {"R_swig_DoubleVector_assign", (DL_FUNC) &R_swig_DoubleVector_assign, 3},
    {"R_swig_IntVector_assign", (DL_FUNC) &R_swig_IntVector_assign, 3},
@@ -7360,6 +7639,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_StringVector_empty", (DL_FUNC) &R_swig_StringVector_empty, 2},
    {"R_swig_DoubleVector_empty", (DL_FUNC) &R_swig_DoubleVector_empty, 2},
    {"R_swig_IntVector_empty", (DL_FUNC) &R_swig_IntVector_empty, 2},
+   {"R_swig_mifi_cdm_reader_csVec__set", (DL_FUNC) &R_swig_mifi_cdm_reader_csVec__set, 2},
    {"R_swig_delete_IntVector", (DL_FUNC) &R_swig_delete_IntVector, 1},
    {"R_swig_StringVector_size", (DL_FUNC) &R_swig_StringVector_size, 2},
    {"R_swig_DoubleVector_size", (DL_FUNC) &R_swig_DoubleVector_size, 2},
@@ -7368,6 +7648,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_IntVector___len__", (DL_FUNC) &R_swig_IntVector___len__, 2},
    {"R_swig_DoubleVector___len__", (DL_FUNC) &R_swig_DoubleVector___len__, 2},
    {"R_swig___lshift__", (DL_FUNC) &R_swig___lshift__, 3},
+   {"R_swig_mifi_cdm_reader_reader__get", (DL_FUNC) &R_swig_mifi_cdm_reader_reader__get, 1},
    {"R_swig_delete_CDMReader", (DL_FUNC) &R_swig_delete_CDMReader, 1},
    {"R_swig_delete_boost__shared_ptrCDMReader", (DL_FUNC) &R_swig_delete_boost__shared_ptrCDMReader, 1},
    {"R_swig_StringVector___setitem__", (DL_FUNC) &R_swig_StringVector___setitem__, 3},
@@ -7379,7 +7660,6 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_IntVector___setitem__", (DL_FUNC) &R_swig_IntVector___setitem__, 3},
    {"R_swig_IntVector___getitem__", (DL_FUNC) &R_swig_IntVector___getitem__, 3},
    {"R_swig_IntVector___delitem__", (DL_FUNC) &R_swig_IntVector___delitem__, 2},
-   {"R_swig_new_mifi_slicebuilder", (DL_FUNC) &R_swig_new_mifi_slicebuilder, 1},
    {"R_swig_delete_mifi_slicebuilder", (DL_FUNC) &R_swig_delete_mifi_slicebuilder, 1},
    {"R_swig_delete_SliceBuilder", (DL_FUNC) &R_swig_delete_SliceBuilder, 1},
    {"R_swig_new_StringVector__SWIG_0", (DL_FUNC) &R_swig_new_StringVector__SWIG_0, 0},
@@ -7388,6 +7668,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_IntVector__SWIG_0", (DL_FUNC) &R_swig_new_IntVector__SWIG_0, 0},
    {"R_swig_IntVector_resize__SWIG_0", (DL_FUNC) &R_swig_IntVector_resize__SWIG_0, 2},
    {"R_swig_StringVector_resize__SWIG_0", (DL_FUNC) &R_swig_StringVector_resize__SWIG_0, 2},
+   {"R_swig_new_mifi_slicebuilder__SWIG_0", (DL_FUNC) &R_swig_new_mifi_slicebuilder__SWIG_0, 2},
    {"R_swig_new_SliceBuilder__SWIG_0", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_0, 3},
    {"R_swig_SliceBuilder_setStartAndSize__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_0, 4},
    {"R_swig_SliceBuilder_setAll__SWIG_0", (DL_FUNC) &R_swig_SliceBuilder_setAll__SWIG_0, 2},
@@ -7400,6 +7681,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_new_IntVector__SWIG_1", (DL_FUNC) &R_swig_new_IntVector__SWIG_1, 1},
    {"R_swig_IntVector_resize__SWIG_1", (DL_FUNC) &R_swig_IntVector_resize__SWIG_1, 3},
    {"R_swig_StringVector_resize__SWIG_1", (DL_FUNC) &R_swig_StringVector_resize__SWIG_1, 3},
+   {"R_swig_new_mifi_slicebuilder__SWIG_1", (DL_FUNC) &R_swig_new_mifi_slicebuilder__SWIG_1, 1},
    {"R_swig_mifi_get_unique_forecast_reference_time", (DL_FUNC) &R_swig_mifi_get_unique_forecast_reference_time, 3},
    {"R_swig_new_SliceBuilder__SWIG_1", (DL_FUNC) &R_swig_new_SliceBuilder__SWIG_1, 2},
    {"R_swig_SliceBuilder_setStartAndSize__SWIG_1", (DL_FUNC) &R_swig_SliceBuilder_setStartAndSize__SWIG_1, 4},
@@ -7421,6 +7703,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_StringVector_capacity", (DL_FUNC) &R_swig_StringVector_capacity, 2},
    {"R_swig_SliceBuilder_getDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getDimensionSizes, 2},
    {"R_swig_SliceBuilder_getMaxDimensionSizes", (DL_FUNC) &R_swig_SliceBuilder_getMaxDimensionSizes, 2},
+   {"R_swig_mifi_slicebuilder_cs__set", (DL_FUNC) &R_swig_mifi_slicebuilder_cs__set, 2},
    {"R_swig_DoubleVector_push_back", (DL_FUNC) &R_swig_DoubleVector_push_back, 2},
    {"R_swig_IntVector_push_back", (DL_FUNC) &R_swig_IntVector_push_back, 2},
    {"R_swig_StringVector_push_back", (DL_FUNC) &R_swig_StringVector_push_back, 2},
@@ -7428,6 +7711,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_DoubleVector_get_allocator", (DL_FUNC) &R_swig_DoubleVector_get_allocator, 2},
    {"R_swig_IntVector_get_allocator", (DL_FUNC) &R_swig_IntVector_get_allocator, 2},
    {"R_swig_StringVector_get_allocator", (DL_FUNC) &R_swig_StringVector_get_allocator, 2},
+   {"R_swig_mifi_cdm_reader_csVec__get", (DL_FUNC) &R_swig_mifi_cdm_reader_csVec__get, 1},
    {"R_swig_mifi_get_variable_name", (DL_FUNC) &R_swig_mifi_get_variable_name, 2},
    {"R_swig_new_mifi_cdm_reader", (DL_FUNC) &R_swig_new_mifi_cdm_reader, 1},
    {"R_swig_delete_mifi_cdm_reader", (DL_FUNC) &R_swig_delete_mifi_cdm_reader, 1},
@@ -7437,13 +7721,13 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {"R_swig_IntVector_pop_back", (DL_FUNC) &R_swig_IntVector_pop_back, 1},
    {"R_swig_StringVector_pop_back", (DL_FUNC) &R_swig_StringVector_pop_back, 1},
    {"R_swig_delete_NetCDF_CDMWriter", (DL_FUNC) &R_swig_delete_NetCDF_CDMWriter, 1},
+   {"R_swig_getProj4", (DL_FUNC) &R_swig_getProj4, 4},
    {"R_swig_StringVector_swap", (DL_FUNC) &R_swig_StringVector_swap, 2},
    {"R_swig_DoubleVector_swap", (DL_FUNC) &R_swig_DoubleVector_swap, 2},
    {"R_swig_IntVector_swap", (DL_FUNC) &R_swig_IntVector_swap, 2},
    {"R_swig_StringVector___nonzero__", (DL_FUNC) &R_swig_StringVector___nonzero__, 2},
    {"R_swig_IntVector___nonzero__", (DL_FUNC) &R_swig_IntVector___nonzero__, 2},
    {"R_swig_DoubleVector___nonzero__", (DL_FUNC) &R_swig_DoubleVector___nonzero__, 2},
-   {"R_swig_mifi_cdm_reader_get", (DL_FUNC) &R_swig_mifi_cdm_reader_get, 2},
    {"R_swig_DoubleVector_front", (DL_FUNC) &R_swig_DoubleVector_front, 2},
    {"R_swig_IntVector_front", (DL_FUNC) &R_swig_IntVector_front, 2},
    {"R_swig_StringVector_front", (DL_FUNC) &R_swig_StringVector_front, 2},

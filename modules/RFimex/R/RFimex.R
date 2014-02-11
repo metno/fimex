@@ -5,7 +5,7 @@
 # the SWIG interface file instead.
 
 ##   Generated via the command line invocation:
-##	 swig -Isrc -I/usr/include -c++ -r -module RFimex -o src/fimex_wrap.cpp ../fimex.i
+##	 swig -Isrc -I/usr/include -c++ -r -module RFimex -o fimex_wrap.cpp ../fimex.i
 
 
 #                         srun.swg                            #
@@ -1757,20 +1757,59 @@ attr(`mifi_cdm_reader`, 'returnType') = '_p_mifi_cdm_reader'
 attr(`mifi_cdm_reader`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t')
 class(`mifi_cdm_reader`) = c("SWIGFunction", class('mifi_cdm_reader'))
 
-# Start of mifi_cdm_reader_get
+# Start of mifi_cdm_reader_reader__set
 
-`mifi_cdm_reader_get` = function(self, .copy = FALSE)
+`mifi_cdm_reader_reader__set` = function(self, s_reader_)
 {
-  ;ans = .Call('R_swig_mifi_cdm_reader_get', self, as.logical(.copy), PACKAGE='RFimex');
+  ;.Call('R_swig_mifi_cdm_reader_reader__set', self, s_reader_, PACKAGE='RFimex');
+  
+}
+
+attr(`mifi_cdm_reader_reader__set`, 'returnType') = 'void'
+attr(`mifi_cdm_reader_reader__set`, "inputTypes") = c('_p_mifi_cdm_reader', '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t')
+class(`mifi_cdm_reader_reader__set`) = c("SWIGFunction", class('mifi_cdm_reader_reader__set'))
+
+# Start of mifi_cdm_reader_reader__get
+
+`mifi_cdm_reader_reader__get` = function(self)
+{
+  ;ans = .Call('R_swig_mifi_cdm_reader_reader__get', self, PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
   
   ans
   
 }
 
-attr(`mifi_cdm_reader_get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
-attr(`mifi_cdm_reader_get`, "inputTypes") = c('_p_mifi_cdm_reader')
-class(`mifi_cdm_reader_get`) = c("SWIGFunction", class('mifi_cdm_reader_get'))
+attr(`mifi_cdm_reader_reader__get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
+attr(`mifi_cdm_reader_reader__get`, "inputTypes") = c('_p_mifi_cdm_reader')
+class(`mifi_cdm_reader_reader__get`) = c("SWIGFunction", class('mifi_cdm_reader_reader__get'))
+
+# Start of mifi_cdm_reader_csVec__set
+
+`mifi_cdm_reader_csVec__set` = function(self, s_csVec_)
+{
+  ;.Call('R_swig_mifi_cdm_reader_csVec__set', self, s_csVec_, PACKAGE='RFimex');
+  
+}
+
+attr(`mifi_cdm_reader_csVec__set`, 'returnType') = 'void'
+attr(`mifi_cdm_reader_csVec__set`, "inputTypes") = c('_p_mifi_cdm_reader', '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t')
+class(`mifi_cdm_reader_csVec__set`) = c("SWIGFunction", class('mifi_cdm_reader_csVec__set'))
+
+# Start of mifi_cdm_reader_csVec__get
+
+`mifi_cdm_reader_csVec__get` = function(self)
+{
+  ;ans = .Call('R_swig_mifi_cdm_reader_csVec__get', self, PACKAGE='RFimex');
+  class(ans) <- "_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t";
+  
+  ans
+  
+}
+
+attr(`mifi_cdm_reader_csVec__get`, 'returnType') = '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t'
+attr(`mifi_cdm_reader_csVec__get`, "inputTypes") = c('_p_mifi_cdm_reader')
+class(`mifi_cdm_reader_csVec__get`) = c("SWIGFunction", class('mifi_cdm_reader_csVec__get'))
 
 # Start of delete_mifi_cdm_reader
 
@@ -1788,8 +1827,8 @@ class(`delete_mifi_cdm_reader`) = c("SWIGFunction", class('delete_mifi_cdm_reade
 setMethod('$', '_p_mifi_cdm_reader', function(x, name)
 
 {
-  accessorFuns = list('get' = mifi_cdm_reader_get);
-  vaccessors = c('get');
+  accessorFuns = list('reader_' = mifi_cdm_reader_reader__get, 'csVec_' = mifi_cdm_reader_csVec__get);
+  vaccessors = c('reader_', 'csVec_');
   ;        idx = pmatch(name, names(accessorFuns));
   if(is.na(idx)) 
   return(callNextMethod(x, name));
@@ -1801,12 +1840,43 @@ setMethod('$', '_p_mifi_cdm_reader', function(x, name)
 
 );
 # end of accessor method for mifi_cdm_reader
+# Start of accessor method for mifi_cdm_reader
+setMethod('$<-', '_p_mifi_cdm_reader', function(x, name, value)
+
+{
+  accessorFuns = list('reader_' = mifi_cdm_reader_reader__set, 'csVec_' = mifi_cdm_reader_csVec__set);
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name, value));
+  f = accessorFuns[[idx]];
+  f(x, value);
+  x;
+}
+
+
+);
+setMethod('[[<-', c('_p_mifi_cdm_reader', 'character'),function(x, i, j, ..., value)
+
+{
+  name = i;
+  accessorFuns = list('reader_' = mifi_cdm_reader_reader__set, 'csVec_' = mifi_cdm_reader_csVec__set);
+  ;        idx = pmatch(name, names(accessorFuns));
+  if(is.na(idx)) 
+  return(callNextMethod(x, name, value));
+  f = accessorFuns[[idx]];
+  f(x, value);
+  x;
+}
+
+
+);
+# end of accessor method for mifi_cdm_reader
 setMethod('delete', '_p_mifi_cdm_reader', function(obj) {delete_mifi_cdm_reader(obj)})
 # Start of new_mifi_slicebuilder
 
-`mifi_slicebuilder` = function(sb)
+`mifi_slicebuilder__SWIG_0` = function(sb, cs)
 {
-  ;ans = .Call('R_swig_new_mifi_slicebuilder', sb, PACKAGE='RFimex');
+  ;ans = .Call('R_swig_new_mifi_slicebuilder__SWIG_0', sb, cs, PACKAGE='RFimex');
   class(ans) <- "_p_mifi_slicebuilder";
   
   reg.finalizer(ans, delete_mifi_slicebuilder)
@@ -1814,10 +1884,46 @@ setMethod('delete', '_p_mifi_cdm_reader', function(obj) {delete_mifi_cdm_reader(
   
 }
 
-attr(`mifi_slicebuilder`, 'returnType') = '_p_mifi_slicebuilder'
-attr(`mifi_slicebuilder`, "inputTypes") = c('_p_MetNoFimex__SliceBuilder')
-class(`mifi_slicebuilder`) = c("SWIGFunction", class('mifi_slicebuilder'))
+attr(`mifi_slicebuilder__SWIG_0`, 'returnType') = '_p_mifi_slicebuilder'
+attr(`mifi_slicebuilder__SWIG_0`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t', '_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t')
+class(`mifi_slicebuilder__SWIG_0`) = c("SWIGFunction", class('mifi_slicebuilder__SWIG_0'))
 
+# Start of new_mifi_slicebuilder
+
+`mifi_slicebuilder__SWIG_1` = function(sb)
+{
+  ;ans = .Call('R_swig_new_mifi_slicebuilder__SWIG_1', sb, PACKAGE='RFimex');
+  class(ans) <- "_p_mifi_slicebuilder";
+  
+  reg.finalizer(ans, delete_mifi_slicebuilder)
+  ans
+  
+}
+
+attr(`mifi_slicebuilder__SWIG_1`, 'returnType') = '_p_mifi_slicebuilder'
+attr(`mifi_slicebuilder__SWIG_1`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t')
+class(`mifi_slicebuilder__SWIG_1`) = c("SWIGFunction", class('mifi_slicebuilder__SWIG_1'))
+
+`mifi_slicebuilder` <- function(...) {
+  argtypes <- mapply(class, list(...));
+  argv <- list(...);
+  argc <- length(argtypes);
+# dispatch functions 2
+  if (argc == 1) {
+    if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t')) {
+      f <- mifi_slicebuilder__SWIG_1; 
+    }
+  } else if (argc == 2) {
+    if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t') && extends(argtypes[2], '_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t')) {
+      f <- mifi_slicebuilder__SWIG_0; 
+    }
+  } else {
+    stop("cannot find overloaded function for mifi_slicebuilder with argtypes (",toString(argtypes),")");
+  };
+  f(...);
+}
+
+# Dispatch function
 # Start of mifi_slicebuilder_sb__set
 
 `mifi_slicebuilder_sb__set` = function(self, s_sb_)
@@ -1827,7 +1933,7 @@ class(`mifi_slicebuilder`) = c("SWIGFunction", class('mifi_slicebuilder'))
 }
 
 attr(`mifi_slicebuilder_sb__set`, 'returnType') = 'void'
-attr(`mifi_slicebuilder_sb__set`, "inputTypes") = c('_p_mifi_slicebuilder', '_p_MetNoFimex__SliceBuilder')
+attr(`mifi_slicebuilder_sb__set`, "inputTypes") = c('_p_mifi_slicebuilder', '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t')
 class(`mifi_slicebuilder_sb__set`) = c("SWIGFunction", class('mifi_slicebuilder_sb__set'))
 
 # Start of mifi_slicebuilder_sb__get
@@ -1835,15 +1941,42 @@ class(`mifi_slicebuilder_sb__set`) = c("SWIGFunction", class('mifi_slicebuilder_
 `mifi_slicebuilder_sb__get` = function(self)
 {
   ;ans = .Call('R_swig_mifi_slicebuilder_sb__get', self, PACKAGE='RFimex');
-  class(ans) <- "_p_MetNoFimex__SliceBuilder";
+  class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t";
   
   ans
   
 }
 
-attr(`mifi_slicebuilder_sb__get`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
+attr(`mifi_slicebuilder_sb__get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t'
 attr(`mifi_slicebuilder_sb__get`, "inputTypes") = c('_p_mifi_slicebuilder')
 class(`mifi_slicebuilder_sb__get`) = c("SWIGFunction", class('mifi_slicebuilder_sb__get'))
+
+# Start of mifi_slicebuilder_cs__set
+
+`mifi_slicebuilder_cs__set` = function(self, s_cs_)
+{
+  ;.Call('R_swig_mifi_slicebuilder_cs__set', self, s_cs_, PACKAGE='RFimex');
+  
+}
+
+attr(`mifi_slicebuilder_cs__set`, 'returnType') = 'void'
+attr(`mifi_slicebuilder_cs__set`, "inputTypes") = c('_p_mifi_slicebuilder', '_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t')
+class(`mifi_slicebuilder_cs__set`) = c("SWIGFunction", class('mifi_slicebuilder_cs__set'))
+
+# Start of mifi_slicebuilder_cs__get
+
+`mifi_slicebuilder_cs__get` = function(self)
+{
+  ;ans = .Call('R_swig_mifi_slicebuilder_cs__get', self, PACKAGE='RFimex');
+  class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t";
+  
+  ans
+  
+}
+
+attr(`mifi_slicebuilder_cs__get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t'
+attr(`mifi_slicebuilder_cs__get`, "inputTypes") = c('_p_mifi_slicebuilder')
+class(`mifi_slicebuilder_cs__get`) = c("SWIGFunction", class('mifi_slicebuilder_cs__get'))
 
 # Start of delete_mifi_slicebuilder
 
@@ -1861,8 +1994,8 @@ class(`delete_mifi_slicebuilder`) = c("SWIGFunction", class('delete_mifi_slicebu
 setMethod('$', '_p_mifi_slicebuilder', function(x, name)
 
 {
-  accessorFuns = list('sb_' = mifi_slicebuilder_sb__get);
-  vaccessors = c('sb_');
+  accessorFuns = list('sb_' = mifi_slicebuilder_sb__get, 'cs_' = mifi_slicebuilder_cs__get);
+  vaccessors = c('sb_', 'cs_');
   ;        idx = pmatch(name, names(accessorFuns));
   if(is.na(idx)) 
   return(callNextMethod(x, name));
@@ -1878,7 +2011,7 @@ setMethod('$', '_p_mifi_slicebuilder', function(x, name)
 setMethod('$<-', '_p_mifi_slicebuilder', function(x, name, value)
 
 {
-  accessorFuns = list('sb_' = mifi_slicebuilder_sb__set);
+  accessorFuns = list('sb_' = mifi_slicebuilder_sb__set, 'cs_' = mifi_slicebuilder_cs__set);
   ;        idx = pmatch(name, names(accessorFuns));
   if(is.na(idx)) 
   return(callNextMethod(x, name, value));
@@ -1893,7 +2026,7 @@ setMethod('[[<-', c('_p_mifi_slicebuilder', 'character'),function(x, i, j, ..., 
 
 {
   name = i;
-  accessorFuns = list('sb_' = mifi_slicebuilder_sb__set);
+  accessorFuns = list('sb_' = mifi_slicebuilder_sb__set, 'cs_' = mifi_slicebuilder_cs__set);
   ;        idx = pmatch(name, names(accessorFuns));
   if(is.na(idx)) 
   return(callNextMethod(x, name, value));
@@ -2283,6 +2416,19 @@ class(`listCoordinateSystems`) = c("SWIGFunction", class('listCoordinateSystems'
 attr(`listCoordinates`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
 attr(`listCoordinates`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t', 'character')
 class(`listCoordinates`) = c("SWIGFunction", class('listCoordinates'))
+
+# Start of getProj4
+
+`getProj4` = function(reader, csList, varName, .copy = FALSE)
+{
+  varName = as(varName, "character"); 
+  ;.Call('R_swig_getProj4', reader, csList, varName, as.logical(.copy), PACKAGE='RFimex');
+  
+}
+
+attr(`getProj4`, 'returnType') = 'character'
+attr(`getProj4`, "inputTypes") = c('_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t', 'character')
+class(`getProj4`) = c("SWIGFunction", class('getProj4'))
 
 # Start of latLonInterpolatedReader
 

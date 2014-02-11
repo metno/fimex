@@ -109,7 +109,7 @@ mifi.reader.getCoordinates <- function(reader, varName) {
 }
 
 mifi.reader.getProj4 <- function(reader, varName) {
-    ans <- getProj4((reader$p_, reader$csList_, varName);
+    ans <- getProj4(reader$p_, reader$csList_, varName);
     ans
 }
 

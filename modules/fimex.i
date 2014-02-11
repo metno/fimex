@@ -150,6 +150,7 @@ class shared_ptr
 namespace MetNoFimex {
 std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<MetNoFimex::CDMReader> reader);
 std::vector<std::string> listCoordinates(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName);
+std::string getProj4(boost::shared_ptr<MetNoFimex::CDMReader> reader, std::vector<boost::shared_ptr<const MetNoFimex::CoordinateSystem> >* csList, std::string varName);
 boost::shared_ptr<MetNoFimex::CDMReader> latLonInterpolatedReader(boost::shared_ptr<MetNoFimex::CDMReader> in, int method, const std::vector<double>& lonVals, const std::vector<double>& latVals) throw(MetNoFimex::CDMException);
 boost::shared_ptr<MetNoFimex::CDMReader> vectorAutoRotatedReader(boost::shared_ptr<MetNoFimex::CDMReader> in, int toLatLon) throw(MetNoFimex::CDMException);
 
