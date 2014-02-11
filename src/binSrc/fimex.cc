@@ -83,12 +83,13 @@ static void writeUsage(ostream& out, const po::options_description& generic, con
     out << "             [--input.optional OPT1 --input.optional OPT2 ...]" << endl;
     out << "             [--num_threads ...]" << endl;
     out << "             [--process....]" << endl;
-    out << "             [--extract....]" << endl;
     out << "             [--qualityExtract....]" << endl;
+    out << "             [--extract....]" << endl;
     out << "             [--interpolate....]" << endl;
     out << "             [--verticalInterpolate....]" << endl;
     out << "             [--timeInterpolate....]" << endl;
     out << "             [--merge....]" << endl;
+    out << "             [--qualityExtract2....]" << endl;
     out << "             [--ncml.config NCMLFILE]" << endl;
     out << endl;
     out << generic << endl;
@@ -272,6 +273,11 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "merge.printNcML", vm);
     writeOptionAny(out, "merge.printCS", vm);
     writeOptionAny(out, "merge.printSize", vm);
+    writeOption<string>(out, "qualityExtract2.autoConfigString", vm);
+    writeOption<string>(out, "qualityExtract2.config", vm);
+    writeOption<string>(out, "qualityExtract2.printNcML", vm);
+    writeOption<string>(out, "qualityExtract2.printCS", vm);
+    writeOption<string>(out, "qualityExtract2.printSize", vm);
     writeOption<string>(out, "ncml.config", vm);
     writeOption<string>(out, "ncml.printNcML", vm);
     writeOptionAny(out, "ncml.printCS", vm);
@@ -545,16 +551,15 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
     return boost::shared_ptr<CDMReader>(extractor);
 }
 
-static boost::shared_ptr<CDMReader> getCDMQualityExtractor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+static boost::shared_ptr<CDMReader> getCDMQualityExtractor(string version, po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
     string autoConf, config;
-    if (vm.count("qualityExtract.autoConfigString")) autoConf = vm["qualityExtract.autoConfigString"].as<string>();
-    if (vm.count("qualityExtract.config")) config = vm["qualityExtract.config"].as<string>();
+    if (vm.count("qualityExtract"+version+".autoConfigString")) autoConf = vm["qualityExtract"+version+".autoConfigString"].as<string>();
+    if (vm.count("qualityExtract"+version+".config")) config = vm["qualityExtract"+version+".config"].as<string>();
     if (autoConf != "" || config != "") {
         LOG4FIMEX(logger, Logger::DEBUG, "adding CDMQualityExtractor with (" << autoConf << "," << config <<")");
         dataReader = boost::shared_ptr<CDMReader>(new CDMQualityExtractor(boost::shared_ptr<CDMReader>(dataReader), autoConf, config));
     }
-    printReaderStatements("qualityExtract", vm, dataReader);
-
+    printReaderStatements("qualityExtract"+version, vm, dataReader);
     return dataReader;
 }
 
@@ -1029,6 +1034,15 @@ int run(int argc, char* args[])
 #endif
         ("timeInterpolate.printCS", "print CoordinateSystems of timeInterpolator")
         ("timeInterpolate.printSize", "print size estimate")
+        ("qualityExtract2.autoConfString", po::value<string>(), "configure the quality-assignment using CF-1.3 status-flag")
+        ("qualityExtract2.config", po::value<string>(), "configure the quality-assignment with a xml-config file")
+#if BOOST_VERSION >= 104000
+        ("qualityExtract2.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
+#else
+        ("qualityExtract2.printNcML", po::value<string>(), "print NcML description of extractor (use - for command-line")
+#endif
+        ("qualityExtract2.printCS", "print CoordinateSystems of extractor")
+        ("qualityExtract2.printSize", "print size estimate")
         ("ncml.config", po::value<string>(), "modify/configure with ncml-file")
 #if BOOST_VERSION >= 104000
         ("ncml.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of extractor")
@@ -1102,12 +1116,13 @@ int run(int argc, char* args[])
 
     boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
     dataReader = getCDMProcessor(vm, dataReader);
-    dataReader = getCDMQualityExtractor(vm, dataReader);
+    dataReader = getCDMQualityExtractor("", vm, dataReader);
     dataReader = getCDMExtractor(vm, dataReader);
     dataReader = getCDMTimeInterpolator(vm, dataReader);
     dataReader = getCDMInterpolator(vm, dataReader);
     dataReader = getCDMVerticalInterpolator(vm, dataReader);
     dataReader = getCDMMerger(vm, dataReader);
+    dataReader = getCDMQualityExtractor("2", vm, dataReader);
     dataReader = getNcmlCDMReader(vm, dataReader);
     fillWriteCDM(dataReader, vm);
     writeCDM(dataReader, vm);
