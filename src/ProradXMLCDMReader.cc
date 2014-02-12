@@ -125,8 +125,8 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
         } else {
             cdm_->addAttribute(pimpl_->xname, CDMAttribute("units", "m"));
             cdm_->addAttribute(pimpl_->yname, CDMAttribute("units", "m"));
-            cdm_->addAttribute(pimpl_->xname, CDMAttribute("standard_name", "projection_x_axis"));
-            cdm_->addAttribute(pimpl_->yname, CDMAttribute("standard_name", "projection_y_axis"));
+            cdm_->addAttribute(pimpl_->xname, CDMAttribute("standard_name", "projection_x_coordinate"));
+            cdm_->addAttribute(pimpl_->yname, CDMAttribute("standard_name", "projection_y_coordinate"));
         }
         {
             // axes values
@@ -192,6 +192,7 @@ ProradXMLCDMReader::ProradXMLCDMReader(const std::string& source)
             for (size_t i = 0; i < 11; ++i) {
                 string flgNm = string(cartesian->datatype) + "_" + extraVars[i] + "_radar";
                 cdm_->addVariable(CDMVariable(flgNm, CDM_CHAR, shape));
+                cdm_->addAttribute(flgNm, CDMAttribute("grid_mapping", proj->getName()));
                 if (coordinates != "") {
                     cdm_->addAttribute(flgNm, CDMAttribute("coordinates", coordinates));
                 }

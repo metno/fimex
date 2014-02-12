@@ -67,6 +67,9 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
     if (cs.hasProjection()) {
         out << ";" << *(cs.getProjection());
     }
+    if (cs.isSimpleSpatialGridded()) {
+        out << ";" << "simpleSpatialGrid";
+    }
     if (cs.hasVerticalTransformation()) {
          out << ";" << *(cs.getVerticalTransformation());
      }
