@@ -231,9 +231,12 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
         for (int i = 0; i < on; ++i) {
             double phi = atan2((out_y_delta_proj_axis[i] - out_y_field[i]),
                     (out_x_delta_proj_axis[i] - out_x_field[i]));
-            //fprintf(stderr, "atan2-x: %f\n", phi/MIFI_PI*180);
-            matrix[0 + 4 * i] = sign * cos(phi);
-            matrix[1 + 4 * i] = sign * sin(phi);
+            if (sign < 0) {
+                phi += MIFI_PI;
+            }
+            //fprintf(stderr, "atan2-y/x: %f\n", phi/MIFI_PI*180);
+            matrix[0 + 4 * i] = phi; // temporary storage
+            //matrix[1 + 4 * i] = sin(phi);
         }
     }
     {
@@ -257,12 +260,22 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
         }
         double sign = deltaY > 0 ? 1. : -1.;
         for (int i = 0; i < on; ++i) {
-            double phi = atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
+            double phi = -1 * atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
                   (out_y_delta_proj_axis[i] - out_y_field[i]));
+            if (sign < 0) {
+                phi += MIFI_PI;
+            }
             //fprintf(stderr, "%f-%f / %f-%f", out_x_delta_proj_axis[i], out_x_field[i], out_y_delta_proj_axis[i], out_y_field[i]);
-            //fprintf(stderr, "atan2-x: %f\n", phi/MIFI_PI*180);
-            matrix[2 + 4 * i] = sign * sin(phi);
-            matrix[3 + 4 * i] = sign * cos(phi);
+            //fprintf(stderr, "atan2-x/y: %f %f %f %f\n", phi/MIFI_PI*180, acos(matrix[0+4*i])/MIFI_PI*180, deltaX, deltaY);
+            double phiy = matrix[0+4*i];
+            //average
+            double phi0 = .5*(phi+phiy);
+            double c = cos(phi0);
+            double s = sin(phi0);
+            matrix[0 + 4 * i] = c;
+            matrix[1 + 4 * i] = s;
+            matrix[2 + 4 * i] = -1 * s;
+            matrix[3 + 4 * i] =  c;
         }
     }
     free(out_y_delta_proj_axis);
@@ -630,29 +643,13 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
         float *vz = &v_out[z*layerSize]; // current z-layer of v
 
         // loop over one layer: calc uv' = A*uv at each pos
-        if (method == MIFI_VECTOR_KEEP_SIZE) {
-            for (size_t i = 0; i < layerSize; i++) {
-                const double* m = &matrixPos[4*i];
-                double u_new = uz[i] * m[0] + vz[i] * m[2];
-                double v_new = uz[i] * m[1] + vz[i] * m[3];
-                double uv_new2 = (u_new*u_new + v_new*v_new);
-                if (uv_new2 == 0) {
-                    uz[i] = 0.;
-                    vz[i] = 0.;
-                } else {
-                    double norm = sqrt( (uz[i]*uz[i] + vz[i]*vz[i]) / uv_new2 );
-                    uz[i] = u_new * norm;
-                    vz[i] = v_new * norm;
-                }
-            }
-        } else {
-            for (size_t i = 0; i < layerSize; i++) {
-                const double* m = &matrixPos[4*i];
-                double u_new = uz[i] * m[0] + vz[i] * m[2];
-                double v_new = uz[i] * m[1] + vz[i] * m[3];
-                uz[i] = u_new;
-                vz[i] = v_new;
-            }
+        for (size_t i = 0; i < layerSize; i++) {
+            const double* m = &matrixPos[4*i];
+            double u_new = uz[i] * m[0] + vz[i] * m[2];
+            double v_new = uz[i] * m[1] + vz[i] * m[3];
+            // matrix is rotation matrix, no further normalization needed
+            uz[i] = u_new;
+            vz[i] = v_new;
         }
     }
     return MIFI_OK;
