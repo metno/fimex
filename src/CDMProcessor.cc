@@ -43,6 +43,12 @@ namespace MetNoFimex
 
 using namespace std;
 
+struct SliceCache {
+    string varName;
+    size_t ulimDimPos;
+    boost::shared_ptr<Data> data;
+};
+
 struct CDMProcessorImpl {
     boost::shared_ptr<CDMReader> dataReader;
     set<string> deaccumulateVars;
@@ -53,6 +59,7 @@ struct CDMProcessorImpl {
     map<string, pair<string, string> > rotateLatLonVectorY;
     // horizontalId -> cachedVectorReprojection
     map<string, boost::shared_ptr<CachedVectorReprojection> > cachedVectorReprojection;
+    SliceCache sliceCache;
 };
 
 CDMProcessor::CDMProcessor(boost::shared_ptr<CDMReader> dataReader)
@@ -212,6 +219,20 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
 
 }
 
+// add d2 to d1 and return d1
+static void addDataP2Data(DataPtr& data, DataPtr& dataP) {
+    if ((data->size() != 0) && (dataP->size() != 0)) {
+        assert(data->size() == dataP->size());
+        boost::shared_array<double> d = data->asDouble();
+        boost::shared_array<double> dp = dataP->asDouble();
+        // this might modify the original data in the reader
+        std::transform(&d[0], &d[0]+data->size(), &dp[0], &d[0], std::plus<double>());
+        data = createData(data->size(), d);
+    } else if (dataP->size() != 0) {
+        data = dataP; // data->size was 0
+    }
+}
+
 DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
@@ -219,19 +240,25 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
     if (p_->accumulateVars.find(varName) != p_->accumulateVars.end()) {
         LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
         if (unLimDimPos > 0) { // cannot accumulate first
-            for (size_t i = 0; i <= unLimDimPos-1; ++i) {
-                DataPtr dataP = p_->dataReader->getDataSlice(varName, i);
-                if ((data->size() != 0) && (dataP->size() != 0)) {
-                    assert(data->size() == dataP->size());
-                    boost::shared_array<double> d = data->asDouble();
-                    boost::shared_array<double> dp = dataP->asDouble();
-                    // this might modify the original data in the reader
-                    std::transform(&d[0], &d[0]+data->size(), &dp[0], &d[0], std::plus<double>());
-                    data = createData(data->size(), d);
-                } else if (dataP->size() != 0) {
-                    data = dataP; // data->size was 0
+            size_t start = 0;
+            if (p_->sliceCache.varName == varName && p_->sliceCache.ulimDimPos <= unLimDimPos) {
+                start = p_->sliceCache.ulimDimPos + 1;
+                if (p_->sliceCache.ulimDimPos == unLimDimPos) {
+                    data = p_->sliceCache.data;
+                } else {
+                    DataPtr dataP = p_->sliceCache.data;
+                    addDataP2Data(data, dataP);
                 }
             }
+            // data contains last slice + eventually cache
+            for (size_t i = start; i <= unLimDimPos-1; ++i) {
+                DataPtr dataP = p_->dataReader->getDataSlice(varName, i);
+                addDataP2Data(data, dataP);
+            }
+            // fill the cache
+            p_->sliceCache.varName = varName;
+            p_->sliceCache.ulimDimPos = unLimDimPos;
+            p_->sliceCache.data = data;
         }
     }
     // deaccumulation
