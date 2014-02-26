@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdm_gribwriter_config
+                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--                        xsi:noNamespaceSchemaLocation="cdmGribWriterConfig.xsd"> -->
+<global_attributes>
+    <!-- type can be double, long, string -->
+    <attribute name="identificationOfOriginatingGeneratingCentre" value="88" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
+    <!-- use for grib1 only attributes -->
+    <!--  <g1attribute name="" value="" type="" /> -->
+    <!-- use for grib2 only attributes -->
+    <g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
+    <g2attribute name="typeOfPacking" value="grid_simple" type="string" /> <!-- jpeg2000 -->
+</global_attributes>
+<axes>
+<!-- no vertical axis -->
+<vertical_axis standard_name="">
+   <!-- using height in meter, 0 -->
+   <grib1 id="105" value="0" type="short"/>
+   <grib2 id="103" value="0" type="short"/>
+</vertical_axis>
+<vertical_axis unitCompatibleTo="m">
+   <!-- no standard_name for height/depth, defined only by positive=up/down -->
+   <grib1 id="105" units="m" type="short"/>
+   <grib2 id="103" units="m" type="double"/>
+</vertical_axis>
+<vertical_axis unitCompatibleTo="Pa">
+   <!-- no standard_name for pressure coord, defined only by unit of hPa -->
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
+<vertical_axis standard_name="air_pressure">
+   <grib1 id="100" units="hPa" type="short"/>
+   <grib2 id="100" units="Pa" type="double"/>
+</vertical_axis>
+<vertical_axis standard_name="atmosphere_sigma_coordinate">
+    <grib1 id="107" scale_factor="1e-4" add_offset="0" type="short" />
+    <grib2 id="104" type="double" />
+</vertical_axis>
+<vertical_axis standard_name="atmosphere_hybrid_sigma_pressure_coordinate">
+    <!--  <grib1 id="109" type="short" /> -->
+    <!-- 109 is correct, but we currently use hybrid as 'surface' in arome -->
+    <grib1 id="1" type="short" />
+    <grib2 id="105" type="double" />
+</vertical_axis>
+<vertical_axis standard_name="height_above_reference_ellipsoid">
+    <grib1 id="103" type="short" />
+    <grib2 id="102" type="double" />
+</vertical_axis>
+</axes>
+<variables>
+<!-- translation section for parameter names/standard_names -->
+<parameter name="air_temperature_2m">
+    <grib1 parameterNumber="11" codeTable="3" units="K"/>
+</parameter>
+<parameter name="precipitation_amount_acc">
+    <grib1 parameterNumber="61" codeTable="3" units="kg/m2"/>
+    <grib2 discipline="0" parameterCategory="1" parameterNumber="8" units="kg/m2"/>
+</parameter>
+<parameter name="cloud_area_fraction">
+<!-- clouds clouds -->
+    <grib1 parameterNumber="71" codeTable="3" units="1"/>
+</parameter>
+<parameter name="fog_area_fraction">
+<!-- fog clouds -->
+    <grib1 parameterNumber="71" codeTable="3" units="1"/>
+</parameter>
+<parameter name="liquid_water_content_of_surface_snow">
+<!-- high clouds -->
+    <grib1 parameterNumber="66" codeTable="3" units="kg/m2"/>
+</parameter>
+<parameter name="relative_humidity_2m">
+    <grib1 parameterNumber="52" codeTable="3" units="%"/>
+</parameter>
+<parameter name="air_pressure_at_sea_level">
+    <grib1 parameterNumber="1" codeTable="3" units="Pa"/>
+</parameter>
+<parameter name="surface_air_pressure">
+    <grib1 parameterNumber="1" codeTable="3" units="Pa"/>
+</parameter>
+<parameter name="x_wind_10m">
+    <grib1 parameterNumber="33" codeTable="3" units="m/s"/>
+</parameter>
+<parameter name="y_wind_10m">
+    <grib1 parameterNumber="34" codeTable="3" units="m/s"/>
+</parameter>
+
+</variables>
+</cdm_gribwriter_config>
