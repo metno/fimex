@@ -123,6 +123,7 @@
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:grib1"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:grib2"/>
         <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:attribute"/>
+        <xs:element minOccurs="0" maxOccurs="1" ref="c:spatial_vector"/>
       </xs:sequence>
       <xs:attribute name="name" use="required" type="xs:string"/>
       <xs:attribute name="type" use="required" type="xs:string"/>
@@ -135,10 +136,20 @@
       <xs:attribute name="value" use="required"/>
     </xs:complexType>
   </xs:element>
+  <xs:element name="spatial_vector">
+    <xs:complexType>
+      <xs:attribute name="direction" use="required" type="xs:string"/>
+      <xs:attribute name="counterpart" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="values">
     <xs:complexType>
-      <xs:attribute name="mode" use="required"/>
-      <xs:attribute name="scale_factor" type="xs:decimal"/>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="mode" use="optional"/>
+          <xs:attribute name="scale_factor" type="xs:decimal"/>
+        </xs:extension>
+      </xs:simpleContent>
     </xs:complexType>
   </xs:element>
   <xs:complexType name="gribAttr">
