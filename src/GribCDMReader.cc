@@ -220,7 +220,9 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
             for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
                 string optVal = getXmlProp(node, opt->first);
                 if (optVal != "") {
-                    if (opt->second != string2type<long>(optVal)) {
+                    vector<long> optVals = tokenizeDotted<long>(optVal, ",");
+                    if (find(optVals.begin(), optVals.end(), opt->second) == optVals.end()) {
+                        // opt->second not found
                         // optional set and not the same as this message value, don't use
                         allOptionalsMatch = false;
                     }
