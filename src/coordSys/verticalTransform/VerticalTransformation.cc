@@ -47,8 +47,8 @@ std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransforma
 
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
-    if (not isComplete())
-        throw CDMException("incomplete vertical transformation");
+//    if (not isComplete())
+//        throw CDMException("incomplete vertical transformation");
     switch (verticalType) {
     case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
     case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
