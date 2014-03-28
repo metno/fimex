@@ -68,6 +68,7 @@ All further options will be send to fimex without any modifications.
 =cut
 
 our $DEBUG = 0;
+use constant LATIN1 => 1;
 
 use strict;
 use warnings;
@@ -113,6 +114,16 @@ LINES: while (defined (my $line = <$fh>)) {
     my $name = join ',', @vals;
     $name =~ s/.*'(.*)'.*/$1/; # something between ticks
     $name =~ s/,/;/g; # forbidd , in names (split in fimex)
+    # special met.no decoding scheme, pre latin1/utf8
+    $name =~ s/#/Æ/g;
+    $name =~ s/\@/Ø/g;
+    $name =~ s/\$/Å/g;
+    if (LATIN1) {
+        require Encode;
+        # make sure characters are recognized as utf8
+        $name = Encode::decode_utf8($name);
+        $name = Encode::encode("ISO-8859-1", $name, Encode::FB_CROAK);
+    }
     push @names, $name;
 }
 close $fh;
