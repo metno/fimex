@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Encode qw();
 
 =begin LICENSE
 
@@ -119,7 +120,6 @@ LINES: while (defined (my $line = <$fh>)) {
     $name =~ s/\@/Ø/g;
     $name =~ s/\$/Å/g;
     if (LATIN1) {
-        require Encode;
         # make sure characters are recognized as utf8
         $name = Encode::decode_utf8($name);
         $name = Encode::encode("ISO-8859-1", $name, Encode::FB_CROAK);
