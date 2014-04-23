@@ -139,29 +139,29 @@ Configurational options:
   --interpolate.printCS                   print CoordinateSystems of
                                           interpolator
   --merge.inner.file arg                  inner file for merge
-  --merge.inner.type arg                  filetype of inner merge file, e.g. nc, 
+  --merge.inner.type arg                  filetype of inner merge file, e.g. nc,
                                           nc4, ncml, felt, grib1, grib2, wdb
-  --merge.inner.config arg                non-standard configuration for inner 
+  --merge.inner.config arg                non-standard configuration for inner
                                           merge file
-  --merge.smoothing arg                   smoothing function for merge, e.g. 
-                                          "LINEAR(5,2)" for linear smoothing, 5 
-                                          grid points transition, 2 grid points 
+  --merge.smoothing arg                   smoothing function for merge, e.g.
+                                          "LINEAR(5,2)" for linear smoothing, 5
+                                          grid points transition, 2 grid points
                                           border
-  --merge.method arg                      interpolation method for grid 
-                                          conversions, one of nearestneighbor, 
+  --merge.method arg                      interpolation method for grid
+                                          conversions, one of nearestneighbor,
                                           bilinear, bicubic, coord_nearestneighbor,
-                                          coord_kdtree, forward_max, 
-                                          forward_mean, forward_median or 
+                                          coord_kdtree, forward_max,
+                                          forward_mean, forward_median or
                                           forward_sum
-  --merge.projString arg                  proj4 input string describing the new 
+  --merge.projString arg                  proj4 input string describing the new
                                           projection
-  --merge.xAxisValues arg                 string with values on x-Axis, use ... 
+  --merge.xAxisValues arg                 string with values on x-Axis, use ...
                                           to continue, i.e. 10.5,11,...,29.5, see
-                                          Fimex::SpatialAxisSpec for full 
+                                          Fimex::SpatialAxisSpec for full
                                           definition
-  --merge.yAxisValues arg                 string with values on x-Axis, use ... 
+  --merge.yAxisValues arg                 string with values on x-Axis, use ...
                                           to continue, i.e. 10.5,11,...,29.5, see
-                                          Fimex::SpatialAxisSpec for full 
+                                          Fimex::SpatialAxisSpec for full
                                           definition
   --merge.xAxisUnit arg                   unit of x-Axis given as udunits string,
                                           i.e. m or degrees_east
@@ -294,7 +294,15 @@ Below follows a complete felt-configuration.
 Unidata's NetCDF Markup Language (NcML) as described in http://www.unidata.ucar.edu/software/netcdf/ncml/
 gives the opportunity to change all information written in the CDM. With the --ncml.config option, the CDM
 will be configured immediately after reading a file. It is also possilbe to read in a ncml file with the
---input.file=xxx.ncml option. In this case, the real data must be linked with the 'location' markup.
+--input.file=xxx.ncml option. In this case, the real data must be linked with the 'location' markup. As an extension
+to the Unidata ncml-location field, fimex allows to add a type and config field to location, e.g.
+
+@code
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        location="test.flt felt felt2netcdfconfig.xml"
+</netcdf>
+@endcode
 
 Input-files can and should be validated against the included ncml-2.2.xsd.
 
@@ -307,7 +315,7 @@ Input-files can and should be validated against the included ncml-2.2.xsd.
 
 <!-- same as above, but with scan -->
 <aggregation type="joinExisting">
-    <scan location="." regExp="joinExistingAgg\d+\.nc" />
+    <scan location=". felt felt2nc.xml" regExp="joinExistingAgg\d+\.flt" />
 </aggregation>
 
 </netcdf>
