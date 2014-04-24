@@ -75,6 +75,7 @@ static int bsearchDoubleIndex(const double key, const double* base, int num, int
 
 int mifi_points2position(double* points, const int n, const double* axis, const int num, const int axis_type)
 {
+    int circularLongitude = 0;
     int (*comparator)(const void * a, const void * b);
     if (axis[0] < axis[num-1]) comparator = ascendingDoubleComparator;
     else comparator = descendingDoubleComparator;
@@ -87,9 +88,21 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
                 if (points[i] > MIFI_PI) points[i] -= 2*MIFI_PI;
             }
         } else {
-            // change negative points
+            // change negative points (0-360)
             for (int i = 0; i < n; i++) {
                 if (points[i] < 0) points[i] += 2*MIFI_PI;
+            }
+        }
+        double nextOnAxis = axis[num-1] + (axis[1]-axis[0]);
+        if (axis[0] < axis[num-1]) { // ascending
+            nextOnAxis -= 2*MIFI_PI;
+            if (nextOnAxis >= axis[0]) {
+                circularLongitude = 1;
+            }
+        } else { // descending
+            nextOnAxis += 2*MIFI_PI;
+            if (nextOnAxis <= axis[0]) {
+                circularLongitude = 1;
             }
         }
     }
@@ -110,6 +123,15 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
             double slope = axis[nPos] - axis[nPos-1];
             double offset = axis[nPos] - (slope*nPos);
             double arrayPos = (points[i] - offset) / slope;
+            if (circularLongitude && arrayPos <= -0.5) {
+                arrayPos += num;
+            }
+            if (circularLongitude && arrayPos > (num+0.5)) {
+                arrayPos -= num;
+            }
+//            if (arrayPos <= -0.5 || points[i] >= num) {
+//                fprintf(stderr, "outside range: %f => %f\n", points[i]*RAD_TO_DEG, arrayPos);
+//            }
             points[i] = arrayPos;
         }
     }
