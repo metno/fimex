@@ -1,7 +1,9 @@
   * 2014-02-26 fimex-0.52beta
     * performance improvements of process.accumulate
     * fixes when reading prorad
-    * performance and accuracy-improvements
+    * performance and accuracy-improvements in interpolation
+    * circular handling of longitude-axes in interpolation
+    * fixing interpolation exceptions when coordinates axes are not correctly defined
   * 2014-02-11 fimex-0.51
     * adding support for Prorad xml-files
     * avoiding singularities in interpolation

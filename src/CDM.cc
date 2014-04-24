@@ -678,7 +678,7 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
     boost::shared_array<double> latVal(new double[fieldSize]);
     std::string lonLatProj(MIFI_WGS84_LATLON_PROJ4);
     std::string projStr = Projection::create(getAttributes(projectionVariable))->getProj4String();
-    LOG4FIMEX(logger, Logger::DEBUG, "generating lat("<<xDim<<","<<yDim<<"),lon("<<xDim<<","<<yDim<<") using proj4: "+projStr);
+    LOG4FIMEX(logger, Logger::DEBUG, "generating "<<latDim<<"("<<xDim<<","<<yDim<<"),"<<lonDim<<"("<<xDim<<","<<yDim<<") using proj4: "+projStr);
     if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
         throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);
     }

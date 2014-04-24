@@ -636,7 +636,7 @@ map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjection
  * @param orgXAxis
  * @param orgYAxis
  */
-static void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordSysPtr>& csMap, const map<string, string>& projectionVariables, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType xAxisType, CDMDataType yAxisType, const string& longitudeName, const string& latitudeName)
+static void changeCDM(CDM& cdm, const string& proj_input, const map<string, CoordSysPtr>& csMap, map<string, string>& projectionVariables, const vector<double>& out_x_axis, const vector<double>& out_y_axis, const string& out_x_axis_unit, const string& out_y_axis_unit, CDMDataType xAxisType, CDMDataType yAxisType, const string& longitudeName, const string& latitudeName)
 {
     string newProj = getProjectionName(proj_input);
     string newXAxis;
@@ -652,6 +652,7 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
             for (size_t i = 0; i < gridMappings.size(); i++) {
                 LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gridMappings[i]);
                 cdm.removeVariable(gridMappings[i]);
+                projectionVariables.erase(gridMappings[i]);
             }
             LOG4FIMEX(logger, Logger::DEBUG, "original projection: " << orgProjection);
         }
@@ -681,6 +682,8 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
             }
             cdm.removeVariable(orgXAxis);
             cdm.removeVariable(orgYAxis);
+            projectionVariables.erase(orgXAxis);
+            projectionVariables.erase(orgYAxis);
         }
 
         // remove projection and coordinates (lon lat)
@@ -691,6 +694,8 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
             LOG4FIMEX(logger, Logger::DEBUG, "removing old coordinate axes " << latAxis->getName() << " and " << lonAxis->getName());
             cdm.removeVariable(latAxis->getName());
             cdm.removeVariable(lonAxis->getName());
+            projectionVariables.erase(latAxis->getName());
+            projectionVariables.erase(lonAxis->getName());
         }
         if (orgXAxis != newXAxis) {
             cdm.removeDimension(orgXAxis);
@@ -1363,7 +1368,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
 static void changeCDMToLatLonTemplate(CDM& cdm,
                                       const string& tmpl_proj_input,
                                       const map<string, CoordSysPtr>& csMap,
-                                      const map<string, string>& projectionVariables,
+                                      map<string, string>& projectionVariables,
                                       const vector<double>& out_x_axis,
                                       const vector<double>& out_y_axis,
                                       const string& out_x_axis_unit,
@@ -1393,6 +1398,7 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
             for (size_t i = 0; i < gridMappings.size(); i++) {
                 LOG4FIMEX(logger, Logger::DEBUG, "removing projection-variable " << gridMappings[i]);
                 cdm.removeVariable(gridMappings[i]);
+                projectionVariables.erase(gridMappings[i]);
             }
             LOG4FIMEX(logger, Logger::DEBUG, "original projection: " << orgProjection);
         }
@@ -1426,11 +1432,15 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
             LOG4FIMEX(logger, Logger::DEBUG, "removing old coordinate axes " << latAxis->getName() << " and " << lonAxis->getName());
             cdm.removeVariable(latAxis->getName());
             cdm.removeVariable(lonAxis->getName());
+            projectionVariables.erase(latAxis->getName());
+            projectionVariables.erase(lonAxis->getName());
         }
 
         if(newXAxis != orgXAxis && newYAxis != orgYAxis) {
             cdm.removeVariable(orgXAxis);
             cdm.removeVariable(orgYAxis);
+            projectionVariables.erase(orgXAxis);
+            projectionVariables.erase(orgYAxis);
             cdm.removeDimension(orgXAxis);
             cdm.removeDimension(orgYAxis);
         }
