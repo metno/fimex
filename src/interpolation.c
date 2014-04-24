@@ -126,12 +126,14 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
             if (circularLongitude && arrayPos <= -0.5) {
                 arrayPos += num;
             }
-            if (circularLongitude && arrayPos > (num+0.5)) {
+            if (circularLongitude && arrayPos > (num-0.5)) {
                 arrayPos -= num;
             }
-//            if (arrayPos <= -0.5 || points[i] >= num) {
-//                fprintf(stderr, "outside range: %f => %f\n", points[i]*RAD_TO_DEG, arrayPos);
-//            }
+            if (MIFI_DEBUG > 0) {
+                if (arrayPos <= -0.5 || arrayPos >= (num-0.5)) {
+                    fprintf(stderr, "outside range: %f => %f (isCircular=%d)\n", points[i]*RAD_TO_DEG, arrayPos, circularLongitude);
+                }
+            }
             points[i] = arrayPos;
         }
     }
@@ -712,6 +714,7 @@ int mifi_get_values_f(const float* infield, float* outvalues, const double x, co
             outvalues[z] = infield[mifi_3d_array_position(rx,ry,z,ix,iy,iz)];
         }
     } else {
+        // fprintf(stderr, "outside values: %f, %f (0,%d : 0,%d)\n", x, y, ix, iy);
         for (int z = 0; z < iz; ++z) {
             outvalues[z] = MIFI_UNDEFINED_F;
         }
