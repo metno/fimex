@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdmGribReaderConfig xmlns="http://www.met.no/schema/fimex/cdmGribReaderConfig"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<!--                     xsi:schemaLocation="http://www.met.no/schema/fimex/cdmGribReaderConfig cdmGribReaderConfig.xsd" -->
+<processOptions>
+    <!-- parameters to select: all, definedOnly -->
+    <option name="selectParameters" value="all"/>
+</processOptions>
+<overrule>
+    <!-- use these values instead of the values in the grib-messages -->
+    <!-- <earthFigure proj4="+ellps=WGS84 +towgs84=0,0,0" /> -->
+</overrule>
+<global_attributes>
+    <attribute name="Conventions" value="CF-1.0" type="string"/>
+    <attribute name="institution" value="Norwegian Meteorological Institute (MET Norway)" type="string"/>
+    <attribute name="source" value="ECMWF ENS wave" type="string"/>
+    <attribute name="title" value="unknown" type="string"/>
+    <attribute name="min_time" value="%MIN_DATETIME(%Y-%m-%d %H:%M:%SZ)%" type="string"/>
+    <attribute name="max_time" value="%MAX_DATETIME(%Y-%m-%d)%" type="string"/>
+    <attribute name="Expires" value="%MAX_DATETIME(%Y-%m-%d,2419200)%" type="string"/>
+    <attribute name="references" value="unknown" type="string"/>
+    <!-- <attribute name="history" value="unknown" type="string" /> -->
+    <attribute name="comment" value="none" type="string"/>
+</global_attributes>
+
+<axes>
+<time id="time" name="time" type="double">
+    <attribute name="long_name" value="time" type="string"/>
+    <attribute name="standard_name" value="time" type="string"/>
+    <attribute name="units" value="seconds since 1970-01-01 00:00:00 +00:00" type="string"/>
+</time>
+
+<spatial_axis typeOfGrid="regular_ll" id="x" name="longitude" type="float">
+    <attribute name="long_name" value="longitude" type="string"/>
+    <attribute name="units" value="degrees_east" type="string"/>
+</spatial_axis>
+
+<spatial_axis typeOfGrid="regular_ll" id="y" name="latitude" type="float">
+    <attribute name="long_name" value="latitude" type="string"/>
+    <attribute name="units" value="degrees_north" type="string"/>
+</spatial_axis>
+
+<spatial_axis id="longitude" name="longitude">
+    <attribute name="valid_max" value="180." type="float"/>
+    <attribute name="valid_min" value="-180." type="float"/>
+    <attribute name="long_name" value="longitude" type="string"/>
+    <attribute name="standard_name" value="longitude" type="string"/>
+    <attribute name="units" value="degree_east" type="string"/>
+</spatial_axis>
+
+<spatial_axis id="latitude" name="latitude">
+    <attribute name="valid_max" value="90." type="float"/>
+    <attribute name="valid_min" value="-90." type="float"/>
+    <attribute name="long_name" value="latitude" type="string"/>
+    <attribute name="standard_name" value="latitude" type="string"/>
+    <attribute name="units" value="degree_north" type="string"/>
+</spatial_axis>
+
+<vertical_axis id="mean_sea_level" name="mean_sea_level" grib2_id="101" grib1_id="102" type="short">
+    <attribute name="_FillValue" value="-32767" type="short"/>
+    <attribute name="description" value="mean sea level" type="string"/>
+    <attribute name="long_name" value="mean_sea_level" type="string"/>
+    <attribute name="positive" value="up" type="string"/>
+    <attribute name="units" value="m" type="string"/>
+</vertical_axis>
+
+<vertical_axis id="height" name="height" grib2_id="103" grib1_id="105" type="float">
+    <attribute name="description" value="height above ground" type="string"/>
+    <attribute name="long_name" value="height" type="string"/>
+    <attribute name="positive" value="up" type="string"/>
+    <attribute name="units" value="m" type="string"/>
+</vertical_axis>
+</axes>
+
+
+<variables>  
+  <parameter name="maximum_individual_wave_height" type="float">
+    <grib1 indicatorOfParameter="218" gribTablesVersionNo="140"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="metno_name" value="maximum_individual_wave_height" type="string"/>
+    <attribute name="units" value="m" type="string"/>
+  </parameter>  
+
+  <parameter name="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="float">
+    <grib1 indicatorOfParameter="221" gribTablesVersionNo="140"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="string"/>
+    <attribute name="units" value="s" type="string"/>
+  </parameter>  
+
+  <parameter name="sea_surface_swell_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="float">
+    <grib1 indicatorOfParameter="227" gribTablesVersionNo="140"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="sea_surface_swell_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="string"/>
+    <attribute name="units" value="s" type="string"/>
+  </parameter>
+
+  <parameter name="sea_surface_wave_significant_height" type="float">
+    <grib1 indicatorOfParameter="229" gribTablesVersionNo="140"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="units" value="m" type="string"/>
+    <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string"/>
+  </parameter>
+  
+  <parameter name="sea_surface_wave_period_at_variance_spectral_density_maximum" type="float">
+    <grib1 indicatorOfParameter="231" gribTablesVersionNo="140"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="sea_surface_wave_period_at_variance_spectral_density_maximum" type="string"/>
+    <attribute name="units" value="s" type="string"/>
+  </parameter>
+
+  <parameter name="sea_surface_swell_wave_significant_height" type="float">
+    <grib1 indicatorOfParameter="237" gribTablesVersionNo="140"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string"/>
+    <attribute name="units" value="m" type="string"/>
+  </parameter>  
+
+  <parameter name="sea_surface_swell_wave_from_direction" type="float">
+    <grib1 indicatorOfParameter="238" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="sea_surface_swell_wave_from_direction" type="string"/>
+    <attribute name="units" value="degree" type="string"/>
+  </parameter>
+
+  <parameter name="wind_speed_10m" type="float">
+    <grib1 indicatorOfParameter="245" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="wind_speed" type="string"/>
+    <attribute name="units" value="m/s" type="string"/>
+  </parameter>
+
+  <parameter name="wind_from_direction_10m" type="float">
+    <grib1 indicatorOfParameter="249" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+    <attribute name="standard_name" value="wind_from_direction" type="string"/>
+    <attribute name="units" value="degree" type="string"/>
+  </parameter>
+</variables>
+
+
+</cdmGribReaderConfig>
+
+
