@@ -283,6 +283,8 @@ config_DATA = \
     cdmGribReaderConfig.xml\
     cdmGribReaderConfigArome2_5.xml\
     cdmGribReaderConfigGlameps.xml\
+    cdmGribReaderConfigEC_MAD.xml\
+    cdmGribReaderConfigECEnsWave.xml\
     cdmGribReaderConfig.xsd\
 	cdmGribWriterConfig.xml\
 	cdmGribWriterConfig.xsd\
