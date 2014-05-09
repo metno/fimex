@@ -242,6 +242,7 @@ void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std:
             throw CDMException(varNames[i] + " not rotatable since it does not belong to a horizontal projection");
 
         string csId = projectionVariables[varNames[i]];
+        p_->rotateLatLonDirection[varNames[i]] = csId;
 
         if (p_->cachedVectorReprojection.find(csId) == p_->cachedVectorReprojection.end()) {
             // TODO: this code is long and duplicated with rotateVectorToLatLon
@@ -287,12 +288,32 @@ void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std:
                 // using MIFI_PROJ_AXIS even for LAT/LON since axes already in radian
                 mifi_get_vector_reproject_matrix(MIFI_WGS84_LATLON_PROJ4, cs->getProjection()->getProj4String().c_str(), &xAxisD[0], &yAxisD[0], MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, xAxisSize, yAxisSize, matrix.get());
             }
-            LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection for direction");
+            LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection for direction: " << csId);
             p_->cachedVectorReprojection[csId] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
         }
-        p_->rotateLatLonDirection[varNames[i]] = csId;
     }
 }
+
+template<typename T>
+struct ScaleOffset : public std::unary_function<T, double>
+{
+    double scale_;
+    double offset_;
+    ScaleOffset(double scale, double offset) : scale_(scale), offset_(offset) {}
+    double operator()(const T& in) const {
+        return scale_*in + offset_;
+    }
+};
+template<typename T>
+struct UnScaleOffset : public std::unary_function<double, T>
+{
+    double invscale_;
+    double offset_;
+    UnScaleOffset(double scale, double offset) : invscale_(1/scale), offset_(offset) {}
+    T operator()(const double& in) const {
+        return invscale_*(in-offset_);
+    }
+};
 
 
 // add d2 to d1 and return d1
@@ -394,10 +415,18 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
         if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
             LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
         }
-        string csId = p_->rotateLatLonVectorY[varName].second;
+        string csId = p_->rotateLatLonDirection[varName];
+        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, "rotating direction " << varName << " with csId " << csId);
+        assert(p_->cachedVectorReprojection.find(csId) != p_->cachedVectorReprojection.end());
         boost::shared_ptr<CachedVectorReprojection> cvr = p_->cachedVectorReprojection[csId];
         boost::shared_array<float> array = data2InterpolationArray(data, getCDM().getFillValue(varName));
+        double addOffset = 0.;
+        double scaleFactor = 1.;
+        getScaleAndOffsetOf(varName, scaleFactor, addOffset);
+        transform(&array[0], &array[0]+ data->size(), &array[0], ScaleOffset<float>(scaleFactor, addOffset));
         cvr->reprojectDirectionValues(array, data->size());
+        transform(&array[0], &array[0]+ data->size(), &array[0], UnScaleOffset<float>(scaleFactor, addOffset));
+        data = interpolationArray2Data(array, data->size(), getCDM().getFillValue(varName));
     }
     return data;
 }
