@@ -122,7 +122,7 @@ extern int mifi_vector_reproject_values_f(int method,
                         int ox, int oy, int oz);
 /**
  * calculate the reprojected vectors with a known matrix for #mifi_vector_reproject_values_f
- * @param method (one of MIFI_VECTOR_KEEP_SIZE, MIFI_VECTOR_RESIZE) (for RESIZE you must be sure that the matrix is normed correctly!)
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE) (MIFI_VECTOR_RESIZE no longer available)
  * @param matrix reprojection matrix of size (4,ox,oy)
  * @param u_out values of u, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
  * @param v_out values of v, with position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
@@ -134,6 +134,22 @@ extern int mifi_vector_reproject_values_f(int method,
 extern int mifi_vector_reproject_values_by_matrix_f(int method,
                         const double* matrix,
                         float* u_out, float* v_out,
+                        int ox, int oy, int oz);
+
+/**
+ * Calculate the reprojected directions with a known matrix. Directions are the angle between the projections y-Axis (0degree) clockwise
+ * to 360degree.
+ * @param method (one of MIFI_VECTOR_KEEP_SIZE) (MIFI_VECTOR_RESIZE no longer available)
+ * @param matrix reprojection matrix of size (4,ox,oy)
+ * @param angle_out angles in degrees at position in the output-projection (i.e. by prevously applying mifi_interpolate_f). The values here will be changed!
+ * @param ox x-dimension of outfield
+ * @param oy y-dimension of outfield
+ * @param oz z-dimension of the outfield
+ * @return MIFI_OK or error value
+ */
+extern int mifi_vector_reproject_direction_by_matrix_f(int method,
+                        const double* matrix,
+                        float* angle_out, // angle in radian
                         int ox, int oy, int oz);
 
 /**

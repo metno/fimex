@@ -565,6 +565,74 @@ BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_keep_size )
     BOOST_CHECK(true);
 }
 
+
+BOOST_AUTO_TEST_CASE( test_mifi_vector_reproject_directions )
+{
+    std::string emepProj("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=0 +lat_ts=60");
+    std::string latlongProj("+ellps=sphere +a=6370 +e=0 +proj=latlong");
+    int ox = 5;
+    int oy = 5;
+    int oz = 1;
+    double emepIAxis[ox];
+    double emepJAxis[oy];
+    // in_x_field[x+oy*y] = inXAxis[x]
+    double in_x_field[ox*oy];
+    double in_y_field[ox*oy];
+    float angles[ox*oy];
+    // initialize axes around northpole
+    for (int i = 0; i < 5; ++i) {
+        emepIAxis[i] = (i - 2) * 1000;
+        emepJAxis[i] = (i - 2) * 1000;
+    }
+    // initialize values
+    for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 5; ++j) {
+            angles[oy*j + i] = 0; // all point to y-axis
+            in_x_field[i+oy*j] = emepIAxis[i];
+            in_y_field[i+oy*j] = emepJAxis[j];
+        }
+     }
+
+
+    double xOut[ox*oy];
+    double yOut[ox*oy];
+    mifi_project_axes(emepProj.c_str(), latlongProj.c_str(), emepIAxis, emepJAxis, ox, oy, xOut, yOut);
+    double* matrix = (double*) malloc(ox*oy*4*sizeof(double));
+    if (matrix == NULL) {
+        fprintf(stderr, "error allocating memory of double(4*%d*%d)", ox, oy);
+        exit(1);
+    }
+    // calculate the positions in the original proj.
+    int errcode = mifi_get_vector_reproject_matrix_field(emepProj.c_str(), latlongProj.c_str(), in_x_field, in_y_field, ox, oy, matrix);
+    BOOST_CHECK(errcode == MIFI_OK);
+
+    mifi_vector_reproject_direction_by_matrix_f(MIFI_VECTOR_KEEP_SIZE, matrix, angles, ox, oy, oz);
+    for (int i = 0; i < ox; ++i) {
+        for (int j = 0; j < oy; ++j) {
+            // std::cerr << "("<<i<<","<<j<<") = ("<<(xOut[oy*j+i]*RAD_TO_DEG)<<","<<(yOut[oy*j+i]*RAD_TO_DEG)<<") -> " << angles[oy*j+i] << std::endl;
+        }
+    }
+    BOOST_CHECK_CLOSE(315, angles[0 + oy*0], 1);
+    BOOST_CHECK_CLOSE(270, angles[0 + oy*2], 1);
+    BOOST_CHECK_CLOSE(225, angles[0 + oy*4], 1);
+    float out = angles[2 + oy*0];
+    if (out > 300) out -= 360;
+    BOOST_CHECK_CLOSE(10, 10+out, 1);
+    out = angles[2 + oy*1];
+    if (out > 300) out -= 360;
+    BOOST_CHECK_CLOSE(10, 10+out, 1);
+    BOOST_CHECK_CLOSE(180, angles[2 + oy*3], 1);
+    BOOST_CHECK_CLOSE(180, angles[2 + oy*4], 1);
+
+    BOOST_CHECK_CLOSE(45, angles[4 + oy*0], 1);
+    BOOST_CHECK_CLOSE(90, angles[4 + oy*2], 1);
+    BOOST_CHECK_CLOSE(135, angles[4 + oy*4], 1);
+
+    BOOST_CHECK(true);
+}
+
+
+
 BOOST_AUTO_TEST_CASE( test_Utils )
 {
     std::vector<MetNoFimex::CDMAttribute> attrs = MetNoFimex::projStringToAttributes("+ellps=sphere +a=127.4 +e=0 +proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +x_0=7 +y_0=109");

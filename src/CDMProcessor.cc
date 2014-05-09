@@ -55,6 +55,8 @@ struct CDMProcessorImpl {
     set<string> accumulateVars;
     // variable -> <counterPart, horizontalId>
     map<string, pair<string, string> > rotateLatLonVectorX;
+    // variable -> horizontalId
+    map<string, string> rotateLatLonDirection;
     // variable -> <counterPart, horizontalId> (same as above but with Y as first component)
     map<string, pair<string, string> > rotateLatLonVectorY;
     // horizontalId -> cachedVectorReprojection
@@ -219,6 +221,80 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
 
 }
 
+void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std::string>& varNames)
+{
+    LoggerPtr logger = getLogger("fimex.CDMProcessor");
+    if (varNames.size() == 0) return;
+
+    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+    typedef map<string, CoordSysPtr> CoordSysMap;
+    typedef vector<CoordSysPtr> CoordSysVec;
+    CoordSysMap coordSysMap;
+    map<string, string> projectionVariables;
+    vector<string> incompatibleVariables;
+    if (0 == findBestHorizontalCoordinateSystems(true, p_->dataReader, coordSysMap, projectionVariables, incompatibleVariables)) {
+        LOG4FIMEX(logger, Logger::ERROR, "no coordinate-systems with projection found, rotateVectorToLatLon not possible");
+        throw CDMException("no coordinate-systems found");
+    }
+
+    for (size_t i = 0; i < varNames.size(); ++i) {
+        if (projectionVariables.find(varNames[i]) == projectionVariables.end())
+            throw CDMException(varNames[i] + " not rotatable since it does not belong to a horizontal projection");
+
+        string csId = projectionVariables[varNames[i]];
+
+        if (p_->cachedVectorReprojection.find(csId) == p_->cachedVectorReprojection.end()) {
+            // TODO: this code is long and duplicated with rotateVectorToLatLon
+            assert(coordSysMap.find(csId) != coordSysMap.end());
+            CoordSysPtr cs = coordSysMap[csId];
+            assert(cs->hasProjection());
+
+            typedef CoordinateSystem::ConstAxisPtr ConstAxisPtr;
+            ConstAxisPtr xAxis = cs->getGeoXAxis();
+            assert(xAxis.get() != 0);
+            ConstAxisPtr yAxis = cs->getGeoYAxis();
+            assert(yAxis.get() != 0);
+
+            DataPtr xAxisData;
+            DataPtr yAxisData;
+            if (cs->getProjection()->isDegree()) {
+                xAxisData = p_->dataReader->getScaledDataInUnit(xAxis->getName(), "radian");
+                yAxisData = p_->dataReader->getScaledDataInUnit(yAxis->getName(), "radian");
+            } else {
+                xAxisData = p_->dataReader->getScaledDataInUnit(xAxis->getName(), "m");
+                yAxisData = p_->dataReader->getScaledDataInUnit(yAxis->getName(), "m");
+            }
+            size_t xAxisSize = xAxisData->size();
+            size_t yAxisSize = yAxisData->size();
+            boost::shared_array<double> xAxisD = xAxisData->asDouble();
+            boost::shared_array<double> yAxisD = yAxisData->asDouble();
+
+
+            LOG4FIMEX(logger, Logger::DEBUG, "creating cached vector projection interpolation matrix");
+            boost::shared_array<double> matrix(new double[xAxisSize * yAxisSize * 4]);
+            if (toLatLon) {
+                boost::shared_array<double> inXField(new double[xAxisSize*yAxisSize]);
+                boost::shared_array<double> inYField(new double[xAxisSize*yAxisSize]);
+                for (size_t i = 0; i < xAxisSize; i++) {
+                    for (size_t j = 0; j < yAxisSize; j++) {
+                        inXField[xAxisSize*j + i] = xAxisD[i];
+                        inYField[xAxisSize*j + i] = yAxisD[j];
+                    }
+                }
+                // prepare interpolation of vectors
+                mifi_get_vector_reproject_matrix_field(cs->getProjection()->getProj4String().c_str(), MIFI_WGS84_LATLON_PROJ4, &inXField[0], &inYField[0], xAxisSize, yAxisSize, matrix.get());
+            } else {
+                // using MIFI_PROJ_AXIS even for LAT/LON since axes already in radian
+                mifi_get_vector_reproject_matrix(MIFI_WGS84_LATLON_PROJ4, cs->getProjection()->getProj4String().c_str(), &xAxisD[0], &yAxisD[0], MIFI_PROJ_AXIS, MIFI_PROJ_AXIS, xAxisSize, yAxisSize, matrix.get());
+            }
+            LOG4FIMEX(logger, Logger::DEBUG, "creating vector reprojection for direction");
+            p_->cachedVectorReprojection[csId] = boost::shared_ptr<CachedVectorReprojection>(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
+        }
+        p_->rotateLatLonDirection[varNames[i]] = csId;
+    }
+}
+
+
 // add d2 to d1 and return d1
 static void addDataP2Data(DataPtr& data, DataPtr& dataP) {
     if ((data->size() != 0) && (dataP->size() != 0)) {
@@ -314,7 +390,15 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             data = interpolationArray2Data(yArray, yData->size(), getCDM().getFillValue(yVar));
         }
     }
-
+    if (p_->rotateLatLonDirection.find(varName) != p_->rotateLatLonDirection.end()) {
+        if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
+            LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
+        }
+        string csId = p_->rotateLatLonVectorY[varName].second;
+        boost::shared_ptr<CachedVectorReprojection> cvr = p_->cachedVectorReprojection[csId];
+        boost::shared_array<float> array = data2InterpolationArray(data, getCDM().getFillValue(varName));
+        cvr->reprojectDirectionValues(array, data->size());
+    }
     return data;
 }
 

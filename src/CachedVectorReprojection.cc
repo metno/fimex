@@ -30,16 +30,29 @@
 namespace MetNoFimex
 {
 
-void CachedVectorReprojection::reprojectValues(boost::shared_array<float>& uValues, boost::shared_array<float>& vValues, size_t size) const throw(CDMException)
+void CachedVectorReprojection::reprojectValues(boost::shared_array<float>& uValues, boost::shared_array<float>& vValues, size_t size) const
 {
-	if (ox == 0 || oy == 0 || matrix.get() == 0) {
-	    LoggerPtr logger = getLogger("fimex.CachedVectorReprojection");
-	    LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
-	    return;
-	}
-	size_t oz = size / (ox*oy);
-	int errcode = mifi_vector_reproject_values_by_matrix_f(method, matrix.get(), &uValues[0], &vValues[0], ox, oy, oz);
-	if (errcode != MIFI_OK)	throw CDMException("Error during reprojection of vector-values");
+    if (ox == 0 || oy == 0 || matrix.get() == 0) {
+        LoggerPtr logger = getLogger("fimex.CachedVectorReprojection");
+        LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
+        return;
+    }
+    size_t oz = size / (ox*oy);
+    int errcode = mifi_vector_reproject_values_by_matrix_f(method, matrix.get(), &uValues[0], &vValues[0], ox, oy, oz);
+    if (errcode != MIFI_OK)	throw CDMException("Error during reprojection of vector-values");
 }
+
+void CachedVectorReprojection::reprojectDirectionValues(boost::shared_array<float>& angles, size_t size) const
+{
+    if (ox == 0 || oy == 0 || matrix.get() == 0) {
+        LoggerPtr logger = getLogger("fimex.CachedVectorReprojection");
+        LOG4FIMEX(logger, Logger::WARN, "CachedVectorReprojection not initialized, using identity");
+        return;
+    }
+    size_t oz = size / (ox*oy);
+    int errcode = mifi_vector_reproject_direction_by_matrix_f(method, matrix.get(), &angles[0], ox, oy, oz);
+    if (errcode != MIFI_OK) throw CDMException("Error during reprojection of vector-direction-values");
+}
+
 
 }

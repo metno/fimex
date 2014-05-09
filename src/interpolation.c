@@ -299,7 +299,7 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
             matrix[0 + 4 * i] = c;
             matrix[1 + 4 * i] = s;
             matrix[2 + 4 * i] = -1 * s;
-            matrix[3 + 4 * i] =  c;
+            matrix[3 + 4 * i] =  phi0;
         }
     }
     free(out_y_delta_proj_axis);
@@ -669,11 +669,34 @@ int mifi_vector_reproject_values_by_matrix_f(int method,
         // loop over one layer: calc uv' = A*uv at each pos
         for (size_t i = 0; i < layerSize; i++) {
             const double* m = &matrixPos[4*i];
-            double u_new = uz[i] * m[0] + vz[i] * m[2];
-            double v_new = uz[i] * m[1] + vz[i] * m[3];
+            double u_new = uz[i] * m[0] - vz[i] * m[1];
+            double v_new = uz[i] * m[1] + vz[i] * m[0];
             // matrix is rotation matrix, no further normalization needed
             uz[i] = u_new;
             vz[i] = v_new;
+        }
+    }
+    return MIFI_OK;
+}
+
+int mifi_vector_reproject_direction_by_matrix_f(int method,
+                        const double* matrix,
+                        float* angle_out, // angle in degree
+                        int ox, int oy, int oz)
+{
+    size_t layerSize = ox*oy;
+    for (size_t z = 0; z < oz; ++z) {
+        const double *matrixPos = matrix;
+        float* angZ = &angle_out[z*layerSize];
+        for (size_t i = 0; i < layerSize; i++) {
+            const double* m = &matrixPos[4*i];
+            // angle stored as true angle (in rad) in the matrix m[3]
+            // fprintf(stderr, "asin: %f, acos: %f, phi: %f\n", RAD_TO_DEG* asin(m[1]), RAD_TO_DEG*acos(m[0]), RAD_TO_DEG*m[3]);
+            double angle_new = angZ[i] - RAD_TO_DEG * m[3];
+            // normalize 0..360
+            if (angle_new < 0) angle_new += 360;
+            if (angle_new > 360) angle_new -= 360;
+            angZ[i] = angle_new;
         }
     }
     return MIFI_OK;

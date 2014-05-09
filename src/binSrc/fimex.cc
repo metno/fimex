@@ -446,9 +446,15 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
             processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
         } else if (vm.count("process.rotateVector.all")) {
             processor->rotateAllVectorsToLatLon(toLatLon);
+        } else if (vm.count("process.rotateVector.angle")) {
+            // do nothing here, but don't abort either (see below)
         } else {
-            cerr << "process.rotateVector.x or process.rotateVector.y not found" << endl;
+            cerr << "process.rotateVector.x and process.rotateVector.y, or process.rotateVector.angle not found" << endl;
             exit(1);
+        }
+        if (vm.count("process.rotateVector.angle")) {
+               vector<string> angles = vm["process.rotateVector.angle"].as<vector<string> >();
+               processor->rotateDirectionToLatLon(toLatLon, angles);
         }
     }
     return processor;
@@ -925,6 +931,7 @@ int run(int argc, char* args[])
         ("process.rotateVectorToLatLonX", po::value<vector<string> >()->composing(), "deprecated: rotate this vector x component from grid-direction to latlon direction")
         ("process.rotateVectorToLatLonY", po::value<vector<string> >()->composing(), "deprecated: rotate this vector y component from grid-direction to latlon direction")
         ("process.rotateVector.direction", po::value<string>(), "set direction: to latlon or grid")
+        ("process.rotateVector.angle", po::value<vector<string> >()->composing(), "rotate these angles (in degree) to the direction ")
         ("process.rotateVector.x", po::value<vector<string> >()->composing(), "rotate this vector x component to direction")
         ("process.rotateVector.stdNameX", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
         ("process.rotateVector.y", po::value<vector<string> >()->composing(), "rotate this vector y component from grid-direction to latlon direction")

@@ -77,6 +77,12 @@ public:
      * @param toLatLon convert to latLon if true, otherwise, convert latLon to grid-axes
      */
     void rotateAllVectorsToLatLon(bool toLatLon);
+    /**
+     * rotate the  direction given in degree from y axes to direction in lat axes (north)
+     * @param toLatLon convert to latLon if true, otherwise, convert latLon to grid-axes
+     * @param varNames the variable-names containing directions given as angles in degree
+     */
+    void rotateDirectionToLatLon(bool toLatLon, const std::vector<std::string>& varNames);
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
 private:
