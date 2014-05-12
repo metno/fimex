@@ -442,7 +442,7 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
             if (vm.count("process.rotateVector.stdNameX"))
                 stdX = vm["process.rotateVector.stdNameX"].as<vector<string> >();
             if (vm.count("process.rotateVector.stdNameY"))
-                stdX = vm["process.rotateVector.stdNameY"].as<vector<string> >();
+                stdY = vm["process.rotateVector.stdNameY"].as<vector<string> >();
             processor->rotateVectorToLatLon(toLatLon, xvars, yvars, stdX, stdY);
         } else if (vm.count("process.rotateVector.all")) {
             processor->rotateAllVectorsToLatLon(toLatLon);
