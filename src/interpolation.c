@@ -93,7 +93,7 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
                 if (points[i] < 0) points[i] += 2*MIFI_PI;
             }
         }
-        double nextOnAxis = axis[num-1] + (axis[1]-axis[0]);
+        double nextOnAxis = axis[num-1] + (axis[1]-axis[0])*1.01; // slightly enlarged gitter-distance to avoid numerics
         if (axis[0] < axis[num-1]) { // ascending
             nextOnAxis -= 2*MIFI_PI;
             if (nextOnAxis >= axis[0]) {
