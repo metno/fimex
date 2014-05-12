@@ -30,9 +30,8 @@
 
 namespace { // anonymous
 
-inline double dist(int x1, int x2, int y1, int y2) {
-    const double dx = x1-x2, dy = y1-y2;
-    return sqrt( dx*dx + dy*dy )/sqrt(2);
+inline double dist(int dx, int dy, double tw) {
+    return std::max(1.0, sqrt( dx*dx + dy*dy ) / (tw*tw));
 }
 
 } // anonymous namespace
@@ -54,31 +53,30 @@ double CDMBorderSmoothing_Linear::operator()(size_t curX, size_t curY, double va
         return valueO;
     if( x >= xmax1 and x < xmin2 and y >= ymax1 and y < ymin2 )
         return valueI;
-    const double diff = (valueI - valueO);
+    const double diff = (valueO - valueI);
     if( diff == 0 )
         return valueO;
-    double alpha = 1;
+    double alpha = 0; // 0 => valueI, >= 1 => valueO
     if( x < xmax1 ) {
         if( y < ymax1 )
-            alpha = dist(x, xmin1, y, ymin1);
+            alpha = dist(xmax1-x, ymax1-y, transitionWidth_);
         else if( y >= ymin2 )
-            alpha = dist(x, xmin1, y, ymax2);
+            alpha = dist(xmax1-x, y-ymin2, transitionWidth_);
         else
-            alpha = (x-xmin1);
+            alpha = (xmax1-x) / transitionWidth_;
     } else if( x >= xmin2 ) {
         if( y < ymax1 )
-            alpha = dist(x, xmax2, y, ymin1);
+            alpha = dist(x-xmin2, ymax1-y, transitionWidth_);
         else if( y >= ymin2 )
-            alpha = dist(x, xmax2, y, ymax2);
+            alpha = dist(x-xmin2, y-ymin2, transitionWidth_);
         else
-            alpha = (xmax2-x);
+            alpha = (x-xmin2) / transitionWidth_;
     } else if( y < ymax1 ) {
-        alpha = (y-ymin1);
+        alpha = (ymax1-y) / transitionWidth_;
     } else if( y >= ymin2 ) {
-        alpha = (ymax2-y);
+        alpha = (y-ymin2) / transitionWidth_;
     }
-    alpha /= transitionWidth_;
-    return valueO + alpha*diff;
+    return valueI + alpha*diff;
 }
 
 // ========================================================================

@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE( test_merger )
     // test values: middle, transition, outer
     const int iLon[] = { 28, 24,  8, -1 };
     const int iLat[] = { 56, 56, 56, -1 };
-    const double expected[] = { 288.104, 288.467, 289.937, -1 };
+    const double expected[] = { 288.104, 288.464, 289.937, -1 };
 
     boost::shared_array<double> valuesM = sliceM->asDouble();
     for(int i=0; iLon[i] >= 0; ++i) {
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_merge_target )
     // test values: middle, transition, outer
     const int ix[] = { 19, 22, -1 };
     const int iy[] = { 65, 21, -1 };
-    const double expected[] = { 275.69, 276.35, -1 };
+    const double expected[] = { 274.78, 275.89, -1 };
 
     boost::shared_array<double> valuesM = sliceM->asDouble();
     for(int i=0; ix[i] >= 0; ++i) {
