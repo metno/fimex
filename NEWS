@@ -1,4 +1,8 @@
-  * 2014-02-26 fimex-0.52beta
+  *   fimex-0.53beta
+    *
+  * 2014-05-13 fimex-0.52
+    * join several levelNo in grib-files
+    * rotation of directions (angles)
     * performance improvements of process.accumulate
     * fixes when reading prorad
     * performance and accuracy-improvements in interpolation
