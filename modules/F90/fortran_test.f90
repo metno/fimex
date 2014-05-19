@@ -1,3 +1,5 @@
+!> @example fortran_test.f90
+!! Example on using the fimex interface
 PROGRAM fortran_test
   USE Fimex, ONLY                   : FimexIO, set_filetype, AXIS_GeoX, AXIS_GeoY, AXIS_Lon, AXIS_Lat,INTERPOL_BILINEAR,&
                                       FILETYPE_RW
