@@ -573,7 +573,11 @@ characters, ? for exactly one character and ** for all subdirectories, e.g.
 @verbatim
 /home/heikok/**/*.grb
 @endverbatim will match all grib-files somewhere in my home-directory,
-while <tt>/home/heikok/*/*.grb</tt> will only match all grib-files one directory below my
+while 
+@verbatim
+/home/heikok/*/*.grb
+@endverbatim
+will only match all grib-files one directory below my
 home-directory.
 
 Files might also be concatenated by simply adding new files with <tt>--input.optional</tt>, e.g.
