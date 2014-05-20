@@ -1011,6 +1011,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::
 
 void GribFileIndex::initByXML(boost::filesystem::path xmlFilePath)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << xmlFilePath);
     boost::shared_ptr<XMLDoc> doc(new XMLDoc(file_string(xmlFilePath)));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     XPathObjPtr xp = doc->getXPathObject("/gfi:gribFileIndex");
