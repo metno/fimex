@@ -436,8 +436,8 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
                 vector<double> xLon(2);
                 vector<double> yLat(2);
                 for (size_t i = 1; i < csIt->lonLatCoordinates.size(); ++i) {
-                    xLon.at(0) = csIt->lonLatCoordinates.at(i-i).first;
-                    yLat.at(0) = csIt->lonLatCoordinates.at(i-i).second;
+                    xLon.at(0) = csIt->lonLatCoordinates.at(i-1).first;
+                    yLat.at(0) = csIt->lonLatCoordinates.at(i-1).second;
                     xLon.at(1) = csIt->lonLatCoordinates.at(i).first;
                     yLat.at(1) = csIt->lonLatCoordinates.at(i).second;
                     proj->convertFromLonLat(xLon, yLat);
