@@ -956,7 +956,15 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
             // try environment path: GRIB_INDEX_PATH
             char* indexDir = getenv("GRIB_INDEX_PATH");
             if (indexDir != 0) {
-                xmlFile = fs::path(indexDir) / (filename + ".grbml");
+                // Check if complete path
+                std::string indexDirStr(indexDir);
+                if (indexDirStr.find("/") == 0) {
+                    // absolute path
+                    xmlFile = fs::path(indexDir) / (filename + ".grbml");
+                } else {
+                    // relative path to xml-file
+                    xmlFile = xmlDir / indexDir / (filename + ".grbml");
+                }
                 if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
                     initByXML(xmlFile);
                 } else {
