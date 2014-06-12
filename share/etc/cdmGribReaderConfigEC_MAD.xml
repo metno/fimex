@@ -382,6 +382,13 @@
           <attribute name="standard_name" value="surface_air_pressure" type="string"/>
           <attribute name="units" value="Pa" type="string"/>
       </parameter>
+      <!-- logarithmic surface_air_pressure -->
+      <parameter name="surface_air_pressure" type="float">
+          <grib2 discipline="0" parameterCategory="3" parameterNumber="25" typeOfLevel="105"/>
+          <attribute name="long_name" value="Logarithmic surface air pressure (lnsp)" type="string"/>
+          <attribute name="standard_name" value="surface_air_pressure" type="string"/>
+          <attribute name="units" value="1 ln(re 1Pa)" type="string"/>
+      </parameter>
       <!--- <parameter name="air_pressure_ml" type="float">
         <grib1 indicatorOfParameter="1" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
         <attribute name="long_name" value="Air pressure model levels" type="string" />
@@ -392,6 +399,7 @@
     <!-- Geopotential (129) -->
     <parameter name="geopotential" type="float">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="100"/>
+        <grib2 discipline="0" parameterCategory="3" parameterNumber="4" typeOfLevel="105"/>
         <attribute name="long_name" value="Geopotential pressure levels" type="string"/>
         <attribute name="standard_name" value="geopotential" type="string"/>
         <attribute name="units" value="m^2/s^2" type="string"/>
@@ -410,7 +418,7 @@
         <attribute name="units" value="m^2/s^2" type="string" />
     </parameter>
     -->
-    <!-- Geopotential height (7) finnes ikke 
+    <!-- Geopotential height (7) finnes ikke
     <parameter name="altitude" type="float">
         <grib1 indicatorOfParameter="7" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
         <attribute name="long_name" value="Orography (ZS)" type="string" />
@@ -463,14 +471,13 @@
         <attribute name="standard_name" value="air_temperature" type="string"/>
         <attribute name="units" value="K" type="string"/>
     </parameter>
-    <!--
-    <parameter name="air_temperature_ml" type="float"> 
-        <grib1 indicatorOfParameter="130" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="109" />
-        <attribute name="long_name" value="Air temperature model levels" type="string" />
+    <parameter name="air_temperature_ml" type="float">
+        <grib2 discipline="0" parameterCategory="0" parameterNumber="0" typeOfLevel="105"/>
+<!--         <grib1 indicatorOfParameter="130" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="105" />
+ -->        <attribute name="long_name" value="Air temperature model levels" type="string" />
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    -->
     <parameter name="soil_temperature" type="float">
         <grib1 indicatorOfParameter="139" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="112"/>
         <attribute name="long_name" value="Soil temperature level 1" type="string"/>
@@ -490,7 +497,7 @@
         <attribute name="units" value="K" type="string" />
     </parameter>
     -->
-    <!-- 
+    <!--
     <parameter name="sea_surface_temperature_sea" type="float">
         <grib1 indicatorOfParameter="11" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="760"/>
         <attribute name="long_name" value="Sea Surface Temperature (SST)" type="string" />
@@ -530,7 +537,7 @@
         <attribute name="units" value="m/s" type="string"/>
         <spatial_vector direction="x,longitude" counterpart="y_wind_10m"/>
     </parameter>
-    <!-- 
+    <!--
     <parameter name="x_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
         <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
@@ -546,24 +553,24 @@
         <attribute name="units" value="m/s" type="string"/>
         <spatial_vector direction="x,longitude" counterpart="y_wind_pl"/>
     </parameter>
-    <!-- 
     <parameter name="x_wind_ml" type="float">
-        <grib1 indicatorOfParameter="33" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
+        <grib2 discipline="0" parameterCategory="2" parameterNumber="2" typeOfLevel="105"/>
+        <!-- <grib1 indicatorOfParameter="33" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/> -->
         <attribute name="long_name" value="Zonal wind model levels" type="string" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="x,longitude" counterpart="y_wind_ml" />
     </parameter>
-    -->
     <!-- Meridional wind (34) -->
     <parameter name="y_wind_10m" type="float">
-        <grib1 indicatorOfParameter="166" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
-        <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string"/>
+        <grib2 discipline="0" parameterCategory="2" parameterNumber="3" typeOfLevel="105"/>
+<!--         <grib1 indicatorOfParameter="166" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
+ -->        <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string"/>
         <attribute name="standard_name" value="y_wind" type="string"/>
         <attribute name="units" value="m/s" type="string"/>
         <spatial_vector direction="y,latitude" counterpart="x_wind_10m"/>
     </parameter>
-    <!-- 
+    <!--
     <parameter name="y_wind_10m" type="float">
         <grib1 indicatorOfParameter="34" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="10"/>
         <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string" />
@@ -579,15 +586,13 @@
         <attribute name="units" value="m/s" type="string"/>
         <spatial_vector direction="y,latitude" counterpart="x_wind_pl"/>
     </parameter>
-    <!-- 
     <parameter name="y_wind_ml" type="float">
-        <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
+        <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
         <attribute name="long_name" value="Meridional wind model levels" type="string" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="y,latitude" counterpart="x_wind_ml" />
     </parameter>
-    -->
     <!-- Vertical wind (40) finnes Vertical velocity i Pa/s, ikke m/s
     <parameter name="upward_air_velocity_pl" type="float">
         <grib1 indicatorOfParameter="40" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100" />
@@ -609,22 +614,23 @@
         <attribute name="standard_name" value="specific_humidity" type="string"/>
         <attribute name="units" value="kg/kg" type="string"/>
     </parameter>
-    <!-- 
+    <!--
     <parameter name="specific_humidity_pl" type="float">
         <grib1 indicatorOfParameter="51" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="100"/>
         <attribute name="long_name" value="Specific humidity pressure levels" type="string" />
         <attribute name="standard_name" value="specific_humidity" type="string" />
         <attribute name="units" value="kg/kg" type="string" />
     </parameter>
+    -->
     <parameter name="specific_humidity_ml" type="float">
-        <grib1 indicatorOfParameter="51" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
-        <attribute name="long_name" value="Specific humidity model levels" type="string" />
+        <grib2 discipline="0" parameterCategory="1" parameterNumber="0" typeOfLevel="105"/>
+<!--         <grib1 indicatorOfParameter="51" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
+ -->        <attribute name="long_name" value="Specific humidity model levels" type="string" />
         <attribute name="standard_name" value="specific_humidity" type="string" />
         <attribute name="units" value="kg/kg" type="string" />
     </parameter>
-    -->
     <!-- Relative humidity (52) -->
-    <!-- 
+    <!--
     <parameter name="relative_humidity_2m" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="2"/>
         <attribute name="long_name" value="Screen level relative humidity (RH2M)" type="string" />
@@ -644,7 +650,7 @@
         <attribute name="standard_name" value="relative_humidity" type="string"/>
         <attribute name="units" value="1" type="string"/>
     </parameter>
-    <!-- 
+    <!--
     <parameter name="relative_humidity_ml" type="float">
         <grib1 indicatorOfParameter="52" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109"/>
         <attribute name="long_name" value="Relative humidity model levels" type="string" />
@@ -704,6 +710,12 @@
         <attribute name="units" value="" type="string" />
     </parameter>
     -->
+    <parameter name="cloud_liquid_water_mixing_ratio_ml" type="float">
+        <grib2 discipline="0" parameterCategory="1" parameterNumber="83" typeOfLevel="105"/>
+        <attribute name="long_name" value="Specific cloud liquid water contents (clwc)" type="string"/>
+        <attribute name="standard_name" value="cloud_liquid_water_mixing_ration" type="string"/>
+        <attribute name="units" value="1" type="string"/>
+    </parameter>
     <!-- Total cloud cover  (71) -->
     <parameter name="cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="164" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
@@ -878,7 +890,7 @@
         <attribute name="standard_name" value="vegetation_area_fraction" type="string"/>
         <attribute name="units" value="%" type="string"/>
     </parameter>
-    <!-- Net short-wave radiation (surface) (111) 
+    <!-- Net short-wave radiation (surface) (111)
     <parameter name="surface_net_upward_shortwave_flux_acc" type="float">
         <grib1 indicatorOfParameter="111" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
         <attribute name="long_name" value="Acumulated net surface short wave radiation" type="string" />
@@ -935,7 +947,7 @@
         <attribute name="units" value="W/m^2" type="string" />
     </parameter>
     -->
-    <!-- Momentum flux x-direction (124) finner ikke 
+    <!-- Momentum flux x-direction (124) finner ikke
     <parameter name="downward_eastward_momentum_flux_in_air" type="float">
         <grib1 indicatorOfParameter="124" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
        <attribute name="long_name" value="Momentum flux x-direction" type="string" />
@@ -943,7 +955,7 @@
         <attribute name="units" value="N/m^2" type="string" />
     </parameter>
     -->
-    <!-- Momentum flux y-direction (125) finner ikke 
+    <!-- Momentum flux y-direction (125) finner ikke
     <parameter name="downward_northward_momentum_flux_in_air" type="float">
         <grib1 indicatorOfParameter="125" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105" levelNo="0"/>
         <attribute name="long_name" value="Momentum flux y-direction" type="string" />
