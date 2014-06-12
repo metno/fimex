@@ -563,9 +563,8 @@
     </parameter>
     <!-- Meridional wind (34) -->
     <parameter name="y_wind_10m" type="float">
-        <grib2 discipline="0" parameterCategory="2" parameterNumber="3" typeOfLevel="105"/>
-<!--         <grib1 indicatorOfParameter="166" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
- -->        <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string"/>
+        <grib1 indicatorOfParameter="166" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
+        <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string"/>
         <attribute name="standard_name" value="y_wind" type="string"/>
         <attribute name="units" value="m/s" type="string"/>
         <spatial_vector direction="y,latitude" counterpart="x_wind_10m"/>
@@ -587,8 +586,9 @@
         <spatial_vector direction="y,latitude" counterpart="x_wind_pl"/>
     </parameter>
     <parameter name="y_wind_ml" type="float">
-        <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
-        <attribute name="long_name" value="Meridional wind model levels" type="string" />
+        <grib2 discipline="0" parameterCategory="2" parameterNumber="3" typeOfLevel="105"/>
+<!--         <grib1 indicatorOfParameter="34" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="105"/>
+ -->        <attribute name="long_name" value="Meridional wind model levels" type="string" />
         <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="y,latitude" counterpart="x_wind_ml" />
