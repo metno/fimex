@@ -25,7 +25,7 @@
 !!
 !! @see https://svn.met.no/viewvc/fimex/trunk/modules/F90/fimex.f90?view=co
 MODULE Fimex
-  USE iso_c_binding, ONLY : C_PTR
+  USE iso_c_binding, ONLY : C_PTR, C_NULL_PTR
   IMPLICIT NONE
 
   !> Axis-definitions
@@ -70,8 +70,8 @@ MODULE Fimex
   !! @warning The class FimexIO stores internally two refernces to file and data-handles.
   !!    It should therefore not be accessed from two parallel threads
   TYPE, PUBLIC :: FimexIO
-    TYPE(C_PTR),PRIVATE    :: io
-    TYPE(C_PTR),PRIVATE    :: sb
+    TYPE(C_PTR),PRIVATE    :: io = C_NULL_PTR
+    TYPE(C_PTR),PRIVATE    :: sb = C_NULL_PTR
   CONTAINS
     procedure :: open => open_file
     procedure :: interpolate => new_interpolator
@@ -943,13 +943,15 @@ MODULE Fimex
 
   !> Cleanup internally kept handles and close the file.
   FUNCTION close_file(this)
-    USE iso_c_binding,   ONLY: C_ASSOCIATED
+    USE iso_c_binding,   ONLY: C_ASSOCIATED, C_NULL_PTR
     IMPLICIT NONE
-    CLASS(FimexIO), INTENT(IN)    :: this
-    INTEGER                       :: close_file
+    CLASS(FimexIO), INTENT(INOUT)    :: this
+    INTEGER                          :: close_file
 
     IF ( C_ASSOCIATED(this%sb) ) CALL c_mifi_free_slicebuilder(this%sb)
     IF ( C_ASSOCIATED(this%io) ) CALL c_mifi_free_cdm_reader(this%io)
+    this%sb = C_NULL_PTR
+    this%io = C_NULL_PTR
     close_file=0
   END FUNCTION close_file
 
