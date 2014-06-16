@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( test_rotate )
 
         BOOST_CHECK_NE(xn, xo);
         BOOST_CHECK_NE(yn, yo);
-        BOOST_CHECK_CLOSE(xn*xn+yn*yn, xo*xo+yo*yo, 1e-5);
+        BOOST_CHECK_CLOSE(xn*xn+yn*yn, xo*xo+yo*yo, 1e-4);
 }
 
 #else

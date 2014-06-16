@@ -220,6 +220,25 @@ int mifi_interpolate_f(const int method,
     return mifi_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
+static double mifi_bearing(double lat0, double lon0, double lat1, double lon1)
+{
+    // use spherical distances
+    // (lon1y, lat1y)
+    //     ^
+    //     |
+    //     |
+    // (lon0,lat0) ----> (lon1x,lat1x)
+    double dlon = lon0 - lon1;
+    double sin_dLon = sin(dlon);
+    double cos_dLon = cos(dlon);
+    double sin_lat0 = sin(lat0);
+    double cos_lat0 = cos(lat0);
+    double sin_lat1 = sin(lat1);
+    double cos_lat1 = cos(lat1);
+    double phi = atan2(sin_dLon*cos_lat1, cos_lat0*sin_lat1 - sin_lat0*cos_lat1*cos_dLon);
+    return phi;
+
+}
 static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, projPJ outputPJ,
         const double* in_x_field, const double* in_y_field, // both on
         const double* out_x_field, const double* out_y_field, // both on
@@ -251,12 +270,22 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
             free(out_x_delta_proj_axis);
             return MIFI_ERROR;
         }
+
+        // metric calculations
         double sign = deltaX > 0 ? 1. : -1.;
         for (int i = 0; i < on; ++i) {
-            double phi = atan2((out_y_delta_proj_axis[i] - out_y_field[i]),
-                    (out_x_delta_proj_axis[i] - out_x_field[i]));
-            if (sign < 0) {
-                phi += MIFI_PI;
+            double phi = 0;
+            if (pj_is_latlong(outputPJ)) {
+                // phi = mifi_bearing(out_y_field[i], out_x_field[i], out_y_delta_proj_axis[i], out_x_delta_proj_axis[i]); //atan2(sin(lon_pnt0-dLonNorth)*cos(dLatNorth), cos(lat_pnt0)*sin(dLatNorth)-sin(lat_pnt0)*cos(dLatNorth)*cos(lon_pnt0-dLonNorth));
+                // bearing is towards north, so we have to rotate by 90 degrees since we map x/east-axis
+                // phi += MIFI_PI*.5;
+                // only look at true north rotation for lat-lon
+            } else {
+                phi = atan2((out_y_delta_proj_axis[i] - out_y_field[i]),
+                            (out_x_delta_proj_axis[i] - out_x_field[i]));
+                if (sign < 0) {
+                    phi += MIFI_PI;
+                }
             }
             //fprintf(stderr, "atan2-y/x: %f\n", phi/MIFI_PI*180);
             matrix[0 + 4 * i] = phi; // temporary storage
@@ -282,18 +311,27 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
             free(out_x_delta_proj_axis);
             return MIFI_ERROR;
         }
+        if (pj_is_latlong(outputPJ)) {
+            if (MIFI_DEBUG) fprintf(stderr,"output-projection is latlon\n");
+        }
         double sign = deltaY > 0 ? 1. : -1.;
         for (int i = 0; i < on; ++i) {
-            double phi = -1 * atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
-                  (out_y_delta_proj_axis[i] - out_y_field[i]));
-            if (sign < 0) {
-                phi += MIFI_PI;
+            double phi0;
+            if (pj_is_latlong(outputPJ)) { // this does not handle rotated lat-lon - good!
+                phi0 = mifi_bearing(out_y_field[i], out_x_field[i], out_y_delta_proj_axis[i], out_x_delta_proj_axis[i]); //atan2(sin(lon_pnt0-dLonNorth)*cos(dLatNorth), cos(lat_pnt0)*sin(dLatNorth)-sin(lat_pnt0)*cos(dLatNorth)*cos(lon_pnt0-dLonNorth));
+            } else {
+                double phix = -1 * atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
+                                         (out_y_delta_proj_axis[i] - out_y_field[i]));
+                if (sign < 0) {
+                    phix += MIFI_PI;
+                }
+                //fprintf(stderr, "%f-%f / %f-%f", out_x_delta_proj_axis[i], out_x_field[i], out_y_delta_proj_axis[i], out_y_field[i]);
+                //fprintf(stderr, "atan2-x/y: %f %f %f %f\n", phi/MIFI_PI*180, acos(matrix[0+4*i])/MIFI_PI*180, deltaX, deltaY);
+
+                double phiy = matrix[0+4*i];
+                //average, for non-conformal cases
+                phi0 = .5*(phix+phiy);
             }
-            //fprintf(stderr, "%f-%f / %f-%f", out_x_delta_proj_axis[i], out_x_field[i], out_y_delta_proj_axis[i], out_y_field[i]);
-            //fprintf(stderr, "atan2-x/y: %f %f %f %f\n", phi/MIFI_PI*180, acos(matrix[0+4*i])/MIFI_PI*180, deltaX, deltaY);
-            double phiy = matrix[0+4*i];
-            //average
-            double phi0 = .5*(phi+phiy);
             double c = cos(phi0);
             double s = sin(phi0);
             matrix[0 + 4 * i] = c;
