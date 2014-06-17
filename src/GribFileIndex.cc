@@ -393,6 +393,12 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
         shortName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), "_");
     }
 
+    int err = grib_get_long(gh.get(), "isotopeIdentificationNumber", &isotopeId_);
+    if (err == GRIB_NOT_FOUND) {
+        isotopeId_ = -1;
+    } else {
+        MIFI_GRIB_CHECK(err, 0); // other errors, or no errors
+    }
 
     // level
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "levtype", &levelType_), 0);
@@ -559,6 +565,17 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
             totalNumberOfEnsembles_ = 0;
         }
     }
+    {
+        // isotope
+        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":isotope", node);
+        int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
+        if (size > 0) {
+            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
+            isotopeId_ = string2type<long>(getXmlProp(lNode, "id"));
+        } else {
+            isotopeId_ = -1;
+        }
+    }
 
     {
         XPathObjPtr xp = doc->getXPathObject(nsPrefix+":gridDefinition", node);
@@ -694,6 +711,11 @@ long GribFileMessage::getLevelType() const
     return levelType_;
 }
 
+long GribFileMessage::getIsotopeId() const
+{
+    return isotopeId_;
+}
+
 const vector<long>& GribFileMessage::getParameterIds() const
 {
     return gridParameterIds_;
@@ -779,6 +801,13 @@ string GribFileMessage::toString() const
                     type2string(perturbationNo_))));
             checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("total"), xmlCast(
                     type2string(totalNumberOfEnsembles_))));
+            checkLXML(xmlTextWriterEndElement(writer.get()));
+        }
+
+        if (isotopeId_ >= 0) {
+            checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("isotope")));
+            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("id"), xmlCast(
+                            type2string(isotopeId_))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         }
 

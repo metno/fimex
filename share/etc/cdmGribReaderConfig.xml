@@ -354,6 +354,12 @@
 </axes>
 
 <variables>
+    <parameter name="concAM241" type="float">
+        <!-- multi-id for grib1 and grib2 -->
+        <grib1 indicatorOfParameter="200" gribTablesVersionNo="133" identificationOfOriginatingGeneratingCentre="54" isotopeId="328"/>
+        <!--  <attribute name="standard_name" value="geopotential_height" type="string" /> -->
+        <attribute name="units" value="Bq / m2" type="string" />
+    </parameter>
     <parameter name="geopotential_height" type="float">
         <!-- multi-id for grib1 and grib2 -->
         <grib1 indicatorOfParameter="156" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" timeRangeIndicator="0"/>

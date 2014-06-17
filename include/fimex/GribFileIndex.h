@@ -74,6 +74,8 @@ public:
      * get the current perturbation/ensemble number
      */
     size_t getPerturbationNumber() const { return static_cast<size_t>(perturbationNo_); }
+    long getIsotopeId() const;
+
     /**
      * Get the parameter ids as list with the following meanings:
      * @li ed1: indicatorOfParameter, gribTablesVersionNo, identificationOfOriginatingGeneratingCentre;
@@ -119,6 +121,7 @@ private:
     long levelNo_;
     long perturbationNo_;
     long totalNumberOfEnsembles_;
+    long isotopeId_;
     std::string typeOfGrid_;
     GridDefinition gridDefinition_;
 };
