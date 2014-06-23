@@ -53,6 +53,10 @@ void GribApiCDMWriter_Impl1::setParameter(const std::string& varName, double lev
     GRIB_CHECK(grib_set_long(gribHandle.get(), "indicatorOfParameter", string2type<long>(parameter)),"");
     std::string tableNumber = getXmlProp(node, "codeTable");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "gribTablesVersionNo", string2type<long>(tableNumber)),"");
+
+    // optional keys
+    setNodesAttributes("attribute", node);
+    setNodesAttributes("g1attribute", node);
 }
 
 void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDMException)

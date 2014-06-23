@@ -32,6 +32,9 @@
 #include "fimex/CoordinateSystemSliceBuilder.h"
 #include <grib_api.h>
 #include <cmath>
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
 #include <functional>
 #include <algorithm>
 #include <libxml/tree.h>
@@ -64,7 +67,23 @@ GribApiCDMWriter_ImplAbstract::GribApiCDMWriter_ImplAbstract(int gribVersion, co
 {
     logger = getLogger("fimex.GribApi_CDMWriter");
     std::string gribTemplate("GRIB" + type2string(gribVersion));
-    gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
+
+    std::string templXPath("/cdm_gribwriter_config/template_file");
+    XPathObjPtr xPObj = xmlConfig->getXPathObject(templXPath);
+    xmlNodeSetPtr nodes = xPObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    if (size == 1) {
+        std::string gribTemplate = getXmlProp(nodes->nodeTab[0], "name");
+        int error;
+        FILE* fh = std::fopen(gribTemplate.c_str(), "r");
+        if (fh != 0) {
+            gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_file(0, fh, &error), grib_handle_delete);
+        } else {
+            throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate + std::strerror(errno));
+        }
+    } else {
+        gribHandle = boost::shared_ptr<grib_handle>(grib_handle_new_from_template(0, gribTemplate.c_str()), grib_handle_delete);
+    }
     if (gribHandle.get() == 0) throw CDMException("unable to open grib_handle_from_template for grib-template: " + gribTemplate);
     // check the file
     if (!gribFile.is_open()) throw CDMException("Cannot write grib-file: "+outputFile);
@@ -79,15 +98,16 @@ void GribApiCDMWriter_ImplAbstract::run() throw(CDMException)
     using namespace std;
     using namespace boost::posix_time;
     LOG4FIMEX(logger, Logger::DEBUG, "GribApiCDMWriter_ImplAbstract::run()  " );
-    setGlobalAttributes();
 
-    string pType("grid_second_order");
-    try {
-        size_t pTypeSize = pType.size();
-        GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting endStep");
-    } catch (...) {
-        LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
-    }
+    // default to grid_second_order
+//    string pType("grid_second_order");
+//    try {
+//        size_t pTypeSize = pType.size();
+//        GRIB_CHECK(grib_set_string(gribHandle.get(), "packingType", pType.c_str(), &pTypeSize), "setting endStep");
+//    } catch (...) {
+//        LOG4FIMEX(logger, Logger::WARN, "unable to set packingType to " << pType );
+//    }
+    setGlobalAttributes();
 
     // get all coordinate systems from file, usually one, but may be a few (theoretical limit: # of variables)
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(cdmReader);
@@ -276,28 +296,39 @@ void GribApiCDMWriter_ImplAbstract::setGlobalAttributes()
     std::string attr[] = {"attribute", gattr};
     for (int i = 0; i < 2; i++) {
         std::string attrXPath = globalAttrXPath + attr[i];
-        XPathObjPtr xPObj = xmlConfig->getXPathObject(attrXPath);
-        xmlNodeSetPtr nodes = xPObj->nodesetval;
-        int size = (nodes) ? nodes->nodeNr : 0;
-        for (int j = 0; j < size; j++) {
-            xmlNodePtr node = nodes->nodeTab[j];
-            std::string name = getXmlProp(node, "name");
-            std::string value = getXmlProp(node, "value");
-            std::string type = getXmlProp(node, "type");
-            LOG4FIMEX(logger, Logger::DEBUG, "setting global attribute: " << name << "(" << value << "," << type << ")");
-            if (type == "long") {
-                GRIB_CHECK(grib_set_long(gribHandle.get(), name.c_str(), string2type<long>(value)), "setting global attr");
-            } else if (type == "double") {
-                GRIB_CHECK(grib_set_double(gribHandle.get(), name.c_str(), string2type<double>(value)), "setting global attr");
-            } else if (type == "string") {
-                size_t msgSize = value.size();
-                GRIB_CHECK(grib_set_string(gribHandle.get(), name.c_str(), value.c_str(), &msgSize), "setting global attr");
-            } else {
-                throw CDMException("unknown type for grib global_attributes: " + type );
-            }
+        setNodesAttributes(attrXPath);
+    }
+}
+
+void GribApiCDMWriter_ImplAbstract::setNodesAttributes(std::string attName, void* node)
+{
+    XPathObjPtr xPObj;
+    if (node == 0) {
+        xPObj = xmlConfig->getXPathObject(attName);
+    } else {
+        xPObj = xmlConfig->getXPathObject(attName, reinterpret_cast<xmlNodePtr>(node));
+    }
+    xmlNodeSetPtr nodes = xPObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int j = 0; j < size; j++) {
+        xmlNodePtr node = nodes->nodeTab[j];
+        std::string name = getXmlProp(node, "name");
+        std::string value = getXmlProp(node, "value");
+        std::string type = getXmlProp(node, "type");
+        LOG4FIMEX(logger, Logger::DEBUG, "setting attribute: " << name << "(" << value << "," << type << ")");
+        if (type == "long") {
+            GRIB_CHECK(grib_set_long(gribHandle.get(), name.c_str(), string2type<long>(value)), "setting grib-attr");
+        } else if (type == "double") {
+            GRIB_CHECK(grib_set_double(gribHandle.get(), name.c_str(), string2type<double>(value)), "setting grib-attr");
+        } else if (type == "string") {
+            size_t msgSize = value.size();
+            GRIB_CHECK(grib_set_string(gribHandle.get(), name.c_str(), value.c_str(), &msgSize), "setting grib-attr");
+        } else {
+            throw CDMException("unknown type for grib attributes: " + type );
         }
     }
 }
+
 void GribApiCDMWriter_ImplAbstract::setData(const DataPtr& data)
 {
     GRIB_CHECK(grib_set_double_array(gribHandle.get(), "values", data->asDouble().get(), data->size()), "setting values");

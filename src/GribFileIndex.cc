@@ -346,7 +346,12 @@ GridDefinition getGridDefPolarStereographic(long edition, boost::shared_ptr<grib
     return GridDefinition(proj, false, gmd.sizeX, gmd.sizeY, gmd.incrX, gmd.incrY, startX, startY, gribGetGridOrientation(gh));
 }
 
-GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members)
+GribFileMessage::GribFileMessage(
+        boost::shared_ptr<grib_handle> gh,
+        const std::string& fileURL,
+        long filePos, long msgPos,
+        const std::vector<std::pair<std::string, boost::regex> >& members,
+        const std::vector<std::string>& extraKeys)
 : fileURL_(fileURL), filePos_(filePos), msgPos_(msgPos)
 {
     if (gh.get() == 0)
@@ -393,11 +398,16 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::s
         shortName_ = join(gridParameterIds_.begin(), gridParameterIds_.end(), "_");
     }
 
-    int err = grib_get_long(gh.get(), "isotopeIdentificationNumber", &isotopeId_);
-    if (err == GRIB_NOT_FOUND) {
-        isotopeId_ = -1;
-    } else {
-        MIFI_GRIB_CHECK(err, 0); // other errors, or no errors
+    for (std::vector<std::string>::const_iterator keyIt = extraKeys.begin(); keyIt != extraKeys.end(); ++keyIt) {
+        int err;
+        long val;
+        err = grib_get_long(gh.get(), keyIt->c_str(), &val);
+        if (err == GRIB_NOT_FOUND) {
+            val = -1;
+        } else {
+            MIFI_GRIB_CHECK(err, 0); // other errors, or no errors
+            otherKeys_[*keyIt] = val;
+        }
     }
 
     // level
@@ -566,14 +576,13 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
         }
     }
     {
-        // isotope
-        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":isotope", node);
+        // extraKeys
+        XPathObjPtr xp = doc->getXPathObject(nsPrefix+":extraKey", node);
         int size = xp->nodesetval ? xp->nodesetval->nodeNr : 0;
-        if (size > 0) {
-            xmlNodePtr lNode = xp->nodesetval->nodeTab[0];
-            isotopeId_ = string2type<long>(getXmlProp(lNode, "id"));
-        } else {
-            isotopeId_ = -1;
+        for (int i = 0; i < size; ++i) {
+            xmlNodePtr lNode = xp->nodesetval->nodeTab[i];
+            string keyName = getXmlProp(lNode, "name");
+            otherKeys_[keyName] = string2type<long>(getXmlProp(lNode, "value"));
         }
     }
 
@@ -711,9 +720,9 @@ long GribFileMessage::getLevelType() const
     return levelType_;
 }
 
-long GribFileMessage::getIsotopeId() const
+const std::map<std::string, long>& GribFileMessage::getOtherKeys() const
 {
-    return isotopeId_;
+    return otherKeys_;
 }
 
 const vector<long>& GribFileMessage::getParameterIds() const
@@ -804,10 +813,18 @@ string GribFileMessage::toString() const
             checkLXML(xmlTextWriterEndElement(writer.get()));
         }
 
-        if (isotopeId_ >= 0) {
-            checkLXML(xmlTextWriterStartElement(writer.get(), xmlCast("isotope")));
-            checkLXML(xmlTextWriterWriteAttribute(writer.get(), xmlCast("id"), xmlCast(
-                            type2string(isotopeId_))));
+        // otherKeys / extraKey
+        for (std::map<std::string, long>::const_iterator others =
+                otherKeys_.begin(); others != otherKeys_.end(); ++others) {
+            checkLXML(
+                    xmlTextWriterStartElement(writer.get(),
+                            xmlCast("extraKey")));
+            checkLXML(
+                    xmlTextWriterWriteAttribute(writer.get(), xmlCast("name"),
+                            xmlCast(others->first)));
+            checkLXML(
+                    xmlTextWriterWriteAttribute(writer.get(), xmlCast("value"),
+                            xmlCast(type2string(others->second))));
             checkLXML(xmlTextWriterEndElement(writer.get()));
         }
 
@@ -962,6 +979,11 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
         earthFigure_ = options_["earthfigure"];
         LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure " << earthFigure_);
     }
+    vector<string> extraKeys;
+    if (options_.find("extraKeys") != options.end()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "using extraKeys " << options_["extraKeys"]);
+        extraKeys = tokenize(options_["extraKeys"],",");
+    }
 
     namespace fs = boost::filesystem;
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
@@ -969,7 +991,7 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
     }
 
     if (ignoreExistingXml) {
-        initByGrib(gribFilePath, members);
+        initByGrib(gribFilePath, members, extraKeys);
     } else {
         // find gribml-file younger than original file
 #if BOOST_FILESYSTEM_VERSION == 3
@@ -997,17 +1019,17 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
                 if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
                     initByXML(xmlFile);
                 } else {
-                    initByGrib(gribFilePath, members);
+                    initByGrib(gribFilePath, members, extraKeys);
                 }
             } else {
-                initByGrib(gribFilePath, members);
+                initByGrib(gribFilePath, members, extraKeys);
             }
         }
     }
     earthFigure_ = ""; // remember to reset!
 }
 
-void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members)
+void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys)
 {
     url_ = "file:"+ file_string(gribFilePath);
     FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");
@@ -1037,7 +1059,7 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::
                 // don't change lastPos
             }
             try {
-                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos, members));
+                messages_.push_back(GribFileMessage(gh, url_, lastPos, msgPos, members, extraKeys));
             } catch (CDMException& ex) {
                 LOG4FIMEX(logger, Logger::WARN, "ignoring grib-message at byte " << msgPos <<": " << ex.what());
             }

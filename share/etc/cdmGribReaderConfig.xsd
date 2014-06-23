@@ -136,6 +136,12 @@
       <xs:attribute name="value" use="required"/>
     </xs:complexType>
   </xs:element>
+  <xs:element name="extraKey">
+    <xs:complexType>
+      <xs:attribute name="name" use="required" type="xs:string"/>
+      <xs:attribute name="value" use="required"/>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="spatial_vector">
     <xs:complexType>
       <xs:attribute name="direction" use="required" type="xs:string"/>
@@ -159,6 +165,9 @@
   </xs:complexType>
   <xs:element name="grib1">
     <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:extraKey" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
       <xs:attribute name="indicatorOfParameter" use="required" type="xs:integer"/>
       <xs:attribute name="gribTablesVersionNo" use="optional" type="xs:integer"/>
       <xs:attribute name="identificationOfOriginatingGeneratingCentre" use="optional" type="xs:integer"/>
@@ -169,6 +178,9 @@
   </xs:element>
   <xs:element name="grib2">
     <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:extraKey" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
       <xs:attribute name="parameterNumber" use="required" type="xs:integer"/>
       <xs:attribute name="discipline" use="required" type="xs:integer"/>
       <xs:attribute name="parameterCategory" use="optional" type="xs:integer"/>

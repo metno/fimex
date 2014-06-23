@@ -9,7 +9,7 @@
     <!--  <g1attribute name="" value="" type="" /> -->
     <!-- use for grib2 only attributes -->
     <g2attribute name="shapeOfTheEarth" value="8" type="long" /> <!-- spherical r=6,371,229.0m -->
-    <g2attribute name="typeOfPacking" value="grid_simple" type="string" /> <!-- jpeg2000 -->
+    <attribute name="packingType" value="grid_second_order" type="string" /> <!-- grid_simple, grid_second_order, png, jpeg2000 -->
 </global_attributes>
 <axes>
 <!-- no vertical axis -->

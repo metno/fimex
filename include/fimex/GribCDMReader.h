@@ -82,6 +82,11 @@ private:
      * @return "" or proj4-string as in xml-file
      */
     std::string xmlGetEarthFigure() const;
+    /**
+     * read the non-standard attributes of parameters from the xml-config
+     * @return "" or a comma delimited string with attributes
+     */
+    std::string xmlGetExtraKeys() const;
 
     void initAddTimeDimension();
     void initAddGlobalAttributes();

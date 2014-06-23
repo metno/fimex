@@ -60,6 +60,10 @@ void GribApiCDMWriter_Impl2::setParameter(const std::string& varName, double lev
     GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterNumber", string2type<long> (parameter)), "");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "parameterCategory",	string2type<long> (category)), "");
     GRIB_CHECK(grib_set_long(gribHandle.get(), "discipline", string2type<long> (discipline)), "");
+
+    // optional keys
+    setNodesAttributes("attribute", node);
+    setNodesAttributes("g2attribute", node);
 }
 
 void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDMException)

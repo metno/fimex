@@ -64,6 +64,14 @@ protected:
      * add the global attributes from the config to the default grib-handle
      */
     virtual void setGlobalAttributes();
+    /**
+     * add the attributes named attName from the config to the current grib-handle
+     *
+     * @param attName xpath to search
+     * @param node the xml-node to search below, if 0 start from root-node
+     */
+    void setNodesAttributes(std::string attName, void* node = 0);
+
     virtual void setData(const DataPtr& data);
     /**
      * set the projection parameters, throw an exception if none are available

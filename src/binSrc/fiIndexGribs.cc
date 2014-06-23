@@ -27,6 +27,8 @@
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/ThreadPool.h"
+#include "fimex/Utils.h"
+#include "fimex/Logger.h"
 #include <grib_api.h>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -46,10 +48,14 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 }
 
 void
-indexGrib(const fs::path& input, const fs::path& output, bool force)
+indexGrib(const fs::path& input, const fs::path& output, vector<string> extraKeys, bool force)
 {
     std::vector<std::pair<std::string, boost::regex> > members; // empty members, doesn't make sense for single files
-    MetNoFimex::GribFileIndex gfi(input, members, force);
+    std::map<std::string, std::string> options;
+    if (extraKeys.size() > 0) {
+        options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
+    }
+    MetNoFimex::GribFileIndex gfi(input, members, force, options);
     fs::ofstream os(output);
     os << gfi;
     os.close();
@@ -64,8 +70,10 @@ main(int argc, char* args[])
     po::options_description options("options");
     options.add_options()
         ("help,h", "help message")
+        ("debug", "debug option")
         ("version", "program version")
         ("force,f", "force update of index-file")
+        ("extraKey", po::value<vector<string> >()->composing(), "multiple extraKey to index")
         ("outputDirectory,o", po::value<string>(), "output directory")
         ("inputFile,i", po::value<string>(), "input gribFile")
         ;
@@ -78,6 +86,12 @@ main(int argc, char* args[])
     if (argc == 1 || vm.count("help")) {
         writeUsage(cout, options);
         return 0;
+    }
+    if (vm.count("debug") >= 1) {
+        // TODO allow for multiple occurances and use INFO as == 1
+        MetNoFimex::defaultLogLevel(MetNoFimex::Logger::DEBUG);
+    } else if (vm.count("debug") > 1) {
+        MetNoFimex::defaultLogLevel(MetNoFimex::Logger::DEBUG);
     }
     if (vm.count("version")) {
         cout << "fiIndexGribs version " << fimexVersion() << endl;
@@ -113,6 +127,6 @@ main(int argc, char* args[])
     fs::path outFile = outDir / (filename + ".grbml");
     bool forceUpdate = false;
     if (vm.count("force")) forceUpdate = true;
-    indexGrib(fullInput, outFile, forceUpdate);
+    indexGrib(fullInput, outFile, vm["extraKey"].as<vector<string> >(), forceUpdate);
     return 0;
 }

@@ -155,6 +155,7 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
     if (xmlGetEarthFigure() != "") {
         options["earthfigure"] = xmlGetEarthFigure();
     }
+    options["extraKeys"] = xmlGetExtraKeys();
 
     for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
         vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds, false, options).listMessages();
@@ -199,7 +200,6 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     optionals["typeOfLevel"] = msg.getLevelType();
     optionals["levelNo"] = msg.getLevelNumber();
     optionals["timeRangeIndicator"] = msg.getTimeRangeIndicator();
-    optionals["isotopeId"] = msg.getIsotopeId();
     if (msg.getEdition() == 1) {
         xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"']");
         optionals["gribTablesVersionNo"] = pars.at(1);
@@ -209,6 +209,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
         optionals["parameterCategory"] = pars.at(1);
         optionals["discipline"] = pars.at(2);
     }
+
     XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     size_t size = (nodes) ? nodes->nodeNr : 0;
@@ -229,6 +230,20 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
                     }
                 }
             }
+            // check the options from msg.getOtherKeys()
+            for (map<string, long>::const_iterator opt = msg.getOtherKeys().begin(); opt != msg.getOtherKeys().end(); ++opt) {
+                string xpathStr = "gr:extraKey[@name='" + opt->first + "']";
+                XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathStr, node);
+                xmlNodeSetPtr nodes = xpathObj->nodesetval;
+                size_t size = (nodes) ? nodes->nodeNr : 0;
+                if (size != 0) {
+                    long val = string2type<long>(getXmlProp(nodes->nodeTab[0], "value"));
+                    if (val != opt->second) {
+                        allOptionalsMatch = false;
+                    }
+                }
+            }
+
             if (allOptionalsMatch) {
                 matchingNodes.push_back(node->parent);
             }
@@ -750,6 +765,21 @@ std::string GribCDMReader::xmlGetEarthFigure() const
     }
     return replaceEarthString;
 }
+
+std::string GribCDMReader::xmlGetExtraKeys() const
+{
+    set<string> extraKeys;
+    // get the additinal keys from the xml-document
+    XPathObjPtr xpathObj = p_->doc->getXPathObject("//gr:extraKey");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        string extraKey = getXmlProp(nodes->nodeTab[0], "name");
+        extraKeys.insert(extraKey);
+    }
+    return join(extraKeys.begin(), extraKeys.end(), ",");
+}
+
 
 void GribCDMReader::initAddProjection()
 {

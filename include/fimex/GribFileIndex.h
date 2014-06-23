@@ -30,6 +30,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <vector>
+#include <map>
 #include "fimex/XMLDoc.h"
 #include "fimex/GridDefinition.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -44,7 +45,15 @@ class GribFileMessage
 {
 public:
     GribFileMessage();
-    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >());
+    /**
+     * @param gh grib_handle
+     * @param fileURL url of the input file
+     * @param filePos start of message in file
+     * @param msgPos start of real message within message (multimessage)
+     * @param members list of member-names -> filepath-regexp
+     * @param extraKeys additional keys to read from grib-file (both grib1 and 2) (key -> type)
+     */
+    GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >(), const std::vector<std::string>& extraKeys=std::vector<std::string>());
     GribFileMessage(boost::shared_ptr<XMLDoc>, std::string nsPrefix, xmlNodePtr node);
     ~GribFileMessage();
 
@@ -74,7 +83,11 @@ public:
      * get the current perturbation/ensemble number
      */
     size_t getPerturbationNumber() const { return static_cast<size_t>(perturbationNo_); }
-    long getIsotopeId() const;
+    /**
+     * get other keys - the other keys need to be available already during initialization
+     * @return map with key -> value
+     */
+    const std::map<std::string, long>& getOtherKeys() const;
 
     /**
      * Get the parameter ids as list with the following meanings:
@@ -121,7 +134,7 @@ private:
     long levelNo_;
     long perturbationNo_;
     long totalNumberOfEnsembles_;
-    long isotopeId_;
+    std::map<std::string, long> otherKeys_;
     std::string typeOfGrid_;
     GridDefinition gridDefinition_;
 };
@@ -180,7 +193,7 @@ private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
     std::map<std::string, std::string> options_;
-    void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members);
+    void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >(), const std::vector<std::string>& extraKeys=std::vector<std::string>());
     void initByXML(boost::filesystem::path xmlFilePath);
 };
 

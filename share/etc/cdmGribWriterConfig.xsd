@@ -4,10 +4,16 @@
   <xs:element name="cdm_gribwriter_config">
     <xs:complexType>
       <xs:sequence>
+        <xs:element ref="template_file" minOccurs="0" maxOccurs="1" />
         <xs:element ref="global_attributes" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="axes" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="variables" minOccurs="1" maxOccurs="1"/>
       </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="template_file">
+    <xs:complexType>
+      <xs:attribute name="path" use="required" type="xs:string"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="global_attributes">
@@ -87,6 +93,9 @@
   </xs:complexType>
   <xs:element name="grib1">
     <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="attribute"/>
+      </xs:sequence>
       <xs:attribute name="codeTable" type="xs:integer"/>
       <xs:attribute name="parameterNumber" type="xs:integer"/>
       <xs:attribute name="units"/>
@@ -94,6 +103,9 @@
   </xs:element>
   <xs:element name="grib2">
     <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="1" ref="attribute"/>
+      </xs:sequence>
       <xs:attribute name="discipline" type="xs:integer"/>
       <xs:attribute name="parameterCategory" type="xs:integer"/>
       <xs:attribute name="parameterNumber" type="xs:integer"/>
