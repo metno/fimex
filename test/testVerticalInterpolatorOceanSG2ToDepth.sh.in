@@ -1,17 +1,17 @@
 #! /bin/sh
 echo "testing conversion of ocean_s_g2 to depth"
-../src/binSrc/fimex --input.file=@top_srcdir@/test/verticalOceanSG2.nc --verticalInterpolate.type=depth --verticalInterpolate.method=linear --verticalInterpolate.level1=0,3,10,15,25,50,75,100,150,200,250,300,500,700,1000,2000,3000 --output.file=out.nc
+../src/binSrc/fimex --input.file=@top_srcdir@/test/verticalOceanSG2.nc --verticalInterpolate.type=depth --verticalInterpolate.method=linear --verticalInterpolate.level1=0,3,10,15,25,50,75,100,150,200,250,300,500,700,1000,2000,3000 --output.file=out$$.nc
 if [ $? != 0 ]; then
   echo "failed converting ocean_s_g2 to depth"
-  rm -f out.nc
+  rm -f out$$.nc
   exit 1
 fi
-diff @top_srcdir@/test/verticalOceanSG2_depth.nc out.nc
+diff @top_srcdir@/test/verticalOceanSG2_depth.nc out$$.nc
 if [ $? != 0 ]; then
   echo "failed diff ocean_s_g2 to depth"
-  rm -f out.nc
+  rm -f out$$.nc
   exit 1
 fi
-rm -f out.nc
+rm -f out$$.nc
 echo "success"
 exit 0

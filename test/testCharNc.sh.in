@@ -5,10 +5,11 @@ if [ ! -f @top_srcdir@/test/char.nc ]; then
    echo "no input data: @top_srcdir@/test/char.nc, skipping test..."
    exit 0;
 fi
-../src/binSrc/fimex --input.file=@top_srcdir@/test/char.nc --output.file=out.nc
+../src/binSrc/fimex --input.file=@top_srcdir@/test/char.nc --output.file=out$$.nc
 if [ $? != 0 ]; then
   echo "failed writing char/byte to nc-file"
   exit 1
 fi
 echo "success"
+rm -f out$$.nc
 exit 0

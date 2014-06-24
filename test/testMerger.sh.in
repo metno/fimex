@@ -12,17 +12,18 @@ if [ ! -f "$INNER" -o ! -f "$OUTER" ]; then
 fi
 ../src/binSrc/fimex --input.file="$OUTER" --merge.inner.file="$INNER" \
     --merge.method=bilinear \
-    --output.file=out.nc
+    --output.file=out$$.nc
 if [ $? != 0 ]; then
   echo "failed merge via fimex command-line"
   exit 1
 fi
 
-../src/binSrc/fimex --input.file out.nc --input.printNcML 2>/dev/null | grep -q "<variable \+name=\"$VAR\""
+../src/binSrc/fimex --input.file out$$.nc --input.printNcML 2>/dev/null | grep -q "<variable \+name=\"$VAR\""
 if [ $? != 0 ]; then
   echo "failed merge content via fimex command-line"
   exit 1
 fi
 
 echo "success"
+rm -f out$$.nc
 exit 0

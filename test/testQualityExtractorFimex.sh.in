@@ -11,10 +11,11 @@ if [ ! -f "$DATA" -o ! -f "$MASK" -o ! -f "$CONF" ]; then
    echo "no input data/mask/config: $DATA / $MASK / $CONF, skipping test..."
    exit 0;
 fi
-../src/binSrc/fimex --input.file="$DATA" --qualityExtract.config="$CONF" --output.file=out.nc
+../src/binSrc/fimex --input.file="$DATA" --qualityExtract.config="$CONF" --output.file=out$$.nc
 if [ $? != 0 ]; then
   echo "failed masking via fimex command-line"
   exit 1
 fi
 echo "success"
+rm -f out$$.nc
 exit 0
