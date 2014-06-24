@@ -639,9 +639,6 @@ internally translated to a regex like
 To have nicely formated names instead of the @c memberRegex, one can add another parameter to @c memberRegex and
 @c memberName, e.g. <tt>memberRegex:mbrABC.*:mbrABC</tt> or <tt>--input.optional=memberName:mbrABC:ensembleABC</tt>
 
-@verbatim
-  fiIndexGribs -i input.grb --extraKey=istotopeIdentificationNumber --extraKey=anotherKey
-@endverbatim
 
 
 @subsection gribReaderConfigXml Grib-Table to netcdf/CF translation
@@ -650,10 +647,15 @@ Within fimex, the data-structure needs to conform to CF. Since grib is defined b
 need to be translated to their netcdf/CF equivalents in the <tt>cdmGribReaderConfgig.xml</tt> which is required
 for all grib-files.
 
-@verbinclude share/etc/cdmGribReaderConfig.xml
-
-When extraKey's (e.g. isotopeIdentificationNumber) are needed to define a grib-message, and fiIndexGribs is used
+When extraKey's (e.g. localDefinitionNumber) are needed to define a grib-message, and fiIndexGribs is used
 to index the grib-file, fiIndexGribs needs to list all extraKeys:
+
+@verbatim
+  fiIndexGribs -i input.grb --extraKey=localDefinitionNumber --extraKey=anotherKey
+@endverbatim
+
+Long example of a cdmGribReaderConfig.xml:
+@verbinclude share/etc/cdmGribReaderConfig.xml
 
 
 
