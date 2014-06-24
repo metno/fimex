@@ -51,7 +51,7 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Doxyfile.in \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in $(srcdir)/fimex.pc.in \
 	$(srcdir)/m4/debian.mk $(srcdir)/m4/doxygen.mk \
-	$(top_srcdir)/configure AUTHORS COPYING INSTALL NEWS \
+	$(top_srcdir)/configure AUTHORS COPYING INSTALL NEWS ar-lib \
 	config.guess config.sub depcomp install-sh ltmain.sh missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -949,7 +949,7 @@ dist-hook:
 
 $(pkgconfig_DATA): config.status
 
-@HAVE_LIBPQ_TRUE@test_wdb: 
+@HAVE_LIBPQ_TRUE@test_wdb:
 @HAVE_LIBPQ_TRUE@	cd test; $(MAKE) test_wdb
 
 @DX_COND_doc_TRUE@@DX_COND_ps_TRUE@doxygen-ps: @DX_DOCDIR@/@PACKAGE@.ps

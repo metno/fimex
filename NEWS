@@ -1,5 +1,11 @@
-  *   fimex-0.53beta
-    *
+  * 2014-06-24 fimex-0.53
+    * improved accuracy of vector-rotation to latlon
+    * updating build to multi-arch environments (ubuntu 14.04, debian 7)
+    * extraKey-selection of grib-files
+    * allow absolute/relative GRIB_INDEX_PATH
+    * fix extract.reduceTime for several time-axes
+    * avoid uninitialized ptr in fortran / icc
+    * fix cross-sections with more than 2 points
   * 2014-05-13 fimex-0.52
     * join several levelNo in grib-files
     * rotation of directions (angles)
