@@ -559,6 +559,31 @@ The usage of the program is then very simple:
 @page gribReaderDoc gribReader Configuration
 @section gribReaderConfig gribReader Configuration
 
+@subsection fiIndexGribs Indexing Grib-messages
+
+Grib-files contain a sequence of many grib-messages, giving a representation of
+one layer of one parameter each. Fimex builds first a index over all available
+messages to be able to access the really needed message fast. For applications,
+which only need a few messages, but fast startup-time (i.e. viewer applications),
+it is an advantage to pre-build the index:
+
+@verbatim
+  fiIndexGribs -i input.grb
+@endverbatim
+
+This will create a file input.grbml, which will be automatically opened as long as
+the file is newer than input.grb and in the directory defined by the environment
+variable GRIB_INDEX_PATH. GRIB_INDEX_PATH might be absolute, starting with /, or
+relative to the grib-file (input.grb). If the environment-variable is not set, the
+directory of the input.grb-file is assumed. In an operational environment
+GRIB_INDEX_PATH should be defined globally, and fiIndexGribs should be called from
+the grib-files directory with
+
+@verbatim
+  fiIndexGribs -i input.grb -d $GRIB_INDEX_PATH
+@endverbatim
+
+
 @subsection gribReaderConcat Concatenation of grib-messages
 
 Grib-data is often splitted across several files. These files might be
@@ -573,7 +598,7 @@ characters, ? for exactly one character and ** for all subdirectories, e.g.
 @verbatim
 /home/heikok/**/*.grb
 @endverbatim will match all grib-files somewhere in my home-directory,
-while 
+while
 @verbatim
 /home/heikok/*/*.grb
 @endverbatim
@@ -614,6 +639,9 @@ internally translated to a regex like
 To have nicely formated names instead of the @c memberRegex, one can add another parameter to @c memberRegex and
 @c memberName, e.g. <tt>memberRegex:mbrABC.*:mbrABC</tt> or <tt>--input.optional=memberName:mbrABC:ensembleABC</tt>
 
+@verbatim
+  fiIndexGribs -i input.grb --extraKey=istotopeIdentificationNumber --extraKey=anotherKey
+@endverbatim
 
 
 @subsection gribReaderConfigXml Grib-Table to netcdf/CF translation
@@ -623,6 +651,12 @@ need to be translated to their netcdf/CF equivalents in the <tt>cdmGribReaderCon
 for all grib-files.
 
 @verbinclude share/etc/cdmGribReaderConfig.xml
+
+When extraKey's (e.g. isotopeIdentificationNumber) are needed to define a grib-message, and fiIndexGribs is used
+to index the grib-file, fiIndexGribs needs to list all extraKeys:
+
+
+
 
 @see MetNoFimex::GribCDMReader
 

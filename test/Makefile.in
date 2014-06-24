@@ -47,19 +47,21 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@              testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 
 @HAVE_GRIBAPI_TRUE@am__append_4 = ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
-@HAVE_METGM_TRUE@am__append_5 = testMetGmReader ${METGM_NC_TESTS}
+@HAVE_GRIBAPI_TRUE@am__append_5 = testFiIndexGribs.sh
+@HAVE_METGM_TRUE@am__append_6 = testMetGmReader ${METGM_NC_TESTS}
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/testCharNc.sh.in $(srcdir)/testMerger.sh.in \
-	$(srcdir)/testMergerTarget.sh.in $(srcdir)/testQEmask.xml.in \
+	$(srcdir)/testCharNc.sh.in $(srcdir)/testFiIndexGribs.sh.in \
+	$(srcdir)/testMerger.sh.in $(srcdir)/testMergerTarget.sh.in \
+	$(srcdir)/testQEmask.xml.in \
 	$(srcdir)/testQualityExtractorFimex.sh.in \
 	$(srcdir)/testVerticalInterpolator.sh.in \
 	$(srcdir)/testVerticalInterpolator2.sh.in \
 	$(srcdir)/testVerticalInterpolatorHeight.sh.in \
 	$(srcdir)/testVerticalInterpolatorOceanSG2ToDepth.sh.in \
 	$(srcdir)/wdb/make.mk
-@HAVE_LIBPQ_TRUE@am__append_6 = wdbTest
-@HAVE_LIBPQ_TRUE@am__append_7 = @BOOST_PROGRAM_OPTIONS_LIB@
-@ENABLE_FORTRAN_TRUE@@HAVE_FELT_TRUE@@HAVE_NETCDF_TRUE@am__append_8 = testFortran
+@HAVE_LIBPQ_TRUE@am__append_7 = wdbTest
+@HAVE_LIBPQ_TRUE@am__append_8 = @BOOST_PROGRAM_OPTIONS_LIB@
+@ENABLE_FORTRAN_TRUE@@HAVE_FELT_TRUE@@HAVE_NETCDF_TRUE@am__append_9 = testFortran
 TESTS = $(am__EXEEXT_11) $(am__EXEEXT_13)
 check_PROGRAMS = $(am__EXEEXT_11)
 subdir = test
@@ -87,8 +89,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = testCharNc.sh testVerticalInterpolator.sh \
-	testVerticalInterpolator2.sh testVerticalInterpolatorHeight.sh \
+CONFIG_CLEAN_FILES = testCharNc.sh testFiIndexGribs.sh \
+	testVerticalInterpolator.sh testVerticalInterpolator2.sh \
+	testVerticalInterpolatorHeight.sh \
 	testVerticalInterpolatorOceanSG2ToDepth.sh testQEmask.xml \
 	testQualityExtractorFimex.sh testMerger.sh testMergerTarget.sh
 CONFIG_CLEAN_VPATH_FILES =
@@ -656,7 +659,7 @@ red=; grn=; lgn=; blu=; std=
 @HAVE_NETCDF_TRUE@	testVerticalInterpolatorOceanSG2ToDepth.sh \
 @HAVE_NETCDF_TRUE@	testQualityExtractorFimex.sh testMerger.sh \
 @HAVE_NETCDF_TRUE@	testMergerTarget.sh
-am__EXEEXT_13 = $(am__EXEEXT_12)
+am__EXEEXT_13 = $(am__EXEEXT_12) $(am__append_5)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -842,10 +845,15 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
+EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
+             testVerticalInterpolator.sh.in testVerticalInterpolator2.sh.in \
+             testVerticalInterpolatorHeight.sh.in testVerticalInterpolatorOceanSG2ToDepth.sh.in \
+             testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
+             testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
+             inData.txt diana.setup felt2netcdf.cfg \
              felt2nc_variables_level1000.xml \
              test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
-             testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml \
+             testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml.in \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
@@ -873,16 +881,16 @@ CC_TESTS = testInterpolation testVerticalCoordinates \
 	testData testProjections testUnits testFileReaderFactory \
 	testCDM testSliceBuilder testXMLDoc testFeltReader \
 	$(am__append_1) $(am__append_2) $(am__append_4) \
-	$(am__append_5) $(am__append_6) $(am__append_8)
-SH_TESTS = $(am__append_3)
+	$(am__append_6) $(am__append_7) $(am__append_9)
+SH_TESTS = $(am__append_3) $(am__append_5)
 @ENABLE_FORTRAN_FALSE@LDADD = ../src/libfimex.la \
 @ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
 @ENABLE_FORTRAN_FALSE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
-@ENABLE_FORTRAN_FALSE@	$(am__append_7)
+@ENABLE_FORTRAN_FALSE@	$(am__append_8)
 @ENABLE_FORTRAN_TRUE@LDADD = $(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(BOOST_UNIT_TEST_FRAMEWORK_LIB) \
-@ENABLE_FORTRAN_TRUE@	$(am__append_7)
+@ENABLE_FORTRAN_TRUE@	$(am__append_8)
 AM_CPPFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I$(top_srcdir)/include -I$(top_srcdir)/src \
               ${milib_CFLAGS} \
               @MIFI_UDUNITS_CPPFLAGS@ @MIFI_UDUNITS2_CPPFLAGS@ \
@@ -978,6 +986,8 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 testCharNc.sh: $(top_builddir)/config.status $(srcdir)/testCharNc.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+testFiIndexGribs.sh: $(top_builddir)/config.status $(srcdir)/testFiIndexGribs.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testVerticalInterpolator.sh: $(top_builddir)/config.status $(srcdir)/testVerticalInterpolator.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

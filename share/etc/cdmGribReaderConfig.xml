@@ -583,7 +583,9 @@
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="x_wind_10m" type="float">
-        <grib1 indicatorOfParameter="165" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <grib1 indicatorOfParameter="165" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98">
+          <extraKey name="localDefinitionNumber" value="1" /> <!-- just for testing -->
+        </grib1>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />

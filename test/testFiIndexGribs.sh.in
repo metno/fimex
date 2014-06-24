@@ -1,0 +1,24 @@
+#! /bin/sh
+# @configure_input@
+echo "test fiIndexGribs"
+if [ ! -f @top_srcdir@/test/test.grb1 ]; then
+   echo "no input data: @top_srcdir@/test/test.grb1, skipping test..."
+   exit 0;
+fi
+../src/binSrc/fiIndexGribs --i @top_srcdir@/test/test.grb1 --extraKey=localDefinitionNumber
+if [ $? != 0 ]; then
+  echo "failed writing test.grb1.grbml"
+  exit 1
+fi
+if [ ! -f test.grb1.grbml ]; then
+  echo "failed writing test.grb1.grbml"
+  exit 1
+fi
+if grep -q localDefinitionNumber test.grb1.grbml; then
+  echo "success"
+else 
+  echo "no localDefinitionNumber in test.grb1.grbml"
+  exit 1;
+fi
+exit 0
+

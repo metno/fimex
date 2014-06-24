@@ -1,7 +1,12 @@
-EXTRA_DIST = $(SH_TESTS) inData.txt diana.setup felt2netcdf.cfg \
+EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
+             testVerticalInterpolator.sh.in testVerticalInterpolator2.sh.in \
+             testVerticalInterpolatorHeight.sh.in testVerticalInterpolatorOceanSG2ToDepth.sh.in \
+             testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
+             testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
+             inData.txt diana.setup felt2netcdf.cfg \
              felt2nc_variables_level1000.xml \
              test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
-             testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml \
+             testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml.in \
              coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
              verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
@@ -78,6 +83,7 @@ if HAVE_NETCDF
 endif
 if HAVE_GRIBAPI
   CC_TESTS += ${GRIBAPI_MI_TESTS} ${GRIBAPI_NC_TESTS}
+  SH_TESTS += testFiIndexGribs.sh
 endif
 if HAVE_METGM
   CC_TESTS += testMetGmReader ${METGM_NC_TESTS}

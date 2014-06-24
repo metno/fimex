@@ -58,6 +58,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     defaultLogLevel(Logger::INFO);
     boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
     //grbReader->getCDM().toXMLStream(cout);
+    BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     BOOST_CHECK(true); // made it so far
     NetCDF_CDMWriter(grbReader, "testGribRead.nc");
     BOOST_CHECK(true); // and it is even writeable
