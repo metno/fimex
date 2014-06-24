@@ -210,9 +210,9 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
                     // make a relative rounding delta
                     roundingDelta = .01 * fabs(vArray[0] - vArray[1]);
                 }
-                startVal = startVal*slope + offset - roundingDelta;
-                endVal = endVal*slope + offset + roundingDelta;
-                LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of " << (*va)->getName() << " after unit-conversion: ("<< startVal << ","<< endVal<<")");
+                double startValX = startVal*slope + offset - roundingDelta;
+                double endValX = endVal*slope + offset + roundingDelta;
+                LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes of " << (*va)->getName() << " after unit-conversion (slope,offset="<<slope<<","<<offset<<"): ("<< startValX << ","<< endValX<<")");
 
                 // find start and end time in time-axis
                 // make sure data is growing
@@ -223,8 +223,8 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
                 }
 
                 // vArray assumed to be monotonic growing
-                double* lower = lower_bound(&vArray[0], &vArray[0] + vData->size(), startVal); // val included
-                double* upper = upper_bound(&vArray[0], &vArray[0] + vData->size(), endVal);   // val excluded
+                double* lower = lower_bound(&vArray[0], &vArray[0] + vData->size(), startValX); // val included
+                double* upper = upper_bound(&vArray[0], &vArray[0] + vData->size(), endValX);   // val excluded
 
                 if (upper == (&vArray[0] + vData->size())) {
                     LOG4FIMEX(logger, Logger::DEBUG, "reduceAxes found lower,upper ("<< *lower << ",end)");
