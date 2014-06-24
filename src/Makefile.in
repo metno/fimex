@@ -292,6 +292,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	wdb/config/WdbConfiguration.cpp \
 	wdb/config/GlobalWdbConfiguration.h \
 	wdb/config/GlobalWdbConfiguration.cpp
+am__dirstamp = $(am__leading_dot)dirstamp
 @HAVE_NETCDF_TRUE@am__objects_1 = NetCDF_CDMReader.lo \
 @HAVE_NETCDF_TRUE@	NetCDF_CDMWriter.lo NetCDF_Utils.lo
 @HAVE_GRIBAPI_TRUE@am__objects_2 = GribApiCDMWriter.lo \
@@ -300,30 +301,38 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 @HAVE_GRIBAPI_TRUE@	GribApiCDMWriter_Impl2.lo GribCDMReader.lo \
 @HAVE_GRIBAPI_TRUE@	GribFileIndex.lo GribUtils.lo
 @HAVE_METGM_TRUE@am__objects_3 = MetGmCDMReader.lo \
-@HAVE_METGM_TRUE@	MetGmCDMReaderImpl.lo \
-@HAVE_METGM_TRUE@	MetGmCDMReaderSlicedImpl.lo MetGmCDMWriter.lo \
-@HAVE_METGM_TRUE@	MetGmCDMWriterImpl.lo \
-@HAVE_METGM_TRUE@	MetGmCDMWriterSlicedImpl.lo \
-@HAVE_METGM_TRUE@	MetGmHorizontalTag.lo MetGmTimeTag.lo \
-@HAVE_METGM_TRUE@	MetGmVerticalTag.lo MetGmGroup1Ptr.lo \
-@HAVE_METGM_TRUE@	MetGmGroup2Ptr.lo MetGmGroup3Ptr.lo \
-@HAVE_METGM_TRUE@	MetGmGroup5Ptr.lo \
-@HAVE_METGM_TRUE@	MetGmCommentAttributeParser.lo \
-@HAVE_METGM_TRUE@	MetGmDimensionsTag.lo MetGmTags.lo \
-@HAVE_METGM_TRUE@	MetGmHandlePtr.lo
+@HAVE_METGM_TRUE@	metgm/MetGmCDMReaderImpl.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmCDMReaderSlicedImpl.lo \
+@HAVE_METGM_TRUE@	MetGmCDMWriter.lo metgm/MetGmCDMWriterImpl.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmCDMWriterSlicedImpl.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmHorizontalTag.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmTimeTag.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmVerticalTag.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmGroup1Ptr.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmGroup2Ptr.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmGroup3Ptr.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmGroup5Ptr.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmCommentAttributeParser.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmDimensionsTag.lo \
+@HAVE_METGM_TRUE@	metgm/MetGmTags.lo metgm/MetGmHandlePtr.lo
 @HAVE_PRORADXML_TRUE@am__objects_4 = ProradXMLCDMReader.lo
-@HAVE_LIBPQ_TRUE@am__objects_5 = WdbCDMReader.lo WdbIndex.lo \
-@HAVE_LIBPQ_TRUE@	DataSummary.lo ParameterData.lo \
-@HAVE_LIBPQ_TRUE@	Wdb2CdmBuilder.lo TimeHandler.lo \
-@HAVE_LIBPQ_TRUE@	LevelHandler.lo VersionHandler.lo \
-@HAVE_LIBPQ_TRUE@	GridHandler.lo GridInformation.lo \
-@HAVE_LIBPQ_TRUE@	LatLonGridInformation.lo \
-@HAVE_LIBPQ_TRUE@	RotatedLatLonGridInformation.lo \
-@HAVE_LIBPQ_TRUE@	MetricGridInformation.lo Parameter.lo \
-@HAVE_LIBPQ_TRUE@	Level.lo WdbConnection.lo \
-@HAVE_LIBPQ_TRUE@	WciReadQuerySpecification.lo DataSanitizer.lo \
-@HAVE_LIBPQ_TRUE@	GridData.lo WdbConfiguration.lo \
-@HAVE_LIBPQ_TRUE@	GlobalWdbConfiguration.lo
+@HAVE_LIBPQ_TRUE@am__objects_5 = WdbCDMReader.lo wdb/WdbIndex.lo \
+@HAVE_LIBPQ_TRUE@	wdb/DataSummary.lo wdb/ParameterData.lo \
+@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilder.lo wdb/TimeHandler.lo \
+@HAVE_LIBPQ_TRUE@	wdb/LevelHandler.lo wdb/VersionHandler.lo \
+@HAVE_LIBPQ_TRUE@	wdb/GridHandler.lo \
+@HAVE_LIBPQ_TRUE@	wdb/gridInformation/GridInformation.lo \
+@HAVE_LIBPQ_TRUE@	wdb/gridInformation/LatLonGridInformation.lo \
+@HAVE_LIBPQ_TRUE@	wdb/gridInformation/RotatedLatLonGridInformation.lo \
+@HAVE_LIBPQ_TRUE@	wdb/gridInformation/MetricGridInformation.lo \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/Parameter.lo \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/Level.lo \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/WdbConnection.lo \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/WciReadQuerySpecification.lo \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/DataSanitizer.lo \
+@HAVE_LIBPQ_TRUE@	wdb/database_access/GridData.lo \
+@HAVE_LIBPQ_TRUE@	wdb/config/WdbConfiguration.lo \
+@HAVE_LIBPQ_TRUE@	wdb/config/GlobalWdbConfiguration.lo
 am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CachedInterpolation.lo CachedForwardInterpolation.lo \
 	CachedVectorReprojection.lo CDM.lo CDMAttribute.lo \
@@ -335,22 +344,33 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
 	CDMReaderWriter.lo CDMTimeInterpolator.lo CDMVariable.lo \
 	CDMVerticalInterpolator.lo CDM_XMLConfigHelper.lo \
-	CoordinateSystemSliceBuilder.lo CoordinateSystem.lo \
-	CoordinateAxis.lo CoordSysUtils.lo CF1_xCoordSysBuilder.lo \
-	WRFCoordSysBuilder.lo Projection.lo ProjectionImpl.lo \
-	AlbersConicalEqualAreaProjection.lo \
-	AzimuthalEquidistantProjection.lo \
-	LambertAzimuthalEqualAreaProjection.lo \
-	LambertConformalConicProjection.lo \
-	LambertCylindricalEqualAreaProjection.lo \
-	LatitudeLongitudeProjection.lo MercatorProjection.lo \
-	OrthographicProjection.lo PolarStereographicProjection.lo \
-	RotatedLatitudeLongitudeProjection.lo \
-	StereographicProjection.lo TransverseMercatorProjection.lo \
-	VerticalPerspectiveProjection.lo UnknownToFgdcProjection.lo \
-	VerticalTransformation.lo AtmosphereSigma.lo Height.lo \
-	HybridSigmaPressure1.lo HybridSigmaPressure2.lo LnPressure.lo \
-	Pressure.lo OceanSG1.lo Data.lo DataIndex.lo \
+	CoordinateSystemSliceBuilder.lo coordSys/CoordinateSystem.lo \
+	coordSys/CoordinateAxis.lo coordSys/CoordSysUtils.lo \
+	coordSys/CF1_xCoordSysBuilder.lo \
+	coordSys/WRFCoordSysBuilder.lo coordSys/Projection.lo \
+	coordSys/ProjectionImpl.lo \
+	coordSys/AlbersConicalEqualAreaProjection.lo \
+	coordSys/AzimuthalEquidistantProjection.lo \
+	coordSys/LambertAzimuthalEqualAreaProjection.lo \
+	coordSys/LambertConformalConicProjection.lo \
+	coordSys/LambertCylindricalEqualAreaProjection.lo \
+	coordSys/LatitudeLongitudeProjection.lo \
+	coordSys/MercatorProjection.lo \
+	coordSys/OrthographicProjection.lo \
+	coordSys/PolarStereographicProjection.lo \
+	coordSys/RotatedLatitudeLongitudeProjection.lo \
+	coordSys/StereographicProjection.lo \
+	coordSys/TransverseMercatorProjection.lo \
+	coordSys/VerticalPerspectiveProjection.lo \
+	coordSys/UnknownToFgdcProjection.lo \
+	coordSys/verticalTransform/VerticalTransformation.lo \
+	coordSys/verticalTransform/AtmosphereSigma.lo \
+	coordSys/verticalTransform/Height.lo \
+	coordSys/verticalTransform/HybridSigmaPressure1.lo \
+	coordSys/verticalTransform/HybridSigmaPressure2.lo \
+	coordSys/verticalTransform/LnPressure.lo \
+	coordSys/verticalTransform/Pressure.lo \
+	coordSys/verticalTransform/OceanSG1.lo Data.lo DataIndex.lo \
 	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
 	Felt_File2.lo FeltParameters.lo FillWriter.lo \
 	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
@@ -751,18 +771,323 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+coordSys/$(am__dirstamp):
+	@$(MKDIR_P) coordSys
+	@: > coordSys/$(am__dirstamp)
+coordSys/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) coordSys/$(DEPDIR)
+	@: > coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/CoordinateSystem.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/CoordinateAxis.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/CoordSysUtils.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/CF1_xCoordSysBuilder.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/WRFCoordSysBuilder.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/Projection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/ProjectionImpl.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/AlbersConicalEqualAreaProjection.lo:  \
+	coordSys/$(am__dirstamp) coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/AzimuthalEquidistantProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/LambertAzimuthalEqualAreaProjection.lo:  \
+	coordSys/$(am__dirstamp) coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/LambertConformalConicProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/LambertCylindricalEqualAreaProjection.lo:  \
+	coordSys/$(am__dirstamp) coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/LatitudeLongitudeProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/MercatorProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/OrthographicProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/PolarStereographicProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/RotatedLatitudeLongitudeProjection.lo:  \
+	coordSys/$(am__dirstamp) coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/StereographicProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/TransverseMercatorProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/VerticalPerspectiveProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/UnknownToFgdcProjection.lo: coordSys/$(am__dirstamp) \
+	coordSys/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/$(am__dirstamp):
+	@$(MKDIR_P) coordSys/verticalTransform
+	@: > coordSys/verticalTransform/$(am__dirstamp)
+coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) coordSys/verticalTransform/$(DEPDIR)
+	@: > coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/VerticalTransformation.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/AtmosphereSigma.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/Height.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/HybridSigmaPressure1.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/HybridSigmaPressure2.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/LnPressure.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/Pressure.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/OceanSG1.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+metgm/$(am__dirstamp):
+	@$(MKDIR_P) metgm
+	@: > metgm/$(am__dirstamp)
+metgm/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) metgm/$(DEPDIR)
+	@: > metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmCDMReaderImpl.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmCDMReaderSlicedImpl.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmCDMWriterImpl.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmCDMWriterSlicedImpl.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmHorizontalTag.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmTimeTag.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmVerticalTag.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmGroup1Ptr.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmGroup2Ptr.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmGroup3Ptr.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmGroup5Ptr.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmCommentAttributeParser.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmDimensionsTag.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmTags.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+metgm/MetGmHandlePtr.lo: metgm/$(am__dirstamp) \
+	metgm/$(DEPDIR)/$(am__dirstamp)
+wdb/$(am__dirstamp):
+	@$(MKDIR_P) wdb
+	@: > wdb/$(am__dirstamp)
+wdb/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) wdb/$(DEPDIR)
+	@: > wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/WdbIndex.lo: wdb/$(am__dirstamp) wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/DataSummary.lo: wdb/$(am__dirstamp) wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/ParameterData.lo: wdb/$(am__dirstamp) \
+	wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/Wdb2CdmBuilder.lo: wdb/$(am__dirstamp) \
+	wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/TimeHandler.lo: wdb/$(am__dirstamp) wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/LevelHandler.lo: wdb/$(am__dirstamp) wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/VersionHandler.lo: wdb/$(am__dirstamp) \
+	wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/GridHandler.lo: wdb/$(am__dirstamp) wdb/$(DEPDIR)/$(am__dirstamp)
+wdb/gridInformation/$(am__dirstamp):
+	@$(MKDIR_P) wdb/gridInformation
+	@: > wdb/gridInformation/$(am__dirstamp)
+wdb/gridInformation/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) wdb/gridInformation/$(DEPDIR)
+	@: > wdb/gridInformation/$(DEPDIR)/$(am__dirstamp)
+wdb/gridInformation/GridInformation.lo:  \
+	wdb/gridInformation/$(am__dirstamp) \
+	wdb/gridInformation/$(DEPDIR)/$(am__dirstamp)
+wdb/gridInformation/LatLonGridInformation.lo:  \
+	wdb/gridInformation/$(am__dirstamp) \
+	wdb/gridInformation/$(DEPDIR)/$(am__dirstamp)
+wdb/gridInformation/RotatedLatLonGridInformation.lo:  \
+	wdb/gridInformation/$(am__dirstamp) \
+	wdb/gridInformation/$(DEPDIR)/$(am__dirstamp)
+wdb/gridInformation/MetricGridInformation.lo:  \
+	wdb/gridInformation/$(am__dirstamp) \
+	wdb/gridInformation/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/$(am__dirstamp):
+	@$(MKDIR_P) wdb/database_access
+	@: > wdb/database_access/$(am__dirstamp)
+wdb/database_access/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) wdb/database_access/$(DEPDIR)
+	@: > wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/Parameter.lo: wdb/database_access/$(am__dirstamp) \
+	wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/Level.lo: wdb/database_access/$(am__dirstamp) \
+	wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/WdbConnection.lo:  \
+	wdb/database_access/$(am__dirstamp) \
+	wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/WciReadQuerySpecification.lo:  \
+	wdb/database_access/$(am__dirstamp) \
+	wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/DataSanitizer.lo:  \
+	wdb/database_access/$(am__dirstamp) \
+	wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/database_access/GridData.lo: wdb/database_access/$(am__dirstamp) \
+	wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+wdb/config/$(am__dirstamp):
+	@$(MKDIR_P) wdb/config
+	@: > wdb/config/$(am__dirstamp)
+wdb/config/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) wdb/config/$(DEPDIR)
+	@: > wdb/config/$(DEPDIR)/$(am__dirstamp)
+wdb/config/WdbConfiguration.lo: wdb/config/$(am__dirstamp) \
+	wdb/config/$(DEPDIR)/$(am__dirstamp)
+wdb/config/GlobalWdbConfiguration.lo: wdb/config/$(am__dirstamp) \
+	wdb/config/$(DEPDIR)/$(am__dirstamp)
 libfimex.la: $(libfimex_la_OBJECTS) $(libfimex_la_DEPENDENCIES) $(EXTRA_libfimex_la_DEPENDENCIES) 
 	$(libfimex_la_LINK) -rpath $(libdir) $(libfimex_la_OBJECTS) $(libfimex_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f coordSys/AlbersConicalEqualAreaProjection.$(OBJEXT)
+	-rm -f coordSys/AlbersConicalEqualAreaProjection.lo
+	-rm -f coordSys/AzimuthalEquidistantProjection.$(OBJEXT)
+	-rm -f coordSys/AzimuthalEquidistantProjection.lo
+	-rm -f coordSys/CF1_xCoordSysBuilder.$(OBJEXT)
+	-rm -f coordSys/CF1_xCoordSysBuilder.lo
+	-rm -f coordSys/CoordSysUtils.$(OBJEXT)
+	-rm -f coordSys/CoordSysUtils.lo
+	-rm -f coordSys/CoordinateAxis.$(OBJEXT)
+	-rm -f coordSys/CoordinateAxis.lo
+	-rm -f coordSys/CoordinateSystem.$(OBJEXT)
+	-rm -f coordSys/CoordinateSystem.lo
+	-rm -f coordSys/LambertAzimuthalEqualAreaProjection.$(OBJEXT)
+	-rm -f coordSys/LambertAzimuthalEqualAreaProjection.lo
+	-rm -f coordSys/LambertConformalConicProjection.$(OBJEXT)
+	-rm -f coordSys/LambertConformalConicProjection.lo
+	-rm -f coordSys/LambertCylindricalEqualAreaProjection.$(OBJEXT)
+	-rm -f coordSys/LambertCylindricalEqualAreaProjection.lo
+	-rm -f coordSys/LatitudeLongitudeProjection.$(OBJEXT)
+	-rm -f coordSys/LatitudeLongitudeProjection.lo
+	-rm -f coordSys/MercatorProjection.$(OBJEXT)
+	-rm -f coordSys/MercatorProjection.lo
+	-rm -f coordSys/OrthographicProjection.$(OBJEXT)
+	-rm -f coordSys/OrthographicProjection.lo
+	-rm -f coordSys/PolarStereographicProjection.$(OBJEXT)
+	-rm -f coordSys/PolarStereographicProjection.lo
+	-rm -f coordSys/Projection.$(OBJEXT)
+	-rm -f coordSys/Projection.lo
+	-rm -f coordSys/ProjectionImpl.$(OBJEXT)
+	-rm -f coordSys/ProjectionImpl.lo
+	-rm -f coordSys/RotatedLatitudeLongitudeProjection.$(OBJEXT)
+	-rm -f coordSys/RotatedLatitudeLongitudeProjection.lo
+	-rm -f coordSys/StereographicProjection.$(OBJEXT)
+	-rm -f coordSys/StereographicProjection.lo
+	-rm -f coordSys/TransverseMercatorProjection.$(OBJEXT)
+	-rm -f coordSys/TransverseMercatorProjection.lo
+	-rm -f coordSys/UnknownToFgdcProjection.$(OBJEXT)
+	-rm -f coordSys/UnknownToFgdcProjection.lo
+	-rm -f coordSys/VerticalPerspectiveProjection.$(OBJEXT)
+	-rm -f coordSys/VerticalPerspectiveProjection.lo
+	-rm -f coordSys/WRFCoordSysBuilder.$(OBJEXT)
+	-rm -f coordSys/WRFCoordSysBuilder.lo
+	-rm -f coordSys/verticalTransform/AtmosphereSigma.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/AtmosphereSigma.lo
+	-rm -f coordSys/verticalTransform/Height.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/Height.lo
+	-rm -f coordSys/verticalTransform/HybridSigmaPressure1.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/HybridSigmaPressure1.lo
+	-rm -f coordSys/verticalTransform/HybridSigmaPressure2.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/HybridSigmaPressure2.lo
+	-rm -f coordSys/verticalTransform/LnPressure.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/LnPressure.lo
+	-rm -f coordSys/verticalTransform/OceanSG1.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/OceanSG1.lo
+	-rm -f coordSys/verticalTransform/Pressure.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/Pressure.lo
+	-rm -f coordSys/verticalTransform/VerticalTransformation.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/VerticalTransformation.lo
+	-rm -f metgm/MetGmCDMReaderImpl.$(OBJEXT)
+	-rm -f metgm/MetGmCDMReaderImpl.lo
+	-rm -f metgm/MetGmCDMReaderSlicedImpl.$(OBJEXT)
+	-rm -f metgm/MetGmCDMReaderSlicedImpl.lo
+	-rm -f metgm/MetGmCDMWriterImpl.$(OBJEXT)
+	-rm -f metgm/MetGmCDMWriterImpl.lo
+	-rm -f metgm/MetGmCDMWriterSlicedImpl.$(OBJEXT)
+	-rm -f metgm/MetGmCDMWriterSlicedImpl.lo
+	-rm -f metgm/MetGmCommentAttributeParser.$(OBJEXT)
+	-rm -f metgm/MetGmCommentAttributeParser.lo
+	-rm -f metgm/MetGmDimensionsTag.$(OBJEXT)
+	-rm -f metgm/MetGmDimensionsTag.lo
+	-rm -f metgm/MetGmGroup1Ptr.$(OBJEXT)
+	-rm -f metgm/MetGmGroup1Ptr.lo
+	-rm -f metgm/MetGmGroup2Ptr.$(OBJEXT)
+	-rm -f metgm/MetGmGroup2Ptr.lo
+	-rm -f metgm/MetGmGroup3Ptr.$(OBJEXT)
+	-rm -f metgm/MetGmGroup3Ptr.lo
+	-rm -f metgm/MetGmGroup5Ptr.$(OBJEXT)
+	-rm -f metgm/MetGmGroup5Ptr.lo
+	-rm -f metgm/MetGmHandlePtr.$(OBJEXT)
+	-rm -f metgm/MetGmHandlePtr.lo
+	-rm -f metgm/MetGmHorizontalTag.$(OBJEXT)
+	-rm -f metgm/MetGmHorizontalTag.lo
+	-rm -f metgm/MetGmTags.$(OBJEXT)
+	-rm -f metgm/MetGmTags.lo
+	-rm -f metgm/MetGmTimeTag.$(OBJEXT)
+	-rm -f metgm/MetGmTimeTag.lo
+	-rm -f metgm/MetGmVerticalTag.$(OBJEXT)
+	-rm -f metgm/MetGmVerticalTag.lo
+	-rm -f wdb/DataSummary.$(OBJEXT)
+	-rm -f wdb/DataSummary.lo
+	-rm -f wdb/GridHandler.$(OBJEXT)
+	-rm -f wdb/GridHandler.lo
+	-rm -f wdb/LevelHandler.$(OBJEXT)
+	-rm -f wdb/LevelHandler.lo
+	-rm -f wdb/ParameterData.$(OBJEXT)
+	-rm -f wdb/ParameterData.lo
+	-rm -f wdb/TimeHandler.$(OBJEXT)
+	-rm -f wdb/TimeHandler.lo
+	-rm -f wdb/VersionHandler.$(OBJEXT)
+	-rm -f wdb/VersionHandler.lo
+	-rm -f wdb/Wdb2CdmBuilder.$(OBJEXT)
+	-rm -f wdb/Wdb2CdmBuilder.lo
+	-rm -f wdb/WdbIndex.$(OBJEXT)
+	-rm -f wdb/WdbIndex.lo
+	-rm -f wdb/config/GlobalWdbConfiguration.$(OBJEXT)
+	-rm -f wdb/config/GlobalWdbConfiguration.lo
+	-rm -f wdb/config/WdbConfiguration.$(OBJEXT)
+	-rm -f wdb/config/WdbConfiguration.lo
+	-rm -f wdb/database_access/DataSanitizer.$(OBJEXT)
+	-rm -f wdb/database_access/DataSanitizer.lo
+	-rm -f wdb/database_access/GridData.$(OBJEXT)
+	-rm -f wdb/database_access/GridData.lo
+	-rm -f wdb/database_access/Level.$(OBJEXT)
+	-rm -f wdb/database_access/Level.lo
+	-rm -f wdb/database_access/Parameter.$(OBJEXT)
+	-rm -f wdb/database_access/Parameter.lo
+	-rm -f wdb/database_access/WciReadQuerySpecification.$(OBJEXT)
+	-rm -f wdb/database_access/WciReadQuerySpecification.lo
+	-rm -f wdb/database_access/WdbConnection.$(OBJEXT)
+	-rm -f wdb/database_access/WdbConnection.lo
+	-rm -f wdb/gridInformation/GridInformation.$(OBJEXT)
+	-rm -f wdb/gridInformation/GridInformation.lo
+	-rm -f wdb/gridInformation/LatLonGridInformation.$(OBJEXT)
+	-rm -f wdb/gridInformation/LatLonGridInformation.lo
+	-rm -f wdb/gridInformation/MetricGridInformation.$(OBJEXT)
+	-rm -f wdb/gridInformation/MetricGridInformation.lo
+	-rm -f wdb/gridInformation/RotatedLatLonGridInformation.$(OBJEXT)
+	-rm -f wdb/gridInformation/RotatedLatLonGridInformation.lo
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AlbersConicalEqualAreaProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AtmosphereSigma.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMAttribute.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMBorderSmoothing.Plo@am__quote@
@@ -787,26 +1112,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMVerticalInterpolator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM_XMLConfigHelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMconstants.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CF1_xCoordSysBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/C_CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedForwardInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedInterpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CachedVectorReprojection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordSysUtils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateAxis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CoordinateSystemSliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataIndex.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataSanitizer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataSummary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DataTypeChanger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltCDMReader2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FeltParameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_Array2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Felt_File2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FillWriter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GlobalWdbConfiguration.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribApiCDMWriter_Impl2.Plo@am__quote@
@@ -814,597 +1132,168 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribFileIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GribUtils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridData.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridDefinition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridHandler.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridInformation.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Height.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HybridSigmaPressure1.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HybridSigmaPressure2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IndexedData.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatLonGridInformation.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LevelHandler.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LnPressure.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Log4cppLogger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Logger.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReaderImpl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMReaderSlicedImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMWriter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMWriterImpl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCDMWriterSlicedImpl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmCommentAttributeParser.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmDimensionsTag.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup1Ptr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup2Ptr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup3Ptr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmGroup5Ptr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmHandlePtr.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmHorizontalTag.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmTags.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmTimeTag.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetGmVerticalTag.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MetricGridInformation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlAggregationReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NcmlCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_CDMWriter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NetCDF_Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Null_CDMWriter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OceanSG1.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OrthographicProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Parameter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ParameterData.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PolarStereographicProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pressure.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Projection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProjectionImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProradXMLCDMReader.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringObject.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReplaceStringTimeObject.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RotatedLatLonGridInformation.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RotatedLatitudeLongitudeProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SliceBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpatialAxisSpec.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StereographicProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadPool.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeHandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ToVLevelConverter.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransverseMercatorProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UnknownToFgdcProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VersionHandler.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VerticalTransformation.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WRFCoordSysBuilder.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WciReadQuerySpecification.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Wdb2CdmBuilder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbCDMReader.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbConfiguration.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbConnection.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbIndex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLDoc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLInput.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_fimex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vertical_coordinate_transformations.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/AlbersConicalEqualAreaProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CF1_xCoordSysBuilder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CoordSysUtils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CoordinateAxis.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CoordinateSystem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LambertConformalConicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/LatitudeLongitudeProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/MercatorProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/OrthographicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/PolarStereographicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/Projection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/ProjectionImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/RotatedLatitudeLongitudeProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/StereographicProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/TransverseMercatorProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/UnknownToFgdcProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/WRFCoordSysBuilder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/AtmosphereSigma.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/Height.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/HybridSigmaPressure1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/HybridSigmaPressure2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/LnPressure.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/OceanSG1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/Pressure.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/VerticalTransformation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMReaderImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMReaderSlicedImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMWriterImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMWriterSlicedImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCommentAttributeParser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmDimensionsTag.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmGroup1Ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmGroup2Ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmGroup3Ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmGroup5Ptr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmHandlePtr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmHorizontalTag.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmTags.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmTimeTag.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmVerticalTag.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/DataSummary.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/GridHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/LevelHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/ParameterData.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/TimeHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/VersionHandler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/Wdb2CdmBuilder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/WdbIndex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/config/$(DEPDIR)/GlobalWdbConfiguration.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/config/$(DEPDIR)/WdbConfiguration.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/database_access/$(DEPDIR)/DataSanitizer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/database_access/$(DEPDIR)/GridData.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/database_access/$(DEPDIR)/Level.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/database_access/$(DEPDIR)/Parameter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/database_access/$(DEPDIR)/WciReadQuerySpecification.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/database_access/$(DEPDIR)/WdbConnection.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/gridInformation/$(DEPDIR)/GridInformation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/gridInformation/$(DEPDIR)/LatLonGridInformation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/gridInformation/$(DEPDIR)/MetricGridInformation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@wdb/gridInformation/$(DEPDIR)/RotatedLatLonGridInformation.Plo@am__quote@
 
 .c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+@am__fastdepCC_FALSE@	$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .cc.o:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
 
 .cc.obj:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cc.lo:
-@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-CoordinateSystem.lo: coordSys/CoordinateSystem.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CoordinateSystem.lo -MD -MP -MF $(DEPDIR)/CoordinateSystem.Tpo -c -o CoordinateSystem.lo `test -f 'coordSys/CoordinateSystem.cc' || echo '$(srcdir)/'`coordSys/CoordinateSystem.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/CoordinateSystem.Tpo $(DEPDIR)/CoordinateSystem.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordinateSystem.cc' object='CoordinateSystem.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordinateSystem.lo `test -f 'coordSys/CoordinateSystem.cc' || echo '$(srcdir)/'`coordSys/CoordinateSystem.cc
-
-CoordinateAxis.lo: coordSys/CoordinateAxis.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CoordinateAxis.lo -MD -MP -MF $(DEPDIR)/CoordinateAxis.Tpo -c -o CoordinateAxis.lo `test -f 'coordSys/CoordinateAxis.cc' || echo '$(srcdir)/'`coordSys/CoordinateAxis.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/CoordinateAxis.Tpo $(DEPDIR)/CoordinateAxis.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordinateAxis.cc' object='CoordinateAxis.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordinateAxis.lo `test -f 'coordSys/CoordinateAxis.cc' || echo '$(srcdir)/'`coordSys/CoordinateAxis.cc
-
-CoordSysUtils.lo: coordSys/CoordSysUtils.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CoordSysUtils.lo -MD -MP -MF $(DEPDIR)/CoordSysUtils.Tpo -c -o CoordSysUtils.lo `test -f 'coordSys/CoordSysUtils.cc' || echo '$(srcdir)/'`coordSys/CoordSysUtils.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/CoordSysUtils.Tpo $(DEPDIR)/CoordSysUtils.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CoordSysUtils.cc' object='CoordSysUtils.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CoordSysUtils.lo `test -f 'coordSys/CoordSysUtils.cc' || echo '$(srcdir)/'`coordSys/CoordSysUtils.cc
-
-CF1_xCoordSysBuilder.lo: coordSys/CF1_xCoordSysBuilder.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CF1_xCoordSysBuilder.lo -MD -MP -MF $(DEPDIR)/CF1_xCoordSysBuilder.Tpo -c -o CF1_xCoordSysBuilder.lo `test -f 'coordSys/CF1_xCoordSysBuilder.cc' || echo '$(srcdir)/'`coordSys/CF1_xCoordSysBuilder.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/CF1_xCoordSysBuilder.Tpo $(DEPDIR)/CF1_xCoordSysBuilder.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/CF1_xCoordSysBuilder.cc' object='CF1_xCoordSysBuilder.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CF1_xCoordSysBuilder.lo `test -f 'coordSys/CF1_xCoordSysBuilder.cc' || echo '$(srcdir)/'`coordSys/CF1_xCoordSysBuilder.cc
-
-WRFCoordSysBuilder.lo: coordSys/WRFCoordSysBuilder.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WRFCoordSysBuilder.lo -MD -MP -MF $(DEPDIR)/WRFCoordSysBuilder.Tpo -c -o WRFCoordSysBuilder.lo `test -f 'coordSys/WRFCoordSysBuilder.cc' || echo '$(srcdir)/'`coordSys/WRFCoordSysBuilder.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WRFCoordSysBuilder.Tpo $(DEPDIR)/WRFCoordSysBuilder.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/WRFCoordSysBuilder.cc' object='WRFCoordSysBuilder.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WRFCoordSysBuilder.lo `test -f 'coordSys/WRFCoordSysBuilder.cc' || echo '$(srcdir)/'`coordSys/WRFCoordSysBuilder.cc
-
-Projection.lo: coordSys/Projection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Projection.lo -MD -MP -MF $(DEPDIR)/Projection.Tpo -c -o Projection.lo `test -f 'coordSys/Projection.cc' || echo '$(srcdir)/'`coordSys/Projection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Projection.Tpo $(DEPDIR)/Projection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/Projection.cc' object='Projection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Projection.lo `test -f 'coordSys/Projection.cc' || echo '$(srcdir)/'`coordSys/Projection.cc
-
-ProjectionImpl.lo: coordSys/ProjectionImpl.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ProjectionImpl.lo -MD -MP -MF $(DEPDIR)/ProjectionImpl.Tpo -c -o ProjectionImpl.lo `test -f 'coordSys/ProjectionImpl.cc' || echo '$(srcdir)/'`coordSys/ProjectionImpl.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ProjectionImpl.Tpo $(DEPDIR)/ProjectionImpl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/ProjectionImpl.cc' object='ProjectionImpl.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ProjectionImpl.lo `test -f 'coordSys/ProjectionImpl.cc' || echo '$(srcdir)/'`coordSys/ProjectionImpl.cc
-
-AlbersConicalEqualAreaProjection.lo: coordSys/AlbersConicalEqualAreaProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT AlbersConicalEqualAreaProjection.lo -MD -MP -MF $(DEPDIR)/AlbersConicalEqualAreaProjection.Tpo -c -o AlbersConicalEqualAreaProjection.lo `test -f 'coordSys/AlbersConicalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/AlbersConicalEqualAreaProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AlbersConicalEqualAreaProjection.Tpo $(DEPDIR)/AlbersConicalEqualAreaProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/AlbersConicalEqualAreaProjection.cc' object='AlbersConicalEqualAreaProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AlbersConicalEqualAreaProjection.lo `test -f 'coordSys/AlbersConicalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/AlbersConicalEqualAreaProjection.cc
-
-AzimuthalEquidistantProjection.lo: coordSys/AzimuthalEquidistantProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT AzimuthalEquidistantProjection.lo -MD -MP -MF $(DEPDIR)/AzimuthalEquidistantProjection.Tpo -c -o AzimuthalEquidistantProjection.lo `test -f 'coordSys/AzimuthalEquidistantProjection.cc' || echo '$(srcdir)/'`coordSys/AzimuthalEquidistantProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AzimuthalEquidistantProjection.Tpo $(DEPDIR)/AzimuthalEquidistantProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/AzimuthalEquidistantProjection.cc' object='AzimuthalEquidistantProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AzimuthalEquidistantProjection.lo `test -f 'coordSys/AzimuthalEquidistantProjection.cc' || echo '$(srcdir)/'`coordSys/AzimuthalEquidistantProjection.cc
-
-LambertAzimuthalEqualAreaProjection.lo: coordSys/LambertAzimuthalEqualAreaProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LambertAzimuthalEqualAreaProjection.lo -MD -MP -MF $(DEPDIR)/LambertAzimuthalEqualAreaProjection.Tpo -c -o LambertAzimuthalEqualAreaProjection.lo `test -f 'coordSys/LambertAzimuthalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertAzimuthalEqualAreaProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LambertAzimuthalEqualAreaProjection.Tpo $(DEPDIR)/LambertAzimuthalEqualAreaProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LambertAzimuthalEqualAreaProjection.cc' object='LambertAzimuthalEqualAreaProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LambertAzimuthalEqualAreaProjection.lo `test -f 'coordSys/LambertAzimuthalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertAzimuthalEqualAreaProjection.cc
-
-LambertConformalConicProjection.lo: coordSys/LambertConformalConicProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LambertConformalConicProjection.lo -MD -MP -MF $(DEPDIR)/LambertConformalConicProjection.Tpo -c -o LambertConformalConicProjection.lo `test -f 'coordSys/LambertConformalConicProjection.cc' || echo '$(srcdir)/'`coordSys/LambertConformalConicProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LambertConformalConicProjection.Tpo $(DEPDIR)/LambertConformalConicProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LambertConformalConicProjection.cc' object='LambertConformalConicProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LambertConformalConicProjection.lo `test -f 'coordSys/LambertConformalConicProjection.cc' || echo '$(srcdir)/'`coordSys/LambertConformalConicProjection.cc
-
-LambertCylindricalEqualAreaProjection.lo: coordSys/LambertCylindricalEqualAreaProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LambertCylindricalEqualAreaProjection.lo -MD -MP -MF $(DEPDIR)/LambertCylindricalEqualAreaProjection.Tpo -c -o LambertCylindricalEqualAreaProjection.lo `test -f 'coordSys/LambertCylindricalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertCylindricalEqualAreaProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LambertCylindricalEqualAreaProjection.Tpo $(DEPDIR)/LambertCylindricalEqualAreaProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LambertCylindricalEqualAreaProjection.cc' object='LambertCylindricalEqualAreaProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LambertCylindricalEqualAreaProjection.lo `test -f 'coordSys/LambertCylindricalEqualAreaProjection.cc' || echo '$(srcdir)/'`coordSys/LambertCylindricalEqualAreaProjection.cc
-
-LatitudeLongitudeProjection.lo: coordSys/LatitudeLongitudeProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LatitudeLongitudeProjection.lo -MD -MP -MF $(DEPDIR)/LatitudeLongitudeProjection.Tpo -c -o LatitudeLongitudeProjection.lo `test -f 'coordSys/LatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/LatitudeLongitudeProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LatitudeLongitudeProjection.Tpo $(DEPDIR)/LatitudeLongitudeProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/LatitudeLongitudeProjection.cc' object='LatitudeLongitudeProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LatitudeLongitudeProjection.lo `test -f 'coordSys/LatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/LatitudeLongitudeProjection.cc
-
-MercatorProjection.lo: coordSys/MercatorProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MercatorProjection.lo -MD -MP -MF $(DEPDIR)/MercatorProjection.Tpo -c -o MercatorProjection.lo `test -f 'coordSys/MercatorProjection.cc' || echo '$(srcdir)/'`coordSys/MercatorProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MercatorProjection.Tpo $(DEPDIR)/MercatorProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/MercatorProjection.cc' object='MercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MercatorProjection.lo `test -f 'coordSys/MercatorProjection.cc' || echo '$(srcdir)/'`coordSys/MercatorProjection.cc
-
-OrthographicProjection.lo: coordSys/OrthographicProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OrthographicProjection.lo -MD -MP -MF $(DEPDIR)/OrthographicProjection.Tpo -c -o OrthographicProjection.lo `test -f 'coordSys/OrthographicProjection.cc' || echo '$(srcdir)/'`coordSys/OrthographicProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OrthographicProjection.Tpo $(DEPDIR)/OrthographicProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/OrthographicProjection.cc' object='OrthographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OrthographicProjection.lo `test -f 'coordSys/OrthographicProjection.cc' || echo '$(srcdir)/'`coordSys/OrthographicProjection.cc
-
-PolarStereographicProjection.lo: coordSys/PolarStereographicProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT PolarStereographicProjection.lo -MD -MP -MF $(DEPDIR)/PolarStereographicProjection.Tpo -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/PolarStereographicProjection.Tpo $(DEPDIR)/PolarStereographicProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/PolarStereographicProjection.cc' object='PolarStereographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o PolarStereographicProjection.lo `test -f 'coordSys/PolarStereographicProjection.cc' || echo '$(srcdir)/'`coordSys/PolarStereographicProjection.cc
-
-RotatedLatitudeLongitudeProjection.lo: coordSys/RotatedLatitudeLongitudeProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT RotatedLatitudeLongitudeProjection.lo -MD -MP -MF $(DEPDIR)/RotatedLatitudeLongitudeProjection.Tpo -c -o RotatedLatitudeLongitudeProjection.lo `test -f 'coordSys/RotatedLatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/RotatedLatitudeLongitudeProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/RotatedLatitudeLongitudeProjection.Tpo $(DEPDIR)/RotatedLatitudeLongitudeProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/RotatedLatitudeLongitudeProjection.cc' object='RotatedLatitudeLongitudeProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o RotatedLatitudeLongitudeProjection.lo `test -f 'coordSys/RotatedLatitudeLongitudeProjection.cc' || echo '$(srcdir)/'`coordSys/RotatedLatitudeLongitudeProjection.cc
-
-StereographicProjection.lo: coordSys/StereographicProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT StereographicProjection.lo -MD -MP -MF $(DEPDIR)/StereographicProjection.Tpo -c -o StereographicProjection.lo `test -f 'coordSys/StereographicProjection.cc' || echo '$(srcdir)/'`coordSys/StereographicProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/StereographicProjection.Tpo $(DEPDIR)/StereographicProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/StereographicProjection.cc' object='StereographicProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o StereographicProjection.lo `test -f 'coordSys/StereographicProjection.cc' || echo '$(srcdir)/'`coordSys/StereographicProjection.cc
-
-TransverseMercatorProjection.lo: coordSys/TransverseMercatorProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TransverseMercatorProjection.lo -MD -MP -MF $(DEPDIR)/TransverseMercatorProjection.Tpo -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/TransverseMercatorProjection.Tpo $(DEPDIR)/TransverseMercatorProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/TransverseMercatorProjection.cc' object='TransverseMercatorProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TransverseMercatorProjection.lo `test -f 'coordSys/TransverseMercatorProjection.cc' || echo '$(srcdir)/'`coordSys/TransverseMercatorProjection.cc
-
-VerticalPerspectiveProjection.lo: coordSys/VerticalPerspectiveProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VerticalPerspectiveProjection.lo -MD -MP -MF $(DEPDIR)/VerticalPerspectiveProjection.Tpo -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VerticalPerspectiveProjection.Tpo $(DEPDIR)/VerticalPerspectiveProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/VerticalPerspectiveProjection.cc' object='VerticalPerspectiveProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalPerspectiveProjection.lo `test -f 'coordSys/VerticalPerspectiveProjection.cc' || echo '$(srcdir)/'`coordSys/VerticalPerspectiveProjection.cc
-
-UnknownToFgdcProjection.lo: coordSys/UnknownToFgdcProjection.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT UnknownToFgdcProjection.lo -MD -MP -MF $(DEPDIR)/UnknownToFgdcProjection.Tpo -c -o UnknownToFgdcProjection.lo `test -f 'coordSys/UnknownToFgdcProjection.cc' || echo '$(srcdir)/'`coordSys/UnknownToFgdcProjection.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/UnknownToFgdcProjection.Tpo $(DEPDIR)/UnknownToFgdcProjection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/UnknownToFgdcProjection.cc' object='UnknownToFgdcProjection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o UnknownToFgdcProjection.lo `test -f 'coordSys/UnknownToFgdcProjection.cc' || echo '$(srcdir)/'`coordSys/UnknownToFgdcProjection.cc
-
-VerticalTransformation.lo: coordSys/verticalTransform/VerticalTransformation.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VerticalTransformation.lo -MD -MP -MF $(DEPDIR)/VerticalTransformation.Tpo -c -o VerticalTransformation.lo `test -f 'coordSys/verticalTransform/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/VerticalTransformation.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VerticalTransformation.Tpo $(DEPDIR)/VerticalTransformation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/VerticalTransformation.cc' object='VerticalTransformation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VerticalTransformation.lo `test -f 'coordSys/verticalTransform/VerticalTransformation.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/VerticalTransformation.cc
-
-AtmosphereSigma.lo: coordSys/verticalTransform/AtmosphereSigma.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT AtmosphereSigma.lo -MD -MP -MF $(DEPDIR)/AtmosphereSigma.Tpo -c -o AtmosphereSigma.lo `test -f 'coordSys/verticalTransform/AtmosphereSigma.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/AtmosphereSigma.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/AtmosphereSigma.Tpo $(DEPDIR)/AtmosphereSigma.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/AtmosphereSigma.cc' object='AtmosphereSigma.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AtmosphereSigma.lo `test -f 'coordSys/verticalTransform/AtmosphereSigma.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/AtmosphereSigma.cc
-
-Height.lo: coordSys/verticalTransform/Height.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Height.lo -MD -MP -MF $(DEPDIR)/Height.Tpo -c -o Height.lo `test -f 'coordSys/verticalTransform/Height.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Height.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Height.Tpo $(DEPDIR)/Height.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/Height.cc' object='Height.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Height.lo `test -f 'coordSys/verticalTransform/Height.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Height.cc
-
-HybridSigmaPressure1.lo: coordSys/verticalTransform/HybridSigmaPressure1.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT HybridSigmaPressure1.lo -MD -MP -MF $(DEPDIR)/HybridSigmaPressure1.Tpo -c -o HybridSigmaPressure1.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure1.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/HybridSigmaPressure1.Tpo $(DEPDIR)/HybridSigmaPressure1.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/HybridSigmaPressure1.cc' object='HybridSigmaPressure1.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o HybridSigmaPressure1.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure1.cc
-
-HybridSigmaPressure2.lo: coordSys/verticalTransform/HybridSigmaPressure2.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT HybridSigmaPressure2.lo -MD -MP -MF $(DEPDIR)/HybridSigmaPressure2.Tpo -c -o HybridSigmaPressure2.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure2.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure2.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/HybridSigmaPressure2.Tpo $(DEPDIR)/HybridSigmaPressure2.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/HybridSigmaPressure2.cc' object='HybridSigmaPressure2.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o HybridSigmaPressure2.lo `test -f 'coordSys/verticalTransform/HybridSigmaPressure2.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/HybridSigmaPressure2.cc
-
-LnPressure.lo: coordSys/verticalTransform/LnPressure.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LnPressure.lo -MD -MP -MF $(DEPDIR)/LnPressure.Tpo -c -o LnPressure.lo `test -f 'coordSys/verticalTransform/LnPressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/LnPressure.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LnPressure.Tpo $(DEPDIR)/LnPressure.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/LnPressure.cc' object='LnPressure.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LnPressure.lo `test -f 'coordSys/verticalTransform/LnPressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/LnPressure.cc
-
-Pressure.lo: coordSys/verticalTransform/Pressure.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Pressure.lo -MD -MP -MF $(DEPDIR)/Pressure.Tpo -c -o Pressure.lo `test -f 'coordSys/verticalTransform/Pressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Pressure.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Pressure.Tpo $(DEPDIR)/Pressure.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/Pressure.cc' object='Pressure.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Pressure.lo `test -f 'coordSys/verticalTransform/Pressure.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/Pressure.cc
-
-OceanSG1.lo: coordSys/verticalTransform/OceanSG1.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OceanSG1.lo -MD -MP -MF $(DEPDIR)/OceanSG1.Tpo -c -o OceanSG1.lo `test -f 'coordSys/verticalTransform/OceanSG1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/OceanSG1.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/OceanSG1.Tpo $(DEPDIR)/OceanSG1.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='coordSys/verticalTransform/OceanSG1.cc' object='OceanSG1.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OceanSG1.lo `test -f 'coordSys/verticalTransform/OceanSG1.cc' || echo '$(srcdir)/'`coordSys/verticalTransform/OceanSG1.cc
-
-MetGmCDMReaderImpl.lo: metgm/MetGmCDMReaderImpl.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMReaderImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMReaderImpl.Tpo -c -o MetGmCDMReaderImpl.lo `test -f 'metgm/MetGmCDMReaderImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderImpl.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCDMReaderImpl.Tpo $(DEPDIR)/MetGmCDMReaderImpl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMReaderImpl.cc' object='MetGmCDMReaderImpl.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMReaderImpl.lo `test -f 'metgm/MetGmCDMReaderImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderImpl.cc
-
-MetGmCDMReaderSlicedImpl.lo: metgm/MetGmCDMReaderSlicedImpl.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMReaderSlicedImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMReaderSlicedImpl.Tpo -c -o MetGmCDMReaderSlicedImpl.lo `test -f 'metgm/MetGmCDMReaderSlicedImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderSlicedImpl.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCDMReaderSlicedImpl.Tpo $(DEPDIR)/MetGmCDMReaderSlicedImpl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMReaderSlicedImpl.cc' object='MetGmCDMReaderSlicedImpl.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMReaderSlicedImpl.lo `test -f 'metgm/MetGmCDMReaderSlicedImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMReaderSlicedImpl.cc
-
-MetGmCDMWriterImpl.lo: metgm/MetGmCDMWriterImpl.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMWriterImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMWriterImpl.Tpo -c -o MetGmCDMWriterImpl.lo `test -f 'metgm/MetGmCDMWriterImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterImpl.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCDMWriterImpl.Tpo $(DEPDIR)/MetGmCDMWriterImpl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMWriterImpl.cc' object='MetGmCDMWriterImpl.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMWriterImpl.lo `test -f 'metgm/MetGmCDMWriterImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterImpl.cc
-
-MetGmCDMWriterSlicedImpl.lo: metgm/MetGmCDMWriterSlicedImpl.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCDMWriterSlicedImpl.lo -MD -MP -MF $(DEPDIR)/MetGmCDMWriterSlicedImpl.Tpo -c -o MetGmCDMWriterSlicedImpl.lo `test -f 'metgm/MetGmCDMWriterSlicedImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterSlicedImpl.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCDMWriterSlicedImpl.Tpo $(DEPDIR)/MetGmCDMWriterSlicedImpl.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCDMWriterSlicedImpl.cc' object='MetGmCDMWriterSlicedImpl.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCDMWriterSlicedImpl.lo `test -f 'metgm/MetGmCDMWriterSlicedImpl.cc' || echo '$(srcdir)/'`metgm/MetGmCDMWriterSlicedImpl.cc
-
-MetGmHorizontalTag.lo: metgm/MetGmHorizontalTag.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmHorizontalTag.lo -MD -MP -MF $(DEPDIR)/MetGmHorizontalTag.Tpo -c -o MetGmHorizontalTag.lo `test -f 'metgm/MetGmHorizontalTag.cc' || echo '$(srcdir)/'`metgm/MetGmHorizontalTag.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmHorizontalTag.Tpo $(DEPDIR)/MetGmHorizontalTag.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmHorizontalTag.cc' object='MetGmHorizontalTag.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmHorizontalTag.lo `test -f 'metgm/MetGmHorizontalTag.cc' || echo '$(srcdir)/'`metgm/MetGmHorizontalTag.cc
-
-MetGmTimeTag.lo: metgm/MetGmTimeTag.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmTimeTag.lo -MD -MP -MF $(DEPDIR)/MetGmTimeTag.Tpo -c -o MetGmTimeTag.lo `test -f 'metgm/MetGmTimeTag.cc' || echo '$(srcdir)/'`metgm/MetGmTimeTag.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmTimeTag.Tpo $(DEPDIR)/MetGmTimeTag.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmTimeTag.cc' object='MetGmTimeTag.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmTimeTag.lo `test -f 'metgm/MetGmTimeTag.cc' || echo '$(srcdir)/'`metgm/MetGmTimeTag.cc
-
-MetGmVerticalTag.lo: metgm/MetGmVerticalTag.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmVerticalTag.lo -MD -MP -MF $(DEPDIR)/MetGmVerticalTag.Tpo -c -o MetGmVerticalTag.lo `test -f 'metgm/MetGmVerticalTag.cc' || echo '$(srcdir)/'`metgm/MetGmVerticalTag.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmVerticalTag.Tpo $(DEPDIR)/MetGmVerticalTag.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmVerticalTag.cc' object='MetGmVerticalTag.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmVerticalTag.lo `test -f 'metgm/MetGmVerticalTag.cc' || echo '$(srcdir)/'`metgm/MetGmVerticalTag.cc
-
-MetGmGroup1Ptr.lo: metgm/MetGmGroup1Ptr.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmGroup1Ptr.lo -MD -MP -MF $(DEPDIR)/MetGmGroup1Ptr.Tpo -c -o MetGmGroup1Ptr.lo `test -f 'metgm/MetGmGroup1Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup1Ptr.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmGroup1Ptr.Tpo $(DEPDIR)/MetGmGroup1Ptr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmGroup1Ptr.cc' object='MetGmGroup1Ptr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmGroup1Ptr.lo `test -f 'metgm/MetGmGroup1Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup1Ptr.cc
-
-MetGmGroup2Ptr.lo: metgm/MetGmGroup2Ptr.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmGroup2Ptr.lo -MD -MP -MF $(DEPDIR)/MetGmGroup2Ptr.Tpo -c -o MetGmGroup2Ptr.lo `test -f 'metgm/MetGmGroup2Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup2Ptr.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmGroup2Ptr.Tpo $(DEPDIR)/MetGmGroup2Ptr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmGroup2Ptr.cc' object='MetGmGroup2Ptr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmGroup2Ptr.lo `test -f 'metgm/MetGmGroup2Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup2Ptr.cc
-
-MetGmGroup3Ptr.lo: metgm/MetGmGroup3Ptr.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmGroup3Ptr.lo -MD -MP -MF $(DEPDIR)/MetGmGroup3Ptr.Tpo -c -o MetGmGroup3Ptr.lo `test -f 'metgm/MetGmGroup3Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup3Ptr.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmGroup3Ptr.Tpo $(DEPDIR)/MetGmGroup3Ptr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmGroup3Ptr.cc' object='MetGmGroup3Ptr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmGroup3Ptr.lo `test -f 'metgm/MetGmGroup3Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup3Ptr.cc
-
-MetGmGroup5Ptr.lo: metgm/MetGmGroup5Ptr.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmGroup5Ptr.lo -MD -MP -MF $(DEPDIR)/MetGmGroup5Ptr.Tpo -c -o MetGmGroup5Ptr.lo `test -f 'metgm/MetGmGroup5Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup5Ptr.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmGroup5Ptr.Tpo $(DEPDIR)/MetGmGroup5Ptr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmGroup5Ptr.cc' object='MetGmGroup5Ptr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmGroup5Ptr.lo `test -f 'metgm/MetGmGroup5Ptr.cc' || echo '$(srcdir)/'`metgm/MetGmGroup5Ptr.cc
-
-MetGmCommentAttributeParser.lo: metgm/MetGmCommentAttributeParser.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmCommentAttributeParser.lo -MD -MP -MF $(DEPDIR)/MetGmCommentAttributeParser.Tpo -c -o MetGmCommentAttributeParser.lo `test -f 'metgm/MetGmCommentAttributeParser.cc' || echo '$(srcdir)/'`metgm/MetGmCommentAttributeParser.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmCommentAttributeParser.Tpo $(DEPDIR)/MetGmCommentAttributeParser.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmCommentAttributeParser.cc' object='MetGmCommentAttributeParser.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmCommentAttributeParser.lo `test -f 'metgm/MetGmCommentAttributeParser.cc' || echo '$(srcdir)/'`metgm/MetGmCommentAttributeParser.cc
-
-MetGmDimensionsTag.lo: metgm/MetGmDimensionsTag.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmDimensionsTag.lo -MD -MP -MF $(DEPDIR)/MetGmDimensionsTag.Tpo -c -o MetGmDimensionsTag.lo `test -f 'metgm/MetGmDimensionsTag.cc' || echo '$(srcdir)/'`metgm/MetGmDimensionsTag.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmDimensionsTag.Tpo $(DEPDIR)/MetGmDimensionsTag.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmDimensionsTag.cc' object='MetGmDimensionsTag.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmDimensionsTag.lo `test -f 'metgm/MetGmDimensionsTag.cc' || echo '$(srcdir)/'`metgm/MetGmDimensionsTag.cc
-
-MetGmTags.lo: metgm/MetGmTags.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmTags.lo -MD -MP -MF $(DEPDIR)/MetGmTags.Tpo -c -o MetGmTags.lo `test -f 'metgm/MetGmTags.cc' || echo '$(srcdir)/'`metgm/MetGmTags.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmTags.Tpo $(DEPDIR)/MetGmTags.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmTags.cc' object='MetGmTags.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmTags.lo `test -f 'metgm/MetGmTags.cc' || echo '$(srcdir)/'`metgm/MetGmTags.cc
-
-MetGmHandlePtr.lo: metgm/MetGmHandlePtr.cc
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetGmHandlePtr.lo -MD -MP -MF $(DEPDIR)/MetGmHandlePtr.Tpo -c -o MetGmHandlePtr.lo `test -f 'metgm/MetGmHandlePtr.cc' || echo '$(srcdir)/'`metgm/MetGmHandlePtr.cc
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetGmHandlePtr.Tpo $(DEPDIR)/MetGmHandlePtr.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='metgm/MetGmHandlePtr.cc' object='MetGmHandlePtr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetGmHandlePtr.lo `test -f 'metgm/MetGmHandlePtr.cc' || echo '$(srcdir)/'`metgm/MetGmHandlePtr.cc
-
-WdbIndex.lo: wdb/WdbIndex.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbIndex.lo -MD -MP -MF $(DEPDIR)/WdbIndex.Tpo -c -o WdbIndex.lo `test -f 'wdb/WdbIndex.cpp' || echo '$(srcdir)/'`wdb/WdbIndex.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WdbIndex.Tpo $(DEPDIR)/WdbIndex.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/WdbIndex.cpp' object='WdbIndex.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WdbIndex.lo `test -f 'wdb/WdbIndex.cpp' || echo '$(srcdir)/'`wdb/WdbIndex.cpp
-
-DataSummary.lo: wdb/DataSummary.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DataSummary.lo -MD -MP -MF $(DEPDIR)/DataSummary.Tpo -c -o DataSummary.lo `test -f 'wdb/DataSummary.cpp' || echo '$(srcdir)/'`wdb/DataSummary.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/DataSummary.Tpo $(DEPDIR)/DataSummary.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/DataSummary.cpp' object='DataSummary.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DataSummary.lo `test -f 'wdb/DataSummary.cpp' || echo '$(srcdir)/'`wdb/DataSummary.cpp
-
-ParameterData.lo: wdb/ParameterData.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ParameterData.lo -MD -MP -MF $(DEPDIR)/ParameterData.Tpo -c -o ParameterData.lo `test -f 'wdb/ParameterData.cpp' || echo '$(srcdir)/'`wdb/ParameterData.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ParameterData.Tpo $(DEPDIR)/ParameterData.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/ParameterData.cpp' object='ParameterData.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ParameterData.lo `test -f 'wdb/ParameterData.cpp' || echo '$(srcdir)/'`wdb/ParameterData.cpp
-
-Wdb2CdmBuilder.lo: wdb/Wdb2CdmBuilder.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Wdb2CdmBuilder.lo -MD -MP -MF $(DEPDIR)/Wdb2CdmBuilder.Tpo -c -o Wdb2CdmBuilder.lo `test -f 'wdb/Wdb2CdmBuilder.cpp' || echo '$(srcdir)/'`wdb/Wdb2CdmBuilder.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Wdb2CdmBuilder.Tpo $(DEPDIR)/Wdb2CdmBuilder.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/Wdb2CdmBuilder.cpp' object='Wdb2CdmBuilder.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Wdb2CdmBuilder.lo `test -f 'wdb/Wdb2CdmBuilder.cpp' || echo '$(srcdir)/'`wdb/Wdb2CdmBuilder.cpp
-
-TimeHandler.lo: wdb/TimeHandler.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TimeHandler.lo -MD -MP -MF $(DEPDIR)/TimeHandler.Tpo -c -o TimeHandler.lo `test -f 'wdb/TimeHandler.cpp' || echo '$(srcdir)/'`wdb/TimeHandler.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/TimeHandler.Tpo $(DEPDIR)/TimeHandler.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/TimeHandler.cpp' object='TimeHandler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TimeHandler.lo `test -f 'wdb/TimeHandler.cpp' || echo '$(srcdir)/'`wdb/TimeHandler.cpp
-
-LevelHandler.lo: wdb/LevelHandler.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LevelHandler.lo -MD -MP -MF $(DEPDIR)/LevelHandler.Tpo -c -o LevelHandler.lo `test -f 'wdb/LevelHandler.cpp' || echo '$(srcdir)/'`wdb/LevelHandler.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LevelHandler.Tpo $(DEPDIR)/LevelHandler.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/LevelHandler.cpp' object='LevelHandler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LevelHandler.lo `test -f 'wdb/LevelHandler.cpp' || echo '$(srcdir)/'`wdb/LevelHandler.cpp
-
-VersionHandler.lo: wdb/VersionHandler.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT VersionHandler.lo -MD -MP -MF $(DEPDIR)/VersionHandler.Tpo -c -o VersionHandler.lo `test -f 'wdb/VersionHandler.cpp' || echo '$(srcdir)/'`wdb/VersionHandler.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/VersionHandler.Tpo $(DEPDIR)/VersionHandler.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/VersionHandler.cpp' object='VersionHandler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o VersionHandler.lo `test -f 'wdb/VersionHandler.cpp' || echo '$(srcdir)/'`wdb/VersionHandler.cpp
-
-GridHandler.lo: wdb/GridHandler.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridHandler.lo -MD -MP -MF $(DEPDIR)/GridHandler.Tpo -c -o GridHandler.lo `test -f 'wdb/GridHandler.cpp' || echo '$(srcdir)/'`wdb/GridHandler.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GridHandler.Tpo $(DEPDIR)/GridHandler.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/GridHandler.cpp' object='GridHandler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridHandler.lo `test -f 'wdb/GridHandler.cpp' || echo '$(srcdir)/'`wdb/GridHandler.cpp
-
-GridInformation.lo: wdb/gridInformation/GridInformation.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridInformation.lo -MD -MP -MF $(DEPDIR)/GridInformation.Tpo -c -o GridInformation.lo `test -f 'wdb/gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/GridInformation.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GridInformation.Tpo $(DEPDIR)/GridInformation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/gridInformation/GridInformation.cpp' object='GridInformation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridInformation.lo `test -f 'wdb/gridInformation/GridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/GridInformation.cpp
-
-LatLonGridInformation.lo: wdb/gridInformation/LatLonGridInformation.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT LatLonGridInformation.lo -MD -MP -MF $(DEPDIR)/LatLonGridInformation.Tpo -c -o LatLonGridInformation.lo `test -f 'wdb/gridInformation/LatLonGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/LatLonGridInformation.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/LatLonGridInformation.Tpo $(DEPDIR)/LatLonGridInformation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/gridInformation/LatLonGridInformation.cpp' object='LatLonGridInformation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o LatLonGridInformation.lo `test -f 'wdb/gridInformation/LatLonGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/LatLonGridInformation.cpp
-
-RotatedLatLonGridInformation.lo: wdb/gridInformation/RotatedLatLonGridInformation.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT RotatedLatLonGridInformation.lo -MD -MP -MF $(DEPDIR)/RotatedLatLonGridInformation.Tpo -c -o RotatedLatLonGridInformation.lo `test -f 'wdb/gridInformation/RotatedLatLonGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/RotatedLatLonGridInformation.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/RotatedLatLonGridInformation.Tpo $(DEPDIR)/RotatedLatLonGridInformation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/gridInformation/RotatedLatLonGridInformation.cpp' object='RotatedLatLonGridInformation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o RotatedLatLonGridInformation.lo `test -f 'wdb/gridInformation/RotatedLatLonGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/RotatedLatLonGridInformation.cpp
-
-MetricGridInformation.lo: wdb/gridInformation/MetricGridInformation.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT MetricGridInformation.lo -MD -MP -MF $(DEPDIR)/MetricGridInformation.Tpo -c -o MetricGridInformation.lo `test -f 'wdb/gridInformation/MetricGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/MetricGridInformation.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/MetricGridInformation.Tpo $(DEPDIR)/MetricGridInformation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/gridInformation/MetricGridInformation.cpp' object='MetricGridInformation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o MetricGridInformation.lo `test -f 'wdb/gridInformation/MetricGridInformation.cpp' || echo '$(srcdir)/'`wdb/gridInformation/MetricGridInformation.cpp
-
-Parameter.lo: wdb/database_access/Parameter.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Parameter.lo -MD -MP -MF $(DEPDIR)/Parameter.Tpo -c -o Parameter.lo `test -f 'wdb/database_access/Parameter.cpp' || echo '$(srcdir)/'`wdb/database_access/Parameter.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Parameter.Tpo $(DEPDIR)/Parameter.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/Parameter.cpp' object='Parameter.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Parameter.lo `test -f 'wdb/database_access/Parameter.cpp' || echo '$(srcdir)/'`wdb/database_access/Parameter.cpp
-
-Level.lo: wdb/database_access/Level.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Level.lo -MD -MP -MF $(DEPDIR)/Level.Tpo -c -o Level.lo `test -f 'wdb/database_access/Level.cpp' || echo '$(srcdir)/'`wdb/database_access/Level.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/Level.Tpo $(DEPDIR)/Level.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/Level.cpp' object='Level.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Level.lo `test -f 'wdb/database_access/Level.cpp' || echo '$(srcdir)/'`wdb/database_access/Level.cpp
-
-WdbConnection.lo: wdb/database_access/WdbConnection.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbConnection.lo -MD -MP -MF $(DEPDIR)/WdbConnection.Tpo -c -o WdbConnection.lo `test -f 'wdb/database_access/WdbConnection.cpp' || echo '$(srcdir)/'`wdb/database_access/WdbConnection.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WdbConnection.Tpo $(DEPDIR)/WdbConnection.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/WdbConnection.cpp' object='WdbConnection.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WdbConnection.lo `test -f 'wdb/database_access/WdbConnection.cpp' || echo '$(srcdir)/'`wdb/database_access/WdbConnection.cpp
-
-WciReadQuerySpecification.lo: wdb/database_access/WciReadQuerySpecification.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WciReadQuerySpecification.lo -MD -MP -MF $(DEPDIR)/WciReadQuerySpecification.Tpo -c -o WciReadQuerySpecification.lo `test -f 'wdb/database_access/WciReadQuerySpecification.cpp' || echo '$(srcdir)/'`wdb/database_access/WciReadQuerySpecification.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WciReadQuerySpecification.Tpo $(DEPDIR)/WciReadQuerySpecification.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/WciReadQuerySpecification.cpp' object='WciReadQuerySpecification.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WciReadQuerySpecification.lo `test -f 'wdb/database_access/WciReadQuerySpecification.cpp' || echo '$(srcdir)/'`wdb/database_access/WciReadQuerySpecification.cpp
-
-DataSanitizer.lo: wdb/database_access/DataSanitizer.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DataSanitizer.lo -MD -MP -MF $(DEPDIR)/DataSanitizer.Tpo -c -o DataSanitizer.lo `test -f 'wdb/database_access/DataSanitizer.cpp' || echo '$(srcdir)/'`wdb/database_access/DataSanitizer.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/DataSanitizer.Tpo $(DEPDIR)/DataSanitizer.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/DataSanitizer.cpp' object='DataSanitizer.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DataSanitizer.lo `test -f 'wdb/database_access/DataSanitizer.cpp' || echo '$(srcdir)/'`wdb/database_access/DataSanitizer.cpp
-
-GridData.lo: wdb/database_access/GridData.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridData.lo -MD -MP -MF $(DEPDIR)/GridData.Tpo -c -o GridData.lo `test -f 'wdb/database_access/GridData.cpp' || echo '$(srcdir)/'`wdb/database_access/GridData.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GridData.Tpo $(DEPDIR)/GridData.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/database_access/GridData.cpp' object='GridData.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridData.lo `test -f 'wdb/database_access/GridData.cpp' || echo '$(srcdir)/'`wdb/database_access/GridData.cpp
-
-WdbConfiguration.lo: wdb/config/WdbConfiguration.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WdbConfiguration.lo -MD -MP -MF $(DEPDIR)/WdbConfiguration.Tpo -c -o WdbConfiguration.lo `test -f 'wdb/config/WdbConfiguration.cpp' || echo '$(srcdir)/'`wdb/config/WdbConfiguration.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WdbConfiguration.Tpo $(DEPDIR)/WdbConfiguration.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/config/WdbConfiguration.cpp' object='WdbConfiguration.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WdbConfiguration.lo `test -f 'wdb/config/WdbConfiguration.cpp' || echo '$(srcdir)/'`wdb/config/WdbConfiguration.cpp
-
-GlobalWdbConfiguration.lo: wdb/config/GlobalWdbConfiguration.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GlobalWdbConfiguration.lo -MD -MP -MF $(DEPDIR)/GlobalWdbConfiguration.Tpo -c -o GlobalWdbConfiguration.lo `test -f 'wdb/config/GlobalWdbConfiguration.cpp' || echo '$(srcdir)/'`wdb/config/GlobalWdbConfiguration.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/GlobalWdbConfiguration.Tpo $(DEPDIR)/GlobalWdbConfiguration.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wdb/config/GlobalWdbConfiguration.cpp' object='GlobalWdbConfiguration.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GlobalWdbConfiguration.lo `test -f 'wdb/config/GlobalWdbConfiguration.cpp' || echo '$(srcdir)/'`wdb/config/GlobalWdbConfiguration.cpp
-
 .cpp.o:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
 
 .cpp.obj:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cpp.lo:
-@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
@@ -1414,6 +1303,13 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf coordSys/.libs coordSys/_libs
+	-rm -rf coordSys/verticalTransform/.libs coordSys/verticalTransform/_libs
+	-rm -rf metgm/.libs metgm/_libs
+	-rm -rf wdb/.libs wdb/_libs
+	-rm -rf wdb/config/.libs wdb/config/_libs
+	-rm -rf wdb/database_access/.libs wdb/database_access/_libs
+	-rm -rf wdb/gridInformation/.libs wdb/gridInformation/_libs
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -1642,6 +1538,20 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f coordSys/$(DEPDIR)/$(am__dirstamp)
+	-rm -f coordSys/$(am__dirstamp)
+	-rm -f coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+	-rm -f coordSys/verticalTransform/$(am__dirstamp)
+	-rm -f metgm/$(DEPDIR)/$(am__dirstamp)
+	-rm -f metgm/$(am__dirstamp)
+	-rm -f wdb/$(DEPDIR)/$(am__dirstamp)
+	-rm -f wdb/$(am__dirstamp)
+	-rm -f wdb/config/$(DEPDIR)/$(am__dirstamp)
+	-rm -f wdb/config/$(am__dirstamp)
+	-rm -f wdb/database_access/$(DEPDIR)/$(am__dirstamp)
+	-rm -f wdb/database_access/$(am__dirstamp)
+	-rm -f wdb/gridInformation/$(DEPDIR)/$(am__dirstamp)
+	-rm -f wdb/gridInformation/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1652,7 +1562,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-recursive
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) coordSys/$(DEPDIR) coordSys/verticalTransform/$(DEPDIR) metgm/$(DEPDIR) wdb/$(DEPDIR) wdb/config/$(DEPDIR) wdb/database_access/$(DEPDIR) wdb/gridInformation/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1698,7 +1608,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) coordSys/$(DEPDIR) coordSys/verticalTransform/$(DEPDIR) metgm/$(DEPDIR) wdb/$(DEPDIR) wdb/config/$(DEPDIR) wdb/database_access/$(DEPDIR) wdb/gridInformation/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

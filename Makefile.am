@@ -25,7 +25,7 @@ pkgconfig_DATA = @PACKAGE_TARNAME@.pc
 $(pkgconfig_DATA): config.status
 
 if HAVE_LIBPQ 
-test_wdb: 
+test_wdb:
 	cd test; $(MAKE) test_wdb
 endif
 
