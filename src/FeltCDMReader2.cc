@@ -148,7 +148,9 @@ void FeltCDMReader2::readAdditionalAxisVariablesFromXPath(const XMLDoc& doc, con
             CDMDataType dataType = string2datatype(type);
             vector<double> values = readValuesFromXPath(doc, addAxisXPath + "[@name='" + name + "']");
             vector<string> shape;
-            shape.push_back(axis);
+            if (axis != "") { // not a scalar
+                shape.push_back(axis);
+            }
             CDMVariable var(name, dataType, shape);
             var.setData(createData(dataType, values.begin(), values.end()));
             cdm_->addVariable(var);
