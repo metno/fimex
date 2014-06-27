@@ -182,11 +182,13 @@
         <!--  optional values, will otherwise be retrieved from ident19 -->
         <!--  <values>0 0 0.00011835 0.00057981 0.00158568 0.003314615 0.00592347 0.00954814 0.01430438 0.020288635 0.027578885 0.03623547 0.04630191 0.05780577 0.07075946 0.08516109 0.10099527 0.118233985 0.136837405 0.156754715 0.17792495 0.200277825 0.223734585 0.248208815 0.27360728 0.29983076 0.32677488 0.35433095 0.38238677 0.410827505 0.43953649 0.46839609 0.497288455 0.526096385 0.554704285 0.5829989 0.610870045 0.638211525 0.66492209 0.690906155 0.71607453 0.740345365 0.763645065 0.78590901 0.80708235 0.827120885 0.845992015 0.86367537 0.88016373 0.895463935 0.90959763 0.922602075 0.93453102 0.94545557 0.95546498 0.96466746 0.97319103 0.981184395 0.98881774 0.996283525</values> -->
     </additional_axis_variable>
+    <!-- this should be set as soon as fimex > 0.54 is widely used, does not work with <= 0.54
     <additional_axis_variable name="p0" type="int" axis="">
         <attribute name="long_name" value="reference pressure for hybrid sigma coordinate" type="string" />
         <attribute name="units" value="Pa" type="string" />
         <values>100000</values>
     </additional_axis_variable>
+     -->
 </vertical_axis>
 <vertical_axis id="l" name="l" felt_id="12" type="double">
     <attribute name="_FillValue" value="-32767" type="short" />
