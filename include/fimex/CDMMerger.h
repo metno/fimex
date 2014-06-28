@@ -34,7 +34,7 @@
 
 namespace MetNoFimex {
 
-class CDMMergerPrivate;
+struct CDMMergerPrivate;
 
 /**
  * @headerfile fimex/CDMMerger.h
@@ -60,7 +60,7 @@ public:
     /** Set the smooting function factory to be used.
      * Must be called before setting target grid.
      * \parameter smoothingFactory a factory for smoothing functors
-     */    
+     */
     void setSmoothing(CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory);
 
     /** Decide if the outer value shall be used if the inner value is undefined. Default: true.

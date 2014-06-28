@@ -33,7 +33,7 @@
 
 namespace MetNoFimex {
 
-class CDMOverlayPrivate;
+struct CDMOverlayPrivate;
 
 /**
  * @headerfile fimex/CDMOverlay.h
@@ -41,7 +41,7 @@ class CDMOverlayPrivate;
 /**
  * Takes two readers, base and top, and returns top when defined, else
  * base. Interpolates top to base's grid.
- * 
+ *
  * Used in CDMMerger together with CDMBorderSmoothing, and maybe not
  * very useful elsewhere.
  */

@@ -34,7 +34,7 @@ namespace MetNoFimex
 {
 
 // forward decl
-class CDMProcessorImpl;
+struct CDMProcessorImpl;
 
 /**
  * @headerfile fimex/CDMProcessor.h

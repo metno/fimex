@@ -33,7 +33,7 @@
 
 namespace MetNoFimex {
 
-class CDMBorderSmoothingPrivate;
+struct CDMBorderSmoothingPrivate;
 
 /**
  * @headerfile fimex/CDMBorderSmoothing.h
@@ -43,7 +43,7 @@ class CDMBorderSmoothingPrivate;
  * the inner grid smoothed for overlaying onto outer. If the outer grid
  * does not match the inner, it will be interpolated. Variable names must
  * match.
- * 
+ *
  * Used in CDMMerger together with CDMOverlay, and probably not very useful
  * elsewhere.
  */

@@ -742,7 +742,6 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
 
 static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
 
-    const size_t nProj = vm.count("merge.projString"), nXValues = vm.count("merge.xAxisValues"), nYValues = vm.count("merge.yAxisValues");
     if (not (vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
                     or vm.count("merge.smoothing") or vm.count("merge.method")))
         return dataReader;

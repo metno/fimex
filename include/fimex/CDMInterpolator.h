@@ -97,7 +97,7 @@ class CDMInterpolator : public MetNoFimex::CDMReader
 {
 private:
     // the pimpl
-    struct boost::shared_ptr<CDMInterpolatorInternals> p_;
+    class boost::shared_ptr<CDMInterpolatorInternals> p_;
     /** converter for axes-strings */
     void axisString2Vector(const std::string& axis, std::vector<double>& axis_vals, int axisId);
     void changeProjectionByProjectionParameters(int method, const std::string& proj_input, const std::vector<double>& out_x_axis, const std::vector<double>& out_y_axis, const std::string& out_x_axis_unit, const std::string& out_y_axis_unit, CDMDataType out_x_axis_type, CDMDataType out_y_axis_type);
