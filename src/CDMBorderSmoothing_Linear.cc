@@ -47,7 +47,7 @@ double CDMBorderSmoothing_Linear::operator()(size_t curX, size_t curY, double va
     const size_t ymin1 = borderWidth_, ymax1 = ymin1+transitionWidth_;
     const size_t xmax2 = sizeX_ - borderWidth_, xmin2 = xmax2-transitionWidth_;
     const size_t ymax2 = sizeY_ - borderWidth_, ymin2 = ymax2-transitionWidth_;
-    
+
     const size_t x = curX, y = curY;
     if( x < xmin1 or x >= xmax2 or y < ymin1 or y >= ymax2 )
         return valueO;
@@ -90,7 +90,7 @@ CDMBorderSmoothing_LinearFactory::CDMBorderSmoothing_LinearFactory(size_t transi
     : transitionWidth_(transitionWidth)
     , borderWidth_(borderWidth)
 {
-    if( transitionWidth_ <= 0 or borderWidth_ < 0 )
+    if( transitionWidth_ <= 0 )
         throw CDMException("invalid parameter values for linear smoothing");
 }
 

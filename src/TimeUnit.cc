@@ -75,7 +75,7 @@ FimexTime::FimexTime(special_values val)
     switch (val) {
         case min_date_time: setTime(0, CHAR_MIN, CHAR_MIN, CHAR_MIN, CHAR_MIN, CHAR_MIN, 0); break;
         case max_date_time: setTime(USHRT_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, CHAR_MAX, USHRT_MAX); break;
-        default: throw CDMException("unimplemented special_value: "+val);
+        default: throw CDMException("unimplemented special_value: "+type2string(val));
     }
 }
 

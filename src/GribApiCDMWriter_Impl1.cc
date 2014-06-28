@@ -131,7 +131,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
                 throw CDMException("unable to find latitude/longitude for variable " + varName);
             }
             GRIB_CHECK(grib_set_double(gribHandle.get(), "orientationOfTheGridInDegrees", orientationOfTheGridInDegrees),"");
-            if (abs(latitudeWhereDxAndDyAreSpecifiedInDegrees - 60.) > 1.e-5) {
+            if (std::fabs(latitudeWhereDxAndDyAreSpecifiedInDegrees - 60.) > 1.e-5) {
                 LOG4FIMEX(logger, Logger::ERROR, "grib1 does not support polar_stereographic with lat_ts != 60degree, got " << latitudeWhereDxAndDyAreSpecifiedInDegrees);
                 throw CDMException("grib1 does not support polar_stereographic with lat_ts != 60degree");
                 //GRIB_CHECK(grib_set_double(gribHandle.get(), "latitudeWhereDxAndDyAreSpecifiedInDegrees", latitudeWhereDxAndDyAreSpecifiedInDegrees),"");
