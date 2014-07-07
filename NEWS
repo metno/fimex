@@ -1,3 +1,8 @@
+  * 2014-07-07 fimex-0.53.1
+    * many tests for vector-rotation
+    * fix bug for flipping vector whith some special projections
+	* remove some llvm-warnings
+    * allow scalar felt-axes
   * 2014-06-24 fimex-0.53
     * improved accuracy of vector-rotation to latlon
     * updating build to multi-arch environments (ubuntu 14.04, debian 7)
