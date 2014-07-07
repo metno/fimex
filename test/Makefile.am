@@ -18,7 +18,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
              data/joinExistingAggSuffix.ncml data/aggNothing.ncml data/aggWrong.ncml \
-             data/unionAgg.ncml data/unionAgg2.nc3
+             data/unionAgg.ncml data/unionAgg2.nc3 data/north.nc
 
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc out*.nc\
              testQualityExtractor.nc test_0time.nc \

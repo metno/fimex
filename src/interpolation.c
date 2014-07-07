@@ -276,7 +276,7 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
         for (int i = 0; i < on; ++i) {
             double phi = 0;
             if (pj_is_latlong(outputPJ)) {
-                // phi = mifi_bearing(out_y_field[i], out_x_field[i], out_y_delta_proj_axis[i], out_x_delta_proj_axis[i]); //atan2(sin(lon_pnt0-dLonNorth)*cos(dLatNorth), cos(lat_pnt0)*sin(dLatNorth)-sin(lat_pnt0)*cos(dLatNorth)*cos(lon_pnt0-dLonNorth));
+                phi = mifi_bearing(out_y_field[i], out_x_field[i], out_y_delta_proj_axis[i], out_x_delta_proj_axis[i]); //atan2(sin(lon_pnt0-dLonNorth)*cos(dLatNorth), cos(lat_pnt0)*sin(dLatNorth)-sin(lat_pnt0)*cos(dLatNorth)*cos(lon_pnt0-dLonNorth));
                 // bearing is towards north, so we have to rotate by 90 degrees since we map x/east-axis
                 // phi += MIFI_PI*.5;
                 // only look at true north rotation for lat-lon
@@ -319,6 +319,9 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
             double phi0;
             if (pj_is_latlong(outputPJ)) { // this does not handle rotated lat-lon - good!
                 phi0 = mifi_bearing(out_y_field[i], out_x_field[i], out_y_delta_proj_axis[i], out_x_delta_proj_axis[i]); //atan2(sin(lon_pnt0-dLonNorth)*cos(dLatNorth), cos(lat_pnt0)*sin(dLatNorth)-sin(lat_pnt0)*cos(dLatNorth)*cos(lon_pnt0-dLonNorth));
+                if (sign < 0) {
+                    phi0 += MIFI_PI;
+                }
             } else {
                 double phix = -1 * atan2((out_x_delta_proj_axis[i] - out_x_field[i]),
                                          (out_y_delta_proj_axis[i] - out_y_field[i]));
@@ -332,6 +335,7 @@ static int mifi_get_vector_reproject_matrix_points_proj_delta(projPJ inputPJ, pr
                 //average, for non-conformal cases
                 phi0 = .5*(phix+phiy);
             }
+            //fprintf(stderr,"%f: %f, %f, %f, %f\n", RAD_TO_DEG*phi0, RAD_TO_DEG*out_y_field[i], RAD_TO_DEG*out_x_field[i], RAD_TO_DEG*out_y_delta_proj_axis[i], RAD_TO_DEG*out_x_delta_proj_axis[i]);
             double c = cos(phi0);
             double s = sin(phi0);
             matrix[0 + 4 * i] = c;
