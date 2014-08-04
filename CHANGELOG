@@ -1,0 +1,429 @@
+===== 0.53.1 - 2014-07-07 =====
+  * many tests for vector-rotation
+  * fix bug for flipping vector with some special projections
+	* remove some llvm-warnings
+  * allow scalar felt-axes
+===== 0.53 - 2014-06-24 =====
+  * improved accuracy of vector-rotation to latlon
+  * updating build to multi-arch environments (ubuntu 14.04, debian 7)
+  * extraKey-selection of grib-files
+  * allow absolute/relative GRIB_INDEX_PATH
+  * use packingType from gribWriterConfig.xml
+  * fix extract.reduceTime for several time-axes
+  * avoid uninitialized ptr in fortran / icc
+  * fix cross-sections with more than 2 points
+===== 0.52 - 2014-05-13 =====
+  * join several levelNo in grib-files
+  * rotation of directions (angles)
+  * performance improvements of process.accumulate
+  * fixes when reading prorad
+  * performance and accuracy-improvements in interpolation
+  * circular handling of longitude-axes in interpolation
+  * fixing interpolation exceptions when coordinates axes are not correctly defined
+===== 0.51 - 2014-02-11 =====
+  * adding support for Prorad xml-files
+  * avoiding singularities in interpolation
+  * adding variable_type and dimension_size in Fortran
+  * improving WRF-convention support (rot lat/lon, auxiliary axes)
+  * using CF after horizontal transformation of WRF-files
+  * bugfixes in merge (still in beta)
+  * fixing grib-reader for mercator-files
+  * adding qualityExtract2 command-line option,
+    convenient for land-masking after interpolation
+===== 0.50 - 2013-12-16 =====
+  * extending f90-interface, including --enable-fortran target
+  * extending c-interface
+  * improving parallelization, in particular with Intel Compiler >= 14
+  * fix setting of netcdf-compression per variable
+  * improve scanning of grib-files
+  * re-implement merging of files to allow for new target-grid
+  * improve reading of WRF-files; better coordinate-support and vector-detection
+  * fix latlon-interpolation with staggered grids
+  * add support for logarithmic units
+  * fix mercator-axes from grib-files
+===== 0.49 - 2013-10-21 =====
+  * adding fortran90 interface
+  * improved C interface
+  * fix scaling of CDMReaderWriter
+  * fix parsing of process.rotateVector.direction
+  * using enums instead of #define for several constants
+  * exposing getSimpleAxes in CoordSysUtils
+  * adding getPreferredVerticalType
+  * better API for fimex-versions (see CDMconstants.h)
+===== 0.48 - 2013-10-03 =====
+  * vector-autorotation from command-line
+  * printSize estimates
+  * improved error-messages
+  * scalar values allowed from ncml
+===== 0.47.2 - 2013-08-30 =====
+  * fixed grib-file overruling of earth radius
+===== 0.47.1 - 2013-08-26 =====
+  * allowing to extract only first dimension element (start=end=0)
+  * fixing lambert-projection parameters in felt
+  * fixing typo's in VerticalTransformation API
+  * fixing time-interpolation when units-change
+  * makeing Logger thread-safe
+===== 0.47 - 2013-08-12 =====
+  * adding vertical cross-section interpolation
+  * exposing vertical-transformations
+  * (re-)adding SliceBuilder interface to NcML aggregation (reduce memory-consumption)
+    * was dropped in 0.45
+  * allow ncml to add values to unlimited dimensions
+  * grib-reader allows time-unit change
+===== 0.46.1 - 2013-06-12 =====
+  * warning, not failing with old grib-config files
+===== 0.46 - 2013-06-12 =====
+  * grib-reading automatically adds unknown levels
+  * grib-reading allows adding of ensemble dimension (glameps) (E. de Vreede)
+  * grib-reading using globs or regexp
+  * grib-reading read hybrid-values
+  * grib-reading by timeRangeIndicator
+  * configurable shuffling in netcdf4 (default on)
+  * creepfillval to certain value instead of average
+  * fixing vector reprojection together with preprocessing
+  * fixing threading bug in forward-interpolation
+===== 0.45 - 2013-05-20 =====
+  * adding ncml-aggregation, union and joinExisting
+  * allow reading of other filetypes than netcdf in ncml
+  * auto-detection of vectors by CF standard_names
+  * vector-reprojection when selecting lat/lon-points
+  * improved vector-rotation algorithm
+  * lambert-projection for grib-writer
+  * small improvements in example-input files
+===== 0.44.2 - 2013-04-11 =====
+  * fix bug with netcdf-CDMReaderWriter and empty variables
+  * fix direction of vertical axes for pressure, sigma and sigma-hybrid
+===== 0.44.1 - 2013-04-08 =====
+  * allow file-generation from pure ncml
+===== 0.44 - 2013-04-08 =====
+  * process.accumulate option to accumulate data along unlim (time)-dimension
+  * automatically create chunks 1-10MB for compressed netcdf-files
+===== 0.43 - 2013-03-25 =====
+  * new FillWriter, allowing netcdf-files to be filled slice by slice
+  * change longitude to be within -180/180 from grib-files
+  * enable creation of new variable in ncml
+  * enable logical variable-shape changes in ncml
+  * adding sync to CDMReaderWriter
+===== 0.42 - 2013-03-04 =====
+  * add API for CDMReaderWriter
+  * implement read-writing to netcdf-files
+  * finding example-configuration directory for xml-files as first-guess
+===== 0.41.2 - 2013-02-14 =====
+  * fix for interpolation to values, if axes in km instead of m
+===== 0.41.1 - 2013-02-08 =====
+  * default log-level changed back to WARN
+  * remove sigma-levels for clouds and dummy levels in felt-files
+  * remove some openmp-flags for intel-compilers (segfault)
+===== 0.41 - 2012-12-17 =====
+  * R interface to fimex for reading fields
+  * log4cpp support
+  * auxiliary variable support in extract.selectVariables
+===== 0.40.1 - 2012-11-27 =====
+  * read multiple grib-files
+  * allow writing of latlon grib-files from north to south
+  * allow duplicated coordinates
+  * remove duplicated coordinates for felt-files in latlon
+  * allow different names for latlong (e.g. longlat) projections
+  * remove long deprecated FeltCDMReader2.h
+  * allow change of dimensions without variables in ncml
+  * allow variable name-change and attribute-change in one step in ncml
+===== 0.40 - 2012-11-07 =====
+  * splitting of vertical axes in grib-files
+  * support for ensemble products in grib-files
+===== 0.39.2 - 2012-10-30 =====
+  * vertical-interpolation invalidating data below ocean floor
+  * vertical interpolation fixing axis (positive down) of depth
+===== 0.39.1 - 2012-10-15 =====
+  * backport to boost-0.32
+  * avoid problems with older gcc or icc when using constant class members
+  * improve performance of scaling (use nan-macro rather than function)
+===== 0.39 - 2012-09-08 =====
+  * merging of grids with different resolution (A. Bürger)
+  * allow quality-flags and land-masks from external sources (A. Bürger)
+  * successfully build on MacOS X/gcc
+  * successfully tested with felt-archive files
+===== 0.38.1 - 2012-08-11 =====
+  * compatibility with boost filesystem V3 / boost 1.50
+  * adapting to gcc-4.6 / Ubuntu 12.04
+===== 0.38 - 2012-07-19 =====
+  * 2x improved output-performance to netcdf3 files
+  * support for ocean_s_coordinate_g1 and *_g2
+  * adding IndexedData for convenience
+  * introducing DataPtr typedef instead of boost::shared_ptr<Data>
+  * adding fiConfigOverview.pl script to simplify configuration
+===== 0.37.4 - 2012-07-05 =====
+  * fixing netcdf-files with 0-terminated strings
+  * felt: using undefined-values for undefined levels
+===== 0.37.3 - 2012-05-09 =====
+  * enabling build with nc-config and netcdf-4.1.2 to 4.2 without hdf5
+  * enabling build with proj-4.8
+  * adding latlon projection in gribwriter
+  * fixing bug in gribreader with special options
+  * enabling name and standard_name selection of variables in grib_writer
+  * fixing WRF earth radius
+===== 0.37.2 - 2012-04-11 =====
+  * using towgs84 parameter of CF-1.7-proposal
+  * setting felt earth-figure to simple earth
+  * allow overruling of felt-earth-figure in config
+===== 0.37.1 - 2012-03-27 =====
+  * adding preliminar WRF output support
+===== 0.37 - 2012-03-27 =====
+  * fix colon-separated variable-indicators for felt
+  * fix axes in vector-interpolation (deg2rad)
+  * disabling colon delimiter in wdb-sourcestrings
+  * performance-improvements/memory reduction in NcmlCDMReader
+  * adding de-accumulation processor
+  * synchronize default fill-value with netcdf
+  * fine-tuning usage of surface-variables from felt
+  * allowing to force earth-figure in grib-files
+  * template interpolation supports several coordinate systems
+  * adding alpha-version of vector to latlon rotation
+===== 0.36 - 2012-03-02 =====
+  * interpolation to simple list of lat/lon values (e.g. multiple profiles)
+  * avoid numerical effect in linear interpolation
+  * fix race-condition in timeInterpolator
+  * fix axes of lambert felt-files
+  * update of examples
+===== 0.35.2 - 2012-02-20 =====
+  * allow to read ASIMOF-grib files
+  * allow writing grib-data without time
+  * fix forward/coordinate interpolation bug from latlon-projection
+===== 0.35.1 - 2012-02-07 =====
+  * fixing bug in interpretation of lambert-parameters for felt-files
+  * improving performance: vectorization of vector-interpolation
+  * deprecating IOCDMReader in favour of CDMReaderFactory
+===== 0.35 - 2012-01-04 =====
+  * grib-reader: supporting several types of levels for same parameter
+  * grib-reader: supporting several horizontal CS for different parameters
+  * grib-writer: fixing date-settings
+  * grib-writer: using second-order packing if possible
+  * interpolation: support for several horizontal CS (e.g. staggered grids)
+  * interpolation: using nanoflann instead of kdtree++, 4*speedup
+  * interpolation: supporting degree-based projections in coord_kdtree
+  * interpolation: configurable radius for coord_kdtree
+  * interpolation: improved index-access, 1.1*speedup
+  * interpolation: bilinear: better border handling, 1.3*speedup
+  * interpolation: parallelization of nn, bilinear, cubic and vectors
+  * vertical-interpolation: support for depth
+  * using WGS84 coordinates of latitude/longitude instead of spherical
+  * extract-reduceToBoundigBox supporting bb around -180
+  * make get*Data* operations thread-safe
+  * make (Time-)Units thread-safe
+  * parallelization of NetCDF-writer and NullCDMWriter
+  * upgrade to libtool 2.4.2 (including openmp support)
+  * adding ThreadPool.h for runtime configuration of threads
+  * forcing boost-filesystem api to be compatible with newer boost-versions
+  * remove isinf - not part of C++03
+===== 0.34 - 2011-12-01 =====
+  * shared connections to wdb databases
+  * spatial_vector extension in ncml
+  * backport of tests to boost 1.34
+  * stabilizing interpolation to netcdf-template
+  * fixing char-data writing to netcdf
+===== 0.33.2 - 2011-11-21 =====
+  * backport to netcdf 3.6
+  * enabling build without netcdf
+  * wdb: dropping ensemble_member dimension when only data-version differs in parameter
+===== 0.33.1 - 2011-11-17 =====
+  * fixing vector-projection interpolation of wind-fields
+  * fixing interpolation to projections in degree
+  * enabling compilation with newer versions of boost_filesystem (1.44-1.47)
+  * adding forgotten functions to support unsigned datatypes
+  * deprecating data.asConstTYPE() methods
+===== 0.33 - 2011-11-03 =====
+  * backport to boost-1.34 and gcc 4.2.4
+  * improving build-system, abort when required headers are missing
+  * adding omega2vwind conversion
+  * supporting unsigned and 64bit integer datatypes
+  * removing dependency on deprecated netcdf_c++ library
+  * adding interpolation to netcdf-template
+  * projection improvements to gribWriter, but still in beta
+  * using DSN syntax to connect to wdb
+  * allowing CDMFileReaderFactory to read config-files from memory and URLs
+  * support ensemble members in felt
+  * adding vcoord and param options to felt-parameters
+  * allowing global parameter restrictions in felt-config
+===== 0.32 - 2011-09-22 =====
+  * switching to metgm-library >=0.93.2, allowing lower memory consumption through slicing
+  * faster reindexing in metgm-writer
+  * allowing own fillValue in cdmQualityReader
+  * consistent handling of datum (through towgs84-parameters)
+  * allowing different scan-mode in felt-reader
+  * allowing continuous felt-files (felt-type = 1)
+  * using WGS84-ellipsoid world for all data from felt
+===== 0.31 - 2011-08-29 =====
+  * fixing global attributes in wdb
+  * improving error-messages in metgm
+  * improving ncml-output with redirection to files
+  * configurable axes-types in interpolation
+===== 0.30 - 2011-08-22 =====
+  * vertical interpolation to pressure and height from pressure, height, sigma, lnP and sigma_hybrid
+  * data-transformations for vertical-levels: add4Dpressure, theta2T
+  * logarithmic and double-logarithmic interpolation
+  * wdb using wdbml setup-format (same as wdb-netcdf-java)
+  * metgm-improved, pre-production
+  * remove deprecated FeltCDMReader (use FeltCDMReader2)
+===== 0.29 - 2011-06-16 =====
+  * much improved and production ready [[http://sourceforge.net/projects/wdb/|wdb]]-reader
+  * beta version of MetGM / STANAG6022 reader and writer (MetgmCDMReader.[h|cc] and MetgmCDMWriter.[h|cc] files)
+  * support for [[http://www.unidata.ucar.edu/software/netcdf/ncml/v2.2/FmrcAggregation.html|FMRC]] / reference time axis
+  * faster build-process / better portability (ported to AIX)
+  * mercator and lambert projection support in grib-reader
+  * better handling of netcdf-files with unknown units
+  * fixing some memory leaks
+===== 0.28 - 2011-05-09 =====
+  * improving ncml-support: creation of dimensions and variables, adding values, allow filenames
+  * improving CDMFileReaderFactory to be better usable as library
+  * better handling of rounding-errors when reading data-ranges
+  * allow slices of scalar
+  * fix scan-mode for grib-reader, improve support for grib2
+  * refactoring CDMInterpolator to use CoordinateSystems
+  * adding fill2d preprocess method to CDMInterpolator
+  * improved/rewritten wdb-reader
+===== 0.27 - 2011-03-22 =====
+  * new documentation target
+  * generic usage of udunits2 without udunits1-wrapper
+  * felt-reader to allow reading time-independant files
+  * NC_BYTE variables don't change to NC_CHAR
+  * support +R proj4 parameter
+  * grib-reader: use DxInMetres instead of xDirectionInMetres
+  * adding all CF1.4 projections: AlbersConical, AzimuthalEquidistant,
+                                  LambertAzimuthal, LambertCylindrical,
+                                  Orthograhpic, VerticalPerspective
+  * improve exception-handling
+===== 0.26.1 - 2011-02-14 =====
+  * adding config.h to NcmlCDMReader to detect netcdf-support
+===== 0.26 - 2011-02-11 =====
+  * improved detection of coordinate-systems with variable-less dimensions
+  * compilation improvements for newer boost-versions / ubuntu maverick
+  * alpha version of WDB-reader
+  * enabling setting of unlimited dimension in ncml
+  * bug-fix in handling of netcdf4
+  * reducing memory consumpting when reading (with unlimited dimension) for opendap
+===== 0.25.1 - 2010-12-03 =====
+  * workaround for compiler-bug in gcc < 4
+  * upgrading build-infrastructure to automake-1.11
+===== 0.25 - 2010-11-18 =====
+  * reduce memory consumption
+  * allow extraction of lat/lon bounding-boxes, time and vertical axes by values
+  * fimex usable as OpENDAP client
+  * adding a data-subsetter script
+  * fixing edge-cases, fetching of 0-size data
+  * back-porting to boost 1.32
+  * adding standard_parallel for lcc projection
+===== 0.24 - 2010-09-13 =====
+  * grib-support included in debian package
+  * adding forecast-reference-time from felt and grib-files
+  * use grib-steps to determine valid time
+  * using gstmerc istead of tmerc for mercator, requires proj4.4.7
+  * fine grained library dependencies
+  * bugfix when reading grib index-files
+===== 0.23 - 2010-07-15 =====
+  * allowing axes with negative steps
+  * reading units-initialization only once
+  * requiring SSE2 on all i386 machines in debian-packages
+===== 0.22 - 2010-06-10 =====
+  * support for transverse mercator and UTM projection
+  * support for several standard ellipsoids, e.g. WGS85, NAD83
+  * support for other time-units than epoch-seconds from felt-files
+  * including examples in fimex-bin debian package
+  * best-effort time selection when writing grib-fields without known time
+  * fixing typo in rotated latitude longitude projection
+  * fixing bug in second extended grid-type method (felt-files)
+===== 0.21 - 2010-05-07 =====
+  * allow data-slicing along any dimension
+  * adding abstract coordinate-systems
+  * adding abstract projections
+  * better coordinate-system support for CF-1.0
+  * adding mercator projection
+  * allow for units compatible to m in CDMInterpolator
+  * simplified and improved build-system
+===== 0.20 - 2010-03-09 =====
+  * porting to Visual C++
+  * fixing bugs in lambert-projection
+===== 0.19 - 2009-12-18 =====
+  * debian packages (without grib support)
+  * fixing time-interpolator
+  * fiGribCut program to extract parameters and geographical region
+    from grib-files
+===== 0.18 - 2009-11-13 =====
+  * addition of C-API (c-fimex.h)
+===== 0.17.1 - 2009-10-19 =====
+  * bugfix in translation of CF projection parameters to proj4
+  * double-check of projected variables to contain 'grid_parameter' and 'coordinates' attributes
+===== 0.17 - 2009-10-13 =====
+  * adding grib version 1 and 2 reader (beta)
+  * adding program indexGribs to create index-files for large or distributed grib-files
+  * better integration to other projects started (api-changes)
+  * better support for ellipsoids
+===== 0.16 - 2009-08-11 =====
+  * support for earth-ellipsoids as supported by CF-1.2 (earth_radius)
+  * support for more projections, lambert conformal conic and mercator
+  * integrated felt library, fortran no longer required, simpler build process
+  * support for static and dynamic library
+  * support for udunits2
+===== 0.15.1 - 2009-06-08 =====
+  * bugfix for translation of rotated lat-long from felt to proj
+  * removing some compiler warnings
+  * improving compatibility with older versions of libxml
+===== 0.15 - 2009-05-29 =====
+  * enabling forward projection interpolation
+  * adding configurable quality-status evaluation/extraction
+===== 0.14 - 2009-05-15 =====
+  * support for reading/configuring with NcML
+  * backporting to netcdf-3.5
+  * skipping of tests with boost < 1.34
+===== 0.13 - 2009-03-20 =====
+  * allowing for auto-tuning axes in interpolation (SpatialAxisSpec)
+  * removal of variables/attributes in cdmWriterConfig
+  * fixing broken projection-interpolation (broken since 0.12)
+===== 0.12 - 2009-03-02 =====
+  * adding coordinate interpolation (kdtree and brute force)
+  * fixing bugs in lat-lon interpolation
+  * enabling interpolation of ghrsst satellite data files
+  * easier build without felt-library
+  * using optional OpenMP for time-critical routines
+===== 0.11 - 2009-01-23 =====
+  * adding bicubic spatial interpolation
+  * enabling netcdf-4 output with hdf5-zlib compression
+===== 0.10 - 2009-01-13 =====
+  * adding time-interpolation
+  * adding documentation
+  * fix for erroneous felt projections
+===== 0.9 - 2008-09-23 =====
+  * adding grib-writer (v1 and v2) via [[http://www.ecmwf.int/publications/manuals/grib_api/index.html|grib_api]]
+  * improved logging
+  * switching to svn
+  * adding proj4 to automake
+===== 0.8 - 2008-06-20 =====
+  * moving headers to fimex/*.h
+  * throw exception when renaming non-existing field in NetCDF-writer (instead of segfault)
+  * allowing additional parameters to MIN_DATETIME()/MAX_DATETIME in attributes for felt2nc_variables
+  * reading sigma_hybrid parameters directly from felt_file
+  * changing global attributes for damocles
+  * fixing a bug in vector-interpolation (errors during calculation of v-vector)
+  * improving speed of vector-interpolation
+===== 0.7 - 2008-06-12 =====
+  * fixing coordinates of polar-stereographic felt-files
+===== 0.6 - 2008-06-11 =====
+  * units-support for netcdf output configuration
+  * keeping input-order of variables/attributes/dimensions within fimex
+===== 0.5 - 2008-06-05 =====
+  * bugfix for short-fields when converting from felt
+  * netcdf output configuration
+===== 0.4 - 2008-05-21 =====
+  * performance improvements of interpolation (>90% with SIMD)
+  * adjusting output to damocles
+  * fixing order of long, lat projection axes
+===== 0.3 - 2008-05-15 =====
+  * adding vector-interpolation
+  * handling _FillValue in interpolation
+  * reading of parameterized levels
+  * renaming to fimex
+* 2008-04-17 utplukk-0.2
+  * backport to routine-machine, BOOST-1.32, hardcoded netcdf-path
+  * dist-checked distribution
+* 2008-01-02 utplukk-0.1
+  * initial release using autotools
+* 2007-09-18 utplukk-0.0
+  * starting work on utplukk
