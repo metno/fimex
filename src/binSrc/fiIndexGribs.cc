@@ -42,7 +42,7 @@ namespace fs = boost::filesystem;
 using namespace std;
 
 static void writeUsage(ostream& out, const po::options_description& options) {
-    out << "usage: fiIndexGribs --outputDirectory DIRNAME --inputFile gribFile" << endl;
+    out << "usage: fiIndexGribs [ --outputDirectory DIRNAME ] -i gribFile" << endl;
     out << endl;
     out << options << endl;
 }
@@ -127,6 +127,10 @@ main(int argc, char* args[])
     fs::path outFile = outDir / (filename + ".grbml");
     bool forceUpdate = false;
     if (vm.count("force")) forceUpdate = true;
-    indexGrib(fullInput, outFile, vm["extraKey"].as<vector<string> >(), forceUpdate);
+    vector<string> extraKeys;
+    if (vm.count("extraKey")) {
+        extraKeys = vm["extraKey"].as<vector<string> >();
+    }
+    indexGrib(fullInput, outFile, extraKeys, forceUpdate);
     return 0;
 }

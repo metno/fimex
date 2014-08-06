@@ -5,7 +5,8 @@ if [ ! -f @top_srcdir@/test/test.grb1 ]; then
    echo "no input data: @top_srcdir@/test/test.grb1, skipping test..."
    exit 0;
 fi
-../src/binSrc/fiIndexGribs --i @top_srcdir@/test/test.grb1 --extraKey=localDefinitionNumber
+rm -f test.grb1.grbml
+../src/binSrc/fiIndexGribs --i @top_srcdir@/test/test.grb1
 if [ $? != 0 ]; then
   echo "failed writing test.grb1.grbml"
   exit 1
@@ -14,9 +15,20 @@ if [ ! -f test.grb1.grbml ]; then
   echo "failed writing test.grb1.grbml"
   exit 1
 fi
+
+rm -f test.grb1.grbml
+../src/binSrc/fiIndexGribs --i @top_srcdir@/test/test.grb1 --extraKey=localDefinitionNumber
+if [ $? != 0 ]; then
+  echo "failed writing test.grb1.grbml with extraKey"
+  exit 1
+fi
+if [ ! -f test.grb1.grbml ]; then
+  echo "failed writing test.grb1.grbml with extraKey"
+  exit 1
+fi
 if grep -q localDefinitionNumber test.grb1.grbml; then
   echo "success"
-else 
+else
   echo "no localDefinitionNumber in test.grb1.grbml"
   exit 1;
 fi
