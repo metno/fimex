@@ -162,6 +162,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
     } else {
         string horizontalId = p_->projectionVariables.find(varName)->second;
         DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+        if (data->size() == 0) return data;
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
         if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
