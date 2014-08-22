@@ -328,6 +328,10 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
     NcDimIdMap ncDimMap;
     for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
         int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
+        if (!it->isUnlimited()) {
+            // length = 0 means unlimited in netcdf, so I create a dummy
+            if (length == 0) length = 1;
+        }
         // NcDim is organized by NcFile, no need to clean
         // change the name written to the file according to getDimensionName
         int dimId;

@@ -418,6 +418,7 @@ void NcmlCDMReader::initDimensionUnlimited()
                     }
                 }
             } else if (isUnlimited == "false") {
+                unlimitedDimensionChanges[name] = orgName;
                 cdm_->getDimension(name).setUnlimited(0);
             } else {
                 string warning = "NcML: unlimited of dimension of " + name + " must be 'true' or 'false' but is: " + isUnlimited;
@@ -494,21 +495,31 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
 
     DataPtr data;
     const CDM& orgCDM = dataReader->getCDM();
-    // check if the first new unlimited dimension is part of the variable
-    // (for simplicity check only first)
+    const CDMDimension* orgUnlimDim = orgCDM.getUnlimitedDim();
+    string orgUnlimDimNm = (orgUnlimDim != 0) ? orgUnlimDim->getName() : "";
+    const CDMDimension* unlimDim = cdm_->getUnlimitedDim();
+    string unlimDimNm = (unlimDim != 0) ? unlimDim->getName() : "";
     if ( (unlimitedDimensionChanges.size() > 0) &&
          find(cdm_->getVariable(varName).getShape().begin(),
               cdm_->getVariable(varName).getShape().end(),
               unlimitedDimensionChanges.begin()->first) != cdm_->getVariable(varName).getShape().end()
        ) {
-        string unlimDim = unlimitedDimensionChanges.begin()->second;
-        LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim " << unlimDim);
+        // not working for several unlimited dimensions yet
+        LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim " << unlimitedDimensionChanges[unlimDimNm]);
         SliceBuilder sb(dataReader->getCDM(), orgVarName);
-        sb.setStartAndSize(unlimDim, unLimDimPos, 1);
-        data = dataReader->getDataSlice(orgVarName, sb);
+        if (dataReader->getCDM().hasDimension(unlimitedDimensionChanges[unlimDimNm])) {
+            sb.setStartAndSize(unlimitedDimensionChanges[unlimDimNm], unLimDimPos, 1);
+        }
+        //
+        const vector<size_t>& sizes = sb.getDimensionSizes();
+        if (find(sizes.begin(), sizes.end(), 0) == sizes.end()) {
+            data = dataReader->getDataSlice(orgVarName, sb);
+        } else {
+            // one dimension has size 0 -> 0 length data
+            data = createData(dataReader->getCDM().getVariable(orgVarName).getDataType(), 0, 0.0d);
+        }
     } else {
         // check if extended unlimited dimension slice
-        const CDMDimension* unlimDim = orgCDM.getUnlimitedDim();
         if ((unlimDim != 0) &&
                 (orgCDM.getVariable(orgVarName).checkDimension(unlimDim->getName())) &&
                 (unlimDim->getLength() <= unLimDimPos)) {

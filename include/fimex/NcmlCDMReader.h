@@ -150,7 +150,7 @@ private:
     std::map<std::string, std::string> variableNameChanges;
     std::map<std::string, CDMDataType> variableTypeChanges;
     // maps dimension-name to original dimension-name of the
-    // dimensions which changed the unlimited dimension
+    // dimensions which changed to or from unlimited dimension
     std::map<std::string, std::string> unlimitedDimensionChanges;
 
 
