@@ -516,7 +516,7 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
             data = dataReader->getDataSlice(orgVarName, sb);
         } else {
             // one dimension has size 0 -> 0 length data
-            data = createData(dataReader->getCDM().getVariable(orgVarName).getDataType(), 0, 0.0d);
+            data = createData(dataReader->getCDM().getVariable(orgVarName).getDataType(), 0, 0.0);
         }
     } else {
         // check if extended unlimited dimension slice
