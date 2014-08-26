@@ -1,3 +1,6 @@
+  * 2014-08-26 fimex-0.53.2
+    * ncml-fixes: allow record-dims to change to normal dimensions
+	* interpolator: avoid crash when no data
   * 2014-07-07 fimex-0.53.1
     * many tests for vector-rotation
     * fix bug for flipping vector with some special projections
