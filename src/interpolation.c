@@ -419,7 +419,9 @@ static int mifi_get_vector_reproject_matrix_proj(projPJ inputPJ, projPJ outputPJ
         }
     }
     if (fabs(deltaX) < 1e-9 || fabs(deltaY) < 1e-9 ) {
-        fprintf(stderr, "WARNING, tiny deltaX/Y: %f %f possible singularity in vector-reprojection\n", deltaX, deltaY);
+        fprintf(stderr, "WARNING, tiny deltaX/Y: %f %f possible singularity in vector-reprojection. Using default: %f\n", deltaX, deltaY, defaultDelta);
+        deltaX = defaultDelta;
+        deltaY = defaultDelta;
     }
     return mifi_get_vector_reproject_matrix_points_proj_delta(inputPJ, outputPJ,
             in_x_field, in_y_field, // both on
