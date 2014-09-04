@@ -507,7 +507,8 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
         // not working for several unlimited dimensions yet
         LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << orgVarName << " with fake unlimDim " << unlimitedDimensionChanges[unlimDimNm]);
         SliceBuilder sb(dataReader->getCDM(), orgVarName);
-        if (dataReader->getCDM().hasDimension(unlimitedDimensionChanges[unlimDimNm])) {
+        vector<string> dimNames = sb.getDimensionNames();
+        if (find(dimNames.begin(), dimNames.end(), unlimitedDimensionChanges[unlimDimNm]) != dimNames.end()) {
             sb.setStartAndSize(unlimitedDimensionChanges[unlimDimNm], unLimDimPos, 1);
         }
         //
