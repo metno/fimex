@@ -55,7 +55,7 @@ public:
      * static NAME constant
      * @return atmosphere_sigma_coordinate
      */
-    static const std::string NAME() { return "atmosphere_hybrid_sigma_pressure_coordinate_2"; }
+    static const std::string NAME() { return "atmosphere_sigma_coordinate"; }
     /**
      * @return same as static NAME()
      */
