@@ -53,6 +53,13 @@ vector<double> IdentityToVLevelConverter::operator()(size_t, size_t, size_t)
     return vlevel_;
 }
 
+vector<double> Identity4DToVLevelConverter::operator()(size_t x, size_t y, size_t t) {
+    vector<double> h(nz_);
+    for (size_t z = 0; z < nz_; z++)
+        h.at(z) = pressure_[((t*nz_ + z)*ny_ + y)*nx_ +x];
+    return h;
+}
+
 LnPressureToPressureConverter::LnPressureToPressureConverter(double p0, const vector<double>& lnP) : pres_(lnP.size())
 {
     mifi_atmosphere_ln_pressure(lnP.size(), p0, &lnP[0], &pres_[0]);

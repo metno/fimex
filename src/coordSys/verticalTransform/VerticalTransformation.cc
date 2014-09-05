@@ -36,7 +36,7 @@
 
 namespace MetNoFimex {
 
-static LoggerPtr logger = getLogger("fimex.VerticalTransformation.h");
+static LoggerPtr logger = getLogger("fimex.VerticalTransformation");
 
 
 std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransformation& vt)
@@ -50,7 +50,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const 
 //    if (not isComplete())
 //        throw CDMException("incomplete vertical transformation");
     switch (verticalType) {
-    case MIFI_VINT_PRESSURE: return getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
+    case MIFI_VINT_PRESSURE: return findPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     case MIFI_VINT_DEPTH: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     default: throw CDMException("unknown vertical type");
@@ -110,6 +110,52 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(
     return heightConv;
 }
 
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+{
+    // try use 4d pressure field
+    using namespace std;
+    typedef boost::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
 
+    const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
+    const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+    const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+    if (not (xAxis && yAxis && zAxis)) {
+        LOG4FIMEX(logger, Logger::INFO, "cs lacks " << (xAxis.get() ? "" : "x ")
+                << (yAxis.get() ? "" : "y ") << (zAxis.get() ? "" : "z ") << "axis/axes, no pressure field");
+        return ToVLevelConverter_p();
+    }
+
+    vector<string> dims;
+    dims.push_back(xAxis->getShape()[0]);
+    dims.push_back(yAxis->getShape()[0]);
+    dims.push_back(zAxis->getShape()[0]);
+
+    map<string, string> attrs;
+    attrs["standard_name"] = "pressure";
+
+    const vector<string> pVars = reader->getCDM().findVariables(attrs, dims);
+    if (pVars.empty()) {
+        LOG4FIMEX(logger, Logger::INFO, "no pressure field");
+        return ToVLevelConverter_p();
+    }
+
+    const string& pVar = pVars.front();
+
+    LOG4FIMEX(logger, Logger::INFO, "using pressure field "<<pVar<<" to retrieve pressure");
+    DataPtr pData = reader->getScaledDataSliceInUnit(pVar, "hPa", unLimDimPos);
+    if (pData->size() != (nx * ny * nz * nt)) {
+        throw CDMException("pressure field '" + pVar + "' has strange size: " + type2string(pData->size()) + " != " + type2string(nx * ny * nz * nt));
+    }
+
+    return ToVLevelConverter_p(new Identity4DToVLevelConverter(pData->asFloat(), nx, ny, nz, nt));
+}
+
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::findPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+{
+    boost::shared_ptr<ToVLevelConverter> pConv = getIdentityPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+    if (not pConv)
+        pConv = getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
+    return pConv;
+}
 
 } // namespace MetNoFimex
