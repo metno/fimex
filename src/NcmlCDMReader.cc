@@ -369,6 +369,7 @@ void NcmlCDMReader::initDimensionNameChange()
             std::string name = getXmlProp(nodes->nodeTab[i], "name");
             if (name == "") throw CDMException("ncml-file "+ configId + " has no name for dimension with orgName: "+ orgName);
             cdm_->renameDimension(orgName, name);
+            dimensionNameChanges[name] = orgName;
         }
     }
     // add dimensions not existing
@@ -584,8 +585,29 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuild
         orgVarName = vit->second;
     }
 
+    SliceBuilder orgSb(dataReader->getCDM(), orgVarName);
+    {
+        vector<string> shape = sb.getDimensionNames();
+        vector<size_t> sizes = sb.getDimensionSizes();
+        vector<size_t> start = sb.getDimensionStartPositions();
+        vector<string> orgShape = orgSb.getDimensionNames();
+        for (size_t i = 0; i < shape.size(); ++i) {
+            string orgDim = dimensionNameChanges[shape.at(i)];
+            if (orgDim == "") orgDim = shape[i]; // no name change
+            if (find(orgShape.begin(), orgShape.end(), orgDim) != orgShape.end()) {
+                orgSb.setStartAndSize(orgDim, start.at(i), sizes.at(i));
+            }
+        }
+        // set all other dims to 1
+        vector<string> unsetDims = orgSb.getUnsetDimensionNames();
+        for (size_t i = 0; i < unsetDims.size(); ++i) {
+            // make minimal
+            orgSb.setStartAndSize(unsetDims.at(i), 0, 1);
+        }
+    }
+
     // get data from original source with slicebuilder
-    DataPtr data = dataReader->getDataSlice(orgVarName, sb);
+    DataPtr data = dataReader->getDataSlice(orgVarName, orgSb);
 
     // eventually, change the type from the old type to the new type
     map<string, CDMDataType>::iterator dtIt = variableTypeChanges.find(varName);

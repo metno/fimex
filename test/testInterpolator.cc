@@ -408,18 +408,6 @@ public:
 BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
 {
     string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/data/north.nc");
-    if (!ifstream(fileName.c_str())) {
-        // no testfile, skip test
-        return;
-    }
-    boost::shared_ptr<CDMReader> reader;
-    try {
-        reader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
-    } catch (CDMException& ex) {
-        // ignore, most likely nc4 not readable
-        return;
-    }
 
     TestMany<IP> tests;
     tests(IP("+proj=stere +lat_0=90 +lon_0=-32 +lat_ts=60 +ellps=sphere +R="+type2string(MIFI_EARTH_RADIUS_M),
@@ -448,27 +436,56 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vector_backforth)
              "-30,-29,...,40","50,51,...,85", 1e-2)) // UTM
          ;
 
+    for (size_t k = 0; k < 2; ++k) {
+        boost::shared_ptr<CDMReader> reader;
+        string fileName(topSrcDir+"/test/data/north.nc");
+        double xWind = 0;
+        double yWind = 1;
+        if (k == 1) {
+            fileName = topSrcDir+"/test/data/east.nc";
+            xWind = 1;
+            yWind = 0;
+        }
+        if (!ifstream(fileName.c_str())) {
+            // no testfile, skip test
+            continue;
+        }
+        try {
+            reader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName));
+        } catch (CDMException& ex) {
+            // ignore, most likely nc4 not readable
+            continue;
+        }
+        for (size_t i = 0; i < tests.size(); ++i) {
+            IP ip(tests.get(i));
+            boost::shared_ptr<CDMInterpolator> interp(
+                    new CDMInterpolator(reader));
+            interp->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, ip.proj,
+                    ip.xAxis, ip.yAxis, ip.unit, ip.unit);
 
-    for (size_t i = 0; i < tests.size(); ++i) {
-        IP ip(tests.get(i));
-        boost::shared_ptr<CDMInterpolator>interp(new CDMInterpolator(reader));
-        interp->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, ip.proj, ip.xAxis, ip.yAxis, ip.unit, ip.unit);
+            boost::shared_ptr<CDMInterpolator> iback(
+                    new CDMInterpolator(interp));
+            iback->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR,
+                    "+proj=latlon +R=" + type2string(MIFI_EARTH_RADIUS_M),
+                    ip.lonAxis, ip.latAxis, "degrees_east", "degrees_north");
 
-        boost::shared_ptr<CDMInterpolator> iback(new CDMInterpolator(interp));
-        iback->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, "+proj=latlon +R="+type2string(MIFI_EARTH_RADIUS_M), ip.lonAxis, ip.latAxis, "degrees_east", "degrees_north");
+            DataPtr dxwind = iback->getScaledData("x_wind");
+            boost::shared_array<float> xwind = dxwind->asFloat();
+            boost::shared_array<float> ywind =
+                    iback->getScaledData("y_wind")->asFloat();
 
-        DataPtr dxwind = iback->getScaledData("x_wind");
-        boost::shared_array<float> xwind = dxwind->asFloat();
-        boost::shared_array<float> ywind = iback->getScaledData("y_wind")->asFloat();
-        double fillValue = iback->getCDM().getFillValue("x_wind");
-
-        for (size_t i = 0; i < dxwind->size(); ++i) {
-            if (!(mifi_isnan(xwind[i]) || (mifi_isnan(ywind[i])))) {
-                if ((fabs(xwind[i]) >= ip.delta) || (fabs(1-ywind[i]) >= ip.delta)) {
-                    cerr << "i, xwind[i], ywind[i], proj: " << i << ", " << xwind[i] << ", " << ywind[i] << ": " << ip.proj << endl;
+            for (size_t i = 0; i < dxwind->size(); ++i) {
+                if (!(mifi_isnan(xwind[i]) || (mifi_isnan(ywind[i])))) {
+                    if ((fabs(xWind - xwind[i]) >= ip.delta)
+                            || (fabs(yWind - ywind[i]) >= ip.delta)) {
+                        cerr << "(xWind,yWind) -> i, (xwind[i],ywind[i]), proj:("
+                                << xWind << "," << yWind << ") -> " << i << ": ("
+                                << xwind[i] << "," << ywind[i] << "): "
+                                << ip.proj << endl;
+                    }
+                    BOOST_CHECK(fabs(xWind - xwind[i]) < ip.delta);
+                    BOOST_CHECK(fabs(yWind - ywind[i]) < ip.delta);
                 }
-                BOOST_CHECK(fabs(xwind[i]) < ip.delta);
-                BOOST_CHECK(fabs(1-ywind[i]) < ip.delta);
             }
         }
     }
