@@ -370,7 +370,7 @@ GribFileMessage::GribFileMessage(
         if (gridParameterIds_[0] == 254) {
             long level = -1;
             MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &level), 0);
-            if (level == -1 || level == (pow(2,32)-1)) { // -1 = 2^32-1 if typeof(long) > 32bit
+            if (level == GRIB_MISSING_LONG) {
                 throw CDMException("Asimof-message deteced, cannot decode this message");
             }
         }
