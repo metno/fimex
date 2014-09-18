@@ -522,11 +522,11 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
         }
     } else {
         // check if extended unlimited dimension slice
-        if ((unlimDim != 0) &&
-                (orgCDM.getVariable(orgVarName).checkDimension(unlimDim->getName())) &&
-                (unlimDim->getLength() <= unLimDimPos)) {
+        if ((orgUnlimDim != 0) &&
+                (orgCDM.getVariable(orgVarName).checkDimension(orgUnlimDim->getName())) &&
+                (orgUnlimDim->getLength() <= unLimDimPos)) {
             LOG4FIMEX(logger, Logger::DEBUG, "getting data for var " << varName << " and slice " << unLimDimPos << " outside original data, using undef");
-            data = createData(cdm_->getVariable(orgVarName).getDataType(), 0);
+            data = createData(cdm_->getVariable(varName).getDataType(), 0);
         } else {
             // get data as usual
             data = dataReader->getDataSlice(orgVarName, unLimDimPos);
