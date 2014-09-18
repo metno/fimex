@@ -18,6 +18,13 @@
   <attribute name="test" value="lon_rho"/>
 </variable>
 
+<!-- extending unlimited dimension from 4 to 6 -->
+<dimension name="time" length="6" />
+<variable name="time">
+<values>1 2 3 4 5 6</values>
+</variable>
+
+
 <variable name="x_wind">
   <spatial_vector direction="x,longitude" counterpart="y_wind" />
 </variable>
