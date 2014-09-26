@@ -88,6 +88,7 @@ open (my $fh, $vcrossFile)
     or die "cannot read input $vcrossFile: $!\n";
 LINES: while (defined (my $line = <$fh>)) {
     chomp $line;
+    next if $line =~ /^\*/; #* is skip-character
     my @vals = split ',', $line;
     my $type = int(shift @vals);
     if ($type == 0) {

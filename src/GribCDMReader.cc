@@ -64,6 +64,8 @@ struct GribCDMReaderImpl {
     string configId;
     vector<GribFileMessage> indices;
     boost::shared_ptr<XMLDoc> doc;
+    map<int, vector<xmlNodePtr> > nodeIdx1;
+    map<int, vector<xmlNodePtr> > nodeIdx2;
     MutexType mutex;
     map<GridDefinition, ProjectionInfo> gridProjection;
     string timeDimName;
@@ -150,6 +152,8 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
         size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
         if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
     }
+    initXMLNodeIdx();
+
 
     std::map<std::string, std::string> options;
     if (xmlGetEarthFigure() != "") {
@@ -192,6 +196,41 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
     }
 }
 
+void GribCDMReader::initXMLNodeIdx() {
+    string xpathString = "/gr:cdmGribReaderConfig/gr:variables/gr:parameter";
+    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathString);
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    size_t size = (nodes) ? nodes->nodeNr : 0;
+    cerr << "found " << size << " parameters " << endl;
+    for (size_t i = 0; i < size; ++i) {
+        xmlNodePtr node = nodes->nodeTab[i];
+        string grib1Id = "gr:grib1";
+        XPathObjPtr xpathObj1 = p_->doc->getXPathObject(grib1Id, node);
+        xmlNodeSetPtr nodes1 = xpathObj1->nodesetval;
+        size_t size1 = (nodes1) ? nodes1->nodeNr : 0;
+        for (size_t i = 0; i < size1; ++i) {
+            xmlNodePtr node1 = nodes1->nodeTab[i];
+            string idVal = getXmlProp(node1, "indicatorOfParameter");
+            if (idVal == "") continue;
+            long id = string2type<long>(idVal);
+            p_->nodeIdx1[id].push_back(node1);
+        }
+        // and the same for grib2
+        string grib2Id = "gr:grib2";
+        XPathObjPtr xpathObj2 = p_->doc->getXPathObject(grib2Id, node);
+        xmlNodeSetPtr nodes2 = xpathObj2->nodesetval;
+        size_t size2 = (nodes2) ? nodes2->nodeNr : 0;
+        for (size_t i = 0; i < size2; ++i) {
+            xmlNodePtr node2 = nodes2->nodeTab[i];
+            string idVal = getXmlProp(node2, "parameterNumber");
+            if (idVal == "") continue;
+            long id = string2type<long>(idVal);
+            p_->nodeIdx2[id].push_back(node2);
+        }
+    }
+    cerr << "nodeIdx1: " << p_->nodeIdx1.size() << endl;
+}
+
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
 {
     string xpathString;
@@ -200,24 +239,22 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     optionals["typeOfLevel"] = msg.getLevelType();
     optionals["levelNo"] = msg.getLevelNumber();
     optionals["timeRangeIndicator"] = msg.getTimeRangeIndicator();
+    vector<xmlNodePtr> nodes;
     if (msg.getEdition() == 1) {
-        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib1[@indicatorOfParameter='"+type2string(pars.at(0))+"']");
+        nodes = p_->nodeIdx1[pars.at(0)];
         optionals["gribTablesVersionNo"] = pars.at(1);
         optionals["identificationOfOriginatingGeneratingCentre"] = pars.at(2);
     } else {
-        xpathString = ("/gr:cdmGribReaderConfig/gr:variables/gr:parameter/gr:grib2[@parameterNumber='"+type2string(pars.at(0))+"']");
+        nodes = p_->nodeIdx2[pars.at(0)];
         optionals["parameterCategory"] = pars.at(1);
         optionals["discipline"] = pars.at(2);
     }
 
-    XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathString);
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    size_t size = (nodes) ? nodes->nodeNr : 0;
-    if (size >= 1) {
+    if (nodes.size() >= 1) {
         LOG4FIMEX(logger, Logger::DEBUG, "found parameter at " << xpathString);
         vector<xmlNodePtr> matchingNodes;
-        for (size_t i = 0; i < size; ++i) {
-            xmlNodePtr node = nodes->nodeTab[i];
+        for (size_t i = 0; i < nodes.size(); ++i) {
+            xmlNodePtr node = nodes.at(i);
             bool allOptionalsMatch = true;
             for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
                 string optVal = getXmlProp(node, opt->first);

@@ -66,6 +66,11 @@ private:
     // pimpl
     boost::shared_ptr<GribCDMReaderImpl> p_;
 
+    /**
+     * init xmlNodeIdx1 and xmlNodeIdx2, used for faster lookups in xml-tree
+     */
+    void initXMLNodeIdx();
+
     /** Define which parameters to select
      * @param select can be "all", "definedOnly"
      */
