@@ -1,10 +1,16 @@
+  * 2014-10-07 fimex-0.54
+    * fix grib-missing-long on 64bit platforms for asimov-files
+    * more tests on vector-rotation, using defaults around singularities
+    * fix name of atmosphere_sigma_coordinate
+    * allow record-dimensions to switch to normal dimensions and vv in NcML
+    * avoid crashes when data missing
   * 2014-08-26 fimex-0.53.2
     * ncml-fixes: allow record-dims to change to normal dimensions
-	* interpolator: avoid crash when no data
+    * interpolator: avoid crash when no data
   * 2014-07-07 fimex-0.53.1
     * many tests for vector-rotation
     * fix bug for flipping vector with some special projections
-	* remove some llvm-warnings
+    * remove some llvm-warnings
     * allow scalar felt-axes
   * 2014-06-24 fimex-0.53
     * improved accuracy of vector-rotation to latlon
