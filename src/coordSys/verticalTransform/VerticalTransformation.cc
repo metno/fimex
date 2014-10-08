@@ -103,7 +103,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(
             vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
         } else {
             LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
-            boost::shared_ptr<ToVLevelConverter> presConv = getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
+            boost::shared_ptr<ToVLevelConverter> presConv = findPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
             heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
         }
     }
