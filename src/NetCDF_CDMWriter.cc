@@ -113,7 +113,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
     }
     int ncVersion = getNcVersion(version, doc);
     ncFile->filename = outputFile;
-    ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId));
+    ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
     ncFile->isOpen = true;
 
 

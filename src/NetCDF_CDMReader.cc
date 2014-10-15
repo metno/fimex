@@ -43,7 +43,7 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
 {
     ScopedCritical lock(Nc::getMutex());
     ncFile->filename = filename;
-    ncCheck(nc_open(ncFile->filename.c_str(), writeable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId));
+    ncCheck(nc_open(ncFile->filename.c_str(), writeable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId), "opening "+ncFile->filename);
     ncFile->isOpen = true;
 
     // investigate the dimensions

@@ -69,7 +69,7 @@ CDMDataType ncType2cdmDataType(nc_type nctype);
 /**
  * read a nc-status and throw an error if status != NC_NOERR
  */
-void ncCheck(int status);
+void ncCheck(int status, std::string msg="");
 
 /**
  * read values from an attribute to a data
