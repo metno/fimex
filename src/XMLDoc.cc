@@ -33,6 +33,7 @@ XMLDoc::XMLDoc(const std::string& filename)
 {
     init();
     xmlDoc* pdoc = xmlReadFile(filename.c_str(), NULL, 0);
+    if (pdoc == 0) throw CDMException("cannot read xml-file: "+filename);
     setDoc(pdoc);
     setXPathCtx(pdoc);
 }
@@ -118,19 +119,19 @@ void XMLDoc::registerNamespace(const std::string& prefix, const std::string& hre
 
 void XMLDoc::cleanup()
 {
-	if (doc != 0) {
-		xmlFreeDoc(doc);
-	}
-	if (xpathCtx != 0) {
-		xmlXPathFreeContext(xpathCtx);
-	}
-	xmlCleanupParser();
+    if (doc != 0) {
+        xmlFreeDoc(doc);
+    }
+    if (xpathCtx != 0) {
+        xmlXPathFreeContext(xpathCtx);
+    }
+    xmlCleanupParser();
 
 }
 
 XMLDoc::~XMLDoc()
 {
-	cleanup();
+    cleanup();
 }
 
 XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) const
@@ -140,11 +141,11 @@ XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) co
     } else {
         xpathCtx->node = node;
     }
-	XPathObjPtr xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx), xmlXPathFreeObject);
-	if (xpathObj.get() == 0) {
-		throw CDMException("unable to parse xpath: " + xpath);
-	}
-	return xpathObj;
+    XPathObjPtr xpathObj(xmlXPathEvalExpression(reinterpret_cast<const xmlChar*>(xpath.c_str()), xpathCtx), xmlXPathFreeObject);
+    if (xpathObj.get() == 0) {
+        throw CDMException("unable to parse xpath: " + xpath);
+    }
+    return xpathObj;
 }
 
 /**
@@ -153,16 +154,16 @@ XPathObjPtr XMLDoc::getXPathObject(const std::string& xpath, xmlNodePtr node) co
  * @return a string of the attribute, "" if attribute doesn't exist
  */
 std::string getXmlProp(const xmlNodePtr node, const std::string& attrName) {
-	boost::shared_ptr<xmlChar> xChar(xmlGetProp(node, reinterpret_cast<const xmlChar *>(attrName.c_str())), xmlFree);
-	std::string retVal;
-	if (xChar.get() != 0) {
-		retVal = std::string(reinterpret_cast<char *>(xChar.get()));
-	}
-	return retVal;
+    boost::shared_ptr<xmlChar> xChar(xmlGetProp(node, reinterpret_cast<const xmlChar *>(attrName.c_str())), xmlFree);
+    std::string retVal;
+    if (xChar.get() != 0) {
+        retVal = std::string(reinterpret_cast<char *>(xChar.get()));
+    }
+    return retVal;
 }
 
 std::string getXmlName(const xmlNodePtr node) {
-	return std::string (reinterpret_cast<const char *>(node->name));
+    return std::string (reinterpret_cast<const char *>(node->name));
 }
 std::string getXmlContent(const xmlNodePtr node)
 {
