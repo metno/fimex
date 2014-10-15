@@ -48,7 +48,7 @@ void ncCheck(int status, std::string msg) {
     std::string outMsg("");
     if (msg != "") outMsg = " : "+msg;
     if (status != NC_NOERR)
-        throw CDMException(nc_strerror(status) + msg);
+        throw CDMException(nc_strerror(status) + outMsg);
 }
 
 Nc::~Nc()
