@@ -269,9 +269,27 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
         string latitude = coordSys->findAxisOfType(CoordinateAxis::Lat)->getName();
         if (latitude == "" || longitude == "") throw CDMException("could not find lat/long variables");
         const vector<string> dims = cdm_->getVariable(latitude).getShape();
-        boost::shared_array<double> latVals = p_->dataReader->getScaledData(latitude)->asDouble();
-        size_t latSize = p_->dataReader->getData(latitude)->size();
-        boost::shared_array<double> lonVals = p_->dataReader->getScaledData(longitude)->asDouble();
+        DataPtr lonData = p_->dataReader->getScaledData(longitude);
+        DataPtr latData = p_->dataReader->getScaledData(latitude);
+        boost::shared_array<double> latVals = latData->asDouble();
+        boost::shared_array<double> lonVals = lonData->asDouble();
+        size_t latSize = latData->size();
+        size_t lonSize = lonData->size();
+        if (latSize != lonSize) {
+            // latData/lonData are not 2d-coordinate-variable, but 1d axes
+            // making latVals/lonVals 2d with size latSize*lonSize
+            boost::shared_array<double>lxVals(new double[latSize*lonSize]);
+            boost::shared_array<double>lyVals(new double[latSize*lonSize]);
+            for (size_t i=0; i < lonSize; i++) {
+                for (size_t j=0; j<latSize; j++) {
+                    lxVals[i+lonSize*j] = lonVals[i];
+                    lyVals[i+lonSize*j] = latVals[j];
+                }
+            }
+            lonVals = lxVals;
+            latVals = lyVals;
+            latSize *= lonSize;
+        }
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         transform(&lonVals[0], &lonVals[0]+latSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         if (getProjectionName(proj_input) != "latlong") {
