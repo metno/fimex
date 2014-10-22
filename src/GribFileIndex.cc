@@ -922,7 +922,7 @@ size_t GribFileMessage::readData(std::vector<double>& data, double missingValue)
     return size;
 }
 
-size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double missingValue) const
+size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader) const
 {
     if (!isValid()) return 0;
     string url = getFileURL();
@@ -932,15 +932,20 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     if (fh.get() == 0) {
         throw runtime_error("cannot open file: " + getFileURL());
     }
-    fseek(fh.get(), getFilePosition(), SEEK_SET);
-
+    if (!asimofHeader) {
+        fseek(fh.get(), getFilePosition(), SEEK_SET);
+    } else {
+        fseek(fh.get(), 0, SEEK_SET);
+    }
     // enable multi-messages
     grib_multi_support_on(0);
 
     int err = 0;
-    for (size_t i = 0; i < getMessageNumber(); i++) {
-        // forward to correct multimessage
-        boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+    if (!asimofHeader) {
+        for (size_t i = 0; i < getMessageNumber(); i++) {
+            // forward to correct multimessage
+            boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
+        }
     }
     // read the message of interest
     boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
@@ -964,6 +969,7 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     }
     return size;
 }
+
 
 
 

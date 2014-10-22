@@ -201,7 +201,7 @@ void GribCDMReader::initXMLNodeIdx() {
     XPathObjPtr xpathObj = p_->doc->getXPathObject(xpathString);
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
     size_t size = (nodes) ? nodes->nodeNr : 0;
-    cerr << "found " << size << " parameters " << endl;
+    //cerr << "found " << size << " parameters " << endl;
     for (size_t i = 0; i < size; ++i) {
         xmlNodePtr node = nodes->nodeTab[i];
         string grib1Id = "gr:grib1";
@@ -228,7 +228,7 @@ void GribCDMReader::initXMLNodeIdx() {
             p_->nodeIdx2[id].push_back(node2);
         }
     }
-    cerr << "nodeIdx1: " << p_->nodeIdx1.size() << endl;
+    //cerr << "nodeIdx1: " << p_->nodeIdx1.size() << endl;
 }
 
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
@@ -427,15 +427,15 @@ void GribCDMReader::initLevels()
 }
 
 
-vector<double> GribCDMReader::readVarPv_(string exampleVar)
+vector<double> GribCDMReader::readVarPv_(string exampleVar, bool asimofHeader)
 {
     vector<double> pv;
     // example gribFileMessage
     size_t gfiPos = p_->varTimeLevelEnsembleGFIBox[exampleVar].begin()->second.begin()->second.begin()->second;
-    //
-    size_t count = p_->indices.at(gfiPos).readLevelData(pv, MIFI_FILL_DOUBLE);
+    // Read asimof header if true
+    size_t count = p_->indices.at(gfiPos).readLevelData(pv, MIFI_FILL_DOUBLE, asimofHeader);
     if (count <= 0) {
-        LOG4FIMEX(logger, Logger::INFO, "could not find extra level data (PV)");
+        LOG4FIMEX(logger, Logger::WARN, "could not find extra level data (PV)");
     }
     return pv;
 }
@@ -474,16 +474,47 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                     }
                 }
             } else if (mode == "extraHalvLevel1" || mode == "extraHalvLevel2") {
-                vector<double> pv = readVarPv_(exampleVar);
-                size_t offset = (mode == "extraHalvLevel1") ? 0 : pv.size()/2;
+                bool asimofHeader = false;
+                vector<double> pv = readVarPv_(exampleVar,asimofHeader);
                 boost::shared_array<unsigned int> lv = levelData->asUInt();
+                if (pv.size()/2 < levelData->size()) {
+                    // reread pv, try asimof header
+                    asimofHeader=true;
+                    pv = readVarPv_(exampleVar, asimofHeader);
+                    // TODO: Check and read all messages if pv.size()/2 != levelData->size()
+                    //if (pv.size()/2 != levelData->size())
+                    //{
+                    //}
+                }
+                // NOTE: In the asimof header, the values are a1,b1,a2,b2...an,bn
+                size_t offset;
+                if (!asimofHeader) {
+                    offset = (mode == "extraHalvLevel1") ? 0 : pv.size()/2;
+                } else {
+                    offset = (mode == "extraHalvLevel1") ? 0 : 1;
+                }
                 for (size_t i = 0; i < levelData->size(); i++) {
-                    size_t pos = offset + lv[i];
+                    size_t pos;
+                    if (!asimofHeader) {
+                        pos = offset + lv[i] - 1;
+                    } else {
+                        pos = offset + 2*i;
+                    }
+                    //cerr  << "pos: " << pos << " lv[i]: " << lv[i] << ",i: " << i << endl;
                     if (pos < pv.size()) {
-                        double value = (pos == 0) ? pv.at(0) : (pv[pos] + pv[pos-1])/2;
+                        double value;
+                        if (!asimofHeader) {
+                            value = (pos == 0) ? pv.at(0) : (pv[pos] + pv[pos-1])/2;
+                        } else {
+                            if ((pos == 0)||(pos == 1)) {
+                                value = pv[pos];
+                            } else {
+                                value = (pv[pos] + pv[pos-2])/2;
+                            }
+                        }
                         retValues.push_back(value);
                     } else {
-                        throw CDMException("levelData (pv) of " + exampleVar + " has not enough elements, need " + type2string(pos+1));
+                        throw CDMException("levelData (pv) of " + exampleVar + " has not enough elements, need " + type2string(levelData->size()));
                     }
                 }
             } else if (mode == "hybridSigmaCalc(ap,b,p0)") {

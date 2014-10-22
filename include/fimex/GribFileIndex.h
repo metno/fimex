@@ -112,7 +112,7 @@ public:
      * @param missingValue the missing- / fill-value the returned data will have
      * @return the actual amount of data read
      */
-    size_t readLevelData(std::vector<double>& levelData, double missingValue) const;
+    size_t readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader=false) const;
 private:
     std::string fileURL_;
     size_t filePos_;

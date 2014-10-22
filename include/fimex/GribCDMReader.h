@@ -106,7 +106,7 @@ private:
     void initAddVariables();
 
     // read levels (pv) from a variable
-    std::vector<double> readVarPv_(std::string exampleVar);
+    std::vector<double> readVarPv_(std::string exampleVar, bool asimofHeader=false);
     std::vector<double> readValuesFromXPath_(xmlNodePtr node, DataPtr levelData, std::string exampleVar, std::string extension);
     void initSpecialLevels_(xmlNodePtr node, const std::string& extension, const std::string& levelType, std::size_t levelPos, const std::vector<std::string>& levelShape, DataPtr& levelData);
 };
