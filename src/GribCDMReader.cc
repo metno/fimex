@@ -658,19 +658,23 @@ void GribCDMReader::initAddTimeDimension()
     cdm_->getVariable(timeVar.getName()).setData(timeData);
 
     // TODO check if reference time changes, assuming they are all alike
-    boost::posix_time::ptime refTime = p_->indices.begin()->getReferenceTime();
-    // TODO: move reference time name to config
-    string referenceTime = "forecast_reference_time";
-    vector<string> nullShape;
-    CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
-    DataPtr refTimeData = createData(timeDataType, 1);
-    // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
-    refTimeData->setValue(0, posixTime2epochTime(refTime));
-    refTimeVar.setData(refTimeData);
-    cdm_->addVariable(refTimeVar);
-    cdm_->addAttribute(referenceTime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
-    cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "forecast_reference_time"));
-
+    boost::posix_time::ptime refTime(boost::posix_time::not_a_date_time);
+    for (size_t i = 0; (refTime == boost::posix_time::not_a_date_time) && (i < p_->indices.size()); ++i) {
+        refTime = p_->indices.at(i).getReferenceTime();
+    }
+    if (refTime != boost::posix_time::not_a_date_time) {
+        // TODO: move reference time name to config
+        string referenceTime = "forecast_reference_time";
+        vector<string> nullShape;
+        CDMVariable refTimeVar(referenceTime, timeDataType, nullShape);
+        DataPtr refTimeData = createData(timeDataType, 1);
+        // TODO: this forces times to be seconds since 1970-01-01, maybe I should interpret the config-file unit first
+        refTimeData->setValue(0, posixTime2epochTime(refTime));
+        refTimeVar.setData(refTimeData);
+        cdm_->addVariable(refTimeVar);
+        cdm_->addAttribute(referenceTime, CDMAttribute("units", "seconds since 1970-01-01 00:00:00 +00:00"));
+        cdm_->addAttribute(referenceTime, CDMAttribute("standard_name", "forecast_reference_time"));
+    }
 
 }
 
