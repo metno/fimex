@@ -662,15 +662,20 @@ boost::posix_time::ptime GribFileMessage::getReferenceTime() const
     long hour = dataTime_ / 100;
     long minutes = dataTime_ % 100;
 
-    boost::gregorian::date date(year, month, day);
-    boost::posix_time::time_duration clock(hour, minutes, 0);
-    boost::posix_time::ptime reference = boost::posix_time::ptime(date, clock);
-
-    return reference;
+    try {
+        boost::gregorian::date date(year, month, day);
+        boost::posix_time::time_duration clock(hour, minutes, 0);
+        boost::posix_time::ptime reference(date, clock);
+        return reference;
+    } catch (exception& ex) {
+        LOG4FIMEX(logger, Logger::INFO, "invalid reference time: " << dataDate_ << " " << dataTime_ << " mapping to date-free field");
+    }
+    return boost::posix_time::not_a_date_time;
 }
 boost::posix_time::ptime GribFileMessage::getValidTime() const
 {
     boost::posix_time::ptime reference = getReferenceTime();
+    if (reference == boost::posix_time::not_a_date_time) return boost::posix_time::not_a_date_time;
     boost::posix_time::time_duration timeOffset(0,0,0);
     long days(0);
     long months(0);

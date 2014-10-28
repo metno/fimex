@@ -41,6 +41,7 @@
 #include "fimex/ReplaceStringTemplateObject.h"
 #include "fimex/coordSys/Projection.h"
 #include <set>
+#include <limits>
 #include <map>
 #include <algorithm>
 #include <stdexcept>
@@ -609,7 +610,10 @@ void GribCDMReader::initAddTimeDimension()
     {
         set<boost::posix_time::ptime> timesSet;
         for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
-            timesSet.insert(gfmIt->getValidTime());
+            boost::posix_time::ptime vt(gfmIt->getValidTime());
+            if (vt != boost::posix_time::not_a_date_time) {
+                timesSet.insert(gfmIt->getValidTime());
+            }
         }
         p_->times = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
     }
@@ -711,9 +715,13 @@ void GribCDMReader::initCreateGFIBoxes()
     int pos = 0;
     for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt, ++pos) {
         string varName = getVariableName(*gfmIt);
-        vector<boost::posix_time::ptime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), gfmIt->getValidTime());
-        assert(pTimesIt != p_->times.end());
-        size_t unlimDimPos = distance(p_->times.begin(), pTimesIt);
+        boost::posix_time::ptime valTime(gfmIt->getValidTime());
+        size_t unlimDimPos = std::numeric_limits<std::size_t>::max();
+        if (valTime != boost::posix_time::not_a_date_time) {
+            vector<boost::posix_time::ptime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), valTime);
+            assert(pTimesIt != p_->times.end());
+            unlimDimPos = distance(p_->times.begin(), pTimesIt);
+        }
 
         bool hasEnsemble;
         if (gfmIt->getTotalNumberOfEnsembles() > 1) {
@@ -1031,7 +1039,9 @@ void GribCDMReader::initAddVariables()
 
              string levelDimName = p_->levelDimNames[levelTypePos.first].at(levelTypePos.second);
              shape.push_back(levelDimName);
-             shape.push_back(p_->timeDimName);
+             if (gfmIt->getReferenceTime() != boost::posix_time::not_a_date_time) {
+                 shape.push_back(p_->timeDimName);
+             }
 
              CDMVariable var(varName, type, shape);
              if (vectorCounterpart != "") {
@@ -1072,12 +1082,15 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
     // only time can be unLimDim for grib
-    if (unLimDimPos >= getData(p_->timeDimName)->size()) {
-        throw CDMException("requested time outside data-region");
+    if (cdm_->hasUnlimitedDim(variable)) {
+        if (unLimDimPos >= getData(p_->timeDimName)->size()) {
+            throw CDMException("requested time outside data-region");
+        }
+    } else {
+        unLimDimPos = std::numeric_limits<size_t>::max(); // undefined
     }
 
     //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
-
     map<string, map<size_t, map<long, map<size_t, size_t> > > >::const_iterator gmIt = p_->varTimeLevelEnsembleGFIBox.find(varName);
     if (gmIt == p_->varTimeLevelEnsembleGFIBox.end()) {
         throw CDMException("no grib message found for variable '" + varName + "'");
