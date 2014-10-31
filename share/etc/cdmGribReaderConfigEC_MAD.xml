@@ -25,7 +25,7 @@
         <time id="time" name="time" type="double">
             <attribute name="long_name" value="Uninitialized analysis / image product / forecast product valid for RT + P1" type="string"/>
             <attribute name="standard_name" value="time" type="string"/>
-            <attribute name="units" value="Hour since 2014-03-05T00:00:00Z" type="string"/>
+            <attribute name="units" value="seconds since 2014-03-05 00:00:00 +0000" type="string"/>
         </time>
         <spatial_axis typeOfGrid="lambert" id="x" name="x" type="float">
             <attribute name="long_name" value="x-coordinate in Cartesian system" type="string"/>
@@ -352,13 +352,13 @@
           <attribute name="standard_name" value="" type="string"/>
           <attribute name="units" value="K" type="string"/>
       </parameter>
-      <!-- cloud cover -->
-      <parameter name="cloudcover" type="float">
+      <!-- fog -->
+      <parameter name="fog_area_fraction" type="float">
           <grib1  indicatorOfParameter="248" gribTablesVersionNo="128"
               identificationOfOriginatingGeneratingCentre="98"
               typeOfLevel="109" levelNo="91"/>
           <attribute name="long_name" value="cloud cover" type="string"/>
-          <attribute name="standard_name" value="cloud_area_fraction" type="string"/>
+          <attribute name="standard_name" value="fog_area_fraction" type="string"/>
           <attribute name="units" value="1" type="string"/>
       </parameter>
       <!-- cape -->
@@ -1076,5 +1076,111 @@
         <attribute name="units" value="" type="string" />
      </parameter>
      -->
-  </variables>
+    <!-- WAVE -->
+    <!-- mp2 -->
+    <parameter name="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="float">
+      <grib1 indicatorOfParameter="221" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="standard_name" value="sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="string"/>
+      <attribute name="units" value="s" type="string"/>
+    </parameter>
+
+    <!-- p2ps -->
+    <parameter name="sea_surface_swell_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="float">
+      <grib1 indicatorOfParameter="227" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="standard_name" value="sea_surface_swell_wave_mean_period_from_variance_spectral_density_second_frequency_moment" type="string"/>
+      <attribute name="units" value="s" type="string"/>
+    </parameter>
+
+    <!-- swh -->
+    <parameter name="sea_surface_wave_significant_height" type="float">
+      <grib1 indicatorOfParameter="229" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="units" value="m" type="string"/>
+      <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string"/>
+    </parameter>
+
+    <!-- pp1d -->
+    <parameter name="sea_surface_wave_period_at_variance_spectral_density_maximum" type="float">
+      <grib1 indicatorOfParameter="231" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="standard_name" value="sea_surface_wave_period_at_variance_spectral_density_maximum" type="string"/>
+      <attribute name="units" value="s" type="string"/>
+    </parameter>
+
+    <!-- shts -->
+    <parameter name="sea_surface_swell_wave_significant_height" type="float">
+      <grib1 indicatorOfParameter="237" gribTablesVersionNo="140"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string"/>
+      <attribute name="units" value="m" type="string"/>
+    </parameter>
+
+    <!-- mdts -->
+    <parameter name="sea_surface_swell_wave_from_direction" type="float">
+      <grib1 indicatorOfParameter="238" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float"/>
+      <attribute name="standard_name" value="sea_surface_swell_wave_from_direction" type="string"/>
+      <attribute name="units" value="degree" type="string"/>
+    </parameter>
+
+    <!-- mwp -->
+    <parameter name="mean_wave_period" type="float" >
+      <grib1 indicatorOfParameter="232" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment" type="string"/>
+      <attribute name="units" value="s" type="string" />
+    </parameter>
+
+    <!-- mwd -->
+    <parameter name="mean_wave_direction" type="float" >
+      <grib1 indicatorOfParameter="230" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_wave_to_direction" type="string" />
+      <attribute name="units" value="degree" type="string" />
+    </parameter>
+
+    <!-- shww -->
+    <parameter name="significant_wind_wave_height" type="float" >
+      <grib1 indicatorOfParameter="234" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <grib1 indicatorOfParameter="102" gribTablesVersionNo="3" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_wind_wave_significant_height" type="string" />
+      <attribute name="units" value="m" type="string" />
+    </parameter>
+
+    <!-- mdww -->
+    <parameter name="sea_surface_wind_wave_to_direction" type="float" >
+      <grib1 indicatorOfParameter="101" gribTablesVersionNo="3" identificationOfOriginatingGeneratingCentre="98"/>
+      <grib1 indicatorOfParameter="235" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_wind_wave_to_direction" type="string" />
+      <attribute name="units" value="degree" type="string" />
+    </parameter>
+
+    <!-- mpts -->
+    <parameter name="sea_surface_swell_wave_period" type="float" >
+      <grib1 indicatorOfParameter="239" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_swell_wave_period" type="string" />
+      <attribute name="units" value="s" type="string" />
+    </parameter>
+
+    <!-- ust -->
+    <parameter name="x_stokes_drift" type="float" >
+      <grib1 indicatorOfParameter="215" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_wave_stokes_drift_x_velocity " type="string" />
+      <attribute name="units" value="m s-1" type="string" />
+    </parameter>
+    <!-- vst -->
+    <parameter name="y_stokes_drift" type="float" >
+      <grib1 indicatorOfParameter="216" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+      <attribute name="cell_methods" value="time: point" type="string" />
+      <attribute name="standard_name" value="sea_surface_wave_stokes_drift_y_velocity " type="string" />
+      <attribute name="units" value="m s-1" type="string" />
+    </parameter>
+
+</variables>
 </cdmGribReaderConfig>

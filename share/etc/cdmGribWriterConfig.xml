@@ -103,6 +103,9 @@
 <parameter name="significant_wave_period">
     <grib1 parameterNumber="232" codeTable="128" units="s"/>
 </parameter>
+<parameter standard_name="sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment">
+    <grib1 parameterNumber="232" codeTable="128" units="s"/>
+</parameter>
 <parameter standard_name="sea_surface_wave_significant_height">
     <grib1 parameterNumber="100" codeTable="128" units="m"/>
 </parameter>

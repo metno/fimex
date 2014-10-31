@@ -2,71 +2,72 @@
 <!DOCTYPE variables SYSTEM "felt_variables.dtd">
 <variables>
 <parameter id="4200,3,0" name="significant_wave_height" type="float">
-	<attribute name="_FillValue" value="-32767" type="float" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wave_significant_height" type="string" />
-	<attribute name="standard_name" value="sea_surface_wave_significant_height" type="string" />
-	<attribute name="units" value="m" type="string" />
+    <attribute name="_FillValue" value="-32767" type="float" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wave_significant_height" type="string" />
+    <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string" />
+    <attribute name="units" value="m" type="string" />
 </parameter>
 <parameter id="4201,3,0" name="peak_wave_period">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wave_peak_period" type="string" />
-	<attribute name="units" value="s" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wave_peak_period" type="string" />
+    <attribute name="units" value="s" type="string" />
 </parameter>
-<parameter id="4202,3,0" name="significant_wave_period">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wave_significant_period" type="string" />
-	<attribute name="units" value="s" type="string" />
+<parameter id="4202,3,0" name="mean_wave_period">
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wave_significant_period" type="string" />
+    <attribute name="standard_name" value="sea_surface_wave_mean_period_from_variance_spectral_density_first_frequency_moment" type="string"/>
+    <attribute name="units" value="s" type="string" />
 </parameter>
 <parameter id="4204,3,0" name="wave_direction">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wave_to_direction" type="string" />
-	<attribute name="standard_name" value="sea_surface_wave_to_direction" type="string" />
-	<attribute name="units" value="degree" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wave_to_direction" type="string" />
+    <attribute name="standard_name" value="sea_surface_wave_to_direction" type="string" />
+    <attribute name="units" value="degree" type="string" />
 </parameter>
 <parameter id="4210,3,0" name="significant_wind_wave_height" type="float">
-	<attribute name="_FillValue" value="-32767"  type="float" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wind_wave_significant_height" type="string" />
-	<attribute name="standard_name" value="sea_surface_wind_wave_significant_height" type="string" />
-	<attribute name="units" value="m" type="string" />
+    <attribute name="_FillValue" value="-32767"  type="float" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wind_wave_significant_height" type="string" />
+    <attribute name="standard_name" value="sea_surface_wind_wave_significant_height" type="string" />
+    <attribute name="units" value="m" type="string" />
 </parameter>
 <parameter id="4213,3,0" name="sea_surface_wind_wave_period">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wind_wave_period" type="string" />
-	<attribute name="standard_name" value="sea_surface_wind_wave_period" type="string" />
-	<attribute name="units" value="s" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wind_wave_period" type="string" />
+    <attribute name="standard_name" value="sea_surface_wind_wave_period" type="string" />
+    <attribute name="units" value="s" type="string" />
 </parameter>
 <parameter id="4214,3,0" name="sea_surface_wind_wave_to_direction">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_wind_wave_to_direction" type="string" />
-	<attribute name="standard_name" value="sea_surface_wind_wave_to_direction" type="string" />
-	<attribute name="units" value="degree" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_wind_wave_to_direction" type="string" />
+    <attribute name="standard_name" value="sea_surface_wind_wave_to_direction" type="string" />
+    <attribute name="units" value="degree" type="string" />
 </parameter>
 <parameter id="4220,3,0" name="significant_swell_wave_height" type="float">
-	<attribute name="_FillValue" value="-32767" type="float" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_swell_wave_significant_height" type="string" />
-	<attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string" />
-	<attribute name="units" value="m" type="string" />
+    <attribute name="_FillValue" value="-32767" type="float" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_swell_wave_significant_height" type="string" />
+    <attribute name="standard_name" value="sea_surface_swell_wave_significant_height" type="string" />
+    <attribute name="units" value="m" type="string" />
 </parameter>
 <parameter id="4223,3,0" name="sea_surface_swell_wave_period">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_swell_wave_period" type="string" />
-	<attribute name="standard_name" value="sea_surface_swell_wave_period" type="string" />
-	<attribute name="units" value="s" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_swell_wave_period" type="string" />
+    <attribute name="standard_name" value="sea_surface_swell_wave_period" type="string" />
+    <attribute name="units" value="s" type="string" />
 </parameter>
 <parameter id="4224,3,0" name="sea_surface_swell_wave_to_direction">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="sea_surface_swell_wave_to_direction" type="string" />
-	<attribute name="standard_name" value="sea_surface_swell_wave_to_direction" type="string" />
-	<attribute name="units" value="degree" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="sea_surface_swell_wave_to_direction" type="string" />
+    <attribute name="standard_name" value="sea_surface_swell_wave_to_direction" type="string" />
+    <attribute name="units" value="degree" type="string" />
 </parameter>
 </variables>
