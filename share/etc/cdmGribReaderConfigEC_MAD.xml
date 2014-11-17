@@ -395,14 +395,14 @@
     </parameter>
     -->
     <!-- Geopotential (129) -->
-    <parameter name="geopotential" type="float">
+    <parameter name="geopotential_pl" type="float">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="100"/>
         <grib2 discipline="0" parameterCategory="3" parameterNumber="4" typeOfLevel="105"/>
         <attribute name="long_name" value="Geopotential pressure levels" type="string"/>
         <attribute name="standard_name" value="geopotential" type="string"/>
         <attribute name="units" value="m^2/s^2" type="string"/>
     </parameter>
-    <!--<parameter name="geopotential_ml" type="float">
+    <parameter name="geopotential_ml" type="float">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="109"/>
         <attribute name="long_name" value="Geopotential model levels" type="string" />
         <attribute name="standard_name" value="geopotential" type="string" />
@@ -721,14 +721,13 @@
         <attribute name="standard_name" value="cloud_area_fraction" type="string"/>
         <attribute name="units" value="1" type="string"/>
     </parameter>
-    <!-- <parameter name="fog_area_fraction" type="float">
+    <parameter name="fog_area_fraction" type="float">
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="253" identificationOfOriginatingGeneratingCentre="233" typeOfLevel="109" levelNo="65"/>
-        <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+        <grib2 discipline="0" parameterCategory="6" parameterNumber="32" typeOfLevel="105" />
         <attribute name="long_name" value="Fog" type="string" />
-        <attribute name="metno_name" value="fog_area_fraction" type="string" />
+        <attribute name="standard_name" value="fog_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-    -->
     <!-- Low heigth cloud cover  (73) -->
     <parameter name="low_type_cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="186" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>

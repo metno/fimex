@@ -248,9 +248,12 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
                     // reverse data back for possible later usage
                     reverse(&vArray[0], &vArray[0] + vData->size());
                 }
-
-                LOG4FIMEX(logger, Logger::DEBUG, "reducing axes-dimension "<< shape[0] << " from: " << startPos << " size: " << size);
-                reduceDimension(shape[0], startPos, size);
+                if (dimChanges.find(shape[0]) == dimChanges.end()) {
+                    LOG4FIMEX(logger, Logger::DEBUG, "reducing axes-dimension "<< shape[0] << " from: " << startPos << " size: " << size);
+                    reduceDimension(shape[0], startPos, size);
+                } else {
+                    LOG4FIMEX(logger, Logger::DEBUG, "not reducing axes-dimension "<< shape[0] << ": already done earlier");
+                }
 
             }
         }
