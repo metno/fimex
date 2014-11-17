@@ -446,9 +446,9 @@
         <attribute name="units" value="K" type="string" />
     </parameter>
     -->
-    <parameter name="air_temperature_0m" type="float">
+    <parameter name="air_temperature_2m" type="float">
         <grib1 indicatorOfParameter="167" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
-        <attribute name="long_name" value="Surface temperature (T0M)" type="string"/>
+        <attribute name="long_name" value="Screen level temperature (T2M)" type="string"/>
         <attribute name="standard_name" value="air_temperature" type="string"/>
         <attribute name="units" value="K" type="string"/>
     </parameter>
@@ -663,7 +663,7 @@
         <grib1 indicatorOfParameter="228" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
         <attribute name="long_name" value="Accumulated total precipitation" type="string"/>
         <attribute name="standard_name" value="precipitation_amount" type="string"/>
-        <attribute name="units" value="kg/m^2" type="string"/>
+        <attribute name="units" value="Mg/m^2" type="string"/>
     </parameter>
     <!-- Frontal precipitation  () -->
     <parameter name="lwe_thickness_of_stratiform_precipitation_amount" type="float">
