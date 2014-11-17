@@ -132,10 +132,10 @@
             <attribute name="positive" value="up" type="string"/>
             <attribute name="units" value="m" type="string"/>
         </vertical_axis>
-        <vertical_axis id="isobaric" name="pressure" grib2_id="100" grib1_id="100" type="float">
+        <vertical_axis id="pressure" name="pressure" grib2_id="100" grib1_id="100" type="float">
             <!-- Isobaric level -->
             <attribute name="description" value="pressure" type="string"/>
-            <attribute name="long_name" value="Isobaric surface" type="string"/>
+            <attribute name="long_name" value="pressure" type="string"/>
             <attribute name="standard_name" value="air_pressure" type="string"/>
             <attribute name="positive" value="down" type="string"/>
             <grib1>
@@ -145,7 +145,7 @@
                 <attribute name="units" value="Pa" type="string"/>
             </grib2>
         </vertical_axis>
-        <vertical_axis id="height_above_msl" name="height_above_msl" grib2_id="102" grib1_id="103" type="float">
+<vertical_axis id="altitude" name="altitude" grib2_id="102" grib1_id="103" type="float">
             <attribute name="description" value="height above MSL" type="string"/>
             <attribute name="long_name" value="height" type="string"/>
             <attribute name="positive" value="up" type="string"/>
@@ -323,15 +323,14 @@
   </axes>
   <variables>
       <!-- Precipitable water -->
-      <parameter name="precipwater" type="float">
-          <grib1  indicatorOfParameter="137" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1" levelNo="0"/>
-          <attribute name="long_name" value="Total column water vapor" type="string"/>
-          <attribute name="standard_name"
-              value="atmosphere_mass_content_of_water_vapor" type="string"/>
-          <attribute name="units" value="kg m-2" type="string"/>
+      <parameter name="atmosphere_mass_content_of_water_vapor" type="float">
+        <grib1 indicatorOfParameter="137" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="long_name" value="Total column water vapour" type="string"/>
+        <attribute name="standard_name" value="atmosphere_mass_content_of_water_vapor" type="string"/>
+        <attribute name="units" value="kg/m^2" type="string"/>
       </parameter>
       <!-- Ozone -->
-      <parameter name="ozone" type="float">
+      <parameter name="atmosphere_mass_content_of_ozone" type="float">
           <grib1  indicatorOfParameter="206" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1" levelNo="0"/>
           <attribute name="long_name" value="Total column ozone" type="string"/>
           <attribute name="standard_name"
@@ -339,18 +338,17 @@
           <attribute name="units" value="kg m-2" type="string"/>
       </parameter>
       <!-- 2m dew point temperature -->
-      <parameter name="dewpointtemp" type="float">
-          <grib1  indicatorOfParameter="168" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1" levelNo="0"/>
-          <attribute name="long_name" value="2m dew point temperature" type="string"/>
-          <attribute name="standard_name" value="dew_point_temperature" type="string"/>
-          <attribute name="units" value="K" type="string"/>
+      <parameter name="dew_point_temperature_2m" type="float">
+        <grib1 indicatorOfParameter="168" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="standard_name" value="dew_point_temperature" type="string"/>
+        <attribute name="units" value="K" type="string"/>
       </parameter>
       <!-- skin temperature -->
-      <parameter name="dewpointtemp" type="float">
-          <grib1  indicatorOfParameter="235" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1" levelNo="0"/>
-          <attribute name="long_name" value="skin temperature" type="string"/>
-          <attribute name="standard_name" value="" type="string"/>
-          <attribute name="units" value="K" type="string"/>
+      <parameter name="surface_temperature" type="float">
+        <grib1 indicatorOfParameter="235" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="long_name" value="Surface (skin) temperature (SKT)" type="string"/>
+        <attribute name="standard_name" value="surface_temperature" type="string"/>
+        <attribute name="units" value="K" type="string"/>
       </parameter>
       <!-- fog -->
       <parameter name="fog_area_fraction" type="float">
@@ -362,11 +360,11 @@
           <attribute name="units" value="1" type="string"/>
       </parameter>
       <!-- cape -->
-      <parameter name="cape" type="float">
-          <grib1  indicatorOfParameter="59" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1" levelNo="0"/>
-          <attribute name="long_name" value="Convective available potential Energy" type="string"/>
-          <attribute name="standard_name" value="" type="string"/>
-          <attribute name="units" value="J kg-1" type="string"/>
+      <parameter name="specific_convective_available_potential_energy" type="float">
+        <grib1 indicatorOfParameter="59" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
+        <attribute name="long_name" value="Convective Available Potential Energy (CAPE)" type="string"/>
+        <attribute name="standard_name" value="specific_convective_available_potential_energy" type="string"/>
+        <attribute name="units" value="J/kg" type="string"/>
       </parameter>
 
       <!-- Pressure () -->
