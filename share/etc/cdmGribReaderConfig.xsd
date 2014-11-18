@@ -80,11 +80,11 @@
   <xs:element name="vertical_axis">
     <xs:complexType>
       <xs:sequence>
-        <xs:element maxOccurs="unbounded" ref="c:attribute"/>
+        <xs:element ref="c:attribute" maxOccurs="unbounded" />
         <xs:choice minOccurs="0">
           <xs:sequence>
-            <xs:element ref="c:values"/>
-            <xs:element maxOccurs="unbounded" ref="c:additional_axis_variable"/>
+            <xs:element ref="c:values" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="c:additional_axis_variable" maxOccurs="unbounded" />
           </xs:sequence>
           <xs:sequence>
             <xs:element name="grib1" type="c:gribAttr" minOccurs="0" maxOccurs="1"/>
@@ -103,7 +103,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="c:attribute"/>
-        <xs:element ref="c:values"/>
+        <xs:element ref="c:values" minOccurs="0"/>
       </xs:sequence>
       <xs:attribute name="axis" use="required" type="xs:string"/>
       <xs:attribute name="name" use="required" type="xs:string"/>
