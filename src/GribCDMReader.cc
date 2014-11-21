@@ -917,11 +917,13 @@ void GribCDMReader::initAddProjection()
             CDMVariable xVar(pi.xDim, xDataType, xDimShape);
             vector<double> xData;
             xData.reserve(gridDef.getXSize());
-            for (size_t i=0; i < gridDef.getXSize(); i++) {
-                xData.push_back(gridDef.getXStart() + i*gridDef.getXIncrement());
-            }
+            double xStart = gridDef.getXStart();
             if (gridDef.isDegree()) {
-                transform(xData.begin(), xData.end(), xData.begin(), &normalizeLongitude180<double>);
+                // normalize only start, coordinate-axes should be monotonous: http://www.unidata.ucar.edu/netcdf/docs/netcdf.html#Variables
+                xStart = normalizeLongitude180(gridDef.getXStart());
+            }
+            for (size_t i=0; i < gridDef.getXSize(); i++) {
+                xData.push_back(xStart + i*gridDef.getXIncrement());
             }
             xVar.setData(createData(xDataType, xData.begin(), xData.end()));
             cdm_->addDimension(xDim);
