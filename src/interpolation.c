@@ -29,7 +29,9 @@
 #include <omp.h>
 #endif
 
-static int ascendingDoubleComparator(const void * a, const void * b)
+#include "fimex/CDMconstants.h"
+
+static inline int ascendingDoubleComparator(const void * a, const void * b)
 {
     double x = *(double*)a;
     double y = *(double*)b;
@@ -39,7 +41,7 @@ static int ascendingDoubleComparator(const void * a, const void * b)
     else return -1;
 }
 
-static int descendingDoubleComparator(const void * a, const void * b)
+static inline int descendingDoubleComparator(const void * a, const void * b)
 {
     return -1 * ascendingDoubleComparator(a,b);
 }
@@ -220,7 +222,19 @@ int mifi_interpolate_f(const int method,
     return mifi_interpolate_f_functional(func, proj_input, infield, in_x_axis, in_y_axis, in_x_axis_type, in_y_axis_type, ix, iy, iz, proj_output, outfield, out_x_axis, out_y_axis, out_x_axis_type, out_y_axis_type, ox, oy);
 }
 
-static double mifi_bearing(double lat0, double lon0, double lat1, double lon1)
+/*
+ * great-circle angle: http://en.wikipedia.org/wiki/Great-circle_distance
+ * multiply by R to get distance
+ * param phi1, phi2 input longitude in radian
+ * param lambda1, lambda2 input latitudes in radian
+ */
+static inline double mifi_great_circle_angle(double lat0, double lon0, double lat1, double lon1)
+{
+    return acos(sin(lat0)*sin(lat1) + cos(lat0)*cos(lat1)*cos(lon1-lon0));
+}
+
+
+static inline double mifi_bearing(double lat0, double lon0, double lat1, double lon1)
 {
     // use spherical distances
     // (lon1y, lat1y)
@@ -1393,6 +1407,240 @@ int mifi_creepfillval2d_f(size_t nx, size_t ny, float* field, float defaultVal, 
     }
     //fprintf(stderr, "defaultVal: %f, changed: %d\n", defaultVal, *nChanged);
     return mifi_creepfillval2dImpl_f(nx, ny, field, defaultVal, repeat, setWeight, *nChanged);
+}
+
+int mifi_griddistance(size_t nx, size_t ny, const double* lonVals, const double* latVals, float* gridDistX, float* gridDistY)
+{
+    size_t fieldSize = nx*ny;
+    if (fieldSize == 1) {
+        gridDistX[0] = 0;
+        gridDistY[0] = 0;
+        return MIFI_ERROR; // no grid
+    } else if (nx == 1 || ny == 1) {
+        // 1-dimensional 'grid'
+        for (size_t p = 0; p < (fieldSize - 1); p++) {
+            gridDistX[p] = MIFI_EARTH_RADIUS_M
+                    * mifi_great_circle_angle(DEG_TO_RAD * latVals[p],
+                            DEG_TO_RAD * lonVals[p],
+                            DEG_TO_RAD * latVals[p+1],
+                            DEG_TO_RAD * lonVals[p+1]);
+            gridDistY[p] = gridDistX[p];
+        }
+        gridDistX[(fieldSize - 1)] = gridDistX[(fieldSize - 2)];
+        gridDistY[(fieldSize - 1)] = gridDistY[(fieldSize - 2)];
+    } else {
+        for (size_t j = 0; j < (ny - 1); j++) {
+            for (size_t i = 0; i < (nx - 1); i++) {
+                size_t p = i + nx * j;
+                size_t right = p + 1;
+                size_t down = p + nx;
+                double lat0 = latVals[p];
+                double lat1 = latVals[right];
+                double latY = latVals[down];
+                // avoid singularities at pole
+
+                gridDistX[p] = MIFI_EARTH_RADIUS_M
+                        * mifi_great_circle_angle(DEG_TO_RAD * lat0,
+                                DEG_TO_RAD * lonVals[p],
+                                DEG_TO_RAD * lat1,
+                                DEG_TO_RAD * lonVals[right]);
+                gridDistY[p] = MIFI_EARTH_RADIUS_M
+                        * mifi_great_circle_angle(DEG_TO_RAD * lat0,
+                                DEG_TO_RAD * lonVals[p],
+                                DEG_TO_RAD * latY,
+                                DEG_TO_RAD * lonVals[down]);
+            }
+        }
+        // last column
+        for (size_t j = 0; j < ny; j++) {
+            size_t p = j*nx + (nx-1);
+            gridDistX[p] = gridDistX[p-1];
+            gridDistY[p] = gridDistY[p-1];
+        }
+        // last row
+        for (size_t i = 0; i < nx; i++) {
+            size_t p = (ny-1)*nx + i;
+            gridDistX[p] = gridDistX[p-ny];
+            gridDistY[p] = gridDistY[p-ny];
+        }
+    }
+    return MIFI_OK;
+}
+
+size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx, double dy, const float* gridDistX, const float* gridDistY, const double* ap, const double* b,
+                          const float* zs, const float* ps, const float* u, const float* v, const float* t, float* w)
+{
+    const double R = 287.058;  // specific gas constant dry air
+    const double g = 9.80665; // gravity
+
+    double* mapRatioX = (double*) malloc(nx*ny*sizeof(double));
+    double* mapRatioY = (double*) malloc(nx*ny*sizeof(double));
+    double* rhx       = (double*) malloc(nx*ny*sizeof(double));
+    double* rhy       = (double*) malloc(nx*ny*sizeof(double));
+    double* rhxy      = (double*) malloc(nx*ny*sizeof(double));
+    double* sum       = (double*) malloc(nx*ny*sizeof(double));
+    double* uu        = (double*) malloc(nx*ny*sizeof(double));
+    double* vv        = (double*) malloc(nx*ny*sizeof(double));
+    double* dp        = (double*) malloc(nx*ny*nz*sizeof(double));
+    double* dlnp      = (double*) malloc(nx*ny*nz*sizeof(double));
+    double* alfa      = (double*) malloc(nx*ny*nz*sizeof(double));
+    double* z         = (double*) malloc(nx*ny*nz*sizeof(double));
+
+    if (mapRatioX == NULL || mapRatioY == NULL || rhx == NULL || rhy == NULL ||
+            rhxy == NULL || sum == NULL || uu == NULL || vv == NULL || dp == NULL
+            || dlnp == NULL || alfa == NULL || z == NULL) {
+        fprintf(stderr, "memory allocation error in mifi_compute_vertical_verlocity\n");
+        free(mapRatioX);
+        free(mapRatioY);
+        free(rhx);
+        free(rhy);
+        free(rhxy);
+        free(sum);
+        free(uu);
+        free(vv);
+        free(dp);
+        free(dlnp);
+        free(alfa);
+        free(z);
+        return MIFI_ERROR;
+    }
+
+    double rdx_2 = 1/(2*dx);
+    double rdy_2 = 1/(2*dy);
+
+    fprintf(stderr, "compute map-factors\n");
+    for (size_t j = 0; j < ny; j++) {
+        for (size_t i = 0; i < nx; i++) {
+            size_t ij = i+nx*j;
+            mapRatioX[ij] = gridDistX[ij] / dx; // this is hx in original code
+            mapRatioY[ij] = gridDistY[ij] / dy;
+            rhx[ij] = 1 / mapRatioX[ij];
+            rhy[ij] = 1 / mapRatioY[ij];
+            rhxy[ij] = rhx[ij] * rhy[ij];
+        }
+    }
+
+
+    fprintf(stderr, "compute half model levels");
+
+    double ah[nz+1], bh[nz+1];
+    ah[0]  = 0.0;
+    bh[0]  = 0.0;
+    ah[nz] = 0.0;
+    bh[nz] = 1.0;
+
+    for (size_t k = 0; k < nz; k++) {
+//        ah[k+1] = 2.0*ap[k]-ah[k];
+//        bh[k+1] = 2.0*b[k] - bh[k];
+    }
+    for (size_t k = nz-1; k > 0; --k) {
+//          ah[k] = 2.0*ap[k]-ah[k+1];
+//          bh[k] = 2.0*b[k] -bh[k+1];
+//
+        ah[k] = 0.5 * (ap[k]-ap[k-1]);
+        bh[k] = 0.5 * (b[k]-b[k-1]);
+    }
+
+
+    fprintf(stderr, "compute pressure variables needed only once\n");
+
+    double ln2= log(2.);
+    double da=ah[1]-ah[0];
+    double db=bh[1]-bh[0];
+
+    for (size_t j = 0; j < ny; ++j) {
+        for (size_t i = 0; i < nx; ++i) {
+            dp[j*nx + i]   = da+db*ps[i+j*nx];
+            dlnp[j*nx + i] = 0.;
+            alfa[j*nx + i] = ln2;
+        }
+    }
+    for (size_t k = 1; k < nz; k++) {
+        da = ah[k+1]- ah[k];
+        db = bh[k+1]- bh[k];
+        fprintf(stderr, "k = %d, ah = %f, bh= %f, da = %f, db = %f\n", k, ah[k], bh[k], da, db);
+        for (size_t j = 0; j < ny; ++j) {
+            for (size_t i = 0; i < nx; ++i) {
+                double pm = ah[k]   + bh[k]*ps[i+j*nx];
+                double pp = ah[k+1] + bh[k+1]*ps[i+j*nx];
+                dp[i+nx*(j+ny*k)]   = da + db*ps[i+j*nx];
+                dlnp[i+nx*(j+ny*k)] = log(pp/pm);
+                alfa[i+nx*(j+ny*k)] = 1.-pm*dlnp[i+nx*(j+ny*k)]/dp[i+nx*(j+ny*k)];
+            }
+        }
+    }
+    fprintf(stderr, "k = %d, ah = %f, bh= %f\n", nz, ah[nz], bh[nz]);
+
+    fprintf(stderr, "vertical integration of hydrostatic equation\n");
+    for (size_t j = 0; j < ny; j++) {
+        for (size_t i = 0; i < nx; i++) {
+            sum[j*nx+i] = zs[j*nx+i]*g;
+        }
+    }
+    for (size_t k = nz-1; k <= 0; k--) {
+        for (size_t j = 0; j < ny; j++) {
+            for (size_t i = 0; i < nx; i++) {
+                size_t ij = i+nx*j;
+                size_t ijk = i+nx*(j+k*ny);
+                double rt = R*t[ijk];
+                z[ijk] = sum[ij] + rt*alfa[ijk];
+                sum[ij] += rt*dlnp[ijk];
+            }
+        }
+    }
+
+    fprintf(stderr, "vertical integral of divergence, compute w\n");
+    for (size_t j = 0; j < ny; j++) {
+        for (size_t i = 0; i < nx; i++) {
+             sum[i+nx*j]=0.;
+        }
+    }
+    for (size_t k = 1; k < nz; k++) {
+        for (size_t j = 0; j < ny; j++) {
+            for (size_t i = 0; i < nx; i++) {
+                size_t ij = i+nx*j;
+                size_t ijk = i+nx*(j+ny*k);
+                uu[ij] = mapRatioY[ij] * u[ijk]*dp[ijk];
+                vv[ij] = mapRatioX[ij] * v[ijk]*dp[ijk];
+            }
+        }
+        for (size_t j = 1; j < ny-1; j++) {
+            for (size_t i = 1; i < nx-1; i++) {
+                size_t ij = i+nx*j;
+                size_t ijk = i+nx*(j+ny*k);
+                double div = rhxy[ij]*(  rdx_2 * (uu[ij+1]  - uu[ij-1])
+                                       + rdy_2 * (vv[ij+nx] - vv[ij-nx]));
+                double w1 = R*t[ijk]
+                             * (dlnp[ijk]*sum[ij] + alfa[ijk]*div)
+                             / dp[ijk];
+                double w2 =   rhx[ij] * rdx_2 * (z[ijk+i]  - z[ijk-1])
+                            + rhy[ij] * rdy_2 * (z[ijk+nx] - z[ijk-nx]);
+                w[ijk] = (w1+w2) / g;
+                sum[ij] = sum[ij] + div;
+            }
+        }
+        for (size_t i = 1; i < nx-1; i++) {
+            w[i+nx*(0+ny*k)] = w[i+nx*(1+ny*k)];
+            w[i+nx*(ny-1+ny*k)] = w[i+nx*(ny-2 + ny*k)];
+        }
+        for (size_t j = 0; j < ny; j++) {
+            w[0+nx*(j+ny*k)] = w[1+nx*(j+ny*k)];
+            w[nx-1+nx*(j+ny*k)] = w[nx-2+nx*(j+ny*k)];
+        }
+    }
+    free(mapRatioX);
+    free(mapRatioY);
+    free(rhx);
+    free(rhy);
+    free(rhxy);
+    free(sum);
+    free(uu);
+    free(vv);
+    free(dp);
+    free(dlnp);
+    free(alfa);
+    free(z);
+    return MIFI_OK;
 }
 
 size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal) {
