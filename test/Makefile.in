@@ -38,7 +38,8 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@              testCoordinateSystemSliceBuilder  testNcmlReader \
 @HAVE_NETCDF_TRUE@              testNcmlAggregationReader \
 @HAVE_NETCDF_TRUE@              testProcessor testMerger testNetCDFReaderWriter \
-@HAVE_NETCDF_TRUE@              testFillWriter
+@HAVE_NETCDF_TRUE@              testFillWriter \
+@HAVE_NETCDF_TRUE@			  testVerticalVelocity
 
 @HAVE_NETCDF_TRUE@am__append_3 = ${NETCDF_MI_SH_TESTS} testCharNc.sh \
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh \
@@ -107,7 +108,8 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_NETCDF_TRUE@	testNcmlAggregationReader$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testProcessor$(EXEEXT) testMerger$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testNetCDFReaderWriter$(EXEEXT) \
-@HAVE_NETCDF_TRUE@	testFillWriter$(EXEEXT)
+@HAVE_NETCDF_TRUE@	testFillWriter$(EXEEXT) \
+@HAVE_NETCDF_TRUE@	testVerticalVelocity$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_4 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = testGribReader$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_4) $(am__EXEEXT_5)
@@ -117,10 +119,10 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_LIBPQ_TRUE@am__EXEEXT_9 = wdbTest$(EXEEXT)
 @ENABLE_FORTRAN_TRUE@@HAVE_FELT_TRUE@@HAVE_NETCDF_TRUE@am__EXEEXT_10 = testFortran$(EXEEXT)
 am__EXEEXT_11 = testInterpolation$(EXEEXT) \
-	testVerticalCoordinates$(EXEEXT) testVerticalVelocity$(EXEEXT) \
-	testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
-	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
-	testData$(EXEEXT) testProjections$(EXEEXT) testUnits$(EXEEXT) \
+	testVerticalCoordinates$(EXEEXT) testBinaryConstants$(EXEEXT) \
+	testUtils$(EXEEXT) testTimeSpec$(EXEEXT) \
+	testSpatialAxisSpec$(EXEEXT) testData$(EXEEXT) \
+	testProjections$(EXEEXT) testUnits$(EXEEXT) \
 	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
 	testSliceBuilder$(EXEEXT) testXMLDoc$(EXEEXT) \
 	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) \
@@ -876,6 +878,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
              merge_target_base.nc merge_target_top.nc \
              test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
+             verticalVelocity.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
              data/joinExistingAggSuffix.ncml data/aggNothing.ncml data/aggWrong.ncml \
@@ -891,12 +894,11 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc out*.nc\
              test_netcdfrw.nc fillOut.nc
 
 CC_TESTS = testInterpolation testVerticalCoordinates \
-	testVerticalVelocity testBinaryConstants testUtils \
-	testTimeSpec testSpatialAxisSpec testData testProjections \
-	testUnits testFileReaderFactory testCDM testSliceBuilder \
-	testXMLDoc testFeltReader $(am__append_1) $(am__append_2) \
-	$(am__append_4) $(am__append_6) $(am__append_7) \
-	$(am__append_9)
+	testBinaryConstants testUtils testTimeSpec testSpatialAxisSpec \
+	testData testProjections testUnits testFileReaderFactory \
+	testCDM testSliceBuilder testXMLDoc testFeltReader \
+	$(am__append_1) $(am__append_2) $(am__append_4) \
+	$(am__append_6) $(am__append_7) $(am__append_9)
 SH_TESTS = $(am__append_3) $(am__append_5)
 @ENABLE_FORTRAN_FALSE@LDADD = ../src/libfimex.la \
 @ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \

@@ -1508,7 +1508,8 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
     double rdx_2 = 1/(2*dx);
     double rdy_2 = 1/(2*dy);
 
-    fprintf(stderr, "compute map-factors\n");
+    if (MIFI_DEBUG)
+        fprintf(stderr, "compute map-factors\n");
     for (size_t j = 0; j < ny; j++) {
         for (size_t i = 0; i < nx; i++) {
             size_t ij = i+nx*j;
@@ -1520,30 +1521,23 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
         }
     }
 
-
-    fprintf(stderr, "compute half model levels");
-
+    if (MIFI_DEBUG)
+        fprintf(stderr, "compute half model levels");
     double ah[nz+1], bh[nz+1];
     ah[0]  = 0.0;
     bh[0]  = 0.0;
     ah[nz] = 0.0;
     bh[nz] = 1.0;
 
-    for (size_t k = 0; k < nz; k++) {
-//        ah[k+1] = 2.0*ap[k]-ah[k];
-//        bh[k+1] = 2.0*b[k] - bh[k];
-    }
+
     for (size_t k = nz-1; k > 0; --k) {
           ah[k] = 2.0*ap[k]-ah[k+1];
           bh[k] = 2.0*b[k] -bh[k+1];
-//
-//        ah[k] = 0.5 * (ap[k]-ap[k-1]);
-//        bh[k] = 0.5 * (b[k]-b[k-1]);
     }
 
 
-    fprintf(stderr, "compute pressure variables needed only once\n");
-
+    if (MIFI_DEBUG)
+        fprintf(stderr, "compute pressure variables needed only once\n");
     double ln2= log(2.);
     double da=ah[1]-ah[0];
     double db=bh[1]-bh[0];
@@ -1558,7 +1552,8 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
     for (size_t k = 1; k < nz; k++) {
         da = ah[k+1]- ah[k];
         db = bh[k+1]- bh[k];
-        fprintf(stderr, "k = %d, ah = %f, bh= %f, da = %f, db = %f\n", k, ah[k], bh[k], da, db);
+        if (MIFI_DEBUG)
+            fprintf(stderr, "k = %d, ah = %f, bh= %f, da = %f, db = %f\n", k, ah[k], bh[k], da, db);
         for (size_t j = 0; j < ny; ++j) {
             for (size_t i = 0; i < nx; ++i) {
                 double pm = ah[k]   + bh[k]*ps[i+j*nx];
@@ -1569,9 +1564,11 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
             }
         }
     }
-    fprintf(stderr, "k = %d, ah = %f, bh= %f\n", nz, ah[nz], bh[nz]);
+    if (MIFI_DEBUG)
+        fprintf(stderr, "k = %d, ah = %f, bh= %f\n", nz, ah[nz], bh[nz]);
 
-    fprintf(stderr, "vertical integration of hydrostatic equation\n");
+    if (MIFI_DEBUG)
+        fprintf(stderr, "vertical integration of hydrostatic equation\n");
     for (size_t j = 0; j < ny; j++) {
         for (size_t i = 0; i < nx; i++) {
             sum[j*nx+i] = zs[j*nx+i]*g;
@@ -1589,7 +1586,8 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
         }
     }
 
-    fprintf(stderr, "vertical integral of divergence, compute w\n");
+    if (MIFI_DEBUG)
+        fprintf(stderr, "vertical integral of divergence, compute w\n");
     for (size_t j = 0; j < ny; j++) {
         for (size_t i = 0; i < nx; i++) {
              sum[i+nx*j]=0.;

@@ -49,7 +49,9 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
 {
-    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create("netcdf", "/home/heikok/Programme/MetSis/Fimex/test/ecbfs.nc4"));//"/disk1/myopdata/ec/bfs/nc4/ec_ml_20141125_00.nc"));
+    string topSrcDir(TOP_SRCDIR);
+    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
+    if (reader.get() == 0) return; // no support for netcdf4
 
     vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(reader);
     const CDM& cdm = reader->getCDM();
@@ -65,13 +67,13 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
         CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z
         CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
 
-        cerr << "found axes" << endl;
+        //cerr << "found axes" << endl;
 
         size_t nx = reader->getData(xAxis->getName())->size();
         size_t ny = reader->getData(yAxis->getName())->size();
         size_t nz = reader->getData(zAxis->getName())->size();
 
-        cerr << "(x,y,z) = " << "(" << nx << "," << ny << "," << nz << ")" << endl;
+        //cerr << "(x,y,z) = " << "(" << nx << "," << ny << "," << nz << ")" << endl;
 
         assert (nx*ny*nz > 0);
 
@@ -88,26 +90,26 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
         DataPtr tD = reader->getScaledDataSliceInUnit("air_temperature_ml", "K", timePos);
         BOOST_CHECK_EQUAL(tD->size(), nx*ny*nz);
 
-        cerr << "got data" << endl;
+        //cerr << "got data" << endl;
 
         float gInv = 1 / 9.806;
         boost::shared_array<float> zs = zsD->asFloat();
         transform(&zs[0], &zs[0]+(nx*ny), &zs[0], std::bind1st(multiplies<float>(), gInv));
 
-        cerr << "transformed zs" << endl;
+        //cerr << "transformed zs" << endl;
 
         // output
         double dx = fabs(reader->getData(xAxis->getName())->asDouble()[1] - reader->getData(xAxis->getName())->asDouble()[0]);
         double dy = fabs(reader->getData(yAxis->getName())->asDouble()[1] - reader->getData(yAxis->getName())->asDouble()[0]);
         string lat, lon;
         cdm.getLatitudeLongitude("air_temperature_ml", lat, lon);
-        cerr << lat << " " << lon << endl;
+        //cerr << lat << " " << lon << endl;
         DataPtr lonVals = reader->getScaledDataInUnit(lon, "degree");
         DataPtr latVals = reader->getScaledDataInUnit(lat, "degree");
         boost::shared_array<float> gridDistX(new float[nx*ny]());
         boost::shared_array<float> gridDistY(new float[nx*ny]());
         BOOST_CHECK_EQUAL(MIFI_OK, mifi_griddistance(nx, ny, lonVals->asDouble().get(), latVals->asDouble().get(), gridDistX.get(), gridDistY.get()));
-        cerr << "got gridDistance" << endl;
+        //cerr << "got gridDistance" << endl;
         boost::shared_array<float> w(new float[nx*ny*nz]());
         BOOST_CHECK_EQUAL(MIFI_OK, mifi_compute_vertical_velocity(nx, ny, nz, dx, dy, gridDistX.get(), gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(), zs.get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()));
 
@@ -116,7 +118,9 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
         boost::shared_array<float> hy = hyD->asFloat();
         for (size_t k = 0; k < nz; ++k) {
             pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
-            printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
+            BOOST_CHECK(*minMax.first > -4);
+            BOOST_CHECK(*minMax.second < 4);
+            //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
         }
     }
 }
