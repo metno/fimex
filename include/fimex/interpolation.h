@@ -461,6 +461,45 @@ extern int mifi_creepfill2d_f(size_t nx, size_t ny, float* field, unsigned short
  */
 extern int mifi_creepfillval2d_f(size_t nx, size_t ny, float* field, float defaultVal, unsigned short repeat, char setWeight, size_t* nChanged);
 
+
+/**
+ * Calculate the real distance in m between neigboring grid-cells (center to center). Distances
+ * are calculated using the great-circle distance. The size of a gridcell is gridDistX*gridDistY.
+ * @param nx points in x direction
+ * @param ny points in y direction
+ * @param lonVals longitude values in degree (j*ny + i)
+ * @param latVals latitude values in degree (j*ny + i)
+ * @param gridDistX output x-distance between neighbors in m (j*ny +i)
+ * @param gridDistY output y-distance between neighbors in m (j*ny +i)
+ * @return error-code or MIFI_OK
+ */
+int mifi_griddistance(size_t nx, size_t ny, const double* lonVals, const double* latVals, float* gridDistX, float* gridDistY);
+
+/**
+ * Compute vertical velocity from continuity equation, integrating over all model-levels. Derived from compw.f: J.E. Haugen, (C) 1995 DNMI
+ *
+ * @param nx size of grid in x direction
+ * @param ny size of grid in y direction
+ * @param nz size of levels
+ * @param dx x-grid-distance in projection-plane (m) (use radian*R for spherical coordinates)
+ * @param dy y-grid-distance in projection-plan (m) (use radian*R for spherical coordinates)
+ * @param gridDistX distance in m on surface between two grid points in x-direction (nx*ny)
+ * @param gridDistY distance in m on surface between two grid points in y-direction (nx*ny)
+ * @param ap ap parameter of full hybrid-sigma coordinates in Pa
+ * @param b b parameter of full hybrid-sigma coordinates (dimensionless)
+ * @param zs surface-geopotential in m (nx*ny)
+ * @param ps surface-pressure in Pa (nx*ny)
+ * @param u x-velocity in m/s (nx*ny*nz)
+ * @param v y-velocity in m/s (nx*ny*nz)
+ * @param t abs. temperature in K (nx*ny*nz)
+ * @param w output, vertical velocity in m/s, must be preallocated (nx*ny*nz)
+ * @return MIFI_OK/MIFI_ERROR
+ */
+size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx, double dy, const float* gridDistX, const float* gridDistY, const double* ap, const double* b,
+                          const float* zs, const float* ps, const float* u, const float* v, const float* t,
+                          float* w);
+
+
 /**
  * Convert bad-values to nan. The mifi_ functions don't handle bad values generally, but
  * forward this work to the floating-point IEEE NaN's. This function converts a general bad value
@@ -502,6 +541,8 @@ extern MIFI_DEPRECATED(int mifi_isnanf(float val));
  * @deprecated use mifi_isnan() template from fimex/Utils.h
  */
 extern MIFI_DEPRECATED(int mifi_isnand(double val));
+
+
 
 
 #ifdef __cplusplus

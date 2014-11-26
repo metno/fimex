@@ -505,12 +505,12 @@ vector<double> GribCDMReader::readValuesFromXPath_(xmlNodePtr node, DataPtr leve
                     if (pos < pv.size()) {
                         double value;
                         if (!asimofHeader) {
-                            value = (pos == 0) ? pv.at(0) : (pv[pos] + pv[pos-1])/2;
+                            value = ((pos+1) < pv.size()) ? (pv.at(pos) + pv.at(pos+1))/2 : pv.at(pv.size()-1);
                         } else {
                             if ((pos == 0)||(pos == 1)) {
-                                value = pv[pos];
+                                value = pv.at(pos);
                             } else {
-                                value = (pv[pos] + pv[pos-2])/2;
+                                value = (pv.at(pos) + pv.at(pos-2))/2;
                             }
                         }
                         retValues.push_back(value);

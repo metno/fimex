@@ -1534,11 +1534,11 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
 //        bh[k+1] = 2.0*b[k] - bh[k];
     }
     for (size_t k = nz-1; k > 0; --k) {
-//          ah[k] = 2.0*ap[k]-ah[k+1];
-//          bh[k] = 2.0*b[k] -bh[k+1];
+          ah[k] = 2.0*ap[k]-ah[k+1];
+          bh[k] = 2.0*b[k] -bh[k+1];
 //
-        ah[k] = 0.5 * (ap[k]-ap[k-1]);
-        bh[k] = 0.5 * (b[k]-b[k-1]);
+//        ah[k] = 0.5 * (ap[k]-ap[k-1]);
+//        bh[k] = 0.5 * (b[k]-b[k-1]);
     }
 
 

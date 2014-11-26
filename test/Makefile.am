@@ -31,6 +31,7 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc out*.nc\
 
 CC_TESTS = testInterpolation \
            testVerticalCoordinates \
+           testVerticalVelocity \
            testBinaryConstants \
            testUtils \
            testTimeSpec \
@@ -131,6 +132,7 @@ testQualityExtractor_SOURCES = testQualityExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
 testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
+testVerticalVelocity_SOURCES = testVerticalVelocity.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
 test_c_consumer_SOURCES = test_c_consumer.c
 testFortran_SOURCES = testFortran.F90

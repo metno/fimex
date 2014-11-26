@@ -117,10 +117,10 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_LIBPQ_TRUE@am__EXEEXT_9 = wdbTest$(EXEEXT)
 @ENABLE_FORTRAN_TRUE@@HAVE_FELT_TRUE@@HAVE_NETCDF_TRUE@am__EXEEXT_10 = testFortran$(EXEEXT)
 am__EXEEXT_11 = testInterpolation$(EXEEXT) \
-	testVerticalCoordinates$(EXEEXT) testBinaryConstants$(EXEEXT) \
-	testUtils$(EXEEXT) testTimeSpec$(EXEEXT) \
-	testSpatialAxisSpec$(EXEEXT) testData$(EXEEXT) \
-	testProjections$(EXEEXT) testUnits$(EXEEXT) \
+	testVerticalCoordinates$(EXEEXT) testVerticalVelocity$(EXEEXT) \
+	testBinaryConstants$(EXEEXT) testUtils$(EXEEXT) \
+	testTimeSpec$(EXEEXT) testSpatialAxisSpec$(EXEEXT) \
+	testData$(EXEEXT) testProjections$(EXEEXT) testUnits$(EXEEXT) \
 	testFileReaderFactory$(EXEEXT) testCDM$(EXEEXT) \
 	testSliceBuilder$(EXEEXT) testXMLDoc$(EXEEXT) \
 	testFeltReader$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_3) \
@@ -526,6 +526,19 @@ testVerticalCoordinates_LDADD = $(LDADD)
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
+am_testVerticalVelocity_OBJECTS = testVerticalVelocity.$(OBJEXT)
+testVerticalVelocity_OBJECTS = $(am_testVerticalVelocity_OBJECTS)
+testVerticalVelocity_LDADD = $(LDADD)
+@ENABLE_FORTRAN_FALSE@testVerticalVelocity_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testVerticalVelocity_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testXMLDoc_OBJECTS = testXMLDoc.$(OBJEXT)
 testXMLDoc_OBJECTS = $(am_testXMLDoc_OBJECTS)
 testXMLDoc_LDADD = $(LDADD)
@@ -627,8 +640,8 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
 	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
-	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
-	$(wdbTest_SOURCES)
+	$(testVerticalVelocity_SOURCES) $(testXMLDoc_SOURCES) \
+	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testCoordSys_SOURCES) \
 	$(testCoordinateSystemSliceBuilder_SOURCES) \
@@ -646,8 +659,8 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
 	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
-	$(testXMLDoc_SOURCES) $(test_c_consumer_SOURCES) \
-	$(am__wdbTest_SOURCES_DIST)
+	$(testVerticalVelocity_SOURCES) $(testXMLDoc_SOURCES) \
+	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -878,11 +891,12 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc out*.nc\
              test_netcdfrw.nc fillOut.nc
 
 CC_TESTS = testInterpolation testVerticalCoordinates \
-	testBinaryConstants testUtils testTimeSpec testSpatialAxisSpec \
-	testData testProjections testUnits testFileReaderFactory \
-	testCDM testSliceBuilder testXMLDoc testFeltReader \
-	$(am__append_1) $(am__append_2) $(am__append_4) \
-	$(am__append_6) $(am__append_7) $(am__append_9)
+	testVerticalVelocity testBinaryConstants testUtils \
+	testTimeSpec testSpatialAxisSpec testData testProjections \
+	testUnits testFileReaderFactory testCDM testSliceBuilder \
+	testXMLDoc testFeltReader $(am__append_1) $(am__append_2) \
+	$(am__append_4) $(am__append_6) $(am__append_7) \
+	$(am__append_9)
 SH_TESTS = $(am__append_3) $(am__append_5)
 @ENABLE_FORTRAN_FALSE@LDADD = ../src/libfimex.la \
 @ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
@@ -948,6 +962,7 @@ testQualityExtractor_SOURCES = testQualityExtractor.cc
 testInterpolator_SOURCES = testInterpolator.cc
 testTimeInterpolator_SOURCES = testTimeInterpolator.cc
 testUnits_SOURCES = testUnits.cc
+testVerticalVelocity_SOURCES = testVerticalVelocity.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
 test_c_consumer_SOURCES = test_c_consumer.c
 testFortran_SOURCES = testFortran.F90
@@ -1108,6 +1123,9 @@ testUtils$(EXEEXT): $(testUtils_OBJECTS) $(testUtils_DEPENDENCIES) $(EXTRA_testU
 testVerticalCoordinates$(EXEEXT): $(testVerticalCoordinates_OBJECTS) $(testVerticalCoordinates_DEPENDENCIES) $(EXTRA_testVerticalCoordinates_DEPENDENCIES) 
 	@rm -f testVerticalCoordinates$(EXEEXT)
 	$(CXXLINK) $(testVerticalCoordinates_OBJECTS) $(testVerticalCoordinates_LDADD) $(LIBS)
+testVerticalVelocity$(EXEEXT): $(testVerticalVelocity_OBJECTS) $(testVerticalVelocity_DEPENDENCIES) $(EXTRA_testVerticalVelocity_DEPENDENCIES) 
+	@rm -f testVerticalVelocity$(EXEEXT)
+	$(CXXLINK) $(testVerticalVelocity_OBJECTS) $(testVerticalVelocity_LDADD) $(LIBS)
 testXMLDoc$(EXEEXT): $(testXMLDoc_OBJECTS) $(testXMLDoc_DEPENDENCIES) $(EXTRA_testXMLDoc_DEPENDENCIES) 
 	@rm -f testXMLDoc$(EXEEXT)
 	$(CXXLINK) $(testXMLDoc_OBJECTS) $(testXMLDoc_LDADD) $(LIBS)
@@ -1181,6 +1199,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testVerticalCoordinates.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testVerticalVelocity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_c_consumer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@wdb/$(DEPDIR)/wdbTest-ConfigurationTest.Po@am__quote@
