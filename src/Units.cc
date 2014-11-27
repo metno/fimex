@@ -195,25 +195,25 @@ bool Units::unload(bool force) throw(UnitException)
 
 void Units::convert(const std::string& from, const std::string& to, double& slope, double& offset)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "convert from " << from << " to " << to);
+    LOG4FIMEX(logger, Logger::DEBUG, "convert from '" << from << "' to '" << to << "'");
     boost::shared_ptr<UnitsConverter> conv = getConverter(from, to);
     conv->getScaleOffset(slope, offset);
 }
 
 boost::shared_ptr<UnitsConverter> Units::getConverter(const std::string& from, const std::string& to)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "getConverter from " << from << " to " << to);
+    LOG4FIMEX(logger, Logger::DEBUG, "getConverter from '" << from << "' to '" << to << "'");
     if (from == to) {
         return boost::shared_ptr<UnitsConverter>(new LinearUnitsConverter(1.,0.));
     }
     ScopedCritical lock(unitsMutex);
 #ifdef HAVE_UDUNITS2_H
     boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, from.c_str(), UT_UTF8), ut_free);
-    handleUdUnitError(ut_get_status(), from);
+    handleUdUnitError(ut_get_status(), "'" + from + "'");
     boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, to.c_str(), UT_UTF8), ut_free);
-    handleUdUnitError(ut_get_status(), to);
+    handleUdUnitError(ut_get_status(), "'" + to + "'");
     cv_converter* conv = ut_get_converter(fromUnit.get(), toUnit.get());
-    handleUdUnitError(ut_get_status(), from + " converted to " +to);
+    handleUdUnitError(ut_get_status(), "'" + from + "' converted to '" +to + "'");
     return boost::shared_ptr<UnitsConverter>(new Ud2UnitsConverter(conv));
 #else
     double slope, offset;
@@ -234,9 +234,9 @@ bool Units::areConvertible(const std::string& unit1, const std::string& unit2) c
 #ifdef HAVE_UDUNITS2_H
     try {
         boost::shared_ptr<ut_unit> fromUnit(ut_parse(utSystem, unit1.c_str(), UT_UTF8), ut_free);
-        handleUdUnitError(ut_get_status(), unit1);
+        handleUdUnitError(ut_get_status(), "'" + unit1 + "'");
         boost::shared_ptr<ut_unit> toUnit(ut_parse(utSystem, unit2.c_str(), UT_UTF8), ut_free);
-        handleUdUnitError(ut_get_status(), unit2);
+        handleUdUnitError(ut_get_status(), "'" + unit2 + "'");
         areConv = ut_are_convertible(fromUnit.get(), toUnit.get());
     } catch (UnitException& ue) {
         LOG4FIMEX(logger, Logger::WARN, ue.what());
