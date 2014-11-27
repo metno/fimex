@@ -32,6 +32,7 @@
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/CachedVectorReprojection.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
 #include "fimex/interpolation.h"
 #include "fimex/CDMInterpolator.h"
 #include <set>
@@ -49,6 +50,26 @@ struct SliceCache {
     boost::shared_ptr<Data> data;
 };
 
+struct VerticalVelocityComps {
+    string xWind;
+    string yWind;
+    string temp;
+    string geopot;
+    boost::shared_ptr<const HybridSigmaPressure1> vt;
+    boost::shared_ptr<const CoordinateSystem> cs;
+    size_t nx;
+    size_t ny;
+    size_t nz;
+    double dx;
+    double dy;
+    boost::shared_array<float> gridDistX;
+    boost::shared_array<float> gridDistY;
+    DataPtr geopotData;
+    string wVarName;
+    bool tempNotDefined() {return temp == "";}
+    bool geopotNotDefined() {return geopotData.get() == 0;}
+};
+
 struct CDMProcessorImpl {
     boost::shared_ptr<CDMReader> dataReader;
     set<string> deaccumulateVars;
@@ -62,6 +83,7 @@ struct CDMProcessorImpl {
     // horizontalId -> cachedVectorReprojection
     map<string, boost::shared_ptr<CachedVectorReprojection> > cachedVectorReprojection;
     SliceCache sliceCache;
+    VerticalVelocityComps vvComp;
 };
 
 CDMProcessor::CDMProcessor(boost::shared_ptr<CDMReader> dataReader)
@@ -74,6 +96,168 @@ CDMProcessor::CDMProcessor(boost::shared_ptr<CDMReader> dataReader)
 CDMProcessor::~CDMProcessor()
 {
 }
+
+void CDMProcessor::addVerticalVelocity()
+{
+    LoggerPtr logger = getLogger("fimex.CDMProcessor.addVerticalVelocity");
+    if (cdm_->hasVariable("upward_air_velocity_ml")) {
+        LOG4FIMEX(logger, Logger::INFO, "upward_air_velocity_ml already exists, not calculating new one");
+    }
+    enhanceVectorProperties(p_->dataReader); // set spatial-vectors
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(p_->dataReader);
+
+    // find x_wind in hybrid-sigma layers (complete with ap and b)
+    vector<string> xWinds = cdm_->findVariables("standard_name","(x|grid_eastward)_wind");
+    vector<VerticalVelocityComps> vvcs;
+    for (vector<string>::iterator xw = xWinds.begin(); xw != xWinds.end(); xw++) {
+        vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+                find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(*xw));
+        if (varSysIt != coordSys.end() && (*varSysIt)->hasVerticalTransformation() && (*varSysIt)->isSimpleSpatialGridded()) {
+            CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z or Lat
+            boost::shared_ptr<const VerticalTransformation> vtrans = (*varSysIt)->getVerticalTransformation();
+            if (vtrans->getName() == HybridSigmaPressure1::NAME() && vtrans->isComplete()) {
+                VerticalVelocityComps vvc;
+                vvc.xWind = *xw;
+                vvc.vt = boost::shared_ptr<const HybridSigmaPressure1>(reinterpret_cast<const HybridSigmaPressure1*>(vtrans.get()));
+                vvc.cs = *varSysIt;
+                vvc.yWind = p_->dataReader->getCDM().getVariable(*xw).getSpatialVectorCounterpart();
+                if (vvc.yWind != "") {
+                    vvcs.push_back(vvc);
+                }
+            }
+        }
+    }
+    if (vvcs.size() == 0) {
+        LOG4FIMEX(logger, Logger::WARN, "no x_wind with hybrid-sigma levels and corresponding y_wind found");
+        return;
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "found x_wind, y_wind: '" << vvcs.at(0).xWind << "','" << vvcs.at(0).yWind << "'");
+
+    // find air_temperature with similar sized axes
+    vector<string> temps = cdm_->findVariables("standard_name","air_temperature");
+    for (vector<VerticalVelocityComps>::iterator vvcIt = vvcs.begin(); vvcIt != vvcs.end(); vvcIt++) {
+        for (vector<string>::iterator tempIt = temps.begin(); tempIt != temps.end(); tempIt++) {
+            if (compareCDMVarShapes(*cdm_, vvcIt->xWind, *cdm_, *tempIt)) {
+                vvcIt->temp = *tempIt;
+            }
+        }
+    }
+    vvcs.erase(remove_if(vvcs.begin(), vvcs.end(), mem_fun_ref(&VerticalVelocityComps::tempNotDefined)), vvcs.end());
+    if (vvcs.size() == 0) {
+        LOG4FIMEX(logger, Logger::WARN, "no air_temperature found with correspondig x/y_wind");
+        return;
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "found x_wind, y_wind, temp: '" << vvcs.at(0).xWind << "','" << vvcs.at(0).yWind << "', '" << vvcs.at(0).temp << "'");
+
+    // find geopotential, surface_geopotential or geopotential_height (units: m) (2d)
+    vector<string> geopots = cdm_->findVariables("standard_name","(surface_geopotential|altitude|geopotential_height|geopotential)");
+    for (vector<VerticalVelocityComps>::iterator vvcIt = vvcs.begin(); vvcIt != vvcs.end(); vvcIt++) {
+        size_t xSize = cdm_->getDimension(vvcIt->cs->getGeoXAxis()->getName()).getLength();
+        size_t ySize = cdm_->getDimension(vvcIt->cs->getGeoYAxis()->getName()).getLength();
+
+        for (vector<string>::iterator gpIt = geopots.begin(); gpIt != geopots.end(); gpIt++) {
+            vector<boost::shared_ptr<const CoordinateSystem> >::iterator gpCs =
+                    find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(*gpIt));
+            if (gpCs != coordSys.end()) {
+                CoordinateSystem::ConstAxisPtr gxAxis = (*gpCs)->getGeoXAxis();
+                CoordinateSystem::ConstAxisPtr gyAxis = (*gpCs)->getGeoYAxis();
+                if (gxAxis != 0 && gyAxis != 0) {
+                    size_t gxSize = cdm_->getDimension(gxAxis->getName()).getLength();
+                    size_t gySize = cdm_->getDimension(gyAxis->getName()).getLength();
+                    if (xSize == gxSize && ySize == gySize) {
+                        SliceBuilder sb(p_->dataReader->getCDM(), *gpIt);
+                        sb.setStartAndSize(gxAxis, 0, gxSize);
+                        sb.setStartAndSize(gyAxis, 0, gySize);
+                        vector<string> unsetv = sb.getUnsetDimensionNames();
+                        for (vector<string>::iterator unset = unsetv.begin(); unset != unsetv.end(); unset++){
+                            sb.setStartAndSize(*unset, 0, 1);
+                        }
+                        string stdName = cdm_->getAttribute(*gpIt, "standard_name").getStringValue();
+                        string gpUnit;
+                        if (stdName == "altitude" || stdName == "geopotential_height") {
+                            gpUnit = "m";
+                        } else {
+                            gpUnit = "1/9.81*m^2/s^2"; // devision of gepotential by gravity
+                        }
+                        DataPtr gpd;
+                        try {
+                            gpd = p_->dataReader->getScaledDataSliceInUnit(*gpIt, gpUnit, sb);
+                        } catch (CDMException& ex) {
+                            LOG4FIMEX(logger, Logger::ERROR, "unable to read '" << *gpIt << "' with unit '"<<gpUnit <<"'");
+                        }
+                        if (gpd.get() != 0) {
+                            vvcIt->geopot = *gpIt;
+                            vvcIt->geopotData = gpd;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    vvcs.erase(remove_if(vvcs.begin(), vvcs.end(), mem_fun_ref(&VerticalVelocityComps::geopotNotDefined)), vvcs.end());
+    if (vvcs.size() == 0) {
+        LOG4FIMEX(logger, Logger::WARN, "no geopotential/_height/altitude found for corresponding x/y_wind");
+        return;
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "creating upward_air_velocity_ml with xwind='" << vvcs.at(0).xWind << "', ywind='" << vvcs.at(0).yWind << "', temp='" << vvcs.at(0).temp << "', geopot='" << vvcs.at(0).geopot << "'");
+
+    // calculate helper fields
+    vvcs.at(0).nx = cdm_->getDimension(vvcs.at(0).cs->getGeoXAxis()->getName()).getLength();
+    vvcs.at(0).ny = cdm_->getDimension(vvcs.at(0).cs->getGeoYAxis()->getName()).getLength();
+    size_t nx = vvcs.at(0).nx;
+    size_t ny = vvcs.at(0).ny;
+    vvcs.at(0).nz = cdm_->getDimension(vvcs.at(0).cs->getGeoZAxis()->getName()).getLength();
+    vvcs.at(0).dx = fabs(p_->dataReader->getData(vvcs.at(0).cs->getGeoXAxis()->getName())->asDouble()[1] - p_->dataReader->getData(vvcs.at(0).cs->getGeoXAxis()->getName())->asDouble()[0]);
+    vvcs.at(0).dy = fabs(p_->dataReader->getData(vvcs.at(0).cs->getGeoYAxis()->getName())->asDouble()[1] - p_->dataReader->getData(vvcs.at(0).cs->getGeoYAxis()->getName())->asDouble()[0]);
+    string lat, lon;
+    cdm_->getLatitudeLongitude(vvcs.at(0).xWind, lat, lon);
+    // get 2d coordinates
+    DataPtr lonVals = p_->dataReader->getScaledDataInUnit(lon, "degree");
+    DataPtr latVals = p_->dataReader->getScaledDataInUnit(lat, "degree");
+    boost::shared_array<double> lonlon;
+    boost::shared_array<double> latlat;
+    if (cdm_->getVariable(lon).getShape().size() == 1) {
+        lonlon = boost::shared_array<double>(new double[nx*ny]());
+        latlat = boost::shared_array<double>(new double[nx*ny]());
+        boost::shared_array<double> lat = latVals->asDouble();
+        boost::shared_array<double> lon = lonVals->asDouble();
+        assert(lonVals->size() == nx);
+        assert(latVals->size() == ny);
+        for (size_t j = 0; j < ny; j++) {
+            for (size_t i = 0; i < nx; i++) {
+                lonlon[i+j*nx] = lon[i];
+                latlat[i+j*nx] = lat[j];
+            }
+        }
+    } else {
+        lonlon = lonVals->asDouble();
+        latlat = latVals->asDouble();
+    }
+
+    boost::shared_array<float> gridDistX(new float[nx*ny]());
+    boost::shared_array<float> gridDistY(new float[nx*ny]());
+    if (MIFI_OK != mifi_griddistance(nx, ny, lonlon.get(), latlat.get(), gridDistX.get(), gridDistY.get())) {
+        throw CDMException("addVerticalVelocity: cannot calculate griddistance");
+    }
+    vvcs.at(0).gridDistX = gridDistX;
+    vvcs.at(0).gridDistY = gridDistY;
+
+    // create upward_air_velocity_ml (same shape as wind)
+    string uav = "upward_air_velocity_ml";
+    CDMVariable uavv(uav, CDM_FLOAT, cdm_->getVariable(vvcs.at(0).xWind).getShape());
+    cdm_->addVariable(uavv);
+    cdm_->addAttribute(uav, CDMAttribute("units", "m/s"));
+    cdm_->addAttribute(uav, CDMAttribute("standard_name", "upward_air_velocity"));
+    CDMAttribute coords;
+    if (cdm_->getAttribute(vvcs.at(0).xWind, "coordinates", coords)) {
+        cdm_->addAttribute(uav, coords);
+    }
+
+    // create a calculation-object for selecting slices
+    p_->vvComp = vvcs.at(0);
+}
+
 
 void CDMProcessor::accumulate(const std::string& varName)
 {
@@ -332,7 +516,42 @@ static void addDataP2Data(DataPtr& data, DataPtr& dataP) {
 
 DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+    LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, "getDataSlice for '" << varName << "' at " << unLimDimPos);
+    DataPtr data;
+    if (varName == "upward_air_velocity_ml" && p_->vvComp.xWind != "") {
+        boost::shared_ptr<CDMReader> reader = p_->dataReader;
+        size_t nx = p_->vvComp.nx;
+        size_t ny = p_->vvComp.ny;
+        size_t nz = p_->vvComp.nz;
+
+        assert (nx*ny*nz > 0);
+
+        DataPtr zsD = p_->vvComp.geopotData;
+        assert(zsD->size() == nx*ny);
+        DataPtr psD = reader->getScaledDataSliceInUnit(p_->vvComp.vt->ps, "Pa", unLimDimPos);
+        assert(psD->size() == nx*ny);
+        DataPtr apD = reader->getScaledDataInUnit(p_->vvComp.vt->ap, "Pa");
+        assert(apD->size() == nz);
+        DataPtr bD = reader->getScaledData(p_->vvComp.vt->b);
+        assert(bD->size() == nz);
+        DataPtr uD = reader->getScaledDataSliceInUnit(p_->vvComp.xWind, "m/s", unLimDimPos);
+        assert(uD->size() == nx*ny*nz);
+        DataPtr vD = reader->getScaledDataSliceInUnit(p_->vvComp.yWind, "m/s", unLimDimPos);
+        assert(vD->size() == nx*ny*nz);
+        DataPtr tD = reader->getScaledDataSliceInUnit(p_->vvComp.temp, "K", unLimDimPos);
+        assert(tD->size() == nx*ny*nz);
+
+
+        // output
+        boost::shared_array<float> w(new float[nx*ny*nz]());
+        if (MIFI_OK != mifi_compute_vertical_velocity(nx, ny, nz, p_->vvComp.dx, p_->vvComp.dy, p_->vvComp.gridDistX.get(), p_->vvComp.gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(), zsD->asFloat().get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get())) {
+            throw CDMException("addVerticalVelocity: cannot calculate mifi_compute_vertical_velocity");
+        }
+        data = createData(nx*ny*nz, w);
+    } else {
+        data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+    }
+
     // accumulation
     if (p_->accumulateVars.find(varName) != p_->accumulateVars.end()) {
         LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");

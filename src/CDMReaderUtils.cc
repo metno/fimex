@@ -87,14 +87,21 @@ vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, co
     return vector<double>(&array[0], &array[0] + data->size());
 }
 
-std::size_t estimateCDMDataSize(const CDM& cdm)
+static std::map<std::string, std::size_t> getCDMDimensionSizes(const CDM& cdm)
 {
-    size_t retVal = 0;
     map<string, size_t> dimSizes;
     const CDM::DimVec& dims = cdm.getDimensions();
     for (CDM::DimVec::const_iterator dit = dims.begin(); dit != dims.end(); ++dit) {
         dimSizes[dit->getName()] = dit->getLength();
     }
+    return dimSizes;
+}
+
+std::size_t estimateCDMDataSize(const CDM& cdm)
+{
+    size_t retVal = 0;
+    map<string, size_t> dimSizes = getCDMDimensionSizes(cdm);
+
     const CDM::VarVec& vars = cdm.getVariables();
     for (CDM::VarVec::const_iterator vit = vars.begin(); vit != vars.end(); ++vit) {
         DataPtr d = createData(vit->getDataType(), 0u);
@@ -108,6 +115,46 @@ std::size_t estimateCDMDataSize(const CDM& cdm)
     return retVal;
 }
 
+bool compareCDMVarShapes(const CDM& cdm1, const string& varName1, const CDM& cdm2, const string& varName2)
+{
+    map<string, size_t> dimSizes1 = getCDMDimensionSizes(cdm1);
+    map<string, size_t> dimSizes2 = getCDMDimensionSizes(cdm2);
 
+    const vector<string>& shape1 = cdm1.getVariable(varName1).getShape();
+    const vector<string>& shape2 = cdm2.getVariable(varName2).getShape();
+
+    vector<string>::const_iterator s1 = shape1.begin();
+    vector<string>::const_iterator s2 = shape2.begin();
+    while (s1 != shape1.end()) {
+        if (dimSizes1[*s1] == 1) {
+            // skip dimensions of size 1
+            s1++;
+            continue;
+        }
+        // skip dimensions of size 1 for shape2
+        while (s2 != shape2.end() && (dimSizes2[*s2] == 1)) {
+            s2++;
+        }
+        if (s2 == shape2.end()) {
+            return false; // s2 reached end, s1 not
+        } else {
+            if (dimSizes1[*s1] != dimSizes2[*s2]) {
+                return false;
+            } else {
+                // shapes equal, nothing to be done here, just go to next index
+            }
+        }
+        s1++;
+        s2++;
+    }
+    // skip dimensions of size 1 for shape2
+    while (s2 != shape2.end() && (dimSizes2[*s2] == 1)) {
+        s2++;
+    }
+    if (s2 != shape2.end()) {
+        return false; // s1 reached end, s2 not
+    }
+    return true;
+}
 
 }

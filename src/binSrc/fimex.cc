@@ -201,6 +201,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOptionAny(out, "process.rotateVector.all", vm);
     writeVectorOptionString(out, "process.rotateVector.stdNameX", vm);
     writeVectorOptionString(out, "process.rotateVector.stdNameY", vm);
+    writeOptionAny(out, "process.addVerticalVelocity", vm);
     writeOption<string>(out, "process.printNcML", vm);
     writeOption<string>(out, "process.printCS", vm);
     writeOption<string>(out, "process.printSize", vm);
@@ -403,8 +404,9 @@ static int getInterpolationMethod(po::variables_map& vm, const string& key) {
 
 static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
     if (! (vm.count("process.accumulateVariable") || vm.count("process.deaccumulateVariable") ||
-            vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction"))) {
-        LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction not found, no process used");
+            vm.count("process.rotateVectorToLatLonX") || vm.count("process.rotateVector.direction") ||
+            vm.count("process.addVerticalVelocity"))) {
+        LOG4FIMEX(logger, Logger::DEBUG, "process.[de]accumulateVariable or rotateVector.direction or addVerticalVelocity not found, no process used");
         return dataReader;
     }
     boost::shared_ptr<CDMProcessor> processor(new CDMProcessor(boost::shared_ptr<CDMReader>(dataReader)));
@@ -456,6 +458,9 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
                vector<string> angles = vm["process.rotateVector.angle"].as<vector<string> >();
                processor->rotateDirectionToLatLon(toLatLon, angles);
         }
+    }
+    if (vm.count("process.addVerticalVelocity")) {
+        processor->addVerticalVelocity();
     }
     return processor;
 }
@@ -936,6 +941,7 @@ int run(int argc, char* args[])
         ("process.rotateVector.y", po::value<vector<string> >()->composing(), "rotate this vector y component from grid-direction to latlon direction")
         ("process.rotateVector.stdNameY", po::value<vector<string> >()->composing(), "new standard_name for the rotated vector")
         ("process.rotateVector.all", "rotate all known vectors (e.g. standard_name) to given direction")
+        ("process.addVerticalVelocity", "calculate upward_air_velocity_ml")
 #if BOOST_VERSION >= 104000
         ("process.printNcML", po::value<string>()->implicit_value("-"), "print NcML description of process")
 #else

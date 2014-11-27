@@ -49,6 +49,10 @@ public:
     CDMProcessor(boost::shared_ptr<CDMReader> dataReader);
     virtual ~CDMProcessor();
     /**
+     * add vertical velocity to this CDM, using continuity equation on model-levels
+     */
+    void addVerticalVelocity();
+    /**
      * mark a variable for accumulation along the unlimited dimension, i.e.
      * vnew(0) = vold(0)
      * vnew(n) = vold(n)+vold(n-1)

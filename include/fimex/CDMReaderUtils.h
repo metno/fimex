@@ -75,5 +75,18 @@ std::vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reade
  * return estimated size of CDM-data in bytes
  */
 std::size_t estimateCDMDataSize(const CDM& cdm);
+
+/**
+ * check if the shapes of two variables (eventually belonging to two different CDMs) have the same
+ * sizes. Dimensions of size 1 are ignored.
+ *
+ * @param cdm1 first CDM
+ * @param varName1 first variable-name
+ * @param cdm2 second CDM
+ * @param varName2 second variable-name
+ * @return
+ */
+bool compareCDMVarShapes(const CDM& cdm1, const std::string& varName1, const CDM& cdm2, const std::string& varName2);
+
 }
 #endif /* CDMREADERUTILS_H_ */
