@@ -45,6 +45,8 @@ namespace MetNoFimex
 {
 using namespace std;
 
+static const string logCat = "fimex.coordSys.CoordinateSystem";
+
 CoordinateSystem::CoordinateSystem()
 : pimpl_(boost::shared_ptr<CoordSysImpl>(new CoordSysImpl()))
 {
@@ -461,7 +463,6 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     builders.push_back(cfBuilder);
     builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
 
-    string logCat = "fimex/coordSys/CoordinateSystem";
     for (size_t i = 0; i < builders.size(); ++i) {
         boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
         if (builder->isMine(cdm)) {
@@ -491,7 +492,6 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(bo
     builders.push_back(cfBuilder);
     builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
 
-    string logCat = "fimex/coordSys/CoordinateSystem";
     for (size_t i = 0; i < builders.size(); ++i) {
         boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
         if (builder->isMine(reader->getCDM())) {
@@ -519,7 +519,6 @@ void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
     builders.push_back(cfBuilder);
     builders.push_back(boost::shared_ptr<CoordSysBuilder>(new WRFCoordSysBuilder()));
 
-    string logCat = "fimex/coordSys/CoordinateSystem";
     bool found = false;
     for (size_t i = 0; i < builders.size(); ++i) {
         boost::shared_ptr<CoordSysBuilder> builder = builders.at(i);
