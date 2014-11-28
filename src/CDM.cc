@@ -180,7 +180,7 @@ const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDME
     if (varPos != pimpl_->variables.end()) {
         return *varPos;
     } else {
-        throw CDMException("cannot find variable: " + varName);
+        throw CDMException("cannot find variable: '" + varName + "'");
     }
 }
 CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException)

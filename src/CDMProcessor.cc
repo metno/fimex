@@ -51,12 +51,15 @@ struct SliceCache {
 };
 
 struct VerticalVelocityComps {
+    string wVarName;
     string xWind;
     string yWind;
     string temp;
     string geopot;
-    boost::shared_ptr<const HybridSigmaPressure1> vt;
-    boost::shared_ptr<const CoordinateSystem> cs;
+    string ps;
+    string ap;
+    string b;
+
     size_t nx;
     size_t ny;
     size_t nz;
@@ -65,7 +68,6 @@ struct VerticalVelocityComps {
     boost::shared_array<float> gridDistX;
     boost::shared_array<float> gridDistY;
     DataPtr geopotData;
-    string wVarName;
     bool tempNotDefined() {return temp == "";}
     bool geopotNotDefined() {return geopotData.get() == 0;}
 };
@@ -118,8 +120,16 @@ void CDMProcessor::addVerticalVelocity()
             if (vtrans->getName() == HybridSigmaPressure1::NAME() && vtrans->isComplete()) {
                 VerticalVelocityComps vvc;
                 vvc.xWind = *xw;
-                vvc.vt = boost::shared_ptr<const HybridSigmaPressure1>(reinterpret_cast<const HybridSigmaPressure1*>(vtrans.get()));
-                vvc.cs = *varSysIt;
+                boost::shared_ptr<const HybridSigmaPressure1> vt = boost::dynamic_pointer_cast<const HybridSigmaPressure1>(vtrans);
+                vvc.ap = vt->ap;
+                vvc.ps = vt->ps;
+                vvc.b = vt->b;
+                vvc.nx = cdm_->getDimension((*varSysIt)->getGeoXAxis()->getName()).getLength();
+                vvc.ny = cdm_->getDimension((*varSysIt)->getGeoYAxis()->getName()).getLength();
+                vvc.nz = cdm_->getDimension((*varSysIt)->getGeoZAxis()->getName()).getLength();
+                vvc.dx = fabs(p_->dataReader->getData((*varSysIt)->getGeoXAxis()->getName())->asDouble()[1] - p_->dataReader->getData((*varSysIt)->getGeoXAxis()->getName())->asDouble()[0]);
+                vvc.dy = fabs(p_->dataReader->getData((*varSysIt)->getGeoYAxis()->getName())->asDouble()[1] - p_->dataReader->getData((*varSysIt)->getGeoYAxis()->getName())->asDouble()[0]);
+
                 vvc.yWind = p_->dataReader->getCDM().getVariable(*xw).getSpatialVectorCounterpart();
                 if (vvc.yWind != "") {
                     vvcs.push_back(vvc);
@@ -152,9 +162,6 @@ void CDMProcessor::addVerticalVelocity()
     // find geopotential, surface_geopotential or geopotential_height (units: m) (2d)
     vector<string> geopots = cdm_->findVariables("standard_name","(surface_geopotential|altitude|geopotential_height|geopotential)");
     for (vector<VerticalVelocityComps>::iterator vvcIt = vvcs.begin(); vvcIt != vvcs.end(); vvcIt++) {
-        size_t xSize = cdm_->getDimension(vvcIt->cs->getGeoXAxis()->getName()).getLength();
-        size_t ySize = cdm_->getDimension(vvcIt->cs->getGeoYAxis()->getName()).getLength();
-
         for (vector<string>::iterator gpIt = geopots.begin(); gpIt != geopots.end(); gpIt++) {
             vector<boost::shared_ptr<const CoordinateSystem> >::iterator gpCs =
                     find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(*gpIt));
@@ -164,7 +171,7 @@ void CDMProcessor::addVerticalVelocity()
                 if (gxAxis != 0 && gyAxis != 0) {
                     size_t gxSize = cdm_->getDimension(gxAxis->getName()).getLength();
                     size_t gySize = cdm_->getDimension(gyAxis->getName()).getLength();
-                    if (xSize == gxSize && ySize == gySize) {
+                    if (vvcIt->nx == gxSize && vvcIt->ny == gySize) {
                         SliceBuilder sb(p_->dataReader->getCDM(), *gpIt);
                         sb.setStartAndSize(gxAxis, 0, gxSize);
                         sb.setStartAndSize(gyAxis, 0, gySize);
@@ -203,13 +210,8 @@ void CDMProcessor::addVerticalVelocity()
     LOG4FIMEX(logger, Logger::DEBUG, "creating upward_air_velocity_ml with xwind='" << vvcs.at(0).xWind << "', ywind='" << vvcs.at(0).yWind << "', temp='" << vvcs.at(0).temp << "', geopot='" << vvcs.at(0).geopot << "'");
 
     // calculate helper fields
-    vvcs.at(0).nx = cdm_->getDimension(vvcs.at(0).cs->getGeoXAxis()->getName()).getLength();
-    vvcs.at(0).ny = cdm_->getDimension(vvcs.at(0).cs->getGeoYAxis()->getName()).getLength();
     size_t nx = vvcs.at(0).nx;
     size_t ny = vvcs.at(0).ny;
-    vvcs.at(0).nz = cdm_->getDimension(vvcs.at(0).cs->getGeoZAxis()->getName()).getLength();
-    vvcs.at(0).dx = fabs(p_->dataReader->getData(vvcs.at(0).cs->getGeoXAxis()->getName())->asDouble()[1] - p_->dataReader->getData(vvcs.at(0).cs->getGeoXAxis()->getName())->asDouble()[0]);
-    vvcs.at(0).dy = fabs(p_->dataReader->getData(vvcs.at(0).cs->getGeoYAxis()->getName())->asDouble()[1] - p_->dataReader->getData(vvcs.at(0).cs->getGeoYAxis()->getName())->asDouble()[0]);
     string lat, lon;
     cdm_->getLatitudeLongitude(vvcs.at(0).xWind, lat, lon);
     // get 2d coordinates
@@ -528,11 +530,11 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
 
         DataPtr zsD = p_->vvComp.geopotData;
         assert(zsD->size() == nx*ny);
-        DataPtr psD = reader->getScaledDataSliceInUnit(p_->vvComp.vt->ps, "Pa", unLimDimPos);
+        DataPtr psD = reader->getScaledDataSliceInUnit(p_->vvComp.ps, "Pa", unLimDimPos);
         assert(psD->size() == nx*ny);
-        DataPtr apD = reader->getScaledDataInUnit(p_->vvComp.vt->ap, "Pa");
+        DataPtr apD = reader->getScaledDataInUnit(p_->vvComp.ap, "Pa");
         assert(apD->size() == nz);
-        DataPtr bD = reader->getScaledData(p_->vvComp.vt->b);
+        DataPtr bD = reader->getScaledData(p_->vvComp.b);
         assert(bD->size() == nz);
         DataPtr uD = reader->getScaledDataSliceInUnit(p_->vvComp.xWind, "m/s", unLimDimPos);
         assert(uD->size() == nx*ny*nz);

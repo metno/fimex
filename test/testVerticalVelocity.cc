@@ -39,6 +39,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/interpolation.h"
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMReader.h"
+#include "fimex/CDMProcessor.h"
 #include "fimex/Data.h"
 #include "fimex/CDM.h"
 #include "fimex/CDMconstants.h"
@@ -114,6 +115,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
         BOOST_CHECK_EQUAL(MIFI_OK, mifi_compute_vertical_velocity(nx, ny, nz, dx, dy, gridDistX.get(), gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(), zs.get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()));
 
 
+
         DataPtr hyD = reader->getScaledData("hybrid0");
         boost::shared_array<float> hy = hyD->asFloat();
         for (size_t k = 0; k < nz; ++k) {
@@ -124,6 +126,49 @@ BOOST_AUTO_TEST_CASE( test_mifi_compute_vertical_velocity )
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE( test_cdmprocessor_addverticalvelocity )
+{
+    string topSrcDir(TOP_SRCDIR);
+    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create("netcdf", topSrcDir + "/test/verticalVelocity.nc"));
+    if (reader.get() == 0) return; // no support for netcdf4
+
+    boost::shared_ptr<CDMProcessor> proc(new CDMProcessor(reader));
+    proc->addVerticalVelocity();
+    BOOST_CHECK(proc->getCDM().hasVariable("upward_air_velocity_ml"));
+    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(proc);
+
+    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
+            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator("upward_air_velocity_ml"));
+    if (varSysIt != coordSys.end()) {
+        CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+        CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+        CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Z
+        CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
+
+        //cerr << "found axes" << endl;
+
+        size_t nx = proc->getData(xAxis->getName())->size();
+        size_t ny = proc->getData(yAxis->getName())->size();
+        size_t nz = proc->getData(zAxis->getName())->size();
+        size_t nt = proc->getData(tAxis->getName())->size();
+
+        DataPtr hyD = proc->getScaledData("hybrid0");
+        boost::shared_array<float> hy = hyD->asFloat();
+        for (size_t t = 0; t < nt; ++t) {
+            boost::shared_array<float> w = proc->getScaledDataSliceInUnit("upward_air_velocity_ml", "m/s", t)->asFloat();
+            for (size_t k = 0; k < nz; ++k) {
+                pair<float*, float*> minMax = boost::minmax_element(&w[k*nx*ny], &w[k*nx*ny]+nx*ny);
+                BOOST_CHECK(*minMax.first > -4);
+                BOOST_CHECK(*minMax.second < 4);
+                //printf("k=%d, eta=%f: min = %f, max = %f m/s\n", k, hy[k], *minMax.first, *minMax.second);
+            }
+        }
+    } else {
+        BOOST_CHECK(false);
+    }
+}
+
 
 #else
 // no boost testframework
