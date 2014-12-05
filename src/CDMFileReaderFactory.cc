@@ -183,7 +183,25 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
 #endif
 #ifdef HAVE_NETCDF_H
     case MIFI_FILETYPE_NETCDF: {
-        boost::shared_ptr<CDMReader> reader(new NetCDF_CDMReader(fileName, false));
+        boost::shared_ptr<CDMReader> reader;
+        // scanfiles by a glob
+        std::string globStr("glob:");
+        if (fileName.find(globStr) == 0) { // starts with glob:
+            std::string glob = fileName.substr(globStr.size());
+            std::vector<std::string> files;
+            globFiles(files, glob);
+            std::ostringstream ncml;
+            ncml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl
+                 << "<netcdf xmlns=\"http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2\">"
+                 << "<aggregation type=\"joinExisting\">";
+            for (size_t i = 0; i < files.size(); ++i) {
+                ncml << "<netcdf location=\"" << files.at(i) << "\" />";
+            }
+            ncml << "</aggregation></netcdf>";
+            reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(XMLInputString(ncml.str())));
+        } else {
+            reader = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(fileName, false));
+        }
         if (!configXML.isEmpty()) {
             reader = boost::shared_ptr<CDMReader>(new NcmlCDMReader(reader, configXML));
         }
