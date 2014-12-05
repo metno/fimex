@@ -707,11 +707,11 @@
         <attribute name="units" value="" type="string" />
     </parameter>
     -->
-    <parameter name="cloud_liquid_water_mixing_ratio_ml" type="float">
+    <parameter name="mass_fraction_of_cloud_liquid_water_in_air_ml" type="float">
         <grib2 discipline="0" parameterCategory="1" parameterNumber="83" typeOfLevel="105"/>
         <attribute name="long_name" value="Specific cloud liquid water contents (clwc)" type="string"/>
-        <attribute name="standard_name" value="cloud_liquid_water_mixing_ration" type="string"/>
-        <attribute name="units" value="1" type="string"/>
+        <attribute name="standard_name" value="mass_fraction_of_cloud_liquid_water_in_air" type="string"/>
+        <attribute name="units" value="kg/kg" type="string"/>
     </parameter>
     <!-- Total cloud cover  (71) -->
     <parameter name="cloud_area_fraction" type="float">

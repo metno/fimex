@@ -3,125 +3,125 @@
 <variables>
 <!--  I dont use components in model-layer 59/60 (see hirlam12ml) -->
 <parameter id="8,2,1000" name="air_pressure">
-	<attribute name="_FillValue" value="-32767" type="short" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="air_pressure_at_sea_level" type="string" />
-	<attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
-	<!--<attribute name="scale_factor" value="10" type="float" />-->
-	<attribute name="units" value="hPa" type="string" />
+    <attribute name="_FillValue" value="-32767" type="short" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="air_pressure_at_sea_level" type="string" />
+    <attribute name="standard_name" value="air_pressure_at_sea_level" type="string" />
+    <!--<attribute name="scale_factor" value="10" type="float" />-->
+    <attribute name="units" value="hPa" type="string" />
 </parameter>
 <parameter id="19" name="lwe_thickness_of_large_scale_precipitation_amount" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="lwe_thickness_of_large_scale_precipitation_amount" type="string" />
-	<attribute name="standard_name" value="lwe_thickness_of_large_scale_precipitation_amount" type="string" />
-	<attribute name="units" value="mm" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="lwe_thickness_of_large_scale_precipitation_amount" type="string" />
+    <attribute name="standard_name" value="lwe_thickness_of_large_scale_precipitation_amount" type="string" />
+    <attribute name="units" value="mm" type="string" />
 </parameter>
 <parameter id="20" name="lwe_thickness_of_convective_precipitation_amount" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="lwe_thickness_of_convective_precipitation_amount" type="string" />
-	<attribute name="standard_name" value="lwe_thickness_of_convective_precipitation_amount" type="string" />
-	<attribute name="units" value="mm" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="lwe_thickness_of_convective_precipitation_amount" type="string" />
+    <attribute name="standard_name" value="lwe_thickness_of_convective_precipitation_amount" type="string" />
+    <attribute name="units" value="mm" type="string" />
 </parameter>
 <parameter id="21" name="tendency_of_surface_air_pressure" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="tendency_of_surface_air_pressure" type="string" />
-	<attribute name="standard_name" value="tendency_of_surface_air_pressure" type="string" />
-	<attribute name="units" value="Pa s-1" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="tendency_of_surface_air_pressure" type="string" />
+    <attribute name="standard_name" value="tendency_of_surface_air_pressure" type="string" />
+    <attribute name="units" value="Pa s-1" type="string" />
 </parameter>
-<parameter id="22,2,1000" name="cloud_liquid_water_content_of_atmosphere_layer" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="cloud_liquid_water_content_of_atmosphere_layer" type="string" />
-	<attribute name="standard_name" value="cloud_liquid_water_content_of_atmosphere_layer" type="string" />
-	<attribute name="metno_name" value="qliq" type="string" />
-	<attribute name="units" value="kg m-2" type="string" />
+<parameter id="22,2,1000" name="mass_fraction_of_cloud_liquid_water_in_air" type="float">
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="mass_fraction_of_cloud_liquid_water_in_air" type="string" />
+    <attribute name="standard_name" value="mass_fraction_of_cloud_liquid_water_in_air" type="string" />
+    <attribute name="metno_name" value="qliq" type="string" />
+    <attribute name="units" value="kg/kg" type="string" />
 </parameter>
 <parameter id="29,2,1000" name="soil_temperature" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="soil_temperature" type="string" />
-	<attribute name="standard_name" value="soil_temperature" type="string" />
-	<attribute name="units" value="K" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="soil_temperature" type="string" />
+    <attribute name="standard_name" value="soil_temperature" type="string" />
+    <attribute name="units" value="K" type="string" />
 </parameter>
 <parameter id="30,2,1000" name="air_temperature" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="cell_methods" value="time: point" type="string" />
-	<attribute name="long_name" value="air_temperature" type="string" />
-	<attribute name="standard_name" value="air_temperature" type="string" />
-	<attribute name="units" value="K" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="cell_methods" value="time: point" type="string" />
+    <attribute name="long_name" value="air_temperature" type="string" />
+    <attribute name="standard_name" value="air_temperature" type="string" />
+    <attribute name="units" value="K" type="string" />
 </parameter>
 <parameter id="35,2,1000" name="surface_downwelling_shortwave_flux_in_air" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="surface_downwelling_shortwave_flux_in_air" type="string" />
-	<attribute name="standard_name" value="surface_downwelling_shortwave_flux_in_air" type="string" />
-	<attribute name="units" value="kJ/m2" type="string" />
-	<attribute name="cell_method" value="time: accumulated" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="surface_downwelling_shortwave_flux_in_air" type="string" />
+    <attribute name="standard_name" value="surface_downwelling_shortwave_flux_in_air" type="string" />
+    <attribute name="units" value="kJ/m2" type="string" />
+    <attribute name="cell_method" value="time: accumulated" type="string" />
 </parameter>
 <!-- change in scale_factor -->
 <parameter id="36,2,1000" name="surface_upward_sensible_heat_flux" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="surface_upward_sensible_heat_flux" type="string" />
-	<attribute name="standard_name" value="surface_upward_sensible_heat_flux" type="string" />
-	<attribute name="units" value="kJ/m2" type="string" />
-	<attribute name="cell_method" value="time: accumulated" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="surface_upward_sensible_heat_flux" type="string" />
+    <attribute name="standard_name" value="surface_upward_sensible_heat_flux" type="string" />
+    <attribute name="units" value="kJ/m2" type="string" />
+    <attribute name="cell_method" value="time: accumulated" type="string" />
 </parameter>
 <parameter id="37,2,1000" name="surface_upward_latent_heat_flux" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="surface_upward_latent_heat_flux" type="string" />
-	<attribute name="standard_name" value="surface_upward_latent_heat_flux" type="string" />
-	<attribute name="units" value="kJ/m2" type="string" />
-	<attribute name="cell_method" value="time: accumulated" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="surface_upward_latent_heat_flux" type="string" />
+    <attribute name="standard_name" value="surface_upward_latent_heat_flux" type="string" />
+    <attribute name="units" value="kJ/m2" type="string" />
+    <attribute name="cell_method" value="time: accumulated" type="string" />
 </parameter>
 <parameter id="63,2,1000" name="lwe_thickness_of_snowfall_amount" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="lwe_thickness_of_snowfall_amount" type="string" />
-	<attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
-	<attribute name="units" value="mm" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="lwe_thickness_of_snowfall_amount" type="string" />
+    <attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
+    <attribute name="units" value="mm" type="string" />
 </parameter>
 <parameter id="64,2,1000" name="lwe_thickness_of_large_scale_snowfall_amount" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="lwe_thickness_of_large_scale_snowfall_amount" type="string" />
-	<attribute name="metno_name" value="lwe_thickness_of_large_scale_snowfall_amount" type="string" />
-	<attribute name="units" value="mm" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="lwe_thickness_of_large_scale_snowfall_amount" type="string" />
+    <attribute name="metno_name" value="lwe_thickness_of_large_scale_snowfall_amount" type="string" />
+    <attribute name="units" value="mm" type="string" />
 </parameter>
 <parameter id="65,2,1000" name="lwe_thickness_of_convective_snowfall_amount" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="lwe_thickness_of_convective_snowfall_amount" type="string" />
-	<attribute name="standard_name" value="lwe_thickness_of_convective_snowfall_amount" type="string" />
-	<attribute name="units" value="mm" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="lwe_thickness_of_convective_snowfall_amount" type="string" />
+    <attribute name="standard_name" value="lwe_thickness_of_convective_snowfall_amount" type="string" />
+    <attribute name="units" value="mm" type="string" />
 </parameter>
 <parameter id="66,2,1000" name="lwe_thickness_of_surface_snow_amount">
-	<attribute name="long_name" value="lwe_thickness_of_surface_snow_amount" type="string" />
-	<attribute name="standard_name" value="lwe_thickness_of_surface_snow_amount" type="string" />
-	<attribute name="units" value="m" type="string" />
+    <attribute name="long_name" value="lwe_thickness_of_surface_snow_amount" type="string" />
+    <attribute name="standard_name" value="lwe_thickness_of_surface_snow_amount" type="string" />
+    <attribute name="units" value="m" type="string" />
 </parameter>
 <parameter id="83,2,1000" name="surface_roughness_length" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="surface_roughness_length" type="string" />
-	<attribute name="standard_name" value="surface_roughness_length" type="string" />
-	<attribute name="units" value="m" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="surface_roughness_length" type="string" />
+    <attribute name="standard_name" value="surface_roughness_length" type="string" />
+    <attribute name="units" value="m" type="string" />
 </parameter>
 <parameter id="85,2,1000" name="soil_moisture_content">
-	<attribute name="long_name" value="soil_moisture_content" type="string" />
-	<attribute name="standard_name" value="soil_moisture_content" type="string" />
-	<attribute name="units" value="kg/m2" type="string" />
+    <attribute name="long_name" value="soil_moisture_content" type="string" />
+    <attribute name="standard_name" value="soil_moisture_content" type="string" />
+    <attribute name="units" value="kg/m2" type="string" />
 </parameter>
 <parameter id="86,2,1000" name="moisture_content_of_soil_layer" type="float">
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="moisture_content_of_soil_layer" type="string" />
-	<attribute name="standard_name" value="moisture_content_of_soil_layer" type="string" />
-	<attribute name="metno_info" value="deep_soil" type="string"/>
-	<attribute name="units" value="kg/m2" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="moisture_content_of_soil_layer" type="string" />
+    <attribute name="standard_name" value="moisture_content_of_soil_layer" type="string" />
+    <attribute name="metno_info" value="deep_soil" type="string"/>
+    <attribute name="units" value="kg/m2" type="string" />
 </parameter>
 <parameter id="87,2,1000" name="surface_longwave_radiation" type="float" >
-	<attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-	<attribute name="long_name" value="surface_longwave_radiation" type="string" />
-	<attribute name="metno_name" value="surface_longwave_radiation" type="string" />
-	<attribute name="units" value="kW m-2 s-1" type="string" />
+    <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
+    <attribute name="long_name" value="surface_longwave_radiation" type="string" />
+    <attribute name="metno_name" value="surface_longwave_radiation" type="string" />
+    <attribute name="units" value="kW m-2 s-1" type="string" />
 </parameter>
 <parameter id="175,2,1000" name="surface_albedo">
-	<attribute name="long_name" value="surface_albedo" type="string" />
-	<attribute name="standard_name" value="surface_albedo" type="string" />
-	<attribute name="scale_factor" value="0.01" type="float" />
-	<attribute name="units" value="1" type="string" />
+    <attribute name="long_name" value="surface_albedo" type="string" />
+    <attribute name="standard_name" value="surface_albedo" type="string" />
+    <attribute name="scale_factor" value="0.01" type="float" />
+    <attribute name="units" value="1" type="string" />
 </parameter>
 </variables>
