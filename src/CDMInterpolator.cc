@@ -74,6 +74,7 @@ struct CDMInterpolatorInternals {
     std::string latitudeName;
     std::string longitudeName;
     std::vector<boost::shared_ptr<InterpolatorProcess2d> > preprocesses;
+    std::vector<boost::shared_ptr<InterpolatorProcess2d> > postprocesses;
     // variableName, horizontalId
     std::map<std::string, std::string> projectionVariables;
     // horizontalId, cachedInterpolation
@@ -197,6 +198,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 LOG4FIMEX(logger, Logger::WARN, "Cannot reproject vector " << variable.getName());
             }
         }
+        processArray_(p_->postprocesses, iArray.get(), newSize, ci->getOutX(), ci->getOutY());
         return interpolationArray2Data(iArray, newSize, badValue);
     }
 }
@@ -1747,5 +1749,12 @@ void CDMInterpolator::addPreprocess(boost::shared_ptr<InterpolatorProcess2d> pro
     LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation preprocess");
     p_->preprocesses.push_back(process);
 }
+
+void CDMInterpolator::addPostprocess(boost::shared_ptr<InterpolatorProcess2d> process)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation postprocess");
+    p_->postprocesses.push_back(process);
+}
+
 
 }
