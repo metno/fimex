@@ -158,6 +158,12 @@ enum mifi_interpol_method {
  * vertical interpolation to sigma dimensionless vertical coordinate
  */
 #define MIFI_VINT_SIGMA 3
+/**
+ * @brief vertical interpolation type
+ *
+ * vertical interpolation to height above mean sea levels in m
+ */
+#define MIFI_VINT_ALTITUDE 4
 
 
 /**

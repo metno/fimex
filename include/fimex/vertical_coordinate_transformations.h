@@ -109,7 +109,8 @@ extern int mifi_atmosphere_hybrid_sigma_pressure(size_t n, double p0, double ps,
 extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const double* ap, const double* b, double* pressure);
 
 /**
- * convert height to pressure using the formula http://en.wikipedia.org/wiki/Barometric_formula
+ * convert height above base-layer (usually altitude, i.e. height above MSL) to pressure
+ * using the formula http://en.wikipedia.org/wiki/Barometric_formula
  *
  * P(h) = P_b exp[ -gM/R * h/T_b  ]
  *
@@ -121,7 +122,7 @@ extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const d
  * R = Universal gas constant (8.31432 N·m /(mol·K) )
  *
  * @param n size of array h and pressure
- * @param P_b pressure at base-layer (i.e. surface, or means-sea-level) - usually varying in time,x,y
+ * @param P_b pressure at base-layer (e.g. means-sea-level) - usually varying in time,x,y
  * @param h height in m above base-layer
  * @param T_b temperature at base layer in K - usually varying in time,x,y
  * @param pressure output values in the same unit as p_b and at the same place as ps
@@ -131,7 +132,7 @@ extern int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const d
 extern int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, double* pressure);
 
 /**
- * convert height to pressure using the formula http://en.wikipedia.org/wiki/Barometric_formula
+ * convert altitude to pressure using the formula http://en.wikipedia.org/wiki/Barometric_formula
  * and using the international standard atmosphere http://en.wikimedia.org/wiki/International_Standard_Atmosphere
  */
 extern int mifi_barometric_standard_pressure(size_t n, const double* h, double* pressure);
@@ -162,8 +163,9 @@ extern int mifi_barometric_height(size_t n, double P_b, const double* p, double 
 /**
  * convert pressure to height using the formula http://en.wikipedia.org/wiki/Barometric_formula
  * and using the international standard atmosphere http://en.wikimedia.org/wiki/International_Standard_Atmosphere
+ * @param altitude output values, i.e. height above mean sea level in m
  */
-extern int mifi_barometric_standard_height(size_t n, const double* p, double* height);
+extern int mifi_barometric_standard_altitude(size_t n, const double* p, double* altitude);
 
 /**
  * convert a standard_name="ocean_s_coordinate_g1" to z using the

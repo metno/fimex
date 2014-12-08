@@ -70,12 +70,12 @@ vector<double> LnPressureToPressureConverter::operator()(size_t, size_t, size_t)
     return pres_;
 }
 
-HeightStandardToPressureConverter::HeightStandardToPressureConverter(const vector<double>& h) : pres_(h.size())
+AltitudeStandardToPressureConverter::AltitudeStandardToPressureConverter(const vector<double>& h) : pres_(h.size())
 {
     mifi_barometric_standard_pressure(h.size(), &h[0], &pres_[0]);
 }
 
-vector<double> HeightStandardToPressureConverter::operator()(size_t, size_t, size_t)
+vector<double> AltitudeStandardToPressureConverter::operator()(size_t, size_t, size_t)
 {
     return pres_;
 }
@@ -100,21 +100,44 @@ vector<double> HybridSigmaToPressureConverter::operator()(size_t x, size_t y, si
 }
 
 
-vector<double> PressureToStandardHeightConverter::operator()(size_t x, size_t y, size_t t) {
+vector<double> PressureToStandardAltitudeConverter::operator()(size_t x, size_t y, size_t t) {
+    assert(presConv_.get() != 0);
     const vector<double> p((*presConv_)(x,y,t));
     vector<double> h(p.size());
-    mifi_barometric_standard_height(p.size(), &p[0], &h[0]);
+    mifi_barometric_standard_altitude(p.size(), &p[0], &h[0]);
     return h;
 }
 
-vector<double> GeopotentialToHeightConverter::operator()(size_t x, size_t y, size_t t) {
-    vector<double> h(nz_);
+vector<double> AltitudeConverterToHeightConverter::operator()(size_t x, size_t y, size_t t) {
+    assert(conv_.get() != 0);
+    vector<double> h = (*conv_)(x, y, t);
     for (size_t z = 0; z < nz_; z++) {
-        float hg = geopot_[((t*nz_ + z)*ny_ + y)*nx_ +x];
-        h.at(z) =  static_cast<double>(hg - alti_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)]);
+        float hg = h.at(z);
+        h.at(z) =  static_cast<double>(hg - topo_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)]);
     }
     return h;
 }
+
+vector<double> HeightConverterToAltitudeConverter::operator()(size_t x, size_t y, size_t t) {
+    assert(conv_.get() != 0);
+    vector<double> alti = (*conv_)(x, y, t);
+    for (size_t z = 0; z < nz_; z++) {
+        float hg = alti.at(z);
+        alti.at(z) =  static_cast<double>(hg + topo_[mifi_3d_array_position(x,y,t,nx_,ny_,nt_)]);
+    }
+    return alti;
+}
+
+vector<double> GeopotentialToAltitudeConverter::operator()(size_t x, size_t y, size_t t) {
+    vector<double> h(nz_);
+    for (size_t z = 0; z < nz_; z++) {
+        float hg = geopot_[((t*nz_ + z)*ny_ + y)*nx_ +x];
+        h.at(z) =  static_cast<double>(hg);
+    }
+    return h;
+}
+
+
 
 vector<double> OceanSCoordinateGToDepthConverter::operator()(size_t x, size_t y, size_t t) {
     vector<double> z(nz_);

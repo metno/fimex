@@ -107,6 +107,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
         pimpl_->verticalType = MIFI_VINT_PRESSURE;
     } else if (verticalType == "height") {
         pimpl_->verticalType = MIFI_VINT_HEIGHT;
+    } else if (verticalType == "altitude") {
+        pimpl_->verticalType = MIFI_VINT_ALTITUDE;
     } else if (verticalType == "depth") {
         pimpl_->verticalType = MIFI_VINT_DEPTH;
     } else {
@@ -143,6 +145,20 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
             break;
         case MIFI_VINT_HEIGHT:
             pimpl_->vAxis = findUniqueDimVarName(dataReader->getCDM(), "height");
+            {
+                cdm_->addDimension(CDMDimension(pimpl_->vAxis, level1.size()));
+                CDMVariable var(pimpl_->vAxis, CDM_DOUBLE, vector<string>(1, pimpl_->vAxis));
+                boost::shared_array<double> height(new double[level1.size()]);
+                copy(level1.begin(), level1.end(), &height[0]);
+                var.setData(createData(level1.size(), height));
+                cdm_->addVariable(var);
+                cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("long_name", "height above ground"));
+                cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("units", "m"));
+                cdm_->addAttribute(pimpl_->vAxis, CDMAttribute("positive", "up"));
+            }
+            break;
+        case MIFI_VINT_ALTITUDE:
+            pimpl_->vAxis = findUniqueDimVarName(dataReader->getCDM(), "height_above_msl");
             {
                 cdm_->addDimension(CDMDimension(pimpl_->vAxis, level1.size()));
                 CDMVariable var(pimpl_->vAxis, CDM_DOUBLE, vector<string>(1, pimpl_->vAxis));
@@ -243,6 +259,9 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
             xAxis, yAxis, zAxis, tAxis,
             nx, ny, nz, startT, nt, unLimDimPos);
     boost::shared_ptr<ToVLevelConverter> levConv = cs->getVerticalTransformation()->getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
+    if (levConv.get() == 0) {
+        throw CDMException("no level-converter for variable " + varName);
+    }
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
     switch (pimpl_->verticalInterpolationMethod) {

@@ -87,10 +87,12 @@ public:
     /// the most natural vertical type, one of the MIFI_VINT_* in fimex/mifi_constants.h
     virtual int getPreferredVerticalType() const = 0;
     /**
-     *  Indicate if all parameters are given. In some cases
-     *  a transformation might be used as indicator, even if
-     *  transformations to other vertical transformations are not
-     *  possible.
+     * Indicate if all parameters are given to fully describe the transformation.
+     *
+     * Even a fully described transformation does not guarantee that a converter exists
+     * (e.g. height -> altitude requires in addition topography).
+     *
+     * And converters might exist, even if a transformation is not complete.
      */
     virtual bool isComplete() const = 0;
     /**
@@ -113,7 +115,19 @@ public:
 protected:
     virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const = 0;
     /**
-     * Default implementation: Convert to height with pressure(-converter) and standard atmosphere.
+     * Default implementation: Convert to altitude (height above MSL) with pressure(-converter) and standard atmosphere.
+     * @param reader
+     * @param unLimDimPos
+     * @param cs
+     * @param nx
+     * @param ny
+     * @param nz
+     * @param nt
+     * @return
+     */
+    virtual boost::shared_ptr<ToVLevelConverter> getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    /**
+     * Default implementation: Convert to height above ground with pressure(-converter) and standard atmosphere.
      * @param reader
      * @param unLimDimPos
      * @param cs

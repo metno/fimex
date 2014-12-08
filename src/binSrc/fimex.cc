@@ -1033,7 +1033,7 @@ int run(int argc, char* args[])
         ("merge.printCS", "print CoordinateSystems of interpolator")
         ("merge.printSize", "print size estimate")
 
-        ("verticalInterpolate.type", po::value<string>(), "pressure, height or depth")
+        ("verticalInterpolate.type", po::value<string>(), "pressure, height (above ground) or depth")
         ("verticalInterpolate.method", po::value<string>(), "linear, log, loglog or nearestneighbor interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")

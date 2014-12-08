@@ -100,9 +100,9 @@ int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, do
     return MIFI_OK;
 }
 
-int mifi_barometric_standard_height(size_t n, const double* p, double* height)
+int mifi_barometric_standard_altitude(size_t n, const double* p, double* altitude)
 {
-    return mifi_barometric_height(n, 1013.25, p, 288.15, height);
+    return mifi_barometric_height(n, 1013.25, p, 288.15, altitude);
 }
 
 int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z)
