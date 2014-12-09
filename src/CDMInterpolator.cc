@@ -39,6 +39,7 @@
 #include "fimex/SpatialAxisSpec.h"
 #include "nanoflann/nanoflann.hpp"
 #include "fimex/Utils.h"
+#include "fimex/CDMReaderUtils.h"
 #include "../config.h"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -626,6 +627,11 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
 
 map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjectionVars(bool withProjection)
 {
+    if (!withProjection) {
+        // make sure lat/lon points exist for all projections
+        generateProjectionCoordinates(p_->dataReader);
+    }
+
     typedef map<string, CoordSysPtr> CoordSysMap;
     typedef vector<CoordSysPtr> CoordSysVec;
     CoordSysMap coordSysMap;
@@ -1146,10 +1152,12 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
         DataPtr latData = p_->dataReader->getScaledData(latitude);
+        assert(latData.get() != 0);
         boost::shared_array<double> latVals = latData->asDouble();
         size_t latSize = latData->size();
         latData.reset();
         DataPtr lonData = p_->dataReader->getScaledData(longitude);
+        assert(lonData.get() != 0);
         boost::shared_array<double> lonVals = lonData->asDouble();
         size_t lonSize = lonData->size();
         lonData.reset();

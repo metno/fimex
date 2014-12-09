@@ -30,6 +30,7 @@
 #include "fimex/CDM.h"
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
+#include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "coordSys/CoordSysUtils.h"
@@ -56,23 +57,6 @@ struct VIntPimpl {
     // variable-names with vertical information to change
     vector<CoordSysPtr> changeCoordSys;
 };
-
-string findUniqueDimVarName(const CDM& cdm, string baseVar)
-{
-    // find a unique variable name
-    if (!(cdm.hasVariable(baseVar) || cdm.hasDimension(baseVar))) {
-        return baseVar;
-    } else {
-        for (size_t i = 0; i < 9; i++) {
-            string varName = baseVar + type2string(i);
-            if (!(cdm.hasVariable(varName) || cdm.hasDimension(varName))) {
-                return varName;
-            }
-        }
-    }
-    throw CDMException("unable to generate new dimension/variable name starting with "+ baseVar);
-}
-
 
 /* TODO: see CDMInterpolator.cc, deduplicate */
 static boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue) {

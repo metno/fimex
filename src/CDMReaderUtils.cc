@@ -25,6 +25,8 @@
  */
 
 #include "fimex/CDMReaderUtils.h"
+#include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/coordSys/Projection.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
 #include "fimex/TimeUnit.h"
@@ -33,6 +35,7 @@
 #include <boost/shared_array.hpp>
 #include <vector>
 #include <set>
+#include <map>
 
 namespace MetNoFimex
 {
@@ -155,6 +158,72 @@ bool compareCDMVarShapes(const CDM& cdm1, const string& varName1, const CDM& cdm
         return false; // s1 reached end, s2 not
     }
     return true;
+}
+
+string findUniqueDimVarName(const CDM& cdm, string baseVar)
+{
+    // find a unique variable name
+    if (!(cdm.hasVariable(baseVar) || cdm.hasDimension(baseVar))) {
+        return baseVar;
+    } else {
+        for (size_t i = 0; i < 99; i++) {
+            string varName = baseVar + type2string(i);
+            if (!(cdm.hasVariable(varName) || cdm.hasDimension(varName))) {
+                return varName;
+            }
+        }
+    }
+    throw CDMException("unable to generate new dimension/variable name starting with "+ baseVar);
+}
+
+
+struct CoordsInformation {
+    string xDim;
+    string yDim;
+    set<string> variables;
+    boost::shared_ptr<const Projection> proj;
+};
+
+void generateProjectionCoordinates(boost::shared_ptr<CDMReader>& reader)
+{
+    typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+    typedef vector<CoordSysPtr> CoordSysVec;
+
+    CoordSysVec coordSys = listCoordinateSystems(reader);
+    CDM& cdm = reader->getInternalCDM();
+    vector<CDMVariable> variables = cdm.getVariables();
+    map<string, CoordsInformation> coords;
+    for (CoordSysVec::iterator cs = coordSys.begin(); cs != coordSys.end(); ++cs) {
+        if ((*cs)->isSimpleSpatialGridded() && (*cs)->hasProjection() &&
+              (!((*cs)->hasAxisType(CoordinateAxis::Lat) && (*cs)->hasAxisType(CoordinateAxis::Lon)))) {
+            CoordinateSystem::ConstAxisPtr x = (*cs)->getGeoXAxis();
+            assert(x.get() != 0);
+            CoordinateSystem::ConstAxisPtr y = (*cs)->getGeoYAxis();
+            assert(y.get() != 0);
+            string xy = x->getName() + "_" + y->getName();
+            coords[xy].xDim = x->getName();
+            coords[xy].yDim = y->getName();
+            coords[xy].proj = (*cs)->getProjection();
+            for (vector<CDMVariable>::iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
+                string varnm = varIt->getName();
+                if ((*cs)->isComplete(varnm) && (*cs)->isCSFor(varnm)) {
+                    coords[xy].variables.insert(varnm);
+                }
+            }
+        }
+    }
+
+    for (map<string,CoordsInformation>::iterator ci = coords.begin(); ci != coords.end(); ++ci) {
+        string lon = findUniqueDimVarName(cdm, "lon");
+        string lat = findUniqueDimVarName(cdm, "lat");
+        cdm.getVariable(ci->second.xDim).setData(reader->getData(ci->second.xDim));
+        cdm.getVariable(ci->second.yDim).setData(reader->getData(ci->second.yDim));
+        cdm.generateProjectionCoordinates(ci->second.proj, ci->second.xDim, ci->second.yDim, lon, lat);
+        for (set<string>::iterator varIt = ci->second.variables.begin(); varIt != ci->second.variables.end(); ++varIt) {
+            cdm.addOrReplaceAttribute(*varIt, CDMAttribute("coordinates", lon + " " +lat));
+        }
+    }
+
 }
 
 }
