@@ -31,6 +31,38 @@
 
 #include "fimex/CDMconstants.h"
 
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
+int mifi_string_to_interpolation_method(const char* mString)
+{
+    int method = MIFI_INTERPOL_UNKNOWN;
+    size_t len = strlen(mString);
+    if (strncmp("bilinear", mString, MIN(len, strlen("bilinear"))) == 0) {
+        method = MIFI_INTERPOL_BILINEAR;
+    } else if (strncmp("nearestneighbor", mString, MIN(len, strlen("nearestneighbor"))) == 0) {
+        method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
+    } else if (strncmp("bicubic", mString, MIN(len, strlen("bicubic"))) == 0) {
+        method = MIFI_INTERPOL_BICUBIC;
+    } else if (strncmp("coord_nearestneighbor", mString, MIN(len, strlen("coord_nearestneighbor"))) == 0) {
+        method = MIFI_INTERPOL_COORD_NN;
+    } else if (strncmp("coord_kdtree", mString, MIN(len, strlen("coord_kdtree"))) == 0) {
+        method = MIFI_INTERPOL_COORD_NN_KD;
+    } else if (strncmp("forward_sum", mString, MIN(len, strlen("forward_sum"))) == 0) {
+        method = MIFI_INTERPOL_FORWARD_SUM;
+    } else if (strncmp("forward_mean", mString, MIN(len, strlen("forward_mean"))) == 0) {
+        method = MIFI_INTERPOL_FORWARD_MEAN;
+    } else if (strncmp("forward_median", mString, MIN(len, strlen("forward_median"))) == 0) {
+        method = MIFI_INTERPOL_FORWARD_MEDIAN;
+    } else if (strncmp("forward_max", mString, MIN(len, strlen("forward_max"))) == 0) {
+        method = MIFI_INTERPOL_FORWARD_MAX;
+    } else if (strncmp("forward_min", mString, MIN(len, strlen("forward_min"))) == 0) {
+        method = MIFI_INTERPOL_FORWARD_MIN;
+    }
+    return method;
+}
+
+
 static inline int ascendingDoubleComparator(const void * a, const void * b)
 {
     double x = *(double*)a;
