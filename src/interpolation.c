@@ -32,31 +32,44 @@
 #include "fimex/CDMconstants.h"
 
 
-#define MIN(a,b) (((a)<(b))?(a):(b))
+/**
+ * compare two strings
+ * @param str1
+ * @param str2
+ * @return 0 if str1 != str2, 1 otherwise
+ */
+static int mifi_string_equal(const char* str1, const char* str2)
+{
+    size_t len1 = strlen(str1);
+    size_t len2 = strlen(str2);
+    if (len1 == len2) {
+        return (strncmp(str1, str2, len1) == 0);
+    }
+    return 0;
+}
 
 int mifi_string_to_interpolation_method(const char* mString)
 {
     int method = MIFI_INTERPOL_UNKNOWN;
-    size_t len = strlen(mString);
-    if (strncmp("bilinear", mString, MIN(len, strlen("bilinear"))) == 0) {
+    if (mifi_string_equal("bilinear", mString)) {
         method = MIFI_INTERPOL_BILINEAR;
-    } else if (strncmp("nearestneighbor", mString, MIN(len, strlen("nearestneighbor"))) == 0) {
+    } else if (mifi_string_equal("nearestneighbor", mString)) {
         method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-    } else if (strncmp("bicubic", mString, MIN(len, strlen("bicubic"))) == 0) {
+    } else if (mifi_string_equal("bicubic", mString)) {
         method = MIFI_INTERPOL_BICUBIC;
-    } else if (strncmp("coord_nearestneighbor", mString, MIN(len, strlen("coord_nearestneighbor"))) == 0) {
+    } else if (mifi_string_equal("coord_nearestneighbor", mString)) {
         method = MIFI_INTERPOL_COORD_NN;
-    } else if (strncmp("coord_kdtree", mString, MIN(len, strlen("coord_kdtree"))) == 0) {
+    } else if (mifi_string_equal("coord_kdtree", mString)) {
         method = MIFI_INTERPOL_COORD_NN_KD;
-    } else if (strncmp("forward_sum", mString, MIN(len, strlen("forward_sum"))) == 0) {
+    } else if (mifi_string_equal("forward_sum", mString)) {
         method = MIFI_INTERPOL_FORWARD_SUM;
-    } else if (strncmp("forward_mean", mString, MIN(len, strlen("forward_mean"))) == 0) {
+    } else if (mifi_string_equal("forward_mean", mString)) {
         method = MIFI_INTERPOL_FORWARD_MEAN;
-    } else if (strncmp("forward_median", mString, MIN(len, strlen("forward_median"))) == 0) {
+    } else if (mifi_string_equal("forward_median", mString)) {
         method = MIFI_INTERPOL_FORWARD_MEDIAN;
-    } else if (strncmp("forward_max", mString, MIN(len, strlen("forward_max"))) == 0) {
+    } else if (mifi_string_equal("forward_max", mString)) {
         method = MIFI_INTERPOL_FORWARD_MAX;
-    } else if (strncmp("forward_min", mString, MIN(len, strlen("forward_min"))) == 0) {
+    } else if (mifi_string_equal("forward_min", mString)) {
         method = MIFI_INTERPOL_FORWARD_MIN;
     }
     return method;
