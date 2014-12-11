@@ -82,10 +82,20 @@ static bool detectXML(const char* magic) {
 
 mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
 {
+    // get appendix
+    std::string type("");
+    boost::smatch what;
+    if (boost::regex_match(fileName, what, boost::regex(".*\\.(\\w+)$"))) {
+        type = what[1].str();
+        std::transform(type.begin(), type.end(), type.begin(), (int(*)(int)) tolower);
+    }
+
     std::ifstream fs(fileName.c_str());
     if (!fs.is_open()) {
         throw CDMException("cannot open file "+fileName);
     }
+
+    // magic
     char magic[MIFI_MAGIC_SIZE];
     for (int i = 0; i < MIFI_MAGIC_SIZE; ++i) {
         magic[i] = 0;
@@ -99,15 +109,13 @@ mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
         return MIFI_FILETYPE_NETCDF;
     }
     if (detectXML(magic)) {
-        return MIFI_FILETYPE_NCML;
+        if (type != "grbml") { // avoid conflict between grbml and ncml xml-files
+            return MIFI_FILETYPE_NCML;
+        }
     }
 
     // detection by appendix
-    boost::smatch what;
-    if (boost::regex_match(fileName, what, boost::regex(".*\\.(\\w+)$"))) {
-        std::string type = what[1].str();
-        std::transform(type.begin(), type.end(), type.begin(), (int(*)(int)) tolower);
-
+    if (type != "") {
         if (type == "flt" || type == "dat" || type == "felt" || type == "flt2" || type == "dat2" || type == "felt2")
             return MIFI_FILETYPE_FELT;
         if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4")
@@ -122,6 +130,8 @@ mifi_filetype CDMFileReaderFactory::detectFileType(const std::string & fileName)
             return MIFI_FILETYPE_METGM;
         if (type == "prorad")
             return MIFI_FILETYPE_PRORAD;
+        if (type == "grbml")
+            return MIFI_FILETYPE_GRBML;
     }
     return MIFI_FILETYPE_UNKNOWN;
 }
@@ -132,6 +142,29 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
     return create(fileType, fileName, configXML, args);
 }
 
+static void getGribArgs(const std::vector<std::string> & args, std::vector<std::pair<std::string, std::string> >& members, std::vector<std::string>& files)
+{
+    for (std::vector<std::string>::const_iterator argIt = args.begin(); argIt != args.end(); ++argIt) {
+        std::string memberRegex("memberRegex:");
+        std::string memberName("memberName:");
+        if (argIt->find(memberRegex) == 0) {
+            std::vector<std::string> memberRegexParts = tokenize(argIt->substr(memberRegex.size()), ":");
+            if (memberRegexParts.size() == 1) {
+                memberRegexParts.push_back(memberRegexParts.at(0));
+            }
+            members.push_back(std::make_pair(memberRegexParts.at(1), memberRegexParts.at(0)));
+        } else if (argIt->find(memberName) == 0) {
+            std::vector<std::string> memberNameParts = tokenize(argIt->substr(memberName.size()), ":");
+            if (memberNameParts.size() == 1) {
+                memberNameParts.push_back(memberNameParts.at(0));
+            }
+            members.push_back(std::make_pair(memberNameParts.at(1), ".*\\Q" + memberNameParts.at(0) + "\\E.*"));
+        } else {
+            // additional file
+            files.push_back(*argIt);
+        }
+    }
+}
 
 boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const std::string & fileName, const XMLInput& configXML, const std::vector<std::string> & args)
 {
@@ -144,6 +177,15 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
         return boost::shared_ptr<CDMReader>(new FeltCDMReader2(fileName, configXML));
 #endif /* FELT */
 #ifdef HAVE_GRIB_API_H
+    case MIFI_FILETYPE_GRBML: {
+        std::vector<std::pair<std::string, std::string> > members;
+        std::vector<std::string> files; // files not used for grbml
+        getGribArgs(args, members, files);
+        if (configXML.isEmpty()) {
+            throw CDMException("config file required for grbml-files");
+        }
+        return boost::shared_ptr<CDMReader>(new GribCDMReader(fileName, configXML, members));
+    }
     case MIFI_FILETYPE_GRIB: {
         std::vector<std::string> files;
         // scanfiles by a glob
@@ -155,26 +197,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
             files.push_back(fileName);
         }
         std::vector<std::pair<std::string, std::string> > members;
-        for (std::vector<std::string>::const_iterator argIt = args.begin(); argIt != args.end(); ++argIt) {
-            std::string memberRegex("memberRegex:");
-            std::string memberName("memberName:");
-            if (argIt->find(memberRegex) == 0) {
-                std::vector<std::string> memberRegexParts = tokenize(argIt->substr(memberRegex.size()), ":");
-                if (memberRegexParts.size() == 1) {
-                    memberRegexParts.push_back(memberRegexParts.at(0));
-                }
-                members.push_back(std::make_pair(memberRegexParts.at(1), memberRegexParts.at(0)));
-            } else if (argIt->find(memberName) == 0) {
-                std::vector<std::string> memberNameParts = tokenize(argIt->substr(memberName.size()), ":");
-                if (memberNameParts.size() == 1) {
-                    memberNameParts.push_back(memberNameParts.at(0));
-                }
-                members.push_back(std::make_pair(memberNameParts.at(1), ".*\\Q" + memberNameParts.at(0) + "\\E.*"));
-            } else {
-                // additional file
-                files.push_back(*argIt);
-            }
-        }
+        getGribArgs(args, members, files);
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grib-files");
         }

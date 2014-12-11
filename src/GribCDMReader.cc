@@ -137,25 +137,10 @@ bool operator>=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(lhs < rh
 bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs);}
 bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
 
-
 GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
     : p_(new GribCDMReaderImpl())
 {
-    for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
-        p_->ensembleMemberIds.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
-    }
-    p_->configId = configXML.id();
-    p_->doc = configXML.getXMLDoc();
-    p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
-    {
-        // check config for root element
-        XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig");
-        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
-        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
-    }
-    initXMLNodeIdx();
-
-
+    initXMLAndMembers(configXML, members);
     std::map<std::string, std::string> options;
     if (xmlGetEarthFigure() != "") {
         options["earthfigure"] = xmlGetEarthFigure();
@@ -166,6 +151,39 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
         vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds, false, options).listMessages();
         copy(messages.begin(), messages.end(), back_inserter(p_->indices));
     }
+    initPostIndices();
+}
+
+GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
+    : p_(new GribCDMReaderImpl())
+{
+    initXMLAndMembers(configXML, members);
+
+    p_->indices = GribFileIndex(grbmlFileName).listMessages();
+
+    initPostIndices();
+}
+
+void GribCDMReader::initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
+{
+    for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
+        p_->ensembleMemberIds.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
+    }
+
+    p_->configId = configXML.id();
+    p_->doc = configXML.getXMLDoc();
+    p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
+    {
+        // check config for root element
+        XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig");
+        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
+        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
+    }
+    initXMLNodeIdx();
+}
+
+void GribCDMReader::initPostIndices()
+{
 
     // select wanted indices from doc, default to all
     {

@@ -983,20 +983,56 @@ GribFileIndex::GribFileIndex()
     // dummy generator
 }
 
-GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml, std::map<std::string, std::string> options)
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath,
+        const std::vector<std::pair<std::string, boost::regex> >& members,
+        bool ignoreExistingXml,
+        std::map<std::string, std::string> options)
 : options_(options)
 {
-    if (options_.find("earthfigure") != options.end()) {
-        earthFigure_ = options_["earthfigure"];
-        LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure " << earthFigure_);
+    init(gribFilePath, "", members, ignoreExistingXml);
+}
+
+GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath,
+        boost::filesystem::path grbmlFilePath,
+        const std::vector<std::pair<std::string,
+        boost::regex> >& members,
+        bool ignoreExistingXml,
+        std::map<std::string, std::string> options)
+: options_(options)
+{
+    init(gribFilePath, grbmlFilePath, members, ignoreExistingXml);
+}
+
+GribFileIndex::GribFileIndex(boost::filesystem::path grbmlFilePath)
+{
+    if (boost::filesystem::exists(grbmlFilePath)) {
+        initByXML(grbmlFilePath);
+    } else {
+        throw runtime_error("no such grbml-file: " + grbmlFilePath.string());
+    }
+}
+
+
+void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
+        const boost::filesystem::path& grbmlFilePath,
+        const std::vector<std::pair<std::string, boost::regex> >& members,
+        bool ignoreExistingXml)
+{
+    namespace fs = boost::filesystem;
+    if (fs::exists(grbmlFilePath)) {
+        initByXML(grbmlFilePath);
+    }
+    std::map<std::string, std::string>::const_iterator efIt = options_.find("earthfigure");
+    if (efIt != options_.end()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure '" << efIt->second << "'");
     }
     vector<string> extraKeys;
-    if (options_.find("extraKeys") != options.end()) {
-        LOG4FIMEX(logger, Logger::DEBUG, "using extraKeys " << options_["extraKeys"]);
-        extraKeys = tokenize(options_["extraKeys"],",");
+    std::map<std::string, std::string>::const_iterator ekIt = options_.find("extraKeys");
+    if (ekIt != options_.end()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "using extraKeys '" << ekIt->second << "'");
+        extraKeys = tokenize(ekIt->second,",");
     }
 
-    namespace fs = boost::filesystem;
     if (!fs::exists(gribFilePath) || ! fs::is_regular(gribFilePath)) {
         throw runtime_error("no such file: " + gribFilePath.string());
     }
@@ -1040,7 +1076,8 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath, const std::ve
     earthFigure_ = ""; // remember to reset!
 }
 
-void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys)
+
+void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys)
 {
     url_ = "file:"+ file_string(gribFilePath);
     FILE *fileh = fopen(file_string(gribFilePath).c_str(), "r");
@@ -1079,15 +1116,15 @@ void GribFileIndex::initByGrib(boost::filesystem::path gribFilePath, const std::
 
 }
 
-void GribFileIndex::initByXML(boost::filesystem::path xmlFilePath)
+void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
 {
-    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << xmlFilePath);
-    boost::shared_ptr<XMLDoc> doc(new XMLDoc(file_string(xmlFilePath)));
+    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
+    boost::shared_ptr<XMLDoc> doc(new XMLDoc(file_string(grbmlFilePath)));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     XPathObjPtr xp = doc->getXPathObject("/gfi:gribFileIndex");
     int size = (xp->nodesetval) ? xp->nodesetval->nodeNr : 0;
     if (size == 0) {
-        throw runtime_error("grib-index xmlfile does not contain root node at: " + file_string(xmlFilePath));
+        throw runtime_error("grib-index xmlfile does not contain root node at: " + file_string(grbmlFilePath));
     }
     url_ = getXmlProp(xp->nodesetval->nodeTab[0], "url");
 

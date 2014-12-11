@@ -42,20 +42,20 @@ namespace fs = boost::filesystem;
 using namespace std;
 
 static void writeUsage(ostream& out, const po::options_description& options) {
-    out << "usage: fiIndexGribs [ --outputDirectory DIRNAME ] -i gribFile" << endl;
+    out << "usage: fiIndexGribs [ --outputDirectory DIRNAME | --appendFile GRMBL_NAME] -i gribFile" << endl;
     out << endl;
     out << options << endl;
 }
 
 void
-indexGrib(const fs::path& input, const fs::path& output, vector<string> extraKeys, bool force)
+indexGrib(const fs::path& input, const fs::path& append, const fs::path& output, vector<string> extraKeys, bool force)
 {
     std::vector<std::pair<std::string, boost::regex> > members; // empty members, doesn't make sense for single files
     std::map<std::string, std::string> options;
     if (extraKeys.size() > 0) {
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
     }
-    MetNoFimex::GribFileIndex gfi(input, members, force, options);
+    MetNoFimex::GribFileIndex gfi(input, append, members, force, options);
     fs::ofstream os(output);
     os << gfi;
     os.close();
@@ -76,6 +76,7 @@ main(int argc, char* args[])
         ("extraKey", po::value<vector<string> >()->composing(), "multiple extraKey to index")
         ("outputDirectory,o", po::value<string>(), "output directory")
         ("inputFile,i", po::value<string>(), "input gribFile")
+        ("appendFile,a", po::value<string>(), "append output new index to a grbml-file")
         ;
 
     // read the options
@@ -131,6 +132,11 @@ main(int argc, char* args[])
     if (vm.count("extraKey")) {
         extraKeys = vm["extraKey"].as<vector<string> >();
     }
-    indexGrib(fullInput, outFile, extraKeys, forceUpdate);
+    fs::path appendFile;
+    if (vm.count("appendFile")) {
+        appendFile = fs::path(vm["appendFile"].as<string>());
+        outFile = appendFile;
+    }
+    indexGrib(fullInput, appendFile, outFile, extraKeys, forceUpdate);
     return 0;
 }
