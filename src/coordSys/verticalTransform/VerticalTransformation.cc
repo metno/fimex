@@ -51,8 +51,9 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const 
 //        throw CDMException("incomplete vertical transformation");
     switch (verticalType) {
     case MIFI_VINT_PRESSURE: return findPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-    case MIFI_VINT_HEIGHT: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-    case MIFI_VINT_DEPTH: return getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+    case MIFI_VINT_HEIGHT: return  getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+    case MIFI_VINT_ALTITUDE: return getAltitudeConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+    case MIFI_VINT_DEPTH: return getAltitudeConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     default: throw CDMException("unknown vertical type");
     }
 }
@@ -67,11 +68,11 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const 
     return getConverter(reader, verticalType, unLimDimPos, cs, nx, ny, nz, t1-t0);
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     // try geopotential_height or fall back to pressure
     using namespace std;
-    boost::shared_ptr<ToVLevelConverter> heightConv;
+    boost::shared_ptr<ToVLevelConverter> altConv;
     map<string, string> attrs;
     vector<string> dims;
     const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
@@ -83,32 +84,57 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(
         dims.push_back(zAxis->getShape()[0]);
         attrs["standard_name"] = "geopotential_height";
         vector<string> geoVars = reader->getCDM().findVariables(attrs, dims);
-        dims.clear();
-        dims.push_back(xAxis->getShape()[0]);
-        dims.push_back(yAxis->getShape()[0]);
-        attrs["standard_name"] = "altitude";
-        vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
-        if (geoVars.size() > 0 && altVars.size() > 0) {
+        if (geoVars.size() > 0) {
             LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
             DataPtr geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
             if (geoPotData->size() != (nx * ny * nz * nt)) {
                 throw CDMException("geopotential height '" + geoVars[0] + "' has strange size: " + type2string(geoPotData->size()) + " != " + type2string(nx * ny * nz * nt));
             }
-            LOG4FIMEX(logger, Logger::INFO, "using altitude "<<altVars[0]<<" to retrieve height");
-            DataPtr altData = reader->getScaledDataSliceInUnit(altVars[0], "m", unLimDimPos);
-            if (altData->size() != (nx * ny)) {
-                throw CDMException("altitude '" + altVars[0] + "' has strange size: " + type2string(altData->size()) + " != " + type2string(nx * ny));
-            }
-            heightConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToHeightConverter(geoPotData->asFloat(), altData->asFloat(), nx, ny, nz, nt));
-            vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
+            altConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToAltitudeConverter(geoPotData->asFloat(), nx, ny, nz, nt));
+            //vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
         } else {
             LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
             boost::shared_ptr<ToVLevelConverter> presConv = findPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-            heightConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardHeightConverter(presConv));
+            altConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardAltitudeConverter(presConv));
+        }
+    }
+    return altConv;
+}
+
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+{
+    // try geopotential_height or fall back to pressure
+    using namespace std;
+    boost::shared_ptr<ToVLevelConverter> heightConv;
+    boost::shared_ptr<ToVLevelConverter> altConv = getAltitudeConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+    if (altConv.get() == 0) {
+        return heightConv; // no converter
+    }
+    map<string, string> attrs;
+    vector<string> dims;
+    const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
+    const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
+    const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
+    if (xAxis.get() != 0 && yAxis.get() != 0 && zAxis.get() != 0) {
+        dims.push_back(xAxis->getShape()[0]);
+        dims.push_back(yAxis->getShape()[0]);
+        attrs["standard_name"] = "altitude";
+        vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
+        if (topoVars.size() > 0) {
+            LOG4FIMEX(logger, Logger::INFO, "using altitude "<<topoVars[0]<<" to retrieve height");
+            DataPtr topoData = reader->getScaledDataSliceInUnit(topoVars[0], "m", unLimDimPos);
+            if (topoData->size() != (nx * ny)) {
+                throw CDMException("altitude '" + topoVars[0] + "' has strange size: " + type2string(topoData->size()) + " != " + type2string(nx * ny));
+            }
+            heightConv = boost::shared_ptr<ToVLevelConverter>(new AltitudeConverterToHeightConverter(altConv, topoData->asFloat(), nx, ny, nz, nt));
+        } else {
+            LOG4FIMEX(logger, Logger::DEBUG, "no topography/altitude found to retrieve height");
         }
     }
     return heightConv;
 }
+
+
 
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {

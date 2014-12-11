@@ -243,11 +243,17 @@ public:
      */
     virtual void setDistanceOfInterest(double dist);
     /**
-     * add a process to the internal list of preprocesses
+     * add a process to the internal list of preprocesses, run on fields before interpolation
      *
      * @warning this function is not completely thought through and might change
      */
     virtual void addPreprocess(boost::shared_ptr<InterpolatorProcess2d> process);
+    /**
+     * add a process to the internal list of postprocesses, run after interpolation
+     *
+     * @warning this function is not completely thought through and might change
+     */
+    virtual void addPostprocess(boost::shared_ptr<InterpolatorProcess2d> process);
 };
 
 /**

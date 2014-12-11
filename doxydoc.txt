@@ -583,6 +583,31 @@ the grib-files directory with
   fiIndexGribs -i input.grb -d $GRIB_INDEX_PATH
 @endverbatim
 
+It is also possible to create one big grbml for many grib-files, e.g. when model-output is
+spread over several files. Use the -a (appendFile) option of fiIndexGribs to generate the
+file, e.g.
+
+@verbatim
+rm -f myanmar_atmos1028_00.grbml
+for i in atmosfc10280000_0*.grib \
+         atmopl_lb10280000_0*.grib \
+         atmopl_lb10280000_0*.grib; \
+do
+   fiIndexGribs -i $i -a atmos1028_00.grbml;
+done
+@endverbation
+
+This grbml file can later be read like one big grib-file, i.e.
+@verbatim
+fimex \
+--input.file=atmos1028_00.grbml \
+--input.type=grbml \
+--input.config=cdmGribReaderConfigEC_MAD_LB_FOG.xml \
+--output.file=fromGribML.nc
+@endverbatim
+It is left to the user to ensure that all data-files are exactly in the same place and have
+the same contents as when the grbml file was generated.
+
 
 @subsection gribReaderConcat Concatenation of grib-messages
 

@@ -31,6 +31,51 @@
 
 #include "fimex/CDMconstants.h"
 
+
+/**
+ * compare two strings
+ * @param str1
+ * @param str2
+ * @return 0 if str1 != str2, 1 otherwise
+ */
+static int mifi_string_equal(const char* str1, const char* str2)
+{
+    size_t len1 = strlen(str1);
+    size_t len2 = strlen(str2);
+    if (len1 == len2) {
+        return (strncmp(str1, str2, len1) == 0);
+    }
+    return 0;
+}
+
+int mifi_string_to_interpolation_method(const char* mString)
+{
+    int method = MIFI_INTERPOL_UNKNOWN;
+    if (mifi_string_equal("bilinear", mString)) {
+        method = MIFI_INTERPOL_BILINEAR;
+    } else if (mifi_string_equal("nearestneighbor", mString)) {
+        method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
+    } else if (mifi_string_equal("bicubic", mString)) {
+        method = MIFI_INTERPOL_BICUBIC;
+    } else if (mifi_string_equal("coord_nearestneighbor", mString)) {
+        method = MIFI_INTERPOL_COORD_NN;
+    } else if (mifi_string_equal("coord_kdtree", mString)) {
+        method = MIFI_INTERPOL_COORD_NN_KD;
+    } else if (mifi_string_equal("forward_sum", mString)) {
+        method = MIFI_INTERPOL_FORWARD_SUM;
+    } else if (mifi_string_equal("forward_mean", mString)) {
+        method = MIFI_INTERPOL_FORWARD_MEAN;
+    } else if (mifi_string_equal("forward_median", mString)) {
+        method = MIFI_INTERPOL_FORWARD_MEDIAN;
+    } else if (mifi_string_equal("forward_max", mString)) {
+        method = MIFI_INTERPOL_FORWARD_MAX;
+    } else if (mifi_string_equal("forward_min", mString)) {
+        method = MIFI_INTERPOL_FORWARD_MIN;
+    }
+    return method;
+}
+
+
 static inline int ascendingDoubleComparator(const void * a, const void * b)
 {
     double x = *(double*)a;

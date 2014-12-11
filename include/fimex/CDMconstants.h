@@ -25,8 +25,8 @@
 #define MIFI_VERSION_MAJOR  0
 #define MIFI_VERSION_MINOR 55
 #define MIFI_VERSION_PATCH  0
-#define MIFI_VERSION_STATUS 0xB0
-#define MIFI_VERSION_STRING "0.55beta"
+#define MIFI_VERSION_STATUS 0xF0
+#define MIFI_VERSION_STRING "0.55"
 
 
 /**
@@ -57,6 +57,7 @@ enum mifi_filetype {
     MIFI_FILETYPE_WDB,
     MIFI_FILETYPE_METGM,
     MIFI_FILETYPE_PRORAD,
+    MIFI_FILETYPE_GRBML,
     /**
      * MIFI_FILETYPE_RW is a flag to specify that files should be opened in read-write mode.
      * Example: MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW

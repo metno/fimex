@@ -50,6 +50,10 @@
  * i.e. implicit as latlon or explicit with projection-string
  */
 enum mifi_interpol_method {
+    /**
+     * Error-flag for unknown interpolation-method
+     */
+    MIFI_INTERPOL_UNKNOWN = -1,
    /**
     * Flag for bilinear interpolation. This requires,
     * that the original data comes with a properly defined projection,
@@ -158,6 +162,12 @@ enum mifi_interpol_method {
  * vertical interpolation to sigma dimensionless vertical coordinate
  */
 #define MIFI_VINT_SIGMA 3
+/**
+ * @brief vertical interpolation type
+ *
+ * vertical interpolation to height above mean sea levels in m
+ */
+#define MIFI_VINT_ALTITUDE 4
 
 
 /**

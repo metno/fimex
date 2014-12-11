@@ -41,10 +41,14 @@ class CachedInterpolationInterface {
 public:
     virtual ~CachedInterpolationInterface() {}
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
-    /** return x-size of input array */
+    /** @return x-size of input array */
     virtual size_t getInX() const = 0;
-    /** return y-size of input array */
+    /** @return y-size of input array */
     virtual size_t getInY() const = 0;
+    /** @return x-size of output array */
+    virtual size_t getOutX() const = 0;
+    /** @return y-size of output array */
+    virtual size_t getOutY() const = 0;
 };
 
 /**
@@ -81,8 +85,22 @@ public:
      * @param newSize return the size of the output-array
      */
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
+    /**
+     * @return x-size of the input data
+     */
     virtual size_t getInX() const {return inX;}
+    /**
+     * @return y-size of the input data
+     */
     virtual size_t getInY() const {return inY;}
+    /**
+     * @return x-size of the output data
+     */
+    virtual size_t getOutX() const {return outX;}
+    /**
+     * @return y-size of the output data
+     */
+    virtual size_t getOutY() const {return outY;}
 };
 
 

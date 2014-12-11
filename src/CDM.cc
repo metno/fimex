@@ -180,7 +180,7 @@ const CDMVariable& CDM::getVariable(const std::string& varName) const throw(CDME
     if (varPos != pimpl_->variables.end()) {
         return *varPos;
     } else {
-        throw CDMException("cannot find variable: " + varName);
+        throw CDMException("cannot find variable: '" + varName + "'");
     }
 }
 CDMVariable& CDM::getVariable(const std::string& varName) throw(CDMException)
@@ -648,11 +648,17 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
 
     return retVal;
 }
+void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim)
+{
+    generateProjectionCoordinates(Projection::create(getAttributes(projectionVariable)), xDim, yDim, lonDim, latDim);
+}
 
-void CDM::generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException)
+void CDM::generateProjectionCoordinates(boost::shared_ptr<const Projection> projection, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim)
 {
     const CDMVariable& xVar = getVariable(xDim);
     const CDMVariable& yVar = getVariable(yDim);
+    assert(xVar.hasData());
+    assert(yVar.hasData());
     boost::shared_array<double> xData = xVar.getData()->asDouble();
     boost::shared_array<double> yData = yVar.getData()->asDouble();
     size_t xDimLength = getDimension(xDim).getLength();
@@ -677,7 +683,8 @@ void CDM::generateProjectionCoordinates(const std::string& projectionVariable, c
     boost::shared_array<double> longVal(new double[fieldSize]);
     boost::shared_array<double> latVal(new double[fieldSize]);
     std::string lonLatProj(MIFI_WGS84_LATLON_PROJ4);
-    std::string projStr = Projection::create(getAttributes(projectionVariable))->getProj4String();
+    assert(projection.get() != 0);
+    std::string projStr = projection->getProj4String();
     LOG4FIMEX(logger, Logger::DEBUG, "generating "<<latDim<<"("<<xDim<<","<<yDim<<"),"<<lonDim<<"("<<xDim<<","<<yDim<<") using proj4: "+projStr);
     if (MIFI_OK != mifi_project_axes(projStr.c_str(),lonLatProj.c_str(), xData.get(), yData.get(), xDimLength, yDimLength, longVal.get(), latVal.get())) {
         throw CDMException("unable to project axes from "+projStr+ " to " +lonLatProj);

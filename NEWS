@@ -1,3 +1,19 @@
+  * 2014-12-11 fimex-0.55
+    * creation of one grib-index file for many grib-files
+    * new filetype grbml (grib-index file) as reader
+    * translation of grib-messages to netcdf-variables without time-axes possible
+    * read grib-asimov (hirlam) header
+    * interpolation with forward_* method now possible if only projection, but not coordinates present
+    * fix relative interpolation axis for lat-lon input
+    * height above ground and height above mean-sea level now clearly distinct, use 'height' for above ground, and altitude for height above msl
+    * post-processor for interpolation, e.g. for extrapolation similar to pre-processor
+    * process: addVerticalVelocity, calculated from continuity equation for hydrostatic models
+    * fixing standard_name of cloud-water
+    * glob: notation to join several netcdf-files along the unlimited dimension
+    * fix vertical levels for grib 'extraHalvLevels' (+1 onffest)
+    * monotonous longitude axis, even when outside -180:180
+    * fix geographical extraction when multiple coordinate-systems exist in one file
+    * improvements in error messages, filenames on missing/wrong files, ticks around wrong units/variables
   * 2014-10-07 fimex-0.54
     * fix grib-missing-long on 64bit platforms for asimov-files
     * more tests on vector-rotation, using defaults around singularities

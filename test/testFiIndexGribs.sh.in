@@ -32,5 +32,15 @@ else
   echo "no localDefinitionNumber in test.grb1.grbml"
   exit 1;
 fi
+
+# read grbml with fimex
+../src/binSrc/fimex --input.file=test.grb1.grbml --input.config=@top_srcdir@/share/etc/cdmGribReaderConfig.xml --input.printNcML | grep x_wind_10m > /dev/null
+if [ $? != 0 ]; then
+  echo "failed reading test.grb1.grbml with fimex"
+  exit 1
+else
+  echo "success"
+fi
+
 exit 0
 

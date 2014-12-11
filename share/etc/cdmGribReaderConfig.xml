@@ -438,7 +438,7 @@
         <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
-    <parameter name="fi" type="float">
+    <parameter name="fi" type="float" constantTime="true">
         <grib1 indicatorOfParameter="6" gribTablesVersionNo="1" identificationOfOriginatingGeneratingCentre="96" typeOfLevel="100"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="standard_name" value="geopotential_height" type="string" />
@@ -527,7 +527,7 @@
     </parameter>
 
 <!-- from MEE ensembles (ec) -->
-    <parameter name="geopotential" type="float">
+    <parameter name="geopotential" type="float" constantTime="true">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <attribute name="long_name" value="geopotential" type="string" />

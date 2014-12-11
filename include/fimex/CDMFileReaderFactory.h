@@ -70,7 +70,7 @@ public:
      * if arguments are not desired.
      *
      * @param fileType one of #mifi_filetype, possibly read by detectFileType(). To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW.
-     * @param fileName name of input type
+     * @param fileName name of input file (might start with glob: for grib or netcdf, e.g. glob:*.nc (joinExisting aggregation, see NcmlCDMReader.h)
      * @param configFile
      * @param args optional options for the CDMReader, e.g. for grib: additional message files
      * @return pointer to CDMReader
@@ -91,7 +91,7 @@ public:
      * if arguments are not desired.
      *
      * @param fileType one of #mifi_filetype, possibly read by detectFileType(). To get a CDMReaderWriter, use MIFI_FILETYPE_NETCDF|MIFI_FILETYPE_RW
-     * @param fileName name of input type
+     * @param fileName name of input file (might start with glob: for grib or netcdf, e.g. glob:*.nc (joinExisting aggregation, see NcmlCDMReader.h)
      * @param configXML config source
      * @param args optional options for the CDMReader
      * @return pointer to CDMReader

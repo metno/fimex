@@ -295,14 +295,27 @@ public:
     /**
      * @brief generate the projection coordinates (usually named "lat lon")
      *
-     * @param projectionVariable the variable containing the projection information
+     * @param projection the projection information
      * @param xDim the x dimension (the corresponding variable needs to contain data and units)
      * @param yDim the y dimension (the corresponding variable needs to contain data and units)
      * @param lonDim name of the longitude variable
      * @param latDim name of the latitude variable
      * @throw CDMException if any information is missing
      */
-    void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim) throw(CDMException);
+    void generateProjectionCoordinates(boost::shared_ptr<const Projection> projection, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim);
+    /**
+     * @brief generate the projection coordinates (usually named "lat lon")
+     *
+     * @param projectionVariable the variable containing the projection information
+     * @param xDim the x dimension (the corresponding variable needs to contain data and units in this CDM (not the data-reader))
+     * @param yDim the y dimension (the corresponding variable needs to contain data and units in this CDM (not the data-reader))
+     * @param lonDim name of the longitude variable
+     * @param latDim name of the latitude variable
+     * @throw CDMException if any information is missing
+     * @deprecated use generateProjectionCoordinate with projection and get the projection by Projection::create(getAttributes(projectionVariable));
+     *
+     */
+    MIFI_DEPRECATED(void generateProjectionCoordinates(const std::string& projectionVariable, const std::string& xDim, const std::string& yDim, const std::string& lonDim, const std::string& latDim);)
     /**
      * @brief extract the names of the projection-variable and the corresponding projection-axes
      *

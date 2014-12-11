@@ -186,6 +186,46 @@ public:
      * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
      */
     GribFileIndex(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
+    /**
+     * Create a joined index from gribml and grib-file
+     *
+     * Initialize the gribFileIndex for the gribFile gribFilePath.
+     * If ignoreExistingXml = false, searches for existing indexes in
+     * @li file.grbml
+     * @li ENV{GRIB_FILE_INDEX}/file.grbml
+     *
+     * Otherwise, it parses the grib-file and creates a index in memory.
+     *
+     * Performance for getting an index of a 150MB grib-file with some 10s of messages:
+     * @li remote NFS file, first time: 16s
+     * @li file completely in memory: 1.1s
+     * @li xml-file: 0.1s
+     *
+     * @param gribFilePath path to first filename (or empty)
+     * @param grbmlFilePath path to gribml to append information from
+     * @param members translation of members to filenames
+     * @param ignoreExistingXml if file has been indexed before, the index will be used unless this option is set to true
+     * @param options map with several string options, currently, only earthfigure = proj4-string is allowed
+     */
+    GribFileIndex(boost::filesystem::path gribFilePath, boost::filesystem::path grbmlFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml = false, std::map<std::string, std::string> options = std::map<std::string, std::string>());
+    /**
+     * Create an index from gribml.
+     *
+     * Initialize the gribFileIndex for the gribFile gribFilePath.
+     * If ignoreExistingXml = false, searches for existing indexes in
+     * @li file.grbml
+     * @li ENV{GRIB_FILE_INDEX}/file.grbml
+     *
+     * Otherwise, it parses the grib-file and creates a index in memory.
+     *
+     * Performance for getting an index of a 150MB grib-file with some 10s of messages:
+     * @li remote NFS file, first time: 16s
+     * @li file completely in memory: 1.1s
+     * @li xml-file: 0.1s
+     *
+     * @param gribmlFilePath path to gribml to append information from
+     */
+    GribFileIndex(boost::filesystem::path gribmlFilePath);
     virtual ~GribFileIndex();
     const std::vector<GribFileMessage>& listMessages() const {return messages_;}
     const std::string& getUrl() const {return url_;}
@@ -193,8 +233,9 @@ private:
     std::string url_;
     std::vector<GribFileMessage> messages_;
     std::map<std::string, std::string> options_;
-    void initByGrib(boost::filesystem::path gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >(), const std::vector<std::string>& extraKeys=std::vector<std::string>());
-    void initByXML(boost::filesystem::path xmlFilePath);
+    void init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml);
+    void initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys);
+    void initByXML(const boost::filesystem::path& xmlFilePath);
 };
 
 /// outputstream for a GribFileMessage

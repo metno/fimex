@@ -39,6 +39,7 @@
 #include "fimex/SpatialAxisSpec.h"
 #include "nanoflann/nanoflann.hpp"
 #include "fimex/Utils.h"
+#include "fimex/CDMReaderUtils.h"
 #include "../config.h"
 #ifdef HAVE_NETCDF_H
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -74,6 +75,7 @@ struct CDMInterpolatorInternals {
     std::string latitudeName;
     std::string longitudeName;
     std::vector<boost::shared_ptr<InterpolatorProcess2d> > preprocesses;
+    std::vector<boost::shared_ptr<InterpolatorProcess2d> > postprocesses;
     // variableName, horizontalId
     std::map<std::string, std::string> projectionVariables;
     // horizontalId, cachedInterpolation
@@ -197,6 +199,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 LOG4FIMEX(logger, Logger::WARN, "Cannot reproject vector " << variable.getName());
             }
         }
+        processArray_(p_->postprocesses, iArray.get(), newSize, ci->getOutX(), ci->getOutY());
         return interpolationArray2Data(iArray, newSize, badValue);
     }
 }
@@ -624,6 +627,11 @@ void CDMInterpolator::changeProjection(int method, const std::string& netcdf_tem
 
 map<string, CoordSysPtr> CDMInterpolator::findBestCoordinateSystemsAndProjectionVars(bool withProjection)
 {
+    if (!withProjection) {
+        // make sure lat/lon points exist for all projections
+        generateProjectionCoordinates(p_->dataReader);
+    }
+
     typedef map<string, CoordSysPtr> CoordSysMap;
     typedef vector<CoordSysPtr> CoordSysVec;
     CoordSysMap coordSysMap;
@@ -1144,10 +1152,12 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         string latitude = cs->findAxisOfType(CoordinateAxis::Lat)->getName();
         string longitude = cs->findAxisOfType(CoordinateAxis::Lon)->getName();
         DataPtr latData = p_->dataReader->getScaledData(latitude);
+        assert(latData.get() != 0);
         boost::shared_array<double> latVals = latData->asDouble();
         size_t latSize = latData->size();
         latData.reset();
         DataPtr lonData = p_->dataReader->getScaledData(longitude);
+        assert(lonData.get() != 0);
         boost::shared_array<double> lonVals = lonData->asDouble();
         size_t lonSize = lonData->size();
         lonData.reset();
@@ -1747,5 +1757,12 @@ void CDMInterpolator::addPreprocess(boost::shared_ptr<InterpolatorProcess2d> pro
     LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation preprocess");
     p_->preprocesses.push_back(process);
 }
+
+void CDMInterpolator::addPostprocess(boost::shared_ptr<InterpolatorProcess2d> process)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "adding interpolation postprocess");
+    p_->postprocesses.push_back(process);
+}
+
 
 }

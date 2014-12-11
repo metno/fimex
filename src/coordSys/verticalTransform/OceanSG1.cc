@@ -53,7 +53,7 @@ boost::shared_ptr<ToVLevelConverter> OceanSG1::getPressureConverter(const boost:
     throw CDMException("no pressure converter for " + getName());
 }
 
-boost::shared_ptr<ToVLevelConverter> OceanSG1::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> OceanSG1::getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     // default eta: single value, 0
     vector<double> sVec = getDataSliceInUnit(reader, s, "", unLimDimPos); // size k

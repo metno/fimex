@@ -244,6 +244,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "interpolate.latitudeName", vm);
     writeOption<string>(out, "interpolate.longitudeName", vm);
     writeOption<string>(out, "interpolate.preprocess", vm);
+    writeOption<string>(out, "interpolate.postprocess", vm);
     writeOption<string>(out, "interpolate.printNcML", vm);
     writeOptionAny(out, "interpolate.printCS", vm);
     writeOptionAny(out, "interpolate.printSize", vm);
@@ -372,31 +373,14 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm, cons
 }
 
 static int getInterpolationMethod(po::variables_map& vm, const string& key) {
+
     int method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
     if( vm.count(key) ) {
         const string& m = vm[key].as<string>();
-        if (m == "bilinear") {
-            method = MIFI_INTERPOL_BILINEAR;
-        } else if (m == "nearestneighbor") {
-            method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
-        } else if (m == "bicubic") {
-            method = MIFI_INTERPOL_BICUBIC;
-        } else if (m == "coord_nearestneighbor") {
-            method = MIFI_INTERPOL_COORD_NN;
-        } else if (m == "coord_kdtree") {
-            method = MIFI_INTERPOL_COORD_NN_KD;
-        } else if (m == "forward_sum") {
-            method = MIFI_INTERPOL_FORWARD_SUM;
-        } else if (m == "forward_mean") {
-            method = MIFI_INTERPOL_FORWARD_MEAN;
-        } else if (m == "forward_median") {
-            method = MIFI_INTERPOL_FORWARD_MEDIAN;
-        } else if (m == "forward_max") {
-            method = MIFI_INTERPOL_FORWARD_MAX;
-        } else if (m == "forward_min") {
-            method = MIFI_INTERPOL_FORWARD_MIN;
-        } else {
+        method = mifi_string_to_interpolation_method(m.c_str());
+        if (method == MIFI_INTERPOL_UNKNOWN) {
             cerr << "WARNING: unknown " << key << ": " << m << " using nearestneighbor" << endl;
+            method = MIFI_INTERPOL_NEAREST_NEIGHBOR;
         }
     }
     return method;
@@ -621,7 +605,34 @@ static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map
     return boost::shared_ptr<CDMReader>(vInterpolator);
 }
 
-
+static boost::shared_ptr<InterpolatorProcess2d> parseProcess(std::string procString, std::string logProcess)
+{
+    boost::smatch what;
+     if (boost::regex_match(procString, what, boost::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
+         double critx = string2type<double>(what[1]);
+         double cor = string2type<double>(what[2]);
+         size_t maxLoop = string2type<size_t>(what[3]);
+         LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
+         return boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorFill2d(critx,cor,maxLoop));
+     } else if (boost::regex_match(procString, what, boost::regex("\\s*creepfill2d\\((.+)\\).*"))) {
+         vector<string> vals = tokenize(what[1], ",");
+         if (vals.size() == 2) {
+             unsigned short repeat = string2type<unsigned short>(vals.at(0));
+             char setWeight = string2type<char>(vals.at(1));
+             LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfill2d("<<repeat<<","<<setWeight<<")");
+             return boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFill2d(repeat, setWeight));
+         } else if (vals.size() == 3) {
+             unsigned short repeat = string2type<unsigned short>(vals.at(0));
+             char setWeight = string2type<char>(vals.at(1));
+             float defVal = string2type<float>(vals.at(2));
+             LOG4FIMEX(logger, Logger::DEBUG, "running interpolate "<< logProcess <<": creepfillval2d("<<repeat<<","<<setWeight<<","<<defVal<<")");
+             return boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFillVal2d(repeat, setWeight,defVal));
+         } else {
+             throw CDMException("creepfill requires two or three arguments, got " + what[1]);
+         }
+     }
+     throw CDMException("undefined interpolate."+logProcess+": " + procString);
+}
 static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
 
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(boost::shared_ptr<CDMReader>(dataReader)));
@@ -633,32 +644,10 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
     }
 
     if (vm.count("interpolate.preprocess")) {
-        boost::smatch what;
-        if (boost::regex_match(vm["interpolate.preprocess"].as<string>(), what, boost::regex("\\s*fill2d\\(([^,]+),([^,]+),([^)]+)\\).*"))) {
-            double critx = string2type<double>(what[1]);
-            double cor = string2type<double>(what[2]);
-            size_t maxLoop = string2type<size_t>(what[3]);
-            LOG4FIMEX(logger, Logger::DEBUG, "running interpolate preprocess: fill2d("<<critx<<","<<cor<<","<<maxLoop<<")");
-            interpolator->addPreprocess(boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorFill2d(critx,cor,maxLoop)));
-        } else if (boost::regex_match(vm["interpolate.preprocess"].as<string>(), what, boost::regex("\\s*creepfill2d\\((.+)\\).*"))) {
-            vector<string> vals = tokenize(what[1], ",");
-            if (vals.size() == 2) {
-                unsigned short repeat = string2type<unsigned short>(vals.at(0));
-                char setWeight = string2type<char>(vals.at(1));
-                LOG4FIMEX(logger, Logger::DEBUG, "running interpolate preprocess: creepfill2d("<<repeat<<","<<setWeight<<")");
-                interpolator->addPreprocess(boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFill2d(repeat, setWeight)));
-            } else if (vals.size() == 3) {
-                unsigned short repeat = string2type<unsigned short>(vals.at(0));
-                char setWeight = string2type<char>(vals.at(1));
-                float defVal = string2type<float>(vals.at(2));
-                LOG4FIMEX(logger, Logger::DEBUG, "running interpolate preprocess: creepfillval2d("<<repeat<<","<<setWeight<<","<<defVal<<")");
-                interpolator->addPreprocess(boost::shared_ptr<InterpolatorProcess2d>(new InterpolatorCreepFillVal2d(repeat, setWeight,defVal)));
-            } else {
-                throw CDMException("creepfill requires two or three arguments, got " + what[1]);
-            }
-        } else {
-            throw CDMException("undefined interpolate.preprocess: " + vm["interpolate.preprocess"].as<string>());
-        }
+        interpolator->addPreprocess(parseProcess(vm["interpolate.preprocess"].as<string>(), "preprocess"));
+    }
+    if (vm.count("interpolate.postprocess")) {
+        interpolator->addPostprocess(parseProcess(vm["interpolate.postprocess"].as<string>(), "postprocess"));
     }
 
     int method = getInterpolationMethod(vm, "interpolate.method");
@@ -991,7 +980,8 @@ int run(int argc, char* args[])
         ("interpolate.distanceOfInterest", po::value<double>(), "optional distance of interest used differently depending on method")
         ("interpolate.latitudeName", po::value<string>(), "name for auto-generated projection coordinate latitude")
         ("interpolate.longitudeName", po::value<string>(), "name for auto-generated projection coordinate longitude")
-        ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess to before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
+        ("interpolate.preprocess", po::value<string>(), "add a 2d preprocess before the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
+        ("interpolate.postprocess", po::value<string>(), "add a 2d postprocess after the interpolation, e.g. \"fill2d(critx=0.01,cor=1.6,maxLoop=100)\" or \"creepfill2d(repeat=20,weight=2[,defaultValue=0.0])\"")
         ("interpolate.latitudeValues", po::value<string>(), "string with latitude values in degree, i.e. 60.5,70,90")
         ("interpolate.longitudeValues", po::value<string>(), "string with longitude values in degree, i.e. -10.5,-10.5,29.5")
         ("interpolate.vcrossNames", po::value<string>(), "string with comma-separated names for vertical cross sections")
@@ -1026,7 +1016,7 @@ int run(int argc, char* args[])
         ("merge.printCS", "print CoordinateSystems of interpolator")
         ("merge.printSize", "print size estimate")
 
-        ("verticalInterpolate.type", po::value<string>(), "pressure, height or depth")
+        ("verticalInterpolate.type", po::value<string>(), "pressure, height (above ground) or depth")
         ("verticalInterpolate.method", po::value<string>(), "linear, log, loglog or nearestneighbor interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")

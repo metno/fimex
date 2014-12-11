@@ -137,25 +137,10 @@ bool operator>=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(lhs < rh
 bool operator>(const GribVarIdx& lhs, const GribVarIdx& rhs) {return (rhs < lhs);}
 bool operator<=(const GribVarIdx& lhs, const GribVarIdx& rhs) {return !(rhs < lhs);}
 
-
 GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
     : p_(new GribCDMReaderImpl())
 {
-    for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
-        p_->ensembleMemberIds.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
-    }
-    p_->configId = configXML.id();
-    p_->doc = configXML.getXMLDoc();
-    p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
-    {
-        // check config for root element
-        XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig");
-        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
-        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
-    }
-    initXMLNodeIdx();
-
-
+    initXMLAndMembers(configXML, members);
     std::map<std::string, std::string> options;
     if (xmlGetEarthFigure() != "") {
         options["earthfigure"] = xmlGetEarthFigure();
@@ -166,6 +151,39 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
         vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds, false, options).listMessages();
         copy(messages.begin(), messages.end(), back_inserter(p_->indices));
     }
+    initPostIndices();
+}
+
+GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
+    : p_(new GribCDMReaderImpl())
+{
+    initXMLAndMembers(configXML, members);
+
+    p_->indices = GribFileIndex(grbmlFileName).listMessages();
+
+    initPostIndices();
+}
+
+void GribCDMReader::initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
+{
+    for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
+        p_->ensembleMemberIds.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
+    }
+
+    p_->configId = configXML.id();
+    p_->doc = configXML.getXMLDoc();
+    p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
+    {
+        // check config for root element
+        XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig");
+        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
+        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
+    }
+    initXMLNodeIdx();
+}
+
+void GribCDMReader::initPostIndices()
+{
 
     // select wanted indices from doc, default to all
     {
@@ -610,9 +628,9 @@ void GribCDMReader::initAddTimeDimension()
     {
         set<boost::posix_time::ptime> timesSet;
         for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt) {
-            boost::posix_time::ptime vt(gfmIt->getValidTime());
+            boost::posix_time::ptime vt(getVariableValidTime(*gfmIt));
             if (vt != boost::posix_time::not_a_date_time) {
-                timesSet.insert(gfmIt->getValidTime());
+                timesSet.insert(vt);
             }
         }
         p_->times = vector<boost::posix_time::ptime>(timesSet.begin(), timesSet.end());
@@ -692,6 +710,20 @@ string GribCDMReader::getVariableName(const GribFileMessage& gfm) const
     return varName;
 }
 
+boost::posix_time::ptime GribCDMReader::getVariableValidTime(const GribFileMessage& gfm) const
+{
+    xmlNodePtr node = findVariableXMLNode(gfm);
+    if (node == 0) {
+        return gfm.getValidTime();
+    } else {
+        if (getXmlProp(node, "constantTime") == "true") {
+            return boost::date_time::not_a_date_time;
+        } else {
+            return gfm.getValidTime();
+        }
+    }
+}
+
 // IN1 and IN2 should both be collections
 template<typename IN1, typename IN2>
 class EqualFunctor : public unary_function<IN2, bool> {
@@ -719,7 +751,7 @@ void GribCDMReader::initCreateGFIBoxes()
     int pos = 0;
     for (vector<GribFileMessage>::const_iterator gfmIt = p_->indices.begin(); gfmIt != p_->indices.end(); ++gfmIt, ++pos) {
         string varName = getVariableName(*gfmIt);
-        boost::posix_time::ptime valTime(gfmIt->getValidTime());
+        boost::posix_time::ptime valTime(getVariableValidTime(*gfmIt));
         size_t unlimDimPos = std::numeric_limits<std::size_t>::max();
         if (valTime != boost::posix_time::not_a_date_time) {
             vector<boost::posix_time::ptime>::iterator pTimesIt = find(p_->times.begin(), p_->times.end(), valTime);
@@ -1045,7 +1077,7 @@ void GribCDMReader::initAddVariables()
 
              string levelDimName = p_->levelDimNames[levelTypePos.first].at(levelTypePos.second);
              shape.push_back(levelDimName);
-             if (gfmIt->getReferenceTime() != boost::posix_time::not_a_date_time) {
+             if (getVariableValidTime(*gfmIt) != boost::posix_time::not_a_date_time) {
                  shape.push_back(p_->timeDimName);
              }
 

@@ -88,5 +88,19 @@ std::size_t estimateCDMDataSize(const CDM& cdm);
  */
 bool compareCDMVarShapes(const CDM& cdm1, const std::string& varName1, const CDM& cdm2, const std::string& varName2);
 
+
+/**
+ * find a unique variable and dimension name, starting with baseVar
+ * @param cdm
+ * @param baseVar the basic variable name
+ * @return a st
+ */
+std::string findUniqueDimVarName(const CDM& cdm, std::string baseVar);
+
+/**
+ * generate projection coordinates if they don't exist for a coordinate system
+ */
+void generateProjectionCoordinates(boost::shared_ptr<CDMReader>& reader);
+
 }
 #endif /* CDMREADERUTILS_H_ */

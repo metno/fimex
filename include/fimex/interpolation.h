@@ -35,6 +35,14 @@
 extern "C" {
 #endif
 
+/**
+ * Convert interpolation methods in string-format to mifi_interpol_method (see mifi_constants.h)
+ * @param stringMethod one of nearestneighbor, bilinear,bicubic, forward_max, forward_min, forward_mean,
+ *    forward_median, forward_sum, coord_nearestneighbor, coord_kdtree
+ * @return mifi_interpol_method enum, or MIFI_INTERPOL_UNKNOWN on error
+ */
+extern int mifi_string_to_interpolation_method(const char* stringMethod);
+
 
 /**
  * Interpolation between two projections. Missing values are set to MIFI_UNDEFINED_F

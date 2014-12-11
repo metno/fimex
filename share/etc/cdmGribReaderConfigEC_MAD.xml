@@ -395,21 +395,21 @@
     </parameter>
     -->
     <!-- Geopotential (129) -->
-    <parameter name="geopotential_pl" type="float">
+    <parameter name="geopotential_pl" type="float" constantTime="true">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="100"/>
         <grib2 discipline="0" parameterCategory="3" parameterNumber="4" typeOfLevel="105"/>
         <attribute name="long_name" value="Geopotential pressure levels" type="string"/>
         <attribute name="standard_name" value="geopotential" type="string"/>
         <attribute name="units" value="m^2/s^2" type="string"/>
     </parameter>
-    <parameter name="geopotential_ml" type="float">
+    <parameter name="geopotential_ml" type="float" constantTime="true">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="109"/>
         <attribute name="long_name" value="Geopotential model levels" type="string" />
         <attribute name="standard_name" value="geopotential" type="string" />
         <attribute name="units" value="m^2/s^2" type="string" />
     </parameter>
 
-    <parameter name="surface_geopotential" type="float">
+    <parameter name="surface_geopotential" type="float" constantTime="true">
         <grib1 indicatorOfParameter="129" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="1"/>
         <attribute name="long_name" value="Surface geopotential (fis)" type="string" />
         <attribute name="standard_name" value="surface_geopotential" type="string" />
@@ -707,11 +707,11 @@
         <attribute name="units" value="" type="string" />
     </parameter>
     -->
-    <parameter name="cloud_liquid_water_mixing_ratio_ml" type="float">
+    <parameter name="mass_fraction_of_cloud_liquid_water_in_air_ml" type="float">
         <grib2 discipline="0" parameterCategory="1" parameterNumber="83" typeOfLevel="105"/>
         <attribute name="long_name" value="Specific cloud liquid water contents (clwc)" type="string"/>
-        <attribute name="standard_name" value="cloud_liquid_water_mixing_ration" type="string"/>
-        <attribute name="units" value="1" type="string"/>
+        <attribute name="standard_name" value="mass_fraction_of_cloud_liquid_water_in_air" type="string"/>
+        <attribute name="units" value="kg/kg" type="string"/>
     </parameter>
     <!-- Total cloud cover  (71) -->
     <parameter name="cloud_area_fraction" type="float">

@@ -39,7 +39,7 @@
 #endif
 
 #include <vector>
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "fimex/GribFileIndex.h"
 #include "fimex/CDMReader.h"
 #include "fimex/ReplaceStringObject.h"
@@ -58,6 +58,7 @@ class GribCDMReader: public MetNoFimex::CDMReader
 {
 public:
     GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
+    GribCDMReader(const std::string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
     virtual ~GribCDMReader();
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
@@ -71,6 +72,20 @@ private:
      */
     void initXMLNodeIdx();
 
+    /**
+     * initialize the member information and the configXML document
+     * @param fileNames
+     * @param configXML
+     * @param members
+     */
+    void initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members);
+    /**
+     * initialize everything after the internal indices have been read from the grbml-file or the grbml-files
+     * @param configXML
+     * @param members
+     */
+    void initPostIndices();
+
     /** Define which parameters to select
      * @param select can be "all", "definedOnly"
      */
@@ -81,6 +96,13 @@ private:
      */
     xmlNodePtr findVariableXMLNode(const GribFileMessage& msg) const;
     std::string getVariableName(const GribFileMessage& gfm) const;
+    /**
+     * Find the valid time of the gfm, or not_a_date_time if variable is defined to be constant.
+     * @param gfm
+     * @return time or not_a_date_time
+     */
+    boost::posix_time::ptime getVariableValidTime(const GribFileMessage& gfm) const;
+
     size_t getVariableMaxEnsembles(std::string varName) const;
     /**
      * read the earth-figure from the xml-file

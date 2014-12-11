@@ -122,15 +122,15 @@ public:
 };
 
 /**
- * using the international standard atmosphere to convert height to pressure
+ * using the international standard atmosphere to convert altitude to pressure
  */
-class HeightStandardToPressureConverter : public ToVLevelConverter {
+class AltitudeStandardToPressureConverter : public ToVLevelConverter {
     vector<double> pres_;
 public:
     /**
      * @param h given in m
      */
-    HeightStandardToPressureConverter(const vector<double>& h);
+    AltitudeStandardToPressureConverter(const vector<double>& h);
     virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
@@ -213,33 +213,67 @@ public:
 };
 
 /**
- * Conversion from pressure to height using the international standard atmosphere.
+ * Conversion from pressure to height above MSL (i.e. altitude) using the international standard atmosphere.
  * The pressure levels are initialized by a previous pressure-conversion.
  */
-class PressureToStandardHeightConverter : public ToVLevelConverter {
+class PressureToStandardAltitudeConverter : public ToVLevelConverter {
     const boost::shared_ptr<ToVLevelConverter> presConv_;
 public:
     /**
      * @param presConv another ToVLevelConverter converting to pressure
      */
-    PressureToStandardHeightConverter(boost::shared_ptr<ToVLevelConverter> presConv) : presConv_(presConv) {}
+    PressureToStandardAltitudeConverter(boost::shared_ptr<ToVLevelConverter> presConv) : presConv_(presConv) {}
     virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
 /**
- * Use geopotential height and altitude to calculate the
- * height above ground (hg = geop.h. - alt)
+ * Use altitude (height above MSL) and topography to calculate the
+ * height above ground (hg = height - topo)
  */
-class GeopotentialToHeightConverter : public ToVLevelConverter {
-    const boost::shared_array<float> geopot_;
-    const boost::shared_array<float> alti_;
+class AltitudeConverterToHeightConverter : public ToVLevelConverter {
+    const boost::shared_ptr<ToVLevelConverter> conv_;
+    const boost::shared_array<float> topo_;
     size_t nx_;
     size_t ny_;
     size_t nz_;
     size_t nt_;
 public:
-    GeopotentialToHeightConverter(const boost::shared_array<float> geopotential, const boost::shared_array<float> altitude, size_t nx, size_t ny, size_t nk, size_t nt)
-    : geopot_(geopotential), alti_(altitude), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
+    AltitudeConverterToHeightConverter(const boost::shared_ptr<ToVLevelConverter> altiConverter, const boost::shared_array<float> topography, size_t nx, size_t ny, size_t nk, size_t nt)
+    : conv_(altiConverter), topo_(topography), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
+};
+
+/**
+ * Use height-converter and topography to calculate the
+ * altitude = height above MSL (height = hg + topo)
+ */
+class HeightConverterToAltitudeConverter : public ToVLevelConverter {
+    const boost::shared_ptr<ToVLevelConverter> conv_;
+    const boost::shared_array<float> topo_;
+    size_t nx_;
+    size_t ny_;
+    size_t nz_;
+    size_t nt_;
+public:
+    HeightConverterToAltitudeConverter(const boost::shared_ptr<ToVLevelConverter> heightConverter, const boost::shared_array<float> topography, size_t nx, size_t ny, size_t nk, size_t nt)
+    : conv_(heightConverter), topo_(topography), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
+};
+
+
+/**
+ * Use geopotential height (in m) and topography to calculate the
+ * height above ground (hg = height - topo)
+ */
+class GeopotentialToAltitudeConverter : public ToVLevelConverter {
+    const boost::shared_array<float> geopot_;
+    size_t nx_;
+    size_t ny_;
+    size_t nz_;
+    size_t nt_;
+public:
+    GeopotentialToAltitudeConverter(const boost::shared_array<float> geopot_height, size_t nx, size_t ny, size_t nk, size_t nt)
+    : geopot_(geopot_height), nx_(nx), ny_(ny), nz_(nk), nt_(nt) {}
     virtual vector<double> operator()(size_t x, size_t y, size_t t);
 };
 
