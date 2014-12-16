@@ -1,3 +1,5 @@
+  * 2014-12-16 fimex-0.55.1
+    * fix correction of earthfigure for grb-files (bug introduced in 0.55)
   * 2014-12-11 fimex-0.55
     * creation of one grib-index file for many grib-files
     * new filetype grbml (grib-index file) as reader

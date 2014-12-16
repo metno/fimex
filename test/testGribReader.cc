@@ -37,6 +37,7 @@
 #include "fimex/NetCDF_CDMWriter.h"
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
+#include "fimex/Data.h"
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
@@ -56,10 +57,18 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
     defaultLogLevel(Logger::INFO);
-    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/share/etc/cdmGribReaderConfig.xml")));
+    boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/test/cdmGribReaderConfig_newEarth.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     BOOST_CHECK(true); // made it so far
+
+    // check grib has new earth-radius
+    CDMAttribute attr;
+    BOOST_CHECK(grbReader->getCDM().getAttribute("projection_polar_stereographic", "earth_radius", attr));
+    BOOST_CHECK(fabs(attr.getData()->asFloat()[0] - 6372000) < 1);
+    BOOST_CHECK(fabs(grbReader->getData("x")->asFloat()[0] - -5719440) < 1);
+
+
     NetCDF_CDMWriter(grbReader, "testGribRead.nc");
     BOOST_CHECK(true); // and it is even writeable
 

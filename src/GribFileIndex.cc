@@ -1024,7 +1024,8 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
     }
     std::map<std::string, std::string>::const_iterator efIt = options_.find("earthfigure");
     if (efIt != options_.end()) {
-        LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure '" << efIt->second << "'");
+        earthFigure_ = efIt->second;
+        LOG4FIMEX(logger, Logger::DEBUG, "using earthfigure '" << earthFigure_ << "'");
     }
     vector<string> extraKeys;
     std::map<std::string, std::string>::const_iterator ekIt = options_.find("extraKeys");
