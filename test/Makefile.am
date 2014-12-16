@@ -4,6 +4,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
              testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
              inData.txt diana.setup felt2netcdf.cfg \
+             cdmGribReaderConfig_newEarth.xml \
              felt2nc_variables_level1000.xml \
              test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
              testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml.in \
