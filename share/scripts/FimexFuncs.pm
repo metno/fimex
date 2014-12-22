@@ -123,9 +123,17 @@ sub grib2netcdf {
             return FAIL;
 
         }
-        my @files = File::Glob::bsd_glob($glob);
+        my @cleanupFiles = File::Glob::bsd_glob($glob);
+
+        # cleanup also the files .xml/.ncml files in the /tmp directory
+        my (undef, undef, $globfilename) =  File::Spec->splitpath( $glob );
+        my $ncmlTempGlob = File::Spec->catfile($tmpdir, $globfilename . ".ncml");
+        my $cdmConfigTempGlob = File::Spec->catfile($tmpdir, $globfilename . ".xml");
+        my @tmpfiles = File::Glob::bsd_glob($ncmlTempGlob);
+        push @tmpfiles, File::Glob::bsd_glob($cdmConfigTempGlob);
         my $minage = time - 24*60*60*($days+1);
-        foreach my $file (@files) {
+
+        foreach my $file (@cleanupFiles, @tmpfiles) {
             my $mtime = (stat($file))[9];
             if ($mtime < $minage) {
                 debugPrint_("grib2netcdf: cleanup file: $file") if $debug;
