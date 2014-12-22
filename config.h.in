@@ -58,6 +58,9 @@
 /* Define to 1 if you have the <metgm.h> header file. */
 #undef HAVE_METGM_H
 
+/* Define if MPI is enabled */
+#undef HAVE_MPI
+
 /* define if the compiler implements namespaces */
 #undef HAVE_NAMESPACES
 
