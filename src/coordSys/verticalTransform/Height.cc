@@ -1,7 +1,7 @@
 /*
  * Fimex, Height.cc
  *
- * (C) Copyright 2013, met.no
+ * (C) Copyright 2013-2015, met.no
  *
  * Project Info:  https://wiki.met.no/fimex/start
  *
@@ -56,7 +56,7 @@ boost::shared_ptr<ToVLevelConverter> Height::getAltitudeConverter(const boost::s
     using namespace std;
     boost::shared_ptr<ToVLevelConverter> altConv;
     boost::shared_ptr<ToVLevelConverter> heightConv = getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-    assert(heightConv.get() == 0);
+    assert(heightConv.get() != 0);
     map<string, string> attrs;
     vector<string> dims;
     const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
