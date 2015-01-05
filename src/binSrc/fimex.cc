@@ -1138,13 +1138,11 @@ int run(int argc, char* args[])
 int main(int argc, char* args[])
 {
 
+    int retStatus = 0;
+
 #ifdef HAVE_MPI
     MPI_Init(&argc, &args);
-    static int ranks[] = {0};
-    MPI_Comm_group(MPI_COMM_WORLD, &mifi_mpi_group_world);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mifi_mpi_me); /* local */
-    MPI_Group_excl(mifi_mpi_group_world, 1, ranks, &mifi_mpi_grprem); /* local */
-    MPI_Comm_create(MPI_COMM_WORLD, mifi_mpi_grprem, &mifi_mpi_commslave);
+    mifi_initialize_mpi(MPI_COMM_WORLD, MPI_INFO_NULL);
 #endif
 
     // wrapping main-functions in run to catch all exceptions
@@ -1155,22 +1153,22 @@ int main(int argc, char* args[])
 #endif
 
 
-        return run(argc, args);
+        retStatus = run(argc, args);
 
 #ifndef DO_NOT_CATCH_EXCEPTIONS_FROM_MAIN
     } catch (const boost::program_options::error& ex) {
         clog << "invalid options: " << ex.what() << endl;
-        return 1;
+        retStatus = 1;
     } catch (exception& ex) {
         clog << "exception occured: " << ex.what() << endl;
-        return 1;
+        retStatus = 1;
     }
 #endif
 #ifdef HAVE_MPI
-    MPI_Comm_free(&mifi_mpi_commslave);
-    MPI_Group_free(&mifi_mpi_grprem);
-    MPI_Group_free(&mifi_mpi_group_world);
+    mifi_free_mpi();
     MPI_Finalize();
 #endif
+
+    return retStatus;
 }
 

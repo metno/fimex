@@ -22,12 +22,19 @@
  */
 
 #include "fimex/NetCDF_CDMWriter.h"
-extern "C" {
-#include "netcdf.h"
-}
 #include "../config.h"
 #ifndef HAVE_NETCDF_HDF5_LIB
 #undef NC_NETCDF4 /* netcdf4.1.2-4.2 define NC_NETCDF4 even when functions are not in library */
+#endif
+#ifdef HAVE_MPI
+#include "fimex/mifi_mpi.h"
+extern "C" {
+#include "netcdf_par.h"
+}
+#else
+extern "C" {
+#include "netcdf.h"
+}
 #endif
 
 #include <iostream>
@@ -48,6 +55,7 @@ extern "C" {
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
 #include "fimex/MutexLock.h" // also includes omp.h
+
 
 namespace MetNoFimex
 {
@@ -113,7 +121,16 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
     }
     int ncVersion = getNcVersion(version, doc);
     ncFile->filename = outputFile;
+#ifdef HAVE_MPI
+    if (mifi_mpi_initialized()) {
+        // currently using no MPI_Info object, i.e.
+        ncCheck(nc_create_par(ncFile->filename.c_str(), ncVersion | NC_MPIIO, mifi_mpi_comm, mifi_mpi_info, &ncFile->ncId), "creating "+ncFile->filename);
+    } else {
+        ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
+    }
+#else
     ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
+#endif
     ncFile->isOpen = true;
 
 
@@ -144,7 +161,6 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
     initFillRenameAttribute(doc);
 
     init();
-
 }
 
 void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
@@ -497,6 +513,17 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 #endif //__INTEL_COMPILER
     Units units;
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
+#ifdef HAVE_MPI
+        if (mifi_mpi_initialized()) {
+            // only work on variables which belong to this mpi-process (modulo-base)
+            if ((vi % mifi_mpi_size) != mifi_mpi_me) {
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_me << " skipping on variable " << vi << "=" << cdmVars.at(vi).getName());
+                continue;
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_me << " working on variable " << vi << "=" << cdmVars.at(vi).getName());
+            }
+        }
+#endif
         CDMVariable cdmVar = cdmVars.at(vi);
         std::string varName = cdmVar.getName();
         DataTypeChanger dtc(cdmVar.getDataType());

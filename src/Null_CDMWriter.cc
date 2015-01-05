@@ -28,9 +28,18 @@
 #include "fimex/Utils.h"
 #include "fimex/Data.h"
 #include "fimex/MutexLock.h"
+#include "fimex/Logger.h"
+
+#include "../config.h"
+#ifdef HAVE_MPI
+#include "fimex/mifi_mpi.h"
+#endif
 
 namespace MetNoFimex
 {
+
+static LoggerPtr logger = getLogger("fimex.Null_CDMWriter");
+
 
 static bool putRecData(CDMDataType dt, DataPtr data, size_t recNum) {
     if (data->size() == 0) return true;
@@ -144,6 +153,18 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
     {
 #endif
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
+#ifdef HAVE_MPI
+        if (mifi_mpi_initialized()) {
+            // only work on variables which belong to this mpi-process (modulo-base)
+            if ((vi % mifi_mpi_size) != mifi_mpi_me) {
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_me << " skipping on variable " << vi << "=" << cdmVars.at(vi).getName());
+                continue;
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_me << " working on variable " << vi << "=" << cdmVars.at(vi).getName());
+            }
+        }
+#endif
+
 //	for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
         if (!cdm.hasUnlimitedDim(cdmVars.at(vi))) {
 #ifdef _OPENMP

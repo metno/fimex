@@ -35,10 +35,27 @@
 extern "C" {
 #endif
 
-static MPI_Group mifi_mpi_group_world;
-static MPI_Group mifi_mpi_grprem;
-static MPI_Comm  mifi_mpi_commslave;
-static int mifi_mpi_me;
+extern MPI_Comm  mifi_mpi_comm;
+extern MPI_Info  mifi_mpi_info;
+extern int mifi_mpi_me;
+extern int mifi_mpi_size;
+extern int mifi_mpi_rank;
+
+/**
+ * Initialize mifi_mpi_* variables. Must be called after MPI_Init()
+ * @param comm MPI_Communication, e.g. MPI_WORLD_COMM
+ * @param info MPI_Information, e.g. MPI_INFO_NULL
+ */
+extern void mifi_initialize_mpi(MPI_Comm comm, MPI_Info info);
+/**
+ * Free/uninitialize mifi_mpi_* variables. Must be called before MPI_Finalize()
+ */
+extern void mifi_free_mpi();
+/**
+ * check if mifi_initialize_mpi has been called before
+ * @return 1 on success, 0 on false
+ */
+extern int mifi_mpi_initialized();
 
 #ifdef __cplusplus
 }

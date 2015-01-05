@@ -234,7 +234,7 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
-	Log4cppLogger.cc Log4cppLogger.h NcmlCDMReader.cc \
+	Log4cppLogger.cc Log4cppLogger.h mifi_mpi.c NcmlCDMReader.cc \
 	NcmlAggregationReader.h NcmlAggregationReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
@@ -375,13 +375,13 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
 	Felt_File2.lo FeltParameters.lo FillWriter.lo \
 	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
-	NcmlCDMReader.lo NcmlAggregationReader.lo Null_CDMWriter.lo \
-	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
-	SpatialAxisSpec.lo SliceBuilder.lo ThreadPool.lo TimeUnit.lo \
-	TimeSpec.lo ToVLevelConverter.lo Units.lo Utils.lo \
-	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
-	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4) $(am__objects_5)
+	mifi_mpi.lo NcmlCDMReader.lo NcmlAggregationReader.lo \
+	Null_CDMWriter.lo ReplaceStringObject.lo \
+	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
+	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
+	Units.lo Utils.lo vertical_coordinate_transformations.lo \
+	XMLDoc.lo XMLInput.lo $(am__objects_1) $(am__objects_2) \
+	$(am__objects_3) $(am__objects_4) $(am__objects_5)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -699,7 +699,7 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
-	Log4cppLogger.cc Log4cppLogger.h NcmlCDMReader.cc \
+	Log4cppLogger.cc Log4cppLogger.h mifi_mpi.c NcmlCDMReader.cc \
 	NcmlAggregationReader.h NcmlAggregationReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
@@ -1162,6 +1162,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/XMLInput.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_fimex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mifi_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vertical_coordinate_transformations.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/AlbersConicalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
