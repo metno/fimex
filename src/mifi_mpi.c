@@ -24,6 +24,9 @@
  *      Author: heikok
  */
 
+#include "../config.h"
+#ifdef HAVE_MPI
+
 #include "fimex/mifi_mpi.h"
 #include <stdio.h>
 
@@ -69,3 +72,4 @@ void mifi_free_mpi()
                mpi_name, mpi_size, mpi_rank);
     }
 }
+#endif
