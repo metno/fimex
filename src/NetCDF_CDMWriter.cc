@@ -122,8 +122,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
     int ncVersion = getNcVersion(version, doc);
     ncFile->filename = outputFile;
 #ifdef HAVE_MPI
-    if (mifi_mpi_initialized()) {
-        // currently using no MPI_Info object, i.e.
+    if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
         ncCheck(nc_create_par(ncFile->filename.c_str(), ncVersion | NC_MPIIO, mifi_mpi_comm, mifi_mpi_info, &ncFile->ncId), "creating "+ncFile->filename);
     } else {
         ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
@@ -384,6 +383,11 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
 #ifdef NC_NETCDF4
         // set compression
         if ((ncFile->format == NC_FORMAT_NETCDF4) || (ncFile->format == NC_FORMAT_NETCDF4_CLASSIC)) {
+#ifdef HAVE_MPI
+            if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
+                LOG4FIMEX(logger, Logger::INFO, "disabling all compression, not possible with parallel HDF5");
+            } else {
+#endif //HAVE_MPI
             int compression = 0;
             int shuffle = 0;
             assert(variableCompression.find(var.getName()) != variableCompression.end());
@@ -418,8 +422,11 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                 LOG4FIMEX(logger, Logger::DEBUG, "compressing variable " << var.getName() << " with level " << compression << " and shuffle="<< shuffle);
                 ncCheck(nc_def_var_deflate(ncFile->ncId, varId, shuffle, 1, compression));
             }
+#ifdef HAVE_MPI
+            }
+#endif // HAVE_MPI
         }
-#endif
+#endif // NC_NETCDF4
     }
     return ncVarMap;
 }
@@ -516,11 +523,11 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 #ifdef HAVE_MPI
         if (mifi_mpi_initialized()) {
             // only work on variables which belong to this mpi-process (modulo-base)
-            if ((vi % mifi_mpi_size) != mifi_mpi_me) {
-                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_me << " skipping on variable " << vi << "=" << cdmVars.at(vi).getName());
+            if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on variable " << vi << "=" << cdmVars.at(vi).getName());
                 continue;
             } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_me << " working on variable " << vi << "=" << cdmVars.at(vi).getName());
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on variable " << vi << "=" << cdmVars.at(vi).getName());
             }
         }
 #endif

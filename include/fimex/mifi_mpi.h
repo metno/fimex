@@ -37,7 +37,6 @@ extern "C" {
 
 extern MPI_Comm  mifi_mpi_comm;
 extern MPI_Info  mifi_mpi_info;
-extern int mifi_mpi_me;
 extern int mifi_mpi_size;
 extern int mifi_mpi_rank;
 

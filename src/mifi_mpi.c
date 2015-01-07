@@ -34,7 +34,6 @@ static int mifi_is_initialized = 0;
 
 MPI_Comm  mifi_mpi_comm;
 MPI_Info mifi_mpi_info;
-int mifi_mpi_me;
 int mifi_mpi_size;
 int mifi_mpi_rank;
 
