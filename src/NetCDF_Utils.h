@@ -31,6 +31,7 @@
 extern "C" {
 #include "netcdf.h"
 }
+#include "unistd.h"
 
 
 namespace MetNoFimex
@@ -39,14 +40,14 @@ namespace MetNoFimex
 /// storage class for netcdf-file pointer
 class Nc {
 public:
-    Nc() : isOpen(false) {}
+    Nc() : isOpen(false), pid(getpid()) {}
     ~Nc();
     static MutexType& getMutex(); // lock against common reading/writing in nc4
     std::string filename;
     int ncId;
     int format;
     bool isOpen;
-
+    pid_t pid;
 };
 
 

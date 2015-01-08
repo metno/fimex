@@ -119,6 +119,13 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, size_t unLimD
 
     DataPtr data;
     ScopedCritical lock(Nc::getMutex());
+    if (ncFile->pid != getpid()) {
+        // reopen file so file descriptions (e.g. offset) are not shared
+        ncCheck(nc_close(ncFile->ncId), "closing parent filehandle");
+        ncFile->pid = getpid();
+        ncCheck(nc_open(ncFile->filename.c_str(), NC_NOWRITE, &ncFile->ncId), "re-opening '"+ncFile->filename+"' after fork");
+        LOG4FIMEX(logger, Logger::DEBUG, "reopening file " << ncFile->filename << " after fork to " << ncFile->pid << " '" << ncFile->ncId << "' ");
+    }
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;
@@ -153,6 +160,14 @@ DataPtr NetCDF_CDMReader::getDataSlice(const std::string& varName, const SliceBu
 
     DataPtr data;
     ScopedCritical lock(Nc::getMutex());
+    if (ncFile->pid != getpid()) {
+        // reopen file so file descriptions (e.g. offset) are not shared
+        ncCheck(nc_close(ncFile->ncId), "closing parent filehandle");
+        ncFile->pid = getpid();
+        ncCheck(nc_open(ncFile->filename.c_str(), NC_NOWRITE, &ncFile->ncId), "re-opening '"+ncFile->filename+"' after fork");
+        LOG4FIMEX(logger, Logger::DEBUG, "reopening file " << ncFile->filename << " after fork to " << ncFile->pid << " '" << ncFile->ncId << "' ");
+    }
+
     int varid;
     ncCheck(nc_inq_varid(ncFile->ncId, var.getName().c_str(), &varid));
     nc_type dtype;
