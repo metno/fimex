@@ -135,8 +135,18 @@ int main(int argc, char* args[]) {
         sb.setStartAndSize("time", i, 1);
         slices.push_back(sb); // copy of current slice
     }
-
-    size_t maxProcs = string2type<size_t>(args[1]);
+    size_t maxProcs = 0;
+    if (argc > 1) {
+        maxProcs = string2type<size_t>(args[1]);
+    }
+    if (maxProcs <= 0) {
+#ifdef _SC_NPROCESSORS_ONLN
+        maxProcs = sysconf( _SC_NPROCESSORS_ONLN );
+        // better, but needs c++11: std::thread::hardware_concurrency();
+#endif
+        if (maxProcs == 0) maxProcs = 1; // cannot detect
+    }
+    printf("maxProcs = %d\n", maxProcs);
     DataPtr data;
     //for (size_t i = 0; i < 1000; i++) { // stress-test
         data = getParallelScaledDataSliceInUnit(maxProcs, reader, parName, parUnit, slices);
