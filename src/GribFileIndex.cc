@@ -41,6 +41,7 @@
 #include <cstdio>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <algorithm>
 
 #if BOOST_VERSION < 103400
 // declare is_regular function to allways be true
@@ -1013,6 +1014,12 @@ GribFileIndex::GribFileIndex(boost::filesystem::path grbmlFilePath)
 }
 
 
+struct HasSameUrl {
+    std::string file_;
+    HasSameUrl(string filename) : file_(filename) {}
+    bool operator()(GribFileMessage& gfm) const {return gfm.getFileURL() == file_;}
+};
+
 void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
         const boost::filesystem::path& grbmlFilePath,
         const std::vector<std::pair<std::string, boost::regex> >& members,
@@ -1020,7 +1027,10 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
 {
     namespace fs = boost::filesystem;
     if (fs::exists(grbmlFilePath)) {
+        // append to existing grbml-file
         initByXML(grbmlFilePath);
+        // but remove existing messages for the same file
+        messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl("file:"+file_string(gribFilePath))), messages_.end());
     }
     std::map<std::string, std::string>::const_iterator efIt = options_.find("earthfigure");
     if (efIt != options_.end()) {
