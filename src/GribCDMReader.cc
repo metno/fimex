@@ -309,7 +309,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
             for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
                 opt_ss << opt->first << "=" << opt->second << ", ";
             }
-            if (matchingNodes.size() > 1)  LOG4FIMEX(logger, Logger::WARN, "using first of several parameters for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "' and " << opt_ss.str());
+            if (matchingNodes.size() > 1)  LOG4FIMEX(logger, Logger::INFO, "using first of several parameters for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "' and " << opt_ss.str());
             return matchingNodes.at(0); // return the parent, since xpath looks for grib1/2 node
         }
     }
