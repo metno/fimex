@@ -252,7 +252,6 @@ void GribCDMReader::initXMLNodeIdx() {
 
 xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
 {
-    string xpathString;
     const vector<long>& pars = msg.getParameterIds();
     map<string, long> optionals;
     optionals["typeOfLevel"] = msg.getLevelType();
@@ -270,7 +269,7 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
     }
 
     if (nodes.size() >= 1) {
-        LOG4FIMEX(logger, Logger::DEBUG, "found parameter at " << xpathString);
+        LOG4FIMEX(logger, Logger::DEBUG, "found parameter for edition " << msg.getEdition() << " and id " << pars.at(0));
         vector<xmlNodePtr> matchingNodes;
         for (size_t i = 0; i < nodes.size(); ++i) {
             xmlNodePtr node = nodes.at(i);
@@ -310,11 +309,11 @@ xmlNodePtr GribCDMReader::findVariableXMLNode(const GribFileMessage& msg) const
             for (map<string, long>::iterator opt = optionals.begin(); opt != optionals.end(); ++opt) {
                 opt_ss << opt->first << "=" << opt->second << ", ";
             }
-            if (matchingNodes.size() > 1)  LOG4FIMEX(logger, Logger::WARN, "using first of several parameters for " << xpathString << " and " << opt_ss.str());
+            if (matchingNodes.size() > 1)  LOG4FIMEX(logger, Logger::WARN, "using first of several parameters for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "' and " << opt_ss.str());
             return matchingNodes.at(0); // return the parent, since xpath looks for grib1/2 node
         }
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "no parameter found in config for " << xpathString);
+    LOG4FIMEX(logger, Logger::DEBUG, "no parameter found in config for edition '" << msg.getEdition() << "', id '" << pars.at(0) << "'");
     return 0;
 }
 
