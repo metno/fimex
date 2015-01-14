@@ -105,7 +105,8 @@ DataPtr getParallelScaledDataSliceInUnit(size_t maxProcs, boost::shared_ptr<CDMR
         if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
             std::cerr << "Process " << i << " (pid " << children.at(i) << ") failed" << std::endl;
             throw runtime_error("child-process did not finish correctly when fetching data");
-            exit(1);
+            // use _exit, to be sure that no cleanup-code is called for the child
+            _exit(1);
         }
     }
     // read the shared_memory
