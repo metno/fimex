@@ -934,10 +934,12 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     string url = getFileURL();
     // remove the 'file:' prefix, needs to be improved when streams are allowed
     url = url.substr(5);
-    boost::shared_ptr<FILE> fh(fopen(url.c_str(), "rb"), fclose);
-    if (fh.get() == 0) {
-        throw runtime_error("cannot open file: " + getFileURL());
+    FILE* fhh = fopen(url.c_str(), "rb");
+    LOG4FIMEX(getLogger("fimex.GribFileMessage"), Logger::DEBUG, "opening file: " << url << " filehandle: " << fhh);
+    if (fhh == 0) {
+        throw runtime_error("cannot open file: " + url);
     }
+    boost::shared_ptr<FILE> fh(fhh, fclose);
     if (!asimofHeader) {
         fseek(fh.get(), getFilePosition(), SEEK_SET);
     } else {
