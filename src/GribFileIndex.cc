@@ -41,6 +41,8 @@
 #include <cstdio>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <libxml/xmlreader.h>
+
 #include <algorithm>
 
 #if BOOST_VERSION < 103400
@@ -606,6 +608,218 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     }
 }
 
+GribFileMessage::GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName) {
+    const xmlChar* name;
+    const xmlChar* value;
+
+
+    while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+        name = xmlTextReaderName(reader);
+        value = xmlTextReaderValue(reader);
+        if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("url"))) {
+            if (xmlStrlen(value) == 0) throw runtime_error("could not find url for node");
+            fileURL_ = string(reinterpret_cast<const char*>(value));
+        } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("seekPos"))) {
+            if (xmlStrlen(value) == 0) throw runtime_error("could not find seekPos for node");
+            filePos_ = atoll(reinterpret_cast<const char*>(value));
+        } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("messagePos"))) {
+            if (xmlStrlen(value) == 0) msgPos_ = 0;
+            else msgPos_ = atoll(reinterpret_cast<const char*>(value));
+        }
+    }
+    // defaults
+    perturbationNo_ = 0;
+    totalNumberOfEnsembles_ = 0;
+
+    int ret = xmlTextReaderRead(reader);
+    while (ret == 1) {
+        int type = xmlTextReaderNodeType(reader);
+        switch (type) {
+        case XML_READER_TYPE_ELEMENT: {
+            name = xmlTextReaderConstName(reader);
+            if (name == NULL) name = reinterpret_cast<const xmlChar*>("-- NONAME");
+            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("parameter"))) {
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("name"))) {
+                        parameterName_ = string(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("shortName"))) {
+                        shortName_ = string(reinterpret_cast<const char*>(value));
+                    }
+                }
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("grib1"))) {
+                // grib1
+                edition_ = 1;
+                int id = 0;
+                int centre = 0;
+                int table = 0;
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("indicatorOfParameter"))) {
+                        id = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("gribTablesVersionNo"))) {
+                        table = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("identificationOfOriginatingGeneratingCentre"))) {
+                        centre = atol(reinterpret_cast<const char*>(value));
+                    }
+                }
+                gridParameterIds_.push_back(id);
+                gridParameterIds_.push_back(table);
+                gridParameterIds_.push_back(centre);
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("grib2"))) {
+                // grib1
+                edition_ = 2;
+                int no = 0;
+                int cat = 0;
+                int dis = 0;
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("parameterNumber"))) {
+                        no = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("parameterCategory"))) {
+                        cat = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("discipline"))) {
+                        dis = atol(reinterpret_cast<const char*>(value));
+                    }
+                }
+                gridParameterIds_.push_back(no);
+                gridParameterIds_.push_back(cat);
+                gridParameterIds_.push_back(dis);
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("level"))) {
+                // level
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("no"))) {
+                        levelNo_ = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("type"))) {
+                        levelType_ = atol(reinterpret_cast<const char*>(value));
+                    }
+                }
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("time"))) {
+                // time
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("dataDate"))) {
+                        dataDate_ = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("dataTime"))) {
+                        dataTime_ = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepUnits"))) {
+                        stepUnits_ = string(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepType"))) {
+                        stepType_ = string(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("timeRangeIndicator"))) {
+                        timeRangeIndicator_ = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepStart"))) {
+                        stepStart_ = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("stepEnd"))) {
+                        stepEnd_ = atol(reinterpret_cast<const char*>(value));
+                    }
+                }
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("typeOfGrid"))) {
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("name"))) {
+                        typeOfGrid_ = string(reinterpret_cast<const char*>(value));
+                    }
+                }
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("ensemble"))) {
+                // ensemble
+
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("total"))) {
+                        totalNumberOfEnsembles_ = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("no"))) {
+                        perturbationNo_ = atol(reinterpret_cast<const char*>(value));
+                    }
+                }
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("extraKey"))) {
+                // extraKeys
+                string keyName;
+                long keyVal = 0;
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("name"))) {
+                        keyName = string(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("value"))) {
+                        keyVal = atol(reinterpret_cast<const char*>(value));
+                    }
+                }
+                otherKeys_[keyName] = keyVal;
+            } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gridDefinition"))) {
+                // gridDefinition
+                string proj4 = "";
+                int isDegree = 0;
+                double startX = 0;
+                double startY = 0;
+                size_t sizeX = 0;
+                size_t sizeY = 0;
+                double incrX = 0;
+                double incrY = 0;
+                GridDefinition::Orientation scanMode = GridDefinition::LeftLowerHorizontal;
+                while (xmlTextReaderMoveToNextAttribute(reader) == 1) {
+                    name = xmlTextReaderName(reader);
+                    value = xmlTextReaderValue(reader);
+                    if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("proj4"))) {
+                        proj4 = string(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("isDegree"))) {
+                        isDegree = atol(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("startX"))) {
+                        startX = atof(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("startY"))) {
+                        startY = atof(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("sizeX"))) {
+                        sizeX = atoll(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("sizeY"))) {
+                        sizeY = atoll(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("incrX"))) {
+                        incrX = atof(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("incrY"))) {
+                        incrY = atof(reinterpret_cast<const char*>(value));
+                    } else if (0 == xmlStrcmp(name, reinterpret_cast<const xmlChar*>("scanMode"))) {
+                        scanMode = static_cast<GridDefinition::Orientation>(atol(reinterpret_cast<const char*>(value)));
+                    }
+                }
+                gridDefinition_ = GridDefinition(proj4, isDegree, sizeX, sizeY, incrX, incrY, startX, startY, scanMode);
+            } else {
+                LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << fileName << " name: " << name);
+            }
+            break;
+        }
+        case XML_READER_TYPE_END_ELEMENT: {
+            name = xmlTextReaderConstName(reader);
+            if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
+            if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
+                if (gridParameterIds_.size() != 3) throw runtime_error("no grib parameters found in " + fileName);
+                if (!isValid()) throw runtime_error("unable to parse gribMessage from " + fileName);
+                // stop reading and return
+                return;
+            }
+            break;
+        }
+        default: break; // only element nodes
+        }
+        ret = xmlTextReaderRead(reader);
+    }
+    throw CDMException("no end node for gribMessage in " + fileName);
+}
+
+
+
 GribFileMessage::GribFileMessage()
 {
 
@@ -1010,7 +1224,7 @@ GribFileIndex::GribFileIndex(boost::filesystem::path gribFilePath,
 GribFileIndex::GribFileIndex(boost::filesystem::path grbmlFilePath)
 {
     if (boost::filesystem::exists(grbmlFilePath)) {
-        initByXML(grbmlFilePath);
+        initByXMLReader(grbmlFilePath);
     } else {
         throw runtime_error("no such grbml-file: " + grbmlFilePath.string());
     }
@@ -1031,7 +1245,7 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
     namespace fs = boost::filesystem;
     if (fs::exists(grbmlFilePath)) {
         // append to existing grbml-file
-        initByXML(grbmlFilePath);
+        initByXMLReader(grbmlFilePath);
         // but remove existing messages for the same file
         messages_.erase(std::remove_if(messages_.begin(), messages_.end(), HasSameUrl("file:"+file_string(gribFilePath))), messages_.end());
     }
@@ -1063,7 +1277,7 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
         fs::path xmlDir = gribFilePath.branch_path();
         fs::path xmlFile = xmlDir / (filename + ".grbml");
         if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
-            initByXML(xmlFile);
+            initByXMLReader(xmlFile);
         } else {
             // try environment path: GRIB_INDEX_PATH
             char* indexDir = getenv("GRIB_INDEX_PATH");
@@ -1078,7 +1292,7 @@ void GribFileIndex::init(const boost::filesystem::path& gribFilePath,
                     xmlFile = xmlDir / indexDir / (filename + ".grbml");
                 }
                 if (fs::exists(xmlFile) && (fs::last_write_time(xmlFile) >= fs::last_write_time(gribFilePath))) {
-                    initByXML(xmlFile);
+                    initByXMLReader(xmlFile);
                 } else {
                     initByGrib(gribFilePath, members, extraKeys);
                 }
@@ -1130,9 +1344,81 @@ void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, cons
 
 }
 
+#if 0
+// useful for debugging
+static void processNode(xmlTextReaderPtr reader) {
+    const xmlChar *name, *value;
+
+    name = xmlTextReaderConstName(reader);
+    if (name == NULL)
+    name = BAD_CAST "--";
+
+    value = xmlTextReaderConstValue(reader);
+
+    printf("%d %d %s %d %d",
+        xmlTextReaderDepth(reader),
+        xmlTextReaderNodeType(reader),
+        name,
+        xmlTextReaderIsEmptyElement(reader),
+        xmlTextReaderHasValue(reader));
+    if (value == NULL)
+    printf("\n");
+    else {
+        if (xmlStrlen(value) > 40)
+            printf(" %.40s...\n", value);
+        else
+        printf(" %s\n", value);
+    }
+}
+#endif
+
+void GribFileIndex::initByXMLReader(const boost::filesystem::path& grbmlFilePath)
+{
+    std::string fileName = file_string(grbmlFilePath);
+    LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << fileName);
+    xmlTextReaderPtr reader = xmlReaderForFile(fileName.c_str(), NULL, 0);
+    if (reader != NULL) {
+        boost::shared_ptr<xmlTextReader> cleanupReader(reader, xmlFreeTextReader);
+        const xmlChar* name;
+        int ret = xmlTextReaderRead(reader);
+        while (ret == 1) {
+            //int depth = xmlTextReaderDepth(reader);
+            int type = xmlTextReaderNodeType(reader);
+            switch (type) {
+            case XML_READER_TYPE_ELEMENT: {
+                name = xmlTextReaderConstName(reader);
+                if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
+                if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
+                    url_ = string(reinterpret_cast<const char*>(xmlTextReaderGetAttribute(reader, reinterpret_cast<const xmlChar*>("url"))));
+                } else if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribMessage"))) {
+                    messages_.push_back(GribFileMessage(reader, fileName));
+                } else {
+                    LOG4FIMEX(logger, Logger::WARN, "unknown node in file :" << fileName << " name: " << name);
+                }
+                break;
+            }
+            case XML_READER_TYPE_END_ELEMENT: {
+                name = xmlTextReaderConstName(reader);
+                if (name == NULL) name = reinterpret_cast<const xmlChar*>("");
+                if (xmlStrEqual(name, reinterpret_cast<const xmlChar*>("gribFileIndex"))) {
+                    return; // finished
+                }
+                break;
+            }
+            default: break; // only element nodes of interest
+            }
+            ret = xmlTextReaderRead(reader);
+        }
+        if (ret != 0) {
+            fprintf(stderr, "%s : failed to parse\n", file_string(grbmlFilePath).c_str());
+        }
+    }
+}
+
 void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "reading GribFile-index :" << grbmlFilePath);
+    initByXMLReader(grbmlFilePath);
     boost::shared_ptr<XMLDoc> doc(new XMLDoc(file_string(grbmlFilePath)));
     doc->registerNamespace("gfi", "http://www.met.no/schema/fimex/gribFileIndex");
     XPathObjPtr xp = doc->getXPathObject("/gfi:gribFileIndex");
@@ -1148,6 +1434,8 @@ void GribFileIndex::initByXML(const boost::filesystem::path& grbmlFilePath)
         messages_.push_back(GribFileMessage(doc, "gfi", xp->nodesetval->nodeTab[i]));
     }
 }
+
+
 
 GribFileIndex::~GribFileIndex()
 {

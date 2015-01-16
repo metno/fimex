@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 #include "fimex/XMLDoc.h"
+#include <libxml/xmlreader.h>
 #include "fimex/GridDefinition.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/regex.hpp>
@@ -55,6 +56,7 @@ public:
      */
     GribFileMessage(boost::shared_ptr<grib_handle> gh, const std::string& fileURL, long filePos, long msgPos, const std::vector<std::pair<std::string, boost::regex> >& members=std::vector<std::pair<std::string, boost::regex> >(), const std::vector<std::string>& extraKeys=std::vector<std::string>());
     GribFileMessage(boost::shared_ptr<XMLDoc>, std::string nsPrefix, xmlNodePtr node);
+    GribFileMessage(xmlTextReaderPtr reader, const std::string& fileName);
     ~GribFileMessage();
 
     /// test if this is a proper GribFileMessage or just the default constructor
@@ -236,6 +238,7 @@ private:
     void init(const boost::filesystem::path& gribFilePath, const boost::filesystem::path& grbmlFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, bool ignoreExistingXml);
     void initByGrib(const boost::filesystem::path& gribFilePath, const std::vector<std::pair<std::string, boost::regex> >& members, const std::vector<std::string>& extraKeys);
     void initByXML(const boost::filesystem::path& xmlFilePath);
+    void initByXMLReader(const boost::filesystem::path& xmlFilePath);
 };
 
 /// outputstream for a GribFileMessage
