@@ -120,23 +120,28 @@ enum mifi_interpol_method {
      */
     MIFI_INTERPOL_FORWARD_MIN,
     /**
-     * forward interpolation, summing over all input-cells, thus propagating undefined values
+     * forward interpolation, summing over all input-cells, thus propagating undefined values,
+     * i.e. value+undef=undef
      */
      MIFI_INTERPOL_FORWARD_UNDEF_SUM,
     /**
-     * forward interpolation, averaging (mean) over all input-cells, thus propagating undefined values
+     * forward interpolation, averaging (mean) over all input-cells, thus propagating undefined values,
+     * i.e. value+undef=undef
      */
      MIFI_INTERPOL_FORWARD_UNDEF_MEAN,
      /**
-      * forward interpolation, median over all input-cells, thus propagating undefined values
+      * forward interpolation, median over all input-cells, thus propagating undefined values,
+      * i.e. value+undef=undef
       */
      MIFI_INTERPOL_FORWARD_UNDEF_MEDIAN,
      /**
-      * forward interpolation, max over all input-cells, thus propagating undefined values
+      * forward interpolation, max over all input-cells, thus propagating undefined values,
+      * i.e. value+undef=undef
       */
      MIFI_INTERPOL_FORWARD_UNDEF_MAX,
      /**
-      * forward interpolation, min over all input-cells, thus propagating undefined values
+      * forward interpolation, min over all input-cells, thus propagating undefined values,
+      * i.e. value+undef=undef
       */
      MIFI_INTERPOL_FORWARD_UNDEF_MIN
 };
