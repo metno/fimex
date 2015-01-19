@@ -71,6 +71,16 @@ int mifi_string_to_interpolation_method(const char* mString)
         method = MIFI_INTERPOL_FORWARD_MAX;
     } else if (mifi_string_equal("forward_min", mString)) {
         method = MIFI_INTERPOL_FORWARD_MIN;
+    } else if (mifi_string_equal("forward_undef_sum", mString)) {
+        method = MIFI_INTERPOL_FORWARD_UNDEF_SUM;
+    } else if (mifi_string_equal("forward_undef_mean", mString)) {
+        method = MIFI_INTERPOL_FORWARD_UNDEF_MEAN;
+    } else if (mifi_string_equal("forward_undef_median", mString)) {
+        method = MIFI_INTERPOL_FORWARD_UNDEF_MEDIAN;
+    } else if (mifi_string_equal("forward_undef_max", mString)) {
+        method = MIFI_INTERPOL_FORWARD_UNDEF_MAX;
+    } else if (mifi_string_equal("forward_undef_min", mString)) {
+        method = MIFI_INTERPOL_FORWARD_MIN;
     }
     return method;
 }

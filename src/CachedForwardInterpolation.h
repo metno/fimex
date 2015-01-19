@@ -45,6 +45,7 @@ private:
     size_t outX;
     size_t outY;
     float (*aggrFunc)(const std::vector<float>& vec);
+    bool undefAggr;
 
 public:
     CachedForwardInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);

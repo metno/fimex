@@ -349,6 +349,11 @@ void CDMInterpolator::changeProjection(int method, const string& proj_input, con
     case MIFI_INTERPOL_FORWARD_MEDIAN:
     case MIFI_INTERPOL_FORWARD_MAX:
     case MIFI_INTERPOL_FORWARD_MIN:
+    case MIFI_INTERPOL_FORWARD_UNDEF_SUM:
+    case MIFI_INTERPOL_FORWARD_UNDEF_MEAN:
+    case MIFI_INTERPOL_FORWARD_UNDEF_MEDIAN:
+    case MIFI_INTERPOL_FORWARD_UNDEF_MAX:
+    case MIFI_INTERPOL_FORWARD_UNDEF_MIN:
         changeProjectionByForwardInterpolation(method, proj_input, out_x_axis, out_y_axis, out_x_axis_unit, out_y_axis_unit, out_x_axis_type, out_y_axis_type); break;
     default: throw CDMException("unknown projection method: " + type2string(method));
     }

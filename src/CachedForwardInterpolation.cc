@@ -36,6 +36,11 @@ namespace MetNoFimex
 {
 
 float aggrSum(const vector<float>& vec) {
+#if 0
+    for (vector<float>::const_iterator vit = vec.begin(); vit != vec.end(); ++vit)
+        cerr << *vit << " ";
+    cerr << endl;
+#endif
     return accumulate(vec.begin(), vec.end(), 0.f);
 }
 float aggrMean(const vector<float>& vec) {
@@ -62,12 +67,18 @@ float aggrMin(const vector<float>& vec) {
 CachedForwardInterpolation::CachedForwardInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
 : pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY)
 {
+    undefAggr = false;
     switch (funcType) {
     case MIFI_INTERPOL_FORWARD_SUM: aggrFunc = aggrSum; break;
     case MIFI_INTERPOL_FORWARD_MEAN: aggrFunc = aggrMean; break;
     case MIFI_INTERPOL_FORWARD_MEDIAN: aggrFunc = aggrMedian; break;
     case MIFI_INTERPOL_FORWARD_MAX: aggrFunc = aggrMax; break;
     case MIFI_INTERPOL_FORWARD_MIN: aggrFunc = aggrMin; break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_SUM: aggrFunc = aggrSum; undefAggr = true; break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MEAN: aggrFunc = aggrMean; undefAggr = true; break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MEDIAN: aggrFunc = aggrMedian; undefAggr = true; break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MAX: aggrFunc = aggrMax; undefAggr = true; break;
+    case MIFI_INTERPOL_FORWARD_UNDEF_MIN: aggrFunc = aggrMin; undefAggr = true; break;
     default: throw CDMException("unknown forward interpolation method: " + type2string(funcType));
     }
 }
@@ -86,7 +97,7 @@ boost::shared_array<float> CachedForwardInterpolation::interpolateValues(boost::
         for (size_t y = 0; y < inY; ++y) {
             for (size_t x = 0; x < inX; ++x) {
                 float val = *inDataIt++;
-                if (!mifi_isnan(val)) {
+                if (undefAggr || !mifi_isnan(val)) {
                     int xOutPos = MetNoFimex::round(pointsOnXAxis[y*inX+x]);
                     if (xOutPos >= 0 && xOutPos < static_cast<int>(outX)) {
                         int yOutPos = MetNoFimex::round(pointsOnYAxis[y*inX+x]);
