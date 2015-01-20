@@ -40,6 +40,11 @@ namespace MetNoFimex
  */
 
 /**
+ *  @example parallelRead.cpp
+ * Example on reading several slices in parallel with a CDMReader.
+ */
+
+/**
  * avoid deletion of the shared_ptr or shared_array when used as
  * boost::shared_ptr<CDMReader>(this, null_deleter())
  * @param r
