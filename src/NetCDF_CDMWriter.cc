@@ -342,7 +342,13 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
     const CDM::DimVec& cdmDims = cdm.getDimensions();
     NcDimIdMap ncDimMap;
     for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
+#ifdef HAVE_MPI
+        // netcdf-MPI does not work with unlimited variables
+        int length = it->getLength();
+        if (length == 0) length++;
+#else
         int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
+#endif
         if (!it->isUnlimited()) {
             // length = 0 means unlimited in netcdf, so I create a dummy
             if (length == 0) length = 1;
