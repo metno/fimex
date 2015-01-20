@@ -72,6 +72,13 @@ boost::posix_time::ptime getUniqueForecastReferenceTime(boost::shared_ptr<CDMRea
 std::vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, const std::string& var, const std::string& unit, int unLimDimPos);
 
 /**
+ * Get the size of each dimension
+ * @param cdm
+ * @return map with dimension -> size
+ */
+std::map<std::string, std::size_t> getCDMDimensionSizes(const CDM& cdm);
+
+/**
  * return estimated size of CDM-data in bytes
  */
 std::size_t estimateCDMDataSize(const CDM& cdm);

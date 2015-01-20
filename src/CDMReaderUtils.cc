@@ -90,7 +90,7 @@ vector<double> getDataSliceInUnit(const boost::shared_ptr<CDMReader>& reader, co
     return vector<double>(&array[0], &array[0] + data->size());
 }
 
-static std::map<std::string, std::size_t> getCDMDimensionSizes(const CDM& cdm)
+std::map<std::string, std::size_t> getCDMDimensionSizes(const CDM& cdm)
 {
     map<string, size_t> dimSizes;
     const CDM::DimVec& dims = cdm.getDimensions();
