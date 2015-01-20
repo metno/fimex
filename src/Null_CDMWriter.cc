@@ -26,7 +26,6 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/Utils.h"
-#include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "fimex/MutexLock.h"
 #include "fimex/Logger.h"
@@ -83,24 +82,6 @@ static bool putVarData(CDMDataType dt, DataPtr data) {
     return true;
 }
 
-static std::size_t getVarSize(const CDMVariable& var, const std::map<std::string, std::size_t>& dimSizes) {
-    const std::vector<std::string>& shape = var.getShape();
-    std::size_t size = 1;
-    for (std::vector<std::string>::const_iterator sit = shape.begin(); sit != shape.end(); ++sit) {
-        size *= dimSizes.find(*sit)->second;
-    }
-    return size;
-}
-
-struct VariableSizeComparator : public std::binary_function<const CDMVariable&, const CDMVariable&, bool>{
-    std::map<std::string, std::size_t> dimSizes_;
-    VariableSizeComparator(std::map<std::string, std::size_t> dimSizes) : dimSizes_(dimSizes) {}
-    bool operator()(const CDMVariable& var1, const CDMVariable& var2) {
-        return getVarSize(var1, dimSizes_) < getVarSize(var2, dimSizes_);
-    }
-};
-
-
 Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile)
 : CDMWriter(cdmReader, outputFile)
 {
@@ -113,7 +94,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
     }
 
     // define vars
-    CDM::VarVec cdmVars = cdm.getVariables();
+    const CDM::VarVec& cdmVars = cdm.getVariables();
     for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {
         const CDMVariable& var = *it;
         const std::vector<std::string>& shape = var.getShape();
@@ -170,10 +151,6 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
     //omp_set_nested(1);
 #pragma omp single
     {
-#endif
-#ifdef HAVE_MPI
-    // sort cdmVars by size to distribute work more equally
-    std::sort(cdmVars.begin(), cdmVars.end(), VariableSizeComparator(getCDMDimensionSizes(cdm)));
 #endif
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
 #ifdef HAVE_MPI

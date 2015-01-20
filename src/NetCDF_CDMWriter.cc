@@ -52,7 +52,6 @@ extern "C" {
 #include "fimex/XMLDoc.h"
 #include "fimex/Logger.h"
 #include "fimex/NcmlCDMReader.h"
-#include "fimex/CDMReaderUtils.h"
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
 #include "fimex/MutexLock.h" // also includes omp.h
@@ -343,17 +342,12 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
     const CDM::DimVec& cdmDims = cdm.getDimensions();
     NcDimIdMap ncDimMap;
     for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
-        int length;
 #ifdef HAVE_MPI
         // netcdf-MPI does not work with unlimited variables
-        if (mifi_mpi_initialized()) {
-            length = it->getLength();
-            if (length == 0) length++;
-        } else {
-#endif
-        length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
-#ifdef HAVE_MPI
-        }
+        int length = it->getLength();
+        if (length == 0) length++;
+#else
+        int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
 #endif
         if (!it->isUnlimited()) {
             // length = 0 means unlimited in netcdf, so I create a dummy
@@ -518,26 +512,9 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
     return retVal;
 }
 
-static std::size_t getVarSize(const CDMVariable& var, const std::map<std::string, std::size_t>& dimSizes) {
-    const std::vector<std::string>& shape = var.getShape();
-    std::size_t size = 1;
-    for (std::vector<std::string>::const_iterator sit = shape.begin(); sit != shape.end(); ++sit) {
-        size *= dimSizes.find(*sit)->second;
-    }
-    return size;
-}
-
-struct VariableSizeComparator : public std::binary_function<const CDMVariable&, const CDMVariable&, bool>{
-    std::map<std::string, std::size_t> dimSizes_;
-    VariableSizeComparator(std::map<std::string, std::size_t> dimSizes) : dimSizes_(dimSizes) {}
-    bool operator()(const CDMVariable& var1, const CDMVariable& var2) {
-        return getVarSize(var1, dimSizes_) < getVarSize(var2, dimSizes_);
-    }
-};
-
 
 void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
-    CDM::VarVec cdmVars = cdm.getVariables();
+    const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600)) // openmp gives currently segfaults with intel compilers < 16.
 #ifdef _OPENMP
@@ -548,10 +525,6 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 #endif
 #endif //__INTEL_COMPILER
     Units units;
-#ifdef HAVE_MPI
-    // sort cdmVars by size to distribute work more equally
-    std::sort(cdmVars.begin(), cdmVars.end(), VariableSizeComparator(getCDMDimensionSizes(cdm)));
-#endif
     for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
 #ifdef HAVE_MPI
         if (mifi_mpi_initialized()) {
