@@ -1,3 +1,13 @@
+  * 2015-01-20 fimex-0.56
+    * making getDataSlice calls fork-safe
+	* adding example on how to efficiently parallelize multi-field
+	  reading with fork
+	* possibility to parallelize fimex with MPI and MPI-IO
+    * adding forward_undef_* interpolations, i.e. forward_* interpolation with
+	  different interpretation of undefined values
+	* improving performance by a factor 8 when reading large grbml files
+	* avoid segfault when grbml points to non-existing grb-file
+	* fix height/altitude conversion (gave no results before)
   * 2014-12-16 fimex-0.55.1
     * fix correction of earthfigure for grb-files (bug introduced in 0.55)
   * 2014-12-11 fimex-0.55
