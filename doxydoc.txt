@@ -583,7 +583,7 @@ GRIB_INDEX_PATH should be defined globally, and fiIndexGribs should be called fr
 the grib-files directory with
 
 @verbatim
-  fiIndexGribs -i input.grb -d $GRIB_INDEX_PATH
+  fiIndexGribs -i input.grb -o $GRIB_INDEX_PATH
 @endverbatim
 
 It is also possible to create one big grbml for many grib-files, e.g. when model-output is
