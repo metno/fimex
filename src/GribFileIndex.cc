@@ -188,13 +188,13 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
 //    } else {
 //        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
 //        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+//        if (orient & GridDefinition::ScanStartRight) {
+//            incrX *= -1;
+//        }
+//        if (!(orient & GridDefinition::ScanStartBottom)) {
+//            incrY *= -1;
+//        }
 //    }
-    if (orient & GridDefinition::ScanStartRight) {
-        incrX *= -1;
-    }
-    if (!(orient & GridDefinition::ScanStartBottom)) {
-        incrY *= -1;
-    }
 
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh) + " +no_defs";
 
