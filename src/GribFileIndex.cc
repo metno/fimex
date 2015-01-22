@@ -177,24 +177,30 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
 
     GridDefinition::Orientation orient = gribGetGridOrientation(gh);
-// resolution of ijDirection is 0.001degree in grib1, calculation via first/last point is much more accurate
-//    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
-//    if (ijDirectionIncrementGiven == 0) {
-        double endX, endY;
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
-        incrX = (endX - startX) / (sizeX-1);
-        incrY = (endY - startY) / (sizeY-1);
-//    } else {
-//        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
-//        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
-//        if (orient & GridDefinition::ScanStartRight) {
-//            incrX *= -1;
-//        }
-//        if (!(orient & GridDefinition::ScanStartBottom)) {
-//            incrY *= -1;
-//        }
-//    }
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
+    double endX, endY;
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
+    MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
+    incrX = (endX - startX) / (sizeX-1);
+    incrY = (endY - startY) / (sizeY-1);
+    if (ijDirectionIncrementGiven != 0) {
+        double incrX1, incrY1;
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX1), 0);
+        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY1), 0);
+        if (orient & GridDefinition::ScanStartRight) {
+            incrX1 *= -1;
+        }
+        if (!(orient & GridDefinition::ScanStartBottom)) {
+            incrY1 *= -1;
+        }
+        // resolution of ijDirection is 0.001degree in grib1, calculation via first/last point is much more accurate
+        if (fabs(incrX1-incrX) > 0.001) {
+            incrX = incrX1; // strange behaviour, maybe going over 0/360 degree, better to use increment here
+        }
+        if (fabs(incrY1-incrY) > 0.001) {
+            incrY = incrY1; // strange behaviour, maybe going over 0/360 degree, better to use increment here
+        }
+    }
 
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh) + " +no_defs";
 
