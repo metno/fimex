@@ -177,22 +177,23 @@ GridDefinition getGridDefRegularLL(long edition, boost::shared_ptr<grib_handle> 
     MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfFirstGridPointInDegrees", &startY), 0);
 
     GridDefinition::Orientation orient = gribGetGridOrientation(gh);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
-    if (ijDirectionIncrementGiven == 0) {
+// resolution of ijDirection is 0.001degree in grib1, calculation via first/last point is much more accurate
+//    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "ijDirectionIncrementGiven", &ijDirectionIncrementGiven), 0);
+//    if (ijDirectionIncrementGiven == 0) {
         double endX, endY;
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "longitudeOfLastGridPointInDegrees", &endX), 0);
         MIFI_GRIB_CHECK(grib_get_double(gh.get(), "latitudeOfLastGridPointInDegrees", &endY), 0);
-        incrX = (endX - startX) / sizeX;
-        incrY = (endY - startY) / sizeY;
-    } else {
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
-        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
-        if (orient & GridDefinition::ScanStartRight) {
-            incrX *= -1;
-        }
-        if (!(orient & GridDefinition::ScanStartBottom)) {
-            incrY *= -1;
-        }
+        incrX = (endX - startX) / (sizeX-1);
+        incrY = (endY - startY) / (sizeY-1);
+//    } else {
+//        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "iDirectionIncrementInDegrees", &incrX), 0);
+//        MIFI_GRIB_CHECK(grib_get_double(gh.get(), "jDirectionIncrementInDegrees", &incrY), 0);
+//    }
+    if (orient & GridDefinition::ScanStartRight) {
+        incrX *= -1;
+    }
+    if (!(orient & GridDefinition::ScanStartBottom)) {
+        incrY *= -1;
     }
 
     string proj = "+proj=longlat " + getEarthsFigure(edition, gh) + " +no_defs";
