@@ -288,7 +288,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
         throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
     }
 
-    return boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(0), fillValue));
+    return boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(), fillValue));
 }
 
     boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
@@ -330,7 +330,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                    + boost::lexical_cast<std::string>(gp3->p_id()));
         }
 
-        return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>(0)));
+        return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
     }
 
     boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedReading(const boost::shared_ptr<MetGmGroup3Ptr> gp3,
@@ -341,7 +341,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             case MetGmHDTag::HD_2D_T:
             case MetGmHDTag::HD_3D_T:
                 {
-                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>(0)));
+                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
 
                     /**
                       * must skip data to keep METGM C API lib satisifed
@@ -366,7 +366,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                    + boost::lexical_cast<std::string>(gp3->p_id()));
         }
 
-        return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>(0)));
+        return  boost::shared_ptr<MetGmGroup5Ptr> (new MetGmGroup5Ptr(gp3, hdTag, boost::shared_array<float>()));
     }
 
     /*
@@ -445,20 +445,20 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                 {
                     FILE* fh = fopen(pGp3_->mgmHandle()->fileHandle()->fileName().c_str(), "rb");;
                     if(!fh) {
-                        return boost::shared_array<float>(0);
+                        return boost::shared_array<float>();
                     }
 
                     mgm_handle* mh = mgm_new_handle();
                     if(!mh) {
                         fclose(fh);
-                        return boost::shared_array<float>(0);
+                        return boost::shared_array<float>();
                     }
 
                     mgm_group3* gp3 = mgm_new_group3();
                     if(!gp3) {
                         mgm_free_handle(mh);
                         fclose(fh);
-                        return boost::shared_array<float>(0);
+                        return boost::shared_array<float>();
                     }
 
                     int call_result = MGM_OK;
@@ -473,7 +473,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                         mgm_free_group3(gp3);
                         mgm_free_handle(mh);
                         fclose(fh);
-                        return boost::shared_array<float>(0);
+                        return boost::shared_array<float>();
                     }
 
                     np = mgm_get_number_of_params(mh);
@@ -487,7 +487,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                             mgm_free_group3(gp3);
                             mgm_free_handle(mh);
                             fclose(fh);
-                            return boost::shared_array<float>(0);
+                            return boost::shared_array<float>();
                         }
 
                         if (mgm_get_pz(gp3) > 0) {
@@ -496,7 +496,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                 mgm_free_group3(gp3);
                                 mgm_free_handle(mh);
                                 fclose(fh);
-                                return boost::shared_array<float>(0);
+                                return boost::shared_array<float>();
                             }
 
                         }
@@ -512,7 +512,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                     mgm_free_group3(gp3);
                                     mgm_free_handle(mh);
                                     fclose(fh);
-                                    return boost::shared_array<float>(0);
+                                    return boost::shared_array<float>();
                                 }
                             }
                         } else if(cOffset > sOffset_) {
@@ -520,7 +520,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                             mgm_free_group3(gp3);
                             mgm_free_handle(mh);
                             fclose(fh);
-                            return boost::shared_array<float>(0);
+                            return boost::shared_array<float>();
                         } else {
                             boost::shared_array<float> data(new float[hdTag_->sliceSize() * numberOfSlices]);
 
@@ -534,7 +534,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                     mgm_free_group3(gp3);
                                     mgm_free_handle(mh);
                                     fclose(fh);
-                                    return boost::shared_array<float>(0);
+                                    return boost::shared_array<float>();
                                 }
                                 if(cSlicePos >= pos && cSlicePos < pos + numberOfSlices -1) {
                                     ++slices_read;
@@ -562,7 +562,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                     mgm_free_group3(gp3);
                     mgm_free_handle(mh);
                     fclose(fh);
-                    return  boost::shared_array<float>(0);
+                    return  boost::shared_array<float>();
                 }
                 break;
             case MetGmHDTag::HD_0D:
@@ -577,7 +577,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                                    + boost::lexical_cast<std::string>(pGp3_->p_id()));
         }
 
-        return  boost::shared_array<float>(0);
+        return  boost::shared_array<float>();
     }
 
     boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForSlicedWriting(const boost::shared_ptr<CDMReader> pCdmReader,
@@ -629,7 +629,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
                           return boost::shared_ptr<MetGmGroup5Ptr>();
                     }
 
-                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(0)));
+                    boost::shared_ptr<MetGmGroup5Ptr> gp5(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>()));
                     gp5->units_ = mgmUnits;
 
                     return gp5;
@@ -645,7 +645,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
         }
 
-        return boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>(0)));
+        return boost::shared_ptr<MetGmGroup5Ptr>(new MetGmGroup5Ptr(pg3, hdtag, boost::shared_array<float>()));
     }
 
     /*
