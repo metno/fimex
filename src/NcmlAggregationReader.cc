@@ -37,6 +37,7 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 #include <boost/regex.hpp>
+#include "../config.h"
 
 namespace MetNoFimex
 {
@@ -79,6 +80,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
         } else {
             string file, type, config;
             getFileTypeConfig(getXmlProp(nodesL->nodeTab[0], "location"), file, type, config);
+#ifdef HAVE_NETCDF_H
             if (type == "" || type == "netcdf" || type == "nc" || type == "nc4") {
                 // remove file: URL-prefix
                 file = boost::regex_replace(file, boost::regex("^file:"), "", boost::format_first_only);
@@ -86,7 +88,9 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
                 file = boost::regex_replace(file, boost::regex("^dods:"), "http:", boost::format_first_only);
                 LOG4FIMEX(getLogger("fimex/NcmlCDMReader"), Logger::DEBUG, "reading netcdf-file:  ");
                 gDataReader_ = boost::shared_ptr<CDMReader>(new NetCDF_CDMReader(file));
-            } else {
+            } else
+#endif // HAVE_NETCDF_H
+            {
                 LOG4FIMEX(getLogger("fimex/NcmlCDMReader"), Logger::DEBUG, "reading file:  "<< file << ", " << type << ", " << config);
                 gDataReader_ = CDMFileReaderFactory::create(type, file, config);
             }
