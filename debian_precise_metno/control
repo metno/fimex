@@ -1,23 +1,23 @@
 Source: fimex
 Priority: extra
 Maintainer: Heiko Klein <heiko.klein@met.no>
-Build-Depends: debhelper (>= 5), quilt, devscripts, pkg-config, gfortran, fakeroot, pkg-config, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-system-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, libproj-dev, libudunits2-dev, libnetcdf4-dev-metno, libgrib-api-dev, libjasper-dev, libpng12-dev, libjpeg-dev, libpq-dev, libmetgm-dev, proradxmlrw-dev, liblog4cpp5-dev
-Build-Conflicts: libfimex-dev, libfelt-dev
+Build-Depends: debhelper (>= 5), quilt, devscripts, pkg-config, gfortran, fakeroot, pkg-config, libboost-date-time-dev, libboost-dev, libboost-filesystem-dev, libboost-system-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-regex-dev, libboost-test-dev, libxml2-dev, libproj-dev, libudunits2-dev, libnetcdf4-dev-metno, libgrib-api-1.13.0-dev, libjasper-dev, libpng12-dev, libjpeg-dev, zlibnew, libpq-dev, libmetgm-dev, proradxmlrw-dev, liblog4cpp5-dev
+Build-Conflicts: libfimex-dev, libfelt-dev, libgrib-api-dev
 Standards-Version: 3.7.2
 Section: libs
 
 Package: libfimex-dev
 Section: libdevel
 Architecture: i386 amd64 ia64 powerpc
-Depends: libfimex-0.25.1-0 (= ${binary:Version}), ${misc:Depends}, libxml2-dev, libboost-dev, libboost-date-time-dev
+Depends: libfimex-0.56-0 (= ${binary:Version}), ${misc:Depends}, libxml2-dev, libboost-dev, libboost-date-time-dev
 Description: library for geo-spatial gridded data
  Development library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
 
-Package: libfimex-0.25.1-0
+Package: libfimex-0.56-0
 Section: libs
 Architecture: i386 amd64 ia64 powerpc
-Depends: ${shlibs:Depends}, ${misc:Depends}, fimex-share, libfelt-0.25.1-0 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, fimex-share, libfelt-0.56-0 (= ${binary:Version}), zlibnew
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
@@ -25,7 +25,7 @@ Description: library for geo-spatial gridded data
 Package: fimex-bin
 Section: science
 Architecture: i386 amd64 ia64 powerpc
-Depends: ${shlibs:Depends}, ${misc:Depends}, libfimex-0.25.1-0 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libfimex-0.56-0 (= ${binary:Version})
 Description: command line utility for geo-spatial gridded data
  The program fimex is a program for File Interpolations, Manipulations and
  EXtraction of gridded geo-spatial data.
@@ -40,7 +40,7 @@ Description: shared files required for fimex-bin and libfimex
  EXtraction of gridded geo-spatial data.
 
 
-Package: libfelt-0.25.1-0
+Package: libfelt-0.56-0
 Section: libs
 Architecture: i386 amd64 ia64 powerpc
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -51,15 +51,15 @@ Description: A c++ library for reading met.no's felt-files
 Package: libfelt-dev
 Section: libdevel
 Architecture: i386 amd64 ia64 powerpc
-Depends: libfelt-0.25.1-0 (= ${binary:Version}), ${misc:Depends}
+Depends: libfelt-0.56-0 (= ${binary:Version}), ${misc:Depends}
 Description: A c++ library for reading met.no's felt-files
  Dev-library for reading the internal file-format of the
  Norwegian Meteorological Institute
 
-Package: libfimexf-0.25.1-0
+Package: libfimexf-0.56-0
 Section: libs
 Architecture: i386 amd64 ia64 powerpc
-Depends: libfimex-0.25.1-0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}, fimex-share
+Depends: libfimex-0.56-0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}, fimex-share
 Description: library for geo-spatial gridded data
  Library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.
@@ -67,7 +67,7 @@ Description: library for geo-spatial gridded data
 Package: libfimexf-dev
 Section: libdevel
 Architecture: i386 amd64 ia64 powerpc
-Depends: libfimexf-0.25.1-0 (= ${binary:Version}), ${misc:Depends}, libfimex-dev
+Depends: libfimexf-0.56-0 (= ${binary:Version}), ${misc:Depends}, libfimex-dev
 Description: library for geo-spatial gridded data
  Development library for File Interpolations, Manipulations and EXtraction
  of gridded geo-spatial data.

@@ -33,8 +33,11 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
+#include <iostream>
 
 
 namespace po = boost::program_options;
@@ -42,7 +45,7 @@ namespace fs = boost::filesystem;
 using namespace std;
 
 static void writeUsage(ostream& out, const po::options_description& options) {
-    out << "usage: fiIndexGribs [ --outputDirectory DIRNAME | --appendFile GRMBL_NAME] -i gribFile" << endl;
+    out << "usage: fiIndexGribs [ --outputDirectory DIRNAME | --appendFile GRMBL_NAME] [-c] -i gribFile" << endl;
     out << endl;
     out << options << endl;
 }
@@ -56,9 +59,22 @@ indexGrib(const fs::path& input, const fs::path& append, const fs::path& output,
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
     }
     MetNoFimex::GribFileIndex gfi(input, append, members, force, options);
-    fs::ofstream os(output);
-    os << gfi;
-    os.close();
+    // open stream before filter, required for closing order
+    std::ofstream realOutStream;
+    boost::iostreams::filtering_ostream outStream;
+    if (output.string().find_last_of(".gz") == (output.string().size()-1)) {
+        //cerr << "using gz" << endl;
+        outStream.push(boost::iostreams::gzip_compressor(boost::iostreams::zlib::default_compression));
+        realOutStream.open(output.c_str(), std::ios::binary|std::ios::out);
+    } else {
+        //cerr << output.string().find_last_of(".gz") << " " << output.string().size() << endl;
+        realOutStream.open(output.c_str(), std::ios::out);
+    }
+    outStream.push(realOutStream);
+
+//    fs::ofstream os(output);
+    outStream << gfi;
+// outStream auto-close will close the file
 }
 
 int

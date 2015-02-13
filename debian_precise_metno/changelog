@@ -1,8 +1,8 @@
-fimex (0.56-1) precise; urgency=low
+fimex (0.56-2) precise; urgency=low
 
-  * initial upload
+  * linking with zlibnew and grib_api 1.13.0
 
- -- Heiko Klein <heiko.klein@met.no>  Tue, 20 Jan 2015 16:07:45 +0100
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 02 Feb 2015 16:07:45 +0100
 
 fimex (0.55.1-1) precise; urgency=low
 

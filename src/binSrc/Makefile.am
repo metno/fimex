@@ -11,7 +11,7 @@ fimex_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@ @LOG4
 if HAVE_GRIBAPI
   bin_PROGRAMS += fiIndexGribs fiGribCut
   fiIndexGribs_SOURCES = fiIndexGribs.cc
-  fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
+  fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
   fiGribCut_SOURCES = fiGribCut.cc
   fiGribCut_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @MIFI_GRIB_API_LIBS@
 endif
