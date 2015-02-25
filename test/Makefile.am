@@ -15,7 +15,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
              merge_target_base.nc merge_target_top.nc \
-             test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
+             test_merge_inner.nc test_merge_outer.nc fillIn2.nc testdata_arome_vc.nc \
              verticalVelocity.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
@@ -75,8 +75,8 @@ if HAVE_NETCDF
               testNcmlAggregationReader \
               testProcessor testMerger testNetCDFReaderWriter \
               testFillWriter \
-			  testVerticalVelocity
-              
+              testVerticalVelocity testVLevelConverter
+
   GRIBAPI_NC_TESTS = testGribReader
   METGM_NC_TESTS = testMetGmWriter 
   SH_TESTS += ${NETCDF_MI_SH_TESTS} testCharNc.sh \
@@ -109,6 +109,7 @@ testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
 testInterpolation_SOURCES = testInterpolation.cc
 testVerticalCoordinates_SOURCES = testVerticalCoordinates.cc
+testVLevelConverter_SOURCES = testVLevelConverter.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc

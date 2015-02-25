@@ -1525,8 +1525,8 @@ int mifi_griddistance(size_t nx, size_t ny, const double* lonVals, const double*
 size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx, double dy, const float* gridDistX, const float* gridDistY, const double* ap, const double* b,
                           const float* zs, const float* ps, const float* u, const float* v, const float* t, float* w)
 {
-    const double R = 287.058;  // specific gas constant dry air
-    const double g = 9.80665; // gravity
+    const double R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR;  // specific gas constant dry air
+    const double g = MIFI_EARTH_GRAVITY; // gravity
 
     double* mapRatioX = (double*) malloc(nx*ny*sizeof(double));
     double* mapRatioY = (double*) malloc(nx*ny*sizeof(double));

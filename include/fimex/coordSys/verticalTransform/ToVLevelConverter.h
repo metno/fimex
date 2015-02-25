@@ -227,6 +227,26 @@ public:
 };
 
 /**
+ * Conversion from pressure to height above MSL (i.e. altitude) integrating pressure levels using the hypsometric equation.
+ * The pressure levels are initialized by a previous pressure-conversion.
+ */
+class PressureIntegrationToAltitudeConverter : public ToVLevelConverter {
+    const boost::shared_ptr<ToVLevelConverter> presConv_;
+    typedef const boost::shared_array<float> float_cp;
+    float_cp surface_air_pressure_, surface_geopotential_, air_temperature_, specific_humidity_;
+    size_t nx_, ny_, nt_;
+
+public:
+    /**
+     * @param presConv another ToVLevelConverter converting to pressure
+     */
+    PressureIntegrationToAltitudeConverter(boost::shared_ptr<ToVLevelConverter> pressure,
+            float_cp sapVal, float_cp sgpVal, float_cp airtVal, float_cp shVal,
+            size_t nx, size_t ny, size_t nt);
+    virtual vector<double> operator()(size_t x, size_t y, size_t t);
+};
+
+/**
  * Use altitude (height above MSL) and topography to calculate the
  * height above ground (hg = height - topo)
  */

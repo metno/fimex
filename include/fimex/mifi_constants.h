@@ -225,6 +225,17 @@ enum mifi_interpol_method {
 
 
 
+/** An earth gravitational accelaration value, 9.80665 m/s**2. */
+#define MIFI_EARTH_GRAVITY 9.80665
+
+/** Molar mass dry air, 0.0289644  kg / mol */
+#define MIFI_MOLAR_MASS_DRY_AIR 0.0289644
+
+/** Gas constant R, 8.31432 J / (mol*K) */
+#define MIFI_GAS_CONSTANT 8.31432
+
+
+
 #ifdef __cplusplus
 #include <limits>
 /** @brief undefined value for floats */

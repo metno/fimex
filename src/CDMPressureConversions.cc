@@ -181,7 +181,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
     boost::shared_ptr<ToVLevelConverter> pConv = p_->cs->getVerticalTransformation()->getConverter(dataReader_, MIFI_VINT_PRESSURE, unLimDimPos, p_->cs, nx, ny, nz, (nt-startT));
     if (varName == "air_temperature") {
         const float cp = 1004.; // J/kgK
-        const float R = 287.; // J/K
+        const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K
         const float ps = 1000.; // hPa
         const float psX1 = 1/ps;
         const float Rcp = R/cp;

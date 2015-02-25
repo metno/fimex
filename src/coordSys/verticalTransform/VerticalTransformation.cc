@@ -68,37 +68,106 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const 
     return getConverter(reader, verticalType, unLimDimPos, cs, nx, ny, nz, t1-t0);
 }
 
+
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     // try geopotential_height or fall back to pressure
     using namespace std;
-    boost::shared_ptr<ToVLevelConverter> altConv;
-    map<string, string> attrs;
-    vector<string> dims;
+    typedef boost::shared_ptr<ToVLevelConverter> conv_p;
+
     const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
     const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
     const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
-    if (xAxis.get() != 0 && yAxis.get() != 0 && zAxis.get() != 0) {
-        dims.push_back(xAxis->getShape()[0]);
-        dims.push_back(yAxis->getShape()[0]);
-        dims.push_back(zAxis->getShape()[0]);
-        attrs["standard_name"] = "geopotential_height";
-        vector<string> geoVars = reader->getCDM().findVariables(attrs, dims);
-        if (geoVars.size() > 0) {
-            LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve height");
-            DataPtr geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
-            if (geoPotData->size() != (nx * ny * nz * nt)) {
-                throw CDMException("geopotential height '" + geoVars[0] + "' has strange size: " + type2string(geoPotData->size()) + " != " + type2string(nx * ny * nz * nt));
-            }
-            altConv = boost::shared_ptr<ToVLevelConverter>(new GeopotentialToAltitudeConverter(geoPotData->asFloat(), nx, ny, nz, nt));
-            //vector<string> altVars = reader->getCDM().findVariables(attrs, dims);
-        } else {
-            LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate height levels");
-            boost::shared_ptr<ToVLevelConverter> presConv = findPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-            altConv = boost::shared_ptr<ToVLevelConverter>(new PressureToStandardAltitudeConverter(presConv));
+    if (!(xAxis && yAxis && zAxis))
+        return conv_p();
+
+    vector<string> dims3;
+    dims3.push_back(xAxis->getShape()[0]);
+    dims3.push_back(yAxis->getShape()[0]);
+    dims3.push_back(zAxis->getShape()[0]);
+    vector<string> dims2;
+    dims2.push_back(xAxis->getShape()[0]);
+    dims2.push_back(yAxis->getShape()[0]);
+    map<string, string> attrs;
+    attrs["standard_name"] = "geopotential_height";
+    vector<string> geoVars = reader->getCDM().findVariables(attrs, dims3);
+    if (geoVars.size() > 0) {
+        LOG4FIMEX(logger, Logger::INFO, "using geopotential height "<<geoVars[0]<<" to retrieve altitude");
+        DataPtr geoPotData = reader->getScaledDataSliceInUnit(geoVars[0], "m", unLimDimPos);
+        if (geoPotData->size() != (nx * ny * nz * nt)) {
+            throw CDMException("geopotential height '" + geoVars[0]
+                    + "' has strange size: " + type2string(geoPotData->size())
+                    + " != " + type2string(nx * ny * nz * nt));
         }
+        return conv_p(new GeopotentialToAltitudeConverter(geoPotData->asFloat(), nx, ny, nz, nt));
     }
-    return altConv;
+
+    conv_p pressure = findPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
+
+    attrs["standard_name"] = "surface_air_pressure";
+    vector<string> sapVars = reader->getCDM().findVariables(attrs, dims2);
+
+    attrs["standard_name"] = "surface_geopotential";
+    vector<string> sgpVars = reader->getCDM().findVariables(attrs, dims2);
+
+    attrs["standard_name"] = "air_temperature";
+    vector<string> airtVars = reader->getCDM().findVariables(attrs, dims3);
+
+    if (pressure && !sapVars.empty() && !sgpVars.empty() && !airtVars.empty()) {
+        attrs["standard_name"] = "specific_humidity";
+        vector<string> shVars = reader->getCDM().findVariables(attrs, dims3);
+
+        LOG4FIMEX(logger, Logger::INFO, "using hypsometric equation with surface pressure '"
+                << sapVars[0] << "', surface geopotential '" << sgpVars[0]
+                << "', air_temperature '" << airtVars[0] << "' to retrieve altitude");
+
+        DataPtr sapData = reader->getScaledDataSliceInUnit(sapVars[0], "hPa", unLimDimPos);
+        DataPtr sgpData = reader->getScaledDataSliceInUnit(sgpVars[0], "m^2/s^2", unLimDimPos);
+        DataPtr airtData = reader->getScaledDataSliceInUnit(airtVars[0], "K", unLimDimPos);
+        if (!sapData || !sgpData || !airtData) {
+            LOG4FIMEX(logger, Logger::INFO, "hypsometric no data");
+            return conv_p();
+        }
+        if (sapData->size() != (nx * ny * nt)) {
+            throw CDMException("surface air pressure '" + sapVars[0]
+                    + "' has strange size: " + type2string(sapData->size())
+                    + " != " + type2string(nx * ny * nt));
+        }
+        if (sgpData->size() != (nx * ny * nt)) {
+            throw CDMException("surface geopotential '" + sgpVars[0]
+                    + "' has strange size: " + type2string(sgpData->size())
+                    + " != " + type2string(nx * ny * nt));
+        }
+        if (airtData->size() != (nx * ny * nz * nt)) {
+            throw CDMException("air temperature '" + airtVars[0]
+                    + "' has strange size: " + type2string(airtData->size())
+                    + " != " + type2string(nx * ny * nz * nt));
+        }
+        boost::shared_array<float> shVal;
+        if (!shVars.empty()) {
+            DataPtr shData = reader->getScaledDataSliceInUnit(shVars[0], "1", unLimDimPos);
+            if (shData->size() != (nx * ny * nz * nt)) {
+                LOG4FIMEX(logger, Logger::INFO, "specific humidity '" + shVars[0]
+                    + "' has strange size: " + type2string(shData->size())
+                        + " != " + type2string(nx * ny * nz * nt)
+                        + ", not using specific humidity");
+            } else {
+                LOG4FIMEX(logger, Logger::INFO, "hypsometric equation uses virtual "
+                        "temperature with specific humidity '" << shVars[0] << "'");
+            }
+            shVal = shData->asFloat();
+        }
+        return conv_p(new PressureIntegrationToAltitudeConverter(pressure,
+                        sapData->asFloat(), sgpData->asFloat(), airtData->asFloat(),
+                        shVal, nx, ny, nt));
+    }
+
+    if (pressure) {
+        LOG4FIMEX(logger, Logger::INFO, "using pressure and standard atmosphere to estimate altitude levels");
+        return conv_p(new PressureToStandardAltitudeConverter(pressure));
+    }
+
+    return conv_p();
 }
 
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
@@ -161,7 +230,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressure
 
     const vector<string> pVars = reader->getCDM().findVariables(attrs, dims);
     if (pVars.empty()) {
-        LOG4FIMEX(logger, Logger::INFO, "no pressure field");
+        //LOG4FIMEX(logger, Logger::DEBUG, "no pressure field");
         return ToVLevelConverter_p();
     }
 

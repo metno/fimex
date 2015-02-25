@@ -168,6 +168,24 @@ extern int mifi_barometric_height(size_t n, double P_b, const double* p, double 
 extern int mifi_barometric_standard_altitude(size_t n, const double* p, double* altitude);
 
 /**
+ * calculate virtual temperature from specific humidity and temperature
+ * @param spec_humidity specific humidity
+ * @param temperature in K
+ * @return virtual temperature in K
+ */
+extern float mifi_virtual_temperature(float spec_humidity, float T);
+
+/**
+ * convert pressure difference to layer thickness using the
+ * hyspometric equation http://en.wikipedia.org/wiki/Hypsometric_equation
+ * @param p_low_alti pressure at lower altitude in hPa
+ * @param p_high_alti pressure at higher altitude in hPa
+ * @param T temperature in K
+ * @return layer thickness in m
+ */
+extern float mifi_barometric_layer_thickness(float p_low_alti, float p_high_alti, float T);
+
+/**
  * convert a standard_name="ocean_s_coordinate_g1" to z using the
  * formula  z(k) = h_c*sigma(k) + C(k)*(h - h_c) + zeta*(1+(h_c*sigma(k)+C(k)*(h-h_c)/h))
  *

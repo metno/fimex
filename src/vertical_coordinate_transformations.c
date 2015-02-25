@@ -70,12 +70,15 @@ int mifi_atmosphere_hybrid_sigma_ap_pressure(size_t n, double ps, const double* 
     return MIFI_OK;
 }
 
+static const double BAROMETRIC_FACTOR = MIFI_GAS_CONSTANT
+        /(MIFI_EARTH_GRAVITY*MIFI_MOLAR_MASS_DRY_AIR);
+
+static const double MOL_WEIGHT_RATIO = 0.622, // eps = Mv / Md = ratio of molecular weights of water and dry air
+    Z_MOL_WEIGHT_RATIO =.60771704180064308681; // = 1/MOL_WEIGHT_RATIO - 1;
+
 int mifi_barometric_pressure(size_t n, double P_b, const double* h, double T_b, double* pressure)
 {
-    const double g = 9.80665;
-    const double M = 0.0289644;
-    const double R = 8.31432;
-    const double C = -g*M/(R*T_b);
+    const double C = -1/(BAROMETRIC_FACTOR * T_b);
     while (n--) {
         *pressure++ = P_b * exp(C * (*h++));
     }
@@ -90,10 +93,7 @@ int mifi_barometric_standard_pressure(size_t n, const double* h, double* pressur
 
 int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, double* height)
 {
-    const double g = 9.80665;
-    const double M = 0.0289644;
-    const double R = 8.31432;
-    const double K = -R*T_b/(g*M);
+    const double K = -BAROMETRIC_FACTOR * T_b;
     while (n--) {
         *height++ =  K * log(*p++/P_b);
     }
@@ -103,6 +103,16 @@ int mifi_barometric_height(size_t n, double P_b, const double* p, double T_b, do
 int mifi_barometric_standard_altitude(size_t n, const double* p, double* altitude)
 {
     return mifi_barometric_height(n, 1013.25, p, 288.15, altitude);
+}
+
+float mifi_virtual_temperature(float spec_humidity, float T)
+{
+    return (1+Z_MOL_WEIGHT_RATIO*spec_humidity) * T;
+}
+
+float mifi_barometric_layer_thickness(float p_low_alti, float p_high_alti, float T)
+{
+    return log(p_low_alti / p_high_alti) * T * BAROMETRIC_FACTOR;
 }
 
 int mifi_ocean_s_g1_z(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z)
@@ -131,9 +141,8 @@ int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, 
     //
     // rho = p / ( R * T )  (see http://wikimedia.org/wikipedia/en/wiki/Density_of_air )
     // -> w = -omega * R * T / (g * p)
-    // R (dry_air) = 287.058 J/(kg·K)
-    const double g = 9.80665;
-    const double mR_g = -1 * 287.058 / g;
+    // R (dry_air) = 287.058 J/(kg·K) = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR
+    const double mR_g = -BAROMETRIC_FACTOR;
 
     while (n--) {
         *w++ = mR_g * *omega++ * *t++ / *p++;

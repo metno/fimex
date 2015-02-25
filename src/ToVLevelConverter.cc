@@ -108,6 +108,54 @@ vector<double> PressureToStandardAltitudeConverter::operator()(size_t x, size_t 
     return h;
 }
 
+PressureIntegrationToAltitudeConverter::PressureIntegrationToAltitudeConverter(boost::shared_ptr<ToVLevelConverter> presConv,
+        float_cp sapVal, float_cp sgpVal, float_cp airtVal, float_cp shVal,
+        size_t nx, size_t ny, size_t nt)
+    : presConv_(presConv), surface_air_pressure_(sapVal),
+      surface_geopotential_(sgpVal), air_temperature_(airtVal),
+      specific_humidity_(shVal), nx_(nx), ny_(ny), nt_(nt)
+{
+    assert(presConv_);
+    assert(surface_air_pressure_);
+    assert(surface_geopotential_);
+    assert(air_temperature_);
+}
+
+vector<double> PressureIntegrationToAltitudeConverter::operator()(size_t x, size_t y, size_t t)
+{
+    const vector<double> pressure((*presConv_)(x,y,t));
+    const size_t nl = pressure.size();
+    if (nl == 0)
+        return vector<double>();
+
+    int l0 = 0, l1 = nl-1, dl = 1;
+    if (pressure.front() < pressure.back()) {
+        std::swap(l0, l1);
+        dl = -1;
+    }
+    l1 += dl;
+
+    const size_t idx3 = mifi_3d_array_position(x,y,t,nx_,ny_,nt_);
+    const float p_surf = surface_air_pressure_[idx3];
+
+    double a = surface_geopotential_[idx3] / MIFI_EARTH_GRAVITY;
+
+    vector<double> altitude(nl);
+    for (int l = l0; l != l1; l += dl) {
+        const float p_low_alti = (l == l0) ? p_surf : pressure.at(l - dl);
+        const float p_high_alti = pressure.at(l);
+
+        const size_t idx4 = mifi_3d_array_position(x,y,l,nx_,ny_,nl) + t * (nx_*ny_*nl*nt_);
+        float Tv = air_temperature_[idx4];
+        if (specific_humidity_)
+            Tv = mifi_virtual_temperature(specific_humidity_[idx4], Tv);
+
+        a += mifi_barometric_layer_thickness(p_low_alti, p_high_alti, Tv);
+        altitude.at(l) = a;
+    }
+    return altitude;
+}
+
 vector<double> AltitudeConverterToHeightConverter::operator()(size_t x, size_t y, size_t t) {
     assert(conv_.get() != 0);
     vector<double> h = (*conv_)(x, y, t);
