@@ -346,7 +346,9 @@ extern int mifi_get_values_log_log_f(const float* infieldA, const float* infield
 /**
  *  @brief find position in array of position in projection
  *
- * points2position uses linear splines to find the array-position of points in the given axis
+ * Points2position uses linear splines to find the array-position of points in the given axis.
+ * Undefined (NaN/Inf) values will be translated to -999 to be far outside the position-range (0-(num-1)).
+ *
  *
  *  @param points the values will get changed from points in axis coordinates to array coordinates
  *  @param n number of values in points

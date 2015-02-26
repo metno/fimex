@@ -133,7 +133,7 @@ extern int mifi_barometric_pressure(size_t n, double P_b, const double* h, doubl
 
 /**
  * convert altitude to pressure using the formula http://en.wikipedia.org/wiki/Barometric_formula
- * and using the international standard atmosphere http://en.wikimedia.org/wiki/International_Standard_Atmosphere
+ * and using the international standard atmosphere http://en.wikipedia.org/wiki/International_Standard_Atmosphere
  */
 extern int mifi_barometric_standard_pressure(size_t n, const double* h, double* pressure);
 

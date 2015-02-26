@@ -39,7 +39,7 @@ host_triplet = @host@
 @HAVE_NETCDF_TRUE@              testNcmlAggregationReader \
 @HAVE_NETCDF_TRUE@              testProcessor testMerger testNetCDFReaderWriter \
 @HAVE_NETCDF_TRUE@              testFillWriter \
-@HAVE_NETCDF_TRUE@			  testVerticalVelocity
+@HAVE_NETCDF_TRUE@              testVerticalVelocity testVLevelConverter
 
 @HAVE_NETCDF_TRUE@am__append_3 = ${NETCDF_MI_SH_TESTS} testCharNc.sh \
 @HAVE_NETCDF_TRUE@              testInterpolatorFill.sh \
@@ -110,7 +110,8 @@ CONFIG_CLEAN_VPATH_FILES =
 @HAVE_NETCDF_TRUE@	testProcessor$(EXEEXT) testMerger$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testNetCDFReaderWriter$(EXEEXT) \
 @HAVE_NETCDF_TRUE@	testFillWriter$(EXEEXT) \
-@HAVE_NETCDF_TRUE@	testVerticalVelocity$(EXEEXT)
+@HAVE_NETCDF_TRUE@	testVerticalVelocity$(EXEEXT) \
+@HAVE_NETCDF_TRUE@	testVLevelConverter$(EXEEXT)
 @HAVE_FELT_TRUE@am__EXEEXT_4 = testGribWriter$(EXEEXT)
 @HAVE_NETCDF_TRUE@am__EXEEXT_5 = testGribReader$(EXEEXT)
 @HAVE_GRIBAPI_TRUE@am__EXEEXT_6 = $(am__EXEEXT_4) $(am__EXEEXT_5)
@@ -514,6 +515,19 @@ testUtils_LDADD = $(LDADD)
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
+am_testVLevelConverter_OBJECTS = testVLevelConverter.$(OBJEXT)
+testVLevelConverter_OBJECTS = $(am_testVLevelConverter_OBJECTS)
+testVLevelConverter_LDADD = $(LDADD)
+@ENABLE_FORTRAN_FALSE@testVLevelConverter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
+@ENABLE_FORTRAN_TRUE@testVLevelConverter_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
+@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
+@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testVerticalCoordinates_OBJECTS =  \
 	testVerticalCoordinates.$(OBJEXT)
 testVerticalCoordinates_OBJECTS =  \
@@ -642,7 +656,8 @@ SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
+	$(testUtils_SOURCES) $(testVLevelConverter_SOURCES) \
+	$(testVerticalCoordinates_SOURCES) \
 	$(testVerticalVelocity_SOURCES) $(testXMLDoc_SOURCES) \
 	$(test_c_consumer_SOURCES) $(wdbTest_SOURCES)
 DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
@@ -661,7 +676,8 @@ DIST_SOURCES = $(testBinaryConstants_SOURCES) $(testCDM_SOURCES) \
 	$(testQualityExtractor_SOURCES) $(testSliceBuilder_SOURCES) \
 	$(testSpatialAxisSpec_SOURCES) $(testTimeInterpolator_SOURCES) \
 	$(testTimeSpec_SOURCES) $(testUnits_SOURCES) \
-	$(testUtils_SOURCES) $(testVerticalCoordinates_SOURCES) \
+	$(testUtils_SOURCES) $(testVLevelConverter_SOURCES) \
+	$(testVerticalCoordinates_SOURCES) \
 	$(testVerticalVelocity_SOURCES) $(testXMLDoc_SOURCES) \
 	$(test_c_consumer_SOURCES) $(am__wdbTest_SOURCES_DIST)
 ETAGS = etags
@@ -880,7 +896,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
              merge_target_base.nc merge_target_top.nc \
-             test_merge_inner.nc test_merge_outer.nc fillIn2.nc \
+             test_merge_inner.nc test_merge_outer.nc fillIn2.nc testdata_arome_vc.nc \
              verticalVelocity.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
@@ -941,6 +957,7 @@ testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
 testInterpolation_SOURCES = testInterpolation.cc
 testVerticalCoordinates_SOURCES = testVerticalCoordinates.cc
+testVLevelConverter_SOURCES = testVLevelConverter.cc
 testSpatialAxisSpec_SOURCES = testSpatialAxisSpec.cc
 testTimeSpec_SOURCES = testTimeSpec.cc
 testData_SOURCES = testData.cc
@@ -1125,6 +1142,9 @@ testUnits$(EXEEXT): $(testUnits_OBJECTS) $(testUnits_DEPENDENCIES) $(EXTRA_testU
 testUtils$(EXEEXT): $(testUtils_OBJECTS) $(testUtils_DEPENDENCIES) $(EXTRA_testUtils_DEPENDENCIES) 
 	@rm -f testUtils$(EXEEXT)
 	$(CXXLINK) $(testUtils_OBJECTS) $(testUtils_LDADD) $(LIBS)
+testVLevelConverter$(EXEEXT): $(testVLevelConverter_OBJECTS) $(testVLevelConverter_DEPENDENCIES) $(EXTRA_testVLevelConverter_DEPENDENCIES) 
+	@rm -f testVLevelConverter$(EXEEXT)
+	$(CXXLINK) $(testVLevelConverter_OBJECTS) $(testVLevelConverter_LDADD) $(LIBS)
 testVerticalCoordinates$(EXEEXT): $(testVerticalCoordinates_OBJECTS) $(testVerticalCoordinates_DEPENDENCIES) $(EXTRA_testVerticalCoordinates_DEPENDENCIES) 
 	@rm -f testVerticalCoordinates$(EXEEXT)
 	$(CXXLINK) $(testVerticalCoordinates_OBJECTS) $(testVerticalCoordinates_LDADD) $(LIBS)
@@ -1203,6 +1223,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testTimeSpec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUnits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testUtils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testVLevelConverter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testVerticalCoordinates.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testVerticalVelocity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testXMLDoc.Po@am__quote@

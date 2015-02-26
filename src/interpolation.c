@@ -165,6 +165,10 @@ int mifi_points2position(double* points, const int n, const double* axis, const 
     }
 
     for (int i = 0; i < n; i++) {
+        if (!isfinite(points[i])) {
+            points[i] = -999.; // outside range
+            continue;
+        }
         int pos = bsearchDoubleIndex(points[i], axis, num, comparator);
         if (pos >= 0) {
             points[i] = (double) pos;
@@ -844,6 +848,7 @@ int mifi_get_values_f(const float* infield, float* outvalues, const double x, co
 {
     int rx = lround(x);
     int ry = lround(y);
+    // fprintf(stderr, "values: %f, %f (%d ,%d)\n", x, y, rx, ry);
     if (((rx >= 0) && (rx < ix)) &&
         ((ry >= 0) && (ry < iy))) { // pos in range
         for (int z = 0; z < iz; ++z) {
