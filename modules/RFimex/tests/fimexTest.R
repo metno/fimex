@@ -16,12 +16,13 @@ if (inherits(reader, "try-error")) {
 #reader <- mifi.reader.new("netcdf", "out.nc", "")
 #reader <- mifi.reader.new("netcdf", "http://thredds.met.no/thredds/dodsC/metno/proff4km/default/Proff_Default_4km_best.ncd", "")
 
+
 vars <- mifi.reader.variables(reader)
 length(vars)
 vars
 if (length(vars) != 21) {
     stop("didn't get all variables, just ",vars);
-} 
+}
 
 coords <- mifi.reader.getCoordinates(reader, "altitude")
 coords
@@ -83,4 +84,16 @@ mifi.sb.getDimensions(sb)
 altitude <- mifi.reader.getSliceVecInUnit(iread, "altitude", sb, "m")
 if (length(altitude) != length(lats)) {
     stop("interpolation failed, got length ", length(altitude));
+}
+
+# loop and check if garbage-collection works
+for (i in 1:1025 ) {
+   reader <- try(mifi.reader.new("felt", "../../../test/flth00.dat", "../../../share/etc/felt2nc_variables.xml"))
+   if (inherits(reader, "try-error")) {
+       stop("mifi.reader.new failed")
+   }
+   if (i %% 50 == 0) {
+     cat("calling gc")
+     gc(TRUE)
+   }
 }

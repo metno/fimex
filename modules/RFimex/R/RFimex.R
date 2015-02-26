@@ -26,43 +26,43 @@
 
 ######################################################################
 
-if(length(getClassDef("RSWIGStruct")) == 0) 
+if(length(getClassDef("RSWIGStruct")) == 0)
   setClass("RSWIGStruct", representation("VIRTUAL"))
 
 
 
-if(length(getClassDef("ExternalReference")) == 0) 
+if(length(getClassDef("ExternalReference")) == 0)
 # Should be virtual but this means it loses its slots currently
 #representation("VIRTUAL")
   setClass("ExternalReference", representation( ref = "externalptr"))
 
 
 
-if(length(getClassDef("NativeRoutinePointer")) == 0) 
-  setClass("NativeRoutinePointer", 
+if(length(getClassDef("NativeRoutinePointer")) == 0)
+  setClass("NativeRoutinePointer",
               representation(parameterTypes = "character",
                              returnType = "character",
-                             "VIRTUAL"), 
+                             "VIRTUAL"),
               contains = "ExternalReference")
 
-if(length(getClassDef("CRoutinePointer")) == 0) 
+if(length(getClassDef("CRoutinePointer")) == 0)
   setClass("CRoutinePointer", contains = "NativeRoutinePointer")
 
 
-if(length(getClassDef("EnumerationValue")) == 0) 
+if(length(getClassDef("EnumerationValue")) == 0)
   setClass("EnumerationValue", contains = "integer")
 
 
-if(!isGeneric("copyToR")) 
+if(!isGeneric("copyToR"))
  setGeneric("copyToR",
-            function(value, obj = new(gsub("Ref$", "", class(value)))) 
+            function(value, obj = new(gsub("Ref$", "", class(value))))
                standardGeneric("copyToR"
            ))
 
 setGeneric("delete", function(obj) standardGeneric("delete"))
 
 
-SWIG_createNewRef = 
+SWIG_createNewRef =
 function(className, ..., append = TRUE)
 {
   f = get(paste("new", className, sep = "_"), mode = "function")
@@ -70,14 +70,14 @@ function(className, ..., append = TRUE)
   f(...)
 }
 
-if(!isGeneric("copyToC")) 
- setGeneric("copyToC", 
+if(!isGeneric("copyToC"))
+ setGeneric("copyToC",
              function(value, obj = RSWIG_createNewRef(class(value)))
               standardGeneric("copyToC"
             ))
 
 
-# 
+#
 defineEnumeration =
 function(name, .values, where = topenv(parent.frame()), suffix = "Value")
 {
@@ -97,7 +97,7 @@ enumToInteger <- function(name,type)
    ans <- as.integer(get(paste(".__E__", type, sep = ""))[name])
    if (is.na(ans)) {warning("enum not found ", name, " ", type)}
    ans
-   } 
+   }
 }
 
 enumFromInteger =
@@ -108,7 +108,7 @@ function(i,type)
 }
 
 coerceIfNotSubclass =
-function(obj, type) 
+function(obj, type)
 {
     if(!is(obj, type)) {as(obj, type)} else obj
 }
@@ -122,7 +122,7 @@ setMethod("length", "SWIGArray", function(x) x@dims[1])
 defineEnumeration("SCopyReferences",
                    .values = c( "FALSE" = 0, "TRUE" = 1, "DEEP" = 2))
 
-assert = 
+assert =
 function(condition, message = "")
 {
   if(!condition)
@@ -176,14 +176,14 @@ setClass('_p_MetNoFimex__NetCDF_CDMWriter', contains = 'C++Reference')
 
 
 setMethod('[', "ExternalReference",
-function(x,i,j, ..., drop=TRUE) 
-if (!is.null(x$"__getitem__")) 
+function(x,i,j, ..., drop=TRUE)
+if (!is.null(x$"__getitem__"))
 sapply(i, function(n) x$"__getitem__"(i=as.integer(n-1))))
 
 setMethod('[<-' , "ExternalReference",
-function(x,i,j, ..., value) 
+function(x,i,j, ..., value)
 if (!is.null(x$"__setitem__")) {
-sapply(1:length(i), function(n) 
+sapply(1:length(i), function(n)
 x$"__setitem__"(i=as.integer(i[n]-1), x=value[n]))
 x
 })
@@ -199,7 +199,7 @@ function(x) {print(as(x, "character"))})
 `IntVector___nonzero__` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_IntVector___nonzero__', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector___nonzero__`, 'returnType') = 'logical'
@@ -212,9 +212,9 @@ class(`IntVector___nonzero__`) = c("SWIGFunction", class('IntVector___nonzero__'
 {
   ;ans = .Call('R_swig_IntVector___len__', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector___len__`, 'returnType') = 'integer'
@@ -227,9 +227,9 @@ class(`IntVector___len__`) = c("SWIGFunction", class('IntVector___len__'))
 {
   ;ans = .Call('R_swig_IntVector_pop', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector_pop`, 'returnType') = 'integer'
@@ -243,18 +243,18 @@ class(`IntVector_pop`) = c("SWIGFunction", class('IntVector_pop'))
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
+
   ;ans = .Call('R_swig_IntVector___getslice__', self, i, j, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector___getslice__`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -268,16 +268,16 @@ class(`IntVector___getslice__`) = c("SWIGFunction", class('IntVector___getslice_
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
-  
+
+
   ;.Call('R_swig_IntVector___setslice__', self, i, j, v, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector___setslice__`, 'returnType') = 'void'
@@ -291,15 +291,15 @@ class(`IntVector___setslice__`) = c("SWIGFunction", class('IntVector___setslice_
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
+
   ;.Call('R_swig_IntVector___delslice__', self, i, j, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector___delslice__`, 'returnType') = 'void'
@@ -313,9 +313,9 @@ class(`IntVector___delslice__`) = c("SWIGFunction", class('IntVector___delslice_
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
+
   ;.Call('R_swig_IntVector___delitem__', self, i, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector___delitem__`, 'returnType') = 'void'
@@ -329,12 +329,12 @@ class(`IntVector___delitem__`) = c("SWIGFunction", class('IntVector___delitem__'
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
+
   ;ans = .Call('R_swig_IntVector___getitem__', self, i, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector___getitem__`, 'returnType') = '_p_size_t'
@@ -348,10 +348,10 @@ class(`IntVector___getitem__`) = c("SWIGFunction", class('IntVector___getitem__'
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
+
+
   ;.Call('R_swig_IntVector___setitem__', self, i, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector___setitem__`, 'returnType') = 'void'
@@ -363,7 +363,7 @@ class(`IntVector___setitem__`) = c("SWIGFunction", class('IntVector___setitem__'
 `IntVector_append` = function(self, x)
 {
   ;.Call('R_swig_IntVector_append', self, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_append`, 'returnType') = 'void'
@@ -376,10 +376,10 @@ class(`IntVector_append`) = c("SWIGFunction", class('IntVector_append'))
 {
   ;ans = .Call('R_swig_new_IntVector__SWIG_0', PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   reg.finalizer(ans, delete_IntVector)
   ans
-  
+
 }
 
 attr(`IntVector__SWIG_0`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -391,10 +391,10 @@ class(`IntVector__SWIG_0`) = c("SWIGFunction", class('IntVector__SWIG_0'))
 {
   ;ans = .Call('R_swig_new_IntVector__SWIG_1', s_arg1, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   reg.finalizer(ans, delete_IntVector)
   ans
-  
+
 }
 
 attr(`IntVector__SWIG_1`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -406,7 +406,7 @@ class(`IntVector__SWIG_1`) = c("SWIGFunction", class('IntVector__SWIG_1'))
 `IntVector_empty` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_IntVector_empty', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_empty`, 'returnType') = 'logical'
@@ -419,9 +419,9 @@ class(`IntVector_empty`) = c("SWIGFunction", class('IntVector_empty'))
 {
   ;ans = .Call('R_swig_IntVector_size', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector_size`, 'returnType') = 'integer'
@@ -433,7 +433,7 @@ class(`IntVector_size`) = c("SWIGFunction", class('IntVector_size'))
 `IntVector_clear` = function(self)
 {
   ;.Call('R_swig_IntVector_clear', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_clear`, 'returnType') = 'void'
@@ -445,7 +445,7 @@ class(`IntVector_clear`) = c("SWIGFunction", class('IntVector_clear'))
 `IntVector_swap` = function(self, v)
 {
   ;.Call('R_swig_IntVector_swap', self, v, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_swap`, 'returnType') = 'void'
@@ -458,9 +458,9 @@ class(`IntVector_swap`) = c("SWIGFunction", class('IntVector_swap'))
 {
   ;ans = .Call('R_swig_IntVector_get_allocator', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__allocatorT_size_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector_get_allocator`, 'returnType') = '_p_std__allocatorT_size_t_t'
@@ -474,13 +474,13 @@ class(`IntVector_get_allocator`) = c("SWIGFunction", class('IntVector_get_alloca
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
+
   ;ans = .Call('R_swig_new_IntVector__SWIG_2', size, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   reg.finalizer(ans, delete_IntVector)
   ans
-  
+
 }
 
 attr(`IntVector__SWIG_2`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -492,7 +492,7 @@ class(`IntVector__SWIG_2`) = c("SWIGFunction", class('IntVector__SWIG_2'))
 `IntVector_pop_back` = function(self)
 {
   ;.Call('R_swig_IntVector_pop_back', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_pop_back`, 'returnType') = 'void'
@@ -506,9 +506,9 @@ class(`IntVector_pop_back`) = c("SWIGFunction", class('IntVector_pop_back'))
   if(length(new_size) > 1) {
     warning("using only the first element of new_size");
   };
-  
+
   ;.Call('R_swig_IntVector_resize__SWIG_0', self, new_size, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_resize__SWIG_0`, 'returnType') = 'void'
@@ -522,14 +522,14 @@ class(`IntVector_resize__SWIG_0`) = c("SWIGFunction", class('IntVector_resize__S
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
-  
+
+
   ;ans = .Call('R_swig_new_IntVector__SWIG_3', size, value, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   reg.finalizer(ans, delete_IntVector)
   ans
-  
+
 }
 
 attr(`IntVector__SWIG_3`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -542,17 +542,17 @@ class(`IntVector__SWIG_3`) = c("SWIGFunction", class('IntVector__SWIG_3'))
   argc <- length(argtypes);
 # dispatch functions 4
   if (argc == 0) {
-    f <- IntVector__SWIG_0; 
+    f <- IntVector__SWIG_0;
   } else if (argc == 1) {
     if ((is.integer(argv[[1]]) || is.numeric(argv[[1]]))) {
-      f <- IntVector__SWIG_2; 
+      f <- IntVector__SWIG_2;
     }
     else if (extends(argtypes[1], '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t')) {
-      f <- IntVector__SWIG_1; 
+      f <- IntVector__SWIG_1;
     }
   } else if (argc == 2) {
     if ((is.integer(argv[[1]]) || is.numeric(argv[[1]])) && extends(argtypes[2], '_p_size_t')) {
-      f <- IntVector__SWIG_3; 
+      f <- IntVector__SWIG_3;
     }
   } else {
     stop("cannot find overloaded function for IntVector with argtypes (",toString(argtypes),")");
@@ -566,7 +566,7 @@ class(`IntVector__SWIG_3`) = c("SWIGFunction", class('IntVector__SWIG_3'))
 `IntVector_push_back` = function(self, x)
 {
   ;.Call('R_swig_IntVector_push_back', self, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_push_back`, 'returnType') = 'void'
@@ -579,9 +579,9 @@ class(`IntVector_push_back`) = c("SWIGFunction", class('IntVector_push_back'))
 {
   ;ans = .Call('R_swig_IntVector_front', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector_front`, 'returnType') = '_p_size_t'
@@ -594,9 +594,9 @@ class(`IntVector_front`) = c("SWIGFunction", class('IntVector_front'))
 {
   ;ans = .Call('R_swig_IntVector_back', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector_back`, 'returnType') = '_p_size_t'
@@ -610,10 +610,10 @@ class(`IntVector_back`) = c("SWIGFunction", class('IntVector_back'))
   if(length(n) > 1) {
     warning("using only the first element of n");
   };
-  
-  
+
+
   ;.Call('R_swig_IntVector_assign', self, n, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_assign`, 'returnType') = 'void'
@@ -627,10 +627,10 @@ class(`IntVector_assign`) = c("SWIGFunction", class('IntVector_assign'))
   if(length(new_size) > 1) {
     warning("using only the first element of new_size");
   };
-  
-  
+
+
   ;.Call('R_swig_IntVector_resize__SWIG_1', self, new_size, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_resize__SWIG_1`, 'returnType') = 'void'
@@ -644,11 +644,11 @@ class(`IntVector_resize__SWIG_1`) = c("SWIGFunction", class('IntVector_resize__S
 # dispatch functions 2
   if (argc == 2) {
     if (extends(argtypes[1], '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]]))) {
-      f <- IntVector_resize__SWIG_0; 
+      f <- IntVector_resize__SWIG_0;
     }
   } else if (argc == 3) {
     if (extends(argtypes[1], '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]])) && extends(argtypes[3], '_p_size_t')) {
-      f <- IntVector_resize__SWIG_1; 
+      f <- IntVector_resize__SWIG_1;
     }
   } else {
     stop("cannot find overloaded function for IntVector_resize with argtypes (",toString(argtypes),")");
@@ -664,9 +664,9 @@ class(`IntVector_resize__SWIG_1`) = c("SWIGFunction", class('IntVector_resize__S
   if(length(n) > 1) {
     warning("using only the first element of n");
   };
-  
+
   ;.Call('R_swig_IntVector_reserve', self, n, PACKAGE='RFimex');
-  
+
 }
 
 attr(`IntVector_reserve`, 'returnType') = 'void'
@@ -679,9 +679,9 @@ class(`IntVector_reserve`) = c("SWIGFunction", class('IntVector_reserve'))
 {
   ;ans = .Call('R_swig_IntVector_capacity', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`IntVector_capacity`, 'returnType') = 'integer'
@@ -693,7 +693,7 @@ class(`IntVector_capacity`) = c("SWIGFunction", class('IntVector_capacity'))
 `delete_IntVector` = function(self)
 {
   ;.Call('R_swig_delete_IntVector', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_IntVector`, 'returnType') = 'void'
@@ -706,7 +706,7 @@ setMethod('$', '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t', function(x, 
 {
   accessorFuns = list('__nonzero__' = IntVector___nonzero__, '__len__' = IntVector___len__, 'pop' = IntVector_pop, '__getslice__' = IntVector___getslice__, '__setslice__' = IntVector___setslice__, '__delslice__' = IntVector___delslice__, '__delitem__' = IntVector___delitem__, '__getitem__' = IntVector___getitem__, '__setitem__' = IntVector___setitem__, 'append' = IntVector_append, 'empty' = IntVector_empty, 'size' = IntVector_size, 'clear' = IntVector_clear, 'swap' = IntVector_swap, 'get_allocator' = IntVector_get_allocator, 'pop_back' = IntVector_pop_back, 'resize' = IntVector_resize, 'push_back' = IntVector_push_back, 'front' = IntVector_front, 'back' = IntVector_back, 'assign' = IntVector_assign, 'reserve' = IntVector_reserve, 'capacity' = IntVector_capacity);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -722,7 +722,7 @@ setMethod('delete', '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t', functio
 `DoubleVector___nonzero__` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_DoubleVector___nonzero__', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector___nonzero__`, 'returnType') = 'logical'
@@ -735,9 +735,9 @@ class(`DoubleVector___nonzero__`) = c("SWIGFunction", class('DoubleVector___nonz
 {
   ;ans = .Call('R_swig_DoubleVector___len__', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`DoubleVector___len__`, 'returnType') = 'integer'
@@ -749,7 +749,7 @@ class(`DoubleVector___len__`) = c("SWIGFunction", class('DoubleVector___len__'))
 `DoubleVector_pop` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_DoubleVector_pop', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_pop`, 'returnType') = 'numeric'
@@ -763,18 +763,18 @@ class(`DoubleVector_pop`) = c("SWIGFunction", class('DoubleVector_pop'))
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
+
   ;ans = .Call('R_swig_DoubleVector___getslice__', self, i, j, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`DoubleVector___getslice__`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -788,16 +788,16 @@ class(`DoubleVector___getslice__`) = c("SWIGFunction", class('DoubleVector___get
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
-  
+
+
   ;.Call('R_swig_DoubleVector___setslice__', self, i, j, v, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector___setslice__`, 'returnType') = 'void'
@@ -811,15 +811,15 @@ class(`DoubleVector___setslice__`) = c("SWIGFunction", class('DoubleVector___set
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
+
   ;.Call('R_swig_DoubleVector___delslice__', self, i, j, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector___delslice__`, 'returnType') = 'void'
@@ -833,9 +833,9 @@ class(`DoubleVector___delslice__`) = c("SWIGFunction", class('DoubleVector___del
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
+
   ;.Call('R_swig_DoubleVector___delitem__', self, i, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector___delitem__`, 'returnType') = 'void'
@@ -849,9 +849,9 @@ class(`DoubleVector___delitem__`) = c("SWIGFunction", class('DoubleVector___deli
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
+
   ;.Call('R_swig_DoubleVector___getitem__', self, i, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector___getitem__`, 'returnType') = 'numeric'
@@ -865,10 +865,10 @@ class(`DoubleVector___getitem__`) = c("SWIGFunction", class('DoubleVector___geti
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
+
+
   ;.Call('R_swig_DoubleVector___setitem__', self, i, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector___setitem__`, 'returnType') = 'void'
@@ -880,7 +880,7 @@ class(`DoubleVector___setitem__`) = c("SWIGFunction", class('DoubleVector___seti
 `DoubleVector_append` = function(self, x)
 {
   ;.Call('R_swig_DoubleVector_append', self, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_append`, 'returnType') = 'void'
@@ -893,10 +893,10 @@ class(`DoubleVector_append`) = c("SWIGFunction", class('DoubleVector_append'))
 {
   ;ans = .Call('R_swig_new_DoubleVector__SWIG_0', PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   reg.finalizer(ans, delete_DoubleVector)
   ans
-  
+
 }
 
 attr(`DoubleVector__SWIG_0`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -908,10 +908,10 @@ class(`DoubleVector__SWIG_0`) = c("SWIGFunction", class('DoubleVector__SWIG_0'))
 {
   ;ans = .Call('R_swig_new_DoubleVector__SWIG_1', s_arg1, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   reg.finalizer(ans, delete_DoubleVector)
   ans
-  
+
 }
 
 attr(`DoubleVector__SWIG_1`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -923,7 +923,7 @@ class(`DoubleVector__SWIG_1`) = c("SWIGFunction", class('DoubleVector__SWIG_1'))
 `DoubleVector_empty` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_DoubleVector_empty', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_empty`, 'returnType') = 'logical'
@@ -936,9 +936,9 @@ class(`DoubleVector_empty`) = c("SWIGFunction", class('DoubleVector_empty'))
 {
   ;ans = .Call('R_swig_DoubleVector_size', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`DoubleVector_size`, 'returnType') = 'integer'
@@ -950,7 +950,7 @@ class(`DoubleVector_size`) = c("SWIGFunction", class('DoubleVector_size'))
 `DoubleVector_clear` = function(self)
 {
   ;.Call('R_swig_DoubleVector_clear', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_clear`, 'returnType') = 'void'
@@ -962,7 +962,7 @@ class(`DoubleVector_clear`) = c("SWIGFunction", class('DoubleVector_clear'))
 `DoubleVector_swap` = function(self, v)
 {
   ;.Call('R_swig_DoubleVector_swap', self, v, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_swap`, 'returnType') = 'void'
@@ -975,9 +975,9 @@ class(`DoubleVector_swap`) = c("SWIGFunction", class('DoubleVector_swap'))
 {
   ;ans = .Call('R_swig_DoubleVector_get_allocator', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__allocatorT_double_t";
-  
+
   ans
-  
+
 }
 
 attr(`DoubleVector_get_allocator`, 'returnType') = '_p_std__allocatorT_double_t'
@@ -991,13 +991,13 @@ class(`DoubleVector_get_allocator`) = c("SWIGFunction", class('DoubleVector_get_
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
+
   ;ans = .Call('R_swig_new_DoubleVector__SWIG_2', size, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   reg.finalizer(ans, delete_DoubleVector)
   ans
-  
+
 }
 
 attr(`DoubleVector__SWIG_2`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -1009,7 +1009,7 @@ class(`DoubleVector__SWIG_2`) = c("SWIGFunction", class('DoubleVector__SWIG_2'))
 `DoubleVector_pop_back` = function(self)
 {
   ;.Call('R_swig_DoubleVector_pop_back', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_pop_back`, 'returnType') = 'void'
@@ -1023,9 +1023,9 @@ class(`DoubleVector_pop_back`) = c("SWIGFunction", class('DoubleVector_pop_back'
   if(length(new_size) > 1) {
     warning("using only the first element of new_size");
   };
-  
+
   ;.Call('R_swig_DoubleVector_resize__SWIG_0', self, new_size, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_resize__SWIG_0`, 'returnType') = 'void'
@@ -1039,14 +1039,14 @@ class(`DoubleVector_resize__SWIG_0`) = c("SWIGFunction", class('DoubleVector_res
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
-  
+
+
   ;ans = .Call('R_swig_new_DoubleVector__SWIG_3', size, value, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   reg.finalizer(ans, delete_DoubleVector)
   ans
-  
+
 }
 
 attr(`DoubleVector__SWIG_3`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -1059,17 +1059,17 @@ class(`DoubleVector__SWIG_3`) = c("SWIGFunction", class('DoubleVector__SWIG_3'))
   argc <- length(argtypes);
 # dispatch functions 4
   if (argc == 0) {
-    f <- DoubleVector__SWIG_0; 
+    f <- DoubleVector__SWIG_0;
   } else if (argc == 1) {
     if ((is.integer(argv[[1]]) || is.numeric(argv[[1]]))) {
-      f <- DoubleVector__SWIG_2; 
+      f <- DoubleVector__SWIG_2;
     }
     else if (extends(argtypes[1], '_p_std__vectorT_double_std__allocatorT_double_t_t')) {
-      f <- DoubleVector__SWIG_1; 
+      f <- DoubleVector__SWIG_1;
     }
   } else if (argc == 2) {
     if ((is.integer(argv[[1]]) || is.numeric(argv[[1]])) && is.numeric(argv[[2]])) {
-      f <- DoubleVector__SWIG_3; 
+      f <- DoubleVector__SWIG_3;
     }
   } else {
     stop("cannot find overloaded function for DoubleVector with argtypes (",toString(argtypes),")");
@@ -1083,7 +1083,7 @@ class(`DoubleVector__SWIG_3`) = c("SWIGFunction", class('DoubleVector__SWIG_3'))
 `DoubleVector_push_back` = function(self, x)
 {
   ;.Call('R_swig_DoubleVector_push_back', self, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_push_back`, 'returnType') = 'void'
@@ -1095,7 +1095,7 @@ class(`DoubleVector_push_back`) = c("SWIGFunction", class('DoubleVector_push_bac
 `DoubleVector_front` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_DoubleVector_front', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_front`, 'returnType') = 'numeric'
@@ -1107,7 +1107,7 @@ class(`DoubleVector_front`) = c("SWIGFunction", class('DoubleVector_front'))
 `DoubleVector_back` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_DoubleVector_back', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_back`, 'returnType') = 'numeric'
@@ -1121,10 +1121,10 @@ class(`DoubleVector_back`) = c("SWIGFunction", class('DoubleVector_back'))
   if(length(n) > 1) {
     warning("using only the first element of n");
   };
-  
-  
+
+
   ;.Call('R_swig_DoubleVector_assign', self, n, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_assign`, 'returnType') = 'void'
@@ -1138,10 +1138,10 @@ class(`DoubleVector_assign`) = c("SWIGFunction", class('DoubleVector_assign'))
   if(length(new_size) > 1) {
     warning("using only the first element of new_size");
   };
-  
-  
+
+
   ;.Call('R_swig_DoubleVector_resize__SWIG_1', self, new_size, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_resize__SWIG_1`, 'returnType') = 'void'
@@ -1155,11 +1155,11 @@ class(`DoubleVector_resize__SWIG_1`) = c("SWIGFunction", class('DoubleVector_res
 # dispatch functions 2
   if (argc == 2) {
     if (extends(argtypes[1], '_p_std__vectorT_double_std__allocatorT_double_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]]))) {
-      f <- DoubleVector_resize__SWIG_0; 
+      f <- DoubleVector_resize__SWIG_0;
     }
   } else if (argc == 3) {
     if (extends(argtypes[1], '_p_std__vectorT_double_std__allocatorT_double_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]])) && is.numeric(argv[[3]])) {
-      f <- DoubleVector_resize__SWIG_1; 
+      f <- DoubleVector_resize__SWIG_1;
     }
   } else {
     stop("cannot find overloaded function for DoubleVector_resize with argtypes (",toString(argtypes),")");
@@ -1175,9 +1175,9 @@ class(`DoubleVector_resize__SWIG_1`) = c("SWIGFunction", class('DoubleVector_res
   if(length(n) > 1) {
     warning("using only the first element of n");
   };
-  
+
   ;.Call('R_swig_DoubleVector_reserve', self, n, PACKAGE='RFimex');
-  
+
 }
 
 attr(`DoubleVector_reserve`, 'returnType') = 'void'
@@ -1190,9 +1190,9 @@ class(`DoubleVector_reserve`) = c("SWIGFunction", class('DoubleVector_reserve'))
 {
   ;ans = .Call('R_swig_DoubleVector_capacity', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`DoubleVector_capacity`, 'returnType') = 'integer'
@@ -1204,7 +1204,7 @@ class(`DoubleVector_capacity`) = c("SWIGFunction", class('DoubleVector_capacity'
 `delete_DoubleVector` = function(self)
 {
   ;.Call('R_swig_delete_DoubleVector', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_DoubleVector`, 'returnType') = 'void'
@@ -1217,7 +1217,7 @@ setMethod('$', '_p_std__vectorT_double_std__allocatorT_double_t_t', function(x, 
 {
   accessorFuns = list('__nonzero__' = DoubleVector___nonzero__, '__len__' = DoubleVector___len__, 'pop' = DoubleVector_pop, '__getslice__' = DoubleVector___getslice__, '__setslice__' = DoubleVector___setslice__, '__delslice__' = DoubleVector___delslice__, '__delitem__' = DoubleVector___delitem__, '__getitem__' = DoubleVector___getitem__, '__setitem__' = DoubleVector___setitem__, 'append' = DoubleVector_append, 'empty' = DoubleVector_empty, 'size' = DoubleVector_size, 'clear' = DoubleVector_clear, 'swap' = DoubleVector_swap, 'get_allocator' = DoubleVector_get_allocator, 'pop_back' = DoubleVector_pop_back, 'resize' = DoubleVector_resize, 'push_back' = DoubleVector_push_back, 'front' = DoubleVector_front, 'back' = DoubleVector_back, 'assign' = DoubleVector_assign, 'reserve' = DoubleVector_reserve, 'capacity' = DoubleVector_capacity);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -1233,7 +1233,7 @@ setMethod('delete', '_p_std__vectorT_double_std__allocatorT_double_t_t', functio
 `StringVector___nonzero__` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_StringVector___nonzero__', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector___nonzero__`, 'returnType') = 'logical'
@@ -1246,9 +1246,9 @@ class(`StringVector___nonzero__`) = c("SWIGFunction", class('StringVector___nonz
 {
   ;ans = .Call('R_swig_StringVector___len__', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`StringVector___len__`, 'returnType') = 'integer'
@@ -1260,7 +1260,7 @@ class(`StringVector___len__`) = c("SWIGFunction", class('StringVector___len__'))
 `StringVector_pop` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_StringVector_pop', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_pop`, 'returnType') = 'character'
@@ -1274,18 +1274,18 @@ class(`StringVector_pop`) = c("SWIGFunction", class('StringVector_pop'))
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
+
   ;ans = .Call('R_swig_StringVector___getslice__', self, i, j, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`StringVector___getslice__`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -1299,16 +1299,16 @@ class(`StringVector___getslice__`) = c("SWIGFunction", class('StringVector___get
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
-  
+
+
   ;.Call('R_swig_StringVector___setslice__', self, i, j, v, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector___setslice__`, 'returnType') = 'void'
@@ -1322,15 +1322,15 @@ class(`StringVector___setslice__`) = c("SWIGFunction", class('StringVector___set
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  
-  
+
+
+
   if(length(j) > 1) {
     warning("using only the first element of j");
   };
-  
+
   ;.Call('R_swig_StringVector___delslice__', self, i, j, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector___delslice__`, 'returnType') = 'void'
@@ -1344,9 +1344,9 @@ class(`StringVector___delslice__`) = c("SWIGFunction", class('StringVector___del
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
+
   ;.Call('R_swig_StringVector___delitem__', self, i, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector___delitem__`, 'returnType') = 'void'
@@ -1360,9 +1360,9 @@ class(`StringVector___delitem__`) = c("SWIGFunction", class('StringVector___deli
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
+
   ;.Call('R_swig_StringVector___getitem__', self, i, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector___getitem__`, 'returnType') = 'character'
@@ -1376,10 +1376,10 @@ class(`StringVector___getitem__`) = c("SWIGFunction", class('StringVector___geti
   if(length(i) > 1) {
     warning("using only the first element of i");
   };
-  
-  x = as(x, "character"); 
+
+  x = as(x, "character");
   ;.Call('R_swig_StringVector___setitem__', self, i, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector___setitem__`, 'returnType') = 'void'
@@ -1390,9 +1390,9 @@ class(`StringVector___setitem__`) = c("SWIGFunction", class('StringVector___seti
 
 `StringVector_append` = function(self, x)
 {
-  x = as(x, "character"); 
+  x = as(x, "character");
   ;.Call('R_swig_StringVector_append', self, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_append`, 'returnType') = 'void'
@@ -1405,10 +1405,10 @@ class(`StringVector_append`) = c("SWIGFunction", class('StringVector_append'))
 {
   ;ans = .Call('R_swig_new_StringVector__SWIG_0', PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   reg.finalizer(ans, delete_StringVector)
   ans
-  
+
 }
 
 attr(`StringVector__SWIG_0`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -1420,10 +1420,10 @@ class(`StringVector__SWIG_0`) = c("SWIGFunction", class('StringVector__SWIG_0'))
 {
   ;ans = .Call('R_swig_new_StringVector__SWIG_1', s_arg1, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   reg.finalizer(ans, delete_StringVector)
   ans
-  
+
 }
 
 attr(`StringVector__SWIG_1`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -1435,7 +1435,7 @@ class(`StringVector__SWIG_1`) = c("SWIGFunction", class('StringVector__SWIG_1'))
 `StringVector_empty` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_StringVector_empty', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_empty`, 'returnType') = 'logical'
@@ -1448,9 +1448,9 @@ class(`StringVector_empty`) = c("SWIGFunction", class('StringVector_empty'))
 {
   ;ans = .Call('R_swig_StringVector_size', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`StringVector_size`, 'returnType') = 'integer'
@@ -1462,7 +1462,7 @@ class(`StringVector_size`) = c("SWIGFunction", class('StringVector_size'))
 `StringVector_clear` = function(self)
 {
   ;.Call('R_swig_StringVector_clear', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_clear`, 'returnType') = 'void'
@@ -1474,7 +1474,7 @@ class(`StringVector_clear`) = c("SWIGFunction", class('StringVector_clear'))
 `StringVector_swap` = function(self, v)
 {
   ;.Call('R_swig_StringVector_swap', self, v, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_swap`, 'returnType') = 'void'
@@ -1487,9 +1487,9 @@ class(`StringVector_swap`) = c("SWIGFunction", class('StringVector_swap'))
 {
   ;ans = .Call('R_swig_StringVector_get_allocator', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__allocatorT_std__string_t";
-  
+
   ans
-  
+
 }
 
 attr(`StringVector_get_allocator`, 'returnType') = '_p_std__allocatorT_std__string_t'
@@ -1503,13 +1503,13 @@ class(`StringVector_get_allocator`) = c("SWIGFunction", class('StringVector_get_
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
+
   ;ans = .Call('R_swig_new_StringVector__SWIG_2', size, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   reg.finalizer(ans, delete_StringVector)
   ans
-  
+
 }
 
 attr(`StringVector__SWIG_2`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -1521,7 +1521,7 @@ class(`StringVector__SWIG_2`) = c("SWIGFunction", class('StringVector__SWIG_2'))
 `StringVector_pop_back` = function(self)
 {
   ;.Call('R_swig_StringVector_pop_back', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_pop_back`, 'returnType') = 'void'
@@ -1535,9 +1535,9 @@ class(`StringVector_pop_back`) = c("SWIGFunction", class('StringVector_pop_back'
   if(length(new_size) > 1) {
     warning("using only the first element of new_size");
   };
-  
+
   ;.Call('R_swig_StringVector_resize__SWIG_0', self, new_size, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_resize__SWIG_0`, 'returnType') = 'void'
@@ -1551,14 +1551,14 @@ class(`StringVector_resize__SWIG_0`) = c("SWIGFunction", class('StringVector_res
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
-  value = as(value, "character"); 
+
+  value = as(value, "character");
   ;ans = .Call('R_swig_new_StringVector__SWIG_3', size, value, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   reg.finalizer(ans, delete_StringVector)
   ans
-  
+
 }
 
 attr(`StringVector__SWIG_3`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -1571,17 +1571,17 @@ class(`StringVector__SWIG_3`) = c("SWIGFunction", class('StringVector__SWIG_3'))
   argc <- length(argtypes);
 # dispatch functions 4
   if (argc == 0) {
-    f <- StringVector__SWIG_0; 
+    f <- StringVector__SWIG_0;
   } else if (argc == 1) {
     if ((is.integer(argv[[1]]) || is.numeric(argv[[1]]))) {
-      f <- StringVector__SWIG_2; 
+      f <- StringVector__SWIG_2;
     }
     else if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')) {
-      f <- StringVector__SWIG_1; 
+      f <- StringVector__SWIG_1;
     }
   } else if (argc == 2) {
     if ((is.integer(argv[[1]]) || is.numeric(argv[[1]])) && is.character(argv[[2]])) {
-      f <- StringVector__SWIG_3; 
+      f <- StringVector__SWIG_3;
     }
   } else {
     stop("cannot find overloaded function for StringVector with argtypes (",toString(argtypes),")");
@@ -1594,9 +1594,9 @@ class(`StringVector__SWIG_3`) = c("SWIGFunction", class('StringVector__SWIG_3'))
 
 `StringVector_push_back` = function(self, x)
 {
-  x = as(x, "character"); 
+  x = as(x, "character");
   ;.Call('R_swig_StringVector_push_back', self, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_push_back`, 'returnType') = 'void'
@@ -1608,7 +1608,7 @@ class(`StringVector_push_back`) = c("SWIGFunction", class('StringVector_push_bac
 `StringVector_front` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_StringVector_front', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_front`, 'returnType') = 'character'
@@ -1620,7 +1620,7 @@ class(`StringVector_front`) = c("SWIGFunction", class('StringVector_front'))
 `StringVector_back` = function(self, .copy = FALSE)
 {
   ;.Call('R_swig_StringVector_back', self, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_back`, 'returnType') = 'character'
@@ -1634,10 +1634,10 @@ class(`StringVector_back`) = c("SWIGFunction", class('StringVector_back'))
   if(length(n) > 1) {
     warning("using only the first element of n");
   };
-  
-  x = as(x, "character"); 
+
+  x = as(x, "character");
   ;.Call('R_swig_StringVector_assign', self, n, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_assign`, 'returnType') = 'void'
@@ -1651,10 +1651,10 @@ class(`StringVector_assign`) = c("SWIGFunction", class('StringVector_assign'))
   if(length(new_size) > 1) {
     warning("using only the first element of new_size");
   };
-  
-  x = as(x, "character"); 
+
+  x = as(x, "character");
   ;.Call('R_swig_StringVector_resize__SWIG_1', self, new_size, x, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_resize__SWIG_1`, 'returnType') = 'void'
@@ -1668,11 +1668,11 @@ class(`StringVector_resize__SWIG_1`) = c("SWIGFunction", class('StringVector_res
 # dispatch functions 2
   if (argc == 2) {
     if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]]))) {
-      f <- StringVector_resize__SWIG_0; 
+      f <- StringVector_resize__SWIG_0;
     }
   } else if (argc == 3) {
     if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t') && (is.integer(argv[[2]]) || is.numeric(argv[[2]])) && is.character(argv[[3]])) {
-      f <- StringVector_resize__SWIG_1; 
+      f <- StringVector_resize__SWIG_1;
     }
   } else {
     stop("cannot find overloaded function for StringVector_resize with argtypes (",toString(argtypes),")");
@@ -1688,9 +1688,9 @@ class(`StringVector_resize__SWIG_1`) = c("SWIGFunction", class('StringVector_res
   if(length(n) > 1) {
     warning("using only the first element of n");
   };
-  
+
   ;.Call('R_swig_StringVector_reserve', self, n, PACKAGE='RFimex');
-  
+
 }
 
 attr(`StringVector_reserve`, 'returnType') = 'void'
@@ -1703,9 +1703,9 @@ class(`StringVector_reserve`) = c("SWIGFunction", class('StringVector_reserve'))
 {
   ;ans = .Call('R_swig_StringVector_capacity', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`StringVector_capacity`, 'returnType') = 'integer'
@@ -1717,7 +1717,7 @@ class(`StringVector_capacity`) = c("SWIGFunction", class('StringVector_capacity'
 `delete_StringVector` = function(self)
 {
   ;.Call('R_swig_delete_StringVector', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_StringVector`, 'returnType') = 'void'
@@ -1730,7 +1730,7 @@ setMethod('$', '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t', fu
 {
   accessorFuns = list('__nonzero__' = StringVector___nonzero__, '__len__' = StringVector___len__, 'pop' = StringVector_pop, '__getslice__' = StringVector___getslice__, '__setslice__' = StringVector___setslice__, '__delslice__' = StringVector___delslice__, '__delitem__' = StringVector___delitem__, '__getitem__' = StringVector___getitem__, '__setitem__' = StringVector___setitem__, 'append' = StringVector_append, 'empty' = StringVector_empty, 'size' = StringVector_size, 'clear' = StringVector_clear, 'swap' = StringVector_swap, 'get_allocator' = StringVector_get_allocator, 'pop_back' = StringVector_pop_back, 'resize' = StringVector_resize, 'push_back' = StringVector_push_back, 'front' = StringVector_front, 'back' = StringVector_back, 'assign' = StringVector_assign, 'reserve' = StringVector_reserve, 'capacity' = StringVector_capacity);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -1747,10 +1747,10 @@ setMethod('delete', '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t
 {
   ;ans = .Call('R_swig_new_mifi_cdm_reader', reader, PACKAGE='RFimex');
   class(ans) <- "_p_mifi_cdm_reader";
-  
+
   reg.finalizer(ans, delete_mifi_cdm_reader)
   ans
-  
+
 }
 
 attr(`mifi_cdm_reader`, 'returnType') = '_p_mifi_cdm_reader'
@@ -1762,7 +1762,7 @@ class(`mifi_cdm_reader`) = c("SWIGFunction", class('mifi_cdm_reader'))
 `mifi_cdm_reader_reader__set` = function(self, s_reader_)
 {
   ;.Call('R_swig_mifi_cdm_reader_reader__set', self, s_reader_, PACKAGE='RFimex');
-  
+
 }
 
 attr(`mifi_cdm_reader_reader__set`, 'returnType') = 'void'
@@ -1775,9 +1775,11 @@ class(`mifi_cdm_reader_reader__set`) = c("SWIGFunction", class('mifi_cdm_reader_
 {
   ;ans = .Call('R_swig_mifi_cdm_reader_reader__get', self, PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
-  
+
+  reg.finalizer(ans, delete_boost__shared_ptrCDMReader, onexit = TRUE)
+
   ans
-  
+
 }
 
 attr(`mifi_cdm_reader_reader__get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
@@ -1789,7 +1791,7 @@ class(`mifi_cdm_reader_reader__get`) = c("SWIGFunction", class('mifi_cdm_reader_
 `mifi_cdm_reader_csVec__set` = function(self, s_csVec_)
 {
   ;.Call('R_swig_mifi_cdm_reader_csVec__set', self, s_csVec_, PACKAGE='RFimex');
-  
+
 }
 
 attr(`mifi_cdm_reader_csVec__set`, 'returnType') = 'void'
@@ -1802,9 +1804,9 @@ class(`mifi_cdm_reader_csVec__set`) = c("SWIGFunction", class('mifi_cdm_reader_c
 {
   ;ans = .Call('R_swig_mifi_cdm_reader_csVec__get', self, PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`mifi_cdm_reader_csVec__get`, 'returnType') = '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t'
@@ -1816,7 +1818,7 @@ class(`mifi_cdm_reader_csVec__get`) = c("SWIGFunction", class('mifi_cdm_reader_c
 `delete_mifi_cdm_reader` = function(self)
 {
   ;.Call('R_swig_delete_mifi_cdm_reader', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_mifi_cdm_reader`, 'returnType') = 'void'
@@ -1830,7 +1832,7 @@ setMethod('$', '_p_mifi_cdm_reader', function(x, name)
   accessorFuns = list('reader_' = mifi_cdm_reader_reader__get, 'csVec_' = mifi_cdm_reader_csVec__get);
   vaccessors = c('reader_', 'csVec_');
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -1846,7 +1848,7 @@ setMethod('$<-', '_p_mifi_cdm_reader', function(x, name, value)
 {
   accessorFuns = list('reader_' = mifi_cdm_reader_reader__set, 'csVec_' = mifi_cdm_reader_csVec__set);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name, value));
   f = accessorFuns[[idx]];
   f(x, value);
@@ -1861,7 +1863,7 @@ setMethod('[[<-', c('_p_mifi_cdm_reader', 'character'),function(x, i, j, ..., va
   name = i;
   accessorFuns = list('reader_' = mifi_cdm_reader_reader__set, 'csVec_' = mifi_cdm_reader_csVec__set);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name, value));
   f = accessorFuns[[idx]];
   f(x, value);
@@ -1878,10 +1880,10 @@ setMethod('delete', '_p_mifi_cdm_reader', function(obj) {delete_mifi_cdm_reader(
 {
   ;ans = .Call('R_swig_new_mifi_slicebuilder__SWIG_0', sb, cs, PACKAGE='RFimex');
   class(ans) <- "_p_mifi_slicebuilder";
-  
+
   reg.finalizer(ans, delete_mifi_slicebuilder)
   ans
-  
+
 }
 
 attr(`mifi_slicebuilder__SWIG_0`, 'returnType') = '_p_mifi_slicebuilder'
@@ -1894,10 +1896,10 @@ class(`mifi_slicebuilder__SWIG_0`) = c("SWIGFunction", class('mifi_slicebuilder_
 {
   ;ans = .Call('R_swig_new_mifi_slicebuilder__SWIG_1', sb, PACKAGE='RFimex');
   class(ans) <- "_p_mifi_slicebuilder";
-  
+
   reg.finalizer(ans, delete_mifi_slicebuilder)
   ans
-  
+
 }
 
 attr(`mifi_slicebuilder__SWIG_1`, 'returnType') = '_p_mifi_slicebuilder'
@@ -1911,11 +1913,11 @@ class(`mifi_slicebuilder__SWIG_1`) = c("SWIGFunction", class('mifi_slicebuilder_
 # dispatch functions 2
   if (argc == 1) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t')) {
-      f <- mifi_slicebuilder__SWIG_1; 
+      f <- mifi_slicebuilder__SWIG_1;
     }
   } else if (argc == 2) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t') && extends(argtypes[2], '_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t')) {
-      f <- mifi_slicebuilder__SWIG_0; 
+      f <- mifi_slicebuilder__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for mifi_slicebuilder with argtypes (",toString(argtypes),")");
@@ -1929,7 +1931,7 @@ class(`mifi_slicebuilder__SWIG_1`) = c("SWIGFunction", class('mifi_slicebuilder_
 `mifi_slicebuilder_sb__set` = function(self, s_sb_)
 {
   ;.Call('R_swig_mifi_slicebuilder_sb__set', self, s_sb_, PACKAGE='RFimex');
-  
+
 }
 
 attr(`mifi_slicebuilder_sb__set`, 'returnType') = 'void'
@@ -1942,9 +1944,9 @@ class(`mifi_slicebuilder_sb__set`) = c("SWIGFunction", class('mifi_slicebuilder_
 {
   ;ans = .Call('R_swig_mifi_slicebuilder_sb__get', self, PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t";
-  
+
   ans
-  
+
 }
 
 attr(`mifi_slicebuilder_sb__get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__SliceBuilder_t'
@@ -1956,7 +1958,7 @@ class(`mifi_slicebuilder_sb__get`) = c("SWIGFunction", class('mifi_slicebuilder_
 `mifi_slicebuilder_cs__set` = function(self, s_cs_)
 {
   ;.Call('R_swig_mifi_slicebuilder_cs__set', self, s_cs_, PACKAGE='RFimex');
-  
+
 }
 
 attr(`mifi_slicebuilder_cs__set`, 'returnType') = 'void'
@@ -1969,9 +1971,9 @@ class(`mifi_slicebuilder_cs__set`) = c("SWIGFunction", class('mifi_slicebuilder_
 {
   ;ans = .Call('R_swig_mifi_slicebuilder_cs__get', self, PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t";
-  
+
   ans
-  
+
 }
 
 attr(`mifi_slicebuilder_cs__get`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t'
@@ -1983,7 +1985,7 @@ class(`mifi_slicebuilder_cs__get`) = c("SWIGFunction", class('mifi_slicebuilder_
 `delete_mifi_slicebuilder` = function(self)
 {
   ;.Call('R_swig_delete_mifi_slicebuilder', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_mifi_slicebuilder`, 'returnType') = 'void'
@@ -1997,7 +1999,7 @@ setMethod('$', '_p_mifi_slicebuilder', function(x, name)
   accessorFuns = list('sb_' = mifi_slicebuilder_sb__get, 'cs_' = mifi_slicebuilder_cs__get);
   vaccessors = c('sb_', 'cs_');
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -2013,7 +2015,7 @@ setMethod('$<-', '_p_mifi_slicebuilder', function(x, name, value)
 {
   accessorFuns = list('sb_' = mifi_slicebuilder_sb__set, 'cs_' = mifi_slicebuilder_cs__set);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name, value));
   f = accessorFuns[[idx]];
   f(x, value);
@@ -2028,7 +2030,7 @@ setMethod('[[<-', c('_p_mifi_slicebuilder', 'character'),function(x, i, j, ..., 
   name = i;
   accessorFuns = list('sb_' = mifi_slicebuilder_sb__set, 'cs_' = mifi_slicebuilder_cs__set);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name, value));
   f = accessorFuns[[idx]];
   f(x, value);
@@ -2045,9 +2047,9 @@ setMethod('delete', '_p_mifi_slicebuilder', function(obj) {delete_mifi_slicebuil
 {
   ;ans = .Call('R_swig_mifi_get_variable_number', reader, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_size_t";
-  
+
   ans
-  
+
 }
 
 attr(`mifi_get_variable_number`, 'returnType') = 'integer'
@@ -2061,9 +2063,9 @@ class(`mifi_get_variable_number`) = c("SWIGFunction", class('mifi_get_variable_n
   if(length(pos) > 1) {
     warning("using only the first element of pos");
   };
-  
+
   ;.Call('R_swig_mifi_get_variable_name', reader, pos, PACKAGE='RFimex');
-  
+
 }
 
 attr(`mifi_get_variable_name`, 'returnType') = 'character'
@@ -2074,9 +2076,9 @@ class(`mifi_get_variable_name`) = c("SWIGFunction", class('mifi_get_variable_nam
 
 `mifi_get_unique_forecast_reference_time` = function(reader, units, .copy = FALSE)
 {
-  units = as(units, "character"); 
+  units = as(units, "character");
   ;.Call('R_swig_mifi_get_unique_forecast_reference_time', reader, units, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`mifi_get_unique_forecast_reference_time`, 'returnType') = 'numeric'
@@ -2087,14 +2089,14 @@ class(`mifi_get_unique_forecast_reference_time`) = c("SWIGFunction", class('mifi
 
 `SliceBuilder__SWIG_0` = function(cdm, varName, setUnlimited)
 {
-  varName = as(varName, "character"); 
+  varName = as(varName, "character");
   setUnlimited = as.logical(setUnlimited);
   ;ans = .Call('R_swig_new_SliceBuilder__SWIG_0', cdm, varName, setUnlimited, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__SliceBuilder";
-  
+
   reg.finalizer(ans, delete_SliceBuilder)
   ans
-  
+
 }
 
 attr(`SliceBuilder__SWIG_0`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
@@ -2105,13 +2107,13 @@ class(`SliceBuilder__SWIG_0`) = c("SWIGFunction", class('SliceBuilder__SWIG_0'))
 
 `SliceBuilder__SWIG_1` = function(cdm, varName)
 {
-  varName = as(varName, "character"); 
+  varName = as(varName, "character");
   ;ans = .Call('R_swig_new_SliceBuilder__SWIG_1', cdm, varName, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__SliceBuilder";
-  
+
   reg.finalizer(ans, delete_SliceBuilder)
   ans
-  
+
 }
 
 attr(`SliceBuilder__SWIG_1`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
@@ -2124,10 +2126,10 @@ class(`SliceBuilder__SWIG_1`) = c("SWIGFunction", class('SliceBuilder__SWIG_1'))
 {
   ;ans = .Call('R_swig_new_SliceBuilder__SWIG_2', dimNames, dimSize, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__SliceBuilder";
-  
+
   reg.finalizer(ans, delete_SliceBuilder)
   ans
-  
+
 }
 
 attr(`SliceBuilder__SWIG_2`, 'returnType') = '_p_MetNoFimex__SliceBuilder'
@@ -2141,14 +2143,14 @@ class(`SliceBuilder__SWIG_2`) = c("SWIGFunction", class('SliceBuilder__SWIG_2'))
 # dispatch functions 3
   if (argc == 2) {
     if (extends(argtypes[1], '_p_MetNoFimex__CDM') && is.character(argv[[2]])) {
-      f <- SliceBuilder__SWIG_1; 
+      f <- SliceBuilder__SWIG_1;
     }
     else if (extends(argtypes[1], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t') && extends(argtypes[2], '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t')) {
-      f <- SliceBuilder__SWIG_2; 
+      f <- SliceBuilder__SWIG_2;
     }
   } else if (argc == 3) {
     if (extends(argtypes[1], '_p_MetNoFimex__CDM') && is.character(argv[[2]]) && extends(argtypes[3], 'logical')) {
-      f <- SliceBuilder__SWIG_0; 
+      f <- SliceBuilder__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for SliceBuilder with argtypes (",toString(argtypes),")");
@@ -2162,7 +2164,7 @@ class(`SliceBuilder__SWIG_2`) = c("SWIGFunction", class('SliceBuilder__SWIG_2'))
 `delete_SliceBuilder` = function(self)
 {
   ;.Call('R_swig_delete_SliceBuilder', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_SliceBuilder`, 'returnType') = 'void'
@@ -2173,21 +2175,21 @@ class(`delete_SliceBuilder`) = c("SWIGFunction", class('delete_SliceBuilder'))
 
 `SliceBuilder_setStartAndSize__SWIG_0` = function(self, dimName, start, size)
 {
-  dimName = as(dimName, "character"); 
-  
-  
+  dimName = as(dimName, "character");
+
+
   if(length(start) > 1) {
     warning("using only the first element of start");
   };
-  
-  
-  
+
+
+
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
+
   ;.Call('R_swig_SliceBuilder_setStartAndSize__SWIG_0', self, dimName, start, size, PACKAGE='RFimex');
-  
+
 }
 
 attr(`SliceBuilder_setStartAndSize__SWIG_0`, 'returnType') = 'void'
@@ -2201,15 +2203,15 @@ class(`SliceBuilder_setStartAndSize__SWIG_0`) = c("SWIGFunction", class('SliceBu
   if(length(start) > 1) {
     warning("using only the first element of start");
   };
-  
-  
-  
+
+
+
   if(length(size) > 1) {
     warning("using only the first element of size");
   };
-  
+
   ;.Call('R_swig_SliceBuilder_setStartAndSize__SWIG_1', self, axis, start, size, PACKAGE='RFimex');
-  
+
 }
 
 attr(`SliceBuilder_setStartAndSize__SWIG_1`, 'returnType') = 'void'
@@ -2223,10 +2225,10 @@ class(`SliceBuilder_setStartAndSize__SWIG_1`) = c("SWIGFunction", class('SliceBu
 # dispatch functions 2
   if (argc == 4) {
     if (extends(argtypes[1], '_p_MetNoFimex__SliceBuilder') && extends(argtypes[2], '_p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t') && (is.integer(argv[[3]]) || is.numeric(argv[[3]])) && (is.integer(argv[[4]]) || is.numeric(argv[[4]]))) {
-      f <- SliceBuilder_setStartAndSize__SWIG_1; 
+      f <- SliceBuilder_setStartAndSize__SWIG_1;
     }
     else if (extends(argtypes[1], '_p_MetNoFimex__SliceBuilder') && is.character(argv[[2]]) && (is.integer(argv[[3]]) || is.numeric(argv[[3]])) && (is.integer(argv[[4]]) || is.numeric(argv[[4]]))) {
-      f <- SliceBuilder_setStartAndSize__SWIG_0; 
+      f <- SliceBuilder_setStartAndSize__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for SliceBuilder_setStartAndSize with argtypes (",toString(argtypes),")");
@@ -2239,9 +2241,9 @@ class(`SliceBuilder_setStartAndSize__SWIG_1`) = c("SWIGFunction", class('SliceBu
 
 `SliceBuilder_setAll__SWIG_0` = function(self, dimName)
 {
-  dimName = as(dimName, "character"); 
+  dimName = as(dimName, "character");
   ;.Call('R_swig_SliceBuilder_setAll__SWIG_0', self, dimName, PACKAGE='RFimex');
-  
+
 }
 
 attr(`SliceBuilder_setAll__SWIG_0`, 'returnType') = 'void'
@@ -2253,7 +2255,7 @@ class(`SliceBuilder_setAll__SWIG_0`) = c("SWIGFunction", class('SliceBuilder_set
 `SliceBuilder_setAll__SWIG_1` = function(self, axis)
 {
   ;.Call('R_swig_SliceBuilder_setAll__SWIG_1', self, axis, PACKAGE='RFimex');
-  
+
 }
 
 attr(`SliceBuilder_setAll__SWIG_1`, 'returnType') = 'void'
@@ -2267,10 +2269,10 @@ class(`SliceBuilder_setAll__SWIG_1`) = c("SWIGFunction", class('SliceBuilder_set
 # dispatch functions 2
   if (argc == 2) {
     if (extends(argtypes[1], '_p_MetNoFimex__SliceBuilder') && extends(argtypes[2], '_p_boost__shared_ptrT_MetNoFimex__CoordinateAxis_const_t')) {
-      f <- SliceBuilder_setAll__SWIG_1; 
+      f <- SliceBuilder_setAll__SWIG_1;
     }
     else if (extends(argtypes[1], '_p_MetNoFimex__SliceBuilder') && is.character(argv[[2]])) {
-      f <- SliceBuilder_setAll__SWIG_0; 
+      f <- SliceBuilder_setAll__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for SliceBuilder_setAll with argtypes (",toString(argtypes),")");
@@ -2285,9 +2287,9 @@ class(`SliceBuilder_setAll__SWIG_1`) = c("SWIGFunction", class('SliceBuilder_set
 {
   ;ans = .Call('R_swig_SliceBuilder_getDimensionStartPositions', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`SliceBuilder_getDimensionStartPositions`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -2300,9 +2302,9 @@ class(`SliceBuilder_getDimensionStartPositions`) = c("SWIGFunction", class('Slic
 {
   ;ans = .Call('R_swig_SliceBuilder_getDimensionSizes', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`SliceBuilder_getDimensionSizes`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -2315,9 +2317,9 @@ class(`SliceBuilder_getDimensionSizes`) = c("SWIGFunction", class('SliceBuilder_
 {
   ;ans = .Call('R_swig_SliceBuilder_getDimensionNames', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`SliceBuilder_getDimensionNames`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -2330,9 +2332,9 @@ class(`SliceBuilder_getDimensionNames`) = c("SWIGFunction", class('SliceBuilder_
 {
   ;ans = .Call('R_swig_SliceBuilder_getUnsetDimensionNames', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`SliceBuilder_getUnsetDimensionNames`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -2345,9 +2347,9 @@ class(`SliceBuilder_getUnsetDimensionNames`) = c("SWIGFunction", class('SliceBui
 {
   ;ans = .Call('R_swig_SliceBuilder_getMaxDimensionSizes', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_size_t_std__allocatorT_size_t_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`SliceBuilder_getMaxDimensionSizes`, 'returnType') = '_p_std__vectorT_size_t_std__allocatorT_size_t_t_t'
@@ -2360,7 +2362,7 @@ setMethod('$', '_p_MetNoFimex__SliceBuilder', function(x, name)
 {
   accessorFuns = list('setStartAndSize' = SliceBuilder_setStartAndSize, 'setAll' = SliceBuilder_setAll, 'getDimensionStartPositions' = SliceBuilder_getDimensionStartPositions, 'getDimensionSizes' = SliceBuilder_getDimensionSizes, 'getDimensionNames' = SliceBuilder_getDimensionNames, 'getUnsetDimensionNames' = SliceBuilder_getUnsetDimensionNames, 'getMaxDimensionSizes' = SliceBuilder_getMaxDimensionSizes);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -2377,9 +2379,9 @@ setMethod('delete', '_p_MetNoFimex__SliceBuilder', function(obj) {delete_MetNoFi
 {
   ;ans = .Call('R_swig___lshift__', os, sb, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__ostream";
-  
+
   ans
-  
+
 }
 
 attr(`__lshift__`, 'returnType') = '_p_std__ostream'
@@ -2392,9 +2394,9 @@ class(`__lshift__`) = c("SWIGFunction", class('__lshift__'))
 {
   ;ans = .Call('R_swig_listCoordinateSystems', reader, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`listCoordinateSystems`, 'returnType') = '_p_std__vectorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_std__allocatorT_boost__shared_ptrT_MetNoFimex__CoordinateSystem_const_t_t_t'
@@ -2405,12 +2407,12 @@ class(`listCoordinateSystems`) = c("SWIGFunction", class('listCoordinateSystems'
 
 `listCoordinates` = function(reader, csList, varName, .copy = FALSE)
 {
-  varName = as(varName, "character"); 
+  varName = as(varName, "character");
   ;ans = .Call('R_swig_listCoordinates', reader, csList, varName, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_std__string_std__allocatorT_std__string_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`listCoordinates`, 'returnType') = '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t'
@@ -2421,9 +2423,9 @@ class(`listCoordinates`) = c("SWIGFunction", class('listCoordinates'))
 
 `getProj4` = function(reader, csList, varName, .copy = FALSE)
 {
-  varName = as(varName, "character"); 
+  varName = as(varName, "character");
   ;.Call('R_swig_getProj4', reader, csList, varName, as.logical(.copy), PACKAGE='RFimex');
-  
+
 }
 
 attr(`getProj4`, 'returnType') = 'character'
@@ -2434,19 +2436,22 @@ class(`getProj4`) = c("SWIGFunction", class('getProj4'))
 
 `latLonInterpolatedReader` = function(s_arg1, method, lonVals, latVals, .copy = FALSE)
 {
-  method = as.integer(method); 
-  
+  method = as.integer(method);
+
   if(length(method) > 1) {
     warning("using only the first element of method");
   };
-  
-  
-  
+
+
+
   ;ans = .Call('R_swig_latLonInterpolatedReader', s_arg1, method, lonVals, latVals, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
-  
+
+  reg.finalizer(ans, delete_boost__shared_ptrCDMReader, onexit = TRUE)
+
+
   ans
-  
+
 }
 
 attr(`latLonInterpolatedReader`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
@@ -2457,17 +2462,19 @@ class(`latLonInterpolatedReader`) = c("SWIGFunction", class('latLonInterpolatedR
 
 `vectorAutoRotatedReader` = function(s_arg1, toLatLon, .copy = FALSE)
 {
-  toLatLon = as.integer(toLatLon); 
-  
+  toLatLon = as.integer(toLatLon);
+
   if(length(toLatLon) > 1) {
     warning("using only the first element of toLatLon");
   };
-  
+
   ;ans = .Call('R_swig_vectorAutoRotatedReader', s_arg1, toLatLon, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
-  
+
+  reg.finalizer(ans, delete_boost__shared_ptrCDMReader, onexit = TRUE)
+
   ans
-  
+
 }
 
 attr(`vectorAutoRotatedReader`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
@@ -2479,7 +2486,7 @@ class(`vectorAutoRotatedReader`) = c("SWIGFunction", class('vectorAutoRotatedRea
 `delete_CDM` = function(self)
 {
   ;.Call('R_swig_delete_CDM', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_CDM`, 'returnType') = 'void'
@@ -2493,9 +2500,11 @@ setMethod('delete', '_p_MetNoFimex__CDM', function(obj) {delete_MetNoFimex__CDM(
 {
   ;ans = .Call('R_swig_CDMReader_getCDM', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__CDM";
-  
+
+  reg.finalizer(ans, delete_CDM)
+
   ans
-  
+
 }
 
 attr(`CDMReader_getCDM`, 'returnType') = '_p_MetNoFimex__CDM'
@@ -2506,14 +2515,14 @@ class(`CDMReader_getCDM`) = c("SWIGFunction", class('CDMReader_getCDM'))
 
 `CDMReader_getSliceVecInUnit__SWIG_0` = function(self, varName, sb, units, .copy = FALSE)
 {
-  varName = as(varName, "character"); 
-  
-  units = as(units, "character"); 
+  varName = as(varName, "character");
+
+  units = as(units, "character");
   ;ans = .Call('R_swig_CDMReader_getSliceVecInUnit__SWIG_0', self, varName, sb, units, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`CDMReader_getSliceVecInUnit__SWIG_0`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -2524,13 +2533,13 @@ class(`CDMReader_getSliceVecInUnit__SWIG_0`) = c("SWIGFunction", class('CDMReade
 
 `CDMReader_getSliceVecInUnit__SWIG_1` = function(self, varName, sb, .copy = FALSE)
 {
-  varName = as(varName, "character"); 
-  
+  varName = as(varName, "character");
+
   ;ans = .Call('R_swig_CDMReader_getSliceVecInUnit__SWIG_1', self, varName, sb, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`CDMReader_getSliceVecInUnit__SWIG_1`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -2544,11 +2553,11 @@ class(`CDMReader_getSliceVecInUnit__SWIG_1`) = c("SWIGFunction", class('CDMReade
 # dispatch functions 2
   if (argc == 3) {
     if (extends(argtypes[1], '_p_MetNoFimex__CDMReader') && is.character(argv[[2]]) && extends(argtypes[3], '_p_MetNoFimex__SliceBuilder')) {
-      f <- CDMReader_getSliceVecInUnit__SWIG_1; 
+      f <- CDMReader_getSliceVecInUnit__SWIG_1;
     }
   } else if (argc == 4) {
     if (extends(argtypes[1], '_p_MetNoFimex__CDMReader') && is.character(argv[[2]]) && extends(argtypes[3], '_p_MetNoFimex__SliceBuilder') && is.character(argv[[4]])) {
-      f <- CDMReader_getSliceVecInUnit__SWIG_0; 
+      f <- CDMReader_getSliceVecInUnit__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for CDMReader_getSliceVecInUnit with argtypes (",toString(argtypes),")");
@@ -2562,7 +2571,7 @@ class(`CDMReader_getSliceVecInUnit__SWIG_1`) = c("SWIGFunction", class('CDMReade
 `delete_CDMReader` = function(self)
 {
   ;.Call('R_swig_delete_CDMReader', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_CDMReader`, 'returnType') = 'void'
@@ -2575,7 +2584,7 @@ setMethod('$', '_p_MetNoFimex__CDMReader', function(x, name)
 {
   accessorFuns = list('getCDM' = CDMReader_getCDM, 'getSliceVecInUnit' = CDMReader_getSliceVecInUnit);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -2592,9 +2601,9 @@ setMethod('delete', '_p_MetNoFimex__CDMReader', function(obj) {delete_MetNoFimex
 {
   ;ans = .Call('R_swig_boost__shared_ptrCDMReader___deref__', self, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__CDMReader";
-  
+
   ans
-  
+
 }
 
 attr(`boost__shared_ptrCDMReader___deref__`, 'returnType') = '_p_MetNoFimex__CDMReader'
@@ -2606,7 +2615,7 @@ class(`boost__shared_ptrCDMReader___deref__`) = c("SWIGFunction", class('boost__
 `delete_boost__shared_ptrCDMReader` = function(self)
 {
   ;.Call('R_swig_delete_boost__shared_ptrCDMReader', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_boost__shared_ptrCDMReader`, 'returnType') = 'void'
@@ -2619,9 +2628,9 @@ class(`delete_boost__shared_ptrCDMReader`) = c("SWIGFunction", class('delete_boo
 {
   ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getCDM', self, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__CDM";
-  
+
   ans
-  
+
 }
 
 attr(`boost__shared_ptrCDMReader_getCDM`, 'returnType') = '_p_MetNoFimex__CDM'
@@ -2632,14 +2641,14 @@ class(`boost__shared_ptrCDMReader_getCDM`) = c("SWIGFunction", class('boost__sha
 
 `boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0` = function(self, varName, sb, units, .copy = FALSE)
 {
-  varName = as(varName, "character"); 
-  
-  units = as(units, "character"); 
+  varName = as(varName, "character");
+
+  units = as(units, "character");
   ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0', self, varName, sb, units, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -2650,13 +2659,13 @@ class(`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0`) = c("SWIGFunction"
 
 `boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1` = function(self, varName, sb, .copy = FALSE)
 {
-  varName = as(varName, "character"); 
-  
+  varName = as(varName, "character");
+
   ;ans = .Call('R_swig_boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1', self, varName, sb, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_std__vectorT_double_std__allocatorT_double_t_t";
-  
+
   ans
-  
+
 }
 
 attr(`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1`, 'returnType') = '_p_std__vectorT_double_std__allocatorT_double_t_t'
@@ -2670,11 +2679,11 @@ class(`boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1`) = c("SWIGFunction"
 # dispatch functions 2
   if (argc == 3) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t') && is.character(argv[[2]]) && extends(argtypes[3], '_p_MetNoFimex__SliceBuilder')) {
-      f <- boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1; 
+      f <- boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_1;
     }
   } else if (argc == 4) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t') && is.character(argv[[2]]) && extends(argtypes[3], '_p_MetNoFimex__SliceBuilder') && is.character(argv[[4]])) {
-      f <- boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0; 
+      f <- boost__shared_ptrCDMReader_getSliceVecInUnit__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for boost__shared_ptrCDMReader_getSliceVecInUnit with argtypes (",toString(argtypes),")");
@@ -2689,7 +2698,7 @@ setMethod('$', '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', function(x, name
 {
   accessorFuns = list('__deref__' = boost__shared_ptrCDMReader___deref__, 'getCDM' = boost__shared_ptrCDMReader_getCDM, 'getSliceVecInUnit' = boost__shared_ptrCDMReader_getSliceVecInUnit);
   ;        idx = pmatch(name, names(accessorFuns));
-  if(is.na(idx)) 
+  if(is.na(idx))
   return(callNextMethod(x, name));
   f = accessorFuns[[idx]];
   formals(f)[[1]] = x;
@@ -2704,15 +2713,17 @@ setMethod('delete', '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t', function(ob
 
 `CDMFileReaderFactory_create__SWIG_0` = function(fileType, filename, configFile, s_args, .copy = FALSE)
 {
-  fileType = as(fileType, "character"); 
-  filename = as(filename, "character"); 
-  configFile = as(configFile, "character"); 
-  
+  fileType = as(fileType, "character");
+  filename = as(filename, "character");
+  configFile = as(configFile, "character");
+
   ;ans = .Call('R_swig_CDMFileReaderFactory_create__SWIG_0', fileType, filename, configFile, s_args, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
-  
+
+  reg.finalizer(ans, delete_boost__shared_ptrCDMReader, onexit = TRUE)
+
   ans
-  
+
 }
 
 attr(`CDMFileReaderFactory_create__SWIG_0`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
@@ -2723,14 +2734,16 @@ class(`CDMFileReaderFactory_create__SWIG_0`) = c("SWIGFunction", class('CDMFileR
 
 `CDMFileReaderFactory_create__SWIG_1` = function(fileType, filename, configFile, .copy = FALSE)
 {
-  fileType = as(fileType, "character"); 
-  filename = as(filename, "character"); 
-  configFile = as(configFile, "character"); 
+  fileType = as(fileType, "character");
+  filename = as(filename, "character");
+  configFile = as(configFile, "character");
   ;ans = .Call('R_swig_CDMFileReaderFactory_create__SWIG_1', fileType, filename, configFile, as.logical(.copy), PACKAGE='RFimex');
   class(ans) <- "_p_boost__shared_ptrT_MetNoFimex__CDMReader_t";
-  
+
+  reg.finalizer(ans, delete_boost__shared_ptrCDMReader, onexit = TRUE)
+
   ans
-  
+
 }
 
 attr(`CDMFileReaderFactory_create__SWIG_1`, 'returnType') = '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t'
@@ -2744,11 +2757,11 @@ class(`CDMFileReaderFactory_create__SWIG_1`) = c("SWIGFunction", class('CDMFileR
 # dispatch functions 2
   if (argc == 3) {
     if (is.character(argv[[1]]) && is.character(argv[[2]]) && is.character(argv[[3]])) {
-      f <- CDMFileReaderFactory_create__SWIG_1; 
+      f <- CDMFileReaderFactory_create__SWIG_1;
     }
   } else if (argc == 4) {
     if (is.character(argv[[1]]) && is.character(argv[[2]]) && is.character(argv[[3]]) && extends(argtypes[4], '_p_std__vectorT_std__string_std__allocatorT_std__string_t_t')) {
-      f <- CDMFileReaderFactory_create__SWIG_0; 
+      f <- CDMFileReaderFactory_create__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for CDMFileReaderFactory_create with argtypes (",toString(argtypes),")");
@@ -2762,7 +2775,7 @@ class(`CDMFileReaderFactory_create__SWIG_1`) = c("SWIGFunction", class('CDMFileR
 `delete_CDMFileReaderFactory` = function(self)
 {
   ;.Call('R_swig_delete_CDMFileReaderFactory', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_CDMFileReaderFactory`, 'returnType') = 'void'
@@ -2774,20 +2787,20 @@ setMethod('delete', '_p_MetNoFimex__CDMFileReaderFactory', function(obj) {delete
 
 `NetCDF_CDMWriter__SWIG_0` = function(reader, filename, configFile, version)
 {
-  filename = as(filename, "character"); 
-  configFile = as(configFile, "character"); 
-  version = as.integer(version); 
-  
+  filename = as(filename, "character");
+  configFile = as(configFile, "character");
+  version = as.integer(version);
+
   if(length(version) > 1) {
     warning("using only the first element of version");
   };
-  
+
   ;ans = .Call('R_swig_new_NetCDF_CDMWriter__SWIG_0', reader, filename, configFile, version, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__NetCDF_CDMWriter";
-  
+
   reg.finalizer(ans, delete_NetCDF_CDMWriter)
   ans
-  
+
 }
 
 attr(`NetCDF_CDMWriter__SWIG_0`, 'returnType') = '_p_MetNoFimex__NetCDF_CDMWriter'
@@ -2798,14 +2811,14 @@ class(`NetCDF_CDMWriter__SWIG_0`) = c("SWIGFunction", class('NetCDF_CDMWriter__S
 
 `NetCDF_CDMWriter__SWIG_1` = function(reader, filename, configFile)
 {
-  filename = as(filename, "character"); 
-  configFile = as(configFile, "character"); 
+  filename = as(filename, "character");
+  configFile = as(configFile, "character");
   ;ans = .Call('R_swig_new_NetCDF_CDMWriter__SWIG_1', reader, filename, configFile, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__NetCDF_CDMWriter";
-  
+
   reg.finalizer(ans, delete_NetCDF_CDMWriter)
   ans
-  
+
 }
 
 attr(`NetCDF_CDMWriter__SWIG_1`, 'returnType') = '_p_MetNoFimex__NetCDF_CDMWriter'
@@ -2816,13 +2829,13 @@ class(`NetCDF_CDMWriter__SWIG_1`) = c("SWIGFunction", class('NetCDF_CDMWriter__S
 
 `NetCDF_CDMWriter__SWIG_2` = function(reader, filename)
 {
-  filename = as(filename, "character"); 
+  filename = as(filename, "character");
   ;ans = .Call('R_swig_new_NetCDF_CDMWriter__SWIG_2', reader, filename, PACKAGE='RFimex');
   class(ans) <- "_p_MetNoFimex__NetCDF_CDMWriter";
-  
+
   reg.finalizer(ans, delete_NetCDF_CDMWriter)
   ans
-  
+
 }
 
 attr(`NetCDF_CDMWriter__SWIG_2`, 'returnType') = '_p_MetNoFimex__NetCDF_CDMWriter'
@@ -2836,15 +2849,15 @@ class(`NetCDF_CDMWriter__SWIG_2`) = c("SWIGFunction", class('NetCDF_CDMWriter__S
 # dispatch functions 3
   if (argc == 2) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t') && is.character(argv[[2]])) {
-      f <- NetCDF_CDMWriter__SWIG_2; 
+      f <- NetCDF_CDMWriter__SWIG_2;
     }
   } else if (argc == 3) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t') && is.character(argv[[2]]) && is.character(argv[[3]])) {
-      f <- NetCDF_CDMWriter__SWIG_1; 
+      f <- NetCDF_CDMWriter__SWIG_1;
     }
   } else if (argc == 4) {
     if (extends(argtypes[1], '_p_boost__shared_ptrT_MetNoFimex__CDMReader_t') && is.character(argv[[2]]) && is.character(argv[[3]]) && (is.integer(argv[[4]]) || is.numeric(argv[[4]]))) {
-      f <- NetCDF_CDMWriter__SWIG_0; 
+      f <- NetCDF_CDMWriter__SWIG_0;
     }
   } else {
     stop("cannot find overloaded function for NetCDF_CDMWriter with argtypes (",toString(argtypes),")");
@@ -2858,7 +2871,7 @@ class(`NetCDF_CDMWriter__SWIG_2`) = c("SWIGFunction", class('NetCDF_CDMWriter__S
 `delete_NetCDF_CDMWriter` = function(self)
 {
   ;.Call('R_swig_delete_NetCDF_CDMWriter', self, PACKAGE='RFimex');
-  
+
 }
 
 attr(`delete_NetCDF_CDMWriter`, 'returnType') = 'void'

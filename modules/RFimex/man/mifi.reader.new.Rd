@@ -5,7 +5,8 @@
 mifi.reader.new-internals
 }
 \description{
-    create a new reader object, e.g. a file-handle
+    Create a new reader object, e.g. a file-handle. The file-handle will be automatically
+    closed when the object goes out of scope and garbage collector is called, e.g. gc(TRUE)
 }
 \usage{
 mifi.reader.new(type, filename, config)

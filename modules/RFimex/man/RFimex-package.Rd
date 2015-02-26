@@ -15,8 +15,8 @@ to access gridded data, eventually interpolated gridded data.
 \tabular{ll}{
 Package: \tab RFimex\cr
 Type: \tab Package\cr
-Version: \tab 0.04\cr
-Date: \tab 2014-02-11\cr
+Version: \tab 0.05\cr
+Date: \tab 2015-02-26\cr
 License: \tab LGPL-2 \cr
 }
 
