@@ -62,13 +62,18 @@ indexGrib(const fs::path& input, const fs::path& append, const fs::path& output,
     // open stream before filter, required for closing order
     std::ofstream realOutStream;
     boost::iostreams::filtering_ostream outStream;
-    if (output.string().find_last_of(".gz") == (output.string().size()-1)) {
+#if BOOST_FILESYSTEM_VERSION == 3
+    std::string outputStr = output.string();
+#else
+    std::string outputStr = output.file_string();
+#endif
+    if (outputStr.find_last_of(".gz") == (outputStr.size()-1)) {
         //cerr << "using gz" << endl;
         outStream.push(boost::iostreams::gzip_compressor(boost::iostreams::zlib::default_compression));
-        realOutStream.open(output.c_str(), std::ios::binary|std::ios::out);
+        realOutStream.open(outputStr.c_str(), std::ios::binary|std::ios::out);
     } else {
         //cerr << output.string().find_last_of(".gz") << " " << output.string().size() << endl;
-        realOutStream.open(output.c_str(), std::ios::out);
+        realOutStream.open(outputStr.c_str(), std::ios::out);
     }
     outStream.push(realOutStream);
 
