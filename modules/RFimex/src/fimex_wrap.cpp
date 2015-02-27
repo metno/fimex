@@ -6986,7 +6986,7 @@ R_swig_CDMFileReaderFactory_create__SWIG_1 ( SEXP fileType, SEXP filename, SEXP 
     /*@SWIG@*/;
   }
 
-  Rprintf("object creation called for CDMReader from R_swig_CDMFileReaderFactory_create__SWIG_1\n");
+  /*Rprintf("object creation called for CDMReader from R_swig_CDMFileReaderFactory_create__SWIG_1\n");*/
   r_ans = SWIG_R_NewPointerObj((new boost::shared_ptr< MetNoFimex::CDMReader >(static_cast< const boost::shared_ptr< MetNoFimex::CDMReader >& >(result))), SWIGTYPE_p_boost__shared_ptrT_MetNoFimex__CDMReader_t, SWIG_POINTER_OWN |  0 );
 
 
