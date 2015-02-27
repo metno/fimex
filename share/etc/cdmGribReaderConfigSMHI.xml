@@ -355,20 +355,20 @@
   <parameter name="geopotential_pl" type="float">
     <grib1 indicatorOfParameter="6" typeOfLevel="100"/>
     <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-    <attribute name="standard_name" value="geopotential_height" type="string" />
-    <attribute name="units" value="m" type="string" />
+    <attribute name="standard_name" value="geopotential" type="string" />
+    <attribute name="units" value="m^2/s^2" type="string" />
   </parameter>
   <parameter name="geopotential_pl" type="float">
     <grib1 indicatorOfParameter="129" typeOfLevel="100"/>
     <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-    <attribute name="standard_name" value="geopotential_height" type="string" />
-    <attribute name="units" value="m" type="string" />
+    <attribute name="standard_name" value="geopotential" type="string" />
+    <attribute name="units" value="m^2/s^2" type="string" />
   </parameter>
   <parameter name="geopotential_pl" type="float">
     <grib1 indicatorOfParameter="156" typeOfLevel="100"/>
     <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-    <attribute name="standard_name" value="geopotential_height" type="string" />
-    <attribute name="units" value="m" type="string" />
+    <attribute name="standard_name" value="geopotential" type="string" />
+    <attribute name="units" value="m^2/s^2" type="string" />
   </parameter>
   <parameter name="surface_geopotential" type="float">
     <grib1 indicatorOfParameter="6" typeOfLevel="105" levelNo="0"/>
@@ -380,8 +380,8 @@
   <parameter name="geopotential" type="float">
     <grib1 indicatorOfParameter="6" typeOfLevel="105"/>
     <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-    <attribute name="standard_name" value="geopotential_height" type="string" />
-    <attribute name="units" value="m" type="string" />
+    <attribute name="standard_name" value="geopotential" type="string" />
+    <attribute name="units" value="m^2/s^2" type="string" />
   </parameter>
     <parameter name="geopotential_ml" type="float">
         <grib1 indicatorOfParameter="6" typeOfLevel="109"/>
@@ -524,19 +524,19 @@
     <parameter name="air_temperature_2m_water" type="float">
         <grib1 indicatorOfParameter="11" typeOfLevel="105" levelNo="772"/>
         <attribute name="long_name" value="Lake screen level temperature (LST)" type="string" />
-        <attribute name="standard_name" value="air_temperature" type="string" />   
+        <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_temperature_2m_nature" type="float">
         <grib1 indicatorOfParameter="11" typeOfLevel="105" levelNo="802"/>
         <attribute name="long_name" value="Nature screen level temperature" type="string" />
-        <attribute name="standard_name" value="air_temperature" type="string" />   
+        <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
     <parameter name="air_temperature_2m_town" type="float">
         <grib1 indicatorOfParameter="11" typeOfLevel="105" levelNo="950"/>
         <attribute name="long_name" value="Town screen level temperature" type="string" />
-        <attribute name="standard_name" value="air_temperature" type="string" />   
+        <attribute name="standard_name" value="air_temperature" type="string" />
         <attribute name="units" value="K" type="string" />
     </parameter>
 
@@ -561,11 +561,11 @@
   </parameter>
 
     <!-- Zonal wind (33) -->
-  
+
     <parameter name="x_wind_10m" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="105" levelNo="10"/>
         <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
-        <attribute name="standard_name" value="x_wind_10m" type="string" />
+        <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
     </parameter>
@@ -573,14 +573,14 @@
   <parameter name="x_wind_10m" type="float">
     <grib2 discipline="0" parameterCategory="2" parameterNumber="2" typeOfLevel="103" levelNo="10"/>
     <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
-    <attribute name="standard_name" value="x_wind_10m" type="string" />
+    <attribute name="standard_name" value="x_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
   </parameter>
   <parameter name="x_wind_gust_10m" type="float">
     <grib1 indicatorOfParameter="162" typeOfLevel="105" levelNo="10"/>
     <attribute name="long_name" value="Zonal 10 metre wind gust (U10M)" type="string" />
-    <attribute name="standard_name" value="x_wind_gust_10m" type="string" />
+    <attribute name="standard_name" value="x_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="x,longitude" counterpart="y_wind_gust_10m" />
   </parameter>
@@ -595,21 +595,21 @@
   <parameter name="x_wind_10m" type="float">
     <grib1 indicatorOfParameter="165" typeOfLevel="1" levelNo="0"/>
     <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
-    <attribute name="standard_name" value="x_wind_10m" type="string" />
+    <attribute name="standard_name" value="x_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="x,longitude" counterpart="y_wind_10m" />
   </parameter>
     <parameter name="x_wind_pl" type="float">
         <grib1 indicatorOfParameter="33" typeOfLevel="100"/>
         <attribute name="long_name" value="Zonal wind pressure levels" type="string" />
-        <attribute name="standard_name" value="x_wind_pl" type="string" />
+        <attribute name="standard_name" value="x_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="x,longitude" counterpart="y_wind_pl" />
     </parameter>
   <parameter name="x_wind_pl" type="float">
     <grib1 indicatorOfParameter="131" typeOfLevel="100"/>
     <attribute name="long_name" value="Zonal wind pressure levels" type="string" />
-    <attribute name="standard_name" value="x_wind_pl" type="string" />
+    <attribute name="standard_name" value="x_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="x,longitude" counterpart="y_wind_pl" />
   </parameter>
@@ -622,11 +622,11 @@
     </parameter>
 
     <!-- Meridional wind (34) -->
-  
+
     <parameter name="y_wind_10m" type="float">
         <grib1 indicatorOfParameter="34" typeOfLevel="105" levelNo="10"/>
         <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string" />
-        <attribute name="standard_name" value="y_wind_10m" type="string" />
+        <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
     </parameter>
@@ -634,7 +634,7 @@
   <parameter name="y_wind_10m" type="float">
     <grib2 discipline="0" parameterCategory="2" parameterNumber="3" typeOfLevel="103" levelNo="10"/>
     <attribute name="long_name" value="Zonal 10 metre wind (U10M)" type="string" />
-    <attribute name="standard_name" value="y_wind_10m" type="string" />
+    <attribute name="standard_name" value="y_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="x,longitude" counterpart="x_wind_10m" />
   </parameter>
@@ -642,7 +642,7 @@
   <parameter name="y_wind_gust_10m" type="float">
     <grib1 indicatorOfParameter="163" typeOfLevel="105" levelNo="10"/>
     <attribute name="long_name" value="Meridional 10 metre wind gust (V10M)" type="string" />
-    <attribute name="standard_name" value="y_wind_gust_10m" type="string" />
+    <attribute name="standard_name" value="y_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="y,latitude" counterpart="x_wind_gust_10m" />
   </parameter>
@@ -656,28 +656,28 @@
   <parameter name="y_wind_10m" type="float">
     <grib1 indicatorOfParameter="166" typeOfLevel="1" levelNo="0"/>
     <attribute name="long_name" value="Meridional 10 metre wind (V10M)" type="string" />
-    <attribute name="standard_name" value="y_wind_10m" type="string" />
+    <attribute name="standard_name" value="y_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="y,latitude" counterpart="x_wind_10m" />
   </parameter>
     <parameter name="y_wind_pl" type="float">
         <grib1 indicatorOfParameter="34" typeOfLevel="100"/>
         <attribute name="long_name" value="Meridional wind pressure levels" type="string" />
-        <attribute name="standard_name" value="y_wind_pl" type="string" />
+        <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="y,latitude" counterpart="x_wind_pl" />
     </parameter>
   <parameter name="y_wind_pl" type="float">
     <grib1 indicatorOfParameter="132" typeOfLevel="100"/>
     <attribute name="long_name" value="Meridional wind pressure levels" type="string" />
-    <attribute name="standard_name" value="y_wind_pl" type="string" />
+    <attribute name="standard_name" value="y_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
     <spatial_vector direction="y,latitude" counterpart="x_wind_pl" />
   </parameter>
     <parameter name="y_wind_ml" type="float">
         <grib1 indicatorOfParameter="34" typeOfLevel="109"/>
         <attribute name="long_name" value="Meridional wind model levels" type="string" />
-        <attribute name="standard_name" value="y_wind_ml" type="string" />
+        <attribute name="standard_name" value="y_wind" type="string" />
         <attribute name="units" value="m/s" type="string" />
         <spatial_vector direction="y,latitude" counterpart="x_wind_ml" />
     </parameter>
@@ -686,13 +686,13 @@
   <parameter name="pressure_vertical_velocity" type="float">
     <grib1 indicatorOfParameter="39" typeOfLevel="100" />
     <attribute name="long_name" value="Pressure vertical velocity (Omega)" type="string" />
-    <attribute name="standard_name" value="pressure_vertical_velocity" type="string" />
+    <attribute name="standard_name" value="vertical_air_velocity_expressed_as_tendency_of_pressure" type="string" />
     <attribute name="units" value="pa/s" type="string" />
   </parameter>
   <parameter name="pressure_vertical_velocity" type="float">
     <grib1 indicatorOfParameter="135" typeOfLevel="100" />
     <attribute name="long_name" value="Pressure vertical velocity (Omega)" type="string" />
-    <attribute name="standard_name" value="pressure_vertical_velocity" type="string" />
+    <attribute name="standard_name" value="vertical_air_velocity_expressed_as_tendency_of_pressure" type="string" />
     <attribute name="units" value="pa/s" type="string" />
   </parameter>
 
@@ -793,33 +793,31 @@
   <parameter name="pmean" type="float">
     <grib1 indicatorOfParameter="148" gribTablesVersionNo="130" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Mean precipitation" type="string" />
-    <attribute name="standard_name" value="Mean_precipitation" type="string" />
+    <attribute name="standard_name" value="precipitation_flux" type="string" />
     <attribute name="units" value="kg/m^2" type="string" />
   </parameter>
   <!-- Median precipitation  (149) -->
   <parameter name="pmedian" type="float">
     <grib1 indicatorOfParameter="149" gribTablesVersionNo="130" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Median precipitation" type="string" />
-    <attribute name="standard_name" value="Median_precipitation" type="string" />
+    <attribute name="standard_name" value="precipitation_flux" type="string" />
     <attribute name="units" value="kg/m^2" type="string" />
   </parameter>
   <!-- Min precipitation  (142) -->
   <parameter name="pmin" type="float">
     <grib1 indicatorOfParameter="142" gribTablesVersionNo="130" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Min precipitation" type="string" />
-    <attribute name="standard_name" value="Min_precipitation" type="string" />
+    <attribute name="standard_name" value="precipitation_flux" type="string" />
     <attribute name="units" value="kg/m^2" type="string" />
   </parameter>
   <!-- Max precipitation  (143) -->
   <parameter name="pmax" type="float">
     <grib1 indicatorOfParameter="143" gribTablesVersionNo="130" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Max precipitation" type="string" />
-    <attribute name="standard_name" value="Max_precipitation" type="string" />
+    <attribute name="standard_name" value="precipitation_flux" type="string" />
     <attribute name="units" value="kg/m^2" type="string" />
   </parameter>
-  
-  
-  
+
     <!-- Total precipitation  (61) -->
     <parameter name="precipitation_amount_acc" type="float">
         <grib1 indicatorOfParameter="61" typeOfLevel="105" levelNo="0"/>
@@ -865,7 +863,7 @@
   <parameter name="frontal_snow_precipitation" type="float">
     <grib1 indicatorOfParameter="79" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Frontal snow precipitation" type="string" />
-    <attribute name="standard_name" value="stratiform_snow_precipitation_amount" type="string" />
+    <attribute name="standard_name" value="stratiform_precipitation_amount" type="string" />
     <attribute name="units" value="kg/m^2" type="string" />
   </parameter>
   <!-- Frontal precipitation  (142) -->
@@ -894,7 +892,7 @@
   <parameter name="convective_snow_precipitation" type="float">
     <grib1 indicatorOfParameter="78" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Convective snow precipitation" type="string" />
-    <attribute name="standard_name" value="convective_snow_precipitation_amount" type="string" />
+    <attribute name="standard_name" value="convective_precipitation_amount" type="string" />
     <attribute name="units" value="kg/m^2" type="string" />
   </parameter>
 
@@ -968,12 +966,12 @@
         <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
-	<parameter name="fog_area_fraction" type="float">
+    <parameter name="fog_area_fraction" type="float">
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="253" typeOfLevel="109" levelNo="65"/>
         <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
         <!-- standard-name not ensured yet -->
         <attribute name="long_name" value="Fog" type="string" />
-        <attribute name="metno_name" value="fog_area_fraction" type="string" />
+        <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
     <parameter name="cloud_area_fraction" type="float">
@@ -1016,7 +1014,7 @@
         <grib1 indicatorOfParameter="71" gribTablesVersionNo="253" typeOfLevel="109" levelNo="65"/>
         <!-- standard-name not ensured yet -->
         <attribute name="long_name" value="Fog" type="string" />
-        <attribute name="metno_name" value="fog_area_fraction" type="string" />
+        <attribute name="standard_name" value="cloud_area_fraction" type="string" />
         <attribute name="units" value="1" type="string" />
     </parameter>
 
@@ -1024,7 +1022,7 @@
   <parameter name="cloud_area_fraction_mean" type="float">
     <grib1 indicatorOfParameter="67" gribTablesVersionNo="130" typeOfLevel="105"/>
     <attribute name="long_name" value="Total cloud cover (TCC)" type="string" />
-    <attribute name="standard_name" value="cloud_area_fraction_mean" type="string" />
+    <attribute name="standard_name" value="cloud_area_fraction" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 
@@ -1071,7 +1069,7 @@
   <parameter name="low_type_cloud_area_fraction_mean" type="float">
     <grib1 indicatorOfParameter="68" gribTablesVersionNo="130" typeOfLevel="105"/>
     <attribute name="long_name" value="Cloud cover of low clouds (LCC)" type="string" />
-    <attribute name="standard_name" value="low_type_cloud_area_fraction_mean" type="string" />
+    <attribute name="standard_name" value="low_type_cloud_area_fraction" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 
@@ -1094,7 +1092,7 @@
   <parameter name="medium_type_cloud_area_fraction_mean" type="float">
     <grib1 indicatorOfParameter="69" gribTablesVersionNo="130" typeOfLevel="105"/>
     <attribute name="long_name" value="Cloud cover of medium height clouds (MCC)" type="string" />
-    <attribute name="standard_name" value="medium_type_cloud_area_fraction_mean" type="string" />
+    <attribute name="standard_name" value="medium_type_cloud_area_fraction" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 
@@ -1104,7 +1102,7 @@
     <attribute name="standard_name" value="medium_type_cloud_area_fraction" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
-  
+
     <!-- High height cloud cover  (75) -->
     <parameter name="high_type_cloud_area_fraction" type="float">
         <grib1 indicatorOfParameter="75" typeOfLevel="105"/>
@@ -1124,7 +1122,7 @@
   <parameter name="high_type_cloud_area_fraction_mean" type="float">
     <grib1 indicatorOfParameter="70" gribTablesVersionNo="130" typeOfLevel="105"/>
     <attribute name="long_name" value="Cloud cover of high clouds (HCC)" type="string" />
-    <attribute name="standard_name" value="high_type_cloud_area_fraction_mean" type="string" />
+    <attribute name="standard_name" value="high_type_cloud_area_fraction" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 
@@ -1132,22 +1130,22 @@
   <parameter name="cloud_water_ml" type="float">
     <grib1 indicatorOfParameter="76" typeOfLevel="109"/>
     <attribute name="long_name" value="Cloud water" type="string" />
-    <attribute name="standard_name" value="cloud_water_ml" type="string" />
+    <attribute name="standard_name" value="atmosphere_cloud_condensed_water_content" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
-  
+
   <!-- Cloud base significant  (135) -->
   <parameter name="aiv.convection.base" type="float">
     <grib1 indicatorOfParameter="135" gribTablesVersionNo="151" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Cloud base significant" type="string" />
-    <attribute name="standard_name" value="cloud_base_significant" type="string" />
+    <attribute name="standard_name" value="convective_cloud_base_height" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
 
   <parameter name="cloud_base_significant" type="float">
     <grib1 indicatorOfParameter="135" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Cloud base significant" type="string" />
-    <attribute name="standard_name" value="cloud_base_significant" type="string" />
+    <attribute name="standard_name" value="convective_cloud_base_height" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
 
@@ -1156,14 +1154,14 @@
   <parameter name="aiv.convection.top" type="float">
     <grib1 indicatorOfParameter="136" gribTablesVersionNo="151" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Cloud base significant" type="string" />
-    <attribute name="standard_name" value="cloud_base_significant" type="string" />
+    <attribute name="standard_name" value="convective_cloud_top_height" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
 
   <parameter name="cloud_top_significant" type="float">
     <grib1 indicatorOfParameter="136" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Cloud top significant" type="string" />
-    <attribute name="standard_name" value="cloud_top_significant" type="string" />
+    <attribute name="standard_name" value="convective_cloud_top_height" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
 
@@ -1172,14 +1170,14 @@
   <parameter name="aiv.visib" type="float">
     <grib1 indicatorOfParameter="20" gribTablesVersionNo="1" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Horizontal visibility" type="string" />
-    <attribute name="standard_name" value="visibility" type="string" />
+    <attribute name="standard_name" value="visibility_in_air" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
-  
+
   <parameter name="visibility" type="float">
     <grib1 indicatorOfParameter="20" typeOfLevel="105" levelNo="2"/>
     <attribute name="long_name" value="Horizontal visibility" type="string" />
-    <attribute name="standard_name" value="visibility" type="string" />
+    <attribute name="standard_name" value="visibility_in_air" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
 
@@ -1218,7 +1216,7 @@
     <!-- Surface roughness length (83) -->
     <parameter name="surface_roughness_length" type="float">
         <grib1 indicatorOfParameter="83" typeOfLevel="105" levelNo="810"/>
-        <attribute name="long_name" value="Surface roughness length" type="string" /> 
+        <attribute name="long_name" value="Surface roughness length" type="string" />
         <attribute name="standard_name" value="surface_roughness_length" type="string" />
         <attribute name="units" value="m" type="string" />
     </parameter>
@@ -1365,7 +1363,7 @@
         <attribute name="units" value="W/m^2" type="string" />
     </parameter>
 
-    <!-- Momentum flux x-direction (124) --> 
+    <!-- Momentum flux x-direction (124) -->
     <parameter name="downward_eastward_momentum_flux_in_air" type="float">
         <grib1 indicatorOfParameter="124" typeOfLevel="105" levelNo="0"/>
        <attribute name="long_name" value="Momentum flux x-direction" type="string" />
@@ -1373,7 +1371,7 @@
         <attribute name="units" value="N/m^2" type="string" />
     </parameter>
 
-    <!-- Momentum flux y-direction (125) --> 
+    <!-- Momentum flux y-direction (125) -->
     <parameter name="downward_northward_momentum_flux_in_air" type="float">
         <grib1 indicatorOfParameter="125" typeOfLevel="105" levelNo="0"/>
         <attribute name="long_name" value="Momentum flux y-direction" type="string" />
@@ -1416,16 +1414,16 @@
     <attribute name="standard_name" value="specific_convective_available_potential_energy" type="string" />
     <attribute name="units" value="J/kg" type="string" />
   </parameter>
-  
+
   <!-- Probability thunderstorm (60) -->
   <parameter name="thunderprob" type="float">
     <grib1 indicatorOfParameter="60" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Probability thunderstorm" type="string" />
-    <attribute name="standard_name" value="thunder_prob" type="string" />
+    <attribute name="standard_name" value="thunderstorm_probability" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
-  
-  
+
+
 
    <!-- Rain (181) -->
   <parameter name="rainfall_amount_acc" type="float">
@@ -1452,7 +1450,7 @@
   <parameter name="prob.undercooled.rain" type="float">
     <grib1 indicatorOfParameter="58" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Probability of frozen rain" type="string" />
-    <attribute name="standard_name" value="prob_undercoold_rain" type="string" />
+    <attribute name="standard_name" value="atmosphere_cloud_ice_content" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 
@@ -1488,7 +1486,7 @@
   <parameter name="rain_snow_mix" type="float">
     <grib1 indicatorOfParameter="144" gribTablesVersionNo="130" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Frozen part of total_precipitation" type="string" />
-    <attribute name="standard_name" value="rain_snow_mix" type="string" />
+    <attribute name="standard_name" value="lwe_thickness_of_snowfall_amount" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 
@@ -1608,6 +1606,7 @@
         <attribute name="units" value="m/s" type="string" />
     </parameter>
 
+
   <!-- Wind gust (131) -->
   <parameter name="wind_speed_of_gust" type="float">
     <grib1 indicatorOfParameter="131" typeOfLevel="105" levelNo="10"/>
@@ -1631,7 +1630,7 @@
         <attribute name="metno_name" value="duration_precipitation" type="string" />
         <attribute name="units" value="s" type="string" />
     </parameter>
-  
+
   <!--WAVE models-->
   <parameter name="significant_wave_height" type="float">
     <grib1 indicatorOfParameter="100" typeOfLevel="102" levelNo="0"/>
@@ -1639,12 +1638,12 @@
     <attribute name="metno_name" value="significant_wave_height" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
-  
+
   <!-- AIV specific-->
   <parameter name="aiv.convec2.top_temp" type="float">
     <grib1 indicatorOfParameter="138" gribTablesVersionNo="151" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Top temperature convective cloud" type="string" />
-    <attribute name="standard_name" value="convective_type_cloud_top_temperature" type="string" />
+    <attribute name="standard_name" value="air_temperature_at_cloud_top" type="string" />
     <attribute name="units" value="K" type="string" />
   </parameter>
 
@@ -1658,7 +1657,7 @@
   <parameter name="aiv.convection" type="float">
     <grib1 indicatorOfParameter="133" gribTablesVersionNo="151" typeOfLevel="109" levelNo="0"/>
     <attribute name="long_name" value="Convection" type="string" />
-    <attribute name="standard_name" value="convective_type_cloud_top_temperature" type="string" />
+    <attribute name="standard_name" value="air_temperature_at_cloud_top" type="string" />
     <attribute name="units" value="1" type="string" />
   </parameter>
 <!--What does it mean?-->
@@ -1710,18 +1709,18 @@
     <attribute name="standard_name" value="maximum_wind_height" type="string" />
     <attribute name="units" value="m" type="string" />
   </parameter>
-  
+
   <parameter name="aiv.maxu" type="float">
   <grib1 indicatorOfParameter="163" gribTablesVersionNo="151" typeOfLevel="105" levelNo="0"/>
   <attribute name="long_name" value="Maximum u" type="string" />
-  <attribute name="standard_name" value="maximum_u_wind" type="string" />
+  <attribute name="standard_name" value="x_wind" type="string" />
   <attribute name="units" value="m/s" type="string" />
 </parameter>
 
   <parameter name="aiv.maxv" type="float">
     <grib1 indicatorOfParameter="164" gribTablesVersionNo="151" typeOfLevel="105" levelNo="0"/>
     <attribute name="long_name" value="Maximum v" type="string" />
-    <attribute name="standard_name" value="maximum_v_wind" type="string" />
+    <attribute name="standard_name" value="y_wind" type="string" />
     <attribute name="units" value="m/s" type="string" />
   </parameter>
 
