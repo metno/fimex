@@ -91,6 +91,7 @@ private:
     std::map<std::string, std::string> variableNameChanges;
     std::map<std::string, CDMDataType> variableTypeChanges;
     std::map<std::string, unsigned int> variableCompression;
+    std::map<std::string, unsigned int> dimensionChunkSize;
     std::map<std::string, std::string> dimensionNameChanges;
 };
 

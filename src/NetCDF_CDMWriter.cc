@@ -294,7 +294,18 @@ void NetCDF_CDMWriter::initFillRenameVariable(std::auto_ptr<XMLDoc>& doc)
             variableCompression[name] = compression;
         }
     }
-
+    // chunking
+    if (doc.get() != 0) {
+        // set the compression level for all variables
+        XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/dimension[@chunkSize]");
+        xmlNodeSetPtr nodes = xpathObj->nodesetval;
+        int size = (nodes) ? nodes->nodeNr : 0;
+        for (int i = 0; i < size; i++) {
+            std::string name = getXmlProp(nodes->nodeTab[i], "name");
+            unsigned int chunkSize = string2type<unsigned int>(getXmlProp(nodes->nodeTab[i], "chunkSize"));
+            dimensionChunkSize[name] = chunkSize;
+        }
+    }
 }
 
 void NetCDF_CDMWriter::initFillRenameAttribute(std::auto_ptr<XMLDoc>& doc)
@@ -413,11 +424,19 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                     // revert order, cdm requires fastest moving first, netcdf-c requires fastest moving last
                     CDMDimension& dim = cdm.getDimension(shape.at(i));
                     size_t dimSize = dim.isUnlimited() ? 1 : dim.getLength();
-                    chunkSize *= dimSize;
-                    if (chunkSize < DEFAULT_CHUNK) {
-                        ncChunk[shape.size()-1 - i] = dimSize;
+                    std::map<std::string, unsigned int>::const_iterator defaultChunk = dimensionChunkSize.find(shape.at(i));
+                    if (defaultChunk != dimensionChunkSize.end()) {
+                        unsigned int chunkDim = (defaultChunk->second > dimSize) ? dimSize : defaultChunk->second;
+                        if (chunkDim == 0) chunkDim = 1;
+                        ncChunk[shape.size()-1 - i] = chunkDim;
+                        chunkSize *= chunkDim;
                     } else {
-                        ncChunk[shape.size()-1 - i] = 1;
+                        chunkSize *= dimSize;
+                        if (chunkSize < DEFAULT_CHUNK) {
+                            ncChunk[shape.size()-1 - i] = dimSize;
+                        } else {
+                            ncChunk[shape.size()-1 - i] = 1;
+                        }
                     }
                 }
                 if (chunkSize > 0) {

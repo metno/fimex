@@ -47,11 +47,12 @@
     compressionLevel CDATA #IMPLIED
   >
 
-<!--- DEPRECATED, use Ncml instead -->
+<!--- newname deprecated, chunkSize -->
 <!ELEMENT dimension EMPTY>
 <!ATTLIST dimension
-    newname CDATA #REQUIRED
     name CDATA #REQUIRED
+    newname CDATA #IMPLIED
+    chunkSize CDATA #IMPLIED
   >
 
 <!--- DEPRECATED, use Ncml instead -->
@@ -61,4 +62,3 @@
     name CDATA #REQUIRED
     type CDATA #REQUIRED
   >
-  

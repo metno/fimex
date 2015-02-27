@@ -6,7 +6,9 @@
 <!-- compression levels are 0 (no compression) to 9 -->
 <!-- compression levels from 10 to 19 will enable shuffling -->
 <!-- <default filetype="netcdf4" compressionLevel="3" /> -->
-<default filetype="netcdf3" compressionLevel="0" />
+<!-- <default filetype="netcdf3" compressionLevel="0" /> -->
+
+<dimension name="x_c" chunkSize="4" />
 
 <!--  change units from m to km-->
 <!--  make sure to put the type to change the data, too!!! -->
@@ -20,4 +22,4 @@
 <!-- configure the output with the help of ncml -->
 <ncmlConfig  filename="../share/etc/ncmlCDMConfig.ncml" />
 
-</cdm_ncwriter_config>  
+</cdm_ncwriter_config>
