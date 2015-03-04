@@ -533,153 +533,166 @@ double NetCDF_CDMWriter::getNewAttribute(const std::string& varName, const std::
 
 
 void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
+    const CDMDimension* unLimDim = cdm.getUnlimitedDim();
+    long long maxUnLim = (unLimDim == 0) ? 0 : unLimDim->getLength();
     const CDM::VarVec& cdmVars = cdm.getVariables();
     // write data
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600)) // openmp gives currently segfaults with intel compilers < 16.
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap)
+#pragma omp parallel default(none) shared(logger, cdmVars, ncVarMap, maxUnLim)
     {
 #pragma omp single
-    {
+        {
 #endif
 #endif //__INTEL_COMPILER
-    Units units;
-    for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
+            Units units;
+
+            // read data along unLimDim and then variables, otherwise netcdf3 reading might get very slow
+            // see http://www.unidata.ucar.edu/support/help/MailArchives/netcdf/msg10905.html
+            // use unLimDimPos = -1 for variables without unlimited dimension
+            for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
 #ifdef HAVE_MPI
-        if (mifi_mpi_initialized()) {
-            // only work on variables which belong to this mpi-process (modulo-base)
-            if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
-                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on variable " << vi << "=" << cdmVars.at(vi).getName());
-                continue;
-            } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on variable " << vi << "=" << cdmVars.at(vi).getName());
-            }
-        }
-#endif
-        CDMVariable cdmVar = cdmVars.at(vi);
-        std::string varName = cdmVar.getName();
-        DataTypeChanger dtc(cdmVar.getDataType());
-        if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
-            (variableTypeChanges[varName] != CDM_NAT)) {
-            double oldFill = cdmReader->getCDM().getFillValue(varName);
-            double oldScale = getOldAttribute(varName, "scale_factor", 1.);
-            double oldOffset = getOldAttribute(varName, "add_offset", 0.);
-            double newFill = cdm.getFillValue(varName);
-            double newScale = getNewAttribute(varName, "scale_factor", 1.);
-            double newOffset = getNewAttribute(varName, "add_offset", 0.);
-
-            // changes of the units
-            double unitSlope = 1.;
-            double unitOffset = 0.;
-            std::string oldUnit;
-            std::string newUnit;
-            try {
-                oldUnit = cdmReader->getCDM().getAttribute(varName, "units").getData()->asString();
-                newUnit = getAttribute(varName, "units").getData()->asString();
-                if (oldUnit != newUnit) {
-                    units.convert(oldUnit, newUnit, unitSlope, unitOffset);
+                if (mifi_mpi_initialized()) {
+                    // only work on variables which belong to this mpi-process (modulo-base)
+                    if ((unLimDimPos % mifi_mpi_size) != mifi_mpi_rank) {
+                        LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on unLimDimPos " << unLimDimPos);
+                        continue;
+                    } else {
+                        LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on unLimDimPos " << unLimDimPos);
+                    }
                 }
-            } catch (UnitException& e) {
-                LOG4FIMEX(logger, Logger::WARN, "unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what());
-            } catch (CDMException& e) {
-                // units not defined, do nothing
-            }
+#endif
+                // posixio error with nc_sync in 4.3.0?
+                //ncCheck(nc_sync(ncFile->ncId)); // sync every 'time/unlimited' step (does not work with MPI)
 
-            dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
-        }
-        int varId = ncVarMap.find(cdmVar.getName())->second;
-        int dimLen;
-        ncCheck(nc_inq_varndims(ncFile->ncId, varId, &dimLen));
-        int dimIds[dimLen];
-        ncCheck(nc_inq_vardimid(ncFile->ncId, varId, &dimIds[0]));
-        size_t count[dimLen];
-        size_t start[dimLen];
-        for (int i = 0; i < dimLen; ++i) {
-            start[i] = 0;
-            ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
-        }
+                for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
+                    CDMVariable cdmVar = cdmVars.at(vi);
+                    std::string varName = cdmVar.getName();
+                    DataTypeChanger dtc(cdmVar.getDataType());
+                    if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
+                            (variableTypeChanges[varName] != CDM_NAT)) {
+                        double oldFill = cdmReader->getCDM().getFillValue(varName);
+                        double oldScale = getOldAttribute(varName, "scale_factor", 1.);
+                        double oldOffset = getOldAttribute(varName, "add_offset", 0.);
+                        double newFill = cdm.getFillValue(varName);
+                        double newScale = getNewAttribute(varName, "scale_factor", 1.);
+                        double newOffset = getNewAttribute(varName, "add_offset", 0.);
 
-        if (!cdm.hasUnlimitedDim(cdmVar)) {
+                        // changes of the units
+                        double unitSlope = 1.;
+                        double unitOffset = 0.;
+                        std::string oldUnit;
+                        std::string newUnit;
+                        try {
+                            oldUnit = cdmReader->getCDM().getAttribute(varName, "units").getData()->asString();
+                            newUnit = getAttribute(varName, "units").getData()->asString();
+                            if (oldUnit != newUnit) {
+                                units.convert(oldUnit, newUnit, unitSlope, unitOffset);
+                            }
+                        } catch (UnitException& e) {
+                            LOG4FIMEX(logger, Logger::WARN, "unable to convert data-units for variable " << cdmVar.getName() << ": " << e.what());
+                        } catch (CDMException& e) {
+                            // units not defined, do nothing
+                        }
+
+                        dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
+                    }
+                    int varId = ncVarMap.find(cdmVar.getName())->second;
+                    int dimLen;
+                    ncCheck(nc_inq_varndims(ncFile->ncId, varId, &dimLen));
+                    int dimIds[dimLen];
+                    ncCheck(nc_inq_vardimid(ncFile->ncId, varId, &dimIds[0]));
+                    size_t count[dimLen];
+                    size_t start[dimLen];
+                    for (int i = 0; i < dimLen; ++i) {
+                        start[i] = 0;
+                        ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
+                    }
+
+                    if (unLimDimPos == -1) {
+                        if (!cdm.hasUnlimitedDim(cdmVar)) {
+                            //variable without unlimited dimension write at -1
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 #ifdef _OPENMP
 #pragma omp task firstprivate(cdmVar,varName,vi)
-            {
+                            {
 #endif
 #endif
-            DataPtr data = cdmReader->getData(varName);
-            try {
-                data = dtc.convertData(data);
-            } catch (CDMException& e) {
-                throw CDMException("problems converting data of var " + varName + ": " + e.what());
-            }
-            if (data->size() == 0 && ncFile->format < 3) {
-                // need to write data with _FillValue,
-                // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
-                size_t size = (dimLen > 0) ? std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>()) : 1;
-                data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
-            }
+                                DataPtr data = cdmReader->getData(varName);
+                                try {
+                                    data = dtc.convertData(data);
+                                } catch (CDMException& e) {
+                                    throw CDMException("problems converting data of var " + varName + ": " + e.what());
+                                }
+                                if (data->size() == 0 && ncFile->format < 3) {
+                                    // need to write data with _FillValue,
+                                    // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
+                                    size_t size = (dimLen > 0) ? std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>()) : 1;
+                                    data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
+                                }
 
-            if (data->size() > 0) {
-                try {
-                    ScopedCritical ncLock(Nc::getMutex());
-                    LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
-                    ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
-                } catch (CDMException& ex) {
-                    throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
-                }
-            }
+                                if (data->size() > 0) {
+                                    try {
+                                        ScopedCritical ncLock(Nc::getMutex());
+                                        LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName);
+                                        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
+                                    } catch (CDMException& ex) {
+                                        throw CDMException(ex.what() + std::string(" while writing var ")+ varName );
+                                    }
+                                }
+                            }
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 #ifdef _OPENMP
-            }
+                        }
 #endif
 #endif
-        } else {
-            // iterate over each unlimited dim (usually time)
-            const CDMDimension* unLimDim = cdm.getUnlimitedDim();
-            for (size_t i = 0; i < unLimDim->getLength(); ++i) {
+                    } else {
+                        if (cdm.hasUnlimitedDim(cdmVar)) {
+                            // variables with unlimited dimension
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 #ifdef _OPENMP
-#pragma omp task firstprivate(cdmVar,varName,vi,i)
-                {
+#pragma omp task firstprivate(cdmVar,varName,vi,unLimDimPos)
+                            {
 #endif
 #endif
-                DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), i);
-                try {
-                    data = dtc.convertData(data);
-                } catch (CDMException& e) {
-                    throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
-                }
-                if (data->size() == 0 && ncFile->format < 3) {
-                    // need to write data with _FillValue,
-                    // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
-                    count[0] = 1; // just one slice
-                    size_t size = (dimLen == 0) ? 1 : std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
-                    data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
-                }
-                // unlim-dim is in position 0
-                if (data->size() > 0) {
-                    count[0] = 1;
-                    start[0] = i;
-                    try {
-                        ScopedCritical ncLock(Nc::getMutex());
-                        LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName << "("<< i << ")");
-                        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
-                    } catch (CDMException& ex) {
-                        throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );
+                                DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), unLimDimPos);
+                                try {
+                                    data = dtc.convertData(data);
+                                } catch (CDMException& e) {
+                                    throw CDMException("problems converting data of var " + cdmVar.getName() + ": " + e.what());
+                                }
+                                if (data->size() == 0 && ncFile->format < 3) {
+                                    // need to write data with _FillValue,
+                                    // since we are using NC_NOFILL for nc3 format files = NC_FORMAT_CLASSIC(1) NC_FORMAT_64BIT(2))
+                                    count[0] = 1; // just one slice
+                                    size_t size = (dimLen == 0) ? 1 : std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
+                                    data = createData(cdmVar.getDataType(), size, cdm.getFillValue(varName));
+                                }
+                                // unlim-dim is in position 0
+                                if (data->size() > 0) {
+                                    count[0] = 1;
+                                    start[0] = unLimDimPos;
+                                    try {
+                                        ScopedCritical ncLock(Nc::getMutex());
+                                        LOG4FIMEX(logger, Logger::DEBUG, "writing variable " << varName << "("<< unLimDimPos << ")");
+                                        ncPutValues(data, ncFile->ncId, varId, cdmDataType2ncType(cdmVar.getDataType()), dimLen, start, count);
+                                    } catch (CDMException& ex) {
+                                        throw CDMException(ex.what() + std::string(" while writing slice of var ")+ varName );
+                                    }
+
+                                }
+#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
+#ifdef _OPENMP
+                            }
+#endif
+#endif
+                        }
                     }
-
                 }
             }
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 #ifdef _OPENMP
-            }
-#endif
-#endif
-        }
-    }
-#if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
-#ifdef _OPENMP
-    } // single
+        } // single
     } // parallel
 #endif
 #endif
