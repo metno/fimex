@@ -123,6 +123,7 @@ NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const
     ncFile->filename = outputFile;
 #ifdef HAVE_MPI
     if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
+        LOG4FIMEX(logger, Logger::DEBUG, "opening parallel nc-file: " << ncFile->filename);
         ncCheck(nc_create_par(ncFile->filename.c_str(), ncVersion | NC_MPIIO, mifi_mpi_comm, mifi_mpi_info, &ncFile->ncId), "creating "+ncFile->filename);
     } else {
         ncCheck(nc_create(ncFile->filename.c_str(), ncVersion, &ncFile->ncId), "creating "+ncFile->filename);
