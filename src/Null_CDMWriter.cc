@@ -158,11 +158,11 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
 #ifdef HAVE_MPI
         if (mifi_mpi_initialized()) {
             // only work on variables which belong to this mpi-process (modulo-base)
-            if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
-                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on variable " << vi << "=" << cdmVars.at(vi).getName());
+            if ((unLimDimPos % mifi_mpi_size) != mifi_mpi_rank) {
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on unLimDimPos " << unLimDimPos);
                 continue;
             } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on variable " << vi << "=" << cdmVars.at(vi).getName());
+                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on unLimDimPos " << unLimDimPos);
             }
         }
 #endif
@@ -172,47 +172,46 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
                 if (!cdm.hasUnlimitedDim(cdmVars.at(vi))) {
 #ifdef _OPENMP
 #pragma omp task firstprivate(vi)
-            {
-#endif
-            const CDMVariable& cdmVar = cdmVars.at(vi);
-            //std::stringstream ss;
-            //ss << omp_get_thread_num() << ":" << vi << ":" << cdmVar.getName() << std::endl;
-            //std::cerr << ss.str();
-            DataPtr data = cdmReader->getData(cdmVar.getName());
-            ScopedCritical lock(writerMutex);
-            if (!putVarData(cdmVar.getDataType(), data)) {
-                throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
-            }
-#ifdef _OPENMP
-            } // task
-#endif
-                }
-        } else {
-            if (cdm.hasUnlimitedDim(cdmVars.at(vi))) {
-            // iterate over each unlimited dim (usually time)
-#ifdef _OPENMP
-#pragma omp task firstprivate(vi,unLimDimPos)
                 {
 #endif
-                const CDMVariable& cdmVar = cdmVars.at(vi);
-#if 0
-                std::stringstream ss;
-                ss << omp_get_thread_num() << ":" << unLimDimPos << ":" << cdmVar.getName() << std::endl;
-                std::cout << ss.str();//    NetCDF_CDMWriter(timeInterpol, "test4.nc");
-                BOOST_CHECK(true);
-
-#endif
-                DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), unLimDimPos);
-                ScopedCritical lock(writerMutex);
-                if (!putRecData(cdmVar.getDataType(), data, unLimDimPos)) {
-                    throw CDMException("problems writing datarecord " + type2string(unLimDimPos) + " to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
-                }
+                    const CDMVariable& cdmVar = cdmVars.at(vi);
+                    //std::stringstream ss;
+                    //ss << omp_get_thread_num() << ":" << vi << ":" << cdmVar.getName() << std::endl;
+                    //std::cerr << ss.str();
+                    DataPtr data = cdmReader->getData(cdmVar.getName());
+                    ScopedCritical lock(writerMutex);
+                    if (!putVarData(cdmVar.getDataType(), data)) {
+                        throw CDMException("problems writing data to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
+                    }
 #ifdef _OPENMP
                 } // task
 #endif
-            }
-            }
+                }
+            } else {
+                if (cdm.hasUnlimitedDim(cdmVars.at(vi))) {
+                    // iterate over each unlimited dim (usually time)
+#ifdef _OPENMP
+#pragma omp task firstprivate(vi,unLimDimPos)
+                    {
+#endif
+                    const CDMVariable& cdmVar = cdmVars.at(vi);
+#if 0
+                    std::stringstream ss;
+                    ss << omp_get_thread_num() << ":" << unLimDimPos << ":" << cdmVar.getName() << std::endl;
+                    std::cout << ss.str();//    NetCDF_CDMWriter(timeInterpol, "test4.nc");
+                    BOOST_CHECK(true);
 
+#endif
+                    DataPtr data = cdmReader->getDataSlice(cdmVar.getName(), unLimDimPos);
+                    ScopedCritical lock(writerMutex);
+                    if (!putRecData(cdmVar.getDataType(), data, unLimDimPos)) {
+                        throw CDMException("problems writing datarecord " + type2string(unLimDimPos) + " to var " + cdmVar.getName() + ": " + ", datalength: " + type2string(data->size()));
+                    }
+#ifdef _OPENMP
+                    } // task
+#endif
+                }
+            }
         }
     }
 #ifdef _OPENMP
