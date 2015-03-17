@@ -79,16 +79,17 @@ int getNcVersion(int version, std::auto_ptr<XMLDoc>& doc)
         xmlNodeSetPtr nodes = xpathObj->nodesetval;
         if (nodes->nodeNr) {
             std::string filetype = string2lowerCase(getXmlProp(nodes->nodeTab[0], "filetype"));
+            retVal = NC_CLOBBER;
             if (filetype == "netcdf3") {
-                retVal = NC_CLOBBER;
+                //retVal = NC_CLOBBER;
             } else if (filetype == "netcdf3_64bit") {
-                retVal = NC_CLOBBER | NC_64BIT_OFFSET;
+                retVal |= NC_64BIT_OFFSET;
             }
 #ifdef NC_NETCDF4
             else if (filetype == "netcdf4") {
-                retVal = NC_CLOBBER | NC_NETCDF4;
+                retVal |= NC_NETCDF4;
             } else if (filetype == "netcdf4classic") {
-                retVal = NC_CLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL;
+                retVal |= NC_NETCDF4 | NC_CLASSIC_MODEL;
             }
 #endif
             else {
@@ -563,9 +564,6 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                     }
                 }
 #endif
-                // posixio error with nc_sync in 4.3.0?
-                //ncCheck(nc_sync(ncFile->ncId)); // sync every 'time/unlimited' step (does not work with MPI)
-
                 for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
                     CDMVariable cdmVar = cdmVars.at(vi);
                     std::string varName = cdmVar.getName();
@@ -690,6 +688,12 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                         }
                     }
                 }
+#ifndef HAVE_MPI
+                if (unLimDimPos >= 0) {
+                    ScopedCritical ncLock(Nc::getMutex());
+                    ncCheck(nc_sync(ncFile->ncId)); // sync every 'time/unlimited' step (does not work with MPI)
+                }
+#endif
             }
 #if !(defined(__INTEL_COMPILER) && (__INTEL_COMPILER < 1600))
 #ifdef _OPENMP
