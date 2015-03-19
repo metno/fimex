@@ -1020,7 +1020,7 @@ int run(int argc, char* args[])
         ("merge.printSize", "print size estimate")
 
         ("verticalInterpolate.type", po::value<string>(), "pressure, height (above ground) or depth")
-        ("verticalInterpolate.method", po::value<string>(), "linear, log, loglog or nearestneighbor interpolation")
+        ("verticalInterpolate.method", po::value<string>(), "linear, linear_weak_extra, linear_no_extra, log, loglog or nearestneighbor interpolation")
         ("verticalInterpolate.level1", po::value<string>(), "specification of first level, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.level2", po::value<string>(), "specification of second level, only required for hybrid levels, see Fimex::CDMVerticalInterpolator for a full definition")
         ("verticalInterpolate.dataConversion", po::value<vector<string> >()->composing(), "vertical data-conversion: theta2T, omega2vwind or add4Dpressure")

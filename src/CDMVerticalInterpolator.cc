@@ -49,7 +49,7 @@ using namespace std;
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
 struct VIntPimpl {
     int verticalType;
-    int verticalInterpolationMethod;
+    mifi_vertical_interpol_method verticalInterpolationMethod;
     vector<double> level1;
     vector<double> level2;
     // name of the generated vertical axis
@@ -100,6 +100,10 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
     }
     if (verticalInterpolationMethod == "linear") {
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LIN;
+    } else if (verticalInterpolationMethod == "linear_weak_extra") {
+        pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LIN_WEAK_EXTRA;
+    } else if (verticalInterpolationMethod == "linear_no_extra") {
+        pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LIN_NO_EXTRA;
     } else if (verticalInterpolationMethod == "log") {
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LOG;
     } else if (verticalInterpolationMethod == "loglog") {
@@ -250,6 +254,8 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
     switch (pimpl_->verticalInterpolationMethod) {
     case MIFI_VINT_METHOD_LIN: intFunc = &mifi_get_values_linear_f; break;
+    case MIFI_VINT_METHOD_LIN_WEAK_EXTRA: intFunc = &mifi_get_values_linear_weak_extrapol_f; break;
+    case MIFI_VINT_METHOD_LIN_NO_EXTRA: intFunc = &mifi_get_values_linear_no_extrapol_f; break;
     case MIFI_VINT_METHOD_LOG: intFunc = &mifi_get_values_log_f; break;
     case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
     case MIFI_VINT_METHOD_NN: intFunc = &mifi_get_values_nearest_f; break;

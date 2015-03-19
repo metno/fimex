@@ -1058,6 +1058,42 @@ int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, dou
     return MIFI_OK;
 }
 
+static int mifi_get_values_linear_conf_extrapol_f(float leftLimit, float rightLimit, const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+{
+    const float f = (a == b) ? 0 :  ((x - a) / (b - a));
+    if (f == 0) {
+        // avoid numerical side-effects, like 0*nan = nan
+        memcpy(outfield, infieldA, n * sizeof(float));
+    } else if (f == 1) {
+        // avoid numerical side-effects, like 0*nan = nan
+        memcpy(outfield, infieldB, n * sizeof(float));
+    } else if ((f >= leftLimit) && (f <= rightLimit)) {
+        int i = 0;
+        while (n > i++) {
+            float iA = *infieldA++;
+            float iB = *infieldB++;
+            float* o = outfield++; // position!
+            *o = iA + f * (iB - iA);
+        }
+    } else {
+        int i = 0;
+        while (n > i++) {
+            float* o = outfield++; // position!
+            *o = MIFI_UNDEFINED_F;
+        }
+    }
+    return MIFI_OK;
+}
+
+int mifi_get_values_linear_weak_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+{
+    return mifi_get_values_linear_conf_extrapol_f(-1., 2., infieldA, infieldB, outfield, n, a, b, x);
+}
+int mifi_get_values_linear_no_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x)
+{
+    return mifi_get_values_linear_conf_extrapol_f(0., 2., infieldA, infieldB, outfield, n, a, b, x);
+}
+
 // o(x) = m*log(x) + c
 // exp(o(x)) = exp(m*log(x) + c) = exp(m*log(x)) * exp(c)
 // exp(o(xO)) = x^m * exp(c)

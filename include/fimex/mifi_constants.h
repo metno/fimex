@@ -194,35 +194,37 @@ enum mifi_interpol_method {
  */
 #define MIFI_VINT_ALTITUDE 4
 
-
 /**
  * @brief vertical interpolation method
  *
- * linear interpolation, e.g. mifi_get_values_lin_f()
+ * Flag for vertical interpolation.
  */
-#define MIFI_VINT_METHOD_LIN 0
-
-/**
- * @brief vertical interpolation method
- *
- * logarithmic interpolation, e.g. mifi_get_values_log_f()
- */
-#define MIFI_VINT_METHOD_LOG 1
-
-/**
- * @brief vertical interpolation method
- *
- * double logarithmic interpolation, e.g. mifi_get_values_log_f()
- */
-#define MIFI_VINT_METHOD_LOGLOG 2
-
-/**
- * @brief vertical interpolation method
- *
- * nearest neighbor "interpolation", e.g. mifi_get_values_f()
- */
-#define MIFI_VINT_METHOD_NN 3
-
+enum mifi_vertical_interpol_method {
+    /**
+     * linear interpolation, e.g. mifi_get_values_lin_f(), extrapolating
+     */
+    MIFI_VINT_METHOD_LIN=0,
+    /**
+     * logarithmic interpolation, e.g. mifi_get_values_log_f()
+     */
+    MIFI_VINT_METHOD_LOG=1,
+    /**
+     * double logarithmic interpolation, e.g. mifi_get_values_log_f()
+     */
+    MIFI_VINT_METHOD_LOGLOG=2,
+    /**
+     * nearest neighbor "interpolation", e.g. mifi_get_values_f()
+     */
+    MIFI_VINT_METHOD_NN=3,
+    /**
+     * linear interpolation, e.g. mifi_get_values_lin_f(), extrapolating one distance of the closest values.
+     */
+    MIFI_VINT_METHOD_LIN_WEAK_EXTRA=4,
+    /**
+     * linear interpolation, e.g. mifi_get_values_lin_f(), no extrapolation
+     */
+    MIFI_VINT_METHOD_LIN_NO_EXTRA=5
+};
 
 
 /** An earth gravitational accelaration value, 9.80665 m/s**2. */

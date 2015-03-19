@@ -231,6 +231,26 @@ int mifi_get_vector_reproject_matrix_points(const char* proj_input,
 extern int mifi_get_values_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
 
 /**
+ * Get the nearest neighbor of a value. Values are rounded to array-position. Extrapolates to once the distance of the two leftmost values (or rightmost).
+ *
+ * @param infield 3d fortran array of size ix,iy,iz
+ * @param outfield 1d array of size iz containing the values
+ * @param x,y
+ * @param ix,iy,iz
+ */
+extern int mifi_get_values_weak_extrapol_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
+
+/**
+ * Get the nearest neighbor of a value. Values are rounded to array-position. No extrapolation will occur.
+ *
+ * @param infield 3d fortran array of size ix,iy,iz
+ * @param outfield 1d array of size iz containing the values
+ * @param x,y
+ * @param ix,iy,iz
+ */
+extern int mifi_get_values_no_extrapol_f(const float* infield, float* outfield, const double x, const double y, const int ix, const int iy, const int iz);
+
+/**
  *  Bilinear interpolation requires a neighborhood extending one pixel to the right and below the central sample. If the fractional subsample position is given by (xfrac, yfrac), the resampled pixel value will be:
  *
  * @verbatim
@@ -289,7 +309,7 @@ extern int mifi_get_values_nearest_f(const float* infieldA, const float* infield
  * with o(x) = in(a) + (x - a) * (in(b) - in(a)) / (b - a)
  * (that describes a linear function o(x) = m*x + c )
  *
- * This interpolation can be used for linear time-interpolation.
+ * This interpolation can be used for linear time-interpolation and uses full extrapolation.
  *
  * @param infieldA array of size n with values of input at position a
  * @param infieldB array of size n with values of input at position b
@@ -301,6 +321,30 @@ extern int mifi_get_values_nearest_f(const float* infieldA, const float* infield
  * @return MIFI_OK return-value set for compatibility with mifi_get_values_log_f()
  */
 extern int mifi_get_values_linear_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+/**
+ * Same as mifi_get_values_nearest_f() but with extrapolation limited to  a - (a-b), or b + (a-b).
+ * @param infieldA
+ * @param infieldB
+ * @param outfield
+ * @param n
+ * @param a
+ * @param b
+ * @param x
+ * @return
+ */
+extern int mifi_get_values_linear_weak_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+/**
+ * Same as mifi_get_values_nearest_f() but without any extrapolation
+ * @param infieldA
+ * @param infieldB
+ * @param outfield
+ * @param n
+ * @param a
+ * @param b
+ * @param x
+ * @return
+ */
+extern int mifi_get_values_linear_no_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
 /**
  * This is the same as mifi_get_values_linear_f() for double input/output values.
  */
