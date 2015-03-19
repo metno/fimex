@@ -122,7 +122,7 @@ DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unL
             data = d1;
         } else if (d1->size() == d2->size()) {
             boost::shared_array<float> out(new float[d1->size()]);
-            mifi_get_values_linear_f(d1->asFloat().get(), d2->asFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
+            mifi_get_values_linear_weak_extrapol_f(d1->asFloat().get(), d2->asFloat().get(), out.get(), d1->size(), d1Time, d2Time, currentTime);
             data = createData(d1->size(), out);
         } else {
             throw CDMException("getDataSlice for " + varName + ": got slices with different size");
