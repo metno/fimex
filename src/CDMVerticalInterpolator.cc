@@ -182,33 +182,38 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
         CoordinateSystem::ConstAxisPtr zAxis = coordSys[i]->getGeoZAxis();
         // require x and y axis (ps(x,y)) and obviously zAxis
         if (xAxis != 0 && yAxis != 0 && zAxis != 0) {
-            pimpl_->changeCoordSys.push_back(coordSys[i]);
-            // change the shape of the variable: remove the old axis, add the new one
-            const CDM::VarVec vars = dataReader_->getCDM().getVariables();
-            for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
-                if (coordSys[i]->isCSFor(varIt->getName()) && coordSys[i]->isComplete(varIt->getName())) {
-                    CDMVariable& var = cdm_->getVariable(varIt->getName());
-                    vector<string> shape = var.getShape();
-                    vector<string>::iterator axisPos = find(shape.begin(), shape.end(), zAxis->getName());
-                    if (axisPos != shape.end()) {
-                        // change to new axis
-                        *axisPos = pimpl_->vAxis;
-                        var.setShape(shape);
-                        // some people set explicit axis to implicit axis (coordinates in CF) - remove those!
-                        CDMAttribute coord;
-                        if (cdm_->getAttribute(varIt->getName(), "coordinates", coord)) {
-                            string coords = coord.getData()->asString();
-                            coords = boost::regex_replace(coords, boost::regex("\\b\\Q"+zAxis->getName()+"\\E\\b"), "");
-                            cdm_->removeAttribute(varIt->getName(), "coordinates");
-                            cdm_->addAttribute(varIt->getName(), CDMAttribute("coordinates", coords));
+            // ignore strange and/or size=1 zAxes
+            if (zAxis->getShape().size() == 1 && zAxis->isExplicit() &&
+                    cdm_->hasDimension(zAxis->getShape().at(0)) &&
+                    cdm_->getDimension(zAxis->getShape().at(0)).getLength() > 1) {
+                pimpl_->changeCoordSys.push_back(coordSys[i]);
+                // change the shape of the variable: remove the old axis, add the new one
+                const CDM::VarVec vars = dataReader_->getCDM().getVariables();
+                for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
+                    if (coordSys[i]->isCSFor(varIt->getName()) && coordSys[i]->isComplete(varIt->getName())) {
+                        CDMVariable& var = cdm_->getVariable(varIt->getName());
+                        vector<string> shape = var.getShape();
+                        vector<string>::iterator axisPos = find(shape.begin(), shape.end(), zAxis->getName());
+                        if (axisPos != shape.end()) {
+                            // change to new axis
+                            *axisPos = pimpl_->vAxis;
+                            var.setShape(shape);
+                            // some people set explicit axis to implicit axis (coordinates in CF) - remove those!
+                            CDMAttribute coord;
+                            if (cdm_->getAttribute(varIt->getName(), "coordinates", coord)) {
+                                string coords = coord.getData()->asString();
+                                coords = boost::regex_replace(coords, boost::regex("\\b\\Q"+zAxis->getName()+"\\E\\b"), "");
+                                cdm_->removeAttribute(varIt->getName(), "coordinates");
+                                cdm_->addAttribute(varIt->getName(), CDMAttribute("coordinates", coords));
+                            }
+                        } else {
+                            throw CDMException("axis in complete coordinate system for variable '"+ varIt->getName() +"' but not in shape");
                         }
-                    } else {
-                        throw CDMException("axis in complete coordinate system for variable '"+ varIt->getName() +"' but not in shape");
                     }
                 }
+                // remove the old zAxis
+                cdm_->removeVariable(zAxis->getName());
             }
-            // remove the old zAxis
-            cdm_->removeVariable(zAxis->getName());
         }
     }
 }
