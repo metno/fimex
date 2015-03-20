@@ -54,65 +54,66 @@ static LoggerPtr logger = getLogger("fimex.Felt_File2");
 
 
 Felt_File2::Felt_File2(const string& filename)
-	: filename_(filename)
+    : filename_(filename)
 {
-	int pos = filename.rfind("/");
-	std::string dianaSetup = filename.substr(0, pos+1) + "diana.setup";
-	std::ifstream setupFile(dianaSetup.c_str());
-	if (setupFile.is_open()) {
-		setupFile.close();
-		feltParameters_ = FeltParameters(dianaSetup);
-	}
-	// else default constructor
-	init();
+    int pos = filename.rfind("/");
+    std::string dianaSetup = filename.substr(0, pos+1) + "diana.setup";
+    std::ifstream setupFile(dianaSetup.c_str());
+    if (setupFile.is_open()) {
+        setupFile.close();
+        feltParameters_ = FeltParameters(dianaSetup);
+    }
+    // else default constructor
+    init();
 }
 
 Felt_File2::Felt_File2(const std::string& filename, const std::vector<std::string>& dianaParamList, const std::map<std::string, std::string>& options)
 : filename_(filename)
 {
     setOptions(options);
-	feltParameters_ = FeltParameters(dianaParamList, globalParameterOptions_);
+    feltParameters_ = FeltParameters(dianaParamList, globalParameterOptions_);
     init();
 }
 
 void Felt_File2::setOptions(const std::map<std::string, std::string>& options) {
-	// set gridParameterDelta from string ' ' splitted string of max 6 double values
-	std::set<std::string> knownOptions;
+    // set gridParameterDelta from string ' ' splitted string of max 6 double values
+    std::set<std::string> knownOptions;
 
     for (int i = 0; i < 6; i++) gridParameterDelta_[i] = 0;
 
-	std::string optName = "gridParameterDelta";
+    std::string optName = "gridParameterDelta";
     knownOptions.insert(optName);
-	std::map<std::string, std::string>::const_iterator gridParOpt = options.find("gridParameterDelta");
-	if (gridParOpt != options.end()) {
-		std::vector<std::string> tokens = tokenize(gridParOpt->second);
-		int end = tokens.size() < gridParameterDelta_.size() ? tokens.size() : gridParameterDelta_.size();
-		for (int i = 0; i < end; ++i) {
-			gridParameterDelta_.at(i) = string2type<double>(tokens[i]);
-		}
-		LOG4FIMEX(logger, Logger::DEBUG, "adding " << optName << " processing-option: " << gridParOpt->second);
-	}
+    std::map<std::string, std::string>::const_iterator gridParOpt = options.find("gridParameterDelta");
+    if (gridParOpt != options.end()) {
+        std::vector<std::string> tokens = tokenize(gridParOpt->second);
+        int end = tokens.size() < gridParameterDelta_.size() ? tokens.size() : gridParameterDelta_.size();
+        for (int i = 0; i < end; ++i) {
+            gridParameterDelta_.at(i) = string2type<double>(tokens[i]);
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "adding " << optName << " processing-option: " << gridParOpt->second);
+    }
 
-	optName = "globalParameterRestrictions";
+    optName = "globalParameterRestrictions";
     knownOptions.insert(optName);
     if (options.find(optName) != options.end()) {
         globalParameterOptions_ = options.find(optName)->second;
     }
 
-	// test for unknown options
-	for (std::map<std::string, std::string>::const_iterator oit = options.begin(); oit != options.end(); ++oit) {
-		if (knownOptions.find(oit->first) == knownOptions.end()) {
-			LOG4FIMEX(logger, Logger::WARN, "unknown processing options: " << oit->first);
-		}
-	}
+    // test for unknown options
+    for (std::map<std::string, std::string>::const_iterator oit = options.begin(); oit != options.end(); ++oit) {
+        if (knownOptions.find(oit->first) == knownOptions.end()) {
+            LOG4FIMEX(logger, Logger::WARN, "unknown processing options: " << oit->first);
+        }
+    }
 }
 
 void Felt_File2::init()
 {
-	try {
+    try {
         feltFile_ = boost::shared_ptr<felt::FeltFile>(new felt::FeltFile(
                 boost::filesystem::path(filename_)));
         feltFile_->setLogging(logger->isEnabledFor(Logger::DEBUG));
+        LOG4FIMEX(logger, Logger::DEBUG, "FeltParameters: " << feltParameters_);
         LOG4FIMEX(logger, Logger::DEBUG, feltFile_->information());
         for (felt::FeltFile::const_iterator ffit = feltFile_->begin(); ffit
                 != feltFile_->end(); ++ffit) {
@@ -128,11 +129,13 @@ void Felt_File2::init()
                         hybridLevels_[lp] = field->miscField();
                     }
                 }
+            } else {
+                LOG4FIMEX(logger, Logger::DEBUG, "no definition for '" << join(header.begin(), header.end(), ",") << "'");
             }
         }
-	} catch (runtime_error& re) {
-	    throw Felt_File_Error(re.what());
-	}
+    } catch (runtime_error& re) {
+        throw Felt_File_Error(re.what());
+    }
 }
 
 Felt_File2::~Felt_File2()
@@ -141,55 +144,55 @@ Felt_File2::~Felt_File2()
 
 // true = find, false = create
 bool Felt_File2::findOrCreateFeltArray(boost::shared_ptr<felt::FeltField> field) {
-	string name = feltParameters_.getParameterName(field->getHeader());
-	string dataType = feltParameters_.getParameterDatatype(name);
-	map<string, boost::shared_ptr<Felt_Array2> >::iterator it = feltArrayMap_.find(name);
-	if (it == feltArrayMap_.end()) {
-		LOG4FIMEX(logger, Logger::DEBUG, "new FeltArray " << name << ": " << dataType << " " << feltParameters_.getParameterFillValue(name) << " vTime: " << field->validTime());
-		boost::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters_.getParameterFillValue(name)));
-		feltArrayMap_[name] = fa;   // copy to map
-		return false; // reference from map
-	} else {
-	    it->second->addInformationByField(field);
-		return true;
-	}
+    string name = feltParameters_.getParameterName(field->getHeader());
+    string dataType = feltParameters_.getParameterDatatype(name);
+    map<string, boost::shared_ptr<Felt_Array2> >::iterator it = feltArrayMap_.find(name);
+    if (it == feltArrayMap_.end()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "new FeltArray " << name << ": " << dataType << " " << feltParameters_.getParameterFillValue(name) << " vTime: " << field->validTime());
+        boost::shared_ptr<Felt_Array2> fa(new Felt_Array2(name, field, dataType, feltParameters_.getParameterFillValue(name)));
+        feltArrayMap_[name] = fa;   // copy to map
+        return false; // reference from map
+    } else {
+        it->second->addInformationByField(field);
+        return true;
+    }
 }
 
 const boost::shared_ptr<Felt_Array2> Felt_File2::getFeltArray(const string& arrayName) const {
-	map<string, boost::shared_ptr<Felt_Array2> >::const_iterator it = feltArrayMap_.find(arrayName);
-	if (it == feltArrayMap_.end()) {
-		throw Felt_File_Error("unknown parameter: " + arrayName);
-	}
-	return it->second;
+    map<string, boost::shared_ptr<Felt_Array2> >::const_iterator it = feltArrayMap_.find(arrayName);
+    if (it == feltArrayMap_.end()) {
+        throw Felt_File_Error("unknown parameter: " + arrayName);
+    }
+    return it->second;
 }
 
 std::vector<boost::shared_ptr<Felt_Array2> > Felt_File2::listFeltArrays() const {
-	vector<boost::shared_ptr<Felt_Array2> > li;
-	for (map<string, boost::shared_ptr<Felt_Array2> >::const_iterator it = feltArrayMap_.begin(); it != feltArrayMap_.end(); ++it) {
-		li.push_back(it->second);
-	}
-	return li;
+    vector<boost::shared_ptr<Felt_Array2> > li;
+    for (map<string, boost::shared_ptr<Felt_Array2> >::const_iterator it = feltArrayMap_.begin(); it != feltArrayMap_.end(); ++it) {
+        li.push_back(it->second);
+    }
+    return li;
 }
 
 template<typename T>
 class Scale : public unary_function<short, T> {
 public:
-	Scale(double newFillValue, double scalingFactor) : newFill(static_cast<T>(newFillValue)), scalingFactor(scalingFactor) {}
-	T operator()(short val) {
-		return (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
-	}
+    Scale(double newFillValue, double scalingFactor) : newFill(static_cast<T>(newFillValue)), scalingFactor(scalingFactor) {}
+    T operator()(short val) {
+        return (val == ANY_VALUE() ? newFill : static_cast<T>(val * scalingFactor));
+    }
 private:
-	const T newFill;
-	const float scalingFactor;
+    const T newFill;
+    const float scalingFactor;
 };
 
 // convert felt short to a scaled Data
 template<typename T>
 boost::shared_ptr<MetNoFimex::Data> createScaledData(const vector<short>& indata, double newFillValue, double scalingFactor) {
-	boost::shared_array<T> data(new T[indata.size()]);
-	Scale<T> scale(newFillValue, scalingFactor);
-	std::transform(&indata[0], &indata[0]+indata.size(), &data[0], scale);
-	return MetNoFimex::createData(indata.size(), data);
+    boost::shared_array<T> data(new T[indata.size()]);
+    Scale<T> scale(newFillValue, scalingFactor);
+    std::transform(&indata[0], &indata[0]+indata.size(), &data[0], scale);
+    return MetNoFimex::createData(indata.size(), data);
 }
 
 boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level)
@@ -200,34 +203,34 @@ boost::shared_ptr<MetNoFimex::Data> Felt_File2::getScaledDataSlice(boost::shared
     int fieldScaleFactor = feltArray->getGridAllowDelta(time, level, data, gridParameterDelta_);
 
     boost::shared_ptr<MetNoFimex::Data> returnData;
-	if (feltArray->getDatatype() == "short") {
-		if (fieldScaleFactor != feltArray->scaleFactor()) {
-			throw Felt_File_Error("change in scaling factor for parameter: " + feltArray->getName() + " consider using float or double datatpye");
-		}
-		returnData = createScaledData<short>(data, feltArray->getFillValue(), 1.);
-	} else if (feltArray->getDatatype() == "float") {
-		returnData = createScaledData<float>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(fieldScaleFactor)));
-	} else if (feltArray->getDatatype() == "double") {
-		returnData = createScaledData<double>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(fieldScaleFactor)));
-	} else {
-		throw Felt_File_Error("unknown datatype for feltArray " + feltArray->getName() + ": " + feltArray->getDatatype());
-	}
-	return returnData;
+    if (feltArray->getDatatype() == "short") {
+        if (fieldScaleFactor != feltArray->scaleFactor()) {
+            throw Felt_File_Error("change in scaling factor for parameter: " + feltArray->getName() + " consider using float or double datatpye");
+        }
+        returnData = createScaledData<short>(data, feltArray->getFillValue(), 1.);
+    } else if (feltArray->getDatatype() == "float") {
+        returnData = createScaledData<float>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(fieldScaleFactor)));
+    } else if (feltArray->getDatatype() == "double") {
+        returnData = createScaledData<double>(data, feltArray->getFillValue(), std::pow(10,static_cast<double>(fieldScaleFactor)));
+    } else {
+        throw Felt_File_Error("unknown datatype for feltArray " + feltArray->getName() + ": " + feltArray->getDatatype());
+    }
+    return returnData;
 }
 
 std::map<short, std::vector<LevelPair> > Felt_File2::getFeltLevelPairs() const {
-	// put level values of each id into the levelSet (sort and unique)
-	std::map<short, set<LevelPair, LevelPairLess> > typeLevelSet;
-	for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-		vector<LevelPair> levels = fait->second->getLevelPairs();
-		typeLevelSet[fait->second->getLevelType()].insert(levels.begin(), levels.end());
-	}
-	// convert the set into a vector
-	std::map<short, std::vector<LevelPair> > typeLevelVector;
-	for (std::map<short, set<LevelPair, LevelPairLess> >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
-		typeLevelVector[it->first] = std::vector<LevelPair>(it->second.begin(), it->second.end());
-	}
-	return typeLevelVector;
+    // put level values of each id into the levelSet (sort and unique)
+    std::map<short, set<LevelPair, LevelPairLess> > typeLevelSet;
+    for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
+        vector<LevelPair> levels = fait->second->getLevelPairs();
+        typeLevelSet[fait->second->getLevelType()].insert(levels.begin(), levels.end());
+    }
+    // convert the set into a vector
+    std::map<short, std::vector<LevelPair> > typeLevelVector;
+    for (std::map<short, set<LevelPair, LevelPairLess> >::iterator it = typeLevelSet.begin(); it != typeLevelSet.end(); ++it) {
+        typeLevelVector[it->first] = std::vector<LevelPair>(it->second.begin(), it->second.end());
+    }
+    return typeLevelVector;
 }
 
 std::vector<short> Felt_File2::getEnsembleMembers() const {
@@ -254,45 +257,45 @@ boost::shared_ptr<boost::posix_time::ptime> Felt_File2::getUniqueReferenceTime()
 }
 
 std::vector<boost::posix_time::ptime> Felt_File2::getFeltTimes() const {
-	std::set<boost::posix_time::ptime> times;
-	for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-		vector<boost::posix_time::ptime> fa_times = fait->second->getTimes();
-		times.insert(fa_times.begin(), fa_times.end());
-	}	// times automatically unique and sorted due to set
-	std::vector<boost::posix_time::ptime> sortedTimes(times.begin(), times.end());
-	return sortedTimes;
+    std::set<boost::posix_time::ptime> times;
+    for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
+        vector<boost::posix_time::ptime> fa_times = fait->second->getTimes();
+        times.insert(fa_times.begin(), fa_times.end());
+    }	// times automatically unique and sorted due to set
+    std::vector<boost::posix_time::ptime> sortedTimes(times.begin(), times.end());
+    return sortedTimes;
 }
 
 int Felt_File2::getNX() const {
-	int nx = 0;
-	for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-		nx = std::max(fait->second->getX(), nx);
-	}
-	return nx;
+    int nx = 0;
+    for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
+        nx = std::max(fait->second->getX(), nx);
+    }
+    return nx;
 }
 
 int Felt_File2::getNY() const {
-	int ny = 0;
-	for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
-		ny = std::max(fait->second->getY(), ny);
-	}
-	return ny;
+    int ny = 0;
+    for (std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin(); fait != feltArrayMap_.end(); ++fait) {
+        ny = std::max(fait->second->getY(), ny);
+    }
+    return ny;
 }
 
 DataPtr Felt_File2::getXData() const
 {
-	DataPtr xData = createData(CDM_FLOAT, getNX());
-	boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
-	for (int i = 0; i < getNX(); i++) {
-		float value = gridDef->startX() + i * gridDef->getXIncrement();
-		xData->setValue(i, value);
-	}
-	return xData;
+    DataPtr xData = createData(CDM_FLOAT, getNX());
+    boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
+    for (int i = 0; i < getNX(); i++) {
+        float value = gridDef->startX() + i * gridDef->getXIncrement();
+        xData->setValue(i, value);
+    }
+    return xData;
 }
 
 DataPtr Felt_File2::getYData() const
 {
-	DataPtr yData = createData(CDM_FLOAT, getNY());
+    DataPtr yData = createData(CDM_FLOAT, getNY());
     boost::shared_ptr<felt::FeltGridDefinition> gridDef = getGridDefinition();
     float start = gridDef->startY();
     float incr = gridDef->getYIncrement();
@@ -329,12 +332,12 @@ int Felt_File2::getGridType() const
 
 boost::shared_ptr<felt::FeltGridDefinition> Felt_File2::getGridDefinition() const
 {
-	std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin();
-	if (feltArrayMap_.size() > 0) {
-	    return fait->second->getGridDefinition();
-	} else {
-		throw(Felt_File_Error("cannot read gridParameters: no Felt_Array2 available"));
-	}
+    std::map<std::string, boost::shared_ptr<Felt_Array2> >::const_iterator fait = feltArrayMap_.begin();
+    if (feltArrayMap_.size() > 0) {
+        return fait->second->getGridDefinition();
+    } else {
+        throw(Felt_File_Error("cannot read gridParameters: no Felt_Array2 available"));
+    }
 }
 
 

@@ -163,6 +163,7 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
     boost::tokenizer<boost::char_separator<char> >::iterator tok2It = tok2.begin();
     for (int i = 0; tok2It != tok2.end(); ++tok2It, ++i) {
         short value(std::atoi((*tok2It).c_str()));
+        //cerr << value << endl;
         switch (i) {
             case 0: diana2feltParameters[11] = value; break; // param
             case 1: diana2feltParameters[10] = value; break; // v.coord
@@ -174,6 +175,7 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
     for (;tokIt != tok.end(); ++tokIt) {
         if (boost::regex_match(*tokIt, what, equalSeparatedRegex)) {
             short id(std::atoi(what[2].str().c_str()));
+            //cerr << what[1].str() << ": " << id << endl;
             if (what[1].str() == "prod") {
                 diana2feltParameters[0] = id;
             } else if (what[1].str() == "grid") {
@@ -193,6 +195,7 @@ boost::array<short, 16> FeltParameters::diana2feltparameters(const std::string& 
             }
         }
     }
+    //cerr << diana2feltParameters[11] << "," << diana2feltParameters[10]<< "," << diana2feltParameters[12] << endl;
     return diana2feltParameters;
 }
 
@@ -241,6 +244,17 @@ double FeltParameters::getParameterFillValue(const std::string& parameterName) c
     }
 }
 
+std::ostream& operator<<(std::ostream& os, const FeltParameters& fp) {
+    std::map<std::string, boost::array<short, 16> >::const_iterator it;
+    for (it = fp.parameterMap.begin(); it != fp.parameterMap.end(); ++it) {
+        const boost::array<short, 16>&  value = it->second;
+        const std::string& name = it->first;
+        os << name << ": ";
+        for (int i = 0; i < 15; i++) os << value[i] << ",";
+        os << endl;
+    }
+    return os;
+}
 
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters)
 {
