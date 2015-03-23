@@ -439,7 +439,21 @@ GribFileMessage::GribFileMessage(
     int gribError = grib_get_long(gh.get(), "numberOfForecastsInEnsemble", &totalNumberOfEnsembles_);
     switch (gribError) {
     case GRIB_SUCCESS: {
-        MIFI_GRIB_CHECK(grib_get_long(gh.get(), "perturbationNumber", &perturbationNo_), 0);
+        int gribError_pn = grib_get_long(gh.get(), "perturbationNumber", &perturbationNo_);
+        if (gribError_pn == GRIB_NOT_FOUND) {
+            perturbationNo_ = 0;
+            totalNumberOfEnsembles_ = 0;
+            long productDefinitionTemplateNo;
+            int gribError_pdn = grib_get_long(gh.get(), "productDefinitionTemplateNumber", &productDefinitionTemplateNo);
+            if ((gribError_pdn == GRIB_SUCCESS) && (productDefinitionTemplateNo == 2 || productDefinitionTemplateNo == 3 || productDefinitionTemplateNo == 4 ||
+                    productDefinitionTemplateNo == 12 || productDefinitionTemplateNo == 13 || productDefinitionTemplateNo == 14)) {
+                LOG4FIMEX(logger, Logger::DEBUG, "productDefinitionTemplateNumber=" << productDefinitionTemplateNo << "=ensemble derived product, ignoring ensembles");
+            } else {
+                LOG4FIMEX(logger, Logger::WARN, "numberOfForecastsInEnsemble without perturbationNumber, ignoring ensembles");
+            }
+        } else {
+            MIFI_GRIB_CHECK(gribError_pn, 0);
+        }
         break;
     }
     case GRIB_NOT_FOUND: {
