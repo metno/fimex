@@ -482,7 +482,20 @@ GribFileMessage::GribFileMessage(
     }
     default: MIFI_GRIB_CHECK(gribError, 0); break;
     }
-
+    // cluster (mapped internally like ensembles)
+    if (totalNumberOfEnsembles_ == 0) {
+        int gribError = grib_get_long(gh.get(), "totalNumberOfClusters", &totalNumberOfEnsembles_);
+        if (gribError == GRIB_SUCCESS) {
+            int gribError_cn = grib_get_long(gh.get(), "clusterNumber", &perturbationNo_);
+            if (gribError_cn == GRIB_NOT_FOUND) {
+                perturbationNo_ = 0;
+            }
+        } else {
+            LOG4FIMEX(logger, Logger::WARN, "clusterNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
+            perturbationNo_ = 0;
+            totalNumberOfEnsembles_ = 0;
+        }
+    }
     // TODO: more definitions, see http://www.ecmwf.int/publications/manuals/grib_api/gribexkeys/ksec2.html
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "typeOfGrid", msg, &msgLength), 0);
