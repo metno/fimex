@@ -346,6 +346,18 @@ extern int mifi_get_values_linear_weak_extrapol_f(const float* infieldA, const f
  */
 extern int mifi_get_values_linear_no_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
 /**
+ * Same as mifi_get_values_nearest_f() but with constant extrapolation
+ * @param infieldA
+ * @param infieldB
+ * @param outfield
+ * @param n
+ * @param a
+ * @param b
+ * @param x
+ * @return
+ */
+extern int mifi_get_values_linear_const_extrapol_f(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x);
+/**
  * This is the same as mifi_get_values_linear_f() for double input/output values.
  */
 extern int mifi_get_values_linear_d(const double* infieldA, const double* infieldB, double* outfield, const size_t n, const double a, const double b, const double x);

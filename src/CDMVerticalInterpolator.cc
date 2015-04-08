@@ -104,6 +104,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LIN_WEAK_EXTRA;
     } else if (verticalInterpolationMethod == "linear_no_extra") {
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LIN_NO_EXTRA;
+    } else if (verticalInterpolationMethod == "linear_const_extra") {
+        pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LIN_CONST_EXTRA;
     } else if (verticalInterpolationMethod == "log") {
         pimpl_->verticalInterpolationMethod = MIFI_VINT_METHOD_LOG;
     } else if (verticalInterpolationMethod == "loglog") {
@@ -261,6 +263,7 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
     case MIFI_VINT_METHOD_LIN: intFunc = &mifi_get_values_linear_f; break;
     case MIFI_VINT_METHOD_LIN_WEAK_EXTRA: intFunc = &mifi_get_values_linear_weak_extrapol_f; break;
     case MIFI_VINT_METHOD_LIN_NO_EXTRA: intFunc = &mifi_get_values_linear_no_extrapol_f; break;
+    case MIFI_VINT_METHOD_LIN_CONST_EXTRA: intFunc = &mifi_get_values_linear_const_extrapol_f; break;
     case MIFI_VINT_METHOD_LOG: intFunc = &mifi_get_values_log_f; break;
     case MIFI_VINT_METHOD_LOGLOG: intFunc = &mifi_get_values_log_log_f; break;
     case MIFI_VINT_METHOD_NN: intFunc = &mifi_get_values_nearest_f; break;

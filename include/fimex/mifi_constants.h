@@ -201,7 +201,7 @@ enum mifi_interpol_method {
  */
 enum mifi_vertical_interpol_method {
     /**
-     * linear interpolation, e.g. mifi_get_values_lin_f(), extrapolating
+     * linear interpolation, e.g. mifi_get_values_linear_f(), extrapolating
      */
     MIFI_VINT_METHOD_LIN=0,
     /**
@@ -217,13 +217,17 @@ enum mifi_vertical_interpol_method {
      */
     MIFI_VINT_METHOD_NN=3,
     /**
-     * linear interpolation, e.g. mifi_get_values_lin_f(), extrapolating one distance of the closest values.
+     * linear interpolation, e.g. mifi_get_values_linear_weak_extrapol_f(), extrapolating one distance of the closest values.
      */
     MIFI_VINT_METHOD_LIN_WEAK_EXTRA=4,
     /**
-     * linear interpolation, e.g. mifi_get_values_lin_f(), no extrapolation
+     * linear interpolation, e.g. mifi_get_values_linear_no_extrapol_f(), no extrapolation
      */
-    MIFI_VINT_METHOD_LIN_NO_EXTRA=5
+    MIFI_VINT_METHOD_LIN_NO_EXTRA=5,
+    /**
+     * linear interpolation, e.g. mifi_get_values_linear_const_extrapol_f(), constant extrapolation
+     */
+    MIFI_VINT_METHOD_LIN_CONST_EXTRA=6
 };
 
 
