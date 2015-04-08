@@ -491,7 +491,7 @@ GribFileMessage::GribFileMessage(
                 perturbationNo_ = 0;
             }
         } else {
-            LOG4FIMEX(logger, Logger::WARN, "clusterNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
+            //LOG4FIMEX(logger, Logger::DEBUG, "clusterNumber for " << fileURL.c_str() << " not found [" << perturbationNo_ << "," << totalNumberOfEnsembles_ << "]!!!");
             perturbationNo_ = 0;
             totalNumberOfEnsembles_ = 0;
         }
