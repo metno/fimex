@@ -347,7 +347,7 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                     }
                 }
                 // fetch the data
-                if (vm["stats"].as<string>() != "none") {
+                if (vm.count("stats")) {
                     DataPtr data = reader->getScaledDataSlice(*varIt, *sbIt);
                     map<string, double> stats = calcStats(data);
                     string statStr = vm["stats"].as<string>();
@@ -411,7 +411,7 @@ int run(int argc, char* args[])
         ("stdName", po::value<vector<string> >()->composing(), "standard_name of parameters")
         ("varName", po::value<vector<string> >()->composing(), "variable name of parameters")
         ("forecastTime", po::value<string>(), "forecast hours since reference time, e.g. 3,6,12,15,...,24,36")
-        ("stats", po::value<string>()->default_value("def,mean"), "comma-separated list of stats to show, possible: mean,median,min,max,stddev,def,undef (=all) (or none)")
+        ("stats", po::value<string>(), "comma-separated list of stats to show, possible: mean,median,min,max,stddev,def,undef (=all)")
         ;
 
 
