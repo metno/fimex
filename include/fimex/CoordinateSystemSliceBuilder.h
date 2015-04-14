@@ -54,7 +54,7 @@ public:
      * Get the types of the dimensions.
      * @return vector of size of dimensions
      */
-    std::vector<CoordinateAxis::AxisType> getAxisTypes();
+    std::vector<CoordinateAxis::AxisType> getAxisTypes() const;
 
     /**
      * Set a single reference-time. The CoordinateSystemSliceBuilder

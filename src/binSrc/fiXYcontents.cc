@@ -1,5 +1,5 @@
 /*
- * Fimex, fiContents.cc
+ * Fimex, fiXYcontents.cc
  *
  * (C) Copyright 2015, met.no
  *
@@ -37,6 +37,9 @@
 #include "fimex/Logger.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/Utils.h"
+#include <functional>
+#include <numeric>
 
 
 namespace po = boost::program_options;
@@ -49,9 +52,9 @@ static void writeUsage(ostream& out, const po::options_description& generic) {
     out << "             [--input.optional OPT1 --input.optional OPT2 ...]" << endl;
     out << "             [--num_threads ...]" << endl;
     out << "             [--verticalLayer [units:hPa|no|stdname]]" << endl;
-    out << "             [--layerValue ... | layerPosition]" << endl;
+    out << "             [--layerValue ... | layerPosition ...]" << endl;
     out << "             [--varName VAR1 --varName VAR2 --stdName STDNM3]" << endl;
-    out << "             [--forecastTime ... | --dates ...]" << endl;
+    out << "             [--forecastTime ... ]" << endl;
     out << "             [--stats mean,median,min,max,stddev,def,undef]" << endl;
     out << endl;
     out << generic << endl;
@@ -74,6 +77,50 @@ static boost::shared_ptr<CDMReader> getCDMFileReader(po::variables_map& vm) {
         opts = vm["input.optional"].as<vector<string> >();
     }
     return CDMFileReaderFactory::create(type, name, config, opts);
+}
+
+double quantile(vector<double> &v, float quant)
+{
+    size_t n = v.size() * quant;
+    nth_element(v.begin(), v.begin()+n, v.end());
+    return v[n];
+}
+
+static map<string, double> calcStats(DataPtr data) {
+    map<string, double> stats;
+    vector<double> vec;
+    size_t undefs = 0;
+    { // count and remove undefs
+        vec.reserve(data->size());
+        boost::shared_array<double> array = data->asDouble();
+        for (size_t i = 0; i < data->size(); i++) {
+            if (mifi_isnan(array[i])) {
+                undefs++;
+            } else {
+                vec.push_back(array[i]);
+            }
+        }
+    }
+    stats["undef"] = undefs;
+    stats["def"] = data->size() - undefs;
+
+    if (vec.size() > 0) {
+        double sum = std::accumulate(vec.begin(), vec.end(), 0.0);
+        double mean = sum / vec.size();
+        double sq_sum = 0., min = vec.at(0), max = vec.at(0);
+        for (vector<double>::iterator vit = vec.begin(); vit != vec.end(); ++vit) {
+            sq_sum += (*vit - mean) * (*vit - mean);
+            max = std::max(max, *vit);
+            min = std::min(min, *vit);
+        }
+        stats["stddev"] = std::sqrt(sq_sum / (vec.size()-1));
+        stats["median"] = quantile(vec, .5);
+        stats["sum"] = sum;
+        stats["mean"] = mean;
+        stats["min"] = min;
+        stats["max"] = max;
+    }
+    return stats;
 }
 
 static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader)
@@ -190,9 +237,21 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                         refTime = tu.unitTime2fimexTime(tData->asDouble()[0]).asPosixTime();
                     }
                     tData = reader->getScaledDataSliceInUnit(tAxis->getName(), "hours since "+boost::posix_time::to_iso_extended_string(refTime), sb.getTimeVariableSliceBuilder());
-                    /* select the desired startTime and the sice for the time-slices */
-                    // fetch the 2nd and 3rd time-step of the 4th run
+                    boost::shared_array<float> tArray = tData->asFloat();
+                    set<long> forecastTimes60;
+                    if (vm.count("forecastTime")) {
+                        vector<float> ft = tokenizeDotted<float>(vm["forecastTime"].as<string>(), ",");
+                        for (size_t i = 0; i < ft.size(); i++) {
+                            forecastTimes60.insert(ft.at(i)*60);
+                        }
+                    }
                     for (size_t i = 0; i < tData->size(); i++) {
+                        if (forecastTimes60.size() > 0) {
+                            long t60 = tArray[i] * 60;
+                            if (forecastTimes60.find(t60) == forecastTimes60.end()) {
+                                continue; // skip time
+                            }
+                        }
                         sb.setTimeStartAndSize(i, 1);
                         sb.setAll(xAxis);
                         sb.setAll(yAxis);
@@ -208,8 +267,22 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                         zData = reader->getScaledData(zAxis->getName());
                     }
                     vector<CoordinateSystemSliceBuilder> csbs_temp;
+                    set<size_t> layerPos;
+                    if (vm.count("layerPosition")) {
+                        vector<size_t> lp = tokenizeDotted<size_t>(vm["layerPosition"].as<string>());
+                        layerPos.insert(lp.begin(), lp.end());
+                    }
+                    set<long> layerVal10;
+                    if (vm.count("layerValue")) {
+                        vector<float> lp = tokenizeDotted<float>(vm["layerValue"].as<string>());
+                        transform(lp.begin(), lp.end(), lp.begin(), bind1st(multiplies<float>(),10.));
+                        layerVal10.insert(lp.begin(), lp.end());
+                    }
+                    boost::shared_array<float> zArray = zData->asFloat();
                     for (vector<CoordinateSystemSliceBuilder>::iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {
                         for (size_t i = 0; i < zData->size(); i++) {
+                            if (layerPos.size() && layerPos.find(i) == layerPos.end()) continue;
+                            if (layerVal10.size() && layerVal10.find(zArray[i]*10) == layerVal10.end()) continue;
                             sbIt->setStartAndSize(zAxis, i, 1);
                             csbs_temp.push_back(*sbIt);
                         }
@@ -234,10 +307,10 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
 
                 /* do something with the data */
             } else {
-                // TODO info var not simple spatial gridded
+                // var not simple spatial gridded
             }
         } else {
-            // TODO var without coordsys (ignore on default)
+            // var without coordsys (ignore on default)
         }
 
 
@@ -251,9 +324,66 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                 unit = attr.getStringValue();
             }
             printf("Var: %17s %17s %10s %15s %dx%d: %d\n", varIt->c_str(), stdName.c_str(), unit.c_str(), boost::posix_time::to_iso_string(refTime).c_str(), xSize, ySize, csbs.size());
+            boost::shared_array<float> tArray, zArray;
+            if (tData.get() != 0) tArray = tData->asFloat();
+            if (zData.get() != 0) zArray = zData->asFloat();
+            for (vector<CoordinateSystemSliceBuilder>::const_iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {
+                vector<string> dimNames = sbIt->getDimensionNames();
+                vector<size_t> pos = sbIt->getDimensionStartPositions();
+                vector<CoordinateAxis::AxisType> axisTypes = sbIt->getAxisTypes();
+                printf("  ");
+                for (long i = dimNames.size()-1; i >= 0; i--) {
+                    switch (axisTypes.at(i)) {
+                    case CoordinateAxis::Time: printf("t=%.1f ", tArray[pos.at(i)]); break;
+                    case CoordinateAxis::GeoZ:
+                    case CoordinateAxis::Pressure:
+                    case CoordinateAxis::Height: printf("k=%d(%.1f) ", pos.at(i), zArray[pos.at(i)]); break;
+                    case CoordinateAxis::GeoX:
+                    case CoordinateAxis::GeoY:
+                    case CoordinateAxis::Lon:
+                    case CoordinateAxis::Lat: break; // do nothing on horizontal
+                    case CoordinateAxis::Undefined:
+                    default: printf("%10s=%.1f ", dimNames.at(i).c_str(), dimData[dimNames.at(i)]->asFloat()[pos.at(i)]); break;
+                    }
+                }
+                // fetch the data
+                if (vm["stats"].as<string>() != "none") {
+                    DataPtr data = reader->getScaledDataSlice(*varIt, *sbIt);
+                    map<string, double> stats = calcStats(data);
+                    string statStr = vm["stats"].as<string>();
+                    if (statStr == "all" || statStr == "") {
+                        statStr = "def,mean,median,stddev,min,max,undef";
+                    }
 
-            // fetch the data
-            //DataPtr data = reader->getDataSlice(*varIt, sb);
+                    vector<string> vs = tokenize(statStr, ",");
+                    for (size_t i = 0; i < vs.size(); ++i) {
+                        if (vs.at(i) == "def") {
+                            if (stats["def"] > 0) {
+                                printf("def=T ");
+                            } else {
+                                printf("def=F ");
+                            }
+                        } else if (vs.at(i) == "median") {
+                            if (stats["def"] > 0) printf("median=%.1f ", stats["median"]);
+                        } else if (vs.at(i) == "mean") {
+                            if (stats["def"] > 0) printf("mean=%.1f ", stats["mean"]);
+                        } else if (vs.at(i) == "stddev") {
+                            if (stats["def"] > 0) printf("stddev=%.1f ", stats["stddev"]);
+                        } else if (vs.at(i) == "sum") {
+                            if (stats["def"] > 0) printf("sum=%.1f ", stats["sum"]);
+                        } else if (vs.at(i) == "min") {
+                            if (stats["def"] > 0) printf("min=%.1f ", stats["min"]);
+                        } else if (vs.at(i) == "max") {
+                            if (stats["def"] > 0) printf("max=%.1f ", stats["max"]);
+                        } else if (vs.at(i) == "undef") {
+                            if (stats["def"] > 0) printf("undef=%d ", static_cast<int>(stats["undef"]));
+                        } else {
+                            printf("%s=unkown ", vs.at(i).c_str());
+                        }
+                    }
+                }
+                cout << endl;
+            }
         }
 
     }
@@ -277,10 +407,11 @@ int run(int argc, char* args[])
         ("input.optional", po::value<vector<string> >()->composing(), "additional options, e.g. multiple files for grib")
         ("verticalLayer", po::value<vector<string> >()->composing(), "vertical layer definitions, defined by standard_name or units (or no for no (or size 1) vertical axis), e.g. units:hPa, no, atmosphere_hybrid_sigma_pressure_coordinate")
         ("layerValue", po::value<string>(), "vertical layer values, e.g. 1000,950,...,500,300,100")
+        ("layerPosition", po::value<string>(), "vertical layer positions, e.g. 0,1,2,...,90")
         ("stdName", po::value<vector<string> >()->composing(), "standard_name of parameters")
-        ("varName", po::value<vector<string> >()->composing(), "variable_name of parameters")
+        ("varName", po::value<vector<string> >()->composing(), "variable name of parameters")
         ("forecastTime", po::value<string>(), "forecast hours since reference time, e.g. 3,6,12,15,...,24,36")
-        ("stats", po::value<string>()->default_value("def,mean"), "comma-separated list of stats to show, possible: mean,median,min,max,stddev,def,undef")
+        ("stats", po::value<string>()->default_value("def,mean"), "comma-separated list of stats to show, possible: mean,median,min,max,stddev,def,undef (=all) (or none)")
         ;
 
 
@@ -312,7 +443,6 @@ int run(int argc, char* args[])
 #endif
     }
     if (vm.count("debug") >= 1) {
-        // TODO allow for multiple occurances and use INFO as == 1
         defaultLogLevel(Logger::DEBUG);
     } else if (vm.count("debug") > 1) {
         defaultLogLevel(Logger::DEBUG);
@@ -327,7 +457,6 @@ int run(int argc, char* args[])
 
     boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
     runStats(vm, dataReader);
-    // TODO: do something with the dataReader
 
     return 0;
 }
