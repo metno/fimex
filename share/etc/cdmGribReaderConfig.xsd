@@ -137,6 +137,14 @@
       <xs:attribute name="value" use="required"/>
     </xs:complexType>
   </xs:element>
+  <xs:element name="precision">
+    <!-- the precision attribute will be applied to the data and then added to the scale_factor/add_offset attributes of the data -->
+    <!-- the scale_factor/add_offset attributes will not change the data, while precision will -->
+    <xs:complexType>
+      <xs:attribute name="scale_factor" use="optional" type="xs:double" />
+      <xs:attribute name="add_offset" use="optional" type="xs:double" />
+    </xs:complexType>
+  </xs:element>
   <xs:element name="extraKey">
     <xs:complexType>
       <xs:attribute name="name" use="required" type="xs:string"/>

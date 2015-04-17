@@ -31,6 +31,7 @@
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/GridDefinition.h"
 #include "fimex/GribFileIndex.h"
+#include "fimex/DataTypeChanger.h"
 #include "CDM_XMLConfigHelper.h"
 #include "fimex/XMLDoc.h"
 #include "fimex/Logger.h"
@@ -76,6 +77,7 @@ struct GribCDMReaderImpl {
     // store ptimes of all times
     vector<boost::posix_time::ptime> times;
 
+    map<string, std::pair<double, double> > varPrecision;
     // varName -> time (unlimDimPos) -> level (val) -> ensemble (val) -> GFI (index)
     map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
     // varName -> has Ensemble
@@ -1034,6 +1036,31 @@ void GribCDMReader::initAddVariables()
             vector<CDMAttribute> attributes;
             if (node != 0) {
                 fillAttributeListFromXMLNode(attributes, node->children, p_->templateReplacementAttributes);
+                // check precision
+                {
+
+                    xmlNodePtr varNodeChild = node->children;
+                    while (varNodeChild != 0) {
+                        if ((varNodeChild->type == XML_ELEMENT_NODE) &&
+                            (string("precision") == reinterpret_cast<const char *>(varNodeChild->name))) {
+                            double scale = 1.;
+                            double offset = 0.;
+                            string str = getXmlProp(varNodeChild, "scale_factor");
+                            // TODO: fix scale_factor and add_offset attributes when already existing
+                            if (str != "") {
+                                scale = string2type<double>(str);
+                                attributes.push_back(CDMAttribute("scale_factor", scale));
+                            }
+                            str = getXmlProp(varNodeChild, "add_offset");
+                            if (str != "") {
+                                offset = string2type<double>(str);
+                                attributes.push_back(CDMAttribute("add_offset", offset));
+                            }
+                            p_->varPrecision[varName] = make_pair(scale, offset);
+                        }
+                        varNodeChild = varNodeChild->next;
+                    }
+                }
             }
 
             // add the projection
@@ -1176,8 +1203,13 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
     // storage for complete data
     boost::shared_array<double> doubleArray(new double[slice_size]);
     // prefill with missing values
+
     double missingValue = cdm_->getFillValue(varName);
-    fill(&doubleArray[0], &doubleArray[slice_size], missingValue);
+    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
+        // varPrecision used, use default missing
+        missingValue = MIFI_FILL_DOUBLE;
+    }
+    fill(&doubleArray[0], &doubleArray[slice_size], MIFI_FILL_DOUBLE);
     DataPtr data = createData(slice_size, doubleArray);
     // storage for one layer
     vector<double> gridData(slice_size/slices.size());
@@ -1189,7 +1221,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
             size_t dataRead;
             {
                 ScopedCritical lock(p_->mutex);
-                dataRead = gfmIt->readData(gridData, missingValue);
+                dataRead = gfmIt->readData(gridData, MIFI_FILL_DOUBLE);
             }
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
             copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
@@ -1198,7 +1230,12 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         }
         dataCurrentPos += gridData.size(); // always forward a complete slice
     }
-
+    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
+        double scale = p_->varPrecision[varName].first;
+        double offset = p_->varPrecision[varName].second;
+        DataTypeChanger dtc(CDM_DOUBLE, missingValue, 1.0, 0.0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset, 1., 0.);
+        return dtc.convertData(data);
+    }
     return data;
 }
 
