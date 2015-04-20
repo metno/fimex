@@ -144,7 +144,17 @@ public:
     virtual void getScaleOffset(double& scale, double& offset) {
         if (! isLinear()) throw UnitException("cannot get scale and offset of non-linear function");
         offset = convert(0.0);
-        scale = convert(1.0) - offset;
+        scale = convert(1.) - offset;
+        // make sure, scale is determined at a place where offset is no longer numerically superior
+        if (scale != 0 && offset != 0) {
+            double temp = -offset/scale;
+            //std::cerr << temp << " offset:" << offset << " scale: " << scale <<  std::endl;
+            double scale2 = (convert(temp)-offset)/temp;
+            if (fabs(scale - scale2) < 1e-3) {
+                // should only increase precision, not nan/inf or other cases
+                scale = scale2;
+            }
+        }
     }
 };
 #endif
