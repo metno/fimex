@@ -33,6 +33,7 @@ contact me.
     -# @ref gribWriterDoc
     -# @ref netcdfWriterDoc
   -# @ref parallelization
+  -# @ref memory_usage
   -# @ref fortran90
 
 @page programDoc fimex Program Options
@@ -836,6 +837,22 @@ nproc time [s]  factor
 @endverbatim
 
 Using other compute-intensive data-manipulations will usually improve the scaling.
+
+
+@page memory_usage
+@section memory_usage Memory Usage
+
+The fimex command line utility uses memory usually as one unlimited-dimension slice size, and this often
+copied between different buffers, so minimum memory-usage is that slice multiplied with 2 or 3.
+
+Interpolation needs a interpolation-cache with the horizontal resolution times 5 when vector-reprojection
+is used.
+
+NetCDF4/hdf5 uses a hdf chunk cache of size 1009*4M (10*4M per variable)
+(as default in netcdf-4.3.0). The environment-variable FIMEX_CHUNK_CACHE_SIZE
+changes that size, e.g. FIMEX_CHUNK_CACHE_SIZE=419430400 will set the global cache to
+100*4M (4M=4194304), and a size of 0 disables the cache (and as long as
+complete/compressed chunks are read, usually without preformance-degradations).
 
 
 @page fortran90
