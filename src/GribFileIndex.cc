@@ -426,9 +426,11 @@ GribFileMessage::GribFileMessage(
     // time
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
+    long step;
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "step", &step),0); // dummy, otherwise grib_api does not initialize stepUnits
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepUnits", msg, &msgLength), 0);
-    stepUnits_ = std::string(msg);
+    cerr << "stepUnits: " <<msg << endl;
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
     stepType_ = std::string(msg);
