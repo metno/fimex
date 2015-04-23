@@ -426,15 +426,15 @@ GribFileMessage::GribFileMessage(
     // time
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
+    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
     msgLength = 1024;
-    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepUnits", msg, &msgLength), 0);
+    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepUnits", msg, &msgLength), 0); // need startStep before stepUnits!!!
     stepUnits_ = std::string(msg);
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
     stepType_ = std::string(msg);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
-    MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
     // ensemble
     int gribError = grib_get_long(gh.get(), "numberOfForecastsInEnsemble", &totalNumberOfEnsembles_);
     switch (gribError) {

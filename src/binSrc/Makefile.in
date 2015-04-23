@@ -34,7 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = fimex$(EXEEXT) $(am__EXEEXT_1)
+bin_PROGRAMS = fimex$(EXEEXT) fiXYcontents$(EXEEXT) $(am__EXEEXT_1)
 @HAVE_GRIBAPI_TRUE@am__append_1 = fiIndexGribs fiGribCut
 subdir = src/binSrc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -77,6 +77,9 @@ am__fiIndexGribs_SOURCES_DIST = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@am_fiIndexGribs_OBJECTS = fiIndexGribs.$(OBJEXT)
 fiIndexGribs_OBJECTS = $(am_fiIndexGribs_OBJECTS)
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_DEPENDENCIES = ../libfimex.la
+am_fiXYcontents_OBJECTS = fiXYcontents.$(OBJEXT)
+fiXYcontents_OBJECTS = $(am_fiXYcontents_OBJECTS)
+fiXYcontents_DEPENDENCIES = ../libfimex.la
 am_fimex_OBJECTS = fimex.$(OBJEXT)
 fimex_OBJECTS = $(am_fimex_OBJECTS)
 fimex_DEPENDENCIES = ../libfimex.la
@@ -94,9 +97,10 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(fiGribCut_SOURCES) $(fiIndexGribs_SOURCES) \
-	$(fimex_SOURCES)
+	$(fiXYcontents_SOURCES) $(fimex_SOURCES)
 DIST_SOURCES = $(am__fiGribCut_SOURCES_DIST) \
-	$(am__fiIndexGribs_SOURCES_DIST) $(fimex_SOURCES)
+	$(am__fiIndexGribs_SOURCES_DIST) $(fiXYcontents_SOURCES) \
+	$(fimex_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -329,6 +333,8 @@ AM_CXXFLAGS = $(BOOST_CPPFLAGS) @LOG4CPP_CFLAGS@
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DPKGDATADIR="\"$(pkgdatadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS}  @MIFI_GRIB_API_CPPFLAGS@ ${XML_CPPFLAGS}
 fimex_SOURCES = fimex.cc
 fimex_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@ @LOG4CPP_LIBS@
+fiXYcontents_SOURCES = fiXYcontents.cc
+fiXYcontents_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@ @LOG4CPP_LIBS@
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_SOURCES = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
 @HAVE_GRIBAPI_TRUE@fiGribCut_SOURCES = fiGribCut.cc
@@ -416,6 +422,9 @@ fiGribCut$(EXEEXT): $(fiGribCut_OBJECTS) $(fiGribCut_DEPENDENCIES) $(EXTRA_fiGri
 fiIndexGribs$(EXEEXT): $(fiIndexGribs_OBJECTS) $(fiIndexGribs_DEPENDENCIES) $(EXTRA_fiIndexGribs_DEPENDENCIES) 
 	@rm -f fiIndexGribs$(EXEEXT)
 	$(CXXLINK) $(fiIndexGribs_OBJECTS) $(fiIndexGribs_LDADD) $(LIBS)
+fiXYcontents$(EXEEXT): $(fiXYcontents_OBJECTS) $(fiXYcontents_DEPENDENCIES) $(EXTRA_fiXYcontents_DEPENDENCIES) 
+	@rm -f fiXYcontents$(EXEEXT)
+	$(CXXLINK) $(fiXYcontents_OBJECTS) $(fiXYcontents_LDADD) $(LIBS)
 fimex$(EXEEXT): $(fimex_OBJECTS) $(fimex_DEPENDENCIES) $(EXTRA_fimex_DEPENDENCIES) 
 	@rm -f fimex$(EXEEXT)
 	$(CXXLINK) $(fimex_OBJECTS) $(fimex_LDADD) $(LIBS)
@@ -428,6 +437,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fiGribCut.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fiIndexGribs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fiXYcontents.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fimex.Po@am__quote@
 
 .cc.o:

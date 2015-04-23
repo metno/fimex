@@ -28,6 +28,7 @@
 #include "fimex/Logger.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"
+#include <cstdlib>
 extern "C" {
 #include "netcdf.h"
 }
@@ -42,6 +43,12 @@ NetCDF_CDMReader::NetCDF_CDMReader(const std::string& filename, bool writeable)
 : ncFile(std::auto_ptr<Nc>(new Nc()))
 {
     ScopedCritical lock(Nc::getMutex());
+    char* fimexCache = getenv("FIMEX_CHUNK_CACHE_SIZE");
+    if (fimexCache != 0) {
+        int cacheSize = string2type<int>(fimexCache);
+        cacheSize /= 100;
+        nc_set_chunk_cache(cacheSize, 100, 0.75);
+    }
     ncFile->filename = filename;
     ncCheck(nc_open(ncFile->filename.c_str(), writeable ? NC_WRITE : NC_NOWRITE, &ncFile->ncId), "opening "+ncFile->filename);
     ncFile->isOpen = true;

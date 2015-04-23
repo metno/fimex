@@ -1,3 +1,15 @@
+  * 2015-04-23 fimex-0.58
+    * adding fiXYcontents script, listing content as horizontal 2d-fields
+    * new vertical interpolation methods (different extrapolations)
+      * linear_const_extra, linear_weak_extra, linear_no_extra
+    * using linear_weak_extra for time-interpolation (only 1 timestep extrapolation)
+    * adding FIMEX_CHUNK_CACHE_SIZE to remove chunk-cache in constraint environments (e.g. webservers)
+    * increase precision of units-conversion (<1e-14)
+    * fix debian-packages for fortran-dev
+    * grib: fix stepUnits when different from h
+    * grib: handling clusters as ensembles
+    * changing loop-order when writing netcdf (time,variable)
+      to avoid performance problems with filesystems with large blocksize (lustre)
   * 2015-02-27 fimex-0.57
     * convert pressure to altitude using hypsometric formula
     * compressed grbml.gz files with fiIndexGribs

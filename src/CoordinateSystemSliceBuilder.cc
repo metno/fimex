@@ -133,7 +133,7 @@ void CoordinateSystemSliceBuilder::setAxisStartAndSize(CoordinateAxis::AxisType 
     }
 }
 
-vector<CoordinateAxis::AxisType> CoordinateSystemSliceBuilder::getAxisTypes()
+vector<CoordinateAxis::AxisType> CoordinateSystemSliceBuilder::getAxisTypes() const
 {
     vector<string> dimNames = getDimensionNames();
     vector<CoordinateAxis::AxisType> retVal;
