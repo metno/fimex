@@ -539,10 +539,10 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
         CDMAttribute attr;
         double orgScale = 1.;
         double orgOffset = 0.;
-        if (orgCDM.getAttribute(varName, "scale_factor", attr)) {
+        if (orgCDM.getAttribute(orgVarName, "scale_factor", attr)) {
             orgScale = attr.getData()->asDouble()[0];
         }
-        if (orgCDM.getAttribute(varName, "add_offset", attr)) {
+        if (orgCDM.getAttribute(orgVarName, "add_offset", attr)) {
             orgOffset = attr.getData()->asDouble()[0];
         }
         double newFill = cdm_->getFillValue(varName);
