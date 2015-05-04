@@ -292,7 +292,7 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
 
                 // by default, all other dimensions are fetched at maximum size
                 // here, I reduce them to the first slice
-                vector<string> dims = sb.getUnsetDimensionNames();
+                vector<string> dims = csbs.at(0).getUnsetDimensionNames();
                 for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
                     dimData[*dim] = reader->getScaledData(*dim);
                     vector<CoordinateSystemSliceBuilder> csbs_temp;
@@ -334,7 +334,7 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                 printf("  ");
                 for (long i = dimNames.size()-1; i >= 0; i--) {
                     switch (axisTypes.at(i)) {
-                    case CoordinateAxis::Time: printf("t=%.1f ", tArray[pos.at(i)]); break;
+                    case CoordinateAxis::Time: printf("t=%d(%.1f) ", pos.at(i), tArray[pos.at(i)]); break;
                     case CoordinateAxis::GeoZ:
                     case CoordinateAxis::Pressure:
                     case CoordinateAxis::Height: printf("k=%d(%.1f) ", pos.at(i), zArray[pos.at(i)]); break;
