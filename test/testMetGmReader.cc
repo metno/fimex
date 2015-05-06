@@ -108,15 +108,19 @@ BOOST_AUTO_TEST_CASE(test_slicebuilder_metgm1)
             find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
     if (csIt == coordSys.end()) BOOST_CHECK(false);
     CoordinateSystemSliceBuilder sb(cdm, *csIt);
-    sb.setReferenceTimePos(1);
+    vector<string> dimNames = sb.getDimensionNames();
+    sb.setReferenceTimePos(0);
     sb.setTimeStartAndSize(0, 2);
 
     BOOST_CHECK(sb.getUnsetDimensionNames()[0] == "height_in_meters_above_ground_level_pid_5");
     BOOST_CHECK(sb.getUnsetDimensionNames()[1] == "latitude");
     BOOST_CHECK(sb.getUnsetDimensionNames()[2] == "longitude");
+    sb.setAll("height_in_meters_above_ground_level_pid_5");
+    sb.setAll("latitude");
+    sb.setAll("longitude");
 
-    DataPtr data = metgmReaderEd1->getDataSlice("air_temperature_GND", sb.getTimeVariableSliceBuilder());
-//    BOOST_CHECK(data->size() == 2);
+    DataPtr data = metgmReaderEd1->getDataSlice("air_temperature_GND", sb);
+    BOOST_CHECK(data->size() == (7072*2));
 }
 
 #else
