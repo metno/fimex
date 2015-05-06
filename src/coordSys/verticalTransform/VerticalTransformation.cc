@@ -78,7 +78,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverte
     const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
     const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
     const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
-    if (!(xAxis && yAxis && zAxis))
+    if (!(xAxis.get() && yAxis.get() && zAxis.get()))
         return conv_p();
 
     vector<string> dims3;
@@ -113,7 +113,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverte
     attrs["standard_name"] = "air_temperature";
     vector<string> airtVars = reader->getCDM().findVariables(attrs, dims3);
 
-    if (pressure && !sapVars.empty() && !sgpVars.empty() && !airtVars.empty()) {
+    if (pressure.get() && !sapVars.empty() && !sgpVars.empty() && !airtVars.empty()) {
         attrs["standard_name"] = "specific_humidity";
         vector<string> shVars = reader->getCDM().findVariables(attrs, dims3);
 
@@ -214,7 +214,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressure
     const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
     const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
     const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
-    if (not (xAxis && yAxis && zAxis)) {
+    if (!(xAxis.get() && yAxis.get() && zAxis.get())) {
         LOG4FIMEX(logger, Logger::INFO, "cs lacks " << (xAxis.get() ? "" : "x ")
                 << (yAxis.get() ? "" : "y ") << (zAxis.get() ? "" : "z ") << "axis/axes, no pressure field");
         return ToVLevelConverter_p();
@@ -248,7 +248,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressure
 boost::shared_ptr<ToVLevelConverter> VerticalTransformation::findPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     boost::shared_ptr<ToVLevelConverter> pConv = getIdentityPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-    if (not pConv)
+    if (!pConv.get())
         pConv = getPressureConverter(reader, unLimDimPos, cs, nx, ny, nt);
     return pConv;
 }
