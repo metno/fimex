@@ -23,7 +23,9 @@ namespace MetNoFimex {
         virtual ~MetGmCDMReaderSlicedImpl();
 
         virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+#if 0
         virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
+#endif
 
     protected:
         virtual void parseMgmFile(const std::string& mgmFileName);

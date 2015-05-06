@@ -138,7 +138,8 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                     if (coordSys[i]->getGeoXAxis().get() != 0 &&
                             coordSys[i]->getGeoYAxis().get() != 0 &&
                             coordSys[i]->getGeoZAxis().get() != 0 &&
-                            coordSys[i]->getTimeAxis().get() != 0) {
+                            coordSys[i]->getTimeAxis().get() != 0 &&
+                            coordSys[i]->hasVerticalTransformation()) {
                         if (!p_->cs.get()) {
                             p_->cs = coordSys[i];
                         } else {

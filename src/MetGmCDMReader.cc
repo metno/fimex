@@ -53,11 +53,5 @@ namespace MetNoFimex {
         return d_ptr->getDataSlice(varName, unLimDimPos);
     }
 
-    DataPtr MetGmCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
-    {
-        ScopedCritical lock(mutex);
-        return d_ptr->getDataSlice(varName, sb);
-    }
-
 }
 
