@@ -29,6 +29,7 @@
 //
 #include "fimex/CDM.h"
 #include "fimex/XMLDoc.h"
+#include "fimex/Logger.h"
 
 // libxml2
 //
@@ -49,6 +50,8 @@ boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::crea
     CDMAttribute metgmMetaData; // encoded within comment
     if(pCdmReader->getCDM().getAttribute(pCdmReader->getCDM().globalAttributeNS(), "comment", metgmMetaData)) {
         try {
+            std::string commentStr = metgmMetaData.getStringValue();
+            if (! (commentStr.size() > 0 && commentStr.substr(0,1) == "<")) throw CDMException("comment not xml");
             boost::shared_ptr<XMLDoc> doc = XMLDoc::fromString(metgmMetaData.getStringValue());
 
             if(doc.get() != 0) {
@@ -76,7 +79,8 @@ boost::shared_ptr<MetGmCommentAttributeParser> MetGmCommentAttributeParser::crea
                 }
             }
         } catch (CDMException& exception) {
-            // just ignore
+            // ignore
+            LOG4FIMEX(getLogger("fimex.MetGmCDMWriter.MetGmCommentAttribute"), Logger::DEBUG, "failed parsing global attribute 'comment' as xml: '" << metgmMetaData.getStringValue() << "'");
         }
     }
 
