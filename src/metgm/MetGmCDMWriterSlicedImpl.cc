@@ -35,7 +35,7 @@
 #include "MetGmGroup5Ptr.h"
 #include "MetGmFileHandlePtr.h"
 #include "MetGmConfigurationMappings.h"
-#include "../fimex/CDMException.h"
+#include "fimex/CDMException.h"
 
 namespace MetNoFimex {
     MetGmCDMWriterSlicedImpl::MetGmCDMWriterSlicedImpl
