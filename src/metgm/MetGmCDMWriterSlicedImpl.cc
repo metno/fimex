@@ -35,6 +35,7 @@
 #include "MetGmGroup5Ptr.h"
 #include "MetGmFileHandlePtr.h"
 #include "MetGmConfigurationMappings.h"
+#include "fimex/CDMException.h"
 
 namespace MetNoFimex {
     MetGmCDMWriterSlicedImpl::MetGmCDMWriterSlicedImpl
@@ -46,12 +47,8 @@ namespace MetNoFimex {
         : MetGmCDMWriterImpl(cdmReader, outputFile)
     {
         configFileName_ = configFile;
-        std::auto_ptr<XMLDoc> xmlDoc;
-        if (configFileName_ == std::string()) {
-            xmlDoc = std::auto_ptr<XMLDoc>(0);
-        } else {
-            xmlDoc = std::auto_ptr<XMLDoc>(new XMLDoc(configFileName_));
-        }
+        if (configFileName_ == "") throw CDMException("metgm requires configFile");
+        std::auto_ptr<XMLDoc> xmlDoc(new XMLDoc(configFileName_));
 
         metgmTimeTag_ = MetGmTimeTag::createMetGmTimeTagGlobal(cdmReader);
         metgmVersion_ = MetGmVersion::createMetGmVersion(xmlDoc);

@@ -37,6 +37,7 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
+#include "fimex/Logger.h"
 #include "coordSys/CoordSysUtils.h"
 
 namespace MetNoFimex
@@ -137,13 +138,25 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                     if (coordSys[i]->getGeoXAxis().get() != 0 &&
                             coordSys[i]->getGeoYAxis().get() != 0 &&
                             coordSys[i]->getGeoZAxis().get() != 0 &&
-                            coordSys[i]->getTimeAxis().get() != 0) {
-                        p_->cs = coordSys[i];
-                        break;
+                            coordSys[i]->getTimeAxis().get() != 0 &&
+                            coordSys[i]->hasVerticalTransformation()) {
+                        if (!p_->cs.get()) {
+                            p_->cs = coordSys[i];
+                        } else {
+                            // use the largest coordinate-system with largest zAxis
+                            size_t dimsizeNew = cdm_->getDimension(coordSys[i]->getGeoZAxis()->getShape()[0]).getLength();
+                            size_t dimsizeOld = cdm_->getDimension(p_->cs->getGeoZAxis()->getShape()[0]).getLength();
+                            if (dimsizeNew > dimsizeOld) {
+                                p_->cs = coordSys[i];
+                            }
+                        }
                     }
                 }
-                if (p_->cs.get() == 0)
+                if (p_->cs.get() == 0) {
                     throw CDMException("no x,y,z,t 4D-coordinate system found");
+                } else {
+                    LOG4FIMEX(getLogger("fimex.CDMPressureConverter"), Logger::DEBUG, "add4Dpressure using coordsys: " << *(p_->cs));
+                }
             }
             CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
             size_t nx, ny, nz, nt;
@@ -179,6 +192,10 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
             nx, ny, nz, startT, nt, unLimDimPos);
 
     boost::shared_ptr<ToVLevelConverter> pConv = p_->cs->getVerticalTransformation()->getConverter(dataReader_, MIFI_VINT_PRESSURE, unLimDimPos, p_->cs, nx, ny, nz, (nt-startT));
+    if (pConv.get() == 0) {
+        vector<string> shape = getCDM().getVariable(varName).getShape();
+        throw CDMException("no vertical-transformation found for " + varName + "(" + join(shape.begin(), shape.end()) + ")");
+    }
     if (varName == "air_temperature") {
         const float cp = 1004.; // J/kgK
         const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K

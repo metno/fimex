@@ -166,6 +166,9 @@ namespace MetNoFimex {
         }
     }
 
+#if 0
+    // this code does not work and was thought to improve performance
+    // disabled until Alexandar fixes it
     DataPtr MetGmCDMReaderSlicedImpl::getDataSlice(const std::string& varName, const SliceBuilder& sb)
     {
 //        MGM_CHECK_POINT()
@@ -221,6 +224,7 @@ namespace MetNoFimex {
         }
         return retData;
     }
+#endif
 
     void MetGmCDMReaderSlicedImpl::parseMgmFile(const std::string& mgmFileName)
     {

@@ -117,6 +117,9 @@ DataPtr CDMReader::getDataSlice(const std::string& varName, const SliceBuilder& 
                 DataPtr unLimDimData = getDataSlice(varName, i+unLimDimStart);
                 if (unLimDimData->size() != 0) {
                     unLimDimData = unLimDimData->slice(maxDimSize, dimStart, dimSize);
+                    if (unLimDimData->size() != unLimSliceSize) {
+                        throw CDMException("size mismatch with unlimited slices for var " + varName+": " + type2string(unLimDimData->size()) + "!=" + type2string(unLimSliceSize));
+                    }
                     assert(unLimDimData->size() == unLimSliceSize);
                     retData->setValues(i*unLimSliceSize, *unLimDimData);
                 }

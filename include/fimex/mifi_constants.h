@@ -240,7 +240,8 @@ enum mifi_vertical_interpol_method {
 /** Gas constant R, 8.31432 J / (mol*K) */
 #define MIFI_GAS_CONSTANT 8.31432
 
-
+/** 0-deg C in K */
+#define MIFI_T0 273.15
 
 #ifdef __cplusplus
 #include <limits>

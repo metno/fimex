@@ -591,6 +591,7 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
 
         switch(hdtag->asShort()) {
             case MetGmHDTag::HD_2D:
+            case MetGmHDTag::HD_3D:
             case MetGmHDTag::HD_3D_T:
                 {
                     if(pg3->p_id() == 7) {
@@ -640,7 +641,6 @@ boost::shared_ptr<MetGmGroup5Ptr> MetGmGroup5Ptr::createMetGmGroup5PtrForWriting
             case MetGmHDTag::HD_1D:
             case MetGmHDTag::HD_1D_T:
             case MetGmHDTag::HD_2D_T:
-            case MetGmHDTag::HD_3D:
             default:
             throw CDMException(std::string(__FUNCTION__) + std::string(": dimensionality not supported yet :") + hdtag->asString() + " for " + pVariable->getName());
         }

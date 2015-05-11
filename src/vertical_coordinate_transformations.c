@@ -110,6 +110,33 @@ float mifi_virtual_temperature(float spec_humidity, float T)
     return (1+Z_MOL_WEIGHT_RATIO*spec_humidity) * T;
 }
 
+float mifi_relative_to_specific_temperature(float rh, float t, float p)
+{
+    const float c1 = 610.78;
+    const float c2 = 17.269;
+    const float c3 = 273.16;
+    const float c4 = 35.86;
+    float es = c1 * exp((c2*(t-c3))/(t-c4));
+    float sh = rh * 0.01 *es* 0.622 / p;
+    if (sh < 0.) sh = 0.;
+    return sh;
+
+}
+
+float mifi_specific_to_relative_temperature(float sh, float t, float p)
+{
+    const float c1 = 610.78;
+    const float c2 = 17.269;
+    const float c3 = 273.16;
+    const float c4 = 35.86;
+    float es = c1 * exp((c2*(t-c3))/(t-c4));
+    float rh = 100. * sh * p / (es * 0.622);
+    if (rh < 0.) rh = 0;
+    else if (rh > 100.) rh = 100;
+    return rh;
+}
+
+
 float mifi_barometric_layer_thickness(float p_low_alti, float p_high_alti, float T)
 {
     return log(p_low_alti / p_high_alti) * T * BAROMETRIC_FACTOR;

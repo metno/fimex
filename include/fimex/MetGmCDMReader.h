@@ -56,7 +56,6 @@ namespace MetNoFimex {
         ~MetGmCDMReader();
 
         DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
-        DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
 
     private:
         boost::shared_ptr<MetGmCDMReaderImpl> d_ptr;

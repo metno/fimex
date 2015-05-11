@@ -1,4 +1,10 @@
-fimex (0.58-1) trusty; urgency=low
+fimex (0.58.1-1) trusty; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 11 May 2015 15:55:07 +0200
+
+fimex (0.58-2) trusty; urgency=low
 
   * initial upload
 

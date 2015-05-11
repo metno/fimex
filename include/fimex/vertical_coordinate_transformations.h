@@ -169,11 +169,32 @@ extern int mifi_barometric_standard_altitude(size_t n, const double* p, double* 
 
 /**
  * calculate virtual temperature from specific humidity and temperature
- * @param spec_humidity specific humidity
+ * @param spec_humidity specific humidity in kg/kg
  * @param temperature in K
  * @return virtual temperature in K
  */
-extern float mifi_virtual_temperature(float spec_humidity, float T);
+extern float mifi_virtual_temperature(float spec_humidity, float t);
+
+/**
+ * Calculate specific humidity from relative humidity and temperature.  Derived from
+ * HIRLAM version 2.6.0, by G. Cats
+ * @param rh relative humidity in %
+ * @param temperature in K
+ * @param p pressure in hPa
+ * @return specific humidity in kg/kg
+ */
+extern float mifi_relative_to_specific_temperature(float rh, float t, float p);
+
+/**
+ * Calculate specific humidity from relative humidity and temperature. Derived from
+ * HIRLAM version 2.6.0, by G. Cats
+ *
+ * @param sh specific humidity in kg/kg
+ * @param temperature in K
+ * @param p pressure in hPa
+ * @return relative humidity in %
+ */
+extern float mifi_specific_to_relative_temperature(float sh, float t, float p);
 
 /**
  * convert pressure difference to layer thickness using the
