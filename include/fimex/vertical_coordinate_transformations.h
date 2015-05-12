@@ -169,11 +169,42 @@ extern int mifi_barometric_standard_altitude(size_t n, const double* p, double* 
 
 /**
  * calculate virtual temperature from specific humidity and temperature
- * @param spec_humidity specific humidity
+ * @param spec_humidity specific humidity in kg/kg
  * @param temperature in K
  * @return virtual temperature in K
  */
-extern float mifi_virtual_temperature(float spec_humidity, float T);
+extern float mifi_virtual_temperature(float spec_humidity, float t);
+
+/**
+ * Calculate specific humidity from relative humidity and temperature.  Derived from
+ * HIRLAM version 2.6.0, by G. Cats
+ * @param rh relative humidity in %
+ * @param temperature in K
+ * @param p pressure in hPa
+ * @return specific humidity in kg/kg
+ */
+extern float mifi_relative_to_specific_humidity(float rh, float t, float p);
+
+/**
+ * Calculate specific humidity from relative humidity and temperature. Derived from
+ * HIRLAM version 2.6.0, by G. Cats
+ *
+ * @param sh specific humidity in kg/kg
+ * @param temperature in K
+ * @param p pressure in hPa
+ * @return relative humidity in %
+ */
+extern float mifi_specific_to_relative_humidity(float sh, float t, float p);
+
+/**
+ * Calculate relative humidity from dewpoint temperature and temperature. Derived from
+ * Bolton, 1980: http://www.eol.ucar.edu/projects/ceop/dm/documents/refdata_report/eqns.html
+ * @param dew dewpoint temperature in K
+ * @param t temperature in K
+ * @return relative humidity in %
+ */
+extern float mifi_dewpoint_to_relative_humidity(float dew, float t);
+
 
 /**
  * convert pressure difference to layer thickness using the
@@ -229,6 +260,19 @@ extern int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const 
  * @return MIFI_OK status
  */
 extern int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, const double* t, double* w);
+
+/**
+ * convert the vertical wind-speed in m/s to vertical pressure change omega using omega = - rho * g * w
+ *
+ * @param n size of the array omega, p, t, w
+ * @param w vertical wind speed in m/s
+ * @param p pressure in Pa
+ * @param t temperature in K
+ * @param omega output-array of vertical flow in Pa/s
+ * @return MIFI_OK status
+ */
+extern int mifi_vertical_wind_to_omega(size_t n, const double* w, const double* p, const double* t, double* omega);
+
 
 
 #ifdef __cplusplus

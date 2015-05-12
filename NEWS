@@ -1,3 +1,7 @@
+  * 2015-05-11 fimex-0.58.1
+    * fixing problems with metgm-files
+	* fix bug when changing both scaling and varName in NcML
+	* avoid fetching multiple levels in fiXYcontents
   * 2015-04-23 fimex-0.58
     * adding fiXYcontents script, listing content as horizontal 2d-fields
     * new vertical interpolation methods (different extrapolations)
