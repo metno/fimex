@@ -73,7 +73,7 @@ void GribApiCDMWriter_Impl1::setProjection(const std::string& varName) throw(CDM
             // straight_vertical_longitude_from_pole (polar_stereographic), longitude_of_projection_origin (stereographic)
             double latitudeWhereDxAndDyAreSpecifiedInDegrees = 60.;
             double orientationOfTheGridInDegrees = 0.;
-            if (projection == "polar_stereograhpic") {
+            if (projection == "polar_stereographic") {
                 LOG4FIMEX(logger, Logger::INFO, "polar_stereographic projection for" << varName);
                 // get lat_ts fixed
                 latitudeWhereDxAndDyAreSpecifiedInDegrees = 60.;
