@@ -236,6 +236,19 @@ T string2type(std::string s) {
 }
 
 /**
+ * Typesafe varargs implementation, for pre-C11 variadic functions
+ */
+template<typename T>
+struct Varargs {
+    /** container of arguments */
+    std::vector<T> args;
+    /** push_back operator */
+    Varargs& operator()(T arg) {args.push_back(arg); return *this;}
+    Varargs(T arg) {args.push_back(arg);}
+};
+
+
+/**
  * normalize Longitude to be within [-180:180]
  * @param in longitude in degree
  * @return longitude in degree within [-180:180]

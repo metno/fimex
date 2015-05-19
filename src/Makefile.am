@@ -41,6 +41,15 @@ libfimex_la_SOURCES = interpolation.c \
 					 CDMVerticalInterpolator.cc \
                      CDM_XMLConfigHelper.cc \
                      CDM_XMLConfigHelper.h \
+                     convert/CDMReaderVar.h \
+                     convert/Converter.cc \
+                     convert/Converter.h \
+                     convert/ConverterSrc.h \
+                     convert/ConverterSrc.cc \
+                     convert/ConverterImpl.h \
+                     convert/ConverterImpl.cc \
+                     convert/RelativeToSpecificHumidityConverter.h \
+                     convert/RelativeToSpecificHumidityConverter.cc \
                      CoordinateSystemSliceBuilder.cc \
                      coordSys/CoordinateSystem.cc \
                      coordSys/CoordinateAxis.cc \

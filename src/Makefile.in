@@ -200,10 +200,14 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMReaderWriter.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
-	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
-	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
-	coordSys/CoordSysBuilder.h coordSys/CoordSysUtils.cc \
-	coordSys/CF1_xCoordSysBuilder.h \
+	CDM_XMLConfigHelper.h convert/Converter.cc convert/Converter.h \
+	convert/ConverterSrc.h convert/ConverterSrc.cc \
+	convert/ConverterImpl.h convert/ConverterImpl.cc \
+	convert/RelativeToSpecificHumidityConverter.h \
+	convert/RelativeToSpecificHumidityConverter.cc \
+	CoordinateSystemSliceBuilder.cc coordSys/CoordinateSystem.cc \
+	coordSys/CoordinateAxis.cc coordSys/CoordSysBuilder.h \
+	coordSys/CoordSysUtils.cc coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
 	coordSys/CoordSysUtils.h coordSys/Projection.cc \
@@ -345,6 +349,9 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	CDMQualityExtractor.lo CDMReader.lo CDMReaderUtils.lo \
 	CDMReaderWriter.lo CDMTimeInterpolator.lo CDMVariable.lo \
 	CDMVerticalInterpolator.lo CDM_XMLConfigHelper.lo \
+	convert/Converter.lo convert/ConverterSrc.lo \
+	convert/ConverterImpl.lo \
+	convert/RelativeToSpecificHumidityConverter.lo \
 	CoordinateSystemSliceBuilder.lo coordSys/CoordinateSystem.lo \
 	coordSys/CoordinateAxis.lo coordSys/CoordSysUtils.lo \
 	coordSys/CF1_xCoordSysBuilder.lo \
@@ -665,10 +672,14 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMReaderWriter.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
-	CDM_XMLConfigHelper.h CoordinateSystemSliceBuilder.cc \
-	coordSys/CoordinateSystem.cc coordSys/CoordinateAxis.cc \
-	coordSys/CoordSysBuilder.h coordSys/CoordSysUtils.cc \
-	coordSys/CF1_xCoordSysBuilder.h \
+	CDM_XMLConfigHelper.h convert/Converter.cc convert/Converter.h \
+	convert/ConverterSrc.h convert/ConverterSrc.cc \
+	convert/ConverterImpl.h convert/ConverterImpl.cc \
+	convert/RelativeToSpecificHumidityConverter.h \
+	convert/RelativeToSpecificHumidityConverter.cc \
+	CoordinateSystemSliceBuilder.cc coordSys/CoordinateSystem.cc \
+	coordSys/CoordinateAxis.cc coordSys/CoordSysBuilder.h \
+	coordSys/CoordSysUtils.cc coordSys/CF1_xCoordSysBuilder.h \
 	coordSys/CF1_xCoordSysBuilder.cc coordSys/WRFCoordSysBuilder.h \
 	coordSys/WRFCoordSysBuilder.cc coordSys/CoordSysImpl.h \
 	coordSys/CoordSysUtils.h coordSys/Projection.cc \
@@ -773,6 +784,20 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+convert/$(am__dirstamp):
+	@$(MKDIR_P) convert
+	@: > convert/$(am__dirstamp)
+convert/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) convert/$(DEPDIR)
+	@: > convert/$(DEPDIR)/$(am__dirstamp)
+convert/Converter.lo: convert/$(am__dirstamp) \
+	convert/$(DEPDIR)/$(am__dirstamp)
+convert/ConverterSrc.lo: convert/$(am__dirstamp) \
+	convert/$(DEPDIR)/$(am__dirstamp)
+convert/ConverterImpl.lo: convert/$(am__dirstamp) \
+	convert/$(DEPDIR)/$(am__dirstamp)
+convert/RelativeToSpecificHumidityConverter.lo:  \
+	convert/$(am__dirstamp) convert/$(DEPDIR)/$(am__dirstamp)
 coordSys/$(am__dirstamp):
 	@$(MKDIR_P) coordSys
 	@: > coordSys/$(am__dirstamp)
@@ -958,6 +983,14 @@ libfimex.la: $(libfimex_la_OBJECTS) $(libfimex_la_DEPENDENCIES) $(EXTRA_libfimex
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f convert/Converter.$(OBJEXT)
+	-rm -f convert/Converter.lo
+	-rm -f convert/ConverterImpl.$(OBJEXT)
+	-rm -f convert/ConverterImpl.lo
+	-rm -f convert/ConverterSrc.$(OBJEXT)
+	-rm -f convert/ConverterSrc.lo
+	-rm -f convert/RelativeToSpecificHumidityConverter.$(OBJEXT)
+	-rm -f convert/RelativeToSpecificHumidityConverter.lo
 	-rm -f coordSys/AlbersConicalEqualAreaProjection.$(OBJEXT)
 	-rm -f coordSys/AlbersConicalEqualAreaProjection.lo
 	-rm -f coordSys/AzimuthalEquidistantProjection.$(OBJEXT)
@@ -1164,6 +1197,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/interpolation.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mifi_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vertical_coordinate_transformations.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@convert/$(DEPDIR)/Converter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@convert/$(DEPDIR)/ConverterImpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@convert/$(DEPDIR)/ConverterSrc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@convert/$(DEPDIR)/RelativeToSpecificHumidityConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/AlbersConicalEqualAreaProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/AzimuthalEquidistantProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/CF1_xCoordSysBuilder.Plo@am__quote@
@@ -1306,6 +1343,7 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf convert/.libs convert/_libs
 	-rm -rf coordSys/.libs coordSys/_libs
 	-rm -rf coordSys/verticalTransform/.libs coordSys/verticalTransform/_libs
 	-rm -rf metgm/.libs metgm/_libs
@@ -1541,6 +1579,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f convert/$(DEPDIR)/$(am__dirstamp)
+	-rm -f convert/$(am__dirstamp)
 	-rm -f coordSys/$(DEPDIR)/$(am__dirstamp)
 	-rm -f coordSys/$(am__dirstamp)
 	-rm -f coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
@@ -1565,7 +1605,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-recursive
-	-rm -rf ./$(DEPDIR) coordSys/$(DEPDIR) coordSys/verticalTransform/$(DEPDIR) metgm/$(DEPDIR) wdb/$(DEPDIR) wdb/config/$(DEPDIR) wdb/database_access/$(DEPDIR) wdb/gridInformation/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) convert/$(DEPDIR) coordSys/$(DEPDIR) coordSys/verticalTransform/$(DEPDIR) metgm/$(DEPDIR) wdb/$(DEPDIR) wdb/config/$(DEPDIR) wdb/database_access/$(DEPDIR) wdb/gridInformation/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1611,7 +1651,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-	-rm -rf ./$(DEPDIR) coordSys/$(DEPDIR) coordSys/verticalTransform/$(DEPDIR) metgm/$(DEPDIR) wdb/$(DEPDIR) wdb/config/$(DEPDIR) wdb/database_access/$(DEPDIR) wdb/gridInformation/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) convert/$(DEPDIR) coordSys/$(DEPDIR) coordSys/verticalTransform/$(DEPDIR) metgm/$(DEPDIR) wdb/$(DEPDIR) wdb/config/$(DEPDIR) wdb/database_access/$(DEPDIR) wdb/gridInformation/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -117,7 +117,7 @@ float mifi_relative_to_specific_humidity(float rh, float t, float p)
     const float c3 = 273.16;
     const float c4 = 35.86;
     float es = c1 * exp((c2*(t-c3))/(t-c4));
-    float sh = rh * 0.01 *es* 0.622 / p;
+    float sh = rh * 0.01 *es* MOL_WEIGHT_RATIO / p;
     if (sh < 0.) sh = 0.;
     return sh;
 
@@ -130,7 +130,7 @@ float mifi_specific_to_relative_humidity(float sh, float t, float p)
     const float c3 = 273.16;
     const float c4 = 35.86;
     float es = c1 * exp((c2*(t-c3))/(t-c4));
-    float rh = 100. * sh * p / (es * 0.622);
+    float rh = 100. * sh * p / (es * MOL_WEIGHT_RATIO);
     if (rh < 0.) rh = 0;
     else if (rh > 100.) rh = 100;
     return rh;
