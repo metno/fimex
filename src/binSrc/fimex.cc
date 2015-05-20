@@ -883,7 +883,6 @@ int run(int argc, char* args[])
 {
     // Declare the supported options.
     po::options_description generic("Generic options");
-    std::string configFile("fimex.cfg");
     int num_threads = 1;
     generic.add_options()
         ("help,h", "help message")
@@ -891,7 +890,7 @@ int run(int argc, char* args[])
         ("debug", "debug program")
         ("log4cpp", po::value<string>(), "log4cpp property file (- = log4cpp without prop-file)")
         ("print-options", "print all options")
-        ("config,c", po::value<string>(&configFile)->default_value(configFile), "configuration file")
+        ("config,c", po::value<string>(), "configuration file")
         ("num_threads,n", po::value<int>(&num_threads)->default_value(num_threads), "number of threads")
         ;
 
@@ -1076,8 +1075,14 @@ int run(int argc, char* args[])
 
     po::variables_map vm;
     po::store(po::command_line_parser(argc, args).options(cmdline_options).positional(p).run(), vm);
-    ifstream ifs(configFile.c_str());
-    po::store(po::parse_config_file(ifs, config_file_options), vm);
+    if (vm.count("config")) {
+        ifstream ifs(vm["config"].as<string>().c_str());
+        if (!ifs) {
+            cerr << "missing config file '" << vm["config"].as<string>() << "'" << endl;
+            return -1;
+        }
+        po::store(po::parse_config_file(ifs, config_file_options), vm);
+    }
     po::notify(vm);
     if (argc == 1 || vm.count("help")) {
         writeUsage(cout, generic, config);
