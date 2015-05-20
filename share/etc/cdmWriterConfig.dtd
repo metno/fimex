@@ -22,6 +22,7 @@
 <!ATTLIST default
     filetype CDATA #IMPLIED
     compressionLevel CDATA #IMPLIED
+    autoRemoveUnusedDimensions (true|false) "true"
   >
 
 <!ELEMENT ncmlConfig EMPTY>
@@ -38,7 +39,6 @@
     name CDATA #REQUIRED
   >
 
-<!--- Everything except compressionLevel is DEPRECATED, use Ncml instead -->
 <!ELEMENT variable (attribute|remove)*>
 <!ATTLIST variable
     newname CDATA #IMPLIED
@@ -56,7 +56,7 @@
   >
 
 <!--- DEPRECATED, use Ncml instead -->
-<!--- Remove a type='attribute' or 'variable' -->
+<!--- Remove a type='attribute' or 'variable' or 'dimension' -->
 <!ELEMENT remove EMPTY>
 <!ATTLIST remove
     name CDATA #REQUIRED

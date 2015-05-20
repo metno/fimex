@@ -181,6 +181,7 @@ void NetCDF_CDMWriter::initNcmlReader(std::auto_ptr<XMLDoc>& doc)
 
 void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
 {
+    bool autoRemoveDims = true;
     if (doc.get() != 0) {
         {
             // remove global attributes
@@ -209,12 +210,42 @@ void NetCDF_CDMWriter::initRemove(std::auto_ptr<XMLDoc>& doc)
             xmlNodeSetPtr nodes = xpathObj->nodesetval;
             int size = (nodes) ? nodes->nodeNr : 0;
             for (int i = 0; i < size; i++) {
-                LOG4FIMEX(logger, Logger::WARN, "Removing variables in cdmWriterConfig.xml is deprecated, use ncmlCDMConfig instead!");
                 std::string name = getXmlProp(nodes->nodeTab[i], "name");
+                LOG4FIMEX(logger, Logger::DEBUG, "Removing variables '" << name << "'");
                 cdm.removeVariable(name);
             }
         }
-
+        {
+            // remove dimensions
+            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/remove[@type='dimension']");
+            xmlNodeSetPtr nodes = xpathObj->nodesetval;
+            int size = (nodes) ? nodes->nodeNr : 0;
+            for (int i = 0; i < size; i++) {
+                std::string name = getXmlProp(nodes->nodeTab[i], "name");
+                if (cdm.testDimensionInUse(name)) {
+                    LOG4FIMEX(logger, Logger::WARN, "Cannot remove dimension in use: '" << name << "'");
+                } else {
+                    LOG4FIMEX(logger, Logger::DEBUG, "Removing dimension '" << name << "'");
+                    cdm.removeDimension(name);
+                }
+            }
+        }
+        {
+            // check for autoRemoveUnusedDimensions
+            XPathObjPtr xpathObj = doc->getXPathObject("/cdm_ncwriter_config/default[@autoRemoveUnusedDimension='false']");
+            xmlNodeSetPtr nodes = xpathObj->nodesetval;
+            int size = (nodes) ? nodes->nodeNr : 0;
+            if (size > 0) autoRemoveDims = false;
+         }
+    }
+    if (autoRemoveDims) {
+        const CDM::DimVec dims = cdm.getDimensions();
+        for (CDM::DimVec::const_iterator dimIt = dims.begin(); dimIt != dims.end(); ++dimIt) {
+            if (! cdm.testDimensionInUse(dimIt->getName())) {
+                LOG4FIMEX(logger, Logger::DEBUG, "Auto-removing dimension '" << dimIt->getName() << "'");
+                cdm.removeDimension(dimIt->getName());
+            }
+        }
     }
 }
 

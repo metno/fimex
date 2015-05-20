@@ -200,7 +200,8 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMReaderWriter.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
-	CDM_XMLConfigHelper.h convert/Converter.cc convert/Converter.h \
+	CDM_XMLConfigHelper.h convert/CDMReaderVar.h \
+	convert/Converter.cc convert/Converter.h \
 	convert/ConverterSrc.h convert/ConverterSrc.cc \
 	convert/ConverterImpl.h convert/ConverterImpl.cc \
 	convert/RelativeToSpecificHumidityConverter.h \
@@ -672,7 +673,8 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	CDMQualityExtractor.cc CDMReader.cc CDMReaderUtils.cc \
 	CDMReaderWriter.cc CDMTimeInterpolator.cc CDMVariable.cc \
 	CDMVerticalInterpolator.cc CDM_XMLConfigHelper.cc \
-	CDM_XMLConfigHelper.h convert/Converter.cc convert/Converter.h \
+	CDM_XMLConfigHelper.h convert/CDMReaderVar.h \
+	convert/Converter.cc convert/Converter.h \
 	convert/ConverterSrc.h convert/ConverterSrc.cc \
 	convert/ConverterImpl.h convert/ConverterImpl.cc \
 	convert/RelativeToSpecificHumidityConverter.h \

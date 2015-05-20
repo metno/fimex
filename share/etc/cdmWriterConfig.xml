@@ -6,7 +6,7 @@
 <!-- compression levels are 0 (no compression) to 9 -->
 <!-- compression levels from 10 to 19 will enable shuffling -->
 <!-- <default filetype="netcdf4" compressionLevel="3" /> -->
-<!-- <default filetype="netcdf3" compressionLevel="0" /> -->
+<!-- <default filetype="netcdf3" compressionLevel="0" autoRemoveUnusedDimension="false" /> -->
 
 <dimension name="x_c" chunkSize="4" />
 
