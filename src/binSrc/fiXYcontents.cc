@@ -83,7 +83,7 @@ double quantile(vector<double> &v, float quant)
 {
     size_t n = v.size() * quant;
     nth_element(v.begin(), v.begin()+n, v.end());
-    return v[n];
+    return v.at(n);
 }
 
 static map<string, double> calcStats(DataPtr data) {
@@ -292,17 +292,19 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
 
                 // by default, all other dimensions are fetched at maximum size
                 // here, I reduce them to the first slice
-                vector<string> dims = csbs.at(0).getUnsetDimensionNames();
-                for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
-                    dimData[*dim] = reader->getScaledData(*dim);
-                    vector<CoordinateSystemSliceBuilder> csbs_temp;
-                    for (vector<CoordinateSystemSliceBuilder>::iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {
-                        for (size_t i = 0; i < dimData[*dim]->size(); i++) {
-                            sbIt->setStartAndSize(*dim, i, 1);
-                            csbs_temp.push_back(*sbIt);
+                if (csbs.size() > 0) {
+                    vector<string> dims = csbs.at(0).getUnsetDimensionNames();
+                    for (vector<string>::iterator dim = dims.begin(); dim != dims.end(); ++dim) {
+                        dimData[*dim] = reader->getScaledData(*dim);
+                        vector<CoordinateSystemSliceBuilder> csbs_temp;
+                        for (vector<CoordinateSystemSliceBuilder>::iterator sbIt = csbs.begin(); sbIt != csbs.end(); ++sbIt) {
+                            for (size_t i = 0; i < dimData[*dim]->size(); i++) {
+                                sbIt->setStartAndSize(*dim, i, 1);
+                                csbs_temp.push_back(*sbIt);
+                            }
                         }
+                        csbs = csbs_temp;
                     }
-                    csbs = csbs_temp;
                 }
 
                 /* do something with the data */
