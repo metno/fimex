@@ -47,6 +47,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include "fimex/MutexLock.h"
+#include <boost/math/special_functions/round.hpp>
 
 namespace MetNoFimex
 {
@@ -1036,31 +1037,6 @@ void GribCDMReader::initAddVariables()
             vector<CDMAttribute> attributes;
             if (node != 0) {
                 fillAttributeListFromXMLNode(attributes, node->children, p_->templateReplacementAttributes);
-                // check precision
-                {
-
-                    xmlNodePtr varNodeChild = node->children;
-                    while (varNodeChild != 0) {
-                        if ((varNodeChild->type == XML_ELEMENT_NODE) &&
-                            (string("precision") == reinterpret_cast<const char *>(varNodeChild->name))) {
-                            double scale = 1.;
-                            double offset = 0.;
-                            string str = getXmlProp(varNodeChild, "scale_factor");
-                            // TODO: fix scale_factor and add_offset attributes when already existing
-                            if (str != "") {
-                                scale = string2type<double>(str);
-                                attributes.push_back(CDMAttribute("scale_factor", scale));
-                            }
-                            str = getXmlProp(varNodeChild, "add_offset");
-                            if (str != "") {
-                                offset = string2type<double>(str);
-                                attributes.push_back(CDMAttribute("add_offset", offset));
-                            }
-                            p_->varPrecision[varName] = make_pair(scale, offset);
-                        }
-                        varNodeChild = varNodeChild->next;
-                    }
-                }
             }
 
             // add the projection
@@ -1088,6 +1064,36 @@ void GribCDMReader::initAddVariables()
                         }
                         varNodeChild = varNodeChild->next;
                     }
+                }
+            }
+            // check precision
+            if (node != 0) {
+                xmlNodePtr varNodeChild = node->children;
+                while (varNodeChild != 0) {
+                    if ((varNodeChild->type == XML_ELEMENT_NODE) &&
+                        (string("precision") == reinterpret_cast<const char *>(varNodeChild->name))) {
+                        double scale = 1.;
+                        double offset = 0.;
+                        string str = getXmlProp(varNodeChild, "scale_factor");
+                        // TODO: fix scale_factor and add_offset attributes when already existing
+                        if (str != "") {
+                            scale = string2type<double>(str);
+                        }
+                        str = getXmlProp(varNodeChild, "add_offset");
+                        if (str != "") {
+                            offset = string2type<double>(str);
+                        }
+                        p_->varPrecision[varName] = make_pair(scale, offset);
+                        if (type != CDM_FLOAT && type != CDM_DOUBLE) {
+                            if (scale != 1.) {
+                                attributes.push_back(CDMAttribute("scale_factor", scale));
+                            }
+                            if (offset != 0.) {
+                                attributes.push_back(CDMAttribute("add_offset", offset));
+                            }
+                        }
+                    }
+                    varNodeChild = varNodeChild->next;
                 }
             }
 
@@ -1132,6 +1138,17 @@ size_t GribCDMReader::getVariableMaxEnsembles(string varName) const {
         ensembles = 1;
     }
     return ensembles;
+}
+
+template<typename T>
+DataPtr roundData(boost::shared_array<T> array, size_t n, double scale)
+{
+    T myScale = scale;
+    T scaleInv = 1/scale;
+    for (size_t i = 0; i < n; i++) {
+        array[i] = myScale * boost::math::round<T>(scaleInv * array[i]);
+    }
+    return createData(n, array);
 }
 
 DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
@@ -1231,10 +1248,19 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         dataCurrentPos += gridData.size(); // always forward a complete slice
     }
     if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
-        double scale = p_->varPrecision[varName].first;
-        double offset = p_->varPrecision[varName].second;
-        DataTypeChanger dtc(CDM_DOUBLE, missingValue, 1.0, 0.0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset, 1., 0.);
-        return dtc.convertData(data);
+        if (variable.getDataType() == CDM_FLOAT || variable.getDataType() == CDM_DOUBLE) {
+            double scale = p_->varPrecision[varName].first;
+            if (variable.getDataType() == CDM_FLOAT) {
+                data = roundData(data->asFloat(), data->size(), scale);
+            } else {
+                data = roundData(data->asDouble(), data->size(), scale);
+            }
+        } else {
+            double scale = p_->varPrecision[varName].first;
+            double offset = p_->varPrecision[varName].second;
+            DataTypeChanger dtc(CDM_DOUBLE, missingValue, 1.0, 0.0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset, 1., 0.);
+            data = dtc.convertData(data);
+        }
     }
     return data;
 }
