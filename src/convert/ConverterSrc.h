@@ -35,6 +35,12 @@ class CDMReader;
 class ConverterSrc;
 typedef boost::shared_ptr<ConverterSrc> ConverterSrcPtr;
 
+
+/**
+ * Class to bundle a CDMReader and restrictions like (only these few variables)
+ *
+ * TODO: restrictions not implemented yet
+ */
 class ConverterSrc
 {
 public:
