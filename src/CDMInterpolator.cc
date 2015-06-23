@@ -472,14 +472,20 @@ void CDMInterpolator::changeProjectionToCrossSections(int method, const std::vec
                     double yLatD = yLat.at(1) - yLat.at(0);
                     // number of gridpoints to select between two coordinates
                     size_t num = static_cast<size_t>(floor(max(fabs(xLonD/dx), fabs(yLatD/dy))));
-                    // first and last point will always be part
                     vector<double> xLonPart, yLatPart;
-                    xLonPart.push_back(xLon.at(0));
-                    yLatPart.push_back(yLat.at(0));
+                    if (i == 1) {
+                        // first point is part only for the very first
+                        // sub-crossection (otherwise it would be
+                        // repeated, as it is also the last point of
+                        // the next sub-crossection)
+                        xLonPart.push_back(xLon.at(0));
+                        yLatPart.push_back(yLat.at(0));
+                    }
                     for (size_t j = 1; j < num; ++j) {
                         xLonPart.push_back(xLon.at(0) + j*xLonD/num);
                         yLatPart.push_back(yLat.at(0) + j*yLatD/num);
                     }
+                    // first and last point will always be part
                     xLonPart.push_back(xLon.at(1));
                     yLatPart.push_back(yLat.at(1));
                     proj->convertToLonLat(xLonPart, yLatPart);
