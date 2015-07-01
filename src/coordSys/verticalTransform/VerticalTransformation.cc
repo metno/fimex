@@ -226,7 +226,7 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressure
     dims.push_back(zAxis->getShape()[0]);
 
     map<string, string> attrs;
-    attrs["standard_name"] = "pressure";
+    attrs["standard_name"] = "(air_)?pressure";
 
     const vector<string> pVars = reader->getCDM().findVariables(attrs, dims);
     if (pVars.empty()) {
