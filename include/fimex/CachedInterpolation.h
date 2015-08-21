@@ -31,9 +31,30 @@
 namespace MetNoFimex
 {
 
+//forward decl.
+class CDMReader;
+
 /**
  * @headerfile fimex/CachedInterpolation.h
  */
+/**
+ * Struct to store information used to create a slicebuilder limiting the amount of input data.
+ */
+struct ReducedInterpolationDomain {
+    // name of x-dimension
+    std::string xDim;
+    // name of y-dimension
+    std::string yDim;
+    // offset on x-axis
+    size_t xMin;
+    // original complete size of x-axis
+    size_t xOrg;
+    // offset on y-axis
+    size_t yMin;
+    // original complete size of y-axis
+    size_t yOrg;
+};
+
 /**
  * Interface for new cached spatial interpolation as used in #MetNoFimex::CDMInterpolator
  */
@@ -49,6 +70,21 @@ public:
     virtual size_t getOutX() const = 0;
     /** @return y-size of output array */
     virtual size_t getOutY() const = 0;
+    /**
+     * Read the input data from the reader, which is later used for the interpolateValues() function. This function will eventually reduce the
+     * domain of the input data if createReducedDomain was called earlier.
+     * @param reader
+     * @param varName
+     * @param unLimDim
+     * @return Data matching input-data for this CachedInterpolationInterface
+     */
+    virtual boost::shared_ptr<Data> getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDim) const;
+private:
+    /**
+     * allow fetching of a reduced interpolation domain, i.e. to work with a much smaller amount of input data
+     * @return a 0-pointer unless a internal function to reduce the domain has been run, e.g. CachedInterpolation::createReducedDomain()
+     */
+    virtual boost::shared_ptr<ReducedInterpolationDomain> reducedDomain() const {return boost::shared_ptr<ReducedInterpolationDomain>();}
 };
 
 /**
@@ -64,6 +100,7 @@ private:
     size_t inY;
     size_t outX;
     size_t outY;
+    boost::shared_ptr<ReducedInterpolationDomain> reducedDomain_;
     int (*func)(const float* infield, float* outvalues, const double x, const double y, const int ix, const int iy, const int iz);
 public:
     /**
@@ -101,6 +138,13 @@ public:
      * @return y-size of the output data
      */
     virtual size_t getOutY() const {return outY;}
+    virtual boost::shared_ptr<ReducedInterpolationDomain> reducedDomain() const {return reducedDomain_;}
+    /**
+     * Create a reduced domain for later generation of a slicebuild to read a smaller domain.
+     * It should be run immediately after creating the CachedInterpolation.
+     */
+    void createReducedDomain(std::string xDimName, std::string yDimName);
+
 };
 
 

@@ -163,14 +163,14 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         return p_->dataReader->getDataSlice(varName, unLimDimPos);
     } else {
         string horizontalId = p_->projectionVariables.find(varName)->second;
-        DataPtr data = p_->dataReader->getDataSlice(varName, unLimDimPos);
+        boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
+        DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, unLimDimPos);
         if (data->size() == 0) return data;
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
         if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
             throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
         }
-        boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
         processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
         size_t newSize = 0;
         LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(" << unLimDimPos << ")");
@@ -184,7 +184,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
                 // fetch and transpose vector-data
                 // transposing needed once for each direction (or caching, but that needs to much memory)
                 const std::string& counterpart = variable.getSpatialVectorCounterpart();
-                boost::shared_array<float> counterPartArray = data2InterpolationArray(p_->dataReader->getDataSlice(counterpart, unLimDimPos), cdm_->getFillValue(counterpart));
+                boost::shared_array<float> counterPartArray = data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, unLimDimPos), cdm_->getFillValue(counterpart));
                 processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
                 LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(" << unLimDimPos << ")");
                 boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
@@ -1607,6 +1607,8 @@ static void changeCDMToLatLonTemplate(CDM& cdm,
 
 struct CSGridDefinition {
     std::string key;
+    std::string xAxisName;
+    std::string yAxisName;
     DataPtr xAxisData;
     DataPtr yAxisData;
 };
@@ -1627,19 +1629,19 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
     map<string, CSGridDefinition> orgGrids;
 
     for (map<string, CoordSysPtr>::const_iterator csi = csMap.begin(); csi != csMap.end(); ++csi) {
-        // copy all the data you might need before CDM model changes
-        // and you will definitely save on debugging time
+        // copy all the data one might need before CDM model changes
         CSGridDefinition def;
         def.key = csi->first;
+        def.xAxisName = csi->second->getGeoXAxis()->getName();
+        def.yAxisName = csi->second->getGeoYAxis()->getName();
         if (csi->second->hasProjection()) {
             std::string orgUnit = csi->second->getProjection()->isDegree() ? "degree" : "m";
-            def.xAxisData = p_->dataReader->getScaledDataInUnit(csi->second->getGeoXAxis()->getName(), orgUnit);
-            def.yAxisData = p_->dataReader->getScaledDataInUnit(csi->second->getGeoYAxis()->getName(), orgUnit);
+            def.xAxisData = p_->dataReader->getScaledDataInUnit(def.xAxisName, orgUnit);
+            def.yAxisData = p_->dataReader->getScaledDataInUnit(def.yAxisName, orgUnit);
         } else {
-            def.xAxisData = p_->dataReader->getScaledData(csi->second->getGeoXAxis()->getName());
-            def.yAxisData = p_->dataReader->getScaledData(csi->second->getGeoYAxis()->getName());
+            def.xAxisData = p_->dataReader->getScaledData(def.xAxisName);
+            def.yAxisData = p_->dataReader->getScaledData(def.yAxisName);
         }
-
         orgGrids.insert(std::make_pair<string, CSGridDefinition>(def.key, def));
     }
 
@@ -1700,15 +1702,16 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), def.xAxisData->size(), miupXAxis);
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") " << def.xAxisData->size() << "x" << def.yAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csi->first] =
-                boost::shared_ptr<CachedInterpolationInterface>(
-                        new CachedInterpolation(method,
-                                                lonX,
-                                                latY,
-                                                def.xAxisData->size(),
-                                                def.yAxisData->size(),
-                                                out_x_axis.size(),
-                                                out_y_axis.size()));
+        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(method,
+                                        lonX,
+                                        latY,
+                                        def.xAxisData->size(),
+                                        def.yAxisData->size(),
+                                        out_x_axis.size(),
+                                        out_y_axis.size()));
+        ci->createReducedDomain(def.xAxisName, def.yAxisName);
+        LOG4FIMEX(logger, Logger::DEBUG, "reducing cached projection domain to " << ci->getInX() << "x" << ci->getInY());
+        p_->cachedInterpolation[csi->first] = ci;
         if (csi->second->hasProjection() && hasXYSpatialVectors()) {
             // as template data is in degrees we have to do deg2rad
             boost::shared_array<double> tmplLatArray = tmplLatVals->asDouble();

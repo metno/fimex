@@ -23,6 +23,9 @@
 
 #include "fimex/CachedInterpolation.h"
 #include "fimex/Data.h"
+#include "fimex/CDMReader.h"
+#include "fimex/CDM.h"
+#include "fimex/SliceBuilder.h"
 #include <boost/scoped_array.hpp>
 #ifdef _OPENMP
 #include <omp.h>
@@ -32,24 +35,47 @@
 namespace MetNoFimex
 {
 
+boost::shared_ptr<Data> CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDimPos) const
+{
+    boost::shared_ptr<Data> data;
+    if (reducedDomain().get() != 0) {
+        // fetch a reduced domain from the input-source
+        SliceBuilder sb(reader->getCDM(), varName);
+        const CDMVariable& var = reader->getCDM().getVariable(varName);
+        sb.setStartAndSize(reducedDomain()->xDim, reducedDomain()->xMin, getInX());
+        sb.setStartAndSize(reducedDomain()->yDim, reducedDomain()->yMin, getInY());
+        if (reader->getCDM().hasUnlimitedDim(var)) {
+            sb.setStartAndSize(reader->getCDM().getUnlimitedDim()->getName(), unLimDimPos, 1);
+        }
+        std::vector<std::string> unsetVars = sb.getUnsetDimensionNames();
+        for (size_t i = 0; i < unsetVars.size(); i++) {
+            sb.setAll(unsetVars.at(i));
+        }
+        data = reader->getDataSlice(varName, sb);
+    } else {
+        data = reader->getDataSlice(varName, unLimDimPos);
+    }
+    return data;
+}
+
 
 CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
 : pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY) {
-	switch (funcType) {
-	case MIFI_INTERPOL_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
-	case MIFI_INTERPOL_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;
-	case MIFI_INTERPOL_NEAREST_NEIGHBOR:
-	case MIFI_INTERPOL_COORD_NN:
-	case MIFI_INTERPOL_COORD_NN_KD: this->func = mifi_get_values_f; break;
-	default: throw CDMException("unknown interpolation function: " + type2string(funcType));
-	}
+    switch (funcType) {
+    case MIFI_INTERPOL_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
+    case MIFI_INTERPOL_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;
+    case MIFI_INTERPOL_NEAREST_NEIGHBOR:
+    case MIFI_INTERPOL_COORD_NN:
+    case MIFI_INTERPOL_COORD_NN_KD: this->func = mifi_get_values_f; break;
+    default: throw CDMException("unknown interpolation function: " + type2string(funcType));
+    }
 }
 
 boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const
 {
     const size_t outLayerSize = outX * outY;
-	const size_t inZ = size / (inX*inY);
-	newSize = outLayerSize*inZ;
+    const size_t inZ = size / (inX*inY);
+    newSize = outLayerSize*inZ;
     boost::shared_array<float> outfield(new float[newSize]);
 
 #ifdef _OPENMP
@@ -60,7 +86,7 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
 #ifdef _OPENMP
 #pragma omp for
 #endif
-	for (size_t xy = 0; xy < outLayerSize; ++xy) {
+    for (size_t xy = 0; xy < outLayerSize; ++xy) {
         float* outPos = &outfield[xy];
         if (func(inData.get(), zValues.get(), pointsOnXAxis[xy], pointsOnYAxis[xy], inX, inY, inZ) != MIFI_ERROR) {
             for (size_t z = 0; z < inZ; ++z) {
@@ -68,12 +94,69 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
                 outPos += outLayerSize;
             }
         } else (throw CDMException("error during interpolation"));
-	}
+    }
 #ifdef _OPENMP
     }
 #endif
 
-	return outfield;
+    return outfield;
 }
+
+
+
+void CachedInterpolation::createReducedDomain(std::string xDimName, std::string yDimName)
+{
+    // don't set twice
+    if (reducedDomain().get() != 0) return;
+    const size_t outLayerSize = outX * outY;
+    long long minX = inX-1;
+    long long minY = inY-1;
+    long long maxX = 0;
+    long long maxY = 0;
+    for (size_t xy = 0; xy < outLayerSize; ++xy) {
+        minX = std::min(minX, static_cast<long long>(std::floor(pointsOnXAxis[xy])));
+        maxX = std::max(minX, static_cast<long long>(std::ceil(pointsOnXAxis[xy])));
+    }
+    for (size_t xy = 0; xy < outLayerSize; ++xy) {
+        minY = std::min(minY, static_cast<long long>(std::floor(pointsOnYAxis[xy])));
+        maxY = std::max(minY, static_cast<long long>(std::ceil(pointsOnYAxis[xy])));
+    }
+    // allow additional cells for interpolation (2 for bicubic)
+    minX -= 2;
+    minY -= 2;
+    maxX += 2;
+    maxY += 2;
+    // can't get bigger than original domain
+    minX = std::max(0LL, minX);
+    minY = std::max(0LL, minY);
+    maxX = std::min(static_cast<long long>(inX-1), maxX);
+    maxY = std::min(static_cast<long long>(inY-1), maxY);
+
+    // make sure you still have a useful size
+    if ((maxX - minX) < 1) return;
+    if ((maxY - minY) < 1) return;
+
+    // update the axes
+    for (size_t xy = 0; xy < outLayerSize; ++xy) {
+        pointsOnXAxis[xy] -= minX;
+        pointsOnYAxis[xy] -= minY;
+    }
+
+    // create the reduced interpolation
+    boost::shared_ptr<ReducedInterpolationDomain> rid(new ReducedInterpolationDomain());
+    rid->xDim = xDimName;
+    rid->yDim = yDimName;
+    rid->xMin = minX;
+    rid->yMin = minY;
+    rid->xOrg = inX;
+    rid->yOrg = inY;
+    reducedDomain_ = rid;
+
+    // reduce the expected input size
+    inX = maxX-minX+1;
+    inY = maxY-minY+1;
+
+}
+
 
 }
