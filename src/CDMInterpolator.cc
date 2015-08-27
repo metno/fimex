@@ -163,14 +163,14 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         return p_->dataReader->getDataSlice(varName, unLimDimPos);
     } else {
         string horizontalId = p_->projectionVariables.find(varName)->second;
+        if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
+            throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
+        }
         boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
         DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, unLimDimPos);
         if (data->size() == 0) return data;
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
-        if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
-            throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
-        }
         processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
         size_t newSize = 0;
         LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(" << unLimDimPos << ")");
