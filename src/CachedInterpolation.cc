@@ -102,42 +102,40 @@ boost::shared_array<float> CachedInterpolation::interpolateValues(boost::shared_
     return outfield;
 }
 
-
+inline long long clamp(long long low, double dvalue, long long high)
+{
+    const long long value = static_cast<long long>(dvalue);
+    if (value < low)
+        return low;
+    if (value < high)
+        return value;
+    return high;
+}
 
 void CachedInterpolation::createReducedDomain(std::string xDimName, std::string yDimName)
 {
     // don't set twice
-    if (reducedDomain().get() != 0) return;
-    const size_t outLayerSize = outX * outY;
-    long long minX = inX-1;
-    long long minY = inY-1;
-    long long maxX = 0;
-    long long maxY = 0;
-    for (size_t xy = 0; xy < outLayerSize; ++xy) {
-        minX = std::min(minX, static_cast<long long>(std::floor(pointsOnXAxis[xy])));
-        maxX = std::max(minX, static_cast<long long>(std::ceil(pointsOnXAxis[xy])));
-    }
-    for (size_t xy = 0; xy < outLayerSize; ++xy) {
-        minY = std::min(minY, static_cast<long long>(std::floor(pointsOnYAxis[xy])));
-        maxY = std::max(minY, static_cast<long long>(std::ceil(pointsOnYAxis[xy])));
-    }
-    // allow additional cells for interpolation (2 for bicubic)
-    minX -= 2;
-    minY -= 2;
-    maxX += 2;
-    maxY += 2;
-    // can't get bigger than original domain
-    minX = std::max(0LL, minX);
-    minY = std::max(0LL, minY);
-    maxX = std::min(static_cast<long long>(inX-1), maxX);
-    maxY = std::min(static_cast<long long>(inY-1), maxY);
+    if (reducedDomain().get() != 0)
+        return;
 
-    // make sure you still have a useful size
-    if ((maxX - minX) < 1) return;
-    if ((maxY - minY) < 1) return;
+    const double pMinX = *std::min_element(pointsOnXAxis.begin(), pointsOnXAxis.end());
+    const double pMinY = *std::min_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
+    const double pMaxX = *std::max_element(pointsOnXAxis.begin(), pointsOnXAxis.end());
+    const double pMaxY = *std::max_element(pointsOnYAxis.begin(), pointsOnYAxis.end());
+
+    // allow additional cells for interpolation (2 for bicubic)
+    const long long EXTEND = 2;
+    const long long minX = clamp(0, std::floor(pMinX)-EXTEND, inX-1);
+    const long long minY = clamp(0, std::floor(pMinY)-EXTEND, inY-1);
+    const long long maxX = clamp(0, std::ceil(pMaxX) +EXTEND, inX-1);
+    const long long maxY = clamp(0, std::ceil(pMaxY) +EXTEND, inY-1);
+
+    // make sure we still have a useful size
+    if ((maxX - minX) < 1 || (maxY - minY) < 1)
+        return;
 
     // update the axes
-    for (size_t xy = 0; xy < outLayerSize; ++xy) {
+    for (size_t xy = 0; xy < outX * outY; ++xy) {
         pointsOnXAxis[xy] -= minX;
         pointsOnYAxis[xy] -= minY;
     }
@@ -155,7 +153,6 @@ void CachedInterpolation::createReducedDomain(std::string xDimName, std::string 
     // reduce the expected input size
     inX = maxX-minX+1;
     inY = maxY-minY+1;
-
 }
 
 
