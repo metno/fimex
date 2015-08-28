@@ -267,17 +267,20 @@ BOOST_AUTO_TEST_CASE(test_interpolator_template)
     BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == 29*31);
     BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
     BOOST_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
-    boost::shared_array<double> array = interpolator->getData("ga_skt")->asDouble();
-    BOOST_CHECK( (!mifi_isnan(array[0])) && (array[0] < 280) && (array[0] > 270));
+    DataPtr data = interpolator->getData("ga_skt");
+    boost::shared_array<double> array = data->asDouble();
+    for (size_t i = 0; i < 7; ++i) { // only first 7 datapoints are defined
+        BOOST_CHECK( (!mifi_isnan(array[i])) && (array[i] < 280) && (array[i] > 270));
+    }
     BOOST_CHECK(true);
 }
 
 BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
 {
-    double lat[] = {59.109, 59.052, 58.994, 58.934, 58.874, 58.812, 58.749, 58.685, 58.62};
-    double lon[] = {4.965, 5.13, 5.296, 5.465, 5.637, 5.81, 5.986, 6.164001, 6.344};
-    vector<double> latVals(&lat[0], &lat[0]+9);
-    vector<double> lonVals(&lon[0], &lon[0]+9);
+    double lat[] = {59.109, 59.052, 58.994, 58.934, 58.874, 58.812, 58.749, 58.685, 58.62, 64.};
+    double lon[] = {4.965, 5.13, 5.296, 5.465, 5.637, 5.81, 5.986, 6.164001, 6.344, 3.};
+    vector<double> latVals(&lat[0], &lat[0]+10);
+    vector<double> lonVals(&lon[0], &lon[0]+10);
 
     string topSrcDir(TOP_SRCDIR);
     string ncFileName(topSrcDir+"/test/erai.sfc.40N.0.75d.200301011200.nc");
@@ -287,13 +290,17 @@ BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
     }
     boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
     boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncReader));
-    interpolator->changeProjection(MIFI_INTERPOL_BICUBIC, lonVals, latVals);
+    interpolator->changeProjection(MIFI_INTERPOL_BILINEAR, lonVals, latVals);
     BOOST_CHECK(true);
     BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == lonVals.size());
     BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
     BOOST_CHECK(interpolator->getCDM().hasVariable("ga_skt"));
-    boost::shared_array<double> array = interpolator->getData("ga_skt")->asDouble();
+    DataPtr data = interpolator->getData("ga_skt");
+    boost::shared_array<double> array = data->asDouble();
     BOOST_CHECK( (!mifi_isnan(array[0])) && (array[0] < 280) && (array[0] > 270));
+    for (size_t i = 0; i < data->size(); ++i) {
+        BOOST_CHECK( (!mifi_isnan(array[i])) && (array[i] < 281.1) && (array[i] > 266));
+    }
     //interpolator->getCDM().toXMLStream(cout);
     BOOST_CHECK(true);
 }
