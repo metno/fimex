@@ -1,3 +1,17 @@
+  * 2015-08-28 fimex-0.59.1
+    * fixing bug 'sometimes no data when interpolating to many lat/lon points'
+  * 2015-08-25 fimex-0.59
+    * autoremoving unused dimensions when writing netcdf-files
+	* require '-c fimex.cfg' to read fimex.cfg files
+	* avoid double points on cross-sections corners
+	* precision-scaling on grib-data to float-format uses
+	  rounding at 1/scale_factor instead of adding scale_factor/add_offset
+	* allow pressure and air_pressure as standard_name
+	* use subsetting of input data when interpolating to lon-lat points
+	  - giving up 20x faster response on cached local data
+	  - reducing data-transmission to <0.1% on opendap sources
+	* enabling extractor to propagate subsetting
+	* adding FIMEX_CHUNK_CACHE_SLOTS env-variable for better cache-control
   * 2015-05-11 fimex-0.58.1
     * fixing problems with metgm-files
 	* fix bug when changing both scaling and varName in NcML
