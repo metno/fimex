@@ -119,7 +119,19 @@ private:
      * map of CoordinateSystem::horizontalId() and the CoordinateSystem
      */
     std::map<std::string, boost::shared_ptr<const CoordinateSystem> > findBestCoordinateSystemsAndProjectionVars(bool withProjection);
+    /**
+     * check if the input-data has spatial vectors
+     * @return
+     */
     bool hasXYSpatialVectors() const;
+    /**
+     * check if the spatial vectors in x/y direction have all the same horizontal domain (e.g. not staggered)
+     * @param horizontalId horizontal id to check
+     * @param exampleVar1 Output set if false. First part of a vector with horizontalId mismatch.
+     * @param exampleVar2 Output set if false. Second part of a vector with horizontalId mismatch.
+     * @return false if one example with horizontaId mismatch is found. true if all vectors share same horizontalId. Also true if no vectors exists.
+     */
+    bool allXYSpatialVectorsHaveSameHorizontalId(std::string horizontalId, std::string& exampleVar1, std::string& exampleVar2) const;
 public:
     CDMInterpolator(boost::shared_ptr<CDMReader> dataReader);
     virtual ~CDMInterpolator();

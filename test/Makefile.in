@@ -894,7 +894,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
              verticalOceanSG2.nc verticalOceanSG2_depth.nc \
              sample_ed1.gm sample_ed2.gm \
-             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc \
+             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc  c11.nc c11.ncml \
              merge_target_base.nc merge_target_top.nc \
              test_merge_inner.nc test_merge_outer.nc fillIn2.nc testdata_arome_vc.nc \
              verticalVelocity.nc \

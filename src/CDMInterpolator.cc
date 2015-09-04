@@ -1709,8 +1709,13 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
                                         def.yAxisData->size(),
                                         out_x_axis.size(),
                                         out_y_axis.size()));
-        ci->createReducedDomain(def.xAxisName, def.yAxisName);
-        LOG4FIMEX(logger, Logger::DEBUG, "reducing cached projection domain to " << ci->getInX() << "x" << ci->getInY());
+        std::string testVar1, testVar2;
+        if (allXYSpatialVectorsHaveSameHorizontalId(csi->first, testVar1, testVar2)) {
+            ci->createReducedDomain(def.xAxisName, def.yAxisName);
+            LOG4FIMEX(logger, Logger::DEBUG, "reducing cached projection domain to " << ci->getInX() << "x" << ci->getInY());
+        } else {
+            LOG4FIMEX(logger, Logger::WARN, "axes mismatch for vector, e.g. (" << testVar1 << ", " << testVar2 << ") might lead to wrong results");
+        }
         p_->cachedInterpolation[csi->first] = ci;
         if (csi->second->hasProjection() && hasXYSpatialVectors()) {
             // as template data is in degrees we have to do deg2rad
@@ -1734,6 +1739,31 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         }
     }
 
+}
+
+bool CDMInterpolator::allXYSpatialVectorsHaveSameHorizontalId(string horizontalId, string& exampleVar1, string& exampleVar2) const {
+    const CDM::VarVec& variables = getCDM().getVariables();
+    for (CDM::VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
+        if (p_->projectionVariables.find(varIt->getName()) != p_->projectionVariables.end()) {
+            string cur_hid = p_->projectionVariables.find(varIt->getName())->second;
+            if (horizontalId == cur_hid) {
+                if (varIt->isSpatialVector()) {
+                    const string& direction = varIt->getSpatialVectorDirection();
+                    // only check x/y, not lat/lon grids
+                    if (!((direction.find("x") == string::npos) && (direction.find("y") == string::npos))) {
+                        const string counterVar = varIt->getSpatialVectorCounterpart();
+                        string counter_hid = p_->projectionVariables.find(counterVar)->second;
+                        if (counter_hid != horizontalId) {
+                            exampleVar1 = varIt->getName();
+                            exampleVar2 = counterVar;
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
 }
 
 bool CDMInterpolator::hasXYSpatialVectors() const

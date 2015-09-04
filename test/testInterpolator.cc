@@ -305,6 +305,38 @@ BOOST_AUTO_TEST_CASE(test_interpolator_latlon)
     BOOST_CHECK(true);
 }
 
+BOOST_AUTO_TEST_CASE(test_interpolator_wrongaxes_latlon)
+{
+    double lat[] = {60.0};
+    double lon[] = {10.0};
+    vector<double> latVals(&lat[0], &lat[0]+1);
+    vector<double> lonVals(&lon[0], &lon[0]+1);
+
+    string topSrcDir(TOP_SRCDIR);
+    string ncmlFileName(topSrcDir+"/test/c11.ncml");
+    string ncFileName(topSrcDir+"/test/c11.nc");
+    if (!ifstream(ncFileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> ncReader(new NetCDF_CDMReader(ncFileName));
+    boost::shared_ptr<CDMReader> ncmlReader(new NcmlCDMReader(ncReader, XMLInputFile(ncmlFileName)));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(ncmlReader));
+    interpolator->changeProjection(MIFI_INTERPOL_NEAREST_NEIGHBOR, lonVals, latVals);
+    BOOST_CHECK(true);
+    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == lonVals.size());
+    BOOST_CHECK(interpolator->getDataSlice("longitude")->size() == interpolator->getDataSlice("latitude")->size());
+    BOOST_CHECK(interpolator->getCDM().hasVariable("x_wind_pl"));
+    DataPtr data = interpolator->getData("x_wind_pl");
+    boost::shared_array<double> array = data->asDouble();
+    for (size_t i = 0; i < data->size(); ++i) {
+        BOOST_CHECK( (!mifi_isnan(array[i])));
+    }
+    //interpolator->getCDM().toXMLStream(cout);
+    BOOST_CHECK(true);
+}
+
+
 BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
@@ -387,6 +419,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         }
     }
 }
+
 
 struct IP {
     IP(string proj, string xAxis, string yAxis, string unit, string lonAxis="-180,-179,...,180", string latAxis="-90,-89,...,90", double delta=1e-4)
