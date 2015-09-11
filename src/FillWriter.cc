@@ -52,9 +52,11 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
     for (CDM::DimVec::const_iterator iDimsIt = iDims.begin(); iDimsIt != iDims.end(); ++iDimsIt) {
         CDM::DimVec::const_iterator oDimsIt = find_if(oDims.begin(), oDims.end(), CDMNameEqual(iDimsIt->getName()));
         if (oDimsIt == oDims.end()) {
-            throw CDMException("Cannot find name '" + iDimsIt->getName() + "' in output, can't fill");
+            LOG4FIMEX(logger, Logger::INFO, "dimension '"+ iDimsIt->getName() + "' not found in output-file, ignoring");
+            continue;
         }
         if (iCdm.hasVariable(iDimsIt->getName()) && oCdm.hasVariable(oDimsIt->getName())) {
+            // rewrite coordinate-variables
             boost::shared_array<double> iDimData = in->getScaledData(iDimsIt->getName())->asDouble();
             boost::shared_array<double> oDimData = io->getScaledData(iDimsIt->getName())->asDouble();
             size_t changes = 0;
