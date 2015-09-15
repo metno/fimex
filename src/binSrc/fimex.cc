@@ -814,7 +814,11 @@ static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_
     if (type == "nc" || type == "cdf" || type == "netcdf" || type == "nc4") {
         LOG4FIMEX(logger, Logger::DEBUG, "filling NetCDF-file " << vm["output.fillFile"].as<string>() << " without config");
         boost::shared_ptr<CDMReaderWriter> readerWriter = boost::shared_ptr<CDMReaderWriter>(new NetCDF_CDMReader(vm["output.fillFile"].as<string>(), true));
-        FillWriter(sharedDataReader, readerWriter);
+        std::string config;
+        if (vm.count("output.config")) {
+            config = vm["output.config"].as<string>();
+        }
+        FillWriter(sharedDataReader, readerWriter, config);
         return;
     }
 #endif
