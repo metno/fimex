@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdmFillWriter  xmlns="http://www.met.no/schema/fimex/cdmFillWriterConfig"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+><!--                 xsi:schemaLocation="http://www.met.no/schema/fimex/cdmFillWriterConfig cdmFillWriterConfig.xsd"> -->
+  <!-- input does not have several ensemble dimensions, put all data to ensemble slice 2 -->
+  <translate outputDimension="y" outputSlices="2"/>
+</cdmFillWriter>

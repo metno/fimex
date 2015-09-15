@@ -15,8 +15,8 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              sample_ed1.gm sample_ed2.gm \
              erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc  c11.nc c11.ncml \
              merge_target_base.nc merge_target_top.nc \
-             test_merge_inner.nc test_merge_outer.nc fillIn2.nc testdata_arome_vc.nc \
-             verticalVelocity.nc \
+             test_merge_inner.nc test_merge_outer.nc fillIn2.nc fillIn3.nc fillWriterConfig.xml \
+             testdata_arome_vc.nc verticalVelocity.nc \
              data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
              data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
              data/joinExistingAggSuffix.ncml data/aggNothing.ncml data/aggWrong.ncml \

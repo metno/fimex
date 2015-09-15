@@ -55,8 +55,9 @@ namespace MetNoFimex
 class FillWriter
 {
 public:
-    FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io);
+    FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName = "");
     ~FillWriter();
+
 };
 
 } /* namespace MetNoFimex */

@@ -90,6 +90,40 @@ BOOST_AUTO_TEST_CASE( test_fillWriter )
     BOOST_CHECK(true);
 }
 
+BOOST_AUTO_TEST_CASE( test_fillWriterConfig )
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/coordRefTimeTest.nc");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    string inFillName(topSrcDir+"/test/fillIn3.nc");
+    if (!ifstream(inFillName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    // copy the input
+    std::ifstream  src(fileName.c_str());
+    string outFile = "fillOut.nc";
+    std::ofstream  dst(outFile.c_str());
+    dst << src.rdbuf();
+
+    boost::shared_ptr<CDMReader> in(new NetCDF_CDMReader(inFillName));
+    boost::shared_ptr<CDMReaderWriter> out(new NetCDF_CDMReader(outFile, true));
+    FillWriter(in, out, topSrcDir+"/test/fillWriterConfig.xml");
+    out.reset((NetCDF_CDMReader*)0); // make sure to close the writer before re-reading it
+    out.reset(new NetCDF_CDMReader(outFile));
+
+    BOOST_CHECK(out->getData("longitude")->asFloat()[2*11]+13 < 1e-5);
+    BOOST_CHECK(out->getData("latitude")->asFloat()[2*11]-28 < 1e-5);
+
+
+
+    BOOST_CHECK(true);
+
+}
+
 #else
 // no boost testframework
 int main(int argc, char* args[]) {

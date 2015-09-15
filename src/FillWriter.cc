@@ -28,18 +28,34 @@
 #include "fimex/Logger.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/XMLDoc.h"
 #include <vector>
 #include <map>
 #include <utility>
 #include <algorithm>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
+
 
 namespace MetNoFimex
 {
 
-FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io)
+struct FillWriterTranslation {
+    std::string inputDim;
+    std::string outputDim;
+    std::vector<std::size_t> inSlices;
+    std::vector<std::size_t> outSlices;
+};
+
+std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName);
+
+
+FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName)
 {
     using namespace std;
     LoggerPtr logger = getLogger("fimex.FillWriter");
+
+    std::vector<FillWriterTranslation> fwts = readConfigFile(configFileName);
 
     const CDM& iCdm = in->getCDM();
     const CDM& oCdm = io->getCDM();
@@ -109,9 +125,9 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
     // process variables
     CDM::VarVec iVars = iCdm.getVariables();
     for (CDM::VarVec::iterator iv = iVars.begin(); iv != iVars.end(); ++iv) {
-        LOG4FIMEX(logger, Logger::DEBUG, "processing variable  " << iv->getName());
+        LOG4FIMEX(logger, Logger::DEBUG, "processing variable  '" << iv->getName()<< "'");
         if (!oCdm.hasVariable(iv->getName())) {
-            LOG4FIMEX(logger, Logger::WARN, "new variable " << iv->getName() << ": omitting");
+            LOG4FIMEX(logger, Logger::WARN, "new variable '" << iv->getName() << "': omitting");
             continue;
         }
         const CDMVariable& iVar = *iv;
@@ -119,15 +135,50 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
         const CDMVariable& oVar = oCdm.getVariable(iv->getName());
         const vector<string>& oShape = oVar.getShape();
 
-        if (!equal(iShape.begin(), iShape.end(), oShape.begin())) {
-            LOG4FIMEX(logger, Logger::WARN, "variable " << iv->getName() << "has different shape: omitting");
+        vector<string> iTestShape(iShape.begin(), iShape.end());
+        vector<string> oTestShape(oShape.begin(), oShape.end());
+        for (vector<FillWriterTranslation>::iterator fit = fwts.begin(); fit != fwts.end(); ++fit) {
+            // translated dimensions are handled different from normal dimension, so omitting from regular test
+            iTestShape.erase( std::remove( iTestShape.begin(), iTestShape.end(), fit->inputDim ), iTestShape.end() );
+            oTestShape.erase( std::remove( oTestShape.begin(), oTestShape.end(), fit->outputDim ), oTestShape.end() );
+        }
+        // simple test of equal shapes (omitting translated dims
+        if (!equal(iTestShape.begin(), iTestShape.end(), oTestShape.begin())) {
+            LOG4FIMEX(logger, Logger::WARN, "variable '" << iv->getName() << "' has different shape: omitting");
             continue;
         }
 
         typedef vector<pair<SliceBuilder, SliceBuilder> > SlicePairs;
+        SliceBuilder inputSb(iCdm, iv->getName());
+        SliceBuilder outputSb(oCdm, iv->getName(), true); // extension along unlimited possible for output
+        // translate dimensions of input and output slice from config-file
+        for (vector<FillWriterTranslation>::iterator fit = fwts.begin(); fit != fwts.end(); ++fit) {
+            // reduce the input slicebuilder
+            if (std::find(iShape.begin(), iShape.end(), fit->inputDim) != iShape.end()) {
+                if (fit->inSlices.size() == 1) { // 0 = do nothing
+                    //cerr << "reducing input dim: " << fit->outputDim;
+                    inputSb.setStartAndSize(fit->inputDim, fit->inSlices.at(0), 1);
+                } else {
+                    // TODO
+                    throw CDMException("FillWriter translation to with multiple elements in slice not implemented yet");
+                }
+            }
+            // reduce the output slicebuilder
+            if (std::find(oShape.begin(), oShape.end(), fit->outputDim) != oShape.end()) {
+                if (fit->outSlices.size() == 1) { // 0 = do nothing
+                    //cerr << "reducing output dim: " << fit->outputDim;
+                    outputSb.setStartAndSize(fit->outputDim, fit->outSlices.at(0), 1);
+                } else {
+                    // TODO
+                    throw CDMException("FillWriter translation to with multiple elements in slice not implemented yet");
+                }
+            }
+        }
+
         SlicePairs slices;
-        slices.push_back(make_pair(SliceBuilder(iCdm, iv->getName()), SliceBuilder(oCdm, iv->getName(), true)));
-        for (vector<string>::const_iterator dimIt = iShape.begin(); dimIt != iShape.end(); ++dimIt) {
+        slices.push_back(make_pair(inputSb, outputSb));
+        // loop over the untranslated slices
+        for (vector<string>::const_iterator dimIt = iTestShape.begin(); dimIt != iTestShape.end(); ++dimIt) {
             if (dimSlices.find(*dimIt) != dimSlices.end()) {
                 SlicePairs newSlices;
                 map<size_t, size_t> currentDimSlices = dimSlices.find(*dimIt)->second;
@@ -154,6 +205,50 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
 
 FillWriter::~FillWriter()
 {
+}
+
+std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName)
+{
+    std::vector<FillWriterTranslation> fwts;
+    if (fileName == "") return fwts;
+
+    LoggerPtr logger = getLogger("fimex.FillWriter");
+    XMLDoc doc(fileName);
+    doc.registerNamespace("c", "http://www.met.no/schema/fimex/cdmFillWriterConfig");
+    XPathObjPtr xpathObj = doc.getXPathObject("/c:cdmFillWriter");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    if (nodes->nodeNr != 1) {
+        throw CDMException("file '"+fileName+"' is not a cdmFillWriterConfig with root /cdmFillWriter");
+    }
+    // translate
+    xpathObj = doc.getXPathObject("/c:cdmFillWriter/c:translate");
+    nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        FillWriterTranslation fwt;
+        fwt.inputDim = getXmlProp(nodes->nodeTab[i], "inputDimension");
+        fwt.outputDim = getXmlProp(nodes->nodeTab[i], "outputDimension");
+        std::string iSlices = getXmlProp(nodes->nodeTab[i], "inputSlices");
+        std::string oSlices = getXmlProp(nodes->nodeTab[i], "outputSlices");
+        fwt.inSlices = tokenizeDotted<size_t>(iSlices);
+        fwt.outSlices = tokenizeDotted<size_t>(oSlices);
+        if (fwt.outSlices.size() > 1) {
+            if (fwt.inSlices.size() > 0) {
+                if (fwt.outSlices.size() != fwt.inSlices.size()) {
+                    throw CDMException("fillWriterConfig: inputSlices != outputSlices for " + fwt.inputDim);
+                }
+            }
+        }
+        if (fwt.inSlices.size() > 1) {
+            if (fwt.outSlices.size() > 0) {
+                if (fwt.outSlices.size() != fwt.inSlices.size()) {
+                    throw CDMException("fillWriterConfig: inputSlices != outputSlices for " + fwt.inputDim);
+                }
+            }
+        }
+        fwts.push_back(fwt);
+    }
+    return fwts;
 }
 
 } /* namespace MetNoFimex */
