@@ -585,19 +585,37 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
             // use unLimDimPos = -1 for variables without unlimited dimension
             for (long long unLimDimPos = -1; unLimDimPos < maxUnLim; ++unLimDimPos) {
 #ifdef HAVE_MPI
-                if (mifi_mpi_initialized()) {
-                    // only work on variables which belong to this mpi-process (modulo-base)
-                    if ((unLimDimPos % mifi_mpi_size) != mifi_mpi_rank) {
-                        LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on unLimDimPos " << unLimDimPos);
-                        continue;
-                    } else {
-                        LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on unLimDimPos " << unLimDimPos);
+                const bool sliceAlongUnlimited = (maxUnLim > 3);
+                if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
+                    if (sliceAlongUnlimited) { // MPI-slices along unlimited dimension
+                        // only work on variables which belong to this mpi-process (modulo-base)
+                        if ((unLimDimPos % mifi_mpi_size) != mifi_mpi_rank) {
+                            LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on unLimDimPos " << unLimDimPos);
+                            continue;
+                        } else {
+                            LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on unLimDimPos " << unLimDimPos);
+                        }
                     }
                 }
 #endif
                 for (size_t vi = 0; vi < cdmVars.size(); ++vi) {
                     CDMVariable cdmVar = cdmVars.at(vi);
                     std::string varName = cdmVar.getName();
+                    int varId = ncVarMap.find(cdmVar.getName())->second;
+#ifdef HAVE_MPI
+                    if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
+                        ncCheck(nc_var_par_access(ncFile->ncId, varId, NC_INDEPENDENT));
+                        if (!sliceAlongUnlimited) { // MPI-slices along unlimited dimension
+                            // only work on variables which belong to this mpi-process (modulo-base along variable-ids)
+                            if ((vi % mifi_mpi_size) != mifi_mpi_rank) {
+                                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " skipping on variable " << varName);
+                                continue;
+                            } else {
+                                LOG4FIMEX(logger, Logger::DEBUG, "processor " << mifi_mpi_rank << " working on variable '" << varName << "'");
+                            }
+                        }
+                    }
+#endif
                     DataTypeChanger dtc(cdmVar.getDataType());
                     if ((variableTypeChanges.find(varName) != variableTypeChanges.end()) &&
                             (variableTypeChanges[varName] != CDM_NAT)) {
@@ -627,7 +645,6 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
 
                         dtc = DataTypeChanger(cdmVar.getDataType(), oldFill, oldScale, oldOffset, variableTypeChanges[cdmVar.getName()], newFill, newScale, newOffset, unitSlope, unitOffset);
                     }
-                    int varId = ncVarMap.find(cdmVar.getName())->second;
                     int dimLen;
                     ncCheck(nc_inq_varndims(ncFile->ncId, varId, &dimLen));
                     int dimIds[dimLen];
