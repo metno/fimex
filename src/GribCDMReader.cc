@@ -1141,13 +1141,30 @@ size_t GribCDMReader::getVariableMaxEnsembles(string varName) const {
 }
 
 template<typename T>
-DataPtr roundData(boost::shared_array<T> array, size_t n, double scale)
+class RoundValue {
+private:
+    T scale_;
+    T scaleInv_;
+    T initialMissing_;
+    T finalMissing_;
+public:
+    RoundValue(double scale, double initialMissing, double finalMissing) :
+        scale_(scale), scaleInv_(1/scale), initialMissing_(initialMissing), finalMissing_(finalMissing) {}
+    T operator()(T in) {
+        if (in == initialMissing_)
+            return finalMissing_;
+        return scale_ * boost::math::round<T>(scaleInv_ * in);
+    }
+};
+
+template<typename T>
+DataPtr roundData(boost::shared_array<T> array, size_t n, double scale, double initialMissing, double finalMissing)
 {
     T myScale = scale;
     T scaleInv = 1/scale;
-    for (size_t i = 0; i < n; i++) {
-        array[i] = myScale * boost::math::round<T>(scaleInv * array[i]);
-    }
+    T initMiss = static_cast<T>(initialMissing);
+    T finalMiss = static_cast<T>(finalMissing);
+    transform(array.get(), array.get()+n, array.get(), RoundValue<T>(scale, initialMissing, finalMissing));
     return createData(n, array);
 }
 
@@ -1226,7 +1243,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         // varPrecision used, use default missing
         missingValue = MIFI_FILL_DOUBLE;
     }
-    fill(&doubleArray[0], &doubleArray[slice_size], MIFI_FILL_DOUBLE);
+    fill(&doubleArray[0], &doubleArray[slice_size], missingValue);
     DataPtr data = createData(slice_size, doubleArray);
     // storage for one layer
     vector<double> gridData(slice_size/slices.size());
@@ -1238,7 +1255,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
             size_t dataRead;
             {
                 ScopedCritical lock(p_->mutex);
-                dataRead = gfmIt->readData(gridData, MIFI_FILL_DOUBLE);
+                dataRead = gfmIt->readData(gridData, missingValue);
             }
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
             copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
@@ -1251,9 +1268,9 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
         if (variable.getDataType() == CDM_FLOAT || variable.getDataType() == CDM_DOUBLE) {
             double scale = p_->varPrecision[varName].first;
             if (variable.getDataType() == CDM_FLOAT) {
-                data = roundData(data->asFloat(), data->size(), scale);
+                data = roundData(data->asFloat(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
             } else {
-                data = roundData(data->asDouble(), data->size(), scale);
+                data = roundData(data->asDouble(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
             }
         } else {
             double scale = p_->varPrecision[varName].first;

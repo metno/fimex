@@ -61,6 +61,14 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
     BOOST_CHECK(true); // made it so far
+    DataPtr data = grbReader->getDataSlice("x_wind_10m", 0);
+    boost::shared_array<float> dataFlt = data->asFloat();
+    for (int i = 85*229+50; i < 85*229+150; i++) {
+        // check data-range
+        BOOST_CHECK(fabs(dataFlt[i]) < 15);
+        // check data-precision (0.1 according to setup-file)
+        BOOST_CHECK(1e-5 > fabs(10*dataFlt[i] - MetNoFimex::round(10*dataFlt[i])));
+    }
 
     // check grib has new earth-radius
     CDMAttribute attr;
