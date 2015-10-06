@@ -1141,7 +1141,7 @@ size_t GribCDMReader::getVariableMaxEnsembles(string varName) const {
 }
 
 template<typename T>
-class RoundValue {
+class RoundValue : public unary_function<T, T> {
 private:
     T scale_;
     T scaleInv_;
@@ -1160,10 +1160,6 @@ public:
 template<typename T>
 DataPtr roundData(boost::shared_array<T> array, size_t n, double scale, double initialMissing, double finalMissing)
 {
-    T myScale = scale;
-    T scaleInv = 1/scale;
-    T initMiss = static_cast<T>(initialMissing);
-    T finalMiss = static_cast<T>(finalMissing);
     transform(array.get(), array.get()+n, array.get(), RoundValue<T>(scale, initialMissing, finalMissing));
     return createData(n, array);
 }
