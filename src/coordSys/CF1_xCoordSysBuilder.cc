@@ -343,9 +343,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
             bool simpleY = false;
             if (xAxis.get() != 0) {
                 if (xAxis->isExplicit() && xAxis->getShape().size() == 1) {
-                    if (xAxis->isExplicit()) {
-                        simpleX = true;
-                    }
+                    simpleX = true;
                 }
             }
             if (yAxis.get() != 0) {
