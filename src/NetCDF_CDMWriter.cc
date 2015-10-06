@@ -387,9 +387,14 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
     NcDimIdMap ncDimMap;
     for (CDM::DimVec::const_iterator it = cdmDims.begin(); it != cdmDims.end(); ++it) {
 #ifdef HAVE_MPI
-        // netcdf-MPI does not work with unlimited variables
-        int length = it->getLength();
-        if (length == 0) length++;
+        int length;
+        if (mifi_mpi_initialized() && (mifi_mpi_size > 1)) {
+            // netcdf-MPI does not work with unlimited variables
+            length = it->getLength();
+            if (length == 0) length++;
+        } else {
+            length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
+        }
 #else
         int length = it->isUnlimited() ? NC_UNLIMITED : it->getLength();
 #endif
