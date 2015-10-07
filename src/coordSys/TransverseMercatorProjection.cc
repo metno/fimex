@@ -26,6 +26,7 @@
 
 #include "fimex/coordSys/TransverseMercatorProjection.h"
 #include <boost/regex.hpp>
+#include <proj_api.h>
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
 
@@ -78,10 +79,10 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
         if (boost::regex_search(proj4Str, what, boost::regex("\\+south"))) {
             attrs.push_back(CDMAttribute("false_northing", 10000000));
         }
-        LOG4FIMEX(logger, Logger::WARN, "proj4 utm projection is only valid 6 deg. from center-longitude. Consider using: +proj=gstmerc (or etmerc) +k=0.9996 +lon_0="<< longOfProjOrigin << "+x_0=500000");
+        LOG4FIMEX(logger, Logger::WARN, "proj4 utm projection is only valid 6 deg. from center-longitude. Consider using: +proj=gstmerc (or etmerc proj4.8, NGA rec.) +k=0.9996 +lon_0="<< longOfProjOrigin << "+x_0=500000");
     } else { // projection given as tmerc or gstmerc
         if (proj4ProjectionMatchesName(proj4Str, "tmerc")) {
-            LOG4FIMEX(logger, Logger::WARN, "proj4 tmerc projection is only valid 6 deg. from center-longitude. Consider using: +proj=gstmerc (proj 4.7) or etmerc (proj >=4.8)");
+            LOG4FIMEX(logger, Logger::WARN, "proj4 tmerc projection is only valid 6 deg. from center-longitude. Consider using: +proj=etmerc (proj4.8, NGA recommendation) or +proj=gstmerc (proj 4.7) or etmerc (proj >=4.8)");
         }
         // longitude at origin
         double longOfProjOrigin = 0.;
@@ -108,7 +109,15 @@ std::vector<CDMAttribute> TransverseMercatorProjection::parametersFromProj4(cons
 
 std::ostream& TransverseMercatorProjection::getProj4ProjectionPart(std::ostream& oproj) const
 {
+#if PJ_VERSION > 480
+    oproj << "+proj=etmerc";
+#else
+#if PJ_VERSION > 470
     oproj << "+proj=gstmerc";
+#else
+    oproj << "+proj=tmerc";
+#endif
+#endif
     addParameterToStream(oproj, "longitude_of_central_meridian", " +lon_0=");
     addParameterToStream(oproj, "latitude_of_projection_origin", " +lat_0=");
     addParameterToStream(oproj, "scale_factor_at_central_meridian", " +k_0=");
