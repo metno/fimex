@@ -145,10 +145,10 @@ GribCDMReader::GribCDMReader(const vector<string>& fileNames, const XMLInput& co
 {
     initXMLAndMembers(configXML, members);
     std::map<std::string, std::string> options;
-    if (xmlGetEarthFigure() != "") {
-        options["earthfigure"] = xmlGetEarthFigure();
+    if (getConfigEarthFigure(p_->doc) != "") {
+        options["earthfigure"] = getConfigEarthFigure(p_->doc);
     }
-    options["extraKeys"] = xmlGetExtraKeys();
+    options["extraKeys"] = getConfigExtraKeys(p_->doc);
 
     for (vector<string>::const_iterator fileIt = fileNames.begin(); fileIt != fileNames.end(); ++fileIt) {
         vector<GribFileMessage> messages = GribFileIndex(*fileIt, p_->ensembleMemberIds, false, options).listMessages();
@@ -167,6 +167,49 @@ GribCDMReader::GribCDMReader(const string& grbmlFileName, const XMLInput& config
     initPostIndices();
 }
 
+boost::shared_ptr<XMLDoc> GribCDMReader::initXMLConfig(const XMLInput& configXML)
+{
+    boost::shared_ptr<XMLDoc> doc(configXML.getXMLDoc());
+    doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
+    {
+        // check config for root element
+        XPathObjPtr xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig");
+        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
+        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + configXML.id());
+    }
+    return doc;
+}
+
+std::string GribCDMReader::getConfigEarthFigure(boost::shared_ptr<XMLDoc> doc)
+{
+    // get the overruled earthform
+    XPathObjPtr xpathObj = doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    string replaceEarthString = "";
+    if (size == 1) {
+        replaceEarthString = getXmlProp(nodes->nodeTab[0], "proj4");
+    }
+    return replaceEarthString;
+}
+
+std::string GribCDMReader::getConfigExtraKeys(boost::shared_ptr<XMLDoc> doc)
+{
+    set<string> extraKeys;
+    // get the additinal keys from the xml-document
+    XPathObjPtr xpathObj = doc->getXPathObject("//gr:extraKey");
+    xmlNodeSetPtr nodes = xpathObj->nodesetval;
+    int size = (nodes) ? nodes->nodeNr : 0;
+    for (int i = 0; i < size; i++) {
+        string extraKey = getXmlProp(nodes->nodeTab[0], "name");
+        extraKeys.insert(extraKey);
+    }
+    return join(extraKeys.begin(), extraKeys.end(), ",");
+}
+
+
+
+
 void GribCDMReader::initXMLAndMembers(const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members)
 {
     for (vector<pair<string, string> >::const_iterator memIt = members.begin(); memIt != members.end(); ++memIt) {
@@ -174,14 +217,7 @@ void GribCDMReader::initXMLAndMembers(const XMLInput& configXML, const std::vect
     }
 
     p_->configId = configXML.id();
-    p_->doc = configXML.getXMLDoc();
-    p_->doc->registerNamespace("gr", "http://www.met.no/schema/fimex/cdmGribReaderConfig");
-    {
-        // check config for root element
-        XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig");
-        size_t rootElements = (xpathObj->nodesetval == 0) ? 0 : xpathObj->nodesetval->nodeNr;
-        if (rootElements != 1) throw CDMException("error with rootElement in cdmGribReaderConfig at: " + p_->configId);
-    }
+    p_->doc = initXMLConfig(configXML);
     initXMLNodeIdx();
 }
 
@@ -867,38 +903,10 @@ void GribCDMReader::initAddEnsembles()
     }
 }
 
-std::string GribCDMReader::xmlGetEarthFigure() const
-{
-    // get the overruled earthform
-    XPathObjPtr xpathObj = p_->doc->getXPathObject("/gr:cdmGribReaderConfig/gr:overrule/gr:earthFigure");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    string replaceEarthString = "";
-    if (size == 1) {
-        replaceEarthString = getXmlProp(nodes->nodeTab[0], "proj4");
-    }
-    return replaceEarthString;
-}
-
-std::string GribCDMReader::xmlGetExtraKeys() const
-{
-    set<string> extraKeys;
-    // get the additinal keys from the xml-document
-    XPathObjPtr xpathObj = p_->doc->getXPathObject("//gr:extraKey");
-    xmlNodeSetPtr nodes = xpathObj->nodesetval;
-    int size = (nodes) ? nodes->nodeNr : 0;
-    for (int i = 0; i < size; i++) {
-        string extraKey = getXmlProp(nodes->nodeTab[0], "name");
-        extraKeys.insert(extraKey);
-    }
-    return join(extraKeys.begin(), extraKeys.end(), ",");
-}
-
-
 void GribCDMReader::initAddProjection()
 {
     // get the overruled earthform
-    string replaceEarthString = xmlGetEarthFigure();
+    string replaceEarthString = getConfigEarthFigure(p_->doc);
     if (replaceEarthString != "") {
         LOG4FIMEX(logger, Logger::DEBUG,"overruling earth-parametes with " << replaceEarthString);
     }

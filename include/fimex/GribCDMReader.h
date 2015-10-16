@@ -62,6 +62,24 @@ public:
     virtual ~GribCDMReader();
     using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
+    /**
+     * Read a initialized cdmGribReader xml-document
+     * @param configXML
+     * @return the XMLDoc dom object
+     */
+    static boost::shared_ptr<XMLDoc> initXMLConfig(const XMLInput& configXML);
+    /**
+     * read the earth-figure from the xml-file
+     * @return "" or proj4-string as in xml-file
+     */
+    static std::string getConfigEarthFigure(boost::shared_ptr<XMLDoc> doc);
+    /**
+     * read the non-standard attributes of parameters from the xml-config
+     * @return "" or a comma delimited string with attributes
+     */
+    static std::string getConfigExtraKeys(boost::shared_ptr<XMLDoc> doc);
+
+
 
 private:
     // pimpl
@@ -104,16 +122,6 @@ private:
     boost::posix_time::ptime getVariableValidTime(const GribFileMessage& gfm) const;
 
     size_t getVariableMaxEnsembles(std::string varName) const;
-    /**
-     * read the earth-figure from the xml-file
-     * @return "" or proj4-string as in xml-file
-     */
-    std::string xmlGetEarthFigure() const;
-    /**
-     * read the non-standard attributes of parameters from the xml-config
-     * @return "" or a comma delimited string with attributes
-     */
-    std::string xmlGetExtraKeys() const;
 
     void initAddTimeDimension();
     void initAddGlobalAttributes();
@@ -132,7 +140,6 @@ private:
     std::vector<double> readValuesFromXPath_(xmlNodePtr node, DataPtr levelData, std::string exampleVar, std::string extension);
     void initSpecialLevels_(xmlNodePtr node, const std::string& extension, const std::string& levelType, std::size_t levelPos, const std::vector<std::string>& levelShape, DataPtr& levelData);
 };
-
 
 }
 

@@ -25,6 +25,7 @@
  */
 
 #include "fimex/GribFileIndex.h"
+#include "fimex/GribCDMReader.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
@@ -51,10 +52,16 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 }
 
 void
-indexGrib(const fs::path& input, const fs::path& append, const fs::path& output, vector<string> extraKeys, bool force)
+indexGrib(const fs::path& input, const fs::path& append, const fs::path& output, vector<string> extraKeys, string config, bool force)
 {
     std::vector<std::pair<std::string, boost::regex> > members; // empty members, doesn't make sense for single files
     std::map<std::string, std::string> options;
+    if (config != "") {
+        using namespace MetNoFimex;
+        boost::shared_ptr<XMLDoc> doc = GribCDMReader::initXMLConfig(XMLInputFile(config));
+        options["earthfigure"] = GribCDMReader::getConfigEarthFigure(doc);
+        extraKeys.push_back(GribCDMReader::getConfigExtraKeys(doc));
+    }
     if (extraKeys.size() > 0) {
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
     }
@@ -95,6 +102,7 @@ main(int argc, char* args[])
         ("version", "program version")
         ("force,f", "force update of index-file")
         ("extraKey", po::value<vector<string> >()->composing(), "multiple extraKey to index")
+        ("readerConfig", po::value<string>(), "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.")
         ("outputDirectory,o", po::value<string>(), "output directory")
         ("inputFile,i", po::value<string>(), "input gribFile")
         ("appendFile,a", po::value<string>(), "append output new index to a grbml-file")
@@ -153,11 +161,15 @@ main(int argc, char* args[])
     if (vm.count("extraKey")) {
         extraKeys = vm["extraKey"].as<vector<string> >();
     }
+    string readerConfig("");
+    if (vm.count("readerConfig")) {
+        readerConfig = vm["readerConfig"].as<string>();
+    }
     fs::path appendFile;
     if (vm.count("appendFile")) {
         appendFile = fs::path(vm["appendFile"].as<string>());
         outFile = appendFile;
     }
-    indexGrib(fullInput, appendFile, outFile, extraKeys, forceUpdate);
+    indexGrib(fullInput, appendFile, outFile, extraKeys, readerConfig, forceUpdate);
     return 0;
 }
