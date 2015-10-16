@@ -142,7 +142,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
     return create(fileType, fileName, configXML, args);
 }
 
-static void getGribArgs(const std::vector<std::string> & args, std::vector<std::pair<std::string, std::string> >& members, std::vector<std::string>& files)
+void CDMFileReaderFactory::parseGribArgs(const std::vector<std::string> & args, std::vector<std::pair<std::string, std::string> >& members, std::vector<std::string>& files)
 {
     for (std::vector<std::string>::const_iterator argIt = args.begin(); argIt != args.end(); ++argIt) {
         std::string memberRegex("memberRegex:");
@@ -180,7 +180,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
     case MIFI_FILETYPE_GRBML: {
         std::vector<std::pair<std::string, std::string> > members;
         std::vector<std::string> files; // files not used for grbml
-        getGribArgs(args, members, files);
+        parseGribArgs(args, members, files);
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grbml-files");
         }
@@ -197,7 +197,7 @@ boost::shared_ptr<CDMReader> CDMFileReaderFactory::create(int fileType, const st
             files.push_back(fileName);
         }
         std::vector<std::pair<std::string, std::string> > members;
-        getGribArgs(args, members, files);
+        parseGribArgs(args, members, files);
         if (configXML.isEmpty()) {
             throw CDMException("config file required for grib-files");
         }

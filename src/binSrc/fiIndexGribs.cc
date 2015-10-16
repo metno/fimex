@@ -27,6 +27,7 @@
 #include "fimex/GribFileIndex.h"
 #include "fimex/GribCDMReader.h"
 #include "fimex/CDMconstants.h"
+#include "fimex/CDMFileReaderFactory.h"
 #include "fimex/ThreadPool.h"
 #include "fimex/Utils.h"
 #include "fimex/Logger.h"
@@ -52,9 +53,8 @@ static void writeUsage(ostream& out, const po::options_description& options) {
 }
 
 void
-indexGrib(const fs::path& input, const fs::path& append, const fs::path& output, vector<string> extraKeys, string config, bool force)
+indexGrib(const fs::path& input, const fs::path& append, const fs::path& output, vector<string> extraKeys, string config, vector<string> memberOptions, bool force)
 {
-    std::vector<std::pair<std::string, boost::regex> > members; // empty members, doesn't make sense for single files
     std::map<std::string, std::string> options;
     if (config != "") {
         using namespace MetNoFimex;
@@ -64,6 +64,15 @@ indexGrib(const fs::path& input, const fs::path& append, const fs::path& output,
     }
     if (extraKeys.size() > 0) {
         options["extraKeys"] = MetNoFimex::join(extraKeys.begin(), extraKeys.end(), ",");
+    }
+    std::vector<std::pair<std::string, boost::regex> > members;
+    if (memberOptions.size() > 0) {
+        vector<pair<string, string> > memberStrings;
+        vector<string> files;
+        MetNoFimex::CDMFileReaderFactory::parseGribArgs(memberOptions, memberStrings, files);
+        for (vector<pair<string, string> >::const_iterator memIt = memberStrings.begin(); memIt != memberStrings.end(); ++memIt) {
+            members.push_back(make_pair(memIt->first, boost::regex(memIt->second)));
+        }
     }
     MetNoFimex::GribFileIndex gfi(input, append, members, force, options);
     // open stream before filter, required for closing order
@@ -105,6 +114,7 @@ main(int argc, char* args[])
         ("readerConfig", po::value<string>(), "cdmGribReaderConfig as used by later calls. Using the config already during indexing will make sure that extraKeys and earthFigures correspond.")
         ("outputDirectory,o", po::value<string>(), "output directory")
         ("inputFile,i", po::value<string>(), "input gribFile")
+        ("input.optional", po::value<vector<string> >()->composing(), "optional arguments for grib-files as in fimex, i.e. memberRegex: , memberName: pairs")
         ("appendFile,a", po::value<string>(), "append output new index to a grbml-file")
         ;
 
@@ -165,11 +175,15 @@ main(int argc, char* args[])
     if (vm.count("readerConfig")) {
         readerConfig = vm["readerConfig"].as<string>();
     }
+    vector<string> members;
+    if (vm.count("input.optional")) {
+        members = vm["input.optional"].as<vector<string> >();
+    }
     fs::path appendFile;
     if (vm.count("appendFile")) {
         appendFile = fs::path(vm["appendFile"].as<string>());
         outFile = appendFile;
     }
-    indexGrib(fullInput, appendFile, outFile, extraKeys, readerConfig, forceUpdate);
+    indexGrib(fullInput, appendFile, outFile, extraKeys, readerConfig, members, forceUpdate);
     return 0;
 }

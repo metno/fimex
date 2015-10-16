@@ -104,6 +104,14 @@ public:
      */
     static boost::shared_ptr<CDMReader> create(const std::string& fileType, const std::string& fileName, const XMLInput& configXML, const std::vector<std::string>& args = std::vector<std::string>());
 
+    /**
+     * @brief parse special arguments for grib-files
+     *
+     * @param args list of arguments, e.g. combined --input.file --input.optional from fimex command-line
+     * @param members return members as memberName/memberRegexp pairs
+     * @param files retrun all input files
+     */
+    static void parseGribArgs(const std::vector<std::string> & args, std::vector<std::pair<std::string, std::string> >& members, std::vector<std::string>& files);
 
 };
 
