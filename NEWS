@@ -1,3 +1,12 @@
+  * 2015-10-26 fimex-0.60
+    * grib-indexing with explicit ensemble data and earth figure
+	* using etmerc instead of tmerc for transverse mercator, with proj 4.8.0
+	* better check for simpleSpatial data
+	* fixing missing value handling for grib-precision scaling
+	* improve MPI-handling
+	* output.config for fillWriter, allowing special selection of slices
+	* ignore unused dimensions/coordinates inf fillWriter
+	* detecting axes mismatch for vector-reprojections
   * 2015-08-28 fimex-0.59.1
     * fixing bug 'sometimes no data when interpolating to many lat/lon points'
   * 2015-08-25 fimex-0.59
