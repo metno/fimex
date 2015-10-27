@@ -23,10 +23,10 @@
  * touch configure.ac after changing these numbers
  */
 #define MIFI_VERSION_MAJOR  0
-#define MIFI_VERSION_MINOR 60
+#define MIFI_VERSION_MINOR 61
 #define MIFI_VERSION_PATCH  0
 #define MIFI_VERSION_STATUS 0xB0
-#define MIFI_VERSION_STRING "0.60beta"
+#define MIFI_VERSION_STRING "0.61beta"
 
 
 /**
