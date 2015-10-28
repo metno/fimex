@@ -2,6 +2,8 @@
 <cdm_gribwriter_config
                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 <!--                        xsi:noNamespaceSchemaLocation="cdmGribWriterConfig.xsd"> -->
+<!-- select a specialized grib-template instead of using the default grib_api file -->
+<!-- <template_file name="/disk1/Fimex/conc_Am-241.ID_328.grib" /> -->
 <global_attributes>
     <!-- type can be double, long, string -->
     <attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->
