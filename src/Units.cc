@@ -113,7 +113,7 @@ public:
     virtual ~Ud2UnitsConverter() {cv_free(conv_);}
     virtual double convert(double from) {
         double retval;
-#pragma omp critical(cv_converter)
+#pragma omp critical (cv_converter)
         {
             retval = cv_convert_double(conv_, from);
         }
