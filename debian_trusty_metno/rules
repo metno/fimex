@@ -21,7 +21,7 @@ DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_BUILD_OPTIONS ?= parallel=2
 
 LDFLAGS = -Wl,-rpath -Wl,/opt/zlibnew/lib/
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
 else
@@ -131,7 +131,7 @@ binary-arch: build install
 #	dh_installinfo
 	dh_installman
 	dh_link
-	dh_strip
+	dh_strip --dbg-package=fimex-dbg
 	dh_compress
 	dh_fixperms
 #	dh_perl
