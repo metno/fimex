@@ -1,7 +1,7 @@
 SUBDIRS = .
 
 AM_CFLAGS = 
-AM_CXXFLAGS = $(BOOST_CPPFLAGS) @LOG4CPP_CFLAGS@
+AM_CXXFLAGS = $(BOOST_CPPFLAGS) @LOG4CPP_CFLAGS@ @XML_CPPFLAGS@
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DPKGDATADIR="\"$(pkgdatadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS}  @MIFI_GRIB_API_CPPFLAGS@ ${XML_CPPFLAGS}
 
 bin_PROGRAMS = fimex fiXYcontents
@@ -11,9 +11,11 @@ fiXYcontents_SOURCES = fiXYcontents.cc
 fiXYcontents_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@ @LOG4CPP_LIBS@
 
 if HAVE_GRIBAPI
-  bin_PROGRAMS += fiIndexGribs fiGribCut
+  bin_PROGRAMS += fiIndexGribs fiGribCut fiGrbmlCat
   fiIndexGribs_SOURCES = fiIndexGribs.cc
   fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
   fiGribCut_SOURCES = fiGribCut.cc
   fiGribCut_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @MIFI_GRIB_API_LIBS@
+  fiGrbmlCat_SOURCES = fiGrbmlCat.cc
+  fiGrbmlCat_LDADD = @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@  @XML_LIBS@  
 endif
