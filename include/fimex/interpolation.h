@@ -574,7 +574,7 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
  * @param posPtr start pointer of the float array
  * @param endPtr end-pointer of the float array (excluded from conversion)
  * @param badVal bad value to be converted to nan
- * @return number of conversions
+ * @return 0 (in fimex < 0.61, this was possibly the number of conversions, but it was never strict)
  */
 extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
 /**
@@ -583,7 +583,7 @@ extern size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal);
  * @param posPtr start pointer of the float array
  * @param endPtr end-pointer of the float array (excluded from conversion)
  * @param badVal value NaNs will be  converted to
- * @return number of conversions
+ * @return 0 (in fimex < 0.61, this was possibly the number of conversions, but it was never strict)
  */
 extern size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal);
 

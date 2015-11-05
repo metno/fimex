@@ -1751,31 +1751,23 @@ size_t mifi_compute_vertical_velocity(size_t nx, size_t ny, size_t nz, double dx
 }
 
 size_t mifi_bad2nanf(float* posPtr, float* endPtr, float badVal) {
-    size_t retVal = 0;
     if (!isnan(badVal)) {
         while (posPtr != endPtr) {
-            if (*posPtr == badVal) {
-                *posPtr = MIFI_UNDEFINED_F;
-                retVal++;
-            }
+            *posPtr = (*posPtr == badVal) ? MIFI_UNDEFINED_F : *posPtr;
             posPtr++;
         }
     }
-    return retVal;
+    return 0;
 }
 
 size_t mifi_nanf2bad(float* posPtr, float* endPtr, float badVal) {
-    size_t retVal = 0;
     if (!isnan(badVal)) {
         while (posPtr != endPtr) {
-            if (isnan(*posPtr)) {
-                *posPtr = badVal;
-                retVal++;
-            }
+            *posPtr = (isnan(*posPtr)) ? badVal : *posPtr;
             posPtr++;
         }
     }
-    return retVal;
+    return 0;
 }
 
 int mifi_isnanf(float val)
