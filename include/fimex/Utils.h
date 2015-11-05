@@ -369,14 +369,12 @@ public:
         oldOffsetMinusNewOffsetNewScaleInv_((oldOffset-newOffset)/newScale),
         newFill_(static_cast<OUT>(newFill)) {}
     OUT operator()(const IN& in) const {
-        if (in == oldFill_ || mifi_isnan<IN>(in)) {
-            return newFill_;
-        } else {
+        return (in == oldFill_ || mifi_isnan<IN>(in))
+            ? newFill_
+            : static_cast<OUT>(oldScaleNewScaleInv_*in + oldOffsetMinusNewOffsetNewScaleInv_);
             //(((oldScale_*in + oldOffset_)-newOffset_)/newScale_);
             // => ((oldScale_*in + oldOffsetMinusNewOffset_)*newScaleInv_);
             // => oldScaleNewScale_ * in + oldOffsetMinusNewOffsetNewScale_
-            return static_cast<OUT>(oldScaleNewScaleInv_*in + oldOffsetMinusNewOffsetNewScaleInv_);
-        }
     }
 };
 
