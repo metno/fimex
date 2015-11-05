@@ -400,11 +400,9 @@ public:
         uconv_(uconv),
         newFill_(static_cast<OUT>(newFill)), newScaleInv_(1/newScale), newOffset_(newOffset) {}
     OUT operator()(const IN& in) const {
-        if (in == oldFill_ || mifi_isnan<IN>(in)) {
-            return newFill_;
-        } else {
-            return static_cast<OUT>((uconv_->convert(oldScale_*in + oldOffset_)-newOffset_)*newScaleInv_);
-        }
+        return (in == oldFill_ || mifi_isnan<IN>(in))
+                ? newFill_
+                : static_cast<OUT>((uconv_->convert(oldScale_*in + oldOffset_)-newOffset_)*newScaleInv_);
     }
 };
 
@@ -422,11 +420,9 @@ public:
     ChangeMissingValue(double oldFill, double newFill) :
         oldFill_(static_cast<IN>(oldFill)), newFill_(static_cast<OUT>(newFill)) {}
     OUT operator()(const IN& in) const {
-        if (in == oldFill_ || mifi_isnan(in)) {
-            return newFill_;
-        } else {
-            return static_cast<OUT>(in);
-        }
+        return (in == oldFill_ || mifi_isnan(in))
+                ? newFill_
+                : static_cast<OUT>(in);
     }
 };
 
