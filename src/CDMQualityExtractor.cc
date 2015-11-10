@@ -284,6 +284,22 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
 
         const CDM& cdmS = readerS->getCDM();
         const size_t sizeD = data->size(), sizeS = statusData->size();
+        if (sizeD == 0 && sizeS == 0) {
+            // special case: only undefined data
+            const CDMVariable& var = cdm_->getVariable(varName);
+            const vector<string>& shape = var.getShape();
+            size_t length = 1;
+            for (size_t i = 0; i < shape.size(); ++i) {
+                if (i == 0) {
+                    if (! cdm_->hasUnlimitedDim(var)) {
+                        length *= cdm_->getDimension(shape.at(i)).getLength();
+                    }
+                }
+                length *= cdm_->getDimension(shape.at(i)).getLength();
+            }
+            // return undefined data with new fill-value
+            return createData(cdm_->getVariable(varName).getDataType(), length, variableFill[varName]);
+        }
         const double sizeRatio = double(sizeD)/sizeS;
         if (sizeRatio == int(sizeRatio) && sizeRatio >= 1) {
             boost::shared_array<double> sd = statusData->asDouble();
