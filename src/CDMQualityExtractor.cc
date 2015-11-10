@@ -291,11 +291,12 @@ DataPtr CDMQualityExtractor::getDataSlice(const std::string& varName, size_t unL
             size_t length = 1;
             for (size_t i = 0; i < shape.size(); ++i) {
                 if (i == 0) {
-                    if (! cdm_->hasUnlimitedDim(var)) {
+                    if (!cdm_->hasUnlimitedDim(var)) {
                         length *= cdm_->getDimension(shape.at(i)).getLength();
                     }
+                } else {
+                    length *= cdm_->getDimension(shape.at(i)).getLength();
                 }
-                length *= cdm_->getDimension(shape.at(i)).getLength();
             }
             // return undefined data with new fill-value
             return createData(cdm_->getVariable(varName).getDataType(), length, variableFill[varName]);
