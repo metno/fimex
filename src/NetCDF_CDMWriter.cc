@@ -407,6 +407,7 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
         int dimId;
         ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(it->getName()).c_str(), length, &dimId));
         ncDimMap[it->getName()] = dimId;
+        LOG4FIMEX(logger,Logger::INFO, "DimId of " << it->getName() << " = " << dimId);
     }
     return ncDimMap;
 }
@@ -433,6 +434,7 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
             datatype = CDM_INT;
         }
         int varId;
+        LOG4FIMEX(logger, Logger::DEBUG, "defining variable " << var.getName() << " with shape '" << join(shape.begin(), shape.end()) << "' = " <<join(&ncshape[0], &ncshape[0]+shape.size()));
         ncCheck(nc_def_var(ncFile->ncId, getVariableName(var.getName()).c_str(), cdmDataType2ncType(datatype), shape.size(), &ncshape[0], &varId));
         ncVarMap[var.getName()] = varId;
 #ifdef NC_NETCDF4
@@ -660,7 +662,7 @@ void NetCDF_CDMWriter::writeData(const NcVarIdMap& ncVarMap) {
                         start[i] = 0;
                         ncCheck(nc_inq_dimlen(ncFile->ncId, dimIds[i], &count[i]));
                     }
-
+                    LOG4FIMEX(logger, Logger::DEBUG, "dimids of " << varName << ": " << join(&dimIds[0], &dimIds[0]+dimLen));
                     if (unLimDimPos == -1) {
                         if (!cdm.hasUnlimitedDim(cdmVar)) {
                             //variable without unlimited dimension write at -1

@@ -1109,7 +1109,7 @@ void GribCDMReader::initAddVariables()
              vector<string> shape;
              shape.push_back(pi.xDim);
              shape.push_back(pi.yDim);
-             if (gfmIt->getTotalNumberOfEnsembles() > 1) {
+             if (p_->ensembleDimName != "" && gfmIt->getTotalNumberOfEnsembles() > 1) {
                  shape.push_back(p_->ensembleDimName);
              }
              assert(p_->varLevelTypePos.find(varName) != p_->varLevelTypePos.end());
