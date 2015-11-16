@@ -26,6 +26,7 @@
 
 #include <string>
 #include <fstream>
+#include <iostream>
 #include <libxml/xmlreader.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/program_options.hpp>
