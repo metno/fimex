@@ -26,7 +26,6 @@
 
 #include <map>
 #include <set>
-#include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "fimex/CDMReader.h"
@@ -43,9 +42,9 @@ namespace MetNoFimex
 class CDMExtractor : public MetNoFimex::CDMReader
 {
 private:
-    boost::shared_ptr<CDMReader> dataReader;
-    typedef std::map<std::string, boost::array<size_t, 2> > DimChangeMap;
-    DimChangeMap dimChanges;
+    boost::shared_ptr<CDMReader> dataReader_;
+    typedef std::map<std::string, std::vector<size_t> > DimSlicesMap;
+    DimSlicesMap dimSlices_;
     /**
      * all extractors need to have another Reader with input-data
      */
@@ -78,6 +77,14 @@ public:
      * @warning ignores selection of non-existing variable
      */
     virtual void selectVariables(std::set<std::string> variables, bool keepLogical = false);
+    /**
+      * @brief Reduce a dimension of the file
+      *
+      * @param dimName  dimension to change
+      * @param slices  slices to pick from the original dimension
+      * @throw CDMException if dimension doesn't exist or start+size outside range of the original dimension
+      */
+     void reduceDimension(std::string dimName, const std::set<std::size_t>& slices);
     /**
      * @brief Reduce a dimension of the file
      *

@@ -40,9 +40,9 @@ namespace MetNoFimex
 static LoggerPtr logger(getLogger("fimex.CDMExtractor"));
 
 CDMExtractor::CDMExtractor(boost::shared_ptr<CDMReader> datareader)
-: dataReader(datareader)
+: dataReader_(datareader)
 {
-    *cdm_ = dataReader->getCDM();
+    *cdm_ = dataReader_->getCDM();
 }
 
 CDMExtractor::~CDMExtractor()
@@ -58,12 +58,12 @@ DataPtr CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPo
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
     DataPtr data;
-    if (dimChanges.empty()) {
+    if (dimSlices_.empty()) {
         // simple read
-        data = dataReader->getDataSlice(varName, unLimDimPos);
+        data = dataReader_->getDataSlice(varName, unLimDimPos);
     } else {
         // translate slice-variable size where dimensions have been transformed, (via data.slice)
-        const CDM& orgCDM = dataReader->getCDM();
+        const CDM& orgCDM = dataReader_->getCDM();
         SliceBuilder sb(orgCDM, varName);
         const std::vector<std::string>& dims = sb.getDimensionNames();
         // loop over variables dimensions and see which to reduce
@@ -72,21 +72,20 @@ DataPtr CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPo
             if (dim.isUnlimited()) {
                 sb.setStartAndSize(dim.getName(), unLimDimPos, 1);
             }
-            DimChangeMap::iterator foundDim = dimChanges.find(dim.getName());
-            if (foundDim != dimChanges.end()) {
-                   size_t start = (foundDim->second)[0];
-                   size_t length = (foundDim->second)[1];
+            DimSlicesMap::iterator foundDim = dimSlices_.find(dim.getName());
+            if (foundDim != dimSlices_.end()) {
                    if (dim.isUnlimited()) { // this is the slice-dim
                        // changing unLimDimPos to readers dimension
                        // and fetch only one slice
-                       sb.setStartAndSize(dim.getName(), start + unLimDimPos, 1);
+                       sb.setStartAndSize(dim.getName(), foundDim->second.at(unLimDimPos), 1);
                    } else {
-                       sb.setStartAndSize(dim.getName(), start, length);
+                   // TODO: handle non-continuous slices
+                       sb.setStartAndSize(dim.getName(), foundDim->second.at(0), foundDim->second.size());
                    }
             }
         }
         // read
-        data = dataReader->getDataSlice(varName, sb);
+        data = dataReader_->getDataSlice(varName, sb);
      }
     // TODO: translate datatype where required
     return data;
@@ -107,9 +106,9 @@ DataPtr CDMExtractor::getDataSlice(const std::string& varName, const SliceBuilde
         }
     }
 
-    if (dimChanges.empty()) {
+    if (dimSlices_.empty()) {
         // no further slicing of dimensions
-        return dataReader->getDataSlice(varName, sb);
+        return dataReader_->getDataSlice(varName, sb);
     }
     return CDMReader::getDataSlice(varName, sb);
 }
@@ -125,7 +124,7 @@ void CDMExtractor::selectVariables(std::set<std::string> variables, bool addAuxi
 {
     using namespace std;
     if (addAuxiliaryVariables) {
-        addAuxiliary(variables, getCDM(), listCoordinateSystems(this->dataReader));
+        addAuxiliary(variables, getCDM(), listCoordinateSystems(this->dataReader_));
     }
 
 
@@ -150,19 +149,23 @@ void CDMExtractor::selectVariables(std::set<std::string> variables, bool addAuxi
              bind1st(mem_fun(&CDMExtractor::removeVariable),this));
 }
 
-void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length)
+void CDMExtractor::reduceDimension(std::string dimName, const std::set<std::size_t>& slices)
 {
     CDMDimension& dim = cdm_->getDimension(dimName);
-    if (start+length > dim.getLength()) {
-        throw CDMException("can't enlarge dimension " + dimName + ": start+length ("+type2string(start)+"+"+type2string(length)+") out of bounds: "+ type2string(dim.getLength()));
+    std::set<std::size_t> useSlices;
+    for (std::set<std::size_t>::const_iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt ) {
+        if (*sliceIt > dim.getLength()) {
+//            LOG4FIMEX(logger,Logger.WARN, "can't select slice of dimension '" << dimName + "': "<<*sliceIt << " out of bounds: "<< dim.getLength());
+            throw CDMException("can't select slice of dimension '" + dimName + "': " + type2string(*sliceIt) + " out of bounds: "+ type2string(dim.getLength()));
+        } else {
+            useSlices.insert(*sliceIt);
+        }
     }
     // keep track of changes
-    dim.setLength(length);
-    boost::array<size_t, 2> changes = { {start, length} };
-    dimChanges[dimName] = changes;
+    dim.setLength(useSlices.size());
+    dimSlices_[dimName] = std::vector<size_t>(useSlices.begin(), useSlices.end());
 
-
-    // removing all data containing this dimension, just to be sure it's read from the dataReader
+    // removing all data containing this dimension, just to be sure it's read from the dataReader_
     const CDM::VarVec& variables = cdm_->getVariables();
     for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
         const std::vector<std::string>& shape = it->getShape();
@@ -170,6 +173,16 @@ void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t len
             cdm_->getVariable(it->getName()).setData(DataPtr());
         }
     }
+
+}
+
+void CDMExtractor::reduceDimension(std::string dimName, size_t start, size_t length)
+{
+    std::set<std::size_t> useSlices;
+    for (std::size_t i = 0; i < length; i++) {
+        useSlices.insert(start+i);
+    }
+    reduceDimension(dimName, useSlices);
 }
 
 void CDMExtractor::reduceDimensionStartEnd(std::string dimName, size_t start, long long end)
@@ -197,8 +210,8 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
 
     Units units;
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList coordsys = listCoordinateSystems(dataReader);
-    const CDM& cdm = dataReader->getCDM();
+    CsList coordsys = listCoordinateSystems(dataReader_);
+    const CDM& cdm = dataReader_->getCDM();
     typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
     VAxesList vAxes;
     for (CsList::const_iterator cs = coordsys.begin(); cs != coordsys.end(); ++cs) {
@@ -221,7 +234,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
         } else if (usedDimensions.find(shape[0]) == usedDimensions.end()) {
             // set usedDimensions to not process dimension again
             usedDimensions.insert(shape[0]);
-            DataPtr vData = dataReader->getScaledData((*va)->getName());
+            DataPtr vData = dataReader_->getScaledData((*va)->getName());
             if (vData->size() > 0) {
                 boost::shared_array<double> vArray = vData->asDouble();
                 // calculate everything in the original unit
@@ -271,7 +284,7 @@ void CDMExtractor::reduceAxes(const std::vector<CoordinateAxis::AxisType>& types
                     // reverse data back for possible later usage
                     reverse(&vArray[0], &vArray[0] + vData->size());
                 }
-                if (dimChanges.find(shape[0]) == dimChanges.end()) {
+                if (dimSlices_.find(shape[0]) == dimSlices_.end()) {
                     LOG4FIMEX(logger, Logger::DEBUG, "reducing axes-dimension "<< shape[0] << " from: " << startPos << " size: " << size);
                     reduceDimension(shape[0], startPos, size);
                 } else {
@@ -317,7 +330,7 @@ void CDMExtractor::reduceLatLonBoundingBox(double south, double north, double we
     }
     // find coordinate-systems
     typedef vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-    CsList coordsys = listCoordinateSystems(dataReader);
+    CsList coordsys = listCoordinateSystems(dataReader_);
     typedef vector<CoordinateSystem::ConstAxisPtr> VAxesList;
     VAxesList vAxes;
     set<string> convertedAxes;
