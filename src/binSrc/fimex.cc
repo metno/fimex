@@ -219,6 +219,8 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeVectorOptionString(out, "extract.reduceDimension.name", vm);
     writeVectorOptionInt(out, "extract.reduceDimension.start", vm);
     writeVectorOptionInt(out, "extract.reduceDimension.end", vm);
+    writeVectorOptionString(out, "extract.pickDimension.name", vm);
+    writeVectorOptionString(out, "extract.pickDimension.list", vm);
     writeOption<string>(out, "extract.reduceTime.start", vm);
     writeOption<string>(out, "extract.reduceTime.end", vm);
     writeOption<string>(out, "extract.reduceVerticalAxis.unit", vm);
@@ -453,7 +455,7 @@ static boost::shared_ptr<CDMReader> getCDMProcessor(po::variables_map& vm, boost
 }
 
 static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.removeVariable") ||
+    if (! (vm.count("extract.reduceDimension.name") || vm.count("extract.pickDimension.name") || vm.count("extract.removeVariable") ||
            vm.count("extract.selectVariables") || vm.count("extract.reduceTime.start") ||
            vm.count("extract.reduceTime.start") || vm.count("extract.reduceVerticalAxis.unit") ||
            vm.count("extract.reduceToBoundingBox.south") || vm.count("extract.reduceToBoundingBox.north") ||
@@ -487,6 +489,21 @@ static boost::shared_ptr<CDMReader> getCDMExtractor(po::variables_map& vm, boost
             } else {
                 extractor->reduceDimensionStartEnd(vars[i], startPos[i], endPos[i]);
             }
+        }
+    }
+    if (vm.count("extract.pickDimension.name")) {
+        vector<string> dims = vm["extract.pickDimension.name"].as<vector<string> >();
+        vector<string> lists;
+        if (vm.count("extract.pickDimension.list")) {
+            lists = vm["extract.pickDimension.list"].as<vector<string> >();
+        }
+        if (dims.size() != lists.size()) {
+            cerr << "extract.pickDimension.name has not same no. of elements than extract.pickDimension.list" << endl;
+        }
+        for (size_t i = 0; i < dims.size(); ++i) {
+            vector<int> pos = tokenizeDotted<int>(lists.at(i)); // tokenizeDotted does not work with unsigned values
+            set<size_t> posSet(pos.begin(), pos.end());
+            extractor->reduceDimension(dims.at(i), posSet);
         }
     }
     if (vm.count("extract.reduceTime.start") || vm.count("extract.reduceTime.end")) {
@@ -950,6 +967,8 @@ int run(int argc, char* args[])
         ("extract.reduceDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to reduce")
         ("extract.reduceDimension.start", po::value<vector<int> >()->composing(), "start position of the dimension to reduce (>=0)")
         ("extract.reduceDimension.end", po::value<vector<int> >()->composing(), "end position of the dimension to reduce")
+        ("extract.pickDimension.name", po::value<vector<string> >()->composing(), "name of a dimension to pick levels")
+        ("extract.pickDimension.list", po::value<vector<string> >()->composing(), "list of dim-positions (including dots), starting at 0")
         ("extract.reduceTime.start", po::value<string>(), "start-time as iso-string")
         ("extract.reduceTime.end", po::value<string>(), "end-time by iso-string")
         ("extract.reduceVerticalAxis.unit", po::value<string>(), "unit of vertical axis to reduce")
