@@ -32,6 +32,8 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <functional>
+#include <numeric>
 #include <iterator>
 
 namespace MetNoFimex
@@ -49,6 +51,44 @@ CDMExtractor::~CDMExtractor()
 {
 }
 
+// join SliceBuilder request and build a big dataPtr
+// the slices need to come in a logical order of the data
+DataPtr joinSlices(boost::shared_ptr<CDMReader> reader, std::string varName, const std::vector<SliceBuilder>& slices)
+{
+    const CDMVariable& var = reader->getCDM().getVariable(varName);
+    // handle trivial cases
+    if (slices.size() == 0) return createData(var.getDataType(), 0, 0.);
+    if (slices.size() == 1) return reader->getDataSlice(varName, slices.at(0));
+
+    size_t totalSize = 0;
+    for (size_t i = 0; i < slices.size(); i++) {
+        // estimate total size
+        const SliceBuilder& sb = slices.at(i);
+        std::vector<std::size_t> dimSizes = sb.getDimensionSizes();
+        std::size_t sliceSize = std::accumulate(dimSizes.begin(), dimSizes.end(), 1ul, std::multiplies<size_t>());
+        totalSize += sliceSize;
+    }
+
+    DataPtr retData = createData(var.getDataType(), totalSize, reader->getCDM().getFillValue(varName));
+    size_t dataPos = 0;
+    for (size_t i = 0; i < slices.size(); i++) {
+        // add the data
+        const SliceBuilder& sb = slices.at(i);
+        std::vector<std::size_t> dimSizes = sb.getDimensionSizes();
+        std::size_t sliceSize = std::accumulate(dimSizes.begin(), dimSizes.end(), 1ul, std::multiplies<size_t>());
+        DataPtr sliceData = reader->getDataSlice(varName, sb);
+        if (sliceData->size() == 0) {
+            dataPos += sliceSize;
+        } else {
+            assert(sliceData->size() == sliceSize);
+            retData->setValues(dataPos, *sliceData);
+            dataPos += sliceSize;
+        }
+    }
+    if (dataPos != retData->size()) throw CDMException("joining slices failed: " + type2string(retData->size()) + " != " + type2string(dataPos) );
+    return retData;
+}
+
 DataPtr CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -64,28 +104,73 @@ DataPtr CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPo
     } else {
         // translate slice-variable size where dimensions have been transformed, (via data.slice)
         const CDM& orgCDM = dataReader_->getCDM();
-        SliceBuilder sb(orgCDM, varName);
-        const std::vector<std::string>& dims = sb.getDimensionNames();
+        std::vector<SliceBuilder> slices;
+        slices.push_back(SliceBuilder(orgCDM,varName));
+
+        const std::vector<std::string>& dims = slices.at(0).getDimensionNames();
         // loop over variables dimensions and see which to reduce
+        // revert the dimensions to match joining, unlimit is last in slicebuilder, but slowest changing
         for (std::vector<std::string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
             const CDMDimension& dim = orgCDM.getDimension(*it);
             if (dim.isUnlimited()) {
-                sb.setStartAndSize(dim.getName(), unLimDimPos, 1);
+                for (std::vector<SliceBuilder>::iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt) {
+                    sliceIt->setStartAndSize(dim.getName(), unLimDimPos, 1);
+                }
             }
             DimSlicesMap::iterator foundDim = dimSlices_.find(dim.getName());
             if (foundDim != dimSlices_.end()) {
-                   if (dim.isUnlimited()) { // this is the slice-dim
-                       // changing unLimDimPos to readers dimension
-                       // and fetch only one slice
-                       sb.setStartAndSize(dim.getName(), foundDim->second.at(unLimDimPos), 1);
-                   } else {
-                   // TODO: handle non-continuous slices
-                       sb.setStartAndSize(dim.getName(), foundDim->second.at(0), foundDim->second.size());
+               if (dim.isUnlimited()) { // this is the slice-dim
+                   // changing unLimDimPos to readers dimension
+                   // and fetch only one slice
+                   for (std::vector<SliceBuilder>::iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt) {
+                       sliceIt->setStartAndSize(dim.getName(), unLimDimPos, 1);
                    }
+               } else {
+                   // handle slices in chunks
+                   const std::vector<std::size_t>& positions = foundDim->second;
+                   if (slices.size() <= 1) {
+                       // make chunks as large as possible for efficiency
+                       std::vector<std::pair<size_t, size_t> > chunks; // start,size
+                       size_t start = positions.at(0);
+                       size_t last = positions.at(0);
+                       for (size_t i = 1; i < positions.size(); ++i) {
+                           if (positions.at(i) == last+1) {
+                               // make a larger continuous chunk
+                               last = positions.at(i);
+                           } else {
+                               chunks.push_back(std::make_pair(start, last-start+1));
+                               start = positions.at(i);
+                               last = positions.at(i);
+                           }
+                       }
+                       chunks.push_back(std::make_pair(start, last-start+1)); // chunks with start and size
+                       // create one slice for each chunk
+                       std::vector<SliceBuilder> newSlices;
+                       for (std::vector<std::pair<size_t, size_t> >::iterator chunksIt = chunks.begin(); chunksIt != chunks.end(); ++chunksIt) {
+                           for (std::vector<SliceBuilder>::iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt) {
+                               SliceBuilder sb = *sliceIt;
+                               sb.setStartAndSize(dim.getName(), chunksIt->first, chunksIt->second);
+                               newSlices.push_back(sb);
+                           }
+                       }
+                       slices = newSlices;
+                   } else {
+                       // chunks already splitted up, just add the relevant slices one by one
+                       std::vector<SliceBuilder> newSlices;
+                       for (size_t i = 0; i < positions.size(); ++i) {
+                           for (std::vector<SliceBuilder>::iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt) {
+                               SliceBuilder sb = *sliceIt;
+                               sb.setStartAndSize(dim.getName(), positions.at(i), 1);
+                               newSlices.push_back(sb);
+                           }
+                       }
+                       slices = newSlices;
+                   }
+               }
             }
         }
         // read
-        data = dataReader_->getDataSlice(varName, sb);
+        data = joinSlices(dataReader_, varName, slices);
      }
     // TODO: translate datatype where required
     return data;

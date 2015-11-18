@@ -81,7 +81,7 @@ DataPtr createDataPtr_(CDMDataType datatype, size_t length)
         case CDM_UINT:   return boost::shared_ptr<DataImpl<unsigned int> >(new DataImpl<unsigned int>(length));
         case CDM_USHORT: return boost::shared_ptr<DataImpl<unsigned short> >(new DataImpl<unsigned short>(length));
         case CDM_UCHAR:  return boost::shared_ptr<DataImpl<unsigned char> >(new DataImpl<unsigned char>(length));
-        case CDM_NAT: return DataPtr(new DataImpl<char>(0));
+        case CDM_NAT: return DataPtr(new DataImpl<char>(length));
         default: break;
     }
     throw(CDMException("cannot create dataslice of CDMDataType: " + type2string(datatype)));

@@ -37,6 +37,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMExtractor.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
+#include "fimex/interpolation.h"
 
 using namespace std;
 using namespace MetNoFimex;
@@ -44,37 +45,95 @@ using namespace MetNoFimex;
 BOOST_AUTO_TEST_CASE( test_extract )
 {
     //defaultLogLevel(Logger::DEBUG);
-	string topSrcDir(TOP_SRCDIR);
-	string fileName(topSrcDir+"/test/flth00.dat");
-	if (!ifstream(fileName.c_str())) {
-		// no testfile, skip test
-		return;
-	}
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/flth00.dat");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
     boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir + "/share/etc/felt2nc_variables.xml"));
-	boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
-	extract->removeVariable("relative_humidity");
-	try {
-		extract->getCDM().getVariable("relative_humidity");
-		BOOST_CHECK(false);
-	} catch (...) {
-		BOOST_CHECK(true);
-	}
+    boost::shared_ptr<CDMExtractor> extract(new CDMExtractor(feltReader));
+    extract->removeVariable("relative_humidity");
+    try {
+        extract->getCDM().getVariable("relative_humidity");
+        BOOST_CHECK(false);
+    } catch (...) {
+        BOOST_CHECK(true);
+    }
 
-	extract->reduceDimension("y", 10, 50);
-	extract->reduceDimension("x", 80, 50); // spain
-	FimexTime startTime(2007,5,16, 9);
+    extract->reduceDimension("y", 10, 50);
+    extract->reduceDimension("x", 80, 50); // spain
+    FimexTime startTime(2007,5,16, 9);
     FimexTime endTime(2007,5,16, 20);
-	extract->reduceTime(startTime, endTime); // 12 hours 9..20
-	BOOST_CHECK(extract->getData("y")->size() == 50);
+    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    BOOST_CHECK(extract->getData("y")->size() == 50);
     BOOST_CHECK(extract->getData("x")->size() == 50);
     BOOST_CHECK(extract->getData("time")->size() == 12);
     BOOST_CHECK(extract->getData("altitude")->size() == 50*50);
     BOOST_CHECK(extract->getData("precipitation_amount")->size() == 50*50*12);
-	NetCDF_CDMWriter(extract, "test3.nc");
-	BOOST_CHECK(true);
+    BOOST_CHECK(extract->getData("air_temperature")->size() == 50*50*12);
+    boost::shared_array<float> precData1 = extract->getData("air_temperature")->asFloat();
+    NetCDF_CDMWriter(extract, "test3.nc");
+    BOOST_CHECK(true);
 
-	extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
-	extract->reduceTime(FimexTime(FimexTime::min_date_time), FimexTime(FimexTime::max_date_time));
+    // test chunked reading
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    std::set<size_t> slices;
+    slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
+    extract->reduceDimension("y", slices);
+    slices.clear(); slices.insert(80); slices.insert(83);
+    extract->reduceDimension("x", slices);
+    BOOST_CHECK(extract->getCDM().getDimension("y").getLength() == 4);
+    BOOST_CHECK(extract->getData("y")->size() == 4);
+    BOOST_CHECK(extract->getData("x")->size() == 2);
+    BOOST_CHECK(extract->getData("time")->size() == 12);
+    BOOST_CHECK(extract->getData("precipitation_amount")->size() == 4*2*12);
+    boost::shared_array<float> precData2 = extract->getData("air_temperature")->asFloat();
+    //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
+    for (size_t t = 0; t < 12; t++) {
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,0,t,50,50,12)] == precData2[mifi_3d_array_position(0,0,t,2,4,12)]);
+//        cerr << precData1[mifi_3d_array_position(3,0,t,50,50,12)] << " " << precData2[mifi_3d_array_position(1,0,t,2,4,12)] << endl;
+//        cerr << precData1[mifi_3d_array_position(0,1,t,50,50,12)] << " " <<  precData2[mifi_3d_array_position(0,1,t,2,4,12)] << endl;;
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,0,t,50,50,12)] == precData2[mifi_3d_array_position(1,0,t,2,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,1,t,50,50,12)] == precData2[mifi_3d_array_position(0,1,t,2,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,1,t,50,50,12)] == precData2[mifi_3d_array_position(1,1,t,2,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,3,t,50,50,12)] == precData2[mifi_3d_array_position(0,2,t,2,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,3,t,50,50,12)] == precData2[mifi_3d_array_position(1,2,t,2,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,6,t,50,50,12)] == precData2[mifi_3d_array_position(0,3,t,2,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,6,t,50,50,12)] == precData2[mifi_3d_array_position(1,3,t,2,4,12)]);
+    }
+    BOOST_CHECK(true);
+
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceTime(startTime, endTime); // 12 hours 9..20
+    slices.clear(); slices.insert(10); slices.insert(11); slices.insert(13); slices.insert(16);
+    extract->reduceDimension("y", slices);
+    extract->reduceDimension("x", 80, 50); // spain
+    BOOST_CHECK(extract->getCDM().getDimension("y").getLength() == 4);
+    BOOST_CHECK(extract->getData("y")->size() == 4);
+    BOOST_CHECK(extract->getData("x")->size() == 50);
+    BOOST_CHECK(extract->getData("time")->size() == 12);
+    BOOST_CHECK(extract->getData("precipitation_amount")->size() == 4*50*12);
+    precData2 = extract->getData("air_temperature")->asFloat();
+    //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
+    for (size_t t = 0; t < 12; t++) {
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,0,t,50,50,12)] == precData2[mifi_3d_array_position(0,0,t,50,4,12)]);
+//        cerr << precData1[mifi_3d_array_position(3,0,t,50,50,12)] << " " << precData2[mifi_3d_array_position(3,0,t,50,4,12)] << endl;
+//        cerr << precData1[mifi_3d_array_position(0,1,t,50,50,12)] << " " <<  precData2[mifi_3d_array_position(0,1,t,50,4,12)] << endl;;
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,0,t,50,50,12)] == precData2[mifi_3d_array_position(3,0,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,1,t,50,50,12)] == precData2[mifi_3d_array_position(0,1,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,1,t,50,50,12)] == precData2[mifi_3d_array_position(3,1,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,3,t,50,50,12)] == precData2[mifi_3d_array_position(0,2,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,3,t,50,50,12)] == precData2[mifi_3d_array_position(3,2,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(0,6,t,50,50,12)] == precData2[mifi_3d_array_position(0,3,t,50,4,12)]);
+        BOOST_CHECK(precData1[mifi_3d_array_position(3,6,t,50,50,12)] == precData2[mifi_3d_array_position(3,3,t,50,4,12)]);
+    }
+    BOOST_CHECK(true);
+
+
+    extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
+    extract->reduceTime(FimexTime(FimexTime::min_date_time), FimexTime(FimexTime::max_date_time));
     BOOST_CHECK(extract->getData("time")->size() == 61);
 
     extract = boost::shared_ptr<CDMExtractor>(new CDMExtractor(feltReader));
@@ -118,6 +177,7 @@ BOOST_AUTO_TEST_CASE( test_extract )
     extract->selectVariables(variables);
     BOOST_CHECK(extract->getCDM().hasVariable("relative_humidity"));
     BOOST_CHECK(false == extract->getCDM().hasVariable("precipitation_amount"));
+
 
 
 }
