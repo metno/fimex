@@ -88,6 +88,8 @@ struct GribCDMReaderImpl {
     map<string, vector<vector<long> > > levelValsOfType;
     // edition_typeOfLevel -> [ dimensionName ]
     map<string, vector<string> > levelDimNames;
+    // above levelDimNames as set over the dimensions in the vector<string>
+    set<string> levelDimSet;
     // varName -> (edition_levelType, position n levelValsOfType
     map<string, pair<string, size_t> > varLevelTypePos;
 
@@ -481,6 +483,15 @@ void GribCDMReader::initLevels()
         }
         p_->levelDimNames[lit->first] = dimNames;
     }
+
+    // create a fast lookup set for all level-names
+    for (map<string, vector<string> >::const_iterator levDimsIt = p_->levelDimNames.begin(); levDimsIt !=  p_->levelDimNames.end(); ++levDimsIt) {
+        for (vector<string>::const_iterator levDimsIt2 = levDimsIt->second.begin(); levDimsIt2 != levDimsIt->second.end(); ++levDimsIt2) {
+            p_->levelDimSet.insert(*levDimsIt2);
+        }
+    }
+
+
 }
 
 
@@ -1204,14 +1215,6 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
         throw CDMException("no grib message found for variable '" + varName + "'");
     }
 
-
-    set<string> levelNames;
-    for (map<string, vector<string> >::const_iterator levDimsIt = p_->levelDimNames.begin(); levDimsIt !=  p_->levelDimNames.end(); ++levDimsIt) {
-        for (vector<string>::const_iterator levDimsIt2 = levDimsIt->second.begin(); levDimsIt2 != levDimsIt->second.end(); ++levDimsIt2) {
-            levelNames.insert(*levDimsIt2);
-        }
-    }
-
     // grib data can be (x,y,[ensemble,]level,time) or (x,y,[ensemble,]level) or just (x,y[,ensemble])
     const vector<string>& dimNames = sb.getDimensionNames();
     //cerr << join(dimNames.begin(), dimNames.end()) << endl;
@@ -1232,7 +1235,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
             ensembleId = i;
         } else if (dimNames.at(i) == p_->timeDimName) {
             timeId = i;
-        } else if (levelNames.find(dimNames.at(i)) != levelNames.end()) {
+        } else if (p_->levelDimSet.find(dimNames.at(i)) != p_->levelDimSet.end()) {
             // this is a level
             levelId = i;
         } else {
@@ -1371,122 +1374,6 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
     }
     return getDataSlice(varName, sb);
 }
-
-#if 0
-DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
-{
-    LOG4FIMEX(logger, Logger::DEBUG, "fetching unlim-slice " << unLimDimPos << " for variable " << varName);
-    const CDMVariable& variable = cdm_->getVariable(varName);
-
-    if (variable.getDataType() == CDM_NAT) {
-        return createData(CDM_INT,0); // empty
-    }
-    if (variable.hasData()) {
-        return getDataSliceFromMemory(variable, unLimDimPos);
-    }
-    // only time can be unLimDim for grib
-    if (cdm_->hasUnlimitedDim(variable)) {
-        if (unLimDimPos >= getData(p_->timeDimName)->size()) {
-            throw CDMException("requested time outside data-region");
-        }
-    } else {
-        unLimDimPos = std::numeric_limits<size_t>::max(); // undefined
-    }
-
-    //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
-    map<string, map<size_t, map<long, map<size_t, size_t> > > >::const_iterator gmIt = p_->varTimeLevelEnsembleGFIBox.find(varName);
-    if (gmIt == p_->varTimeLevelEnsembleGFIBox.end()) {
-        throw CDMException("no grib message found for variable '" + varName + "'");
-    }
-
-
-    // grib data can be (x,y,[ensemble,]level,time) or (x,y,[ensemble,]level) or just (x,y[,ensemble])
-    const vector<string>& dims = variable.getShape();
-    size_t slice_size = 1;
-    for (vector<string>::const_iterator it = dims.begin(); it != dims.end(); ++it) {
-        CDMDimension& dim = cdm_->getDimension(*it);
-        if (! dim.isUnlimited()) {
-            slice_size *= dim.getLength();
-        }
-    }
-
-    LOG4FIMEX(logger, Logger::DEBUG, "building unlim-slice " << unLimDimPos << " for variable " << varName << ": size: " << slice_size);
-    vector<GribFileMessage> slices;
-    map<size_t, map<long, map<size_t, size_t> > >::const_iterator gmt = gmIt->second.find(unLimDimPos);
-    if (gmt != gmIt->second.end()) {
-        pair<string, size_t> typePos = p_->varLevelTypePos.at(varName);
-        vector<long> levels = p_->levelValsOfType.at(typePos.first).at(typePos.second);
-        for (size_t l = 0; l < levels.size(); ++l) {
-            map<long, map<size_t, size_t> >::const_iterator gmtl = gmt->second.find(levels[l]);
-            if (gmtl != gmt->second.end()) {
-                for (size_t e = 0; e < getVariableMaxEnsembles(varName); ++e) {
-                    map<size_t, size_t>::const_iterator gmtle = gmtl->second.find(e);
-                    if (gmtle != gmtl->second.end()) {
-                        slices.push_back(p_->indices.at(gmtle->second));
-                    } else {
-                        slices.push_back(GribFileMessage()); // add empty slice
-                    }
-                }
-            } else {
-                // layer not found, add empty slices
-                for (size_t e = 0; e < getVariableMaxEnsembles(varName); ++e) {
-                    slices.push_back(GribFileMessage()); // add empty slices
-                }
-            }
-        }
-    }
-
-    // read data from file
-    if (slices.size() == 0) return createData(variable.getDataType(), 0);
-
-    // storage for complete data
-    boost::shared_array<double> doubleArray(new double[slice_size]);
-    // prefill with missing values
-
-    double missingValue = cdm_->getFillValue(varName);
-    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
-        // varPrecision used, use default missing
-        missingValue = MIFI_FILL_DOUBLE;
-    }
-    fill(&doubleArray[0], &doubleArray[slice_size], missingValue);
-    DataPtr data = createData(slice_size, doubleArray);
-    // storage for one layer
-    vector<double> gridData(slice_size/slices.size());
-    size_t dataCurrentPos = 0;
-    for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
-        // join the data of the different levels
-        if (gfmIt->isValid()) {
-            DataPtr data;
-            size_t dataRead;
-            {
-                ScopedCritical lock(p_->mutex);
-                dataRead = gfmIt->readData(gridData, missingValue);
-            }
-            LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
-            copy(&gridData[0], &gridData[0]+dataRead, &doubleArray[dataCurrentPos]);
-        } else {
-            LOG4FIMEX(logger, Logger::DEBUG, "skipping variable " << varName << ", 1 level, " << " size " << gridData.size());
-        }
-        dataCurrentPos += gridData.size(); // always forward a complete slice
-    }
-    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
-        if (variable.getDataType() == CDM_FLOAT || variable.getDataType() == CDM_DOUBLE) {
-            double scale = p_->varPrecision[varName].first;
-            if (variable.getDataType() == CDM_FLOAT) {
-                data = roundData(data->asFloat(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
-            } else {
-                data = roundData(data->asDouble(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
-            }
-        } else {
-            double scale = p_->varPrecision[varName].first;
-            double offset = p_->varPrecision[varName].second;
-            DataTypeChanger dtc(CDM_DOUBLE, missingValue, 1.0, 0.0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset, 1., 0.);
-            data = dtc.convertData(data);
-        }
-    }
-    return data;
-}
-#endif
 
 
 }

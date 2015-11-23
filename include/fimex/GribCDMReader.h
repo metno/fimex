@@ -60,7 +60,6 @@ public:
     GribCDMReader(const std::vector<std::string>& fileNames, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
     GribCDMReader(const std::string& grbmlFileName, const XMLInput& configXML, const std::vector<std::pair<std::string, std::string> >& members=std::vector<std::pair<std::string, std::string> >());
     virtual ~GribCDMReader();
-    //using CDMReader::getDataSlice;
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos);
     virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
     /**
