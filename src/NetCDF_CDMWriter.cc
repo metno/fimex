@@ -407,7 +407,7 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
         int dimId;
         ncCheck(nc_def_dim(ncFile->ncId, getDimensionName(it->getName()).c_str(), length, &dimId));
         ncDimMap[it->getName()] = dimId;
-        LOG4FIMEX(logger,Logger::INFO, "DimId of " << it->getName() << " = " << dimId);
+        LOG4FIMEX(logger,Logger::DEBUG, "DimId of " << it->getName() << " = " << dimId);
     }
     return ncDimMap;
 }

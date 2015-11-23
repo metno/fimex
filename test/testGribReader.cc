@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     }
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
-    defaultLogLevel(Logger::INFO);
+    defaultLogLevel(Logger::DEBUG);
     boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/test/cdmGribReaderConfig_newEarth.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
@@ -74,8 +74,23 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     CDMAttribute attr;
     BOOST_CHECK(grbReader->getCDM().getAttribute("projection_polar_stereographic", "earth_radius", attr));
     BOOST_CHECK(fabs(attr.getData()->asFloat()[0] - 6372000) < 1);
+    // the following test has a tendency to fail when not all tests are run in correct order
+    // a remaining grbml-file uses the wrong earth radius
     BOOST_CHECK(fabs(grbReader->getData("x")->asFloat()[0] - -5719440) < 1);
 
+
+    // slicebuilder
+    SliceBuilder sbX(grbReader->getCDM(), "x");
+    sbX.setStartAndSize("x", 4, 10);
+    BOOST_CHECK(grbReader->getDataSlice("x", sbX)->size() == 10);
+
+    SliceBuilder sb(grbReader->getCDM(), "x_wind_10m");
+    sb.setStartAndSize("time", 0, 1);
+    sb.setStartAndSize("x", 4, 10);
+    sb.setStartAndSize("y", 2, 2);
+    vector<size_t> dimStart = sb.getDimensionStartPositions();
+    DataPtr dataS = grbReader->getDataSlice("x_wind_10m", sb);
+    BOOST_CHECK(20 == dataS->size());
 
     NetCDF_CDMWriter(grbReader, "testGribRead.nc");
     BOOST_CHECK(true); // and it is even writeable

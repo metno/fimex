@@ -1172,6 +1172,207 @@ DataPtr roundData(boost::shared_array<T> array, size_t n, double scale, double i
     return createData(n, array);
 }
 
+
+vector<size_t> createVector(size_t id, const vector<size_t>& dimStart, const vector<size_t>& dimSizes)
+{
+    vector<size_t> retVal;
+    if (id == std::numeric_limits<size_t>::max()) {
+        retVal.push_back(std::numeric_limits<size_t>::max());
+    } else {
+        for (size_t i = 0; i < dimSizes.at(id); i++) {
+            retVal.push_back(i + dimStart.at(id));
+        }
+    }
+    return retVal;
+}
+
+DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& sb)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "fetching slicebuilder for variable " << varName);
+    const CDMVariable& variable = cdm_->getVariable(varName);
+
+    if (variable.getDataType() == CDM_NAT) {
+        return createData(CDM_INT,0); // empty
+    }
+    if (variable.hasData()) {
+        return variable.getData()->slice(sb.getMaxDimensionSizes(), sb.getDimensionStartPositions(), sb.getDimensionSizes());
+    }
+
+    //map<string, map<size_t, map<long, map<size_t, size_t> > > > varTimeLevelEnsembleGFIBox;
+    map<string, map<size_t, map<long, map<size_t, size_t> > > >::const_iterator gmIt = p_->varTimeLevelEnsembleGFIBox.find(varName);
+    if (gmIt == p_->varTimeLevelEnsembleGFIBox.end()) {
+        throw CDMException("no grib message found for variable '" + varName + "'");
+    }
+
+
+    set<string> levelNames;
+    for (map<string, vector<string> >::const_iterator levDimsIt = p_->levelDimNames.begin(); levDimsIt !=  p_->levelDimNames.end(); ++levDimsIt) {
+        for (vector<string>::const_iterator levDimsIt2 = levDimsIt->second.begin(); levDimsIt2 != levDimsIt->second.end(); ++levDimsIt2) {
+            levelNames.insert(*levDimsIt2);
+        }
+    }
+
+    // grib data can be (x,y,[ensemble,]level,time) or (x,y,[ensemble,]level) or just (x,y[,ensemble])
+    const vector<string>& dimNames = sb.getDimensionNames();
+    //cerr << join(dimNames.begin(), dimNames.end()) << endl;
+    assert(dimNames.at(0) != p_->timeDimName);
+    const vector<size_t>& dimSizes = sb.getDimensionSizes();
+    const vector<size_t>& dimStart = sb.getDimensionStartPositions();
+    const vector<size_t>& maxSizes = sb.getMaxDimensionSizes();
+
+    // x/y = dimNames/Size 0,1
+    const size_t xySliceSize = dimSizes.at(0) * dimSizes.at(1);
+    size_t sliceSize = xySliceSize;
+    size_t levelId = std::numeric_limits<size_t>::max(); // undefined
+    size_t timeId = std::numeric_limits<size_t>::max(); // undefined
+    size_t ensembleId = std::numeric_limits<size_t>::max(); // undefined
+    for (size_t i = 2; i < dimNames.size(); ++i) {
+        sliceSize *= dimSizes.at(i);
+        if (dimNames.at(i) == p_->ensembleDimName) {
+            ensembleId = i;
+        } else if (dimNames.at(i) == p_->timeDimName) {
+            timeId = i;
+        } else if (levelNames.find(dimNames.at(i)) != levelNames.end()) {
+            // this is a level
+            levelId = i;
+        } else {
+            throw CDMException("unknown dimension '" + dimNames.at(i) + "' for variable '" + varName + " in Slicebuilder");
+        }
+    }
+
+
+    LOG4FIMEX(logger, Logger::DEBUG, "building slices for variable " << varName << ": size: " << sliceSize);
+    vector<size_t> timeSlices = createVector(timeId, dimStart, dimSizes);
+    vector<size_t> levelSlices = createVector(levelId, dimStart, dimSizes);
+    vector<size_t> ensembleSlices = createVector(ensembleId, dimStart, dimSizes);
+    vector<GribFileMessage> slices;
+    for (size_t t = 0; t < timeSlices.size(); t++) {
+        map<size_t, map<long, map<size_t, size_t> > >::const_iterator gmt = gmIt->second.find(timeSlices.at(t));
+        if (gmt == gmIt->second.end()) {
+            for (size_t e = 0; e < ensembleSlices.size(); ++e) {
+                for (size_t l = 0; l < levelSlices.size(); ++l) {
+                    slices.push_back(GribFileMessage()); // add empty slices
+                }
+            }
+        } else {
+            pair<string, size_t> typePos = p_->varLevelTypePos.at(varName);
+            vector<long> levels = p_->levelValsOfType.at(typePos.first).at(typePos.second);
+            for (size_t l = 0; l < levelSlices.size(); ++l) {
+                size_t lev = (levelSlices.at(l) == std::numeric_limits<size_t>::max()) ? 0 : levelSlices.at(l); // undefined added as 0
+                map<long, map<size_t, size_t> >::const_iterator gmtl = gmt->second.find(levels.at(lev));
+                if (gmtl != gmt->second.end()) {
+                    for (size_t e = 0; e < ensembleSlices.size(); ++e) {
+                        size_t ens = (ensembleSlices.at(e) == std::numeric_limits<size_t>::max()) ? 0 : ensembleSlices.at(e); // undefined added as 0
+                        map<size_t, size_t>::const_iterator gmtle =
+                                gmtl->second.find(ens);
+                        if (gmtle != gmtl->second.end()) {
+                            slices.push_back(p_->indices.at(gmtle->second));
+                        } else {
+                            slices.push_back(GribFileMessage()); // add empty slice
+                        }
+                    }
+                } else {
+                    // layer not found, add empty slices
+                    for (size_t e = 0; e < ensembleSlices.size(); ++e) {
+                        slices.push_back(GribFileMessage()); // add empty slices
+                    }
+                }
+            }
+        }
+    }
+
+    // read data from file
+    if (slices.size() == 0) return createData(variable.getDataType(), 0);
+
+    size_t maxXySize = maxSizes.at(0) * maxSizes.at(1);
+
+    // storage for complete data
+    boost::shared_array<double> doubleArray(new double[sliceSize]);
+    // prefill with missing values
+
+    double missingValue = cdm_->getFillValue(varName);
+    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
+        // varPrecision used, use default missing
+        missingValue = MIFI_FILL_DOUBLE;
+    }
+    fill(&doubleArray[0], &doubleArray[sliceSize], missingValue);
+    DataPtr data = createData(sliceSize, doubleArray);
+    // storage for one layer
+    vector<double> gridData(maxXySize);
+    size_t dataCurrentPos = 0;
+    for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
+        // join the data of the different levels
+        if (gfmIt->isValid()) {
+            DataPtr data;
+            size_t dataRead;
+            {
+                ScopedCritical lock(p_->mutex);
+                dataRead = gfmIt->readData(gridData, missingValue);
+            }
+            LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);
+            if (maxXySize != xySliceSize) {
+                // slicing on xy-data
+                DataPtr tempData = createData(CDM_DOUBLE, gridData.begin(), gridData.end());
+                vector<size_t> orgSizes, newStart, newSizes;
+                orgSizes.push_back(maxSizes.at(0));
+                orgSizes.push_back(maxSizes.at(1));
+                newStart.push_back(dimStart.at(0));
+                newStart.push_back(dimStart.at(1));
+                newSizes.push_back(dimSizes.at(0));
+                newSizes.push_back(dimSizes.at(1));
+                tempData->slice(orgSizes, newStart, newSizes);
+                boost::shared_array<double> da = tempData->asDouble();
+                gridData.assign(&da[0], &da[0]+xySliceSize);
+            }
+            // copy complete vector
+            copy(gridData.begin(), gridData.end(), &doubleArray[dataCurrentPos]);
+        } else {
+            LOG4FIMEX(logger, Logger::DEBUG, "skipping variable " << varName << ", 1 level, " << " size " << gridData.size());
+        }
+        dataCurrentPos += xySliceSize; // always forward a complete slice
+    }
+    if (p_->varPrecision.find(varName) != p_->varPrecision.end()) {
+        if (variable.getDataType() == CDM_FLOAT || variable.getDataType() == CDM_DOUBLE) {
+            double scale = p_->varPrecision[varName].first;
+            if (variable.getDataType() == CDM_FLOAT) {
+                data = roundData(data->asFloat(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
+            } else {
+                data = roundData(data->asDouble(), data->size(), scale, missingValue, cdm_->getFillValue(varName));
+            }
+        } else {
+            double scale = p_->varPrecision[varName].first;
+            double offset = p_->varPrecision[varName].second;
+            DataTypeChanger dtc(CDM_DOUBLE, missingValue, 1.0, 0.0, variable.getDataType(), cdm_->getFillValue(varName), scale, offset, 1., 0.);
+            data = dtc.convertData(data);
+        }
+    }
+    return data;
+
+}
+
+DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "fetching unlim-slice " << unLimDimPos << " for variable " << varName);
+    const CDMVariable& variable = cdm_->getVariable(varName);
+
+    if (variable.getDataType() == CDM_NAT) {
+        return createData(CDM_INT,0); // empty
+    }
+    if (variable.hasData()) {
+        return getDataSliceFromMemory(variable, unLimDimPos);
+    }
+    // only time can be unLimDim for grib
+    SliceBuilder sb(*cdm_, varName);
+    if (cdm_->hasUnlimitedDim(variable)) {
+        if (unLimDimPos >= cdm_->getDimension(p_->timeDimName).getLength()) {
+            throw CDMException("requested time outside data-region");
+        }
+        sb.setStartAndSize(p_->timeDimName, unLimDimPos, 1);
+    }
+    return getDataSlice(varName, sb);
+}
+
+#if 0
 DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
 {
     LOG4FIMEX(logger, Logger::DEBUG, "fetching unlim-slice " << unLimDimPos << " for variable " << varName);
@@ -1285,6 +1486,7 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, size_t unLimDimPos)
     }
     return data;
 }
+#endif
 
 
 }
