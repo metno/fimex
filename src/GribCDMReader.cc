@@ -1301,13 +1301,14 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
     fill(&doubleArray[0], &doubleArray[sliceSize], missingValue);
     DataPtr data = createData(sliceSize, doubleArray);
     // storage for one layer
-    vector<double> gridData(maxXySize);
+    vector<double> gridData;
     size_t dataCurrentPos = 0;
     for (vector<GribFileMessage>::iterator gfmIt = slices.begin(); gfmIt != slices.end(); ++gfmIt) {
         // join the data of the different levels
         if (gfmIt->isValid()) {
             DataPtr data;
             size_t dataRead;
+            gridData.resize(maxXySize); // make sure the gridData is always large enough
             {
                 ScopedCritical lock(p_->mutex);
                 dataRead = gfmIt->readData(gridData, missingValue);
@@ -1323,12 +1324,13 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
                 newStart.push_back(dimStart.at(1));
                 newSizes.push_back(dimSizes.at(0));
                 newSizes.push_back(dimSizes.at(1));
-                tempData->slice(orgSizes, newStart, newSizes);
+                tempData = tempData->slice(orgSizes, newStart, newSizes);
                 boost::shared_array<double> da = tempData->asDouble();
-                gridData.assign(&da[0], &da[0]+xySliceSize);
+                copy(da.get(), da.get()+tempData->size(), &doubleArray[dataCurrentPos]);
+            } else {
+                // copy complete vector
+                copy(gridData.begin(), gridData.end(), &doubleArray[dataCurrentPos]);
             }
-            // copy complete vector
-            copy(gridData.begin(), gridData.end(), &doubleArray[dataCurrentPos]);
         } else {
             LOG4FIMEX(logger, Logger::DEBUG, "skipping variable " << varName << ", 1 level, " << " size " << gridData.size());
         }
