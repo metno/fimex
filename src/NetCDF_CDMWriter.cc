@@ -457,7 +457,8 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
             }
             if (compression > 0 &&  shape.size() >= 1) { // non-scalar variables
                 // create a chunk-strategy: continuous in last dimensions, max MAX_CHUNK
-                const size_t DEFAULT_CHUNK = 2 << 20; // good chunk up to 1MB *sizof(type)
+                const size_t DEFAULT_CHUNK = 2 << 20; // good chunk up to 1M *sizeof(type)
+                const size_t MIN_CHUNK = 2 << 16; // chunks should be at least reasonably sized, e.g. 64k*sizeof(type)
                 boost::scoped_array<size_t> ncChunk(new size_t[shape.size()]);
                 size_t chunkSize = 1;
                 for (size_t i = 0; i < shape.size(); i++) {
@@ -471,11 +472,19 @@ NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap&
                         ncChunk[shape.size()-1 - i] = chunkDim;
                         chunkSize *= chunkDim;
                     } else {
+                        size_t lastChunkSize = chunkSize;
                         chunkSize *= dimSize;
                         if (chunkSize < DEFAULT_CHUNK) {
                             ncChunk[shape.size()-1 - i] = dimSize;
                         } else {
-                            ncChunk[shape.size()-1 - i] = 1;
+                            size_t thisChunk = 1;
+                            if (dimSize > 1 && (lastChunkSize < (MIN_CHUNK))) {
+                                // create a chunk-size which makes the total chunk ~= MIN_CHUNK
+                                thisChunk = floor(chunkSize / MIN_CHUNK); // a number > 2^4 since chunkSize > DEFAULT_CHUNK
+                                if (thisChunk > dimSize) thisChunk = dimSize;
+                                if (thisChunk < 1) thisChunk = 1;
+                            }
+                            ncChunk[shape.size()-1 - i] = thisChunk;
                         }
                     }
                 }
