@@ -87,8 +87,9 @@ my $vcrossFile = shift @ARGV;
 open (my $fh, $vcrossFile)
     or die "cannot read input $vcrossFile: $!\n";
 LINES: while (defined (my $line = <$fh>)) {
+    $line =~ s/\x{ef}\x{bb}\x{bf}//g; # remove BOM
     chomp $line;
-    next if $line =~ /^\*/; #* is skip-character
+    next if $line =~ /^\s*\*/; #* is skip-character, after whitespace
     my @vals = split ',', $line;
     my $type = int(shift @vals);
     if ($type == 0) {
@@ -121,9 +122,13 @@ LINES: while (defined (my $line = <$fh>)) {
     $name =~ s/\@/Ø/g;
     $name =~ s/\$/Å/g;
     if (LATIN1) {
-        # make sure characters are recognized as utf8
-        $name = Encode::decode_utf8($name);
-        $name = Encode::encode("ISO-8859-1", $name, Encode::FB_CROAK);
+        eval {
+            # make sure characters are recognized as utf8
+            $name = Encode::decode_utf8($name);
+            $name = Encode::encode("ISO-8859-1", $name, Encode::FB_CROAK);
+        }; if ($@) {
+            die "undefined character in line: $@\n$name";
+        }
     }
     push @names, $name;
 }
