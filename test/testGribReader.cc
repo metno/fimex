@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
     }
     vector<string> gribFiles;
     gribFiles.push_back(fileName);
-    defaultLogLevel(Logger::DEBUG);
+    defaultLogLevel(Logger::INFO);
     boost::shared_ptr<CDMReader> grbReader(new GribCDMReader(gribFiles, XMLInputFile(topSrcDir+"/test/cdmGribReaderConfig_newEarth.xml")));
     //grbReader->getCDM().toXMLStream(cout);
     BOOST_CHECK(grbReader->getCDM().hasVariable("x_wind_10m"));
