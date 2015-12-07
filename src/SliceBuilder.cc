@@ -28,6 +28,7 @@
 #include "fimex/CDM.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMDimension.h"
+#include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include <limits>
 
@@ -96,7 +97,7 @@ void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, si
 {
     size_t pos = getDimPos(dimName);
     if ((!unlimited_.at(pos)) && maxSize_.at(pos) < (start + size)) {
-        throw out_of_range("slicebuilder: "+ dimName);
+        throw out_of_range("slicebuilder: "+ dimName + " to large: start: " + type2string(start) + " size: " + type2string(size));
     }
     start_.at(pos) = start;
     size_.at(pos) = size;
