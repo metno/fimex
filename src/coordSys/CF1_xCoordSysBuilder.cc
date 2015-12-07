@@ -125,6 +125,8 @@ static CoordinateAxis::AxisType getAxisTypeCF1_x(const CDM& cdm, const string& v
             return CoordinateAxis::Lat;
         if ( lcSName == "forecast_reference_time" )
             return CoordinateAxis::ReferenceTime;
+        if ( lcSName == "realization" )
+            return CoordinateAxis::Realization;
         if ( lcSName == "projection_x_coordinate" ||
              lcSName == "grid_longitude" )
             return CoordinateAxis::GeoX;

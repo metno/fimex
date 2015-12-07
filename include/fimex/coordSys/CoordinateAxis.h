@@ -49,6 +49,7 @@ public:
         Pressure,
         Height,
         ReferenceTime,
+        Realization
     };
     static std::string type2string(AxisType type) {
         switch (type) {
@@ -61,6 +62,7 @@ public:
         case Pressure: return "Pressure";
         case Height: return "Height";
         case ReferenceTime: return "ReferenceTime";
+        case Realization: return "Realization";
         default: return "Undefined";
         }
     }

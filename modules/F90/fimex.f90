@@ -32,7 +32,7 @@ MODULE Fimex
   !! These are the same definitions as in CoordinateAxis::AxisType
   ENUM, BIND(C)
     ENUMERATOR :: AXIS_Undefined = 0, AXIS_GeoX, AXIS_GeoY, AXIS_GeoZ, AXIS_Time, AXIS_Lon, AXIS_Lat,&
-     AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime
+     AXIS_Pressure, AXIS_Height, AXIS_ReferenceTime, AXIS_Realization
   END ENUM
   !> @enum Interpolation methods
   !! These are the same definintions as #mifi_interpol_method in mifi_constants.h
