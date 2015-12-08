@@ -78,6 +78,8 @@ using namespace std;
 using namespace MetNoFimex;
 
 static LoggerPtr logger = getLogger("fimex");
+static po::options_description config_file_options;
+
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
@@ -268,6 +270,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "merge.inner.file", vm);
     writeOption<string>(out, "merge.inner.type", vm);
     writeOption<string>(out, "merge.inner.config", vm);
+    writeOption<string>(out, "merge.inner.cfg", vm);
     writeOption<string>(out, "merge.smoothing", vm);
     writeOption<string>(out, "merge.method", vm);
     writeOption<string>(out, "merge.projString", vm);
@@ -754,6 +757,16 @@ static boost::shared_ptr<CDMReader> getCDMInterpolator(po::variables_map& vm, bo
     return boost::shared_ptr<CDMReader>(interpolator);
 }
 
+static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+    if (! vm.count("ncml.config")) {
+        return dataReader;
+    }
+    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),XMLInputFile(vm["ncml.config"].as<string>())));
+    printReaderStatements("ncml", vm, ncmlReader);
+
+    return boost::shared_ptr<CDMReader>(ncmlReader);
+}
+
 static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
 
     if (not (vm.count("merge.inner.file") or vm.count("merge.inner.type") or vm.count("merge.inner.config")
@@ -763,6 +776,25 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
     boost::shared_ptr<CDMReader> readerI = getCDMFileReader(vm, "merge.inner");
     if( not readerI )
         throw CDMException("could not create reader for inner in merge");
+    if (vm.count("merge.inner.cfg")) {
+        po::variables_map mvm;
+        ifstream ifs(vm["merge.inner.cfg"].as<string>().c_str());
+        if (!ifs) {
+            cerr << "missing merge.inner.cfg file '" << vm["merge.inner.cfg"].as<string>() << "'" << endl;
+        } else {
+            po::store(po::parse_config_file(ifs, config_file_options), mvm);
+            // apply all fimex processing tasks to the merge.inner stream
+            readerI = getCDMProcessor(mvm, readerI);
+            readerI = getCDMQualityExtractor("", mvm, readerI);
+            readerI = getCDMExtractor(mvm, readerI);
+            readerI = getCDMTimeInterpolator(mvm, readerI);
+            readerI = getCDMInterpolator(mvm, readerI);
+            readerI = getCDMVerticalInterpolator(mvm, readerI);
+            readerI = getCDMMerger(mvm, readerI);
+            readerI = getCDMQualityExtractor("2", mvm, readerI);
+            readerI = getNcmlCDMReader(mvm, readerI);
+        }
+    }
 
     boost::shared_ptr<CDMMerger> merger = boost::shared_ptr<CDMMerger>(new CDMMerger(readerI, dataReader));
 
@@ -808,16 +840,6 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
 
     printReaderStatements("merge", vm, merger);
     return merger;
-}
-
-static boost::shared_ptr<CDMReader> getNcmlCDMReader(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! vm.count("ncml.config")) {
-        return dataReader;
-    }
-    boost::shared_ptr<NcmlCDMReader> ncmlReader(new NcmlCDMReader(boost::shared_ptr<CDMReader>(dataReader),XMLInputFile(vm["ncml.config"].as<string>())));
-    printReaderStatements("ncml", vm, ncmlReader);
-
-    return boost::shared_ptr<CDMReader>(ncmlReader);
 }
 
 static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
@@ -1023,6 +1045,7 @@ int run(int argc, char* args[])
         ("merge.inner.file", po::value<string>(), "inner file for merge")
         ("merge.inner.type", po::value<string>(), "filetype of inner merge file, e.g. nc, nc4, ncml, felt, grib1, grib2, wdb")
         ("merge.inner.config", po::value<string>(), "non-standard configuration for inner merge file")
+        ("merge.inner.cfg", po::value<string>(), "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging")
         ("merge.smoothing", po::value<string>(), "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border")
         ("merge.method", po::value<string>(), "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
                 " coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_* (*=max,min,mean,median,sum")
@@ -1084,7 +1107,6 @@ int run(int argc, char* args[])
     po::options_description cmdline_options;
     cmdline_options.add(generic).add(config);
 
-    po::options_description config_file_options;
     config_file_options.add(config);
 
     po::positional_options_description p;
