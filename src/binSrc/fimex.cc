@@ -79,7 +79,7 @@ using namespace MetNoFimex;
 
 static LoggerPtr logger = getLogger("fimex");
 static po::options_description config_file_options;
-
+static boost::shared_ptr<CDMReader> applyFimexStreamTasks(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader);
 
 static void writeUsage(ostream& out, const po::options_description& generic, const po::options_description& config) {
     out << "usage: fimex --input.file  FILENAME [--input.type  INPUT_TYPE]" << endl;
@@ -784,15 +784,7 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
         } else {
             po::store(po::parse_config_file(ifs, config_file_options), mvm);
             // apply all fimex processing tasks to the merge.inner stream
-            readerI = getCDMProcessor(mvm, readerI);
-            readerI = getCDMQualityExtractor("", mvm, readerI);
-            readerI = getCDMExtractor(mvm, readerI);
-            readerI = getCDMTimeInterpolator(mvm, readerI);
-            readerI = getCDMInterpolator(mvm, readerI);
-            readerI = getCDMVerticalInterpolator(mvm, readerI);
-            readerI = getCDMMerger(mvm, readerI);
-            readerI = getCDMQualityExtractor("2", mvm, readerI);
-            readerI = getNcmlCDMReader(mvm, readerI);
+            readerI = applyFimexStreamTasks(mvm, readerI);
         }
     }
 
@@ -840,6 +832,19 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
 
     printReaderStatements("merge", vm, merger);
     return merger;
+}
+
+boost::shared_ptr<CDMReader> applyFimexStreamTasks(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
+    dataReader = getCDMProcessor(vm, dataReader);
+    dataReader = getCDMQualityExtractor("", vm, dataReader);
+    dataReader = getCDMExtractor(vm, dataReader);
+    dataReader = getCDMTimeInterpolator(vm, dataReader);
+    dataReader = getCDMInterpolator(vm, dataReader);
+    dataReader = getCDMVerticalInterpolator(vm, dataReader);
+    dataReader = getCDMMerger(vm, dataReader);
+    dataReader = getCDMQualityExtractor("2", vm, dataReader);
+    dataReader = getNcmlCDMReader(vm, dataReader);
+    return dataReader;
 }
 
 static void fillWriteCDM(boost::shared_ptr<CDMReader> dataReader, po::variables_map& vm) {
@@ -1170,15 +1175,7 @@ int run(int argc, char* args[])
     }
 
     boost::shared_ptr<CDMReader> dataReader = getCDMFileReader(vm);
-    dataReader = getCDMProcessor(vm, dataReader);
-    dataReader = getCDMQualityExtractor("", vm, dataReader);
-    dataReader = getCDMExtractor(vm, dataReader);
-    dataReader = getCDMTimeInterpolator(vm, dataReader);
-    dataReader = getCDMInterpolator(vm, dataReader);
-    dataReader = getCDMVerticalInterpolator(vm, dataReader);
-    dataReader = getCDMMerger(vm, dataReader);
-    dataReader = getCDMQualityExtractor("2", vm, dataReader);
-    dataReader = getNcmlCDMReader(vm, dataReader);
+    dataReader = applyFimexStreamTasks(vm, dataReader);
     fillWriteCDM(dataReader, vm);
     writeCDM(dataReader, vm);
 

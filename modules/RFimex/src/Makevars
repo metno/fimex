@@ -1,2 +1,2 @@
-PKG_CPPFLAGS = -I. -I/usr/include/libxml2  
-PKG_LIBS = -fopenmp -lfimex  
+PKG_CPPFLAGS = -I. -I/vol/fou/emep/People/heikok/fimexTrunk/include
+PKG_LIBS = -L/vol/fou/emep/People/heikok/fimexTrunk/lib 
