@@ -42,12 +42,12 @@ static int axisLength(CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr ax)
     return dim.getLength();
 }
 
-bool checkSingleAxisCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT, 
+bool checkSingleAxisCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT,
         CoordinateSystem::ConstAxisPtr axB, CoordinateSystem::ConstAxisPtr axT,
         const char* messageLabel)
 {
     const int axisLengthB = axisLength(readerB, axB), axisLengthT = axisLength(readerT, axT);
-    LOG4FIMEX(logger, Logger::DEBUG, "axis length B=" << axisLengthB << " T= " << axisLengthT);
+    LOG4FIMEX(logger, Logger::DEBUG, "axis " << messageLabel << " length B=" << axisLengthB << " T= " << axisLengthT);
 
     // both a variable, different length >= bad
     if (axisLengthB >= -1 and axisLengthT >= -1 and axisLengthB != axisLengthT)
@@ -86,8 +86,10 @@ bool checkAxesCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT, Coordina
         "z", "time", "pressure", "height", "reference time"
     };
     for(int i=0; i<N; ++i) {
-        if (not checkSingleAxisCompatibility(readerB, readerT, csB->findAxisOfType(types[i]), csT->findAxisOfType(types[i]), labels[i]))
+        if (not checkSingleAxisCompatibility(readerB, readerT, csB->findAxisOfType(types[i]), csT->findAxisOfType(types[i]), labels[i])) {
+            LOG4FIMEX(logger, Logger::DEBUG, "axis " << labels[i] << " incompatible");
             return false;
+        }
     }
     return true;
 }
@@ -151,7 +153,7 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
     const CDM& cdmB = readerB->getCDM(), &cdmT = readerT->getCDM();
     if (not (cdmT.hasVariable(varName) and cdmB.hasVariable(varName)))
         LOG_INCOMPATIBLE("not found in top and base");
-    
+
     const CoordinateSystemPtr_cit itCsB = findCS(allCsB, varName);
     const CoordinateSystemPtr_cit itCsT = findCS(allCsT, varName);
     const bool hasCsB = (itCsB != allCsB.end()), hasCsT = (itCsT != allCsT.end());
@@ -161,21 +163,21 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
         LOG4FIMEX(logger, Logger::DEBUG, "variable '" << varName << "' has no CS, defined as compatible");
         return true;
     }
-        
+
     // FIXME the next checks are actually checking what CDMInterpolator can do
     const CoordinateSystemPtr csB = *itCsB, csT = *itCsT;
-    
+
 //    const bool hasSimpleGridB = csB->isSimpleSpatialGridded(), hasSimpleGridT = csT->isSimpleSpatialGridded();
 //    if (not (hasSimpleGridB and hasSimpleGridT))
 //        LOG_INCOMPATIBLE("no simple spatial grid in base and top");
-//    
+//
 //    if (not (csB->hasProjection() and csT->hasProjection()))
 //        LOG_INCOMPATIBLE("no projection in base or top");
 
     // ProjectionPtr projB = csB->getProjection(), projT = csT->getProjection();
     // if (projB->isDegree() != projT->isDegree())
     //     LOG_INCOMPATIBLE("CS projections  are not both in degrees");
-    
+
     if (not checkAxesCompatibility(readerB, readerT, csB, csT))
         LOG_INCOMPATIBLE("CS have incompatible axes");
 
@@ -206,7 +208,7 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
                     isGeoYT = (shapeT[idxT] == csT->getGeoYAxis()->getName());
             if (isGeoXB != isGeoXT or isGeoYB != isGeoYT)
                 LOG_INCOMPATIBLE("geo x/y mismatch");
-            
+
             // if not geox or geoy, must be same dimension length and values
             if (not (isGeoXB or isGeoYB)) {
                 const size_t lengthB = cdmB.getDimension(shapeB[idxB]).getLength(),
@@ -219,7 +221,7 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
             }
         }
     }
-    
+
     return true;
 }
 
