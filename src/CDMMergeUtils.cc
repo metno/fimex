@@ -37,8 +37,8 @@ static int axisLength(CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr ax)
     if (ax.get() == 0)
         return -2;
     const CDMDimension& dim = reader->getCDM().getDimension(ax->getName());
-    if (dim.isUnlimited())
-        return -1;
+    // if (dim.isUnlimited())
+    //    return -1;
     return dim.getLength();
 }
 
@@ -61,14 +61,6 @@ bool checkSingleAxisCompatibility(CDMReaderPtr readerB, CDMReaderPtr readerT,
     if ((axisLengthB == -2 and axisLengthT != 1) or (axisLengthB != 1 and axisLengthT == -2))
         return false;
 
-    if (axisLengthB == -2 or axisLengthT == -2)
-        return true;
-
-    DataPtr dataB = axB->getData(), dataT = axT->getData();
-    if ((not dataB) != (not dataT))
-        return false;
-    if (dataB.get() != 0 and dataB->size() != dataT->size())
-        return false;
     return true;
 }
 
