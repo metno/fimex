@@ -191,6 +191,7 @@ Null_CDMWriter::Null_CDMWriter(const boost::shared_ptr<CDMReader> cdmReader, con
                 if (cdm.hasUnlimitedDim(cdmVars.at(vi))) {
                     // iterate over each unlimited dim (usually time)
 #ifdef _OPENMP
+// the execution order of the tasks is completely undefined, even on a single processor
 #pragma omp task firstprivate(vi,unLimDimPos)
                     {
 #endif
