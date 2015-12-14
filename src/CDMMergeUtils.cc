@@ -218,8 +218,9 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
 }
 
 CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpolationMethod,
-        CDMInterpolatorPtr& interpolatedO, string& nameX, string& nameY)
+        CDMInterpolatorPtr& interpolatedO, string& nameX, string& nameY, bool keepAllOuter)
 {
+    const CDM& cdmIC = readerI->getCDM();
     CDM cdmI = readerI->getCDM();                  // copy, as we modify cdmI
     const CDM::VarVec varsI = cdmI.getVariables(); // copy, as we modify cdmI
     const vector<CoordinateSystemPtr> allCsI = listCoordinateSystems(readerI);
@@ -269,6 +270,23 @@ CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpola
             cdmI.removeVariable(varName);
         } else {
             LOG4FIMEX(logger, Logger::INFO, "variable '" << varName << "' kept");
+        }
+    }
+
+    if (keepAllOuter) {
+        const CDM::DimVec& dims = interpolatedO->getCDM().getDimensions();
+        BOOST_FOREACH(const CDMDimension& dim, dims) {
+            if (!cdmI.hasDimension(dim.getName())) {
+                LOG4FIMEX(logger, Logger::DEBUG, "dimension '" << dim.getName() << "' added from outer");
+                cdmI.addDimension(dim);
+            }
+        }
+        const CDM::VarVec& vars = interpolatedO->getCDM().getVariables();
+        BOOST_FOREACH(const CDMVariable& var, vars) {
+            if (!cdmIC.hasVariable(var.getName())) {
+                LOG4FIMEX(logger, Logger::DEBUG, "variable '" << var.getName() << "' added from outer");
+                cdmI.addVariable(var);
+            }
         }
     }
 

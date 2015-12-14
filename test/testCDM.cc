@@ -39,91 +39,91 @@ using namespace std;
 using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE(test_cdm) {
-	CDM cdm;
-	BOOST_CHECK(true); // cdm initialized
+    CDM cdm;
+    BOOST_CHECK(true); // cdm initialized
 
 }
 
 
 BOOST_AUTO_TEST_CASE( test_variable) {
-	vector<std::string> noDim;
-	string varName("test");
-	CDMVariable testVar(varName, CDM_NAT, noDim);
-	CDM cdm;
-	cdm.addVariable(testVar);
-	BOOST_CHECK(cdm.hasVariable(varName));
+    vector<std::string> noDim;
+    string varName("test");
+    CDMVariable testVar(varName, CDM_NAT, noDim);
+    CDM cdm;
+    cdm.addVariable(testVar);
+    BOOST_CHECK(cdm.hasVariable(varName));
 
-	try {
-		CDMVariable failVar(varName, CDM_NAT, noDim);
-		cdm.addVariable(failVar); // adding new variable with same name should fail
-		BOOST_CHECK(false);
-	} catch (CDMException& ex) {
-		BOOST_CHECK(true);
-	}
+    try {
+        CDMVariable failVar(varName, CDM_NAT, noDim);
+        cdm.addVariable(failVar); // adding new variable with same name should fail
+        BOOST_CHECK(false);
+    } catch (CDMException& ex) {
+        BOOST_CHECK(true);
+    }
 
-	CDMVariable& varRef = cdm.getVariable(varName);
-	BOOST_CHECK(varRef.getName() == varName);
-	try {
-		cdm.getVariable("dummy");
-		BOOST_CHECK(false);
-	} catch (CDMException& ex) {
-		BOOST_CHECK(true);
-	}
+    CDMVariable& varRef = cdm.getVariable(varName);
+    BOOST_CHECK(varRef.getName() == varName);
+    try {
+        cdm.getVariable("dummy");
+        BOOST_CHECK(false);
+    } catch (CDMException& ex) {
+        BOOST_CHECK(true);
+    }
 
-	string newName = varName + "xx";
-	cdm.renameVariable(varName, newName);
-	BOOST_CHECK(cdm.hasVariable(newName));
-	BOOST_CHECK(!cdm.hasVariable(varName));
-	BOOST_CHECK(cdm.getVariable(newName).getName() == newName);
+    string newName = varName + "xx";
+    cdm.renameVariable(varName, newName);
+    BOOST_CHECK(cdm.hasVariable(newName));
+    BOOST_CHECK(!cdm.hasVariable(varName));
+    BOOST_CHECK(cdm.getVariable(newName).getName() == newName);
 
-	cdm.removeVariable(newName);
-	BOOST_CHECK(true);
+    cdm.removeVariable(newName);
+    BOOST_CHECK(true);
 }
 
 BOOST_AUTO_TEST_CASE( test_attributes)
 {
-	CDM cdm;
-	string varName("test");
-	vector<std::string> noDim;
-	CDMVariable testVar(varName, CDM_NAT, noDim);
-	cdm.addVariable(testVar);
-	string varName2("test2");
-	CDMVariable testVar2(varName2, CDM_NAT, noDim);
-	cdm.addVariable(testVar2);
-	string varName3("test3");
+    CDM cdm;
+    string varName("test");
+    vector<std::string> noDim;
+    CDMVariable testVar(varName, CDM_NAT, noDim);
+    cdm.addVariable(testVar);
+    string varName2("test2");
+    CDMVariable testVar2(varName2, CDM_NAT, noDim);
+    cdm.addVariable(testVar2);
+    string varName3("test3");
 
-	cdm.addAttribute(varName, CDMAttribute("attr", "value"));
-	cdm.addAttribute(varName, CDMAttribute("attr2", "value"));
-	cdm.addAttribute(varName2, CDMAttribute("attr", "value"));
-	cdm.addAttribute(varName2, CDMAttribute("attr2", "valueX"));
+    cdm.addAttribute(varName, CDMAttribute("attr", "value"));
+    cdm.addAttribute(varName, CDMAttribute("attr2", "value"));
+    cdm.addAttribute(varName2, CDMAttribute("attr", "value"));
+    cdm.addAttribute(varName2, CDMAttribute("attr2", "valueX"));
 
-	vector<std::string> vars = cdm.findVariables("attr", "value");
-	BOOST_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
-	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
-	vars = cdm.findVariables("attr2", "valueX");
-	BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
-	BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+    vector<std::string> vars = cdm.findVariables("attr", "value");
+    BOOST_CHECK(find(vars.begin(), vars.end(), varName) != vars.end());
+    BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
+    vars = cdm.findVariables("attr2", "valueX");
+    BOOST_CHECK(find(vars.begin(), vars.end(), varName) == vars.end());
+    BOOST_CHECK(find(vars.begin(), vars.end(), varName2) != vars.end());
 
-	/* find attributes of renamed variables */
-	cdm.renameVariable(varName2, varName3);
+    /* find attributes of renamed variables */
+    cdm.renameVariable(varName2, varName3);
     vars = cdm.findVariables("attr", "value");
     BOOST_CHECK(find(vars.begin(), vars.end(), varName2) == vars.end());
     BOOST_CHECK(find(vars.begin(), vars.end(), varName3) != vars.end());
 
 
-	try {
-		cdm.addAttribute(varName, CDMAttribute("attr", "value"));
-		BOOST_CHECK(false); // should throw an error
-	} catch (CDMException& ex) {
-		BOOST_CHECK(true);
-	}
-	cdm.addOrReplaceAttribute(varName, CDMAttribute("attr", "valueNew"));
-	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() > 0);
-	cdm.removeAttribute("bla", "blub");
-	BOOST_CHECK(true); // no error
+    try {
+        cdm.addAttribute(varName, CDMAttribute("attr", "value"));
+        BOOST_CHECK(false); // should throw an error
+    } catch (CDMException& ex) {
+        BOOST_CHECK(true);
+    }
+    cdm.addOrReplaceAttribute(varName, CDMAttribute("attr", "valueNew"));
+    BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() > 0);
+    cdm.removeAttribute("bla", "blub");
+    BOOST_CHECK(true); // no error
 
-	cdm.removeAttribute(varName, "attr");
-	BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() == 0);
+    cdm.removeAttribute(varName, "attr");
+    BOOST_CHECK(cdm.findVariables("attr", "valueNew").size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE( test_dimension)
@@ -174,87 +174,122 @@ BOOST_AUTO_TEST_CASE( test_dimension)
 
 }
 
+BOOST_AUTO_TEST_CASE( test_constructor )
+{
+    // test constructors and assignment
+    CDM cdm, cdm2;
+    cdm.addDimension(CDMDimension("test1",1));
+    cdm.addDimension(CDMDimension("test2",2));
+    cdm2.addDimension(CDMDimension("xxx", 1));
+
+    // assignment
+    cdm2 = cdm;
+    cdm.addDimension(CDMDimension("test3",3));
+    cdm2.addDimension(CDMDimension("xxx2",1));
+    BOOST_CHECK(cdm2.hasDimension("test2"));
+    BOOST_CHECK(! cdm2.hasDimension("test3"));
+    BOOST_CHECK(! cdm2.hasDimension("xxx"));
+    BOOST_CHECK(cdm2.hasDimension("xxx2"));
+    BOOST_CHECK(! cdm.hasDimension("xxx2"));
+
+    // copy
+    CDM cdm3(cdm);
+    BOOST_CHECK(cdm3.hasDimension("test1"));
+    BOOST_CHECK(cdm3.hasDimension("test2"));
+    BOOST_CHECK(cdm3.hasDimension("test3"));
+    cdm.removeDimension("test3");
+    BOOST_CHECK(! cdm.hasDimension("test3"));
+    BOOST_CHECK(cdm3.hasDimension("test3"));
+    cdm3.addDimension(CDMDimension("xxx2",1));
+    BOOST_CHECK(! cdm.hasDimension("xxx2"));
+    BOOST_CHECK(cdm3.hasDimension("xxx2"));
+
+
+
+
+}
+
 BOOST_AUTO_TEST_CASE( test_coordinateSystem)
 {
-	// preparing a cs
-	CDM cdm;
+    // preparing a cs
+    CDM cdm;
 
-	cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("Conventions", "CF-1.0"));
+    cdm.addAttribute(cdm.globalAttributeNS(), CDMAttribute("Conventions", "CF-1.0"));
 
-	string x("x");
-	string y("y");
-	string p("p");
-	string t("t");
+    string x("x");
+    string y("y");
+    string p("p");
+    string t("t");
     string l("l");
-	string var("var");
-	string var2("var2");
-	string var3d("var3d");
-	cdm.addDimension(CDMDimension(x, 1));
-	cdm.addDimension(CDMDimension(y, 1));
-	cdm.addDimension(CDMDimension(p, 1));
+    string var("var");
+    string var2("var2");
+    string var3d("var3d");
+    cdm.addDimension(CDMDimension(x, 1));
+    cdm.addDimension(CDMDimension(y, 1));
+    cdm.addDimension(CDMDimension(p, 1));
     cdm.addDimension(CDMDimension(l, 1));
-	cdm.addDimension(CDMDimension(t, 1));
-	vector<std::string> shape;
-	shape.push_back(x);
-	shape.push_back(y);
-	shape.push_back(t);
-	shape.push_back(p);
-	shape.push_back(l);
-	for (vector<string>::iterator sit = shape.begin(); sit != shape.end(); ++sit) {
-		vector<string> dimShape;
-		dimShape.push_back(*sit);
-		cdm.addVariable(CDMVariable(*sit, CDM_INT, dimShape));
-	}
-	shape.pop_back(); // remove l
-	cdm.addVariable(CDMVariable(var, CDM_INT, shape));
-	shape.pop_back(); // remove p
-	shape.push_back(l);
-	cdm.addVariable(CDMVariable(var2, CDM_INT, shape));
-	shape.pop_back(); // remove l
-	cdm.addVariable(CDMVariable(var3d, CDM_INT, shape));
+    cdm.addDimension(CDMDimension(t, 1));
+    vector<std::string> shape;
+    shape.push_back(x);
+    shape.push_back(y);
+    shape.push_back(t);
+    shape.push_back(p);
+    shape.push_back(l);
+    for (vector<string>::iterator sit = shape.begin(); sit != shape.end(); ++sit) {
+        vector<string> dimShape;
+        dimShape.push_back(*sit);
+        cdm.addVariable(CDMVariable(*sit, CDM_INT, dimShape));
+    }
+    shape.pop_back(); // remove l
+    cdm.addVariable(CDMVariable(var, CDM_INT, shape));
+    shape.pop_back(); // remove p
+    shape.push_back(l);
+    cdm.addVariable(CDMVariable(var2, CDM_INT, shape));
+    shape.pop_back(); // remove l
+    cdm.addVariable(CDMVariable(var3d, CDM_INT, shape));
 
-	// define units
-	cdm.addAttribute(x, CDMAttribute("units", "m"));
-	cdm.addAttribute(y, CDMAttribute("units", "m"));
-	cdm.addAttribute(p, CDMAttribute("units", "bar"));
-	cdm.addAttribute(l, CDMAttribute("positive", "UP"));
-	cdm.addAttribute(t, CDMAttribute("units", "days since 1973-06-26 09:51:00"));
+    // define units
+    cdm.addAttribute(x, CDMAttribute("units", "m"));
+    cdm.addAttribute(y, CDMAttribute("units", "m"));
+    cdm.addAttribute(p, CDMAttribute("units", "bar"));
+    cdm.addAttribute(l, CDMAttribute("positive", "UP"));
+    cdm.addAttribute(t, CDMAttribute("units", "days since 1973-06-26 09:51:00"));
 
-	// define projection params
-	cdm.addAttribute(x, CDMAttribute("standard_name", "projection_x_coordinate"));
-	cdm.addAttribute(y, CDMAttribute("standard_name", "projection_y_coordinate"));
+    // define projection params
+    cdm.addAttribute(x, CDMAttribute("standard_name", "projection_x_coordinate"));
+    cdm.addAttribute(y, CDMAttribute("standard_name", "projection_y_coordinate"));
 
 #if 0
-	typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CsList;
-	CsList cs = listCoordinateSystems(cdm);
-	for (CsList::const_iterator cit = cs.begin(); cit != cs.end(); ++cit) {
-	    std::cerr << **cit << std::endl;
-	}
+    typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CsList;
+    CsList cs = listCoordinateSystems(cdm);
+    for (CsList::const_iterator cit = cs.begin(); cit != cs.end(); ++cit) {
+        std::cerr << **cit << std::endl;
+    }
 #endif
 
-	BOOST_CHECK(x == cdm.getHorizontalXAxis(var));
-	BOOST_CHECK(y == cdm.getHorizontalYAxis(var));
-	BOOST_CHECK(t == cdm.getTimeAxis(var));
-	BOOST_CHECK(p == cdm.getVerticalAxis(var));
-	BOOST_CHECK(l == cdm.getVerticalAxis(var2));
-	BOOST_CHECK("" == cdm.getVerticalAxis(var3d));
+    BOOST_CHECK(x == cdm.getHorizontalXAxis(var));
+    BOOST_CHECK(y == cdm.getHorizontalYAxis(var));
+    BOOST_CHECK(t == cdm.getTimeAxis(var));
+    BOOST_CHECK(p == cdm.getVerticalAxis(var));
+    BOOST_CHECK(l == cdm.getVerticalAxis(var2));
+    BOOST_CHECK("" == cdm.getVerticalAxis(var3d));
 
-	// test cdm.getLatitudeLongitude
-	string lat("lat");
-	string lon("lon");
-	vector<string> xyShape;
-	xyShape.push_back(x);
-	xyShape.push_back(y);
-	cdm.addVariable(CDMVariable(lat, CDM_INT, xyShape));
-	cdm.addVariable(CDMVariable(lon, CDM_INT, xyShape));
-	cdm.addAttribute(lat, CDMAttribute("units", "degreesN"));
-	cdm.addAttribute(lon, CDMAttribute("units", "degreesE"));
-	cdm.addAttribute(var, CDMAttribute("coordinates", lat + " " + lon));
+    // test cdm.getLatitudeLongitude
+    string lat("lat");
+    string lon("lon");
+    vector<string> xyShape;
+    xyShape.push_back(x);
+    xyShape.push_back(y);
+    cdm.addVariable(CDMVariable(lat, CDM_INT, xyShape));
+    cdm.addVariable(CDMVariable(lon, CDM_INT, xyShape));
+    cdm.addAttribute(lat, CDMAttribute("units", "degreesN"));
+    cdm.addAttribute(lon, CDMAttribute("units", "degreesE"));
+    cdm.addAttribute(var, CDMAttribute("coordinates", lat + " " + lon));
 
-	string latRetVal, lonRetVal;
-	BOOST_CHECK(cdm.getLatitudeLongitude(var, latRetVal, lonRetVal));
-	BOOST_CHECK(latRetVal == lat);
-	BOOST_CHECK(lonRetVal == lon);
+    string latRetVal, lonRetVal;
+    BOOST_CHECK(cdm.getLatitudeLongitude(var, latRetVal, lonRetVal));
+    BOOST_CHECK(latRetVal == lat);
+    BOOST_CHECK(lonRetVal == lon);
 
 }
 

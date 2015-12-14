@@ -56,7 +56,7 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
 values_v getAxisValues(const CDMReaderPtr reader, CoordinateSystem::ConstAxisPtr axis, const std::string& unit);
 
 CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpolationMethod,
-        CDMInterpolatorPtr& interpolatedO, std::string& nameX, std::string& nameY);
+        CDMInterpolatorPtr& interpolatedO, std::string& nameX, std::string& nameY, bool keepAllOuter = false);
 
 inline const CoordinateSystemPtr_cit findCS(const CoordinateSystemPtr_v& cs_v, const std::string& varName)
 {

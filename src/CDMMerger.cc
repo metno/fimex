@@ -64,6 +64,7 @@ struct CDMMergerPrivate {
 
     int gridInterpolationMethod;
     bool useOuterIfInnerUndefined;
+    bool keepIndependentOuterVariables;
     CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory;
 
     CDM makeCDM(const string& tproj, const values_v& tx, const values_v& ty,
@@ -82,6 +83,7 @@ CDMMerger::CDMMerger(CDMReaderPtr inner, CDMReaderPtr outer)
     p->gridInterpolationMethod = MIFI_INTERPOL_BILINEAR;
     p->smoothingFactory = CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory());
     p->useOuterIfInnerUndefined = true;
+    p->keepIndependentOuterVariables = true;
 }
 
 // ------------------------------------------------------------------------
@@ -158,7 +160,7 @@ void CDMMerger::setTargetGridFromInner()
                 itCsO = findCS(allCsO, varName);
         if (itCsI == allCsI.end() or itCsO == allCsO.end())
             continue;
-        
+
         const CoordinateSystemPtr csI = *itCsI, csO = *itCsO;
         if (not (csI->isSimpleSpatialGridded() and csO->isSimpleSpatialGridded()))
             continue;
@@ -171,7 +173,7 @@ void CDMMerger::setTargetGridFromInner()
 
         CoordinateSystem::ConstAxisPtr xAxisI = csI->getGeoXAxis(),
                 yAxisI = csI->getGeoYAxis();
-            
+
         const char* unit = projI->isDegree() ? "degree" : "m";
         const values_v vx = p->extendInnerAxis(xAxisI, csO->getGeoXAxis(), unit);
         const values_v vy = p->extendInnerAxis(yAxisI, csO->getGeoYAxis(), unit);
@@ -182,7 +184,7 @@ void CDMMerger::setTargetGridFromInner()
                 xAxisI->getDataType(), yAxisI->getDataType());
         return;
     }
-    
+
     LOG4FIMEX(logger, Logger::WARN, "extending grid failed, no inner variable with CS found");
 }
 
@@ -211,7 +213,7 @@ CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const valu
             tx, ty, tx_unit, ty_unit, tx_type, ty_type);
 
     readerOverlay = CDMOverlayPtr(new CDMOverlay(readerO, interpolatedST, gridInterpolationMethod));
-    
+
     return readerOverlay->getCDM();
 }
 
