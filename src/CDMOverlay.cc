@@ -32,7 +32,7 @@ using namespace std;
 
 namespace MetNoFimex {
 
-static LoggerPtr logger(getLogger("fimex.CDMOverlay"));
+//static LoggerPtr logger(getLogger("fimex.CDMOverlay"));
 
 // ========================================================================
 
@@ -41,32 +41,40 @@ struct CDMOverlayPrivate {
     CDMReaderPtr readerT;
     CDMInterpolatorPtr interpolatedB;
 
-    CDM init(int gridInterpolationMethod);
+    CDM init(int gridInterpolationMethod, bool keepOuterVariables);
 };
 
 // ========================================================================
 
 // base == big, top == small
-CDMOverlay::CDMOverlay(CDMReaderPtr base, CDMReaderPtr top, int grim)
+CDMOverlay::CDMOverlay(CDMReaderPtr base, CDMReaderPtr top, int grim, bool keepOuterVariables)
     : p(new CDMOverlayPrivate)
 {
     p->readerB = base;
     p->readerT = top;
-    *cdm_ = p->init(grim);
+    *cdm_ = p->init(grim, keepOuterVariables);
 }
 
 // ------------------------------------------------------------------------
 
 DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
 {
-    if (cdm_->hasDimension(varName) and cdm_->hasVariable(varName)) {
-      return p->readerT->getDataSlice(varName, unLimDimPos); // not scaled
+    // use cdmB if not defined in cdmT
+    // get simple coordinate variables from readerT
+    if (cdm_->hasDimension(varName) and p->readerT->getCDM().hasVariable(varName)) {
+        // read dimension variables from top
+        return p->readerT->getDataSlice(varName, unLimDimPos); // not scaled
+    }
+
+    if (not p->readerT->getCDM().hasVariable(varName)) {
+        // use complete base-data
+        return p->interpolatedB->getDataSlice(varName, unLimDimPos);
     }
 
     const CDM& cdmB = p->interpolatedB->getCDM();
     if (not cdmB.hasVariable(varName))
         THROW("variable '" << varName << "' unknown in base");
-    
+
     DataPtr sliceT = p->readerT->getScaledDataSlice(varName, unLimDimPos);
     DataPtr sliceB = p->interpolatedB->getScaledDataSlice(varName, unLimDimPos);
     for (size_t i=0; i<sliceB->size(); ++i) {
@@ -84,10 +92,10 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
 
 // ########################################################################
 
-CDM CDMOverlayPrivate::init(int gridInterpolationMethod)
+CDM CDMOverlayPrivate::init(int gridInterpolationMethod, bool keepOuterVariables)
 {
     string nameX, nameY;
-    return makeMergedCDM(readerT, readerB, gridInterpolationMethod, interpolatedB, nameX, nameY);
+    return makeMergedCDM(readerT, readerB, gridInterpolationMethod, interpolatedB, nameX, nameY, keepOuterVariables);
 }
 
 } // namespace MetNoFimex

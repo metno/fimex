@@ -147,10 +147,17 @@ Configurational options:
                                           nc4, ncml, felt, grib1, grib2, wdb
   --merge.inner.config arg                non-standard configuration for inner
                                           merge file
+  --merge.inner.cfg arg                   recursive fimex.cfg setup-file to
+                                          enable all fimex-processing steps (i.e.
+                                          not input and output) to the
+                                          merge.inner source before merging
   --merge.smoothing arg                   smoothing function for merge, e.g.
                                           "LINEAR(5,2)" for linear smoothing, 5
                                           grid points transition, 2 grid points
                                           border
+  --merge.keepOuterVariables              keep all outer variables, default: only
+                                          keep variables existing in inner and
+                                          outer
   --merge.method arg                      interpolation method for grid
                                           conversions, one of nearestneighbor,
                                           bilinear, bicubic, coord_nearestneighbor,
@@ -450,14 +457,12 @@ variable.
 @page mergerDoc field merging Options
 @section mergerDoc field merging Options
 
-@warning The merging functionality is in a early stage of
-development. The merging procedure and configuration might change in
-the future. Any feedback is strongly welcome.
-
 The purpose of the merging functionaltiy is to produce a combined
 field from two input fields, typically one with low horizontal
-resolution covering a large area, and one with high horizontal
-resolution covering a small area. The merge process has two steps:
+resolution covering a large area (base or outer ),
+and one with high horizontal
+resolution covering a small area (top or inner).
+The merge process has two steps:
 first, the transition between the outer border of the high-resolution
 field and the low-resolution field is smoothed; second, both are
 interpolated to the final grid, using the smoothed high-resolution
@@ -467,10 +472,133 @@ When using the fimex program, input.file/type/config specify the outer
 "low resolution" file, while merge.inner.file/type/config specify the
 inner "high resolution" file. All compatible variables will be merged,
 where compatibilty means that names agree, and shapes match except for
-length-1 dimensions and horizontal axes. The final grid may be
+length-1 dimensions and horizontal axes. To keep all other variables from
+the base-file, on can specify merge.keepOuterVariables.
+
+The final grid may be
 specified with merge.projString,x/yAxisValues,x/yAxisUnit,x/yAxisType;
 if not specified, it will be derived automatically by extending the
 high resolution grid until it covers the outer grid.
+
+Ofen, one needs to manipulate heavily both the outer as well as the inner
+inner data to match each other. The outer data can be manipulated with the
+usual fimex-commands, while the inner can be modified with a fimex-setup file
+and the --merge.inner.cfg option.
+
+A complex example is shown below, run as
+@verbatim
+  fimex -c ecPlusArome.cfg --output.file=out.nc4
+@endverbatim
+It joins global EC-data with Norwegian local AROME data. EC-data comes in 3hourly
+timesteps, while Arome has hourly data. EC precipitation is split into convective
+and large-scale precipitation, Arome has only one type of precipitation (arome precipitation
+will be put into convective precipitation, while large-scale precipitation will be set
+to 0).
+Arome contains only surface data, while the output
+should contain all model-level data from EC model (keepOuterVariables).
+
+
+@verbatim
+# file: ecPlusArome.cfg
+
+[input]
+file=ec_n1d_20151208_00.nc
+
+
+# extract only certain parameters used for dispersion modelling
+[extract]
+selectVariables=air_temperature_2m
+selectVariables=lwe_thickness_of_convective_precipitation_amount
+selectVariables=lwe_thickness_of_stratiform_precipitation_amount
+selectVariables=x_wind_10m
+selectVariables=y_wind_10m
+selectVariables=air_temperature_ml
+selectVariables=x_wind_ml
+selectVariables=y_wind_ml
+selectVariables=air_pressure_at_sea_level
+selectVariables=surface_air_pressure
+selectVariables=surface_geopotential
+
+
+# merge with arome 2.5km data
+[merge]
+inner.file=arome_metcoop2_5km_20151208_00.nc
+# manipulate names with arome2EcPrecip.ncml
+inner.config=arome2EcPrecip.ncml
+# further configure data with arome2hprecip.cfg
+inner.cfg=arome3hprecip.cfg
+keepOuterVariables=1
+smoothing=LINEAR(3,2)
+method=bilinear
+# ec - 0.05deg
+projString=+proj=longlat +R=6.371e+06 +no_defs
+xAxisUnit=degree_east
+yAxisUnit=degree_north
+
+# create 3hourly data
+[timeInterpolate]
+timeSpec=2015-12-08T00:00:00Z,2015-12-08T03:00:00Z,...,2015-12-10T12:00:00
+
+@endverbatim
+
+@verbatim
+#file: arome2precip.ncml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2 http://www.unidata.ucar.edu/schemas/netcdf/ncml-2.2.xsd">
+
+<!-- change from kg/m2 (mm) to m and rename -->
+<variable orgName="precipitation_amount_acc" name="lwe_thickness_of_convective_precipitation_amount">
+  <attribute name="units" type="String" value="m" />
+  <attribute name="scale_factor" type="float" value="0.001" />
+</variable>
+
+<!-- create a dummy with everything, will be made 0 in quality extractor -->
+<variable orgName="surface_air_pressure" name="lwe_thickness_of_stratiform_precipitation_amount">
+  <attribute name="units" type="String" value="m" />
+  <attribute name="scale_factor" type="float" value="0.001" />
+</variable>
+
+
+</netcdf>
+
+@endverbatim
+
+@verbatim
+# file: arome3hprecip.cfg
+[extract]
+# this is a dummy 0 genereated with ncml
+selectVariables=lwe_thickness_of_stratiform_precipitation_amount
+# was precipitation_amount_acc before ncml
+selectVariables=lwe_thickness_of_convective_precipitation_amount
+
+# select same period as in ec
+[timeInterpolate]
+timeSpec=2015-12-08T00:00:00Z,2015-12-08T03:00:00Z,...,2015-12-10T12:00:00
+
+[qualityExtract]
+config=noConvectivePrec.xml
+@endverbatim
+
+@verbatim
+# file: noConvectivePrec.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<cdmQualityConfig>
+
+<!-- set all values to 0 (no negative precip) -->
+<variable name="lwe_thickness_of_stratiform_precipitation_amount" fillValue="0">
+   <status_flag_variable name="lwe_thickness_of_stratiform_precipitation_amount">
+      <allowed_values use="max:0" />
+   </status_flag_variable>
+</variable>
+
+</cdmQualityConfig>
+
+@endverbatim
+
 
 @see MetNoFimex::CDMMerger
 @ref programDoc

@@ -68,6 +68,12 @@ public:
      */
     void setUseOuterIfInnerUndefined(bool useOuter);
 
+    /**
+     * Keep outer variables, even if no inner variable with the same name exists. Default: false.
+     * Forwarded to CDMOverlay-constructor, so needs to set before setTargetGrid.
+     */
+    void setKeepOuterVariables(bool keepOuterVariabes);
+
     /** Set grid interpolation method.
      * Must be called before setting target grid.
      * \parameter method one of MIFI_INTERPOL_*

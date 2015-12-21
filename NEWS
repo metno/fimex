@@ -1,30 +1,44 @@
+  * 2015-12-21 fimex-0.61
+    * improved merge options
+      * both inputs fully configurable
+      * outer variables may be kept even when no inner exist
+      * improved documentation with real world example
+    * adding extract.pickDimension for striding
+    * support for ensembles/realization axes
+    * improve performance of grib-reading with SliceBuilder
+      * fix bug when reading grib-files with <ensemble no=“0” total=“220” />
+      * no longer reading repeatedly level-data
+    * fiGrbmlCat: Fast merger of grbml-files, parallel grbml-file generation possible
+    * packages with debug-symbols
+    * avoid too small chunks in netcdf4
+    * micro-performance optimization (vectorization mostly for interpolation)
   * 2015-10-26 fimex-0.60
     * grib-indexing with explicit ensemble data and earth figure
-	* using etmerc instead of tmerc for transverse mercator, with proj 4.8.0
-	* better check for simpleSpatial data
-	* fixing missing value handling for grib-precision scaling
-	* improve MPI-handling
-	* output.config for fillWriter, allowing special selection of slices
-	* ignore unused dimensions/coordinates inf fillWriter
-	* detecting axes mismatch for vector-reprojections
+    * using etmerc instead of tmerc for transverse mercator, with proj 4.8.0
+    * better check for simpleSpatial data
+    * fixing missing value handling for grib-precision scaling
+    * improve MPI-handling
+    * output.config for fillWriter, allowing special selection of slices
+    * ignore unused dimensions/coordinates inf fillWriter
+    * detecting axes mismatch for vector-reprojections
   * 2015-08-28 fimex-0.59.1
     * fixing bug 'sometimes no data when interpolating to many lat/lon points'
   * 2015-08-25 fimex-0.59
     * autoremoving unused dimensions when writing netcdf-files
-	* require '-c fimex.cfg' to read fimex.cfg files
-	* avoid double points on cross-sections corners
-	* precision-scaling on grib-data to float-format uses
-	  rounding at 1/scale_factor instead of adding scale_factor/add_offset
-	* allow pressure and air_pressure as standard_name
-	* use subsetting of input data when interpolating to lon-lat points
-	  - giving up 20x faster response on cached local data
-	  - reducing data-transmission to <0.1% on opendap sources
-	* enabling extractor to propagate subsetting
-	* adding FIMEX_CHUNK_CACHE_SLOTS env-variable for better cache-control
+    * require '-c fimex.cfg' to read fimex.cfg files
+    * avoid double points on cross-sections corners
+    * precision-scaling on grib-data to float-format uses
+      rounding at 1/scale_factor instead of adding scale_factor/add_offset
+    * allow pressure and air_pressure as standard_name
+    * use subsetting of input data when interpolating to lon-lat points
+      - giving up 20x faster response on cached local data
+      - reducing data-transmission to <0.1% on opendap sources
+    * enabling extractor to propagate subsetting
+    * adding FIMEX_CHUNK_CACHE_SLOTS env-variable for better cache-control
   * 2015-05-11 fimex-0.58.1
     * fixing problems with metgm-files
-	* fix bug when changing both scaling and varName in NcML
-	* avoid fetching multiple levels in fiXYcontents
+    * fix bug when changing both scaling and varName in NcML
+    * avoid fetching multiple levels in fiXYcontents
   * 2015-04-23 fimex-0.58
     * adding fiXYcontents script, listing content as horizontal 2d-fields
     * new vertical interpolation methods (different extrapolations)
