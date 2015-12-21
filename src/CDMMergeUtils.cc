@@ -286,6 +286,10 @@ CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpola
             if (!cdmIC.hasVariable(var.getName())) {
                 LOG4FIMEX(logger, Logger::DEBUG, "variable '" << var.getName() << "' added from outer");
                 cdmI.addVariable(var);
+                vector<CDMAttribute> attrs = interpolatedO->getCDM().getAttributes(var.getName());
+                BOOST_FOREACH(const CDMAttribute& att, attrs) {
+                    cdmI.addAttribute(var.getName(), att);
+                }
             }
         }
     }
