@@ -32,7 +32,7 @@ using namespace std;
 
 namespace MetNoFimex {
 
-static LoggerPtr logger(getLogger("fimex.CDMOverlay"));
+//static LoggerPtr logger(getLogger("fimex.CDMOverlay"));
 
 // ========================================================================
 
@@ -41,18 +41,18 @@ struct CDMOverlayPrivate {
     CDMReaderPtr readerT;
     CDMInterpolatorPtr interpolatedB;
 
-    CDM init(int gridInterpolationMethod);
+    CDM init(int gridInterpolationMethod, bool keepOuterVariables);
 };
 
 // ========================================================================
 
 // base == big, top == small
-CDMOverlay::CDMOverlay(CDMReaderPtr base, CDMReaderPtr top, int grim)
+CDMOverlay::CDMOverlay(CDMReaderPtr base, CDMReaderPtr top, int grim, bool keepOuterVariables)
     : p(new CDMOverlayPrivate)
 {
     p->readerB = base;
     p->readerT = top;
-    *cdm_ = p->init(grim);
+    *cdm_ = p->init(grim, keepOuterVariables);
 }
 
 // ------------------------------------------------------------------------
@@ -63,7 +63,6 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
     // get simple coordinate variables from readerT
     if (cdm_->hasDimension(varName) and p->readerT->getCDM().hasVariable(varName)) {
         // read dimension variables from top
-        p->readerT->getCDM().toXMLStream(cerr);
         return p->readerT->getDataSlice(varName, unLimDimPos); // not scaled
     }
 
@@ -93,11 +92,10 @@ DataPtr CDMOverlay::getDataSlice(const std::string &varName, size_t unLimDimPos)
 
 // ########################################################################
 
-CDM CDMOverlayPrivate::init(int gridInterpolationMethod)
+CDM CDMOverlayPrivate::init(int gridInterpolationMethod, bool keepOuterVariables)
 {
     string nameX, nameY;
-    bool keepAllOuter = true;
-    return makeMergedCDM(readerT, readerB, gridInterpolationMethod, interpolatedB, nameX, nameY, keepAllOuter);
+    return makeMergedCDM(readerT, readerB, gridInterpolationMethod, interpolatedB, nameX, nameY, keepOuterVariables);
 }
 
 } // namespace MetNoFimex

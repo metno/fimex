@@ -272,6 +272,7 @@ static void writeOptions(ostream& out, const po::variables_map& vm) {
     writeOption<string>(out, "merge.inner.config", vm);
     writeOption<string>(out, "merge.inner.cfg", vm);
     writeOption<string>(out, "merge.smoothing", vm);
+    writeOptionAny(out, "merge.keepOuterVariables", vm);
     writeOption<string>(out, "merge.method", vm);
     writeOption<string>(out, "merge.projString", vm);
     writeOption<string>(out, "merge.xAxisValues", vm);
@@ -812,6 +813,9 @@ static boost::shared_ptr<CDMReader> getCDMMerger(po::variables_map& vm, boost::s
         LOG4FIMEX(logger, Logger::DEBUG, "no merge.smoothing given, using default as defined by CDMMerger");
     }
 
+    if (vm.count("merge.keepOuterVariables")) {
+        merger->setKeepOuterVariables(true);
+    }
     int method = getInterpolationMethod(vm, "merge.method");
     merger->setGridInterpolationMethod(method);
 
@@ -1052,9 +1056,10 @@ int run(int argc, char* args[])
         ("merge.inner.config", po::value<string>(), "non-standard configuration for inner merge file")
         ("merge.inner.cfg", po::value<string>(), "recursive fimex.cfg setup-file to enable all fimex-processing steps (i.e. not input and output) to the merge.inner source before merging")
         ("merge.smoothing", po::value<string>(), "smoothing function for merge, e.g. \"LINEAR(5,2)\" for linear smoothing, 5 grid points transition, 2 grid points border")
+        ("merge.keepOuterVariables", "keep all outer variables, default: only keep variables existing in inner and outer")
         ("merge.method", po::value<string>(), "interpolation method for grid conversions, one of nearestneighbor, bilinear, bicubic,"
                 " coord_nearestneighbor, coord_kdtree, forward_max, forward_min, forward_mean, forward_median, forward_sum or forward_undef_* (*=max,min,mean,median,sum")
-        ("merge.projString", po::value<string>(), "proj4 input string describing the new projection")
+        ("merge.projString", po::value<string>(), "proj4 input string describing the new projection, default: use inner projection extended to outer grid")
         ("merge.xAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
         ("merge.yAxisValues", po::value<string>(), "string with values on x-Axis, use ... to continue, i.e. 10.5,11,...,29.5, see Fimex::SpatialAxisSpec for full definition")
         ("merge.xAxisUnit", po::value<string>(), "unit of x-Axis given as udunits string, i.e. m or degrees_east")

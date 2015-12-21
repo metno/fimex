@@ -51,7 +51,7 @@ public:
      * Merge data from top grid onto base grid.
      */
     CDMOverlay(boost::shared_ptr<CDMReader> base, boost::shared_ptr<CDMReader> top,
-            int gridInterpolationMethod = MIFI_INTERPOL_BILINEAR);
+            int gridInterpolationMethod = MIFI_INTERPOL_BILINEAR, bool keepOuterVariables = false);
 
     using CDMReader::getDataSlice;
     virtual boost::shared_ptr<Data> getDataSlice(const std::string &varName, std::size_t unLimDimPos);

@@ -64,7 +64,7 @@ struct CDMMergerPrivate {
 
     int gridInterpolationMethod;
     bool useOuterIfInnerUndefined;
-    bool keepIndependentOuterVariables;
+    bool keepOuterVariables;
     CDMBorderSmoothing::SmoothingFactoryPtr smoothingFactory;
 
     CDM makeCDM(const string& tproj, const values_v& tx, const values_v& ty,
@@ -83,7 +83,7 @@ CDMMerger::CDMMerger(CDMReaderPtr inner, CDMReaderPtr outer)
     p->gridInterpolationMethod = MIFI_INTERPOL_BILINEAR;
     p->smoothingFactory = CDMBorderSmoothing::SmoothingFactoryPtr(new CDMBorderSmoothing_LinearFactory());
     p->useOuterIfInnerUndefined = true;
-    p->keepIndependentOuterVariables = true;
+    p->keepOuterVariables = false;
 }
 
 // ------------------------------------------------------------------------
@@ -102,6 +102,15 @@ void CDMMerger::setUseOuterIfInnerUndefined(bool useOuter)
     p->useOuterIfInnerUndefined = useOuter;
     if (p->readerSmooth.get() != 0)
         p->readerSmooth->setUseOuterIfInnerUndefined(useOuter);
+}
+// ------------------------------------------------------------------------
+
+void CDMMerger::setKeepOuterVariables(bool keepOuterVariables)
+{
+    if (p->readerOverlay.get() != 0)
+        LOG4FIMEX(logger, Logger::WARN, "setting keepOuterVariables after setting target grid has"
+                " no effect on the already defined target grid");
+    p->keepOuterVariables = keepOuterVariables;
 }
 // ------------------------------------------------------------------------
 
@@ -212,7 +221,7 @@ CDM CDMMergerPrivate::makeCDM(const string& proj, const values_v& tx, const valu
     interpolatedST->changeProjection(gridInterpolationMethod, proj,
             tx, ty, tx_unit, ty_unit, tx_type, ty_type);
 
-    readerOverlay = CDMOverlayPtr(new CDMOverlay(readerO, interpolatedST, gridInterpolationMethod));
+    readerOverlay = CDMOverlayPtr(new CDMOverlay(readerO, interpolatedST, gridInterpolationMethod, keepOuterVariables));
 
     return readerOverlay->getCDM();
 }
