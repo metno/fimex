@@ -73,20 +73,35 @@ am__fiGrbmlCat_SOURCES_DIST = fiGrbmlCat.cc
 @HAVE_GRIBAPI_TRUE@am_fiGrbmlCat_OBJECTS = fiGrbmlCat.$(OBJEXT)
 fiGrbmlCat_OBJECTS = $(am_fiGrbmlCat_OBJECTS)
 fiGrbmlCat_DEPENDENCIES =
+fiGrbmlCat_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(fiGrbmlCat_LDFLAGS) $(LDFLAGS) -o $@
 am__fiGribCut_SOURCES_DIST = fiGribCut.cc
 @HAVE_GRIBAPI_TRUE@am_fiGribCut_OBJECTS = fiGribCut.$(OBJEXT)
 fiGribCut_OBJECTS = $(am_fiGribCut_OBJECTS)
 @HAVE_GRIBAPI_TRUE@fiGribCut_DEPENDENCIES = ../libfimex.la
+fiGribCut_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(fiGribCut_LDFLAGS) $(LDFLAGS) -o $@
 am__fiIndexGribs_SOURCES_DIST = fiIndexGribs.cc
 @HAVE_GRIBAPI_TRUE@am_fiIndexGribs_OBJECTS = fiIndexGribs.$(OBJEXT)
 fiIndexGribs_OBJECTS = $(am_fiIndexGribs_OBJECTS)
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_DEPENDENCIES = ../libfimex.la
+fiIndexGribs_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(fiIndexGribs_LDFLAGS) $(LDFLAGS) -o $@
 am_fiXYcontents_OBJECTS = fiXYcontents.$(OBJEXT)
 fiXYcontents_OBJECTS = $(am_fiXYcontents_OBJECTS)
 fiXYcontents_DEPENDENCIES = ../libfimex.la
+fiXYcontents_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(fiXYcontents_LDFLAGS) $(LDFLAGS) -o $@
 am_fimex_OBJECTS = fimex.$(OBJEXT)
 fimex_OBJECTS = $(am_fimex_OBJECTS)
 fimex_DEPENDENCIES = ../libfimex.la
+fimex_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(fimex_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -337,14 +352,19 @@ AM_CFLAGS =
 AM_CXXFLAGS = $(BOOST_CPPFLAGS) @LOG4CPP_CFLAGS@ @XML_CPPFLAGS@
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include -DPKGDATADIR="\"$(pkgdatadir)\"" ${milib_CFLAGS} ${NETCDF_CPPFLAGS}  @MIFI_GRIB_API_CPPFLAGS@ ${XML_CPPFLAGS}
 fimex_SOURCES = fimex.cc
+fimex_LDFLAGS = @BOOST_LDFLAGS@
 fimex_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@ @LOG4CPP_LIBS@
 fiXYcontents_SOURCES = fiXYcontents.cc
+fiXYcontents_LDFLAGS = @BOOST_LDFLAGS@
 fiXYcontents_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_REGEX_LIB@ @LOG4CPP_LIBS@
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_SOURCES = fiIndexGribs.cc
+@HAVE_GRIBAPI_TRUE@fiIndexGribs_LDFLAGS = @BOOST_LDFLAGS@
 @HAVE_GRIBAPI_TRUE@fiIndexGribs_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_DATE_TIME_LIB@ @BOOST_IOSTREAMS_LIB@ @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
 @HAVE_GRIBAPI_TRUE@fiGribCut_SOURCES = fiGribCut.cc
+@HAVE_GRIBAPI_TRUE@fiGribCut_LDFLAGS = @BOOST_LDFLAGS@
 @HAVE_GRIBAPI_TRUE@fiGribCut_LDADD = ../libfimex.la @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@ @MIFI_GRIB_API_LIBS@
 @HAVE_GRIBAPI_TRUE@fiGrbmlCat_SOURCES = fiGrbmlCat.cc
+@HAVE_GRIBAPI_TRUE@fiGrbmlCat_LDFLAGS = @BOOST_LDFLAGS@
 @HAVE_GRIBAPI_TRUE@fiGrbmlCat_LDADD = @BOOST_PROGRAM_OPTIONS_LIB@ @BOOST_IOSTREAMS_LIB@  @XML_LIBS@  
 all: all-recursive
 
@@ -425,19 +445,19 @@ clean-binPROGRAMS:
 	rm -f $$list
 fiGrbmlCat$(EXEEXT): $(fiGrbmlCat_OBJECTS) $(fiGrbmlCat_DEPENDENCIES) $(EXTRA_fiGrbmlCat_DEPENDENCIES) 
 	@rm -f fiGrbmlCat$(EXEEXT)
-	$(CXXLINK) $(fiGrbmlCat_OBJECTS) $(fiGrbmlCat_LDADD) $(LIBS)
+	$(fiGrbmlCat_LINK) $(fiGrbmlCat_OBJECTS) $(fiGrbmlCat_LDADD) $(LIBS)
 fiGribCut$(EXEEXT): $(fiGribCut_OBJECTS) $(fiGribCut_DEPENDENCIES) $(EXTRA_fiGribCut_DEPENDENCIES) 
 	@rm -f fiGribCut$(EXEEXT)
-	$(CXXLINK) $(fiGribCut_OBJECTS) $(fiGribCut_LDADD) $(LIBS)
+	$(fiGribCut_LINK) $(fiGribCut_OBJECTS) $(fiGribCut_LDADD) $(LIBS)
 fiIndexGribs$(EXEEXT): $(fiIndexGribs_OBJECTS) $(fiIndexGribs_DEPENDENCIES) $(EXTRA_fiIndexGribs_DEPENDENCIES) 
 	@rm -f fiIndexGribs$(EXEEXT)
-	$(CXXLINK) $(fiIndexGribs_OBJECTS) $(fiIndexGribs_LDADD) $(LIBS)
+	$(fiIndexGribs_LINK) $(fiIndexGribs_OBJECTS) $(fiIndexGribs_LDADD) $(LIBS)
 fiXYcontents$(EXEEXT): $(fiXYcontents_OBJECTS) $(fiXYcontents_DEPENDENCIES) $(EXTRA_fiXYcontents_DEPENDENCIES) 
 	@rm -f fiXYcontents$(EXEEXT)
-	$(CXXLINK) $(fiXYcontents_OBJECTS) $(fiXYcontents_LDADD) $(LIBS)
+	$(fiXYcontents_LINK) $(fiXYcontents_OBJECTS) $(fiXYcontents_LDADD) $(LIBS)
 fimex$(EXEEXT): $(fimex_OBJECTS) $(fimex_DEPENDENCIES) $(EXTRA_fimex_DEPENDENCIES) 
 	@rm -f fimex$(EXEEXT)
-	$(CXXLINK) $(fimex_OBJECTS) $(fimex_LDADD) $(LIBS)
+	$(fimex_LINK) $(fimex_OBJECTS) $(fimex_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
