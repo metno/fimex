@@ -123,7 +123,7 @@ DataPtr CDMExtractor::getDataSlice(const std::string& varName, size_t unLimDimPo
                    // changing unLimDimPos to readers dimension
                    // and fetch only one slice
                    for (std::vector<SliceBuilder>::iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt) {
-                       sliceIt->setStartAndSize(dim.getName(), unLimDimPos, 1);
+                       sliceIt->setStartAndSize(dim.getName(), foundDim->second.at(unLimDimPos), 1);
                    }
                } else {
                    // handle slices in chunks
@@ -249,6 +249,7 @@ void CDMExtractor::reduceDimension(std::string dimName, const std::set<std::size
     // keep track of changes
     dim.setLength(useSlices.size());
     dimSlices_[dimName] = std::vector<size_t>(useSlices.begin(), useSlices.end());
+    LOG4FIMEX(logger,Logger::DEBUG, "reducing dimension '" << dimName << "' to: " << join(useSlices.begin(), useSlices.end(), ",") );
 
     // removing all data containing this dimension, just to be sure it's read from the dataReader_
     const CDM::VarVec& variables = cdm_->getVariables();
