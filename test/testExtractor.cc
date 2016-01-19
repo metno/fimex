@@ -114,6 +114,10 @@ BOOST_AUTO_TEST_CASE( test_extract )
     BOOST_CHECK(extract->getData("y")->size() == 4);
     BOOST_CHECK(extract->getData("x")->size() == 50);
     BOOST_CHECK(extract->getData("time")->size() == 12);
+    //cerr << extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[0] << endl;
+    BOOST_CHECK(extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[0] == 0);
+    BOOST_CHECK(extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[4] == 4);
+    BOOST_CHECK(extract->getScaledDataInUnit("time", "hours since 2007-05-16 09:00:00 +0000")->asInt()[11] == 11);
     BOOST_CHECK(extract->getData("precipitation_amount")->size() == 4*50*12);
     precData2 = extract->getData("air_temperature")->asFloat();
     //cerr << join (&precData2[0], &precData2[0]+(4*2*12));
