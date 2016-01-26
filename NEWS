@@ -1,3 +1,5 @@
+  * 2016-01-19 fimex-0.61.1
+    * bugfix: extraction of unlimited dimension ignores all offsets
   * 2015-12-21 fimex-0.61
     * improved merge options
       * both inputs fully configurable

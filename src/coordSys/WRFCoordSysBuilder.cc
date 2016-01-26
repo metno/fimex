@@ -349,29 +349,35 @@ static std::vector<boost::shared_ptr<const CoordinateSystem> > wrfListCoordinate
             } else {
                 // try to read the time from the data-reader TIMES-variable
                 // Times is usually given as 'YYYY-MM-DD_HH:MM:SS' in UTM as string
-                SliceBuilder sb(cdm, "Times");
-                size_t timeSize = cdm.getDimension("Time").getLength();
-                boost::posix_time::ptime ptFirst;
-                for (size_t i = 0; i < timeSize; ++i) {
-                    sb.setStartAndSize("Time", i, 1);
-                    DataPtr data = reader->getDataSlice("Times", sb);
-                    // define units and set time in that unit as float to vals
-                    string thisTime = data->asString();
-                    if (thisTime.find("_") != string::npos) {
-                        thisTime = thisTime.replace(thisTime.find("_"), 1, " "); // replace _ with space
+                if (cdm.hasVariable("Times")) {
+                    SliceBuilder sb(cdm, "Times");
+                    size_t timeSize = cdm.getDimension("Time").getLength();
+                    boost::posix_time::ptime ptFirst;
+                    for (size_t i = 0; i < timeSize; ++i) {
+                        sb.setStartAndSize("Time", i, 1);
+                        DataPtr data = reader->getDataSlice("Times", sb);
+                        // define units and set time in that unit as float to vals
+                        string thisTime = data->asString();
+                        if (thisTime.find("_") != string::npos) {
+                            thisTime = thisTime.replace(thisTime.find("_"), 1, " "); // replace _ with space
+                        }
+                        boost::posix_time::ptime pt(boost::posix_time::time_from_string(thisTime));
+                        if (i == 0) {
+                            ptFirst = pt;
+                            boost::posix_time::time_facet* time_output =
+                                    new boost::posix_time::time_facet("hours since %Y-%m-%d %H:%M:%S");
+                            stringstream ss;
+                            ss.imbue(std::locale(ss.getloc(), time_output));
+                            ss << ptFirst;
+                            units = ss.str();
+                        }
+                        boost::posix_time::time_duration td(pt - ptFirst);
+                        vals[i] = td.hours() + td.minutes() / 60. + td.seconds() / 3600.;
                     }
-                    boost::posix_time::ptime pt(boost::posix_time::time_from_string(thisTime));
-                    if (i == 0) {
-                        ptFirst = pt;
-                        boost::posix_time::time_facet* time_output = new boost::posix_time::time_facet("hours since %Y-%m-%d %H:%M:%S");
-                        stringstream ss;
-                        ss.imbue(std::locale(ss.getloc(), time_output));
-                        ss << ptFirst;
-                        units = ss.str();
-                    }
-                    boost::posix_time::time_duration td(pt - ptFirst);
-                    vals[i] = td.hours() + td.minutes()/60. + td.seconds()/3600.;
+                } else {
+                    LOG4FIMEX(logger, Logger::ERROR, "no 'Times' variable in WRF found, time-dimension will give wrong results");
                 }
+
             }
             cdm.addVariable(CDMVariable(Time, CDM_FLOAT, shape));
             cdm.addAttribute(Time, CDMAttribute("units", units));
