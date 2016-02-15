@@ -1,3 +1,25 @@
+# general ignore stuff
+#files being edited
+*~
+
+# make and build files
+*.lst
+*.o
+*.eep
+*.lss
+*.map
+*.sym
+*.lo
+*.la
+*.a
+*.so
+
+# eclipse stuff
+/.cdtproject
+/.cproject
+/.settings
+/.csettings
+/.dep
 
 # /
 /stamp-h1
@@ -48,6 +70,7 @@
 /modules/F90/testOut.nc
 /modules/F90/Makefile
 /modules/F90/.deps
+/modules/F90/.libs
 
 # /modules/RFimex/
 /modules/RFimex/config.status
@@ -91,6 +114,7 @@
 /src/binSrc/fiContents
 /src/binSrc/fiXYcontents
 /src/binSrc/fiGrbmlCat
+/src/binSrc/*.o
 
 # /src/convert/
 /src/convert/.deps
