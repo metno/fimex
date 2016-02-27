@@ -870,20 +870,20 @@
     <parameter name="WG1" type="float">
         <grib1 indicatorOfParameter="140" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="112"/>
         <attribute name="long_name" value="Soil moisture content level 1" type="string"/>
-        <attribute name="standard_name" value="soil_moisture_content" type="string"/>
-        <attribute name="units" value="kg/m^2" type="string"/>
+        <attribute name="standard_name" value="volume_fraction_of_condensed_water_in_soil" type="string"/>
+        <attribute name="units" value="m^3/m^3" type="string"/>
     </parameter>
     <parameter name="WG2" type="float">
         <grib1 indicatorOfParameter="171" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="112"/>
         <attribute name="long_name" value="Soil moisture content level 2" type="string"/>
-        <attribute name="standard_name" value="soil_moisture_content" type="string"/>
-        <attribute name="units" value="kg/m^2" type="string"/>
+        <attribute name="standard_name" value="volume_fraction_of_condensed_water_in_soil" type="string"/>
+        <attribute name="units" value="m^3/m^3" type="string"/>
     </parameter>
     <parameter name="WG3" type="float">
         <grib1 indicatorOfParameter="184" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="98" typeOfLevel="112"/>
         <attribute name="long_name" value="Soil moisture content level 3" type="string"/>
-        <attribute name="standard_name" value="soil_moisture_content" type="string"/>
-        <attribute name="units" value="kg/m^2" type="string"/>
+        <attribute name="standard_name" value="volume_fraction_of_condensed_water_in_soil" type="string"/>
+        <attribute name="units" value="m^3/m^3" type="string"/>
     </parameter>
     <!-- Vegetation (87) -->
     <parameter name="vegetation_area_fraction" type="float">

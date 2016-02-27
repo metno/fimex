@@ -100,17 +100,16 @@
     <attribute name="standard_name" value="surface_roughness_length" type="string" />
     <attribute name="units" value="m" type="string" />
 </parameter>
-<parameter id="85,2,1000" name="soil_moisture_content">
-    <attribute name="long_name" value="soil_moisture_content" type="string" />
-    <attribute name="standard_name" value="soil_moisture_content" type="string" />
-    <attribute name="units" value="kg/m2" type="string" />
+<parameter id="85,2,1000" name="volume_fraction_of_condensed_water_in_soil_sl2">
+    <attribute name="long_name" value="Deep soil water content" type="string" />
+    <attribute name="standard_name" value="volume_fraction_of_condensed_water_in_soil" type="string" />
+    <attribute name="units" value="m^3/m^3" type="string" />
 </parameter>
-<parameter id="86,2,1000" name="moisture_content_of_soil_layer" type="float">
+<parameter id="86,2,1000" name="volume_fraction_of_condensed_water_in_soil_sl1" type="float">
     <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />
-    <attribute name="long_name" value="moisture_content_of_soil_layer" type="string" />
-    <attribute name="standard_name" value="moisture_content_of_soil_layer" type="string" />
-    <attribute name="metno_info" value="deep_soil" type="string"/>
-    <attribute name="units" value="kg/m2" type="string" />
+    <attribute name="long_name" value="Soil water content" type="string" />
+    <attribute name="standard_name" value="volume_fraction_of_condensed_water_in_soil" type="string" />
+    <attribute name="units" value="m^3/m^3" type="string" />
 </parameter>
 <parameter id="87,2,1000" name="surface_longwave_radiation" type="float" >
     <attribute name="_FillValue" value="9.9692099683868690e+36f" type="float" />

@@ -36,7 +36,6 @@
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-
 namespace MetNoFimex
 {
 
@@ -124,7 +123,13 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
 
     // process variables
     CDM::VarVec iVars = iCdm.getVariables();
-    for (CDM::VarVec::iterator iv = iVars.begin(); iv != iVars.end(); ++iv) {
+    int varVecSize = iVars.size();
+#ifdef _OPENMP
+#pragma omp parallel for default(shared)
+#endif
+    for (int iVar = 0; iVar < varVecSize; iVar++) {
+    //for (CDM::VarVec::iterator iv = iVars.begin(); iv != iVars.end(); ++iv) {
+        CDMVariable* iv = &iVars.at(iVar);
         LOG4FIMEX(logger, Logger::DEBUG, "processing variable  '" << iv->getName()<< "'");
         if (!oCdm.hasVariable(iv->getName())) {
             LOG4FIMEX(logger, Logger::WARN, "new variable '" << iv->getName() << "': omitting");
@@ -198,7 +203,8 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
         LOG4FIMEX(logger, Logger::DEBUG, "processing "<< iv->getName() << " with " << slices.size() << " slices");
         for (SlicePairs::iterator sliceIt = slices.begin(); sliceIt != slices.end(); ++sliceIt) {
             LOG4FIMEX(logger, Logger::DEBUG, "processing "<< iv->getName() << " with:  " << endl << sliceIt->first << endl << sliceIt->second);
-            io->putDataSlice(iv->getName(), sliceIt->second, in->getDataSlice(iv->getName(), sliceIt->first));
+            DataPtr inData = in->getDataSlice(iv->getName(), sliceIt->first);
+            io->putDataSlice(iv->getName(), sliceIt->second, inData);
         }
     }
 }
