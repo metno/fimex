@@ -28,6 +28,10 @@
 #define MIFI_VERSION_STATUS 0xB0
 #define MIFI_VERSION_STRING "0.62beta"
 
+#define MIFI_VERSION_INT(major,minor,patch) \
+    (1000000*major + 1000*minor + patch)
+#define MIFI_VERSION_CURRENT_INT \
+    MIFI_VERSION_INT(MIFI_VERSION_MAJOR, MIFI_VERSION_MINOR, MIFI_VERSION_PATCH)
 
 /**
  * the default radius of a spherical earth in meter
