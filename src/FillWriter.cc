@@ -38,6 +38,7 @@
 
 namespace MetNoFimex
 {
+static LoggerPtr logger = getLogger("fimex.FillWriter");
 
 struct FillWriterTranslation {
     std::string inputDim;
@@ -52,7 +53,6 @@ std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName);
 FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName)
 {
     using namespace std;
-    LoggerPtr logger = getLogger("fimex.FillWriter");
 
     std::vector<FillWriterTranslation> fwts = readConfigFile(configFileName);
 
@@ -218,7 +218,6 @@ std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName)
     std::vector<FillWriterTranslation> fwts;
     if (fileName == "") return fwts;
 
-    LoggerPtr logger = getLogger("fimex.FillWriter");
     XMLDoc doc(fileName);
     doc.registerNamespace("c", "http://www.met.no/schema/fimex/cdmFillWriterConfig");
     XPathObjPtr xpathObj = doc.getXPathObject("/c:cdmFillWriter");
