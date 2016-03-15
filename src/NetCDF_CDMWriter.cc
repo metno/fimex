@@ -112,7 +112,6 @@ void checkDoc(std::auto_ptr<XMLDoc>& doc, const std::string& filename)
 NetCDF_CDMWriter::NetCDF_CDMWriter(boost::shared_ptr<CDMReader> cdmReader, const std::string& outputFile, std::string configFile, int version)
 : CDMWriter(cdmReader, outputFile), ncFile(std::auto_ptr<Nc>(new Nc()))
 {
-    LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
     std::auto_ptr<XMLDoc> doc;
     if (configFile == "") {
         doc = std::auto_ptr<XMLDoc>(0);
@@ -413,7 +412,6 @@ NetCDF_CDMWriter::NcDimIdMap NetCDF_CDMWriter::defineDimensions() {
 }
 
 NetCDF_CDMWriter::NcVarIdMap NetCDF_CDMWriter::defineVariables(const NcDimIdMap& ncDimIdMap) {
-    LoggerPtr logger = getLogger("fimex.NetCDF_CDMWriter");
     const CDM::VarVec& cdmVars = cdm.getVariables();
     NcVarIdMap ncVarMap;
     for (CDM::VarVec::const_iterator it = cdmVars.begin(); it != cdmVars.end(); ++it) {

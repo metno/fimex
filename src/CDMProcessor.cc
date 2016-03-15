@@ -44,6 +44,8 @@ namespace MetNoFimex
 
 using namespace std;
 
+static LoggerPtr logger = getLogger("fimex.CDMProcessor");
+
 struct SliceCache {
     string varName;
     size_t ulimDimPos;
@@ -267,7 +269,7 @@ void CDMProcessor::accumulate(const std::string& varName)
     if (cdm_->hasUnlimitedDim(variable)) {
         p_->accumulateVars.insert(varName);
     } else {
-        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName <<  " is not unlimited, ignoring accumulate");
+        LOG4FIMEX(logger, Logger::WARN, varName <<  " is not unlimited, ignoring accumulate");
     }
 
 }
@@ -277,7 +279,7 @@ void CDMProcessor::deAccumulate(const std::string& varName)
     if (cdm_->hasUnlimitedDim(variable)) {
         p_->deaccumulateVars.insert(varName);
     } else {
-        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName <<  " is not unlimited, ignoring deaccumulate");
+        LOG4FIMEX(logger, Logger::WARN, varName <<  " is not unlimited, ignoring deaccumulate");
     }
 
 }
@@ -311,7 +313,6 @@ void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
 
 void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY, const std::vector<std::string>& stdNameX, const std::vector<std::string>& stdNameY)
 {
-    LoggerPtr logger = getLogger("fimex.CDMProcessor");
     if (varNameX.size() != varNameY.size()) {
         throw CDMException("rotateVectorToLatLon requires same number of x as of y variableNames");
     }
@@ -409,7 +410,6 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
 
 void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std::string>& varNames)
 {
-    LoggerPtr logger = getLogger("fimex.CDMProcessor");
     if (varNames.size() == 0) return;
 
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
@@ -518,7 +518,7 @@ static void addDataP2Data(DataPtr& data, DataPtr& dataP) {
 
 DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, "getDataSlice for '" << varName << "' at " << unLimDimPos);
+    LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice for '" << varName << "' at " << unLimDimPos);
     DataPtr data;
     if (varName == "upward_air_velocity_ml" && p_->vvComp.xWind != "") {
         boost::shared_ptr<CDMReader> reader = p_->dataReader;
@@ -556,7 +556,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
 
     // accumulation
     if (p_->accumulateVars.find(varName) != p_->accumulateVars.end()) {
-        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
+        LOG4FIMEX(logger, Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
         if (unLimDimPos > 0) { // cannot accumulate first
             size_t start = 0;
             if (p_->sliceCache.varName == varName && p_->sliceCache.ulimDimPos <= unLimDimPos) {
@@ -581,7 +581,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
     }
     // deaccumulation
     if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
-        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
+        LOG4FIMEX(logger, Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
         if (unLimDimPos != 0) { // cannot deaccumulate first
             DataPtr dataP = p_->dataReader->getDataSlice(varName, unLimDimPos-1);
             if ((data->size() != 0) && (dataP->size() != 0)) {
@@ -598,7 +598,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
     if (p_->rotateLatLonVectorX.find(varName) != p_->rotateLatLonVectorX.end() ||
             p_->rotateLatLonVectorY.find(varName) != p_->rotateLatLonVectorY.end()) {
         if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
-            LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
+            LOG4FIMEX(logger, Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
         }
         DataPtr xData;
         DataPtr yData;
@@ -634,10 +634,10 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
     }
     if (p_->rotateLatLonDirection.find(varName) != p_->rotateLatLonDirection.end()) {
         if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
-            LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
+            LOG4FIMEX(logger, Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
         }
         string csId = p_->rotateLatLonDirection[varName];
-        LOG4FIMEX(getLogger("fimex.CDMProcessor"), Logger::DEBUG, "rotating direction " << varName << " with csId " << csId);
+        LOG4FIMEX(logger, Logger::DEBUG, "rotating direction " << varName << " with csId " << csId);
         assert(p_->cachedVectorReprojection.find(csId) != p_->cachedVectorReprojection.end());
         boost::shared_ptr<CachedVectorReprojection> cvr = p_->cachedVectorReprojection[csId];
         boost::shared_array<float> array = data2InterpolationArray(data, getCDM().getFillValue(varName));

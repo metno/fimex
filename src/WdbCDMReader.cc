@@ -51,10 +51,7 @@
 
 namespace MetNoFimex
 {
-namespace
-{
-LoggerPtr logger = getLogger("WdbCDMReader");
-}
+static LoggerPtr logger = getLogger("fimex.WdbCDMReader");
 
 // mutex for the get*Data*
 static MutexType wdbmutex;
