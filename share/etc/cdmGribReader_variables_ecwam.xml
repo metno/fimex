@@ -77,6 +77,7 @@
   
   <parameter name="significant_wave_height" type="float">
     <grib1 indicatorOfParameter="229" gribTablesVersionNo="140"/>
+    <grib1 indicatorOfParameter="100" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="88"/>
     <attribute name="units" value="m" type="string"/>
     <attribute name="standard_name" value="sea_surface_wave_significant_height" type="string"/>
   </parameter>
@@ -96,6 +97,7 @@
 
   <parameter name="mean_wave_period" type="float">
     <grib1 indicatorOfParameter="232" gribTablesVersionNo="140"/>
+    <grib1 indicatorOfParameter="232" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="88"/>
     <attribute name="units" value="s" type="string"/>
     <attribute name="long_name" value="sea_surface_wave_significant_period" type="string"/>
   </parameter>
@@ -145,6 +147,8 @@
 
   <parameter name="x_stokes_drift" type="float">
     <grib1 indicatorOfParameter="215" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+    <grib1 indicatorOfParameter="247" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="88"/>
+
     <attribute name="cell_methods" value="time: point" type="string"/>
     <attribute name="standard_name" value="sea_surface_wave_stokes_drift_x_velocity " type="string"/>
     <attribute name="units" value="m s-1" type="string"/>
@@ -152,6 +156,8 @@
 
   <parameter name="y_stokes_drift" type="float">
     <grib1 indicatorOfParameter="216" gribTablesVersionNo="140" identificationOfOriginatingGeneratingCentre="98"/>
+    <grib1 indicatorOfParameter="248" gribTablesVersionNo="128" identificationOfOriginatingGeneratingCentre="88"/>
+
     <attribute name="cell_methods" value="time: point" type="string"/>
     <attribute name="standard_name" value="sea_surface_wave_stokes_drift_y_velocity " type="string"/>
     <attribute name="units" value="m s-1" type="string"/>
