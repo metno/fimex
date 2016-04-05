@@ -1389,7 +1389,15 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
+        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
+        std::string testVar1, testVar2;
+        if (allXYSpatialVectorsHaveSameHorizontalId(csIt->first, testVar1, testVar2)) {
+            ci->createReducedDomain(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName());
+            LOG4FIMEX(logger, Logger::DEBUG, "reducing cached projection domain to " << ci->getInX() << "x" << ci->getInY());
+        } else {
+            LOG4FIMEX(logger, Logger::WARN, "axes mismatch for vector, e.g. (" << testVar1 << ", " << testVar2 << ") might lead to wrong results");
+        }
+        p_->cachedInterpolation[csIt->first] = ci;
         LOG4FIMEX(logger, Logger::DEBUG, "...created");
 
         if (hasXYSpatialVectors()) {
