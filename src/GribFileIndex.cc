@@ -529,7 +529,7 @@ GribFileMessage::GribFileMessage(boost::shared_ptr<XMLDoc> doc, string nsPrefix,
     if (posStr.size() == 0) {
         throw runtime_error("could not find seekPos for node");
     }
-    filePos_ = string2type<size_t>(posStr);
+    filePos_ = string2type<off_t>(posStr);
     string msgPosStr = getXmlProp(node, "messagePos");
     if (msgPosStr.size() == 0) msgPos_ = 0;
     else msgPos_ = string2type<size_t>(msgPosStr);
@@ -885,7 +885,7 @@ const std::string& GribFileMessage::getFileURL() const
 {
     return fileURL_;
 }
-const size_t GribFileMessage::getFilePosition() const
+const off_t GribFileMessage::getFilePosition() const
 {
     return filePos_;
 }
@@ -1149,7 +1149,7 @@ size_t GribFileMessage::readData(std::vector<double>& data, double missingValue)
         throw runtime_error("cannot open file: " + getFileURL());
     }
     boost::shared_ptr<FILE> fh(fileh, fclose);
-    fseek(fh.get(), getFilePosition(), SEEK_SET);
+    fseeko(fh.get(), getFilePosition(), SEEK_SET);
 
     // enable multi-messages
     grib_multi_support_on(0);
@@ -1190,9 +1190,9 @@ size_t GribFileMessage::readLevelData(std::vector<double>& levelData, double mis
     }
     boost::shared_ptr<FILE> fh(fileh, fclose);
     if (!asimofHeader) {
-        fseek(fh.get(), getFilePosition(), SEEK_SET);
+        fseeko(fh.get(), getFilePosition(), SEEK_SET);
     } else {
-        fseek(fh.get(), 0, SEEK_SET);
+        fseeko(fh.get(), 0, SEEK_SET);
     }
     // enable multi-messages
     grib_multi_support_on(0);
@@ -1349,14 +1349,14 @@ void GribFileIndex::initByGrib(const boost::filesystem::path& gribFilePath, cons
     boost::shared_ptr<FILE> fh(fileh, fclose);
     // enable multi-messages
     grib_multi_support_on(0);
-    size_t lastPos = static_cast<size_t>(-1);
+    off_t lastPos = static_cast<size_t>(-1);
     size_t msgPos = 0;
     while (!feof(fh.get())) {
         // read the next message
-        size_t pos = ftell(fh.get());
+        off_t pos = ftello(fh.get());
         int err = 0;
         boost::shared_ptr<grib_handle> gh(grib_handle_new_from_file(0, fh.get(), &err), grib_handle_delete);
-        size_t newPos = ftell(fh.get());
+        off_t newPos = ftello(fh.get());
         if (gh.get() != 0) {
             if (err != GRIB_SUCCESS) GRIB_CHECK(err,0);
             if (newPos != pos) {

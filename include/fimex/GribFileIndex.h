@@ -31,6 +31,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <vector>
 #include <map>
+#include <cstdio>
 #include "fimex/XMLDoc.h"
 #include <libxml/xmlreader.h>
 #include "fimex/GridDefinition.h"
@@ -66,7 +67,7 @@ public:
     /// accessors
     const long getEdition() const;
     const std::string& getFileURL() const;
-    const size_t getFilePosition() const;
+    const off_t getFilePosition() const;
     /// messages number within a multi-message
     const size_t getMessageNumber() const;
     const std::string& getName() const;
@@ -117,7 +118,7 @@ public:
     size_t readLevelData(std::vector<double>& levelData, double missingValue, bool asimofHeader=false) const;
 private:
     std::string fileURL_;
-    size_t filePos_;
+    off_t filePos_;
     size_t msgPos_; // for multiMessages: multimessages
     std::string parameterName_;
     std::string shortName_;
