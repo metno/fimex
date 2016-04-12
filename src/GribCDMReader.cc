@@ -24,6 +24,7 @@
  *      Author: Heiko Klein
  */
 
+#include "../config.h"
 #include "fimex/CDM.h"
 #include <boost/regex.hpp>
 #define MIFI_IO_READER_SUPPRESS_DEPRECATED
@@ -1310,7 +1311,9 @@ DataPtr GribCDMReader::getDataSlice(const string& varName, const SliceBuilder& s
             size_t dataRead;
             gridData.resize(maxXySize); // make sure the gridData is always large enough
             {
+#ifndef HAVE_GRIB_API_THREADSAFE
                 ScopedCritical lock(p_->mutex);
+#endif
                 dataRead = gfmIt->readData(gridData, missingValue);
             }
             LOG4FIMEX(logger, Logger::DEBUG, "reading variable " << gfmIt->getShortName() << ", level "<< gfmIt->getLevelNumber() << " size " << dataRead << " starting at " << dataCurrentPos);

@@ -37,6 +37,9 @@
 /* Define to 1 if you have the <grib_api.h> header file. */
 #undef HAVE_GRIB_API_H
 
+/* define if grib_api compiled with --enable-ptrhead */
+#undef HAVE_GRIB_API_THREADSAFE
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 

@@ -152,6 +152,16 @@ fi
 # I will just try that
 MIFI_USELIB([grib_api], [grib_api.h], [grib_set_string], [])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test "x$with_grib_api" = "xyes"])
+AC_ARG_ENABLE(grib_api-pthread, [  --enable-grib_api-pthread           enable grib_api compiled with --enable-pthread [[default=no]]],[
+   if test "$enableval" = "no"; then
+     enable_gribapipthread="no"
+   else
+     enable_gribapipthread="yes"
+    fi
+  ],[enable_gribapipthread="no"])
+if test x$enable_gribapipthread = xyes; then
+   AC_DEFINE([HAVE_GRIB_API_THREADSAFE], [1], [define if grib_api compiled with --enable-ptrhead])
+fi
 
 MIFI_USELIB([pq], [libpq-fe.h], [PQconnectdb])
 AM_CONDITIONAL([HAVE_LIBPQ], [test "x$with_pq" != xno])
