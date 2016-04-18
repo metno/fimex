@@ -744,8 +744,9 @@ WARN_LOGFILE           =
 
 INPUT                  = "@srcdir@/doxydoc.txt" \
                          "@srcdir@/include/" \
-						 "@srcdir@/modules/F90/fimex.f90" \
-						 "@srcdir@/modules/F90/fortran_test.f90"
+                         "@srcdir@/modules/F90/fimex.f90" \
+                         "@srcdir@/modules/F90/fimex2d.F90" \
+                         "@srcdir@/modules/F90/fortran_test.f90"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -772,7 +773,8 @@ FILE_PATTERNS          = *.c \
                          *.h \
                          *.hpp \
                          *.inc \
-                         *.f90
+                         *.f90 \
+                         *.F90
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -815,7 +817,7 @@ EXCLUDE_PATTERNS       = */_gfortran_iargc.c
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories use the pattern */test/*
 
-EXCLUDE_SYMBOLS        = 
+EXCLUDE_SYMBOLS        =
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include
