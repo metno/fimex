@@ -29,7 +29,8 @@ CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc out*.nc\
              bicubicOutData.txt bilinearOutData.txt \
              testMetgmReadEd1.nc testMetgmReadEd2.nc \
              hirlam12.mgm hirlam12.mgm.nc testGribRead.nc \
-             test_netcdfrw.nc fillOut.nc
+             test_netcdfrw.nc fillOut.nc \
+             *.log *.trs
 
 CC_TESTS = testInterpolation \
            testVerticalCoordinates \

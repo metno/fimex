@@ -156,6 +156,8 @@
 /src/wdb/gridInformation/.deps
 
 # /test/
+/test/*.log
+/test/*.trs
 /test/test.nc
 /test/test2.nc
 /test/testInterpolator.nc
