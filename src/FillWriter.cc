@@ -64,6 +64,7 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
     map<string, map<size_t, size_t> > dimSlices;
     const CDM::DimVec iDims = iCdm.getDimensions();
     const CDM::DimVec oDims = oCdm.getDimensions();
+    std::set<std::string> unusableIDims;
     for (CDM::DimVec::const_iterator iDimsIt = iDims.begin(); iDimsIt != iDims.end(); ++iDimsIt) {
         CDM::DimVec::const_iterator oDimsIt = find_if(oDims.begin(), oDims.end(), CDMNameEqual(iDimsIt->getName()));
         if (oDimsIt == oDims.end()) {
@@ -85,7 +86,9 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
                     if (oDimsIt->isUnlimited()) {
                         oPos = oDimsIt->getLength() + unLimCount++;
                     } else {
-                        throw CDMException("Could  not find value '" + type2string(iDimData[i])+"' in fill-output of dimension " + oDimsIt->getName());
+                        unusableIDims.insert(iDimsIt->getName());
+                        LOG4FIMEX(logger, Logger::ERROR, "Dimension-value error for '" << oDimsIt->getName() << "': value '" << iDimData[i] << "' not found");
+                        continue;
                     }
                 }
                 currentSlices[i] = oPos;
