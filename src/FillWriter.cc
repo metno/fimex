@@ -49,6 +49,21 @@ struct FillWriterTranslation {
 
 std::vector<FillWriterTranslation> readConfigFile(const std::string& fileName);
 
+/**
+ * find the first shape-element wich is in the unusableDims set
+ * @param unusableDims set with dimensions which should not be used
+ * @param shape dimensions of a variable
+ * @return first string in shape which maches unusableDims
+ */
+static std::string findFirstUnusableDimension(const std::set<std::string>& unusableDims, const std::vector<std::string>& shape)
+{
+    for (std::vector<std::string>::const_iterator shapeIt = shape.begin(); shapeIt != shape.end(); ++shapeIt) {
+        if (unusableDims.find(*shapeIt) != unusableDims.end()) {
+            return *shapeIt;
+        }
+    }
+    return "";
+}
 
 FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMReaderWriter> io, std::string configFileName)
 {
@@ -110,10 +125,13 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
             } else if (iDimsIt->getLength() == oDimsIt->getLength()){
                 LOG4FIMEX(logger, Logger::INFO, "no dimension-variable for '" << iDimsIt->getName() <<"': keeping as is'");
             } else {
-                throw CDMException("no dimension-variable for '" + iDimsIt->getName() + "' and neither unlimited nor equal");
+                unusableIDims.insert(iDimsIt->getName());
+                LOG4FIMEX(logger, Logger::ERROR, "Dimension-missing in fill-output: '" << iDimsIt->getName());
             }
         }
-
+        if (unusableIDims.find(iDimsIt->getName()) == unusableIDims.end()) {
+            continue;
+        }
         if (iDimsIt->isUnlimited() && (dimSlices.find(iDimsIt->getName()) == dimSlices.end())) {
             // iDims = oDims, but slice anyway since it is unLimited (save memory!)
             LOG4FIMEX(logger, Logger::DEBUG, "dimensions changed for  " << iDimsIt->getName() << " since it is unlimited");
@@ -140,6 +158,11 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
         }
         const CDMVariable& iVar = *iv;
         const vector<string>& iShape = iVar.getShape();
+        string badDim = findFirstUnusableDimension(unusableIDims, iShape);
+        if (badDim != "") {
+            LOG4FIMEX(logger, Logger::ERROR, "Cannot fill-write '" << iv->getName() << "' due to bad dimension: '" << badDim << "'");
+            continue;
+        }
         const CDMVariable& oVar = oCdm.getVariable(iv->getName());
         const vector<string>& oShape = oVar.getShape();
 
@@ -210,6 +233,7 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
             io->putDataSlice(iv->getName(), sliceIt->second, inData);
         }
     }
+    if (unusableIDims.size() > 0) throw CDMException("FillWriter finished with errors in dimension-mapping");
 }
 
 FillWriter::~FillWriter()
