@@ -1,3 +1,10 @@
+  * 2016-04-19 fimex-0.62
+    * new high-level fortran90 fimex2d API
+    * supporting grib-files > 2GB on 32bit platforms
+    * enabling parallel grib reading when grib_api build with --enable-pthreads
+    * parallelizing FillWriter/fillFile
+    * lazy error-handling in FillWriter/fillFile, writing more data even when errors are found
+    * supporting WRF-output without Times-axis
   * 2016-01-19 fimex-0.61.1
     * bugfix: extraction of unlimited dimension ignores all offsets
   * 2015-12-21 fimex-0.61

@@ -666,8 +666,10 @@ uninstall-am: uninstall-fimexfincHEADERS uninstall-libLTLIBRARIES
 	uninstall-libLTLIBRARIES
 
 
-@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex.mod: fimex.o
-@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex2d.mod: fimex.mod fimex2d.o
+@ENABLE_FORTRAN_TRUE@fimex.o: fimex.f90
+@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex.mod fimex.mod: fimex.o fimex.f90
+@ENABLE_FORTRAN_TRUE@fimex2d.o: fimex.o fimex2d.F90
+@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex2d.mod fimex2d.mod: fimex2d.o
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
