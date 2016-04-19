@@ -746,7 +746,8 @@ INPUT                  = "@srcdir@/doxydoc.txt" \
                          "@srcdir@/include/" \
                          "@srcdir@/modules/F90/fimex.f90" \
                          "@srcdir@/modules/F90/fimex2d.F90" \
-                         "@srcdir@/modules/F90/fortran_test.f90"
+                         "@srcdir@/modules/F90/fortran_test.f90" \
+                         "@srcdir@/modules/F90/fimex2d_example.F90"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

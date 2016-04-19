@@ -1,0 +1,37 @@
+netcdf fimex2d_example {
+dimensions:
+	y = 949 ;
+	x = 739 ;
+variables:
+    float air_temperature_2m(y, x) ;
+        air_temperature_2m:units = "1" ;
+        air_temperature_2m:grid_mapping = "projection_lambert" ;
+        air_temperature_2m:coordinates = "longitude latitude" ;
+	double latitude(y, x) ;
+		latitude:units = "degree_north" ;
+		latitude:long_name = "latitude" ;
+		latitude:standard_name = "latitude" ;
+	double longitude(y, x) ;
+		longitude:units = "degree_east" ;
+		longitude:long_name = "longitude" ;
+		longitude:standard_name = "longitude" ;
+	float x(x) ;
+		x:long_name = "x-coordinate in Cartesian system" ;
+		x:standard_name = "projection_x_coordinate" ;
+		x:units = "m" ;
+	float y(y) ;
+		y:long_name = "y-coordinate in Cartesian system" ;
+		y:standard_name = "projection_y_coordinate" ;
+		y:units = "m" ;
+
+    // global attributes:
+		:Conventions = "CF-1.6" ;
+		:institution = "Norwegian Meteorological Institute" ;
+		:source = "WBKZ" ;
+		:title = "unknown" ;
+		:min_time = "2015-12-08 18:00:00Z" ;
+		:max_time = "2015-12-08" ;
+		:Expires = "2016-01-05" ;
+		:references = "unknown" ;
+		:comment = "none" ;
+}

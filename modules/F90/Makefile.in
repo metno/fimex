@@ -429,7 +429,7 @@ AM_FCFLAGS =
 @ENABLE_FORTRAN_TRUE@libfimexf_la_SOURCES = fimex.f90 fimex2d.F90
 @ENABLE_FORTRAN_TRUE@fimexfincdir = $(includedir)
 @ENABLE_FORTRAN_TRUE@fimexfinc_HEADERS = $(top_builddir)/modules/F90/fimex.mod $(top_builddir)/modules/F90/fimex2d.mod
-@ENABLE_FORTRAN_TRUE@CLEANFILES = fimex.mod fimex2d.mod
+@ENABLE_FORTRAN_TRUE@CLEANFILES = fimex.mod fimex2d.mod fimex2d_example_all.nc4 fimex2d_example.nc4 fimex2d_example
 all: all-am
 
 .SUFFIXES:

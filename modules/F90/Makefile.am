@@ -13,6 +13,6 @@ fimexfinc_HEADERS= $(top_builddir)/modules/F90/fimex.mod $(top_builddir)/modules
 $(top_builddir)/modules/F90/fimex.mod: fimex.o
 $(top_builddir)/modules/F90/fimex2d.mod: fimex.mod fimex2d.o
 
-CLEANFILES = fimex.mod fimex2d.mod
+CLEANFILES = fimex.mod fimex2d.mod fimex2d_example_all.nc4 fimex2d_example.nc4 fimex2d_example
 
 endif

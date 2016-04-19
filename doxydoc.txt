@@ -988,12 +988,17 @@ much larger than the number of chunks.
 @page fortran90
 @section fortran90 Fortran90 interface
 
-The fimex-source comes with a fimex.f90 fortran interface in modules/F90/fimex.f90.
-This files should be added to your fortran program, compiled with a fortran:2003
-aware compiler and linked with fimex-library ''-lfimex''. Documentatation of the
+Fimex comes with a fortran90 interface in modules/F90/fimex.f90 using fortran:2003.
+The libfimexf and fimex.mod for using it will be build when --enable-fortran is used
+during ./configure of fimex, and should be linked with -lfimexf. Documentatation of the
 interface can be found in fimex.f90. Of most interest are the methods belonging to
 the high-level interface Fimex::FimexIO.
 
 An example can be found in modules/F90/fortran_test.f90 (see Examples)
+
+For working with 2D x/y-fields as common with numerical weather prediction models
+and grib-files, the fimexf library contains also the module modules/F90/fimex2d.F90 .
+An example on using the 2d high-level library can be found in
+modules/F90/fimex2d_example.F90 (see Examples).
 
 */
