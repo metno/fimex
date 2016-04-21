@@ -31,6 +31,18 @@
 
 #include "fimex/CDMconstants.h"
 
+#ifdef __GNUC__
+#  if  __GNUC_PREREQ(6,0)
+// bug fixed
+#  else
+//   if  gcc_version <= 6.0, isnan/isinf not using __builtin in math.h (but in c++ <cmath>)
+//   see https://sourceware.org/bugzilla/show_bug.cgi?id=15367
+#    if __GNUC_PREREQ (4,4) && !defined __SUPPORT_SNAN__
+#      define isnan(x) __builtin_isnan (x)
+#    endif
+#  endif
+#endif
+
 
 /**
  * compare two strings
