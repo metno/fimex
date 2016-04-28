@@ -156,8 +156,7 @@ FillWriter::FillWriter(boost::shared_ptr<CDMReader> in, boost::shared_ptr<CDMRea
             LOG4FIMEX(logger, Logger::WARN, "new variable '" << iv->getName() << "': omitting");
             continue;
         }
-        const CDMVariable& iVar = *iv;
-        const vector<string>& iShape = iVar.getShape();
+        const vector<string>& iShape = iv->getShape();
         string badDim = findFirstUnusableDimension(unusableIDims, iShape);
         if (badDim != "") {
             LOG4FIMEX(logger, Logger::ERROR, "Cannot fill-write '" << iv->getName() << "' due to bad dimension: '" << badDim << "'");
