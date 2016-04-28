@@ -152,6 +152,77 @@ static void processArray_(vector<boost::shared_ptr<InterpolatorProcess2d> > proc
     return;
 }
 
+DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBuilder& sb)
+{
+    LOG4FIMEX(logger, Logger::DEBUG, "interpolating '"<< varName << "' with sliceBuilder" );
+    const CDMVariable& variable = cdm_->getVariable(varName);
+    if (variable.hasData()) {
+        LOG4FIMEX(logger, Logger::DEBUG, "fetching data from memory");
+        DataPtr data = variable.getData();
+        if (data->size() == 0) {
+            return data;
+        } else {
+            return variable.getData()->slice(sb.getMaxDimensionSizes(),
+                    sb.getDimensionStartPositions(),
+                    sb.getDimensionSizes());
+        }
+    }
+    if (p_->projectionVariables.find(varName) == p_->projectionVariables.end()) {
+        // no projection, just forward
+        return p_->dataReader->getDataSlice(varName, sb);
+    } else {
+        string horizontalId = p_->projectionVariables.find(varName)->second;
+        if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
+            throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
+        }
+        boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
+        DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, sb);
+        if (data->size() == 0) return data;
+        double badValue = cdm_->getFillValue(varName);
+        boost::shared_array<float> array = data2InterpolationArray(data, badValue);
+        processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
+        size_t newSize = 0;
+        LOG4FIMEX(logger, Logger::DEBUG, "interpolateValues for: " << varName << "(slicebuilder)");
+        boost::shared_array<float> iArray = ci->interpolateValues(array, data->size(), newSize);
+        const std::string& direction = variable.getSpatialVectorDirection();
+        if (variable.isSpatialVector() &&
+             (!((direction.find("x") == string::npos) && (direction.find("y") == string::npos))))  {
+            // vector in x/y direction
+            if (p_->cachedVectorReprojection.find(horizontalId) != p_->cachedVectorReprojection.end()) {
+                boost::shared_ptr<CachedVectorReprojection> cvr = p_->cachedVectorReprojection[horizontalId];
+                // fetch and transpose vector-data
+                // transposing needed once for each direction (or caching, but that needs to much memory)
+                const std::string& counterpart = variable.getSpatialVectorCounterpart();
+                boost::shared_array<float> counterPartArray = data2InterpolationArray(ci->getInputDataSlice(p_->dataReader, counterpart, sb), cdm_->getFillValue(counterpart));
+                processArray_(p_->preprocesses, counterPartArray.get(), data->size(), ci->getInX(), ci->getInY());
+                LOG4FIMEX(logger, Logger::DEBUG, "implicit interpolateValues for: " << counterpart << "(slicebuilder)");
+                boost::shared_array<float> counterpartiArray = ci->interpolateValues(counterPartArray, data->size(), newSize);
+                if (direction.find("x") != string::npos) {
+                    cvr->reprojectValues(iArray, counterpartiArray, newSize);
+                } else if (direction.find("y") != string::npos) {
+                    cvr->reprojectValues(counterpartiArray, iArray, newSize);
+                } else {
+                    throw CDMException("could not find x,y direction for vector: " + varName + ", direction: " + direction);
+                }
+            } else {
+                LOG4FIMEX(logger, Logger::WARN, "Cannot reproject vector " << variable.getName());
+            }
+        }
+        processArray_(p_->postprocesses, iArray.get(), newSize, ci->getOutX(), ci->getOutY());
+        DataPtr outData = interpolationArray2Data(iArray, newSize, badValue);
+        // slice the x and y direction of the data
+        vector<size_t> maxDims = sb.getMaxDimensionSizes();
+        vector<size_t> startPos = sb.getDimensionStartPositions();
+        vector<size_t> dimSizes = sb.getDimensionSizes();
+        for (size_t i = 2; i < dimSizes.size(); i++) {
+            // all but x and y dimensions (first two) have been set correctly when reading the data
+            maxDims.at(i) = dimSizes.at(i);
+            startPos.at(i) = 0;
+        }
+        return outData->slice(maxDims, startPos, dimSizes);
+    }
+}
+
 DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -1236,7 +1307,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible to interpolate with forward-interpolation");
@@ -1325,7 +1396,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         }
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached coordinate interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible? to interpolate with coordinate-interpolation");
@@ -1389,7 +1460,7 @@ void CDMInterpolator::changeProjectionByProjectionParameters(int method, const s
         mifi_points2position(&pointsOnYAxis[0], fieldSize, orgYAxisValsArray.get(), orgYAxisVals->size(), miupYAxis);
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix " << orgXAxisVals->size() << "x" << orgYAxisVals->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
+        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis, orgXAxisVals->size(), orgYAxisVals->size(), out_x_axis.size(), out_y_axis.size()));
         std::string testVar1, testVar2;
         if (allXYSpatialVectorsHaveSameHorizontalId(csIt->first, testVar1, testVar2)) {
             ci->createReducedDomain(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName());
@@ -1710,7 +1781,7 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
         mifi_points2position(&lonX[0], tmplLonVals->size(), orgXAxisArray.get(), def.xAxisData->size(), miupXAxis);
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached projection interpolation matrix ("<< csi->first << ") " << def.xAxisData->size() << "x" << def.yAxisData->size() << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(method,
+        boost::shared_ptr<CachedInterpolation> ci(new CachedInterpolation(def.xAxisName, def.yAxisName, method,
                                         lonX,
                                         latY,
                                         def.xAxisData->size(),

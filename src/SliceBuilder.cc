@@ -93,6 +93,13 @@ size_t SliceBuilder::getDimPos(const std::string& dimName) const
 }
 
 
+void SliceBuilder::getStartAndSize(const std::string & dimName, std::size_t& start, std::size_t& size) const
+{
+    size_t pos = getDimPos(dimName);
+    start = start_.at(pos);
+    size = size_.at(pos);
+}
+
 void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, size_t size)
 {
     size_t pos = getDimPos(dimName);

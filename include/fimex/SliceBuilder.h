@@ -64,6 +64,15 @@ public:
     SliceBuilder(const std::vector<std::string>& dimNames, const std::vector<size_t>& dimSize);
     virtual ~SliceBuilder();
     /**
+     * get the start position and the size of the slice of that dimension
+     * @param dimName name of the dimension to restrict
+     * @param start output, starting point of slice (starts at 0)
+     * @param size output, size of the slice
+     * @throw CDMException if dimName not part of the dimensions of variable
+     * @throw out_of_range depending on startPos or size
+     */
+    void getStartAndSize(const std::string & dimName, std::size_t& start, std::size_t& size) const;
+    /**
      * set the start position and the size of the slice of that dimension
      * @param dimName name of the dimension to restrict
      * @param start starting point of slice (starts at 0)

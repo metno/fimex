@@ -48,7 +48,7 @@ private:
     bool undefAggr;
 
 public:
-    CachedForwardInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
+    CachedForwardInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
     virtual ~CachedForwardInterpolation() {}
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const;
     virtual size_t getInX() const {return inX;}

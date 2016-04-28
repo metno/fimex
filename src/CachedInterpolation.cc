@@ -58,9 +58,31 @@ boost::shared_ptr<Data> CachedInterpolationInterface::getInputDataSlice(boost::s
     return data;
 }
 
+boost::shared_ptr<Data> CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, const SliceBuilder& sb) const
+{
+    boost::shared_ptr<Data> data;
+    SliceBuilder rsb(reader->getCDM(), varName);
+    if (reducedDomain().get() != 0) {
+        // fetch a reduced domain from the input-source
+        rsb.setStartAndSize(reducedDomain()->xDim, reducedDomain()->xMin, getInX());
+        rsb.setStartAndSize(reducedDomain()->yDim, reducedDomain()->yMin, getInY());
+    } else {
+        rsb.setAll(_xDimName);
+        rsb.setAll(_yDimName);
+    }
+    std::vector<std::string> unsetVars = rsb.getUnsetDimensionNames();
+    for (size_t i = 0; i < unsetVars.size(); i++) {
+        size_t start, size;
+        sb.getStartAndSize(unsetVars.at(i), start, size);
+        rsb.setStartAndSize(unsetVars.at(i), start, size);
+    }
+    data = reader->getDataSlice(varName, rsb);
+    return data;
+}
 
-CachedInterpolation::CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
-: pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY) {
+
+CachedInterpolation::CachedInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
+: CachedInterpolationInterface(xDimName, yDimName), pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY) {
     switch (funcType) {
     case MIFI_INTERPOL_BILINEAR: this->func = mifi_get_values_bilinear_f; break;
     case MIFI_INTERPOL_BICUBIC:  this->func = mifi_get_values_bicubic_f; break;

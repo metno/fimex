@@ -64,8 +64,8 @@ float aggrMin(const vector<float>& vec) {
 }
 
 // pointsOnXAxis map each point in inData[y*inX+x] to a x-position in outData
-CachedForwardInterpolation::CachedForwardInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
-: pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY)
+CachedForwardInterpolation::CachedForwardInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY)
+: CachedInterpolationInterface(xDimName, yDimName), pointsOnXAxis(pointsOnXAxis), pointsOnYAxis(pointsOnYAxis), inX(inX), inY(inY), outX(outX), outY(outY)
 {
     undefAggr = false;
     switch (funcType) {

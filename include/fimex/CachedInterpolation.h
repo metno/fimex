@@ -27,6 +27,7 @@
 #include <boost/shared_array.hpp>
 #include "fimex/interpolation.h"
 #include "fimex/Data.h"
+#include "fimex/SliceBuilder.h"
 
 namespace MetNoFimex
 {
@@ -59,7 +60,10 @@ struct ReducedInterpolationDomain {
  * Interface for new cached spatial interpolation as used in #MetNoFimex::CDMInterpolator
  */
 class CachedInterpolationInterface {
+private:
+    std::string _xDimName, _yDimName;
 public:
+    CachedInterpolationInterface(std::string xDimName, std::string yDimName) : _xDimName(xDimName), _yDimName(yDimName) {}
     virtual ~CachedInterpolationInterface() {}
     virtual boost::shared_array<float> interpolateValues(boost::shared_array<float> inData, size_t size, size_t& newSize) const = 0;
     /** @return x-size of input array */
@@ -79,6 +83,15 @@ public:
      * @return Data matching input-data for this CachedInterpolationInterface
      */
     virtual boost::shared_ptr<Data> getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDim) const;
+    /**
+     * Read the input data from the reader, which is later used for the interpolateValues() function. This function will eventually reduce the
+     * domain of the input data if createReducedDomain was called earlier.
+     * @param reader
+     * @param varName
+     * @param sb a slicebuilder to reduce other than the horizontal dimensions
+     * @return Data matching input-data for this CachedInterpolationInterface
+     */
+    virtual boost::shared_ptr<Data> getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, const SliceBuilder& sb) const;
 private:
     /**
      * allow fetching of a reduced interpolation domain, i.e. to work with a much smaller amount of input data
@@ -112,7 +125,7 @@ public:
      * @param outX size of new X axis
      * @param outY size of new Y axis
      */
-    CachedInterpolation(int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
+    CachedInterpolation(std::string xDimName, std::string yDimName, int funcType, std::vector<double> pointsOnXAxis, std::vector<double> pointsOnYAxis, size_t inX, size_t inY, size_t outX, size_t outY);
     virtual ~CachedInterpolation() {}
     /**
      * Actually interpolate the data. The data will be interpolated as floats internally.

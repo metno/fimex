@@ -142,6 +142,12 @@ public:
      */
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
     /**
+     * @brief retrieve data from the underlying dataReader and interpolate the values due to the current projection
+     *
+     */
+    virtual DataPtr getDataSlice(const std::string& varName, const SliceBuilder& sb);
+
+    /**
      * @brief change the (main) projection of the dataReaders cdm to this new projection
      *
      * @param method Interpolation method
