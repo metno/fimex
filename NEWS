@@ -1,3 +1,7 @@
+  * 2016-04-28 fimex-0.62.1
+    * performance improvements:
+      * implement CDMInterpolator->getDataSlice(slicebuilder)
+      * vectorize mifi_nanf2bad
   * 2016-04-19 fimex-0.62
     * new high-level fortran90 fimex2d API
     * supporting grib-files > 2GB on 32bit platforms
