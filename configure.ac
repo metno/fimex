@@ -1,6 +1,6 @@
 AC_INIT([fimex],m4_esyscmd([grep MIFI_VERSION_STRING include/fimex/CDMconstants.h | head -1 | cut -d ' ' -f 3 | tr -d '"\n']),[heiko.klein@met.no])
 # use POSIX tar to support longer filenames (created by doxygen)
-AM_INIT_AUTOMAKE([1.11 tar-pax -Wall foreign subdir-objects])
+AM_INIT_AUTOMAKE([tar-pax -Wall foreign subdir-objects])
 
 AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_AR
