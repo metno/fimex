@@ -49,7 +49,7 @@ using namespace MetNoFimex;
 
 BOOST_AUTO_TEST_CASE(test_read_grb1) {
     string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/test.grb1");
+    string fileName("test.grb1");
     if (!ifstream(fileName.c_str())) {
         // no testfile, skip test
         return;
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_read_grb1) {
 
 BOOST_AUTO_TEST_CASE(test_read_grb2) {
     string topSrcDir(TOP_SRCDIR);
-    string fileName(topSrcDir+"/test/test.grb2");
+    string fileName("test.grb2");
     if (!ifstream(fileName.c_str())) {
         // no testfile, skip test
         return;
