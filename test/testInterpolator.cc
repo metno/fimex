@@ -115,6 +115,36 @@ BOOST_AUTO_TEST_CASE(test_interpolatorKDTree)
     BOOST_CHECK(true);
 }
 
+
+BOOST_AUTO_TEST_CASE(test_interpolatorSatellite)
+{
+    if (DEBUG) defaultLogLevel(Logger::DEBUG);
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/satellite_cma.nc");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
+    boost::shared_ptr<CDMInterpolator> interpolator(new CDMInterpolator(reader));
+    vector<double> xAxis, yAxis;
+    for (int i = 0; i < 10; i++) {
+        xAxis.push_back(55+ i * 0.1);
+        yAxis.push_back(-106 + i * 0.1);
+    }
+    interpolator->changeProjection(MIFI_INTERPOL_COORD_NN_KD, "+proj=latlon +R="+type2string(MIFI_EARTH_RADIUS_M)+" +e=0", xAxis, yAxis, "degrees_east", "degrees_north", CDM_DOUBLE, CDM_DOUBLE);
+    BOOST_CHECK(true);
+    DataPtr cmaData = interpolator->getDataSlice("cma", 0);
+    boost::shared_array<double> cmaArray = cmaData->asDouble();
+    BOOST_CHECK(true);
+    SliceBuilder cmaSb(interpolator->getCDM(), "cma");
+    DataPtr cmaData2 = interpolator->getDataSlice("cma", cmaSb);
+    BOOST_CHECK(cmaData2->size() == cmaData->size());
+
+    BOOST_CHECK(true);
+}
+
+
 BOOST_AUTO_TEST_CASE(test_interpolator2coords)
 {
     if (DEBUG) defaultLogLevel(Logger::DEBUG);
@@ -363,7 +393,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
         DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (int i = 0; i < xDataOrg->size(); i++) {
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
             // no change in x
             BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-2);
             BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], (yDataRot->asFloat())[i], 1e-2);
@@ -379,7 +409,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
         DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (int i = 0; i < xDataOrg->size(); i++) {
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
             BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], -1.*(yDataRot->asFloat())[i], 1e-1);
             BOOST_CHECK_CLOSE((yDataOrg->asFloat())[i], (xDataRot->asFloat())[i], 1e-1);
         }
@@ -394,7 +424,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
         DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (int i = 0; i < xDataOrg->size(); i++) {
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
             float error = ((xDataOrg->asFloat())[i] < 1) ? 50 : 3;
             BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], (xDataRot->asFloat())[i], error);
             error = ((yDataOrg->asFloat())[i] < 1) ? 50 : 3;
@@ -411,7 +441,7 @@ BOOST_AUTO_TEST_CASE(test_interpolator_vectorlatlon)
         DataPtr xDataRot = processor->getScaledDataSlice(x[0], sbX0);
         DataPtr yDataOrg = feltReader->getScaledDataSlice(y[0], sbY0);
         DataPtr yDataRot = processor->getScaledDataSlice(y[0], sbY0);
-        for (int i = 0; i < xDataOrg->size(); i++) {
+        for (size_t i = 0; i < xDataOrg->size(); i++) {
             float error = ((xDataOrg->asFloat())[i] < 1) ? 1 : .1;
             BOOST_CHECK_CLOSE((xDataOrg->asFloat())[i], (yDataRot->asFloat())[i], error);
             error = ((yDataOrg->asFloat())[i] < 1) ? 1 : .1;
