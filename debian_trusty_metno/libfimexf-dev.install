@@ -1,4 +1,5 @@
 usr/include/fimex.mod
+usr/include/fimex2d.mod
 usr/lib/libfimexf*.a
 usr/lib/libfimexf*.so
 usr/lib/*fimexf*.la
