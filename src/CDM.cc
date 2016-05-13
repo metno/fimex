@@ -435,17 +435,16 @@ void CDM::removeAttribute(const std::string& varName, const std::string& attrNam
 const CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) const throw(CDMException)
 {
     StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
-    if (varIt != pimpl_->attributes.end()) {
-        AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attrName));
-        if (attrIt != (varIt->second).end()) {
-            return *attrIt;
-        } else {
-            throw CDMException("Attribute " + attrName + " not found for variable: " + varName);
-        }
-    } else {
+    if (varIt == pimpl_->attributes.end())
         throw CDMException("Variable " + varName + " not found");
-    }
+
+    AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attrName));
+    if (attrIt == (varIt->second).end())
+        throw CDMException("Attribute " + attrName + " not found for variable: " + varName);
+
+    return *attrIt;
 }
+
 CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& attrName) throw(CDMException)
 {
     return const_cast<CDMAttribute&>(
@@ -455,11 +454,15 @@ CDMAttribute& CDM::getAttribute(const std::string& varName, const std::string& a
 
 bool CDM::getAttribute(const std::string& varName, const std::string& attrName, CDMAttribute& retAttribute) const
 {
-    try {
-        retAttribute = getAttribute(varName, attrName);
-    } catch (CDMException& e) {
+    StrAttrVecMap::const_iterator varIt = pimpl_->attributes.find(varName);
+    if (varIt == pimpl_->attributes.end())
         return false;
-    }
+
+    AttrVec::const_iterator attrIt = find_if(varIt->second.begin(), varIt->second.end(), CDMNameEqual(attrName));
+    if (attrIt == (varIt->second).end())
+        return false;
+
+    retAttribute = *attrIt;
     return true;
 }
 
