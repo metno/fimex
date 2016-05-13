@@ -2,8 +2,9 @@
 if [ ! -f test.nc ]; then
 	exit 0;
 fi
+srcdir=`dirname $0`
 echo "testing conversion NetCDF to NetCDF"
-if [ ! -f flth00.dat ]; then
+if [ ! -f "${srcdir}/flth00.dat" ]; then
    echo "no input data: flth00.dat, skipping test..."
    exit 0;
 fi
