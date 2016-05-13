@@ -26,6 +26,9 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/SliceBuilder.h"
+
+#include "fimex/Logger.h"
+
 #include <boost/scoped_array.hpp>
 #ifdef _OPENMP
 #include <omp.h>
@@ -34,6 +37,8 @@
 
 namespace MetNoFimex
 {
+
+static LoggerPtr logger = getLogger("fimex.CachedInterpolation");
 
 boost::shared_ptr<Data> CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDimPos) const
 {
@@ -61,12 +66,15 @@ boost::shared_ptr<Data> CachedInterpolationInterface::getInputDataSlice(boost::s
 boost::shared_ptr<Data> CachedInterpolationInterface::getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, const SliceBuilder& sb) const
 {
     boost::shared_ptr<Data> data;
+    LOG4FIMEX(logger, Logger::DEBUG, "creating a slicebuilder for '"<< varName << "'" );
     SliceBuilder rsb(reader->getCDM(), varName);
     if (reducedDomain().get() != 0) {
         // fetch a reduced domain from the input-source
+        LOG4FIMEX(logger, Logger::DEBUG, "reduced xDim='"<< reducedDomain()->xDim << "' yDim='" << reducedDomain()->yDim << "'" );
         rsb.setStartAndSize(reducedDomain()->xDim, reducedDomain()->xMin, getInX());
         rsb.setStartAndSize(reducedDomain()->yDim, reducedDomain()->yMin, getInY());
     } else {
+        LOG4FIMEX(logger, Logger::DEBUG, "no reduced, _xDimName='"<< _xDimName << "' _yDimName='" << _yDimName << "'" );
         rsb.setAll(_xDimName);
         rsb.setAll(_yDimName);
     }

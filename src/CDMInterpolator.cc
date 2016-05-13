@@ -79,9 +79,11 @@ struct CDMInterpolatorInternals {
     // variableName, horizontalId
     std::map<std::string, std::string> projectionVariables;
     // horizontalId, cachedInterpolation
-    map<string, boost::shared_ptr<CachedInterpolationInterface> > cachedInterpolation;
+    typedef map<string, boost::shared_ptr<CachedInterpolationInterface> > cachedInterpolation_t;
+    cachedInterpolation_t cachedInterpolation;
     // horizontalId, cachedVectorReprojection
-    map<string, boost::shared_ptr<CachedVectorReprojection> > cachedVectorReprojection;
+    typedef map<string, boost::shared_ptr<CachedVectorReprojection> > cachedVectorReprojection_t;
+    cachedVectorReprojection_t cachedVectorReprojection;
 };
 
 const std::string LAT_LON_PROJSTR = MIFI_WGS84_LATLON_PROJ4;
@@ -171,13 +173,15 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
         // no projection, just forward
         return p_->dataReader->getDataSlice(varName, sb);
     } else {
-        string horizontalId = p_->projectionVariables.find(varName)->second;
-        if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
+        const string& horizontalId = p_->projectionVariables.find(varName)->second;
+        CDMInterpolatorInternals::cachedInterpolation_t::iterator itCI = p_->cachedInterpolation.find(horizontalId);
+        if (itCI == p_->cachedInterpolation.end()) {
             throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
         }
-        boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
+        boost::shared_ptr<CachedInterpolationInterface> ci = itCI->second;
         DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, sb);
-        if (data->size() == 0) return data;
+        if (data->size() == 0)
+            return data;
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
         processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
@@ -233,13 +237,15 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
         // no projection, just forward
         return p_->dataReader->getDataSlice(varName, unLimDimPos);
     } else {
-        string horizontalId = p_->projectionVariables.find(varName)->second;
-        if (p_->cachedInterpolation.find(horizontalId) == p_->cachedInterpolation.end()) {
+        const string& horizontalId = p_->projectionVariables.find(varName)->second;
+        CDMInterpolatorInternals::cachedInterpolation_t::iterator itCI = p_->cachedInterpolation.find(horizontalId);
+        if (itCI == p_->cachedInterpolation.end()) {
             throw CDMException("no cached interpolation for " + varName + "(" + horizontalId + ")");
         }
-        boost::shared_ptr<CachedInterpolationInterface> ci = p_->cachedInterpolation[horizontalId];
+        boost::shared_ptr<CachedInterpolationInterface> ci = itCI->second;
         DataPtr data = ci->getInputDataSlice(p_->dataReader, varName, unLimDimPos);
-        if (data->size() == 0) return data;
+        if (data->size() == 0)
+            return data;
         double badValue = cdm_->getFillValue(varName);
         boost::shared_array<float> array = data2InterpolationArray(data, badValue);
         processArray_(p_->preprocesses, array.get(), data->size(), ci->getInX(), ci->getInY());
@@ -768,7 +774,7 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
 
         string orgXAxis = cs->getGeoXAxis()->getName();
         string orgYAxis = cs->getGeoYAxis()->getName();
-        if (cs->hasAxisType(CoordinateAxis::Lon) && (cs->getGeoXAxis()->getName() == cs->findAxisOfType(CoordinateAxis::Lon)->getName())) {
+        if (cs->hasAxisType(CoordinateAxis::Lon) && (orgXAxis == cs->findAxisOfType(CoordinateAxis::Lon)->getName())) {
             // x and y axis not properly defined, guessing
             vector<string> lonShape = cdm.getVariable(orgXAxis).getShape();
             if (lonShape.size() == 2) {
@@ -777,7 +783,7 @@ static void changeCDM(CDM& cdm, const string& proj_input, const map<string, Coor
                 LOG4FIMEX(logger, Logger::WARN, "need to guess x and y axis: " << lonShape[0] << " " << lonShape[1]);
             }
         }
-        if (newXAxis.size() == 0) {
+        if (newXAxis.empty()) {
             newXAxis = orgXAxis;
             newYAxis = orgYAxis;
         } else {

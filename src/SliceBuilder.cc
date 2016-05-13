@@ -30,12 +30,17 @@
 #include "fimex/CDMDimension.h"
 #include "fimex/Utils.h"
 #include "fimex/coordSys/CoordinateAxis.h"
+
+#include "fimex/Logger.h"
+
 #include <limits>
 
 namespace MetNoFimex
 {
 
 using namespace std;
+
+static LoggerPtr logger = getLogger("fimex.SliceBuilder");
 
 SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>& dimSize)
 {
@@ -45,6 +50,7 @@ SliceBuilder::SliceBuilder(const vector<string>& dimNames, const vector<size_t>&
 
 SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setUnlimited)
 {
+    LOG4FIMEX(logger, Logger::DEBUG, "slicebuilder ctor varName='" << varName << "'");
     const CDMVariable& var = cdm.getVariable(varName);
     vector<string> shape = var.getShape();
     vector<size_t> dimSizes;
@@ -52,6 +58,7 @@ SliceBuilder::SliceBuilder(const CDM& cdm, const std::string& varName, bool setU
     dimSizes.reserve(shape.size());
     unlimited.reserve(shape.size());
     for (vector<string>::const_iterator dimIt = shape.begin(); dimIt != shape.end(); ++dimIt) {
+        LOG4FIMEX(logger, Logger::DEBUG, "  shape dim '" << *dimIt << "'");
         const CDMDimension& dim = cdm.getDimension(*dimIt);
         dimSizes.push_back(dim.getLength());
         if (setUnlimited && dim.isUnlimited()) {
@@ -113,7 +120,8 @@ void SliceBuilder::setStartAndSize(const std::string & dimName, size_t start, si
 
 void SliceBuilder::setStartAndSize(const boost::shared_ptr<const CoordinateAxis>& axis, size_t start, size_t size)
 {
-    if (axis.get() == 0) return;
+    if (axis.get() == 0)
+        return;
     if (axis->isExplicit()) {
         setStartAndSize(axis->getName(), start, size);
     } else {
@@ -126,9 +134,11 @@ void SliceBuilder::setAll(const std::string & dimName)
     size_t pos = getDimPos(dimName);
     setStartAndSize(dimName, 0, maxSize_.at(pos));
 }
+
 void SliceBuilder::setAll(const boost::shared_ptr<const CoordinateAxis>& axis)
 {
-    if (axis.get() == 0) return;
+    if (axis.get() == 0)
+        return;
     if (axis->isExplicit()) {
         setAll(axis->getName());
     } else {
