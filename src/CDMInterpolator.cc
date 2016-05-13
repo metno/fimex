@@ -1246,31 +1246,30 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         transform(&lonVals[0], &lonVals[0]+lonSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
-        size_t orgXDimSize;
-        size_t orgYDimSize;
+        // FIXME the following part also appears in "changeProjectionByCoordinates"
+        string orgXDimName, orgYDimName;
         bool latLonProj = (cs->hasProjection() && (cs->getProjection()->getName() == "latitude_longitude"));
+        if (!latLonProj && cs->getGeoYAxis()->getName() == latitude) {
+            // x and y axis not properly defined, guessing
+            vector<string> latShape = p_->dataReader->getCDM().getVariable(latitude).getShape();
+            if (latShape.size() != 2) {
+                throw CDMException("latitude needs 2 dims for forward interpolation");
+            }
+            orgXDimName = latShape[0];
+            orgYDimName = latShape[1];
+        } else {
+            orgXDimName = cs->getGeoXAxis()->getName();
+            orgYDimName = cs->getGeoYAxis()->getName();
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << orgXDimName << "," << orgYDimName);
+        size_t orgXDimSize = p_->dataReader->getCDM().getDimension(orgXDimName).getLength();
+        size_t orgYDimSize = p_->dataReader->getCDM().getDimension(orgYDimName).getLength();
         if (latLonProj) {
-            orgXDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
-            orgYDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
             // create new latVals and lonVals as a matrix
             lonLatVals2Matrix(lonVals, latVals, orgXDimSize, orgYDimSize);
             latSize = orgXDimSize * orgYDimSize;
-        } else {
-            if (cs->getGeoYAxis()->getName() == latitude) {
-                // x and y axis not properly defined, guessing
-                vector<string> latShape = p_->dataReader->getCDM().getVariable(latitude).getShape();
-                if (latShape.size() != 2) {
-                    throw CDMException("latitude needs 2 dims for forward interpolation");
-                }
-                orgXDimSize = p_->dataReader->getCDM().getDimension(latShape[0]).getLength();
-                orgYDimSize = p_->dataReader->getCDM().getDimension(latShape[1]).getLength();
-                LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "(" << orgXDimSize << "), " << latShape[1] << "(" << orgYDimSize << ")");
-            } else {
-                orgXDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
-                orgYDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
-            }
         }
-
+        // FIXME end of identical part
 
         // store projection changes to be used in data-section
         // translate temporary new axes from deg2rad if required
@@ -1307,7 +1306,7 @@ void CDMInterpolator::changeProjectionByForwardInterpolation(int method, const s
 
         // store the interpolation
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached forward interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedForwardInterpolation(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible to interpolate with forward-interpolation");
@@ -1339,30 +1338,27 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         transform(&latVals[0], &latVals[0]+latSize, &latVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
         transform(&lonVals[0], &lonVals[0]+lonSize, &lonVals[0], bind1st(multiplies<double>(), DEG_TO_RAD));
 
-        size_t orgXDimSize;
-        size_t orgYDimSize;
+        string orgXDimName, orgYDimName;
         bool latLonProj = (cs->hasProjection() && (cs->getProjection()->getName() == "latitude_longitude"));
+        if (!latLonProj && cs->getGeoYAxis()->getName() == latitude) {
+            // x and y axis not properly defined, guessing
+            vector<string> latShape = p_->dataReader->getCDM().getVariable(latitude).getShape();
+            if (latShape.size() != 2) {
+                throw CDMException("latitude needs 2 dims for forward interpolation");
+            }
+            orgXDimName = latShape[0];
+            orgYDimName = latShape[1];
+        } else {
+            orgXDimName = cs->getGeoXAxis()->getName();
+            orgYDimName = cs->getGeoYAxis()->getName();
+        }
+        LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << orgXDimName << "," << orgYDimName);
+        size_t orgXDimSize = p_->dataReader->getCDM().getDimension(orgXDimName).getLength();
+        size_t orgYDimSize = p_->dataReader->getCDM().getDimension(orgYDimName).getLength();
         if (latLonProj) {
-            orgXDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
-            orgYDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
             // create new latVals and lonVals as a matrix
             lonLatVals2Matrix(lonVals, latVals, orgXDimSize, orgYDimSize);
             latSize = orgXDimSize * orgYDimSize;
-        } else {
-            if (cs->getGeoYAxis()->getName() == latitude) {
-                // x and y axis not properly defined, guessing
-                vector<string> latShape = p_->dataReader->getCDM().getVariable(latitude).getShape();
-                if (latShape.size() != 2) {
-                    throw CDMException("latitude needs 2 dims for forward interpolation");
-                }
-                LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << latShape[0] << "," << latShape[1]);
-                orgXDimSize = p_->dataReader->getCDM().getDimension(latShape[0]).getLength();
-                orgYDimSize = p_->dataReader->getCDM().getDimension(latShape[1]).getLength();
-            } else {
-                LOG4FIMEX(logger, Logger::DEBUG, "x and y axis: " << cs->getGeoXAxis()->getName() << "," << cs->getGeoYAxis()->getName());
-                orgXDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoXAxis()->getName()).getLength();
-                orgYDimSize = p_->dataReader->getCDM().getDimension(cs->getGeoYAxis()->getName()).getLength();
-            }
         }
 
         // store projection changes to be used in data-section
@@ -1396,7 +1392,7 @@ void CDMInterpolator::changeProjectionByCoordinates(int method, const string& pr
         }
 
         LOG4FIMEX(logger, Logger::DEBUG, "creating cached coordinate interpolation matrix " << orgXDimSize << "x" << orgYDimSize << " => " << out_x_axis.size() << "x" << out_y_axis.size());
-        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(cs->getGeoXAxis()->getName(), cs->getGeoYAxis()->getName(), method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
+        p_->cachedInterpolation[csIt->first] = boost::shared_ptr<CachedInterpolationInterface>(new CachedInterpolation(orgXDimName, orgYDimName, method, pointsOnXAxis, pointsOnYAxis, orgXDimSize, orgYDimSize, out_x_axis.size(), out_y_axis.size()));
     }
     if (hasXYSpatialVectors()) {
         LOG4FIMEX(logger, Logger::WARN, "vector data found, but not possible? to interpolate with coordinate-interpolation");
