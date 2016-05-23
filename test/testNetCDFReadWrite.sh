@@ -15,14 +15,14 @@ if [ $? != 0 ]; then
   rm -f test.nc
   exit 1
 fi
-diff test.nc testNcRdWr.nc 
-if [ $? != 0 ]; then
+
+if "${srcdir}/nccmp.sh" test.nc testNcRdWr.nc ; then
+  echo "success"
+  E=0
+else
   echo "failed diff nc to nc"
-  rm -f testNcRdWr.nc
-  rm -f test.nc
-  exit 1
+  E=1
 fi
 rm -f testNcRdWr.nc
 rm -f test.nc
-echo "success"
-exit 0
+exit $E

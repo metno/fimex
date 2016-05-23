@@ -3,6 +3,7 @@ EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
              testVerticalInterpolatorHeight.sh.in testVerticalInterpolatorOceanSG2ToDepth.sh.in \
              testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
              testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
+             nccmp.sh \
              inData.txt diana.setup felt2netcdf.cfg \
              cdmGribReaderConfig_newEarth.xml \
              felt2nc_variables_level1000.xml \
