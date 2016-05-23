@@ -277,30 +277,19 @@ testFortran_LDADD = $(LDADD)
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testGribReader_OBJECTS = testGribReader.$(OBJEXT)
 testGribReader_OBJECTS = $(am_testGribReader_OBJECTS)
-testGribReader_LDADD = $(LDADD)
-@ENABLE_FORTRAN_FALSE@testGribReader_DEPENDENCIES =  \
-@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
+@ENABLE_FORTRAN_FALSE@am__DEPENDENCIES_2 = ../src/libfimex.la \
 @ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
-@ENABLE_FORTRAN_TRUE@testGribReader_DEPENDENCIES =  \
+@ENABLE_FORTRAN_TRUE@am__DEPENDENCIES_2 =  \
 @ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
 @ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
+testGribReader_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_testGribWriter_OBJECTS = testGribWriter.$(OBJEXT)
 testGribWriter_OBJECTS = $(am_testGribWriter_OBJECTS)
-testGribWriter_LDADD = $(LDADD)
-@ENABLE_FORTRAN_FALSE@testGribWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_FALSE@	../src/libfimex.la \
-@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
-@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
-@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
-@ENABLE_FORTRAN_TRUE@testGribWriter_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
-@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
-@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
-@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
+testGribWriter_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_testInterpolation_OBJECTS = testInterpolation.$(OBJEXT)
 testInterpolation_OBJECTS = $(am_testInterpolation_OBJECTS)
 testInterpolation_LDADD = $(LDADD)
@@ -522,16 +511,7 @@ testUnits_LDADD = $(LDADD)
 @ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
 am_testUtils_OBJECTS = testUtils.$(OBJEXT)
 testUtils_OBJECTS = $(am_testUtils_OBJECTS)
-testUtils_LDADD = $(LDADD)
-@ENABLE_FORTRAN_FALSE@testUtils_DEPENDENCIES = ../src/libfimex.la \
-@ENABLE_FORTRAN_FALSE@	../src/felt/libfelt.la \
-@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1) \
-@ENABLE_FORTRAN_FALSE@	$(am__DEPENDENCIES_1)
-@ENABLE_FORTRAN_TRUE@testUtils_DEPENDENCIES =  \
-@ENABLE_FORTRAN_TRUE@	$(top_builddir)/modules/F90/libfimexf.la \
-@ENABLE_FORTRAN_TRUE@	../src/libfimex.la ../src/felt/libfelt.la \
-@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1) \
-@ENABLE_FORTRAN_TRUE@	$(am__DEPENDENCIES_1)
+testUtils_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_testVLevelConverter_OBJECTS = testVLevelConverter.$(OBJEXT)
 testVLevelConverter_OBJECTS = $(am_testVLevelConverter_OBJECTS)
 testVLevelConverter_LDADD = $(LDADD)
@@ -893,6 +873,7 @@ program_transform_name = @program_transform_name@
 proradxml_CFLAGS = @proradxml_CFLAGS@
 proradxml_LIBS = @proradxml_LIBS@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -979,6 +960,7 @@ AM_FCFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I../modules/F90/
 check_SCRIPTS = $(SH_TESTS)
 testBinaryConstants_SOURCES = testBinaryConstants.cc
 testUtils_SOURCES = testUtils.cc
+testUtils_LDADD = $(LDADD) @BOOST_REGEX_LIB@
 testInterpolation_SOURCES = testInterpolation.cc
 testVerticalCoordinates_SOURCES = testVerticalCoordinates.cc
 testVLevelConverter_SOURCES = testVLevelConverter.cc
@@ -1000,7 +982,9 @@ testMetGmReader_SOURCES = testMetGmReader.cc
 testMetGmWriter_SOURCES = testMetGmWriter.cc
 testMerger_SOURCES = testMerger.cc
 testGribReader_SOURCES = testGribReader.cc
+testGribReader_LDADD = $(LDADD) @BOOST_SYSTEM_LIB@
 testGribWriter_SOURCES = testGribWriter.cc
+testGribWriter_LDADD = $(LDADD) @BOOST_FILESYSTEM_LIB@ @BOOST_SYSTEM_LIB@
 testFileReaderFactory_SOURCES = testFileReaderFactory.cc
 testExtractor_SOURCES = testExtractor.cc
 testProcessor_SOURCES = testProcessor.cc
