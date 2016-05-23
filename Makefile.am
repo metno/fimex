@@ -32,5 +32,3 @@ endif
 include m4/doxygen.mk
 
 CLEANFILES = $(DX_CLEANFILES)
-
-include m4/debian.mk
