@@ -53,8 +53,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = modules/F90
-DIST_COMMON = $(am__fimexfinc_HEADERS_DIST) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_cxx_have_std.m4 \
 	$(top_srcdir)/m4/ac_cxx_have_stl.m4 \
@@ -139,9 +138,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__fimexfinc_HEADERS_DIST = $(top_builddir)/modules/F90/fimex.mod \
-	$(top_builddir)/modules/F90/fimex2d.mod
-HEADERS = $(fimexfinc_HEADERS)
+HEADERS = $(nodist_fimexfinc_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -322,6 +319,7 @@ program_transform_name = @program_transform_name@
 proradxml_CFLAGS = @proradxml_CFLAGS@
 proradxml_LIBS = @proradxml_LIBS@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -336,7 +334,7 @@ AM_FCFLAGS =
 @ENABLE_FORTRAN_TRUE@libfimexf_la_LIBADD = 
 @ENABLE_FORTRAN_TRUE@libfimexf_la_SOURCES = fimex.f90 fimex2d.F90
 @ENABLE_FORTRAN_TRUE@fimexfincdir = $(includedir)
-@ENABLE_FORTRAN_TRUE@fimexfinc_HEADERS = $(top_builddir)/modules/F90/fimex.mod $(top_builddir)/modules/F90/fimex2d.mod
+@ENABLE_FORTRAN_TRUE@nodist_fimexfinc_HEADERS = $(top_builddir)/modules/F90/fimex.mod $(top_builddir)/modules/F90/fimex2d.mod
 @ENABLE_FORTRAN_TRUE@CLEANFILES = fimex.mod fimex2d.mod fimex2d_example_all.nc4 fimex2d_example.nc4 fimex2d_example
 all: all-am
 
@@ -436,9 +434,9 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-fimexfincHEADERS: $(fimexfinc_HEADERS)
+install-nodist_fimexfincHEADERS: $(nodist_fimexfinc_HEADERS)
 	@$(NORMAL_INSTALL)
-	@list='$(fimexfinc_HEADERS)'; test -n "$(fimexfincdir)" || list=; \
+	@list='$(nodist_fimexfinc_HEADERS)'; test -n "$(fimexfincdir)" || list=; \
 	if test -n "$$list"; then \
 	  echo " $(MKDIR_P) '$(DESTDIR)$(fimexfincdir)'"; \
 	  $(MKDIR_P) "$(DESTDIR)$(fimexfincdir)" || exit 1; \
@@ -452,9 +450,9 @@ install-fimexfincHEADERS: $(fimexfinc_HEADERS)
 	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(fimexfincdir)" || exit $$?; \
 	done
 
-uninstall-fimexfincHEADERS:
+uninstall-nodist_fimexfincHEADERS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(fimexfinc_HEADERS)'; test -n "$(fimexfincdir)" || list=; \
+	@list='$(nodist_fimexfinc_HEADERS)'; test -n "$(fimexfincdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(fimexfincdir)'; $(am__uninstall_files_from_dir)
 
@@ -600,7 +598,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-fimexfincHEADERS
+install-data-am: install-nodist_fimexfincHEADERS
 
 install-dvi: install-dvi-am
 
@@ -645,7 +643,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-fimexfincHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-libLTLIBRARIES \
+	uninstall-nodist_fimexfincHEADERS
 
 .MAKE: install-am install-strip
 
@@ -654,16 +653,16 @@ uninstall-am: uninstall-fimexfincHEADERS uninstall-libLTLIBRARIES
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am \
-	install-fimexfincHEADERS install-html install-html-am \
-	install-info install-info-am install-libLTLIBRARIES \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-fimexfincHEADERS \
-	uninstall-libLTLIBRARIES
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man \
+	install-nodist_fimexfincHEADERS install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-libLTLIBRARIES \
+	uninstall-nodist_fimexfincHEADERS
 
 
 @ENABLE_FORTRAN_TRUE@fimex.o: fimex.f90
