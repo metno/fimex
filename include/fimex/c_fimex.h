@@ -242,7 +242,7 @@ extern const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader);
  * variable might be a dimension (1D), or an 2D field.
  * @param reader
  * @param varName The name of a parameter.
- * @return longitude-variable name or ""
+ * @return longitude-variable name, which must be free'd, or NULL
  */
 extern const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName);
 /**
@@ -250,9 +250,35 @@ extern const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* v
  * variable might be a dimension (1D), or an 2D field.
  * @param reader
  * @param varName The name of a parameter.
- * @return latitude-variable name or ""
+ * @return latitude-variable name, which must be free'd, or NULL
  */
 extern const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName);
+
+/**
+ * Get the name of the latitude variable belonging to a parameter. This function is similar
+ * to mifi_get_var_longitude, except that the name is copied to lonName which is expected to
+ * have a capacity of n.
+ * @param reader
+ * @param varName The name of a parameter.
+ * @param lonName The place to copy the longitude name to.
+ * @param n The capacity of lonName -- 10 means at most 9 characters plus a final 0 byte.
+ * @return -1 if no longitude-latitude variables found; 0 if n is too small, else the
+ *         number of characters copied to lonName, including final NUL.
+ */
+extern int mifi_get_var_longitude_cpy(mifi_cdm_reader* reader, const char* varName, char* lonName, int n);
+
+/**
+ * Get the name of the latitude variable belonging to a parameter. This function is similar
+ * to mifi_get_var_longitude, except that the name is copied to lonName which is expected to
+ * have a capacity of n.
+ * @param reader
+ * @param varName The name of a parameter.
+ * @param latName The place to copy the longitude name to.
+ * @param n The capacity of latName -- 10 means at most 9 characters plus a final 0 byte.
+ * @return -1 if no longitude-latitude variables found; 0 if n is too small, else the
+ *         number of characters copied to latName, including final NUL.
+ */
+extern int mifi_get_var_latitude_cpy(mifi_cdm_reader* reader, const char* varName, char* latName, int n);
 
 
 /**

@@ -289,7 +289,7 @@ const char* mifi_get_unlimited_dimension_name(mifi_cdm_reader* reader)
 const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName) {
     std::string lon,lat;
     if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
-        return lon.c_str();
+        return strdup(lon.c_str());
     }
     return "";
 }
@@ -297,9 +297,41 @@ const char* mifi_get_var_longitude(mifi_cdm_reader* reader, const char* varName)
 const char* mifi_get_var_latitude(mifi_cdm_reader* reader, const char* varName) {
     std::string lon,lat;
     if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
-        return lat.c_str();
+        return strdup(lat.c_str());
     }
     return "";
+}
+
+static int string_cpy(const std::string& src, char* dest, int n)
+{
+    char* d = dest;
+    if (src.size()+1 <= n) {
+        d = std::copy(src.begin(), src.end(), dest);
+        *d++ = '\0';
+    }
+    std::fill(d, dest + n, '\0');
+    return d - dest;
+}
+
+int mifi_get_var_longitude_cpy(mifi_cdm_reader* reader, const char* varName, char* lonName, int n)
+{
+    std::string lon,lat;
+    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
+        return string_cpy(lon, lonName, n);
+    } else {
+        return -1;
+    }
+}
+
+
+int mifi_get_var_latitude_cpy(mifi_cdm_reader* reader, const char* varName, char* latName, int n)
+{
+    std::string lon,lat;
+    if (reader->reader_->getCDM().getLatitudeLongitude(std::string(varName), lat, lon)) {
+        return string_cpy(lat, latName, n);
+    } else {
+        return -1;
+    }
 }
 
 

@@ -202,21 +202,25 @@ MODULE Fimex
     END FUNCTION c_mifi_get_unique_forecast_reference_time
 
     !> F90-wrapper for mifi_get_var_longitude()
-    FUNCTION c_mifi_get_var_longitude(io, varName) BIND(C,NAME="mifi_get_var_longitude")
-      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+    FUNCTION c_mifi_get_var_longitude(io, varName, lonName, n) BIND(C,NAME="mifi_get_var_longitude_cpy")
+      USE iso_c_binding, ONLY: C_INT, C_CHAR, C_PTR
       IMPLICIT NONE
       TYPE(C_PTR), VALUE                      :: io
       CHARACTER(KIND=C_CHAR),INTENT(IN)       :: varName(*)
-      TYPE(C_PTR)                             :: c_mifi_get_var_longitude
+      CHARACTER(KIND=C_CHAR),INTENT(OUT)      :: lonName(*)
+      INTEGER(KIND=C_INT), VALUE              :: n
+      INTEGER(KIND=C_INT)                     :: c_mifi_get_var_longitude
     END FUNCTION c_mifi_get_var_longitude
 
     !> F90-wrapper for mifi_get_var_latitude()
-    FUNCTION c_mifi_get_var_latitude(io, varName) BIND(C,NAME="mifi_get_var_latitude")
-      USE iso_c_binding, ONLY: C_LONG_LONG, C_PTR, C_CHAR
+    FUNCTION c_mifi_get_var_latitude(io, varName, latName, n) BIND(C,NAME="mifi_get_var_latitude_cpy")
+      USE iso_c_binding, ONLY: C_INT, C_CHAR, C_PTR
       IMPLICIT NONE
       TYPE(C_PTR), VALUE                      :: io
       CHARACTER(KIND=C_CHAR),INTENT(IN)       :: varName(*)
-      TYPE(C_PTR)                             :: c_mifi_get_var_latitude
+      CHARACTER(KIND=C_CHAR),INTENT(OUT)      :: latName(*)
+      INTEGER(KIND=C_INT), VALUE              :: n
+      INTEGER(KIND=C_INT)                     :: c_mifi_get_var_latitude
     END FUNCTION c_mifi_get_var_latitude
 
 
@@ -754,21 +758,17 @@ MODULE Fimex
     CLASS(FimexIO), INTENT(IN)     :: this
     CHARACTER(LEN=*), INTENT(IN)   :: varName
     CHARACTER(LEN=1024)            :: get_var_longitude
-
-    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
-    INTEGER                          :: i
+    CHARACTER(LEN=1025)            :: var_array
+    INTEGER                        :: i
 
     IF ( .not. C_ASSOCIATED(this%io) ) THEN
       RETURN
     ENDIF
-    CALL C_F_POINTER(c_mifi_get_var_longitude(this%io, TRIM(varName)//C_NULL_CHAR), var_array, (/1024/))
+    i = c_mifi_get_var_longitude(this%io, TRIM(varName)//C_NULL_CHAR, var_array, 1025)
     get_var_longitude = ""
-    !write(*,*) TRIM(varName)
-    DO i = 1, 1024
-      if (var_array(i) == C_NULL_CHAR) EXIT
-      get_var_longitude(i:i+1) = var_array(i)
-    END DO
-    !write(*,*) TRIM(get_var_longitude)
+    IF (i >= 1) THEN
+       get_var_longitude(1:i) = var_array(1:i)
+    ENDIF
     RETURN
   END FUNCTION get_var_longitude
 
@@ -784,21 +784,17 @@ MODULE Fimex
     CLASS(FimexIO), INTENT(IN)     :: this
     CHARACTER(LEN=*), INTENT(IN)   :: varName
     CHARACTER(LEN=1024)            :: get_var_latitude
-
-    CHARACTER(KIND=C_CHAR), POINTER, DIMENSION(:) :: var_array
+    CHARACTER(LEN=1025)            :: var_array
     INTEGER                          :: i
 
     IF ( .not. C_ASSOCIATED(this%io) ) THEN
       RETURN
     ENDIF
-    CALL C_F_POINTER(c_mifi_get_var_latitude(this%io, TRIM(varName)//C_NULL_CHAR), var_array, (/1024/))
+    i = c_mifi_get_var_latitude(this%io, TRIM(varName)//C_NULL_CHAR, var_array, 1025)
     get_var_latitude = ""
-    !write(*,*) TRIM(varName)
-    DO i = 1, 1024
-      if (var_array(i) == C_NULL_CHAR) EXIT
-      get_var_latitude(i:i+1) = var_array(i)
-    END DO
-    !write(*,*) TRIM(get_var_latitude)
+    IF (i >= 1) THEN
+       get_var_latitude(1:i) = var_array(1:i)
+    ENDIF
     RETURN
   END FUNCTION get_var_latitude
 

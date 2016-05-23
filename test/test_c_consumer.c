@@ -288,15 +288,23 @@ int testCSliceBuilder(const char* feltFile, const char* configFile) {
 
 
     const char* lonName = mifi_get_var_longitude(feltReader, "altitude");
-    if (strcmp("longitude", lonName)) {
+    if (!lonName) {
+        retVal++;
+        fprintf(stderr, "longitude not found\n");
+    } else if (strcmp("longitude", lonName)) {
         retVal++;
         fprintf(stderr, "longitude not named right, longitude != %s\n", lonName);
+        free(lonName);
     }
 
     const char* latName = mifi_get_var_latitude(feltReader, "altitude");
-    if (strcmp("latitude", latName)) {
+        if (!latName) {
+        retVal++;
+        fprintf(stderr, "latitude not found\n");
+    } else if (strcmp("latitude", latName)) {
         retVal++;
         fprintf(stderr, "latitude not named right, latitude != %s\n", latName);
+        free(lonName);
     }
 
 
