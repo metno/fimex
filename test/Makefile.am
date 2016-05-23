@@ -52,6 +52,9 @@ CC_TESTS = testInterpolation \
 SH_TESTS = 
 if ENABLE_FORTRAN
 LDADD = $(top_builddir)/modules/F90/libfimexf.la
+
+$(top_builddir)/modules/F90/libfimexf.la:
+	$(MAKE) -C $(top_builddir)/modules/F90 libfimexf.la
 else
 LDADD =
 endif

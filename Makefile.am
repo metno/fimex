@@ -12,7 +12,7 @@ EXTRA_DIST = doxydoc.txt libstdc++.tag share/doc/examples \
              share/scripts/fiMisSubsetter.pl \
              share/scripts/newProjection.pl \
              share/scripts/fiConfigOverview.pl
-             
+
 dist-hook:
 	rm -rf `find $(distdir)/share/doc/examples -type d -name .svn`
 	rm -rf `find $(distdir)/modules -type d -name .svn`

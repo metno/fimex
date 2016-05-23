@@ -1732,6 +1732,9 @@ uninstall-am:
 	tags uninstall uninstall-am
 
 
+@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/libfimexf.la:
+@ENABLE_FORTRAN_TRUE@	$(MAKE) -C $(top_builddir)/modules/F90 libfimexf.la
+
 @HAVE_LIBPQ_TRUE@test_wdb: wdbTest
 @HAVE_LIBPQ_TRUE@	@./wdbTest
 
