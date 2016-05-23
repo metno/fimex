@@ -316,6 +316,7 @@ program_transform_name = @program_transform_name@
 proradxml_CFLAGS = @proradxml_CFLAGS@
 proradxml_LIBS = @proradxml_LIBS@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
