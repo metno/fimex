@@ -882,32 +882,33 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in testFiIndexGribs.sh.in\
-             testVerticalInterpolator.sh.in testVerticalInterpolator2.sh.in \
-             testVerticalInterpolatorHeight.sh.in testVerticalInterpolatorOceanSG2ToDepth.sh.in \
-             testQualityExtractorFimex.sh.in testMerger.sh.in testMergerTarget.sh.in \
-             testFeltReadNetCDFWrite.sh testNetCDFReadWrite.sh testNcmlRead.sh \
-             nccmp.sh \
-             inData.txt diana.setup felt2netcdf.cfg \
-             cdmGribReaderConfig_newEarth.xml \
-             felt2nc_variables_level1000.xml \
-             test.ncml fillInterpolator.cfg testXMLDoc.xml coordTest.nc char.nc \
-             satellite_cma.nc \
-             testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc testQEmask.xml.in \
-             coordRefTimeTest.nc test.ncml twoCoordsTest.nc \
-             verticalPressure.nc verticalSigmaHybrid.nc verticalPressurePressure.nc \
-             verticalSigmaHybridPressure.nc verticalPressureHeight.nc \
-             verticalOceanSG2.nc verticalOceanSG2_depth.nc \
-             sample_ed1.gm sample_ed2.gm \
-             erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc  c11.nc c11.ncml \
-             merge_target_base.nc merge_target_top.nc \
-             test_merge_inner.nc test_merge_outer.nc fillIn2.nc fillIn3.nc fillWriterConfig.xml \
-             testdata_arome_vc.nc verticalVelocity.nc \
-             data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
-             data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
-             data/joinExistingAggSuffix.ncml data/aggNothing.ncml data/aggWrong.ncml \
-             data/unionAgg.ncml data/unionAgg2.nc3 data/north.nc
-
+EXTRA_DIST = testInterpolatorFill.sh testCharNc.sh.in \
+	testFiIndexGribs.sh.in testVerticalInterpolator.sh.in \
+	testVerticalInterpolator2.sh.in \
+	testVerticalInterpolatorHeight.sh.in \
+	testVerticalInterpolatorOceanSG2ToDepth.sh.in \
+	testQualityExtractorFimex.sh.in testMerger.sh.in \
+	testMergerTarget.sh.in testFeltReadNetCDFWrite.sh \
+	testNetCDFReadWrite.sh testNcmlRead.sh nccmp.sh inData.txt \
+	diana.setup felt2netcdf.cfg cdmGribReaderConfig_newEarth.xml \
+	felt2nc_variables_level1000.xml test.ncml fillInterpolator.cfg \
+	testXMLDoc.xml coordTest.nc char.nc satellite_cma.nc \
+	testQualityConfig.xml testQEmask_data.nc testQEmask_mask.nc \
+	testQEmask.xml.in coordRefTimeTest.nc test.ncml \
+	twoCoordsTest.nc verticalPressure.nc verticalSigmaHybrid.nc \
+	verticalPressurePressure.nc verticalSigmaHybridPressure.nc \
+	verticalPressureHeight.nc verticalOceanSG2.nc \
+	verticalOceanSG2_depth.nc sample_ed1.gm sample_ed2.gm \
+	erai.sfc.40N.0.75d.200301011200.nc template_noaa17.nc c11.nc \
+	c11.ncml merge_target_base.nc merge_target_top.nc \
+	test_merge_inner.nc test_merge_outer.nc fillIn2.nc fillIn3.nc \
+	fillWriterConfig.xml testdata_arome_vc.nc verticalVelocity.nc \
+	data/joinExistingAgg.ncml data/joinExistingAgg1.nc \
+	data/joinExistingAgg3.nc data/joinExistingAgg4.nc \
+	data/joinExistingAggSuffix.ncml data/aggNothing.ncml \
+	data/aggWrong.ncml data/unionAgg.ncml data/unionAgg2.nc3 \
+	data/north.nc wdb/local.wdb.xml wdb/wdb_config.xml \
+	wdb/wdb.wdbml
 CLEANFILES = test.nc test2.nc test3.nc test4.nc out.nc out*.nc\
              testQualityExtractor.nc test_0time.nc \
              testInterpolator.nc testInterpolator2.nc testInterpolator3.nc \
@@ -948,13 +949,13 @@ AM_FCFLAGS = -DTOP_SRCDIR=\"$(top_srcdir)\" -I../modules/F90/
 @HAVE_NETCDF_TRUE@GRIBAPI_NC_TESTS = testGribReader
 @HAVE_NETCDF_TRUE@METGM_NC_TESTS = testMetGmWriter 
 @HAVE_LIBPQ_TRUE@wdbTest_SOURCES = \
-@HAVE_LIBPQ_TRUE@  	wdb/TestingGridData.h wdb/TestingGridData.cpp \
-@HAVE_LIBPQ_TRUE@  	wdb/GridDataFactory.h wdb/GridDataFactory.cpp \
-@HAVE_LIBPQ_TRUE@  	wdb/Wdb2CdmBuilderTest.cc \
-@HAVE_LIBPQ_TRUE@  	wdb/WdbIndexTest.cc \
-@HAVE_LIBPQ_TRUE@  	wdb/ConfigurationTest.cpp \
-@HAVE_LIBPQ_TRUE@  	wdb/GlobalWdbConfigurationTest.cpp \
-@HAVE_LIBPQ_TRUE@  	wdb/TimeHandlerTest.cpp
+@HAVE_LIBPQ_TRUE@	wdb/TestingGridData.h wdb/TestingGridData.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/GridDataFactory.h wdb/GridDataFactory.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/Wdb2CdmBuilderTest.cc \
+@HAVE_LIBPQ_TRUE@	wdb/WdbIndexTest.cc \
+@HAVE_LIBPQ_TRUE@	wdb/ConfigurationTest.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/GlobalWdbConfigurationTest.cpp \
+@HAVE_LIBPQ_TRUE@	wdb/TimeHandlerTest.cpp
 
 @HAVE_LIBPQ_TRUE@wdbTest_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/src/ -DTEST_DIR=\"@srcdir@/wdb\" @MIFI_PQ_CPPFLAGS@
 @HAVE_LIBPQ_TRUE@wdbTest_LDFLAGS = $(AM_LDFLAGS) ../src/libfimex.la
