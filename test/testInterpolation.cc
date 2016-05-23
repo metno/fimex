@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
     BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
 
-    std::ofstream bilinearOut (std::string(topSrcDir+"/test/bilinearOutData.txt").c_str());
+    std::ofstream bilinearOut("bilinearOutData.txt");
     for (int lon = 0; lon < lonSize; ++lon) {
         for (int lat = 0; lat < latSize; ++lat) {
             bilinearOut << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
@@ -397,7 +397,7 @@ BOOST_AUTO_TEST_CASE( test_mifi_interpolate_f )
     BOOST_CHECK(std::fabs(outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] - 32) < 1e-6);
     std::cerr << "long lat val: " << longitudeAxis[9] << " " << latitudeAxis[25] << " " << outArray[mifi_3d_array_position(9, 25, 0, lonSize, latSize, zSize)] << std::endl;
 
-    std::ofstream bicubicOut (std::string(topSrcDir+"/test/bicubicOutData.txt").c_str());
+    std::ofstream bicubicOut("bicubicOutData.txt");
     for (int lon = 0; lon < lonSize; ++lon) {
         for (int lat = 0; lat < latSize; ++lat) {
             bicubicOut << longitudeAxis[lon] << " " << latitudeAxis[lat] << " " << outArray[mifi_3d_array_position(lon, lat, 0, lonSize, latSize,zSize)] << std::endl;
