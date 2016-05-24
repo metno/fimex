@@ -9,8 +9,6 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-DEBIAN_DIR = debian
-DEBIAN_PACKAGE_VERSION = `head -n1 debian/changelog | sed "s/.*(\(.*\)).*/\1/"`
 VERSION = `head -n1 debian/changelog | sed "s/.*(\(.*\)-.*).*/\1/"`
 
 # These are used for cross-compiling and for saving the configure script
@@ -34,29 +32,6 @@ ifeq ($(DEB_HOST_ARCH),i386)
 endif
 
 
-
-# shared library versions, option 1
-#version=2.0.5
-#major=2
-# option 2, assuming the library is created as src/.libs/libfoo.so.2.0.5 or so
-version=`ls src/.libs/lib*.so.* | \
- awk '{if (match($$0,/[0-9]+\.[0-9]+\.[0-9]+$$/)) print substr($$0,RSTART)}'`
-major=`ls src/.libs/lib*.so.* | \
- awk '{if (match($$0,/\.so\.[0-9]+$$/)) print substr($$0,RSTART+4)}'`
-
-prepare:
-	mv $(DEBIAN_DIR)/libfimex.install $(DEBIAN_DIR)/libfimex-$(VERSION)-0.install
-	mv $(DEBIAN_DIR)/libfimexf.install $(DEBIAN_DIR)/libfimexf-$(VERSION)-0.install
-	mv $(DEBIAN_DIR)/libfelt.install $(DEBIAN_DIR)/libfelt-$(VERSION)-0.install
-	mv $(DEBIAN_DIR)/libfimex.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs
-	mv $(DEBIAN_DIR)/libfimexf.shlibs $(DEBIAN_DIR)/libfimexf-$(VERSION)-0.shlibs
-	mv $(DEBIAN_DIR)/libfelt.shlibs $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs
-	for i in $(DEBIAN_DIR)/control $(DEBIAN_DIR)/libfelt-$(VERSION)-0.shlibs $(DEBIAN_DIR)/libfimex-$(VERSION)-0.shlibs $(DEBIAN_DIR)/libfimexf-$(VERSION)-0.shlibs; do \
-		perl -pi -e "s/0\.25\.1/$(VERSION)/g;" $$i; \
-	done
-
-
-
 config.status: configure
 	dh_testdir
 	# Add here commands to configure the package.
@@ -67,11 +42,26 @@ ifneq "$(wildcard /usr/share/misc/config.guess)" ""
 	cp -f /usr/share/misc/config.guess config.guess
 endif
 ifeq ($(DEB_HOST_ARCH),i386)
-	cp -f $(DEBIAN_DIR)/libfimex.preinst.i386 $(DEBIAN_DIR)/libfimex-$(VERSION)-0.preinst
-	cp -f $(DEBIAN_DIR)/libfelt.preinst.i386 $(DEBIAN_DIR)/libfelt-$(VERSION)-0.preinst
+	# we need to check for sse2 only on i386, and we only know the
+	# architecture used for building the package during the build
+	cp -f debian/preinst.require-sse2-on-i386 debian/libfimex-$(VERSION)-0.preinst
+	cp -f debian/preinst.require-sse2-on-i386 debian/libfelt-$(VERSION)-0.preinst
 endif
 	dh_quilt_patch
-	./configure --enable-openmp --enable-log4cpp --enable-fortran --with-netcdf=/opt/netcdf4.3.3 --with-metgm --enable-proradxml --with-pq=/usr/include/postgresql,/usr/lib --with-udunits2 --with-grib_api=/opt/grib_api-1.13.0 --enable-grib_api-pthread --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CFLAGS)"
+	./configure \
+		--enable-openmp \
+		--enable-log4cpp \
+		--enable-fortran \
+		--with-netcdf=/opt/netcdf4.3.3 \
+		--with-metgm --enable-proradxml \
+		--with-pq=/usr/include/postgresql,/usr/lib \
+		--with-udunits2 \
+		--with-grib_api=/opt/grib_api-1.13.0 --enable-grib_api-pthread \
+		--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
+		--prefix=/usr \
+		--mandir=\$${prefix}/share/man \
+		--infodir=\$${prefix}/share/info \
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" CXXFLAGS="$(CFLAGS)"
 
 
 build: build-stamp
@@ -81,7 +71,6 @@ build-stamp:  config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	
 	touch $@
 
 clean:
@@ -90,7 +79,7 @@ clean:
 	rm -f build-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
+	[ ! -f Makefile ] || $(MAKE) distclean
 	#rm -f config.sub config.guess
 
 	dh_clean
@@ -98,7 +87,7 @@ clean:
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	# Add here commands to install the package into debian/tmp

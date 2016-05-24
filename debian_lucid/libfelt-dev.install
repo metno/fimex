@@ -1,4 +1,0 @@
-usr/include/felt/*
-usr/lib/libfelt*.a
-usr/lib/libfelt*.so
-usr/lib/*felt*.la

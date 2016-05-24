@@ -1,3 +1,9 @@
+fimex (0.63-1lucid1) trusty; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 24 May 2016 08:00:08 +0200
+
 fimex (0.61.1-1) lucid; urgency=low
 
   * initial upload

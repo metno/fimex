@@ -1,0 +1,80 @@
+#!/bin/bash
+# based on debian.../README.Debian
+
+set -ex
+
+TARGETDIR="$1"
+DEBIANDIST="$2"
+
+
+usage() {
+    cat <<EOF
+Use: $0 <output_dir> <debian_dir>
+
+where <output_dir> specifies the directory where the dsc file shall be put, and
+where <debian_dir> specifies a directory like 'debian_precise'.
+EOF
+    exit 1
+}
+
+
+if test -z "$TARGETDIR"; then
+    usage
+fi
+
+test -d "$TARGETDIR" || mkdir -p "$TARGETDIR"
+
+PKG_VERSION=`grep ^PACKAGE_VERSION= configure | sed -e "s/.*='\(.*\)'/\1/"`
+FMX="fimex-${PKG_VERSION}"
+ORIGTAR="$TARGETDIR/fimex_${PKG_VERSION}.orig.tar.gz"
+if test ! -f "$ORIGTAR" ; then
+    ./configure
+    make dist
+    mv -vf "${FMX}.tar.gz" "$ORIGTAR"
+fi
+
+
+if test -z "$DEBIANDIST" ; then
+    echo "no debian_dir, stopping now after orig.tar.gz"
+fi
+if test ! -d "$DEBIANDIST"; then
+    usage
+fi
+
+
+DCH_VERSION=`dpkg-parsechangelog -l $DEBIANDIST/changelog -S Version`
+case "$DCH_VERSION" in
+    ${PKG_VERSION}-*) echo "debian changelog version ok" ;;
+    *) echo "debian changelog version mismatch, abort" ; exit 1 ;;
+esac
+
+
+rm -rf "$TARGETDIR/$FMX"
+tar xzvf "$ORIGTAR" -C "$TARGETDIR"
+if test ! -r "$TARGETDIR/$FMX/configure" ; then
+    echo "Error unpacking orig.tar.gz, abort."
+    exit 1
+fi
+
+FMXDEBIAN="$TARGETDIR/$FMX/debian"
+cp -a debian_files "$FMXDEBIAN"
+cp -a "${DEBIANDIST}"/* "$FMXDEBIAN"
+find "$FMXDEBIAN" -type f -size 0 -exec rm -v '{}' ';'
+
+
+
+cd "$TARGETDIR/$FMX"
+for f in debian/*0.25.1* ; do
+    mv $f ${f/0.25.1/${PKG_VERSION}}
+done
+
+for f in debian/control debian/libf*.shlibs ; do
+    perl -pi -e "s/0\.25\.1/${PKG_VERSION}/g;" $f
+done
+
+
+
+( cd .. && dpkg-source -b "$FMX" )
+CHANGES="../fimex_${DCH_VERSION}_source.changes"
+dpkg-genchanges -S > "$CHANGES"
+echo "finished dpkg-genchanges -S > $CHANGES"

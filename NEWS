@@ -1,3 +1,7 @@
+  * 2016-05-23 fimex-0.63
+    * bugfixes:
+      * CDMInterpolator->getDataSlice(slicebuilder)
+      * problems with get_var_longitude/latitude in c_fimex (api change)
   * 2016-04-28 fimex-0.62.1
     * performance improvements:
       * implement CDMInterpolator->getDataSlice(slicebuilder)

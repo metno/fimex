@@ -1,0 +1,5 @@
+fimex (0.63-1xenial+met1) xenial; urgency=low
+
+  * initial release on xenial
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 24 May 2016 08:00:08 +0200

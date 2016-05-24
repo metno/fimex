@@ -1,64 +1,64 @@
-fimex (0.63-1precise1) precise; urgency=low
+fimex (0.63-1trusty1) trusty; urgency=low
 
   * new fimex version
 
  -- Alexander Bürger <alexander.buerger@met.no>  Tue, 24 May 2016 08:00:08 +0200
 
-fimex (0.62.1-1) precise; urgency=low
+fimex (0.62.1-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Thu, 28 Apr 2016 22:44:59 +0200
 
-fimex (0.62-1) precise; urgency=low
+fimex (0.62-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Tue, 19 Apr 2016 20:23:27 +0200
 
-fimex (0.61.1-1) precise; urgency=low
+fimex (0.61.1-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Tue, 19 Jan 2016 10:10:16 +0100
 
-fimex (0.61-1) precise; urgency=low
+fimex (0.61-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Mon, 21 Dec 2015 17:33:27 +0100
 
-fimex (0.60-1) precise; urgency=low
+fimex (0.60-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Mon, 26 Oct 2015 13:50:55 +0100
 
-fimex (0.59.1-1) precise; urgency=low
+fimex (0.59.1-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Fri, 28 Aug 2015 19:54:52 +0200
 
-fimex (0.59-1) precise; urgency=low
+fimex (0.59-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Tue, 25 Aug 2015 13:27:46 +0200
 
-fimex (0.59-1) precise; urgency=low
+fimex (0.59-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Tue, 25 Aug 2015 13:10:02 +0200
 
-fimex (0.58.1-1) precise; urgency=low
+fimex (0.58.1-1) trusty; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Mon, 11 May 2015 15:55:07 +0200
 
-fimex (0.58-1) precise; urgency=low
+fimex (0.58-2) trusty; urgency=low
 
   * initial upload
 
@@ -76,11 +76,11 @@ fimex (0.57-1) precise; urgency=low
 
  -- Heiko Klein <heiko.klein@met.no>  Fri, 27 Feb 2015 14:12:26 +0100
 
-fimex (0.56-1) precise; urgency=low
+fimex (0.56-2) precise; urgency=low
 
-  * initial upload
+  * linking with zlibnew and grib_api 1.13.0
 
- -- Heiko Klein <heiko.klein@met.no>  Tue, 20 Jan 2015 16:07:45 +0100
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 02 Feb 2015 16:07:45 +0100
 
 fimex (0.55.1-1) precise; urgency=low
 
@@ -130,9 +130,9 @@ fimex (0.51-1) precise; urgency=low
 
  -- Heiko Klein <heiko.klein@met.no>  Tue, 11 Feb 2014 12:04:12 +0100
 
-fimex (0.50-1) precise; urgency=low
+fimex (0.50-2) precise; urgency=low
 
-  * initial upload
+  * initial upload with fortran
 
  -- Heiko Klein <heiko.klein@met.no>  Mon, 16 Dec 2013 16:45:08 +0100
 
@@ -146,25 +146,37 @@ fimex (0.48-1) precise; urgency=low
 
   * initial upload
 
- -- Heiko Klein <heiko.klein@met.no>  Wed, 01 Oct 2013 13:00:00 +0200
+ -- Heiko Klein <heiko.klein@met.no>  Wed, 03 Oct 2013 13:00:00 +0200
 
-fimex (0.47-2) precise; urgency=low
+fimex (0.47.2-1) precise; urgency=low
 
-  * adding pkg-config to build-deps
+  * initial upload
 
- -- Heiko Klein <Heiko.Klein@met.no>  Mon, 12 Aug 2013 17:30:00 +0200
+ -- Heiko Klein <heiko.klein@met.no>  Fri, 30 Aug 2013 19:00:00 +0200
+
+fimex (0.47.1-1) precise; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 26 Aug 2013 15:44:00 +0200
 
 fimex (0.47-1) precise; urgency=low
 
   * initial upload
 
- -- Heiko Klein <Heiko.Klein@gmx.net>  Mon, 12 Aug 2013 16:30:00 +0200
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 12 Aug 2013 16:30:00 +0200
 
 fimex (0.46.1-1) precise; urgency=low
 
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Wed, 14 Jun 2013 13:00:00 +0200
+
+fimex (0.46-2) precise; urgency=low
+
+  * adding old fimex-bin versions as conflict to fimex-share
+
+ -- Heiko Klein <heiko.klein@met.no>  Thu, 13 Jun 2013 11:30:00 +0200
 
 fimex (0.46-1) precise; urgency=low
 
@@ -178,6 +190,12 @@ fimex (0.45-1) precise; urgency=low
 
  -- Heiko Klein <heiko.klein@met.no>  Mon, 20 May 2013 21:00:00 +0200
 
+fimex (0.44.2-1) precise; urgency=low
+
+  * initial upload
+
+ -- Heiko Klein <heiko.klein@met.no>  Mon, 11 Apr 2013 16:00:00 +0200
+
 fimex (0.44.1-1) precise; urgency=low
 
   * initial upload
@@ -189,12 +207,6 @@ fimex (0.43-1) precise; urgency=low
   * initial upload
 
  -- Heiko Klein <heiko.klein@met.no>  Mon, 25 Mar 2013 14:00:00 +0100
-
-fimex (0.42-2) precise; urgency=low
-
-  * don't build with log4cpp on launchpad, removing log4cpp
-
- -- Heiko Klein <heiko.klein@met.no>  Tue, 05 Mar 2013 08:10:00 +0100
 
 fimex (0.42-1) precise; urgency=low
 

@@ -18,6 +18,7 @@ DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
 DEB_BUILD_OPTIONS ?= parallel=2
 
+LDFLAGS = -Wl,-rpath -Wl,/opt/zlibnew/lib/
 CFLAGS = -Wall -g
 ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0
@@ -48,13 +49,14 @@ ifeq ($(DEB_HOST_ARCH),i386)
 endif
 	dh_quilt_patch
 	./configure \
+		--enable-openmp \
 		--enable-log4cpp \
 		--enable-fortran \
 		--with-netcdf \
-		--without-metgm \
+		--with-metgm --enable-proradxml \
 		--with-pq=/usr/include/postgresql,/usr/lib \
 		--with-udunits2 \
-		--with-grib_api \
+		--with-grib_api=/opt/grib_api-1.13.0 --enable-grib_api-pthread \
 		--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) \
 		--prefix=/usr \
 		--mandir=\$${prefix}/share/man \
