@@ -424,14 +424,20 @@ GribFileMessage::GribFileMessage(
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "levtype", &levelType_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "level", &levelNo_), 0);
     // time
+    // read files internal time-step unit
+    // https://software.ecmwf.int/wiki/display/GRIB/GRIB+API+Frequently+Asked+Questions+FAQ#GRIBAPIFrequentlyAskedQuestionsFAQ-ConfusedaboutstepUnits?
+    // use indicatorOfUnitOfTimeRange: https://software.ecmwf.int/issues/browse/SUP-1264
+    msgLength = 1024;
+    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "indicatorOfUnitOfTimeRange", msg, &msgLength), 0);
+    // use this unit as unit for future calls to grib-api
+    MIFI_GRIB_CHECK(grib_set_string(gh.get(), "stepUnits", msg, &msgLength), 0);
+    stepUnits_ = std::string(msg);
+
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "dataDate", &dataDate_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "time", &dataTime_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "timeRangeIndicator", &timeRangeIndicator_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "startStep", &stepStart_), 0);
     MIFI_GRIB_CHECK(grib_get_long(gh.get(), "endStep", &stepEnd_), 0);
-    msgLength = 1024;
-    MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepUnits", msg, &msgLength), 0); // need startStep before stepUnits!!!
-    stepUnits_ = std::string(msg);
     msgLength = 1024;
     MIFI_GRIB_CHECK(grib_get_string(gh.get(), "stepType", msg, &msgLength), 0);
     stepType_ = std::string(msg);
