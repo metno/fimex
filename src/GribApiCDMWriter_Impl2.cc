@@ -289,7 +289,7 @@ void GribApiCDMWriter_Impl2::setProjection(const std::string& varName) throw(CDM
             }
             ait = find_if(projAttrs.begin(), projAttrs.end(), CDMNameEqual("latitude_of_projection_origin"));
             if (ait != projAttrs.end()) {
-                LOG4FIMEX(logger, Logger::WARN, "lambert-projection: latitutde_of_projection_origin not usable in grib-api");
+                LOG4FIMEX(logger, Logger::WARN, "lambert-projection: latitude_of_projection_origin not usable in grib-api");
                 lat0 = ait->getData()->asDouble()[0];
             }
             const DataPtr xData = cdmReader->getScaledDataInUnit(cdm.getHorizontalXAxis(varName), "m");

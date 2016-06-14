@@ -596,7 +596,7 @@ bool CDM::getProjectionAndAxesUnits(std::string& projectionName, std::string& xA
             std::cerr << "found several projections, changing " << projs[0] << std::endl;
         }
     }
-    // detect original projection axes (x,y,lon,lat,rlat,rlon) (via projection_x/y_coordinate, degrees_east/north, grid_longitude/latitutde)
+    // detect original projection axes (x,y,lon,lat,rlat,rlon) (via projection_x/y_coordinate, degrees_east/north, grid_longitude/latitude)
     std::vector<std::string> dims;
     if (projectionName == "latitude_longitude") {
         std::vector<std::string> shape;
