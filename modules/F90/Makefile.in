@@ -334,7 +334,7 @@ AM_FCFLAGS =
 @ENABLE_FORTRAN_TRUE@libfimexf_la_LIBADD = 
 @ENABLE_FORTRAN_TRUE@libfimexf_la_SOURCES = fimex.f90 fimex2d.F90
 @ENABLE_FORTRAN_TRUE@fimexfincdir = $(includedir)
-@ENABLE_FORTRAN_TRUE@nodist_fimexfinc_HEADERS = $(top_builddir)/modules/F90/fimex.mod $(top_builddir)/modules/F90/fimex2d.mod
+@ENABLE_FORTRAN_TRUE@nodist_fimexfinc_HEADERS = fimex.mod fimex2d.mod
 @ENABLE_FORTRAN_TRUE@CLEANFILES = fimex.mod fimex2d.mod fimex2d_example_all.nc4 fimex2d_example.nc4 fimex2d_example
 all: all-am
 
@@ -665,10 +665,13 @@ uninstall-am: uninstall-libLTLIBRARIES \
 	uninstall-nodist_fimexfincHEADERS
 
 
-@ENABLE_FORTRAN_TRUE@fimex.o: fimex.f90
-@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex.mod fimex.mod: fimex.o fimex.f90
-@ENABLE_FORTRAN_TRUE@fimex2d.o: fimex.o fimex2d.F90
-@ENABLE_FORTRAN_TRUE@$(top_builddir)/modules/F90/fimex2d.mod fimex2d.mod: fimex2d.o
+# it looks like we need to add dependencies manually to make parallel
+# builds work: gfortran/ifort write .mod files, but automake does not
+# seem to be aware of this
+@ENABLE_FORTRAN_TRUE@fimex.mod: fimex.o
+@ENABLE_FORTRAN_TRUE@fimex2d.mod: fimex2d.o
+# fimex.mod is required to compile fimex2d.F90
+@ENABLE_FORTRAN_TRUE@fimex2d.F90: | fimex.mod
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

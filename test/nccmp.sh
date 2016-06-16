@@ -18,14 +18,14 @@ if cmp --quiet "$NC1" "$NC2"; then
     exit 0
 fi
 
-NCDUMP=/usr/bin/ncdump # debian: netcdf-bin
-MD5SUM=/usr/bin/md5sum # debian: package coreutils
+NCDUMP=ncdump # debian: netcdf-bin
+MD5SUM=md5sum # debian: package coreutils
 
-if test ! -x $NCDUMP; then
+if ! $NCDUMP 2> /dev/null; then
     echo "No ncdump, cannot compare file contents of '$NC1' and '$NC2'"
     exit 1
 fi
-if test ! -x $MD5SUM; then
+if ! $MD5SUM --help > /dev/null; then
     echo "No md5sum, cannot compare file contents of '$NC1' and '$NC2'"
     exit 1
 fi

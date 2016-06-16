@@ -8,12 +8,15 @@ libfimexf_la_LIBADD =
 libfimexf_la_SOURCES = fimex.f90 fimex2d.F90
 
 fimexfincdir = $(includedir)
-nodist_fimexfinc_HEADERS= $(top_builddir)/modules/F90/fimex.mod $(top_builddir)/modules/F90/fimex2d.mod
+nodist_fimexfinc_HEADERS= fimex.mod fimex2d.mod
 
-fimex.o: fimex.f90
-$(top_builddir)/modules/F90/fimex.mod fimex.mod: fimex.o fimex.f90
-fimex2d.o: fimex.o fimex2d.F90
-$(top_builddir)/modules/F90/fimex2d.mod fimex2d.mod: fimex2d.o
+# it looks like we need to add dependencies manually to make parallel
+# builds work: gfortran/ifort write .mod files, but automake does not
+# seem to be aware of this
+fimex.mod: fimex.o
+fimex2d.mod: fimex2d.o
+# fimex.mod is required to compile fimex2d.F90
+fimex2d.F90: | fimex.mod
 
 CLEANFILES = fimex.mod fimex2d.mod fimex2d_example_all.nc4 fimex2d_example.nc4 fimex2d_example
 

@@ -42,7 +42,7 @@ namespace felt {
  * converts a point on earth to a projection plane
  * @param projStr projection definition for proj4
  * @param lon longitude in degree
- * @param lat latitutde in degree
+ * @param lat latitude in degree
  * @param x output of proj (usually m, but dependent on projStr)
  * @param y output of proj
  * @throws runtime_error on proj-failure

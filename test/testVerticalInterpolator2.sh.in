@@ -1,17 +1,25 @@
 #! /bin/sh
 echo "testing conversion of sigma-hybrid to pressure"
-../src/binSrc/fimex --input.file=@top_srcdir@/test/verticalSigmaHybrid.nc --verticalInterpolate.type=pressure --verticalInterpolate.method=log --verticalInterpolate.level1=1000,850,500,300,100,50 --output.file=out$$.nc
+OUT_NC="out$$.nc"
+../src/binSrc/fimex \
+    --input.file=@top_srcdir@/test/verticalSigmaHybrid.nc \
+    --verticalInterpolate.type=pressure \
+    --verticalInterpolate.method=log \
+    --verticalInterpolate.level1=1000,850,500,300,100,50 \
+    --output.file="$OUT_NC"
 if [ $? != 0 ]; then
   echo "failed converting sigma-hybrid to pressure"
-  rm -f out$$.nc
+  rm -f "$OUT_NC"
   exit 1
 fi
-diff @top_srcdir@/test/verticalSigmaHybridPressure.nc out$$.nc
-if [ $? != 0 ]; then
+
+EXP_NC="@top_srcdir@/test/verticalSigmaHybridPressure.nc"
+if "${srcdir}/nccmp.sh" "$EXP_NC" "$OUT_NC" ; then
+  echo "success"
+  E=0
+else
   echo "failed diff sigma-hybrid to pressure"
-  rm -f out$$.nc
-  exit 1
+  E=1
 fi
-rm -f out$$.nc
-echo "success"
-exit 0
+rm -f "$OUT_NC"
+exit $E
