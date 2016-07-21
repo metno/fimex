@@ -37,19 +37,17 @@ namespace MetNoFimex
  */
 class RotatedLatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
 {
-
 public:
     RotatedLatitudeLongitudeProjection();
     virtual ~RotatedLatitudeLongitudeProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
     static std::string NAME();
+
 protected:
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
-
 };
 
 }
-
 
 #endif /* ROTATEDLATITUDELONGITUDEPROJECTION_H_ */

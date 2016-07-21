@@ -48,6 +48,3 @@ boost::shared_ptr<ToVLevelConverter> HybridSigmaPressure2::getPressureConverter(
 }
 
 }
-
-
-

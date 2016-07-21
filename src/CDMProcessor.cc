@@ -263,7 +263,8 @@ void CDMProcessor::addVerticalVelocity()
         LOG4FIMEX(logger, Logger::WARN, "no geopotential/_height/altitude found for corresponding x/y_wind");
         return;
     }
-    LOG4FIMEX(logger, Logger::DEBUG, "creating upward_air_velocity_ml with xwind='" << vvcs.at(0).xWind << "', ywind='" << vvcs.at(0).yWind << "', temp='" << vvcs.at(0).temp << "', geopot='" << vvcs.at(0).geopot << "'");
+    LOG4FIMEX(logger, Logger::DEBUG, "creating upward_air_velocity_ml with xwind='" << vvcs.at(0).xWind << "', ywind='" << vvcs.at(0).yWind
+              << "', temp='" << vvcs.at(0).temp << "', geopot='" << vvcs.at(0).geopot << "'");
 
     // calculate helper fields
     size_t nx = vvcs.at(0).nx;
@@ -316,7 +317,6 @@ void CDMProcessor::addVerticalVelocity()
     p_->vvComp = vvcs.at(0);
 }
 
-
 void CDMProcessor::accumulate(const std::string& varName)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -325,8 +325,8 @@ void CDMProcessor::accumulate(const std::string& varName)
     } else {
         LOG4FIMEX(logger, Logger::WARN, varName <<  " is not unlimited, ignoring accumulate");
     }
-
 }
+
 void CDMProcessor::deAccumulate(const std::string& varName)
 {
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -335,7 +335,6 @@ void CDMProcessor::deAccumulate(const std::string& varName)
     } else {
         LOG4FIMEX(logger, Logger::WARN, varName <<  " is not unlimited, ignoring deaccumulate");
     }
-
 }
 
 void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
@@ -365,12 +364,14 @@ void CDMProcessor::rotateAllVectorsToLatLon(bool toLatLon) {
     rotateVectorToLatLon(toLatLon, varNameX, varNameY, standardNameX, standardNameY);
 }
 
-void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY, const std::vector<std::string>& stdNameX, const std::vector<std::string>& stdNameY)
+void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::string>& varNameX, const std::vector<std::string>& varNameY,
+                                        const std::vector<std::string>& stdNameX, const std::vector<std::string>& stdNameY)
 {
     if (varNameX.size() != varNameY.size()) {
         throw CDMException("rotateVectorToLatLon requires same number of x as of y variableNames");
     }
-    if (varNameX.size() == 0) return;
+    if (varNameX.empty())
+        return;
 
     CoordSysMap coordSysMap;
     map<string, string> projectionVariables;
@@ -401,8 +402,8 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
             cdm_->getVariable(varNameY[i]).setAsSpatialVector(varNameX[i], "y");
         }
 
-        string csXId = projectionVariables[varNameX[i]];
-        string csYId = projectionVariables[varNameY[i]];
+        const string& csXId = projectionVariables[varNameX[i]];
+        const string& csYId = projectionVariables[varNameY[i]];
         if (csXId != csYId)
             throw CDMException(varNameX[i] + " belongs to different horizontal CS than " + varNameY[i] + ": " + csXId + " != " +csYId);
 
@@ -414,12 +415,12 @@ void CDMProcessor::rotateVectorToLatLon(bool toLatLon, const std::vector<std::st
         p_->rotateLatLonVectorX[varNameX[i]] = make_pair(varNameY[i], csXId);
         p_->rotateLatLonVectorY[varNameY[i]] = make_pair(varNameX[i], csXId);
     }
-
 }
 
 void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std::string>& varNames)
 {
-    if (varNames.size() == 0) return;
+    if (varNames.empty())
+        return;
 
     CoordSysMap coordSysMap;
     map<string, string> projectionVariables;
@@ -433,7 +434,7 @@ void CDMProcessor::rotateDirectionToLatLon(bool toLatLon, const std::vector<std:
         if (projectionVariables.find(varNames[i]) == projectionVariables.end())
             throw CDMException(varNames[i] + " not rotatable since it does not belong to a horizontal projection");
 
-        string csId = projectionVariables[varNames[i]];
+        const string& csId = projectionVariables[varNames[i]];
         p_->rotateLatLonDirection[varNames[i]] = csId;
 
         if (p_->cachedVectorReprojection.find(csId) == p_->cachedVectorReprojection.end()) {
@@ -454,6 +455,7 @@ struct ScaleOffset : public std::unary_function<T, double>
         return scale_*in + offset_;
     }
 };
+
 template<typename T>
 struct UnScaleOffset : public std::unary_function<double, T>
 {
@@ -464,7 +466,6 @@ struct UnScaleOffset : public std::unary_function<double, T>
         return invscale_*(in-offset_);
     }
 };
-
 
 // add d2 to d1 and return d1
 static void addDataP2Data(DataPtr& data, DataPtr& dataP) {
@@ -510,7 +511,10 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
 
         // output
         boost::shared_array<float> w(new float[nx*ny*nz]());
-        if (MIFI_OK != mifi_compute_vertical_velocity(nx, ny, nz, p_->vvComp.dx, p_->vvComp.dy, p_->vvComp.gridDistX.get(), p_->vvComp.gridDistY.get(), apD->asDouble().get(), bD->asDouble().get(), zsD->asFloat().get(), psD->asFloat().get(), uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get())) {
+        if (MIFI_OK != mifi_compute_vertical_velocity(nx, ny, nz, p_->vvComp.dx, p_->vvComp.dy, p_->vvComp.gridDistX.get(), p_->vvComp.gridDistY.get(),
+                                                      apD->asDouble().get(), bD->asDouble().get(), zsD->asFloat().get(), psD->asFloat().get(),
+                                                      uD->asFloat().get(), vD->asFloat().get(), tD->asFloat().get(), w.get()))
+        {
             throw CDMException("addVerticalVelocity: cannot calculate mifi_compute_vertical_velocity");
         }
         data = createData(nx*ny*nz, w);
@@ -543,6 +547,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             p_->sliceCache.data = data;
         }
     }
+
     // deaccumulation
     if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
         LOG4FIMEX(logger, Logger::DEBUG, varName << " at slice " << unLimDimPos << " deaccumulate");
@@ -559,8 +564,9 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
         }
     }
 
-    if (p_->rotateLatLonVectorX.find(varName) != p_->rotateLatLonVectorX.end() ||
-            p_->rotateLatLonVectorY.find(varName) != p_->rotateLatLonVectorY.end()) {
+    if (p_->rotateLatLonVectorX.find(varName) != p_->rotateLatLonVectorX.end()
+            || p_->rotateLatLonVectorY.find(varName) != p_->rotateLatLonVectorY.end())
+    {
         if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
             LOG4FIMEX(logger, Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
         }
@@ -596,11 +602,12 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             data = interpolationArray2Data(yArray, yData->size(), getCDM().getFillValue(yVar));
         }
     }
+
     if (p_->rotateLatLonDirection.find(varName) != p_->rotateLatLonDirection.end()) {
         if (p_->deaccumulateVars.find(varName) != p_->deaccumulateVars.end()) {
             LOG4FIMEX(logger, Logger::WARN, varName << " deaccumulate and rotated, this won't work as expected");
         }
-        string csId = p_->rotateLatLonDirection[varName];
+        const string& csId = p_->rotateLatLonDirection[varName];
         LOG4FIMEX(logger, Logger::DEBUG, "rotating direction " << varName << " with csId " << csId);
         assert(p_->cachedVectorReprojection.find(csId) != p_->cachedVectorReprojection.end());
         CachedVectorReprojectionPtr cvr = p_->cachedVectorReprojection[csId];
@@ -613,8 +620,8 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
         transform(&array[0], &array[0]+ data->size(), &array[0], UnScaleOffset<float>(scaleFactor, addOffset));
         data = interpolationArray2Data(array, data->size(), getCDM().getFillValue(varName));
     }
+
     return data;
 }
-
 
 } /* namespace MetNoFimex */

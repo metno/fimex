@@ -228,7 +228,6 @@ boost::shared_ptr<Projection> Projection::createByProj4(const std::string& projS
     return Projection::create(attrs);
 }
 
-
 std::string replaceProj4Earthfigure(const std::string& proj4, const std::string& newEarthfigure)
 {
     using namespace std;
@@ -249,7 +248,5 @@ std::string replaceProj4Earthfigure(const std::string& proj4, const std::string&
     newParts.push_back(newEarthfigure);
     return join(newParts.begin(), newParts.end(), " ");
 }
-
-
 
 }

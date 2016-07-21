@@ -239,7 +239,8 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<Coo
 {
     for (vector<CoordinateAxis::AxisType>::const_iterator typeIt = types.begin(); typeIt != types.end(); ++typeIt) {
         ConstAxisPtr axis = findAxisOfType(*typeIt);
-        if (axis.get() != 0) return axis;
+        if (axis.get() != 0)
+            return axis;
     }
     // return 0/NULL Ptr
     return ConstAxisPtr();
@@ -273,8 +274,7 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::getGeoZAxis() const
 
 CoordinateSystem::ConstAxisPtr CoordinateSystem::getTimeAxis() const
 {
-    vector<CoordinateAxis::AxisType> types;
-    types.push_back(CoordinateAxis::Time);
+    vector<CoordinateAxis::AxisType> types(1, CoordinateAxis::Time);
     return findAxisOfType(types);
 }
 

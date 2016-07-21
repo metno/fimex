@@ -273,7 +273,8 @@ MIFI_DEPRECATED(std::vector<boost::shared_ptr<const CoordinateSystem> > listCoor
  *        which might interfere when changing dimensions
  * @return number of horizontal coordinate systems found, i.e. systems.size()
  */
-int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
+int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string,
+        boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables);
 
 /**
  * Functor to check if a coordinate system completely describes a variable, i.e. all axes match fully.
@@ -293,7 +294,7 @@ private:
  * @return a shared_ptr to the coordinate system that has been found, or a null ptr if none was found
  */
 boost::shared_ptr<const CoordinateSystem> findCompleteCoordinateSystemFor(const std::vector<boost::shared_ptr<const CoordinateSystem> >& coordSys,
-                                                                          const std::string& varName);
+        const std::string& varName);
 
 }
 

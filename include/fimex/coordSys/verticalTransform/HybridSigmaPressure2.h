@@ -51,7 +51,9 @@ public:
      * @param ps surface pressure variable name
      * @param p0 p0 base-pressure
      */
-    HybridSigmaPressure2(const std::string& a, const std::string& b, const std::string& ps, const std::string& p0 = "") : a(a), b(b), ps(ps), p0(p0) {}
+    HybridSigmaPressure2(const std::string& a, const std::string& b, const std::string& ps, const std::string& p0 = "")
+        : a(a), b(b), ps(ps), p0(p0) {}
+
     virtual ~HybridSigmaPressure2() {}
     /**
      * static NAME constant
@@ -65,8 +67,10 @@ public:
     virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "a="+a+",b="+b+",ps="+ps+",p0="+p0; }
     virtual bool isComplete() const {return a != "" && b != "" && ps != "" && p0 != "";}
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
 };
 
 } /* namespace MetNoFimex */

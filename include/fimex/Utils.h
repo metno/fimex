@@ -244,7 +244,7 @@ struct Varargs {
     std::vector<T> args;
     /** push_back operator */
     Varargs& operator()(T arg) {args.push_back(arg); return *this;}
-    Varargs(T arg) {args.push_back(arg);}
+    Varargs(T arg) : args(1, arg) {}
 };
 
 
@@ -434,7 +434,7 @@ public:
  */
 template<typename T>
 struct SharedArrayConstCastDeleter {
-    SharedArrayConstCastDeleter( boost::shared_array<T> ptr ) : ptr(ptr) {};
+    SharedArrayConstCastDeleter( boost::shared_array<T> ptr ) : ptr(ptr) {}
     template<typename C> void operator()(C*) {}
 protected:
     boost::shared_array<T> ptr;

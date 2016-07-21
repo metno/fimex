@@ -58,8 +58,10 @@ DataPtr joinSlices(boost::shared_ptr<CDMReader> reader, std::string varName, con
 {
     const CDMVariable& var = reader->getCDM().getVariable(varName);
     // handle trivial cases
-    if (slices.size() == 0) return createData(var.getDataType(), 0, 0.);
-    if (slices.size() == 1) return reader->getDataSlice(varName, slices.at(0));
+    if (slices.size() == 0)
+        return createData(var.getDataType(), 0, 0.);
+    if (slices.size() == 1)
+        return reader->getDataSlice(varName, slices.at(0));
 
     size_t totalSize = 0;
     for (size_t i = 0; i < slices.size(); i++) {
@@ -86,7 +88,8 @@ DataPtr joinSlices(boost::shared_ptr<CDMReader> reader, std::string varName, con
             dataPos += sliceSize;
         }
     }
-    if (dataPos != retData->size()) throw CDMException("joining slices failed: " + type2string(retData->size()) + " != " + type2string(dataPos) );
+    if (dataPos != retData->size())
+        throw CDMException("joining slices failed: " + type2string(retData->size()) + " != " + type2string(dataPos) );
     return retData;
 }
 

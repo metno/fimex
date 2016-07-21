@@ -106,13 +106,16 @@ public:
      * @param nt The final t-size will be nt-unLimDimPos.
      * @return
      */
-    virtual boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    virtual boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
 
     //! same as getConverter, but determines nx, nz, nt using MetNoFimex::getSimpleAxes from CDMUtils
-    boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs) const;
+    boost::shared_ptr<ToVLevelConverter> getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs) const;
 
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const = 0;
+    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const = 0;
     /**
      * Default implementation: Convert to altitude (height above MSL) with pressure(-converter) and standard atmosphere.
      * @param reader
@@ -124,7 +127,8 @@ protected:
      * @param nt
      * @return
      */
-    virtual boost::shared_ptr<ToVLevelConverter> getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    virtual boost::shared_ptr<ToVLevelConverter> getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
     /**
      * Default implementation: Convert to height above ground with pressure(-converter) and standard atmosphere.
      * @param reader
@@ -136,17 +140,19 @@ protected:
      * @param nt
      * @return
      */
-    virtual boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    virtual boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
 
 private:
-    boost::shared_ptr<ToVLevelConverter> getIdentityPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
-    boost::shared_ptr<ToVLevelConverter> findPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    boost::shared_ptr<ToVLevelConverter> getIdentityPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+
+    boost::shared_ptr<ToVLevelConverter> findPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
 };
 
 std::ostream& operator<<(std::ostream& out, const VerticalTransformation& vt);
 
 } /* namespace MetNoFimex */
-
-
 
 #endif /* VERTICALTRANSFORMATION_H_ */

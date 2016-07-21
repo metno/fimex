@@ -33,7 +33,6 @@ CDMDimension::CDMDimension()
 {
 }
 
-
 CDMDimension::CDMDimension(std::string name, long length)
 : name(name), length(length), unlimited(0)
 {

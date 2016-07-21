@@ -81,5 +81,4 @@ boost::shared_ptr<ToVLevelConverter> OceanSG1::getAltitudeConverter(const boost:
             nx, ny, nz, nt, heightConversionFunction));
 }
 
-
 }

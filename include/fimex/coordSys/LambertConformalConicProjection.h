@@ -37,19 +37,16 @@ namespace MetNoFimex
  */
 class LambertConformalConicProjection: public MetNoFimex::ProjectionImpl
 {
-
 public:
     LambertConformalConicProjection();
     virtual ~LambertConformalConicProjection() {}
     static bool acceptsProj4(const std::string& proj4Str);
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
+
 protected:
     virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
-
-
 };
 
 }
-
 
 #endif /* LAMBERTCONFORMALCONICPROJECTION_H_ */

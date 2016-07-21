@@ -47,6 +47,3 @@ boost::shared_ptr<ToVLevelConverter> AtmosphereSigma::getPressureConverter(const
 }
 
 }
-
-
-

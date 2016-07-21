@@ -48,7 +48,8 @@ std::ostream& operator<<(std::ostream& out, const MetNoFimex::VerticalTransforma
     return out;
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos,
+        boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
 //    if (not isComplete())
 //        throw CDMException("incomplete vertical transformation");
@@ -61,7 +62,8 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const 
     }
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const boost::shared_ptr<CDMReader>& reader, int verticalType, size_t unLimDimPos,
+        boost::shared_ptr<const CoordinateSystem> cs) const
 {
     CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
     size_t nx, ny, nz, t0, t1;
@@ -72,7 +74,8 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getConverter(const 
 }
 
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+        boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     // try geopotential_height or fall back to pressure
     using namespace std;
@@ -173,7 +176,8 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getAltitudeConverte
     return conv_p();
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+        boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     // try geopotential_height or fall back to pressure
     using namespace std;
@@ -208,7 +212,8 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getHeightConverter(
 
 
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+        boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     // try use 4d pressure field
     using namespace std;
@@ -248,7 +253,8 @@ boost::shared_ptr<ToVLevelConverter> VerticalTransformation::getIdentityPressure
     return ToVLevelConverter_p(new Identity4DToVLevelConverter(pData->asFloat(), nx, ny, nz, nt));
 }
 
-boost::shared_ptr<ToVLevelConverter> VerticalTransformation::findPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+boost::shared_ptr<ToVLevelConverter> VerticalTransformation::findPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
+        boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
 {
     boost::shared_ptr<ToVLevelConverter> pConv = getIdentityPressureConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
     if (!pConv.get())

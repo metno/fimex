@@ -253,7 +253,7 @@ class VariableAttributeCheck : public std::unary_function<std::pair<std::string,
     const CDM& cdm;
     const std::string& varName;
 public:
-    VariableAttributeCheck(const CDM& cdm, const std::string& varName) : cdm(cdm), varName(varName) { };
+    VariableAttributeCheck(const CDM& cdm, const std::string& varName) : cdm(cdm), varName(varName) { }
     bool operator() (const std::pair<std::string, boost::regex>& attrRegex) const { return cdm.checkVariableAttribute(varName, attrRegex.first, attrRegex.second); }
 };
 

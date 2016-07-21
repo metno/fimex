@@ -125,9 +125,8 @@ protected:
     static std::vector<ConverterPtr> findByOutput(std::string outputStdName, Varargs<ConverterSrcPtr> srcs);
 
 protected:
-    Converter() {};
-    virtual ~Converter() {};
-
+    Converter() {}
+    virtual ~Converter() {}
 };
 
 } /* namespace MetNoFimex */

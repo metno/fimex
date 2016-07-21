@@ -37,7 +37,6 @@ namespace MetNoFimex
  */
 class LatitudeLongitudeProjection: public MetNoFimex::ProjectionImpl
 {
-
 public:
     LatitudeLongitudeProjection();
     virtual ~LatitudeLongitudeProjection() {}
@@ -49,6 +48,5 @@ protected:
 };
 
 }
-
 
 #endif /* LATITUDELONGITUDEPROJECTION_H_ */

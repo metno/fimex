@@ -45,7 +45,6 @@ namespace MetNoFimex
 
 static LoggerPtr logger = getLogger("fimex.CDMPressureConversions");
 
-
 using namespace std;
 
 struct CDMPressureConversionsImpl {
@@ -79,16 +78,15 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                     LOG4FIMEX(logger, Logger::WARN, "no coordinate system for air_potential_temperature (theta) found");
                 } else {
                     p_->cs = cs;
-                    vector<string> shape = cdm_->getVariable(thetaV[0]).getShape();
+                    const vector<string>& shape = cdm_->getVariable(thetaV[0]).getShape();
                     vector<CDMAttribute> thetaAtts = cdm_->getAttributes(thetaV[0]);
                     CDMDataType thetaType = cdm_->getVariable(thetaV[0]).getDataType();
                     cdm_->removeVariable(thetaV[0]);
                     p_->oldTheta = thetaV[0];
-                    string varName = "air_temperature";
+                    const string varName = "air_temperature";
                     cdm_->addVariable(CDMVariable(varName, thetaType, shape));
                     for (size_t i = 0; i < thetaAtts.size(); i++) {
-                        if (thetaAtts[i].getName() != "standard_name" &&
-                                thetaAtts[i].getName() != "long_name") {
+                        if (thetaAtts[i].getName() != "standard_name" && thetaAtts[i].getName() != "long_name") {
                             cdm_->addAttribute(varName, thetaAtts[i]);
                         }
                     }
@@ -115,9 +113,9 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                     } else {
                         p_->air_temp = tempV[0];
                         p_->cs = cs;
-                        vector<string> shape = cdm_->getVariable(omegaV[0]).getShape();
+                        const vector<string>& shape = cdm_->getVariable(omegaV[0]).getShape();
                         p_->oldOmega = omegaV[0];
-                        string varName = "upward_air_velocity";
+                        const string varName = "upward_air_velocity";
                         cdm_->addVariable(CDMVariable(varName, CDM_FLOAT, shape));
                         cdm_->addAttribute(varName, CDMAttribute("standard_name", "upward_air_velocity"));
                         cdm_->addAttribute(varName, CDMAttribute("units", "m/s"));
@@ -137,7 +135,8 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                             coordSys[i]->getGeoYAxis().get() != 0 &&
                             coordSys[i]->getGeoZAxis().get() != 0 &&
                             coordSys[i]->getTimeAxis().get() != 0 &&
-                            coordSys[i]->hasVerticalTransformation()) {
+                            coordSys[i]->hasVerticalTransformation())
+                    {
                         if (!p_->cs.get()) {
                             p_->cs = coordSys[i];
                         } else {
@@ -167,7 +166,7 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
             shape.push_back(yAxis->getShape()[0]);
             shape.push_back(zAxis->getShape()[0]);
             shape.push_back(tAxis->getShape()[0]);
-            string varName = "air_pressure4D";
+            const string varName = "air_pressure4D";
             cdm_->addVariable(CDMVariable(varName, CDM_FLOAT, shape));
             cdm_->addAttribute(varName, CDMAttribute("units", "hPa"));
             cdm_->addAttribute(varName, CDMAttribute("standard_name", "air_pressure"));
@@ -191,7 +190,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
 
     boost::shared_ptr<ToVLevelConverter> pConv = p_->cs->getVerticalTransformation()->getConverter(dataReader_, MIFI_VINT_PRESSURE, unLimDimPos, p_->cs, nx, ny, nz, (nt-startT));
     if (pConv.get() == 0) {
-        vector<string> shape = getCDM().getVariable(varName).getShape();
+        const vector<string>& shape = getCDM().getVariable(varName).getShape();
         throw CDMException("no vertical-transformation found for " + varName + "(" + join(shape.begin(), shape.end()) + ")");
     }
     if (varName == "air_temperature") {
@@ -202,7 +201,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         const float Rcp = R/cp;
         DataPtr d = dataReader_->getDataSlice(p_->oldTheta, unLimDimPos);
         assert(d.get() != 0);
-        size_t size = d->size();
+        const size_t size = d->size();
         boost::shared_array<float> da = d->asFloat();
         d.reset(); // deallocate d
         for (size_t t = startT; t < nt; t++) {
@@ -210,7 +209,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
             float *dPos = &da[(t-startT)*(nx*ny*nz)];
             for (size_t y = 0; y < ny; y++) {
                 for (size_t x = 0; x < nx; x++) {
-                    vector<double> p = (*pConv)(x, y, timePos);
+                    const vector<double> p = (*pConv)(x, y, timePos);
                     assert(p.size() == nz);
                     for (size_t z = 0; z < nz; z++) {
                         // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
@@ -240,7 +239,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
             float *tPos = &tda[(t-startT)*(nx*ny*nz)];
             for (size_t y = 0; y < ny; y++) {
                 for (size_t x = 0; x < nx; x++) {
-                    vector<double> p = (*pConv)(x, y, timePos);
+                    const vector<double> p = (*pConv)(x, y, timePos);
                     assert(p.size() == nz);
                     for (size_t z = 0; z < nz; z++) {
                         size_t xyzPos = mifi_3d_array_position(x,y,z,nx,ny,nz);
@@ -276,9 +275,6 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
     }
 
     throw CDMException("don't know what to to with variable varName");
-
 }
-
-
 
 }
