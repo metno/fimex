@@ -45,6 +45,32 @@ using namespace MetNoFelt;
 using namespace MetNoFimex;
 namespace fs = boost::filesystem;
 
+BOOST_AUTO_TEST_CASE( test_feltGrib1Append )
+{
+    string topSrcDir(TOP_SRCDIR);
+    string fileName(topSrcDir+"/test/flth00.dat");
+    if (!ifstream(fileName.c_str())) {
+        // no testfile, skip test
+        return;
+    }
+    boost::shared_ptr<CDMReader> feltReader(new FeltCDMReader2(fileName, topSrcDir+"/share/etc/felt2nc_variables.xml"));
+
+    string outputFile("test.grb1");
+    fs::remove(outputFile.c_str());
+    GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/test/cdmGribWriterConfig_append.xml");
+    fs::path out( outputFile );
+    BOOST_CHECK(fs::exists(out));
+    BOOST_CHECK(fs::file_size(out) > 5000000);
+
+    size_t size = fs::file_size(out);
+    GribApiCDMWriter(feltReader, outputFile, 1, topSrcDir+"/test/cdmGribWriterConfig_append.xml");
+    BOOST_CHECK(fs::exists(out));
+    BOOST_CHECK(fs::file_size(out) == 2*size);
+    fs::remove(outputFile.c_str());
+
+}
+
+
 BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
 {
     string topSrcDir(TOP_SRCDIR);
@@ -61,6 +87,7 @@ BOOST_AUTO_TEST_CASE( test_feltGrib1Write )
     BOOST_CHECK(fs::exists(out));
     BOOST_CHECK(fs::file_size(out) > 5000000);
 }
+
 BOOST_AUTO_TEST_CASE( test_feltGrib2Write )
 {
     string topSrcDir(TOP_SRCDIR);
