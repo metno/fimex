@@ -5,7 +5,7 @@
 <!-- select a specialized grib-template instead of using the default grib_api file -->
 <!-- <template_file name="/disk1/Fimex/conc_Am-241.ID_328.grib" /> -->
 <!-- output-file configuration, default-type: overwrite -->
-<!-- <output_file type="append" />  -->
+<output_file type="append" />
 <global_attributes>
     <!-- type can be double, long, string -->
     <attribute name="identificationOfOriginatingGeneratingCentre" value="98" type="long" /> <!-- currently using 98 (ec), since netcdf doesn't support ours -->

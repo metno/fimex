@@ -5,6 +5,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element ref="template_file" minOccurs="0" maxOccurs="1" />
+        <xs:element ref="output_file" minOccurs="0" maxOccurs="1" />
         <xs:element ref="global_attributes" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="axes" minOccurs="1" maxOccurs="1"/>
         <xs:element ref="variables" minOccurs="1" maxOccurs="1"/>
@@ -14,6 +15,11 @@
   <xs:element name="template_file">
     <xs:complexType>
       <xs:attribute name="path" use="required" type="xs:string"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="output_file">
+    <xs:complexType>
+      <xs:attribute name="type" use="optional" type="xs:string"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="global_attributes">
