@@ -24,7 +24,7 @@
  *      Author: Heiko Klein
  */
 #include <ProradXMLCDMReader.h>
-#include "fimex/MutexLock.h"
+#include "MutexLock.h"
 #include "fimex/Logger.h"
 #include "fimex/CDM.h"
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"

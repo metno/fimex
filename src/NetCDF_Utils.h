@@ -27,7 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMDataType.h"
 #include "fimex/DataDecl.h"
-#include "fimex/MutexLock.h"
+#include "MutexLock.h"
 extern "C" {
 #include "netcdf.h"
 }

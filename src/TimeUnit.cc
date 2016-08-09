@@ -23,7 +23,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "fimex/TimeUnit.h"
-#include "fimex/MutexLock.h"
+#include "MutexLock.h"
 #include "fimex/Utils.h"
 #include <limits>
 

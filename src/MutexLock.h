@@ -29,12 +29,14 @@
 
 #include <boost/noncopyable.hpp>
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
+
 namespace MetNoFimex
 {
 
-
 #ifdef _OPENMP
-# include <omp.h>
 struct MutexType : boost::noncopyable
 {
     MutexType() {omp_init_lock(&lock_);}

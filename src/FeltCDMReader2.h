@@ -48,7 +48,7 @@
 #include "fimex/ReplaceStringObject.h"
 #include "fimex/XMLInput.h"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include "fimex/MutexLock.h"
+#include "MutexLock.h"
 
 
 namespace MetNoFelt {
