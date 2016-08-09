@@ -40,7 +40,7 @@ namespace MetNoFimex
 /// storage class for netcdf-file pointer
 class Nc {
 public:
-    Nc() : isOpen(false), pid(getpid()) {}
+    Nc();
     ~Nc();
     static MutexType& getMutex(); // lock against common reading/writing in nc4
     std::string filename;
@@ -48,6 +48,7 @@ public:
     int format;
     bool isOpen;
     pid_t pid;
+    void reopen_if_forked();
 };
 
 
@@ -103,7 +104,6 @@ DataPtr ncGetValues(int ncId, int varId, nc_type type, size_t dimLen, const size
  */
 void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen, const size_t* start, const size_t* count);
 
-
-}
+} // namespace MetNoFimex
 
 #endif /*NETCDF_UTILS_H_*/
