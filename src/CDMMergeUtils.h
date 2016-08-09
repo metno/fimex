@@ -6,6 +6,7 @@
 #include "fimex/CDMInterpolator.h"
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/CoordinateSystem.h"
+#include "fimex/DataDecl.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -20,7 +21,6 @@ namespace MetNoFimex {
 //namespace CDMMergeUtils {
 
 typedef boost::shared_ptr<CDMInterpolator> CDMInterpolatorPtr;
-typedef boost::shared_ptr<Data> DataPtr;
 typedef boost::shared_ptr<CDMReader> CDMReaderPtr;
 typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystemPtr;
 typedef boost::shared_ptr<const Projection> ProjectionPtr;

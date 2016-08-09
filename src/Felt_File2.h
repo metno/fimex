@@ -82,7 +82,7 @@ public:
      * @param time time of slice
      * @param level level of slice
      */
-    boost::shared_ptr<MetNoFimex::Data> getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level);
+    MetNoFimex::DataPtr getScaledDataSlice(boost::shared_ptr<Felt_Array2> feltArray, const boost::posix_time::ptime time, const LevelPair level);
 
     /**
      *  retrieve all felt arrays

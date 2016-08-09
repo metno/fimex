@@ -1,6 +1,7 @@
 
 #include "CDMMergeUtils.h"
 
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
 
 #include <boost/foreach.hpp>

@@ -26,7 +26,7 @@
 
 #include <boost/shared_array.hpp>
 #include "fimex/interpolation.h"
-#include "fimex/Data.h"
+#include "fimex/DataDecl.h"
 #include "fimex/SliceBuilder.h"
 
 namespace MetNoFimex
@@ -82,7 +82,7 @@ public:
      * @param unLimDim
      * @return Data matching input-data for this CachedInterpolationInterface
      */
-    virtual boost::shared_ptr<Data> getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDim) const;
+    virtual DataPtr getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, size_t unLimDim) const;
     /**
      * Read the input data from the reader, which is later used for the interpolateValues() function. This function will eventually reduce the
      * domain of the input data if createReducedDomain was called earlier.
@@ -91,7 +91,7 @@ public:
      * @param sb a slicebuilder to reduce other than the horizontal dimensions
      * @return Data matching input-data for this CachedInterpolationInterface
      */
-    virtual boost::shared_ptr<Data> getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, const SliceBuilder& sb) const;
+    virtual DataPtr getInputDataSlice(boost::shared_ptr<CDMReader> reader, const std::string& varName, const SliceBuilder& sb) const;
 private:
     /**
      * allow fetching of a reduced interpolation domain, i.e. to work with a much smaller amount of input data

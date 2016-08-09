@@ -168,7 +168,7 @@ NcmlAggregationReader::NcmlAggregationReader(const XMLInput& ncml)
                 const CDM::VarVec& variables = cdm_->getVariables();
                 for (CDM::VarVec::const_iterator varIt = variables.begin(); varIt != variables.end(); ++varIt) {
                     if (cdm_->hasUnlimitedDim(*varIt)) {
-                        cdm_->getVariable(varIt->getName()).setData(boost::shared_ptr<Data>(static_cast<Data*>(0)));
+                        cdm_->getVariable(varIt->getName()).setData(DataPtr());
                     }
                 }
                 string uDimName = uDim->getName();

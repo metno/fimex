@@ -47,6 +47,7 @@
 #include "fimex/coordSys/VerticalPerspectiveProjection.h"
 #include "fimex/coordSys/UnknownToFgdcProjection.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
 
 #include <proj_api.h>
 

@@ -29,7 +29,7 @@
 
 #include "fimex/CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/Data.h"
+#include "fimex/DataDecl.h"
 
 namespace MetNoFimex {
 
@@ -89,7 +89,7 @@ public:
     void setUseOuterIfInnerUndefined(bool useOuter);
 
     using CDMReader::getDataSlice;
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string &varName, std::size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string &varName, std::size_t unLimDimPos);
 
 private:
     std::auto_ptr<CDMBorderSmoothingPrivate> p;

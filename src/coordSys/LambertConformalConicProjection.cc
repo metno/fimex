@@ -25,6 +25,8 @@
  */
 
 #include "fimex/coordSys/LambertConformalConicProjection.h"
+#include "fimex/Data.h"
+#include "fimex/Utils.h"
 #include <boost/regex.hpp>
 
 namespace MetNoFimex

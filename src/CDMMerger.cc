@@ -34,6 +34,7 @@
 #include "fimex/CDMconstants.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/coordSys/CoordinateAxis.h"
+#include "fimex/Data.h"
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"

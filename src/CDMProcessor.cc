@@ -55,7 +55,7 @@ typedef boost::shared_ptr<CachedVectorReprojection> CachedVectorReprojectionPtr;
 struct SliceCache {
     string varName;
     size_t ulimDimPos;
-    boost::shared_ptr<Data> data;
+    DataPtr data;
 };
 
 struct VerticalVelocityComps {

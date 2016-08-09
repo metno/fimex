@@ -28,7 +28,6 @@
 #define ROTATEDLATITUDELONGITUDEPROJECTION_H_
 
 #include "fimex/coordSys/ProjectionImpl.h"
-#include "fimex/Data.h"
 
 namespace MetNoFimex
 {

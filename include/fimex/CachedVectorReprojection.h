@@ -24,8 +24,7 @@
 #ifndef CACHEDVECTORREPROJECTION_H_
 #define CACHEDVECTORREPROJECTION_H_
 
-#include <boost/shared_ptr.hpp>
-#include "fimex/Data.h"
+#include <boost/shared_array.hpp>
 #include "fimex/interpolation.h"
 
 namespace MetNoFimex

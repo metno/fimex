@@ -35,6 +35,7 @@
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "CachedForwardInterpolation.h"
 #include "fimex/CachedInterpolation.h"
+#include "fimex/Data.h"
 #include "fimex/Logger.h"
 #include "fimex/SpatialAxisSpec.h"
 #include "nanoflann/nanoflann.hpp"

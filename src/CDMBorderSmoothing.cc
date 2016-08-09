@@ -28,6 +28,7 @@
 #include "fimex/CDMBorderSmoothing_Linear.h"
 
 #include "fimex/CDMconstants.h"
+#include "fimex/Data.h"
 #include "fimex/DataIndex.h"
 #include "fimex/Logger.h"
 

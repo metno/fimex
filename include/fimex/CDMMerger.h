@@ -30,7 +30,7 @@
 #include "fimex/CDMBorderSmoothing.h"
 #include "fimex/CDMReader.h"
 #include "fimex/coordSys/CoordinateSystem.h"
-#include "fimex/Data.h"
+#include "fimex/DataDecl.h"
 
 namespace MetNoFimex {
 
@@ -100,7 +100,7 @@ public:
     void setTargetGridFromInner();
 
     using CDMReader::getDataSlice;
-    virtual boost::shared_ptr<Data> getDataSlice(const std::string &varName, std::size_t unLimDimPos);
+    virtual DataPtr getDataSlice(const std::string &varName, std::size_t unLimDimPos);
 
 private:
     std::auto_ptr<CDMMergerPrivate> p;

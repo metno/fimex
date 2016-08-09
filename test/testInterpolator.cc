@@ -42,6 +42,7 @@ using boost::unit_test_framework::test_suite;
 #include "fimex/CDMFileReaderFactory.h"
 #include "fimex/CDMInterpolator.h"
 #include "fimex/CDMProcessor.h"
+#include "fimex/Data.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
 
