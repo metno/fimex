@@ -208,10 +208,11 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         boost::shared_array<float> da = d->asFloat();
         d.reset(); // deallocate d
         for (size_t t = startT; t < nt; t++) {
+            const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
             float *dPos = &da[(t-startT)*(nx*ny*nz)];
             for (size_t y = 0; y < ny; y++) {
                 for (size_t x = 0; x < nx; x++) {
-                    vector<double> p = (*pConv)(x, y, t);
+                    vector<double> p = (*pConv)(x, y, timePos);
                     assert(p.size() == nz);
                     for (size_t z = 0; z < nz; z++) {
                         // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
@@ -236,11 +237,12 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         vector<double> w(nz);
         vector<double> tv(nz);
         for (size_t t = startT; t < nt; t++) {
+            const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
             float *dPos = &da[(t-startT)*(nx*ny*nz)];
             float *tPos = &tda[(t-startT)*(nx*ny*nz)];
             for (size_t y = 0; y < ny; y++) {
                 for (size_t x = 0; x < nx; x++) {
-                    vector<double> p = (*pConv)(x, y, t);
+                    vector<double> p = (*pConv)(x, y, timePos);
                     assert(p.size() == nz);
                     for (size_t z = 0; z < nz; z++) {
                         size_t xyzPos = mifi_3d_array_position(x,y,z,nx,ny,nz);
@@ -259,10 +261,11 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         const size_t size = nx*ny*nz*(nt-startT);
         boost::shared_array<float> ary(new float[size]);
         for (size_t t = startT; t < nt; t++) {
+            const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
             float *pos = &ary[(t-startT)*(nx*ny*nz)];
             for (size_t y = 0; y < ny; y++) {
                 for (size_t x = 0; x < nx; x++) {
-                    vector<double> p = (*pConv)(x, y, t);
+                    vector<double> p = (*pConv)(x, y, timePos);
                     assert(p.size() == nz);
                     for (size_t z = 0; z < nz; z++) {
                         // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
