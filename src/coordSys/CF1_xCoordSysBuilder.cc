@@ -520,7 +520,7 @@ void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> 
                     if (xShape == yShape) {
                         xv.setAsSpatialVector(*yVar, "x");
                         yv.setAsSpatialVector(*xVar, "y");
-                        LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "makeing "<< *xVar << "," << *yVar << " a vector");
+                        LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
                         break;
                     }
                 }
@@ -604,7 +604,7 @@ void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> 
                     if (xShape == yShape) {
                         xv.setAsSpatialVector(*yVar, "lon");
                         yv.setAsSpatialVector(*xVar, "lat");
-                        LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "makeing "<< *xVar << "," << *yVar << " a vector");
+                        LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
                         break;
                     }
                 }

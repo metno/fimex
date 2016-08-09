@@ -407,7 +407,7 @@ namespace MetNoFimex {
 
             cdmNameView &nameView = cdmConfiguration_.get<cdm_name_index>();
             if(nameView.find(entry.cdmName_) != nameView.end()) {
-                throw CDMException("hmmm... the variable should not be fount in cdm profile map");
+                throw CDMException("hmmm... the variable should not be found in cdm profile map");
             }
 
             const CDMVariable* pVariable = &cdmReader->getCDM().getVariable(entry.cdmName_);

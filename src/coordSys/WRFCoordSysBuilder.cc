@@ -78,7 +78,7 @@ void WRFCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> re
             if (yv.isSpatialVector()) continue;
             xv.setAsSpatialVector(yv.getName(), "x");
             yv.setAsSpatialVector(xv.getName(), "y");
-            LOG4FIMEX(getLogger("fimex.WRFCoordSysBuilder"), Logger::INFO, "makeing "<< xv.getName() << "," << yv.getName() << " a vector");
+            LOG4FIMEX(getLogger("fimex.WRFCoordSysBuilder"), Logger::INFO, "making "<< xv.getName() << "," << yv.getName() << " a vector");
         }
     }
 }
