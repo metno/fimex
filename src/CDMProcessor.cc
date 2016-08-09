@@ -144,16 +144,6 @@ CachedVectorReprojectionPtr makeCachedVectorReprojection(boost::shared_ptr<CDMRe
     return CachedVectorReprojectionPtr(new CachedVectorReprojection(MIFI_VECTOR_KEEP_SIZE, matrix, xAxisSize, yAxisSize));
 }
 
-CoordSysPtr findCompleteCoordinateSystemFor(const CoordSysPtr_v& coordSys, const std::string& varName)
-{
-    CoordSysPtr_v::const_iterator itCS = std::find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
-    if (itCS != coordSys.end())
-        return *itCS;
-    else
-        return CoordSysPtr();
-}
-
-
 CDMProcessor::CDMProcessor(boost::shared_ptr<CDMReader> dataReader)
 : p_(new CDMProcessorImpl())
 {

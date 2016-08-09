@@ -113,10 +113,9 @@ void addAuxiliary(std::set<std::string>& variables, const CDM& cdm, std::vector<
     // add coordinate-system variables
     set<string> varsCopy = variables;
     for (set<string>::iterator sit = varsCopy.begin(); sit != varsCopy.end(); ++sit) {
-        vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(*sit));
-        if (varSysIt != coordSys.end()) {
-            set<string> csDepVars = (*varSysIt)->getDependencyVariables();
+        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, *sit);
+        if (cs.get()) {
+            set<string> csDepVars = cs->getDependencyVariables();
             for (set<string>::iterator dIt = csDepVars.begin(); dIt != csDepVars.end(); ++dIt) {
                 if (variables.find(*dIt) == variables.end()) {
                     variables.insert(*dIt);
@@ -146,9 +145,9 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
     if (not (cdmT.hasVariable(varName) and cdmB.hasVariable(varName)))
         LOG_INCOMPATIBLE("not found in top and base");
 
-    const CoordinateSystemPtr_cit itCsB = findCS(allCsB, varName);
-    const CoordinateSystemPtr_cit itCsT = findCS(allCsT, varName);
-    const bool hasCsB = (itCsB != allCsB.end()), hasCsT = (itCsT != allCsT.end());
+    const CoordinateSystemPtr csB = findCompleteCoordinateSystemFor(allCsB, varName);
+    const CoordinateSystemPtr csT = findCompleteCoordinateSystemFor(allCsT, varName);
+    const bool hasCsB = (csB.get()), hasCsT = (csT.get());
     if (hasCsB != hasCsT)
         LOG_INCOMPATIBLE("CS in base but not in top, or vice versa");
     if (not hasCsB) {
@@ -157,7 +156,6 @@ bool is_compatible(CDMReaderPtr readerB, CDMReaderPtr readerT,
     }
 
     // FIXME the next checks are actually checking what CDMInterpolator can do
-    const CoordinateSystemPtr csB = *itCsB, csT = *itCsT;
 
 //    const bool hasSimpleGridB = csB->isSimpleSpatialGridded(), hasSimpleGridT = csT->isSimpleSpatialGridded();
 //    if (not (hasSimpleGridB and hasSimpleGridT))
@@ -230,10 +228,9 @@ CDM makeMergedCDM(CDMReaderPtr readerI, CDMReaderPtr& readerO, int gridInterpola
         if (not readerO->getCDM().hasVariable(varName))
             continue;
 
-        const CoordinateSystemPtr_cit itCsI = findCS(allCsI, varName);
-        if (itCsI == allCsI.end())
+        const CoordinateSystemPtr csI = findCompleteCoordinateSystemFor(allCsI, varName);
+        if (csI.get() == 0)
             continue;
-        const CoordinateSystemPtr csI = *itCsI;
         if (not (csI->hasProjection() and csI->isSimpleSpatialGridded()))
             continue;
 

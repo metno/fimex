@@ -74,12 +74,11 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
             if (thetaV.size() == 0) {
                 LOG4FIMEX(logger, Logger::WARN, "no air_potential_temperature (theta) found");
             } else {
-                vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                        find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(thetaV[0]));
-                if (varSysIt == coordSys.end()) {
+                boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, thetaV[0]);
+                if (!cs.get()) {
                     LOG4FIMEX(logger, Logger::WARN, "no coordinate system for air_potential_temperature (theta) found");
                 } else {
-                    p_->cs = *varSysIt;
+                    p_->cs = cs;
                     vector<string> shape = cdm_->getVariable(thetaV[0]).getShape();
                     vector<CDMAttribute> thetaAtts = cdm_->getAttributes(thetaV[0]);
                     CDMDataType thetaType = cdm_->getVariable(thetaV[0]).getDataType();
@@ -110,13 +109,12 @@ CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> data
                 if (tempV.size() == 0) {
                     LOG4FIMEX(logger, Logger::WARN, "no air_temperature found needed for omega2vwind");
                 } else {
-                    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                        find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(omegaV[0]));
-                    if (varSysIt == coordSys.end() || CompleteCoordinateSystemForComparator(tempV[0])(*varSysIt)) {
+                    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, omegaV[0]);
+                    if (!cs.get() || !CompleteCoordinateSystemForComparator(tempV[0])(cs)) {
                         LOG4FIMEX(logger, Logger::WARN, "no coordinate system for omega and air_temperature found");
                     } else {
                         p_->air_temp = tempV[0];
-                        p_->cs = *varSysIt;
+                        p_->cs = cs;
                         vector<string> shape = cdm_->getVariable(omegaV[0]).getShape();
                         p_->oldOmega = omegaV[0];
                         string varName = "upward_air_velocity";

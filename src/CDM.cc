@@ -115,7 +115,8 @@ public:
     }
 };
 
-typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
+typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+typedef std::vector<CoordSysPtr> CoordSysList;
 
 struct CDMImpl {
     CDM::StrAttrVecMap attributes;
@@ -746,36 +747,34 @@ CDM::AttrVec CDM::getProjection(std::string varName) const
 boost::shared_ptr<const Projection> CDM::getProjectionOf(std::string varName) const
 {
     enhance(this->pimpl_, *this);
-    const CoordSysList& csList = pimpl_->coordSystems;
-    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == csList.end()) {
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
+    if (cs.get() == 0) {
         return boost::shared_ptr<Projection>();
     }
-    return (*varSysIt)->getProjection();
+    return cs->getProjection();
 }
 
 std::string CDM::getHorizontalXAxis(std::string varName) const
 {
     enhance(this->pimpl_, *this);
 
-    const CoordSysList& csList = pimpl_->coordSystems;
-    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == csList.end()) {
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
+    if (cs.get() == 0) {
         return "";
     }
-    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getGeoXAxis();
+    CoordinateSystem::ConstAxisPtr axis = cs->getGeoXAxis();
     return (axis.get() == 0) ? "" : axis->getName();
 }
+
 std::string CDM::getHorizontalYAxis(std::string varName) const
 {
     enhance(this->pimpl_, *this);
 
-    const CoordSysList& csList = pimpl_->coordSystems;
-    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == csList.end()) {
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
+    if (cs.get() == 0) {
         return "";
     }
-    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getGeoYAxis();
+    CoordinateSystem::ConstAxisPtr axis = cs->getGeoYAxis();
     return (axis.get() == 0) ? "" : axis->getName();
 }
 
@@ -783,13 +782,12 @@ bool CDM::getLatitudeLongitude(std::string varName, std::string& latitude, std::
 {
     enhance(this->pimpl_, *this);
 
-    const CoordSysList& csList = pimpl_->coordSystems;
-    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == csList.end()) {
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(pimpl_->coordSystems, varName);
+    if (cs.get() == 0) {
         return false;
     }
-    CoordinateSystem::ConstAxisPtr latAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::Lat);
-    CoordinateSystem::ConstAxisPtr lonAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::Lon);
+    CoordinateSystem::ConstAxisPtr latAxis = cs->findAxisOfType(CoordinateAxis::Lat);
+    CoordinateSystem::ConstAxisPtr lonAxis = cs->findAxisOfType(CoordinateAxis::Lon);
     if (latAxis.get() != 0 && lonAxis.get() != 0) {
         latitude = latAxis->getName();
         longitude = lonAxis->getName();
@@ -813,11 +811,11 @@ std::string CDM::getTimeAxis(std::string varName) const
     }
 
     // search for coordinate system for varName
-    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == csList.end()) {
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(csList, varName);
+    if (cs.get() == 0) {
         return "";
     }
-    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getTimeAxis();
+    CoordinateSystem::ConstAxisPtr axis = cs->getTimeAxis();
     return (axis.get() == 0) ? "" : axis->getName();
 }
 
@@ -835,13 +833,12 @@ std::string CDM::getVerticalAxis(std::string varName) const
         }
     }
 
-    CoordSysList::const_iterator varSysIt = find_if(csList.begin(), csList.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == csList.end()) {
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(csList, varName);
+    if (cs.get() == 0) {
         return "";
     }
-    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getGeoZAxis();
+    CoordinateSystem::ConstAxisPtr axis = cs->getGeoZAxis();
     return (axis.get() == 0) ? "" : axis->getName();
 }
-
 
 }

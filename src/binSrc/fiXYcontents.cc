@@ -177,12 +177,10 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
         boost::posix_time::ptime refTime = boost::posix_time::not_a_date_time;
         map<string, DataPtr> dimData; // hours since refTime
 
-
-        vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(*varIt));
-        if (varSysIt != coordSys.end()) {
+        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, *varIt);
+        if (cs.get()) {
             if (vm.count("verticalLayer")) {
-                CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
+                CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoXAxis(); // X or Lon
                 bool use = false;
                 switch (vlType) {
                     case vlNo: if (zAxis == 0 || zAxis->getData()->size() <= 1) use = true; break;
@@ -205,14 +203,14 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                 }
                 if (use == false) continue;
             }
-            if ((*varSysIt)->isSimpleSpatialGridded()) {
-                CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis(); // X or Lon
-                CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis(); // Y or Lat
+            if (cs->isSimpleSpatialGridded()) {
+                CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis(); // X or Lon
+                CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis(); // Y or Lat
                 xSize = cdm.getDimension(xAxis->getName()).getLength();
                 ySize = cdm.getDimension(yAxis->getName()).getLength();
-                CoordinateSystem::ConstAxisPtr tAxis = (*varSysIt)->getTimeAxis(); // time
+                CoordinateSystem::ConstAxisPtr tAxis = cs->getTimeAxis(); // time
 
-                CoordinateSystemSliceBuilder sb(cdm, *varSysIt);
+                CoordinateSystemSliceBuilder sb(cdm, cs);
                 // handling of time
                 try {
                     refTime = getUniqueForecastReferenceTime(reader);
@@ -221,8 +219,8 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                 }
                 if (tAxis.get() != 0) {
                     // time-Axis, eventually multi-dimensional, i.e. forecast_reference_time
-                    if ((*varSysIt)->hasAxisType(CoordinateAxis::ReferenceTime)) {
-                        CoordinateSystem::ConstAxisPtr rtAxis = (*varSysIt)->findAxisOfType(CoordinateAxis::ReferenceTime);
+                    if (cs->hasAxisType(CoordinateAxis::ReferenceTime)) {
+                        CoordinateSystem::ConstAxisPtr rtAxis = cs->findAxisOfType(CoordinateAxis::ReferenceTime);
                         DataPtr refTimes = reader->getScaledDataInUnit(rtAxis->getName(),"minutes since 1970-01-01 00:00:00 +00:00");
                         TimeUnit tu("minutes since 1970-01-01 00:00:00 +00:00");
                         /* do something with the refTimes and select the wanted Position */
@@ -259,7 +257,7 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                     }
                 }
 
-                CoordinateSystem::ConstAxisPtr zAxis = (*varSysIt)->getGeoZAxis(); // Y or Lat
+                CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis(); // Y or Lat
                 if (zAxis != 0) {
                     if (vlType == vlUnit) {
                         zData = reader->getScaledDataInUnit(zAxis->getName(), vlName);

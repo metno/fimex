@@ -53,11 +53,10 @@ class ToVLevelConverter;
  *
  @code
     string varName = "air_temperature";
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt != coordSys.end()) {
-        if ((*varSysIt)->hasVerticalTransformation()) {
-            boost::shared_ptr<const VerticalTransformation> vtran = (*varSysIt)->getVerticalTransformation();
+    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, varName);
+    if (cs.get()) {
+        if (cs->hasVerticalTransformation()) {
+            boost::shared_ptr<const VerticalTransformation> vtran = cs->getVerticalTransformation();
             if (vtran->getName() == HybridSigmaPressure1::NAME()) {
                 const HybridSigmaPressure1* hyb1 = dynamic_cast<const HybridSigmaPressure1*>(vtran.get());
                 assert(hyb1 != 0);

@@ -231,14 +231,13 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
     if (variable.hasData()) {
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
-    vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-            find_if(pimpl_->changeCoordSys.begin(), pimpl_->changeCoordSys.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == pimpl_->changeCoordSys.end()) {
+    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName);
+    if (cs.get() == 0) {
         // no level to change, propagate to the dataReader_
         return dataReader_->getDataSlice(varName, unLimDimPos);
     }
 
-    return getLevelDataSlice(*varSysIt, varName, unLimDimPos);
+    return getLevelDataSlice(cs, varName, unLimDimPos);
 }
 
 DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)

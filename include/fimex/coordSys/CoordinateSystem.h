@@ -282,12 +282,18 @@ struct CompleteCoordinateSystemForComparator : public std::unary_function<boost:
 {
 public:
     CompleteCoordinateSystemForComparator(const std::string& varName) : varName(varName) {}
-    virtual ~CompleteCoordinateSystemForComparator() {}
-    bool operator()(const boost::shared_ptr<const CoordinateSystem>& cs) {return cs->isComplete(varName) && cs->isCSFor(varName);}
+    bool operator()(const boost::shared_ptr<const CoordinateSystem>& cs) const
+      { return cs->isComplete(varName) && cs->isCSFor(varName); }
 private:
     const std::string& varName;
-
 };
+
+/**
+ * find a complete coordinate system for a variable using CompleteCoordinateSystemForComparator
+ * @return a shared_ptr to the coordinate system that has been found, or a null ptr if none was found
+ */
+boost::shared_ptr<const CoordinateSystem> findCompleteCoordinateSystemFor(const std::vector<boost::shared_ptr<const CoordinateSystem> >& coordSys,
+                                                                          const std::string& varName);
 
 }
 

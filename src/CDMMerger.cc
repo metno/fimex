@@ -165,12 +165,11 @@ void CDMMerger::setTargetGridFromInner()
         if (cdmI.hasDimension(varName) or cdmO.hasDimension(varName))
             continue;
 
-        const CoordinateSystemPtr_cit itCsI = findCS(allCsI, varName),
-                itCsO = findCS(allCsO, varName);
-        if (itCsI == allCsI.end() or itCsO == allCsO.end())
+        const CoordinateSystemPtr csI = findCompleteCoordinateSystemFor(allCsI, varName),
+                csO = findCompleteCoordinateSystemFor(allCsO, varName);
+        if (!csI.get() || !csO.get())
             continue;
 
-        const CoordinateSystemPtr csI = *itCsI, csO = *itCsO;
         if (not (csI->isSimpleSpatialGridded() and csO->isSimpleSpatialGridded()))
             continue;
         if (not (csI->hasProjection() and csO->hasProjection()))

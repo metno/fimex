@@ -338,11 +338,10 @@ int mifi_get_var_latitude_cpy(mifi_cdm_reader* reader, const char* varName, char
 mifi_slicebuilder* mifi_new_slicebuilder(mifi_cdm_reader* reader, const char* varName)
 {
     try {
-        vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                   find_if(reader->csVec_.begin(), reader->csVec_.end(), CompleteCoordinateSystemForComparator(varName));
-        if (varSysIt != reader->csVec_.end()) {
-            boost::shared_ptr<SliceBuilder> sb(new CoordinateSystemSliceBuilder(reader->reader_->getCDM(), *varSysIt));
-            return new mifi_slicebuilder(sb, *varSysIt);
+        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(reader->csVec_, varName);
+        if (cs.get()) {
+            boost::shared_ptr<SliceBuilder> sb(new CoordinateSystemSliceBuilder(reader->reader_->getCDM(), cs));
+            return new mifi_slicebuilder(sb, cs);
         } else {
             boost::shared_ptr<SliceBuilder> sb(new SliceBuilder(reader->reader_->getCDM(), varName));
             return new mifi_slicebuilder(sb);

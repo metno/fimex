@@ -42,14 +42,13 @@ namespace MetNoFimex {
 
         boost::shared_ptr<MetGmXTag> XTag;
 
-        std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
+        const std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
 
-        std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVariable->getName()));
-        if (varSysIt != coordSys.end()) {
-            if((*varSysIt)->isSimpleSpatialGridded()) {
+        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+        if (cs.get()) {
+            if(cs->isSimpleSpatialGridded()) {
 
-                CoordinateSystem::ConstAxisPtr xAxis = (*varSysIt)->getGeoXAxis();
+                CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
 
                 if(!xAxis.get()) {
                     return boost::shared_ptr<MetGmXTag>();
@@ -86,14 +85,13 @@ namespace MetNoFimex {
 
         boost::shared_ptr<MetGmYTag> YTag;
 
-        std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
+        const std::vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(pCdmReader);
 
-        std::vector<boost::shared_ptr<const CoordinateSystem> >::iterator varSysIt =
-                find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(pVariable->getName()));
-        if (varSysIt != coordSys.end()) {
-            if((*varSysIt)->isSimpleSpatialGridded()) {
+        boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, pVariable->getName());
+        if (cs.get()) {
+            if(cs->isSimpleSpatialGridded()) {
 
-                CoordinateSystem::ConstAxisPtr yAxis = (*varSysIt)->getGeoYAxis();
+                CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
 
                 if(!yAxis.get()) {
                     return boost::shared_ptr<MetGmYTag>();

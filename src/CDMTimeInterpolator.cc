@@ -46,7 +46,7 @@ static LoggerPtr logger = getLogger("fimex.CDMTimeInterpolator");
 typedef std::vector<boost::shared_ptr<const CoordinateSystem> > CoordSysList;
 // TODO: this function is mostly copied from CDM::getTimeAxis
 //       CDM.h should provide a thread-safe version of getTimeAxis
-static std::string getTimeAxis(const CoordSysList& cs, const CDM& cdm, const std::string& varName)
+static std::string getTimeAxis(const CoordSysList& cs, const std::string& varName)
 {
     // check if variable is its own axis (coord-axis don't have coordinate system)
     for (CoordSysList::const_iterator csIt = cs.begin(); csIt != cs.end(); ++csIt) {
@@ -57,11 +57,11 @@ static std::string getTimeAxis(const CoordSysList& cs, const CDM& cdm, const std
     }
 
     // search for coordinate system for varName
-    CoordSysList::const_iterator varSysIt = find_if(cs.begin(), cs.end(), CompleteCoordinateSystemForComparator(varName));
-    if (varSysIt == cs.end()) {
+    boost::shared_ptr<const CoordinateSystem> ccs = findCompleteCoordinateSystemFor(cs, varName);
+    if (!ccs.get()) {
         return "";
     }
-    CoordinateSystem::ConstAxisPtr axis = (*varSysIt)->getTimeAxis();
+    CoordinateSystem::ConstAxisPtr axis = ccs->getTimeAxis();
     return (axis.get() == 0) ? "" : axis->getName();
 }
 
@@ -74,7 +74,7 @@ CDMTimeInterpolator::CDMTimeInterpolator(boost::shared_ptr<CDMReader> dataReader
     // just to be sure it's read from the dataReader_ or assigned in #changeTimeAxis
     const CDM::VarVec& variables = cdm_->getVariables();
     for (CDM::VarVec::const_iterator it = variables.begin(); it != variables.end(); ++it) {
-        std::string timeDimName = getTimeAxis(coordSystems_, getCDM(), it->getName());
+        std::string timeDimName = getTimeAxis(coordSystems_, it->getName());
         if (timeDimName != "") {
             cdm_->getVariable(it->getName()).setData(DataPtr());
         }
@@ -88,7 +88,7 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 MutexType staticMutex;
 DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    std::string timeAxis = getTimeAxis(coordSystems_, getCDM(), varName);
+    std::string timeAxis = getTimeAxis(coordSystems_, varName);
     LOG4FIMEX(logger, Logger::DEBUG, "getting time-interpolated data-slice for " << varName << " with time-axis: " << timeAxis);
     if (timeAxis == "" || (dataReaderTimesInNewUnits_.find(timeAxis)->second.size() == 0)) {
         // not time-axis or "changeTimeAxis" never called

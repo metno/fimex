@@ -377,10 +377,10 @@ int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<C
     // find all variables belonging to a cs containing the projection
     const CDM::VarVec& vars = cdm.getVariables();
     for (CDM::VarVec::const_iterator v = vars.begin(); v != vars.end(); ++v) {
-        CoordSysVec::iterator vCs = find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(v->getName()));
-        if (coordSys.end() != vCs) {
-            if (coordSysMap.find((*vCs)->horizontalId()) != coordSysMap.end()) {
-                variables[v->getName()] = (*vCs)->horizontalId();
+        CoordSysPtr cs = findCompleteCoordinateSystemFor(coordSys, v->getName());
+        if (cs.get()) {
+            if (coordSysMap.find((cs)->horizontalId()) != coordSysMap.end()) {
+                variables[v->getName()] = cs->horizontalId();
             }
         }
     }
@@ -536,5 +536,13 @@ void enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
     }
 }
 
+boost::shared_ptr<const CoordinateSystem> findCompleteCoordinateSystemFor(const std::vector<boost::shared_ptr<const CoordinateSystem> >& coordSys, const std::string& varName)
+{
+    const std::vector<boost::shared_ptr<const CoordinateSystem> >::const_iterator itCS = std::find_if(coordSys.begin(), coordSys.end(), CompleteCoordinateSystemForComparator(varName));
+    if (itCS != coordSys.end())
+        return *itCS;
+    else
+        return boost::shared_ptr<const CoordinateSystem>();
+}
 
 }
