@@ -32,6 +32,8 @@
 #include "fimex/Data.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "coordSys/CoordSysUtils.h"
+
+#include <iostream>
 #include <map>
 
 namespace MetNoFimex {

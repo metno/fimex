@@ -24,7 +24,7 @@
 #ifndef REPLACESTRINGOBJECT_H_
 #define REPLACESTRINGOBJECT_H_
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include <vector>
 

@@ -26,7 +26,7 @@
 
 #include <string>
 #include <vector>
-#include <ostream>
+#include <iosfwd>
 #include <boost/shared_ptr.hpp>
 #include "fimex/DataDecl.h"
 #include "fimex/CDMDataType.h"

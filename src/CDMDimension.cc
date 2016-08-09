@@ -23,6 +23,8 @@
 
 #include "fimex/CDMDimension.h"
 
+#include <iostream>
+
 namespace MetNoFimex
 {
 

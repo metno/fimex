@@ -26,7 +26,7 @@
 
 #include <string>
 #include <vector>
-#include <ostream>
+#include <iosfwd>
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMNamedEntity.h"

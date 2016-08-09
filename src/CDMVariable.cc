@@ -24,6 +24,8 @@
 #include "fimex/CDMVariable.h"
 #include "fimex/CDMAttribute.h"
 
+#include <iostream>
+
 namespace MetNoFimex
 {
 

@@ -33,6 +33,7 @@
 #include <boost/regex.hpp>
 #include <functional>
 #include <algorithm>
+#include <iostream>
 #include <set>
 
 namespace MetNoFimex

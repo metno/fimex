@@ -27,8 +27,8 @@
 #include "fimex/DataDecl.h"
 #include <boost/shared_array.hpp>
 #include <string>
-#include <sstream>
-#include <iostream>
+#include <algorithm>
+#include <iosfwd>
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
 #include "fimex/Utils.h"

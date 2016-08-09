@@ -30,7 +30,7 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 #include "fimex/mifi_constants.h"
 
 

@@ -25,7 +25,7 @@
 #define CDMDIMENSION_H_
 
 #include <string>
-#include <ostream>
+#include <iosfwd>
 #include "fimex/CDMNamedEntity.h"
 
 namespace MetNoFimex

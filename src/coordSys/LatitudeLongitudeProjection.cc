@@ -26,6 +26,7 @@
 
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include <boost/regex.hpp>
+#include <iostream>
 
 namespace MetNoFimex
 {
@@ -57,6 +58,11 @@ std::vector<CDMAttribute> LatitudeLongitudeProjection::parametersFromProj4(const
     proj4GetEarthAttributes(proj4Str, attrs);
     attrs.push_back(CDMAttribute("proj4", proj4Str));
     return attrs;
+}
+
+std::ostream& LatitudeLongitudeProjection::getProj4ProjectionPart(std::ostream& oproj) const
+{
+    return oproj << "+proj=latlong";
 }
 
 }

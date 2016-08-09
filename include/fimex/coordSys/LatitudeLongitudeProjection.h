@@ -45,11 +45,7 @@ public:
     static std::vector<CDMAttribute> parametersFromProj4(const std::string& proj4);
     static std::string NAME();
 protected:
-    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const {
-        return oproj << "+proj=latlong";
-    }
-
-
+    virtual std::ostream& getProj4ProjectionPart(std::ostream& oproj) const;
 };
 
 }

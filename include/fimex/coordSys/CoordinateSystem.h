@@ -33,7 +33,7 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <iostream>
+#include <iosfwd>
 #include "fimex/coordSys/CoordinateAxis.h"
 #include "fimex/coordSys/Projection.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"

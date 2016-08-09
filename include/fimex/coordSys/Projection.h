@@ -28,7 +28,7 @@
 #define PROJECTION_H_
 
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 #include <boost/shared_ptr.hpp>
 #include "fimex/CDMAttribute.h"
 

@@ -27,7 +27,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <ostream>
+#include <iosfwd>
 #include <boost/regex_fwd.hpp>
 #include "fimex/CDMAttribute.h"
 #include "fimex/CDMVariable.h"
