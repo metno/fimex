@@ -44,11 +44,26 @@ static LoggerPtr logger = getLogger("fimex.NetCDF_Utils");
 // hdf5 lib is usually not thread-safe, so reading from one file and writing to another fails
 static MutexType ncMutex;
 
-void ncCheck(int status, std::string msg) {
-    std::string outMsg("");
-    if (msg != "") outMsg = " : "+msg;
-    if (status != NC_NOERR)
-        throw CDMException(nc_strerror(status) + outMsg);
+void ncCheck(int status)
+{
+    if (status != NC_NOERR) {
+        throw CDMException(nc_strerror(status));
+    }
+}
+
+void ncCheck(int status, const std::string& msg)
+{
+    if (status != NC_NOERR) {
+        if (msg.empty()) {
+            throw CDMException(nc_strerror(status));
+        } else {
+            std::ostringstream out;
+            out << nc_strerror(status);
+            out <<  " : " << msg;
+            throw CDMException(out.str());
+        }
+    }
+}
 
 Nc::Nc()
     : isOpen(false)
