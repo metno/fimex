@@ -216,22 +216,18 @@ DataPtr ncGetAttValues(int ncId, int varId, const std::string& attName, nc_type 
     }
 }
 
-
+static const size_t zero = 0, one = 1;
 
 DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t* start, const size_t* count)
 {
     size_t sliceLen;
-    boost::scoped_array<size_t> mstart(new size_t[(dimLen == 0) ? 1 : dimLen]);
-    boost::scoped_array<size_t> mcount(new size_t[(dimLen == 0) ? 1 : dimLen]);
     if (dimLen == 0) {
         // scalar
         sliceLen = 1;
-        mstart[0] = 0;
-        mcount[0] = 1;
+        start = &zero;
+        count = &one;
     } else {
         sliceLen = std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
-        std::copy(&start[0], &start[0]+dimLen, &mstart[0]);
-        std::copy(&count[0], &count[0]+dimLen, &mcount[0]);
     }
 
     switch (dt) {
@@ -241,53 +237,53 @@ DataPtr ncGetValues(int ncId, int varId, nc_type dt, size_t dimLen, const size_t
 #endif
     case NC_CHAR: {
         boost::shared_array<char> vals(new char[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_SHORT: {
         boost::shared_array<short> vals(new short[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_INT: {
         boost::shared_array<int> vals(new int[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_FLOAT: {
         boost::shared_array<float> vals(new float[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_DOUBLE: {
         boost::shared_array<double> vals(new double[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
 #ifdef NC_NETCDF4
     case NC_UBYTE: {
         boost::shared_array<unsigned char> vals(new unsigned char[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_USHORT: {
         boost::shared_array<unsigned short> vals(new unsigned short[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_UINT: {
         boost::shared_array<unsigned int> vals(new unsigned int[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_INT64: {
         boost::shared_array<long long> vals(new long long[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
     case NC_UINT64: {
         boost::shared_array<unsigned long long> vals(new unsigned long long[sliceLen]);
-        ncCheck(nc_get_vara(ncId, varId, &mstart[0], &mcount[0], reinterpret_cast<void*>(&vals[0])));
+        ncCheck(nc_get_vara(ncId, varId, start, count, reinterpret_cast<void*>(&vals[0])));
         return createData(sliceLen, vals);
     }
 #endif
@@ -301,20 +297,15 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
     if (data->size() == 0) return;
 
     size_t sliceLen;
-    boost::scoped_array<size_t> mstart(new size_t[(dimLen == 0) ? 1 : dimLen]);
-    boost::scoped_array<size_t> mcount(new size_t[(dimLen == 0) ? 1 : dimLen]);
     if (dimLen == 0) {
         // scalar
         sliceLen = 1;
-        mstart[0] = 0;
-        mcount[0] = 1;
+        start = &zero;
+        count = &one;
     } else {
         sliceLen = std::accumulate(count, count + dimLen, 1, std::multiplies<size_t>());
-        std::copy(&start[0], &start[0]+dimLen, &mstart[0]);
-        std::copy(&count[0], &count[0]+dimLen, &mcount[0]);
     }
-    if (sliceLen != data->size())
-    {
+    if (sliceLen != data->size()) {
         std::ostringstream msg;
         msg << "sliceLength (" << sliceLen << ") != dataSize (" << data->size() << ")";
         throw CDMException(msg.str());
@@ -328,44 +319,44 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
     case NC_CHAR: {
         // use general nc_put_vara here; nc_put_vara_schar will give problems with nc-internal data-checks
         // in case of real characters != bytes
-        ncCheck(nc_put_vara(ncId, varId, &mstart[0], &mcount[0], data->asChar().get()));
+        ncCheck(nc_put_vara(ncId, varId, start, count, data->asChar().get()));
         break;
     }
     case NC_SHORT: {
-        ncCheck(nc_put_vara_short(ncId, varId, &mstart[0], &mcount[0], data->asShort().get()));
+        ncCheck(nc_put_vara_short(ncId, varId, start, count, data->asShort().get()));
         break;
     }
     case NC_INT: {
-        ncCheck(nc_put_vara_int(ncId, varId, &mstart[0], &mcount[0], data->asInt().get()));
+        ncCheck(nc_put_vara_int(ncId, varId, start, count, data->asInt().get()));
         break;
     }
     case NC_FLOAT: {
-        ncCheck(nc_put_vara_float(ncId, varId, &mstart[0], &mcount[0], data->asFloat().get()));
+        ncCheck(nc_put_vara_float(ncId, varId, start, count, data->asFloat().get()));
         break;
     }
     case NC_DOUBLE: {
-        ncCheck(nc_put_vara_double(ncId, varId, &mstart[0], &mcount[0], data->asDouble().get()));
+        ncCheck(nc_put_vara_double(ncId, varId, start, count, data->asDouble().get()));
         break;
     }
 #if NC_NETCDF4
     case NC_UBYTE: {
-        ncCheck(nc_put_vara_uchar(ncId, varId, &mstart[0], &mcount[0], data->asUChar().get()));
+        ncCheck(nc_put_vara_uchar(ncId, varId, start, count, data->asUChar().get()));
         break;
     }
     case NC_USHORT: {
-        ncCheck(nc_put_vara_ushort(ncId, varId, &mstart[0], &mcount[0], data->asUShort().get()));
+        ncCheck(nc_put_vara_ushort(ncId, varId, start, count, data->asUShort().get()));
         break;
     }
     case NC_UINT: {
-        ncCheck(nc_put_vara_uint(ncId, varId, &mstart[0], &mcount[0], data->asUInt().get()));
+        ncCheck(nc_put_vara_uint(ncId, varId, start, count, data->asUInt().get()));
         break;
     }
     case NC_INT64: {
-        ncCheck(nc_put_vara_longlong(ncId, varId, &mstart[0], &mcount[0], data->asInt64().get()));
+        ncCheck(nc_put_vara_longlong(ncId, varId, start, count, data->asInt64().get()));
         break;
     }
     case NC_UINT64: {
-        ncCheck(nc_put_vara_ulonglong(ncId, varId, &mstart[0], &mcount[0], data->asUInt64().get()));
+        ncCheck(nc_put_vara_ulonglong(ncId, varId, start, count, data->asUInt64().get()));
         break;
     }
 #endif
