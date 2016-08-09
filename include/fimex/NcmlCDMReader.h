@@ -30,13 +30,14 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDMDataType.h"
 #include "fimex/XMLInput.h"
-#include "fimex/MutexLock.h"
 #include <map>
+#include <memory>
 
 namespace MetNoFimex
 {
 /* forward declarations */
 class XMLDoc;
+class MutexType;
 
 /**
  * The NcmlCDMReader can be used as both standard reader of a data and
@@ -141,7 +142,7 @@ private:
 
     std::string configId;
     boost::shared_ptr<XMLDoc> doc;
-    MutexType mutex_;
+    std::auto_ptr<MutexType> mutex_;
     boost::shared_ptr<CDMReader> dataReader;
     /*
      * maps containing the changes. The key will reflect

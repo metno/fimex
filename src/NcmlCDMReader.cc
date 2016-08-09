@@ -25,6 +25,7 @@
  */
 
 #include "fimex/NcmlCDMReader.h"
+#include "MutexLock.h"
 #include "NcmlAggregationReader.h"
 #include "fimex/XMLDoc.h"
 #include <libxml/tree.h>
@@ -50,6 +51,7 @@ static LoggerPtr logger = getLogger("fimex/NcmlCDMReader");
 
 NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
     : configId(configXML.id())
+    , mutex_(new MutexType())
 {
 #ifdef HAVE_NETCDF_H
     setConfigDoc(configXML);
@@ -78,7 +80,9 @@ NcmlCDMReader::NcmlCDMReader(const XMLInput& configXML)
 }
 
 NcmlCDMReader::NcmlCDMReader(const boost::shared_ptr<CDMReader> dataReader, const XMLInput& configXML)
-    : configId(configXML.id()), dataReader(dataReader)
+    : configId(configXML.id())
+    , mutex_(new MutexType())
+    , dataReader(dataReader)
 {
     setConfigDoc(configXML);
     init();
@@ -475,7 +479,7 @@ void NcmlCDMReader::initAttributeNameChange()
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    ScopedCritical sc(mutex_);
+    ScopedCritical sc(*mutex_);
     LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,unlimDimPos): (" << varName << ", " << unLimDimPos << ")");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);
@@ -562,7 +566,7 @@ DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, size_t unLimDimP
 
 DataPtr NcmlCDMReader::getDataSlice(const std::string& varName, const SliceBuilder& sb)
 {
-    ScopedCritical sc(mutex_);
+    ScopedCritical sc(*mutex_);
     LOG4FIMEX(logger, Logger::DEBUG, "getDataSlice(var,sb): (" << varName << ", sb)");
     // return unchanged data from this CDM
     const CDMVariable& variable = cdm_->getVariable(varName);

@@ -25,7 +25,7 @@
 #include "fimex/Data.h"
 #include "fimex/CDMException.h"
 #include "fimex/Logger.h"
-#include "fimex/MutexLock.h"
+#include "MutexLock.h"
 #include <boost/scoped_array.hpp>
 #include <functional>
 #include <numeric>
@@ -63,9 +63,8 @@ Nc::~Nc()
    }
 }
 
-static MutexType mt;
 MutexType& Nc::getMutex() {
-    return mt;
+    return ncMutex;
 }
 
 nc_type cdmDataType2ncType(CDMDataType dt) {

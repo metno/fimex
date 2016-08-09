@@ -47,7 +47,7 @@
 #include <map>
 #include <algorithm>
 #include <stdexcept>
-#include "fimex/MutexLock.h"
+#include "MutexLock.h"
 #include <boost/math/special_functions/round.hpp>
 
 namespace MetNoFimex

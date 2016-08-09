@@ -54,8 +54,6 @@ extern "C" {
 #include "fimex/NcmlCDMReader.h"
 #include "fimex/Data.h"
 #include "NetCDF_Utils.h"
-#include "fimex/MutexLock.h" // also includes omp.h
-
 
 namespace MetNoFimex
 {

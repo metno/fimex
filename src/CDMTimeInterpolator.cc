@@ -34,7 +34,7 @@
 #include "fimex/Data.h"
 #include "fimex/interpolation.h"
 #include "fimex/Logger.h"
-#include "fimex/MutexLock.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {
@@ -85,7 +85,6 @@ CDMTimeInterpolator::~CDMTimeInterpolator()
 {
 }
 
-MutexType staticMutex;
 DataPtr CDMTimeInterpolator::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
     std::string timeAxis = getTimeAxis(coordSystems_, varName);
