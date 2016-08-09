@@ -29,6 +29,7 @@
 #include "fimex/Data.h"
 #include "fimex/CDMVariable.h"
 #include "fimex/CDM.h"
+#include "fimex/Utils.h"
 
 namespace MetNoFimex
 {

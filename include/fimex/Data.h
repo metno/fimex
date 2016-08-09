@@ -31,8 +31,9 @@
 #include <iosfwd>
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMException.h"
-#include "fimex/Utils.h"
 #include "fimex/deprecated.h"
+
+#include <vector>
 
 namespace MetNoFimex
 {

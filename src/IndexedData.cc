@@ -27,6 +27,7 @@
 #include "fimex/IndexedData.h"
 #include "fimex/Data.h"
 #include "fimex/DataIndex.h"
+#include "fimex/Utils.h"
 #include <numeric>
 #include <functional>
 #include "fimex/CDMDataType.h"

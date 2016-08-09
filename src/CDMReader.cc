@@ -26,6 +26,7 @@
 #include "fimex/mifi_constants.h"
 #include "fimex/Data.h"
 #include "fimex/Units.h"
+#include "fimex/Utils.h"
 #include <functional>
 #include <numeric>
 

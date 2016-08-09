@@ -28,6 +28,7 @@
 #include "fimex/Logger.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/Utils.h"
 #include "fimex/XMLDoc.h"
 #include <vector>
 #include <map>

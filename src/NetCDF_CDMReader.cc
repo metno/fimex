@@ -25,6 +25,7 @@
 #include "fimex/NetCDF_CDMReader.h"
 #undef MIFI_IO_READER_SUPPRESS_DEPRECATED
 #include "fimex/Data.h"
+#include "fimex/Utils.h"
 #include "fimex/Logger.h"
 #include "NetCDF_Utils.h"
 #include "fimex/CDM.h"

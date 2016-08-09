@@ -26,6 +26,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/SliceBuilder.h"
+#include "fimex/Utils.h"
 
 #include "fimex/Logger.h"
 

@@ -27,6 +27,7 @@
 #include "fimex/coordSys/ProjectionImpl.h"
 #include "fimex/CDMconstants.h"
 #include "fimex/Data.h"
+#include "fimex/Utils.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>

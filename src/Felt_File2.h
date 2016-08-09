@@ -36,6 +36,8 @@
 #include "fimex/Logger.h"
 #include "felt/FeltTypes.h"
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 namespace MetNoFelt {
 
 class Felt_Array2; // forward decl.

@@ -53,6 +53,7 @@
 #include "fimex/CDMDataType.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/TimeUnit.h"
+#include "fimex/Utils.h"
 
 using namespace MetNoFimex;
 using namespace std;

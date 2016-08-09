@@ -28,6 +28,7 @@
 #include "fimex/coordSys/CoordinateSystem.h"
 #include "fimex/CDMReaderUtils.h"
 #include "fimex/Logger.h"
+#include "fimex/Utils.h"
 #include "CDMMergeUtils.h"
 #include <vector>
 #include <set>

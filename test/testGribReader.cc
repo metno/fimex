@@ -38,6 +38,7 @@
 #include "fimex/Null_CDMWriter.h"
 #include "fimex/Logger.h"
 #include "fimex/Data.h"
+#include "fimex/Utils.h"
 
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK

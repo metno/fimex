@@ -30,6 +30,7 @@
 #include "fimex/CDMReader.h"
 #include "fimex/CDM.h"
 #include "fimex/Data.h"
+#include "fimex/Utils.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "coordSys/CoordSysUtils.h"
 
