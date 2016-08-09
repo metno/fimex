@@ -49,6 +49,11 @@ void ncCheck(int status, std::string msg) {
     if (msg != "") outMsg = " : "+msg;
     if (status != NC_NOERR)
         throw CDMException(nc_strerror(status) + outMsg);
+
+Nc::Nc()
+    : isOpen(false)
+    , pid(getpid())
+{
 }
 
 Nc::~Nc()
@@ -61,6 +66,17 @@ Nc::~Nc()
            LOG4FIMEX(logger, Logger::DEBUG, "close NetCDF file '" << filename << "'");
        }
    }
+}
+
+void Nc::reopen_if_forked()
+{
+    if (pid != getpid()) {
+        // reopen file so file descriptions (e.g. offset) are not shared
+        ncCheck(nc_close(ncId), "closing parent filehandle");
+        pid = getpid();
+        ncCheck(nc_open(filename.c_str(), NC_NOWRITE, &ncId), "re-opening '"+filename+"' after fork");
+        LOG4FIMEX(logger, Logger::DEBUG, "reopening file " << filename << " after fork to " << pid << " '" << ncId << "' ");
+    }
 }
 
 MutexType& Nc::getMutex() {
@@ -341,8 +357,6 @@ void ncPutValues(DataPtr data, int ncId, int varId, nc_type type, size_t dimLen,
     case NC_NAT:
     default: break;
     }
-
 }
-
 
 }
