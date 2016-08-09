@@ -323,7 +323,7 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
             if (cdm.getAttribute(*varIt, "units", attr)) {
                 unit = attr.getStringValue();
             }
-            printf("Var: %17s %17s %10s %15s %dx%d: %d\n", varIt->c_str(), stdName.c_str(), unit.c_str(), boost::posix_time::to_iso_string(refTime).c_str(), xSize, ySize, csbs.size());
+            printf("Var: %17s %17s %10s %15s %ldx%ld: %ld\n", varIt->c_str(), stdName.c_str(), unit.c_str(), boost::posix_time::to_iso_string(refTime).c_str(), xSize, ySize, csbs.size());
             boost::shared_array<float> tArray, zArray;
             if (tData.get() != 0) tArray = tData->asFloat();
             if (zData.get() != 0) zArray = zData->asFloat();
@@ -334,10 +334,10 @@ static void runStats(po::variables_map& vm, boost::shared_ptr<CDMReader>& reader
                 printf("  ");
                 for (long i = dimNames.size()-1; i >= 0; i--) {
                     switch (axisTypes.at(i)) {
-                    case CoordinateAxis::Time: printf("t=%d(%.1f) ", pos.at(i), tArray[pos.at(i)]); break;
+                    case CoordinateAxis::Time: printf("t=%ld(%.1f) ", pos.at(i), tArray[pos.at(i)]); break;
                     case CoordinateAxis::GeoZ:
                     case CoordinateAxis::Pressure:
-                    case CoordinateAxis::Height: printf("k=%d(%.1f) ", pos.at(i), zArray[pos.at(i)]); break;
+                    case CoordinateAxis::Height: printf("k=%ld(%.1f) ", pos.at(i), zArray[pos.at(i)]); break;
                     case CoordinateAxis::GeoX:
                     case CoordinateAxis::GeoY:
                     case CoordinateAxis::Lon:
