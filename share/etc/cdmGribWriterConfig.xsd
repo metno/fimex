@@ -35,7 +35,7 @@
     <xs:complexType>
       <xs:attribute name="name" use="required" type="xs:string"/>
       <xs:attribute name="type" use="required" type="xs:string"/>
-      <xs:attribute name="value" use="required" type="xs:integer"/>
+      <xs:attribute name="value" use="required" type="xs:string"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="g1attribute">
