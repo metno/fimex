@@ -115,10 +115,9 @@ boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double
     return array;
 }
 
-// for performance reasons, the iData-reference will be modified and used within the return data
-DataPtr interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
-    mifi_nanf2bad(&iData[0], &iData[size], badValue);
-    return createData(size, iData);
+DataPtr interpolationArray2Data(CDMDataType newType, boost::shared_array<float> iData, size_t size, double badValue) {
+    DataPtr d = createData(size, iData);
+    return d->convertDataType(MIFI_UNDEFINED_F, 1., 0., newType, badValue, 1., 0.);
 }
 /**
  *
@@ -214,7 +213,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, const SliceBui
             }
         }
         processArray_(p_->postprocesses, iArray.get(), newSize, ci->getOutX(), ci->getOutY());
-        DataPtr outData = interpolationArray2Data(iArray, newSize, badValue);
+        DataPtr outData = interpolationArray2Data(variable.getDataType(), iArray, newSize, badValue);
         // slice the x and y direction of the data
         vector<size_t> maxDims = sb.getMaxDimensionSizes();
         vector<size_t> startPos = sb.getDimensionStartPositions();
@@ -278,7 +277,7 @@ DataPtr CDMInterpolator::getDataSlice(const std::string& varName, size_t unLimDi
             }
         }
         processArray_(p_->postprocesses, iArray.get(), newSize, ci->getOutX(), ci->getOutY());
-        return interpolationArray2Data(iArray, newSize, badValue);
+        return interpolationArray2Data(variable.getDataType(), iArray, newSize, badValue);
     }
 }
 

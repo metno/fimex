@@ -596,10 +596,11 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
             throw CDMException("xData != yData in vectorInterpolation");
         }
         cvr->reprojectValues(xArray, yArray, xData->size());
+        CDMDataType type = getCDM().getVariable(varName).getDataType();
         if (xIsFirst) {
-            data = interpolationArray2Data(xArray, xData->size(), getCDM().getFillValue(xVar));
+            data = interpolationArray2Data(type, xArray, xData->size(), getCDM().getFillValue(xVar));
         } else {
-            data = interpolationArray2Data(yArray, yData->size(), getCDM().getFillValue(yVar));
+            data = interpolationArray2Data(type, yArray, yData->size(), getCDM().getFillValue(yVar));
         }
     }
 
@@ -618,7 +619,7 @@ DataPtr CDMProcessor::getDataSlice(const std::string& varName, size_t unLimDimPo
         transform(&array[0], &array[0]+ data->size(), &array[0], ScaleOffset<float>(scaleFactor, addOffset));
         cvr->reprojectDirectionValues(array, data->size());
         transform(&array[0], &array[0]+ data->size(), &array[0], UnScaleOffset<float>(scaleFactor, addOffset));
-        data = interpolationArray2Data(array, data->size(), getCDM().getFillValue(varName));
+        data = interpolationArray2Data(getCDM().getVariable(varName).getDataType(), array, data->size(), getCDM().getFillValue(varName));
     }
 
     return data;
