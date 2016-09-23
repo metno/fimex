@@ -28,6 +28,7 @@
 #include "fimex/interpolation.h"
 #include "fimex/vertical_coordinate_transformations.h"
 #include "fimex/CDM.h"
+#include "fimex/CDMInterpolator.h" // for data <-> interpolationArray
 #include "fimex/Logger.h"
 #include "fimex/Utils.h"
 #include "fimex/CDMReaderUtils.h"
@@ -57,20 +58,6 @@ struct VIntPimpl {
     // variable-names with vertical information to change
     vector<CoordSysPtr> changeCoordSys;
 };
-
-/* TODO: see CDMInterpolator.cc, deduplicate */
-static boost::shared_array<float> data2InterpolationArray(const DataPtr& inData, double badValue) {
-    boost::shared_array<float> array = inData->asFloat();
-    mifi_bad2nanf(&array[0], &array[inData->size()], badValue);
-    return array;
-}
-
-// for performance reasons, the iData-reference will be modified and used within the return data
-static DataPtr interpolationArray2Data(boost::shared_array<float> iData, size_t size, double badValue) {
-    mifi_nanf2bad(&iData[0], &iData[size], badValue);
-    return createData(size, iData);
-}
-
 
 CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, const string& verticalType, const string& verticalInterpolationMethod, const std::vector<double>& level1, const std::vector<double>& level2)
 : dataReader_(dataReader), pimpl_(new VIntPimpl())
@@ -324,7 +311,8 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
         replace_if(&oData[0], &oData[0]+oSize, bind2nd(greater<float>(), maxVal), maxVal);
     }
 
-    return interpolationArray2Data(oData, nx*ny*pOut.size()*(nt-startT), badValue);
+    CDMDataType oType = getCDM().getVariable(varName).getDataType();
+    return interpolationArray2Data(oType, oData, nx*ny*pOut.size()*(nt-startT), badValue);
 }
 
 
