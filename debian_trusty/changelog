@@ -1,3 +1,9 @@
+fimex (0.63.2-1trusty1) trusty; urgency=low
+
+  * new fimex version
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Tue, 27 Sep 2016 08:00:08 +0200
+
 fimex (0.63.1-1trusty1) trusty; urgency=low
 
   * new fimex version
