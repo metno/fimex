@@ -236,6 +236,18 @@ void CDMExtractor::selectVariables(std::set<std::string> variables, bool addAuxi
     for_each(difference.begin(),
              difference.end(),
              bind1st(mem_fun(&CDMExtractor::removeVariable),this));
+
+    // find variables selected, but not existing
+    set<string> missing;
+    set_difference(variables.begin(),
+                   variables.end(),
+                   allVarNames.begin(),
+                   allVarNames.end(),
+                   inserter(missing, missing.begin()));
+    for (set<string>::iterator missIt = missing.begin(); missIt != missing.end(); missIt++) {
+        LOG4FIMEX(logger, Logger::WARN, "selected variable '"<<*missIt<<"' does not exist, ignoring");
+    }
+
 }
 
 void CDMExtractor::reduceDimension(std::string dimName, const std::set<std::size_t>& slices)
