@@ -113,7 +113,7 @@ find_closest_distinct_elements(InputIterator start, InputIterator end, double x)
         } // else nothing to be done
         cur++;
     }
-    return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(retVal1, retVal2);
+    return make_pair(retVal1, retVal2);
 }
 
 /**
@@ -135,7 +135,7 @@ find_closest_neighbor_distinct_elements(InputIterator start, InputIterator end, 
 {
     using namespace std;
     if (start == end)
-        return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(0, 0);
+        return std::make_pair(0, 0);
 
     InputIterator lowest = start;
     InputIterator heighest = start;
@@ -168,8 +168,7 @@ find_closest_neighbor_distinct_elements(InputIterator start, InputIterator end, 
         return find_closest_distinct_elements(start, end, x);
     }
 
-    return make_pair<typename iterator_traits<InputIterator>::difference_type, typename iterator_traits<InputIterator>::difference_type>(distance(start, lowest), distance(start, heighest));
-
+    return std::make_pair(distance(start, lowest), distance(start, highest));
 }
 /**
  * Join values from an iterator of pointers to a string, using delimiter as separator.

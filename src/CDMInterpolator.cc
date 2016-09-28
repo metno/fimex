@@ -1723,7 +1723,7 @@ void CDMInterpolator::changeProjectionByProjectionParametersToLatLonTemplate(int
             def.xAxisData = p_->dataReader->getScaledData(def.xAxisName);
             def.yAxisData = p_->dataReader->getScaledData(def.yAxisName);
         }
-        orgGrids.insert(std::make_pair<string, CSGridDefinition>(def.key, def));
+        orgGrids.insert(std::make_pair(def.key, def));
     }
 
     changeCDMToLatLonTemplate(*cdm_.get(),

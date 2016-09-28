@@ -183,7 +183,7 @@ void CDMTimeInterpolator::changeTimeAxis(std::string timeSpec)
                     }
                 }
                 lastPos = pos; // make search faster, we know that the next lower_bound_pos will be >= pos
-                timeMapping[newTimePos] = make_pair<size_t, size_t>(t1,t2);
+                timeMapping[newTimePos] = make_pair(t1,t2);
             }
             timeChangeMap_[timeDimName] = timeMapping;
 
