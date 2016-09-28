@@ -70,7 +70,7 @@ private:
 
 std::string getProjString(int gridType, const boost::array<float, 6>& gridParameters);
 
-inline int ANY_VALUE() { return -32767;}
+inline short ANY_VALUE() { return -32767;}
 const std::string& UNDEFINED();
 const boost::array<short, 16>& ANY_ARRAY();
 const boost::array<short, 20>& ANY_ARRAY20();
