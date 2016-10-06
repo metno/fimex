@@ -596,10 +596,6 @@ static boost::shared_ptr<CDMReader> getCDMTimeInterpolator(po::variables_map& vm
 }
 
 static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map& vm, boost::shared_ptr<CDMReader> dataReader) {
-    if (! vm.count("verticalInterpolate.type")) {
-        return dataReader;
-    }
-    LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
     if (vm.count("verticalInterpolate.dataConversion")) {
         vector<string> operations = vm["verticalInterpolate.dataConversion"].as<vector<string> >();
         boost::shared_ptr<CDMPressureConversions> pressConv;
@@ -611,6 +607,10 @@ static boost::shared_ptr<CDMReader> getCDMVerticalInterpolator(po::variables_map
             exit(1);
         }
     }
+    if (! vm.count("verticalInterpolate.type")) {
+        return dataReader;
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "verticalInterpolate found");
     if (! (vm.count("verticalInterpolate.method") && vm.count("verticalInterpolate.level1"))) {
         LOG4FIMEX(logger, Logger::ERROR, "verticalInterpolate needs method and level1");
         exit(1);
