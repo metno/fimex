@@ -60,7 +60,7 @@ fi
 
 AM_PATH_XML2(2.5.0,,AC_MSG_ERROR([*** Libxml is required to build fimex; Available at http://www.libxml.org/.]))
 
-AX_BOOST_BASE([1.32.0], [], [AC_MSG_ERROR([Boost libraries required!])])
+AX_BOOST_BASE([1.38.0], [], [AC_MSG_ERROR([Boost libraries required!])])
 AX_BOOST_REGEX
 if test "x$ax_cv_boost_regex" != "xyes"; then
    AC_MSG_ERROR([Could not find libboost_regex, this is required!])
