@@ -215,6 +215,7 @@
 /test/hirlam12.mgm
 /test/hirlam12.mgm.nc
 /test/out.nc
+/test/testInterpolation2DataFillValue.sh
 /test/testQualityExtractor.nc
 /test/testVerticalInterpolator.sh
 /test/testVerticalInterpolator2.sh
