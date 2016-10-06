@@ -104,6 +104,7 @@ libfimex_la_SOURCES = interpolation.c \
 					 Logger.cc \
 					 Log4cppLogger.cc \
 					 Log4cppLogger.h \
+					 MutexLock.h \
 					 mifi_mpi.c \
 					 NcmlCDMReader.cc \
 					 NcmlAggregationReader.h \
