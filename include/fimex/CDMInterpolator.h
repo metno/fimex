@@ -48,7 +48,7 @@ struct CDMInterpolatorInternals;
 class InterpolatorProcess2d {
 public:
     virtual void operator()(float* array, size_t nx, size_t ny) = 0;
-    virtual ~InterpolatorProcess2d() {};
+    virtual ~InterpolatorProcess2d() {}
 };
 
 class InterpolatorFill2d : public InterpolatorProcess2d {
@@ -59,7 +59,8 @@ private:
 public:
     InterpolatorFill2d(float relaxCrit, float corrEff, size_t maxLoop)
         : relaxCrit_(relaxCrit), corrEff_(corrEff), maxLoop_(maxLoop) {}
-    virtual void operator()(float* array, size_t nx, size_t ny) {size_t nChanged; mifi_fill2d_f(nx, ny, array, relaxCrit_, corrEff_, maxLoop_, &nChanged);};
+    virtual void operator()(float* array, size_t nx, size_t ny)
+      {size_t nChanged; mifi_fill2d_f(nx, ny, array, relaxCrit_, corrEff_, maxLoop_, &nChanged);}
 };
 
 class InterpolatorCreepFill2d : public InterpolatorProcess2d {
@@ -69,7 +70,8 @@ private:
 public:
     InterpolatorCreepFill2d(unsigned short repeat, char setWeight)
         : repeat_(repeat), setWeight_(setWeight) {}
-    virtual void operator()(float* array, size_t nx, size_t ny) {size_t nChanged; mifi_creepfill2d_f(nx, ny, array, repeat_, setWeight_, &nChanged);};
+    virtual void operator()(float* array, size_t nx, size_t ny)
+      {size_t nChanged; mifi_creepfill2d_f(nx, ny, array, repeat_, setWeight_, &nChanged);}
 };
 
 class InterpolatorCreepFillVal2d : public InterpolatorProcess2d {
@@ -80,7 +82,8 @@ private:
 public:
     InterpolatorCreepFillVal2d(unsigned short repeat, char setWeight, float defaultValue)
         : repeat_(repeat), setWeight_(setWeight), defVal_(defaultValue) {}
-    virtual void operator()(float* array, size_t nx, size_t ny) {size_t nChanged; mifi_creepfillval2d_f(nx, ny, array, defVal_, repeat_, setWeight_, &nChanged);};
+    virtual void operator()(float* array, size_t nx, size_t ny)
+      {size_t nChanged; mifi_creepfillval2d_f(nx, ny, array, defVal_, repeat_, setWeight_, &nChanged);}
 };
 
 
