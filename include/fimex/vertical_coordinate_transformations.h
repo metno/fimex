@@ -260,6 +260,7 @@ extern int mifi_ocean_s_g2_z(size_t n, double h, double h_c, double zeta, const 
  * @return MIFI_OK status
  */
 extern int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, const double* t, double* w);
+extern int mifi_omega_to_vertical_wind_f(size_t n, const float* omega, const float* p, const float* t, float* w);
 
 /**
  * convert the vertical wind-speed in m/s to vertical pressure change omega using omega = - rho * g * w

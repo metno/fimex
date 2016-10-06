@@ -188,6 +188,22 @@ int mifi_omega_to_vertical_wind(size_t n, const double* omega, const double* p, 
     return MIFI_OK;
 }
 
+int mifi_omega_to_vertical_wind_f(size_t n, const float* omega, const float* p, const float* t, float* w)
+{
+    // omega = - rho * g * w -> w = -omega/(g*rho)
+    //
+    // rho = p / ( R * T )  (see http://wikimedia.org/wikipedia/en/wiki/Density_of_air )
+    // -> w = -omega * R * T / (g * p)
+    // R (dry_air) = 287.058 J/(kg·K) = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR
+    const float mR_g = -BAROMETRIC_FACTOR;
+
+    while (n--) {
+        *w++ = mR_g * *omega++ * *t++ / *p++;
+    }
+
+    return MIFI_OK;
+}
+
 int mifi_vertical_wind_to_omega(size_t n, const double* w, const double* p, const double* t, double* omega)
 {
     // omega = - rho * g * w -> w = -omega/(g*rho)

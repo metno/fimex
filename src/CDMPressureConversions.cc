@@ -57,6 +57,56 @@ struct CDMPressureConversionsImpl {
     boost::shared_ptr<const CoordinateSystem> cs;
 };
 
+namespace {
+
+DataPtr checkData(DataPtr data, size_t expected, const std::string& what)
+{
+    if (!data.get())
+        throw CDMException("no data for '" + what + "'");
+    if (data->size() != expected)
+        throw CDMException("data for '" + what + "' have size " + type2string(data->size()) + ", expected " + type2string(expected));
+    return data;
+}
+
+DataPtr verticalData4D(boost::shared_ptr<const CoordinateSystem> cs, boost::shared_ptr<CDMReader> reader, size_t unLimDimPos, int verticalType)
+{
+    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
+    size_t nx, ny, nz, nt, startT;
+
+    MetNoFimex::getSimpleAxes(cs, reader->getCDM(),
+            xAxis, yAxis, zAxis, tAxis,
+            nx, ny, nz, startT, nt, unLimDimPos);
+
+    boost::shared_ptr<ToVLevelConverter> converter = cs->getVerticalTransformation()->getConverter(reader, verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
+    if (!converter.get())
+        throw CDMException("no vertical transformation found");
+
+    const size_t sizeXY = nx*ny,
+            sizeT = (nt-startT),
+            sizeXYZ = nz * sizeXY,
+            size = sizeT * sizeXYZ;
+    boost::shared_array<float> verticalValues(new float[size]);
+
+    for (size_t t = startT, datapos = 0; t < nt; t++, datapos += sizeXYZ) {
+        const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
+        for (size_t y = 0; y < ny; y++) {
+            for (size_t x = 0; x < nx; x++) {
+                const vector<double> column = (*converter)(x, y, timePos);
+                if (column.size() != nz)
+                    throw CDMException("vertical column size " + type2string(column.size()) + " must be " + type2string(nz));
+
+                size_t idx = datapos + mifi_3d_array_position(x,y,0,nx,ny,nz);
+                for (size_t z = 0; z < nz; z++, idx += sizeXY) {
+                    verticalValues[idx] = column[z];
+                }
+            }
+        }
+    }
+    return createData(size, verticalValues);
+}
+
+} // namespace
+
 CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations)
 : dataReader_(dataReader), p_(new CDMPressureConversionsImpl())
 {
@@ -181,98 +231,33 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
     if (find(p_->changeVars.begin(), p_->changeVars.end(), varName) == p_->changeVars.end()) {
         return dataReader_->getDataSlice(varName, unLimDimPos);
     }
-    // get all axes
-    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
-    size_t nx, ny, nz, nt, startT;
-    MetNoFimex::getSimpleAxes(p_->cs, dataReader_->getCDM(),
-            xAxis, yAxis, zAxis, tAxis,
-            nx, ny, nz, startT, nt, unLimDimPos);
+    DataPtr pressureData = verticalData4D(p_->cs, dataReader_, unLimDimPos, MIFI_VINT_PRESSURE);
+    if (varName == "air_pressure4D")
+        return pressureData;
 
-    boost::shared_ptr<ToVLevelConverter> pConv = p_->cs->getVerticalTransformation()->getConverter(dataReader_, MIFI_VINT_PRESSURE, unLimDimPos, p_->cs, nx, ny, nz, (nt-startT));
-    if (pConv.get() == 0) {
-        const vector<string>& shape = getCDM().getVariable(varName).getShape();
-        throw CDMException("no vertical-transformation found for " + varName + "(" + join(shape.begin(), shape.end()) + ")");
-    }
+    boost::shared_array<float> pressureValues = pressureData->asFloat();
+    const size_t size = pressureData->size();
     if (varName == "air_temperature") {
+        boost::shared_array<float> thetaValues = checkData(dataReader_->getDataSlice(p_->oldTheta, unLimDimPos), size, p_->oldTheta)->asFloat();
+
         const float cp = 1004.; // J/kgK
         const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K
         const float ps = 1000.; // hPa
         const float psX1 = 1/ps;
         const float Rcp = R/cp;
-        DataPtr d = dataReader_->getDataSlice(p_->oldTheta, unLimDimPos);
-        assert(d.get() != 0);
-        const size_t size = d->size();
-        boost::shared_array<float> da = d->asFloat();
-        d.reset(); // deallocate d
-        for (size_t t = startT; t < nt; t++) {
-            const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-            float *dPos = &da[(t-startT)*(nx*ny*nz)];
-            for (size_t y = 0; y < ny; y++) {
-                for (size_t x = 0; x < nx; x++) {
-                    const vector<double> p = (*pConv)(x, y, timePos);
-                    assert(p.size() == nz);
-                    for (size_t z = 0; z < nz; z++) {
-                        // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
-                        dPos[mifi_3d_array_position(x,y,z,nx,ny,nz)] *= pow(static_cast<float>(p[z]*psX1), Rcp);
-                    }
-                }
-            }
+        for (size_t i = 0; i < size; i++) {
+            // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
+            thetaValues[i] *= pow(pressureValues[i]*psX1, Rcp);
         }
-        return createData(size, da);
+        return createData(size, thetaValues);
     } else if (varName == "upward_air_velocity") {
-        DataPtr td = getDataSlice(p_->air_temp, unLimDimPos);
-        assert(td.get() != 0);
-        boost::shared_array<float> tda = td->asFloat();
-        DataPtr d = dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos);
-        assert(d.get() != 0);
-        size_t size = d->size();
-        assert(size == td->size());
-        boost::shared_array<float> da = d->asFloat();
-        td.reset(); // deallocate td
-        d.reset(); // deallocate d
-        vector<double> omega(nz);
-        vector<double> w(nz);
-        vector<double> tv(nz);
-        for (size_t t = startT; t < nt; t++) {
-            const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-            float *dPos = &da[(t-startT)*(nx*ny*nz)];
-            float *tPos = &tda[(t-startT)*(nx*ny*nz)];
-            for (size_t y = 0; y < ny; y++) {
-                for (size_t x = 0; x < nx; x++) {
-                    const vector<double> p = (*pConv)(x, y, timePos);
-                    assert(p.size() == nz);
-                    for (size_t z = 0; z < nz; z++) {
-                        size_t xyzPos = mifi_3d_array_position(x,y,z,nx,ny,nz);
-                        omega.at(z) = dPos[xyzPos];
-                        tv.at(z) = tPos[xyzPos];
-                    }
-                    mifi_omega_to_vertical_wind(nz, &omega[0], &p[0], &tv[0], &w[0]);
-                    for (size_t z = 0; z < nz; z++) {
-                        dPos[mifi_3d_array_position(x,y,z,nx,ny,nz)] = w.at(z);
-                    }
-                }
-            }
-        }
-        return createData(size, da);
-    } else if (varName == "air_pressure4D") {
-        const size_t size = nx*ny*nz*(nt-startT);
-        boost::shared_array<float> ary(new float[size]);
-        for (size_t t = startT; t < nt; t++) {
-            const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-            float *pos = &ary[(t-startT)*(nx*ny*nz)];
-            for (size_t y = 0; y < ny; y++) {
-                for (size_t x = 0; x < nx; x++) {
-                    vector<double> p = (*pConv)(x, y, timePos);
-                    assert(p.size() == nz);
-                    for (size_t z = 0; z < nz; z++) {
-                        // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
-                        pos[mifi_3d_array_position(x,y,z,nx,ny,nz)] = p[z];
-                    }
-                }
-            }
-        }
-        return createData(size, ary);
+        boost::shared_array<float> airtempValues = checkData(getDataSlice(p_->air_temp, unLimDimPos), size, p_->air_temp)->asFloat();
+        boost::shared_array<float> omegaValues = checkData(dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos), size, p_->oldOmega)->asFloat();
+
+        mifi_omega_to_vertical_wind_f(size, omegaValues.get(), pressureValues.get(), airtempValues.get(), omegaValues.get());
+        return createData(size, omegaValues);
     }
+    // handled first: if (varName == "air_pressure4D")
 
     throw CDMException("don't know what to to with variable varName");
 }
