@@ -52,18 +52,12 @@ BOOST_AUTO_TEST_CASE(test_pressure_integrator)
 
     typedef boost::shared_ptr<CDMReader> CDMReader_p;
     typedef boost::shared_ptr<const CoordinateSystem> CoordinateSystem_p;
-    typedef std::vector<CoordinateSystem_p> CoordinateSystem_pv;
     typedef boost::shared_ptr<const VerticalTransformation> VerticalTransformation_cp;
     typedef boost::shared_ptr<ToVLevelConverter> ToVLevelConverter_p;
 
     CDMReader_p reader(CDMFileReaderFactory::create(MIFI_FILETYPE_NETCDF, fileName));
-    CoordinateSystem_pv coordinateSystems = MetNoFimex::listCoordinateSystems(reader);
-    CoordinateSystem_pv::const_iterator it =
-            std::find_if(coordinateSystems.begin(), coordinateSystems.end(),
-                    MetNoFimex::CompleteCoordinateSystemForComparator("x_wind_ml"));
-
-    BOOST_CHECK(it != coordinateSystems.end());
-    CoordinateSystem_p cs = *it;
+    CoordinateSystem_p cs = findCompleteCoordinateSystemFor(MetNoFimex::listCoordinateSystems(reader), "x_wind_ml");
+    BOOST_CHECK(cs);
 
     VerticalTransformation_cp vt = cs->getVerticalTransformation();
     BOOST_CHECK(vt);
