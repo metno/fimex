@@ -480,138 +480,113 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
     return outCSs;
 }
 
-void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+static void enhanceVectors(CDM& cdm, const std::string& xsn, const std::string& ysn,
+                           const std::string& xdir, const std::string& ydir)
 {
-    CDM& cdm = reader->getInternalCDM();
-    {
-        vector<pair<string, string> > xy_vectors;
-        xy_vectors.push_back(make_pair("x_wind", "y_wind"));
-        xy_vectors.push_back(make_pair("grid_eastward_wind", "grid_northward_wind"));
-        xy_vectors.push_back(make_pair("sea_water_x_velocity", "sea_water_y_velocity"));
-        xy_vectors.push_back(make_pair("x_sea_water_velocity", "y_sea_water_velocity"));
-        xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
-        xy_vectors.push_back(make_pair("bolus_sea_water_x_velocity", "bolus_sea_water_y_velocity"));
-        xy_vectors.push_back(make_pair("surface_geostrophic_sea_water_x_velocity", "surface_geostrophic_sea_water_y_velocity"));
-        xy_vectors.push_back(make_pair("barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity"));
-        xy_vectors.push_back(make_pair("sea_ice_x_velocity", "sea_ice_y_velocity"));
-        xy_vectors.push_back(make_pair("sea_ice_x_transport", "sea_ice_y_transport"));
-        xy_vectors.push_back(make_pair("sea_ice_x_displacement", "sea_ice_y_displacement"));
-        xy_vectors.push_back(make_pair("sea_surface_wave_stokes_drift_x_velocity", "sea_surface_wave_stokes_drift_y_velocity")); // preliminary from mailing-list
-        xy_vectors.push_back(make_pair("land_ice_x_velocity", "land_ice_y_velocity"));
-        xy_vectors.push_back(make_pair("land_ice_basal_x_velocity", "land_ice_basal_y_velocity"));
-        xy_vectors.push_back(make_pair("land_ice_vertical_mean_x_velocity", "land_ice_vertical_mean_y_velocity"));
-        xy_vectors.push_back(make_pair("ocean_heat_x_transport", "ocean_heat_y_transport"));
-        xy_vectors.push_back(make_pair("ocean_salt_x_transport", "ocean_salt_y_transport"));
-        xy_vectors.push_back(make_pair("ocean_volume_x_transport", "ocean_volume_y_transport"));
-
-        for (size_t i = 0; i < xy_vectors.size(); i++) {
-            vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).first+"\\E.*");
-            vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+xy_vectors.at(i).second+"\\E.*");
-            for (vector<string>::iterator xVar = xVars.begin(); xVar != xVars.end(); ++xVar) {
-                CDMVariable& xv = cdm.getVariable(*xVar);
-                if (xv.isSpatialVector()) continue;
-                const vector<string>& xSh = xv.getShape();
-                string xShape = join(xSh.begin(), xSh.end(), ",");
-                for (vector<string>::iterator yVar = yVars.begin(); yVar != yVars.end(); ++yVar) {
-                    CDMVariable& yv = cdm.getVariable(*yVar);
-                    if (yv.isSpatialVector()) continue;
-                    const vector<string>& ySh = yv.getShape();
-                    string yShape = join(ySh.begin(), ySh.end(), ",");
-                    if (xShape == yShape) {
-                        xv.setAsSpatialVector(*yVar, "x");
-                        yv.setAsSpatialVector(*xVar, "y");
-                        LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    {
-        // same vor latlon
-        vector<pair<string, string> > ll_vectors;
-        ll_vectors.push_back(make_pair("atmosphere_eastward_stress_due_to_gravity_wave_drag", "atmosphere_northward_stress_due_to_gravity_wave_drag"));
-        ll_vectors.push_back(make_pair("baroclinic_eastward_sea_water_velocity","baroclinic_northward_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("barotropic_eastward_sea_water_velocity","barotropic_northward_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("bolus_eastward_sea_water_velocity","bolus_northward_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("downward_eastward_momentum_flux_in_air","downward_northward_momentum_flux_in_air"));
-        ll_vectors.push_back(make_pair("downward_eastward_momentum_flux_in_air_due_to_diffusion","downward_northward_momentum_flux_in_air_due_to_diffusion"));
-        ll_vectors.push_back(make_pair("downward_eastward_stress_at_sea_ice_base","downward_northward_stress_at_sea_ice_base"));
-        ll_vectors.push_back(make_pair("eastward_atmosphere_dry_static_energy_transport_across_unit_distance","northward_atmosphere_dry_static_energy_transport_across_unit_distance"));
-        ll_vectors.push_back(make_pair("eastward_atmosphere_water_transport_across_unit_distance","northward_atmosphere_water_transport_across_unit_distance"));
-        ll_vectors.push_back(make_pair("eastward_atmosphere_water_vapor_transport_across_unit_distance","northward_atmosphere_water_vapor_transport_across_unit_distance"));
-        ll_vectors.push_back(make_pair("eastward_derivative_of_northward_sea_ice_velocity","northward_derivative_of_northward_sea_ice_velocity"));
-        ll_vectors.push_back(make_pair("eastward_mass_flux_of_air","northward_mass_flux_of_air"));
-        ll_vectors.push_back(make_pair("eastward_momentum_flux_correction","northward_momentum_flux_correction"));
-        ll_vectors.push_back(make_pair("eastward_sea_ice_displacement", "northward_sea_ice_displacement"));
-        ll_vectors.push_back(make_pair("eastward_sea_ice_velocity","northward_sea_ice_velocity"));
-        ll_vectors.push_back(make_pair("eastward_sea_water_velocity","northward_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("eastward_sea_water_velocity_assuming_no_tide","northward_sea_water_velocity_assuming_no_tide"));
-        ll_vectors.push_back(make_pair("eastward_transformed_eulerian_mean_air_velocity","northward_transformed_eulerian_mean_air_velocity"));
-        ll_vectors.push_back(make_pair("eastward_transformed_eulerian_mean_velocity","northward_transformed_eulerian_mean_velocity"));
-        ll_vectors.push_back(make_pair("eastward_water_vapor_flux_in_air","northward_water_vapor_flux_in_air"));
-        ll_vectors.push_back(make_pair("eastward_water_vapor_flux","northward_water_vapor_flux"));
-        ll_vectors.push_back(make_pair("eastward_water_vapor_transport_across_unit_distance_in_atmosphere_layer","northward_water_vapor_transport_across_unit_distance_in_atmosphere_layer"));
-        ll_vectors.push_back(make_pair("eastward_wind","northward_wind"));
-        ll_vectors.push_back(make_pair("eastward_wind_shear","northward_wind_shear"));
-        ll_vectors.push_back(make_pair("geostrophic_eastward_wind","geostrophic_northward_wind"));
-        // integral_of_surface_downward_eastward_stress_wrt_time
-        // northward_derivative_of_eastward_sea_ice_velocity
-        ll_vectors.push_back(make_pair("product_of_eastward_sea_water_velocity_and_salinity", "product_of_northward_sea_water_velocity_and_salinity"));
-        ll_vectors.push_back(make_pair("product_of_eastward_sea_water_velocity_and_temperature", "product_of_northward_sea_water_velocity_and_temperature"));
-        ll_vectors.push_back(make_pair("product_of_eastward_wind_and_air_temperature","product_of_northward_wind_and_air_temperature"));
-        ll_vectors.push_back(make_pair("product_of_eastward_wind_and_geopotential_height","product_of_northward_wind_and_geopotential_height"));
-        // product_of_eastward_wind_and_northward_wind
-        ll_vectors.push_back(make_pair("product_of_eastward_wind_and_omega","product_of_northward_wind_and_omega"));
-        ll_vectors.push_back(make_pair("product_of_eastward_wind_and_specific_humidity", "product_of_northward_wind_and_specific_humidity"));
-        ll_vectors.push_back(make_pair("product_of_eastward_wind_and_upward_air_velocity","product_of_northward_wind_and_upward_air_velocity"));
-        ll_vectors.push_back(make_pair("surface_downward_eastward_stress","surface_downward_northward_stress"));
-        ll_vectors.push_back(make_pair("surface_eastward_sea_water_velocity","surface_northward_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("surface_geostrophic_eastward_sea_water_velocity", "surface_geostrophic_northward_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("surface_eastward_geostrophic_sea_water_velocity","surface_northward_geostrophic_sea_water_velocity"));
-        ll_vectors.push_back(make_pair("surface_geostrophic_eastward_sea_water_velocity_assuming_sea_level_for_geoid","surface_geostrophic_northward_sea_water_velocity_assuming_sea_level_for_geoid"));
-        ll_vectors.push_back(make_pair("surface_eastward_geostrophic_sea_water_velocity_assuming_sea_level_for_geoid","surface_northward_geostrophic_sea_water_velocity_assuming_sea_level_for_geoid"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind","tendency_of_northward_wind"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_advection","tendency_of_northward_wind_due_to_advection"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_convection","tendency_of_northward_wind_due_to_convection"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_diffusion","tendency_of_northward_wind_due_to_diffusion"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_eliassen_palm_flux_divergence","tendency_of_northward_wind_due_to_eliassen_palm_flux_divergence"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_gravity_wave_drag","tendency_of_northward_wind_due_to_gravity_wave_drag"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_nonorographic_gravity_wave_drag","tendency_of_northward_wind_due_to_nonorographic_gravity_wave_drag"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_numerical_artefacts","tendency_of_northward_wind_due_to_numerical_artefacts"));
-        ll_vectors.push_back(make_pair("tendency_of_eastward_wind_due_to_orographic_gravity_wave_drag","tendency_of_northward_wind_due_to_orographic_gravity_wave_drag"));
-        ll_vectors.push_back(make_pair("upward_eastward_momentum_flux_in_air_due_to_nonorographic_eastward_gravity_waves","upward_northward_momentum_flux_in_air_due_to_nonorographic_northward_gravity_waves"));
-        ll_vectors.push_back(make_pair("upward_flux_of_eastward_momentum_due_to_nonorographic_eastward_gravity_waves","upward_flux_of_northward_momentum_due_to_nonorographic_northward_gravity_waves"));
-        ll_vectors.push_back(make_pair("upward_eastward_momentum_flux_in_air_due_to_nonorographic_westward_gravity_waves","upward_northward_momentum_flux_in_air_due_to_nonorographic_westward_gravity_waves"));
-        ll_vectors.push_back(make_pair("upward_flux_of_eastward_momentum_due_to_nonorographic_westward_gravity_waves","upward_flux_of_northward_momentum_due_to_nonorographic_westward_gravity_waves"));
-        ll_vectors.push_back(make_pair("upward_eastward_momentum_flux_in_air_due_to_orographic_gravity_waves", "upward_northward_momentum_flux_in_air_due_to_orographic_gravity_waves"));
-        ll_vectors.push_back(make_pair("upward_flux_of_eastward_momentum_due_to_orographic_gravity_waves","upward_flux_of_northward_momentum_due_to_orographic_gravity_waves"));
-        ll_vectors.push_back(make_pair("upward_eastward_stress_at_sea_ice_base", "upward_northward_stress_at_sea_ice_base"));
-
-        for (size_t i = 0; i < ll_vectors.size(); i++) {
-            vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+ll_vectors.at(i).first+"\\E.*");
-            vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+ll_vectors.at(i).second+"\\E.*");
-            for (vector<string>::iterator xVar = xVars.begin(); xVar != xVars.end(); ++xVar) {
-                CDMVariable& xv = cdm.getVariable(*xVar);
-                if (xv.isSpatialVector()) continue;
-                const vector<string>& xSh = xv.getShape();
-                string xShape = join(xSh.begin(), xSh.end(), ",");
-                for (vector<string>::iterator yVar = yVars.begin(); yVar != yVars.end(); ++yVar) {
-                    CDMVariable& yv = cdm.getVariable(*yVar);
-                    if (yv.isSpatialVector()) continue;
-                    const vector<string>& ySh = yv.getShape();
-                    string yShape = join(ySh.begin(), ySh.end(), ",");
-                    if (xShape == yShape) {
-                        xv.setAsSpatialVector(*yVar, "lon");
-                        yv.setAsSpatialVector(*xVar, "lat");
-                        LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
-                        break;
-                    }
-                }
+    vector<string> xVars = cdm.findVariables("standard_name", "\\Q"+xsn+"\\E.*");
+    vector<string> yVars = cdm.findVariables("standard_name", "\\Q"+ysn+"\\E.*");
+    for (vector<string>::iterator xVar = xVars.begin(); xVar != xVars.end(); ++xVar) {
+        CDMVariable& xv = cdm.getVariable(*xVar);
+        if (xv.isSpatialVector())
+            continue;
+        const vector<string>& xSh = xv.getShape();
+        for (vector<string>::iterator yVar = yVars.begin(); yVar != yVars.end(); ++yVar) {
+            CDMVariable& yv = cdm.getVariable(*yVar);
+            if (yv.isSpatialVector())
+                continue;
+            const vector<string>& ySh = yv.getShape();
+            if (xSh == ySh) {
+                xv.setAsSpatialVector(*yVar, xdir);
+                yv.setAsSpatialVector(*xVar, ydir);
+                LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
+                break;
             }
         }
     }
 }
 
+void CF1_xCoordSysBuilder::enhanceVectorProperties(boost::shared_ptr<CDMReader> reader)
+{
+    CDM& cdm = reader->getInternalCDM();
+
+    const std::string xdir("x"), ydir("y");
+    enhanceVectors(cdm, "x_wind", "y_wind", xdir, ydir);
+    enhanceVectors(cdm, "grid_eastward_wind", "grid_northward_wind", xdir, ydir);
+    enhanceVectors(cdm, "sea_water_x_velocity", "sea_water_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "x_sea_water_velocity", "y_sea_water_velocity", xdir, ydir);
+    enhanceVectors(cdm, "barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "bolus_sea_water_x_velocity", "bolus_sea_water_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "surface_geostrophic_sea_water_x_velocity", "surface_geostrophic_sea_water_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "barotropic_sea_water_x_velocity", "barotropic_sea_water_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "sea_ice_x_velocity", "sea_ice_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "sea_ice_x_transport", "sea_ice_y_transport", xdir, ydir);
+    enhanceVectors(cdm, "sea_ice_x_displacement", "sea_ice_y_displacement", xdir, ydir);
+    enhanceVectors(cdm, "sea_surface_wave_stokes_drift_x_velocity", "sea_surface_wave_stokes_drift_y_velocity", xdir, ydir); // preliminary from mailing-list
+    enhanceVectors(cdm, "land_ice_x_velocity", "land_ice_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "land_ice_basal_x_velocity", "land_ice_basal_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "land_ice_vertical_mean_x_velocity", "land_ice_vertical_mean_y_velocity", xdir, ydir);
+    enhanceVectors(cdm, "ocean_heat_x_transport", "ocean_heat_y_transport", xdir, ydir);
+    enhanceVectors(cdm, "ocean_salt_x_transport", "ocean_salt_y_transport", xdir, ydir);
+    enhanceVectors(cdm, "ocean_volume_x_transport", "ocean_volume_y_transport", xdir, ydir);
+
+    const std::string londir("lon"), latdir("lat");
+    enhanceVectors(cdm, "atmosphere_eastward_stress_due_to_gravity_wave_drag", "atmosphere_northward_stress_due_to_gravity_wave_drag", londir, latdir);
+    enhanceVectors(cdm, "baroclinic_eastward_sea_water_velocity","baroclinic_northward_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "barotropic_eastward_sea_water_velocity","barotropic_northward_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "bolus_eastward_sea_water_velocity","bolus_northward_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "downward_eastward_momentum_flux_in_air","downward_northward_momentum_flux_in_air", londir, latdir);
+    enhanceVectors(cdm, "downward_eastward_momentum_flux_in_air_due_to_diffusion","downward_northward_momentum_flux_in_air_due_to_diffusion", londir, latdir);
+    enhanceVectors(cdm, "downward_eastward_stress_at_sea_ice_base","downward_northward_stress_at_sea_ice_base", londir, latdir);
+    enhanceVectors(cdm, "eastward_atmosphere_dry_static_energy_transport_across_unit_distance","northward_atmosphere_dry_static_energy_transport_across_unit_distance", londir, latdir);
+    enhanceVectors(cdm, "eastward_atmosphere_water_transport_across_unit_distance","northward_atmosphere_water_transport_across_unit_distance", londir, latdir);
+    enhanceVectors(cdm, "eastward_atmosphere_water_vapor_transport_across_unit_distance","northward_atmosphere_water_vapor_transport_across_unit_distance", londir, latdir);
+    enhanceVectors(cdm, "eastward_derivative_of_northward_sea_ice_velocity","northward_derivative_of_northward_sea_ice_velocity", londir, latdir);
+    enhanceVectors(cdm, "eastward_mass_flux_of_air","northward_mass_flux_of_air", londir, latdir);
+    enhanceVectors(cdm, "eastward_momentum_flux_correction","northward_momentum_flux_correction", londir, latdir);
+    enhanceVectors(cdm, "eastward_sea_ice_displacement", "northward_sea_ice_displacement", londir, latdir);
+    enhanceVectors(cdm, "eastward_sea_ice_velocity","northward_sea_ice_velocity", londir, latdir);
+    enhanceVectors(cdm, "eastward_sea_water_velocity","northward_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "eastward_sea_water_velocity_assuming_no_tide","northward_sea_water_velocity_assuming_no_tide", londir, latdir);
+    enhanceVectors(cdm, "eastward_transformed_eulerian_mean_air_velocity","northward_transformed_eulerian_mean_air_velocity", londir, latdir);
+    enhanceVectors(cdm, "eastward_transformed_eulerian_mean_velocity","northward_transformed_eulerian_mean_velocity", londir, latdir);
+    enhanceVectors(cdm, "eastward_water_vapor_flux_in_air","northward_water_vapor_flux_in_air", londir, latdir);
+    enhanceVectors(cdm, "eastward_water_vapor_flux","northward_water_vapor_flux", londir, latdir);
+    enhanceVectors(cdm, "eastward_water_vapor_transport_across_unit_distance_in_atmosphere_layer","northward_water_vapor_transport_across_unit_distance_in_atmosphere_layer", londir, latdir);
+    enhanceVectors(cdm, "eastward_wind","northward_wind", londir, latdir);
+    enhanceVectors(cdm, "eastward_wind_shear","northward_wind_shear", londir, latdir);
+    enhanceVectors(cdm, "geostrophic_eastward_wind","geostrophic_northward_wind", londir, latdir);
+        // integral_of_surface_downward_eastward_stress_wrt_time
+        // northward_derivative_of_eastward_sea_ice_velocity
+    enhanceVectors(cdm, "product_of_eastward_sea_water_velocity_and_salinity", "product_of_northward_sea_water_velocity_and_salinity", londir, latdir);
+    enhanceVectors(cdm, "product_of_eastward_sea_water_velocity_and_temperature", "product_of_northward_sea_water_velocity_and_temperature", londir, latdir);
+    enhanceVectors(cdm, "product_of_eastward_wind_and_air_temperature","product_of_northward_wind_and_air_temperature", londir, latdir);
+    enhanceVectors(cdm, "product_of_eastward_wind_and_geopotential_height","product_of_northward_wind_and_geopotential_height", londir, latdir);
+        // product_of_eastward_wind_and_northward_wind
+    enhanceVectors(cdm, "product_of_eastward_wind_and_omega","product_of_northward_wind_and_omega", londir, latdir);
+    enhanceVectors(cdm, "product_of_eastward_wind_and_specific_humidity", "product_of_northward_wind_and_specific_humidity", londir, latdir);
+    enhanceVectors(cdm, "product_of_eastward_wind_and_upward_air_velocity","product_of_northward_wind_and_upward_air_velocity", londir, latdir);
+    enhanceVectors(cdm, "surface_downward_eastward_stress","surface_downward_northward_stress", londir, latdir);
+    enhanceVectors(cdm, "surface_eastward_sea_water_velocity","surface_northward_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "surface_geostrophic_eastward_sea_water_velocity", "surface_geostrophic_northward_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "surface_eastward_geostrophic_sea_water_velocity","surface_northward_geostrophic_sea_water_velocity", londir, latdir);
+    enhanceVectors(cdm, "surface_geostrophic_eastward_sea_water_velocity_assuming_sea_level_for_geoid","surface_geostrophic_northward_sea_water_velocity_assuming_sea_level_for_geoid", londir, latdir);
+    enhanceVectors(cdm, "surface_eastward_geostrophic_sea_water_velocity_assuming_sea_level_for_geoid","surface_northward_geostrophic_sea_water_velocity_assuming_sea_level_for_geoid", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind","tendency_of_northward_wind", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_advection","tendency_of_northward_wind_due_to_advection", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_convection","tendency_of_northward_wind_due_to_convection", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_diffusion","tendency_of_northward_wind_due_to_diffusion", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_eliassen_palm_flux_divergence","tendency_of_northward_wind_due_to_eliassen_palm_flux_divergence", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_gravity_wave_drag","tendency_of_northward_wind_due_to_gravity_wave_drag", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_nonorographic_gravity_wave_drag","tendency_of_northward_wind_due_to_nonorographic_gravity_wave_drag", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_numerical_artefacts","tendency_of_northward_wind_due_to_numerical_artefacts", londir, latdir);
+    enhanceVectors(cdm, "tendency_of_eastward_wind_due_to_orographic_gravity_wave_drag","tendency_of_northward_wind_due_to_orographic_gravity_wave_drag", londir, latdir);
+    enhanceVectors(cdm, "upward_eastward_momentum_flux_in_air_due_to_nonorographic_eastward_gravity_waves","upward_northward_momentum_flux_in_air_due_to_nonorographic_northward_gravity_waves", londir, latdir);
+    enhanceVectors(cdm, "upward_flux_of_eastward_momentum_due_to_nonorographic_eastward_gravity_waves","upward_flux_of_northward_momentum_due_to_nonorographic_northward_gravity_waves", londir, latdir);
+    enhanceVectors(cdm, "upward_eastward_momentum_flux_in_air_due_to_nonorographic_westward_gravity_waves","upward_northward_momentum_flux_in_air_due_to_nonorographic_westward_gravity_waves", londir, latdir);
+    enhanceVectors(cdm, "upward_flux_of_eastward_momentum_due_to_nonorographic_westward_gravity_waves","upward_flux_of_northward_momentum_due_to_nonorographic_westward_gravity_waves", londir, latdir);
+    enhanceVectors(cdm, "upward_eastward_momentum_flux_in_air_due_to_orographic_gravity_waves", "upward_northward_momentum_flux_in_air_due_to_orographic_gravity_waves", londir, latdir);
+    enhanceVectors(cdm, "upward_flux_of_eastward_momentum_due_to_orographic_gravity_waves","upward_flux_of_northward_momentum_due_to_orographic_gravity_waves", londir, latdir);
+    enhanceVectors(cdm, "upward_eastward_stress_at_sea_ice_base", "upward_northward_stress_at_sea_ice_base", londir, latdir);
+}
 
 } /* namespace MetNoFimex */
