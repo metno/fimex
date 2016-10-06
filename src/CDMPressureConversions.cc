@@ -41,22 +41,14 @@
 #include "fimex/Logger.h"
 #include "coordSys/CoordSysUtils.h"
 
+#include <boost/make_shared.hpp>
+
 namespace MetNoFimex
 {
 
 static LoggerPtr logger = getLogger("fimex.CDMPressureConversions");
 
 using namespace std;
-
-struct CDMPressureConversionsImpl {
-    vector<string> ops;
-    boost::shared_ptr<ToVLevelConverter> pConv;
-    vector<string> changeVars;
-    string oldTheta;
-    string oldOmega;
-    string air_temp;
-    boost::shared_ptr<const CoordinateSystem> cs;
-};
 
 namespace {
 
@@ -73,174 +65,585 @@ boost::shared_array<double> dataAs<double>(DataPtr data) {
     return data->asDouble();
 }
 
-typedef float VerticalData_t;
-typedef boost::shared_array<VerticalData_t> VerticalDataArray;
+template<typename T>
+void convert_omega_to_vertical_wind(size_t size, const T* o, const T* p, const T* t, T* w);
 
-void convert_omega_to_vertical_wind(size_t size, const double* o, const double* p, const double* t, double* w)
+template<>
+void convert_omega_to_vertical_wind<double>(size_t size, const double* o, const double* p, const double* t, double* w)
 {
     mifi_omega_to_vertical_wind(size, o, p, t, w);
 }
 
-void convert_omega_to_vertical_wind(size_t size, const float* o, const float* p, const float* t, float* w)
+template<>
+void convert_omega_to_vertical_wind<float>(size_t size, const float* o, const float* p, const float* t, float* w)
 {
     mifi_omega_to_vertical_wind_f(size, o, p, t, w);
 }
 
+typedef float VerticalData_t;
+typedef boost::shared_array<VerticalData_t> VerticalDataArray;
+
+const float relative_humidity_scale_factor = 25000;
+
+typedef std::map<std::string, std::string> string_string_m;
+
+typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+typedef std::vector<CoordSysPtr> CoordSysPtr_v;
+
+
+const string ADD_OFFSET = "add_offset";
+const string COORDINATES = "coordinates";
+const string LONG_NAME = "long_name";
+const string SCALE_FACTOR = "scale_factor";
+const string STANDARD_NAME = "standard_name";
+const string UNITS = "units";
+const string VALID_MAX = "valid_max";
+const string VALID_MIN = "valid_min";
+const string VALID_RANGE = "valid_range";
+
+const string AIR_PRESSURE = "air_pressure";
+const string AIR_PRESSURE4D = "air_pressure4D";
+const string AIR_POTENTIAL_TEMPERATURE = "air_potential_temperature";
+const string AIR_TEMPERATURE = "air_temperature";
+const string RELATIVE_HUMIDITY = "relative_humidity";
+const string SPECIFIC_HUMIDITY = "specific_humidity";
+const string UPWARD_AIR_VELOCITY = "upward_air_velocity";
+const string OMEGA_REGEX = "(omega|lagrangian_tendency_of_air_pressure|vertical_air_velocity_expressed_as_tendency_of_pressure)";
+
+class Converter  {
+public:
+    Converter(const std::string& varName)
+        : varName_(varName) { }
+
+    const std::string& variableName() const
+        { return varName_; }
+
+    virtual DataPtr getDataSlice(size_t unLimDimPos) = 0;
+
+private:
+    std::string varName_;
+};
+typedef boost::shared_ptr<Converter> ConverterPtr;
+typedef std::vector<ConverterPtr> ConverterPtr_v;
+
+// ------------------------------------------------------------------------------------------------
+
+struct ConverterFactory {
+    struct Environment {
+        CDMReaderPtr inputReader;
+        const CDM& inputCDM;
+        const CoordSysPtr_v inputCoordSys;
+
+        boost::shared_ptr<CDM> outputCDM;
+
+        Environment(CDMReaderPtr inReader, boost::shared_ptr<CDM> outCDM)
+            : inputReader(inReader), inputCDM(inputReader->getCDM()), inputCoordSys(listCoordinateSystems(inputReader)), outputCDM(outCDM) { }
+    };
+
+    struct Operation {
+        std::string conversion;
+        string_string_m options;
+        bool has_option(const std::string& key) const
+            { return (options.find(key) != options.end()); }
+        const std::string& option(const std::string& key) const
+            { return option(key, key); }
+        const std::string& option(const std::string& key, const std::string& default_value) const
+            { string_string_m::const_iterator it = options.find(key); return (it != options.end()) ? it->second : default_value; }
+    };
+
+    virtual ~ConverterFactory() { }
+    virtual const std::string name() const = 0;
+    virtual int match(const Environment& env, const std::string& conversion) const = 0;
+    virtual ConverterPtr_v createConverter(Environment& env, const Operation& oper) const = 0;
+};
+typedef boost::shared_ptr<ConverterFactory> ConverterFactoryPtr;
+
+// ------------------------------------------------------------------------------------------------
+
+vector<string> findVariables(ConverterFactory::Environment& env, const ConverterFactory::Operation& oper,
+                             const std::string& optionkey, const std::string& standard_name)
+{
+    vector<string> found;
+
+    string_string_m::const_iterator itOptName = oper.options.find(optionkey);
+    if (itOptName != oper.options.end()) {
+        if (env.inputCDM.hasVariable(itOptName->second)) {
+            found.push_back(itOptName->second);
+        } else {
+            LOG4FIMEX(logger, Logger::WARN, "no variable '" << itOptName->second << "' found");
+        }
+    } else {
+        vector<string> dims;
+        map<string, string> atts;
+        atts[STANDARD_NAME] = standard_name;
+        found = env.inputCDM.findVariables(atts, dims);
+    }
+    return found;
+}
+
+vector<string> findVariables(ConverterFactory::Environment& env, const ConverterFactory::Operation& oper,
+                             const std::string& optionkey)
+{
+    return findVariables(env, oper, optionkey, optionkey);
+}
+
+std::string deriveVariableName(const ConverterFactory::Operation& oper, const std::string& key, const std::string& base,
+                               const std::string& replace_this, const std::string& replace_with)
+{
+    if (oper.has_option(key))
+        return oper.option(key);
+
+    std::string derived = base;
+    const boost::regex replace_this_re(replace_this);
+    boost::regex_replace(derived, replace_this_re, replace_with);
+    if (derived != base)
+        return derived;
+    else
+        return key;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class ThetaTemperatureConverter : public Converter {
+public:
+    ThetaTemperatureConverter(const std::string& temperature, CDMReaderPtr reader, CoordSysPtr cs, const std::string& theta)
+        : Converter(temperature), reader_(reader), cs_(cs), theta_(theta) { }
+
+    DataPtr getDataSlice(size_t unLimDimPos);
+
+private:
+    CDMReaderPtr reader_;
+    CoordSysPtr cs_;
+    const std::string& theta_;
+};
+
+DataPtr ThetaTemperatureConverter::getDataSlice(size_t unLimDimPos)
+{
+    DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
+    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    const size_t size = pressureData->size();
+
+    boost::shared_array<float> thetaValues = checkData(reader_->getDataSlice(theta_, unLimDimPos), size, theta_)->asFloat();
+
+    const float cp = 1004.; // J/kgK
+    const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K
+    const float ps = 1000.; // hPa
+    const float psX1 = 1/ps;
+    const float Rcp = R/cp;
+    for (size_t i = 0; i < size; i++) {
+        // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
+        thetaValues[i] *= pow(pressureValues[i]*psX1, Rcp);
+    }
+    return createData(size, thetaValues);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class ThetaTemperatureConverterFactory : public ConverterFactory {
+public:
+    const std::string name() const
+        { return "ThetaTemperature"; }
+
+    int match(const Environment& env, const std::string& conversion) const
+        { return conversion == "theta2T" ? 1 : 0; }
+
+    ConverterPtr_v createConverter(Environment& env, const Operation& oper) const;
+};
+
+ConverterPtr_v ThetaTemperatureConverterFactory::createConverter(Environment& env, const Operation& oper) const
+{
+    ConverterPtr_v converters;
+    const vector<string> thetaV = findVariables(env, oper, AIR_POTENTIAL_TEMPERATURE);
+    for (vector<string>::const_iterator itTheta = thetaV.begin(); itTheta != thetaV.end(); ++itTheta) {
+        CoordSysPtr cs = findCompleteCoordinateSystemFor(env.inputCoordSys, *itTheta);
+        if (!cs) {
+            LOG4FIMEX(logger, Logger::WARN, "no coordinate system for " << *itTheta << " found");
+            continue;
+        }
+
+        const string temperature = deriveVariableName(oper, AIR_TEMPERATURE, *itTheta, "_potential_", "");
+        if (env.outputCDM->hasVariable(temperature)) {
+            LOG4FIMEX(logger, Logger::WARN, "variable '" << temperature << "' exists, no conversion from " << *itTheta);
+            continue;
+        }
+
+        const CDMVariable& vTheta = env.inputCDM.getVariable(*itTheta);
+        const vector<string>& shape = vTheta.getShape();
+        const CDMDataType thetaType = vTheta.getDataType();
+        env.outputCDM->addVariable(CDMVariable(temperature, thetaType, shape));
+
+        const vector<CDMAttribute> thetaAtts = env.inputCDM.getAttributes(*itTheta);
+        for (vector<CDMAttribute>::const_iterator it = thetaAtts.begin(); it != thetaAtts.end(); ++it) {
+            if (it->getName() != STANDARD_NAME && it->getName() != LONG_NAME) {
+                env.outputCDM->addAttribute(temperature, *it);
+            }
+        }
+        env.outputCDM->addAttribute(temperature, CDMAttribute(STANDARD_NAME, AIR_TEMPERATURE));
+        env.outputCDM->removeVariable(*itTheta); // why?
+
+        LOG4FIMEX(logger, Logger::INFO, "converter from " << *itTheta << " to " << temperature);
+        converters.push_back(boost::make_shared<ThetaTemperatureConverter>(temperature, env.inputReader, cs, *itTheta));
+    }
+    return converters;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class HumidityConverter : public Converter {
+public:
+    HumidityConverter(const std::string& relative, CDMReaderPtr reader, CoordSysPtr cs, const std::string& specific, const std::string& temperature)
+        : Converter(relative), reader_(reader), cs_(cs), specific_(specific), temperature_(temperature) { }
+
+    DataPtr getDataSlice(size_t unLimDimPos);
+
+private:
+    CDMReaderPtr reader_;
+    CoordSysPtr cs_;
+    std::string specific_;
+    std::string temperature_;
+};
+
+DataPtr HumidityConverter::getDataSlice(size_t unLimDimPos)
+{
+    DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
+    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    const size_t size = pressureData->size();
+
+    boost::shared_array<float> shValues = checkData(reader_->getScaledDataSliceInUnit(specific_, "1", unLimDimPos), size, specific_)->asFloat();
+    boost::shared_array<float> airtValues = checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_)->asFloat();
+    boost::shared_array<short> rhValues(new short[size]);
+    for (size_t i = 0; i < size; i++) {
+        const float rh = mifi_specific_to_relative_humidity(shValues[i], airtValues[i], pressureValues[i]) / 100; // convert from % to range 0..1
+        rhValues[i] = (short) (relative_humidity_scale_factor * rh + 0.5); // apply scale_factor
+    }
+    return createData(size, rhValues);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class HumidityConverterFactory : public ConverterFactory {
+public:
+    const std::string name() const
+        { return "Humidity"; }
+
+    int match(const Environment& env, const std::string& conversion) const
+        { return conversion == "specific2relative" ? 1 : 0; }
+
+    ConverterPtr_v createConverter(Environment& env, const Operation& oper) const;
+};
+
+ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const Operation& oper) const
+{
+    const vector<string> shV = findVariables(env, oper, SPECIFIC_HUMIDITY);
+    const vector<string> tempV = findVariables(env, oper, AIR_TEMPERATURE);
+
+    ConverterPtr_v converters;
+    for (vector<string>::const_iterator itSpecific = shV.begin(); itSpecific != shV.end(); ++itSpecific) {
+        CoordSysPtr cs = findCompleteCoordinateSystemFor(env.inputCoordSys, *itSpecific);
+        if (!cs.get()) {
+            LOG4FIMEX(logger, Logger::WARN, "no coordinate system for '" << *itSpecific << "' found");
+            continue;
+        }
+        vector<string>::const_iterator itTemp = tempV.begin();
+        while (itTemp != tempV.end() && !cs->isCSAndCompleteFor(*itTemp))
+            ++itSpecific;
+        if (itTemp == tempV.end()) {
+            LOG4FIMEX(logger, Logger::WARN, "no coordinate system for '" << *itSpecific << "' and '" << *itTemp << "' found");
+            continue;
+        }
+
+        const string relativeTempName = deriveVariableName(oper, RELATIVE_HUMIDITY, *itSpecific, "specific", "relative");
+        if (env.outputCDM->hasVariable(relativeTempName)) {
+            LOG4FIMEX(logger, Logger::WARN, "variable '" << relativeTempName << "' exists, no conversion added");
+            continue;
+        }
+
+        const CDMVariable& shVar = env.outputCDM->getVariable(*itSpecific);
+        const vector<string>& shape = shVar.getShape();
+        const vector<CDMAttribute> shAtts = env.outputCDM->getAttributes(*itSpecific);
+        env.outputCDM->addVariable(CDMVariable(relativeTempName, CDM_SHORT, shape));
+
+        for (vector<CDMAttribute>::const_iterator it = shAtts.begin(); it != shAtts.end(); ++it) {
+            const string& aname = it->getName();
+            if (aname != STANDARD_NAME && aname != LONG_NAME && aname != UNITS
+                    && aname != SCALE_FACTOR && aname != ADD_OFFSET
+                    && aname != VALID_MIN && aname != VALID_MAX && aname != VALID_RANGE)
+            {
+                env.outputCDM->addAttribute(relativeTempName, *it);
+            }
+        }
+        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(STANDARD_NAME, RELATIVE_HUMIDITY));
+        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(LONG_NAME, "relative humidity derived from " + *itSpecific + " and " + *itTemp));
+        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(UNITS, "1"));
+        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(VALID_MIN, 0));
+        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(VALID_MAX, (short)relative_humidity_scale_factor));
+        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(SCALE_FACTOR, 1/relative_humidity_scale_factor));
+
+        converters.push_back(boost::make_shared<HumidityConverter>(relativeTempName, env.inputReader, cs, *itSpecific, *itTemp));
+    }
+    LOG4FIMEX(logger, Logger::INFO, "have " << converters.size() << " converters to " << RELATIVE_HUMIDITY);
+    return converters;
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class OmegaVerticalConverter : public Converter {
+public:
+    OmegaVerticalConverter(const std::string& vwind, CDMReaderPtr reader, CoordSysPtr cs, const std::string& omega, const std::string& temperature)
+        : Converter(vwind), reader_(reader), cs_(cs), omega_(omega), temperature_(temperature) { }
+
+    DataPtr getDataSlice(size_t unLimDimPos);
+
+private:
+    CDMReaderPtr reader_;
+    CoordSysPtr cs_;
+    std::string omega_;
+    std::string temperature_;
+};
+
+DataPtr OmegaVerticalConverter::getDataSlice(size_t unLimDimPos)
+{
+    DataPtr pressureData = verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
+    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
+    const size_t size = pressureData->size();
+    VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(reader_->getDataSlice(temperature_, unLimDimPos), size, temperature_));
+    VerticalDataArray omegaValues = dataAs<VerticalData_t>(checkData(reader_->getScaledDataSliceInUnit(omega_, "hPa/s", unLimDimPos), size, omega_));
+
+    convert_omega_to_vertical_wind(size, omegaValues.get(), pressureValues.get(), airtempValues.get(), omegaValues.get());
+    return createData(size, omegaValues);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class OmegaVerticalConverterFactory : public ConverterFactory {
+public:
+    const std::string name() const
+        { return "OmegaVertical"; }
+
+    int match(const Environment& env, const std::string& conversion) const
+        { return conversion == "omega2vwind" ? 1 : 0; }
+
+    std::vector<ConverterPtr> createConverter(Environment& env, const Operation& oper) const;
+};
+
+ConverterPtr_v OmegaVerticalConverterFactory::createConverter(Environment& env, const Operation& oper) const
+{
+    const vector<string> omegaV = findVariables(env, oper, "omega", OMEGA_REGEX);
+    if (omegaV.size() != 1) {
+        LOG4FIMEX(logger, Logger::WARN, "found no, or more than one, variables " << OMEGA_REGEX);
+        return ConverterPtr_v();
+    }
+
+    const vector<string> tempV = findVariables(env, oper, AIR_TEMPERATURE);
+    if (tempV.size() != 1) {
+        LOG4FIMEX(logger, Logger::WARN, "found no, or more than one, variables " << AIR_TEMPERATURE);
+        return ConverterPtr_v();
+    }
+
+    const std::string& omega = omegaV.front(), temperature = tempV.front();
+
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(env.inputCoordSys, omega);
+    if (!cs || !cs->isCSAndCompleteFor(temperature)) {
+        LOG4FIMEX(logger, Logger::WARN, "no coordinate system for '" << omega << "' and '" << temperature << "'' found");
+        return ConverterPtr_v();
+    }
+
+    const string verticalWindName = deriveVariableName(oper, UPWARD_AIR_VELOCITY, omega, OMEGA_REGEX, UPWARD_AIR_VELOCITY);
+    if (env.outputCDM->hasVariable(verticalWindName)) {
+        LOG4FIMEX(logger, Logger::WARN, "variable '" << verticalWindName << "' exists, not adding conversion");
+        return ConverterPtr_v();
+    }
+
+    const vector<string>& shape = env.inputCDM.getVariable(omega).getShape();
+    env.outputCDM->addVariable(CDMVariable(verticalWindName, CDM_FLOAT, shape));
+    env.outputCDM->addAttribute(verticalWindName, CDMAttribute(STANDARD_NAME, UPWARD_AIR_VELOCITY));
+    env.outputCDM->addAttribute(verticalWindName, CDMAttribute(UNITS, "m/s"));
+    CDMAttribute xatt;
+    if (env.inputCDM.getAttribute(verticalWindName, COORDINATES, xatt)) {
+        env.outputCDM->addAttribute(verticalWindName, xatt);
+    }
+    env.outputCDM->removeVariable(omega); // why?
+
+    return ConverterPtr_v(1, boost::make_shared<OmegaVerticalConverter>(verticalWindName, env.inputReader, cs, omega, temperature));
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class AddPressure4DConverter : public Converter {
+public:
+    AddPressure4DConverter(const std::string& pressure4d, CDMReaderPtr reader, CoordSysPtr cs)
+        : Converter(pressure4d), reader_(reader), cs_(cs) { }
+
+    DataPtr getDataSlice(size_t unLimDimPos);
+
+private:
+    CDMReaderPtr reader_;
+    CoordSysPtr cs_;
+};
+
+DataPtr AddPressure4DConverter::getDataSlice(size_t unLimDimPos)
+{
+    return verticalData4D(cs_, reader_, unLimDimPos, MIFI_VINT_PRESSURE);
+}
+
+// ------------------------------------------------------------------------------------------------
+
+class AddPressure4DConverterFactory : public ConverterFactory {
+public:
+    const std::string name() const
+        { return "AddPressure4D"; }
+
+    int match(const Environment& env, const std::string& conversion) const
+        { return conversion == "add4Dpressure" ? 1 : 0; }
+
+    std::vector<ConverterPtr> createConverter(Environment& env, const Operation& oper) const;
+};
+
+ConverterPtr_v AddPressure4DConverterFactory::createConverter(Environment& env, const Operation& oper) const
+{
+    const std::string& pressureName = oper.option(AIR_PRESSURE4D);
+    if (env.outputCDM->hasVariable(pressureName)) {
+        LOG4FIMEX(logger, Logger::WARN, "variable '" << pressureName << "' exists, not adding conversion");
+        return ConverterPtr_v();
+    }
+
+    CoordSysPtr cs;
+    size_t dimsizeOld = 0;
+    vector<string> shape;
+    for (CoordSysPtr_v::const_iterator it = env.inputCoordSys.begin(); it != env.inputCoordSys.end(); ++it) {
+        CoordSysPtr csi = *it;
+        if (csi->getGeoXAxis() && csi->getGeoYAxis() && csi->getGeoZAxis()
+                && csi->getTimeAxis() && csi->hasVerticalTransformation())
+        {
+            const size_t dimsize = env.inputCDM.getDimension(csi->getGeoZAxis()->getShape()[0]).getLength();
+            if (!cs || dimsize > dimsizeOld) {
+                try {
+                    VerticalConverterPtr vconv = csi->getVerticalTransformation()->getConverter(env.inputReader, csi, MIFI_VINT_PRESSURE);
+                    if (!vconv) {
+                        LOG4FIMEX(logger, Logger::INFO, "no pressure converter");
+                        continue;
+                    }
+                    const vector<string> vshape = vconv->getShape();
+                    int non1dims = 0;
+                    for (vector<string>::const_iterator itS = vshape.begin(); itS != vshape.end(); ++itS)
+                        if (env.inputCDM.getDimension(*itS).getLength() > 1)
+                            non1dims += 1;
+                    if (non1dims != 4)
+                        LOG4FIMEX(logger, Logger::WARN, "vertical converter has != 4 dimensions with length > 1, skipped");
+                    // use the largest coordinate-system with largest zAxis
+                    cs = *it;
+                    dimsizeOld = dimsize;
+                    shape = vshape;
+                } catch (CDMException& ex) {
+                    LOG4FIMEX(logger, Logger::WARN, "exception when retrieving pressure converter for coordinate system, skipped: " << ex.what());
+                }
+            }
+        }
+    }
+    if (!cs) {
+        throw CDMException("no x,y,z,t 4D-coordinate system found");
+        return ConverterPtr_v();
+    }
+    LOG4FIMEX(logger, Logger::DEBUG, "add4Dpressure using coordsys: " << *cs);
+
+    env.outputCDM->addVariable(CDMVariable(pressureName, CDM_FLOAT, shape));
+    env.outputCDM->addAttribute(pressureName, CDMAttribute(UNITS, "hPa"));
+    env.outputCDM->addAttribute(pressureName, CDMAttribute(STANDARD_NAME, AIR_PRESSURE));
+
+    return ConverterPtr_v(1, boost::make_shared<AddPressure4DConverter>(pressureName, env.inputReader, cs));
+}
+
+} // anonymous namespace
+
+struct CDMPressureConversionsImpl {
+    std::map<std::string, ConverterPtr> converters;
+};
+
+namespace {
+
+std::vector<ConverterFactoryPtr> converterfactories;
+
+void initfactories() {
+    if (converterfactories.empty()) {
+        converterfactories.push_back(boost::make_shared<HumidityConverterFactory>());
+        converterfactories.push_back(boost::make_shared<ThetaTemperatureConverterFactory>());
+        converterfactories.push_back(boost::make_shared<OmegaVerticalConverterFactory>());
+        converterfactories.push_back(boost::make_shared<AddPressure4DConverterFactory>());
+    }
+}
+
 } // namespace
 
-CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations)
-: dataReader_(dataReader), p_(new CDMPressureConversionsImpl())
-{
-    p_->ops = operations;
-    vector<boost::shared_ptr<const CoordinateSystem> > coordSys = listCoordinateSystems(dataReader_);
-    *cdm_ = dataReader->getCDM();
 
-    for (vector<string>::iterator op = p_->ops.begin(); op != p_->ops.end(); ++op) {
-        if (*op == "theta2T") {
-            vector<string> dims;
-            map<string, string> atts;
-            atts["standard_name"] = "air_potential_temperature";
-            vector<string> thetaV = cdm_->findVariables(atts, dims);
-            if (thetaV.size() == 0) {
-                LOG4FIMEX(logger, Logger::WARN, "no air_potential_temperature (theta) found");
-            } else {
-                boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, thetaV[0]);
-                if (!cs.get()) {
-                    LOG4FIMEX(logger, Logger::WARN, "no coordinate system for air_potential_temperature (theta) found");
-                } else {
-                    p_->cs = cs;
-                    const vector<string>& shape = cdm_->getVariable(thetaV[0]).getShape();
-                    vector<CDMAttribute> thetaAtts = cdm_->getAttributes(thetaV[0]);
-                    CDMDataType thetaType = cdm_->getVariable(thetaV[0]).getDataType();
-                    cdm_->removeVariable(thetaV[0]);
-                    p_->oldTheta = thetaV[0];
-                    const string varName = "air_temperature";
-                    cdm_->addVariable(CDMVariable(varName, thetaType, shape));
-                    for (size_t i = 0; i < thetaAtts.size(); i++) {
-                        if (thetaAtts[i].getName() != "standard_name" && thetaAtts[i].getName() != "long_name") {
-                            cdm_->addAttribute(varName, thetaAtts[i]);
-                        }
-                    }
-                    cdm_->addAttribute(varName, CDMAttribute("standard_name", "air_temperature"));
-                    p_->changeVars.push_back(varName);
+CDMPressureConversions::CDMPressureConversions(boost::shared_ptr<CDMReader> dataReader, std::vector<std::string> operations)
+    : dataReader_(dataReader), p_(new CDMPressureConversionsImpl())
+{
+    initfactories();
+
+    *cdm_ = dataReader_->getCDM();
+    ConverterFactory::Environment env(dataReader_, cdm_);
+
+    for (vector<string>::iterator op = operations.begin(); op != operations.end(); ++op) {
+        ConverterFactory::Operation oper;
+        oper.conversion = *op;
+        const char SEP = ';', EQ = '=';
+        std::string::size_type pos_sep = oper.conversion.find(SEP);
+        if (pos_sep != string::npos) {
+            oper.conversion.erase(pos_sep);
+
+            while (pos_sep != string::npos && pos_sep + 1 < op->size()) {
+                std::string::size_type pos_opt_start = pos_sep + 1;
+                std::string::size_type pos_opt_eq = op->find(EQ, pos_opt_start);
+                if (pos_opt_eq == std::string::npos) {
+                    const std::string key = op->substr(pos_opt_start);
+                    oper.options.insert(std::make_pair(key, ""));
+                    LOG4FIMEX(logger, Logger::DEBUG, "oper.option '" << key << "' (empty)");
+                    break;
                 }
+
+                std::string::size_type pos_opt_end = op->find(SEP, pos_opt_eq);
+                pos_sep = pos_opt_end;
+                if (pos_opt_end == std::string::npos)
+                    pos_opt_end = op->size();
+                const std::string key = op->substr(pos_opt_start, pos_opt_eq - pos_opt_start);
+                const std::string val = op->substr(pos_opt_eq+1, pos_opt_end - pos_opt_eq-1);
+                oper.options.insert(std::make_pair(key, val));
+                LOG4FIMEX(logger, Logger::DEBUG, "oper.option '" << key << "'=>'" << val << "'");
             }
-        } else if (*op == "omega2vwind") {
-            vector<string> dims;
-            map<string, string> atts;
-            atts["standard_name"] = "(omega|lagrangian_tendency_of_air_pressure|vertical_air_velocity_expressed_as_tendency_of_pressure)";
-            vector<string> omegaV = cdm_->findVariables(atts, dims);
-            atts["standard_name"] = "air_temperature";
-            vector<string> tempV = cdm_->findVariables(atts, dims);
-            if (omegaV.size() == 0) {
-                LOG4FIMEX(logger, Logger::WARN, "no omega|lagrangian_tendency_of_air_pressure|vertical_air_velocity_expressed_as_tendency_of_pressure found");
-            } else {
-                if (tempV.size() == 0) {
-                    LOG4FIMEX(logger, Logger::WARN, "no air_temperature found needed for omega2vwind");
-                } else {
-                    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(coordSys, omegaV[0]);
-                    if (!cs.get() || !CompleteCoordinateSystemForComparator(tempV[0])(cs)) {
-                        LOG4FIMEX(logger, Logger::WARN, "no coordinate system for omega and air_temperature found");
-                    } else {
-                        p_->air_temp = tempV[0];
-                        p_->cs = cs;
-                        const vector<string>& shape = cdm_->getVariable(omegaV[0]).getShape();
-                        p_->oldOmega = omegaV[0];
-                        const string varName = "upward_air_velocity";
-                        cdm_->addVariable(CDMVariable(varName, CDM_FLOAT, shape));
-                        cdm_->addAttribute(varName, CDMAttribute("standard_name", "upward_air_velocity"));
-                        cdm_->addAttribute(varName, CDMAttribute("units", "m/s"));
-                        CDMAttribute xatt;
-                        if (cdm_->getAttribute(varName, "coordinates", xatt)) {
-                            cdm_->addAttribute(varName, xatt);
-                        }
-                        cdm_->removeVariable(omegaV[0]);
-                        p_->changeVars.push_back(varName);
-                    }
-                }
+            LOG4FIMEX(logger, Logger::DEBUG, "oper.conversion='" << oper.conversion << "'");
+        }
+
+        int best_match = 0;
+        ConverterFactoryPtr best_factory;
+        for (std::vector<ConverterFactoryPtr>::const_iterator it = converterfactories.begin(); it != converterfactories.end(); ++it) {
+            int match = (*it)->match(env, oper.conversion);
+            if (match > best_match) {
+                best_match = match;
+                best_factory = *it;
             }
-        } else if (*op == "add4Dpressure") {
-            if (p_->cs.get() == 0) {
-                for (size_t i = 0; i < coordSys.size(); i++) {
-                    if (coordSys[i]->getGeoXAxis().get() != 0 &&
-                            coordSys[i]->getGeoYAxis().get() != 0 &&
-                            coordSys[i]->getGeoZAxis().get() != 0 &&
-                            coordSys[i]->getTimeAxis().get() != 0 &&
-                            coordSys[i]->hasVerticalTransformation())
-                    {
-                        if (!p_->cs.get()) {
-                            p_->cs = coordSys[i];
-                        } else {
-                            // use the largest coordinate-system with largest zAxis
-                            size_t dimsizeNew = cdm_->getDimension(coordSys[i]->getGeoZAxis()->getShape()[0]).getLength();
-                            size_t dimsizeOld = cdm_->getDimension(p_->cs->getGeoZAxis()->getShape()[0]).getLength();
-                            if (dimsizeNew > dimsizeOld) {
-                                p_->cs = coordSys[i];
-                            }
-                        }
-                    }
-                }
-                if (p_->cs.get() == 0) {
-                    throw CDMException("no x,y,z,t 4D-coordinate system found");
-                } else {
-                    LOG4FIMEX(getLogger("fimex.CDMPressureConverter"), Logger::DEBUG, "add4Dpressure using coordsys: " << *(p_->cs));
-                }
+        }
+        if (best_factory) {
+            LOG4FIMEX(logger, Logger::DEBUG, "factory: '" << best_factory->name() << "'");
+
+            ConverterPtr_v convs = best_factory->createConverter(env, oper);
+            for (ConverterPtr_v::const_iterator itC = convs.begin(); itC != convs.end(); ++itC) {
+                const std::string& varName = (*itC)->variableName();
+                p_->converters.insert(std::make_pair(varName, *itC));
             }
-            CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
-            size_t nx, ny, nz, nt;
-            bool tIsUnlimited;
-            MetNoFimex::getSimpleAxes(p_->cs, dataReader_->getCDM(),
-                    xAxis, yAxis, zAxis, tAxis,
-                    nx, ny, nz, nt, tIsUnlimited);
-            vector<string> shape;
-            shape.push_back(xAxis->getShape()[0]);
-            shape.push_back(yAxis->getShape()[0]);
-            shape.push_back(zAxis->getShape()[0]);
-            shape.push_back(tAxis->getShape()[0]);
-            const string varName = "air_pressure4D";
-            cdm_->addVariable(CDMVariable(varName, CDM_FLOAT, shape));
-            cdm_->addAttribute(varName, CDMAttribute("units", "hPa"));
-            cdm_->addAttribute(varName, CDMAttribute("standard_name", "air_pressure"));
-            p_->changeVars.push_back(varName);
-        } else
-            throw CDMException("unknown CDMPressureConversion-operation: " + *op);
+        } else {
+            throw CDMException("unknown CDMPressureConversion-operation: '" + oper.conversion + "'");
+        }
     }
 }
 
 DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t unLimDimPos)
 {
-    if (find(p_->changeVars.begin(), p_->changeVars.end(), varName) == p_->changeVars.end()) {
+    std::map<std::string, ConverterPtr>::const_iterator itC = p_->converters.find(varName);
+    if (itC == p_->converters.end()) {
         return dataReader_->getDataSlice(varName, unLimDimPos);
+    } else {
+        return (itC->second)->getDataSlice(unLimDimPos);
     }
-    DataPtr pressureData = verticalData4D(p_->cs, dataReader_, unLimDimPos, MIFI_VINT_PRESSURE);
-    if (varName == "air_pressure4D")
-        return pressureData;
-
-    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
-    const size_t size = pressureData->size();
-    if (varName == "air_temperature") {
-        boost::shared_array<float> thetaValues = checkData(dataReader_->getDataSlice(p_->oldTheta, unLimDimPos), size, p_->oldTheta)->asFloat();
-
-        const float cp = 1004.; // J/kgK
-        const float R = MIFI_GAS_CONSTANT / MIFI_MOLAR_MASS_DRY_AIR; // J/K
-        const float ps = 1000.; // hPa
-        const float psX1 = 1/ps;
-        const float Rcp = R/cp;
-        for (size_t i = 0; i < size; i++) {
-            // theta = T * (ps / p)^(R/cp) => T = theta * (p/ps)^(R/cp)
-            thetaValues[i] *= pow(pressureValues[i]*psX1, Rcp);
-        }
-        return createData(size, thetaValues);
-    } else if (varName == "upward_air_velocity") {
-        VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(getDataSlice(p_->air_temp, unLimDimPos), size, p_->air_temp));
-        VerticalDataArray omegaValues = dataAs<VerticalData_t>(checkData(dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos), size, p_->oldOmega));
-
-        convert_omega_to_vertical_wind(size, omegaValues.get(), pressureValues.get(), airtempValues.get(), omegaValues.get());
-        return createData(size, omegaValues);
-    }
-    // handled first: if (varName == "air_pressure4D")
-
-    throw CDMException("don't know what to to with variable varName");
 }
 
 }
