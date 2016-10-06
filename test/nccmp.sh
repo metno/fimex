@@ -31,7 +31,7 @@ if ! $MD5SUM --help > /dev/null; then
 fi
 
 nc5sum() {
-    $NCDUMP -n anonymous -p 8,15 "$1" | $MD5SUM | cut -d' ' -f1
+    $NCDUMP -f c -n anonymous -p 8,15 "$1" | $MD5SUM | cut -d' ' -f1
 }
 
 NC1MD5=`nc5sum "$NC1"`
