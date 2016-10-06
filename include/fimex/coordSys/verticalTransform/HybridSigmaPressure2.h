@@ -42,6 +42,7 @@ public:
     const std::string b;
     const std::string ps;
     const std::string p0;
+
     /**
      * Initialize HybridSigmaPressure with formula
      *   p(k, x,y,t) = a(k)*p0 + b(k)*ps(x,y,t)
@@ -54,7 +55,6 @@ public:
     HybridSigmaPressure2(const std::string& a, const std::string& b, const std::string& ps, const std::string& p0 = "")
         : a(a), b(b), ps(ps), p0(p0) {}
 
-    virtual ~HybridSigmaPressure2() {}
     /**
      * static NAME constant
      * @return atmosphere_hybrid_sigma_pressure_coordinate_2
@@ -69,9 +69,9 @@ public:
     virtual bool isComplete() const {return a != "" && b != "" && ps != "" && p0 != "";}
 
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos,
-            boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */
+
 #endif /* HYBRIDSIGMAPRESSURE2_H_ */

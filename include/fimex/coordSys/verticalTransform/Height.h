@@ -27,7 +27,6 @@
 #ifndef HEIGHT_H_
 #define HEIGHT_H_
 
-
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
 namespace MetNoFimex
@@ -54,12 +53,14 @@ public:
     virtual std::string getName() const { return NAME(); }
     virtual int getPreferredVerticalType() const { return MIFI_VINT_HEIGHT; }
     virtual std::string getParameterString() const { return "h="+height; }
-    virtual bool isComplete() const {return height != "";}
+    virtual bool isComplete() const {return !height.empty();}
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
-    virtual boost::shared_ptr<ToVLevelConverter> getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
-    virtual boost::shared_ptr<ToVLevelConverter> getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    virtual VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
+    virtual VerticalConverterPtr getHeightConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
+    virtual VerticalConverterPtr getAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */
+
 #endif /* HEIGHT_H_ */

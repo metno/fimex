@@ -240,7 +240,7 @@ void CDMProcessor::addVerticalVelocity()
                         if (stdName == "altitude" || stdName == "geopotential_height") {
                             gpUnit = "m";
                         } else {
-                            gpUnit = "1/9.81*m^2/s^2"; // devision of gepotential by gravity
+                            gpUnit = "1/9.81*m^2/s^2"; // division of gepotential by gravity
                         }
                         DataPtr gpd;
                         try {

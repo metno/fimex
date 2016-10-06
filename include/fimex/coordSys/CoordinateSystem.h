@@ -116,6 +116,10 @@ public:
      * Set or unset if all dimensions are described by the CoordinateSystem
      */
     virtual void setCSFor(const std::string& varName, bool set = true);
+
+    /** Return true iff isComplete and isCSFor both return true. */
+    virtual bool isCSAndCompleteFor(const std::string& varName) const;
+
     /**
      * Check if coordinate system has direct spatial axes, i.e. 1-dim x,y axes or 1-dim lon,lat axes
      */
@@ -284,7 +288,7 @@ struct CompleteCoordinateSystemForComparator : public std::unary_function<boost:
 public:
     CompleteCoordinateSystemForComparator(const std::string& varName) : varName(varName) {}
     bool operator()(const boost::shared_ptr<const CoordinateSystem>& cs) const
-      { return cs->isComplete(varName) && cs->isCSFor(varName); }
+      { return cs->isCSAndCompleteFor(varName); }
 private:
     const std::string& varName;
 };

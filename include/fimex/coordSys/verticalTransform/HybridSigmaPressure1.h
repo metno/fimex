@@ -29,7 +29,6 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-
 namespace MetNoFimex
 {
 /**
@@ -43,6 +42,7 @@ public:
     const std::string b;
     const std::string ps;
     const std::string p0;
+
     /**
      * Initialize HybridSigmaPressure with formula
      *   p(k, x,y,t) = ap(k) + b(k)*ps(x,y,t)
@@ -52,23 +52,27 @@ public:
      * @param ps surface pressure variable name
      * @param p0 optional p0 base-pressure, not needed for transformations
      */
-    HybridSigmaPressure1(const std::string& ap, const std::string& b, const std::string& ps, const std::string& p0 = "") : ap(ap), b(b), ps(ps), p0(p0) {}
-    virtual ~HybridSigmaPressure1() {}
+    HybridSigmaPressure1(const std::string& ap, const std::string& b, const std::string& ps, const std::string& p0 = "")
+        : ap(ap), b(b), ps(ps), p0(p0) {}
+
     /**
      * static NAME constant
      * @return atmosphere_hybrid_sigma_pressure_coordinate_1
      */
     static const std::string NAME() { return "atmosphere_hybrid_sigma_pressure_coordinate_1";}
+
     /**
      * @return same as static NAME()
      */
     virtual std::string getName() const { return NAME(); }
     virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "ap="+ap+",b="+b+",ps="+ps+",p0="+p0; }
-    virtual bool isComplete() const {return ap != "" && b != "" && ps != "";}
+    virtual bool isComplete() const {return !ap.empty() && !b.empty() && !ps.empty();}
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */
+
 #endif /* HYBRIDSIGMAPRESSURE1_H_ */

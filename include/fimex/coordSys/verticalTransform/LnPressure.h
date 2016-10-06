@@ -61,8 +61,9 @@ public:
     virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "lev="+lev+",p0="+p0; }
     virtual bool isComplete() const {return lev != "" && p0 != "";}
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */

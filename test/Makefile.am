@@ -150,3 +150,6 @@ testVerticalVelocity_SOURCES = testVerticalVelocity.cc
 testXMLDoc_SOURCES = testXMLDoc.cc
 test_c_consumer_SOURCES = test_c_consumer.c
 testFortran_SOURCES = testFortran.F90
+
+build-checks: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)

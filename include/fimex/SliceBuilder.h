@@ -27,6 +27,7 @@
 #ifndef SLICEBUILDER_H_
 #define SLICEBUILDER_H_
 
+#include <iosfwd>
 #include <string>
 #include <vector>
 #include <map>
@@ -138,13 +139,10 @@ private:
     std::vector<bool> unlimited_;
     std::vector<size_t> start_;
     std::vector<size_t> size_;
-
 };
 
 std::ostream& operator<<(std::ostream& os, const SliceBuilder& sb);
 
 }
-
-
 
 #endif /* SLICEBUILDER_H_ */

@@ -25,22 +25,16 @@
  */
 
 #include "fimex/coordSys/verticalTransform/LnPressure.h"
-#include "fimex/CDMReader.h"
-#include "fimex/Data.h"
-#include "fimex/CDMReaderUtils.h"
-#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
+#include "fimex/coordSys/verticalTransform/LnPressureToPressureConverter.h"
 
+#include <boost/make_shared.hpp>
 
 namespace MetNoFimex {
 
-boost::shared_ptr<ToVLevelConverter> LnPressure::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const
+VerticalConverterPtr LnPressure::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
-    const vector<double> levVec = getDataSliceInUnit(reader, lev, "", unLimDimPos);
-    const vector<double> p0Vec = getDataSliceInUnit(reader, p0, "hPa", unLimDimPos);
-    return boost::shared_ptr<ToVLevelConverter>(new LnPressureToPressureConverter(p0Vec.at(0), levVec));
+    return boost::make_shared<LnPressureToPressureConverter>(reader, cs, lev, p0);
 }
 
-}
-
-
+} // namespace MetNoFimex
 

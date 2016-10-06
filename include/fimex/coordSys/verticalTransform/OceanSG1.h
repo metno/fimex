@@ -28,6 +28,7 @@
 #define OCEANSG1_H_
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.h"
 
 namespace MetNoFimex
 {
@@ -42,14 +43,11 @@ namespace MetNoFimex
 class OceanSG1 : public VerticalTransformation
 {
 protected:
-    int (*heightConversionFunction)(size_t n, double h, double h_c, double zeta, const double* sigma, const double* C, double* z);
+    OceanSCoordinateGToDepthConverter::heightconversion_t heightConversionFunction;
+
 public:
-    const std::string s;
-    const std::string C;
-    const std::string depth;
-    const std::string depth_c;
-    /* optional */
-    const std::string eta;
+    const OceanSGVars vars;
+
     /**
      * Initialize OceanSG1 with formula as defined by https://www.myroms.org/wiki/index.php/Vertical_S-coordinate
      *
@@ -59,8 +57,8 @@ public:
      * @param depth_c critical depth, usually min(depth(x,y))
      * @param eta time-varying free surface eta(x,y,z) (often also called zeta)
      */
-    OceanSG1(const std::string& s, const std::string& C, const std::string& depth, const std::string& depth_c, const std::string& eta = "");
-    virtual ~OceanSG1() {}
+    OceanSG1(const OceanSGVars& vars);
+
     /**
      * static NAME constant
      * @return ocean_s_coordinate_g1
@@ -71,11 +69,12 @@ public:
      */
     virtual std::string getName() const { return NAME(); }
     virtual int getPreferredVerticalType() const { return MIFI_VINT_DEPTH; }
-    virtual std::string getParameterString() const { return "s="+s+",C="+C+",depth="+depth+",depth_c="+depth_c+",eta="+eta; }
-    virtual bool isComplete() const {return s != "" && C != "" && depth != "" && depth_c != "";}
+    virtual std::string getParameterString() const { return "s="+vars.s+",C="+vars.C+",depth="+vars.depth+",depth_c="+vars.depth_c+",eta="+vars.eta; }
+    virtual bool isComplete() const { return vars.isComplete(); }
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
-    virtual boost::shared_ptr<ToVLevelConverter> getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const;
+    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
+    VerticalConverterPtr getAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */

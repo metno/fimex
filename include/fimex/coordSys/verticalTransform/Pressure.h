@@ -29,12 +29,7 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-namespace MetNoFimex
-{
-
-// forward decl
-class ToVLevelConverter;
-
+namespace MetNoFimex {
 
 /**
  * @headerfile fimex/coordSys/verticalTransform/Pressure.h
@@ -47,7 +42,7 @@ public:
     /// name of the pressure variable
     const std::string pressure;
     Pressure(const std::string& pressure) : pressure(pressure) {}
-    virtual ~Pressure() {}
+
     /**
      * static NAME constant
      * @return pressure
@@ -59,10 +54,12 @@ public:
     virtual std::string getName() const { return NAME(); }
     virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "p="+pressure; }
-    virtual bool isComplete() const {return pressure != "";}
+    virtual bool isComplete() const {return !pressure.empty();}
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
-} /* namespace MetNoFimex */
+} // namespace MetNoFimex
+
 #endif /* PRESSURE_H_ */

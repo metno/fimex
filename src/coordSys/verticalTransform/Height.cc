@@ -25,59 +25,32 @@
  */
 
 #include "fimex/coordSys/verticalTransform/Height.h"
-#include "fimex/CDMReader.h"
-#include "fimex/Data.h"
-#include "fimex/CDM.h"
-#include "fimex/Utils.h"
-#include "fimex/Logger.h"
-#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 
+#include "fimex/coordSys/verticalTransform/AltitudeHeightConverter.h"
+#include "fimex/coordSys/verticalTransform/IdentityConverter.h"
 
 namespace MetNoFimex {
 
-boost::shared_ptr<ToVLevelConverter> Height::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const
+VerticalConverterPtr Height::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
 //    DataPtr h = reader->getScaledDataSliceInUnit(height, "m", unLimDimPos);
 //    boost::shared_array<double> ha = h->asDouble();
 //    return boost::shared_ptr<ToVLevelConverter>(new HeightStandardToPressureConverter(vector<double> (&ha[0],&ha[0] + h->size())));
     // does not exist generally without known topography, which depends the variable to read
-    return boost::shared_ptr<ToVLevelConverter>();
+    return VerticalConverterPtr();
 }
 
-boost::shared_ptr<ToVLevelConverter> Height::getHeightConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+VerticalConverterPtr Height::getHeightConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
-    DataPtr hd = reader->getScaledDataSliceInUnit(height, "m", unLimDimPos);
-    const boost::shared_array<double> ha = hd->asDouble();
-    return boost::shared_ptr<ToVLevelConverter>(new IdentityToVLevelConverter(vector<double> (&ha[0], &ha[0] + hd->size())));
+    return IdentityConverter::createConverterForVarName(reader, cs, height, "m");
 }
 
-boost::shared_ptr<ToVLevelConverter> Height::getAltitudeConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nz, size_t nt) const
+VerticalConverterPtr Height::getAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
-    // try geopotential_height or fall back to pressure
-    using namespace std;
-    boost::shared_ptr<ToVLevelConverter> altConv;
-    boost::shared_ptr<ToVLevelConverter> heightConv = getHeightConverter(reader, unLimDimPos, cs, nx, ny, nz, nt);
-    assert(heightConv.get() != 0);
-    map<string, string> attrs;
-    vector<string> dims;
-    const CoordinateSystem::ConstAxisPtr xAxis = cs->getGeoXAxis();
-    const CoordinateSystem::ConstAxisPtr yAxis = cs->getGeoYAxis();
-    const CoordinateSystem::ConstAxisPtr zAxis = cs->getGeoZAxis();
-    if (xAxis.get() != 0 && yAxis.get() != 0 && zAxis.get() != 0) {
-        dims.push_back(xAxis->getShape()[0]);
-        dims.push_back(yAxis->getShape()[0]);
-        attrs["standard_name"] = "altitude";
-        vector<string> topoVars = reader->getCDM().findVariables(attrs, dims);
-        if (topoVars.size() > 0) {
-            LOG4FIMEX(getLogger("fimex.VerticalTransform.Height"), Logger::INFO, "using altitude "<<topoVars[0]<<" to retrieve height");
-            DataPtr topoData = reader->getScaledDataSliceInUnit(topoVars[0], "m", unLimDimPos);
-            if (topoData->size() != (nx * ny)) {
-                throw CDMException("altitude '" + topoVars[0] + "' has strange size: " + type2string(topoData->size()) + " != " + type2string(nx * ny));
-            }
-            altConv = boost::shared_ptr<ToVLevelConverter>(new HeightConverterToAltitudeConverter(heightConv, topoData->asFloat(), nx, ny, nz, nt));
-        }
-    }
-    return altConv;
+    if (VerticalConverterPtr height = getHeightConverter(reader, cs))
+        return AltitudeHeightConverter::createConverter(reader, cs, height, false);
+
+    return VerticalConverterPtr();
 }
 
 } // namespace MetNoFimex

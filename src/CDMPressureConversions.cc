@@ -27,6 +27,7 @@
 #include "fimex/CDMPressureConversions.h"
 #include "fimex/CDMVerticalInterpolator.h"
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "fimex/Logger.h"
 #include "fimex/CDMReader.h"
@@ -59,50 +60,30 @@ struct CDMPressureConversionsImpl {
 
 namespace {
 
-DataPtr checkData(DataPtr data, size_t expected, const std::string& what)
-{
-    if (!data.get())
-        throw CDMException("no data for '" + what + "'");
-    if (data->size() != expected)
-        throw CDMException("data for '" + what + "' have size " + type2string(data->size()) + ", expected " + type2string(expected));
-    return data;
+template<class T>
+boost::shared_array<T> dataAs(DataPtr data);
+
+template<>
+boost::shared_array<float> dataAs<float>(DataPtr data) {
+    return data->asFloat();
 }
 
-DataPtr verticalData4D(boost::shared_ptr<const CoordinateSystem> cs, boost::shared_ptr<CDMReader> reader, size_t unLimDimPos, int verticalType)
+template<>
+boost::shared_array<double> dataAs<double>(DataPtr data) {
+    return data->asDouble();
+}
+
+typedef float VerticalData_t;
+typedef boost::shared_array<VerticalData_t> VerticalDataArray;
+
+void convert_omega_to_vertical_wind(size_t size, const double* o, const double* p, const double* t, double* w)
 {
-    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
-    size_t nx, ny, nz, nt, startT;
+    mifi_omega_to_vertical_wind(size, o, p, t, w);
+}
 
-    MetNoFimex::getSimpleAxes(cs, reader->getCDM(),
-            xAxis, yAxis, zAxis, tAxis,
-            nx, ny, nz, startT, nt, unLimDimPos);
-
-    boost::shared_ptr<ToVLevelConverter> converter = cs->getVerticalTransformation()->getConverter(reader, verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
-    if (!converter.get())
-        throw CDMException("no vertical transformation found");
-
-    const size_t sizeXY = nx*ny,
-            sizeT = (nt-startT),
-            sizeXYZ = nz * sizeXY,
-            size = sizeT * sizeXYZ;
-    boost::shared_array<float> verticalValues(new float[size]);
-
-    for (size_t t = startT, datapos = 0; t < nt; t++, datapos += sizeXYZ) {
-        const size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-        for (size_t y = 0; y < ny; y++) {
-            for (size_t x = 0; x < nx; x++) {
-                const vector<double> column = (*converter)(x, y, timePos);
-                if (column.size() != nz)
-                    throw CDMException("vertical column size " + type2string(column.size()) + " must be " + type2string(nz));
-
-                size_t idx = datapos + mifi_3d_array_position(x,y,0,nx,ny,nz);
-                for (size_t z = 0; z < nz; z++, idx += sizeXY) {
-                    verticalValues[idx] = column[z];
-                }
-            }
-        }
-    }
-    return createData(size, verticalValues);
+void convert_omega_to_vertical_wind(size_t size, const float* o, const float* p, const float* t, float* w)
+{
+    mifi_omega_to_vertical_wind_f(size, o, p, t, w);
 }
 
 } // namespace
@@ -235,7 +216,7 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
     if (varName == "air_pressure4D")
         return pressureData;
 
-    boost::shared_array<float> pressureValues = pressureData->asFloat();
+    boost::shared_array<VerticalData_t> pressureValues = dataAs<VerticalData_t>(pressureData);
     const size_t size = pressureData->size();
     if (varName == "air_temperature") {
         boost::shared_array<float> thetaValues = checkData(dataReader_->getDataSlice(p_->oldTheta, unLimDimPos), size, p_->oldTheta)->asFloat();
@@ -251,10 +232,10 @@ DataPtr CDMPressureConversions::getDataSlice(const std::string& varName, size_t 
         }
         return createData(size, thetaValues);
     } else if (varName == "upward_air_velocity") {
-        boost::shared_array<float> airtempValues = checkData(getDataSlice(p_->air_temp, unLimDimPos), size, p_->air_temp)->asFloat();
-        boost::shared_array<float> omegaValues = checkData(dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos), size, p_->oldOmega)->asFloat();
+        VerticalDataArray airtempValues = dataAs<VerticalData_t>(checkData(getDataSlice(p_->air_temp, unLimDimPos), size, p_->air_temp));
+        VerticalDataArray omegaValues = dataAs<VerticalData_t>(checkData(dataReader_->getScaledDataSliceInUnit(p_->oldOmega, "hPa/s", unLimDimPos), size, p_->oldOmega));
 
-        mifi_omega_to_vertical_wind_f(size, omegaValues.get(), pressureValues.get(), airtempValues.get(), omegaValues.get());
+        convert_omega_to_vertical_wind(size, omegaValues.get(), pressureValues.get(), airtempValues.get(), omegaValues.get());
         return createData(size, omegaValues);
     }
     // handled first: if (varName == "air_pressure4D")

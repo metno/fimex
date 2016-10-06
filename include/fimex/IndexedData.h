@@ -75,7 +75,7 @@ public:
      *
      * @code
      * IndexedData idata(data, dims);
-     * double val = id.getDouble(id.getIdx().getPos(3, 5, 7));
+     * double val = idata.getDouble(idata.getIdx().getPos(3, 5, 7));
      * @endcode
      *
      * @param pos data position, should be < size (not assured)

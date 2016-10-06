@@ -29,8 +29,8 @@
 
 #include "fimex/coordSys/verticalTransform/VerticalTransformation.h"
 
-namespace MetNoFimex
-{
+namespace MetNoFimex {
+
 /**
  * @headerfile fimex/coordSys/verticalTransform/AtmosphereSigma.h
  */
@@ -49,8 +49,8 @@ public:
      * @param ptop top of model
      * @param ps surface pressure
      */
-    AtmosphereSigma(const std::string& sigma, const std::string& ptop, const std::string& ps) : sigma(sigma), ps(ps), ptop(ptop) {}
-    virtual ~AtmosphereSigma() {}
+    AtmosphereSigma(const std::string& sigma, const std::string& ps, const std::string& ptop) : sigma(sigma), ps(ps), ptop(ptop) {}
+
     /**
      * static NAME constant
      * @return atmosphere_sigma_coordinate
@@ -63,9 +63,11 @@ public:
     virtual int getPreferredVerticalType() const { return MIFI_VINT_PRESSURE; }
     virtual std::string getParameterString() const { return "sigma="+sigma+",ps="+ps+",ptop="+ptop; }
     virtual bool isComplete() const {return sigma != "" && ptop != "" && ps != "";}
+
 protected:
-    virtual boost::shared_ptr<ToVLevelConverter> getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const;
+    VerticalConverterPtr getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const;
 };
 
 } /* namespace MetNoFimex */
+
 #endif /* ATMOSPHERESIGMA_H_ */

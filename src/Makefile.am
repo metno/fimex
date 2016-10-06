@@ -77,17 +77,36 @@ libfimex_la_SOURCES = interpolation.c \
                      coordSys/TransverseMercatorProjection.cc \
                      coordSys/VerticalPerspectiveProjection.cc \
                      coordSys/UnknownToFgdcProjection.cc \
-                     coordSys/verticalTransform/VerticalTransformation.cc \
+                     coordSys/verticalTransform/AltitudeHeightConverter.cc \
+                     coordSys/verticalTransform/AltitudeStandardToPressureConverter.cc \
                      coordSys/verticalTransform/AtmosphereSigma.cc \
+                     coordSys/verticalTransform/GeopotentialToAltitudeConverter.cc \
                      coordSys/verticalTransform/Height.cc \
+                     coordSys/verticalTransform/HybridSigmaApToPressureConverter.cc \
                      coordSys/verticalTransform/HybridSigmaPressure1.cc \
                      coordSys/verticalTransform/HybridSigmaPressure2.cc \
+                     coordSys/verticalTransform/HybridSigmaToPressureConverter.cc \
+                     coordSys/verticalTransform/IdentityConverter.cc \
                      coordSys/verticalTransform/LnPressure.cc \
-                     coordSys/verticalTransform/Pressure.cc \
+                     coordSys/verticalTransform/LnPressureToPressureConverter.cc \
+                     coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.cc \
                      coordSys/verticalTransform/OceanSG1.cc \
+                     coordSys/verticalTransform/OceanSG2.cc \
+                     coordSys/verticalTransform/Pressure.cc \
+                     coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.cc \
+                     coordSys/verticalTransform/PressureToStandardAltitudeConverter.cc \
+                     coordSys/verticalTransform/SigmaToPressureConverter.cc \
+                     coordSys/verticalTransform/ToVLevelConverter.cc \
+                     coordSys/verticalTransform/ToVLevelConverterAdapter.cc \
+                     coordSys/verticalTransform/VerticalConverter.cc \
+                     coordSys/verticalTransform/VerticalTransformation.cc \
+                     coordSys/verticalTransform/VerticalTransformationUtils.cc \
 					 Data.cc \
 					 DataImpl.h \
                      DataIndex.cc \
+                     leap_iterator.h \
+                     ArrayLoop.h \
+                     ArrayLoop.cc \
 					 DataTypeChanger.cc \
 					 Felt_Array2.h \
 					 Felt_Array2.cc \
@@ -116,7 +135,6 @@ libfimex_la_SOURCES = interpolation.c \
                      ThreadPool.c \
 					 TimeUnit.cc \
 					 TimeSpec.cc \
-					 ToVLevelConverter.cc \
 					 Units.cc \
 					 Utils.cc \
 					 vertical_coordinate_transformations.c \

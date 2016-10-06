@@ -25,25 +25,13 @@
  */
 
 #include "fimex/coordSys/verticalTransform/HybridSigmaPressure1.h"
-#include "fimex/CDMReader.h"
-#include "fimex/Data.h"
-#include "fimex/Utils.h"
-#include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
-#include <fimex/CDMReaderUtils.h>
-
+#include "fimex/coordSys/verticalTransform/HybridSigmaApToPressureConverter.h"
 
 namespace MetNoFimex {
 
-boost::shared_ptr<ToVLevelConverter> HybridSigmaPressure1::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const
+VerticalConverterPtr HybridSigmaPressure1::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
-    const vector<double> apVec = getDataSliceInUnit(reader, ap, "hPa", unLimDimPos);
-    const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
-    DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
-    if ((not psData) or (nx * ny * nt != psData->size())) {
-        throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
-                                       "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
-    }
-    return boost::shared_ptr<ToVLevelConverter>(new HybridSigmaApToPressureConverter(apVec, bVec, psData->asDouble(), nx, ny, nt));
+    return HybridSigmaApToPressureConverter::createConverter(reader, cs, ap, b, ps, p0);
 }
 
-}
+} // namespace MetNoFimex

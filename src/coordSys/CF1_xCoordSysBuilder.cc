@@ -34,6 +34,7 @@
 #include "fimex/Units.h"
 #include <set>
 #include <boost/regex.hpp>
+#include <boost/make_shared.hpp>
 #include <fimex/coordSys/verticalTransform/AtmosphereSigma.h>
 #include <fimex/coordSys/verticalTransform/Height.h>
 #include <fimex/coordSys/verticalTransform/HybridSigmaPressure1.h>
@@ -446,11 +447,11 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new AtmosphereSigma(terms["sigma"],terms["ptop"],terms["ps"])));
                         } else if (standardNameValue == "ocean_s_coordinate_g1") {
-                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                                    new OceanSG1(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
+                            cs.setVerticalTransformation(boost::make_shared<OceanSG1>(
+                                    OceanSGVars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
                         } else if (standardNameValue == "ocean_s_coordinate_g2") {
-                            cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
-                                    new OceanSG2(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
+                            cs.setVerticalTransformation(boost::make_shared<OceanSG2>(
+                                    OceanSGVars(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
                         } else {
                             LOG4FIMEX(logger, Logger::INFO, "Vertical transformation for " << standardNameValue << "not implemented yet");
                         }

@@ -34,17 +34,9 @@
 
 namespace MetNoFimex {
 
-boost::shared_ptr<ToVLevelConverter> HybridSigmaPressure2::getPressureConverter(const boost::shared_ptr<CDMReader>& reader, size_t unLimDimPos, boost::shared_ptr<const CoordinateSystem> cs, size_t nx, size_t ny, size_t nt) const
+VerticalConverterPtr HybridSigmaPressure2::getPressureConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
-    const vector<double> aVec = getDataSliceInUnit(reader, a, "", unLimDimPos);
-    const vector<double> bVec = getDataSliceInUnit(reader, b, "", unLimDimPos);
-    const vector<double> p0Vec = getDataSliceInUnit(reader, p0, "hPa", unLimDimPos);
-    DataPtr psData = reader->getScaledDataSliceInUnit(ps, "hPa", unLimDimPos);
-    if (nx * ny * nt != psData->size()) {
-        throw CDMException("unexpected size of pressure " + ps + "(" + type2string(unLimDimPos) +
-                           "), should be " + type2string(nx * ny * nt) + " != " + type2string(psData->size()));
-    }
-    return boost::shared_ptr<ToVLevelConverter>(new HybridSigmaToPressureConverter(aVec, bVec, p0Vec.at(0), psData->asDouble(), nx, ny, nt));
+    return HybridSigmaToPressureConverter::createConverter(reader, cs, a, b, p0, ps);
 }
 
-}
+} // namespace MetNoFimex

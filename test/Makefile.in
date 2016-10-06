@@ -1746,6 +1746,9 @@ uninstall-am:
 @HAVE_LIBPQ_TRUE@test_wdb: wdbTest
 @HAVE_LIBPQ_TRUE@	@./wdbTest
 
+build-checks: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

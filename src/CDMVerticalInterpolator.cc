@@ -35,6 +35,11 @@
 #include "fimex/Data.h"
 #include "fimex/coordSys/verticalTransform/ToVLevelConverter.h"
 #include "coordSys/CoordSysUtils.h"
+
+#include "ArrayLoop.h"
+#include "leap_iterator.h"
+#include "fimex/coordSys/verticalTransform/VerticalTransformationUtils.h"
+
 #include <boost/regex.hpp>
 #include <iterator>
 #include <algorithm>
@@ -48,6 +53,7 @@ static LoggerPtr logger = getLogger("fimex.CDMVerticalInterpolator");
 using namespace std;
 
 typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
+
 struct VIntPimpl {
     int verticalType;
     mifi_vertical_interpol_method verticalInterpolationMethod;
@@ -59,12 +65,13 @@ struct VIntPimpl {
     vector<CoordSysPtr> changeCoordSys;
 };
 
-CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, const string& verticalType, const string& verticalInterpolationMethod, const std::vector<double>& level1, const std::vector<double>& level2)
-: dataReader_(dataReader), pimpl_(new VIntPimpl())
+CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> dataReader, const string& verticalType, const string& verticalInterpolationMethod,
+                                                 const std::vector<double>& level1, const std::vector<double>& level2)
+    : dataReader_(dataReader), pimpl_(new VIntPimpl())
 {
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     // get all coordinate systems from file before changing this cdm
-    vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_);
+    const vector<CoordSysPtr> coordSys = listCoordinateSystems(dataReader_);
 
     *cdm_ = dataReader->getCDM();
     const CDM::VarVec& variables = cdm_->getVariables();
@@ -102,8 +109,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
     } else {
         throw CDMException("unknown vertical interpolation method: " +verticalInterpolationMethod);
     }
-    copy(level1.begin(), level1.end(), back_inserter(pimpl_->level1));
-    copy(level2.begin(), level2.end(), back_inserter(pimpl_->level2));
+    pimpl_->level1 = level1;
+    pimpl_->level2 = level2;
 
     // allocate a new vertical axis
     switch (pimpl_->verticalType)
@@ -174,7 +181,8 @@ CDMVerticalInterpolator::CDMVerticalInterpolator(boost::shared_ptr<CDMReader> da
             // ignore strange and/or size=1 zAxes
             if (zAxis->getShape().size() == 1 && zAxis->isExplicit() &&
                     cdm_->hasDimension(zAxis->getShape().at(0)) &&
-                    cdm_->getDimension(zAxis->getShape().at(0)).getLength() > 1) {
+                    cdm_->getDimension(zAxis->getShape().at(0)).getLength() > 1)
+            {
                 pimpl_->changeCoordSys.push_back(coordSys[i]);
                 // change the shape of the variable: remove the old axis, add the new one
                 const CDM::VarVec vars = dataReader_->getCDM().getVariables();
@@ -218,7 +226,7 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
     if (variable.hasData()) {
         return getDataSliceFromMemory(variable, unLimDimPos);
     }
-    boost::shared_ptr<const CoordinateSystem> cs = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName);
+    CoordSysPtr cs = findCompleteCoordinateSystemFor(pimpl_->changeCoordSys, varName);
     if (cs.get() == 0) {
         // no level to change, propagate to the dataReader_
         return dataReader_->getDataSlice(varName, unLimDimPos);
@@ -229,20 +237,16 @@ DataPtr CDMVerticalInterpolator::getDataSlice(const std::string& varName, size_t
 
 DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::string& varName, size_t unLimDimPos)
 {
-    assert(cs->isCSFor(varName) && cs->isComplete(varName));
-    if (! cs->hasVerticalTransformation()) {
+    LOG4FIMEX(logger, Logger::DEBUG, "getLevelDataSlice(.. '" << varName << "' ..)");
+    assert(cs->isCSAndCompleteFor(varName));
+    if (!cs->hasVerticalTransformation()) {
         throw CDMException(varName + " has no vertical transformation");
     }
-    // get all axes
-    CoordinateSystem::ConstAxisPtr xAxis, yAxis, zAxis, tAxis;
-    size_t nx, ny, nz, nt, startT;
-    getSimpleAxes(cs, dataReader_->getCDM(),
-            xAxis, yAxis, zAxis, tAxis,
-            nx, ny, nz, startT, nt, unLimDimPos);
-    boost::shared_ptr<ToVLevelConverter> levConv = cs->getVerticalTransformation()->getConverter(dataReader_, pimpl_->verticalType, unLimDimPos, cs, nx, ny, nz, (nt-startT));
-    if (levConv.get() == 0) {
-        throw CDMException("no level-converter for variable " + varName);
-    }
+
+    VerticalConverterPtr converter = verticalConverter(cs, dataReader_, pimpl_->verticalType);
+    DataPtr verticalData = verticalData4D(converter, dataReader_->getCDM(), unLimDimPos);
+
+    const vector<double>& pOut = pimpl_->level1;
 
     int (*intFunc)(const float* infieldA, const float* infieldB, float* outfield, const size_t n, const double a, const double b, const double x) = 0;
     switch (pimpl_->verticalInterpolationMethod) {
@@ -256,63 +260,90 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
     default: assert(false); break;
     }
 
-    vector<double>& pOut = pimpl_->level1;
-    DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
-    if (data->size() != (nx*ny*nz*(nt-startT))) {
-        throw CDMException("unexpected dataslice of variable " + varName +": (nx*ny*nz*nt) = (" +
-                           type2string(nx)+"*"+type2string(ny)+"*"+type2string(nz)+"*"+type2string(nt-startT)+
-                           ") != " + type2string(data->size()));
-    }
-    double badValue = cdm_->getFillValue(varName);
-    boost::shared_array<float> iData = data2InterpolationArray(data, badValue);
-    size_t oSize = nx*ny*pOut.size()*(nt-startT);
-    boost::shared_array<float> oData(new float[oSize]);
+    const std::string& geoZi = cs->getGeoZAxis()->getName();
+    const std::string& geoZo = pimpl_->vAxis;
 
-    // loop over data-array, interpolating cell for cell
-    for (size_t t = startT; t < nt; ++t) {
-        size_t timePos = ((nt-startT) > 1) ? t : 0; // multi-time (t) or one time slice (0)
-        const float* inData = &iData[timePos*(nx*ny*nz)];
-        float* outData = &oData[timePos*(nx*ny*pOut.size())];
-#ifdef _OPENMP
-#pragma omp parallel for default(shared)
-#endif
-        for (size_t y = 0; y < ny; ++y) {
-            for (size_t x = 0; x < nx; ++x) {
-                // interpolate in between the pressure values
-                vector<double> pIn = (*levConv)(x, y, timePos);
-                if (pIn.size() != nz) {
-                    throw CDMException("input level size: "
-                            + type2string(pIn.size()) + " must be " + type2string(nz));
-                }
-                for (size_t k = 0; k < pOut.size(); k++) {
-                    size_t outPos = mifi_3d_array_position(x, y, k, nx, ny, pOut.size());
-                    if (levConv->isValid(pOut[k], x, y, t)) {
-                        pair<size_t, size_t> pos = find_closest_neighbor_distinct_elements(pIn.begin(), pIn.end(), pOut[k]);
-                        size_t inPos1 = mifi_3d_array_position(x, y, pos.first, nx, ny, nz);
-                        size_t inPos2 = mifi_3d_array_position(x, y, pos.second, nx, ny, nz);
-                        intFunc(&inData[inPos1], &inData[inPos2], &outData[outPos],
-                                1, pIn.at(pos.first), pIn.at(pos.second), pOut.at(k));
-                    } else {
-                        outData[outPos] = MIFI_UNDEFINED_D;
-                    }
-                }
-            }
+    ArrayDims siData = makeArrayDims(dataReader_->getCDM(), varName);
+    ArrayDims siVertical = makeArrayDims(dataReader_->getCDM(), converter);
+    ArrayDims soData = makeArrayDims(getCDM(), varName);
+    ArrayDims svData;
+
+    set_not_shared(geoZi, siData, siVertical);
+    set_not_shared(geoZo, soData);
+    forceUnLimDimLength1(getCDM(), siData, siVertical, soData);
+
+    enum { IN, VERTICAL, OUT, VALID }; // VALID must be last, it is optional
+    ArrayGroup group = ArrayGroup().add(siData).add(siVertical).add(soData);
+    group.minimizeShared(0); // we have to treat each value separately
+
+    boost::shared_array<unsigned char> validValues;
+    {
+        const std::vector<std::string> validShape = converter->getValidityShape(geoZo);
+        const SliceBuilder sbValid = createSliceBuilder(getCDM(), validShape);
+        DataPtr validData = converter->getValiditySlice(sbValid, pOut);
+        if (validData) {
+            svData = makeArrayDims(getCDM(), validShape);
+            set_not_shared(geoZo, svData);
+            forceUnLimDimLength1(getCDM(), svData);
+
+            group.add(svData);
+
+            validValues = validData->asUChar();
         }
     }
 
+    const size_t nzi = siData.length(geoZi);
+
+    const size_t idataZdelta = siData.delta(geoZi);
+    const size_t iverticalZdelta = siVertical.delta(geoZi);
+    const size_t odataZdelta = soData.delta(geoZo);
+    const size_t vdataZdelta = svData.delta(geoZo);
+
+    DataPtr data = dataReader_->getDataSlice(varName, unLimDimPos);
+    const double badValue = cdm_->getFillValue(varName);
+    boost::shared_array<float> iData = data2InterpolationArray(data, badValue);
+    const size_t oSize = soData.volume();
+    boost::shared_array<float> oData(new float[oSize]);
+    boost::shared_array<float> verticalValues = verticalData->asFloat();
+
+#ifdef _OPENMP
+#pragma omp parallel for default(shared)
+#endif
+    for (size_t k = 0; k < pOut.size(); k++) {
+        const double verticalOut = pOut[k];
+        Loop loop(group);
+        do { // sharedVolume() == 1 because we called minimizeShared before
+            float* interpolated = &oData[loop[OUT] + k*odataZdelta];
+
+            if (!validValues || validValues[loop[VALID] + k*vdataZdelta]) {
+                const leap_iterator<const float*> vertical0(&verticalValues[loop[VERTICAL]], iverticalZdelta);
+                const leap_iterator<const float*> vertical1 = vertical0 + nzi;
+                const pair<size_t, size_t> pos = find_closest_neighbor_distinct_elements(vertical0, vertical1, verticalOut);
+
+                const size_t idataZ0  = loop[IN] + idataZdelta * pos.first;
+                const size_t idataZ1  = loop[IN] + idataZdelta * pos.second;
+                intFunc(&iData[idataZ0], &iData[idataZ1], interpolated,
+                        1, *(vertical0 + pos.first), *(vertical0 + pos.second), verticalOut);
+            } else {
+                *interpolated = MIFI_UNDEFINED_F;
+            }
+        } while (loop.next());
+    }
+
     // correct data going out of bounds
-    if (!isnan(cdm_->getValidMin(varName))) {
-        float minVal = static_cast<float>(cdm_->getValidMin(varName));
+    const double valid_min = cdm_->getValidMin(varName);
+    const double valid_max = cdm_->getValidMax(varName);
+    if (!isnan(valid_min)) {
+        float minVal = static_cast<float>(valid_min);
         replace_if(&oData[0], &oData[0]+oSize, bind2nd(less<float>(), minVal), minVal);
     }
-    if (!isnan(cdm_->getValidMax(varName))) {
-        float maxVal = static_cast<float>(cdm_->getValidMax(varName));
+    if (!isnan(valid_max)) {
+        float maxVal = static_cast<float>(valid_max);
         replace_if(&oData[0], &oData[0]+oSize, bind2nd(greater<float>(), maxVal), maxVal);
     }
 
     CDMDataType oType = getCDM().getVariable(varName).getDataType();
-    return interpolationArray2Data(oType, oData, nx*ny*pOut.size()*(nt-startT), badValue);
+    return interpolationArray2Data(oType, oData, soData.volume(), badValue);
 }
-
 
 }

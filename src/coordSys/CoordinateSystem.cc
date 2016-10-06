@@ -144,7 +144,6 @@ bool CoordinateSystem::isComplete(const std::string & varName) const
 }
 
 
-
 void CoordinateSystem::setComplete(const std::string & varName, bool set)
 {
     setStringToVector(pimpl_->isCompleteVec_, varName, set);
@@ -162,6 +161,10 @@ void CoordinateSystem::setCSFor(const std::string & varName, bool set)
     setStringToVector(pimpl_->isCSForVec_, varName, set);
 }
 
+bool CoordinateSystem::isCSAndCompleteFor(const std::string& varName) const
+{
+    return isCSFor(varName) && isComplete(varName);
+}
 
 bool CoordinateSystem::isSimpleSpatialGridded() const
 {
@@ -181,6 +184,7 @@ boost::shared_ptr<const Projection> CoordinateSystem::getProjection() const
 {
     return pimpl_->proj_;
 }
+
 void CoordinateSystem::setProjection(boost::shared_ptr<const Projection> proj)
 {
     pimpl_->proj_ = proj;
@@ -354,7 +358,9 @@ void CoordinateSystem::addDependencyVariable(std::string varName)
 }
 
 
-int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader, std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems, std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
+int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader,
+        std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems,
+        std::map<std::string, std::string>& variables, std::vector<std::string>& incompatibleVariables)
 {
     typedef boost::shared_ptr<const CoordinateSystem> CoordSysPtr;
     typedef map<string, CoordSysPtr> CoordSysMap;

@@ -244,15 +244,32 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc \
-	coordSys/verticalTransform/VerticalTransformation.cc \
+	coordSys/verticalTransform/AltitudeHeightConverter.cc \
+	coordSys/verticalTransform/AltitudeStandardToPressureConverter.cc \
 	coordSys/verticalTransform/AtmosphereSigma.cc \
+	coordSys/verticalTransform/GeopotentialToAltitudeConverter.cc \
 	coordSys/verticalTransform/Height.cc \
+	coordSys/verticalTransform/HybridSigmaApToPressureConverter.cc \
 	coordSys/verticalTransform/HybridSigmaPressure1.cc \
 	coordSys/verticalTransform/HybridSigmaPressure2.cc \
+	coordSys/verticalTransform/HybridSigmaToPressureConverter.cc \
+	coordSys/verticalTransform/IdentityConverter.cc \
 	coordSys/verticalTransform/LnPressure.cc \
+	coordSys/verticalTransform/LnPressureToPressureConverter.cc \
+	coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.cc \
+	coordSys/verticalTransform/OceanSG1.cc \
+	coordSys/verticalTransform/OceanSG2.cc \
 	coordSys/verticalTransform/Pressure.cc \
-	coordSys/verticalTransform/OceanSG1.cc Data.cc DataImpl.h \
-	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.cc \
+	coordSys/verticalTransform/PressureToStandardAltitudeConverter.cc \
+	coordSys/verticalTransform/SigmaToPressureConverter.cc \
+	coordSys/verticalTransform/ToVLevelConverter.cc \
+	coordSys/verticalTransform/ToVLevelConverterAdapter.cc \
+	coordSys/verticalTransform/VerticalConverter.cc \
+	coordSys/verticalTransform/VerticalTransformation.cc \
+	coordSys/verticalTransform/VerticalTransformationUtils.cc \
+	Data.cc DataImpl.h DataIndex.cc leap_iterator.h ArrayLoop.h \
+	ArrayLoop.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
@@ -260,10 +277,10 @@ am__libfimex_la_SOURCES_DIST = interpolation.c c_fimex.cc \
 	NcmlAggregationReader.h NcmlAggregationReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.cc \
-	Units.cc Utils.cc vertical_coordinate_transformations.c \
-	XMLDoc.cc XMLInput.cc NetCDF_CDMReader.cc NetCDF_CDMWriter.cc \
-	NetCDF_Utils.cc NetCDF_Utils.h GribApiCDMWriter.cc \
+	ThreadPool.c TimeUnit.cc TimeSpec.cc Units.cc Utils.cc \
+	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
+	NetCDF_CDMReader.cc NetCDF_CDMWriter.cc NetCDF_Utils.cc \
+	NetCDF_Utils.h GribApiCDMWriter.cc \
 	GribApiCDMWriter_ImplAbstract.h \
 	GribApiCDMWriter_ImplAbstract.cc GribApiCDMWriter_Impl1.h \
 	GribApiCDMWriter_Impl1.cc GribApiCDMWriter_Impl2.cc \
@@ -389,24 +406,41 @@ am_libfimex_la_OBJECTS = interpolation.lo c_fimex.lo C_CDMReader.lo \
 	coordSys/TransverseMercatorProjection.lo \
 	coordSys/VerticalPerspectiveProjection.lo \
 	coordSys/UnknownToFgdcProjection.lo \
-	coordSys/verticalTransform/VerticalTransformation.lo \
+	coordSys/verticalTransform/AltitudeHeightConverter.lo \
+	coordSys/verticalTransform/AltitudeStandardToPressureConverter.lo \
 	coordSys/verticalTransform/AtmosphereSigma.lo \
+	coordSys/verticalTransform/GeopotentialToAltitudeConverter.lo \
 	coordSys/verticalTransform/Height.lo \
+	coordSys/verticalTransform/HybridSigmaApToPressureConverter.lo \
 	coordSys/verticalTransform/HybridSigmaPressure1.lo \
 	coordSys/verticalTransform/HybridSigmaPressure2.lo \
+	coordSys/verticalTransform/HybridSigmaToPressureConverter.lo \
+	coordSys/verticalTransform/IdentityConverter.lo \
 	coordSys/verticalTransform/LnPressure.lo \
+	coordSys/verticalTransform/LnPressureToPressureConverter.lo \
+	coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.lo \
+	coordSys/verticalTransform/OceanSG1.lo \
+	coordSys/verticalTransform/OceanSG2.lo \
 	coordSys/verticalTransform/Pressure.lo \
-	coordSys/verticalTransform/OceanSG1.lo Data.lo DataIndex.lo \
-	DataTypeChanger.lo Felt_Array2.lo FeltCDMReader2.lo \
-	Felt_File2.lo FeltParameters.lo FillWriter.lo \
-	GridDefinition.lo IndexedData.lo Logger.lo Log4cppLogger.lo \
-	mifi_mpi.lo NcmlCDMReader.lo NcmlAggregationReader.lo \
-	Null_CDMWriter.lo ReplaceStringObject.lo \
-	ReplaceStringTimeObject.lo SpatialAxisSpec.lo SliceBuilder.lo \
-	ThreadPool.lo TimeUnit.lo TimeSpec.lo ToVLevelConverter.lo \
-	Units.lo Utils.lo vertical_coordinate_transformations.lo \
-	XMLDoc.lo XMLInput.lo $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_4) $(am__objects_5)
+	coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.lo \
+	coordSys/verticalTransform/PressureToStandardAltitudeConverter.lo \
+	coordSys/verticalTransform/SigmaToPressureConverter.lo \
+	coordSys/verticalTransform/ToVLevelConverter.lo \
+	coordSys/verticalTransform/ToVLevelConverterAdapter.lo \
+	coordSys/verticalTransform/VerticalConverter.lo \
+	coordSys/verticalTransform/VerticalTransformation.lo \
+	coordSys/verticalTransform/VerticalTransformationUtils.lo \
+	Data.lo DataIndex.lo ArrayLoop.lo DataTypeChanger.lo \
+	Felt_Array2.lo FeltCDMReader2.lo Felt_File2.lo \
+	FeltParameters.lo FillWriter.lo GridDefinition.lo \
+	IndexedData.lo Logger.lo Log4cppLogger.lo mifi_mpi.lo \
+	NcmlCDMReader.lo NcmlAggregationReader.lo Null_CDMWriter.lo \
+	ReplaceStringObject.lo ReplaceStringTimeObject.lo \
+	SpatialAxisSpec.lo SliceBuilder.lo ThreadPool.lo TimeUnit.lo \
+	TimeSpec.lo Units.lo Utils.lo \
+	vertical_coordinate_transformations.lo XMLDoc.lo XMLInput.lo \
+	$(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4) $(am__objects_5)
 libfimex_la_OBJECTS = $(am_libfimex_la_OBJECTS)
 libfimex_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -723,15 +757,32 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	coordSys/TransverseMercatorProjection.cc \
 	coordSys/VerticalPerspectiveProjection.cc \
 	coordSys/UnknownToFgdcProjection.cc \
-	coordSys/verticalTransform/VerticalTransformation.cc \
+	coordSys/verticalTransform/AltitudeHeightConverter.cc \
+	coordSys/verticalTransform/AltitudeStandardToPressureConverter.cc \
 	coordSys/verticalTransform/AtmosphereSigma.cc \
+	coordSys/verticalTransform/GeopotentialToAltitudeConverter.cc \
 	coordSys/verticalTransform/Height.cc \
+	coordSys/verticalTransform/HybridSigmaApToPressureConverter.cc \
 	coordSys/verticalTransform/HybridSigmaPressure1.cc \
 	coordSys/verticalTransform/HybridSigmaPressure2.cc \
+	coordSys/verticalTransform/HybridSigmaToPressureConverter.cc \
+	coordSys/verticalTransform/IdentityConverter.cc \
 	coordSys/verticalTransform/LnPressure.cc \
+	coordSys/verticalTransform/LnPressureToPressureConverter.cc \
+	coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.cc \
+	coordSys/verticalTransform/OceanSG1.cc \
+	coordSys/verticalTransform/OceanSG2.cc \
 	coordSys/verticalTransform/Pressure.cc \
-	coordSys/verticalTransform/OceanSG1.cc Data.cc DataImpl.h \
-	DataIndex.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
+	coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.cc \
+	coordSys/verticalTransform/PressureToStandardAltitudeConverter.cc \
+	coordSys/verticalTransform/SigmaToPressureConverter.cc \
+	coordSys/verticalTransform/ToVLevelConverter.cc \
+	coordSys/verticalTransform/ToVLevelConverterAdapter.cc \
+	coordSys/verticalTransform/VerticalConverter.cc \
+	coordSys/verticalTransform/VerticalTransformation.cc \
+	coordSys/verticalTransform/VerticalTransformationUtils.cc \
+	Data.cc DataImpl.h DataIndex.cc leap_iterator.h ArrayLoop.h \
+	ArrayLoop.cc DataTypeChanger.cc Felt_Array2.h Felt_Array2.cc \
 	FeltCDMReader2.h FeltCDMReader2.cc Felt_File_Error.h \
 	Felt_File2.h Felt_File2.cc FeltParameters.h FeltParameters.cc \
 	FillWriter.cc GridDefinition.cc IndexedData.cc Logger.cc \
@@ -739,10 +790,10 @@ libfimex_la_SOURCES = interpolation.c c_fimex.cc C_CDMReader.cc \
 	NcmlAggregationReader.h NcmlAggregationReader.cc \
 	Null_CDMWriter.cc ReplaceStringObject.cc \
 	ReplaceStringTimeObject.cc SpatialAxisSpec.cc SliceBuilder.cc \
-	ThreadPool.c TimeUnit.cc TimeSpec.cc ToVLevelConverter.cc \
-	Units.cc Utils.cc vertical_coordinate_transformations.c \
-	XMLDoc.cc XMLInput.cc $(am__append_1) $(am__append_2) \
-	$(am__append_3) $(am__append_4) $(am__append_6)
+	ThreadPool.c TimeUnit.cc TimeSpec.cc Units.cc Utils.cc \
+	vertical_coordinate_transformations.c XMLDoc.cc XMLInput.cc \
+	$(am__append_1) $(am__append_2) $(am__append_3) \
+	$(am__append_4) $(am__append_6)
 all: all-recursive
 
 .SUFFIXES:
@@ -878,13 +929,22 @@ coordSys/verticalTransform/$(am__dirstamp):
 coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) coordSys/verticalTransform/$(DEPDIR)
 	@: > coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
-coordSys/verticalTransform/VerticalTransformation.lo:  \
+coordSys/verticalTransform/AltitudeHeightConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/AltitudeStandardToPressureConverter.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
 coordSys/verticalTransform/AtmosphereSigma.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/GeopotentialToAltitudeConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
 coordSys/verticalTransform/Height.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/HybridSigmaApToPressureConverter.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
 coordSys/verticalTransform/HybridSigmaPressure1.lo:  \
@@ -893,13 +953,52 @@ coordSys/verticalTransform/HybridSigmaPressure1.lo:  \
 coordSys/verticalTransform/HybridSigmaPressure2.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/HybridSigmaToPressureConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/IdentityConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
 coordSys/verticalTransform/LnPressure.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/LnPressureToPressureConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/OceanSG1.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/OceanSG2.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
 coordSys/verticalTransform/Pressure.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
-coordSys/verticalTransform/OceanSG1.lo:  \
+coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/PressureToStandardAltitudeConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/SigmaToPressureConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/ToVLevelConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/ToVLevelConverterAdapter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/VerticalConverter.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/VerticalTransformation.lo:  \
+	coordSys/verticalTransform/$(am__dirstamp) \
+	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
+coordSys/verticalTransform/VerticalTransformationUtils.lo:  \
 	coordSys/verticalTransform/$(am__dirstamp) \
 	coordSys/verticalTransform/$(DEPDIR)/$(am__dirstamp)
 metgm/$(am__dirstamp):
@@ -1059,22 +1158,54 @@ mostlyclean-compile:
 	-rm -f coordSys/VerticalPerspectiveProjection.lo
 	-rm -f coordSys/WRFCoordSysBuilder.$(OBJEXT)
 	-rm -f coordSys/WRFCoordSysBuilder.lo
+	-rm -f coordSys/verticalTransform/AltitudeHeightConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/AltitudeHeightConverter.lo
+	-rm -f coordSys/verticalTransform/AltitudeStandardToPressureConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/AltitudeStandardToPressureConverter.lo
 	-rm -f coordSys/verticalTransform/AtmosphereSigma.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/AtmosphereSigma.lo
+	-rm -f coordSys/verticalTransform/GeopotentialToAltitudeConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/GeopotentialToAltitudeConverter.lo
 	-rm -f coordSys/verticalTransform/Height.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/Height.lo
+	-rm -f coordSys/verticalTransform/HybridSigmaApToPressureConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/HybridSigmaApToPressureConverter.lo
 	-rm -f coordSys/verticalTransform/HybridSigmaPressure1.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/HybridSigmaPressure1.lo
 	-rm -f coordSys/verticalTransform/HybridSigmaPressure2.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/HybridSigmaPressure2.lo
+	-rm -f coordSys/verticalTransform/HybridSigmaToPressureConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/HybridSigmaToPressureConverter.lo
+	-rm -f coordSys/verticalTransform/IdentityConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/IdentityConverter.lo
 	-rm -f coordSys/verticalTransform/LnPressure.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/LnPressure.lo
+	-rm -f coordSys/verticalTransform/LnPressureToPressureConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/LnPressureToPressureConverter.lo
+	-rm -f coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/OceanSCoordinateGToDepthConverter.lo
 	-rm -f coordSys/verticalTransform/OceanSG1.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/OceanSG1.lo
+	-rm -f coordSys/verticalTransform/OceanSG2.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/OceanSG2.lo
 	-rm -f coordSys/verticalTransform/Pressure.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/Pressure.lo
+	-rm -f coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/PressureIntegrationToAltitudeConverter.lo
+	-rm -f coordSys/verticalTransform/PressureToStandardAltitudeConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/PressureToStandardAltitudeConverter.lo
+	-rm -f coordSys/verticalTransform/SigmaToPressureConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/SigmaToPressureConverter.lo
+	-rm -f coordSys/verticalTransform/ToVLevelConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/ToVLevelConverter.lo
+	-rm -f coordSys/verticalTransform/ToVLevelConverterAdapter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/ToVLevelConverterAdapter.lo
+	-rm -f coordSys/verticalTransform/VerticalConverter.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/VerticalConverter.lo
 	-rm -f coordSys/verticalTransform/VerticalTransformation.$(OBJEXT)
 	-rm -f coordSys/verticalTransform/VerticalTransformation.lo
+	-rm -f coordSys/verticalTransform/VerticalTransformationUtils.$(OBJEXT)
+	-rm -f coordSys/verticalTransform/VerticalTransformationUtils.lo
 	-rm -f metgm/MetGmCDMReaderImpl.$(OBJEXT)
 	-rm -f metgm/MetGmCDMReaderImpl.lo
 	-rm -f metgm/MetGmCDMReaderSlicedImpl.$(OBJEXT)
@@ -1149,6 +1280,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ArrayLoop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMAttribute.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CDMBorderSmoothing.Plo@am__quote@
@@ -1213,7 +1345,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadPool.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeSpec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeUnit.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ToVLevelConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Units.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WdbCDMReader.Plo@am__quote@
@@ -1248,14 +1379,30 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/UnknownToFgdcProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/VerticalPerspectiveProjection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/$(DEPDIR)/WRFCoordSysBuilder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/AltitudeHeightConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/AltitudeStandardToPressureConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/AtmosphereSigma.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/GeopotentialToAltitudeConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/Height.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/HybridSigmaApToPressureConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/HybridSigmaPressure1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/HybridSigmaPressure2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/HybridSigmaToPressureConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/IdentityConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/LnPressure.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/LnPressureToPressureConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/OceanSCoordinateGToDepthConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/OceanSG1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/OceanSG2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/Pressure.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/PressureIntegrationToAltitudeConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/PressureToStandardAltitudeConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/SigmaToPressureConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/ToVLevelConverter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/ToVLevelConverterAdapter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/VerticalConverter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/VerticalTransformation.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@coordSys/verticalTransform/$(DEPDIR)/VerticalTransformationUtils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMReaderImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMReaderSlicedImpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@metgm/$(DEPDIR)/MetGmCDMWriterImpl.Plo@am__quote@

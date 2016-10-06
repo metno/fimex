@@ -99,7 +99,6 @@ size_t SliceBuilder::getDimPos(const std::string& dimName) const
     return posIt->second;
 }
 
-
 void SliceBuilder::getStartAndSize(const std::string & dimName, std::size_t& start, std::size_t& size) const
 {
     size_t pos = getDimPos(dimName);
@@ -165,8 +164,8 @@ vector<string> SliceBuilder::getUnsetDimensionNames() const
         }
     }
     return names;
-
 }
+
 std::ostream& operator<<(std::ostream& os, const SliceBuilder& sb)
 {
     vector<string> dims = sb.getDimensionNames();
