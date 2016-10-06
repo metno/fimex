@@ -58,6 +58,7 @@ fi
 
 FMXDEBIAN="$TARGETDIR/$FMX/debian"
 cp -a debian_files "$FMXDEBIAN"
+rm "$FMXDEBIAN/gen_debsrc"
 cp -a "${DEBIANDIST}"/* "$FMXDEBIAN"
 find "$FMXDEBIAN" -type f -size 0 -exec rm -v '{}' ';'
 
@@ -68,7 +69,7 @@ for f in debian/*0.25.1* ; do
     mv $f ${f/0.25.1/${PKG_VERSION}}
 done
 
-for f in debian/control debian/libf*.shlibs ; do
+find debian -print | while read f ; do
     perl -pi -e "s/0\.25\.1/${PKG_VERSION}/g;" $f
 done
 
