@@ -47,6 +47,8 @@
 namespace MetNoFimex
 {
 
+static LoggerPtr logger = getLogger("fimex.CF1_xCoordSysBuilder");
+
 using namespace std;
 
 CF1_xCoordSysBuilder::CF1_xCoordSysBuilder()
@@ -417,16 +419,19 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                         while (boost::regex_search(begin, end, what, boost::regex("(\\S+)\\s*:\\s*(\\S+)"))) {
                             string term(what[1].first, what[1].second);
                             string var(what[2].first, what[2].second);
-                            if (cdm.hasVariable(var)) {
+                            if (!var.empty() && cdm.hasVariable(var)) {
                                 cs.addDependencyVariable(var);
                                 terms[term] = var;
+                            } else {
+                                LOG4FIMEX(logger, Logger::WARN, "formula term '" << term << "' specifies unknown variable '" << var << "'");
                             }
                             begin = what[0].second;
                         }
                     }
                     CDMAttribute standardName;
                     if (cdm.getAttribute(zAxis->getName(), "standard_name", standardName)) {
-                        if (standardName.getStringValue() == "atmosphere_hybrid_sigma_pressure_coordinate") {
+                        const std::string  standardNameValue = standardName.getStringValue();
+                        if (standardNameValue == "atmosphere_hybrid_sigma_pressure_coordinate") {
                             if (terms["ap"] == "") {
                                 cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                         new HybridSigmaPressure2(terms["a"], terms["b"],terms["ps"],terms["p0"])));
@@ -434,20 +439,20 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
                                 cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                         new HybridSigmaPressure1(terms["ap"], terms["b"],terms["ps"],terms["p0"])));
                             }
-                        } else if (standardName.getStringValue() == "atmosphere_ln_pressure_coordinate") {
+                        } else if (standardNameValue == "atmosphere_ln_pressure_coordinate") {
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new LnPressure(terms["lev"], terms["p0"])));
-                        } else if (standardName.getStringValue() == "atmosphere_sigma_coordinate") {
+                        } else if (standardNameValue == "atmosphere_sigma_coordinate") {
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new AtmosphereSigma(terms["sigma"],terms["ptop"],terms["ps"])));
-                        } else if (standardName.getStringValue() == "ocean_s_coordinate_g1") {
+                        } else if (standardNameValue == "ocean_s_coordinate_g1") {
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new OceanSG1(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
-                        } else if (standardName.getStringValue() == "ocean_s_coordinate_g2") {
+                        } else if (standardNameValue == "ocean_s_coordinate_g2") {
                             cs.setVerticalTransformation(boost::shared_ptr<VerticalTransformation>(
                                     new OceanSG2(terms["s"], terms["C"], terms["depth"], terms["depth_c"], terms["eta"])));
                         } else {
-                            LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "Vertical transformation for " << standardName.getStringValue() << "not implemented yet");
+                            LOG4FIMEX(logger, Logger::INFO, "Vertical transformation for " << standardNameValue << "not implemented yet");
                         }
                     }
                     break;
@@ -498,7 +503,7 @@ static void enhanceVectors(CDM& cdm, const std::string& xsn, const std::string& 
             if (xSh == ySh) {
                 xv.setAsSpatialVector(*yVar, xdir);
                 yv.setAsSpatialVector(*xVar, ydir);
-                LOG4FIMEX(getLogger("fimex.CF1_xCoordSysBuilder"), Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
+                LOG4FIMEX(logger, Logger::INFO, "making "<< *xVar << "," << *yVar << " a vector");
                 break;
             }
         }
