@@ -45,7 +45,7 @@ DataPtr HybridSigmaToPressureConverter::getDataSlice(const SliceBuilder& sb) con
     const size_t sizeXY = nx*ny, sizeXYZ = sizeXY*nl;
     const size_t size = psData->size() * nl, sizeOther = size / sizeXYZ;
 
-    boost::shared_array<const double> psVal = psData->asDouble();
+    boost::shared_array<double> psVal = psData->asDouble();
     boost::shared_array<double> pVal(new double[size]);
 
     // loop over all dims but z, calculate pressure

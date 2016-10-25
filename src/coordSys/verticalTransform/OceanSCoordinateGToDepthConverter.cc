@@ -80,9 +80,9 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     DataPtr depth_cData = getSliceData(reader_, sb, vars_.depth_c, "m");
     const double depth_c = depth_cData ? depth_cData->asDouble()[0] : 0;
 
-    const boost::shared_array<const double> sValues = getSliceDoubles(reader_, sb, vars_.s, "");
-    const boost::shared_array<const double> CValues = getSliceDoubles(reader_, sb, vars_.C, "");
-    const boost::shared_array<const double> depthValues = getSliceDoubles(reader_, sb, vars_.depth, "m");
+    const boost::shared_array<double> sValues = getSliceDoubles(reader_, sb, vars_.s, "");
+    const boost::shared_array<double> CValues = getSliceDoubles(reader_, sb, vars_.C, "");
+    const boost::shared_array<double> depthValues = getSliceDoubles(reader_, sb, vars_.depth, "m");
 
     ArrayDims dimsS = makeArrayDims(adaptSliceBuilder(cdm, vars_.s, sb));
     ArrayDims dimsC = makeArrayDims(adaptSliceBuilder(cdm, vars_.C, sb));
@@ -95,7 +95,7 @@ DataPtr OceanSCoordinateGToDepthConverter::getDataSlice(const SliceBuilder& sb) 
     enum { S, C, DEPTH, Z, ETA }; // ETA must be last as it is optional
     ArrayGroup group = ArrayGroup().add(dimsS).add(dimsC).add(dimsDepth).add(dimsZ);
 
-    boost::shared_array<const double> etaValues;
+    boost::shared_array<double> etaValues;
     if (!vars_.eta.empty()) {
         etaValues = getSliceDoubles(reader_, sb, vars_.eta, "m");
 
@@ -135,7 +135,7 @@ DataPtr OceanSCoordinateGToDepthConverter::getValiditySlice(const SliceBuilder& 
     const CDM& cdm = reader_->getCDM();
     const std::string& verticalDim = cs_->getGeoZAxis()->getName();
 
-    const boost::shared_array<const double> depthValues = getSliceDoubles(reader_, sb, vars_.depth, "m");
+    const boost::shared_array<double> depthValues = getSliceDoubles(reader_, sb, vars_.depth, "m");
     ArrayDims dimsDepth = makeArrayDims(adaptSliceBuilder(cdm, vars_.depth, sb));
 
     ArrayDims dimsValid = makeArrayDims(cdm, getValidityShape(verticalDim));
