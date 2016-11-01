@@ -83,11 +83,11 @@ DataPtr AltitudeHeightConverter::getDataSlice(const SliceBuilder& sb) const
     boost::shared_array<float> topoVal = topoData->asFloat();
     boost::shared_array<float> haVal(new float[size]);
 
-    size_t offset = 0;
-    for (size_t i=0; i<sizeOther; ++i, offset += sizeXY) {
-        for (size_t xy=0; xy < sizeXY; ++xy) {
-            const size_t idx = offset + xy;
-            haVal[idx] = ahVal[idx] + topographyFactor_ * topoVal[xy];
+    for (size_t xy=0; xy < sizeXY; ++xy) {
+        const float deltaSurface = topographyFactor_ * topoVal[xy];
+        size_t idxHA = xy;
+        for (size_t i=0; i<sizeOther; ++i, idxHA += sizeXY) {
+            haVal[idxHA] = ahVal[idxHA] + deltaSurface;
         }
     }
     return createData(size, haVal);
