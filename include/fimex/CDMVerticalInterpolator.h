@@ -77,9 +77,11 @@ public:
     virtual DataPtr getDataSlice(const std::string& varName, size_t unLimDimPos = 0);
 
 private:
+    DataPtr getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
+
+private:
     boost::shared_ptr<CDMReader> dataReader_;
     boost::shared_ptr<VIntPimpl> pimpl_;
-    DataPtr getLevelDataSlice(boost::shared_ptr<const CoordinateSystem> cs, const std::string& varName, size_t unLimDimPos);
 };
 
 }

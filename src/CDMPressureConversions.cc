@@ -352,16 +352,16 @@ ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const
             continue;
         }
 
-        const string relativeTempName = deriveVariableName(oper, RELATIVE_HUMIDITY, *itSpecific, "specific", "relative");
-        if (env.outputCDM->hasVariable(relativeTempName)) {
-            LOG4FIMEX(logger, Logger::WARN, "variable '" << relativeTempName << "' exists, no conversion added");
+        const string relativeHumName = deriveVariableName(oper, RELATIVE_HUMIDITY, *itSpecific, "specific", "relative");
+        if (env.outputCDM->hasVariable(relativeHumName)) {
+            LOG4FIMEX(logger, Logger::WARN, "variable '" << relativeHumName << "' exists, no conversion added");
             continue;
         }
 
         const CDMVariable& shVar = env.outputCDM->getVariable(*itSpecific);
         const vector<string>& shape = shVar.getShape();
         const vector<CDMAttribute> shAtts = env.outputCDM->getAttributes(*itSpecific);
-        env.outputCDM->addVariable(CDMVariable(relativeTempName, CDM_SHORT, shape));
+        env.outputCDM->addVariable(CDMVariable(relativeHumName, CDM_SHORT, shape));
 
         for (vector<CDMAttribute>::const_iterator it = shAtts.begin(); it != shAtts.end(); ++it) {
             const string& aname = it->getName();
@@ -369,17 +369,17 @@ ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const
                     && aname != SCALE_FACTOR && aname != ADD_OFFSET
                     && aname != VALID_MIN && aname != VALID_MAX && aname != VALID_RANGE)
             {
-                env.outputCDM->addAttribute(relativeTempName, *it);
+                env.outputCDM->addAttribute(relativeHumName, *it);
             }
         }
-        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(STANDARD_NAME, RELATIVE_HUMIDITY));
-        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(LONG_NAME, "relative humidity derived from " + *itSpecific + " and " + *itTemp));
-        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(UNITS, "1"));
-        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(VALID_MIN, 0));
-        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(VALID_MAX, (short)relative_humidity_scale_factor));
-        env.outputCDM->addAttribute(relativeTempName, CDMAttribute(SCALE_FACTOR, 1/relative_humidity_scale_factor));
+        env.outputCDM->addAttribute(relativeHumName, CDMAttribute(STANDARD_NAME, RELATIVE_HUMIDITY));
+        env.outputCDM->addAttribute(relativeHumName, CDMAttribute(LONG_NAME, "relative humidity derived from " + *itSpecific + " and " + *itTemp));
+        env.outputCDM->addAttribute(relativeHumName, CDMAttribute(UNITS, "1"));
+        env.outputCDM->addAttribute(relativeHumName, CDMAttribute(VALID_MIN, 0));
+        env.outputCDM->addAttribute(relativeHumName, CDMAttribute(VALID_MAX, (short)relative_humidity_scale_factor));
+        env.outputCDM->addAttribute(relativeHumName, CDMAttribute(SCALE_FACTOR, 1/relative_humidity_scale_factor));
 
-        converters.push_back(boost::make_shared<HumidityConverter>(relativeTempName, env.inputReader, cs, *itSpecific, *itTemp));
+        converters.push_back(boost::make_shared<HumidityConverter>(relativeHumName, env.inputReader, cs, *itSpecific, *itTemp));
     }
     LOG4FIMEX(logger, Logger::INFO, "have " << converters.size() << " converters to " << RELATIVE_HUMIDITY);
     return converters;

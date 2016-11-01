@@ -322,8 +322,9 @@ DataPtr CDMVerticalInterpolator::getLevelDataSlice(CoordSysPtr cs, const std::st
 
                 const size_t idataZ0  = loop[IN] + idataZdelta * pos.first;
                 const size_t idataZ1  = loop[IN] + idataZdelta * pos.second;
-                intFunc(&iData[idataZ0], &iData[idataZ1], interpolated,
-                        1, *(vertical0 + pos.first), *(vertical0 + pos.second), verticalOut);
+                const float valueI0 = iData[idataZ0], valueI1 = iData[idataZ1];
+                const float verticalI0 = *(vertical0 + pos.first), verticalI1 = *(vertical0 + pos.second);
+                intFunc(&valueI0, &valueI1, interpolated, 1, verticalI0, verticalI1, verticalOut);
             } else {
                 *interpolated = MIFI_UNDEFINED_F;
             }
