@@ -22,7 +22,7 @@ private:
     VerticalConverterPtr altitudeOrHeight_;
     std::string topography_;
     std::string topographyUnit_;
-    int topographyFactor_;
+    float topographyFactor_;
 };
 
 } // namespace MetNoFimex

@@ -54,7 +54,7 @@ AltitudeHeightConverter::AltitudeHeightConverter(CDMReaderPtr reader, CoordSysPt
     if (stdName == "altitude" || stdName == "geopotential_height") {
         topographyUnit_ = "m";
     } else {
-        topographyFactor_ /= 9.81;
+        topographyFactor_ /= MIFI_EARTH_GRAVITY;
         topographyUnit_ = "m^2/s^2"; // division of gepotential by gravity
     }
 }
