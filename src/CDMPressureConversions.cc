@@ -100,6 +100,7 @@ const string UNITS = "units";
 const string VALID_MAX = "valid_max";
 const string VALID_MIN = "valid_min";
 const string VALID_RANGE = "valid_range";
+const string FILL_VALUE = "_FillValue";
 
 const string AIR_PRESSURE = "air_pressure";
 const string AIR_PRESSURE4D = "air_pressure4D";
@@ -366,7 +367,7 @@ ConverterPtr_v HumidityConverterFactory::createConverter(Environment& env, const
         for (vector<CDMAttribute>::const_iterator it = shAtts.begin(); it != shAtts.end(); ++it) {
             const string& aname = it->getName();
             if (aname != STANDARD_NAME && aname != LONG_NAME && aname != UNITS
-                    && aname != SCALE_FACTOR && aname != ADD_OFFSET
+                    && aname != SCALE_FACTOR && aname != ADD_OFFSET && aname != FILL_VALUE
                     && aname != VALID_MIN && aname != VALID_MAX && aname != VALID_RANGE)
             {
                 env.outputCDM->addAttribute(relativeHumName, *it);
