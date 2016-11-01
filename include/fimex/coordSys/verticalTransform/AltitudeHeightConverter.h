@@ -11,12 +11,19 @@ namespace MetNoFimex {
  */
 class AltitudeHeightConverter : public BasicVerticalConverter {
 public:
-    static VerticalConverterPtr createConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, bool addTopography);
+    static VerticalConverterPtr createToHeightConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr altitude)
+        { return createConverter(reader, cs, altitude, false); }
+
+    static VerticalConverterPtr createToAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr height)
+        { return createConverter(reader, cs, height, true); }
 
     AltitudeHeightConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, const std::string& topography, bool addTopography);
 
     std::vector<std::string> getShape() const;
     DataPtr getDataSlice(const SliceBuilder& sb) const;
+
+private:
+    static VerticalConverterPtr createConverter(CDMReaderPtr reader, CoordSysPtr cs, VerticalConverterPtr altitudeOrHeight, bool addTopography);
 
 private:
     VerticalConverterPtr altitudeOrHeight_;

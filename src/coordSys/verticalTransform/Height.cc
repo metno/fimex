@@ -48,7 +48,7 @@ VerticalConverterPtr Height::getHeightConverter(CDMReaderPtr reader, CoordSysPtr
 VerticalConverterPtr Height::getAltitudeConverter(CDMReaderPtr reader, CoordSysPtr cs) const
 {
     if (VerticalConverterPtr height = getHeightConverter(reader, cs))
-        return AltitudeHeightConverter::createConverter(reader, cs, height, false);
+        return AltitudeHeightConverter::createToAltitudeConverter(reader, cs, height);
 
     return VerticalConverterPtr();
 }
