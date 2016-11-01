@@ -314,7 +314,13 @@ DataPtr HumidityConverter::getDataSlice(size_t unLimDimPos)
     boost::shared_array<float> airtValues = checkData(reader_->getScaledDataSliceInUnit(temperature_, "K", unLimDimPos), size, temperature_)->asFloat();
     boost::shared_array<short> rhValues(new short[size]);
     for (size_t i = 0; i < size; i++) {
-        const float rh = mifi_specific_to_relative_humidity(shValues[i], airtValues[i], pressureValues[i]) / 100; // convert from % to range 0..1
+        // we have pressure in hPa and need Pa for
+        // mifi_specific_to_relative_humidity, we must multiply our
+        // pressure with 100; we get relhum in % but want unit "1", ie
+        // we have to divide by 100; as we know the formula, we drop
+        // multiplying and then dividing
+        const float c100 = 1;
+        const float rh = mifi_specific_to_relative_humidity(shValues[i], airtValues[i], pressureValues[i]*c100) / c100;
         rhValues[i] = (short) (relative_humidity_scale_factor * rh + 0.5); // apply scale_factor
     }
     return createData(size, rhValues);

@@ -180,7 +180,7 @@ extern float mifi_virtual_temperature(float spec_humidity, float t);
  * HIRLAM version 2.6.0, by G. Cats
  * @param rh relative humidity in %
  * @param temperature in K
- * @param p pressure in hPa
+ * @param p pressure in Pa
  * @return specific humidity in kg/kg
  */
 extern float mifi_relative_to_specific_humidity(float rh, float t, float p);
@@ -191,7 +191,7 @@ extern float mifi_relative_to_specific_humidity(float rh, float t, float p);
  *
  * @param sh specific humidity in kg/kg
  * @param temperature in K
- * @param p pressure in hPa
+ * @param p pressure in Pa
  * @return relative humidity in %
  */
 extern float mifi_specific_to_relative_humidity(float sh, float t, float p);

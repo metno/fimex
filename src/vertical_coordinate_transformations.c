@@ -110,29 +110,33 @@ float mifi_virtual_temperature(float spec_humidity, float T)
     return (1+Z_MOL_WEIGHT_RATIO*spec_humidity) * T;
 }
 
-float mifi_relative_to_specific_humidity(float rh, float t, float p)
+//! helper function for specific <-> relative humidity conversion
+inline float mifi_humidity_es(float t)
 {
     const float c1 = 610.78;
     const float c2 = 17.269;
     const float c3 = 273.16;
     const float c4 = 35.86;
-    float es = c1 * exp((c2*(t-c3))/(t-c4));
-    float sh = rh * 0.01 *es* MOL_WEIGHT_RATIO / p;
-    if (sh < 0.) sh = 0.;
-    return sh;
+    return c1 * exp((c2*(t-c3))/(t-c4));
+}
 
+float mifi_relative_to_specific_humidity(float rh, float t, float p)
+{
+    float es = mifi_humidity_es(t);
+    float sh = rh * 0.01 *es* MOL_WEIGHT_RATIO / p;
+    if (sh < 0.)
+        sh = 0.;
+    return sh;
 }
 
 float mifi_specific_to_relative_humidity(float sh, float t, float p)
 {
-    const float c1 = 610.78;
-    const float c2 = 17.269;
-    const float c3 = 273.16;
-    const float c4 = 35.86;
-    float es = c1 * exp((c2*(t-c3))/(t-c4));
+    float es = mifi_humidity_es(t);
     float rh = 100. * sh * p / (es * MOL_WEIGHT_RATIO);
-    if (rh < 0.) rh = 0;
-    else if (rh > 100.) rh = 100;
+    if (rh < 0.)
+        rh = 0;
+    else if (rh > 100.)
+        rh = 100;
     return rh;
 }
 
