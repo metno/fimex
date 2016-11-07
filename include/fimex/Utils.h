@@ -138,15 +138,15 @@ find_closest_neighbor_distinct_elements(InputIterator start, InputIterator end, 
         return std::make_pair(0, 0);
 
     InputIterator lowest = start;
-    InputIterator heighest = start;
+    InputIterator highest = start;
     InputIterator cur = start;
     double lowDiff = x - *cur;
-    double heighDiff = *cur -x;
+    double highDiff = *cur -x;
     double maxDiff = std::numeric_limits<double>::max();
     if (lowDiff < 0)
         lowDiff = maxDiff;
-    if (heighDiff < 0)
-        heighDiff = maxDiff;
+    if (highDiff < 0)
+        highDiff = maxDiff;
     while (++cur != end) {
         if (*cur <= x) {
             double diff = x - *cur;
@@ -156,20 +156,20 @@ find_closest_neighbor_distinct_elements(InputIterator start, InputIterator end, 
             }
         } else {
             double diff = *cur - x;
-            if (diff < heighDiff) {
-                heighDiff = diff;
-                heighest = cur;
+            if (diff < highDiff) {
+                highDiff = diff;
+                highest = cur;
             }
         }
     }
-    if (lowDiff == maxDiff ||
-            heighDiff == maxDiff) {
+    if (lowDiff == maxDiff || highDiff == maxDiff) {
         // extrapolating
         return find_closest_distinct_elements(start, end, x);
     }
 
     return std::make_pair(distance(start, lowest), distance(start, highest));
 }
+
 /**
  * Join values from an iterator of pointers to a string, using delimiter as separator.
  *
