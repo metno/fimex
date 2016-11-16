@@ -29,7 +29,7 @@
 #include "fimex/CDM.h"
 #include "fimex/coordSys/LatitudeLongitudeProjection.h"
 #include "fimex/coordSys/RotatedLatitudeLongitudeProjection.h"
-#include "DataImpl.h"
+#include "fimex/Data.h"
 
 #include <boost/shared_array.hpp>
 #include <vector>
