@@ -45,6 +45,55 @@ namespace MetNoFimex
 {
 using namespace std;
 
+namespace {
+
+struct CompareCoordinateAxis {
+    bool operator()(CoordinateSystem::ConstAxisPtr a, CoordinateSystem::ConstAxisPtr b) const {
+        return *a < *b;
+    }
+};
+
+struct TypeCheck : public std::unary_function <CoordinateSystem::ConstAxisPtr, bool> {
+    CoordinateAxis::AxisType type_;
+    TypeCheck(CoordinateAxis::AxisType type) : type_(type) {}
+    bool operator() (const CoordinateSystem::ConstAxisPtr& ca) const {
+        return ca->isAxisType(type_);
+    }
+};
+
+// search a string in a set
+inline bool set_contains(const set<string>& s, const std::string & str)
+{
+    return s.find(str) != s.end();
+}
+
+// add/remove a string to a set
+inline void set_insert_erase(set<string>& s, const std::string& str, bool set)
+{
+    if (set)
+        s.insert(str);
+    else
+        s.erase(str);
+}
+
+bool hasTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
+{
+    CoordinateSystem::ConstAxisList::const_iterator found = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    return found != axes.end();
+}
+
+CoordinateSystem::ConstAxisPtr findTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
+{
+    CoordinateSystem::ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
+    if (axis != axes.end()) {
+        return *axis;
+    }
+    // return 0/NULL Ptr
+    return CoordinateSystem::ConstAxisPtr();
+}
+
+} // anonymous namespace
+
 static LoggerPtr logger = getLogger("fimex.coordSys.CoordinateSystem");
 
 CoordinateSystem::CoordinateSystem()
@@ -78,14 +127,6 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
     return out;
 }
 
-namespace {
-struct CompareCoordinateAxis {
-    bool operator()(CoordinateSystem::ConstAxisPtr a, CoordinateSystem::ConstAxisPtr b) const {
-        return *a < *b;
-    }
-};
-}
-
 std::string CoordinateSystem::id() const
 {
     CoordinateSystem::ConstAxisList axes = getAxes();
@@ -108,8 +149,6 @@ std::string CoordinateSystem::horizontalId() const
     }
 }
 
-
-
 std::string CoordinateSystem::getConventionName() const
 {
     return pimpl_->conventionName_;
@@ -118,21 +157,6 @@ std::string CoordinateSystem::getConventionName() const
 void CoordinateSystem::setConventionName(const std::string& conventionName)
 {
     pimpl_->conventionName_ = conventionName;
-}
-
-// search a string in a set
-inline bool set_contains(const set<string>& s, const std::string & str)
-{
-    return s.find(str) != s.end();
-}
-
-// add/remove a string to a set
-inline void set_insert_erase(set<string>& s, const std::string& str, bool set)
-{
-    if (set)
-        s.insert(str);
-    else
-        s.erase(str);
 }
 
 bool CoordinateSystem::isComplete(const std::string & varName) const
@@ -188,41 +212,20 @@ bool CoordinateSystem::hasVerticalTransformation() const
 {
     return pimpl_->vtran_.get() != 0;
 }
+
 boost::shared_ptr<const VerticalTransformation> CoordinateSystem::getVerticalTransformation() const
 {
     return pimpl_->vtran_;
 }
+
 void CoordinateSystem::setVerticalTransformation(boost::shared_ptr<const VerticalTransformation> vtran)
 {
     pimpl_->vtran_ = vtran;
 }
 
-
-struct TypeCheck : public std::unary_function <CoordinateSystem::ConstAxisPtr, bool>{
-    CoordinateAxis::AxisType type_;
-    TypeCheck(CoordinateAxis::AxisType type) : type_(type) {}
-    bool operator() (const CoordinateSystem::ConstAxisPtr& ca) const { return ca->isAxisType(type_); }
-};
-
-static bool hasTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
-{
-    CoordinateSystem::ConstAxisList::const_iterator found = find_if(axes.begin(), axes.end(), TypeCheck(type));
-    return found != axes.end();
-}
-
 bool CoordinateSystem::hasAxisType(CoordinateAxis::AxisType type) const
 {
     return hasTypeInAxes(type, pimpl_->axes_) || hasTypeInAxes(type, pimpl_->auxiliaryAxes_);
-}
-
-static CoordinateSystem::ConstAxisPtr findTypeInAxes(CoordinateAxis::AxisType type, CoordinateSystem::ConstAxisList& axes)
-{
-    CoordinateSystem::ConstAxisList::iterator axis = find_if(axes.begin(), axes.end(), TypeCheck(type));
-    if (axis != axes.end()) {
-        return *axis;
-    }
-    // return 0/NULL Ptr
-    return CoordinateSystem::ConstAxisPtr();
 }
 
 CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(CoordinateAxis::AxisType type) const
@@ -233,6 +236,7 @@ CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(CoordinateAxis::
     }
     return axis;
 }
+
 CoordinateSystem::ConstAxisPtr CoordinateSystem::findAxisOfType(const vector<CoordinateAxis::AxisType>& types) const
 {
     for (vector<CoordinateAxis::AxisType>::const_iterator typeIt = types.begin(); typeIt != types.end(); ++typeIt) {
@@ -346,11 +350,11 @@ std::set<std::string> CoordinateSystem::getDependencyVariables() const
     }
     return retVal;
 }
+
 void CoordinateSystem::addDependencyVariable(std::string varName)
 {
     pimpl_->dependencyVars_.insert(varName);
 }
-
 
 int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<CDMReader> reader,
         std::map<std::string, boost::shared_ptr<const CoordinateSystem> >& systems,
@@ -447,8 +451,8 @@ int findBestHorizontalCoordinateSystems(bool withProjection, boost::shared_ptr<C
     return systems.size();
 }
 
-
-std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm) {
+std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(const CDM& cdm)
+{
     return listCoordinateSystems(const_cast<CDM&>(cdm));
 }
 
@@ -481,6 +485,7 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(CD
     LOG4FIMEX(logger, Logger::DEBUG, "total conventions found: " << coordSystems.size());
     return coordSystems;
 }
+
 std::vector<boost::shared_ptr<const CoordinateSystem> > listCoordinateSystems(boost::shared_ptr<CDMReader> reader)
 {
     // the return value
