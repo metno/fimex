@@ -78,12 +78,19 @@ std::ostream& operator<<(std::ostream& out, const CoordinateSystem& cs)
     return out;
 }
 
+namespace {
+struct CompareCoordinateAxis {
+    bool operator()(CoordinateSystem::ConstAxisPtr a, CoordinateSystem::ConstAxisPtr b) const {
+        return *a < *b;
+    }
+};
+}
+
 std::string CoordinateSystem::id() const
 {
     CoordinateSystem::ConstAxisList axes = getAxes();
-    sort(axes.begin(), axes.end());
+    sort(axes.begin(), axes.end(), CompareCoordinateAxis());
     return getConventionName() + ":" + joinPtr(axes.begin(), axes.end());
-
 }
 
 std::string CoordinateSystem::horizontalId() const

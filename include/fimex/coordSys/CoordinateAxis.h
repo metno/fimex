@@ -75,7 +75,9 @@ public:
     explicit CoordinateAxis(const CDMVariable& var) : CDMVariable(var), type_(Undefined) {}
     virtual ~CoordinateAxis() {}
 
-    bool operator<(const CoordinateAxis& ca) {return this->getName() < ca.getName();}
+    bool operator<(const CoordinateAxis& ca) const {
+        return this->getName() < ca.getName();
+    }
 
     AxisType getAxisType() const {return type_;}
     std::string getAxisTypeStr() const {return type2string(type_);}
