@@ -86,7 +86,8 @@ bool CF1_xCoordSysBuilder::isMine(const CDM& cdm)
  * @param var variable
  * @return all (auxiliary) coordinate axes used for the variable
  */
-set<string> getCoordinateNamesCF1_x(const CDM& cdm, const CDMVariable& var) {
+static set<string> getCoordinateNamesCF1_x(const CDM& cdm, const CDMVariable& var)
+{
     set<string> coords;
     CDMAttribute attr;
     if (cdm.getAttribute(var.getName(), "coordinates", attr)) {
@@ -103,7 +104,7 @@ set<string> getCoordinateNamesCF1_x(const CDM& cdm, const CDMVariable& var) {
  * @param var variable
  * @return all (auxiliary, non-auxiliary) coordinate axes used for the variable
  */
-set<string> getCoordinateAxesNamesCF1_x(const CDM& cdm, const CDMVariable& var)
+static set<string> getCoordinateAxesNamesCF1_x(const CDM& cdm, const CDMVariable& var)
 {
     vector<string> dims = var.getShape();
     set<string> axes(dims.begin(), dims.end());
@@ -268,11 +269,9 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
             AxisPtr& axis = ca->second;
             CoordinateAxis::AxisType type = getAxisTypeCF1_x(cdm, axis->getName());
             axis->setAxisType(type);
-            if (find_if(dims.begin(), dims.end(), CDMNameEqual(axis->getName())) == dims.end()) {
-                axis->setExplicit(false);
-            } else {
-                axis->setExplicit(true);
-            }
+
+            bool is_explicit = (find_if(dims.begin(), dims.end(), CDMNameEqual(axis->getName())) != dims.end());
+            axis->setExplicit(is_explicit);
         }
     }
 
@@ -321,20 +320,14 @@ std::vector<boost::shared_ptr<const CoordinateSystem> > CF1_xCoordSysBuilder::li
             transform(csAxesPtr.begin(), csAxesPtr.end(), back_inserter(csAxes), getPtrName);
             for (CDM::VarVec::const_iterator varIt = vars.begin(); varIt != vars.end(); ++varIt) {
                 set<string> varAxes = getCoordinateAxesNamesCF1_x(cdm, *varIt);
-                if (includes(varAxes.begin(), varAxes.end(),
-                             csAxes.begin(), csAxes.end())) {
-                    // all csAxes part of varAxes
-                    cit->second.setComplete(varIt->getName(), true);
-                } else {
-                    cit->second.setComplete(varIt->getName(), false);
-                }
-                if (includes(csAxes.begin(), csAxes.end(),
-                             varAxes.begin(), varAxes.end())) {
-                    // all varAxes part of csAxes
-                    cit->second.setCSFor(varIt->getName(), true);
-                } else {
-                    cit->second.setCSFor(varIt->getName(), false);
-                }
+                // all csAxes part of varAxes
+                bool is_complete = includes(varAxes.begin(), varAxes.end(),
+                                            csAxes.begin(), csAxes.end());
+                // all varAxes part of csAxes
+                bool is_cs_for = includes(csAxes.begin(), csAxes.end(),
+                                          varAxes.begin(), varAxes.end());
+                cit->second.setComplete(varIt->getName(), is_complete);
+                cit->second.setCSFor(varIt->getName(), is_cs_for);
             }
         }
     }
