@@ -532,11 +532,15 @@ ConverterPtr_v AddPressure4DConverterFactory::createConverter(Environment& env, 
                     }
                     const vector<string> vshape = vconv->getShape();
                     int non1dims = 0;
-                    for (vector<string>::const_iterator itS = vshape.begin(); itS != vshape.end(); ++itS)
-                        if (env.inputCDM.getDimension(*itS).getLength() > 1)
+                    for (vector<string>::const_iterator itS = vshape.begin(); itS != vshape.end(); ++itS) {
+                        const size_t length = env.inputCDM.getDimension(*itS).getLength();
+                        if (length > 1)
                             non1dims += 1;
-                    if (non1dims != 4)
+                    }
+                    if (non1dims != 4) {
                         LOG4FIMEX(logger, Logger::WARN, "vertical converter has != 4 dimensions with length > 1, skipped");
+                        continue;
+                    }
                     // use the largest coordinate-system with largest zAxis
                     cs = *it;
                     dimsizeOld = dimsize;
